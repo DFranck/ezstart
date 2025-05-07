@@ -1,0 +1,9 @@
+{
+  "extends": "../../packages/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "CommonJS",
+    "esModuleInterop": true
+  },
+  "include": ["index.ts"]
+}
