@@ -1,9 +1,22 @@
 'use client';
 
+import {
+  AbstractIntlMessages,
+  Locale,
+  NextIntlClientProvider,
+} from 'next-intl';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import * as React from 'react';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  messages,
+  locale,
+}: {
+  children: React.ReactNode;
+  messages: AbstractIntlMessages;
+  locale: Locale;
+}) {
   return (
     <NextThemesProvider
       attribute='class'
@@ -12,7 +25,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      {children}
+      <NextIntlClientProvider messages={messages} locale={locale}>
+        {children}
+      </NextIntlClientProvider>
     </NextThemesProvider>
   );
 }
