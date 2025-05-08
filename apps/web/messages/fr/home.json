@@ -31,7 +31,7 @@
     ],
     "footer": "La qualité, ce n'est pas une option. C'est la base."
   },
-  "contact": {
+  "section-contact": {
     "title": "Vous avez un projet ?",
     "description": "Que ce soit pour démarrer vite, refondre proprement ou construire une architecture durable, je peux vous aider à poser les bonnes fondations.",
     "cta": "Me contacter",

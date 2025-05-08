@@ -1,0 +1,53 @@
+{
+  "about": {
+    "title": "À propos de moi",
+    "intro": "Je suis Franck Dufournet, CTO & Full-Stack Developer basé à Ho Chi Minh City. J'allie expertise technique et vision stratégique pour créer des applications web performantes et accessibles.",
+    "timelineTitle": "Mon parcours",
+    "timeline": [
+      {
+        "year": "2015",
+        "title": "Front-End Developer",
+        "description": "Premiers pas en HTML, CSS, JavaScript et jQuery."
+      },
+      {
+        "year": "2018",
+        "title": "Full-Stack",
+        "description": "Adoption de Node.js, Express, MongoDB et React."
+      },
+      {
+        "year": "2021",
+        "title": "CTO & Lead Dev",
+        "description": "Pilotage d'équipes et architecture de solutions SaaS et blockchain."
+      },
+      {
+        "year": "2024",
+        "title": "Création d’EzStart",
+        "description": "Boilerplate PWA Next.js, Tailwind & Prisma pour démarrage rapide."
+      }
+    ],
+    "skillsTitle": "Compétences clés",
+    "skills": [
+      "TypeScript",
+      "React.js & Next.js",
+      "Node.js & Express",
+      "Tailwind CSS & Sass",
+      "Prisma & MongoDB",
+      "Redux & Zustand",
+      "Jest & Testing"
+    ],
+    "valuesTitle": "Valeurs & philosophie",
+    "values": [
+      "Code propre & bonnes pratiques",
+      "Typage strict (pas de any)",
+      "Accessibilité & SEO",
+      "Modularité & réutilisabilité"
+    ],
+    "interestsTitle": "Centres d'intérêt",
+    "interests": [
+      "Finance durable & ESG",
+      "Urbanisme écologique",
+      "Blockchain & Web3",
+      "Veille technologique"
+    ]
+  }
+}

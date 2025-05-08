@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export const SectionContact = () => {
-  const t = useTranslations('contact');
+  const t = useTranslations('section-contact');
 
   return (
     <EzTag as='section' id='contact' className='relative'>
