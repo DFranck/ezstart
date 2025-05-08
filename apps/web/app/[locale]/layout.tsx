@@ -1,5 +1,6 @@
 import { Footer } from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
+import MobileNavbar from '@/components/layout/MobileNavbar';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
 import { EzTag } from '@ezstart/ez-tag';
@@ -44,6 +45,7 @@ export default async function LocaleLayout(props: {
           <EzTag as='div' className='flex min-h-screen flex-col'>
             <Header />
             <main className='flex-1'>{children}</main>
+            <MobileNavbar />
             <Footer />
           </EzTag>
         </Providers>
