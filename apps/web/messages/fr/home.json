@@ -1,6 +1,17 @@
 {
   "hero": {
-    "title": "EzStart by DFranck.",
-    "subtitle": "My projects, articles, and more."
+    "title": "Build faster. Ship better. EzStart.",
+    "subtitle": "Tout est réalisable, il suffit de commencer."
+  },
+  "vision": {
+    "title": "Une vision claire pour un écosystème complexe",
+    "intro": "L’écosystème JavaScript/TypeScript évolue vite, parfois trop. EzStart est né de la volonté d’offrir une base de développement fiable, réutilisable, et pensée pour durer.",
+    "points": [
+      "Respect systématique des bonnes pratiques modernes",
+      "Typage strict, réutilisabilité, accessibilité",
+      "Compatibilité front & back (Next.js, React, Express, etc.)",
+      "Intégration fluide des outils standard (Auth, Zod, Prisma, CI…)"
+    ],
+    "footer": "Ne plus jamais repartir de zéro. Toujours avancer avec des fondations saines."
   }
 }
