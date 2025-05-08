@@ -21,22 +21,18 @@ const page = () => {
     >
       {/* Hero */}
       <EzTag as='div' className='max-w-3xl mx-auto text-center space-y-4'>
-        <EzTag as='h1' variant='heading.primary'>
-          {t('title')}
-        </EzTag>
-        <EzTag as='p' variant='text.body'>
-          {t('intro')}
-        </EzTag>
+        <EzTag as='h1'>{t('title')}</EzTag>
+        <EzTag as='p'>{t('intro')}</EzTag>
       </EzTag>
 
       {/* Timeline */}
       <EzTag as='div' className='max-w-4xl mx-auto mt-16 space-y-8'>
-        <EzTag as='h2' variant='heading.secondary' autoId>
+        <EzTag as='h2' autoId>
           {t('timelineTitle')}
         </EzTag>
-        <EzTag as='ul' className='space-y-6'>
+        <ul className='space-y-6'>
           {timeline.map((item) => (
-            <EzTag as='li' key={item.year} className='flex'>
+            <li key={item.year} className='flex'>
               <EzTag as='span' className='w-20 font-mono text-green-400'>
                 {item.year}
               </EzTag>
@@ -48,9 +44,9 @@ const page = () => {
                   {item.description}
                 </EzTag>
               </EzTag>
-            </EzTag>
+            </li>
           ))}
-        </EzTag>
+        </ul>
       </EzTag>
 
       {/* Skills / Values / Interests */}
@@ -63,17 +59,16 @@ const page = () => {
           <EzTag as='h2' variant='heading.secondary' autoId>
             {t('skillsTitle')}
           </EzTag>
-          <EzTag as='ul' className='mt-4 space-y-2'>
+          <ul className='mt-4 space-y-2'>
             {skills.map((s) => (
-              <EzTag
-                as='li'
+              <li
                 key={s}
                 className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
               >
                 {s}
-              </EzTag>
+              </li>
             ))}
-          </EzTag>
+          </ul>
         </EzTag>
 
         {/* Values */}
@@ -81,17 +76,16 @@ const page = () => {
           <EzTag as='h2' variant='heading.secondary' autoId>
             {t('valuesTitle')}
           </EzTag>
-          <EzTag as='ul' className='mt-4 space-y-2'>
+          <ul className='mt-4 space-y-2'>
             {values.map((v) => (
-              <EzTag
-                as='li'
+              <li
                 key={v}
                 className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
               >
                 {v}
-              </EzTag>
+              </li>
             ))}
-          </EzTag>
+          </ul>
         </EzTag>
 
         {/* Interests */}
@@ -99,17 +93,16 @@ const page = () => {
           <EzTag as='h2' variant='heading.secondary' autoId>
             {t('interestsTitle')}
           </EzTag>
-          <EzTag as='ul' className='mt-4 space-y-2'>
+          <ul className='mt-4 space-y-2'>
             {interests.map((i) => (
-              <EzTag
-                as='li'
+              <li
                 key={i}
                 className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
               >
                 {i}
-              </EzTag>
+              </li>
             ))}
-          </EzTag>
+          </ul>
         </EzTag>
       </EzTag>
     </EzTag>
