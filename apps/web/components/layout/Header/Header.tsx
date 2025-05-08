@@ -1,10 +1,15 @@
 'use client';
+
 import { useDevice } from '@/hooks/useDevice';
 import { DesktopHeader } from './DesktopHeader';
+import MobileHeader from './MobileHeader';
+import TabletHeader from './TabletHeader';
 
-const Header = () => {
-  const { isDesktop, isMobile, isTablet } = useDevice();
-  return <>{isDesktop && <DesktopHeader />}</>;
-};
+export default function Header() {
+  const { isMobile, isTablet } = useDevice();
 
-export default Header;
+  if (isMobile) return <MobileHeader />;
+  if (isTablet) return <TabletHeader />;
+
+  return <DesktopHeader />;
+}

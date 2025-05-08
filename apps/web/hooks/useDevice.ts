@@ -1,4 +1,6 @@
 // apps/web/hooks/useDevice.ts
+'use client';
+
 import { useEffect, useState } from 'react';
 
 type DeviceType = 'mobile' | 'tablet' | 'desktop';
@@ -8,20 +10,30 @@ export function useDevice(): {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  width: number;
+  width: number | null;
+  isReady: boolean;
 } {
-  const [width, setWidth] = useState(
-    typeof window === 'undefined' ? 1024 : window.innerWidth
-  );
+  const [width, setWidth] = useState<number | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const update = () => {
+      setWidth(window.innerWidth);
+      setIsReady(true);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
   }, []);
 
   const type: DeviceType =
-    width < 768 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop';
+    width === null
+      ? 'desktop'
+      : width < 768
+        ? 'mobile'
+        : width < 1024
+          ? 'tablet'
+          : 'desktop';
 
   return {
     type,
@@ -29,5 +41,6 @@ export function useDevice(): {
     isTablet: type === 'tablet',
     isDesktop: type === 'desktop',
     width,
+    isReady,
   };
 }
