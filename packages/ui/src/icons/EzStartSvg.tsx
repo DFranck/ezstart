@@ -16,7 +16,7 @@ export const EzStartSvg = ({
   return (
     <div
       className={cn(
-        'rounded p-2 aspect-square flex justify-center items-center w-8 h-8 mr-2',
+        'rounded p-2 aspect-square flex justify-center items-center w-10 h-10 mr-2',
         className
       )}
       style={{ backgroundColor: `hsl(var(--${background}))` }}
