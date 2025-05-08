@@ -2,11 +2,12 @@
 
 import { useDevice } from '@/hooks/useDevice';
 import { cn } from '@workspace/ui/lib/utils';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export function Footer() {
   const { isMobile } = useDevice();
-
+  const t = useTranslations('footer');
   return (
     <footer
       className={cn(
@@ -15,9 +16,7 @@ export function Footer() {
       )}
     >
       <div className='flex flex-col items-center justify-center gap-2 md:flex-row md:justify-between max-w-5xl mx-auto'>
-        <span>
-          © {new Date().getFullYear()} ezStart. Tous droits réservés.
-        </span>
+        <span>{t('copyright', { year: new Date().getFullYear() })}</span>
 
         <div className='flex gap-4'>
           <Link
@@ -26,10 +25,10 @@ export function Footer() {
             rel='noopener noreferrer'
             className='hover:underline'
           >
-            GitHub
+            {t('github')}
           </Link>
-          <Link href='/mentions-legales' className='hover:underline'>
-            Mentions légales
+          <Link href='/legal-notices' className='hover:underline'>
+            {t('legalNotices')}
           </Link>
         </div>
       </div>

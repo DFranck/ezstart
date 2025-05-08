@@ -17,3 +17,16 @@ Managed with [`pnpm`](https://pnpm.io/) workspaces.
 pnpm install
 pnpm dev:all
 ```
+
+## 🗂️ Structure
+
+```bash
+.
+├── apps/
+│ ├── web/ → Next.js app (frontend)
+│ └── api/ → Express app (backend)
+├── packages/
+│ └── ui/ → Shared UI components (Tailwind, EzTag...)
+└── pnpm-workspace.yaml
+
+```

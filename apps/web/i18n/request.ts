@@ -14,13 +14,17 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale;
   const timeZone = getTimeZoneFromLocale(locale);
 
-  const [common, header, footer, nav, home] = await Promise.all([
-    import(`../messages/${locale}/common.json`),
-    import(`../messages/${locale}/header.json`),
-    import(`../messages/${locale}/footer.json`),
-    import(`../messages/${locale}/nav.json`),
-    import(`../messages/${locale}/home.json`),
-  ]);
+  const [common, header, footer, nav, home, legal, contact] = await Promise.all(
+    [
+      import(`../messages/${locale}/common.json`),
+      import(`../messages/${locale}/header.json`),
+      import(`../messages/${locale}/footer.json`),
+      import(`../messages/${locale}/nav.json`),
+      import(`../messages/${locale}/home.json`),
+      import(`../messages/${locale}/legal-notices.json`),
+      import(`../messages/${locale}/contact.json`),
+    ]
+  );
 
   return {
     locale,
@@ -31,6 +35,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
       footer.default,
       nav.default,
       home.default,
+      legal.default,
+      contact.default,
     ]),
   };
 });

@@ -1,0 +1,29 @@
+{
+  "legal-notices": {
+    "title": "Mentions légales",
+    "intro": "Bienvenue sur notre page des mentions légales. Merci de prendre connaissance des informations suivantes :",
+    "sections": [
+      {
+        "id": "terms-of-use",
+        "title": "Conditions d'utilisation",
+        "content": "Veuillez lire attentivement ces conditions d'utilisation avant d'accéder ou d'utiliser notre site.",
+        "link": null
+      },
+      {
+        "id": "privacy-policy",
+        "title": "Politique de confidentialité",
+        "content": "Nous respectons votre vie privée et traitons vos données personnelles en conformité avec la législation en vigueur.",
+        "link": null
+      },
+      {
+        "id": "contact",
+        "title": "Contact",
+        "content": "Pour toute question juridique, contactez-nous à l'adresse ci-dessous.",
+        "link": {
+          "label": "legal@example.com",
+          "href": "mailto:legal@example.com"
+        }
+      }
+    ]
+  }
+}
