@@ -1,5 +1,6 @@
-import { SectionFeatures } from '@/components/layout/Section/SectionFeatures';
+import { SectionContact } from '@/components/layout/Section/SectionContact';
 import { SectionHero } from '@/components/layout/Section/SectionHero';
+import { SectionTrust } from '@/components/layout/Section/SectionTrust';
 import { SectionVision } from '@/components/layout/Section/SectionVision';
 
 export default function Page() {
@@ -7,7 +8,8 @@ export default function Page() {
     <>
       <SectionHero />
       <SectionVision />
-      <SectionFeatures />
+      <SectionTrust />
+      <SectionContact />
     </>
   );
 }
