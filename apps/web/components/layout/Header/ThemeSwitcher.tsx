@@ -23,7 +23,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
     <Button
       onClick={toggleTheme}
       aria-label='Toggle theme'
-      variant='outline'
+      variant='ghost'
       className='cursor-pointer'
       size={'sm'}
     >

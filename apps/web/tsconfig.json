@@ -25,7 +25,9 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/lib/aceternity.ts",
+    "../../packages/ui/src/components/aurora-background.tsx"
   ],
   "exclude": ["node_modules"]
 }
