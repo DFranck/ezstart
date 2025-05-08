@@ -37,6 +37,7 @@ export function LocaleSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant='outline'
+          className='cursor-pointer'
           size='sm'
           aria-label={t('LocaleSwitcher.label')}
         >

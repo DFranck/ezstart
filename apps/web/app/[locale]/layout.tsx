@@ -1,5 +1,5 @@
-import { Footer } from '@/components/Footer';
-import { Header } from '@/components/Header';
+import { Footer } from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
 import { EzTag } from '@ezstart/ez-tag';
