@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3100",
-    "build": "pnpm --filter @ezstart/ez-tag run build && pnpm --filter apps/web run build",
+    "build": "pnpm --workspace-root --filter @ezstart/ez-tag run build && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
