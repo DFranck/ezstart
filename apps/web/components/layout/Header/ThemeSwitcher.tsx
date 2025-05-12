@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@workspace/ui/components/button';
+import { cn } from '@workspace/ui/lib/utils';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -24,7 +25,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       onClick={toggleTheme}
       aria-label='Toggle theme'
       variant='ghost'
-      className='cursor-pointer'
+      className={cn('cursor-pointer', className)}
       size={'sm'}
     >
       {theme === 'light' ? (
