@@ -2,6 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "tasks": {
+    "web": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**"]
+    },
+    "ez-tag": {
+      "outputs": ["dist/**"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
