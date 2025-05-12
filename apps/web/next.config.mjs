@@ -4,9 +4,6 @@ import createNextIntlPlugin from 'next-intl/plugin';
 /** @type {import('next').NextConfig} */
 const baseConfig = {
   transpilePackages: ['@ezstart/ez-tag', '@workspace/ui'],
-  experimental: {
-    externalDir: true,
-  },
 };
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');

@@ -46,7 +46,6 @@ const LegalNoticesPage = () => {
               id={section.id}
               variant='heading.secondary'
               className='text-2xl font-semibold'
-              autoId
             >
               {section.title}
             </EzTag>

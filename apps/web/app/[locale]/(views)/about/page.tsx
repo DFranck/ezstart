@@ -27,9 +27,7 @@ const page = () => {
 
       {/* Timeline */}
       <EzTag as='div' className='max-w-4xl mx-auto mt-16 space-y-8'>
-        <EzTag as='h2' autoId>
-          {t('timelineTitle')}
-        </EzTag>
+        <EzTag as='h2'>{t('timelineTitle')}</EzTag>
         <ul className='space-y-6'>
           {timeline.map((item) => (
             <li key={item.year} className='flex'>
@@ -56,7 +54,7 @@ const page = () => {
       >
         {/* Skills */}
         <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary' autoId>
+          <EzTag as='h2' variant='heading.secondary'>
             {t('skillsTitle')}
           </EzTag>
           <ul className='mt-4 space-y-2'>
@@ -73,7 +71,7 @@ const page = () => {
 
         {/* Values */}
         <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary' autoId>
+          <EzTag as='h2' variant='heading.secondary'>
             {t('valuesTitle')}
           </EzTag>
           <ul className='mt-4 space-y-2'>
@@ -90,7 +88,7 @@ const page = () => {
 
         {/* Interests */}
         <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary' autoId>
+          <EzTag as='h2' variant='heading.secondary'>
             {t('interestsTitle')}
           </EzTag>
           <ul className='mt-4 space-y-2'>
