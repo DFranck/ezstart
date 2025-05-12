@@ -142,12 +142,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      react:
-        specifier: ^19.0.0
-        version: 19.0.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.0.0(react@19.0.0)
       tailwind-merge:
         specifier: ^3.2.0
         version: 3.2.0
@@ -156,8 +150,14 @@ importers:
         specifier: ^19.0.10
         version: 19.0.10
       '@types/react-dom':
-        specifier: ^18.0.0
-        version: 18.3.7(@types/react@19.0.10)
+        specifier: ^19
+        version: 19.0.4(@types/react@19.0.10)
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.0.0(react@19.0.0)
       typescript:
         specifier: ^5.0.0
         version: 5.7.3
@@ -956,11 +956,6 @@ packages:
 
   '@types/range-parser@1.2.7':
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
-
-  '@types/react-dom@18.3.7':
-    resolution: {integrity: sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==}
-    peerDependencies:
-      '@types/react': ^18.0.0
 
   '@types/react-dom@19.0.4':
     resolution: {integrity: sha512-4fSQ8vWFkg+TGhePfUzVmat3eC14TXYSsiiDSLI0dVLsrm9gZFABjPy/Qu6TKgl1tq1Bu1yDsuQgY3A3DOjCcg==}
@@ -3777,10 +3772,6 @@ snapshots:
   '@types/qs@6.9.18': {}
 
   '@types/range-parser@1.2.7': {}
-
-  '@types/react-dom@18.3.7(@types/react@19.0.10)':
-    dependencies:
-      '@types/react': 19.0.10
 
   '@types/react-dom@19.0.4(@types/react@19.0.10)':
     dependencies:
