@@ -6,7 +6,7 @@ export const SectionHero = () => {
   return (
     <>
       <AuroraBackground className=''>
-        <EzTag as='section' className='z-10 text-foreground'>
+        <EzTag as='section' className='z-10 '>
           <EzTag as='h1'>{t('title')}</EzTag>
           <EzTag as='h2'>{t('subtitle')}</EzTag>
         </EzTag>
