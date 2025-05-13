@@ -3,6 +3,7 @@
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../../../libs/ez-tag/src/**/*.{ts,tsx,css}";
+
 @source "../**/*.{ts,tsx}";
 
 @import 'tw-animate-css';

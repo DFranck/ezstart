@@ -1,5 +1,6 @@
 'use client';
 
+import { EzIcon } from '@ezstart/ez-icon';
 import { H2, Li, P, Section } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 import { Ul } from '../../../../../packages/libs/ez-tag/src';
@@ -16,7 +17,8 @@ export const SectionVision = () => {
       <Ul layout={'grid'}>
         {t.raw('points').map((point: string, index: number) => (
           <Li variant={'card'} key={index}>
-            ✅ {point}
+            <EzIcon name='CheckCircle' size={20} className='text-green-500' />
+            {point}
           </Li>
         ))}
       </Ul>

@@ -1,0 +1,28 @@
+{
+  "name": "@ezstart/ez-icon",
+  "version": "0.1.0",
+  "private": false,
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "lint": "eslint . --ext .ts,.tsx",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "lucide-react": "^0.268.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "eslint": "^8.45.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.10"
+  }
+}

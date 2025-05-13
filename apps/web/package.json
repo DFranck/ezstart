@@ -12,9 +12,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/ez-icon": "workspace:^",
+    "@ezstart/ez-tag": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@workspace/ui": "workspace:*",
-    "@ezstart/ez-tag": "workspace:*",
     "deepmerge": "^4.3.1",
     "framer-motion": "^12.10.1",
     "lucide-react": "^0.475.0",

@@ -1,7 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
-import { EzTag } from '@ezstart/ez-tag';
+import { H2, Li, P, Section, Ul } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 
 type TrustPoint = {
@@ -22,29 +22,24 @@ export const SectionTrust = () => {
       .replace('{downloads}', stats.downloads?.toString() ?? '0');
 
   return (
-    <EzTag as='section' size={'lg'}>
-      <EzTag as='div'>
-        <EzTag as='h2'>{t('title')}</EzTag>
+    <Section size={'lg'} className='z-10'>
+      <H2>{t('title')}</H2>
 
-        <p className='text-lg text-muted-foreground'>{t('intro')}</p>
+      <P>{t('intro')}</P>
 
-        <ul className='grid grid-cols-2 md:grid-cols-3 gap-6 text-left text-sm md:text-base'>
-          {points.map((point, index) => (
-            <li
-              key={index}
-              className='bg-background p-4 rounded-xl shadow text-center space-y-2'
-            >
-              <div className='text-2xl'>{point.icon}</div>
-              <p className='font-semibold text-lg'>
-                {isLoading ? '...' : formatValue(point.value)}
-              </p>
-              <p className='text-muted-foreground text-xs'>{point.label}</p>
-            </li>
-          ))}
-        </ul>
+      <Ul layout={'grid'} className='sm:grid-cols-2 md:grid-cols-3'>
+        {points.map((point, index) => (
+          <Li key={index} variant={'card'} className='flex-col items-center'>
+            <P>{point.icon}</P>
+            <P className='font-semibold text-lg'>
+              {isLoading ? '...' : formatValue(point.value)}
+            </P>
+            <P variant={'muted'}>{point.label}</P>
+          </Li>
+        ))}
+      </Ul>
 
-        <p className='text-muted-foreground italic'>{t('footer')}</p>
-      </EzTag>
-    </EzTag>
+      <P>{t('footer')}</P>
+    </Section>
   );
 };

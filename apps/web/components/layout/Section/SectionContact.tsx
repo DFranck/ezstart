@@ -10,7 +10,7 @@ export const SectionContact = () => {
 
   return (
     <EzTag as='section' size={'lg'}>
-      <LampContainer>
+      <LampContainer className=''>
         <EzTag as='h2'>{t('title')}</EzTag>
 
         <p className='text-muted-foreground text-lg'>{t('description')}</p>

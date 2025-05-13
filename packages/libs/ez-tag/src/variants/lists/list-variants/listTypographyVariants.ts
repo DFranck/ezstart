@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 export const listTypographyVariants = {
-  li: cva('', {
+  li: cva('flex gap-2', {
     variants: {
       variant: {
         default: 'text-sm text-foreground',
