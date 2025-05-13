@@ -38,7 +38,9 @@ export default function Header() {
       >
         <Link href='/' className='flex items-center gap-2'>
           <EzStartSvg background='transparent' />
-          <EzTag as='h2'>EzStart</EzTag>
+          <EzTag as='h2' visual={'h4'}>
+            EzStart
+          </EzTag>
         </Link>
 
         {isDesktop && (

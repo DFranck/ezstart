@@ -9,7 +9,7 @@ import type { TagVariantsMap } from '../variants/variantTypes';
  * Utility type to check if a cva() function has a `variant` prop
  */
 type HasVariant<T extends (...args: any) => any> =
-  'variant' extends keyof VariantProps<T> ? true : false;
+  keyof VariantProps<T> extends never ? false : true;
 
 /**
  * Utility type to filter out cva() functions that don't have a `variant` prop

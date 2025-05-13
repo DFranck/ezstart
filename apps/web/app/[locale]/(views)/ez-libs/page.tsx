@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const EzLibs = () => {
   return (
-    <EzTag as='div' variant={'page'}>
+    <EzTag as='div'>
       <EzTag as='h1'>EzLibs</EzTag>
       <EzTag as='h2'>Check my libs, play with it and install them!</EzTag>
       <EzTag as='section' className=''>
