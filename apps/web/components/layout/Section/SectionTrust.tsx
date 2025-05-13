@@ -1,7 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
-import { EzTag } from '@ezstart/ez-tag';
+import EzTag from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 

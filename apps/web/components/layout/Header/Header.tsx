@@ -4,7 +4,7 @@ import Burger from '@/components/burger';
 import { useDevice } from '@/hooks/useDevice';
 import { useNavLinks } from '@/hooks/useNavLinks';
 import { useOnScroll } from '@/hooks/useOnScroll';
-import { EzTag } from '@ezstart/ez-tag';
+import EzTag from '@ezstart/ez-tag';
 import { EzStartSvg } from '@workspace/ui/icons/EzStartSvg';
 import { cn } from '@workspace/ui/lib/utils';
 import Link from 'next/link';

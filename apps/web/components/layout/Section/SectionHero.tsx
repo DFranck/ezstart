@@ -1,5 +1,5 @@
 import { AuroraBackground } from '@/components/aurora-background';
-import { EzTag } from '@ezstart/ez-tag';
+import EzTag from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 export const SectionHero = () => {
   const t = useTranslations('hero');

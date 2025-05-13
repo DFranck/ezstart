@@ -48,6 +48,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@ezstart/ez-tag':
+        specifier: workspace:*
+        version: link:../../packages/libs/ez-tag
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.14
         version: 2.1.14(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -139,6 +142,9 @@ importers:
 
   packages/libs/ez-tag:
     dependencies:
+      '@workspace/ui':
+        specifier: workspace:*
+        version: link:../../ui
       react:
         specifier: ^19.0.0
         version: 19.0.0
