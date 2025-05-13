@@ -1,4 +1,5 @@
 // src/types/supported-tags.ts
+import { ComponentProps } from 'react';
 
 /**
  * ① Tags that accept children in their JSX syntax
@@ -51,4 +52,4 @@ export type LayoutTag = (typeof ALL_LAYOUT_TAGS)[number];
  * ⑤ Intrinsic JSX props for each tag
  * Maps LayoutTag → the built-in JSX element props
  */
-export type IntrinsicProps<T extends LayoutTag> = JSX.IntrinsicElements[T];
+export type IntrinsicProps<T extends LayoutTag> = ComponentProps<T>;
