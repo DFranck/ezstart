@@ -21,7 +21,20 @@ export const H6 = createAlias('h6');
 export const Section = createAlias('section');
 export const Main = createAlias('main');
 
-// Forms & misc
+// Forms
 export const Button = createAlias('button');
+
+// Typography
+export const P = createAlias('p');
+
+// Lists
+export const Ul = createAlias('ul');
+export const Ol = createAlias('ol');
+export const Li = createAlias('li');
+export const Dl = createAlias('dl');
+export const Dt = createAlias('dt');
+export const Dd = createAlias('dd');
+
+//misc
 export const Span = createAlias('span');
 export const Div = createAlias('div');

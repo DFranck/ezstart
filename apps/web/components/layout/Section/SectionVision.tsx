@@ -1,26 +1,29 @@
 'use client';
 
-import { EzTag } from '@ezstart/ez-tag';
+import { H2, Li, P, Section } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
+import { Ul } from '../../../../../packages/libs/ez-tag/src';
 
 export const SectionVision = () => {
   const t = useTranslations('vision');
 
   return (
-    <EzTag as='section' size={'lg'}>
-      <EzTag as='h2'>{t('title')}</EzTag>
+    <Section size={'lg'}>
+      <H2>{t('title')}</H2>
 
-      <p className='text-lg text-muted-foreground'>{t('intro')}</p>
+      <P>{t('intro')}</P>
 
-      <ul className='grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-sm md:text-base'>
+      <Ul layout={'grid'}>
         {t.raw('points').map((point: string, index: number) => (
-          <li key={index} className='bg-muted p-4 rounded-lg shadow'>
+          <Li variant={'card'} key={index}>
             ✅ {point}
-          </li>
+          </Li>
         ))}
-      </ul>
+      </Ul>
 
-      <p className='text-muted-foreground italic'>{t('footer')}</p>
-    </EzTag>
+      <P variant={'muted'} size={'sm'}>
+        {t('footer')}
+      </P>
+    </Section>
   );
 };

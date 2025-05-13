@@ -1,5 +1,5 @@
 // packages/libs/ez-tag/src/variants/forms/formVariants.ts
-import { buttonVariants } from './form-variants/buttonsVariants';
+import { buttonVariants } from './form-variants/buttonVariants';
 
 export const formVariants = {
   button: buttonVariants,

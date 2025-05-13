@@ -2,6 +2,8 @@
 import { formVariants } from './forms/formVariants';
 import { headingVariants } from './headings/headingVariants';
 import { layoutVariants } from './layouts/layoutVariants';
+import { listVariants } from './lists/listVariants';
+import { typographyVariants } from './typographies/typographyVariants';
 
 /**
  * Central variant map used by EzTag.
@@ -12,4 +14,6 @@ export const tagVariants = {
   ...layoutVariants,
   ...headingVariants,
   ...formVariants,
+  ...typographyVariants,
+  ...listVariants,
 };
