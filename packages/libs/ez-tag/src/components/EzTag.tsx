@@ -68,7 +68,6 @@ export function EzTag<T extends SupportedAs = 'span'>({
 
   const merged = cn(variantClass, className);
   const Component: ElementType = asChild ? Slot : as || 'span';
-
   return (
     <Component className={merged} {...props}>
       {children}

@@ -38,19 +38,17 @@ export default function Header() {
       >
         <Link href='/' className='flex items-center gap-2'>
           <EzStartSvg background='transparent' />
-          <EzTag as='h2' variant={'h4'}>
-            EzStart
-          </EzTag>
+          <EzTag as='h2'>EzStart</EzTag>
         </Link>
 
         {isDesktop && (
-          <EzTag as='nav' className='flex items-center gap-4'>
+          <div className='flex items-center gap-4'>
             {links.map(({ href, label }) => (
               <Link key={href} href={href} className='text-sm hover:underline'>
                 {label}
               </Link>
             ))}
-          </EzTag>
+          </div>
         )}
 
         <div className='flex items-center gap-2'>
@@ -66,8 +64,7 @@ export default function Header() {
             isOpen ? 'max-h-[400px] py-4 bg-background' : 'max-h-0'
           )}
         >
-          <EzTag
-            as='nav'
+          <div
             className={cn(
               'flex flex-col items-start gap-4 p-4 transition-all duration-500 ease-in-out ',
               isOpen ? 'bg-muted ' : ''
@@ -83,7 +80,7 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-          </EzTag>
+          </div>
         </div>
       )}
     </header>

@@ -37,8 +37,7 @@ export function LocaleSwitcher() {
       <DropdownMenuTrigger asChild>
         <EzTag
           as={'button'}
-          variant={'button.primary.small'}
-          className='cursor-pointer'
+          variant='ghost'
           aria-label={t('LocaleSwitcher.label')}
         >
           <GlobeIcon className='w-4 h-4 mr-2' />

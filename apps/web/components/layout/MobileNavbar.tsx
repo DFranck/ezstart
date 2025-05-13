@@ -3,7 +3,6 @@
 import Burger from '@/components/burger';
 import { useDevice } from '@/hooks/useDevice';
 import { useNavLinks } from '@/hooks/useNavLinks';
-import { EzTag } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';
@@ -29,11 +28,10 @@ export default function MobileNavbar() {
       <div
         className={cn(
           'transition-all duration-500 ease-in-out overflow-hidden px-4',
-          isOpen ? 'max-h-[400px] pt-4 pb-2 ' : 'max-h-0'
+          isOpen ? 'max-h-[400px] pt-4 ' : 'max-h-0'
         )}
       >
-        <EzTag
-          as='nav'
+        <div
           className={cn(
             'flex flex-col gap-4 p-4 transition-all duration-500 ease-in-out ',
             isOpen ? 'bg-muted ' : ''
@@ -49,27 +47,22 @@ export default function MobileNavbar() {
               {label}
             </Link>
           ))}
-        </EzTag>
+        </div>
       </div>
 
-      <EzTag as='nav' className=' shadow-md'>
+      <div className=' shadow-md'>
         <div className='grid grid-cols-3 items-center w-full '>
           <Link href={`/${locale}`} className='w-full flex justify-center py-2'>
             <Home className='w-7 h-7' strokeWidth={1.5} />
           </Link>
 
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className='w-full flex justify-center py-2'
-          >
-            <Burger isOpen={isOpen} />
-          </button>
+          <Burger isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
 
           <Link href='/profile' className='w-full flex justify-center py-2'>
             <User className='w-7 h-7' strokeWidth={1.5} />
           </Link>
         </div>
-      </EzTag>
+      </div>
     </div>
   );
 }

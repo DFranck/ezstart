@@ -1,17 +1,18 @@
 'use client';
 
 import { EzTag } from '@ezstart/ez-tag';
-import { Button } from '@workspace/ui/components/button';
 import { cn } from '@workspace/ui/lib/utils';
 
 const Burger = ({
   setIsOpen,
   isOpen,
   className,
+  ...props
 }: {
   setIsOpen?: (isOpen: boolean) => void;
   isOpen: boolean;
   className?: string;
+  [key: string]: any;
 }) => {
   const handleClick = () => {
     if (setIsOpen) {
@@ -19,7 +20,8 @@ const Burger = ({
     }
   };
   return (
-    <Button
+    <EzTag
+      as='button'
       onClick={handleClick}
       size={'sm'}
       variant={'ghost'}
@@ -27,6 +29,7 @@ const Burger = ({
         'relative cursor-pointer flex flex-col justify-center items-center ',
         className
       )}
+      {...props}
     >
       <EzTag
         as='span'
@@ -49,7 +52,7 @@ const Burger = ({
           isOpen ? '-rotate-45 -translate-y-2 ' : 'rotate-0 '
         )}
       />
-    </Button>
+    </EzTag>
   );
 };
 
