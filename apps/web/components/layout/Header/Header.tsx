@@ -25,8 +25,8 @@ export default function Header() {
   }, [isTablet, isOpen]);
 
   return (
-    <div className=' fixed top-0 left-0 right-0 z-50'>
-      <header
+    <header className=' fixed top-0 left-0 right-0 z-50'>
+      <div
         className={cn(
           ' py-4 px-6 flex items-center justify-between transition-all duration-300',
           {
@@ -38,7 +38,9 @@ export default function Header() {
       >
         <Link href='/' className='flex items-center gap-2'>
           <EzStartSvg background='transparent' />
-          <EzTag as='h2'>EzStart</EzTag>
+          <EzTag as='h2' variant={'h4'}>
+            EzStart
+          </EzTag>
         </Link>
 
         {isDesktop && (
@@ -55,7 +57,7 @@ export default function Header() {
           <HeaderControls />
           {isTablet && <Burger setIsOpen={setIsOpen} isOpen={isOpen} />}
         </div>
-      </header>
+      </div>
 
       {isTablet && (
         <div
@@ -84,6 +86,6 @@ export default function Header() {
           </EzTag>
         </div>
       )}
-    </div>
+    </header>
   );
 }

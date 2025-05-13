@@ -2,7 +2,6 @@
 
 import { useExternalStats } from '@/hooks/useExternalStats';
 import { EzTag } from '@ezstart/ez-tag';
-import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 
 type TrustPoint = {
@@ -23,18 +22,11 @@ export const SectionTrust = () => {
       .replace('{downloads}', stats.downloads?.toString() ?? '0');
 
   return (
-    <EzTag as='section' id='trust' className={cn('py-20 px-6 text-center')}>
-      <EzTag as='div' className='max-w-4xl mx-auto space-y-6'>
-        <EzTag
-          as='h2'
-          className='text-3xl md:text-4xl font-bold tracking-tight'
-        >
-          {t('title')}
-        </EzTag>
+    <EzTag as='section' size={'lg'}>
+      <EzTag as='div'>
+        <EzTag as='h2'>{t('title')}</EzTag>
 
-        <EzTag as='p' className='text-lg text-muted-foreground'>
-          {t('intro')}
-        </EzTag>
+        <p className='text-lg text-muted-foreground'>{t('intro')}</p>
 
         <ul className='grid grid-cols-2 md:grid-cols-3 gap-6 text-left text-sm md:text-base'>
           {points.map((point, index) => (
@@ -51,9 +43,7 @@ export const SectionTrust = () => {
           ))}
         </ul>
 
-        <EzTag as='p' className='text-muted-foreground italic'>
-          {t('footer')}
-        </EzTag>
+        <p className='text-muted-foreground italic'>{t('footer')}</p>
       </EzTag>
     </EzTag>
   );

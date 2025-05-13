@@ -1,44 +1,72 @@
-import { ComponentProps, ElementType, ReactNode } from 'react';
-import { twMerge } from 'tailwind-merge';
-import { classNames } from '../classNames';
+import { cn } from '@workspace/ui/lib/utils';
+import type { VariantProps } from 'class-variance-authority';
+import { ComponentProps, ElementType } from 'react';
+import { tagVariants } from '../variants';
+import type { TagVariantsMap } from '../variants/variantTypes';
 
-export type EzTagVariant = keyof typeof classNames;
-export type EzTagProps<T extends ElementType = 'span'> = Omit<
+type HasVariant<T extends (...args: any) => any> =
+  'variant' extends keyof VariantProps<T> ? true : false;
+
+// Keep only the keys of tagVariants whose cva has a `variant` key
+type FilterSupportedAs<T extends Record<string, (...args: any) => any>> = {
+  [K in keyof T]: HasVariant<T[K]> extends true ? K : never;
+}[keyof T];
+/**
+ * List of supported HTML tags for EzTag, including generic span and div.
+ */
+export type SupportedAs =
+  | FilterSupportedAs<typeof tagVariants>
+  | 'span'
+  | 'div';
+
+/**
+ * Dynamically extracts the variant props (like `layout`, `size`, `variant`)
+ * for the given `as` tag, if it's defined in `TagVariantsMap`.
+ */
+export type CustomVariants<T extends SupportedAs> =
+  T extends keyof TagVariantsMap ? TagVariantsMap[T] : {};
+
+/**
+ * Props definition for the EzTag component.
+ * - Uses the underlying native props of the tag (`ComponentProps<T>`)
+ * - Adds support for the `as` prop to choose the tag to render
+ * - Extends with tag-specific variant props dynamically
+ */
+export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
   ComponentProps<T>,
-  'variant'
+  never
 > & {
   as?: T;
-  variant?: EzTagVariant | EzTagVariant[];
-  tooltip?: ReactNode;
-};
+} & CustomVariants<T>;
 
-export function EzTag<T extends ElementType = 'span'>({
+/**
+ * EzTag: a polymorphic, styled tag component with variant support.
+ * It looks up the corresponding `cva()` config from `tagVariants`
+ * and applies the appropriate classNames based on the props.
+ */
+export function EzTag<T extends SupportedAs = 'span'>({
   as,
-  variant,
   className,
   children,
-  ...otherProps
+  ...props
 }: EzTagProps<T>) {
-  // 1️⃣ Le tag sémantique
-  const tag = (as ?? 'span') as EzTagVariant;
+  const tag = (as ?? 'span') as string;
+  const Component = tag as ElementType;
 
-  // 2️⃣ On détermine la(les) clé(s) de variant à utiliser :
-  //    - si array, c'est plusieurs clés
-  //    - sinon, soit variant fourni, soit on retombe sur le tag
-  const variantKeys = Array.isArray(variant) ? variant : [variant ?? tag];
+  // Lookup the corresponding cva() function from tagVariants
+  const variantFn = tagVariants[tag as keyof typeof tagVariants];
 
-  // 3️⃣ On récupère les classes pour chaque clé, puis on fusionne
-  const variantClasses = twMerge(
-    ...variantKeys.map((key) => classNames[key] || '')
-  );
+  // Compute the class string from the cva factory using passed variant props
+  const variantClass =
+    typeof variantFn === 'function'
+      ? variantFn(props as VariantProps<typeof variantFn>)
+      : '';
 
-  // 4️⃣ On fusionne enfin avec le className passé en prop
-  const merged = twMerge(variantClasses, className);
-
-  const Component = (as || 'span') as ElementType;
+  // Merge with custom className
+  const merged = cn(variantClass, className);
 
   return (
-    <Component className={merged} {...otherProps}>
+    <Component className={merged} {...props}>
       {children}
     </Component>
   );

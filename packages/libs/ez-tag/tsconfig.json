@@ -11,6 +11,6 @@
     "incremental": true,
     "composite": true
   },
-  "include": ["src"],
+  "include": ["src", "tailwind.config.js"],
   "exclude": ["node_modules", "dist"]
 }

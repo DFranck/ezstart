@@ -5,8 +5,8 @@ export const SectionHero = () => {
   const t = useTranslations('hero');
   return (
     <>
-      <AuroraBackground className='px-4'>
-        <EzTag as='section' className='z-10'>
+      <AuroraBackground>
+        <EzTag as='section' size={'lg'}>
           <EzTag as='h1'>{t('title')}</EzTag>
           <EzTag as='h3'>{t('subtitle')}</EzTag>
         </EzTag>

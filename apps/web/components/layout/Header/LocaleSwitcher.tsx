@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@workspace/ui/components/button';
+import { EzTag } from '@ezstart/ez-tag';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,15 +35,15 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant='ghost'
+        <EzTag
+          as={'button'}
+          variant={'button.primary.small'}
           className='cursor-pointer'
-          size='sm'
           aria-label={t('LocaleSwitcher.label')}
         >
           <GlobeIcon className='w-4 h-4 mr-2' />
           {activeLabel}
-        </Button>
+        </EzTag>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
         {LOCALES.map((locale) => (

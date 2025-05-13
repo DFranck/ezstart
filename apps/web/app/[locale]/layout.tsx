@@ -3,7 +3,6 @@ import Header from '@/components/layout/Header';
 import MobileNavbar from '@/components/layout/MobileNavbar';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
-import { EzTag } from '@ezstart/ez-tag';
 import '@workspace/ui/globals.css';
 import { hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
@@ -42,12 +41,10 @@ export default async function LocaleLayout(props: {
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
       >
         <Providers messages={messages} locale={locale}>
-          <EzTag as='div' className='flex min-h-screen flex-col '>
-            <Header />
-            <main className='flex-1'>{children}</main>
-            <MobileNavbar />
-            <Footer />
-          </EzTag>
+          <Header />
+          {children}
+          <MobileNavbar />
+          <Footer />
         </Providers>
       </body>
     </html>
