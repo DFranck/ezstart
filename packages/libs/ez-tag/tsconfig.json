@@ -2,7 +2,10 @@
 {
   "extends": "../../../packages/typescript-config/react-library.json",
   "compilerOptions": {
+    "types": ["react", "react/jsx-runtime"],
     "outDir": "dist",
+    "moduleResolution": "bundler",
+    "module": "esnext",
     "declaration": true,
     "declarationMap": true,
     "incremental": true,

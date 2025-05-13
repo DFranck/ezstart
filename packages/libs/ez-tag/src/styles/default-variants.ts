@@ -17,7 +17,7 @@ export const EzTagDefaultVariants: Record<LayoutTag, string> = {
   // ------------------------------------------------------------
   // Headings
   // ------------------------------------------------------------
-  h1: 'text-2xl sm:text-3xl md:text-4xl  font-bold leading-tight bg-red-500',
+  h1: 'text-2xl sm:text-3xl md:text-4xl  font-bold leading-tight',
   h2: 'text-xl sm:text-2xl md:text-3xl  font-semibold leading-snug',
   h3: 'text-lg sm:text-xl md:text-2xl  font-medium leading-snug',
   h4: 'text-base sm:text-lg md:text-xl font-medium leading-snug',
