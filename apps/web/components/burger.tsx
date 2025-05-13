@@ -1,6 +1,6 @@
 'use client';
 
-import EzTag from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { Button } from '@workspace/ui/components/button';
 import { cn } from '@workspace/ui/lib/utils';
 

@@ -1,4 +1,4 @@
-import EzTag from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';

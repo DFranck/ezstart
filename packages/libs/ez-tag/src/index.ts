@@ -1,4 +1,6 @@
-// ezstart/packages/libs/ez-tag/src/index.ts
-import EzTag from './components/EzTag';
+// 1) On exporte le composant principal et ses types
+export { EzTag } from './components/EzTag';
+export type { EzTagProps, EzTagVariant } from './components/EzTag';
 
-export default EzTag;
+// 2) On exporte tous les styles (CVA ou objets) depuis le dossier styles
+export * from './classNames';

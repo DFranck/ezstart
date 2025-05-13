@@ -3,7 +3,7 @@
 import Burger from '@/components/burger';
 import { useDevice } from '@/hooks/useDevice';
 import { useNavLinks } from '@/hooks/useNavLinks';
-import EzTag from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';

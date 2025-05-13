@@ -1,7 +1,7 @@
 'use client';
 
 import { LampContainer } from '@/components/lamp';
-import EzTag from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { Button } from '@workspace/ui/components/button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';

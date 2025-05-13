@@ -1,5 +1,5 @@
 // shared elements between headers
-import EzTag from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
 

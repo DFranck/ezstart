@@ -1,56 +1,45 @@
-// ezstart/packages/libs/ez-tag/src/component/EzTag.tsx
+import { ComponentProps, ElementType, ReactNode } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { classNames } from '../classNames';
 
-import { cn } from '@workspace/ui/lib/utils';
-import { EzTagRuntimeChecks } from '../runtime-checks';
-import { EzTagVariants } from '../styles';
-import { EzTagProps } from '../types/props';
-import { LayoutTag } from '../types/supported-tags';
+export type EzTagVariant = keyof typeof classNames;
+export type EzTagProps<T extends ElementType = 'span'> = Omit<
+  ComponentProps<T>,
+  'variant'
+> & {
+  as?: T;
+  variant?: EzTagVariant | EzTagVariant[];
+  tooltip?: ReactNode;
+};
 
-export default function EzTag<T extends LayoutTag>(props: EzTagProps<T>) {
-  if (!props || typeof props !== 'object') {
-    console.error('[EzTag] ❌ Invalid props:', props);
-    return null;
-  }
+export function EzTag<T extends ElementType = 'span'>({
+  as,
+  variant,
+  className,
+  children,
+  ...otherProps
+}: EzTagProps<T>) {
+  // 1️⃣ Le tag sémantique
+  const tag = (as ?? 'span') as EzTagVariant;
 
-  const {
-    as,
-    variant = 'default',
-    className,
-    style,
-    id,
-    children,
-    ...restProps
-  } = props;
+  // 2️⃣ On détermine la(les) clé(s) de variant à utiliser :
+  //    - si array, c'est plusieurs clés
+  //    - sinon, soit variant fourni, soit on retombe sur le tag
+  const variantKeys = Array.isArray(variant) ? variant : [variant ?? tag];
 
-  const tag = as ?? 'div';
-  const Component = tag as React.ElementType;
+  // 3️⃣ On récupère les classes pour chaque clé, puis on fusionne
+  const variantClasses = twMerge(
+    ...variantKeys.map((key) => classNames[key] || '')
+  );
 
-  // Runtime checks
-  EzTagRuntimeChecks[tag]?.(restProps);
+  // 4️⃣ On fusionne enfin avec le className passé en prop
+  const merged = twMerge(variantClasses, className);
+
+  const Component = (as || 'span') as ElementType;
 
   return (
-    <Component
-      data-ez-tag={tag}
-      className={cn(EzTagVariants[tag]?.[variant], className)}
-      style={style}
-      id={id}
-      {...filterRestProps(restProps)}
-    >
+    <Component className={merged} {...otherProps}>
       {children}
     </Component>
   );
-}
-
-function filterRestProps(obj: Record<string, any>): Record<string, any> {
-  if (!obj || typeof obj !== 'object') return {};
-
-  const safe: Record<string, any> = {};
-
-  Object.keys(obj).forEach((key) => {
-    if (typeof key === 'string') {
-      safe[key] = obj[key];
-    }
-  });
-
-  return safe;
 }
