@@ -1,3 +1,9 @@
 {
-  "extends": "./packages/typescript-config/tsconfig.json"
+  "extends": "./packages/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@workspace/ui/*": ["./packages/ui/src/*"],
+      "@ezstart/ez-tag": ["./packages/libs/ez-tag/src/index.ts"]
+    }
+  }
 }
