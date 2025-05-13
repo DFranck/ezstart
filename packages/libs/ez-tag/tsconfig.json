@@ -1,3 +1,4 @@
+// ezstart/packages/libs/ez-tag/tsconfig.json
 {
   "extends": "../../../packages/typescript-config/react-library.json",
   "compilerOptions": {
