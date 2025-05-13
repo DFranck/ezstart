@@ -1,13 +1,19 @@
+import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@workspace/ui/lib/utils';
 import type { VariantProps } from 'class-variance-authority';
 import { ComponentProps, ElementType } from 'react';
 import { tagVariants } from '../variants';
 import type { TagVariantsMap } from '../variants/variantTypes';
 
+/**
+ * Utility type to check if a cva() function has a `variant` prop
+ */
 type HasVariant<T extends (...args: any) => any> =
   'variant' extends keyof VariantProps<T> ? true : false;
 
-// Keep only the keys of tagVariants whose cva has a `variant` key
+/**
+ * Utility type to filter out cva() functions that don't have a `variant` prop
+ */
 type FilterSupportedAs<T extends Record<string, (...args: any) => any>> = {
   [K in keyof T]: HasVariant<T[K]> extends true ? K : never;
 }[keyof T];
@@ -37,6 +43,7 @@ export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
   never
 > & {
   as?: T;
+  asChild?: boolean;
 } & CustomVariants<T>;
 
 /**
@@ -46,24 +53,21 @@ export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
  */
 export function EzTag<T extends SupportedAs = 'span'>({
   as,
+  asChild,
   className,
   children,
   ...props
-}: EzTagProps<T>) {
+}: EzTagProps<T> & { asChild?: boolean }) {
   const tag = (as ?? 'span') as string;
-  const Component = tag as ElementType;
 
-  // Lookup the corresponding cva() function from tagVariants
   const variantFn = tagVariants[tag as keyof typeof tagVariants];
-
-  // Compute the class string from the cva factory using passed variant props
   const variantClass =
     typeof variantFn === 'function'
       ? variantFn(props as VariantProps<typeof variantFn>)
       : '';
 
-  // Merge with custom className
   const merged = cn(variantClass, className);
+  const Component: ElementType = asChild ? Slot : as || 'span';
 
   return (
     <Component className={merged} {...props}>

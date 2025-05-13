@@ -142,6 +142,9 @@ importers:
 
   packages/libs/ez-tag:
     dependencies:
+      '@radix-ui/react-slot':
+        specifier: ^1.1.2
+        version: 1.2.2(@types/react@19.0.10)(react@19.0.0)
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../ui
