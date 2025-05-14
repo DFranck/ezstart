@@ -1,8 +1,9 @@
 'use client';
 
-import Burger from '@/components/burger';
+import Burger from '@/components/ui/burger';
 import { useDevice } from '@/hooks/useDevice';
 import { useNavLinks } from '@/hooks/useNavLinks';
+import { Li, Ul } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';
@@ -27,39 +28,38 @@ export default function MobileNavbar() {
     <div className='fixed bottom-0 left-0 right-0 z-50 bg-background'>
       <div
         className={cn(
-          'transition-all duration-500 ease-in-out overflow-hidden px-4',
-          isOpen ? 'max-h-[400px] pt-4 ' : 'max-h-0'
+          'transition-all duration-500 border-t-2 ease-in-out overflow-hidden px-2',
+          isOpen ? 'max-h-[400px] py-2 ' : 'max-h-0'
         )}
       >
-        <div
-          className={cn(
-            'flex flex-col gap-4 p-4 transition-all duration-500 ease-in-out ',
-            isOpen ? 'bg-muted ' : ''
-          )}
+        <Ul
+          layout={'grid'}
+          className={cn('grid-cols-2 gap-2', isOpen ? ' ' : '')}
         >
           {links.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className='text-sm hover:underline'
-              onClick={() => setIsOpen(false)}
-            >
-              {label}
-            </Link>
+            <Li key={href} variant={'card'} asChild>
+              <Link
+                href={href}
+                className='text-sm hover:underline'
+                onClick={() => setIsOpen(false)}
+              >
+                {label}
+              </Link>
+            </Li>
           ))}
-        </div>
+        </Ul>
       </div>
 
       <div className=' shadow-md'>
         <div className='grid grid-cols-3 items-center w-full '>
           <Link href={`/${locale}`} className='w-full flex justify-center py-2'>
-            <Home className='w-7 h-7' strokeWidth={1.5} />
+            <Home />
           </Link>
 
           <Burger isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
 
           <Link href='/profile' className='w-full flex justify-center py-2'>
-            <User className='w-7 h-7' strokeWidth={1.5} />
+            <User />
           </Link>
         </div>
       </div>

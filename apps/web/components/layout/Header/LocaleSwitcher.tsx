@@ -1,6 +1,6 @@
 'use client';
 
-import { Dropdown, DropdownItem } from '@/components/dropdown';
+import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
 import { routing } from '@/i18n/routing';
 import { capitalize } from '@/utils/capitalize';
 import { GlobeIcon } from 'lucide-react';

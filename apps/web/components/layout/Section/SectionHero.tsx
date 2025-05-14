@@ -1,4 +1,4 @@
-import { AuroraBackground } from '@/components/aurora-background';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import { H1, H3, Section } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 export const SectionHero = () => {

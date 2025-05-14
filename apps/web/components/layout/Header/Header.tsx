@@ -1,6 +1,6 @@
 'use client';
 
-import Burger from '@/components/burger';
+import Burger from '@/components/ui/burger';
 import { useDevice } from '@/hooks/useDevice';
 import { useNavLinks } from '@/hooks/useNavLinks';
 import { useOnScroll } from '@/hooks/useOnScroll';

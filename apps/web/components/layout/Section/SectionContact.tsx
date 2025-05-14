@@ -1,7 +1,8 @@
 'use client';
 
-import { LampContainer } from '@/components/lamp';
-import { EzTag } from '@ezstart/ez-tag';
+import { LampContainer } from '@/components/ui/lamp';
+import { EzIcon } from '@ezstart/ez-icon';
+import { Button, H2, P, Section, Ul } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -9,27 +10,28 @@ export const SectionContact = () => {
   const t = useTranslations('section-contact');
 
   return (
-    <EzTag as='section' size={'lg'}>
-      <LampContainer className=''>
-        <EzTag as='h2'>{t('title')}</EzTag>
+    <LampContainer>
+      <Section className='items-center' size={'lg'}>
+        <H2>{t('title')}</H2>
 
-        <p className='text-muted-foreground text-lg'>{t('description')}</p>
+        <P>{t('description')}</P>
 
-        <div className='flex justify-center gap-4 mt-6 flex-wrap'>
-          <EzTag as='button'>
+        <Ul layout={'inline'}>
+          <Button>
             <Link href='/contact'>{t('cta')}</Link>
-          </EzTag>
-          <EzTag as='button'>
+          </Button>
+          <Button asChild variant={'outline'}>
             <Link
               href='https://github.com/DFranck/ez-start'
               target='_blank'
               rel='noopener noreferrer'
             >
+              <EzIcon name='Github' size={20} />
               {t('github')}
             </Link>
-          </EzTag>
-        </div>
-      </LampContainer>
-    </EzTag>
+          </Button>
+        </Ul>
+      </Section>
+    </LampContainer>
   );
 };

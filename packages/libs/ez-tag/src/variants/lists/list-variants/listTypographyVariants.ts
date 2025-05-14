@@ -6,7 +6,7 @@ export const listTypographyVariants = {
       variant: {
         default: 'text-sm text-foreground',
         muted: 'text-sm text-muted-foreground',
-        card: 'rounded-lg bg-muted p-4 shadow text-sm',
+        card: 'rounded-lg bg-muted p-4 shadow text-sm items-center justify-center gap-2',
         check: 'text-sm before:content-["✅"] before:mr-2',
       },
     },

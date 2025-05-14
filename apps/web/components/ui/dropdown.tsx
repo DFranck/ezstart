@@ -55,8 +55,8 @@ export function Dropdown({ label, items }: DropdownProps) {
       {open && (
         <Ul
           role='menu'
-          layout='default'
-          className='absolute right-0 mt-2 bg-popover text-popover-foreground data-[side=top]:bottom-1 data-[side=right]:left-0 data-[side=bottom]:top-1 data-[side=left]:right-0 z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-lg'
+          variant={'menu'}
+          className='absolute right-0 mt-2 bg-popover text-popover-foreground data-[side=top]:bottom-1 data-[side=right]:left-0 data-[side=bottom]:top-1 data-[side=left]:right-0 z-50 min-w-[8rem] overflow-hidden '
         >
           {items.map(({ label, onSelect, value }) => (
             <Button asChild key={value} variant='ghost'>
