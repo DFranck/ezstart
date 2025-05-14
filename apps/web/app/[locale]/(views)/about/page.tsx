@@ -1,5 +1,5 @@
 'use client';
-import { EzTag } from '@ezstart/ez-tag';
+import { EzTag, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
@@ -15,71 +15,56 @@ const page = () => {
   const interests = t.raw('interests') as string[];
 
   return (
-    <EzTag
-      as='section'
-      id='about'
-      className={cn('py-20 px-6 bg-background text-muted-foreground')}
-    >
-      {/* Hero */}
-      <EzTag as='div' className='max-w-3xl mx-auto text-center space-y-4'>
+    <Main>
+      <Section className='py-20 mt-10' size={'lg'}>
         <EzTag as='h1'>{t('title')}</EzTag>
         <EzTag as='p'>{t('intro')}</EzTag>
-      </EzTag>
-
-      {/* Timeline */}
-      <EzTag as='div' className='max-w-4xl mx-auto mt-16 space-y-8'>
-        <EzTag as='h2'>{t('timelineTitle')}</EzTag>
-        <ul className='space-y-6'>
+      </Section>
+      <Section>
+        <H2>{t('timelineTitle')}</H2>
+        <Ul className='space-y-8'>
           {timeline.map((item) => (
-            <li key={item.year} className='flex'>
-              <EzTag as='span' className='w-20 font-mono text-green-400'>
+            <Li key={item.year} className='flex'>
+              <div className='w-20 flex items-center justify-center font-mono text-green-400'>
                 {item.year}
-              </EzTag>
-              <EzTag as='div' className='ml-4 space-y-1'>
-                <EzTag as='h3' variant='heading.tertiary'>
-                  {item.title}
-                </EzTag>
-                <EzTag as='p' variant='text.body'>
-                  {item.description}
-                </EzTag>
-              </EzTag>
-            </li>
+              </div>
+              <div className='space-y-1'>
+                <H4>{item.title}</H4>
+                <P>{item.description}</P>
+              </div>
+            </Li>
           ))}
-        </ul>
-      </EzTag>
-
-      {/* Skills / Values / Interests */}
-      <EzTag
-        as='div'
-        className='max-w-4xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-3 gap-12 text-center'
+        </Ul>
+      </Section>
+      <Section
+        id='about'
+        className={cn(
+          'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-20 py-20'
+        )}
       >
         {/* Skills */}
-        <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary'>
-            {t('skillsTitle')}
-          </EzTag>
+        <div className='text-center'>
+          <H4>{t('skillsTitle')}</H4>
           <ul className='mt-4 space-y-2'>
             {skills.map((s) => (
               <li
                 key={s}
-                className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
+                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
               >
                 {s}
               </li>
             ))}
           </ul>
-        </EzTag>
+        </div>
 
         {/* Values */}
-        <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary'>
-            {t('valuesTitle')}
-          </EzTag>
+        <EzTag as='div' className='text-center'>
+          <H4>{t('valuesTitle')}</H4>
           <ul className='mt-4 space-y-2'>
             {values.map((v) => (
               <li
                 key={v}
-                className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
+                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
               >
                 {v}
               </li>
@@ -88,23 +73,24 @@ const page = () => {
         </EzTag>
 
         {/* Interests */}
-        <EzTag as='div'>
-          <EzTag as='h2' variant='heading.secondary'>
-            {t('interestsTitle')}
-          </EzTag>
+        <EzTag
+          as='div'
+          className='md:col-span-2 text-center xl:col-span-1 xl:text-left'
+        >
+          <H4>{t('interestsTitle')}</H4>
           <ul className='mt-4 space-y-2'>
             {interests.map((i) => (
               <li
                 key={i}
-                className="before:content-['▹'] before:text-green-400 before:mr-2 inline-block"
+                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
               >
                 {i}
               </li>
             ))}
           </ul>
         </EzTag>
-      </EzTag>
-    </EzTag>
+      </Section>
+    </Main>
   );
 };
 

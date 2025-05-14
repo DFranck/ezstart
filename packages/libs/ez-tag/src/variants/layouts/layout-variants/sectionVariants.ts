@@ -8,6 +8,7 @@ export const sectionVariants = cva('container mx-auto flex flex-col', {
       loose: 'px-4 md:px-8 lg:px-16 py-16 gap-10',
       tight: 'px-2 py-2 gap-1',
       none: '',
+      screen: 'min-h-screen items-center justify-center',
     },
     size: {
       default: '',
