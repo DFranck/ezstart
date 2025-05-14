@@ -1,5 +1,5 @@
 'use client';
-import { EzTag, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
+import { EzTag, H1, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
@@ -15,10 +15,10 @@ const page = () => {
   const interests = t.raw('interests') as string[];
 
   return (
-    <Main>
-      <Section className='py-20 mt-10' size={'lg'}>
-        <EzTag as='h1'>{t('title')}</EzTag>
-        <EzTag as='p'>{t('intro')}</EzTag>
+    <Main className='py-20 mt-10'>
+      <Section size={'lg'}>
+        <H1>{t('title')}</H1>
+        <P>{t('intro')}</P>
       </Section>
       <Section>
         <H2>{t('timelineTitle')}</H2>

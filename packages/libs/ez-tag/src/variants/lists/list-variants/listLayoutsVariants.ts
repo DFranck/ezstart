@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 export const listLayoutsVariants = {
-  ul: cva('', {
+  ul: cva('flex flex-col gap-2', {
     variants: {
       variant: {
         default: '',

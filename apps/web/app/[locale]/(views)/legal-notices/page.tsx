@@ -34,30 +34,22 @@ const LegalNoticesPage = () => {
 
       <EzTag as='div' className='max-w-4xl mx-auto mt-12 space-y-12'>
         {sections.map((section) => (
-          <EzTag
+          <article
             key={section.id}
-            as='article'
             role='region'
             aria-labelledby={section.id}
             className='space-y-4'
           >
-            <EzTag
-              as='h3'
-              id={section.id}
-              variant='heading.secondary'
-              className='text-2xl font-semibold'
-            >
+            <EzTag as='h3' id={section.id} className='text-2xl font-semibold'>
               {section.title}
             </EzTag>
-            <EzTag as='p' variant='text.body'>
-              {section.content}
-            </EzTag>
+            <EzTag as='p'>{section.content}</EzTag>
             {section.link && (
               <Link href={section.link.href} target='_blank'>
                 {section.link.label}
               </Link>
             )}
-          </EzTag>
+          </article>
         ))}
       </EzTag>
     </EzTag>
