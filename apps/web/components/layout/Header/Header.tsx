@@ -25,13 +25,13 @@ export default function Header() {
   }, [isTablet, isOpen]);
 
   return (
-    <header className=' fixed top-0 left-0 right-0 z-50'>
+    <header className=' fixed  top-0 left-0 right-0 z-50'>
       <div
         className={cn(
           ' py-4 px-6 flex items-center justify-between transition-all duration-300',
           {
             'bg-transparent': isTop,
-            'bg-background ': !isTop || isOpen,
+            'bg-background border-b-2': !isTop || isOpen,
             'py-2': !isTop,
           }
         )}
