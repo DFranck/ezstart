@@ -4,7 +4,7 @@ export const listLayoutsVariants = {
   ul: cva('', {
     variants: {
       layout: {
-        default: 'list-disc pl-5 space-y-2',
+        default: 'list-disc pl-5 flex flex-col ',
         inline: 'list-disc pl-0 flex flex-wrap gap-4',
         grid: 'grid grid-cols-1 md:grid-cols-2 gap-4',
         none: '',

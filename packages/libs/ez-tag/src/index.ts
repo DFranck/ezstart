@@ -6,7 +6,9 @@ export { tagVariants } from './variants';
 export type { TagVariantsMap } from './variants/variantTypes';
 
 export {
+  Button,
   Dd,
+  Div,
   Dl,
   Dt,
   H1,

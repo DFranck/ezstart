@@ -1,6 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
+import { EzIcon } from '@ezstart/ez-icon';
 import { H2, Li, P, Section, Ul } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 
@@ -32,7 +33,11 @@ export const SectionTrust = () => {
           <Li key={index} variant={'card'} className='flex-col items-center'>
             <P>{point.icon}</P>
             <P className='font-semibold text-lg'>
-              {isLoading ? '...' : formatValue(point.value)}
+              {isLoading ? (
+                <EzIcon name='Loader' size={20} spin />
+              ) : (
+                formatValue(point.value)
+              )}
             </P>
             <P variant={'muted'}>{point.label}</P>
           </Li>
