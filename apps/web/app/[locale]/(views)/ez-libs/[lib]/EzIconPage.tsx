@@ -1,5 +1,9 @@
-import { IconGallery, IconGalleryItem } from '@/components/IconGallery';
+'use client';
+import { useDevice } from '@/hooks/useDevice';
 import { customIcons, faIcons, lucideIcons } from '@ezstart/ez-icon';
+import { Button, Div, Main } from '@ezstart/ez-tag';
+import { cn } from '@workspace/ui/lib/utils';
+import { useEffect, useRef, useState } from 'react';
 
 const allIcons = [
   ...lucideIcons.map((name) => ({ lib: 'lucide', name })),
@@ -8,12 +12,54 @@ const allIcons = [
 ];
 
 const EzIconPage = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const asideRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useDevice();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        asideRef.current &&
+        !asideRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <IconGallery
-      title='All Icons'
-      icons={allIcons as IconGalleryItem[]}
-      height={400}
-    />
+    <Div className='flex h-screen mt-[72px] '>
+      {isMobile && (
+        <Div className='fixed top-[72px] flex justify-between  border-b-2 border-t-2 w-full p-2'>
+          <Button variant={'ghost'} onClick={() => setIsOpen((o) => !o)}>
+            Menu
+          </Button>
+          <Button variant={'ghost'}>Return to top</Button>
+        </Div>
+      )}
+      <aside
+        ref={asideRef}
+        className={cn('w-72 bg-muted transition-all duration-300 z-10', {
+          '-translate-x-72 w-0': isMobile && !isOpen,
+        })}
+      >
+        filter
+      </aside>
+      <Main className='relative mt-[56px]'>
+        {/* <IconGallery
+          title='All Icons'
+          icons={allIcons as IconGalleryItem[]}
+          height={400}
+
+          // fullHeight
+        /> */}
+      </Main>
+    </Div>
   );
 };
 export default EzIconPage;

@@ -1,14 +1,9 @@
 import type { LucideProps } from 'lucide-react';
 import * as lucide from 'lucide-react';
 import * as fa from 'react-icons/fa';
-import NpmLogo from '../icons/NpmLogo';
 
-export const customIconsMap = {
-  NpmLogo,
-} as const;
-export const customIcons = Object.keys(
-  customIconsMap
-) as (keyof typeof customIconsMap)[];
+// src/types/icon.ts
+export const customIcons = ['NpmLogo'] as const;
 export const lucideIcons = Object.keys(lucide) as (keyof typeof lucide)[];
 export const faIcons = Object.keys(fa) as (keyof typeof fa)[];
 

@@ -2,7 +2,7 @@
 
 import type { KnownIconName } from '@ezstart/ez-icon';
 import { EzIcon } from '@ezstart/ez-icon';
-import { Div, EzTag } from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ez-tag';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
 
@@ -17,6 +17,7 @@ interface IconGalleryProps {
   size?: number;
   searchable?: boolean;
   height?: number;
+  fullHeight?: boolean;
 }
 
 export const IconGallery = ({
@@ -25,6 +26,7 @@ export const IconGallery = ({
   size = 20,
   searchable = true,
   height = 600,
+  fullHeight = false,
 }: IconGalleryProps) => {
   const [search, setSearch] = useState('');
   const filtered = icons.filter(({ name }) =>
@@ -33,11 +35,14 @@ export const IconGallery = ({
 
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const columnCount = 6;
+  const rowCount = Math.ceil(filtered.length / columnCount);
+
   const rowVirtualizer = useVirtualizer({
-    count: filtered.length,
+    count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => size + 40, // row height
-    overscan: 10,
+    estimateSize: () => size + 40,
+    overscan: 5,
   });
 
   return (
@@ -56,8 +61,12 @@ export const IconGallery = ({
 
       <div
         ref={parentRef}
-        className='relative overflow-y-auto border rounded'
-        style={{ height }}
+        className={`relative overflow-y-auto border rounded ${
+          fullHeight ? 'h-full' : ''
+        }`}
+        style={{
+          height: fullHeight ? undefined : height,
+        }}
       >
         <div
           style={{
@@ -66,22 +75,26 @@ export const IconGallery = ({
           }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = filtered[virtualRow.index];
+            const startIndex = virtualRow.index * columnCount;
+            const itemsInRow = filtered.slice(
+              startIndex,
+              startIndex + columnCount
+            );
+
             return (
               <div
-                key={`${item.lib}:${item.name}`}
-                className='absolute left-0 w-full px-4 py-2'
+                key={virtualRow.index}
+                className='absolute left-0 flex flex-wrap gap-1 w-full '
                 style={{ transform: `translateY(${virtualRow.start}px)` }}
               >
-                <Div className='flex items-center gap-3 text-sm'>
+                {itemsInRow.map((item) => (
                   <EzIcon
+                    key={`${item.lib}:${item.name}`}
                     name={`${item.lib}:${item.name}` as KnownIconName}
                     size={size}
+                    className='bg-muted'
                   />
-                  <span className='text-xs text-foreground'>
-                    {item.name} ({item.lib})
-                  </span>
-                </Div>
+                ))}
               </div>
             );
           })}

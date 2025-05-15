@@ -32,10 +32,7 @@ export function EzIcon({
 
       case 'custom': {
         const mod = await import(`../icons/${iconName}`);
-        const Icon =
-          mod.customIconsMap[iconName as keyof typeof mod.customIconsMap];
-        if (!Icon) throw new Error(`Unknown custom icon: ${iconName}`);
-        return { default: Icon };
+        return { default: mod.default };
       }
 
       default: {
