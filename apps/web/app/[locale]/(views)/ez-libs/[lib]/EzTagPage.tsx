@@ -1,4 +1,3 @@
-'use client';
 import { EzTag, Main } from '@ezstart/ez-tag';
 const EzTagPage = () => {
   return (

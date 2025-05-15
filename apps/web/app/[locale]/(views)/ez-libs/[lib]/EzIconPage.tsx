@@ -1,14 +1,19 @@
-'use client';
-import { EzTag, Main } from '@ezstart/ez-tag';
+import { IconGallery, IconGalleryItem } from '@/components/IconGallery';
+import { customIcons, faIcons, lucideIcons } from '@ezstart/ez-icon';
+
+const allIcons = [
+  ...lucideIcons.map((name) => ({ lib: 'lucide', name })),
+  ...faIcons.map((name) => ({ lib: 'fa', name })),
+  ...customIcons.map((name) => ({ lib: 'custom', name })),
+];
+
 const EzIconPage = () => {
   return (
-    <Main withHeader>
-      <EzTag as='section' className=''>
-        <EzTag as='h1'>icon</EzTag>
-        <EzTag as='h2'>Headings</EzTag>
-      </EzTag>
-    </Main>
+    <IconGallery
+      title='All Icons'
+      icons={allIcons as IconGalleryItem[]}
+      height={400}
+    />
   );
 };
-
 export default EzIconPage;

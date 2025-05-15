@@ -1,13 +1,21 @@
 import { notFound } from 'next/navigation';
-import { LibId, libData } from '../libData';
+import { LibId } from '../libData';
+import EzIconPage from './EzIconPage';
+import EzTagPage from './EzTagPage';
 
-export default function LibPage({ params }: { params: { lib: string } }) {
-  const lib = params.lib as LibId;
-  const Component = libData[lib]?.component;
-  if (!Component) notFound();
-  return <Component />;
-}
+export default async function LibPage({
+  params,
+}: {
+  params: Promise<{ lib: LibId }>;
+}) {
+  const { lib } = await params;
 
-export function generateStaticParams() {
-  return Object.keys(libData).map((lib) => ({ lib }));
+  switch (lib) {
+    case 'ez-tag':
+      return <EzTagPage />;
+    case 'ez-icon':
+      return <EzIconPage />;
+    default:
+      notFound();
+  }
 }

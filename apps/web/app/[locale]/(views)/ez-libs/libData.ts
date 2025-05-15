@@ -1,8 +1,5 @@
 // packages/web/lib/data/libData.ts
 
-import EzIconPage from './[lib]/EzIconPage';
-import EzTagPage from './[lib]/EzTagPage';
-
 export const libData = {
   'ez-tag': {
     name: 'EzTag',
@@ -12,7 +9,6 @@ export const libData = {
     github:
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-tag',
     npm: 'https://www.npmjs.com/package/@ezstart/ez-tag',
-    component: EzTagPage,
   },
   'ez-icon': {
     name: 'EzIcon',
@@ -22,7 +18,6 @@ export const libData = {
     github:
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-icon',
     npm: '',
-    component: EzIconPage,
   },
 } as const;
 

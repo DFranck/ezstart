@@ -1,11 +1,14 @@
-// packages/libs/ez-icon/src/types/icon.ts
 import type { LucideProps } from 'lucide-react';
-
-/** Tous les noms d’icônes fournis par lucide-react */
 import * as lucide from 'lucide-react';
 import * as fa from 'react-icons/fa';
+import NpmLogo from '../icons/NpmLogo';
 
-const customIcons = [] as const;
+export const customIconsMap = {
+  NpmLogo,
+} as const;
+export const customIcons = Object.keys(
+  customIconsMap
+) as (keyof typeof customIconsMap)[];
 export const lucideIcons = Object.keys(lucide) as (keyof typeof lucide)[];
 export const faIcons = Object.keys(fa) as (keyof typeof fa)[];
 
