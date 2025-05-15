@@ -1,4 +1,4 @@
-import { EzTag } from '@ezstart/ez-tag';
+import { Div, H2, H3, P, Section } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -13,26 +13,18 @@ const LegalNoticesPage = () => {
   const sections = t.raw('sections') as LegalSection[];
 
   return (
-    <EzTag
-      as='section'
+    <Section
       id='legal-notices'
       className={cn(
         'py-20 flex flex-col justify-center items-center px-6 bg-background min-h-screen '
       )}
     >
-      <EzTag as='div' className='max-w-4xl mx-auto text-center space-y-6'>
-        <EzTag
-          as='h2'
-          className='text-3xl md:text-4xl font-bold tracking-tight'
-        >
-          {t('title')}
-        </EzTag>
-        <EzTag as='p' className='text-lg text-muted-foreground'>
-          {t('intro')}
-        </EzTag>
-      </EzTag>
+      <Div className='max-w-4xl mx-auto text-center space-y-6'>
+        <H2>{t('title')}</H2>
+        <P>{t('intro')}</P>
+      </Div>
 
-      <EzTag as='div' className='max-w-4xl mx-auto mt-12 space-y-12'>
+      <Div className='max-w-4xl mx-auto mt-12 space-y-12'>
         {sections.map((section) => (
           <article
             key={section.id}
@@ -40,10 +32,8 @@ const LegalNoticesPage = () => {
             aria-labelledby={section.id}
             className='space-y-4'
           >
-            <EzTag as='h3' id={section.id} className='text-2xl font-semibold'>
-              {section.title}
-            </EzTag>
-            <EzTag as='p'>{section.content}</EzTag>
+            <H3 id={section.id}>{section.title}</H3>
+            <P>{section.content}</P>
             {section.link && (
               <Link href={section.link.href} target='_blank'>
                 {section.link.label}
@@ -51,8 +41,8 @@ const LegalNoticesPage = () => {
             )}
           </article>
         ))}
-      </EzTag>
-    </EzTag>
+      </Div>
+    </Section>
   );
 };
 

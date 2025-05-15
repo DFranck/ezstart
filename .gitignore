@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+@ezstart.code-workspace
 
 # Local env files
 .env
