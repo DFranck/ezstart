@@ -11,7 +11,7 @@ export const sectionVariants = cva('container mx-auto flex flex-col', {
       screen: 'min-h-screen items-center justify-center',
     },
     size: {
-      default: '',
+      default: 'max-w-5xl',
       sm: 'max-w-2xl',
       md: 'max-w-4xl',
       lg: 'max-w-5xl',

@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideProps } from 'lucide-react';
-import React, { Suspense, lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import type { EzIconProps } from '../types/icon';
 
 export function EzIcon({
@@ -12,15 +12,38 @@ export function EzIcon({
   style,
   ...props
 }: EzIconProps) {
-  // Dynamic icon typed en LucideProps
+  const [prefix, iconName] = name.includes(':')
+    ? name.split(':')
+    : ['lucide', name];
+
+  if (!iconName) throw new Error('EzIcon: icon name is missing');
+
   const DynamicIcon = lazy<React.ComponentType<LucideProps>>(async () => {
-    const mod = await import('lucide-react');
-    return {
-      default: mod[name] as React.ComponentType<LucideProps>,
-    };
+    switch (prefix) {
+      case 'lucide': {
+        const mod = await import('lucide-react');
+        return { default: mod[iconName as keyof typeof mod] };
+      }
+
+      case 'fa': {
+        const mod = await import('react-icons/fa');
+        return { default: mod[iconName as keyof typeof mod] };
+      }
+
+      case 'custom': {
+        const mod = await import(`../icons/${iconName}`);
+        const Icon =
+          mod.customIconsMap[iconName as keyof typeof mod.customIconsMap];
+        if (!Icon) throw new Error(`Unknown custom icon: ${iconName}`);
+        return { default: Icon };
+      }
+
+      default: {
+        throw new Error(`Unknown icon library: ${prefix}`);
+      }
+    }
   });
 
-  // Taille fallback basée sur props.size (inclus dans LucideProps)
   const fallbackSize = props.size ?? 24;
 
   return (

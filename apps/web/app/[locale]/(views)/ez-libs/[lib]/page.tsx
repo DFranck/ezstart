@@ -1,15 +1,13 @@
 import { notFound } from 'next/navigation';
-import EzTagPage from './EzTagPage';
+import { LibId, libData } from '../libData';
 
-const LibPage = ({ params }: { params: { lib: string } }) => {
-  const { lib } = params;
+export default function LibPage({ params }: { params: { lib: string } }) {
+  const lib = params.lib as LibId;
+  const Component = libData[lib]?.component;
+  if (!Component) notFound();
+  return <Component />;
+}
 
-  switch (lib) {
-    case 'ez-tag':
-      return <EzTagPage />;
-    default:
-      notFound();
-  }
-};
-
-export default LibPage;
+export function generateStaticParams() {
+  return Object.keys(libData).map((lib) => ({ lib }));
+}
