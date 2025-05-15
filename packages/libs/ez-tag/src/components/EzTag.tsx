@@ -44,6 +44,7 @@ export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
 > & {
   as?: T;
   asChild?: boolean;
+  CustomVariants?: CustomVariants<T>;
 } & CustomVariants<T>;
 
 /**
@@ -68,8 +69,19 @@ export function EzTag<T extends SupportedAs = 'span'>({
 
   const merged = cn(variantClass, className);
   const Component: ElementType = asChild ? Slot : as || 'span';
+
+  const domSafeProps = Object.fromEntries(
+    Object.entries(props).filter(
+      ([_, value]) =>
+        typeof value === 'string' ||
+        typeof value === 'undefined' ||
+        typeof value === 'function' ||
+        (typeof value === 'object' && value !== null && !Array.isArray(value))
+    )
+  );
+
   return (
-    <Component className={merged} {...props}>
+    <Component className={merged} {...domSafeProps}>
       {children}
     </Component>
   );

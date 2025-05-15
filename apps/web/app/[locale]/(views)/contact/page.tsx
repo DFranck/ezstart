@@ -1,16 +1,19 @@
+'use client';
 import { H1, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+
 type ContactLink = {
   label: string;
   href: string;
 };
+
 const ContactPage = () => {
   const t = useTranslations('contact');
   const links = t.raw('links') as ContactLink[];
 
   return (
-    <Main className='py-20 pt-10'>
+    <Main withHeader>
       <Section size={'lg'} className='text-center'>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>

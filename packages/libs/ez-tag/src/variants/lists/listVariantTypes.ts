@@ -6,7 +6,7 @@ type ExtractVariantIfPresent<T extends (...args: any) => any> =
     ? { variant?: VariantProps<T>['variant'] }
     : {};
 
-export type LayoutTagVariantsMap = {
+export type ListTagVariantsMap = {
   [K in keyof typeof listVariants]: VariantProps<(typeof listVariants)[K]> &
     ExtractVariantIfPresent<(typeof listVariants)[K]>;
 };
