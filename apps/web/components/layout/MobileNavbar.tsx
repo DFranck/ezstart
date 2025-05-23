@@ -2,18 +2,16 @@
 
 import Burger from '@/components/ui/burger';
 import { useDevice } from '@/hooks/useDevice';
-import { useNavLinks } from '@/hooks/useNavLinks';
-import { Li, Ul } from '@ezstart/ez-tag';
 import { cn } from '@workspace/ui/lib/utils';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { MobileNavMenu } from './MobileNavMenu';
 
 export default function MobileNavbar() {
   const { isMobile } = useDevice();
   const locale = useLocale();
-  const links = useNavLinks();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -32,22 +30,7 @@ export default function MobileNavbar() {
           isOpen ? 'max-h-[400px] py-2 ' : 'max-h-0'
         )}
       >
-        <Ul
-          layout={'grid'}
-          className={cn('grid-cols-2 gap-2', isOpen ? ' ' : '')}
-        >
-          {links.map(({ href, label }) => (
-            <Li key={href} variant={'card'} asChild>
-              <Link
-                href={href}
-                className='text-sm hover:underline'
-                onClick={() => setIsOpen(false)}
-              >
-                {label}
-              </Link>
-            </Li>
-          ))}
-        </Ul>
+        <MobileNavMenu variant={'secondary'} setIsOpen={setIsOpen} />
       </div>
 
       <div className=' shadow-md'>

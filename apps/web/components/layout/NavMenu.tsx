@@ -3,15 +3,27 @@ import { useNavLinks } from '@/hooks/useNavLinks';
 import { Button } from '@ezstart/ez-tag';
 import Link from 'next/link';
 
-export function NavMenu() {
+interface NavMenuProps {
+  variant?:
+    | 'default'
+    | 'ghost'
+    | 'secondary'
+    | 'outline'
+    | 'destructive'
+    | 'link'
+    | null;
+  className?: string;
+}
+
+export function NavMenu({ variant = 'link', className }: NavMenuProps) {
   const links = useNavLinks();
 
   return (
-    <nav>
+    <nav className={className}>
       {links.map((item, i) =>
         'menu' in item ? (
           <Dropdown
-            variant={'link'}
+            variant={variant}
             key={i}
             label={item.menuLabel}
             items={item.menu.map((sub) => ({
@@ -21,7 +33,7 @@ export function NavMenu() {
             }))}
           />
         ) : (
-          <Button variant={'link'} key={item.href} asChild>
+          <Button variant={variant} key={item.href} asChild>
             <Link href={item.href}>{item.label}</Link>
           </Button>
         )

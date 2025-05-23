@@ -44,12 +44,13 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
   }, [open]);
 
   return (
-    <Div ref={containerRef} className='relative inline-block text-left'>
+    <Div ref={containerRef} className='relative inline-block text-left '>
       <EzTag
         as='button'
         variant={variant}
         type='button'
         onClick={() => setOpen((o) => !o)}
+        className='w-full'
         aria-haspopup='menu'
         aria-expanded={open}
       >
