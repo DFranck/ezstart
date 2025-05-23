@@ -29,6 +29,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@ezstart/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       express:
         specifier: ^4.19.2
         version: 4.21.2
@@ -54,6 +57,9 @@ importers:
       '@ezstart/ez-tag':
         specifier: workspace:*
         version: link:../../packages/libs/ez-tag
+      '@ezstart/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.14
         version: 2.1.14(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -204,6 +210,8 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
+
+  packages/types: {}
 
   packages/typescript-config: {}
 

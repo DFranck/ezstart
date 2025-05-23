@@ -8,6 +8,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@ezstart/types": "workspace:*",
     "express": "^4.19.2"
   },
   "devDependencies": {

@@ -3,6 +3,12 @@
     { "label": "Home", "href": "/" },
     { "label": "About", "href": "/about" },
     { "label": "Contact", "href": "/contact" },
-    { "label": "EzLibs", "href": "/ez-libs" }
+    {
+      "menuLabel": "Libraries",
+      "menu": [
+        { "label": "EzLibs", "href": "/ez-libs" },
+        { "label": "Quotes", "href": "/ez-libs/quotes" }
+      ]
+    }
   ]
 }

@@ -9,6 +9,7 @@ import { EzStartSvg } from '@workspace/ui/icons/EzStartSvg';
 import { cn } from '@workspace/ui/lib/utils';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { NavMenu } from '../NavMenu';
 import { HeaderControls } from './HeaderControls';
 
 export default function Header() {
@@ -38,18 +39,14 @@ export default function Header() {
       >
         <Link href='/' className='flex items-center gap-2'>
           <EzStartSvg background='transparent' />
-          <EzTag as='h2' visual={'h4'}>
+          <EzTag as='h2' size={'h4'}>
             EzStart
           </EzTag>
         </Link>
 
         {isDesktop && (
           <div className='flex items-center gap-4'>
-            {links.map(({ href, label }) => (
-              <Link key={href} href={href} className='text-sm hover:underline'>
-                {label}
-              </Link>
-            ))}
+            <NavMenu />
           </div>
         )}
 
@@ -72,16 +69,7 @@ export default function Header() {
               isOpen ? 'bg-muted ' : ''
             )}
           >
-            {links.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className='text-sm hover:underline'
-                onClick={() => setIsOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
+            <NavMenu />
           </div>
         </div>
       )}

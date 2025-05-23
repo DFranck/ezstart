@@ -9,15 +9,19 @@ export interface DropdownItem {
 }
 
 export interface DropdownProps {
-  /**
-   * Le contenu du bouton trigger.
-   * Peut être une chaîne, un icône, ou tout ReactNode.
-   */
   label: React.ReactNode;
   items: DropdownItem[];
+  variant?:
+    | 'default'
+    | 'ghost'
+    | 'secondary'
+    | 'outline'
+    | 'destructive'
+    | 'link'
+    | null;
 }
 
-export function Dropdown({ label, items }: DropdownProps) {
+export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +47,7 @@ export function Dropdown({ label, items }: DropdownProps) {
     <Div ref={containerRef} className='relative inline-block text-left'>
       <EzTag
         as='button'
-        variant='ghost'
+        variant={variant}
         type='button'
         onClick={() => setOpen((o) => !o)}
         aria-haspopup='menu'
