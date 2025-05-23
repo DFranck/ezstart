@@ -1,7 +1,7 @@
 // packages/libs/ez-tag/src/variants/index.ts
 import { formVariants } from './forms/formVariants';
-import { headingVariants } from './headings/headingVariants';
-import { layoutVariants } from './layouts/layoutVariants';
+import { headingVariants, headingVariantsMeta } from './groups/heading';
+import { layoutVariants } from './groups/layout';
 import { listVariants } from './lists/listVariants';
 import { typographyVariants } from './typographies/typographyVariants';
 
@@ -16,4 +16,8 @@ export const tagVariants = {
   ...formVariants,
   ...typographyVariants,
   ...listVariants,
+};
+
+export const tagVariantsMeta = {
+  ...headingVariantsMeta,
 };

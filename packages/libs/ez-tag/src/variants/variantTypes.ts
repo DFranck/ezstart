@@ -6,9 +6,10 @@ import { tagVariants } from './index';
  * Utility type that adds the `variant` prop
  * only if it's explicitly defined inside a cva variant object.
  */
-type ExtractVariantIfPresent<T> = 'variant' extends keyof T
-  ? { variant?: T['variant'] }
-  : {};
+export type ExtractVariantIfPresent<T extends (...args: any) => any> =
+  'variant' extends keyof VariantProps<T>
+    ? { variant?: VariantProps<T>['variant'] }
+    : {};
 
 /**
  * Dynamically infers the valid variant props (like `layout`, `size`, `variant`, etc.)
