@@ -1,7 +1,8 @@
 'use client';
+import { addQuote } from '@/lib/api/quotes';
 import type { Quote } from '@ezstart/types';
 import { useState } from 'react';
-
+import { toast } from 'sonner';
 type Props = {
   onAdded: (q: Quote) => void;
 };
@@ -13,15 +14,16 @@ export function QuotesForm({ onAdded }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const newQuote = { clientName, amount: Number(amount) };
-    const res = await fetch('http://localhost:5000/api/quotes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newQuote),
-    });
-    const data: Quote = await res.json();
-    onAdded(data);
-    setClientName('');
-    setAmount('');
+    try {
+      const data = await addQuote(newQuote);
+      onAdded(data);
+      toast.success('Quote added', {});
+      setClientName('');
+      setAmount('');
+    } catch (err) {
+      console.error('[AddQuote]', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to add quote');
+    }
   }
 
   return (

@@ -76,6 +76,10 @@ export interface Quote extends BillingBase {
   acceptedAt?: string; // ISO Date
 }
 
+export type QuoteCreateInput = {
+  clientName: string;
+  amount: number;
+};
 // Reçu (Receipt)
 export interface Receipt extends BillingBase {
   type: BillingType.RECEIPT;

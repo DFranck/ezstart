@@ -1,5 +1,7 @@
+import { Main } from '@ezstart/ez-tag';
+
 const ReceiptsPage = () => {
-  return <div>receiptsPage</div>;
+  return <Main>receiptsPage</Main>;
 };
 
 export default ReceiptsPage;

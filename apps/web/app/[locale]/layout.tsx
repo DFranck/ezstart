@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import MobileNavbar from '@/components/layout/MobileNavbar';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
+import { Toaster } from '@workspace/ui/components/sonner';
 import '@workspace/ui/globals.css';
 import { hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
@@ -46,6 +47,7 @@ export default async function LocaleLayout(props: {
           <MobileNavbar />
           <Footer />
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

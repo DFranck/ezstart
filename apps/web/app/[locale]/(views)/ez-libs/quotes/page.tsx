@@ -1,5 +1,6 @@
 'use client';
 import { getQuotes } from '@/lib/api/quotes';
+import { H1, Main } from '@ezstart/ez-tag';
 import { Quote } from '@ezstart/types';
 import { useEffect, useState } from 'react';
 import { QuotesForm } from './components/QuotesForm';
@@ -7,16 +8,25 @@ import { QuotesList } from './components/QuotesList';
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getQuotes().then(setQuotes);
+    getQuotes().then((res) => {
+      if (Array.isArray(res)) setQuotes(res);
+      else {
+        setQuotes([]);
+        setError('Failed to load quotes.');
+      }
+    });
   }, []);
 
   return (
-    <main className='p-8 max-w-lg mx-auto'>
-      <h1 className='text-2xl font-bold mb-4'>Quotes</h1>
+    <Main>
+      <H1>Quotes</H1>
+      {error && <p className='text-red-500'>{error}</p>}
+
       <QuotesForm onAdded={(q) => setQuotes((prev) => [q, ...prev])} />
       <QuotesList quotes={quotes} />
-    </main>
+    </Main>
   );
 }

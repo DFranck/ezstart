@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import billsRoutes from './bills';
 import quotesRoutes from './quotes';
 import receiptsRoutes from './receipts';
-import billsRoutes from './bills';
 
 const router = Router();
 

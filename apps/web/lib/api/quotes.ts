@@ -1,15 +1,17 @@
-import type { Quote } from '@ezstart/types';
+import { fetchWrapper } from '@/utils/fetchWrapper';
+import { getApiUrl } from '@/utils/getApiUrl';
+import type { Quote, QuoteCreateInput } from '@ezstart/types';
+
+const apiBase = getApiUrl();
 
 export async function getQuotes(): Promise<Quote[]> {
-  const res = await fetch('http://localhost:5000/api/quotes');
-  return res.json();
+  return fetchWrapper<Quote[]>(`${apiBase}/api/quotes`);
 }
 
-export async function addQuote(quote: Omit<Quote, 'id'>): Promise<Quote> {
-  const res = await fetch('http://localhost:5000/api/quotes', {
+export async function addQuote(quote: QuoteCreateInput): Promise<Quote> {
+  return fetchWrapper<Quote>(`${apiBase}/api/quotes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(quote),
   });
-  return res.json();
 }
