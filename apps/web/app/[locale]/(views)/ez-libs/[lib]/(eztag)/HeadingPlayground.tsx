@@ -70,7 +70,7 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
   const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent, content);
 
   return (
-    <Section className='rounded-xl border border-border bg-background/70 shadow-md p-4 flex flex-col md:flex-row md:gap-8 gap-4 md:items-start'>
+    <Section variant={'outline'}>
       {/* Preview */}
       <div className='flex-1 min-w-0'>
         <EzTag as={tag} {...selected}>
