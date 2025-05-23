@@ -1,19 +1,44 @@
 'use client';
 
-import { EzTag, headings, tagVariantsMeta } from '@ezstart/ez-tag';
+import {
+  EzTag,
+  H6,
+  headings,
+  headingVariants,
+  Section,
+  tagVariantsMeta,
+} from '@ezstart/ez-tag';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@workspace/ui/components/select';
 import { useState } from 'react';
-import { headingVariants } from '../../../../../../../../packages/libs/ez-tag/src/variants/groups/heading';
 import { buildFakeTag } from './buildFakeTag';
 
-export const HeadingPlayground = () => {
-  return (
-    <div className='space-y-6'>
-      {headings.map((tag) => (
-        <HeadingVariantTester key={tag} tag={tag} />
-      ))}
-    </div>
-  );
-};
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@workspace/ui/components/accordion';
+
+export const HeadingPlayground = () => (
+  <Accordion type='multiple' className='w-full'>
+    {headings.map((tag) => (
+      <AccordionItem value={tag} key={tag} className='border-b'>
+        <AccordionTrigger className='capitalize text-xl font-semibold'>
+          {`<${tag}> playground`}
+        </AccordionTrigger>
+        <AccordionContent>
+          <HeadingVariantTester tag={tag} />
+        </AccordionContent>
+      </AccordionItem>
+    ))}
+  </Accordion>
+);
 
 type TesterProps = {
   tag: (typeof headings)[number];
@@ -26,7 +51,6 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
     const out: Record<string, string> = {};
     Object.entries(meta).forEach(([variantName, values]) => {
       if (variantName === 'size' && values.includes(tag)) {
-        // Pour la prop "size", on initialise à la valeur du tag (ex: "h2" pour <h2>)
         out[variantName] = tag;
       } else {
         out[variantName] = factory.defaultVariants?.[variantName] ?? values[0];
@@ -41,42 +65,62 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
   };
 
   const aliasComponent = `H${tag.slice(1)}`;
-  const fakeTagCode = buildFakeTag(tag, selected);
-  const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent);
+  const content = `I'm a ${tag.toUpperCase()}`;
+  const fakeTagCode = buildFakeTag(tag, selected, undefined, content);
+  const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent, content);
 
   return (
-    <div className='space-y-2'>
-      <h3 className='text-lg font-bold capitalize'>{`<${tag}>`}</h3>
-      <div className='flex gap-4 flex-wrap items-end'>
-        {Object.entries(meta).map(([variantName, values]) => (
-          <div key={variantName} className='flex flex-col gap-1'>
-            <label className='text-xs text-neutral-400'>{variantName}</label>
-            <select
-              className='rounded border p-2 bg-black text-white'
-              value={selected[variantName]}
-              onChange={(e) => handleChange(variantName, e.target.value)}
-            >
-              {values.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+    <Section className='rounded-xl border border-border bg-background/70 shadow-md p-4 flex flex-col md:flex-row md:gap-8 gap-4 md:items-start'>
+      {/* Preview */}
+      <div className='flex-1 min-w-0'>
         <EzTag as={tag} {...selected}>
-          {`${tag.toUpperCase()} • ${Object.entries(selected)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join(' • ')}`}
+          {content}
         </EzTag>
       </div>
-      {/* Bloc code dynamic */}
-      <pre className='rounded bg-zinc-900/80 px-4 py-2 text-sm text-zinc-100 mt-2 font-mono'>
-        <code>{fakeAliasCode}</code>
-      </pre>
-      <pre className='rounded bg-zinc-900/80 px-4 py-2 text-sm text-zinc-100 font-mono'>
-        <code>{fakeTagCode}</code>
-      </pre>
-    </div>
+
+      {/* Controls & usage */}
+      <div className='flex-1 min-w-[240px]'>
+        <div className='mb-3'>
+          <div className='grid grid-cols-1 gap-2'>
+            <div>
+              <H6 className='mb-1'>Usage</H6>
+              <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
+                <code>{fakeTagCode}</code>
+              </pre>
+            </div>
+            <div>
+              <H6 className='mb-1'>Alias</H6>
+              <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
+                <code>{fakeAliasCode}</code>
+              </pre>
+            </div>
+          </div>
+        </div>
+        <form className='grid gap-3 md:grid-cols-3'>
+          {Object.entries(meta).map(([variantName, values]) => (
+            <div key={variantName} className='flex flex-col gap-1'>
+              <label className='text-xs font-medium text-neutral-400'>
+                {variantName}
+              </label>
+              <Select
+                value={selected[variantName]}
+                onValueChange={(v: string) => handleChange(variantName, v)}
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder={variantName} />
+                </SelectTrigger>
+                <SelectContent>
+                  {values.map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+        </form>
+      </div>
+    </Section>
   );
 };

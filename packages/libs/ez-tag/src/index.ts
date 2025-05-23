@@ -11,7 +11,7 @@ export type { SupportedAs } from './components/EzTag';
 export { tagVariants, tagVariantsMeta } from './variants';
 
 // -- Variant group exports (expose groups for advanced usage or external extension) --
-export { headings } from './variants/groups/heading';
+export { headings, headingVariants } from './variants/groups/heading';
 
 // -- Auto-generated type map of all supported variants per tag (for type safety, advanced helpers, and DX) --
 export type { TagVariantsMap } from './variants/variantTypes';

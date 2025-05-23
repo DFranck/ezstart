@@ -1,7 +1,8 @@
 export function buildFakeTag(
   tag: string,
   selected: Record<string, string>,
-  variantComponent?: string
+  variantComponent?: string,
+  content?: string
 ) {
   // Ex : variantComponent = "H2" ou "EzTag"
   // On n'affiche pas les props à leur valeur "par défaut"
@@ -19,8 +20,8 @@ export function buildFakeTag(
   });
   if (variantComponent) {
     // Version alias <H2 ... />
-    return `<${variantComponent}${props} />`;
+    return `<${variantComponent}${props}>${content ?? ''}</${variantComponent}>`;
   }
   // Version polymorphe <EzTag as="h2" ... />
-  return `<EzTag as="${tag}"${props} />`;
+  return `<EzTag as="${tag}"${props}>${content ?? ''}</EzTag>`;
 }

@@ -3,12 +3,6 @@ import { textIntents } from '../../tokens/Intents';
 import { textSizeVariants } from '../../tokens/size';
 import { textVariants } from '../../tokens/variants';
 
-/**
- * All heading tags (`h1` to `h6`) mapped to their variant configurations.
- * Each tag uses the same base style and supports a single `variant` (for now).
- * You can extend this later with more variants like `color`, `weight`, etc.
- */
-
 export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 export const headingVariantsMeta = Object.fromEntries(
