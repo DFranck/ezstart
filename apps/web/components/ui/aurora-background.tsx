@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '@ezstart/ui/lib/utils';
+import { cn } from '@ezstart/ui';
 import React, { ReactNode } from 'react';
 
 interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {

@@ -14,7 +14,7 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@ezstart/ui/lib/utils",
+    "utils": "@ezstart/ui",
     "ui": "@ezstart/ui/components"
   }
 }

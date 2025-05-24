@@ -2,7 +2,7 @@
 
 import Burger from '@/components/ui/burger';
 import { useDevice } from '@/hooks/useDevice';
-import { cn } from '@ezstart/ui/lib/utils';
+import { cn } from '@ezstart/ui';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
