@@ -1,6 +1,6 @@
-import type { Quote, QuoteCreateInput } from '../types';
-import { fetchWrapper } from '../utils/fetchWrapper';
-import { getApiUrl } from '../utils/getApiUrl';
+import { fetchWrapper } from '@/utils/fetchWrapper';
+import { getApiUrl } from '@/utils/getApiUrl';
+import { Quote, QuoteCreateInput } from '@ezstart/types';
 
 const apiBase = getApiUrl();
 

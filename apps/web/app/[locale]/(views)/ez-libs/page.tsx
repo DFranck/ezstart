@@ -1,10 +1,9 @@
-import { version } from '@ezstart/ez-billing';
 import { H1, H2, Main, Section } from '@ezstart/ez-tag';
+
 import { LibSection } from './components/LibSection';
 import { libData } from './libData';
 
 export default function EzLibs() {
-  console.log('[ez-billing] version:', version);
   return (
     <Main withHeader>
       <Section>

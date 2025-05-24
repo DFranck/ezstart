@@ -1,8 +1,8 @@
 'use client';
+import { addQuote } from '@/api/quotes';
+import { Quote } from '@ezstart/types';
 import { useState } from 'react';
-// import { toast } from 'sonner';
-import { addQuote } from '../api';
-import { Quote } from '../types';
+
 type Props = {
   onAdded: (q: Quote) => void;
 };

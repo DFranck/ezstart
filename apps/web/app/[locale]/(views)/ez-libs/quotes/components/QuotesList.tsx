@@ -1,8 +1,8 @@
 'use client';
-// import { QuotePdfTemplate } from '@ezstart/templates';
-import { Modal } from '@ezstart/ui/components/modal';
+
+import { Quote } from '@ezstart/types';
+import { Modal } from '@ezstart/ui';
 import { useState } from 'react';
-import { Quote } from '../types';
 
 type Props = {
   quotes: Quote[];
