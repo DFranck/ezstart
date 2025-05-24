@@ -23,7 +23,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@ezstart/ui/components/accordion';
+} from '@ezstart/ui';
 
 export const HeadingPlayground = () => (
   <Accordion type='multiple' className='w-full'>
