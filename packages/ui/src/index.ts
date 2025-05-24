@@ -1,13 +1,27 @@
 // @ezstart/packages/ui/src/index.ts
 
 // Components
-export * from './components/accordion';
-export * from './components/dropdown-menu';
-export * from './components/select';
-export * from './components/sonner';
+export {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './components/accordion';
+export {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from './components/dropdown-menu';
+export {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from './components/select';
+export { Toaster } from './components/sonner';
 
 // Icons
-export * from './icons/EzStartSvg';
+export { EzStartSvg } from './icons/EzStartSvg';
 
 // Utils
-export * from './lib/utils';
+export { cn } from './lib/utils';
