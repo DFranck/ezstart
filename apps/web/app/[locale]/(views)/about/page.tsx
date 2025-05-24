@@ -1,6 +1,6 @@
 'use client';
 import { EzTag, H1, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
-import { cn } from '@ezstart/ui/lib/utils';
+import { cn } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
   year: string;
