@@ -1,6 +1,6 @@
 'use client';
 import { EzTag, H1, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ez-tag';
-import { cn } from '@ezstart/ui';
+// import { cn } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
   year: string;
@@ -38,9 +38,9 @@ const page = () => {
       </Section>
       <Section
         id='about'
-        className={cn(
-          'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-20 py-20'
-        )}
+        // className={cn(
+        //   'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-20 py-20'
+        // )}
       >
         {/* Skills */}
         <div className='text-center'>
