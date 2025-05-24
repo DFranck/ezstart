@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@ezstart/ui';
+import { cn } from '../lib/utils';
 
 export const EzStartSvg = ({
   className,
