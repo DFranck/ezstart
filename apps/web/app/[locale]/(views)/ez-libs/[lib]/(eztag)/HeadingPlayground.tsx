@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@workspace/ui/components/select';
+} from '@ezstart/ui/components/select';
 import { useState } from 'react';
 import { buildFakeTag } from './buildFakeTag';
 
@@ -23,7 +23,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@workspace/ui/components/accordion';
+} from '@ezstart/ui/components/accordion';
 
 export const HeadingPlayground = () => (
   <Accordion type='multiple' className='w-full'>

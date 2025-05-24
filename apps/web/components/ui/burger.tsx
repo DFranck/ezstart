@@ -1,7 +1,7 @@
 'use client';
 
 import { EzTag } from '@ezstart/ez-tag';
-import { cn } from '@workspace/ui/lib/utils';
+import { cn } from '@ezstart/ui/lib/utils';
 
 const Burger = ({
   setIsOpen,

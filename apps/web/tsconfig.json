@@ -1,8 +1,16 @@
 {
-  "extends": "../../packages/typescript-config/nextjs.json",
+  "extends": "../../packages/typescript-config/react-library.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "incremental": true
+    "incremental": true,
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "src",

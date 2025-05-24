@@ -2,7 +2,7 @@
 
 import { useDevice } from '@/hooks/useDevice';
 import { EzIcon } from '@ezstart/ez-icon';
-import { cn } from '@workspace/ui/lib/utils';
+import { cn } from '@ezstart/ui/lib/utils';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 

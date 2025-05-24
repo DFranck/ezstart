@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@workspace/ui/lib/utils';
+import { cn } from '@ezstart/ui/lib/utils';
 
 export const EzStartSvg = ({
   className,
