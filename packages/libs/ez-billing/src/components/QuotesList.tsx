@@ -1,6 +1,6 @@
 'use client';
 // import { QuotePdfTemplate } from '@ezstart/templates';
-import { Modal } from '@workspace/ui/components/Modal';
+import { Modal } from '@workspace/ui/components/modal';
 import { useState } from 'react';
 import { Quote } from '../types';
 

@@ -1,9 +1,10 @@
 {
-  "name": "@workspace/ui",
-  "version": "0.0.0",
+  "name": "@ezstart/ui",
+  "version": "0.1.0",
   "type": "module",
   "private": true,
   "scripts": {
+    "dev": "tsc -b --watch",
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {

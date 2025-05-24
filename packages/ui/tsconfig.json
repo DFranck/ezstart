@@ -4,6 +4,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "composite": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
       "@workspace/ui/*": ["./src/*"]
