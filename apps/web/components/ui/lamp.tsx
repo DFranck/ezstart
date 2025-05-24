@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '@ezstart/ui';
+import { cn } from '@ezstart/ui/src/lib/utils';
 import { motion } from 'framer-motion';
 import React from 'react';
 

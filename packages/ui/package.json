@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "private": false,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -48,6 +48,26 @@
       "types": "./dist/index.d.ts"
     },
     "./globals.css": "./src/styles/globals.css",
-    "./postcss.config": "./postcss.config.mjs"
+    "./postcss.config": "./postcss.config.mjs",
+    "./lib/*": {
+      "import": "./dist/lib/*.js",
+      "require": "./dist/lib/*.js",
+      "types": "./dist/lib/*.d.ts"
+    },
+    "./components/*": {
+      "import": "./dist/components/*.js",
+      "require": "./dist/components/*.js",
+      "types": "./dist/components/*.d.ts"
+    },
+    "./hooks/*": {
+      "import": "./dist/hooks/*.js",
+      "require": "./dist/hooks/*.js",
+      "types": "./dist/hooks/*.d.ts"
+    },
+    "./icons/*": {
+      "import": "./dist/icons/*.js",
+      "require": "./dist/icons/*.js",
+      "types": "./dist/icons/*.d.ts"
+    }
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { EzTag } from '@ezstart/ez-tag';
-import { cn } from '@ezstart/ui';
+import { cn } from '@ezstart/ui/src/lib/utils';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
