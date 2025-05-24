@@ -17,6 +17,7 @@ export {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from './components/select';
 export { Toaster } from './components/sonner';
 
