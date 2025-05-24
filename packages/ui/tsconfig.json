@@ -8,7 +8,7 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@workspace/ui/*": ["./src/*"]
+      "@ezstart/ui/*": ["./src/*"]
     }
   },
   "include": ["src"],

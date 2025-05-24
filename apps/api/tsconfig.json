@@ -1,10 +1,9 @@
 {
-  "extends": "../../packages/typescript-config/tsconfig.json",
+  "extends": "../../packages/typescript-config/api.json",
   "compilerOptions": {
     "outDir": "dist",
-    "jsx": "react",
-    "module": "CommonJS",
-    "esModuleInterop": true
+    "rootDir": "."
   },
-  "include": ["index.ts"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }

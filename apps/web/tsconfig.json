@@ -1,33 +1,8 @@
 {
-  "extends": "../../packages/typescript-config/tsconfig.json",
+  "extends": "../../packages/typescript-config/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@ezstart/ez-tag": ["../../packages/libs/ez-tag/src/index.ts"],
-      "@ezstart/ez-icon": ["../../packages/libs/ez-icon/src/index.ts"]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "noEmit": true,
-    "incremental": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve"
+    "baseUrl": "."
   },
-  "include": [
-    "next-env.d.ts",
-    "next.config.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": ["node_modules"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
