@@ -1,8 +1,8 @@
 'use client';
-import { Modal } from '@/components/ui/Modal';
-import { QuotePdfTemplate } from '@ezstart/templates';
-import type { Quote } from '@ezstart/types';
+// import { QuotePdfTemplate } from '@ezstart/templates';
+import { Modal } from '@workspace/ui/components/Modal';
 import { useState } from 'react';
+import { Quote } from '../types';
 
 type Props = {
   quotes: Quote[];
@@ -30,7 +30,7 @@ export function QuotesList({ quotes }: Props) {
       <Modal open={!!selected} onClose={() => setSelected(null)}>
         {selected && (
           <div>
-            <QuotePdfTemplate quote={selected} />
+            {/* <QuotePdfTemplate quote={selected} /> */}
             {/* Ici tu peux mettre un bouton "Télécharger PDF" plus tard */}
           </div>
         )}

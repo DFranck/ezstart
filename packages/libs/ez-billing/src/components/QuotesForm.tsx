@@ -1,8 +1,8 @@
 'use client';
-import { addQuote } from '@/lib/api/quotes';
-import type { Quote } from '@ezstart/types';
 import { useState } from 'react';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
+import { addQuote } from '../api';
+import { Quote } from '../types';
 type Props = {
   onAdded: (q: Quote) => void;
 };
@@ -17,12 +17,12 @@ export function QuotesForm({ onAdded }: Props) {
     try {
       const data = await addQuote(newQuote);
       onAdded(data);
-      toast.success('Quote added', {});
+      // toast.success('Quote added', {});
       setClientName('');
       setAmount('');
     } catch (err) {
       console.error('[AddQuote]', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to add quote');
+      // toast.error(err instanceof Error ? err.message : 'Failed to add quote');
     }
   }
 

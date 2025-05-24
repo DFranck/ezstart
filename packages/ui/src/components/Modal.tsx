@@ -1,6 +1,5 @@
 // components/ui/Modal.tsx
 'use client';
-import { Button } from '@ezstart/ez-tag';
 import { MouseEvent, ReactNode } from 'react';
 
 type ModalProps = {
@@ -11,7 +10,7 @@ type ModalProps = {
   disableClickOut?: boolean;
 };
 
-export function Modal({
+function Modal({
   open,
   onClose,
   children,
@@ -34,17 +33,18 @@ export function Modal({
     >
       <div className='bg-background border rounded-xl shadow-xl p-8 min-w-[340px] relative'>
         {!disableCloseButton && (
-          <Button
-            variant={'ghost'}
+          <button
             className='absolute top-2 right-2'
             onClick={onClose}
             aria-label='Close modal'
           >
             &times;
-          </Button>
+          </button>
         )}
         {children}
       </div>
     </div>
   );
 }
+
+export { Modal };

@@ -4,8 +4,8 @@ import { H1, Main } from '@ezstart/ez-tag';
 import { Quote } from '@ezstart/types';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { QuotesForm } from './components/QuotesForm';
-import { QuotesList } from './components/QuotesList';
+import QuotesForm from '@ezstart/ez-billing';
+import QuotesList from './QuotesList';
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/ez-billing": "workspace:*",
     "@ezstart/ez-icon": "workspace:*",
     "@ezstart/ez-tag": "workspace:*",
     "@ezstart/types": "workspace:*",

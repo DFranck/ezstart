@@ -1,7 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@workspace/ui/lib/utils';
 import type { VariantProps } from 'class-variance-authority';
 import { ComponentProps, ElementType } from 'react';
+import { cn } from '../lib/utils';
 import { tagVariants } from '../variants';
 import type { TagVariantsMap } from '../variants/variantTypes';
 

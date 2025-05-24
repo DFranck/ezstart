@@ -19,6 +19,15 @@ export const libData = {
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-icon',
     npm: '',
   },
+  'ez-billing': {
+    name: 'EzBilling',
+    description:
+      'EzBilling is a destined to become a Saas or other monayable product where you can manage your subscriptions and payments.',
+    href: '/ez-libs/ez-billing',
+    github:
+      'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-billing',
+    npm: '',
+  },
 } as const;
 
 export type LibId = keyof typeof libData;

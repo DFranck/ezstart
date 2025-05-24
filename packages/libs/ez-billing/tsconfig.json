@@ -1,0 +1,16 @@
+{
+  "extends": "../../../packages/typescript-config/react-library.json",
+  "compilerOptions": {
+    "types": ["react", "react/jsx-runtime", "@types/react"],
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+    "composite": true
+  },
+  "include": ["src", "*.ts", "*.tsx", "tailwind.config.js"],
+  "exclude": ["node_modules", "dist"]
+}

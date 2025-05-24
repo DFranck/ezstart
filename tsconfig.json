@@ -1,4 +1,3 @@
-// ezstart/tsconfig.json
 {
   "extends": "./packages/typescript-config/tsconfig.json"
 }

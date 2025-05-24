@@ -1,16 +1,9 @@
-// ezstart/packages/libs/ez-tag/tsconfig.json
 {
   "extends": "../../../packages/typescript-config/react-library.json",
   "compilerOptions": {
-    "types": ["react", "react/jsx-runtime", "@types/react"],
     "outDir": "dist",
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": true,
     "composite": true
   },
-  "include": ["src", "tailwind.config.js"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
