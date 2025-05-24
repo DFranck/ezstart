@@ -1,0 +1,1 @@
+export { QuotePdfTemplate } from './QuotePdfTemplate';

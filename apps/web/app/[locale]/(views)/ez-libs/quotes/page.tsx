@@ -3,6 +3,7 @@ import { getQuotes } from '@/lib/api/quotes';
 import { H1, Main } from '@ezstart/ez-tag';
 import { Quote } from '@ezstart/types';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { QuotesForm } from './components/QuotesForm';
 import { QuotesList } from './components/QuotesList';
 
@@ -16,6 +17,7 @@ export default function QuotesPage() {
       else {
         setQuotes([]);
         setError('Failed to load quotes.');
+        toast.error('Failed to load quotes.');
       }
     });
   }, []);

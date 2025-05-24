@@ -12,9 +12,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/ez-icon": "workspace:^",
+    "@ezstart/ez-icon": "workspace:*",
     "@ezstart/ez-tag": "workspace:*",
     "@ezstart/types": "workspace:*",
+    "@ezstart/templates": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@tanstack/react-virtual": "^3.13.8",
     "@workspace/ui": "workspace:*",
