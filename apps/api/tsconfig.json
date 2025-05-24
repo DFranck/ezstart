@@ -1,5 +1,5 @@
 {
-  "extends": "../../packages/typescript-config/api.json",
+  "extends": "@workspace/typescript-config/api.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "."

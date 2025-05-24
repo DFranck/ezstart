@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ezstart/ui/components/select';
+} from '@ezstart/ui';
 import { useState } from 'react';
 import { buildFakeTag } from './buildFakeTag';
 
