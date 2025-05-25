@@ -1,7 +1,7 @@
 'use client';
 
 import { Quote } from '@ezstart/types';
-import { Modal } from '@ezstart/ui/components/modal';
+import { Modal } from '@ezstart/ui';
 import { useState } from 'react';
 
 type Props = {

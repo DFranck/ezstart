@@ -13,6 +13,12 @@ pnpm add @ezstart/ui
 pnpm --filter=@ezstart/ui dev
 ```
 
+## ⚠️ Required: Global Styles
+
+This package relies on the shared design system CSS.
+
+👉 [How to setup global styles for EzStart components](../ui/README.md#required-global-css--tailwind-setup)
+
 ## 📁 Folder Structure
 
 ```plaintext

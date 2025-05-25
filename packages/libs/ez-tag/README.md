@@ -36,6 +36,10 @@ yarn add @ezstart/ez-tag
 
 ### Tailwind & Peer Dependencies
 
+[![](https://img.shields.io/badge/Requires%20EzStart%20global%20CSS-blue)](../docs/usage-global-css.md)
+
+See [docs/usage-global-css.md](../docs/usage-global-css.md) for setup instructions.
+
 Make sure your project includes:
 
 ```yaml

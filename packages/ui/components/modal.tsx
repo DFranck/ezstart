@@ -47,3 +47,4 @@ function Modal({
 }
 
 export { Modal };
+export type { ModalProps };
