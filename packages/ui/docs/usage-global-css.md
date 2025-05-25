@@ -12,7 +12,7 @@ Alternative (full control):
 
 You can also copy the globals.css file directly into your own project and adapt it as needed:
 
-[Download globals.css (Raw)](https://raw.githubusercontent.com/DFranck/ez-start/packages/ui/styles/globals.css)
+[Download globals.css (Raw)](https://raw.githubusercontent.com/DFranck/ezstart/master/packages/ui/styles/globals.css)
 
 Import it in your app’s entrypoint:
 

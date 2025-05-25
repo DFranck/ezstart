@@ -36,7 +36,7 @@ yarn add @ezstart/ez-tag
 
 ### Tailwind & Peer Dependencies
 
-[![](https://img.shields.io/badge/Download%20EzStart%20globals.css-blue)](https://raw.githubusercontent.com/DFranck/ez-start/main/packages/ui/styles/globals.css)
+[![](https://img.shields.io/badge/Download%20EzStart%20globals.css-blue)](https://raw.githubusercontent.com/DFranck/ezstart/master/packages/ui/styles/globals.css)
 
 ⚠️ **Important:** You must import the EzStart global CSS for styles to work as intended.  
 [How to set up global CSS](../../ui/docs/usage-global-css.md)
