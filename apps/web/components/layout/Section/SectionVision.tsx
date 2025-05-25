@@ -1,9 +1,8 @@
 'use client';
 
 import { EzIcon } from '@ezstart/ez-icon';
-import { H2, Li, P, Section } from '@ezstart/ez-tag';
+import { H2, Li, P, Section, Ul } from '@ezstart/ez-tag';
 import { useTranslations } from 'next-intl';
-import { Ul } from '../../../../../packages/libs/ez-tag/src';
 
 export const SectionVision = () => {
   const t = useTranslations('vision');

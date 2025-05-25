@@ -49,25 +49,9 @@
     },
     "./globals.css": "./styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
-    "./lib/*": {
-      "import": "./dist/lib/*.js",
-      "require": "./dist/lib/*.js",
-      "types": "./dist/lib/*.d.ts"
-    },
-    "./components/*": {
-      "import": "./dist/components/*.js",
-      "require": "./dist/components/*.js",
-      "types": "./dist/components/*.d.ts"
-    },
-    "./hooks/*": {
-      "import": "./dist/hooks/*.js",
-      "require": "./dist/hooks/*.js",
-      "types": "./dist/hooks/*.d.ts"
-    },
-    "./icons/*": {
-      "import": "./dist/icons/*.js",
-      "require": "./dist/icons/*.js",
-      "types": "./dist/icons/*.d.ts"
-    }
+    "./lib/*": "./lib/*.ts",
+    "./components/*": "./components/*.tsx",
+    "./hooks/*": "./hooks/*.ts",
+    "./icons/*": "./icons/*.tsx"
   }
 }
