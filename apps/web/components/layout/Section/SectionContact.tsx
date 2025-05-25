@@ -26,7 +26,7 @@ export const SectionContact = () => {
               target='_blank'
               rel='noopener noreferrer'
             >
-              <EzIcon name='Github' size={20} />
+              <EzIcon name='fa:FaGithub' size={20} />
               {t('github')}
             </Link>
           </Button>
