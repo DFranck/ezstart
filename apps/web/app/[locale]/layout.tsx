@@ -3,7 +3,7 @@ import Header from '@/components/layout/Header';
 import MobileNavbar from '@/components/layout/MobileNavbar';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
-import { Toaster } from '@ezstart/ui/src/components/sonner';
+import { Toaster } from '@ezstart/ui/components/sonner';
 import '@ezstart/ui/globals.css';
 import { hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
