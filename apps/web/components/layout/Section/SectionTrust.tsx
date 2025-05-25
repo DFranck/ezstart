@@ -34,7 +34,7 @@ export const SectionTrust = () => {
             <P>{point.icon}</P>
             <P className='font-semibold text-lg'>
               {isLoading ? (
-                <EzIcon name='Loader' size={20} spin />
+                <EzIcon name='lucide:Loader' size={20} spin />
               ) : (
                 formatValue(point.value)
               )}

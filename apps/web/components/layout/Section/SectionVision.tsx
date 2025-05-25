@@ -17,7 +17,11 @@ export const SectionVision = () => {
       <Ul layout={'grid'}>
         {t.raw('points').map((point: string, index: number) => (
           <Li variant={'card'} key={index}>
-            <EzIcon name='CheckCircle' size={20} className='text-green-500' />
+            <EzIcon
+              name='lucide:CheckCircle'
+              size={20}
+              className='text-green-500'
+            />
             {point}
           </Li>
         ))}
