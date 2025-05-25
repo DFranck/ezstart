@@ -38,7 +38,8 @@ yarn add @ezstart/ez-tag
 
 [![](https://img.shields.io/badge/Requires%20EzStart%20global%20CSS-blue)](../docs/usage-global-css.md)
 
-See [docs/usage-global-css.md](../docs/usage-global-css.md) for setup instructions.
+⚠️ **Important:** You must import the EzStart global CSS for styles to work as intended.  
+[How to set up global CSS](../docs/usage-global-css.md)
 
 Make sure your project includes:
 
