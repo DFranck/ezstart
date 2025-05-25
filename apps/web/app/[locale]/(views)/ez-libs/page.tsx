@@ -1,4 +1,4 @@
-import { H1, H2, Main, Section } from '@ezstart/ez-tag';
+import { H1, H2, Main, Section } from '@ezstart/ui';
 
 import { LibSection } from './components/LibSection';
 import { libData } from './libData';

@@ -23,15 +23,15 @@ Designed to be accessible, maintainable, and scalable — EzTag powers all layou
 ### With `pnpm`
 
 ```bash
-pnpm add @ezstart/ez-tag
+pnpm add @ezstart/ui
 ```
 
 Or using npm / yarn
 
 ```bash
-npm install @ezstart/ez-tag
+npm install @ezstart/ui
 # or
-yarn add @ezstart/ez-tag
+yarn add @ezstart/ui
 ```
 
 ### Tailwind & Peer Dependencies
@@ -57,7 +57,7 @@ EzTag assumes your Tailwind setup is already configured (tailwind.config.js)
 ### Basic Usage with `EzTag`
 
 ```tsx
-import { EzTag } from '@ezstart/ez-tag';
+import { EzTag } from '@ezstart/ui';
 
 <EzTag as='section' size='lg'>
   <EzTag as='h1' variant='default'>
@@ -70,7 +70,7 @@ import { EzTag } from '@ezstart/ez-tag';
 ### With Semantic Aliases
 
 ```tsx
-import { Section, H1, H3, Button } from '@ezstart/ez-tag';
+import { Section, H1, H3, Button } from '@ezstart/ui';
 
 <Section size='lg'>
   <H1>Welcome to EzStart</H1>
@@ -82,7 +82,7 @@ import { Section, H1, H3, Button } from '@ezstart/ez-tag';
 ### With asChild (Radix Slot support)
 
 ```tsx
-import { Button } from '@ezstart/ez-tag';
+import { Button } from '@ezstart/ui';
 import { Link } from 'react-router-dom';
 
 <Button asChild>

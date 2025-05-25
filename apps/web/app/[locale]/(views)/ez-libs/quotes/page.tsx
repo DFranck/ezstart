@@ -1,7 +1,7 @@
 'use client';
 
 import { getQuotes } from '@/api/quotes';
-import { H1, Main } from '@ezstart/ez-tag';
+import { H1, Main } from '@ezstart/ui';
 import { Quote } from '@ezstart/types';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';

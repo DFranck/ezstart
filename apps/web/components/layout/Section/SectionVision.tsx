@@ -1,7 +1,6 @@
 'use client';
 
-import { EzIcon } from '@ezstart/ez-icon';
-import { H2, Li, P, Section, Ul } from '@ezstart/ez-tag';
+import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 
 export const SectionVision = () => {
@@ -16,7 +15,7 @@ export const SectionVision = () => {
       <Ul layout={'grid'}>
         {t.raw('points').map((point: string, index: number) => (
           <Li variant={'card'} key={index}>
-            <EzIcon
+            <Icon
               name='lucide:CheckCircle'
               size={20}
               className='text-green-500'

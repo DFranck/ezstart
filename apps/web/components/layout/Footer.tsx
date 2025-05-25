@@ -1,8 +1,7 @@
 'use client';
 
 import { useDevice } from '@/hooks/useDevice';
-import { EzIcon } from '@ezstart/ez-icon';
-import { cn } from '@ezstart/ez-tag/src/lib/utils';
+import { cn, Icon } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -26,7 +25,7 @@ export function Footer() {
             rel='noopener noreferrer'
             className='hover:underline flex items-center gap-1'
           >
-            <EzIcon name='fa:FaGithub' size={10} /> {t('github')}
+            <Icon name='fa:FaGithub' size={10} /> {t('github')}
           </Link>
           <Link href='/legal-notices' className='hover:underline'>
             {t('legalNotices')}

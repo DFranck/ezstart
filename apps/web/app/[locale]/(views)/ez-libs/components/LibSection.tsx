@@ -1,6 +1,5 @@
 'use client';
-import { EzIcon } from '@ezstart/ez-icon';
-import { Button, Div, H2, H4, Section } from '@ezstart/ez-tag';
+import { Button, Div, H2, H4, Icon, Section } from '@ezstart/ui';
 import Link from 'next/link';
 import { LibMeta } from '../libData';
 
@@ -18,19 +17,19 @@ export const LibSection = ({
       <Div className='flex gap-2'>
         <Button asChild>
           <Link href={href}>
-            <EzIcon name='lucide:Book' />
+            <Icon name='lucide:Book' />
             {name} documentation
           </Link>
         </Button>
         <Button asChild variant='outline' disabled={!github}>
           <Link href={github || ''} target='_blank'>
-            <EzIcon name='lucide:Github' />
+            <Icon name='lucide:Github' />
             {name} code
           </Link>
         </Button>
         <Button asChild variant='outline' disabled={!npm}>
           <Link href={npm || ''} target='_blank'>
-            <EzIcon name='fa:FaNpm' />
+            <Icon name='fa:FaNpm' />
             {name} lib
           </Link>
         </Button>

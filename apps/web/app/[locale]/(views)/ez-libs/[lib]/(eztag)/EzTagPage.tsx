@@ -1,5 +1,5 @@
 'use client';
-import { EzTag, H2, Main, Section } from '@ezstart/ez-tag';
+import { EzTag, H2, Main, Section } from '@ezstart/ui';
 import { getAllTagVariants } from './getAllTagVariants';
 import { HeadingPlayground } from './HeadingPlayground';
 

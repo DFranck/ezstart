@@ -1,5 +1,5 @@
 // ez-libs/ez-tag/components/Dropdown.tsx
-import { Button, Div, EzTag, Li, Ul } from '@ezstart/ez-tag';
+import { Button, Div, EzTag, Li, Ul } from '@ezstart/ui';
 import React, { useEffect, useRef, useState } from 'react';
 
 export interface DropdownItem {

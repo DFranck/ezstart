@@ -7,7 +7,7 @@ import {
   headingVariants,
   Section,
   tagVariantsMeta,
-} from '@ezstart/ez-tag';
+} from '@ezstart/ui';
 import {
   Select,
   SelectContent,

@@ -1,8 +1,7 @@
 'use client';
 
-import type { KnownIconName } from '@ezstart/ez-icon';
-import { EzIcon } from '@ezstart/ez-icon';
-import { EzTag } from '@ezstart/ez-tag';
+import type { KnownIconName } from '@ezstart/ui';
+import { EzTag, Icon } from '@ezstart/ui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
 
@@ -88,7 +87,7 @@ export const IconGallery = ({
                 style={{ transform: `translateY(${virtualRow.start}px)` }}
               >
                 {itemsInRow.map((item) => (
-                  <EzIcon
+                  <Icon
                     key={`${item.lib}:${item.name}`}
                     name={`${item.lib}:${item.name}` as KnownIconName}
                     size={size}

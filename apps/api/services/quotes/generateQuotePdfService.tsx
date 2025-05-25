@@ -1,10 +1,9 @@
-import { QuotePdfTemplate } from '@ezstart/templates';
 import { Quote } from '@ezstart/types';
 import puppeteer from 'puppeteer';
-import { renderToStaticMarkup } from 'react-dom/server';
 
 export async function generateQuotePdfService(quote: Quote): Promise<Buffer> {
-  const html = renderToStaticMarkup(<QuotePdfTemplate quote={quote} />);
+  // const html = renderToStaticMarkup(<QuotePdfTemplate quote={quote} />);
+  const html = '';
   const fullHtml = `
     <html>
       <head>

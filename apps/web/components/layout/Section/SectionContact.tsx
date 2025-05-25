@@ -1,8 +1,7 @@
 'use client';
 
 import { LampContainer } from '@/components/ui/lamp';
-import { EzIcon } from '@ezstart/ez-icon';
-import { Button, H2, P, Section, Ul } from '@ezstart/ez-tag';
+import { Button, H2, Icon, P, Section, Ul } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -26,7 +25,7 @@ export const SectionContact = () => {
               target='_blank'
               rel='noopener noreferrer'
             >
-              <EzIcon name='fa:FaGithub' size={20} />
+              <Icon name='fa:FaGithub' size={20} />
               {t('github')}
             </Link>
           </Button>

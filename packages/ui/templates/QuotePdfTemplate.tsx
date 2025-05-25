@@ -1,7 +1,10 @@
-// Path: packages/libs/pdf-templates/QuotePdfTemplate.tsx
-
-import { Quote } from '@ezstart/types';
-
+export interface Quote {
+  id: string;
+  clientName: string;
+  date: string;
+  amount: number;
+  acceptedAt?: string;
+}
 export const QuotePdfTemplate = ({ quote }: { quote: Quote }) => {
   return (
     <div className='w-full font-sans p-8 text-gray-900'>

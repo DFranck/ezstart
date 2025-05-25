@@ -8,12 +8,12 @@ export const libData = {
     href: '/ez-libs/ez-tag',
     github:
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-tag',
-    npm: 'https://www.npmjs.com/package/@ezstart/ez-tag',
+    npm: 'https://www.npmjs.com/package/@ezstart/ui',
   },
   'ez-icon': {
-    name: 'EzIcon',
+    name: 'Icon',
     description:
-      'EzIcon is a React icon library that provides a customizable set of icons from lucide.dev and other sources.',
+      'Icon is a React icon library that provides a customizable set of icons from lucide.dev and other sources.',
     href: '/ez-libs/ez-icon',
     github:
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-icon',

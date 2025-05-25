@@ -24,32 +24,36 @@ pnpm run dev
 
 ```bash
 /
-├── apps/                     # Application entry points (deployable)
-│   ├── api/                  # Backend/API (can be split by service/domain)
-│   └── web/                  # Frontend(s) (can be split by app/tenant/etc.)
+├── apps/                     # Toutes tes apps déployables (web, api, workers...)
+│   ├── web/                  # Next.js (ou autre frontend)
+│   ├── admin/                # (optionnel) Backoffice
+│   ├── api/                  # Express/Fastify/Nest (backend(s) REST/GraphQL)
+│   └── worker/               # Cron jobs, queue handlers...
 │
-├── packages/                 # All reusable packages and configurations
-│   ├── libs/                 # Business logic & feature libraries
-│   │   ├── ez-icon/          # Icons library
-│   │   └── ez-tag/           # HTML/SEO tags and helpers
-│   │
-│   ├── ui/                   # Shared design system & UI components
-│   │
-│   ├── types/                # Global TypeScript types/interfaces
-│   ├── templates/            # Email, markdown, or code templates
-│   ├── eslint-config/        # Shared ESLint configurations
-│   └── typescript-config/    # Shared TypeScript configs
+├── packages/                 # Ce qui est réutilisable, publishable, versionnable
+│   ├── ui/                   # Ton design system (centralisé, tout ici)
+│   │   ├── components/       # Tous les composants UI (atomic, form, overlay, layout, etc.)
+│   │   ├── hooks/            # Hooks réutilisables
+│   │   ├── lib/              # Fonctions utilitaires (cn, merge, math, date, etc.)
+│   │   ├── templates/        # Templates d’email, PDF, exports (facultatif)
+│   │   ├── styles/           # globals.css, tokens, config Tailwind, etc.
+│   │   ├── icons/            # SVGs, générateurs d’icônes, etc.
+│   │   ├── variants/         # Variant maps, cva config, etc.
+│   │   ├── types/            # Types internes à ui (jamais any, tout commenté)
+│   │   └── index.ts          # Barrel principal (`export * from ...`)
+│   ├── types/                # Types globaux cross-app (DTO, entités métiers, etc.)
+│   ├── eslint-config/        # (Optionnel) Config partagée
+│   └── typescript-config/    # (Optionnel) tsconfig partagé
 │
-├── .turbo/                   # Turborepo state/cache
-├── node_modules/
-├── .eslintrc.js
-├── .gitignore
-├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── tsconfig.json
-├── turbo.json
-└── README.md
+├── docs/                     # Documentation technique, guides, storybook, etc.
+├── .github/                  # Actions, workflows, templates issues/PR
+├── turbo.json                # Turborepo config
+├── pnpm-workspace.yaml       # PNPM workspaces
+├── package.json              # Racine (scripts, toolings, dev-deps)
+├── tsconfig.json             # Racine, “paths” vers les packages
+├── README.md                 # Documentation générale
+└── ...                       # Autres fichiers de config, CI, etc.
+
 ```
 
 ## 📁 File and Naming Conventions

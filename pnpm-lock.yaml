@@ -26,9 +26,6 @@ importers:
 
   apps/api:
     dependencies:
-      '@ezstart/templates':
-        specifier: workspace:*
-        version: link:../../packages/templates
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -75,15 +72,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@ezstart/ez-icon':
-        specifier: workspace:*
-        version: link:../../packages/libs/ez-icon
-      '@ezstart/ez-tag':
-        specifier: workspace:*
-        version: link:../../packages/libs/ez-tag
-      '@ezstart/templates':
-        specifier: workspace:*
-        version: link:../../packages/templates
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -182,93 +170,12 @@ importers:
         specifier: ^8.24.1
         version: 8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.7.3)
 
-  packages/libs/ez-icon:
-    dependencies:
-      lucide-react:
-        specifier: ^0.268.0
-        version: 0.268.0(react@19.1.0)
-      react:
-        specifier: ^19.0.0
-        version: 19.1.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.1.0(react@19.1.0)
-      react-icons:
-        specifier: ^5.5.0
-        version: 5.5.0(react@19.1.0)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.10
-        version: 19.1.5
-      '@types/react-dom':
-        specifier: ^19.0.10
-        version: 19.1.5(@types/react@19.1.5)
-      typescript:
-        specifier: ^5.1.6
-        version: 5.7.3
-
-  packages/libs/ez-tag:
-    dependencies:
-      '@radix-ui/react-slot':
-        specifier: ^1.1.2
-        version: 1.2.3(@types/react@19.1.5)(react@19.1.0)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      react:
-        specifier: ^19.0.0
-        version: 19.1.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.1.0(react@19.1.0)
-      tailwind-merge:
-        specifier: ^3.0.1
-        version: 3.3.0
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.10
-        version: 19.1.5
-      '@types/react-dom':
-        specifier: ^19.0.10
-        version: 19.1.5(@types/react@19.1.5)
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-
-  packages/templates:
-    dependencies:
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../types
-      react:
-        specifier: ^19.0.0
-        version: 19.1.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.1.0(react@19.1.0)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.10
-        version: 19.1.5
-      '@types/react-dom':
-        specifier: ^19.0.10
-        version: 19.1.5(@types/react@19.1.5)
-      typescript:
-        specifier: ^5.1.6
-        version: 5.7.3
-
   packages/types: {}
 
   packages/typescript-config: {}
 
   packages/ui:
     dependencies:
-      '@ezstart/ez-tag':
-        specifier: '*'
-        version: 0.2.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.1.5(@types/react@19.1.5))(@types/react@19.1.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -299,6 +206,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
+      react-icons:
+        specifier: ^5.5.0
+        version: 5.5.0(react@19.1.0)
       sonner:
         specifier: ^2.0.3
         version: 2.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -406,12 +316,6 @@ packages:
   '@eslint/plugin-kit@0.3.1':
     resolution: {integrity: sha512-0J+zgWxHN+xXONWIyPWKFMgVuJoZuGiIFu8yxk7RJjxkzpGmyja5wRFqZIVtjDVOQpV+Rw0iOAjYPE2eQyjr0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@ezstart/ez-tag@0.2.10':
-    resolution: {integrity: sha512-XwlgntlATdV+LtadqptkbzitwavU6D3YI17axP//XfKE34az7cx11XPY6sIFGxOvH0VUPdrUqc1Z4/FdcqjRSA==}
-    peerDependencies:
-      react: ^19.0.0
-      react-dom: ^19.0.0
 
   '@floating-ui/core@1.7.0':
     resolution: {integrity: sha512-FRdBLykrPPA6P76GGGqlex/e7fbe0F1ykgxHYNXQsH/iTEtjMj/f9bpY5oQqbjt5VgZvgz/uKXbGuROijh3VLA==}
@@ -2470,11 +2374,6 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.268.0:
-    resolution: {integrity: sha512-XP/xY3ASJAViqNqVnDRcEfdxfRB7uNST8sqTLwZhL983ikmHMQ7qQak7ZxrnXOVhB3QDBawdr3ANq0P+iWHP/g==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0
-
   lucide-react@0.475.0:
     resolution: {integrity: sha512-NJzvVu1HwFVeZ+Gwq2q00KygM1aBhy/ZrhY9FsAgJtpB+E4R7uxRk9M2iKvHa6/vNxZydIB59htha4c2vvwvVg==}
     peerDependencies:
@@ -3618,13 +3517,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.14.0
       levn: 0.4.1
-
-  '@ezstart/ez-tag@0.2.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      clsx: 2.1.1
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      tailwind-merge: 3.3.0
 
   '@floating-ui/core@1.7.0':
     dependencies:
@@ -5883,10 +5775,6 @@ snapshots:
   lower-case@1.1.4: {}
 
   lru-cache@7.18.3: {}
-
-  lucide-react@0.268.0(react@19.1.0):
-    dependencies:
-      react: 19.1.0
 
   lucide-react@0.475.0(react@19.1.0):
     dependencies:

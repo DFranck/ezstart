@@ -2,21 +2,21 @@
 
 import type { LucideProps } from 'lucide-react';
 import React, { lazy, Suspense } from 'react';
-import type { EzIconProps } from '../types/icon';
+import type { IconProps } from '../types';
 
-export function EzIcon({
+export function Icon({
   name,
   spin = false,
   rotate,
   className,
   style,
   ...props
-}: EzIconProps) {
+}: IconProps) {
   const [prefix, iconName] = name.includes(':')
     ? name.split(':')
     : ['lucide', name];
 
-  if (!iconName) throw new Error('EzIcon: icon name is missing');
+  if (!iconName) throw new Error('Icon: icon name is missing');
 
   const DynamicIcon = lazy<React.ComponentType<LucideProps>>(async () => {
     switch (prefix) {
@@ -31,7 +31,7 @@ export function EzIcon({
       }
 
       case 'custom': {
-        const mod = await import(`../icons/${iconName}`);
+        const mod = await import(`../custom-icons/${iconName.toLowerCase()}`);
         return { default: mod.default };
       }
 

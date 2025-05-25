@@ -1,8 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
-import { EzIcon } from '@ezstart/ez-icon';
-import { H2, Li, P, Section, Ul } from '@ezstart/ez-tag';
+import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 
 type TrustPoint = {
@@ -34,7 +33,7 @@ export const SectionTrust = () => {
             <P>{point.icon}</P>
             <P className='font-semibold text-lg'>
               {isLoading ? (
-                <EzIcon name='lucide:Loader' size={20} spin />
+                <Icon name='lucide:Loader' size={20} spin />
               ) : (
                 formatValue(point.value)
               )}

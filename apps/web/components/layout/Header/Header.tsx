@@ -2,11 +2,8 @@
 
 import Burger from '@/components/ui/burger';
 import { useDevice } from '@/hooks/useDevice';
-import { useNavLinks } from '@/hooks/useNavLinks';
 import { useOnScroll } from '@/hooks/useOnScroll';
-import { EzTag } from '@ezstart/ez-tag';
-import { EzStartSvg } from '@ezstart/ui/icons/EzStartSvg';
-import { cn } from '@ezstart/ui/lib/utils';
+import { cn, EzTag, Icon } from '@ezstart/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NavMenu } from '../NavMenu';
@@ -16,7 +13,6 @@ export default function Header() {
   const { isDesktop, isTablet } = useDevice();
   const [isOpen, setIsOpen] = useState(false);
   const scrollY = useOnScroll();
-  const links = useNavLinks();
   const isTop = scrollY === 0;
 
   useEffect(() => {
@@ -38,7 +34,7 @@ export default function Header() {
         )}
       >
         <Link href='/' className='flex items-center gap-2'>
-          <EzStartSvg background='transparent' />
+          <Icon name='custom:Ezstart' size={24} />
           <EzTag as='h2' size={'h4'}>
             EzStart
           </EzTag>

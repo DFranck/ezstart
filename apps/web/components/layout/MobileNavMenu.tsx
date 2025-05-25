@@ -1,6 +1,6 @@
 'use client';
 import { useNavLinks } from '@/hooks/useNavLinks';
-import { Button } from '@ezstart/ez-tag';
+import { Button } from '@ezstart/ui';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';

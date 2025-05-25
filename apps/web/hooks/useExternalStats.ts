@@ -14,9 +14,7 @@ export const useExternalStats = () => {
       try {
         const [gh, npm] = await Promise.all([
           fetch('https://api.github.com/repos/DFranck/ez-start'),
-          fetch(
-            'https://api.npmjs.org/downloads/point/last-month/@ezstart/ez-tag'
-          ),
+          fetch('https://api.npmjs.org/downloads/point/last-month/@ezstart/ui'),
         ]);
 
         const ghData = await gh.json();

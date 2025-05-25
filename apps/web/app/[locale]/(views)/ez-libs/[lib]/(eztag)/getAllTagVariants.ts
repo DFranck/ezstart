@@ -1,4 +1,4 @@
-import { tagVariantsMeta } from '@ezstart/ez-tag';
+import { tagVariantsMeta } from '@ezstart/ui';
 
 type TagVariantsExport = Record<string, Record<string, string[]>>;
 

@@ -1,8 +1,14 @@
 'use client';
 import { useDevice } from '@/hooks/useDevice';
-import { customIcons, faIcons, lucideIcons } from '@ezstart/ez-icon';
-import { Button, Div, Main } from '@ezstart/ez-tag';
-import { cn } from '@ezstart/ui/lib/utils';
+import {
+  Button,
+  cn,
+  customIcons,
+  Div,
+  faIcons,
+  lucideIcons,
+  Main,
+} from '@ezstart/ui';
 import { useEffect, useRef, useState } from 'react';
 
 const allIcons = [
@@ -11,7 +17,7 @@ const allIcons = [
   ...customIcons.map((name) => ({ lib: 'custom', name })),
 ];
 
-const EzIconPage = () => {
+const IconPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const asideRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useDevice();
@@ -62,4 +68,4 @@ const EzIconPage = () => {
     </Div>
   );
 };
-export default EzIconPage;
+export default IconPage;
