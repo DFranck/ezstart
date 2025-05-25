@@ -15,9 +15,10 @@ pnpm --filter=@ezstart/ui dev
 
 ## ⚠️ Required: Global Styles
 
-This package relies on the shared design system CSS.
+[![](https://img.shields.io/badge/Download%20EzStart%20globals.css-blue)](https://raw.githubusercontent.com/DFranck/ez-start/main/packages/ui/styles/globals.css)
 
-👉 [How to setup global styles for EzStart components](../ui/README.md#required-global-css--tailwind-setup)
+⚠️ **Important:** You must import the EzStart global CSS for styles to work as intended.  
+[How to set up global CSS](../ui/docs/usage-global-css.md)
 
 ## 📁 Folder Structure
 
