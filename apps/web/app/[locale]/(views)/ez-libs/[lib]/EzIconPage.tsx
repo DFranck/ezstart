@@ -2,7 +2,7 @@
 import { useDevice } from '@/hooks/useDevice';
 import { customIcons, faIcons, lucideIcons } from '@ezstart/ez-icon';
 import { Button, Div, Main } from '@ezstart/ez-tag';
-import { cn } from '@ezstart/ui//lib/utils';
+import { cn } from '@ezstart/ui/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 
 const allIcons = [
