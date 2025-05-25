@@ -1,5 +1,5 @@
-import { Router } from 'express';
-const router = Router();
+import express, { Router } from 'express';
+const router: Router = express.Router();
 
 // GET /api/bills
 router.get('/', (req, res) => {

@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import billsRoutes from './bills';
 import quotesRoutes from './quotes';
 import receiptsRoutes from './receipts';
 
-const router = Router();
+const router: Router = express.Router();
 
 router.use('/quotes', quotesRoutes);
 router.use('/receipts', receiptsRoutes);
