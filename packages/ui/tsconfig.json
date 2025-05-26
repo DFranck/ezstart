@@ -2,9 +2,10 @@
 {
   "extends": "@workspace/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist",
     "composite": true,
     "module": "esnext",
+    "declarationDir": "./dist/types",
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {

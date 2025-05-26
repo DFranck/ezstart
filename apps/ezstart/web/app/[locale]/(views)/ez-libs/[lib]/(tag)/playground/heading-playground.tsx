@@ -4,11 +4,6 @@ import {
   headings,
   headingVariants,
   Section,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Tag,
   tagVariantsMeta,
 } from '@ezstart/ui/components';
@@ -21,7 +16,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ezstart/ui/components';
-import PlaygroundCode from '../components/playground-code';
+import PlaygroundCodeView from '../components/playground-code-view';
+import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 
 export const HeadingPlayground = () => (
   <Accordion type='multiple' className='w-full'>
@@ -78,34 +74,15 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
 
       {/* Controls & usage */}
       <div className='flex-1 min-w-[240px]'>
-        <PlaygroundCode
+        <PlaygroundCodeView
           fakeTagCode={fakeTagCode}
           fakeAliasCode={fakeAliasCode}
         />
-        <form className='grid gap-3 md:grid-cols-3'>
-          {Object.entries(meta).map(([variantName, values]) => (
-            <div key={variantName} className='flex flex-col gap-1'>
-              <label className='text-xs font-medium text-neutral-400'>
-                {variantName}
-              </label>
-              <Select
-                value={selected[variantName]}
-                onValueChange={(v: string) => handleChange(variantName, v)}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder={variantName} />
-                </SelectTrigger>
-                <SelectContent>
-                  {values.map((v) => (
-                    <SelectItem key={v} value={v}>
-                      {v}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </form>
+        <PlaygroundVariantSelects
+          meta={meta}
+          selected={selected}
+          onChange={handleChange}
+        />
       </div>
     </Section>
   );

@@ -1,14 +1,14 @@
 import { H6 } from '@ezstart/ui/components';
 
-interface PlaygroundCodeProps {
+interface PlaygroundCodeViewViewProps {
   fakeTagCode: string;
   fakeAliasCode: string;
 }
 
-const PlaygroundCode = ({
+const PlaygroundCodeView = ({
   fakeTagCode,
   fakeAliasCode,
-}: PlaygroundCodeProps) => {
+}: PlaygroundCodeViewViewProps) => {
   return (
     <div className='mb-3'>
       <div className='grid grid-cols-1 gap-2'>
@@ -29,4 +29,4 @@ const PlaygroundCode = ({
   );
 };
 
-export default PlaygroundCode;
+export default PlaygroundCodeView;

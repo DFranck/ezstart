@@ -1,25 +1,15 @@
 'use client';
 
-import {
-  P,
-  pVariantsMeta,
-  Section,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@ezstart/ui/components';
+import { P, pVariantsMeta, Section } from '@ezstart/ui/components';
 import { useState } from 'react';
-import PlaygroundCode from '../components/playground-code';
+import PlaygroundCodeView from '../components/playground-code-view';
+import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 import { buildFakeTag } from '../utils/build-fake-tag';
 
 export default function PPlayground() {
-  // State des variants sélectionnés
   const [selected, setSelected] = useState(() => {
     const out: Record<string, string> = {};
     Object.entries(pVariantsMeta).forEach(([variantName, values]) => {
-      // Pick 'default' if available, otherwise first
       out[variantName] = values.includes('default')
         ? 'default'
         : values[0] || '';
@@ -40,32 +30,16 @@ export default function PPlayground() {
       {/* Preview */}
       <P {...selected}>{content}</P>
       {/* Usage et Alias preview */}
-      <PlaygroundCode fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />
+      <PlaygroundCodeView
+        fakeTagCode={fakeTagCode}
+        fakeAliasCode={fakeAliasCode}
+      />
       {/* Select Controls */}
-      <div className='grid gap-3 md:grid-cols-3'>
-        {Object.entries(pVariantsMeta).map(([variantName, values]) => (
-          <div key={variantName} className='flex flex-col gap-1'>
-            <label className='text-xs font-medium text-neutral-400'>
-              {variantName}
-            </label>
-            <Select
-              value={selected[variantName]}
-              onValueChange={(v: string) => handleChange(variantName, v)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder={variantName} />
-              </SelectTrigger>
-              <SelectContent>
-                {values.map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        ))}
-      </div>
+      <PlaygroundVariantSelects
+        meta={pVariantsMeta}
+        selected={selected}
+        onChange={handleChange}
+      />
     </Section>
   );
 }
