@@ -1,7 +1,8 @@
 'use client';
 
-import { useDevice } from '@/hooks/useDevice';
-import { cn, Icon } from '@ezstart/ui';
+import { Icon } from '@ezstart/ui/components';
+import { useDevice } from '@ezstart/ui/hooks';
+import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 

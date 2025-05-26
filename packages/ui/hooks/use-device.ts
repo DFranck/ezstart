@@ -1,4 +1,3 @@
-// apps/web/hooks/useDevice.ts
 'use client';
 
 import { useEffect, useState } from 'react';

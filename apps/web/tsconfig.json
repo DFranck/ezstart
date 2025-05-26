@@ -24,9 +24,7 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "../../packages/ui/hooks/useOnScroll.ts",
-    "../../packages/ui/hooks/useDevice.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

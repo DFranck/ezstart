@@ -1,9 +1,9 @@
 'use client';
 
 import Burger from '@/components/ui/burger';
-import { useDevice } from '@/hooks/useDevice';
-import { useOnScroll } from '@/hooks/useOnScroll';
-import { cn, Tag, Icon } from '@ezstart/ui';
+import { Icon, Tag } from '@ezstart/ui/components';
+import { useDevice, useOnScroll } from '@ezstart/ui/hooks';
+import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NavMenu } from '../NavMenu';

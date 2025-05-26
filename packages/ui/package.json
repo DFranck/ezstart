@@ -49,11 +49,6 @@
     },
     "./globals.css": "./styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
-    "./lib/*": {
-      "import": "./lib/*.tsx",
-      "default": "./dist/lib/*.js",
-      "types": "./dist/lib/*.d.ts"
-    },
     "./components/*": {
       "import": "./components/*.tsx",
       "default": "./dist/components/*.js",
@@ -64,10 +59,15 @@
       "default": "./dist/hooks/*.js",
       "types": "./dist/hooks/*.d.ts"
     },
-    "./icons/*": {
-      "import": "./icons/*.tsx",
-      "default": "./dist/icons/*.js",
-      "types": "./dist/icons/*.d.ts"
+    "./lib/*": {
+      "import": "./lib/*.tsx",
+      "default": "./dist/lib/*.js",
+      "types": "./dist/lib/*.d.ts"
+    },
+    "./templates/*": {
+      "import": "./templates/*.tsx",
+      "default": "./dist/templates/*.js",
+      "types": "./dist/templates/*.d.ts"
     }
   }
 }

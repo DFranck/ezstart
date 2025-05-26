@@ -1,14 +1,14 @@
 'use client';
-import { useDevice } from '@/hooks/useDevice';
 import {
   Button,
-  cn,
   customIconMap,
   Div,
   faIcons,
   lucideIcons,
   Main,
-} from '@ezstart/ui';
+} from '@ezstart/ui/components';
+import { useDevice } from '@ezstart/ui/hooks';
+import { cn } from '@ezstart/ui/lib';
 import { useEffect, useRef, useState } from 'react';
 
 const allIcons = [
