@@ -1,6 +1,5 @@
 'use client';
 import {
-  cn,
   H1,
   H2,
   H4,
@@ -11,6 +10,8 @@ import {
   Tag,
   Ul,
 } from '@ezstart/ui/components';
+import { cn } from '@ezstart/ui/lib';
+
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
   year: string;
