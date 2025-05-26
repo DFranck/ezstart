@@ -38,7 +38,7 @@ export const SectionTrust = () => {
                 formatValue(point.value)
               )}
             </P>
-            <P variant={'muted'}>{point.label}</P>
+            <P>{point.label}</P>
           </Li>
         ))}
       </Ul>

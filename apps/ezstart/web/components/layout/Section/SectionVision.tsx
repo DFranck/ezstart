@@ -25,9 +25,7 @@ export const SectionVision = () => {
         ))}
       </Ul>
 
-      <P variant={'muted'} size={'sm'}>
-        {t('footer')}
-      </P>
+      <P size={'sm'}>{t('footer')}</P>
     </Section>
   );
 };
