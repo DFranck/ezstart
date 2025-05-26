@@ -1,4 +1,4 @@
-// ezstart/apps/web/next.config.mjs
+// ezstart/apps/ezstart/web/next.config.mjs
 import createNextIntlPlugin from 'next-intl/plugin';
 
 /** @type {import('next').NextConfig} */

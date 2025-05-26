@@ -1,4 +1,4 @@
-// apps/web/i18n/request.ts
+// apps/ezstart/web/i18n/request.ts
 import merge from 'deepmerge';
 import { getRequestConfig } from 'next-intl/server';
 import { getTimeZoneFromLocale, routing } from './routing';

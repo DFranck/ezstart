@@ -1,6 +1,3 @@
 packages:
-  - apps/*
+  - apps/ezstart/*
   - packages/*
-  - packages/libs/*
-  - packages/types
-  - packages/templates

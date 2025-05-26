@@ -1,8 +1,8 @@
 'use client';
 
 import Burger from '@/components/ui/burger';
+import { cn } from '@ezstart/ui';
 import { useDevice } from '@ezstart/ui/hooks';
-import { cn } from '@ezstart/ui/lib';
 import { Home, User } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';

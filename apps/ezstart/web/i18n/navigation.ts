@@ -1,4 +1,4 @@
-// apps/web/i18n/navigation.ts
+// apps/ezstart/web/i18n/navigation.ts
 import { createNavigation } from 'next-intl/navigation';
 import { routing } from './routing';
 

@@ -2,7 +2,7 @@ import { SectionContact } from '@/components/layout/Section/SectionContact';
 import { SectionHero } from '@/components/layout/Section/SectionHero';
 import { SectionTrust } from '@/components/layout/Section/SectionTrust';
 import { SectionVision } from '@/components/layout/Section/SectionVision';
-import { Main } from '@ezstart/ui';
+import { Main } from '@ezstart/ui/components';
 export default function Page() {
   return (
     <Main>

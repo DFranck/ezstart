@@ -1,4 +1,4 @@
-// apps/web/i18n/routing.ts
+// apps/ezstart/web/i18n/routing.ts
 import { defineRouting } from 'next-intl/routing';
 
 export const routing = defineRouting({
