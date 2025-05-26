@@ -4,7 +4,6 @@ import {
   Button,
   H3,
   H4,
-  H6,
   P,
   Section,
   Select,
@@ -15,7 +14,8 @@ import {
   tagVariantsMeta,
 } from '@ezstart/ui/components';
 import { useState } from 'react';
-import { buildFakeTag } from './build-fake-tag';
+import PlaygroundCode from '../components/playground-code';
+import { buildFakeTag } from '../utils/build-fake-tag';
 
 const sectionMeta = tagVariantsMeta['section'];
 
@@ -56,22 +56,10 @@ export default function SectionPlayground() {
       </Section>
       <Section>
         <div className='container mx-auto flex flex-col border border-border max-w-4xl px-4 md:px-10 py-4 md:py-10 gap-2 md:gap-4'>
-          <div className='mb-3'>
-            <div className='grid grid-cols-1 gap-2'>
-              <div>
-                <H6 className='mb-1'>Usage</H6>
-                <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-                  <code>{fakeTagCode}</code>
-                </pre>
-              </div>
-              <div>
-                <H6 className='mb-1'>Alias</H6>
-                <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-                  <code>{fakeAliasCode}</code>
-                </pre>
-              </div>
-            </div>
-          </div>
+          <PlaygroundCode
+            fakeTagCode={fakeTagCode}
+            fakeAliasCode={fakeAliasCode}
+          />
           {/* Selects pour variantes */}
           <div className='grid gap-3 md:grid-cols-3'>
             {Object.entries(sectionMeta).map(([variantName, values]) => (

@@ -8,10 +8,10 @@ import {
   tagVariantsMeta,
 } from '@ezstart/ui/components';
 import { useState } from 'react';
-import { HeadingPlayground } from './heading-playground';
-import { MainPlaygroundControls } from './main-playground-controls';
-import PPlayground from './p-playground';
-import SectionPlayground from './section-playground';
+import { HeadingPlayground } from './playground/heading-playground';
+import { MainPlaygroundControls } from './playground/main-playground-controls';
+import PPlayground from './playground/p-playground';
+import SectionPlayground from './playground/section-playground';
 
 const mainMeta = tagVariantsMeta['main'];
 

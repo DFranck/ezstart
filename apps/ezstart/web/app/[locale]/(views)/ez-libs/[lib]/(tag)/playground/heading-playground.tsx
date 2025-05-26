@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  H6,
   headings,
   headingVariants,
   Section,
@@ -14,7 +13,7 @@ import {
   tagVariantsMeta,
 } from '@ezstart/ui/components';
 import { useState } from 'react';
-import { buildFakeTag } from './build-fake-tag';
+import { buildFakeTag } from '../utils/build-fake-tag';
 
 import {
   Accordion,
@@ -22,6 +21,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ezstart/ui/components';
+import PlaygroundCode from '../components/playground-code';
 
 export const HeadingPlayground = () => (
   <Accordion type='multiple' className='w-full'>
@@ -78,22 +78,10 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
 
       {/* Controls & usage */}
       <div className='flex-1 min-w-[240px]'>
-        <div className='mb-3'>
-          <div className='grid grid-cols-1 gap-2'>
-            <div>
-              <H6 className='mb-1'>Usage</H6>
-              <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-                <code>{fakeTagCode}</code>
-              </pre>
-            </div>
-            <div>
-              <H6 className='mb-1'>Alias</H6>
-              <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-                <code>{fakeAliasCode}</code>
-              </pre>
-            </div>
-          </div>
-        </div>
+        <PlaygroundCode
+          fakeTagCode={fakeTagCode}
+          fakeAliasCode={fakeAliasCode}
+        />
         <form className='grid gap-3 md:grid-cols-3'>
           {Object.entries(meta).map(([variantName, values]) => (
             <div key={variantName} className='flex flex-col gap-1'>

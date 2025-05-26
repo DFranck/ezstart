@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  H6,
   P,
   pVariantsMeta,
   Section,
@@ -12,7 +11,8 @@ import {
   SelectValue,
 } from '@ezstart/ui/components';
 import { useState } from 'react';
-import { buildFakeTag } from './build-fake-tag';
+import PlaygroundCode from '../components/playground-code';
+import { buildFakeTag } from '../utils/build-fake-tag';
 
 export default function PPlayground() {
   // State des variants sélectionnés
@@ -40,22 +40,7 @@ export default function PPlayground() {
       {/* Preview */}
       <P {...selected}>{content}</P>
       {/* Usage et Alias preview */}
-      <div className='mb-3'>
-        <div className='grid grid-cols-1 gap-2'>
-          <div>
-            <H6 className='mb-1'>Usage</H6>
-            <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-              <code>{fakeTagCode}</code>
-            </pre>
-          </div>
-          <div>
-            <H6 className='mb-1'>Alias</H6>
-            <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-              <code>{fakeAliasCode}</code>
-            </pre>
-          </div>
-        </div>
-      </div>
+      <PlaygroundCode fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />
       {/* Select Controls */}
       <div className='grid gap-3 md:grid-cols-3'>
         {Object.entries(pVariantsMeta).map(([variantName, values]) => (

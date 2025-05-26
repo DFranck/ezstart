@@ -1,5 +1,4 @@
 import {
-  H6,
   Section,
   Select,
   SelectContent,
@@ -7,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ezstart/ui/components';
-import { buildFakeTag } from './build-fake-tag';
+import PlaygroundCode from '../components/playground-code';
+import { buildFakeTag } from '../utils/build-fake-tag';
 
 type Props = {
   meta: Record<string, string[]>;
@@ -21,22 +21,7 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
 
   return (
     <Section variant={'outline'}>
-      <div className='mb-3'>
-        <div className='grid grid-cols-1 gap-2'>
-          <div>
-            <H6 className='mb-1'>Usage</H6>
-            <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-              <code>{fakeTagCode}</code>
-            </pre>
-          </div>
-          <div>
-            <H6 className='mb-1'>Alias</H6>
-            <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
-              <code>{fakeAliasCode}</code>
-            </pre>
-          </div>
-        </div>
-      </div>
+      <PlaygroundCode fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />
       <div className='grid gap-3 md:grid-cols-3'>
         {Object.entries(meta).map(([variantName, values]) => (
           <div key={variantName} className='flex flex-col gap-1'>
