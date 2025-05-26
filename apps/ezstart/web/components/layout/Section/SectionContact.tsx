@@ -10,7 +10,7 @@ export const SectionContact = () => {
 
   return (
     <LampContainer>
-      <Section className='items-center' size={'lg'}>
+      <Section>
         <H2>{t('title')}</H2>
 
         <P>{t('description')}</P>

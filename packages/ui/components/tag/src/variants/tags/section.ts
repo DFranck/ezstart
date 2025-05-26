@@ -11,7 +11,7 @@ export const sectionVariants = cva('container mx-auto flex flex-col', {
   },
   defaultVariants: {
     variant: 'default',
-    size: 'lg',
+    size: 'default',
     intent: 'default',
   },
 });

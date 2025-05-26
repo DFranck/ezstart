@@ -1,15 +1,10 @@
 // 🟩 Visual variations for layouts (section, main, etc.)
 export const containerVariants = {
-  default:
-    'px-4 md:px-10 lg:px-20 py-4 md:py-10 lg:py-20 gap-2 md:gap-4 lg:gap-6',
-  primary:
-    'bg-primary/10 px-4 md:px-10 lg:px-20 py-4 md:py-10 lg:py-20 gap-2 md:gap-4 lg:gap-6',
-  ghost:
-    'px-4 md:px-10 lg:px-20 py-4 md:py-10 lg:py-20 gap-2 md:gap-4 lg:gap-6',
-  secondary:
-    'bg-secondary/10 px-4 md:px-10 lg:px-20 py-4 md:py-10 lg:py-20 gap-2 md:gap-4 lg:gap-6',
-  outline:
-    'border border-border px-4 md:px-10 lg:px-20 py-4 md:py-10 lg:py-20 gap-2 md:gap-4 lg:gap-6',
+  default: '',
+  primary: 'bg-primary/10',
+  secondary: 'bg-secondary/10',
+  ghost: '',
+  outline: 'border border-border',
 } as const;
 
 // 🟦 Visual variations for text (span, p, label, etc.)

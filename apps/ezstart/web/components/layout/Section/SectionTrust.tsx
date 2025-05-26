@@ -22,7 +22,7 @@ export const SectionTrust = () => {
       .replace('{downloads}', stats.downloads?.toString() ?? '0');
 
   return (
-    <Section size={'lg'} className='z-10'>
+    <Section>
       <H2>{t('title')}</H2>
 
       <P>{t('intro')}</P>

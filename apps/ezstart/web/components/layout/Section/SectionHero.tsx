@@ -6,7 +6,7 @@ export const SectionHero = () => {
   return (
     <>
       <AuroraBackground>
-        <Section size={'lg'}>
+        <Section>
           <H1>{t('title')}</H1>
           <H3>{t('subtitle')}</H3>
         </Section>

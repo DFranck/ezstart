@@ -7,7 +7,7 @@ export const SectionVision = () => {
   const t = useTranslations('vision');
 
   return (
-    <Section size={'lg'}>
+    <Section>
       <H2>{t('title')}</H2>
 
       <P>{t('intro')}</P>
