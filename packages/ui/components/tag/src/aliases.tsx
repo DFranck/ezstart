@@ -5,7 +5,6 @@ import { createAlias } from './utils/create-alias';
 // Layouts
 
 // Typography
-export const P = createAlias('p');
 
 // Lists
 export const Ul = createAlias('ul');

@@ -1,5 +1,9 @@
+'use client';
+
 import {
   H6,
+  P,
+  pVariantsMeta,
   Section,
   Select,
   SelectContent,
@@ -7,20 +11,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ezstart/ui/components';
+import { useState } from 'react';
 import { buildFakeTag } from './build-fake-tag';
 
-type Props = {
-  meta: Record<string, string[]>;
-  selected: Record<string, string>;
-  onChange: (prop: string, value: string) => void;
-};
+export default function PPlayground() {
+  // State des variants sélectionnés
+  const [selected, setSelected] = useState(() => {
+    const out: Record<string, string> = {};
+    Object.entries(pVariantsMeta).forEach(([variantName, values]) => {
+      // Pick 'default' if available, otherwise first
+      out[variantName] = values.includes('default')
+        ? 'default'
+        : values[0] || '';
+    });
+    return out;
+  });
 
-export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
-  const fakeTagCode = buildFakeTag('main', selected, undefined, '...');
-  const fakeAliasCode = buildFakeTag('main', selected, 'Main', '...');
+  const handleChange = (prop: string, value: string) => {
+    setSelected((prev) => ({ ...prev, [prop]: value }));
+  };
+
+  const content = "I'm a text";
+  const fakeTagCode = buildFakeTag('p', selected, undefined, content);
+  const fakeAliasCode = buildFakeTag('p', selected, 'P', content);
 
   return (
     <Section variant={'outline'}>
+      {/* Preview */}
+      <P {...selected}>{content}</P>
+      {/* Usage et Alias preview */}
       <div className='mb-3'>
         <div className='grid grid-cols-1 gap-2'>
           <div>
@@ -37,15 +56,16 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
           </div>
         </div>
       </div>
+      {/* Select Controls */}
       <div className='grid gap-3 md:grid-cols-3'>
-        {Object.entries(meta).map(([variantName, values]) => (
+        {Object.entries(pVariantsMeta).map(([variantName, values]) => (
           <div key={variantName} className='flex flex-col gap-1'>
             <label className='text-xs font-medium text-neutral-400'>
               {variantName}
             </label>
             <Select
               value={selected[variantName]}
-              onValueChange={(v: string) => onChange(variantName, v)}
+              onValueChange={(v: string) => handleChange(variantName, v)}
             >
               <SelectTrigger className='w-full'>
                 <SelectValue placeholder={variantName} />
@@ -63,4 +83,4 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
       </div>
     </Section>
   );
-};
+}

@@ -1,7 +1,11 @@
 // packages/libs/ez-tag/src/variants/typography/typographyVariants.ts
 
-import { paragraphVariants } from '../tags/paragraphVariants';
+import { pVariants, pVariantsMeta } from '../tags/p';
 
 export const typographyVariants = {
-  p: paragraphVariants,
+  p: pVariants,
+};
+
+export const typographyVariantsMeta = {
+  p: pVariantsMeta,
 };

@@ -4,6 +4,7 @@ import {
   Button,
   H3,
   H4,
+  H6,
   P,
   Section,
   Select,
@@ -53,47 +54,49 @@ export default function SectionPlayground() {
       <Section {...selected} className='my-8'>
         {content}
       </Section>
-      <Section variant='outline'>
-        <div className='mb-3'>
-          <div className='grid grid-cols-1 gap-2'>
-            <div>
-              <H4 className='mb-1'>Usage</H4>
-              <pre className='bg-background rounded p-2 text-xs overflow-x-auto'>
-                <code>{fakeTagCode}</code>
-              </pre>
-            </div>
-            <div>
-              <H4 className='mb-1'>Alias</H4>
-              <pre className='bg-background rounded p-2 text-xs overflow-x-auto'>
-                <code>{fakeAliasCode}</code>
-              </pre>
+      <Section>
+        <div className='container mx-auto flex flex-col border border-border max-w-4xl px-4 md:px-10 py-4 md:py-10 gap-2 md:gap-4'>
+          <div className='mb-3'>
+            <div className='grid grid-cols-1 gap-2'>
+              <div>
+                <H6 className='mb-1'>Usage</H6>
+                <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
+                  <code>{fakeTagCode}</code>
+                </pre>
+              </div>
+              <div>
+                <H6 className='mb-1'>Alias</H6>
+                <pre className='bg-muted rounded p-2 text-xs overflow-x-auto'>
+                  <code>{fakeAliasCode}</code>
+                </pre>
+              </div>
             </div>
           </div>
-        </div>
-        {/* Selects pour variantes */}
-        <div className='grid gap-3 md:grid-cols-3'>
-          {Object.entries(sectionMeta).map(([variantName, values]) => (
-            <div key={variantName} className='flex flex-col gap-1'>
-              <label className='text-xs font-medium text-neutral-400'>
-                {variantName}
-              </label>
-              <Select
-                value={selected[variantName]}
-                onValueChange={(v: string) => handleChange(variantName, v)}
-              >
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder={variantName} />
-                </SelectTrigger>
-                <SelectContent>
-                  {values.map((v) => (
-                    <SelectItem key={v} value={v}>
-                      {v}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+          {/* Selects pour variantes */}
+          <div className='grid gap-3 md:grid-cols-3'>
+            {Object.entries(sectionMeta).map(([variantName, values]) => (
+              <div key={variantName} className='flex flex-col gap-1'>
+                <label className='text-xs font-medium text-neutral-400'>
+                  {variantName}
+                </label>
+                <Select
+                  value={selected[variantName]}
+                  onValueChange={(v: string) => handleChange(variantName, v)}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder={variantName} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {values.map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
     </>
