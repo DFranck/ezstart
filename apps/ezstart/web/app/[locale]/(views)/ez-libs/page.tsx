@@ -5,7 +5,7 @@ import { libData } from './libData';
 
 export default function EzLibs() {
   return (
-    <Main withHeader>
+    <Main withFixedHeader>
       <Section>
         <H1>EzLibs</H1>
         <Tag as='h1'>ezstart</Tag>

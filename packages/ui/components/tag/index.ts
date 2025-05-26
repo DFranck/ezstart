@@ -1,6 +1,6 @@
-export { Div, Li, Main, P, Section, Ul } from './src/aliases';
+export { Div, Li, P, Ul } from './src/aliases';
 export { Tag } from './src/components/tag';
-export type { TagProps } from './src/components/tag';
-export type { CustomVariants, SupportedAs, TagVariantsMap } from './src/types';
 export { tagVariants, tagVariantsMeta } from './src/variants';
 export * from './src/variants/groups/heading';
+export * from './src/variants/tags/main';
+export * from './src/variants/tags/section';

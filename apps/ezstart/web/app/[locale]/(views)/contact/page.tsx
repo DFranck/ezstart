@@ -13,7 +13,7 @@ const ContactPage = () => {
   const links = t.raw('links') as ContactLink[];
 
   return (
-    <Main withHeader>
+    <Main withFixedHeader>
       <Section size={'lg'} className='text-center'>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>

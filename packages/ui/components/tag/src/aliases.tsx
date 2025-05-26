@@ -3,8 +3,6 @@
 import { createAlias } from './utils/create-alias';
 
 // Layouts
-export const Section = createAlias('section');
-export const Main = createAlias('main');
 
 // Typography
 export const P = createAlias('p');
