@@ -1,7 +1,6 @@
 'use client';
 
 import { getQuotes } from '@/api/quotes';
-import { Quote } from '@ezstart/types';
 import { H1, Main } from '@ezstart/ui/components';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -9,7 +8,7 @@ import { QuotesForm } from './components/QuotesForm';
 import { QuotesList } from './components/QuotesList';
 
 export default function QuotesPage() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quotes, setQuotes] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

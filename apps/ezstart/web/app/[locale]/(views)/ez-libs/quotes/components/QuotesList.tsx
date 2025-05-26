@@ -1,15 +1,14 @@
 'use client';
 
-import { Quote } from '@ezstart/types';
 import { Modal } from '@ezstart/ui/components';
 import { useState } from 'react';
 
 type Props = {
-  quotes: Quote[];
+  quotes: any[];
 };
 
 export function QuotesList({ quotes }: Props) {
-  const [selected, setSelected] = useState<Quote | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
 
   if (!quotes.length) return <p className='text-gray-500'>No quotes yet.</p>;
 

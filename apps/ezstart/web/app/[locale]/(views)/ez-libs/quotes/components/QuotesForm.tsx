@@ -1,10 +1,9 @@
 'use client';
 import { addQuote } from '@/api/quotes';
-import { Quote } from '@ezstart/types';
 import { useState } from 'react';
 
 type Props = {
-  onAdded: (q: Quote) => void;
+  onAdded: (q: any) => void;
 };
 
 export function QuotesForm({ onAdded }: Props) {

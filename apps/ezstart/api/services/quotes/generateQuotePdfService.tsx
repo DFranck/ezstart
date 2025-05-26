@@ -1,7 +1,6 @@
-import { Quote } from '@ezstart/types';
 import puppeteer from 'puppeteer';
 
-export async function generateQuotePdfService(quote: Quote): Promise<Buffer> {
+export async function generateQuotePdfService(quote: any): Promise<Buffer> {
   // const html = renderToStaticMarkup(<QuotePdfTemplate quote={quote} />);
   const html = '';
   const fullHtml = `

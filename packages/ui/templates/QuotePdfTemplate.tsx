@@ -5,7 +5,7 @@ export interface Quote {
   amount: number;
   acceptedAt?: string;
 }
-export const QuotePdfTemplate = ({ quote }: { quote: Quote }) => {
+export const QuotePdfTemplate = ({ quote }: { quote: any }) => {
   return (
     <div className='w-full font-sans p-8 text-gray-900'>
       <h1 className='text-2xl font-bold mb-2'>Quote</h1>
