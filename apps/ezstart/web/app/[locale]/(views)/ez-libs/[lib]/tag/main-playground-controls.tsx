@@ -1,5 +1,6 @@
 import {
   H6,
+  Section,
   Select,
   SelectContent,
   SelectItem,
@@ -21,7 +22,7 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
   const fakeAliasCode = buildFakeTag('main', selected, aliasComponent, content);
 
   return (
-    <>
+    <Section variant={'outline'}>
       <div className='mb-3'>
         <div className='grid grid-cols-1 gap-2'>
           <div>
@@ -62,6 +63,6 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
           </div>
         ))}
       </div>
-    </>
+    </Section>
   );
 };

@@ -10,7 +10,7 @@ export function buildFakeTag(
     if (
       (k === 'variant' && v === 'default') ||
       (k === 'intent' && v === 'default') ||
-      (k === 'size' && v === tag)
+      (k === 'size' && (v === tag || v === 'default'))
     )
       return;
     // Affiche uniquement la prop sans valeur si "true"

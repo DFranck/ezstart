@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { HeadingPlayground } from './heading-playground';
 import { MainPlaygroundControls } from './main-playground-controls';
+import SectionPlayground from './section-playground';
 
 const mainMeta = tagVariantsMeta['main'];
 
@@ -45,9 +46,12 @@ const TagPage = () => {
         <H2>Heading Tags</H2>
         <HeadingPlayground />
       </Section>
-      <Section>
-        <H2>Waiting more Tags...</H2>
-      </Section>
+
+      <H2 className='max-w-4xl w-full text-left px-4 md:px-10  '>
+        Section Tag
+      </H2>
+
+      <SectionPlayground />
     </Main>
   );
 };
