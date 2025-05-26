@@ -1,6 +1,6 @@
 'use client';
 
-import { Tag } from '@ezstart/ui/components';
+import { Button } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -21,8 +21,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
   };
 
   return (
-    <Tag
-      as='button'
+    <Button
       onClick={toggleTheme}
       aria-label='Toggle theme'
       variant='ghost'
@@ -34,6 +33,6 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       ) : (
         <Moon className='w-4 h-4' />
       )}
-    </Tag>
+    </Button>
   );
 }

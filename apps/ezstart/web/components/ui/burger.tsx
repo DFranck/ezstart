@@ -1,6 +1,6 @@
 'use client';
 
-import { Tag } from '@ezstart/ui/components';
+import { Button, Tag } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 
 const Burger = ({
@@ -20,8 +20,7 @@ const Burger = ({
     }
   };
   return (
-    <Tag
-      as='button'
+    <Button
       onClick={handleClick}
       size={'sm'}
       variant={'ghost'}
@@ -52,7 +51,7 @@ const Burger = ({
           isOpen ? '-rotate-45 -translate-y-2 ' : 'rotate-0 '
         )}
       />
-    </Tag>
+    </Button>
   );
 };
 
