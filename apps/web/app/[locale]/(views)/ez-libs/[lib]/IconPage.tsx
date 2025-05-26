@@ -3,7 +3,7 @@ import { useDevice } from '@/hooks/useDevice';
 import {
   Button,
   cn,
-  customIcons,
+  customIconMap,
   Div,
   faIcons,
   lucideIcons,
@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 const allIcons = [
   ...lucideIcons.map((name) => ({ lib: 'lucide', name })),
   ...faIcons.map((name) => ({ lib: 'fa', name })),
-  ...customIcons.map((name) => ({ lib: 'custom', name })),
+  ...Object.keys(customIconMap).map((name) => ({ lib: 'custom', name })),
 ];
 
 const IconPage = () => {

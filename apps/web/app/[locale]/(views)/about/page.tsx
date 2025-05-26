@@ -1,5 +1,5 @@
 'use client';
-import { cn, EzTag, H1, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ui';
+import { cn, Tag, H1, H2, H4, Li, Main, P, Section, Ul } from '@ezstart/ui';
 import { useTranslations } from 'next-intl';
 type TimelineItem = {
   year: string;
@@ -57,7 +57,7 @@ const page = () => {
         </div>
 
         {/* Values */}
-        <EzTag as='div' className='text-center'>
+        <Tag as='div' className='text-center'>
           <H4>{t('valuesTitle')}</H4>
           <ul className='mt-4 space-y-2'>
             {values.map((v) => (
@@ -69,10 +69,10 @@ const page = () => {
               </li>
             ))}
           </ul>
-        </EzTag>
+        </Tag>
 
         {/* Interests */}
-        <EzTag
+        <Tag
           as='div'
           className='md:col-span-2 text-center xl:col-span-1 xl:text-left'
         >
@@ -87,7 +87,7 @@ const page = () => {
               </li>
             ))}
           </ul>
-        </EzTag>
+        </Tag>
       </Section>
     </Main>
   );

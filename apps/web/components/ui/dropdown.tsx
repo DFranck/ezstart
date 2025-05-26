@@ -1,5 +1,5 @@
 // ez-libs/ez-tag/components/Dropdown.tsx
-import { Button, Div, EzTag, Li, Ul } from '@ezstart/ui';
+import { Button, Div, Tag, Li, Ul } from '@ezstart/ui';
 import React, { useEffect, useRef, useState } from 'react';
 
 export interface DropdownItem {
@@ -45,7 +45,7 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
 
   return (
     <Div ref={containerRef} className='relative inline-block text-left '>
-      <EzTag
+      <Tag
         as='button'
         variant={variant}
         type='button'
@@ -55,7 +55,7 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
         aria-expanded={open}
       >
         {label}
-      </EzTag>
+      </Tag>
 
       {open && (
         <Ul

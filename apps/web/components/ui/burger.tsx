@@ -1,6 +1,6 @@
 'use client';
 
-import { cn, EzTag } from '@ezstart/ui';
+import { cn, Tag } from '@ezstart/ui';
 
 const Burger = ({
   setIsOpen,
@@ -19,7 +19,7 @@ const Burger = ({
     }
   };
   return (
-    <EzTag
+    <Tag
       as='button'
       onClick={handleClick}
       size={'sm'}
@@ -30,28 +30,28 @@ const Burger = ({
       )}
       {...props}
     >
-      <EzTag
+      <Tag
         as='span'
         className={cn(
           'block  h-0.5 w-5 bg-current transform transition duration-500 ease-in-out',
           isOpen ? 'rotate-45 translate-y-2' : 'rotate-0 '
         )}
       />
-      <EzTag
+      <Tag
         as='span'
         className={cn(
           'block  h-0.5 w-5 bg-current transform transition duration-500 ease-in-out',
           isOpen ? 'opacity-0' : 'opacity-100'
         )}
       />
-      <EzTag
+      <Tag
         as='span'
         className={cn(
           'block  h-0.5 w-5 bg-current transform transition duration-500 ease-in-out',
           isOpen ? '-rotate-45 -translate-y-2 ' : 'rotate-0 '
         )}
       />
-    </EzTag>
+    </Tag>
   );
 };
 

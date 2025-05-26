@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { LibId } from '../libData';
-import EzTagPage from './(eztag)/EzTagPage';
+import TagPage from './(eztag)/TagPage';
 import IconPage from './IconPage';
 
 export default async function LibPage({
@@ -12,8 +12,8 @@ export default async function LibPage({
 
   switch (lib) {
     case 'ez-tag':
-      return <EzTagPage />;
-    case 'ez-icon':
+      return <TagPage />;
+    case 'icon':
       return <IconPage />;
     default:
       notFound();

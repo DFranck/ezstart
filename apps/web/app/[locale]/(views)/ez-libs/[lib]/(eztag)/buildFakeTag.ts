@@ -4,7 +4,7 @@ export function buildFakeTag(
   variantComponent?: string,
   content?: string
 ) {
-  // Ex : variantComponent = "H2" ou "EzTag"
+  // Ex : variantComponent = "H2" ou "Tag"
   // On n'affiche pas les props à leur valeur "par défaut"
   // Ici "default" (pour variant/intent) et la taille du tag pour size
   let props = '';
@@ -22,6 +22,6 @@ export function buildFakeTag(
     // Version alias <H2 ... />
     return `<${variantComponent}${props}>${content ?? ''}</${variantComponent}>`;
   }
-  // Version polymorphe <EzTag as="h2" ... />
-  return `<EzTag as="${tag}"${props}>${content ?? ''}</EzTag>`;
+  // Version polymorphe <Tag as="h2" ... />
+  return `<Tag as="${tag}"${props}>${content ?? ''}</Tag>`;
 }

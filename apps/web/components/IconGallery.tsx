@@ -1,7 +1,7 @@
 'use client';
 
 import type { KnownIconName } from '@ezstart/ui';
-import { EzTag, Icon } from '@ezstart/ui';
+import { Tag, Icon } from '@ezstart/ui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
 
@@ -45,8 +45,8 @@ export const IconGallery = ({
   });
 
   return (
-    <EzTag as='section'>
-      <EzTag as='h1'>{title}</EzTag>
+    <Tag as='section'>
+      <Tag as='h1'>{title}</Tag>
 
       {searchable && (
         <input
@@ -99,6 +99,6 @@ export const IconGallery = ({
           })}
         </div>
       </div>
-    </EzTag>
+    </Tag>
   );
 };

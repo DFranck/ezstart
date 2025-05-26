@@ -6,7 +6,7 @@ export function useOnScroll(throttleMs = 100): number {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    let timeout: NodeJS.Timeout | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
       if (timeout) return;

@@ -1,11 +1,11 @@
-// -- Main polymorphic EzTag component (core rendering logic) --
-export { EzTag } from './src/components/EzTag';
+// -- Main polymorphic Tag component (core rendering logic) --
+export { Tag } from './src/components/tag';
 
-// -- Public types for EzTag's props and variants --
-export type { CustomVariants, EzTagProps } from './src/components/EzTag';
+// -- Public types for Tag's props and variants --
+export type { CustomVariants, TagProps } from './src/components/tag';
 
-// -- Supported HTML tag types for EzTag's "as" prop --
-export type { SupportedAs } from './src/components/EzTag';
+// -- Supported HTML tag types for Tag's "as" prop --
+export type { SupportedAs } from './src/components/tag';
 
 // -- Centralized variant factories (for runtime styling) and variant meta (for docs/playground/autocomplete) --
 export { tagVariants, tagVariantsMeta } from './src/variants';

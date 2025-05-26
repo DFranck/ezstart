@@ -1,11 +1,11 @@
 // aliases.tsx
-import type { EzTagProps, SupportedAs } from './components/EzTag';
-import { EzTag } from './components/EzTag';
+import type { TagProps, SupportedAs } from './components/tag';
+import { Tag } from './components/tag';
 
 function createAlias<T extends SupportedAs>(as: T) {
-  return function Alias(props: Omit<EzTagProps<T>, 'as'>) {
-    const allProps = { ...props, as } as EzTagProps<T>;
-    return <EzTag {...allProps} />;
+  return function Alias(props: Omit<TagProps<T>, 'as'>) {
+    const allProps = { ...props, as } as TagProps<T>;
+    return <Tag {...allProps} />;
   };
 }
 

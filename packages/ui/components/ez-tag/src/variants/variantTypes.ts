@@ -14,7 +14,7 @@ export type ExtractVariantIfPresent<T extends (...args: any) => any> =
 /**
  * Dynamically infers the valid variant props (like `layout`, `size`, `variant`, etc.)
  * for each supported tag listed in `tagVariants`.
- * This map is used to type the EzTag component dynamically.
+ * This map is used to type the Tag component dynamically.
  */
 export type TagVariantsMap = {
   [K in keyof typeof tagVariants]: VariantProps<(typeof tagVariants)[K]> &

@@ -18,7 +18,7 @@ type FilterSupportedAs<T extends Record<string, (...args: any) => any>> = {
   [K in keyof T]: HasVariant<T[K]> extends true ? K : never;
 }[keyof T];
 /**
- * List of supported HTML tags for EzTag, including generic span and div.
+ * List of supported HTML tags for Tag, including generic span and div.
  */
 export type SupportedAs =
   | FilterSupportedAs<typeof tagVariants>
@@ -33,12 +33,12 @@ export type CustomVariants<T extends SupportedAs> =
   T extends keyof TagVariantsMap ? TagVariantsMap[T] : {};
 
 /**
- * Props definition for the EzTag component.
+ * Props definition for the Tag component.
  * - Uses the underlying native props of the tag (`ComponentProps<T>`)
  * - Adds support for the `as` prop to choose the tag to render
  * - Extends with tag-specific variant props dynamically
  */
-export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
+export type TagProps<T extends SupportedAs = 'span'> = Omit<
   ComponentProps<T>,
   never
 > & {
@@ -48,17 +48,17 @@ export type EzTagProps<T extends SupportedAs = 'span'> = Omit<
 } & CustomVariants<T>;
 
 /**
- * EzTag: a polymorphic, styled tag component with variant support.
+ * Tag: a polymorphic, styled tag component with variant support.
  * It looks up the corresponding `cva()` config from `tagVariants`
  * and applies the appropriate classNames based on the props.
  */
-export function EzTag<T extends SupportedAs = 'span'>({
+export function Tag<T extends SupportedAs = 'span'>({
   as,
   asChild,
   className,
   children,
   ...props
-}: EzTagProps<T> & { asChild?: boolean }) {
+}: TagProps<T> & { asChild?: boolean }) {
   const tag = (as ?? 'span') as string;
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants];

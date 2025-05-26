@@ -1,9 +1,9 @@
-# EzTag – Semantic & Styled React Tag System
+# Tag – Semantic & Styled React Tag System
 
-**EzTag** is a polymorphic, typed, and variant-powered React component library for HTML tags.  
+**Tag** is a polymorphic, typed, and variant-powered React component library for HTML tags.  
 It provides semantic markup, Tailwind-based styling via `cva()`, and DX-friendly aliases like `<H1 />`, `<Section />`, `<Button />`.
 
-Designed to be accessible, maintainable, and scalable — EzTag powers all layout, heading, and interactive elements in your UI.
+Designed to be accessible, maintainable, and scalable — Tag powers all layout, heading, and interactive elements in your UI.
 
 > Built with ❤️ by [@ezstart](https://github.com/DFranck/ez-start)
 
@@ -50,21 +50,21 @@ Make sure your project includes:
 - tailwind-merge (used internally)
 ```
 
-EzTag assumes your Tailwind setup is already configured (tailwind.config.js)
+Tag assumes your Tailwind setup is already configured (tailwind.config.js)
 
 ## Usage
 
-### Basic Usage with `EzTag`
+### Basic Usage with `Tag`
 
 ```tsx
-import { EzTag } from '@ezstart/ui';
+import { Tag } from '@ezstart/ui';
 
-<EzTag as='section' size='lg'>
-  <EzTag as='h1' variant='default'>
+<Tag as='section' size='lg'>
+  <Tag as='h1' variant='default'>
     Hello World
-  </EzTag>
-  <EzTag as='p'>This is a paragraph inside a styled section</EzTag>
-</EzTag>;
+  </Tag>
+  <Tag as='p'>This is a paragraph inside a styled section</Tag>
+</Tag>;
 ```
 
 ### With Semantic Aliases
@@ -90,7 +90,7 @@ import { Link } from 'react-router-dom';
 </Button>;
 ```
 
-EzTag automatically applies the correct styles, responsive layout, and variants based on the tag you use — while keeping the DOM clean and semantic.
+Tag automatically applies the correct styles, responsive layout, and variants based on the tag you use — while keeping the DOM clean and semantic.
 
 ## License
 

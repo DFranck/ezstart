@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  EzTag,
+  Tag,
   H6,
   headings,
   headingVariants,
@@ -73,9 +73,9 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
     <Section variant={'outline'}>
       {/* Preview */}
       <div className='flex-1 min-w-0'>
-        <EzTag as={tag} {...selected}>
+        <Tag as={tag} {...selected}>
           {content}
-        </EzTag>
+        </Tag>
       </div>
 
       {/* Controls & usage */}

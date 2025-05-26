@@ -6,7 +6,7 @@ import { listVariants } from './lists/listVariants';
 import { typographyVariants } from './typographies/typographyVariants';
 
 /**
- * Central variant map used by EzTag.
+ * Central variant map used by Tag.
  * This aggregates all `cva()` variant configurations for supported tags.
  * You can extend it by spreading other variant groups like `headingVariants`, `buttonVariants`, etc.
  */

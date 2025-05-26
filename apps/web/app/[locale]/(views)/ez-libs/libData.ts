@@ -2,15 +2,15 @@
 
 export const libData = {
   'ez-tag': {
-    name: 'EzTag',
+    name: 'Tag',
     description:
-      "EzTag is a React component library that provides a set of reusable components for building user interfaces. It's using TailwindCSS.",
+      "Tag is a React component library that provides a set of reusable components for building user interfaces. It's using TailwindCSS.",
     href: '/ez-libs/ez-tag',
     github:
       'https://github.com/DFranck/ezstart/tree/master/packages/libs/ez-tag',
     npm: 'https://www.npmjs.com/package/@ezstart/ui',
   },
-  'ez-icon': {
+  icon: {
     name: 'Icon',
     description:
       'Icon is a React icon library that provides a customizable set of icons from lucide.dev and other sources.',
