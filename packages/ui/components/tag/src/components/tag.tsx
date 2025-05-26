@@ -1,43 +1,10 @@
-import { cn } from '@ezstart/ui';
+import { cn } from '@ezstart/ui/lib';
 import { Slot } from '@radix-ui/react-slot';
 import type { VariantProps } from 'class-variance-authority';
 import { ComponentProps, ElementType } from 'react';
+import { CustomVariants, SupportedAs } from '../types';
 import { tagVariants } from '../variants';
-import type { TagVariantsMap } from '../variants/variantTypes';
 
-/**
- * Utility type to check if a cva() function has a `variant` prop
- */
-type HasVariant<T extends (...args: any) => any> =
-  keyof VariantProps<T> extends never ? false : true;
-
-/**
- * Utility type to filter out cva() functions that don't have a `variant` prop
- */
-type FilterSupportedAs<T extends Record<string, (...args: any) => any>> = {
-  [K in keyof T]: HasVariant<T[K]> extends true ? K : never;
-}[keyof T];
-/**
- * List of supported HTML tags for Tag, including generic span and div.
- */
-export type SupportedAs =
-  | FilterSupportedAs<typeof tagVariants>
-  | 'span'
-  | 'div';
-
-/**
- * Dynamically extracts the variant props (like `layout`, `size`, `variant`)
- * for the given `as` tag, if it's defined in `TagVariantsMap`.
- */
-export type CustomVariants<T extends SupportedAs> =
-  T extends keyof TagVariantsMap ? TagVariantsMap[T] : {};
-
-/**
- * Props definition for the Tag component.
- * - Uses the underlying native props of the tag (`ComponentProps<T>`)
- * - Adds support for the `as` prop to choose the tag to render
- * - Extends with tag-specific variant props dynamically
- */
 export type TagProps<T extends SupportedAs = 'span'> = Omit<
   ComponentProps<T>,
   never
@@ -47,11 +14,6 @@ export type TagProps<T extends SupportedAs = 'span'> = Omit<
   CustomVariants?: CustomVariants<T>;
 } & CustomVariants<T>;
 
-/**
- * Tag: a polymorphic, styled tag component with variant support.
- * It looks up the corresponding `cva()` config from `tagVariants`
- * and applies the appropriate classNames based on the props.
- */
 export function Tag<T extends SupportedAs = 'span'>({
   as,
   asChild,

@@ -1,5 +1,5 @@
 'use client';
-import { H1, H2, Main, Section } from '@ezstart/ui';
+import { H1, H2, Main, Section, Tag } from '@ezstart/ui/components';
 import { LibSection } from './components/LibSection';
 import { libData } from './libData';
 
@@ -8,6 +8,7 @@ export default function EzLibs() {
     <Main withHeader>
       <Section>
         <H1>EzLibs</H1>
+        <Tag as='h1'>ezstart</Tag>
 
         <H2>Check my libs, play with them and install them!</H2>
       </Section>

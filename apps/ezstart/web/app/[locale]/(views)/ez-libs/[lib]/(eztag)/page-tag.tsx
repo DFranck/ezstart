@@ -1,10 +1,8 @@
 'use client';
-import { Tag, H2, Main, Section } from '@ezstart/ui';
-import { getAllTagVariants } from './getAllTagVariants';
+import { H2, Main, Section, Tag } from '@ezstart/ui';
 import { HeadingPlayground } from './HeadingPlayground';
 
 const TagPage = () => {
-  const variants = getAllTagVariants();
   return (
     <Main withHeader>
       <Tag as='section'>

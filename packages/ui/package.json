@@ -50,8 +50,8 @@
     "./globals.css": "./styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "import": "./dist/components/*",
+      "types": "./dist/components/*"
     },
     "./hooks": {
       "import": "./dist/hooks/index.js",

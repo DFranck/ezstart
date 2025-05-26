@@ -1,20 +1,18 @@
 'use client';
 
 import {
-  Tag,
   H6,
   headings,
   headingVariants,
   Section,
-  tagVariantsMeta,
-} from '@ezstart/ui';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@ezstart/ui/components/select';
+  Tag,
+  tagVariantsMeta,
+} from '@ezstart/ui/components';
 import { useState } from 'react';
 import { buildFakeTag } from './buildFakeTag';
 
@@ -23,7 +21,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@ezstart/ui/components/accordion';
+} from '@ezstart/ui/components';
 
 export const HeadingPlayground = () => (
   <Accordion type='multiple' className='w-full'>
