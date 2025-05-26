@@ -1,7 +1,7 @@
 import { VariantProps } from 'class-variance-authority';
 import { mainVariants } from '../tags/main';
 import { sectionVariants } from '../tags/section';
-import { ExtractVariantIfPresent } from '../variantTypes';
+import { ExtractVariantIfPresent } from '../types';
 
 export const layoutVariants = {
   section: sectionVariants,

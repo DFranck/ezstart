@@ -2,7 +2,7 @@ import { Footer } from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import MobileNavbar from '@/components/layout/MobileNavbar';
 import { Providers } from '@/components/providers';
-import { routing } from '@/i18n/routing';
+import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
 import { Toaster } from '@ezstart/ui';
 import '@ezstart/ui/globals.css';
 import { hasLocale } from 'next-intl';
@@ -35,13 +35,13 @@ export default async function LocaleLayout(props: {
   setRequestLocale(locale);
 
   const messages = await getMessages();
-
+  const timeZone = getTimeZoneFromLocale(locale);
   return (
     <html lang={locale} suppressHydrationWarning className='h-full'>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col h-full`}
       >
-        <Providers messages={messages} locale={locale}>
+        <Providers messages={messages} locale={locale} timeZone={timeZone}>
           <Header />
           {children}
           <MobileNavbar />

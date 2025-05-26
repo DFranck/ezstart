@@ -1,7 +1,7 @@
 // apps/ezstart/web/i18n/request.ts
 import merge from 'deepmerge';
 import { getRequestConfig } from 'next-intl/server';
-import { getTimeZoneFromLocale, routing } from './routing';
+import { routing } from './routing';
 
 function isSupportedLocale(
   locale: string | undefined
@@ -12,7 +12,6 @@ function isSupportedLocale(
 export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale;
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale;
-  const timeZone = getTimeZoneFromLocale(locale);
 
   const [common, header, footer, nav, home, legal, contact, about] =
     await Promise.all([
@@ -28,7 +27,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
-    timeZone,
     messages: merge.all([
       common.default,
       header.default,
