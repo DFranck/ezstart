@@ -1,5 +1,5 @@
 // shared elements between headers
-import { Tag } from '@ezstart/ui';
+import { Tag } from '@ezstart/ui/components';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
 

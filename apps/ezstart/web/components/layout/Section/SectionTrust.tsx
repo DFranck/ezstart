@@ -1,7 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
-import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui';
+import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 
 type TrustPoint = {

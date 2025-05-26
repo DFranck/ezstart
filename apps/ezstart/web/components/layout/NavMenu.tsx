@@ -1,6 +1,6 @@
 import { Dropdown } from '@/components/ui/dropdown';
 import { useNavLinks } from '@/hooks/useNavLinks';
-import { Button } from '@ezstart/ui';
+import { Button } from '@ezstart/ui/components';
 import Link from 'next/link';
 
 interface NavMenuProps {

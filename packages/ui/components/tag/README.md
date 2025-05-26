@@ -57,7 +57,7 @@ Tag assumes your Tailwind setup is already configured (tailwind.config.js)
 ### Basic Usage with `Tag`
 
 ```tsx
-import { Tag } from '@ezstart/ui';
+import { Tag } from '@ezstart/ui/components';
 
 <Tag as='section' size='lg'>
   <Tag as='h1' variant='default'>
@@ -70,7 +70,7 @@ import { Tag } from '@ezstart/ui';
 ### With Semantic Aliases
 
 ```tsx
-import { Section, H1, H3, Button } from '@ezstart/ui';
+import { Section, H1, H3, Button } from '@ezstart/ui/components';
 
 <Section size='lg'>
   <H1>Welcome to EzStart</H1>
@@ -82,7 +82,7 @@ import { Section, H1, H3, Button } from '@ezstart/ui';
 ### With asChild (Radix Slot support)
 
 ```tsx
-import { Button } from '@ezstart/ui';
+import { Button } from '@ezstart/ui/components';
 import { Link } from 'react-router-dom';
 
 <Button asChild>

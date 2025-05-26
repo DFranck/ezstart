@@ -1,6 +1,7 @@
 'use client';
 
-import { cn, Tag } from '@ezstart/ui';
+import { Tag } from '@ezstart/ui/components';
+import { cn } from '@ezstart/ui/lib';
 
 const Burger = ({
   setIsOpen,

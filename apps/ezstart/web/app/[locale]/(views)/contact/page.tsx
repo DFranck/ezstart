@@ -1,5 +1,5 @@
 'use client';
-import { H1, Li, Main, P, Section, Ul } from '@ezstart/ui';
+import { H1, Li, Main, P, Section, Ul } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 

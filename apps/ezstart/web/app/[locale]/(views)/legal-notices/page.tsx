@@ -1,4 +1,4 @@
-import { cn, Div, H2, H3, P, Section } from '@ezstart/ui';
+import { cn, Div, H2, H3, P, Section } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 type LegalSection = {

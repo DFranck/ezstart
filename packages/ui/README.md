@@ -47,7 +47,7 @@ src/
 ## 🚀 Usage
 
 ```tsx
-import { Modal, Select, EzStartSvg } from '@ezstart/ui';
+import { Modal, Select, EzStartSvg } from '@ezstart/ui/components';
 // Use as standard React components
 ```
 

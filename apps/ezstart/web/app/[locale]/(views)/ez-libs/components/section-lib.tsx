@@ -1,5 +1,5 @@
 'use client';
-import { Button, Div, H2, H4, Icon, Section } from '@ezstart/ui';
+import { Button, Div, H2, H4, Icon, Section } from '@ezstart/ui/components';
 import Link from 'next/link';
 import { LibMeta } from '../libData';
 

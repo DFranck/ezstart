@@ -24,7 +24,8 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../../packages/ui/components/tag/src/utils/get-all-tag-variants.ts"
   ],
   "exclude": ["node_modules"]
 }

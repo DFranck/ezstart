@@ -1,4 +1,4 @@
-import { Main } from '@ezstart/ui';
+import { Main } from '@ezstart/ui/components';
 
 const BillsPage = () => {
   return <Main>BillsPage</Main>;

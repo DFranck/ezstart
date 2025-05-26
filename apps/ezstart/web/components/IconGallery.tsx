@@ -1,7 +1,7 @@
 'use client';
 
-import type { KnownIconName } from '@ezstart/ui';
-import { Tag, Icon } from '@ezstart/ui';
+import type { KnownIconName } from '@ezstart/ui/components';
+import { Icon, Tag } from '@ezstart/ui/components';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
 

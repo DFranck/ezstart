@@ -1,6 +1,6 @@
 'use client';
 import { H1, H2, Main, Section, Tag } from '@ezstart/ui/components';
-import { LibSection } from './components/LibSection';
+import { LibSection } from './components/section-lib';
 import { libData } from './libData';
 
 export default function EzLibs() {

@@ -14,7 +14,7 @@ import {
   tagVariantsMeta,
 } from '@ezstart/ui/components';
 import { useState } from 'react';
-import { buildFakeTag } from './buildFakeTag';
+import { buildFakeTag } from './build-fake-tag';
 
 import {
   Accordion,

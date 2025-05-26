@@ -1,6 +1,6 @@
 'use client';
-import { H2, Main, Section, Tag } from '@ezstart/ui';
-import { HeadingPlayground } from './HeadingPlayground';
+import { H2, Main, Section, Tag } from '@ezstart/ui/components';
+import { HeadingPlayground } from './heading-playground';
 
 const TagPage = () => {
   return (

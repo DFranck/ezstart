@@ -42,16 +42,11 @@
     "typescript": "^5.7.3"
   },
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
     "./globals.css": "./styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./components": {
-      "import": "./dist/components/*",
-      "types": "./dist/components/*"
+      "import": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
     },
     "./hooks": {
       "import": "./dist/hooks/index.js",

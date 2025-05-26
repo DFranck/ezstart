@@ -1,7 +1,7 @@
 'use client';
 
 import { LampContainer } from '@/components/ui/lamp';
-import { Button, H2, Icon, P, Section, Ul } from '@ezstart/ui';
+import { Button, H2, Icon, P, Section, Ul } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
