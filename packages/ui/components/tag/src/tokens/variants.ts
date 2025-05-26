@@ -24,7 +24,3 @@ export const controlVariants = {
   ghost: 'hover:bg-accent hover:text-accent-foreground',
   outline: 'border border-input bg-background hover:bg-accent',
 } as const;
-
-export type TextVariant = keyof typeof textVariants;
-export type ControlVariant = keyof typeof controlVariants;
-export type ContainerVariant = keyof typeof containerVariants;

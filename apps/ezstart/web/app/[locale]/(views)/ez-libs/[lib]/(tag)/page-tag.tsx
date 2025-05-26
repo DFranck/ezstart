@@ -12,21 +12,23 @@ import { HeadingPlayground } from './playground/heading-playground';
 import { MainPlaygroundControls } from './playground/main-playground-controls';
 import PPlayground from './playground/p-playground';
 import SectionPlayground from './playground/section-playground';
-
 const mainMeta = tagVariantsMeta['main'];
 
 const TagPage = () => {
   console.log('tagVariantsMeta', tagVariantsMeta);
   const [mainVariants, setMainVariants] = useState(() => {
     const out: Record<string, string> = {};
-    Object.entries(mainMeta).forEach(([key, values]) => {
-      out[key] = values[0];
+    Object.entries(mainMeta).forEach(([variantName, values]) => {
+      out[variantName] = values.includes('default')
+        ? 'default'
+        : values[0] || '';
     });
     return out;
   });
   const handleChange = (prop: string, value: string) => {
     setMainVariants((prev) => ({ ...prev, [prop]: value }));
   };
+
   return (
     <Main {...mainVariants}>
       <Section>

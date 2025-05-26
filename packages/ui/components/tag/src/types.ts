@@ -1,5 +1,4 @@
 import type { VariantProps } from 'class-variance-authority';
-import { ComponentProps } from 'react';
 import { tagVariants } from './variants';
 
 type HasVariant<T extends (...args: any) => any> =
@@ -29,13 +28,3 @@ export type TagVariantsMap = {
   [K in keyof typeof tagVariants]: VariantProps<(typeof tagVariants)[K]> &
     ExtractVariantIfPresent<(typeof tagVariants)[K]>;
 };
-
-// Typage des props du composant <Tag>
-export type TagProps<T extends SupportedAs = 'span'> = Omit<
-  ComponentProps<T>,
-  never
-> & {
-  as?: T;
-  asChild?: boolean;
-  CustomVariants?: CustomVariants<T>;
-} & CustomVariants<T>;

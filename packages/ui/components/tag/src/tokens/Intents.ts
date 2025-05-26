@@ -5,6 +5,7 @@ export const containerIntents = {
   danger:
     'border border-destructive bg-destructive/20 text-destructive-foreground',
   success: 'border border-success bg-success/20 text-success-foreground',
+  muted: 'border border-muted bg-muted/20 text-muted-foreground',
   warning: 'border border-warning bg-warning/20 text-warning-foreground',
 } as const;
 
@@ -27,9 +28,7 @@ export const controlIntents = {
     'bg-success text-success-foreground hover:bg-success/90 focus-visible:ring-success',
   warning:
     'bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:ring-warning',
+  muted:
+    'bg-muted text-muted-foreground hover:bg-muted/90 focus-visible:ring-muted',
   skeleton: 'bg-skeleton text-skeleton-foreground animate-pulse',
 } as const;
-
-export type ContainerIntent = keyof typeof containerIntents;
-export type TextIntent = keyof typeof textIntents;
-export type ControlIntent = keyof typeof controlIntents;
