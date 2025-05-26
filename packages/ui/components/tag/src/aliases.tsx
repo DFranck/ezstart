@@ -6,9 +6,6 @@ import { createAlias } from './utils/create-alias';
 export const Section = createAlias('section');
 export const Main = createAlias('main');
 
-// Forms
-export const Button = createAlias('button');
-
 // Typography
 export const P = createAlias('p');
 

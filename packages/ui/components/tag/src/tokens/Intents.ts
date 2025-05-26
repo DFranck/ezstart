@@ -1,29 +1,33 @@
 // 🟩 Intent variations for containers (section, main, container...)
 export const containerIntents = {
   default: '',
-  skeleton: 'animate-pulse bg-gray-200 text-transparent rounded',
-  danger: 'border border-red-300 bg-red-100 text-red-800',
-  success: 'border border-green-300 bg-green-100 text-green-800',
-  warning: 'border border-yellow-300 bg-yellow-100 text-yellow-800',
+  skeleton: 'animate-pulse bg-skeleton text-skeleton-foreground rounded',
+  danger:
+    'border border-destructive bg-destructive/20 text-destructive-foreground',
+  success: 'border border-success bg-success/20 text-success-foreground',
+  warning: 'border border-warning bg-warning/20 text-warning-foreground',
 } as const;
 
 // 🟦 Intent variations for text (span, p, label, etc.)
 export const textIntents = {
   default: '',
-  danger: 'text-red-600',
-  success: 'text-green-600',
-  warning: 'text-yellow-700',
-  muted: 'text-gray-400',
+  danger: 'text-destructive',
+  success: 'text-success',
+  warning: 'text-warning',
+  muted: 'text-muted-foreground',
+  skeleton: 'text-skeleton-foreground',
 } as const;
 
 // 🟧 Intent variations for controls (buttons, input, select, etc.)
 export const controlIntents = {
   default: '',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+  danger:
+    'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive',
   success:
-    'bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500',
+    'bg-success text-success-foreground hover:bg-success/90 focus-visible:ring-success',
   warning:
-    'bg-yellow-500 text-white hover:bg-yellow-600 focus-visible:ring-yellow-500',
+    'bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:ring-warning',
+  skeleton: 'bg-skeleton text-skeleton-foreground animate-pulse',
 } as const;
 
 export type ContainerIntent = keyof typeof containerIntents;
