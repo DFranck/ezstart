@@ -7,9 +7,8 @@
       "menuLabel": "Libraries",
       "menu": [
         { "label": "EzLibs", "href": "/ez-libs" },
-        { "label": "Quotes", "href": "/ez-libs/quotes" },
-        { "label": "Bills", "href": "/ez-libs/bills" },
-        { "label": "Receipts", "href": "/ez-libs/receipts" }
+        { "label": "Tag", "href": "/ez-libs/tag" },
+        { "label": "Icon", "href": "/ez-libs/icon" }
       ]
     }
   ]

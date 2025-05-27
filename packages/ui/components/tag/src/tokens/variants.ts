@@ -10,10 +10,7 @@ export const containerVariants = {
     'bg-primary text-primary-foreground p-2 shadow-sm'
   ),
   outline: cn(containerCommonClasses, 'border p-2 shadow-sm'),
-  card: cn(
-    containerCommonClasses,
-    'bg-muted text-muted-foreground p-2 shadow-sm'
-  ),
+  card: cn(containerCommonClasses, 'bg-muted border p-2 shadow-sm'),
 } as const;
 
 // 🟦 Visual variations for texts (span, p, label, etc.)

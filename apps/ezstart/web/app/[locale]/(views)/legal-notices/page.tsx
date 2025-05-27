@@ -1,48 +1,90 @@
-import { Div, H2, H3, P, Section } from '@ezstart/ui/components';
-import { cn } from '@ezstart/ui/lib';
+import {
+  Button,
+  Div,
+  H2,
+  H3,
+  Icon,
+  Main,
+  P,
+  Section,
+} from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+
 type LegalSection = {
   id: string;
   title: string;
   content: string;
   link?: { label: string; href: string };
 };
+
+const icons: Record<string, React.ReactNode> = {
+  editor: <Icon name='fa:FaUserShield' className='text-primary' size={20} />,
+  hosting: <Icon name='fa:FaServer' className='text-secondary' size={20} />,
+  intellectualProperty: (
+    <Icon name='fa:FaBalanceScale' className='text-yellow-600' size={20} />
+  ),
+  privacy: <Icon name='fa:FaUserSecret' className='text-green-600' size={20} />,
+  contact: <Icon name='fa:FaEnvelope' className='text-blue-500' size={20} />,
+};
+
 const LegalNoticesPage = () => {
   const t = useTranslations('legal-notices');
   const sections = t.raw('sections') as LegalSection[];
 
   return (
-    <Section
-      id='legal-notices'
-      className={cn(
-        'py-20 flex flex-col justify-center items-center px-6 bg-background min-h-screen '
-      )}
-    >
-      <Div className='max-w-4xl mx-auto text-center space-y-6'>
-        <H2>{t('title')}</H2>
-        <P>{t('intro')}</P>
-      </Div>
+    <Main withFixedHeader>
+      <Section id='legal-notices' className='space-y-8'>
+        <Div className='max-w-4xl mx-auto text-center space-y-6'>
+          <H2>{t('title')}</H2>
+          <P className='text-lg text-muted-foreground'>{t('intro')}</P>
+        </Div>
 
-      <Div className='max-w-4xl mx-auto mt-12 space-y-12'>
         {sections.map((section) => (
-          <article
+          <Section
             key={section.id}
             role='region'
             aria-labelledby={section.id}
-            className='space-y-4'
+            variant={'card'}
           >
-            <H3 id={section.id}>{section.title}</H3>
-            <P>{section.content}</P>
+            <div className='flex items-center gap-3 mb-2'>
+              <span>
+                {icons[section.id] ?? <Icon name='fa:FaFile' size={20} />}
+              </span>
+              <H3 id={section.id}>{section.title}</H3>
+            </div>
+            {section.content
+              .split('\n')
+              .filter(Boolean)
+              .map((line, i) => (
+                <P
+                  key={i}
+                  className={
+                    line.includes('[À compléter]')
+                      ? 'text-orange-600 font-semibold'
+                      : ''
+                  }
+                >
+                  {line}
+                </P>
+              ))}
             {section.link && (
-              <Link href={section.link.href} target='_blank'>
-                {section.link.label}
-              </Link>
+              <Button variant='outline' className='mt-2 w-fit'>
+                <Link
+                  href={section.link.href}
+                  target={
+                    section.link.href.startsWith('http') ? '_blank' : undefined
+                  }
+                  className='underline underline-offset-2 font-semibold'
+                >
+                  {section.link.label}
+                </Link>
+              </Button>
             )}
-          </article>
+          </Section>
         ))}
-      </Div>
-    </Section>
+      </Section>
+    </Main>
   );
 };
 
