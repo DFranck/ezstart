@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { LibId } from '../libData';
+import { LibId } from '../components/section-lib';
+import IconPage from './(icon)/page-icon';
 import TagPage from './(tag)/page-tag';
-import IconPage from './page-icon';
 
 export default async function LibPage({
   params,
