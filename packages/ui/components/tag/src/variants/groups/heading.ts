@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { textIntents } from '../../tokens/Intents';
+import { headingSizeVariants } from '../../tokens/size';
 import { textVariants } from '../../tokens/variants';
 import { createAlias } from '../../utils/create-alias';
 
@@ -11,14 +12,7 @@ export const baseHeadingClasses = 'font-display font-bold !leading-[1.3]';
 export const headingVariantConfig = {
   variant: textVariants,
   intent: textIntents,
-  size: {
-    h1: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
-    h2: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl',
-    h3: 'text-2xl sm:text-3xl md:text-4xl',
-    h4: 'text-xl sm:text-2xl md:text-3xl',
-    h5: 'text-lg sm:text-xl md:text-2xl',
-    h6: 'text-base sm:text-lg md:text-xl',
-  },
+  size: headingSizeVariants,
 };
 // variants
 export const headingVariants = {

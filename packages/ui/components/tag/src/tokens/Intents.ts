@@ -11,8 +11,8 @@ export const containerIntents = {
 // 🟦 Intent variations for text (span, p, label, etc.)
 export const textIntents = {
   default: '',
-  danger: 'text-destructive',
-  success: 'text-success',
-  warning: 'text-warning',
+  danger: 'text-destructive-foreground',
+  success: 'text-success-foreground',
+  warning: 'text-warning-foreground',
   skeleton: 'text-skeleton-foreground',
 } as const;
