@@ -36,6 +36,7 @@ export default async function LocaleLayout(props: {
 
   const messages = await getMessages();
   const timeZone = getTimeZoneFromLocale(locale);
+
   return (
     <html lang={locale} suppressHydrationWarning className='h-full'>
       <body
