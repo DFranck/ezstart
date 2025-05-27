@@ -12,14 +12,17 @@ export const sectionVariantConfig = {
 } as const;
 
 // 👇 cva utilise la config
-export const sectionVariants = cva('container mx-auto flex flex-col', {
-  variants: sectionVariantConfig,
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-    intent: 'default',
-  },
-});
+export const sectionVariants = cva(
+  'container mx-auto flex flex-col my-4 md:my-8',
+  {
+    variants: sectionVariantConfig,
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+      intent: 'default',
+    },
+  }
+);
 
 // 👇 Alias
 export const Section = createAlias('section');

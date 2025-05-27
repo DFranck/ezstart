@@ -33,7 +33,7 @@ const LegalNoticesPage = () => {
   const sections = t.raw('sections') as LegalSection[];
 
   return (
-    <Main withFixedHeader>
+    <Main padding>
       <Section id='legal-notices' className='space-y-8'>
         <Div className='max-w-4xl mx-auto text-center space-y-6'>
           <H2>{t('title')}</H2>

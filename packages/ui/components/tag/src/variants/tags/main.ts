@@ -4,8 +4,8 @@ import { createAlias } from '../../utils/create-alias';
 
 export const mainVariantConfig = {
   intent: containerIntents,
-  withFixedHeader: {
-    true: 'pt-16',
+  padding: {
+    true: 'py-8 md:py-16 lg:py-24',
     false: '',
   },
 } as const;
@@ -16,7 +16,7 @@ export const mainVariants = cva(
     variants: mainVariantConfig,
     defaultVariants: {
       intent: 'default',
-      withFixedHeader: false,
+      padding: false,
     },
   }
 );
@@ -30,5 +30,5 @@ export const mainVariantsMeta = Object.fromEntries(
   ])
 ) as {
   intent: string[];
-  withFixedHeader: string[];
+  padding: string[];
 };

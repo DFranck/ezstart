@@ -34,7 +34,7 @@ export const LibSection = ({
   npm,
 }: LibMeta) => {
   return (
-    <Section>
+    <Section variant={'card'}>
       <H2>{name}</H2>
       <H4>{description}</H4>
       <Div className='flex gap-2'>

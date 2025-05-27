@@ -28,7 +28,7 @@ const page = () => {
   const interests = t.raw('interests') as string[];
 
   return (
-    <Main withFixedHeader>
+    <Main padding>
       <Section>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>

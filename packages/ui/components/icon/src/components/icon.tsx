@@ -40,7 +40,7 @@ export function Icon({
     });
   }, [name]);
 
-  const fallbackSize = props.size ?? 24;
+  const fallbackSize = props.size ?? 20;
   const iconSize = props.size ?? fallbackSize;
 
   const finalStyle =

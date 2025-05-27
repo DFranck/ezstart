@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  H4,
   H6,
   listingVariantsMeta,
   Section,
@@ -50,7 +49,6 @@ export default function ListingPlayground() {
     <Section variant='outline' className='space-y-6'>
       {/* Preview */}
       <Tag as={containerTag} {...containerSelected}>
-        <H4>Container</H4>
         {[...Array(3)].map((_, i) => (
           <Tag key={i} as={itemTag} {...itemSelected}>
             Item {i + 1}
