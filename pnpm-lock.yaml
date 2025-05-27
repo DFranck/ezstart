@@ -24,6 +24,52 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
 
+  apps/ezbilling/api:
+    dependencies:
+      '@ezstart/types':
+        specifier: workspace:*
+        version: link:../../../packages/types
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^4.19.2
+        version: 4.21.2
+      puppeteer:
+        specifier: ^24.9.0
+        version: 24.9.0(typescript@5.7.3)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@types/cors':
+        specifier: ^2.8.18
+        version: 2.8.18
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.22
+      '@types/express-serve-static-core':
+        specifier: ^4.19.6
+        version: 4.19.6
+      '@types/node':
+        specifier: ^20.7.0
+        version: 20.17.50
+      '@types/react':
+        specifier: ^19.1.5
+        version: 19.1.5
+      '@types/react-dom':
+        specifier: ^19.1.5
+        version: 19.1.5(@types/react@19.1.5)
+      ts-node-dev:
+        specifier: ^2.0.0
+        version: 2.0.0(@types/node@20.17.50)(typescript@5.7.3)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
   apps/ezbilling/web:
     dependencies:
       '@ezstart/types':

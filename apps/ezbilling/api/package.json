@@ -1,0 +1,28 @@
+{
+  "name": "ezbilling-api",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@ezstart/types": "workspace:*",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "puppeteer": "^24.9.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/express-serve-static-core": "^4.19.6",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.7.0",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  }
+}
