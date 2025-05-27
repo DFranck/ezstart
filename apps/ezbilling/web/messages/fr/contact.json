@@ -1,0 +1,20 @@
+{
+  "contact": {
+    "title": "Contact",
+    "intro": "N'hésitez pas à me contacter par email ou via mes réseaux sociaux.",
+    "links": [
+      {
+        "label": "Github",
+        "href": "https://github.com/DFranck"
+      },
+      {
+        "label": "Linkedin",
+        "href": "https://www.linkedin.com/in/franckdufournet"
+      },
+      {
+        "label": "Mail",
+        "href": "mailto:franckdufournet@hotmail.fr"
+      }
+    ]
+  }
+}

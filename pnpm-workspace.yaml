@@ -1,3 +1,4 @@
 packages:
   - apps/ezstart/*
+  - apps/ezbilling/*
   - packages/*

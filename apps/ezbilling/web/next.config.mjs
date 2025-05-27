@@ -1,0 +1,10 @@
+// ezstart/apps/ezstart/web/next.config.mjs
+import createNextIntlPlugin from 'next-intl/plugin';
+
+/** @type {import('next').NextConfig} */
+const baseConfig = {
+  transpilePackages: ['@ezstart/ui', '@ezstart/ui'],
+};
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+export default withNextIntl(baseConfig);
