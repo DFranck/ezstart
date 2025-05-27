@@ -9,9 +9,7 @@ export const SectionVision = () => {
   return (
     <Section>
       <H2>{t('title')}</H2>
-
       <P>{t('intro')}</P>
-
       <Ul layout={'grid'} size={'full'}>
         {t.raw('points').map((point: string, index: number) => (
           <Li marker={'check'} variant={'card'} key={index}>
@@ -19,7 +17,6 @@ export const SectionVision = () => {
           </Li>
         ))}
       </Ul>
-
       <P size={'sm'}>{t('footer')}</P>
     </Section>
   );
