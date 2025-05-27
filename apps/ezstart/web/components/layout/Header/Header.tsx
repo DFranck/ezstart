@@ -1,7 +1,7 @@
 'use client';
 
 import Burger from '@/components/ui/burger';
-import { Icon, Tag } from '@ezstart/ui/components';
+import { H2, Icon, Tag } from '@ezstart/ui/components';
 import { useDevice, useOnScroll } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export default function Header() {
   }, [isTablet, isOpen]);
 
   return (
-    <header className='fixed top-0 left-0 right-0 z-50'>
+    <Tag as='header' layout={'spaced'} position={'fixed'}>
       <div
         className={cn(
           ' py-4 px-6 flex items-center justify-between transition-all duration-300',
@@ -35,16 +35,10 @@ export default function Header() {
       >
         <Link href='/' className='flex items-center gap-2'>
           <Icon name='custom:Ezstart' size={24} />
-          <Tag as='h2' size={'h4'}>
-            EzStart
-          </Tag>
+          <H2 size={'h4'}>EzStart</H2>
         </Link>
 
-        {isDesktop && (
-          <div className='flex items-center gap-4'>
-            <NavMenu />
-          </div>
-        )}
+        {isDesktop && <NavMenu className='flex items-center gap-2' />}
 
         <div className='flex items-center gap-2'>
           <HeaderControls />
@@ -59,16 +53,14 @@ export default function Header() {
             isOpen ? 'max-h-[400px] py-4 bg-background' : 'max-h-0'
           )}
         >
-          <div
+          <NavMenu
             className={cn(
               'flex flex-col items-start gap-4 p-4 transition-all duration-500 ease-in-out ',
               isOpen ? 'bg-muted ' : ''
             )}
-          >
-            <NavMenu />
-          </div>
+          />
         </div>
       )}
-    </header>
+    </Tag>
   );
 }

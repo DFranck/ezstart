@@ -14,12 +14,12 @@ const ContactPage = () => {
 
   return (
     <Main withFixedHeader>
-      <Section size={'lg'} className='text-center'>
+      <Section className='text-center'>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>
       </Section>
-      <Section size={'lg'}>
-        <Ul variant={'menu'}>
+      <Section>
+        <Ul >
           {links.map((link) => (
             <Li variant={'card'} key={link.href} asChild>
               <Link

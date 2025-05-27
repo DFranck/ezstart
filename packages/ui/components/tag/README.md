@@ -72,7 +72,7 @@ import { Tag } from '@ezstart/ui/components';
 ```tsx
 import { Section, H1, H3, Button } from '@ezstart/ui/components';
 
-<Section size='lg'>
+<Section>
   <H1>Welcome to EzStart</H1>
   <H3>Your React foundation, simplified.</H3>
   <Button variant='primary'>Get Started</Button>

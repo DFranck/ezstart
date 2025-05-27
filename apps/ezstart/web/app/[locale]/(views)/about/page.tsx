@@ -27,7 +27,7 @@ const page = () => {
 
   return (
     <Main className='py-20 mt-10'>
-      <Section size={'lg'}>
+      <Section>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>
       </Section>
