@@ -1,7 +1,8 @@
 'use client';
 
-import { Button, Li, Ul } from '@ezstart/ui/components';
 import { useEffect, useRef, useState } from 'react';
+import { Button } from './button';
+import { Li, Ul } from './tag';
 
 export interface DropdownItem {
   label: string;
@@ -69,7 +70,7 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
 
       if (e.key === 'Enter' && focusedIndex != null) {
         const item = items[focusedIndex];
-        item.onSelect?.();
+        item?.onSelect?.();
         setOpen(false);
       }
     };

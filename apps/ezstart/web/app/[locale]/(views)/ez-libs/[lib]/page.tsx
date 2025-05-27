@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { LibId } from '../components/section-lib';
+import { LibId } from '../../../../../components/layout/Section/section-lib';
 import IconPage from './(icon)/page-icon';
 import TagPage from './(tag)/page-tag';
 

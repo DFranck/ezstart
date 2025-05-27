@@ -1,8 +1,8 @@
 'use client';
 
-import { Dropdown, DropdownItem } from '@/components/ui/dropdown';
 import { routing } from '@/i18n/routing';
 import { capitalize } from '@/utils/capitalize';
+import { Dropdown, DropdownItem } from '@ezstart/ui/components';
 import { GlobeIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';

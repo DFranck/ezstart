@@ -1,6 +1,6 @@
 // shared elements between headers
-import { LocaleSwitcher } from './LocaleSwitcher';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { LocaleSwitcher } from './local-switcher';
+import { ThemeSwitcher } from './theme-switcher';
 
 export function HeaderControls() {
   return (

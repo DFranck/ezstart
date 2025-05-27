@@ -58,12 +58,14 @@ export function MobileNavMenu({ variant = 'link', setIsOpen }: Props) {
                   asChild
                   variant={'ghost'}
                   key={sub.href}
-                  onClick={() => setIsOpen?.(false)}
+                  onClick={() => {
+                    setOpenIndex(null);
+                    setIsOpen?.(false);
+                  }}
                 >
                   <Link
                     href={sub.href}
                     className='py-1 px-2 rounded hover:bg-muted text-sm'
-                    onClick={() => setOpenIndex(null)} // Ferme le menu après click
                   >
                     {sub.label}
                   </Link>
@@ -72,12 +74,14 @@ export function MobileNavMenu({ variant = 'link', setIsOpen }: Props) {
             </div>
           </div>
         ) : (
-          <Button asChild variant={variant}>
+          <Button key={item.href} asChild variant={variant}>
             <Link
-              key={item.href}
               href={item.href}
               className='py-2 px-2 rounded hover:bg-muted font-medium'
-              onClick={() => setOpenIndex(null)}
+              onClick={() => {
+                setOpenIndex(null);
+                setIsOpen?.(false);
+              }}
             >
               {item.label}
             </Link>

@@ -1,13 +1,13 @@
 'use client';
 
-import Burger from '@/components/ui/burger';
-import { H2, Icon, Tag } from '@ezstart/ui/components';
+import { Burger, H2, Icon, Tag } from '@ezstart/ui/components';
 import { useDevice, useOnScroll } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { NavMenu } from '../NavMenu';
-import { HeaderControls } from './HeaderControls';
+import { MobileNavMenu } from '../mobile-nav-menu';
+import { NavMenu } from '../nav-menu';
+import { HeaderControls } from './header-controls';
 
 export default function Header() {
   const { isDesktop, isTablet } = useDevice();
@@ -53,12 +53,7 @@ export default function Header() {
             isOpen ? 'max-h-[400px] py-4 bg-background' : 'max-h-0'
           )}
         >
-          <NavMenu
-            className={cn(
-              'flex flex-col items-start gap-4 p-4 transition-all duration-500 ease-in-out ',
-              isOpen ? 'bg-muted ' : ''
-            )}
-          />
+          <MobileNavMenu setIsOpen={setIsOpen} />
         </div>
       )}
     </Tag>

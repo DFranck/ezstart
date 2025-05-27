@@ -1,8 +1,8 @@
 'use client';
-import { SectionContact } from '@/components/layout/Section/SectionContact';
-import { SectionHero } from '@/components/layout/Section/SectionHero';
-import { SectionTrust } from '@/components/layout/Section/SectionTrust';
-import { SectionVision } from '@/components/layout/Section/SectionVision';
+import { SectionContact } from '@/components/layout/Section/section-contact';
+import { SectionHero } from '@/components/layout/Section/section-hero';
+import { SectionTrust } from '@/components/layout/Section/section-trust';
+import { SectionVision } from '@/components/layout/Section/section-vision';
 import { Main } from '@ezstart/ui/components';
 export default function Page() {
   return (

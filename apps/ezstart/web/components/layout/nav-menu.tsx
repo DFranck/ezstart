@@ -1,7 +1,7 @@
-import { Dropdown } from '@/components/ui/dropdown';
 import { useNavLinks } from '@/hooks/useNavLinks';
-import { Button } from '@ezstart/ui/components';
+import { Button, Dropdown } from '@ezstart/ui/components';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface NavMenuProps {
   variant?:
@@ -13,9 +13,15 @@ interface NavMenuProps {
     | 'link'
     | null;
   className?: string;
+  setIsOpen?: (isOpen: boolean) => void;
 }
 
-export function NavMenu({ variant = 'link', className }: NavMenuProps) {
+export function NavMenu({
+  variant = 'link',
+  className,
+  setIsOpen,
+}: NavMenuProps) {
+  const router = useRouter();
   const links = useNavLinks();
 
   return (
@@ -29,11 +35,19 @@ export function NavMenu({ variant = 'link', className }: NavMenuProps) {
             items={item.menu.map((sub) => ({
               label: sub.label,
               value: sub.href,
-              onSelect: () => (window.location.href = sub.href),
+              onSelect: () => {
+                router.push(sub.href);
+                setIsOpen?.(false);
+              },
             }))}
           />
         ) : (
-          <Button variant={variant} key={item.href} asChild>
+          <Button
+            variant={variant}
+            key={item.href}
+            asChild
+            onClick={() => setIsOpen?.(false)}
+          >
             <Link href={item.href}>{item.label}</Link>
           </Button>
         )

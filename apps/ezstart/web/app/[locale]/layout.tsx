@@ -1,6 +1,6 @@
 import { Footer } from '@/components/layout/Footer';
-import Header from '@/components/layout/Header';
-import MobileNavbar from '@/components/layout/MobileNavbar';
+import Header from '@/components/layout/Header/header';
+import MobileNavbar from '@/components/layout/mobile-nav-bar';
 import { Providers } from '@/components/providers';
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
 import { Toaster } from '@ezstart/ui/components';

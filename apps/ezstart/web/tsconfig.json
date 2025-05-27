@@ -25,7 +25,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../../packages/ui/components/tag/src/utils/get-all-tag-variants.ts"
+    "../../../packages/ui/components/tag/src/utils/get-all-tag-variants.ts",
+    "../../../packages/ui/components/burger.tsx",
+    "../../../packages/ui/components/dropdown.tsx"
   ],
   "exclude": ["node_modules"]
 }

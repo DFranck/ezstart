@@ -10,7 +10,7 @@ export const headerVariantConfig = {
     xs: 'max-w-2xl px-4 gap-2',
     sm: 'max-w-3xl px-4 md:px-6 gap-2 md:gap-4',
     xl: 'max-w-5xl px-4 md:px-10  gap-4 md:gap-8',
-    full: 'max-w-none gap-6 md:gap-10',
+    full: 'max-w-none',
     default: '',
   },
   intent: containerIntents,

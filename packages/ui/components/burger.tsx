@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from '@ezstart/ui/components';
-import { cn } from '@ezstart/ui/lib';
+import { cn } from '../lib';
+import { Button } from './button';
 
-const Burger = ({
+export const Burger = ({
   setIsOpen,
   isOpen,
   className,
@@ -51,5 +51,3 @@ const Burger = ({
     </Button>
   );
 };
-
-export default Burger;
