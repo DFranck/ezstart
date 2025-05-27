@@ -4,15 +4,15 @@
     "intro": "N'hésitez pas à me contacter par email ou via mes réseaux sociaux.",
     "links": [
       {
-        "label": "GitHub",
+        "label": "Github",
         "href": "https://github.com/DFranck"
       },
       {
-        "label": "LinkedIn",
+        "label": "Linkedin",
         "href": "https://www.linkedin.com/in/franckdufournet"
       },
       {
-        "label": "Email",
+        "label": "Mail",
         "href": "mailto:franckdufournet@hotmail.fr"
       }
     ]
