@@ -24,12 +24,10 @@ export const SectionTrust = () => {
   return (
     <Section>
       <H2>{t('title')}</H2>
-
       <P>{t('intro')}</P>
-
-      <Ul layout={'grid'} className='sm:grid-cols-2 md:grid-cols-3'>
+      <Ul className='grid sm:grid-cols-2 md:grid-cols-3'>
         {points.map((point, index) => (
-          <Li key={index} variant={'card'} className='flex-col items-center'>
+          <Li key={index} className='flex-col items-center'>
             <P>{point.icon}</P>
             <P className='font-semibold text-lg'>
               {isLoading ? (

@@ -1,26 +1,24 @@
-// 🟩 Visual variations for layouts (section, main, etc.)
+import { cn } from '../../../../lib/utils';
+
+// 🟩 Visual variations for containers (section, main, etc.)
+export const containerCommonClasses = 'rounded-md';
+
 export const containerVariants = {
   default: '',
-  primary: 'bg-primary/10',
-  secondary: 'bg-secondary/10',
-  ghost: '',
-  outline: 'border border-border',
+  primary: cn(
+    containerCommonClasses,
+    'bg-primary text-primary-foreground p-2 shadow-sm'
+  ),
+  outline: cn(containerCommonClasses, 'border p-2 shadow-sm'),
+  card: cn(
+    containerCommonClasses,
+    'bg-muted text-muted-foreground p-2 shadow-sm'
+  ),
 } as const;
 
-// 🟦 Visual variations for text (span, p, label, etc.)
+// 🟦 Visual variations for texts (span, p, label, etc.)
+export const textCommonClasses = '';
 export const textVariants = {
   default: '',
-  primary: 'text-primary',
-  secondary: 'text-secondary',
-  ghost: 'text-muted-foreground',
-  outline: 'underline text-primary',
-} as const;
-
-// 🟧 Visual variations for controls (buttons, input, select, etc.)
-export const controlVariants = {
-  default: 'bg-primary text-white hover:bg-primary/90',
-  primary: 'bg-primary text-white hover:bg-primary/90',
-  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-  ghost: 'hover:bg-accent hover:text-accent-foreground',
-  outline: 'border border-input bg-background hover:bg-accent',
+  link: cn(textCommonClasses, 'underline text-primary '),
 } as const;

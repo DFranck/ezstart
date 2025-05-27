@@ -9,6 +9,7 @@ import {
 } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { HeadingPlayground } from './playground/heading-playground';
+import ListingPlayground from './playground/listing-playground';
 import { MainPlaygroundControls } from './playground/main-playground-controls';
 import PPlayground from './playground/p-playground';
 import SectionPlayground from './playground/section-playground';
@@ -58,6 +59,10 @@ const TagPage = () => {
       <Section>
         <H2>P Tag</H2>
         <PPlayground />
+      </Section>
+      <Section>
+        <H2>Listing Tags</H2>
+        <ListingPlayground />
       </Section>
     </Main>
   );

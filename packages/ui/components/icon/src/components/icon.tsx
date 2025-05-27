@@ -42,7 +42,21 @@ export function Icon({
   });
 
   const fallbackSize = props.size ?? 24;
+  const iconSize = props.size ?? fallbackSize;
 
+  const finalStyle =
+    rotate != null || iconSize != null
+      ? {
+          ...style,
+          ...(rotate != null && { transform: `rotate(${rotate}deg)` }),
+          ...(iconSize != null && {
+            width: iconSize,
+            height: iconSize,
+            minWidth: iconSize,
+            minHeight: iconSize,
+          }),
+        }
+      : style;
   return (
     <Suspense
       fallback={
@@ -60,11 +74,7 @@ export function Icon({
         className={[className, spin && 'animate-spin']
           .filter(Boolean)
           .join(' ')}
-        style={
-          rotate != null
-            ? { ...style, transform: `rotate(${rotate}deg)` }
-            : style
-        }
+        style={finalStyle}
       />
     </Suspense>
   );

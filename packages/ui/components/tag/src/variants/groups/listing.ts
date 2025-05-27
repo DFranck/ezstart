@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { containerIntents, textIntents } from '../../tokens/Intents';
+import { containerIntents } from '../../tokens/Intents';
 import { containerSizeVariants, textSizeVariants } from '../../tokens/size';
 import { containerVariants, textVariants } from '../../tokens/variants';
 import { createAlias } from '../../utils/create-alias';
@@ -9,69 +9,70 @@ export const listings = ['ul', 'ol', 'li', 'dl', 'dt', 'dd'] as const;
 export const listingContainers = ['ul', 'ol', 'dl'] as const;
 export const listingItems = ['li', 'dt', 'dd'] as const;
 
-// common base
-export const baseListClasses = 'text-base text-muted-foreground';
+// base variant configs
+const containerListVariantConfig = {
+  variant: containerVariants,
+  intent: containerIntents,
+  size: containerSizeVariants,
+  layout: {
+    default: 'flex flex-col gap-2',
+    inline: 'flex flex-row flex-wrap gap-4',
+    grid: 'grid grid-cols-1 md:grid-cols-2 gap-4',
+    stacked: 'space-y-2',
+  },
+};
+
+const itemListVariantConfig = {
+  variant: { ...containerVariants, ...textVariants },
+  intent: containerIntents,
+  size: textSizeVariants,
+  marker: {
+    default: '',
+    check: 'before:content-["✅"] before:mr-2',
+    arrow: 'before:content-["→"] before:mr-2',
+    dash: 'before:content-["–"] before:mr-2',
+  },
+};
 
 // variants
 export const listingContainersVariants = {
-  ul: cva('list-disc pl-4 space-y-1', {
-    variants: {
-      variant: containerVariants,
-      intent: containerIntents,
-      size: containerSizeVariants,
-    },
+  ul: cva('pl-4 space-y-1', {
+    variants: containerListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'default',
+      size: 'xs',
     },
   }),
   ol: cva('list-decimal pl-4 space-y-1', {
-    variants: {
-      variant: containerVariants,
-      intent: containerIntents,
-      size: containerSizeVariants,
-    },
+    variants: containerListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'default',
+      size: 'xs',
     },
   }),
   dl: cva('grid grid-cols-[auto,1fr] gap-x-2 gap-y-1', {
-    variants: {
-      variant: containerVariants,
-      intent: containerIntents,
-      size: containerSizeVariants,
-    },
+    variants: containerListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'default',
+      size: 'xs',
     },
   }),
 };
 
 export const listingItemsVariants = {
-  li: cva('', {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+  li: cva('flex gap-2', {
+    variants: itemListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
       size: 'default',
     },
   }),
-
   dt: cva('font-semibold', {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: itemListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -79,11 +80,7 @@ export const listingItemsVariants = {
     },
   }),
   dd: cva('', {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: itemListVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -92,42 +89,40 @@ export const listingItemsVariants = {
   }),
 };
 
+// export combined
 export const listingVariants = {
   ...listingContainersVariants,
   ...listingItemsVariants,
 };
 
 // aliases
-export const UL = createAlias('ul');
-export const OL = createAlias('ol');
-export const LI = createAlias('li');
-export const DL = createAlias('dl');
-export const DT = createAlias('dt');
-export const DD = createAlias('dd');
+export const Ul = createAlias('ul');
+export const Ol = createAlias('ol');
+export const Li = createAlias('li');
+export const Dl = createAlias('dl');
+export const Dt = createAlias('dt');
+export const Dd = createAlias('dd');
 
 // meta
-export const listingVariantsMeta = {
-  ...Object.fromEntries(
-    ['ul', 'ol', 'dl'].map((tag) => [
+function extractKeys<T extends Record<string, any>>(config: T): string[] {
+  return Object.keys(config);
+}
+
+export const listingVariantsMeta = Object.fromEntries(
+  listings.map((tag) => {
+    const isContainer = listingContainers.includes(tag as any);
+    const base = isContainer
+      ? containerListVariantConfig
+      : itemListVariantConfig;
+
+    return [
       tag,
-      {
-        variant: Object.keys(containerVariants),
-        intent: Object.keys(containerIntents),
-        size: Object.keys(containerSizeVariants),
-      },
-    ])
-  ),
-  ...Object.fromEntries(
-    ['li', 'dt', 'dd'].map((tag) => [
-      tag,
-      {
-        variant: Object.keys(textVariants),
-        intent: Object.keys(textIntents),
-        size: Object.keys(textSizeVariants),
-      },
-    ])
-  ),
-} as Record<
-  keyof typeof listingVariants,
-  { variant: string[]; intent: string[]; size: string[] }
->;
+      Object.fromEntries(
+        Object.keys(base).map((variantKey) => [
+          variantKey,
+          extractKeys(base[variantKey as keyof typeof base]),
+        ])
+      ),
+    ];
+  })
+) as Record<string, Record<string, string[]>>;

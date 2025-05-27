@@ -1,6 +1,6 @@
 'use client';
 
-import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui/components';
+import { H2, Li, P, Section, Ul } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 
 export const SectionVision = () => {
@@ -12,14 +12,9 @@ export const SectionVision = () => {
 
       <P>{t('intro')}</P>
 
-      <Ul layout={'grid'}>
+      <Ul layout={'grid'} size={'full'}>
         {t.raw('points').map((point: string, index: number) => (
-          <Li variant={'card'} key={index}>
-            <Icon
-              name='lucide:CheckCircle'
-              size={20}
-              className='text-green-500'
-            />
+          <Li marker={'check'} variant={'card'} key={index}>
             {point}
           </Li>
         ))}

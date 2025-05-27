@@ -1,6 +1,5 @@
 import { cva } from 'class-variance-authority';
 import { textIntents } from '../../tokens/Intents';
-import { textSizeVariants } from '../../tokens/size';
 import { textVariants } from '../../tokens/variants';
 import { createAlias } from '../../utils/create-alias';
 
@@ -9,15 +8,22 @@ export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 // common
 export const baseHeadingClasses = 'font-display font-bold !leading-[1.3]';
-
+export const headingVariantConfig = {
+  variant: textVariants,
+  intent: textIntents,
+  size: {
+    h1: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
+    h2: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl',
+    h3: 'text-2xl sm:text-3xl md:text-4xl',
+    h4: 'text-xl sm:text-2xl md:text-3xl',
+    h5: 'text-lg sm:text-xl md:text-2xl',
+    h6: 'text-base sm:text-lg md:text-xl',
+  },
+};
 // variants
 export const headingVariants = {
   h1: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -25,11 +31,7 @@ export const headingVariants = {
     },
   }),
   h2: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -37,11 +39,7 @@ export const headingVariants = {
     },
   }),
   h3: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -49,11 +47,7 @@ export const headingVariants = {
     },
   }),
   h4: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -61,11 +55,7 @@ export const headingVariants = {
     },
   }),
   h5: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -73,11 +63,7 @@ export const headingVariants = {
     },
   }),
   h6: cva(baseHeadingClasses, {
-    variants: {
-      variant: textVariants,
-      intent: textIntents,
-      size: textSizeVariants,
-    },
+    variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
@@ -98,9 +84,9 @@ export const headingVariantsMeta = Object.fromEntries(
   headings.map((tag) => [
     tag,
     {
-      variant: Object.keys(textVariants),
-      intent: Object.keys(textIntents),
-      size: Object.keys(textSizeVariants),
+      variant: Object.keys(headingVariantConfig.variant),
+      intent: Object.keys(headingVariantConfig.intent),
+      size: Object.keys(headingVariantConfig.size),
     },
   ])
 ) as Record<
