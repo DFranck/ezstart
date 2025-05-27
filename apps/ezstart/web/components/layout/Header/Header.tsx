@@ -25,7 +25,7 @@ export default function Header() {
     <Tag as='header' layout={'spaced'} position={'fixed'}>
       <div
         className={cn(
-          ' py-4 px-6 flex items-center justify-between transition-all duration-300',
+          ' py-4 pr-2 pl-4 md:px-6 flex items-center justify-between transition-all duration-300',
           {
             'bg-transparent': isTop,
             'bg-background border-b-2': !isTop || isOpen,

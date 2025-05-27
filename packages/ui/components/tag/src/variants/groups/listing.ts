@@ -26,6 +26,14 @@ const itemListVariantConfig = {
   variant: { ...containerVariants, ...textVariants },
   intent: containerIntents,
   size: textSizeVariants,
+  align: {
+    center: 'items-center justify-center text-center',
+    left: 'items-start justify-start text-left',
+  },
+  wrap: {
+    wrap: 'flex flex-wrap justify-center gap-2',
+    inline: 'inline-block',
+  },
   marker: {
     default: '',
     check: 'before:content-["✅"] before:mr-2',
@@ -42,6 +50,7 @@ export const listingContainersVariants = {
       variant: 'default',
       intent: 'default',
       size: 'xs',
+      layout: 'default',
     },
   }),
   ol: cva('list-decimal pl-4 space-y-1', {
@@ -50,6 +59,7 @@ export const listingContainersVariants = {
       variant: 'default',
       intent: 'default',
       size: 'xs',
+      layout: 'default',
     },
   }),
   dl: cva('grid grid-cols-[auto,1fr] gap-x-2 gap-y-1', {
@@ -58,6 +68,7 @@ export const listingContainersVariants = {
       variant: 'default',
       intent: 'default',
       size: 'xs',
+      layout: 'default',
     },
   }),
 };
@@ -69,6 +80,8 @@ export const listingItemsVariants = {
       variant: 'default',
       intent: 'default',
       size: 'default',
+      align: 'left',
+      marker: 'default',
     },
   }),
   dt: cva('font-semibold', {
@@ -77,6 +90,8 @@ export const listingItemsVariants = {
       variant: 'default',
       intent: 'default',
       size: 'default',
+      align: 'left',
+      marker: 'default',
     },
   }),
   dd: cva('', {
@@ -85,6 +100,9 @@ export const listingItemsVariants = {
       variant: 'default',
       intent: 'default',
       size: 'default',
+      align: 'left',
+      marker: 'default',
+      wrap: 'inline',
     },
   }),
 };

@@ -1,5 +1,8 @@
 'use client';
 import {
+  Dd,
+  Dl,
+  Dt,
   H1,
   H2,
   H4,
@@ -7,7 +10,6 @@ import {
   Main,
   P,
   Section,
-  Tag,
   Ul,
 } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
@@ -26,17 +28,17 @@ const page = () => {
   const interests = t.raw('interests') as string[];
 
   return (
-    <Main className='py-20 mt-10'>
+    <Main withFixedHeader>
       <Section>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>
       </Section>
       <Section>
         <H2>{t('timelineTitle')}</H2>
-        <Ul className='space-y-8'>
+        <Ul>
           {timeline.map((item) => (
-            <Li key={item.year} className='flex'>
-              <div className='w-20 flex items-center justify-center font-mono text-green-400'>
+            <Li key={item.year} className='gap-4'>
+              <div className='pt-2 flex items-start justify-center font-mono text-green-400'>
                 {item.year}
               </div>
               <div className='space-y-1'>
@@ -47,59 +49,52 @@ const page = () => {
           ))}
         </Ul>
       </Section>
-      <Section
-        id='about'
-        className={cn(
-          'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-20 py-20'
-        )}
-      >
-        {/* Skills */}
-        <div className='text-center'>
-          <H4>{t('skillsTitle')}</H4>
-          <ul className='mt-4 space-y-2'>
-            {skills.map((s) => (
-              <li
-                key={s}
-                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
+      <Section aria-labelledby='about-title' id='about' size='full'>
+        <Ul layout='grid' size={'full'}>
+          {[
+            {
+              title: t('skillsTitle'),
+              items: skills,
+            },
+            {
+              title: t('valuesTitle'),
+              items: values,
+            },
+            {
+              title: t('interestsTitle'),
+              items: interests,
+            },
+          ].map((cat, i, arr) => (
+            <Li
+              key={cat.title}
+              align='center'
+              className={cn('p-2', {
+                'md:col-span-2': arr.length % 2 !== 0 && i === arr.length - 1,
+              })}
+            >
+              <Dl
+                size='full'
+                className='w-full flex flex-col items-center gap-2'
               >
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Values */}
-        <Tag as='div' className='text-center'>
-          <H4>{t('valuesTitle')}</H4>
-          <ul className='mt-4 space-y-2'>
-            {values.map((v) => (
-              <li
-                key={v}
-                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
-              >
-                {v}
-              </li>
-            ))}
-          </ul>
-        </Tag>
-
-        {/* Interests */}
-        <Tag
-          as='div'
-          className='md:col-span-2 text-center xl:col-span-1 xl:text-left'
-        >
-          <H4>{t('interestsTitle')}</H4>
-          <ul className='mt-4 space-y-2'>
-            {interests.map((i) => (
-              <li
-                key={i}
-                className="before:content-['▹'] before:text-green-400 before:mr-1 inline-block"
-              >
-                {i}
-              </li>
-            ))}
-          </ul>
-        </Tag>
+                <Dt>
+                  <H4>{cat.title}</H4>
+                </Dt>
+                <div className='flex flex-wrap justify-center gap-2 w-full'>
+                  {cat.items.map((item) => (
+                    <Dd
+                      key={item}
+                      wrap='inline'
+                      marker='default'
+                      className="before:content-['▹'] before:text-green-400 before:mr-1 text-base"
+                    >
+                      {item}
+                    </Dd>
+                  ))}
+                </div>
+              </Dl>
+            </Li>
+          ))}
+        </Ul>
       </Section>
     </Main>
   );

@@ -8,7 +8,8 @@ import { createAlias } from '../../utils/create-alias';
 export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 // common
-export const baseHeadingClasses = 'font-display font-bold !leading-[1.3]';
+export const baseHeadingClasses =
+  'font-display font-bold !leading-[1.3] text-center xl:text-left';
 export const headingVariantConfig = {
   variant: textVariants,
   intent: textIntents,

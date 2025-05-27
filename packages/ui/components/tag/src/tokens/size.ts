@@ -18,6 +18,7 @@ export const textSizeVariants = {
 } as const;
 
 // Headings (déjà responsive)
+
 export const headingSizeVariants = {
   h1: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
   h2: 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl',
