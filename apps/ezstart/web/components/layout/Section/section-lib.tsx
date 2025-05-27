@@ -2,6 +2,9 @@
 import { Button, Div, H2, H4, Icon, Section } from '@ezstart/ui/components';
 import Link from 'next/link';
 
+export type LibId = keyof typeof libData;
+export type LibMeta = (typeof libData)[LibId];
+
 export const libData = {
   'ez-tag': {
     name: 'Tag',
@@ -23,8 +26,6 @@ export const libData = {
   },
 } as const;
 
-export type LibId = keyof typeof libData;
-export type LibMeta = (typeof libData)[LibId];
 export const LibSection = ({
   name,
   description,

@@ -3,7 +3,7 @@ import { H1, H2, Main, Section, Tag } from '@ezstart/ui/components';
 import {
   libData,
   LibSection,
-} from '../../../../components/layout/Section/section-lib';
+} from '../../../../components/layout/section/section-lib';
 
 export default function EzLibs() {
   return (

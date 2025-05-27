@@ -34,6 +34,7 @@ export const headerVariants = cva('container mx-auto flex flex-col', {
     size: 'full',
     intent: 'default',
     layout: 'default',
+    position: 'sticky',
   },
 });
 
@@ -50,4 +51,6 @@ export const headerVariantsMeta = Object.fromEntries(
   variant: string[];
   size: string[];
   intent: string[];
+  layout: string[];
+  position: string[];
 };

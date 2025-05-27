@@ -19,7 +19,7 @@ export const useExternalStats = () => {
 
         const ghData = await gh.json();
         const npmData = await npm.json();
-
+        if (!ghData.stargazers_count || !npmData.downloads) return;
         setStats({
           stars: ghData.stargazers_count,
           downloads: npmData.downloads,

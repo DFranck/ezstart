@@ -1,5 +1,5 @@
-import { Footer } from '@/components/layout/Footer';
-import Header from '@/components/layout/Header/header';
+import { Footer } from '@/components/layout/footer';
+import Header from '@/components/layout/header/header';
 import MobileNavbar from '@/components/layout/mobile-nav-bar';
 import { Providers } from '@/components/providers';
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing';

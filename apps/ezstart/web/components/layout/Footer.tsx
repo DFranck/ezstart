@@ -1,6 +1,6 @@
 'use client';
 
-import { Icon } from '@ezstart/ui/components';
+import { Icon, Tag } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
@@ -10,29 +10,43 @@ export function Footer() {
   const { isMobile } = useDevice();
   const t = useTranslations('footer');
   return (
-    <footer
-      className={cn(
-        'border-t-2 px-6 py-4 text-center text-xs text-muted-foreground bg-background',
-        { 'mb-10': isMobile }
-      )}
+    <Tag
+      as='footer'
+      data-component='footer'
+      layout={'centered'}
+      className={cn(isMobile && 'mb-10')}
+      tabIndex={-1}
+      withFixedMobilebar
     >
-      <div className='flex flex-col items-center justify-center gap-2 md:flex-row md:justify-between max-w-5xl mx-auto'>
-        <span>{t('copyright', { year: new Date().getFullYear() })}</span>
+      {/* Col gauche */}
+      <div className='flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center'>
+        <span className='text-xs opacity-70 select-none'>
+          {t('copyright', { year: new Date().getFullYear() })}
+        </span>
 
-        <div className='flex gap-4'>
-          <Link
-            href='https://github.com/DFranck/ez-start'
-            target='_blank'
-            rel='noopener noreferrer'
-            className='hover:underline flex items-center gap-1'
-          >
-            <Icon name='fa:FaGithub' size={10} /> {t('github')}
-          </Link>
-          <Link href='/legal-notices' className='hover:underline'>
-            {t('legalNotices')}
-          </Link>
-        </div>
+        <Link href='/legal-notices' className='hover:underline text-xs'>
+          {t('legalNotices')}
+        </Link>
       </div>
-    </footer>
+      {/* Col droite */}
+      <div className='flex gap-3 items-center'>
+        <Link
+          href='https://github.com/DFranck/ez-start'
+          target='_blank'
+          rel='noopener noreferrer'
+          aria-label='GitHub'
+          className='hover:opacity-80'
+        >
+          <Icon name='fa:FaGithub' size={16} />
+        </Link>
+        <Link
+          href='mailto:franckdufournet@hotmail.fr'
+          className='hover:opacity-80'
+          aria-label='Email'
+        >
+          <Icon name='fa:FaEnvelope' size={16} />
+        </Link>
+      </div>
+    </Tag>
   );
 }
