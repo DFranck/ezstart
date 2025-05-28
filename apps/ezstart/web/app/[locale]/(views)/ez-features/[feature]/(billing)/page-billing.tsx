@@ -1,5 +1,17 @@
-import { Main } from '@ezstart/ui/components';
+import { H1, Main, Section } from '@ezstart/ui/components';
 
 export const BillingPage = () => {
-  return <Main>page-billing</Main>;
+  return (
+    <Main padding>
+      <Section>
+        <H1>EzBilling</H1>
+        <p className='text-lg text-muted-foreground'>
+          Manage invoices, clients, payments and quotes — all in one place.
+        </p>
+      </Section>
+
+      {/* Placeholder for dashboard content */}
+      <Section variant='card'>TODO: dashboard</Section>
+    </Main>
+  );
 };
