@@ -10,6 +10,13 @@
         { "label": "Tag", "href": "/ez-libs/tag" },
         { "label": "Icon", "href": "/ez-libs/icon" }
       ]
+    },
+    {
+      "menuLabel": "Features",
+      "menu": [
+        { "label": "EzFeatures", "href": "/ez-features" },
+        { "label": "Billing", "href": "/ez-features/billing" }
+      ]
     }
   ]
 }

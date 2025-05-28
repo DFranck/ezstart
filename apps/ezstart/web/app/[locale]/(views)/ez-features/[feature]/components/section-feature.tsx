@@ -2,12 +2,12 @@
 import { getMeta } from '@/utils/get-meta';
 import { Button, H2, H4, H6, Icon, Section } from '@ezstart/ui/components';
 import Link from 'next/link';
-import { LibId } from '../types';
-interface LibSectionProps {
-  libId: LibId;
+import { FeatureId } from '../types';
+interface FeatureSectionProps {
+  featureId: FeatureId;
 }
-export const LibSection = ({ libId }: LibSectionProps) => {
-  const { name, description, github, status } = getMeta('lib', libId);
+export const FeatureSection = ({ featureId }: FeatureSectionProps) => {
+  const { name, description, github, status } = getMeta('feature', featureId);
 
   return (
     <Section variant={'card'}>
@@ -27,19 +27,11 @@ export const LibSection = ({ libId }: LibSectionProps) => {
       <H4>{description}</H4>
       <div className='flex gap-2'>
         <Button asChild>
-          <Link href={'/ez-libs/' + name.toLowerCase()}>
-            <Icon name='lucide:Book' />
-            {name} documentation
+          <Link href={'/ez-features/' + name.toLowerCase()}>
+            <Icon name='fa:FaPlay' />
+            Go to {name}
           </Link>
         </Button>
-        {github && (
-          <Button asChild variant='outline'>
-            <Link href={github} target='_blank'>
-              <Icon name='lucide:Github' />
-              {name} code
-            </Link>
-          </Button>
-        )}
       </div>
     </Section>
   );
