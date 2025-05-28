@@ -1,7 +1,7 @@
-import { LibId } from '@/components/layout/section/section-lib';
 import { notFound } from 'next/navigation';
 import IconPage from './(icon)/page-icon';
 import TagPage from './(tag)/page-tag';
+import { LibId } from './types';
 
 export default async function LibPage({
   params,
@@ -11,7 +11,7 @@ export default async function LibPage({
   const { lib } = await params;
 
   switch (lib) {
-    case 'ez-tag':
+    case 'tag':
       return <TagPage />;
     case 'icon':
       return <IconPage />;

@@ -1,24 +1,24 @@
-# Tag – Semantic & Styled React Tag System
+# 🧩 EzTag `<Tag />` – Semantic & Styled React Tag System
 
-**Tag** is a polymorphic, typed, and variant-powered React component library for HTML tags.  
-It provides semantic markup, Tailwind-based styling via `cva()`, and DX-friendly aliases like `<H1 />`, `<Section />`, `<Button />`.
+**Tag** is a polymorphic, typed, and variant-friendly React component system for HTML tags.
 
-Designed to be accessible, maintainable, and scalable — Tag powers all layout, heading, and interactive elements in your UI.
+It provides semantic markup, Tailwind-based styling via `cva()`, and developer-friendly JSX aliases like `<H1 />`, `<Section />`, and `<Main />` — all designed for clean, accessible, and scalable UI.
 
-> Built with ❤️ by [@ezstart](https://github.com/DFranck/ez-start)
+---
 
-## Features
+## ✨ Features
 
-- ✅ **Polymorphic**: Use any HTML tag via `as="..."` or prebuilt alias (`<H1>`, `<Section>`, etc.)
-- 🎨 **Variants via `cva()`**: Define layout, typography, size, spacing variants per tag
-- 📦 **Alias components**: Import ready-made aliases (`<Main>`, `<Button>`, etc.) for cleaner JSX
-- 🧠 **Typed variants**: TypeScript infers valid props per tag (e.g. `size` only for `<Section>`)
-- ♿️ **Semantic HTML output**: Keeps native tags for better accessibility and SEO
-- 🧩 **Composable**: Easy to extend with your own tags, variants, and aliases
-- 🛠 **Utility-friendly**: Fully compatible with `clsx`, `tailwind-merge`, `radix-slot`
-- 🧪 **Safe by default**: Warnings for unsupported tags or missing variants
+- ✅ **Polymorphic**: Use any tag via `as="..."` or JSX alias
+- 🎨 **Variants**: Tailwind-powered styles with `cva()`
+- 📦 **JSX Aliases**: `<H1 />`, `<Section />`, `<Ul />`, etc.
+- 🧠 **Typed Props**: Per-tag variants and props inference
+- ♿️ **Accessible & Semantic**: Outputs clean native HTML
+- 🧩 **Composable**: Extend with your own variants/tags
+- 🛠 **DX-friendly**: Compatible with `clsx`, `tailwind-merge`, `asChild`
 
-## Installation
+---
+
+## 📦 Installation
 
 ### With `pnpm`
 
@@ -34,23 +34,20 @@ npm install @ezstart/ui
 yarn add @ezstart/ui
 ```
 
-### Tailwind & Peer Dependencies
+## ⚙️ Peer Dependencies
 
 [![](https://img.shields.io/badge/Download%20EzStart%20globals.css-blue)](https://raw.githubusercontent.com/DFranck/ezstart/master/packages/ui/styles/globals.css)
 
-⚠️ **Important:** You must import the EzStart global CSS for styles to work as intended.  
-[How to set up global CSS](../../ui/docs/usage-global-css.md)
+⚠️ **Important**  
+You must import EzStart's global CSS for styles and Tailwind config.
 
-Make sure your project includes:
+Make sure your project has:
 
-```yaml
-- Tailwind CSS
-- class-variance-authority
-- clsx (optional, recommended)
-- tailwind-merge (used internally)
+```bash
+- pnpm add -D tailwindcss class-variance-authority tailwind-merge
 ```
 
-Tag assumes your Tailwind setup is already configured (tailwind.config.js)
+Tag does not include Tailwind or config — you must use your own tailwind.config.js and include the globals.css file.
 
 ## Usage
 
@@ -70,28 +67,20 @@ import { Tag } from '@ezstart/ui/components';
 ### With Semantic Aliases
 
 ```tsx
-import { Section, H1, H3, Button } from '@ezstart/ui/components';
+import { H1, H3, Section, P, Ul, Li } from '@ezstart/ui/components';
 
 <Section>
-  <H1>Welcome to EzStart</H1>
-  <H3>Your React foundation, simplified.</H3>
-  <Button variant='primary'>Get Started</Button>
+  <H1>Welcome</H1>
+  <H3>A lightweight, flexible system</H3>
+  <Ul>
+    <Li>Polymorphic</Li>
+    <Li>Composable</Li>
+  </Ul>
 </Section>;
-```
-
-### With asChild (Radix Slot support)
-
-```tsx
-import { Button } from '@ezstart/ui/components';
-import { Link } from 'react-router-dom';
-
-<Button asChild>
-  <Link to='/docs'>Go to docs</Link>
-</Button>;
 ```
 
 Tag automatically applies the correct styles, responsive layout, and variants based on the tag you use — while keeping the DOM clean and semantic.
 
 ## License
 
-MIT © [DFranck](https://github.com/DFranck)
+MIT © [DFranck](https://github.com/DFranck)/ @ezstart

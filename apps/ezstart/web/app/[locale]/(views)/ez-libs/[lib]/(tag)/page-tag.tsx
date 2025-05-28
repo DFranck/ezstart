@@ -1,13 +1,7 @@
 'use client';
-import {
-  H1,
-  H2,
-  H3,
-  Main,
-  Section,
-  tagVariantsMeta,
-} from '@ezstart/ui/components';
+import { H2, Main, Section, tagVariantsMeta } from '@ezstart/ui/components';
 import { useState } from 'react';
+import { HeaderLib } from '../components/header-lib';
 import { HeadingPlayground } from './playground/heading-playground';
 import ListingPlayground from './playground/listing-playground';
 import { MainPlaygroundControls } from './playground/main-playground-controls';
@@ -16,7 +10,6 @@ import SectionPlayground from './playground/section-playground';
 const mainMeta = tagVariantsMeta['main'];
 
 const TagPage = () => {
-  console.log('tagVariantsMeta', tagVariantsMeta);
   const [mainVariants, setMainVariants] = useState(() => {
     const out: Record<string, string> = {};
     Object.entries(mainMeta).forEach(([variantName, values]) => {
@@ -32,13 +25,7 @@ const TagPage = () => {
 
   return (
     <Main {...mainVariants}>
-      <Section>
-        <H1>Tag</H1>
-        <H3>
-          Here you can find the documentation of Tag wwith all the props and
-          supported tag playground
-        </H3>
-      </Section>
+      <HeaderLib lib='tag' />
       <Section>
         <H2>Main Tag</H2>
         <MainPlaygroundControls

@@ -1,13 +1,4 @@
-import {
-  Button,
-  Div,
-  H2,
-  H3,
-  Icon,
-  Main,
-  P,
-  Section,
-} from '@ezstart/ui/components';
+import { Button, H2, H3, Icon, Main, P, Section } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -35,10 +26,10 @@ const LegalNoticesPage = () => {
   return (
     <Main padding>
       <Section id='legal-notices' className='space-y-8'>
-        <Div className='max-w-4xl mx-auto text-center space-y-6'>
+        <div className='max-w-4xl mx-auto text-center space-y-6'>
           <H2>{t('title')}</H2>
           <P className='text-lg text-muted-foreground'>{t('intro')}</P>
-        </Div>
+        </div>
 
         {sections.map((section) => (
           <Section

@@ -1,6 +1,7 @@
 'use client';
-import { libData, LibSection } from '@/components/layout/section/section-lib';
 import { H1, H2, Main, Section } from '@ezstart/ui/components';
+import { LibSection } from './[lib]/components/section-lib';
+import { libMeta } from './[lib]/meta/lib-meta';
 
 export default function EzLibs() {
   return (
@@ -9,7 +10,7 @@ export default function EzLibs() {
         <H1>EzLibs</H1>
         <H2>Check my libs, play with then install it!</H2>
       </Section>
-      {Object.values(libData).map((lib) => (
+      {Object.values(libMeta).map((lib) => (
         <LibSection key={lib.name} {...lib} />
       ))}
     </Main>
