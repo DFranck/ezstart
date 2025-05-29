@@ -24,7 +24,8 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "app/[locale]/(views)/ez-features/[feature]/(billing)/(dev)/ui/ClientE.tsxE"
   ],
   "exclude": ["node_modules"]
 }

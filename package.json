@@ -8,6 +8,11 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
+  "jest": {
+    "projects": [
+      "<rootDir>/apps/ezstart/api"
+    ]
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@workspace/eslint-config": "workspace:*",

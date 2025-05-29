@@ -1,5 +1,5 @@
 import { H1, Main, Section } from '@ezstart/ui/components';
-import { ClientDemo } from './(dev)/ui/ClientDemo';
+import { ClientE2ETest } from './(dev)/ClientE2ETest';
 
 export const BillingPage = () => {
   return (
@@ -13,7 +13,7 @@ export const BillingPage = () => {
 
       {/* Placeholder for dashboard content */}
       <Section variant='card'>TODO: dashboard</Section>
-      <ClientDemo />
+      <ClientE2ETest />
     </Main>
   );
 };
