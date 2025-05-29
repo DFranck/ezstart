@@ -21,13 +21,15 @@ describe('Client Controller (integration)', () => {
     notes: 'First client',
     taxNumber: 'FR123456789',
   };
+
   const mockClient = {
-    id: '123',
+    _id: '123',
     companyName: 'Test Corp',
     address: '123 Rue X',
     phone: '+33 1 23 45 67 89',
     notes: 'First client',
     taxNumber: 'FR123456789',
+    apps: ['billing'],
     createdAt: '2024-06-01T12:00:00.000Z',
     updatedAt: '2024-06-01T12:00:00.000Z',
   };

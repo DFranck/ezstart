@@ -1,2 +1,2 @@
-export { baseClientSchema, billingClientSchema } from './client';
-export type { BaseClient, BillingClient } from './client';
+export { baseClientSchema, billingClientSchema, clientSchema } from './client';
+export type { BaseClient, BillingClient, Client } from './client';

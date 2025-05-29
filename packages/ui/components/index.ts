@@ -3,6 +3,7 @@ export * from './burger';
 export * from './button';
 export * from './dropdown';
 export * from './icon';
+export * from './input';
 export * from './modal';
 export * from './select';
 export * from './sonner';

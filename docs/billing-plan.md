@@ -4,7 +4,7 @@ Simple, flexible, and modular billing system for SaaS.
 
 ## ✅ Core Features (v1)
 
-- [ ] Define & manage clients (CRUD)
+- [x] Define & manage clients (CRUD)
 - [ ] Create & save invoices (draft, sent, paid)
 - [ ] Create & save quotes / estimates
 - [ ] Create & save receipts

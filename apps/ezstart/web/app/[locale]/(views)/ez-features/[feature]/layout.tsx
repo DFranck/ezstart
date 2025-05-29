@@ -4,14 +4,16 @@ import { FeatureId } from './types';
 
 export default async function FeatureLayout({
   params,
+  children,
 }: {
   params: Promise<{ feature: FeatureId }>;
+  children: React.ReactNode;
 }) {
   const { feature } = await params;
 
   switch (feature) {
     case 'billing':
-      return <LayoutBilling />;
+      return <LayoutBilling children={children} />;
     default:
       notFound();
   }
