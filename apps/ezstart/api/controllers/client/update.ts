@@ -21,6 +21,7 @@ export async function updateClientController(req: Request, res: Response) {
     }
     return res.json(client);
   } catch (err) {
+    console.error('[updateClientController]', err);
     return res.status(500).json({ error: 'Failed to update client' });
   }
 }

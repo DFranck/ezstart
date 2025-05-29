@@ -14,6 +14,7 @@ export async function deleteClientController(req: Request, res: Response) {
     }
     return res.status(204).send();
   } catch (err) {
+    console.error('[deleteClientController]', err);
     return res.status(500).json({ error: 'Failed to delete client' });
   }
 }

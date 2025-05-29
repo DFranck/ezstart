@@ -13,6 +13,7 @@ export async function createClientController(req: Request, res: Response) {
     const client = await createClient(parsed.data);
     return res.status(201).json(client);
   } catch (err) {
+    console.error('[createClientController]', err);
     return res.status(500).json({ error: 'Failed to create client' });
   }
 }

@@ -13,6 +13,7 @@ export async function getClientByIdController(req: Request, res: Response) {
     }
     return res.json(client);
   } catch (err) {
+    console.error('[getClientByIdController]', err);
     return res.status(500).json({ error: 'Failed to get client' });
   }
 }

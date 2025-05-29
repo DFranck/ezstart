@@ -6,6 +6,7 @@ export async function getClientsController(req: Request, res: Response) {
     const clients = await getClients();
     return res.json(clients);
   } catch (err) {
+    console.error('[getClientsController]', err);
     return res.status(500).json({ error: 'Failed to get clients' });
   }
 }
