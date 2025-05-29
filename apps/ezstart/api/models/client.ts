@@ -11,6 +11,7 @@ const clientSchema = new Schema({
   notes: { type: String },
   createdAt: { type: String, required: true },
   updatedAt: { type: String, required: true },
+  deletedAt: { type: String, default: null },
 });
 
 export const ClientModel = model<ClientDocument>('Client', clientSchema);

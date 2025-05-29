@@ -1,12 +1,8 @@
 import express, { Router } from 'express';
-import billsRoutes from './bills';
-import quotesRoutes from './quotes';
-import receiptsRoutes from './receipts';
+import clientRoutes from './clientRoutes';
 
 const router: Router = express.Router();
 
-router.use('/quotes', quotesRoutes);
-router.use('/receipts', receiptsRoutes);
-router.use('/bills', billsRoutes);
+router.use('/clients', clientRoutes);
 
 export default router;

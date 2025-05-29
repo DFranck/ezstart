@@ -1,3 +1,4 @@
+// baseClientSchema: le "shape" de tous les clients
 import { z } from 'zod';
 
 export const baseClientSchema = z.object({
@@ -5,7 +6,5 @@ export const baseClientSchema = z.object({
   address: z.string().optional(),
   phone: z.string().optional(),
   notes: z.string().optional(),
-  createdAt: z.string().min(1),
-  updatedAt: z.string().min(1),
 });
 export type BaseClient = z.infer<typeof baseClientSchema>;

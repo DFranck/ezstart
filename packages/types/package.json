@@ -4,16 +4,6 @@
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./schemas": {
-      "import": "./dist/schemas/index.js",
-      "types": "./dist/schemas/index.d.ts"
-    }
-  },
   "scripts": {
     "dev": "tsc -b --watch",
     "test": "echo \"Error: no test specified\" && exit 1"

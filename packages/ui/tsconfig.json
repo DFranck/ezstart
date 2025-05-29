@@ -7,10 +7,7 @@
     "module": "esnext",
     "declarationDir": "./dist/types",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "paths": {
-      "@ezstart/ui/*": ["./src/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]

@@ -1,1 +1,1 @@
-export * as quotes from './quotes';
+export * as client from './client';
