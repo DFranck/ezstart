@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { getClients } from '../../services';
+import { GetClientsQuery } from '../../validators/client/get-clients-query.schema';
 
 export async function getClientsController(req: Request, res: Response) {
+  const { includeDeleted, deletedOnly } = req.validatedQuery as GetClientsQuery;
   try {
-    const clients = await getClients();
-    return res.json(clients);
+    const clients = await getClients({ includeDeleted, deletedOnly });
+    res.json(clients);
   } catch (err) {
-    console.error('[getClientsController]', err);
-    return res.status(500).json({ error: 'Failed to get clients' });
+    res.status(500).json({ error: 'Failed to fetch clients' });
   }
 }

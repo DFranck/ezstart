@@ -1,4 +1,5 @@
 'use client';
+import { getApiUrl } from '@/utils/get-api-url';
 import { Client } from '@ezstart/types';
 import { Button, Input, Li, Section, Ul } from '@ezstart/ui/components';
 import { useEffect, useState } from 'react';
@@ -17,7 +18,7 @@ export function ClientE2ETest() {
 
   const fetchClients = async () => {
     pushLog('fetchClients()');
-    const res = await fetch('http://localhost:5000/api/clients');
+    const res = await fetch(`${getApiUrl()}/api/clients`);
     const data = await res.json();
     setClients(data);
     pushLog(`GET /api/clients → ${JSON.stringify(data)}`);
@@ -27,7 +28,7 @@ export function ClientE2ETest() {
     setError(null);
     pushLog(`POST /api/clients { companyName: "${companyName}" }`);
     try {
-      const res = await fetch('http://localhost:5000/api/clients', {
+      const res = await fetch(`${getApiUrl()}/api/clients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyName }),
@@ -49,7 +50,7 @@ export function ClientE2ETest() {
   const getClientById = async (id: string) => {
     pushLog(`GET /api/clients/${id}`);
     try {
-      const res = await fetch(`http://localhost:5000/api/clients/${id}`);
+      const res = await fetch(`${getApiUrl()}/api/clients/${id}`);
       const data = await res.json();
       pushLog(`GET status: ${res.status} → ${JSON.stringify(data)}`);
       if (res.status === 200) {
@@ -66,7 +67,7 @@ export function ClientE2ETest() {
   const updateClient = async (id: string) => {
     pushLog(`PUT /api/clients/${id} { companyName: "${updatedName}" }`);
     try {
-      const res = await fetch(`http://localhost:5000/api/clients/${id}`, {
+      const res = await fetch(`${getApiUrl()}/api/clients/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyName: updatedName }),
@@ -89,7 +90,7 @@ export function ClientE2ETest() {
   const deleteClient = async (id: string) => {
     pushLog(`DELETE /api/clients/${id}`);
     try {
-      const res = await fetch(`http://localhost:5000/api/clients/${id}`, {
+      const res = await fetch(`${getApiUrl()}/api/clients/${id}`, {
         method: 'DELETE',
       });
       if (res.status === 204) {
