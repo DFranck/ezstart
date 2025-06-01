@@ -62,6 +62,10 @@
     "./templates": {
       "import": "./dist/templates/index.js",
       "types": "./dist/templates/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
     }
   }
 }

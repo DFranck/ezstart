@@ -1,6 +1,5 @@
 'use client';
 import { callApi } from '@/utils/call-api';
-import { isApiError } from '@/utils/is-api-error';
 import { Client } from '@ezstart/types';
 import {
   Button,
@@ -13,157 +12,97 @@ import {
   SelectTrigger,
   Ul,
 } from '@ezstart/ui/components';
+import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 export function ClientE2ETest() {
   const [clients, setClients] = useState<Client[]>([]);
   const [companyName, setCompanyName] = useState('');
   const [log, setLog] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updatedName, setUpdatedName] = useState('');
   const [filter, setFilter] = useState<'active' | 'deletedOnly' | 'all'>(
     'active'
   );
 
+  const { exec, error, setError } = useApiAction(); // 👈
+
   // Log helper
   const pushLog = (msg: string) =>
     setLog((logs) => [`${new Date().toISOString()} > ${msg}`, ...logs]);
+
   const fetchClients = async (f = filter) => {
     let query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchClients(${f})`);
-    const { data } = await callApi<Client[]>('/api/clients', { query });
-
-    // ** Type guard : check si erreur **
-    if (Array.isArray(data)) {
-      setClients(data);
-      setError(null);
-    } else if (data && typeof data === 'object' && 'error' in data) {
-      setClients([]); // tu veux peut-être garder les clients précédents ou vider (au choix)
-      setError(data.error);
-      toast.error('Error: ' + data.error);
-    } else {
-      setClients([]);
-      setError('Unknown API response');
-      toast.error('Unknown API response');
-    }
+    const data = await exec<Client[]>(() =>
+      callApi<Client[]>('/api/clients', { query })
+    );
+    if (data) setClients(data);
+    else setClients([]);
     pushLog(`GET /api/clients → ${JSON.stringify(data)}`);
   };
 
   const createClient = async () => {
-    setError(null);
     pushLog(`POST /api/clients { companyName: "${companyName}" }`);
-    const { status, data } = await callApi<Client>('/api/clients', {
-      method: 'POST',
-      body: { companyName },
-    });
-    pushLog(`POST status: ${status} → ${JSON.stringify(data)}`);
-    if (status === 201) {
+    const data = await exec<Client>(() =>
+      callApi<Client>('/api/clients', {
+        method: 'POST',
+        body: { companyName },
+      })
+    );
+    pushLog(`POST → ${JSON.stringify(data)}`);
+    if (data) {
       setCompanyName('');
       fetchClients();
-      toast.success('Client created: ' + data.companyName);
-    } else if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    } else {
-      setError(JSON.stringify(data));
-      toast.error('Unknown error');
+      // toast is auto from useApiAction in case of error
     }
   };
 
   const getClientById = async (id: string) => {
     pushLog(`GET /api/clients/${id}`);
-    const { status, data } = await callApi<Client>(`/api/clients/${id}`);
-    pushLog(`GET status: ${status} → ${JSON.stringify(data)}`);
-    if (status === 200) {
-      alert(`Client: ${JSON.stringify(data, null, 2)}`);
-    } else if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    } else {
-      setError(JSON.stringify(data));
-      toast.error('Unknown error');
-    }
+    const data = await exec<Client>(() =>
+      callApi<Client>(`/api/clients/${id}`)
+    );
+    pushLog(`GET → ${JSON.stringify(data)}`);
+    if (data) alert(`Client: ${JSON.stringify(data, null, 2)}`);
   };
 
   const updateClient = async (id: string) => {
     pushLog(`PUT /api/clients/${id} { companyName: "${updatedName}" }`);
-    const { status, data } = await callApi<Client>(`/api/clients/${id}`, {
-      method: 'PUT',
-      body: { companyName: updatedName },
-    });
-    pushLog(`PUT status: ${status} → ${JSON.stringify(data)}`);
-    if (status === 200) {
+    const data = await exec<Client>(() =>
+      callApi<Client>(`/api/clients/${id}`, {
+        method: 'PUT',
+        body: { companyName: updatedName },
+      })
+    );
+    pushLog(`PUT → ${JSON.stringify(data)}`);
+    if (data) {
       fetchClients();
       setUpdatedName('');
       setSelectedId(null);
-      toast.success('Client updated: ' + data.companyName);
-    } else if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    } else {
-      setError(JSON.stringify(data));
-      toast.error('Unknown error');
     }
   };
 
   const deleteClient = async (id: string) => {
     pushLog(`DELETE /api/clients/${id}`);
-    const { status, data } = await callApi(`/api/clients/${id}`, {
-      method: 'DELETE',
-    });
-    if (status === 204) {
-      pushLog('DELETE success: 204 No Content');
-      fetchClients();
-      toast.success('Client deleted');
-      return;
-    }
-    pushLog(`DELETE status: ${status} → ${JSON.stringify(data)}`);
-    setError(JSON.stringify(data));
-    if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    }
+    await exec(() => callApi(`/api/clients/${id}`, { method: 'DELETE' }));
+    fetchClients();
   };
 
   const restoreClient = async (id: string) => {
     pushLog(`POST /api/clients/${id}/restore`);
-    const { status, data } = await callApi(`/api/clients/${id}/restore`, {
-      method: 'POST',
-    });
-    pushLog(`RESTORE status: ${status} → ${JSON.stringify(data)}`);
-    if (status === 200) {
-      fetchClients();
-      toast.success('Client restored: ' + data.companyName);
-    } else if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    } else {
-      setError(JSON.stringify(data));
-      toast.error('Unknown error');
-    }
+    await exec(() => callApi(`/api/clients/${id}/restore`, { method: 'POST' }));
+    fetchClients();
   };
 
   const hardDeleteClient = async (id: string) => {
     pushLog(`DELETE /api/clients/${id}/hard-delete`);
-    const { status, data } = await callApi(`/api/clients/${id}/hard-delete`, {
-      method: 'DELETE',
-    });
-    if (status === 200 || status === 204) {
-      pushLog('HARD DELETE success');
-      fetchClients();
-      toast.success('Client hard deleted');
-      return;
-    }
-    pushLog(`HARD DELETE status: ${status} → ${JSON.stringify(data)}`);
-    setError(JSON.stringify(data));
-    if (isApiError(data)) {
-      setError(data.error);
-      toast.error(data.error);
-    }
+    await exec(() =>
+      callApi(`/api/clients/${id}/hard-delete`, { method: 'DELETE' })
+    );
+    fetchClients();
   };
 
   // --- Filters / useEffect ---
