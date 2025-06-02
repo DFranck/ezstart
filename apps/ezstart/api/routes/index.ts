@@ -4,6 +4,10 @@ import invoiceRoutes from './invoices';
 
 const router: Router = express.Router();
 
-router.use('/clients', clientRoutes).use('/invoices', invoiceRoutes);
+router
+  .use('/clients', clientRoutes)
+  .use('/invoices', invoiceRoutes)
+  .use('/quotes', invoiceRoutes)
+  .use('/receipts', invoiceRoutes);
 
 export default router;
