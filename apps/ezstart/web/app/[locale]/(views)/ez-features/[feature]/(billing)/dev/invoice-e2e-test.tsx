@@ -4,6 +4,7 @@ import { Invoice } from '@ezstart/types';
 import { Button, Input, Li, Ul } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 type Props = {
   pushLog: (msg: string) => void;
   filter?: 'active' | 'deletedOnly' | 'all';
@@ -50,6 +51,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       setClientId('');
       setNotes('');
       fetchInvoices();
+      toast.success('Invoice created!');
     }
   };
 
@@ -75,6 +77,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       fetchInvoices();
       setUpdatedNotes('');
       setSelectedId(null);
+      toast.success('Invoice updated!');
     }
   };
 
@@ -82,6 +85,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
     pushLog(`DELETE /api/invoices/${id}`);
     await exec(() => callApi(`/api/invoices/${id}`, { method: 'DELETE' }));
     fetchInvoices();
+    toast.success('Invoice deleted!');
   };
 
   const restoreInvoice = async (id: string) => {
@@ -90,6 +94,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       callApi(`/api/invoices/${id}/restore`, { method: 'POST' })
     );
     fetchInvoices();
+    toast.success('Invoice restored!');
   };
 
   const hardDeleteInvoice = async (id: string) => {
@@ -98,6 +103,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       callApi(`/api/invoices/${id}/hard-delete`, { method: 'DELETE' })
     );
     fetchInvoices();
+    toast.success('Invoice hard deleted!');
   };
 
   const assignClient = async (id: string) => {
@@ -110,6 +116,8 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
     );
     pushLog(`assignClient → ${JSON.stringify(data)}`);
     fetchInvoices();
+    setClientId('');
+    toast.success('Client assigned!');
   };
 
   const addLineItem = async (id: string) => {
@@ -122,6 +130,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
     );
     pushLog(`addLineItem → ${JSON.stringify(data)}`);
     fetchInvoices();
+    toast.success('line item added!');
   };
 
   const removeLineItem = async (id: string) => {
@@ -136,6 +145,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       })
     );
     fetchInvoices();
+    toast.success('line item removed!');
   };
 
   const markPaid = async (id: string) => {
@@ -144,6 +154,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
       callApi(`/api/invoices/${id}/mark-paid`, { method: 'POST' })
     );
     fetchInvoices();
+    toast.success('Invoice marked as paid!');
   };
 
   useEffect(() => {
@@ -153,109 +164,126 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
 
   return (
     <>
-      <div className='flex gap-2 items-center'>
+      {' '}
+      {error && (
+        <pre className='text-destructive col-span-2 text-center'>{error}</pre>
+      )}
+      <div className='flex flex-col md:flex-row gap-2'>
         <Input
           value={clientId}
           onChange={(e) => setClientId(e.target.value)}
           placeholder='clientId (ObjectId)'
-          className='w-48'
         />
         <Input
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder='notes'
-          className='w-48'
         />
-        <Button onClick={createInvoice}>Create</Button>
-        <Button onClick={() => fetchInvoices()}>Reload</Button>
+        <div className='grid grid-cols-2 md:flex gap-2'>
+          <Button onClick={createInvoice}>Create</Button>
+          <Button onClick={() => fetchInvoices()}>Reload</Button>
+        </div>
       </div>
-      {error && <pre className='text-red-500'>{error}</pre>}
-      <Ul className='divide-y'>
+      <Ul className='p-0 pt-2' size={'full'} layout={'stacked'}>
         {invoices.map((inv) => (
-          <Li key={inv._id} className='py-2 flex items-center gap-2'>
-            <span
-              className='cursor-pointer font-mono text-xs truncate max-w-xs'
-              title={JSON.stringify(inv, null, 2)}
-              onClick={() => getInvoiceById(inv._id)}
-            >
-              {_idShort(inv._id)}
-              {inv.deletedAt && (
-                <span className='ml-1 text-red-500 text-xs'>(deleted)</span>
-              )}
-            </span>
-            <Button
-              size='sm'
-              variant='outline'
-              onClick={() => setSelectedId(inv._id)}
-            >
-              Edit
-            </Button>
-            <Button
-              size='sm'
-              variant='destructive'
-              onClick={() => deleteInvoice(inv._id)}
-              disabled={!!inv.deletedAt}
-            >
-              Soft Delete
-            </Button>
-            <Button size='sm' onClick={() => assignClient(inv._id)}>
-              Assign Client
-            </Button>
-            <Button size='sm' onClick={() => addLineItem(inv._id)}>
-              Add Item
-            </Button>
-            <Button size='sm' onClick={() => removeLineItem(inv._id)}>
-              Remove Item
-            </Button>
-            <Button size='sm' onClick={() => markPaid(inv._id)}>
-              Mark Paid
-            </Button>
-            {inv.deletedAt && (
+          <Li
+            key={inv._id}
+            className='flex flex-col md:flex-row items-center justify-between gap-2'
+            variant={'card'}
+          >
+            {selectedId === inv._id ? (
+              // Bloc édition inline
+              <div className='flex flex-col md:flex-row gap-2 w-full'>
+                <Input
+                  value={updatedNotes}
+                  onChange={(e) => setUpdatedNotes(e.target.value)}
+                  placeholder='New notes'
+                />
+                <div className='grid grid-cols-2 gap-2'>
+                  <Button
+                    onClick={() => updateInvoice(selectedId)}
+                    disabled={!updatedNotes.trim()}
+                  >
+                    Update Note
+                  </Button>
+                  <Button
+                    variant='ghost'
+                    onClick={() => {
+                      setSelectedId(null);
+                      setUpdatedNotes('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
               <>
-                <Button
-                  size='sm'
-                  variant='outline'
-                  onClick={() => restoreInvoice(inv._id)}
+                <span
+                  className='cursor-pointer font-mono text-xs truncate max-w-xs'
+                  title={JSON.stringify(inv, null, 2)}
+                  onClick={() => getInvoiceById(inv._id)}
                 >
-                  Restore
-                </Button>
-                <Button
-                  size='sm'
-                  variant='destructive'
-                  onClick={() => hardDeleteInvoice(inv._id)}
-                >
-                  Hard Delete
-                </Button>
+                  {_idShort(inv._id)}
+                  {inv.deletedAt && (
+                    <span className='ml-1 text-red-500 text-xs'>(deleted)</span>
+                  )}
+                </span>
+                <div className='grid grid-cols-2 md:flex gap-2'>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onClick={() => {
+                      setSelectedId(inv._id);
+                      setUpdatedNotes(inv.notes ?? '');
+                    }}
+                  >
+                    Update Note
+                  </Button>
+                  <Button
+                    size='sm'
+                    variant='destructive'
+                    onClick={() => deleteInvoice(inv._id)}
+                    disabled={!!inv.deletedAt}
+                  >
+                    Soft Delete
+                  </Button>
+                  <Button size='sm' onClick={() => assignClient(inv._id)}>
+                    Assign Client
+                  </Button>
+                  <Button size='sm' onClick={() => addLineItem(inv._id)}>
+                    Add Item
+                  </Button>
+                  <Button size='sm' onClick={() => removeLineItem(inv._id)}>
+                    Remove Item
+                  </Button>
+                  <Button size='sm' onClick={() => markPaid(inv._id)}>
+                    Mark Paid
+                  </Button>
+                  {inv.deletedAt && (
+                    <>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => restoreInvoice(inv._id)}
+                      >
+                        Restore
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='destructive'
+                        onClick={() => hardDeleteInvoice(inv._id)}
+                      >
+                        Hard Delete
+                      </Button>
+                    </>
+                  )}
+                </div>
               </>
             )}
           </Li>
         ))}
       </Ul>
-      {selectedId && (
-        <div className='flex gap-2 items-center border-t pt-2'>
-          <Input
-            value={updatedNotes}
-            onChange={(e) => setUpdatedNotes(e.target.value)}
-            placeholder='New notes'
-            className='w-48'
-          />
-          <Button
-            onClick={() => updateInvoice(selectedId)}
-            disabled={!updatedNotes.trim()}
-          >
-            Update
-          </Button>
-          <Button
-            variant='ghost'
-            onClick={() => {
-              setSelectedId(null);
-              setUpdatedNotes('');
-            }}
-          >
-            Cancel
-          </Button>
-        </div>
-      )}
     </>
   );
 }

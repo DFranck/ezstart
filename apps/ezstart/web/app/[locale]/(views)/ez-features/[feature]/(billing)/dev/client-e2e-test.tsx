@@ -129,84 +129,90 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
               className='flex flex-col md:flex-row items-center justify-between gap-2'
               variant={'card'}
             >
-              <span
-                className='cursor-pointer font-mono text-xs truncate max-w-xs'
-                title={JSON.stringify(c, null, 2)}
-                onClick={() => getClientById(c._id)}
-              >
-                {c.companyName}{' '}
-                <span className='text-gray-400'>({_idShort(c._id)})</span>
-                {c.deletedAt && (
-                  <span className='ml-1 text-red-500 text-xs'>(deleted)</span>
-                )}
-              </span>
-              <div className='grid grid-cols-2 md:flex gap-2'>
-                <Button
-                  size='sm'
-                  variant='outline'
-                  onClick={() => {
-                    setSelectedId(c._id);
-                    setUpdatedName(c.companyName ?? '');
-                  }}
-                  disabled={!!c.deletedAt}
-                >
-                  Edit
-                </Button>
-                <Button
-                  size='sm'
-                  variant='destructive'
-                  onClick={() => deleteClient(c._id)}
-                  disabled={!!c.deletedAt}
-                >
-                  Soft Delete
-                </Button>
-                {c.deletedAt && (
-                  <>
+              {selectedId === c._id ? (
+                // Affiche le formulaire d'édition INLINE ici si c'est le bon id
+                <div className='flex flex-col md:flex-row gap-2 w-full'>
+                  <Input
+                    value={updatedName}
+                    onChange={(e) => setUpdatedName(e.target.value)}
+                    placeholder='New companyName'
+                  />
+                  <div className='grid grid-cols-2 gap-2'>
+                    <Button
+                      onClick={() => updateClient(selectedId)}
+                      disabled={!updatedName.trim()}
+                    >
+                      Update
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      onClick={() => {
+                        setSelectedId(null);
+                        setUpdatedName('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <span
+                    className='cursor-pointer font-mono text-xs truncate max-w-xs'
+                    title={JSON.stringify(c, null, 2)}
+                    onClick={() => getClientById(c._id)}
+                  >
+                    {c.companyName}{' '}
+                    <span className='text-gray-400'>({_idShort(c._id)})</span>
+                    {c.deletedAt && (
+                      <span className='ml-1 text-red-500 text-xs'>
+                        (deleted)
+                      </span>
+                    )}
+                  </span>
+                  <div className='grid grid-cols-2 md:flex gap-2'>
                     <Button
                       size='sm'
                       variant='outline'
-                      onClick={() => restoreClient(c._id)}
+                      onClick={() => {
+                        setSelectedId(c._id);
+                        setUpdatedName(c.companyName ?? '');
+                      }}
+                      disabled={!!c.deletedAt}
                     >
-                      Restore
+                      Edit
                     </Button>
                     <Button
                       size='sm'
                       variant='destructive'
-                      onClick={() => hardDeleteClient(c._id)}
+                      onClick={() => deleteClient(c._id)}
+                      disabled={!!c.deletedAt}
                     >
-                      Hard Delete
+                      Soft Delete
                     </Button>
-                  </>
-                )}
-              </div>
+                    {c.deletedAt && (
+                      <>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          onClick={() => restoreClient(c._id)}
+                        >
+                          Restore
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='destructive'
+                          onClick={() => hardDeleteClient(c._id)}
+                        >
+                          Hard Delete
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </Li>
           ))}
-          {selectedId && (
-            <div className='flex flex-col md:flex-row gap-2'>
-              <Input
-                value={updatedName}
-                onChange={(e) => setUpdatedName(e.target.value)}
-                placeholder='New companyName'
-              />
-              <div className='grid grid-cols-2 gap-2'>
-                <Button
-                  onClick={() => updateClient(selectedId)}
-                  disabled={!updatedName.trim()}
-                >
-                  Update
-                </Button>
-                <Button
-                  variant='ghost'
-                  onClick={() => {
-                    setSelectedId(null);
-                    setUpdatedName('');
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
         </Ul>
       </>
     </>
