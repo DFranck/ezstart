@@ -4,7 +4,7 @@ import { getPaginatedListQuerySchema } from './listing';
 // -----------------------------------
 // 🟢 BASE (never used alone)
 export const baseLineItemSchema = z.object({
-  label: z.string().min(1),
+  label: z.string().min(1, 'Label is required'),
   quantity: z.number().min(1),
   price: z.number().min(0),
 });

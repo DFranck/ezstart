@@ -1,35 +1,21 @@
 'use client';
 import { callApi } from '@/utils/call-api';
 import { Invoice } from '@ezstart/types';
-import {
-  Button,
-  Input,
-  Li,
-  Section,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  Ul,
-} from '@ezstart/ui/components';
+import { Button, Input, Li, Ul } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
-
-export function InvoiceE2ETest() {
+type Props = {
+  pushLog: (msg: string) => void;
+  filter?: 'active' | 'deletedOnly' | 'all';
+};
+export function InvoiceE2ETest({ pushLog, filter }: Props) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [log, setLog] = useState<string[]>([]);
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updatedNotes, setUpdatedNotes] = useState('');
-  const [filter, setFilter] = useState<'active' | 'deletedOnly' | 'all'>(
-    'active'
-  );
 
   const { exec, error } = useApiAction();
-
-  const pushLog = (msg: string) =>
-    setLog((logs) => [`${new Date().toISOString()} > ${msg}`, ...logs]);
 
   const fetchInvoices = async (f = filter) => {
     let query: any = {};
@@ -51,7 +37,7 @@ export function InvoiceE2ETest() {
       callApi<Invoice>('/api/invoices', {
         method: 'POST',
         body: {
-          clientId: clientId.trim() || '6658c5d78904c1234567abcd', // 👈 default valid if vide
+          clientId: clientId.trim(),
           items: [{ label: 'Test Item', quantity: 1, price: 42 }],
           currency: 'EUR',
           notes: notes.trim(),
@@ -119,7 +105,7 @@ export function InvoiceE2ETest() {
     const data = await exec<Invoice>(() =>
       callApi(`/api/invoices/${id}/assign-client`, {
         method: 'POST',
-        body: { clientId: clientId.trim() || '6658c5d78904c1234567abcd' },
+        body: { clientId: clientId.trim() },
       })
     );
     pushLog(`assignClient → ${JSON.stringify(data)}`);
@@ -146,7 +132,7 @@ export function InvoiceE2ETest() {
     await exec(() =>
       callApi(`/api/invoices/${id}/remove-line-item`, {
         method: 'POST',
-        body: { itemId: firstItem._id ?? 'item-1' }, // adapt si tu as un _id sur tes line items
+        body: { itemId: firstItem._id },
       })
     );
     fetchInvoices();
@@ -166,7 +152,7 @@ export function InvoiceE2ETest() {
   }, [filter]);
 
   return (
-    <Section variant='card' className='space-y-4'>
+    <>
       <div className='flex gap-2 items-center'>
         <Input
           value={clientId}
@@ -182,23 +168,6 @@ export function InvoiceE2ETest() {
         />
         <Button onClick={createInvoice}>Create</Button>
         <Button onClick={() => fetchInvoices()}>Reload</Button>
-        <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-          <SelectTrigger className='w-44 ml-2'>
-            Filter:
-            <span className='font-semibold ml-2'>
-              {filter === 'active'
-                ? 'Active only'
-                : filter === 'deletedOnly'
-                  ? 'Deleted only'
-                  : 'All'}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='active'>Active only</SelectItem>
-            <SelectItem value='deletedOnly'>Deleted only</SelectItem>
-            <SelectItem value='all'>All (active + deleted)</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       {error && <pre className='text-red-500'>{error}</pre>}
       <Ul className='divide-y'>
@@ -287,17 +256,7 @@ export function InvoiceE2ETest() {
           </Button>
         </div>
       )}
-      <Section variant='card' className='mt-4'>
-        <h4 className='font-bold mb-2'>Logs</h4>
-        <Ul className='text-xs text-gray-500 overflow-auto bg-gray-900 rounded p-2'>
-          {log.map((l, i) => (
-            <Li key={i} size='sm'>
-              {l}
-            </Li>
-          ))}
-        </Ul>
-      </Section>
-    </Section>
+    </>
   );
 }
 
