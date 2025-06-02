@@ -5,10 +5,11 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components';
 import { ClientE2ETest } from './client-e2e-test';
+import { InvoiceE2ETest } from './invoice-e2e-test';
 
-const dashboard = () => {
+export const Dashboard = () => {
   return (
-    <Tabs defaultValue='client' className='w-[400px]'>
+    <Tabs defaultValue='client'>
       <TabsList>
         <TabsTrigger value='client'>client</TabsTrigger>
         <TabsTrigger value='invoice'>invoice</TabsTrigger>
@@ -16,9 +17,9 @@ const dashboard = () => {
       <TabsContent value='client'>
         <ClientE2ETest />
       </TabsContent>
-      <TabsContent value='invoice'>invoice.</TabsContent>
+      <TabsContent value='invoice'>
+        <InvoiceE2ETest />
+      </TabsContent>
     </Tabs>
   );
 };
-
-export default dashboard;

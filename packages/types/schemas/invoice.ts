@@ -50,6 +50,11 @@ export const invoiceIdSchema = z.object({
 });
 export type InvoiceId = z.infer<typeof invoiceIdSchema>;
 
+export const lineItemSchema = baseLineItemSchema.extend({
+  _id: z.string(),
+});
+export type LineItem = z.infer<typeof lineItemSchema>;
+
 // -----------------------------------
 // 🔵 OUTPUT (API/front)
 export const invoiceSchema = createInvoiceSchema.extend({
@@ -57,6 +62,7 @@ export const invoiceSchema = createInvoiceSchema.extend({
   createdAt: z.string(),
   updatedAt: z.string(),
   deletedAt: z.string().optional(),
+  items: z.array(lineItemSchema),
 });
 export type Invoice = z.infer<typeof invoiceSchema>;
 
