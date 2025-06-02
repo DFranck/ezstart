@@ -1,5 +1,6 @@
+'use client';
 import { H1, Main, Section } from '@ezstart/ui/components';
-import { ClientE2ETest } from './(dev)/ClientE2ETest';
+import { ClientE2ETest } from './(dev)/client-e2e-test';
 
 export const BillingPage = () => {
   return (
@@ -10,9 +11,6 @@ export const BillingPage = () => {
           Manage invoices, clients, payments and quotes — all in one place.
         </p>
       </Section>
-
-      {/* Placeholder for dashboard content */}
-      <Section variant='card'>TODO: dashboard</Section>
       <ClientE2ETest />
     </Main>
   );

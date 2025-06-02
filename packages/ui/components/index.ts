@@ -7,4 +7,5 @@ export * from './input';
 export * from './modal';
 export * from './select';
 export * from './sonner';
+export * from './tabs';
 export * from './tag';

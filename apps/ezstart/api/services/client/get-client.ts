@@ -1,12 +1,7 @@
+import { Client, GetClientsQuery } from '@ezstart/types/schemas/client';
 import { ClientModel } from '../../models/client';
-import { GetClientsQuery } from '../../validators/client/get-clients-query.schema';
+import { findWithQuery } from '../../utils/mongoose/find-with-query';
 
-export async function getClients({
-  includeDeleted,
-  deletedOnly,
-}: GetClientsQuery) {
-  let filter: any = {};
-  if (deletedOnly) filter = { deletedAt: { $ne: null } };
-  else if (!includeDeleted) filter = { deletedAt: null };
-  return ClientModel.find(filter);
+export async function getClients(query: GetClientsQuery): Promise<Client[]> {
+  return findWithQuery(ClientModel, query);
 }

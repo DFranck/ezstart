@@ -1,3 +1,4 @@
+import { getClientsQuerySchema } from '@ezstart/types/dist/schemas/client';
 import express, { Router } from 'express';
 import {
   createClientController,
@@ -9,7 +10,6 @@ import {
   updateClientController,
 } from '../controllers/client';
 import { validateQuery } from '../middlewares/validate-query';
-import { getClientsQuerySchema } from '../validators/client/get-clients-query.schema';
 
 const router: Router = express.Router();
 

@@ -1,6 +1,6 @@
+import { isApiError } from '@ezstart/types';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { isApiError } from '../utils';
 
 export function useApiAction() {
   const [error, setError] = useState<string | null>(null);

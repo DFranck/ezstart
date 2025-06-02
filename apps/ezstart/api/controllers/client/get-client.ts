@@ -1,13 +1,14 @@
+import { GetClientsQuery } from '@ezstart/types/dist/schemas/client';
 import { Request, Response } from 'express';
 import { getClients } from '../../services';
-import { GetClientsQuery } from '../../validators/client/get-clients-query.schema';
 
 export async function getClientsController(req: Request, res: Response) {
-  const { includeDeleted, deletedOnly } = req.validatedQuery as GetClientsQuery;
+  const query = req.validatedQuery as GetClientsQuery;
   try {
-    const clients = await getClients({ includeDeleted, deletedOnly });
+    const clients = await getClients(query);
     res.json(clients);
   } catch (err) {
+    console.error('[getClientsController]', err);
     res.status(500).json({ error: 'Failed to fetch clients' });
   }
 }

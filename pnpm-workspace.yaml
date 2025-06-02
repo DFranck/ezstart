@@ -1,5 +1,5 @@
 packages:
-  - apps/ezstart/*
+  - apps/*/*
   - packages/*
   - packages/ui/*
   - packages/types/*

@@ -1,4 +1,4 @@
-import { billingClientSchema } from '@ezstart/types';
+import { billingClientSchema } from '@ezstart/types/schemas/client';
 import { Request, Response } from 'express';
 import { createClient } from '../../services';
 
