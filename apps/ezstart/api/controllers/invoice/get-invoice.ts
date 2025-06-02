@@ -1,4 +1,4 @@
-import { GetInvoicesQuery } from '@ezstart/types/schemas/invoice';
+import { GetInvoicesQuery } from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { getInvoices } from '../../services';
 

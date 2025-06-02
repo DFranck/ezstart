@@ -1,4 +1,4 @@
-import { invoiceIdSchema } from '@ezstart/types/schemas/invoice';
+import { invoiceIdSchema } from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { markInvoiceAsPaid } from '../../services';
 export async function markInvoiceAsPaidController(req: Request, res: Response) {

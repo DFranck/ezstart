@@ -1,7 +1,5 @@
-import {
-  addLineItemSchema,
-  invoiceIdSchema,
-} from '@ezstart/types/schemas/invoice';
+import { addLineItemSchema } from '@ezstart/types/schemas/billing/billing-actions';
+import { invoiceIdSchema } from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { addLineItem } from '../../services';
 

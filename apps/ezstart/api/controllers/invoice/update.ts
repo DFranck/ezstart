@@ -1,7 +1,7 @@
 import {
   invoiceIdSchema,
   updateInvoiceSchema,
-} from '@ezstart/types/schemas/invoice';
+} from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { updateInvoice } from '../../services';
 

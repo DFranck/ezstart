@@ -1,4 +1,4 @@
-import { getInvoicesQuerySchema } from '@ezstart/types/schemas/invoice';
+import { getInvoicesQuerySchema } from '@ezstart/types/schemas/billing/invoice';
 import express, { Router } from 'express';
 import {
   addLineItemController,
@@ -18,7 +18,6 @@ import { validateQuery } from '../middlewares/validate-query';
 const router: Router = express.Router();
 
 router
-  // CRUD Invoices
   .post('/', createInvoiceController)
   .get('/', validateQuery(getInvoicesQuerySchema), getInvoicesController)
   .get('/:id', getInvoiceByIdController)
@@ -27,10 +26,9 @@ router
   .post('/:id/restore', restoreInvoiceController)
   .delete('/:id/hard-delete', hardDeleteInvoiceController)
 
-  // Relations & Extra actions (v1/v2 ready)
-  .post('/:id/assign-client', assignClientToInvoiceController) // assigner un client
-  .post('/:id/add-line-item', addLineItemController) // ajouter un item
-  .post('/:id/remove-line-item', removeLineItemController) // retirer un item
-  .post('/:id/mark-paid', markInvoiceAsPaidController); // marquer comme payé
+  .post('/:id/assign-client', assignClientToInvoiceController)
+  .post('/:id/add-line-item', addLineItemController)
+  .post('/:id/remove-line-item', removeLineItemController)
+  .post('/:id/mark-paid', markInvoiceAsPaidController);
 
 export default router;

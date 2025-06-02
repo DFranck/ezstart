@@ -1,4 +1,4 @@
-import { invoiceIdSchema } from '@ezstart/types/schemas/invoice';
+import { invoiceIdSchema } from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { restoreInvoice } from '../../services';
 

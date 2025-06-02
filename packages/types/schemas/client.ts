@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getPaginatedListQuerySchema } from './listing';
+import { listingQuerySchema } from './listing';
 
 // -----------------------------------
 // 🟢 BASE (never used alone)
@@ -31,7 +31,7 @@ export const clientSchema = baseClientSchema.extend({
 
 // -----------------------------------
 // 🟡 QUERY (listing/filter)
-export const getClientsQuerySchema = getPaginatedListQuerySchema.extend({});
+export const getClientsQuerySchema = listingQuerySchema.extend({});
 export type GetClientsQuery = z.infer<typeof getClientsQuerySchema>;
 
 // BASE

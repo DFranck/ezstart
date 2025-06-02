@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const getListQuerySchema = z.object({
+export const listingQuerySchema = z.object({
   includeDeleted: z.preprocess(
     (v) => v === '1' || v === 'true' || v === true,
     z.boolean().optional()
@@ -9,9 +9,6 @@ export const getListQuerySchema = z.object({
     (v) => v === '1' || v === 'true' || v === true,
     z.boolean().optional()
   ),
-});
-
-export const getPaginatedListQuerySchema = getListQuerySchema.extend({
   page: z.preprocess(
     (v) => (typeof v === 'string' ? parseInt(v, 10) : v),
     z.number().min(1).optional()
@@ -20,9 +17,8 @@ export const getPaginatedListQuerySchema = getListQuerySchema.extend({
     (v) => (typeof v === 'string' ? parseInt(v, 10) : v),
     z.number().min(1).max(100).optional()
   ),
-  from: z.string().optional(), // date ISO min
-  to: z.string().optional(), // date ISO max
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 
-export type GetListQuery = z.infer<typeof getListQuerySchema>;
-export type GetPaginatedListQuery = z.infer<typeof getPaginatedListQuerySchema>;
+export type ListingQuery = z.infer<typeof listingQuerySchema>;

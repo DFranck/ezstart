@@ -1,7 +1,5 @@
-import {
-  assignClientSchema,
-  invoiceIdSchema,
-} from '@ezstart/types/schemas/invoice';
+import { assignClientSchema } from '@ezstart/types/schemas/billing/billing-actions';
+import { invoiceIdSchema } from '@ezstart/types/schemas/billing/invoice';
 import { Request, Response } from 'express';
 import { assignClientToInvoice } from '../../services';
 export async function assignClientToInvoiceController(
