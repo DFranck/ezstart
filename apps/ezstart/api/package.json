@@ -4,6 +4,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only server.ts",
+    "prebuild": "pnpm --filter @ezstart/types build",
     "build": "tsc",
     "start": "node dist/server.js"
   },
