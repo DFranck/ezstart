@@ -20,6 +20,7 @@ export function createBillingDocSchema(
       },
       taxRate: { type: Number, min: 0, max: 100 },
       deletedAt: { type: String, default: null },
+      documentNumber: { type: String, required: true, unique: true },
       ...extra,
     },
     { timestamps: true }

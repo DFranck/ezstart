@@ -5,13 +5,15 @@ import {
   UpdateInvoice,
 } from '@ezstart/types';
 import { InvoiceModel } from '../../models/billing/invoice';
+import { generateNextNumber } from '../../utils/generateNextNumber';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 
 export async function createInvoiceService(
   data: CreateInvoice
 ): Promise<Invoice> {
-  const doc = new InvoiceModel(data);
+  const documentNumber = await generateNextNumber('invoice');
+  const doc = new InvoiceModel({ ...data, documentNumber });
   return toApiObject(doc.save());
 }
 
@@ -60,9 +62,13 @@ export async function updateInvoiceService(
 export async function restoreInvoiceService(
   id: string
 ): Promise<Invoice | null> {
+  const newDocumentNumber = await generateNextNumber('invoice');
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
-    { deletedAt: null },
+    {
+      deletedAt: null,
+      documentNumber: newDocumentNumber,
+    },
     { new: true }
   );
   return doc ? toApiObject<Invoice>(doc) : null;

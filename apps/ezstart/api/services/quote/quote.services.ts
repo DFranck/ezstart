@@ -5,11 +5,13 @@ import {
   UpdateQuote,
 } from '@ezstart/types';
 import { QuoteModel } from '../../models/billing/quote';
+import { generateNextNumber } from '../../utils/generateNextNumber';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
-  const doc = new QuoteModel(data);
+  const documentNumber = await generateNextNumber('quote');
+  const doc = new QuoteModel({ ...data, documentNumber });
   return toApiObject(doc.save());
 }
 
@@ -54,10 +56,15 @@ export async function updateQuoteService(
 }
 
 export async function restoreQuoteService(id: string): Promise<Quote | null> {
+  const newDocumentNumber = await generateNextNumber('quote');
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
-    { deletedAt: null },
+    {
+      deletedAt: null,
+      documentNumber: newDocumentNumber,
+    },
     { new: true }
   );
+
   return doc ? toApiObject<Quote>(doc) : null;
 }

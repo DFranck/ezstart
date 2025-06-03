@@ -21,10 +21,10 @@
 - [x] Assignation client à une facture (controller/service/route)
 - [x] Ajout/suppression de line item (controller/service/route)
 - [x] Marquer comme payée (controller/service/route)
-- [ ] Génération automatique du numéro de facture
+- [x] Génération automatique du numéro de facture
 - [x] Champ `dueDate`
 - [x] Statut dynamique (draft/sent/paid)
-- [ ] Tests d’intégration complets pour Invoice (après refacto)
+- [x] Tests d’intégration complets pour Invoice (après refacto)
 
 ---
 
@@ -38,8 +38,8 @@
 - [x] Assignation client à un devis (controller/service/route)
 - [x] Ajout/suppression de line item (controller/service/route)
 - [x] Statuts (draft/sent/accepted/rejected)
-- [ ] Champ `validUntil` (date de validité)
-- [ ] Tests d’intégration
+- [x] Champ `validUntil` (date de validité)
+- [x] Tests d’intégration
 
 ---
 
