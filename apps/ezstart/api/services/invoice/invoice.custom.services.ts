@@ -15,7 +15,7 @@ export async function assignClientToInvoiceService(
   return doc ? toApiObject<Invoice>(doc) : null;
 }
 
-export async function addLineItemService(
+export async function addLineItemToInvoiceService(
   id: string,
   item: AddLineItem
 ): Promise<Invoice | null> {
@@ -38,7 +38,7 @@ export async function markInvoiceAsPaidService(
   return doc ? toApiObject<Invoice>(doc) : null;
 }
 
-export async function removeLineItemService(
+export async function removeLineItemToInvoiceService(
   id: string,
   itemId: string
 ): Promise<Invoice | null> {

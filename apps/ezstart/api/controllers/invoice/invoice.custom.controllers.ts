@@ -6,13 +6,16 @@ import {
 import { mongoIdSchema } from '@ezstart/types/schemas/mongo-id';
 import { Request, Response } from 'express';
 import {
-  addLineItemService,
+  addLineItemToInvoiceService,
   assignClientToInvoiceService,
   markInvoiceAsPaidService,
-  removeLineItemService,
+  removeLineItemToInvoiceService,
 } from '../../services/invoice';
 
-export async function addLineItemController(req: Request, res: Response) {
+export async function addLineItemToInvoiceController(
+  req: Request,
+  res: Response
+) {
   const parseId = mongoIdSchema.safeParse(req.params.id);
   if (!parseId.success) {
     return res
@@ -25,7 +28,10 @@ export async function addLineItemController(req: Request, res: Response) {
       .status(400)
       .json({ error: 'Validation error', details: parseItem.error.errors });
   }
-  const invoice = await addLineItemService(parseId.data, parseItem.data);
+  const invoice = await addLineItemToInvoiceService(
+    parseId.data,
+    parseItem.data
+  );
   return res.status(200).json(invoice);
 }
 export async function assignClientToInvoiceController(
@@ -61,7 +67,10 @@ export async function markInvoiceAsPaidController(req: Request, res: Response) {
   return res.status(200).json(invoice);
 }
 
-export async function removeLineItemController(req: Request, res: Response) {
+export async function removeLineItemToInvoiceController(
+  req: Request,
+  res: Response
+) {
   const parseId = mongoIdSchema.safeParse(req.params.id);
   if (!parseId.success) {
     return res
@@ -74,7 +83,7 @@ export async function removeLineItemController(req: Request, res: Response) {
       .status(400)
       .json({ error: 'Validation error', details: parseItem.error.errors });
   }
-  const invoice = await removeLineItemService(
+  const invoice = await removeLineItemToInvoiceService(
     parseId.data,
     parseItem.data.itemId
   );

@@ -7,7 +7,6 @@ import * as services from '../../services/invoice';
 jest.mock('../../services/invoice');
 
 describe('Invoice Controller (integration)', () => {
-  // Id bien formatté (24 char hexa)
   const validId = '4658c5d78904c1234567abcd';
   const createInvoiceInput = {
     clientId: validId,
@@ -116,7 +115,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/add-line-item - should add line item', async () => {
-    (services.addLineItemService as jest.Mock).mockResolvedValue({
+    (services.addLineItemToInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       items: [...mockInvoice.items, { label: 'Mug', quantity: 1, price: 10 }],
     });
@@ -130,7 +129,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/remove-line-item - should remove line item', async () => {
-    (services.removeLineItemService as jest.Mock).mockResolvedValue({
+    (services.removeLineItemToInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       items: [],
     });
