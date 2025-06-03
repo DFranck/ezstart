@@ -1,4 +1,4 @@
-import { getInvoicesQuerySchema } from '@ezstart/types/schemas/billing/invoice';
+import { getInvoicesQuerySchema } from '@ezstart/types';
 import express, { Router } from 'express';
 
 import * as controllers from '../controllers/invoice';

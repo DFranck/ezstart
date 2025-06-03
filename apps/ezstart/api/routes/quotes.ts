@@ -1,4 +1,4 @@
-import { getQuotesQuerySchema } from '@ezstart/types/schemas/billing/quote';
+import { getQuotesQuerySchema } from '@ezstart/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/quote';
 import { validateQuery } from '../middlewares/validate-query';

@@ -1,5 +1,4 @@
-import { AddLineItem } from '@ezstart/types/schemas/billing/billing-actions';
-import { Invoice } from '@ezstart/types/schemas/billing/invoice';
+import { AddLineItem, Invoice } from '@ezstart/types';
 import { InvoiceModel } from '../../models/billing/invoice';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 

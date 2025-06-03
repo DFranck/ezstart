@@ -1,4 +1,4 @@
-import { Quote } from '@ezstart/types/schemas/billing/quote';
+import { Quote } from '@ezstart/types';
 import { model } from 'mongoose';
 import { createBillingDocSchema } from './billing-factory';
 

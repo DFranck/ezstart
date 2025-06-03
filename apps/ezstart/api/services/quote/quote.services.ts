@@ -3,7 +3,7 @@ import {
   GetQuotesQuery,
   Quote,
   UpdateQuote,
-} from '@ezstart/types/schemas/billing/quote';
+} from '@ezstart/types';
 import { QuoteModel } from '../../models/billing/quote';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';

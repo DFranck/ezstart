@@ -3,7 +3,7 @@ import {
   GetInvoicesQuery,
   Invoice,
   UpdateInvoice,
-} from '@ezstart/types/schemas/billing/invoice';
+} from '@ezstart/types';
 import { InvoiceModel } from '../../models/billing/invoice';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';

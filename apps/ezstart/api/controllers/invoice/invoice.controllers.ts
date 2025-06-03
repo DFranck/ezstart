@@ -3,7 +3,7 @@ import {
   GetInvoicesQuery,
   Invoice,
   updateInvoiceSchema,
-} from '@ezstart/types/schemas/billing/invoice';
+} from '@ezstart/types';
 import {
   createInvoiceService,
   getInvoiceByIdService,

@@ -1,4 +1,4 @@
-import { mongoIdSchema } from '@ezstart/types/schemas/mongo-id';
+import { mongoIdSchema } from '@ezstart/types';
 import { Request, Response } from 'express';
 
 export function makeGetByIdController<T>(

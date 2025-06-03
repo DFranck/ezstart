@@ -1,5 +1,4 @@
-import { AddLineItem } from '@ezstart/types/schemas/billing/billing-actions';
-import { Quote } from '@ezstart/types/schemas/billing/quote';
+import { AddLineItem, Quote } from '@ezstart/types';
 import { QuoteModel } from '../../models/billing/quote';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 

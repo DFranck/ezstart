@@ -1,9 +1,9 @@
 import {
   addLineItemSchema,
   assignClientSchema,
+  mongoIdSchema,
   removeLineItemSchema,
-} from '@ezstart/types/schemas/billing/billing-actions';
-import { mongoIdSchema } from '@ezstart/types/schemas/mongo-id';
+} from '@ezstart/types';
 import { Request, Response } from 'express';
 import {
   acceptQuoteService,
