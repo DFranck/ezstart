@@ -31,13 +31,13 @@
 ## 3. Quotes / Estimates
 
 - [x] Schéma Zod (`Quote`)
-- [ ] Modèle Mongoose
-- [ ] Services CRUD (`create`, `get`, `update`, `softDelete`, `restore`, `hardDelete`)
-- [ ] Contrôleurs Express (CRUD + restore)
-- [ ] Routes Express
-- [ ] Assignation client à un devis (controller/service/route)
-- [ ] Ajout/suppression de line item (controller/service/route)
-- [ ] Statuts (draft/sent/accepted/rejected)
+- [x] Modèle Mongoose
+- [x] Services CRUD (`create`, `get`, `update`, `softDelete`, `restore`, `hardDelete`)
+- [x] Contrôleurs Express (CRUD + restore)
+- [x] Routes Express
+- [x] Assignation client à un devis (controller/service/route)
+- [x] Ajout/suppression de line item (controller/service/route)
+- [x] Statuts (draft/sent/accepted/rejected)
 - [ ] Champ `validUntil` (date de validité)
 - [ ] Tests d’intégration
 
