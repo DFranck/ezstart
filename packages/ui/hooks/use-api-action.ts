@@ -1,4 +1,4 @@
-import { isApiError } from '@ezstart/types';
+import { isApiError } from '@ezstart/types/validators';
 import { useState } from 'react';
 import { toast } from 'sonner';
 

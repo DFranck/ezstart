@@ -1,4 +1,4 @@
-import { BillingClient } from '@ezstart/types';
+import { BillingClient } from '@ezstart/types/schemas/client';
 import { Document, Schema, model } from 'mongoose';
 
 type ClientDocument = BillingClient & Document;

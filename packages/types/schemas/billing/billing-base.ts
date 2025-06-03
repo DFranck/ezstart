@@ -31,6 +31,7 @@ export function withBillingOutputFields<T extends ZodRawShape>(
     createdAt: z.string(),
     updatedAt: z.string(),
     deletedAt: z.string().optional(),
+    items: z.array(lineItemSchema),
   });
 }
 
