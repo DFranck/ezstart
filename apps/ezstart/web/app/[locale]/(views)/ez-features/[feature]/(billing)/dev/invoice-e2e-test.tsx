@@ -22,12 +22,12 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
     let query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
-    pushLog(`fetchInvoices(${f})`);
+    // pushLog(`fetchInvoices(${f})`);
     const data = await exec<Invoice[]>(() =>
       callApi<Invoice[]>('/api/invoices', { query })
     );
     setInvoices(data ?? []);
-    pushLog(`GET /api/invoices → ${JSON.stringify(data)}`);
+    // pushLog(`GET /api/invoices → ${JSON.stringify(data)}`);
   };
 
   const createInvoice = async () => {
@@ -46,7 +46,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
         },
       })
     );
-    pushLog(`POST → ${JSON.stringify(data)}`);
+    // pushLog(`POST → ${JSON.stringify(data)}`);
     if (data) {
       setClientId('');
       setNotes('');
@@ -60,7 +60,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
     const data = await exec<Invoice>(() =>
       callApi<Invoice>(`/api/invoices/${id}`)
     );
-    pushLog(`GET → ${JSON.stringify(data)}`);
+    // pushLog(`GET → ${JSON.stringify(data)}`);
     if (data) alert(`Invoice: ${JSON.stringify(data, null, 2)}`);
   };
 
@@ -72,7 +72,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
         body: { notes: updatedNotes },
       })
     );
-    pushLog(`PUT → ${JSON.stringify(data)}`);
+    // pushLog(`PUT → ${JSON.stringify(data)}`);
     if (data) {
       fetchInvoices();
       setUpdatedNotes('');
@@ -114,7 +114,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
         body: { clientId: clientId.trim() },
       })
     );
-    pushLog(`assignClient → ${JSON.stringify(data)}`);
+    // pushLog(`assignClient → ${JSON.stringify(data)}`);
     fetchInvoices();
     setClientId('');
     toast.success('Client assigned!');
@@ -128,7 +128,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
         body: { label: 'LineX', quantity: 1, price: 11 },
       })
     );
-    pushLog(`addLineItem → ${JSON.stringify(data)}`);
+    // pushLog(`addLineItem → ${JSON.stringify(data)}`);
     fetchInvoices();
     toast.success('line item added!');
   };
@@ -159,7 +159,6 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
 
   useEffect(() => {
     fetchInvoices();
-    // eslint-disable-next-line
   }, [filter]);
 
   return (

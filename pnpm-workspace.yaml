@@ -1,5 +1,3 @@
 packages:
   - apps/*/*
   - packages/*
-  - packages/ui/*
-  - packages/types/*
