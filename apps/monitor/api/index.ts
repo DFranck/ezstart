@@ -1,3 +1,4 @@
+import http from 'http';
 import fetch from 'node-fetch';
 
 const urls = ['https://ezstart-api.onrender.com/api/health'];
@@ -24,3 +25,12 @@ const pingAll = async () => {
 
 pingAll();
 setInterval(pingAll, 5 * 60 * 1000);
+
+http
+  .createServer((_, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Monitor is running\n');
+  })
+  .listen(process.env.PORT || 3000, () => {
+    console.log('✅ Monitor service bound to port');
+  });
