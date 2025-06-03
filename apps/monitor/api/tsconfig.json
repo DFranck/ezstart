@@ -1,0 +1,12 @@
+{
+  "extends": "@workspace/typescript-config/api.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "resolveJsonModule": true,
+    "types": ["jest", "node"],
+    "typeRoots": ["../../../packages/types", "./node_modules/@types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../../../packages/types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
