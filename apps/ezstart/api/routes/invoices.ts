@@ -1,34 +1,26 @@
 import { getInvoicesQuerySchema } from '@ezstart/types/schemas/billing/invoice';
 import express, { Router } from 'express';
-import {
-  addLineItemController,
-  assignClientToInvoiceController,
-  createInvoiceController,
-  getInvoiceByIdController,
-  getInvoicesController,
-  hardDeleteInvoiceController,
-  markInvoiceAsPaidController,
-  removeLineItemController,
-  restoreInvoiceController,
-  softDeleteInvoiceController,
-  updateInvoiceController,
-} from '../controllers/invoice';
-import { validateQuery } from '../middlewares/validate-query';
 
+import * as controllers from '../controllers/invoice';
+import { validateQuery } from '../middlewares/validate-query';
 const router: Router = express.Router();
 
 router
-  .post('/', createInvoiceController)
-  .get('/', validateQuery(getInvoicesQuerySchema), getInvoicesController)
-  .get('/:id', getInvoiceByIdController)
-  .put('/:id', updateInvoiceController)
-  .delete('/:id', softDeleteInvoiceController)
-  .post('/:id/restore', restoreInvoiceController)
-  .delete('/:id/hard-delete', hardDeleteInvoiceController)
+  .post('/', controllers.createInvoiceController)
+  .get(
+    '/',
+    validateQuery(getInvoicesQuerySchema),
+    controllers.getInvoicesController
+  )
+  .get('/:id', controllers.getInvoiceByIdController)
+  .put('/:id', controllers.updateInvoiceController)
+  .delete('/:id', controllers.softDeleteInvoiceController)
+  .post('/:id/restore', controllers.restoreInvoiceController)
+  .delete('/:id/hard-delete', controllers.hardDeleteInvoiceController)
 
-  .post('/:id/assign-client', assignClientToInvoiceController)
-  .post('/:id/add-line-item', addLineItemController)
-  .post('/:id/remove-line-item', removeLineItemController)
-  .post('/:id/mark-paid', markInvoiceAsPaidController);
+  .post('/:id/assign-client', controllers.assignClientToInvoiceController)
+  .post('/:id/add-line-item', controllers.addLineItemController)
+  .post('/:id/remove-line-item', controllers.removeLineItemController)
+  .post('/:id/mark-paid', controllers.markInvoiceAsPaidController);
 
 export default router;

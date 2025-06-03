@@ -1,13 +1,10 @@
 import { z } from 'zod';
 import { invoiceStatusEnum } from '../../enums';
-import { mongoIdSchema } from '../mongo-id';
 import {
   baseBillingDocSchema,
   getBillingDocsQuerySchema,
   withBillingOutputFields,
 } from './billing-base';
-
-export const invoiceIdSchema = z.object({ id: mongoIdSchema });
 
 export const createInvoiceSchema = baseBillingDocSchema.extend({
   status: invoiceStatusEnum.default('draft'),

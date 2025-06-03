@@ -3,8 +3,8 @@
  */
 import request from 'supertest';
 import app from '../../index';
-import * as services from '../../services';
-jest.mock('../../services');
+import * as services from '../../services/invoice';
+jest.mock('../../services/invoice');
 
 describe('Invoice Controller (integration)', () => {
   // Id bien formatté (24 char hexa)
@@ -34,25 +34,29 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices - should create invoice', async () => {
-    (services.createInvoice as jest.Mock).mockResolvedValue(mockInvoice);
+    (services.createInvoiceService as jest.Mock).mockResolvedValue(mockInvoice);
     const response = await request(app)
       .post('/api/invoices')
       .send(createInvoiceInput);
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual(mockInvoice);
-    expect(services.createInvoice).toHaveBeenCalledWith(createInvoiceInput);
+    expect(services.createInvoiceService).toHaveBeenCalledWith(
+      createInvoiceInput
+    );
   });
 
   it('GET /api/invoices/:id - should get invoice by id', async () => {
-    (services.getInvoiceById as jest.Mock).mockResolvedValue(mockInvoice);
+    (services.getInvoiceByIdService as jest.Mock).mockResolvedValue(
+      mockInvoice
+    );
     const response = await request(app).get(`/api/invoices/${validId}`);
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockInvoice);
   });
 
   it('PUT /api/invoices/:id - should update invoice', async () => {
-    (services.updateInvoice as jest.Mock).mockResolvedValue({
+    (services.updateInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       notes: 'Nouvelle note',
     });
@@ -65,7 +69,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('DELETE /api/invoices/:id - should soft delete invoice', async () => {
-    (services.softDeleteInvoice as jest.Mock).mockResolvedValue({
+    (services.softDeleteInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       deletedAt: '2024-06-01T13:00:00.000Z',
     });
@@ -75,17 +79,19 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/restore - should restore soft-deleted invoice', async () => {
-    (services.restoreInvoice as jest.Mock).mockResolvedValue(mockInvoice);
+    (services.restoreInvoiceService as jest.Mock).mockResolvedValue(
+      mockInvoice
+    );
     const response = await request(app).post(
       `/api/invoices/${validId}/restore`
     );
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockInvoice);
-    expect(services.restoreInvoice).toHaveBeenCalledWith(validId);
+    expect(services.restoreInvoiceService).toHaveBeenCalledWith(validId);
   });
 
   it('DELETE /api/invoices/:id/hard-delete - should hard delete invoice', async () => {
-    (services.hardDeleteInvoice as jest.Mock).mockResolvedValue({
+    (services.hardDeleteInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       deleted: true,
     });
@@ -94,11 +100,11 @@ describe('Invoice Controller (integration)', () => {
     );
     expect(response.status).toBe(200);
     expect(response.body.deleted).toBe(true);
-    expect(services.hardDeleteInvoice).toHaveBeenCalledWith(validId);
+    expect(services.hardDeleteInvoiceService).toHaveBeenCalledWith(validId);
   });
 
   it('POST /api/invoices/:id/assign-client - should assign client to invoice', async () => {
-    (services.assignClientToInvoice as jest.Mock).mockResolvedValue({
+    (services.assignClientToInvoiceService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       clientId: validId,
     });
@@ -110,7 +116,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/add-line-item - should add line item', async () => {
-    (services.addLineItem as jest.Mock).mockResolvedValue({
+    (services.addLineItemService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       items: [...mockInvoice.items, { label: 'Mug', quantity: 1, price: 10 }],
     });
@@ -124,7 +130,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/remove-line-item - should remove line item', async () => {
-    (services.removeLineItem as jest.Mock).mockResolvedValue({
+    (services.removeLineItemService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       items: [],
     });
@@ -136,7 +142,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('POST /api/invoices/:id/mark-paid - should mark invoice as paid', async () => {
-    (services.markInvoiceAsPaid as jest.Mock).mockResolvedValue({
+    (services.markInvoiceAsPaidService as jest.Mock).mockResolvedValue({
       ...mockInvoice,
       status: 'paid',
     });
@@ -148,7 +154,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('GET /api/invoices - should list invoices', async () => {
-    (services.getInvoices as jest.Mock).mockResolvedValue([mockInvoice]);
+    (services.getInvoicesService as jest.Mock).mockResolvedValue([mockInvoice]);
     const response = await request(app).get('/api/invoices');
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -156,7 +162,7 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('GET /api/invoices - should return empty array if no invoice', async () => {
-    (services.getInvoices as jest.Mock).mockResolvedValue([]);
+    (services.getInvoicesService as jest.Mock).mockResolvedValue([]);
     const response = await request(app).get('/api/invoices');
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -164,13 +170,13 @@ describe('Invoice Controller (integration)', () => {
   });
 
   it('GET /api/invoices/:id - should return 404 if not found', async () => {
-    (services.getInvoiceById as jest.Mock).mockResolvedValue(null);
+    (services.getInvoiceByIdService as jest.Mock).mockResolvedValue(null);
     const response = await request(app).get(`/api/invoices/${validId}`);
     expect(response.status).toBe(404);
   });
 
   it('DELETE /api/invoices/:id - should return 404 if not found', async () => {
-    (services.softDeleteInvoice as jest.Mock).mockResolvedValue(null);
+    (services.softDeleteInvoiceService as jest.Mock).mockResolvedValue(null);
     const response = await request(app).delete(`/api/invoices/${validId}`);
     expect(response.status).toBe(404);
   });

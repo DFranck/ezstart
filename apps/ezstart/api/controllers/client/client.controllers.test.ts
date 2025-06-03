@@ -3,8 +3,8 @@
  */
 import request from 'supertest';
 import app from '../../index';
-import * as services from '../../services';
-jest.mock('../../services');
+import * as services from '../../services/client';
+jest.mock('../../services/client');
 
 describe('Client Controller (integration)', () => {
   const validId = '6658c5d78904c1234567abcd';
@@ -37,24 +37,26 @@ describe('Client Controller (integration)', () => {
   });
 
   it('POST /api/clients - should create client', async () => {
-    (services.createClient as jest.Mock).mockResolvedValue(mockClient);
+    (services.createClientService as jest.Mock).mockResolvedValue(mockClient);
     const response = await request(app)
       .post('/api/clients')
       .send(createClientInput);
     expect(response.status).toBe(201);
     expect(response.body).toEqual(mockClient);
-    expect(services.createClient).toHaveBeenCalledWith(createClientInput);
+    expect(services.createClientService).toHaveBeenCalledWith(
+      createClientInput
+    );
   });
 
   it('GET /api/clients/:id - should get client by id', async () => {
-    (services.getClientById as jest.Mock).mockResolvedValue(mockClient);
+    (services.getClientByIdService as jest.Mock).mockResolvedValue(mockClient);
     const response = await request(app).get(`/api/clients/${validId}`);
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockClient);
   });
 
   it('PUT /api/clients/:id - should update client', async () => {
-    (services.updateClient as jest.Mock).mockResolvedValue({
+    (services.updateClientService as jest.Mock).mockResolvedValue({
       ...mockClient,
       companyName: 'Updated',
     });
@@ -67,7 +69,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('DELETE /api/clients/:id - should delete client', async () => {
-    (services.softDeleteClient as jest.Mock).mockResolvedValue({
+    (services.softDeleteClientService as jest.Mock).mockResolvedValue({
       ...mockClient,
       deletedAt: '2024-06-01T13:00:00.000Z',
     });
@@ -76,43 +78,47 @@ describe('Client Controller (integration)', () => {
   });
 
   it('DELETE /api/clients/:id - should return Not found', async () => {
-    (services.softDeleteClient as jest.Mock).mockResolvedValue(undefined);
+    (services.softDeleteClientService as jest.Mock).mockResolvedValue(
+      undefined
+    );
     const response = await request(app).delete(`/api/clients/${validId}`);
     expect(response.status).toBe(404);
   });
 
   it('POST /api/clients/:id/restore - should restore a soft-deleted client', async () => {
-    (services.restoreClient as jest.Mock).mockResolvedValue(mockClient);
+    (services.restoreClientService as jest.Mock).mockResolvedValue(mockClient);
     const response = await request(app).post(`/api/clients/${validId}/restore`);
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockClient);
-    expect(services.restoreClient).toHaveBeenCalledWith(validId);
+    expect(services.restoreClientService).toHaveBeenCalledWith(validId);
   });
 
   it('POST /api/clients/:id/restore - should return 404 if not found', async () => {
-    (services.restoreClient as jest.Mock).mockResolvedValue(undefined);
+    (services.restoreClientService as jest.Mock).mockResolvedValue(undefined);
     const response = await request(app).post(`/api/clients/${validId}/restore`);
     expect(response.status).toBe(404);
   });
 
   it('DELETE /api/clients/:id/hard-delete - should hard delete a client', async () => {
-    (services.hardDeleteClient as jest.Mock).mockResolvedValue({
+    (services.hardDeleteClientService as jest.Mock).mockResolvedValue({
       _id: validId,
       deleted: true,
     });
     const response = await request(app).delete(
       `/api/clients/${validId}/hard-delete`
     );
-    expect(response.status).toBe(200); // ou 204 selon ta convention (ici, 200 pour renvoyer un body)
+    expect(response.status).toBe(200);
     expect(response.body).toEqual({
       _id: validId,
       deleted: true,
     });
-    expect(services.hardDeleteClient).toHaveBeenCalledWith(validId);
+    expect(services.hardDeleteClientService).toHaveBeenCalledWith(validId);
   });
 
   it('DELETE /api/clients/:id/hard-delete - should return 404 if not found', async () => {
-    (services.hardDeleteClient as jest.Mock).mockResolvedValue(undefined);
+    (services.hardDeleteClientService as jest.Mock).mockResolvedValue(
+      undefined
+    );
     const response = await request(app).delete(
       `/api/clients/${validId}/hard-delete`
     );
@@ -120,7 +126,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('GET /api/clients - should list clients', async () => {
-    (services.getClients as jest.Mock).mockResolvedValue([mockClient]);
+    (services.getClientsService as jest.Mock).mockResolvedValue([mockClient]);
     const response = await request(app).get('/api/clients');
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -128,7 +134,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('GET /api/clients - should return empty array if no client', async () => {
-    (services.getClients as jest.Mock).mockResolvedValue([]);
+    (services.getClientsService as jest.Mock).mockResolvedValue([]);
     const response = await request(app).get('/api/clients');
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -136,7 +142,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('GET /api/clients?includeDeleted=true - should list all clients (active + deleted)', async () => {
-    (services.getClients as jest.Mock).mockResolvedValue([
+    (services.getClientsService as jest.Mock).mockResolvedValue([
       mockClient,
       mockClientWithDeletedAt,
     ]);
@@ -153,7 +159,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('GET /api/clients?deletedOnly=true - should list only deleted clients', async () => {
-    (services.getClients as jest.Mock).mockResolvedValue([
+    (services.getClientsService as jest.Mock).mockResolvedValue([
       mockClientWithDeletedAt,
     ]);
     const response = await request(app).get('/api/clients?deletedOnly=true');
@@ -164,7 +170,7 @@ describe('Client Controller (integration)', () => {
   });
 
   it('GET /api/clients/:id - should return 404 if not found', async () => {
-    (services.getClientById as jest.Mock).mockResolvedValue(null);
+    (services.getClientByIdService as jest.Mock).mockResolvedValue(null);
     const response = await request(app).get(`/api/clients/${validId}`);
     expect(response.status).toBe(404);
   });

@@ -1,25 +1,21 @@
 import { getClientsQuerySchema } from '@ezstart/types/dist/schemas/client';
 import express, { Router } from 'express';
-import {
-  createClientController,
-  getClientByIdController,
-  getClientsController,
-  hardDeleteClientController,
-  restoreClientController,
-  softDeleteClientController,
-  updateClientController,
-} from '../controllers/client';
+import * as controllers from '../controllers/client/client.controllers';
 import { validateQuery } from '../middlewares/validate-query';
 
 const router: Router = express.Router();
 
 router
-  .post('/', createClientController)
-  .get('/', validateQuery(getClientsQuerySchema), getClientsController)
-  .get('/:id', getClientByIdController)
-  .put('/:id', updateClientController)
-  .delete('/:id', softDeleteClientController)
-  .post('/:id/restore', restoreClientController)
-  .delete('/:id/hard-delete', hardDeleteClientController);
+  .post('/', controllers.createClientController)
+  .get(
+    '/',
+    validateQuery(getClientsQuerySchema),
+    controllers.getClientsController
+  )
+  .get('/:id', controllers.getClientByIdController)
+  .put('/:id', controllers.updateClientController)
+  .delete('/:id', controllers.softDeleteClientController)
+  .post('/:id/restore', controllers.restoreClientController)
+  .delete('/:id/hard-delete', controllers.hardDeleteClientController);
 
 export default router;

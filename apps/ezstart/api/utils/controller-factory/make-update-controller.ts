@@ -8,11 +8,11 @@ export function makeUpdateController<TInput, TOutput>(
   logTag: string
 ) {
   return async (req: Request, res: Response) => {
-    const parseId = mongoIdSchema.safeParse({ id: req.params.id });
+    const parseId = mongoIdSchema.safeParse(req.params.id);
     if (!parseId.success) {
       return res
         .status(400)
-        .json({ error: 'Invalid invoice ID', details: parseId.error.errors });
+        .json({ error: 'Invalid ID', details: parseId.error.errors });
     }
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
