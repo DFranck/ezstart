@@ -1,8 +1,4 @@
-import {
-  BillingClient,
-  Client,
-  GetClientsQuery,
-} from '@ezstart/types/schemas/client';
+import { BillingClient, Client, GetClientsQuery } from '@ezstart/types';
 import { ClientModel } from '../../models/client';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
