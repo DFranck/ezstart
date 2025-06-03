@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { ClientE2ETest } from './client-e2e-test';
 import { InvoiceE2ETest } from './invoice-e2e-test';
+import { QuoteE2ETest } from './quote-e2e-test';
 
 export const E2EPlayground = ({
   pushLog,
@@ -25,8 +26,9 @@ export const E2EPlayground = ({
     <Tabs defaultValue='client'>
       <div className='flex flex-col gap-2 md:flex-row'>
         <TabsList>
-          <TabsTrigger value='client'>client</TabsTrigger>
-          <TabsTrigger value='invoice'>invoice</TabsTrigger>
+          <TabsTrigger value='client'>Client</TabsTrigger>
+          <TabsTrigger value='invoice'>Invoice</TabsTrigger>
+          <TabsTrigger value='quote'>Quote</TabsTrigger>
         </TabsList>{' '}
         <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
           <SelectTrigger className='w-44'>
@@ -51,6 +53,9 @@ export const E2EPlayground = ({
       </TabsContent>
       <TabsContent value='invoice'>
         <InvoiceE2ETest pushLog={pushLog} filter={filter} />
+      </TabsContent>
+      <TabsContent value='quote'>
+        <QuoteE2ETest pushLog={pushLog} filter={filter} />
       </TabsContent>
     </Tabs>
   );
