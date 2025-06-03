@@ -1,5 +1,8 @@
-import { Client, GetClientsQuery } from '@ezstart/types/dist/schemas/client';
-import { billingClientSchema } from '@ezstart/types/schemas/client';
+import {
+  billingClientSchema,
+  Client,
+  GetClientsQuery,
+} from '@ezstart/types/schemas/client';
 import {
   createClientService,
   getClientByIdService,

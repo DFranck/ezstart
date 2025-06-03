@@ -1,4 +1,4 @@
-import { getClientsQuerySchema } from '@ezstart/types/dist/schemas/client';
+import { getClientsQuerySchema } from '@ezstart/types/schemas/client';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/client/client.controllers';
 import { validateQuery } from '../middlewares/validate-query';
