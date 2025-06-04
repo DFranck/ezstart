@@ -24,6 +24,9 @@ describe('Receipt Controller (integration)', () => {
     notes: 'Paiement sous 30 jours',
     status: 'issued',
     taxRate: 10,
+    subtotal: 40,
+    taxAmount: 4,
+    total: 44,
     createdAt: '2024-06-01T12:00:00.000Z',
     updatedAt: '2024-06-01T12:00:00.000Z',
   };
@@ -43,6 +46,18 @@ describe('Receipt Controller (integration)', () => {
     expect(services.createReceiptService).toHaveBeenCalledWith(
       createReceiptInput
     );
+  });
+
+  it('POST /api/receipts - should return calculated totals (subtotal, taxAmount, total)', async () => {
+    (services.createReceiptService as jest.Mock).mockResolvedValue(mockReceipt);
+    const response = await request(app)
+      .post('/api/receipts')
+      .send(createReceiptInput);
+
+    expect(response.status).toBe(201);
+    expect(response.body.subtotal).toBe(40);
+    expect(response.body.taxAmount).toBe(4);
+    expect(response.body.total).toBe(44);
   });
 
   it('GET /api/receipts/:id - should get receipt by id', async () => {

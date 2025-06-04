@@ -5,6 +5,7 @@ import {
   UpdateReceipt,
 } from '@ezstart/types';
 import { ReceiptModel } from '../../models/billing/receipt';
+import { calculateTotals } from '../../utils/calculateTotals';
 import { generateNextNumber } from '../../utils/generateNextNumber';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
@@ -12,18 +13,20 @@ import { toApiObject } from '../../utils/mongoose/to-api-object';
 export async function createReceiptService(
   data: CreateReceipt
 ): Promise<Receipt> {
+  const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('receipt');
-  const doc = new ReceiptModel({ ...data, documentNumber });
-  return toApiObject(doc.save());
+  const doc = new ReceiptModel({ documentNumber, ...data, ...totals });
+  return toApiObject(await doc.save());
 }
 
 export async function getReceiptsService(
   query: GetReceiptsQuery
 ): Promise<Receipt[]> {
-  return findWithQuery(ReceiptModel, query, {
+  const docs = await findWithQuery(ReceiptModel, query, {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
   });
+  return docs.map(toApiObject);
 }
 
 export async function getReceiptByIdService(
@@ -38,7 +41,10 @@ export async function softDeleteReceiptService(
 ): Promise<Receipt | null> {
   const doc = await ReceiptModel.findByIdAndUpdate(
     id,
-    { deletedAt: new Date().toISOString() },
+    {
+      deletedAt: new Date().toISOString(),
+      documentNumber: `DELETED-${Date.now()}`,
+    },
     { new: true }
   );
   return doc ? toApiObject<Receipt>(doc) : null;
@@ -55,7 +61,12 @@ export async function updateReceiptService(
   id: string,
   data: UpdateReceipt
 ): Promise<Receipt | null> {
-  const doc = await ReceiptModel.findByIdAndUpdate(id, data, { new: true });
+  const totals = calculateTotals(data.items ?? [], data.taxRate ?? 0);
+  const doc = await ReceiptModel.findByIdAndUpdate(
+    id,
+    { ...data, ...totals },
+    { new: true }
+  );
   return doc ? toApiObject<Receipt>(doc) : null;
 }
 

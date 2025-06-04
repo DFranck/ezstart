@@ -45,6 +45,7 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
           currency: 'EUR',
           notes: notes.trim(),
           status: 'issued',
+          taxRate: 10,
         },
       })
     );

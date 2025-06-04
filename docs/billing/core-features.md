@@ -84,7 +84,7 @@
 ## 8. Due Date, Invoice Number & Terms
 
 - [x] Champ `dueDate` dans les schémas
-- [ ] Génération automatique du numéro de facture
+- [x] Génération automatique du numéro de facture
 - [ ] Génération/validation des “terms” (conditions de paiement)
 
 ---

@@ -33,6 +33,9 @@ export function withBillingOutputFields<T extends ZodRawShape>(
     deletedAt: z.string().optional(),
     items: z.array(lineItemSchema),
     documentNumber: z.string(),
+    subtotal: z.number(),
+    taxAmount: z.number(),
+    total: z.number(),
   });
 }
 

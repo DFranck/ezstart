@@ -21,6 +21,9 @@ export function createBillingDocSchema(
       taxRate: { type: Number, min: 0, max: 100 },
       deletedAt: { type: String, default: null },
       documentNumber: { type: String, required: true, unique: true },
+      subtotal: { type: Number, required: false },
+      taxAmount: { type: Number, required: false },
+      total: { type: Number, required: false },
       ...extra,
     },
     { timestamps: true }

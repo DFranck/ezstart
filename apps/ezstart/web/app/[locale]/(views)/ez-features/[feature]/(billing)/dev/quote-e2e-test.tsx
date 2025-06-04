@@ -43,6 +43,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
           currency: 'EUR',
           notes: notes.trim(),
           status: 'draft',
+          taxRate: 16,
         },
       })
     );

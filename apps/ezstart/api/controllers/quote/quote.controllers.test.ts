@@ -24,6 +24,9 @@ describe('Quote Controller (integration)', () => {
     notes: 'Paiement sous 30 jours',
     status: 'draft',
     taxRate: 10,
+    subtotal: 40,
+    taxAmount: 4,
+    total: 44,
     createdAt: '2024-06-01T12:00:00.000Z',
     updatedAt: '2024-06-01T12:00:00.000Z',
   };
@@ -42,7 +45,17 @@ describe('Quote Controller (integration)', () => {
     expect(response.body).toEqual(mockQuote);
     expect(services.createQuoteService).toHaveBeenCalledWith(createQuoteInput);
   });
+  it('POST /api/receipts - should return calculated totals (subtotal, taxAmount, total)', async () => {
+    (services.createQuoteService as jest.Mock).mockResolvedValue(mockQuote);
+    const response = await request(app)
+      .post('/api/receipts')
+      .send(createQuoteInput);
 
+    expect(response.status).toBe(201);
+    expect(response.body.subtotal).toBe(40);
+    expect(response.body.taxAmount).toBe(4);
+    expect(response.body.total).toBe(44);
+  });
   it('GET /api/quotes/:id - should get quote by id', async () => {
     (services.getQuoteByIdService as jest.Mock).mockResolvedValue(mockQuote);
     const response = await request(app).get(`/api/quotes/${validId}`);

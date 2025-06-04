@@ -5,8 +5,14 @@ export function toApiObject<T = any>(doc: any): T {
   return {
     ...obj,
     _id: obj._id?.toString(),
-    createdAt: obj.createdAt ? obj.createdAt.toISOString() : undefined,
-    updatedAt: obj.updatedAt ? obj.updatedAt.toISOString() : undefined,
+    createdAt:
+      typeof obj.createdAt === 'string'
+        ? obj.createdAt
+        : obj.createdAt?.toISOString(),
+    updatedAt:
+      typeof obj.updatedAt === 'string'
+        ? obj.updatedAt
+        : obj.updatedAt?.toISOString(),
     deletedAt: obj.deletedAt ?? undefined,
   };
 }

@@ -5,6 +5,7 @@ import {
   UpdateInvoice,
 } from '@ezstart/types';
 import { InvoiceModel } from '../../models/billing/invoice';
+import { calculateTotals } from '../../utils/calculateTotals';
 import { generateNextNumber } from '../../utils/generateNextNumber';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
@@ -12,18 +13,20 @@ import { toApiObject } from '../../utils/mongoose/to-api-object';
 export async function createInvoiceService(
   data: CreateInvoice
 ): Promise<Invoice> {
+  const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('invoice');
-  const doc = new InvoiceModel({ ...data, documentNumber });
-  return toApiObject(doc.save());
+  const doc = new InvoiceModel({ ...data, documentNumber, ...totals });
+  return toApiObject(await doc.save());
 }
 
 export async function getInvoicesService(
   query: GetInvoicesQuery
 ): Promise<Invoice[]> {
-  return findWithQuery(InvoiceModel, query, {
+  const docs = await findWithQuery(InvoiceModel, query, {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
   });
+  return docs.map(toApiObject);
 }
 
 export async function getInvoiceByIdService(
@@ -38,7 +41,10 @@ export async function softDeleteInvoiceService(
 ): Promise<Invoice | null> {
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
-    { deletedAt: new Date().toISOString() },
+    {
+      deletedAt: new Date().toISOString(),
+      documentNumber: `DELETED-${Date.now()}`,
+    },
     { new: true }
   );
   return doc ? toApiObject<Invoice>(doc) : null;
@@ -55,7 +61,12 @@ export async function updateInvoiceService(
   id: string,
   data: UpdateInvoice
 ): Promise<Invoice | null> {
-  const doc = await InvoiceModel.findByIdAndUpdate(id, data, { new: true });
+  const totals = calculateTotals(data.items ?? [], data.taxRate ?? 0);
+  const doc = await InvoiceModel.findByIdAndUpdate(
+    id,
+    { ...data, ...totals },
+    { new: true }
+  );
   return doc ? toApiObject<Invoice>(doc) : null;
 }
 
