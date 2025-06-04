@@ -1,3 +1,4 @@
+import { currencyEnum } from '@ezstart/types';
 import { Schema } from 'mongoose';
 import { baseLineItemSchema } from './billing-base';
 
@@ -10,7 +11,17 @@ export function createBillingDocSchema(
     {
       clientId: { type: String, required: true },
       items: { type: [baseLineItemSchema], required: true },
-      currency: { type: String, default: 'EUR' },
+      currency: { type: String, enum: currencyEnum.options, default: 'USD' },
+      exchangeRate: {
+        type: {
+          from: { type: String, enum: currencyEnum.options, required: true },
+          to: { type: String, enum: currencyEnum.options, required: true },
+          rate: { type: Number, required: true },
+          source: { type: String, required: true },
+          fetchedAt: { type: Date, required: true },
+        },
+        required: true,
+      },
       dueDate: { type: String },
       notes: { type: String },
       status: {

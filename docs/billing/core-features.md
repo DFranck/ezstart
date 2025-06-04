@@ -68,8 +68,8 @@
 ## 6. Tax / VAT Support
 
 - [x] Champ `taxRate` dans les schémas
-- [ ] Calcul automatique TVA / total TTC dans les services
-- [ ] Affichage TVA dans la réponse API
+- [x] Calcul automatique TVA / total TTC dans les services
+- [x] Affichage TVA dans la réponse API
 
 ---
 

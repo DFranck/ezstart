@@ -1,5 +1,0 @@
-{
-  "buildCommand": "pnpm --filter ezstart-web build",
-  "outputDirectory": "dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/web || exit 1"
-}

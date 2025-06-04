@@ -1,4 +1,5 @@
 import { z, ZodEnum, ZodObject, ZodRawShape } from 'zod';
+import { currencyEnum } from '../../enums';
 import { listingQuerySchema } from '../listing';
 
 export const baseLineItemSchema = z.object({
@@ -13,10 +14,18 @@ export const lineItemSchema = baseLineItemSchema.extend({
 });
 export type LineItem = z.infer<typeof lineItemSchema>;
 
+export const exchangeRateSchema = z.object({
+  from: currencyEnum,
+  to: z.string(),
+  rate: z.number().min(0),
+  source: z.string(),
+  fetchedAt: z.string(),
+});
+
 export const baseBillingDocSchema = z.object({
   clientId: z.string().min(1, 'Client is required'),
   items: z.array(baseLineItemSchema).min(1),
-  currency: z.string().min(1).default('EUR'),
+  currency: currencyEnum,
   dueDate: z.string().optional(),
   notes: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
@@ -33,6 +42,7 @@ export function withBillingOutputFields<T extends ZodRawShape>(
     deletedAt: z.string().optional(),
     items: z.array(lineItemSchema),
     documentNumber: z.string(),
+    exchangeRate: exchangeRateSchema,
     subtotal: z.number(),
     taxAmount: z.number(),
     total: z.number(),
@@ -45,6 +55,6 @@ export function getBillingDocsQuerySchema<
   return listingQuerySchema.extend({
     clientId: z.string().optional(),
     status: statusEnum.optional(),
-    currency: z.string().optional(),
+    currency: currencyEnum.optional(),
   });
 }

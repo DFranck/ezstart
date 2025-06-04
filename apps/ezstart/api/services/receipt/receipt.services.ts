@@ -5,8 +5,8 @@ import {
   UpdateReceipt,
 } from '@ezstart/types';
 import { ReceiptModel } from '../../models/billing/receipt';
-import { calculateTotals } from '../../utils/calculateTotals';
-import { generateNextNumber } from '../../utils/generateNextNumber';
+import { calculateTotals } from '../../utils/calculate-totals';
+import { generateNextNumber } from '../../utils/generate-next-number';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 

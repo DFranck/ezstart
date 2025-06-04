@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './cron/setup-cron';
 import { connectToDb } from './db/connect';
 import app from './index';
 const PORT = process.env.PORT || 5000;
