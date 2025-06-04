@@ -9,11 +9,18 @@ import { calculateTotals } from '../../utils/calculate-totals';
 import { generateNextNumber } from '../../utils/generate-next-number';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
+import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
+  const exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('quote');
-  const doc = new QuoteModel({ ...data, documentNumber, ...totals });
+  const doc = new QuoteModel({
+    ...data,
+    documentNumber,
+    ...totals,
+    exchangeRate,
+  });
   return toApiObject(await doc.save());
 }
 

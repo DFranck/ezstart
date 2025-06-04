@@ -7,15 +7,22 @@ import {
 import { ReceiptModel } from '../../models/billing/receipt';
 import { calculateTotals } from '../../utils/calculate-totals';
 import { generateNextNumber } from '../../utils/generate-next-number';
+import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
 import { findWithQuery } from '../../utils/mongoose/find-with-query';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 
 export async function createReceiptService(
   data: CreateReceipt
 ): Promise<Receipt> {
+  const exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('receipt');
-  const doc = new ReceiptModel({ documentNumber, ...data, ...totals });
+  const doc = new ReceiptModel({
+    documentNumber,
+    ...data,
+    ...totals,
+    exchangeRate,
+  });
   return toApiObject(await doc.save());
 }
 
