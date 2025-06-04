@@ -10,8 +10,13 @@ Ce document liste les fonctionnalités, améliorations et axes de travail à pr�
 - [ ] Pages de création/édition pour chaque entité
 - [ ] Listing, recherche, pagination, tri
 - [ ] Gestion des statuts & actions rapides (marquer comme payée, restaurer, etc.)
+- [ ] Ajout de line items (articles, services, produits, etc.)
+- [ ] Ajout de templates (factures, devis, etc.)
+- [ ] Ajout de documents (PDF, word, etc.)
+- [ ] Ajout de paiements (Stripe, Paypal, etc.)
+- [ ] Ajout de authentification (utilisateur, admin, superadmin)
 
----
+## Prod/scale quand tu ouvres
 
 ## 2. Documentation & API UX
 
