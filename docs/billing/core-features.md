@@ -46,13 +46,13 @@
 ## 4. Receipts
 
 - [x] Schéma Zod (`Receipt`)
-- [ ] Modèle Mongoose
-- [ ] Services CRUD (`create`, `get`, `update`, `softDelete`, `restore`, `hardDelete`)
-- [ ] Contrôleurs Express (CRUD + restore)
-- [ ] Routes Express
-- [ ] Assignation client à un reçu
-- [ ] Statuts (issued/refunded)
-- [ ] Tests d’intégration
+- [x] Modèle Mongoose
+- [x] Services CRUD (`create`, `get`, `update`, `softDelete`, `restore`, `hardDelete`)
+- [x] Contrôleurs Express (CRUD + restore)
+- [x] Routes Express
+- [x] Assignation client à un reçu
+- [x] Statuts (issued/refunded)
+- [x] Tests d’intégration
 
 ---
 
@@ -60,8 +60,8 @@
 
 - [x] Schéma Zod pour line item
 - [x] Ajout/suppression de line item sur Invoice
-- [ ] Ajout/suppression de line item sur Quote
-- [ ] Ajout/suppression de line item sur Receipt (si pertinent)
+- [x] Ajout/suppression de line item sur Quote
+- [x] Ajout/suppression de line item sur Receipt (si pertinent)
 
 ---
 
