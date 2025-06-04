@@ -1,4 +1,3 @@
-import 'dotenv/config';
 export async function fetchExchangeRate(
   from: string,
   to: string

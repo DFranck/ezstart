@@ -1,5 +1,4 @@
 import console from 'console';
-import 'dotenv/config';
 import cron from 'node-cron';
 import { updateAllExchangeRates } from './update-exchange-rates';
 
