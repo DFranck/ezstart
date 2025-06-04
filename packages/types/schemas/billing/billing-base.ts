@@ -28,6 +28,7 @@ export const baseBillingDocSchema = z.object({
   currency: currencyEnum,
   dueDate: z.string().optional(),
   notes: z.string().optional(),
+  terms: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
 });
 export type BaseBillingDoc = z.infer<typeof baseBillingDocSchema>;

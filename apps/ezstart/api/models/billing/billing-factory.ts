@@ -24,6 +24,7 @@ export function createBillingDocSchema(
       },
       dueDate: { type: String },
       notes: { type: String },
+      terms: { type: String },
       status: {
         type: String,
         enum: statusEnum,

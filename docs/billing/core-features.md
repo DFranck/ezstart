@@ -76,8 +76,8 @@
 ## 7. Multicurrency
 
 - [x] Champ `currency` dans les schémas (`EUR` par défaut)
-- [ ] Sélection et gestion de la devise côté API
-- [ ] Stockage, validation et affichage multi-devises
+- [x] Sélection et gestion de la devise côté API
+- [x] Stockage, validation et affichage multi-devises
 
 ---
 
@@ -85,27 +85,14 @@
 
 - [x] Champ `dueDate` dans les schémas
 - [x] Génération automatique du numéro de facture
-- [ ] Génération/validation des “terms” (conditions de paiement)
+- [x] Génération/validation des “terms” (conditions de paiement)
 
 ---
 
 ## 9. Tests & CI
 
 - [x] Couverture Jest pour Clients (CRUD, restore, edge cases)
-- [ ] Couverture Jest complète pour Invoices (à corriger après refactorisation)
-- [ ] Couverture Jest pour Quotes / Receipts
+- [x] Couverture Jest complète pour Invoices (à corriger après refactorisation)
+- [x] Couverture Jest pour Quotes / Receipts
 
 ---
-
-## **Avancement global**
-
-- **Clients** : **100% terminé**
-- **Invoices** : **75% (presque tout le flow, reste finalisation/numérotation/tests)**
-- **Quotes / Receipts** : **En cours, structure prête, logique à cloner/finaliser**
-- **Transversal (taxes, devises, tests)** : **Schémas prêts, logique métier à finaliser**
-
----
-
-> **Prochaine étape :**  
-> Finaliser le flow Quotes & Receipts, boucler les tests sur Invoice,  
-> puis implémenter les fonctionnalités business (numérotation, TVA, multidevise, terms).
