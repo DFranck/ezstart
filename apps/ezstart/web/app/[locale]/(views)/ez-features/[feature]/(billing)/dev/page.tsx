@@ -8,7 +8,7 @@ const pageDev = () => {
   const pushLog = (msg: string) =>
     setLog((logs) => [`${new Date().toISOString()} > ${msg}`, ...logs]);
   return (
-    <Main padding className='mt-20'>
+    <Main withHeaderOffset className='mt-20'>
       <H1>E2E Playground</H1>
       <Section size={'full'}>
         <Section variant={'outline'} size={'full'}>
@@ -16,7 +16,7 @@ const pageDev = () => {
         </Section>
       </Section>
       <Section size={'full'}>
-        <Ul variant={'outline'} size={'full'} layout={'stacked'}>
+        <Ul variant={'outline'} size={'full'}>
           <H4>Logs</H4>
           {log.map((l, i) => (
             <Li key={i} size='sm' variant={'card'} className='overflow-auto'>

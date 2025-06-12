@@ -15,7 +15,7 @@ const allIcons = [
   ...Object.keys(customIconMap).map((name) => ({ lib: 'custom', name })),
 ];
 
-const IconPage = () => {
+const EzIconPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const asideRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useDevice();
@@ -37,9 +37,9 @@ const IconPage = () => {
   }, [isOpen]);
 
   return (
-    <Main padding>
-      <HeaderLib lib='icon' />
+    <Main withHeaderOffset>
+      <HeaderLib lib='ezicon' />
     </Main>
   );
 };
-export default IconPage;
+export default EzIconPage;

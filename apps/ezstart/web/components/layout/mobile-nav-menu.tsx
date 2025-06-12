@@ -49,7 +49,7 @@ export function MobileNavMenu({ variant = 'link', setIsOpen }: Props) {
                 openIndex === idx ? 'max-h-40 py-2' : 'max-h-0 py-0'
               }`}
               style={{
-                transition: 'max-height 0.3s, padding 0.3s',
+                transition: 'max-height 0.3s, withHeaderOffset 0.3s',
               }}
             >
               {item.menu.map((sub) => (

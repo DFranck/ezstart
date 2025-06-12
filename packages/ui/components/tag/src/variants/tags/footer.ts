@@ -1,14 +1,10 @@
-// @/components/Footer/footer.variants.ts
-// Footer Variants Config (cva)
-
 import { cva } from 'class-variance-authority';
-import { containerIntents } from '../../tokens/Intents';
-import { containerVariants } from '../../tokens/variants';
+import { intentContainer, variantContainer } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
 // Footer variant config, typée
 export const footerVariantConfig = {
-  variant: containerVariants,
+  variant: variantContainer,
   size: {
     xs: 'max-w-2xl px-4 gap-2',
     sm: 'max-w-3xl px-4 md:px-6 gap-2 md:gap-4',
@@ -16,7 +12,7 @@ export const footerVariantConfig = {
     full: 'max-w-none px-4 md:px-10 py-10 md:py-24 gap-6 md:gap-8',
     default: '',
   },
-  intent: containerIntents,
+  intent: intentContainer,
   layout: {
     default:
       'flex flex-col md:flex-row md:items-center md:justify-between gap-4',

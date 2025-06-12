@@ -1,14 +1,14 @@
 export const libMeta = {
-  tag: {
-    name: 'Tag',
+  eztag: {
+    name: 'EzTag',
     description:
       'Styled HTML tags with variants, accessibility and SEO support.',
     github:
       'https://github.com/DFranck/ezstart/blob/master/packages/ui/components/tag/',
     status: 'in progress',
   },
-  icon: {
-    name: 'Icon',
+  ezicon: {
+    name: 'EzIcon',
     description:
       'Dynamic, lazy-loaded icon system using Lucide, FontAwesome, and custom sets.',
     github:

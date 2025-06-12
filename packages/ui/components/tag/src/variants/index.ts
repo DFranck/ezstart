@@ -19,3 +19,7 @@ export const tagVariantsMeta = {
   ...typographyVariantsMeta,
   ...listingVariantsMeta,
 };
+
+export const tagVariantsKeys = Object.keys(
+  tagVariants
+) as (keyof typeof tagVariants)[];

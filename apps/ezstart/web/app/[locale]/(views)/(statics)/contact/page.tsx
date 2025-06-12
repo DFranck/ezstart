@@ -23,7 +23,7 @@ const ContactPage = () => {
   const links = t.raw('links') as ContactLink[];
 
   return (
-    <Main padding>
+    <Main withHeaderOffset>
       <Section>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>

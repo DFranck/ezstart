@@ -1,21 +1,17 @@
 import { cva } from 'class-variance-authority';
-import { textIntents } from '../../tokens/Intents';
-import { textSizeVariants } from '../../tokens/size';
-import { textVariants } from '../../tokens/variants';
+import { sizeText, variantText } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
 export const pVariantConfig = {
-  variant: textVariants,
-  size: textSizeVariants,
-  intent: textIntents,
+  variant: variantText,
+  size: sizeText,
 };
 
 export const pVariants = cva('', {
   variants: pVariantConfig,
   defaultVariants: {
     variant: 'default',
-    size: 'default',
-    intent: 'default',
+    size: 'h6',
   },
 });
 
@@ -29,5 +25,4 @@ export const pVariantsMeta = Object.fromEntries(
 ) as {
   variant: string[];
   size: string[];
-  intent: string[];
 };

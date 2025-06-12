@@ -1,6 +1,15 @@
 'use client';
 import { getMeta } from '@/utils/get-meta';
-import { Button, H2, H4, H6, Icon, Section } from '@ezstart/ui/components';
+import {
+  Button,
+  Div,
+  H3,
+  H4,
+  H6,
+  Icon,
+  Section,
+  Span,
+} from '@ezstart/ui/components';
 import Link from 'next/link';
 import { LibId } from '../types';
 interface LibSectionProps {
@@ -11,21 +20,17 @@ export const LibSection = ({ libId }: LibSectionProps) => {
 
   return (
     <Section variant={'card'}>
-      <div className='flex items-center'>
-        <H2>{name}</H2>
+      <Span>
+        <H3 size='h2'>{name}</H3>
         {status === 'in progress' && (
-          <Section
-            intent={'warning'}
-            size={'xs'}
-            className='flex-row items-center py-2 w-fit m-0 ml-4 '
-          >
+          <Span intent={'warning'}>
             <H6>{status}</H6>
             <Icon name='lucide:LucideLoaderCircle' spin />
-          </Section>
+          </Span>
         )}
-      </div>
-      <H4>{description}</H4>
-      <div className='flex gap-2'>
+      </Span>
+      <H4 size={'h5'}>{description}</H4>
+      <Div layout={'grid'}>
         <Button asChild>
           <Link href={'/ez-libs/' + name.toLowerCase()}>
             <Icon name='lucide:Book' />
@@ -40,7 +45,7 @@ export const LibSection = ({ libId }: LibSectionProps) => {
             </Link>
           </Button>
         )}
-      </div>
+      </Div>
     </Section>
   );
 };

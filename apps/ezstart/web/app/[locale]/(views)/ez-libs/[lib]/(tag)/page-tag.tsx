@@ -1,32 +1,48 @@
 'use client';
-import { H2, Main, Section, tagVariantsMeta } from '@ezstart/ui/components';
-import { useState } from 'react';
+import {
+  Li,
+  Main,
+  Section,
+  tagVariantsKeys,
+  tagVariantsMeta,
+  Ul,
+} from '@ezstart/ui/components';
+import Link from 'next/link';
 import { HeaderLib } from '../components/header-lib';
-import { HeadingPlayground } from './playground/heading-playground';
-import ListingPlayground from './playground/listing-playground';
-import { MainPlaygroundControls } from './playground/main-playground-controls';
-import PPlayground from './playground/p-playground';
-import SectionPlayground from './playground/section-playground';
 const mainMeta = tagVariantsMeta['main'];
 
-const TagPage = () => {
-  const [mainVariants, setMainVariants] = useState(() => {
-    const out: Record<string, string> = {};
-    Object.entries(mainMeta).forEach(([variantName, values]) => {
-      out[variantName] = values.includes('default')
-        ? 'default'
-        : values[0] || '';
-    });
-    return out;
-  });
-  const handleChange = (prop: string, value: string) => {
-    setMainVariants((prev) => ({ ...prev, [prop]: value }));
-  };
-
+const EzTagPage = () => {
+  const headingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const shownTags = [
+    ...tagVariantsKeys.filter((tag) => !headingTags.includes(tag)),
+    'heading',
+  ];
   return (
-    <Main {...mainVariants}>
-      <HeaderLib lib='tag' />
+    <Main withHeaderOffset>
+      <HeaderLib lib='eztag' />
       <Section>
+        <Ul layout={'grid'} align='between' variant={'outline'}>
+          {shownTags
+            .filter(
+              (tag) => tag !== 'main' && tag !== 'header' && tag !== 'footer'
+            )
+            .map((tag) => (
+              <Li
+                key={tag}
+                intent='info'
+                align='center'
+                variant={'outline'}
+                button
+                asChild
+              >
+                <Link href={'/ez-libs/tag/' + tag}>
+                  {tag.toUpperCase().slice(0, 1) + tag.slice(1)}
+                </Link>
+              </Li>
+            ))}
+        </Ul>
+      </Section>
+      {/* <Section>
         <H2>Main Tag</H2>
         <MainPlaygroundControls
           meta={mainMeta}
@@ -39,10 +55,7 @@ const TagPage = () => {
         <HeadingPlayground />
       </Section>
 
-      <H2 className='max-w-4xl w-full text-left px-4 md:px-10  '>
-        Section Tag
-      </H2>
-      <SectionPlayground />
+     
       <Section>
         <H2>P Tag</H2>
         <PPlayground />
@@ -50,9 +63,9 @@ const TagPage = () => {
       <Section>
         <H2>Listing Tags</H2>
         <ListingPlayground />
-      </Section>
+      </Section> */}
     </Main>
   );
 };
 
-export default TagPage;
+export default EzTagPage;

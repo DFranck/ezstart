@@ -122,7 +122,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
           </div>
         </div>
 
-        <Ul className='p-0 pt-2' size={'full'} layout={'stacked'}>
+        <Ul className='p-0 pt-2' size={'full'}>
           {clients.map((c) => (
             <Li
               key={c._id}

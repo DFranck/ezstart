@@ -12,7 +12,7 @@ export default async function FeatureLayout({
   const { feature } = await params;
 
   switch (feature) {
-    case 'billing':
+    case 'ezbilling':
       return <LayoutBilling children={children} />;
     default:
       notFound();

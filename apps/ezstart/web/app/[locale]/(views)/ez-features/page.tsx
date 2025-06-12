@@ -6,7 +6,7 @@ import { FeatureId, FeatureMeta } from './[feature]/types';
 
 export default function EzFeaturesPage() {
   return (
-    <Main padding>
+    <Main withHeaderOffset>
       <Section>
         <H1>EzFeatures</H1>
       </Section>

@@ -7,15 +7,15 @@
       "menuLabel": "Libraries",
       "menu": [
         { "label": "EzLibs", "href": "/ez-libs" },
-        { "label": "Tag", "href": "/ez-libs/tag" },
-        { "label": "Icon", "href": "/ez-libs/icon" }
+        { "label": "EzTag", "href": "/ez-libs/eztag" },
+        { "label": "EzIcon", "href": "/ez-libs/ezicon" }
       ]
     },
     {
       "menuLabel": "Features",
       "menu": [
         { "label": "EzFeatures", "href": "/ez-features" },
-        { "label": "Billing", "href": "/ez-features/billing" }
+        { "label": "Billing", "href": "/ez-features/ezbilling" }
       ]
     }
   ]

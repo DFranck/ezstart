@@ -21,7 +21,7 @@ export function Tag<T extends SupportedAs = 'span'>({
   children,
   ...props
 }: TagProps<T> & { asChild?: boolean }) {
-  const tag = (as ?? 'span') as string;
+  const tag = (as ?? 'span') as SupportedAs;
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants];
   const variantClass =
@@ -29,7 +29,8 @@ export function Tag<T extends SupportedAs = 'span'>({
       ? variantFn(props as VariantProps<typeof variantFn>)
       : '';
 
-  const merged = cn(variantClass, className);
+  const merged = cn([variantClass, className].filter(Boolean));
+
   const Component: ElementType = asChild ? Slot : as || 'span';
 
   const domSafeProps = Object.fromEntries(

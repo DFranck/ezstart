@@ -106,7 +106,6 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
           role='menu'
           ref={menuRef}
           variant={'outline'}
-          layout={'stacked'}
           className='absolute right-0 z-50 min-w-[8rem] focus:outline-none bg-background p-1 space-y-1'
         >
           {items.map(({ label, onSelect, value }, i) => (

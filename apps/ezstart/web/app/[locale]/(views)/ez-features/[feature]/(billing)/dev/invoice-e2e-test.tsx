@@ -184,7 +184,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
           <Button onClick={() => fetchInvoices()}>Reload</Button>
         </div>
       </div>
-      <Ul className='p-0 pt-2' size={'full'} layout={'stacked'}>
+      <Ul className='p-0 pt-2' size={'full'}>
         {invoices.map((inv) => (
           <Li
             key={inv._id}

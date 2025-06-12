@@ -186,7 +186,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
           <Button onClick={() => fetchQuotes()}>Reload</Button>
         </div>
       </div>
-      <Ul className='p-0 pt-2' size={'full'} layout={'stacked'}>
+      <Ul className='p-0 pt-2' size={'full'}>
         {quotes.map((q) => (
           <Li
             key={q._id}

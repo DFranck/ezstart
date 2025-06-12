@@ -10,7 +10,7 @@ export default async function FeaturePage({
   const { feature } = await params;
 
   switch (feature) {
-    case 'billing':
+    case 'ezbilling':
       return <BillingPage />;
     default:
       notFound();

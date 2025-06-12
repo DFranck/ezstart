@@ -1,7 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { textIntents } from '../../tokens/Intents';
-import { headingSizeVariants } from '../../tokens/size';
-import { textVariants } from '../../tokens/variants';
+import { sizeText, variantText } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
 // supported
@@ -11,9 +9,8 @@ export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 export const baseHeadingClasses =
   'font-display font-bold !leading-[1.3] text-center xl:text-left';
 export const headingVariantConfig = {
-  variant: textVariants,
-  intent: textIntents,
-  size: headingSizeVariants,
+  variant: variantText,
+  size: sizeText,
 };
 // variants
 export const headingVariants = {
@@ -21,7 +18,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h1',
     },
   }),
@@ -29,7 +25,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h2',
     },
   }),
@@ -37,7 +32,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h3',
     },
   }),
@@ -45,7 +39,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h4',
     },
   }),
@@ -53,7 +46,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h5',
     },
   }),
@@ -61,7 +53,6 @@ export const headingVariants = {
     variants: headingVariantConfig,
     defaultVariants: {
       variant: 'default',
-      intent: 'default',
       size: 'h6',
     },
   }),
@@ -80,11 +71,10 @@ export const headingVariantsMeta = Object.fromEntries(
     tag,
     {
       variant: Object.keys(headingVariantConfig.variant),
-      intent: Object.keys(headingVariantConfig.intent),
       size: Object.keys(headingVariantConfig.size),
     },
   ])
 ) as Record<
   keyof typeof headingVariants,
-  { variant: string[]; intent: string[]; size: string[] }
+  { variant: string[]; size: string[] }
 >;

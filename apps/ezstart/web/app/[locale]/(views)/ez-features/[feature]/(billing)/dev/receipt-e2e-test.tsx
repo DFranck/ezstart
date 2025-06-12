@@ -198,7 +198,7 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
           <Button onClick={() => fetchReceipts()}>Reload</Button>
         </div>
       </div>
-      <Ul className='p-0 pt-2' size={'full'} layout={'stacked'}>
+      <Ul className='p-0 pt-2' size={'full'}>
         {receipts.map((q) => (
           <Li
             key={q._id}

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export const BillingPage = () => {
   return (
-    <Main padding>
+    <Main withHeaderOffset>
       <Section>
         <H1>EzBilling</H1>
         <p className='text-lg text-muted-foreground'>

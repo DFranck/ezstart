@@ -1,7 +1,14 @@
 import { cva } from 'class-variance-authority';
-import { containerIntents } from '../../tokens/Intents';
-import { containerSizeVariants, textSizeVariants } from '../../tokens/size';
-import { containerVariants, textVariants } from '../../tokens/variants';
+import {
+  align,
+  intentContainer,
+  intentText,
+  layoutContainer,
+  sizeContainer,
+  sizeText,
+  variantContainer,
+  variantText,
+} from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
 // supported tags
@@ -11,28 +18,21 @@ export const listingItems = ['li', 'dt', 'dd'] as const;
 
 // base variant configs
 const containerListVariantConfig = {
-  variant: containerVariants,
-  intent: containerIntents,
-  size: containerSizeVariants,
-  layout: {
-    default: 'flex flex-col gap-2',
-    inline: 'flex flex-row flex-wrap gap-4',
-    grid: 'grid grid-cols-1 md:grid-cols-2 gap-4',
-    stacked: 'space-y-2',
-  },
+  variant: variantContainer,
+  intent: intentContainer,
+  size: sizeContainer,
+  layout: layoutContainer,
+  align: align,
 };
 
 const itemListVariantConfig = {
-  variant: { ...containerVariants, ...textVariants },
-  intent: containerIntents,
-  size: textSizeVariants,
-  align: {
-    center: 'items-center justify-center text-center',
-    left: 'items-start justify-start text-left',
-  },
-  wrap: {
-    wrap: 'flex flex-wrap justify-center gap-2',
-    inline: 'inline-block',
+  variant: { ...variantContainer, ...variantText },
+  intent: intentText,
+  size: { ...sizeText, ...sizeContainer },
+  align: align,
+  button: {
+    true: 'cursor-pointer hover:opacity-80 active:scale-95 transition-all duration-300',
+    false: '',
   },
   marker: {
     default: '',
@@ -49,26 +49,9 @@ export const listingContainersVariants = {
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'xs',
-      layout: 'default',
-    },
-  }),
-  ol: cva('list-decimal pl-4 space-y-1', {
-    variants: containerListVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      intent: 'default',
-      size: 'xs',
-      layout: 'default',
-    },
-  }),
-  dl: cva('grid grid-cols-[auto,1fr] gap-x-2 gap-y-1', {
-    variants: containerListVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      intent: 'default',
-      size: 'xs',
-      layout: 'default',
+      size: 'lg',
+      layout: 'col',
+      align: 'left',
     },
   }),
 };
@@ -79,30 +62,9 @@ export const listingItemsVariants = {
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'default',
+      size: 'xs',
       align: 'left',
       marker: 'default',
-    },
-  }),
-  dt: cva('font-semibold', {
-    variants: itemListVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      intent: 'default',
-      size: 'default',
-      align: 'left',
-      marker: 'default',
-    },
-  }),
-  dd: cva('', {
-    variants: itemListVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      intent: 'default',
-      size: 'default',
-      align: 'left',
-      marker: 'default',
-      wrap: 'inline',
     },
   }),
 };
@@ -115,11 +77,7 @@ export const listingVariants = {
 
 // aliases
 export const Ul = createAlias('ul');
-export const Ol = createAlias('ol');
 export const Li = createAlias('li');
-export const Dl = createAlias('dl');
-export const Dt = createAlias('dt');
-export const Dd = createAlias('dd');
 
 // meta
 function extractKeys<T extends Record<string, any>>(config: T): string[] {

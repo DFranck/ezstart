@@ -1,28 +1,39 @@
 import { cva } from 'class-variance-authority';
-import { containerIntents } from '../../tokens/Intents';
+import { intentContainer } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
+// --- Variants
+
+// NONE
+
+// --- Config
 export const mainVariantConfig = {
-  intent: containerIntents,
-  padding: {
-    true: 'py-8 md:py-16 lg:py-24',
+  intent: intentContainer,
+  withHeaderOffset: {
+    true: 'pt-[71px]',
     false: '',
   },
 } as const;
 
+// --- Default Variants
+export const DEFAULT_MAIN_VARIANTS = {
+  intent: 'default',
+  withHeaderOffset: false,
+} as const;
+
+// --- cva
 export const mainVariants = cva(
-  'relative flex-1 flex flex-col items-center justify-center',
+  'w-full flex-1 flex flex-col items-center justify-center',
   {
     variants: mainVariantConfig,
-    defaultVariants: {
-      intent: 'default',
-      padding: false,
-    },
+    defaultVariants: DEFAULT_MAIN_VARIANTS,
   }
 );
 
+// --- Alias
 export const Main = createAlias('main');
 
+// --- Meta générée dynamiquement pour Playground/Doc/devtools
 export const mainVariantsMeta = Object.fromEntries(
   Object.entries(mainVariantConfig).map(([variantName, variantValues]) => [
     variantName,
@@ -30,5 +41,5 @@ export const mainVariantsMeta = Object.fromEntries(
   ])
 ) as {
   intent: string[];
-  padding: string[];
+  withHeaderOffset: string[];
 };
