@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
-import { intentContainer } from '../../tokens/tokens';
+import { intentContainer, variantContainer } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
-// Variants
+// --- Variants
 export const sectionVariant = {
-  default: '',
-  primary: 'bg-primary text-primary-foreground shadow-sm',
+  default: variantContainer.default,
+  primary: variantContainer.primary,
 } as const;
 
 export const sectionSize = {
@@ -14,13 +14,14 @@ export const sectionSize = {
   md: 'px-6 py-8 md:px-12 md:py-14',
   lg: 'px-8 py-12 md:px-16 md:py-20',
   xl: 'px-12 py-16 md:px-24 md:py-28',
+  full: 'min-h-screen px-12 py-16 md:px-24 md:py-28',
 } as const;
 
 export const sectionIntent = intentContainer;
 
 export const sectionLayout = {
   col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
-  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 ',
+  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 ',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
 } as const;
 

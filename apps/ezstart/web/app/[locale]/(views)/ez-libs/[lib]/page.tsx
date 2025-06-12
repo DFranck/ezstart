@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import EzIconPage from './(icon)/page-icon';
-import EzTagPage from './(tag)/page-tag';
+import EzIconPage from './page/page-icon';
+import EzTagPage from './page/page-tag';
 import { LibId } from './types';
 
 export default async function LibPage({

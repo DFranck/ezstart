@@ -3,7 +3,8 @@
 import {
   Button,
   DEFAULT_SECTION_VARIANTS,
-  H3,
+  Div,
+  H2,
   H4,
   P,
   Section,
@@ -27,14 +28,21 @@ export default function SectionPlayground() {
 
   const content = (
     <>
-      <div>
-        <H3>I'm a section</H3>
-        <H4>Play with me</H4>
-      </div>
-      <div>
-        <P>You can test my variants here and check my responsiveusage.</P>
+      <Div size={'xs'}>
+        <H2>I'm a section</H2>
+        <H4>Play with me, controls are below</H4>
+      </Div>
+      <Div size={'xs'}>
+        <P className='line-clamp-3 md:line-clamp-none'>
+          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Delectus quo
+          rerum officiis ex similique libero. Officiis esse corrupti magnam iste
+          adipisci officia dignissimos ipsam ullam minus non incidunt accusamus
+          eveniet inventore, deserunt culpa animi velit, voluptatibus sequi quia
+          temporibus nemo dolorum eius. Ab ut, necessitatibus eos quisquam omnis
+          debitis libero?
+        </P>
         <Button>Fake Action</Button>
-      </div>
+      </Div>
     </>
   );
 
@@ -44,19 +52,18 @@ export default function SectionPlayground() {
   return (
     <>
       <Section {...selected}>{content}</Section>
-      <Section>
-        <div className='container bg-info mx-auto flex flex-col border border-border max-w-4xl px-4 md:px-10 py-4 md:py-10 gap-2 md:gap-4'>
+      <Section size={'xs'}>
+        <Div variant={'outline'} layout={'grid'} size={'xs'}>
           <PlaygroundCodeView
             fakeTagCode={fakeTagCode}
             fakeAliasCode={fakeAliasCode}
           />
-          {/* Selects pour variantes */}
           <PlaygroundVariantSelects
             meta={sectionMeta}
             selected={selected}
             onChange={handleChange}
           />
-        </div>
+        </Div>
       </Section>
     </>
   );

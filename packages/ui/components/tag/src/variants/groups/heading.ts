@@ -7,7 +7,7 @@ export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 // common
 export const baseHeadingClasses =
-  'font-display font-bold !leading-[1.3] text-center xl:text-left';
+  'font-display font-bold !leading-[1.3] text-center';
 export const headingVariantConfig = {
   variant: variantText,
   size: sizeText,
