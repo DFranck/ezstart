@@ -39,7 +39,7 @@ export const DEFAULT_DIV_VARIANTS = {
 } as const;
 
 // --- cva
-export const divVariants = cva('w-fit mx-auto', {
+export const divVariants = cva('w-fit mx-auto container', {
   variants: divVariantConfig,
   defaultVariants: DEFAULT_DIV_VARIANTS,
 });

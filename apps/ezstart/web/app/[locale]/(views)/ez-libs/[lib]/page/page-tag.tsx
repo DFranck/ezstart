@@ -18,8 +18,8 @@ const EzTagPage = () => {
     ...tagVariantsKeys.filter(
       (tag) => !headingTagSet.has(tag as any) && !listingTagSet.has(tag as any)
     ),
-    `${HEADING_TAGS.join(' ').toUpperCase()}`,
-    `${LISTING_TAGS.join(' ').toUpperCase()}`,
+    `heading`,
+    `listing`,
   ];
 
   return (

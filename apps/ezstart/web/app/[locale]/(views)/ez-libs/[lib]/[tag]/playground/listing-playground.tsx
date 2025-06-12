@@ -1,19 +1,24 @@
 'use client';
 
-import { H6, listingVariantsMeta, Section, Tag } from '@ezstart/ui/components';
+import {
+  Div,
+  LI,
+  listingVariantsMeta,
+  Section,
+  UL,
+} from '@ezstart/ui/components';
 import { useState } from 'react';
+import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
+import { buildFakeTag } from '../utils/build-fake-tag';
+
+const metaUL = listingVariantsMeta['ul'];
+const metaLI = listingVariantsMeta['li'];
 
 export default function ListingPlayground() {
-  const containerTag = 'ul';
-  const itemTag = 'li';
-
-  const variantContainer = listingVariantsMeta[containerTag] || {};
-  const itemVariants = listingVariantsMeta[itemTag] || {};
-
-  const [containerSelected, setContainerSelected] = useState(() => {
+  const [selectedUL, setSelectedUL] = useState<Record<string, string>>(() => {
     const out: Record<string, string> = {};
-    Object.entries(variantContainer).forEach(([variantName, values]) => {
+    Object.entries(metaUL).forEach(([variantName, values]) => {
       out[variantName] = values.includes('default')
         ? 'default'
         : values[0] || '';
@@ -21,9 +26,9 @@ export default function ListingPlayground() {
     return out;
   });
 
-  const [itemSelected, setItemSelected] = useState(() => {
+  const [selectedLI, setSelectedLI] = useState<Record<string, string>>(() => {
     const out: Record<string, string> = {};
-    Object.entries(itemVariants).forEach(([variantName, values]) => {
+    Object.entries(metaLI).forEach(([variantName, values]) => {
       out[variantName] = values.includes('default')
         ? 'default'
         : values[0] || '';
@@ -31,40 +36,72 @@ export default function ListingPlayground() {
     return out;
   });
 
-  const handleContainerChange = (key: string, value: string) => {
-    setContainerSelected((prev) => ({ ...prev, [key]: value }));
+  const handleChangeUL = (prop: string, value: string) => {
+    setSelectedUL((prev) => ({ ...prev, [prop]: value }));
   };
 
-  const handleItemChange = (key: string, value: string) => {
-    setItemSelected((prev) => ({ ...prev, [key]: value }));
+  const handleChangeLI = (prop: string, value: string) => {
+    setSelectedLI((prev) => ({ ...prev, [prop]: value }));
   };
+
+  const fakeTagCodeUL = buildFakeTag('ul', selectedUL, 'UL', '\n  ...\n');
+  const fakeTagCodeLI = buildFakeTag(
+    'li',
+    selectedLI,
+    'LI',
+    'List item content'
+  );
 
   return (
-    <Section className='space-y-6'>
+    <>
       {/* Preview */}
-      <Tag as={containerTag} {...containerSelected}>
-        {[...Array(3)].map((_, i) => (
-          <Tag key={i} as={itemTag} {...itemSelected}>
-            Item {i + 1}
-          </Tag>
-        ))}
-      </Tag>
-
-      {/* Select Controls */}
-      <UL layout={'grid'} className='max-w-full'>
-        <H6>Container</H6>
-        <H6>Items</H6>
-        <PlaygroundVariantSelects
-          meta={variantContainer}
-          selected={containerSelected}
-          onChange={handleContainerChange}
-        />
-        <PlaygroundVariantSelects
-          meta={itemVariants}
-          selected={itemSelected}
-          onChange={handleItemChange}
-        />
+      <UL {...selectedUL}>
+        <LI {...selectedLI}>Item 1</LI>
+        <LI {...selectedLI}>Item 2</LI>
+        <LI {...selectedLI}>Item 3</LI>
       </UL>
-    </Section>
+
+      {/* Container Controls */}
+      <Section size='xs' variant={'primary'} layout={'grid'}>
+        <Div>
+          <h3 className='text-lg font-semibold mb-2'>UL Variants</h3>
+          <PlaygroundCodeView
+            fakeTagCode={fakeTagCodeUL}
+            fakeAliasCode={fakeTagCodeUL}
+          />
+          <PlaygroundVariantSelects
+            meta={metaUL}
+            selected={selectedUL}
+            onChange={handleChangeUL}
+          />
+        </Div>
+        <Div>
+          <h3 className='text-lg font-semibold mb-2'>LI Variants</h3>
+          <PlaygroundCodeView
+            fakeTagCode={fakeTagCodeLI}
+            fakeAliasCode={fakeTagCodeLI}
+          />
+          <PlaygroundVariantSelects
+            meta={metaLI}
+            selected={selectedLI}
+            onChange={handleChangeLI}
+          />
+        </Div>
+      </Section>
+
+      {/* Item Controls */}
+      <Section size='xs' className='mt-8'>
+        <h3 className='text-lg font-semibold mb-2'>LI Variants</h3>
+        <PlaygroundCodeView
+          fakeTagCode={fakeTagCodeLI}
+          fakeAliasCode={fakeTagCodeLI}
+        />
+        <PlaygroundVariantSelects
+          meta={metaLI}
+          selected={selectedLI}
+          onChange={handleChangeLI}
+        />
+      </Section>
+    </>
   );
 }

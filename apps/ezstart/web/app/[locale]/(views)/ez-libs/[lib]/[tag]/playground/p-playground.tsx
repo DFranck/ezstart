@@ -13,7 +13,7 @@ import { useState } from 'react';
 import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 import { buildFakeTag } from '../utils/build-fake-tag';
-import { generateLorem } from '../utils/generateLorem';
+import { generateLorem } from '../utils/generate-lorem';
 
 export default function PPlayground() {
   const [selected, setSelected] = useState(() => {
@@ -47,31 +47,33 @@ export default function PPlayground() {
       {/* Preview */}
       <P {...selected}>{content}</P>
       {/* Usage et Alias preview */}
-      <Div variant={'outline'} layout={'grid'}>
-        <PlaygroundCodeView
-          fakeTagCode={fakeTagCode}
-          fakeAliasCode={fakeAliasCode}
-        />
-        <Div size={'none'}>
-          <Span>
-            <Label htmlFor='loremCount' className='whitespace-nowrap'>
-              Lorem count:
-            </Label>
-            <Input
-              id='contentInput'
-              type='text'
-              value={contentInput}
-              onChange={(e) => setContentInput(e.target.value)}
-            />
-          </Span>
-          {/* Select Controls */}
-          <PlaygroundVariantSelects
-            meta={pVariantsMeta}
-            selected={selected}
-            onChange={handleChange}
+      <Section>
+        <Div variant={'outline'} layout={'grid'}>
+          <PlaygroundCodeView
+            fakeTagCode={fakeTagCode}
+            fakeAliasCode={fakeAliasCode}
           />
+          <Div size={'none'}>
+            <Span>
+              <Label htmlFor='loremCount' className='whitespace-nowrap'>
+                Lorem count:
+              </Label>
+              <Input
+                id='contentInput'
+                type='text'
+                value={contentInput}
+                onChange={(e) => setContentInput(e.target.value)}
+              />
+            </Span>
+            {/* Select Controls */}
+            <PlaygroundVariantSelects
+              meta={pVariantsMeta}
+              selected={selected}
+              onChange={handleChange}
+            />
+          </Div>
         </Div>
-      </Div>
+      </Section>
     </Section>
   );
 }

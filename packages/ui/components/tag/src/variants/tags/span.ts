@@ -7,12 +7,14 @@ export const spanVariantConfig = {
   layout: layoutText,
 } as const;
 
+export const DEFAULT_SPAN_VARIANTS = {
+  intent: 'default',
+  layout: 'inline',
+} as const;
+
 export const spanVariants = cva('', {
   variants: spanVariantConfig,
-  defaultVariants: {
-    intent: 'default',
-    layout: 'inline',
-  },
+  defaultVariants: DEFAULT_SPAN_VARIANTS,
 });
 
 export const Span = createAlias('span');
