@@ -7,6 +7,7 @@ export const sectionVariant = {
   default: variantContainer.default,
   primary: variantContainer.primary,
 } as const;
+export type SectionVariant = keyof typeof sectionVariant;
 
 export const sectionSize = {
   xs: 'px-2 py-4 md:px-4 md:py-6',

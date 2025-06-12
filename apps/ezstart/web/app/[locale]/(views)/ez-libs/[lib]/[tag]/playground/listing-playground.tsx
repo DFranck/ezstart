@@ -88,20 +88,6 @@ export default function ListingPlayground() {
           />
         </Div>
       </Section>
-
-      {/* Item Controls */}
-      <Section size='xs' className='mt-8'>
-        <h3 className='text-lg font-semibold mb-2'>LI Variants</h3>
-        <PlaygroundCodeView
-          fakeTagCode={fakeTagCodeLI}
-          fakeAliasCode={fakeTagCodeLI}
-        />
-        <PlaygroundVariantSelects
-          meta={metaLI}
-          selected={selectedLI}
-          onChange={handleChangeLI}
-        />
-      </Section>
     </>
   );
 }
