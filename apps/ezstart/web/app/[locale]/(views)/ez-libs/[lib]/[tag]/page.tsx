@@ -10,7 +10,7 @@ const page = async ({ params }: { params: Promise<{ tag: string }> }) => {
     <Main withHeaderOffset>
       {tag === 'section' && <SectionPlayground />}
       {tag === 'div' && <DivPlayground />}
-      {tag === 'h1' && <HeadingPlayground />}
+      {tag === 'heading' && <HeadingPlayground />}
     </Main>
   );
 };

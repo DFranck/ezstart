@@ -1,7 +1,8 @@
 'use client';
 
 import {
-  headings,
+  Div,
+  HEADING_TAGS,
   headingVariants,
   Section,
   Tag,
@@ -20,22 +21,24 @@ import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 
 export const HeadingPlayground = () => (
-  <Accordion type='multiple' className='w-full'>
-    {headings.map((tag) => (
-      <AccordionItem value={tag} key={tag} className='border-b'>
-        <AccordionTrigger className='capitalize text-xl font-semibold'>
-          {`<${tag}> playground`}
-        </AccordionTrigger>
-        <AccordionContent>
-          <HeadingVariantTester tag={tag} />
-        </AccordionContent>
-      </AccordionItem>
-    ))}
-  </Accordion>
+  <Section>
+    <Accordion type='multiple' className='w-full'>
+      {HEADING_TAGS.map((tag) => (
+        <AccordionItem value={tag} key={tag} className='border-b'>
+          <AccordionTrigger className='capitalize text-xl font-semibold cursor-pointer'>
+            {`<${tag}> playground`}
+          </AccordionTrigger>
+          <AccordionContent>
+            <HeadingVariantTester tag={tag} />
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </Section>
 );
 
 type TesterProps = {
-  tag: (typeof headings)[number];
+  tag: (typeof HEADING_TAGS)[number];
 };
 
 const HeadingVariantTester = ({ tag }: TesterProps) => {
@@ -64,7 +67,7 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
   const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent, content);
 
   return (
-    <Section>
+    <Section size={'xs'}>
       {/* Preview */}
       <div className='flex-1 min-w-0'>
         <Tag as={tag} {...selected}>
@@ -73,7 +76,7 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
       </div>
 
       {/* Controls & usage */}
-      <div className='flex-1 min-w-[240px]'>
+      <Div variant={'outline'} layout={'grid'} className='w-full'>
         <PlaygroundCodeView
           fakeTagCode={fakeTagCode}
           fakeAliasCode={fakeAliasCode}
@@ -82,8 +85,9 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
           meta={meta}
           selected={selected}
           onChange={handleChange}
+          columns={2}
         />
-      </div>
+      </Div>
     </Section>
   );
 };

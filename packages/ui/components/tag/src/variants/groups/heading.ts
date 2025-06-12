@@ -2,17 +2,20 @@ import { cva } from 'class-variance-authority';
 import { sizeText, variantText } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
-// supported
-export const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+// --- Tags
+export const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
-// common
+// --- Variants
 export const baseHeadingClasses =
   'font-display font-bold !leading-[1.3] text-center';
+
+// --- Config
 export const headingVariantConfig = {
   variant: variantText,
   size: sizeText,
 };
-// variants
+
+// --- cva
 export const headingVariants = {
   h1: cva(baseHeadingClasses, {
     variants: headingVariantConfig,
@@ -57,7 +60,8 @@ export const headingVariants = {
     },
   }),
 };
-// alias
+
+// --- Alias
 export const H1 = createAlias('h1');
 export const H2 = createAlias('h2');
 export const H3 = createAlias('h3');
@@ -65,9 +69,9 @@ export const H4 = createAlias('h4');
 export const H5 = createAlias('h5');
 export const H6 = createAlias('h6');
 
-// meta
+// --- Meta for playground/devtools
 export const headingVariantsMeta = Object.fromEntries(
-  headings.map((tag) => [
+  HEADING_TAGS.map((tag) => [
     tag,
     {
       variant: Object.keys(headingVariantConfig.variant),

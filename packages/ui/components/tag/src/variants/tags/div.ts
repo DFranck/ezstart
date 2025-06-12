@@ -17,7 +17,7 @@ export const divIntent = intentContainer;
 
 export const divLayout = {
   col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
-  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 ',
+  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 ',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
 } as const;
 
@@ -38,7 +38,7 @@ export const DEFAULT_DIV_VARIANTS = {
 } as const;
 
 // --- cva
-export const divVariants = cva('', {
+export const divVariants = cva('w-fit mx-auto', {
   variants: divVariantConfig,
   defaultVariants: DEFAULT_DIV_VARIANTS,
 });
@@ -46,7 +46,7 @@ export const divVariants = cva('', {
 // --- Alias
 export const Div = createAlias('div');
 
-// --- Meta pour playground/devtools
+// --- Meta for playground/devtools
 export const divVariantsMeta = Object.fromEntries(
   Object.entries(divVariantConfig).map(([variantName, variantValues]) => [
     variantName,
