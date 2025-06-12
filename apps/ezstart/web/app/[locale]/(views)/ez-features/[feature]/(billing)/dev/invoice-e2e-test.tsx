@@ -1,7 +1,7 @@
 'use client';
 import { callApi } from '@/utils/call-api';
 import { Invoice } from '@ezstart/types';
-import { Button, Input, Li, Ul } from '@ezstart/ui/components';
+import { Button, Input, Li } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -184,7 +184,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
           <Button onClick={() => fetchInvoices()}>Reload</Button>
         </div>
       </div>
-      <Ul className='p-0 pt-2' size={'full'}>
+      <UL className='p-0 pt-2' size={'full'}>
         {invoices.map((inv) => (
           <Li
             key={inv._id}
@@ -281,9 +281,9 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
                 </div>
               </>
             )}
-          </Li>
+          </LI>
         ))}
-      </Ul>
+      </UL>
     </>
   );
 }

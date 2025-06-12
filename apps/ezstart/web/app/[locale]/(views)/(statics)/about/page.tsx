@@ -10,7 +10,6 @@ import {
   Main,
   P,
   Section,
-  Ul,
 } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 
@@ -35,9 +34,9 @@ const page = () => {
       </Section>
       <Section>
         <H2>{t('timelineTitle')}</H2>
-        <Ul>
+        <UL>
           {timeline.map((item) => (
-            <Li key={item.year} className='gap-4'>
+            <LIkey={item.year} className='gap-4'>
               <div className='pt-2 flex items-start justify-center font-mono text-green-400'>
                 {item.year}
               </div>
@@ -45,12 +44,12 @@ const page = () => {
                 <H4>{item.title}</H4>
                 <P>{item.description}</P>
               </div>
-            </Li>
+            </LI>
           ))}
-        </Ul>
+        </UL>
       </Section>
       <Section aria-labelledby='about-title' id='about' size='full'>
-        <Ul layout='grid' size={'full'}>
+        <UL layout='grid' size={'full'}>
           {[
             {
               title: t('skillsTitle'),
@@ -92,9 +91,9 @@ const page = () => {
                   ))}
                 </div>
               </Dl>
-            </Li>
+            </LI>
           ))}
-        </Ul>
+        </UL>
       </Section>
     </Main>
   );

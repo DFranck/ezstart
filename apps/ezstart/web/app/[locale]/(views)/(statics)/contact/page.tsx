@@ -1,14 +1,5 @@
 'use client';
-import {
-  Button,
-  H1,
-  Icon,
-  Li,
-  Main,
-  P,
-  Section,
-  Ul,
-} from '@ezstart/ui/components';
+import { Button, H1, Icon, Li, Main, P, Section } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -27,7 +18,7 @@ const ContactPage = () => {
       <Section>
         <H1>{t('title')}</H1>
         <P>{t('intro')}</P>
-        <Ul layout={'grid'}>
+        <UL layout={'grid'}>
           {links.map((link, i, arr) => (
             <Li
               className={cn('', {
@@ -49,9 +40,9 @@ const ContactPage = () => {
                   {link.label}
                 </Link>
               </Button>
-            </Li>
+            </LI>
           ))}
-        </Ul>
+        </UL>
       </Section>
     </Main>
   );

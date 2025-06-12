@@ -1,69 +1,45 @@
 'use client';
 import {
-  Li,
+  HEADING_TAGS,
+  LI,
+  LISTING_TAGS,
   Main,
   Section,
   tagVariantsKeys,
-  tagVariantsMeta,
-  Ul,
+  UL,
 } from '@ezstart/ui/components';
 import Link from 'next/link';
 import { HeaderLib } from '../components/header-lib';
-const mainMeta = tagVariantsMeta['main'];
 
 const EzTagPage = () => {
-  const headingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const headingTagSet = new Set(HEADING_TAGS);
+  const listingTagSet = new Set(LISTING_TAGS);
   const shownTags = [
-    ...tagVariantsKeys.filter((tag) => !headingTags.includes(tag)),
-    'heading',
+    ...tagVariantsKeys.filter(
+      (tag) => !headingTagSet.has(tag as any) && !listingTagSet.has(tag as any)
+    ),
+    `${HEADING_TAGS.join(' ').toUpperCase()}`,
+    `${LISTING_TAGS.join(' ').toUpperCase()}`,
   ];
+
   return (
     <Main withHeaderOffset>
       <HeaderLib lib='eztag' />
-      <Section>
-        <Ul layout={'grid'} align='between' variant={'outline'}>
+      <Section variant={'primary'}>
+        <UL layout={'grid'} className='xl:grid-cols-3'>
           {shownTags
             .filter(
               (tag) => tag !== 'main' && tag !== 'header' && tag !== 'footer'
             )
             .map((tag) => (
-              <Li
-                key={tag}
-                intent='info'
-                align='center'
-                variant={'outline'}
-                button
-                asChild
-              >
+              <LI key={tag} variant={'card'} button asChild layout={'center'}>
                 <Link href={'/ez-libs/tag/' + tag}>
                   {tag.toUpperCase().slice(0, 1) + tag.slice(1)}
                 </Link>
-              </Li>
+              </LI>
             ))}
-        </Ul>
+        </UL>
       </Section>
-      {/* <Section>
-        <H2>Main Tag</H2>
-        <MainPlaygroundControls
-          meta={mainMeta}
-          selected={mainVariants}
-          onChange={handleChange}
-        />
-      </Section>
-      <Section>
-        <H2>Heading Tags</H2>
-        <HeadingPlayground />
-      </Section>
-
-     
-      <Section>
-        <H2>P Tag</H2>
-        <PPlayground />
-      </Section>
-      <Section>
-        <H2>Listing Tags</H2>
-        <ListingPlayground />
-      </Section> */}
     </Main>
   );
 };

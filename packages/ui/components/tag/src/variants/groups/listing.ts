@@ -1,35 +1,61 @@
+// Path: ez-libs/ez-tag/components/listingVariants.ts
+
 import { cva } from 'class-variance-authority';
 import {
-  align,
   intentContainer,
   intentText,
-  layoutContainer,
-  sizeContainer,
   sizeText,
   variantContainer,
   variantText,
 } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
+import { mergeVariantStrings } from '../../utils/merge-variant-strings';
 
-// supported tags
-export const listings = ['ul', 'ol', 'li', 'dl', 'dt', 'dd'] as const;
-export const listingContainers = ['ul', 'ol', 'dl'] as const;
-export const listingItems = ['li', 'dt', 'dd'] as const;
+// --- Tags
+export const LISTING_CONTAINERS = ['ul'] as const;
+export const LISTING_ITEMS = ['li'] as const;
+export const LISTING_TAGS = [...LISTING_CONTAINERS, ...LISTING_ITEMS] as const;
 
-// base variant configs
-const containerListVariantConfig = {
-  variant: variantContainer,
-  intent: intentContainer,
-  size: sizeContainer,
-  layout: layoutContainer,
-  align: align,
-};
+// --- Variants tokens
+export const listingContainersVariant = variantContainer;
+export const listingItemsVariant = variantText;
 
-const itemListVariantConfig = {
-  variant: { ...variantContainer, ...variantText },
-  intent: intentText,
-  size: { ...sizeText, ...sizeContainer },
-  align: align,
+export const listingContainersSize = {
+  xs: 'px-2 py-4 md:px-4 md:py-6',
+  sm: 'px-4 py-6 md:px-8 md:py-10',
+  md: 'px-6 py-8 md:px-12 md:py-14',
+  lg: 'px-8 py-12 md:px-16 md:py-20',
+  xl: 'px-12 py-16 md:px-24 md:py-28',
+} as const;
+
+export const listingItemsSize = mergeVariantStrings(
+  listingContainersSize,
+  sizeText
+);
+
+export const listingContainersIntent = intentContainer;
+export const listingItemsIntent = intentText;
+
+export const listingContainersLayout = {
+  col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
+  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2',
+  center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
+  menu: 'flex flex-col p-1 md:p-1',
+} as const;
+
+// --- Variant config
+export const listingContainersVariantConfig = {
+  variant: listingContainersVariant,
+  intent: listingContainersIntent,
+  size: listingContainersSize,
+  layout: listingContainersLayout,
+} as const;
+
+export const listingItemsVariantConfig = {
+  variant: { ...listingItemsVariant, ...listingContainersVariant },
+  intent: listingItemsIntent,
+  size: listingItemsSize,
+  layout: listingContainersLayout,
   button: {
     true: 'cursor-pointer hover:opacity-80 active:scale-95 transition-all duration-300',
     false: '',
@@ -40,56 +66,54 @@ const itemListVariantConfig = {
     arrow: 'before:content-["→"] before:mr-2',
     dash: 'before:content-["–"] before:mr-2',
   },
-};
+} as const;
 
-// variants
+// --- CVA
 export const listingContainersVariants = {
   ul: cva('pl-4 space-y-1', {
-    variants: containerListVariantConfig,
+    variants: listingContainersVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
       size: 'lg',
       layout: 'col',
-      align: 'left',
     },
   }),
 };
 
 export const listingItemsVariants = {
   li: cva('flex gap-2', {
-    variants: itemListVariantConfig,
+    variants: listingItemsVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
       size: 'xs',
-      align: 'left',
       marker: 'default',
     },
   }),
 };
 
-// export combined
+// --- Combined export
 export const listingVariants = {
   ...listingContainersVariants,
   ...listingItemsVariants,
 };
 
-// aliases
-export const Ul = createAlias('ul');
-export const Li = createAlias('li');
+// --- Aliases
+export const UL = createAlias('ul');
+export const LI = createAlias('li');
 
-// meta
+// --- Meta for playground/devtools
 function extractKeys<T extends Record<string, any>>(config: T): string[] {
   return Object.keys(config);
 }
 
 export const listingVariantsMeta = Object.fromEntries(
-  listings.map((tag) => {
-    const isContainer = listingContainers.includes(tag as any);
+  LISTING_TAGS.map((tag) => {
+    const isContainer = LISTING_CONTAINERS.includes(tag as any);
     const base = isContainer
-      ? containerListVariantConfig
-      : itemListVariantConfig;
+      ? listingContainersVariantConfig
+      : listingItemsVariantConfig;
 
     return [
       tag,

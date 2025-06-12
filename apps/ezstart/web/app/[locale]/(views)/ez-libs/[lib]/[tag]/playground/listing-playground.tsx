@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  H6,
-  listingVariantsMeta,
-  Section,
-  Tag,
-  Ul,
-} from '@ezstart/ui/components';
+import { H6, listingVariantsMeta, Section, Tag } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 
@@ -57,7 +51,7 @@ export default function ListingPlayground() {
       </Tag>
 
       {/* Select Controls */}
-      <Ul layout={'grid'} className='max-w-full'>
+      <UL layout={'grid'} className='max-w-full'>
         <H6>Container</H6>
         <H6>Items</H6>
         <PlaygroundVariantSelects
@@ -70,7 +64,7 @@ export default function ListingPlayground() {
           selected={itemSelected}
           onChange={handleItemChange}
         />
-      </Ul>
+      </UL>
     </Section>
   );
 }

@@ -10,7 +10,7 @@ It provides semantic markup, Tailwind-based styling via `cva()`, and developer-f
 
 - ✅ **Polymorphic**: Use any tag via `as="..."` or JSX alias
 - 🎨 **Variants**: Tailwind-powered styles with `cva()`
-- 📦 **JSX Aliases**: `<H1 />`, `<Section />`, `<Ul />`, etc.
+- 📦 **JSX Aliases**: `<H1 />`, `<Section />`, `<UL />`, etc.
 - 🧠 **Typed Props**: Per-tag variants and props inference
 - ♿️ **Accessible & Semantic**: Outputs clean native HTML
 - 🧩 **Composable**: Extend with your own variants/tags
@@ -72,10 +72,10 @@ import { H1, H3, Section, P, Ul, Li } from '@ezstart/ui/components';
 <Section>
   <H1>Welcome</H1>
   <H3>A lightweight, flexible system</H3>
-  <Ul>
-    <Li>Polymorphic</Li>
-    <Li>Composable</Li>
-  </Ul>
+  <UL>
+    <Li>Polymorphic</LI>
+    <Li>Composable</LI>
+  </UL>
 </Section>;
 ```
 

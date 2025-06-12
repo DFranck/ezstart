@@ -1,7 +1,7 @@
 'use client';
 
 import { useExternalStats } from '@/hooks/useExternalStats';
-import { H2, Icon, Li, P, Section, Ul } from '@ezstart/ui/components';
+import { H2, Icon, Li, P, Section } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 
 type TrustPoint = {
@@ -25,9 +25,9 @@ export const SectionTrust = () => {
     <Section>
       <H2>{t('title')}</H2>
       <P>{t('intro')}</P>
-      <Ul layout={'grid'} size={'full'}>
+      <UL layout={'grid'} size={'full'}>
         {points.map((point, index) => (
-          <Li key={index} variant={'card'} className='flex-col items-center'>
+          <LIkey={index} variant={'card'} className='flex-col items-center'>
             <P>{point.icon}</P>
             <P className='font-semibold text-lg'>
               {isLoading ? (
@@ -37,9 +37,9 @@ export const SectionTrust = () => {
               )}
             </P>
             <P>{point.label}</P>
-          </Li>
+          </LI>
         ))}
-      </Ul>
+      </UL>
 
       <P>{t('footer')}</P>
     </Section>

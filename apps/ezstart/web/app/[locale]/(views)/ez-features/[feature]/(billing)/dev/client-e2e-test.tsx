@@ -1,7 +1,7 @@
 'use client';
 import { callApi } from '@/utils/call-api';
 import { Client } from '@ezstart/types';
-import { Button, Input, Li, Ul } from '@ezstart/ui/components';
+import { Button, Input, Li } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -122,7 +122,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
           </div>
         </div>
 
-        <Ul className='p-0 pt-2' size={'full'}>
+        <UL className='p-0 pt-2' size={'full'}>
           {clients.map((c) => (
             <Li
               key={c._id}
@@ -211,9 +211,9 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
                   </div>
                 </>
               )}
-            </Li>
+            </LI>
           ))}
-        </Ul>
+        </UL>
       </>
     </>
   );

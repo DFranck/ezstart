@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './button';
-import { Li, Ul } from './tag';
+import { LI, UL } from './tag';
 
 export interface DropdownItem {
   label: string;
@@ -101,19 +101,20 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
       </Button>
 
       {open && (
-        <Ul
+        <UL
           id={menuId}
           role='menu'
           ref={menuRef}
           variant={'outline'}
-          className='absolute right-0 z-50 min-w-[8rem] focus:outline-none bg-background p-1 space-y-1'
+          layout={'menu'}
+          className='absolute right-0 z-50 focus:outline-none bg-background '
         >
           {items.map(({ label, onSelect, value }, i) => (
             <Button
               key={value}
               variant={'ghost'}
               asChild
-              className='w-full justify-start'
+              className='w-full justify-start mb-0'
               role='menuitem'
               size={'sm'}
               onClick={() => {
@@ -122,10 +123,10 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
               }}
               tabIndex={-1}
             >
-              <Li>{label}</Li>
+              <LI>{label}</LI>
             </Button>
           ))}
-        </Ul>
+        </UL>
       )}
     </div>
   );

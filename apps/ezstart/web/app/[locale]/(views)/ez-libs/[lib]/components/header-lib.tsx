@@ -9,7 +9,6 @@ import {
   Span,
 } from '@ezstart/ui/components';
 import Link from 'next/link';
-import { LibId } from '../types';
 
 export const HeaderLib = ({ lib }: { lib: LibId }) => {
   const { name, description, github, status } = getMeta('lib', lib);

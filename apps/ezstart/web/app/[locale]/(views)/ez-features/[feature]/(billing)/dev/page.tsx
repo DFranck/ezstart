@@ -1,5 +1,5 @@
 'use client';
-import { H1, H4, Li, Main, Section, Ul } from '@ezstart/ui/components';
+import { H1, H4, Li, Main, Section } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { E2EPlayground } from './e2e-playground';
 
@@ -16,14 +16,14 @@ const pageDev = () => {
         </Section>
       </Section>
       <Section size={'full'}>
-        <Ul variant={'outline'} size={'full'}>
+        <UL variant={'outline'} size={'full'}>
           <H4>Logs</H4>
           {log.map((l, i) => (
-            <Li key={i} size='sm' variant={'card'} className='overflow-auto'>
+            <LIkey={i} size='sm' variant={'card'} className='overflow-auto'>
               {l}
-            </Li>
+            </LI>
           ))}
-        </Ul>
+        </UL>
       </Section>
     </Main>
   );

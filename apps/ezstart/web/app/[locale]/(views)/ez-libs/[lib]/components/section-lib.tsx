@@ -11,7 +11,6 @@ import {
   Span,
 } from '@ezstart/ui/components';
 import Link from 'next/link';
-import { LibId } from '../types';
 interface LibSectionProps {
   libId: LibId;
 }
