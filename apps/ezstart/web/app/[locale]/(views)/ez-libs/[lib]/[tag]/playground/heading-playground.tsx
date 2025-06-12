@@ -64,7 +64,7 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
   const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent, content);
 
   return (
-    <Section variant={'outline'}>
+    <Section>
       {/* Preview */}
       <div className='flex-1 min-w-0'>
         <Tag as={tag} {...selected}>

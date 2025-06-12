@@ -26,7 +26,7 @@ export default function PPlayground() {
   const fakeAliasCode = buildFakeTag('p', selected, 'P', content);
 
   return (
-    <Section variant={'outline'}>
+    <Section>
       {/* Preview */}
       <P {...selected}>{content}</P>
       {/* Usage et Alias preview */}

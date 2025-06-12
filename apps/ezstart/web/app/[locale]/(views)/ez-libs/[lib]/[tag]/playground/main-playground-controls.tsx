@@ -14,7 +14,7 @@ export const MainPlaygroundControls = ({ meta, selected, onChange }: Props) => {
   const fakeAliasCode = buildFakeTag('main', selected, 'Main', '...');
 
   return (
-    <Section variant={'outline'}>
+    <Section>
       <PlaygroundCodeView
         fakeTagCode={fakeTagCode}
         fakeAliasCode={fakeAliasCode}

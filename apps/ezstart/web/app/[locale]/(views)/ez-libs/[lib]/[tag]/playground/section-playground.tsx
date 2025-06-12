@@ -15,7 +15,7 @@ import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 import { buildFakeTag } from '../utils/build-fake-tag';
 
-const sectionMeta = tagVariantsMeta['section'];
+const meta = tagVariantsMeta['section'];
 
 export default function SectionPlayground() {
   const [selected, setSelected] = useState<Record<string, string>>(
@@ -59,7 +59,7 @@ export default function SectionPlayground() {
             fakeAliasCode={fakeAliasCode}
           />
           <PlaygroundVariantSelects
-            meta={sectionMeta}
+            meta={meta}
             selected={selected}
             onChange={handleChange}
           />

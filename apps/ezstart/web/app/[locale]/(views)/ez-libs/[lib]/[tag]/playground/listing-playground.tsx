@@ -46,7 +46,7 @@ export default function ListingPlayground() {
   };
 
   return (
-    <Section variant='outline' className='space-y-6'>
+    <Section className='space-y-6'>
       {/* Preview */}
       <Tag as={containerTag} {...containerSelected}>
         {[...Array(3)].map((_, i) => (
