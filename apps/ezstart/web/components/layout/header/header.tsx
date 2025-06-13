@@ -1,10 +1,10 @@
 'use client';
 
 import { Burger, H2, Icon, Tag } from '@ezstart/ui/components';
-import { useDevice, useOnScroll } from '@ezstart/ui/hooks';
+import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MobileNavMenu } from '../mobile-nav-menu';
 import { NavMenu } from '../nav-menu';
 import { HeaderControls } from './header-controls';
@@ -14,6 +14,12 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const scrollY = useOnScroll();
   const isTop = scrollY === 0;
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  useClickOutside(mobileMenuRef, () => {
+    if (isTablet && isOpen) {
+      setIsOpen(false);
+    }
+  });
 
   useEffect(() => {
     if (!isTablet && isOpen) {
@@ -48,6 +54,7 @@ export default function Header() {
 
       {isTablet && (
         <div
+          ref={mobileMenuRef}
           className={cn(
             'transition-all duration-500 ease-in-out overflow-hidden px-6 ',
             isOpen ? 'max-h-[400px] py-4 bg-background border-b-2' : 'max-h-0'
