@@ -16,10 +16,27 @@ import { PlaygroundVariantSelects } from '../components/playground-variant-selec
 import { buildFakeTag } from '../utils/build-fake-tag';
 
 const meta = tagVariantsMeta['div'];
+function omitKeys<T extends object, K extends keyof T>(
+  obj: T,
+  keys: K[]
+): Omit<T, K> {
+  const clone = { ...obj };
+  keys.forEach((key) => {
+    delete clone[key];
+  });
+  return clone;
+}
 
 export default function DivPlayground() {
-  const [selected, setSelected] =
-    useState<Record<string, string>>(DEFAULT_DIV_VARIANTS);
+  const initialVariants = omitKeys(DEFAULT_DIV_VARIANTS, ['withHeaderOffset']);
+  const [selected, setSelected] = useState<Record<string, string>>(
+    Object.fromEntries(
+      Object.entries(initialVariants).map(([key, value]) => [
+        key,
+        String(value),
+      ])
+    )
+  );
 
   const handleChange = (prop: string, value: string) => {
     setSelected((prev) => ({ ...prev, [prop]: value }));
