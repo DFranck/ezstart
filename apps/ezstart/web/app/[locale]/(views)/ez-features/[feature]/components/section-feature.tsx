@@ -10,7 +10,7 @@ export const FeatureSection = ({ featureId }: FeatureSectionProps) => {
   const { name, description, github, status } = getMeta('feature', featureId);
 
   return (
-    <Section variant={'card'}>
+    <Section>
       <div className='flex items-center'>
         <H2>{name}</H2>
         {status === 'in progress' && (
