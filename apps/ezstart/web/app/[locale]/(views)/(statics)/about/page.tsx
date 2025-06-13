@@ -10,7 +10,7 @@ import {
   Section,
   UL,
 } from '@ezstart/ui/components';
-import { cn } from '@ezstart/ui/LIb';
+import { cn } from '@ezstart/ui/Lib';
 
 import { useTranslations } from 'next-intl';
 type TimeLIneItem = {
