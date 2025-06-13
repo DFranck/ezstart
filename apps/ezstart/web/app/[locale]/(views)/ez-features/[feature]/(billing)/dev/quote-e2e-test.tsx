@@ -1,7 +1,7 @@
 'use client';
 import { callApi } from '@/utils/call-api';
 import { Quote } from '@ezstart/types';
-import { Button, Input, Li } from '@ezstart/ui/components';
+import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -186,9 +186,9 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
           <Button onClick={() => fetchQuotes()}>Reload</Button>
         </div>
       </div>
-      <UL className='p-0 pt-2' size={'full'}>
+      <UL className='p-0 pt-2'>
         {quotes.map((q) => (
-          <Li
+          <LI
             key={q._id}
             className='flex flex-col md:flex-row items-center justify-between gap-2'
             variant={'card'}

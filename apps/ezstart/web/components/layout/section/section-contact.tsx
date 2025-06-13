@@ -1,7 +1,7 @@
 'use client';
 
 import { LampContainer } from '@/components/ui/lamp';
-import { Button, H2, Icon, P, Section } from '@ezstart/ui/components';
+import { Button, Div, H2, Icon, P, Section } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -15,7 +15,7 @@ export const SectionContact = () => {
 
         <P>{t('description')}</P>
 
-        <UL layout={'inline'}>
+        <Div>
           <Button>
             <Link href='/contact'>{t('cta')}</Link>
           </Button>
@@ -29,7 +29,7 @@ export const SectionContact = () => {
               {t('github')}
             </Link>
           </Button>
-        </UL>
+        </Div>
       </Section>
     </LampContainer>
   );

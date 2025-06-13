@@ -1,6 +1,6 @@
 'use client';
 
-import { H2, Li, P, Section } from '@ezstart/ui/components';
+import { H2, LI, P, Section, UL } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 
 export const SectionVision = () => {
@@ -10,14 +10,14 @@ export const SectionVision = () => {
     <Section>
       <H2>{t('title')}</H2>
       <P>{t('intro')}</P>
-      <UL layout={'grid'} size={'full'}>
+      <UL layout={'grid'}>
         {t.raw('points').map((point: string, index: number) => (
-          <LImarker={'check'} variant={'card'} key={index}>
+          <LI marker={'check'} variant={'card'} key={index}>
             {point}
           </LI>
         ))}
       </UL>
-      <P size={'sm'}>{t('footer')}</P>
+      <P>{t('footer')}</P>
     </Section>
   );
 };
