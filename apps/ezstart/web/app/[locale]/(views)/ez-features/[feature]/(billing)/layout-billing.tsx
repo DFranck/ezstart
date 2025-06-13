@@ -1,3 +1,5 @@
+import { BillingProvider } from '@/providers/billing-provider';
+
 export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  return <BillingProvider>{children}</BillingProvider>;
 };
