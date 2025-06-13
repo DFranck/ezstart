@@ -1,3 +1,4 @@
+import { asideVariants, asideVariantsMeta } from '../tags/aside';
 import { divVariants, divVariantsMeta } from '../tags/div';
 import { footerVariants, footerVariantsMeta } from '../tags/footer';
 import { headerVariants, headerVariantsMeta } from '../tags/header';
@@ -10,6 +11,7 @@ export const layoutVariants = {
   header: headerVariants,
   footer: footerVariants,
   div: divVariants,
+  aside: asideVariants,
 };
 
 export const layoutVariantsMeta = {
@@ -18,4 +20,5 @@ export const layoutVariantsMeta = {
   header: headerVariantsMeta,
   footer: footerVariantsMeta,
   div: divVariantsMeta,
+  aside: asideVariantsMeta,
 };

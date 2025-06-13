@@ -20,13 +20,14 @@ export const headerVariantConfig = {
   },
   position: {
     static: '',
-    sticky: 'sticky top-0 z-50',
-    fixed: 'fixed top-0 left-0 right-0 z-50',
+    sticky: 'sticky top-0 left-0 right-0 z-30',
+    fixed: 'fixed top-0 left-0 right-0 z-30',
+    absolute: 'absolute top-0 left-0 right-0 z-30',
   },
 } as const;
 
 // 👇 cva utilise la config
-export const headerVariants = cva('container mx-auto flex flex-col', {
+export const headerVariants = cva('flex container mx-auto w-full', {
   variants: headerVariantConfig,
   defaultVariants: {
     variant: 'default',
@@ -38,7 +39,7 @@ export const headerVariants = cva('container mx-auto flex flex-col', {
 });
 
 // 👇 Alias
-export const header = createAlias('header');
+export const Header = createAlias('header');
 
 // 👇 Meta générée dynamiquement pour Playground/Doc/devtools
 export const headerVariantsMeta = Object.fromEntries(

@@ -25,7 +25,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/[locale]/(views)/ez-features/[feature]/(billing)/dev/ui/ClientE.tsxE"
+    "app/[locale]/(views)/ez-features/[feature]/(billing)/dev/ui/ClientE.tsxE",
+    "../../../packages/ui/components/layout-with-aside.tsx"
   ],
   "exclude": ["node_modules"]
 }

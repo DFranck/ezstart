@@ -2,6 +2,7 @@ export { Tag } from './src/components/tag';
 export { tagVariants, tagVariantsKeys, tagVariantsMeta } from './src/variants';
 export * from './src/variants/groups/heading';
 export * from './src/variants/groups/listing';
+export * from './src/variants/tags/aside';
 export * from './src/variants/tags/div';
 export * from './src/variants/tags/main';
 export * from './src/variants/tags/p';

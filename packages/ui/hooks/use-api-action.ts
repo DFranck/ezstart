@@ -1,3 +1,4 @@
+'use client';
 import { isApiError } from '@ezstart/types';
 import { useState } from 'react';
 import { toast } from 'sonner';

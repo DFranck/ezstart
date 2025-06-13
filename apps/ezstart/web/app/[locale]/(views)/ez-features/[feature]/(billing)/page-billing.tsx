@@ -12,7 +12,10 @@ export const BillingPage = () => {
         </p>
       </Section>
       <Button asChild>
-        <Link href='billing/dev'>Go to dev</Link>
+        <Link href='ezbilling/dev'>Go to dev</Link>
+      </Button>
+      <Button asChild>
+        <Link href='ezbilling/dashboard'>Go to dashboard</Link>
       </Button>
     </Main>
   );

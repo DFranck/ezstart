@@ -22,13 +22,13 @@ export default function Header() {
   }, [isTablet, isOpen]);
 
   return (
-    <Tag as='header' layout={'spaced'} position={'fixed'}>
+    <Tag as='header' layout={'spaced'} position={'fixed'} className='flex-col'>
       <div
         className={cn(
           ' py-4 pr-2 pl-4 md:px-6 flex items-center justify-between transition-all duration-300',
           {
             'bg-transparent': isTop,
-            'bg-background border-b-2': !isTop || isOpen,
+            'bg-background border-b-2': !isTop && !isOpen,
             'py-2': !isTop,
           }
         )}
@@ -50,7 +50,7 @@ export default function Header() {
         <div
           className={cn(
             'transition-all duration-500 ease-in-out overflow-hidden px-6 ',
-            isOpen ? 'max-h-[400px] py-4 bg-background' : 'max-h-0'
+            isOpen ? 'max-h-[400px] py-4 bg-background border-b-2' : 'max-h-0'
           )}
         >
           <MobileNavMenu setIsOpen={setIsOpen} />

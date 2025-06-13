@@ -1,4 +1,4 @@
-'use cLIent';
+'use client';
 import {
   Div,
   H1,
@@ -13,14 +13,14 @@ import {
 import { cn } from '@ezstart/ui/lib';
 
 import { useTranslations } from 'next-intl';
-type TimeLIneItem = {
+type TimelineItem = {
   year: string;
   title: string;
   description: string;
 };
 const page = () => {
   const t = useTranslations('about');
-  const timeLIne = t.raw('timeLIne') as TimeLIneItem[];
+  const timeline = t.raw('timeline') as TimelineItem[];
   const skills = t.raw('skills') as string[];
   const values = t.raw('values') as string[];
   const interests = t.raw('interests') as string[];
@@ -32,9 +32,9 @@ const page = () => {
         <P>{t('intro')}</P>
       </Section>
       <Section>
-        <H2>{t('timeLIneTitle')}</H2>
+        <H2>{t('timelineTitle')}</H2>
         <UL>
-          {timeLIne.map((item) => (
+          {timeline.map((item) => (
             <LI key={item.year} className='gap-4'>
               <div className='pt-2 flex items-start justify-center font-mono text-green-400'>
                 {item.year}
