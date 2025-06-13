@@ -1,27 +1,26 @@
-'use client';
+'use cLIent';
 import {
-  Dd,
-  Dl,
-  Dt,
+  Div,
   H1,
   H2,
   H4,
-  Li,
+  LI,
   Main,
   P,
   Section,
+  UL,
 } from '@ezstart/ui/components';
-import { cn } from '@ezstart/ui/lib';
+import { cn } from '@ezstart/ui/LIb';
 
 import { useTranslations } from 'next-intl';
-type TimelineItem = {
+type TimeLIneItem = {
   year: string;
   title: string;
   description: string;
 };
-const page = () => {
+export const page = () => {
   const t = useTranslations('about');
-  const timeline = t.raw('timeline') as TimelineItem[];
+  const timeLIne = t.raw('timeLIne') as TimeLIneItem[];
   const skills = t.raw('skills') as string[];
   const values = t.raw('values') as string[];
   const interests = t.raw('interests') as string[];
@@ -33,10 +32,10 @@ const page = () => {
         <P>{t('intro')}</P>
       </Section>
       <Section>
-        <H2>{t('timelineTitle')}</H2>
+        <H2>{t('timeLIneTitle')}</H2>
         <UL>
-          {timeline.map((item) => (
-            <LIkey={item.year} className='gap-4'>
+          {timeLIne.map((item) => (
+            <LI key={item.year} className='gap-4'>
               <div className='pt-2 flex items-start justify-center font-mono text-green-400'>
                 {item.year}
               </div>
@@ -48,8 +47,8 @@ const page = () => {
           ))}
         </UL>
       </Section>
-      <Section aria-labelledby='about-title' id='about' size='full'>
-        <UL layout='grid' size={'full'}>
+      <Section aria-labelledby='about-title' id='about'>
+        <UL layout='grid'>
           {[
             {
               title: t('skillsTitle'),
@@ -64,33 +63,26 @@ const page = () => {
               items: interests,
             },
           ].map((cat, i, arr) => (
-            <Li
+            <LI
               key={cat.title}
-              align='center'
               className={cn('p-2', {
                 'md:col-span-2': arr.length % 2 !== 0 && i === arr.length - 1,
               })}
             >
-              <Dl
-                size='full'
-                className='w-full flex flex-col items-center gap-2'
-              >
-                <Dt>
-                  <H4>{cat.title}</H4>
-                </Dt>
-                <div className='flex flex-wrap justify-center gap-2 w-full'>
+              <Div className='w-fULl flex flex-col items-center gap-2'>
+                <H4>{cat.title}</H4>
+
+                <UL className='flex flex-wrap justify-center gap-2 w-fULl'>
                   {cat.items.map((item) => (
-                    <Dd
+                    <LI
                       key={item}
-                      wrap='inline'
-                      marker='default'
                       className="before:content-['▹'] before:text-green-400 before:mr-1 text-base"
                     >
                       {item}
-                    </Dd>
+                    </LI>
                   ))}
-                </div>
-              </Dl>
+                </UL>
+              </Div>
             </LI>
           ))}
         </UL>
@@ -98,5 +90,3 @@ const page = () => {
     </Main>
   );
 };
-
-export default page;

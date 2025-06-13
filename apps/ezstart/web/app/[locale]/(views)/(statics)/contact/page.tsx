@@ -1,5 +1,14 @@
 'use client';
-import { Button, H1, Icon, Li, Main, P, Section } from '@ezstart/ui/components';
+import {
+  Button,
+  H1,
+  Icon,
+  LI,
+  Main,
+  P,
+  Section,
+  UL,
+} from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -20,7 +29,7 @@ const ContactPage = () => {
         <P>{t('intro')}</P>
         <UL layout={'grid'}>
           {links.map((link, i, arr) => (
-            <Li
+            <LI
               className={cn('', {
                 'md:col-span-2': arr.length % 2 !== 0 && i === arr.length - 1,
               })}

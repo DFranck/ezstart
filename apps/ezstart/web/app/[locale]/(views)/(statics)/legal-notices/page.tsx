@@ -32,12 +32,7 @@ const LegalNoticesPage = () => {
         </div>
 
         {sections.map((section) => (
-          <Section
-            key={section.id}
-            role='region'
-            aria-labelledby={section.id}
-            variant={'card'}
-          >
+          <Section key={section.id} role='region' aria-labelledby={section.id}>
             <div className='flex items-center gap-3 mb-2'>
               <span>
                 {icons[section.id] ?? <Icon name='fa:FaFile' size={20} />}
