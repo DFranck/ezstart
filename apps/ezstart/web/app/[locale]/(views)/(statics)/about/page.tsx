@@ -18,7 +18,7 @@ type TimeLIneItem = {
   title: string;
   description: string;
 };
-export const page = () => {
+const page = () => {
   const t = useTranslations('about');
   const timeLIne = t.raw('timeLIne') as TimeLIneItem[];
   const skills = t.raw('skills') as string[];
@@ -90,3 +90,4 @@ export const page = () => {
     </Main>
   );
 };
+export default page;
