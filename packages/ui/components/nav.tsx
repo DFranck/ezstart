@@ -7,7 +7,7 @@ type NavProps = {
   children?: ReactNode;
 };
 
-const Nav = ({ children }: NavProps) => {
+export const Nav = ({ children }: NavProps) => {
   if (children) {
     return (
       <Tag as='nav' className='flex gap-4'>
@@ -18,5 +18,3 @@ const Nav = ({ children }: NavProps) => {
 
   return <nav />;
 };
-
-export default Nav;

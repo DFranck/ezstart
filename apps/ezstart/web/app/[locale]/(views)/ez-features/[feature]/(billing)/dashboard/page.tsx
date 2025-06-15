@@ -1,6 +1,6 @@
 'use client';
 import { useBillingContext } from '@/contexts/billing-context';
-import { LayoutWithAside } from '@ezstart/ui/components';
+import { LayoutWithAside, Nav } from '@ezstart/ui/components';
 import ClientCard from '../components/client-card';
 
 const page = () => {
@@ -9,7 +9,7 @@ const page = () => {
   return (
     <LayoutWithAside
       withHeaderOffset
-      topHeaderLeftContent={<h1>Dashboard</h1>}
+      topHeaderCenterContent={<Nav>client, invoices,quote,receipt</Nav>}
       asideContent={clients.map((c) => (
         <ClientCard key={c._id} client={c} />
       ))}
