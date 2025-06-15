@@ -7,9 +7,7 @@ export const navVariant = variantContainer;
 
 export const navSize = {
   none: '',
-  xs: 'px-2 py-4 md:px-4 md:py-6',
-  sm: 'px-4 py-6 md:px-8 md:py-10',
-  md: 'px-6 py-8 md:px-12 md:py-14',
+  xs: 'p-1',
 } as const;
 
 export const navIntent = intentContainer;
@@ -32,13 +30,13 @@ export const navVariantConfig = {
 export const DEFAULT_NAV_VARIANTS = {
   variant: 'default',
   intent: 'default',
-  size: 'md',
+  size: 'xs',
   layout: 'center',
   withHeaderOffset: false,
 } as const;
 
 // --- cva
-export const navVariants = cva('w-fit', {
+export const navVariants = cva('w-full', {
   variants: navVariantConfig,
   defaultVariants: DEFAULT_NAV_VARIANTS,
 });

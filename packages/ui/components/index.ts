@@ -1,6 +1,7 @@
 export * from './accordion';
 export * from './burger';
 export * from './button';
+export * from './card';
 export * from './dropdown';
 export * from './header';
 export * from './icon';

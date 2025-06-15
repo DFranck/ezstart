@@ -49,7 +49,7 @@ export const LayoutWithAside = ({
     >
       {isTopHeaderVisible && (
         <Header
-          className={cn('h-16', debug && 'bg-blue-500')}
+          className={cn('h-16 bg-muted border-y', debug && 'bg-blue-500')}
           leftContent={
             debug ? (
               'left'
@@ -68,11 +68,13 @@ export const LayoutWithAside = ({
       )}
       <Div size={'full'} layout={'aside'}>
         <Aside
+          size={'xs'}
+          layout={'col'}
           className={cn(
-            'transition-transform duration-300 ease-in-out flex-shrink-0 overflow-hidden',
+            'transition-transform duration-300 ease-in-out flex-shrink-0 w-fit bg-muted border-r',
             isMobile &&
               (isAsideOpen
-                ? 'translate-x-0'
+                ? 'translate-x-0 '
                 : '-translate-x-full w-0 px-0 py-0'),
             debug && 'bg-pink-500'
           )}

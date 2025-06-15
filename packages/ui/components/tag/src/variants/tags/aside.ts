@@ -18,7 +18,7 @@ export const asideSize = {
 export const asideIntent = intentContainer;
 
 export const asideLayout = {
-  col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
+  col: 'flex flex-col gap-4 ',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 ',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
 } as const;

@@ -28,20 +28,24 @@ export const Header = ({
       position={position}
       className={cn('px-2 md:px-6', className)}
     >
-      {/* Main header bar */}
       <Div layout={'row'} size={'none'} className='w-full'>
-        <Div layout={'row'} size={'none'}>
-          {leftContent}
-        </Div>
-        <Div layout={'row'} size={'none'}>
-          {centerContent}
-        </Div>
-        <Div layout={'row'} size={'none'}>
-          {rightContent}
-        </Div>
+        {leftContent && (
+          <Div layout={'row'} size={'none'}>
+            {leftContent}
+          </Div>
+        )}
+        {centerContent && (
+          <Div layout={'row'} size={'none'} className='w-full'>
+            {centerContent}
+          </Div>
+        )}
+        {rightContent && (
+          <Div layout={'row'} size={'none'}>
+            {rightContent}
+          </Div>
+        )}
       </Div>
 
-      {/* Optional additional content */}
       {children && (
         <Div size={'none'} layout={'row'}>
           {children}

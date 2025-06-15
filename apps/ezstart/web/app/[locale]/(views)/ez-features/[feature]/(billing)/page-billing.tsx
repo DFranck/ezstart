@@ -1,6 +1,5 @@
 'use client';
-import { Button, H1, Main, Section } from '@ezstart/ui/components';
-import Link from 'next/link';
+import { H1, Main, Section } from '@ezstart/ui/components';
 
 export const BillingPage = () => {
   return (
@@ -11,12 +10,6 @@ export const BillingPage = () => {
           Manage invoices, clients, payments and quotes — all in one place.
         </p>
       </Section>
-      <Button asChild>
-        <Link href='ezbilling/dev'>Go to dev</Link>
-      </Button>
-      <Button asChild>
-        <Link href='ezbilling/dashboard'>Go to dashboard</Link>
-      </Button>
     </Main>
   );
 };
