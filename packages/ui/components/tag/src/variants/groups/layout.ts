@@ -3,6 +3,7 @@ import { divVariants, divVariantsMeta } from '../tags/div';
 import { footerVariants, footerVariantsMeta } from '../tags/footer';
 import { headerVariants, headerVariantsMeta } from '../tags/header';
 import { mainVariants, mainVariantsMeta } from '../tags/main';
+import { navVariants, navVariantsMeta } from '../tags/nav';
 import { sectionVariants, sectionVariantsMeta } from '../tags/section';
 
 export const layoutVariants = {
@@ -12,6 +13,7 @@ export const layoutVariants = {
   footer: footerVariants,
   div: divVariants,
   aside: asideVariants,
+  nav: navVariants,
 };
 
 export const layoutVariantsMeta = {
@@ -21,4 +23,5 @@ export const layoutVariantsMeta = {
   footer: footerVariantsMeta,
   div: divVariantsMeta,
   aside: asideVariantsMeta,
+  nav: navVariantsMeta,
 };

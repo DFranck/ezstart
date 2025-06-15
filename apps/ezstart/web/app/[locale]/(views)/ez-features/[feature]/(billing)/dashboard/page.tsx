@@ -9,6 +9,7 @@ const page = () => {
   return (
     <LayoutWithAside
       withHeaderOffset
+      topHeaderLeftContent={<h1>Dashboard</h1>}
       asideContent={clients.map((c) => (
         <ClientCard key={c._id} client={c} />
       ))}

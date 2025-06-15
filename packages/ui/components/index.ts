@@ -8,6 +8,7 @@ export * from './input';
 export * from './label';
 export * from './layout-with-aside';
 export * from './modal';
+export * from './nav';
 export * from './select';
 export * from './sonner';
 export * from './tabs';

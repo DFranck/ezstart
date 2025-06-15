@@ -25,6 +25,9 @@
 - [x] Champ `dueDate`
 - [x] Statut dynamique (draft/sent/paid)
 - [x] Tests d’intégration complets pour Invoice (après refacto)
+- [] Paiement enrichi → paymentDate, paymentMethod
+- [] Support partially_paid, overdue (statuts avancés)
+- [ ] Lock post-paid (flag isLocked sur Invoice après paiement → ne plus permettre update)
 
 ---
 
@@ -40,6 +43,7 @@
 - [x] Statuts (draft/sent/accepted/rejected)
 - [x] Champ `validUntil` (date de validité)
 - [x] Tests d’intégration
+- [] API markAsSent + sentAt, sentByEmail
 
 ---
 
@@ -86,6 +90,7 @@
 - [x] Champ `dueDate` dans les schémas
 - [x] Génération automatique du numéro de facture
 - [x] Génération/validation des “terms” (conditions de paiement)
+- [] Numérotation légale persistante (sans trous)
 
 ---
 
@@ -96,3 +101,38 @@
 - [x] Couverture Jest pour Quotes / Receipts
 
 ---
+
+## 10. Products / Services
+
+- [] Schéma Zod (Product / Service)
+- [] Modèle Mongoose
+- [] Services CRUD (create, get, update, softDelete, restore, hardDelete)
+- [] Contrôleurs Express (CRUD + restore)
+- [] Routes Express
+- [] Champs : name, description, unitPrice, unit, taxRate
+- [] Archiver un produit
+- [] Tests d’intégration
+
+## 11. Sending / Notification
+
+- [] API markAsSent sur Invoices et Quotes
+- [] Champs sentAt, sentByEmail
+- [] Envoi email avec lien PDF (SMTP simple ou Resend.io)
+
+## 12. PDF Generation
+
+- [] Génération PDF propre pour Invoice
+- [] Génération PDF pour Quote
+- [] Génération PDF pour Receipt
+
+## 13. Reporting / Export
+
+- [] API getInvoicesSummary par mois / année / client
+- [] Export CSV /export/invoices
+- [] Export CSV /export/receipts
+
+## 14. Compliance & Archiving
+
+- [] Numérotation factures conforme
+- [] Lock post-paid (facture non modifiable après paid)
+- [] Archivage sécurisé

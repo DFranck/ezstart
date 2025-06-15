@@ -6,15 +6,20 @@ Ce document liste les fonctionnalités, améliorations et axes de travail à pr�
 
 ## 1. UI / Frontend
 
+### 1.1 Fonctionnalités Core UI
+
 - [ ] Création d’un Dashboard Next.js (liste/filtres CRUD : clients, factures, devis, reçus)
 - [ ] Pages de création/édition pour chaque entité
 - [ ] Listing, recherche, pagination, tri
 - [ ] Gestion des statuts & actions rapides (marquer comme payée, restaurer, etc.)
 - [ ] Ajout de line items (articles, services, produits, etc.)
+- [ ] Ajout de paiements (Stripe, Paypal, etc.)
+- [ ] Ajout d’authentification (utilisateur, admin, superadmin)
+
+### 1.2 Fonctionnalités avancées UI
+
 - [ ] Ajout de templates (factures, devis, etc.)
 - [ ] Ajout de documents (PDF, word, etc.)
-- [ ] Ajout de paiements (Stripe, Paypal, etc.)
-- [ ] Ajout de authentification (utilisateur, admin, superadmin)
 
 ## Prod/scale quand tu ouvres
 
@@ -39,6 +44,7 @@ Ce document liste les fonctionnalités, améliorations et axes de travail à pr�
 - [ ] Génération de PDF pour factures/devis/reçus
 - [ ] Export CSV (clients, factures, etc.)
 - [ ] Préparer connecteurs pour intégration (Xero, Quickbooks, autres API)
+- [ ] Ajout d'API publique sécurisée (permettre usage API depuis des clients externes — génération de clé API / token)
 
 ---
 
@@ -51,10 +57,10 @@ Ce document liste les fonctionnalités, améliorations et axes de travail à pr�
 
 ## 6. Business Logic Avancée
 
-- [ ] Support multi-organisations (multi-tenant)
 - [ ] Templates de conditions de paiement (réutilisables)
-- [ ] Gestion des remises, acomptes, avoirs
-- [ ] Support multilingue (UI & documents)
+- [ ] Support mode Sandbox (tester factures en mode brouillon / test, sans comptabilité réelle)
+- [ ] Gestion des remises, acomptes, avoirs → transformer en : "Remises / Acomptes / Avoirs (documents correctifs)"
+- [ ] Support multi-organisations (multi-tenant) → important mais nécessite réflexion d’archi (Mongoose single-tenant ou multi-tenant pattern ?)
 
 ---
 

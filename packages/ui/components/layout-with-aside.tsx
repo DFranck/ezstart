@@ -9,8 +9,6 @@ import { Aside, Div, Main } from './tag';
 export const LayoutWithAside = ({
   children,
   asideContent,
-  showTopHeader = false,
-  showMainHeader = false,
   topHeaderLeftContent,
   topHeaderCenterContent,
   topHeaderRightContent,
@@ -24,8 +22,6 @@ export const LayoutWithAside = ({
   withHeaderOffset?: boolean;
   children: React.ReactNode;
   asideContent: React.ReactNode;
-  showTopHeader?: boolean;
-  showMainHeader?: boolean;
   topHeaderLeftContent?: React.ReactNode;
   topHeaderCenterContent?: React.ReactNode;
   topHeaderRightContent?: React.ReactNode;
@@ -38,7 +34,10 @@ export const LayoutWithAside = ({
   const { isMobile } = useDevice();
   const [isAsideOpen, setIsAsideOpen] = useState(false);
   const toggleAside = () => setIsAsideOpen((prev) => !prev);
-
+  const isTopHeaderVisible =
+    topHeaderLeftContent || topHeaderCenterContent || topHeaderRightContent;
+  const isMainHeaderVisible =
+    mainHeaderLeftContent || mainHeaderCenterContent || mainHeaderRightContent;
   const debug = false;
 
   return (
@@ -48,7 +47,7 @@ export const LayoutWithAside = ({
       layout={'col'}
       className={cn('gap-0 md:gap-0 lg:gap-0', debug && 'bg-red-500')}
     >
-      {showTopHeader && (
+      {isTopHeaderVisible && (
         <Header
           className={cn('h-16', debug && 'bg-blue-500')}
           leftContent={
@@ -81,7 +80,7 @@ export const LayoutWithAside = ({
           {debug ? 'aside' : asideContent}
         </Aside>
         <Main className={cn('relative', debug && 'bg-yellow-500')}>
-          {showMainHeader && (
+          {isMainHeaderVisible && (
             <Header
               className={cn('h-16', debug && 'bg-green-500')}
               leftContent={
