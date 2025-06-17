@@ -43,9 +43,9 @@ export const LayoutWithAside = ({
   return (
     <Div
       withHeaderOffset={withHeaderOffset}
-      size={'full'}
+      size={'none'}
       layout={'col'}
-      className={cn('gap-0 md:gap-0 lg:gap-0', debug && 'bg-red-500')}
+      className={cn('', debug && 'bg-red-500')}
     >
       {isTopHeaderVisible && (
         <Header

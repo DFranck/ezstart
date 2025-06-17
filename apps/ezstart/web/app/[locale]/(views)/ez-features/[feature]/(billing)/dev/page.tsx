@@ -1,5 +1,5 @@
 'use client';
-import { H1, H4, LI, Main, Section, UL } from '@ezstart/ui/components';
+import { H1, H4, LI, Section, UL } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { E2EPlayground } from './e2e-playground';
 
@@ -8,14 +8,12 @@ const pageDev = () => {
   const pushLog = (msg: string) =>
     setLog((logs) => [`${new Date().toISOString()} > ${msg}`, ...logs]);
   return (
-    <Main withHeaderOffset className='mt-20'>
+    <>
       <H1>E2E Playground</H1>
-      <Section size={'full'}>
-        <Section size={'full'}>
-          <E2EPlayground pushLog={pushLog} />
-        </Section>
+      <Section>
+        <E2EPlayground pushLog={pushLog} />
       </Section>
-      <Section size={'full'}>
+      <Section>
         <UL variant={'outline'}>
           <H4>Logs</H4>
           {log.map((l, i) => (
@@ -25,7 +23,7 @@ const pageDev = () => {
           ))}
         </UL>
       </Section>
-    </Main>
+    </>
   );
 };
 

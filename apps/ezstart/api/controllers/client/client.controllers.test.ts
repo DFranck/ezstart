@@ -9,7 +9,7 @@ jest.mock('../../services/client');
 describe('Client Controller (integration)', () => {
   const validId = '6658c5d78904c1234567abcd';
   const createClientInput = {
-    companyName: 'Test Corp',
+    clientName: 'Test Corp',
     address: '123 Rue X',
     phone: '+33 1 23 45 67 89',
     notes: 'First client',
@@ -18,7 +18,7 @@ describe('Client Controller (integration)', () => {
 
   const mockClient = {
     _id: validId,
-    companyName: 'Test Corp',
+    clientName: 'Test Corp',
     address: '123 Rue X',
     phone: '+33 1 23 45 67 89',
     notes: 'First client',
@@ -58,14 +58,14 @@ describe('Client Controller (integration)', () => {
   it('PUT /api/clients/:id - should update client', async () => {
     (services.updateClientService as jest.Mock).mockResolvedValue({
       ...mockClient,
-      companyName: 'Updated',
+      clientName: 'Updated',
     });
     const response = await request(app)
       .put(`/api/clients/${validId}`)
-      .send({ companyName: 'Updated' });
+      .send({ clientName: 'Updated' });
 
     expect(response.status).toBe(200);
-    expect(response.body.companyName).toBe('Updated');
+    expect(response.body.clientName).toBe('Updated');
   });
 
   it('DELETE /api/clients/:id - should delete client', async () => {

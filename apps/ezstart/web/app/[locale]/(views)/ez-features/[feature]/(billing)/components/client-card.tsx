@@ -9,10 +9,11 @@ import {
 
 type Props = { client: Client };
 const ClientCard = ({ client }: Props) => {
+  console.log('client', client);
   return (
     <Card className='w-full cursor-pointer hover:opacity-80 active:scale-95'>
       <CardHeader>
-        <CardTitle>{client.companyName}</CardTitle>
+        <CardTitle>{client.clientName}</CardTitle>
         <CardDescription></CardDescription>
       </CardHeader>
       <CardContent></CardContent>

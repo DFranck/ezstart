@@ -4,17 +4,37 @@ import { listingQuerySchema } from './listing';
 // -----------------------------------
 // 🟢 BASE (never used alone)
 export const baseClientSchema = z.object({
-  companyName: z.string().min(1, 'Company name is required'),
+  clientName: z.string().min(1, 'Client name is required'),
   address: z.string().optional(),
+  isCompany: z.boolean().default(true),
   phone: z.string().optional(),
   notes: z.string().optional(),
 });
 
 // -----------------------------------
 // 🟢 INPUTS (create/update)
-export const billingClientSchema = baseClientSchema.extend({
-  taxNumber: z.string().optional(),
-});
+export const billingClientSchema = baseClientSchema
+  .extend({
+    taxNumber: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isCompany) {
+      if (!data.taxNumber || data.taxNumber.trim() === '') {
+        ctx.addIssue({
+          path: ['taxNumber'],
+          message: 'Tax number is required for companies.',
+          code: z.ZodIssueCode.custom,
+        });
+      }
+      if (!data.address || data.address.trim() === '') {
+        ctx.addIssue({
+          path: ['address'],
+          message: 'Address is required for companies.',
+          code: z.ZodIssueCode.custom,
+        });
+      }
+    }
+  });
 
 export const clientIdSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId'),

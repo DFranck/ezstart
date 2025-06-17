@@ -12,7 +12,7 @@ type Props = {
 
 export function ClientE2ETest({ pushLog, filter }: Props) {
   const [clients, setClients] = useState<Client[]>([]);
-  const [companyName, setCompanyName] = useState('');
+  const [clientName, setClientName] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updatedName, setUpdatedName] = useState('');
 
@@ -34,16 +34,16 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   };
 
   const createClient = async () => {
-    pushLog(`POST /api/clients { companyName: "${companyName}" }`);
+    pushLog(`POST /api/clients { clientName: "${clientName}" }`);
     const data = await exec<Client>(() =>
       callApi<Client>('/api/clients', {
         method: 'POST',
-        body: { companyName },
+        body: { clientName },
       })
     );
     pushLog(`POST → ${JSON.stringify(data)}`);
     if (data) {
-      setCompanyName('');
+      setClientName('');
       fetchClients();
       toast.success('Client created!');
     }
@@ -59,11 +59,11 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   };
 
   const updateClient = async (id: string) => {
-    pushLog(`PUT /api/clients/${id} { companyName: "${updatedName}" }`);
+    pushLog(`PUT /api/clients/${id} { clientName: "${updatedName}" }`);
     const data = await exec<Client>(() =>
       callApi<Client>(`/api/clients/${id}`, {
         method: 'PUT',
-        body: { companyName: updatedName },
+        body: { clientName: updatedName },
       })
     );
     pushLog(`PUT → ${JSON.stringify(data)}`);
@@ -112,9 +112,9 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
         )}
         <div className='flex flex-col md:flex-row gap-2'>
           <Input
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            placeholder='companyName'
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            placeholder='clientName'
           />
           <div className='grid grid-cols-2 gap-2'>
             <Button onClick={createClient}>Create</Button>
@@ -135,7 +135,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
                   <Input
                     value={updatedName}
                     onChange={(e) => setUpdatedName(e.target.value)}
-                    placeholder='New companyName'
+                    placeholder='New clientName'
                   />
                   <div className='grid grid-cols-2 gap-2'>
                     <Button
@@ -162,7 +162,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
                     title={JSON.stringify(c, null, 2)}
                     onClick={() => getClientById(c._id)}
                   >
-                    {c.companyName}{' '}
+                    {c.clientName}{' '}
                     <span className='text-gray-400'>({_idShort(c._id)})</span>
                     {c.deletedAt && (
                       <span className='ml-1 text-red-500 text-xs'>
@@ -176,7 +176,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
                       variant='outline'
                       onClick={() => {
                         setSelectedId(c._id);
-                        setUpdatedName(c.companyName ?? '');
+                        setUpdatedName(c.clientName ?? '');
                       }}
                       disabled={!!c.deletedAt}
                     >
