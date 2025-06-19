@@ -18,6 +18,7 @@ export const LayoutWithAside = ({
   withHeaderOffset = false,
   disableTopHeaderBurger = false,
   disableMainHeaderBurger = false,
+  asideAbsoluteOnMobile = false,
 }: {
   withHeaderOffset?: boolean;
   children: React.ReactNode;
@@ -30,6 +31,7 @@ export const LayoutWithAside = ({
   mainHeaderRightContent?: React.ReactNode;
   disableTopHeaderBurger?: boolean;
   disableMainHeaderBurger?: boolean;
+  asideAbsoluteOnMobile?: boolean;
 }) => {
   const { isMobile } = useDevice();
   const [isAsideOpen, setIsAsideOpen] = useState(false);
@@ -42,67 +44,60 @@ export const LayoutWithAside = ({
 
   return (
     <Div
-      withHeaderOffset={withHeaderOffset}
-      size={'none'}
-      layout={'col'}
-      className={cn('', debug && 'bg-red-500')}
+      size={'full'}
+      layout={'default'}
+      className={cn('min-h-screen h-full', debug && 'bg-red-500/30')}
     >
       {isTopHeaderVisible && (
         <Header
-          className={cn('h-16 bg-muted border-y', debug && 'bg-blue-500')}
+          className={cn('h-14 bg-muted border-y', debug && 'bg-blue-500/30')}
           leftContent={
-            debug ? (
-              'left'
-            ) : (
-              <>
-                {!disableTopHeaderBurger && isMobile && (
-                  <Burger isOpen={isAsideOpen} setIsOpen={toggleAside} />
-                )}
-                {topHeaderLeftContent}
-              </>
-            )
+            <>
+              {!disableTopHeaderBurger && isMobile && (
+                <Burger isOpen={isAsideOpen} setIsOpen={toggleAside} />
+              )}
+              {topHeaderLeftContent}
+            </>
           }
-          centerContent={debug ? 'center' : topHeaderCenterContent}
-          rightContent={debug ? 'right' : topHeaderRightContent}
+          centerContent={topHeaderCenterContent}
+          rightContent={topHeaderRightContent}
         />
       )}
-      <Div size={'full'} layout={'aside'}>
+      <Div size={'full'} layout={'aside'} className='relative h-full'>
         <Aside
           size={'xs'}
           layout={'col'}
           className={cn(
-            'transition-transform duration-300 ease-in-out flex-shrink-0 w-fit bg-muted border-r',
+            'w-fit bg-muted border-r flex-1  ',
+            'transition-transform duration-300 ease-in-out ',
             isMobile &&
               (isAsideOpen
                 ? 'translate-x-0 '
                 : '-translate-x-full w-0 px-0 py-0'),
-            debug && 'bg-pink-500'
+            isMobile && asideAbsoluteOnMobile && 'absolute left-0 z-40',
+            debug && 'bg-pink-500/30'
           )}
         >
-          {debug ? 'aside' : asideContent}
+          {asideContent}
         </Aside>
-        <Main className={cn('relative', debug && 'bg-yellow-500')}>
+        <Main className={cn('relative ', debug && 'bg-yellow-500/30')}>
           {isMainHeaderVisible && (
             <Header
-              className={cn('h-16', debug && 'bg-green-500')}
+              className={cn('h-14 px-0', debug && 'bg-green-500/30')}
               leftContent={
-                debug ? (
-                  'left'
-                ) : (
-                  <>
-                    {!disableMainHeaderBurger && isMobile && (
-                      <Burger isOpen={isAsideOpen} setIsOpen={toggleAside} />
-                    )}
-                    {mainHeaderLeftContent}
-                  </>
-                )
+                <>
+                  {!disableMainHeaderBurger && isMobile && (
+                    <Burger isOpen={isAsideOpen} setIsOpen={toggleAside} />
+                  )}
+                  {mainHeaderLeftContent}
+                </>
               }
-              centerContent={debug ? 'center' : mainHeaderCenterContent}
-              rightContent={debug ? 'right' : mainHeaderRightContent}
+              centerContent={mainHeaderCenterContent}
+              rightContent={mainHeaderRightContent}
               position='absolute'
             />
           )}
-          {debug ? 'main' : children}
+          {children}
         </Main>
       </Div>
     </Div>

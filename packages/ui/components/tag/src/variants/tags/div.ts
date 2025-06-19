@@ -6,7 +6,7 @@ import { createAlias } from '../../utils/create-alias';
 export const divVariant = variantContainer;
 
 export const divSize = {
-  none: '',
+  default: '',
   xs: 'px-2 py-4 md:px-4 md:py-6',
   sm: 'px-4 py-6 md:px-8 md:py-10',
   md: 'px-6 py-8 md:px-12 md:py-14',
@@ -18,10 +18,11 @@ export const divSize = {
 export const divIntent = intentContainer;
 
 export const divLayout = {
-  col: 'flex flex-col gap-4 md:gap-6 lg:gap-8',
-  row: 'flex flex-row gap-4 md:gap-6 lg:gap-8 items-center justify-between',
-  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 ',
-  center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
+  default: '',
+  col: 'flex flex-col gap-2 md:gap-4 lg:gap-6',
+  row: 'flex flex-row gap-2 md:gap-4 lg:gap-6 items-center justify-between',
+  grid: 'grid gap-2 md:gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-2 ',
+  center: 'flex flex-col items-center justify-center gap-2 md:gap-4 lg:gap-6',
   aside: 'flex flex-row',
 } as const;
 
@@ -31,10 +32,6 @@ export const divVariantConfig = {
   intent: intentContainer,
   size: divSize,
   layout: divLayout,
-  withHeaderOffset: {
-    true: 'pt-[71px]',
-    false: '',
-  },
 } as const;
 
 // --- Default variants
@@ -43,11 +40,10 @@ export const DEFAULT_DIV_VARIANTS = {
   intent: 'default',
   size: 'md',
   layout: 'center',
-  withHeaderOffset: false,
 } as const;
 
 // --- cva
-export const divVariants = cva('w-fit', {
+export const divVariants = cva('', {
   variants: divVariantConfig,
   defaultVariants: DEFAULT_DIV_VARIANTS,
 });
@@ -66,5 +62,4 @@ export const divVariantsMeta = Object.fromEntries(
   intent: string[];
   size: string[];
   layout: string[];
-  withHeaderOffset: string[];
 };

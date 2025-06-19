@@ -1,6 +1,3 @@
-import { Footer } from '@/components/layout/footer';
-import Header from '@/components/layout/header/header';
-import MobileNavbar from '@/components/layout/mobile-nav-bar';
 import { Providers } from '@/components/providers';
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
 import { Toaster } from '@ezstart/ui/components';
@@ -9,6 +6,7 @@ import { hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import ClientLayout from './client-layout';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -38,15 +36,12 @@ export default async function LocaleLayout(props: {
   const timeZone = getTimeZoneFromLocale(locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning className='h-full'>
+    <html lang={locale} suppressHydrationWarning className=''>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col h-full`}
       >
         <Providers messages={messages} locale={locale} timeZone={timeZone}>
-          <Header />
-          {children}
-          <MobileNavbar />
-          <Footer />
+          <ClientLayout>{children}</ClientLayout>
         </Providers>
         <Toaster />
       </body>

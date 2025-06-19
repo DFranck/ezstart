@@ -1,13 +1,15 @@
 import { cva } from 'class-variance-authority';
-import { intentText, layoutText } from '../../tokens/tokens';
+import { intentText, layoutText, sizeText } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
 export const spanVariantConfig = {
+  size: sizeText,
   intent: intentText,
   layout: layoutText,
 } as const;
 
 export const DEFAULT_SPAN_VARIANTS = {
+  size: 'xs',
   intent: 'default',
   layout: 'inline',
 } as const;
@@ -25,6 +27,7 @@ export const spanVariantsMeta = Object.fromEntries(
     Object.keys(variantValues),
   ])
 ) as {
+  size: string[];
   intent: string[];
   layout: string[];
 };

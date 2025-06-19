@@ -2,9 +2,11 @@
 
 import { useBillingContext } from '@/contexts/billing-context';
 import { BillingProvider } from '@/providers/billing-provider';
-import { LayoutWithAside, LI, Nav, UL } from '@ezstart/ui/components';
+import { H1, LayoutWithAside } from '@ezstart/ui/components';
+import { useDevice } from '@ezstart/ui/hooks';
 import Link from 'next/link';
 import ClientCard from './components/client-card';
+import NavBilling from './components/nav-billing';
 
 export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -16,32 +18,18 @@ export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
 
 const BillingLayoutWithData = ({ children }: { children: React.ReactNode }) => {
   const { clients } = useBillingContext();
-
+  const { isMobile } = useDevice();
   return (
     <LayoutWithAside
-      withHeaderOffset
-      topHeaderCenterContent={
-        <Nav>
-          <UL
-            layout={'menu'}
-            className='flex-row justify-between'
-            size={'default'}
-          >
-            <LI layout={'menu'} asChild button>
-              <Link href='/ez-features/ezbilling/clients'>Clients</Link>
-            </LI>
-            <LI layout={'menu'} asChild button>
-              <Link href='/ez-features/ezbilling/invoices'>Invoices</Link>
-            </LI>
-            <LI layout={'menu'} asChild button>
-              <Link href='/ez-features/ezbilling/quotes'>Quotes</Link>
-            </LI>
-            <LI layout={'menu'} asChild button>
-              <Link href='/ez-features/ezbilling/receipts'>Receipts</Link>
-            </LI>
-          </UL>
-        </Nav>
+      asideAbsoluteOnMobile
+      topHeaderLeftContent={
+        <H1 size={'h5'} asChild className='text-start'>
+          <Link href='/ez-features/ezbilling'>EzBilling</Link>
+        </H1>
       }
+      topHeaderCenterContent={!isMobile && <NavBilling />}
+      mainHeaderRightContent={isMobile && <NavBilling />}
+      disableMainHeaderBurger
       asideContent={clients.map((c) => (
         <ClientCard key={c._id} client={c} />
       ))}

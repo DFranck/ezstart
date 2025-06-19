@@ -8,6 +8,7 @@ export const navVariant = variantContainer;
 export const navSize = {
   none: '',
   xs: 'p-1',
+  full: 'w-full',
 } as const;
 
 export const navIntent = intentContainer;
@@ -30,7 +31,7 @@ export const navVariantConfig = {
 export const DEFAULT_NAV_VARIANTS = {
   variant: 'default',
   intent: 'default',
-  size: 'xs',
+  size: 'full',
   layout: 'center',
   withHeaderOffset: false,
 } as const;

@@ -28,26 +28,14 @@ export const Header = ({
       position={position}
       className={cn('px-2 md:px-6', className)}
     >
-      <Div layout={'row'} size={'none'} className='w-full'>
-        {leftContent && (
-          <Div layout={'row'} size={'none'}>
-            {leftContent}
-          </Div>
-        )}
-        {centerContent && (
-          <Div layout={'row'} size={'none'} className='w-full'>
-            {centerContent}
-          </Div>
-        )}
-        {rightContent && (
-          <Div layout={'row'} size={'none'}>
-            {rightContent}
-          </Div>
-        )}
+      <Div layout={'row'} size={'default'} className='w-full'>
+        {leftContent && leftContent}
+        {centerContent && centerContent}
+        {rightContent && rightContent}
       </Div>
 
       {children && (
-        <Div size={'none'} layout={'row'}>
+        <Div size={'default'} layout={'row'}>
           {children}
         </Div>
       )}

@@ -12,7 +12,7 @@ export const asideSize = {
   md: 'px-6 py-8 md:px-12 md:py-14',
   lg: 'px-8 py-12 md:px-16 md:py-20',
   xl: 'px-12 py-16 md:px-24 md:py-28',
-  full: 'min-h-screen w-full px-12 py-16 md:px-24 md:py-28',
+  full: 'min-h-screen w-full',
 } as const;
 
 export const asideIntent = intentContainer;
@@ -29,10 +29,6 @@ export const asideVariantConfig = {
   intent: intentContainer,
   size: asideSize,
   layout: asideLayout,
-  withHeaderOffset: {
-    true: 'pt-[71px]',
-    false: '',
-  },
 } as const;
 
 // --- Default variants
