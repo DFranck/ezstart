@@ -10,9 +10,9 @@ export const SectionVision = () => {
     <Section>
       <H2>{t('title')}</H2>
       <P>{t('intro')}</P>
-      <UL layout={'grid'}>
+      <UL layout={'grid'} size={'xs'}>
         {t.raw('points').map((point: string, index: number) => (
-          <LI marker={'check'} variant={'card'} key={index}>
+          <LI marker={'check'} variant={'card'} size={'sm'} key={index}>
             {point}
           </LI>
         ))}

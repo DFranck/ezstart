@@ -9,12 +9,10 @@ export const SectionContact = () => {
   const t = useTranslations('section-contact');
 
   return (
-    <LampContainer>
+    <LampContainer className=''>
       <Section>
         <H2>{t('title')}</H2>
-
         <P>{t('description')}</P>
-
         <Div>
           <Button>
             <Link href='/contact'>{t('cta')}</Link>

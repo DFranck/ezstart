@@ -5,7 +5,7 @@ export const SectionHero = () => {
   const t = useTranslations('hero');
   return (
     <AuroraBackground>
-      <Section size={'md'}>
+      <Section>
         <H1>{t('title')}</H1>
         <H3>{t('subtitle')}</H3>
       </Section>
