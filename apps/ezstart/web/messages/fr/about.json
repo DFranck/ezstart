@@ -1,53 +1,52 @@
 {
   "about": {
     "title": "À propos de moi",
-    "intro": "Je suis Franck Dufournet, CTO & Full-Stack Developer basé à Ho Chi Minh City. J'allie expertise technique et vision stratégique pour créer des applications web performantes et accessibles.",
+    "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance, fondateur d’EzStart LLC. J’aide les startups et entreprises à créer des bases techniques solides, scalables et bien structurées, en combinant code, architecture et accompagnement stratégique.",
     "timelineTitle": "Mon parcours",
     "timeline": [
       {
         "year": "2015",
-        "title": "Front-End Developer",
-        "description": "Premiers pas en HTML, CSS, JavaScript et jQuery."
+        "title": "Premiers pas front-end",
+        "description": "Initiation autodidacte à HTML/CSS, puis premières interfaces avec JavaScript et jQuery."
       },
       {
         "year": "2018",
-        "title": "Full-Stack",
-        "description": "Adoption de Node.js, Express, MongoDB et React."
+        "title": "Full-Stack confirmé",
+        "description": "Node.js, Express, MongoDB, React. Premiers projets freelance et industrialisation des pratiques de dev."
       },
       {
         "year": "2021",
-        "title": "CTO & Lead Dev",
-        "description": "Pilotage d'équipes et architecture de solutions SaaS et blockchain."
+        "title": "Lead Dev & CTO Freelance",
+        "description": "Pilotage technique, choix d’archi, monorepos, TDD, CI/CD. Accompagnement de plusieurs équipes."
       },
       {
         "year": "2024",
-        "title": "Création d’EzStart",
-        "description": "Boilerplate PWA Next.js, Tailwind & Prisma pour démarrage rapide."
+        "title": "Création d’EzStart LLC",
+        "description": "Structuration de mon offre, open-source, SaaS, starter fullstack TypeScript et UI réutilisable."
       }
     ],
     "skillsTitle": "Compétences clés",
     "skills": [
-      "TypeScript",
-      "React.js & Next.js",
-      "Node.js & Express",
-      "Tailwind CSS & Sass",
-      "Prisma & MongoDB",
-      "Redux & Zustand",
-      "Jest & Testing"
+      "TypeScript fullstack (React, Next.js, Node.js)",
+      "Architecture modulaire & monorepos",
+      "CI/CD (GitHub Actions, Vercel, Railway)",
+      "Zod, tRPC, Prisma, Auth.js",
+      "Testing (Jest, Vitest, Storybook)",
+      "Design System & composants UI réutilisables"
     ],
-    "valuesTitle": "Valeurs & philosophie",
+    "valuesTitle": "Philosophie & principes",
     "values": [
-      "Code propre & bonnes pratiques",
-      "Typage strict (pas de any)",
-      "Accessibilité & SEO",
-      "Modularité & réutilisabilité"
+      "Code lisible, typé et maintenable",
+      "Composants réutilisables & logique isolée",
+      "Séparation front/back stricte & types partagés",
+      "Accessibilité, performance & tests par défaut"
     ],
-    "interestsTitle": "Centres d'intérêt",
+    "interestsTitle": "Sujets qui m’inspirent",
     "interests": [
-      "Finance durable & ESG",
-      "Urbanisme écologique",
-      "Blockchain & Web3",
-      "Veille technologique"
+      "SaaS B2B & architecture produit",
+      "Décentralisation & blockchain utilitaire",
+      "Finance responsable & tech éthique",
+      "Veille constante sur les outils Dev/DevOps"
     ]
   }
 }

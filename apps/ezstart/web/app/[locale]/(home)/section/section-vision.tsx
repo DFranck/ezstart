@@ -17,7 +17,7 @@ export const SectionVision = () => {
           </LI>
         ))}
       </UL>
-      <P>{t('footer')}</P>
+      <P variant={'description'}>{t('footer')}</P>
     </Section>
   );
 };

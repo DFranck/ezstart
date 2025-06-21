@@ -6,8 +6,7 @@ import { createAlias } from '../../utils/create-alias';
 export const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 // --- Variants
-export const baseHeadingClasses =
-  'font-display font-bold !leading-[1.3] text-center';
+export const baseHeadingClasses = 'font-display font-bold !leading-[1.3]';
 
 // --- Config
 export const headingVariantConfig = {

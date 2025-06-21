@@ -1,16 +1,33 @@
 {
-  "hero": {
-    "title": "Build faster. Ship better. EzStart.",
-    "subtitle": "Tout est réalisable, il suffit de commencer."
+  "SectionHero": {
+    "title": "Des bases solides. Des projets qui scalent.",
+    "subtitle": "EzStart, votre socle technique pour des produits durables.",
+    "description": "J'accompagne startups, agences et équipes tech dans la création de bases solides, fiables et modernes — du front au back en passant par le DevOps."
+  },
+  "SectionHero2": {
+    "title": "Développez mieux. Livrez plus vite.",
+    "subtitle": " Avec EzStart.",
+    "description": "  J’aide les startups et entreprises à bâtir des fondations techniques modernes, fiables et prêtes à scaler — en tant que freelance ou CTO externalisé."
+  },
+  "SectionHero3": {
+    "title": "Lancez vite. Construisez bien.",
+    "subtitle": "CTO freelance & développeur fullstack à vos côtés.",
+    "description": "De la base de données à l’auth, du déploiement au dashboard : je structure vos projets avec une stack moderne, typée et maintenable."
+  },
+  "SectionAbout": {
+    "title": "À propos",
+    "paragraph1": "Je suis Franck Dufournet, développeur fullstack & CTO freelance, fondateur de <strong>EzStart LLC</strong>. J’aide les équipes tech à construire des bases modernes, durables et typées — pour livrer plus sereinement.",
+    "paragraph2": "Mon rôle va au-delà du code : j’interviens aussi sur l’architecture, l’outillage DevOps, les choix de services et la stratégie produit. Une approche complète, pour des projets qui scalent vraiment.",
+    "cta": "En savoir plus →"
   },
   "vision": {
-    "title": "Une vision claire pour un écosystème complexe",
-    "intro": "L’écosystème JavaScript/TypeScript évolue vite, parfois trop. EzStart est né de la volonté d’offrir une base de développement fiable, réutilisable, et pensée pour durer.",
+    "title": "Une architecture pensée pour durer",
+    "intro": "Trop de projets souffrent d’une dette technique évitable. EzStart est né d’un besoin simple : bâtir une base claire, modulaire et durable qui respecte les meilleures pratiques du développement moderne. Chaque projet mérite une architecture saine, prévisible et facile à faire évoluer.",
     "points": [
-      "Respect systématique des bonnes pratiques modernes",
-      "Typage strict, réutilisabilité, accessibilité",
-      "Compatibilité front & back (Next.js, React, Express, etc.)",
-      "Intégration fluide des outils standard (Auth, Zod, Prisma, CI…)"
+      "Stack moderne (TypeScript, React, Next.js, Express)",
+      "Architecture modulaire et scalable",
+      "Intégration fluide des outils standards (Zod, CI/CD…)",
+      " Accessibilité, typage strict, tests et conventions"
     ],
     "footer": "Ne plus jamais repartir de zéro. Toujours avancer avec des fondations saines."
   },

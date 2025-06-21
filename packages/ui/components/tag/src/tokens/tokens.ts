@@ -16,15 +16,14 @@ export const sizeContainer = {
 export const sizeTextCommon = 'w-full';
 export const sizeText = {
   default: '',
-  h1: cn(
-    sizeTextCommon,
-    'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl'
-  ),
-  h2: cn(sizeTextCommon, 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl'),
-  h3: cn(sizeTextCommon, 'text-2xl sm:text-3xl md:text-4xl'),
-  h4: cn(sizeTextCommon, 'text-xl sm:text-2xl md:text-3xl'),
-  h5: cn(sizeTextCommon, 'text-lg sm:text-xl md:text-2xl'),
-  h6: cn(sizeTextCommon, 'text-base sm:text-lg md:text-xl'),
+  h1: cn(sizeTextCommon, 'text-3xl sm:text-4xl md:text-5xl'),
+  h2: cn(sizeTextCommon, 'text-2xl sm:text-3xl md:text-4xl'),
+  h3: cn(sizeTextCommon, 'text-xl sm:text-2xl md:text-3xl'),
+  h4: cn(sizeTextCommon, 'text-lg sm:text-xl md:text-2xl'),
+  h5: cn(sizeTextCommon, 'text-base sm:text-lg md:text-xl'),
+  h6: cn(sizeTextCommon, 'text-sm sm:text-base md:text-lg'),
+  giant: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
+  sm: 'text-sm sm:text-base',
   xs: 'text-xs sm:text-sm',
 } as const;
 
@@ -94,5 +93,9 @@ export const variantContainer = {
 export const textCommonClasses = '';
 export const variantText = {
   default: '',
-  link: cn(textCommonClasses, 'underline text-primary '),
+  link: cn(
+    textCommonClasses,
+    'inline-block mt-4 text-cyan-600 hover:underline cursor-pointer'
+  ),
+  description: cn(textCommonClasses, 'italic text-muted-foreground font-light'),
 } as const;

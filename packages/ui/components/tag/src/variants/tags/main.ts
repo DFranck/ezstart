@@ -10,7 +10,7 @@ import { createAlias } from '../../utils/create-alias';
 export const mainVariantConfig = {
   intent: intentContainer,
   withHeaderOffset: {
-    true: 'pt-[71px]',
+    true: 'mt-[71px]',
     false: '',
   },
 } as const;

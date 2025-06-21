@@ -38,11 +38,11 @@ export const listingItemsIntent = intentText;
 
 export const listingContainersLayout = {
   default: '',
-  col: 'flex flex-col',
+  col: 'flex flex-col gap-2 ',
   row: 'flex flex-row items-center',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
-  menu: 'flex flex-col py-1 md:py-1 px-2 md:px-2 gap-2 md:gap-4 lg:gap-6',
+  menu: 'flex flex-col py-1 md:py-1 px-2 md:px-2 gap-2 ',
 } as const;
 
 // --- Variant config
@@ -72,7 +72,7 @@ export const listingItemsVariantConfig = {
 
 // --- CVA
 export const listingContainersVariants = {
-  ul: cva('pl-4', {
+  ul: cva('', {
     variants: listingContainersVariantConfig,
     defaultVariants: {
       variant: 'default',

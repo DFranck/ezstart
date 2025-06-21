@@ -22,7 +22,7 @@ export const sectionIntent = intentContainer;
 
 export const sectionLayout = {
   col: 'flex flex-col justify-center items-center gap-4 md:gap-6 lg:gap-8',
-  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2',
+  grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 items-center',
   center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
 } as const;
 

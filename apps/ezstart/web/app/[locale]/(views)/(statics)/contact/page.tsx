@@ -1,60 +1,88 @@
-'use client';
-import {
-  Button,
-  H1,
-  Icon,
-  LI,
-  Main,
-  P,
-  Section,
-  UL,
-} from '@ezstart/ui/components';
-import { cn } from '@ezstart/ui/lib';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-
-type ContactLink = {
-  label: 'Github' | 'Linkedin' | 'Mail';
-  href: string;
-};
-
-const ContactPage = () => {
-  const t = useTranslations('contact');
-  const links = t.raw('links') as ContactLink[];
-
+export default function ContactPage() {
   return (
-    <Main withHeaderOffset>
-      <Section>
-        <H1>{t('title')}</H1>
-        <P>{t('intro')}</P>
-        <UL layout={'grid'}>
-          {links.map((link, i, arr) => (
-            <LI
-              className={cn('', {
-                'md:col-span-2': arr.length % 2 !== 0 && i === arr.length - 1,
-              })}
-              key={link.href}
-              asChild
-            >
-              <Button
-                asChild
-                variant={`${link.label === 'Mail' ? 'outline' : link.label === 'Github' ? 'default' : link.label === 'Linkedin' ? 'linkedin' : 'default'}`}
-                className={cn(`justify-center`, {})}
-              >
-                <Link
-                  href={link.href}
-                  target={link.href.startsWith('http') ? '_blank' : undefined}
-                >
-                  <Icon name={`lucide:${link.label}`} size={20} />
-                  {link.label}
-                </Link>
-              </Button>
-            </LI>
-          ))}
-        </UL>
-      </Section>
-    </Main>
-  );
-};
+    <main className='max-w-2xl mx-auto px-6 py-24 space-y-10'>
+      <h1 className='text-4xl font-bold'>Discutons de votre projet</h1>
 
-export default ContactPage;
+      <p className='text-gray-700 text-lg'>
+        Vous lancez un nouveau produit&nbsp;? Vous cherchez à consolider une
+        base technique existante ou à refondre un projet complexe&nbsp;? Je
+        propose un accompagnement structuré, en tant que développeur freelance
+        ou CTO externalisé.
+      </p>
+
+      <ul className='space-y-2 text-gray-700'>
+        <li>
+          ✅ Création de socles techniques modernes (Next.js, TypeScript, CI/CD)
+        </li>
+        <li>
+          ✅ Audit & refonte de codebases existantes (architecture, sécurité,
+          tests)
+        </li>
+        <li>✅ Accompagnement CTO : stratégie, roadmap, choix de stack</li>
+        <li>
+          ✅ Développement de MVP ou outils internes (rapidité, qualité,
+          maintenabilité)
+        </li>
+      </ul>
+
+      <div className='space-y-4'>
+        <p className='text-gray-600'>
+          Pour toute demande de collaboration ou d'information complémentaire :
+        </p>
+
+        <ul className='space-y-1 text-cyan-700 underline'>
+          <li>
+            📧{' '}
+            <a href='mailto:franck.dufournet@gmail.com'>
+              franck.dufournet@gmail.com
+            </a>
+          </li>
+          <li>
+            💼{' '}
+            <a
+              href='https://www.linkedin.com/in/franck-dufournet-239446151/'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              LinkedIn
+            </a>
+          </li>
+          <li>
+            🧑‍💻{' '}
+            <a
+              href='https://github.com/DFranck'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              GitHub
+            </a>
+          </li>
+          <li>
+            🛠️{' '}
+            <a
+              href='https://en.malt.fr/profile/franckdufournet1'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Malt
+            </a>{' '}
+            |{' '}
+            <a
+              href='https://www.upwork.com/freelancers/~01193d57968b5d8131'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Upwork
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <p className='text-sm text-gray-500'>
+        📍 <strong>EzStart LLC</strong> – enregistrée dans le Wyoming (USA). Je
+        travaille à distance avec des clients en France, Europe et Amérique du
+        Nord.
+      </p>
+    </main>
+  );
+}

@@ -1,22 +1,45 @@
 {
   "links": [
-    { "label": "Home", "href": "/" },
-    { "label": "About", "href": "/about" },
-    { "label": "Contact", "href": "/contact" },
+    { "label": "Accueil", "href": "/" },
+
+    {
+      "label": "À propos",
+      "href": "/about"
+    },
+
+    {
+      "menuLabel": "Services",
+      "menu": [
+        { "label": "Offres", "href": "/services" },
+        { "label": "Tarifs", "href": "/tarifs" }
+      ]
+    },
+
     {
       "menuLabel": "Libraries",
       "menu": [
-        { "label": "EzLibs", "href": "/ez-libs" },
-        { "label": "EzTag", "href": "/ez-libs/eztag" },
-        { "label": "EzIcon", "href": "/ez-libs/ezicon" }
+        { "label": "Toutes les libs", "href": "/ez-libs" },
+        { "label": "Tag", "href": "/ez-libs/eztag" },
+        { "label": "Icon", "href": "/ez-libs/ezicon" }
       ]
     },
+
     {
       "menuLabel": "Features",
       "menu": [
-        { "label": "EzFeatures", "href": "/ez-features" },
+        { "label": "Projets internes", "href": "/ez-features" },
         { "label": "Billing", "href": "/ez-features/ezbilling" }
       ]
+    },
+
+    {
+      "label": "Blog",
+      "href": "/blog"
+    },
+
+    {
+      "label": "Contact",
+      "href": "/contact"
     }
   ]
 }
