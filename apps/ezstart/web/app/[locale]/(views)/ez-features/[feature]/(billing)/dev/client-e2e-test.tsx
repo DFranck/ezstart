@@ -1,6 +1,6 @@
 'use client';
 import { callApi } from '@/utils/call-api';
-import { Client } from '@ezstart/types';
+import { BillingClient, Client } from '@ezstart/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
@@ -15,7 +15,12 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   const [clientName, setClientName] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updatedName, setUpdatedName] = useState('');
-
+  const [updatedIsCompany, setUpdatedIsCompany] = useState(false);
+  const [updatedAddress, setUpdatedAddress] = useState('');
+  const [updatedTaxNumber, setUpdatedTaxNumber] = useState('');
+  const [isCompany, setIsCompany] = useState(false);
+  const [address, setAddress] = useState('');
+  const [taxNumber, setTaxNumber] = useState('');
   const { exec, error, setError } = useApiAction(); // 👈
 
   // Log helper
@@ -26,7 +31,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchClients(${f})`);
     const data = await exec<Client[]>(() =>
-      callApi<Client[]>('/api/clients', { query })
+      callApi<BillingClient[]>('/api/clients', { query })
     );
     if (data) setClients(data);
     else setClients([]);
@@ -34,16 +39,27 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   };
 
   const createClient = async () => {
-    pushLog(`POST /api/clients { clientName: "${clientName}" }`);
-    const data = await exec<Client>(() =>
-      callApi<Client>('/api/clients', {
+    const payload = {
+      clientName,
+      isCompany,
+      address: isCompany ? address : undefined,
+      taxNumber: isCompany ? taxNumber : undefined,
+    };
+
+    pushLog(`POST /api/clients ${JSON.stringify(payload)}`);
+
+    const data = await exec<BillingClient>(() =>
+      callApi<BillingClient>('/api/clients', {
         method: 'POST',
-        body: { clientName },
+        body: payload,
       })
     );
-    pushLog(`POST → ${JSON.stringify(data)}`);
+
     if (data) {
       setClientName('');
+      setIsCompany(false);
+      setAddress('');
+      setTaxNumber('');
       fetchClients();
       toast.success('Client created!');
     }
@@ -60,10 +76,15 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
 
   const updateClient = async (id: string) => {
     pushLog(`PUT /api/clients/${id} { clientName: "${updatedName}" }`);
-    const data = await exec<Client>(() =>
-      callApi<Client>(`/api/clients/${id}`, {
+    const data = await exec<BillingClient>(() =>
+      callApi<BillingClient>(`/api/clients/${id}`, {
         method: 'PUT',
-        body: { clientName: updatedName },
+        body: {
+          clientName: updatedName,
+          isCompany: updatedIsCompany,
+          address: updatedIsCompany ? updatedAddress : undefined,
+          taxNumber: updatedIsCompany ? updatedTaxNumber : undefined,
+        },
       })
     );
     pushLog(`PUT → ${JSON.stringify(data)}`);
@@ -111,13 +132,47 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
           <pre className='text-destructive col-span-2 text-center'>{error}</pre>
         )}
         <div className='flex flex-col md:flex-row gap-2'>
-          <Input
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            placeholder='clientName'
-          />
+          <div className='flex flex-col md:flex-row gap-2'>
+            <Input
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder='Client name'
+            />
+            <label className='flex items-center gap-2 text-sm'>
+              <input
+                type='checkbox'
+                checked={isCompany}
+                onChange={(e) => setIsCompany(e.target.checked)}
+              />
+              Is Company
+            </label>
+          </div>
+
+          {isCompany && (
+            <div className='flex flex-col md:flex-row gap-2 pt-2'>
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder='Company address'
+              />
+              <Input
+                value={taxNumber}
+                onChange={(e) => setTaxNumber(e.target.value)}
+                placeholder='Tax number'
+              />
+            </div>
+          )}
           <div className='grid grid-cols-2 gap-2'>
-            <Button onClick={createClient}>Create</Button>
+            <Button
+              onClick={createClient}
+              disabled={
+                !clientName.trim() ||
+                (isCompany && (!address.trim() || !taxNumber.trim()))
+              }
+            >
+              Create
+            </Button>
+
             <Button onClick={() => fetchClients()}>Reload</Button>
           </div>
         </div>
@@ -132,18 +187,49 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
               {selectedId === c._id ? (
                 // Affiche le formulaire d'édition INLINE ici si c'est le bon id
                 <div className='flex flex-col md:flex-row gap-2 w-full'>
-                  <Input
-                    value={updatedName}
-                    onChange={(e) => setUpdatedName(e.target.value)}
-                    placeholder='New clientName'
-                  />
+                  <div className='flex flex-col gap-2 w-full'>
+                    <Input
+                      value={updatedName}
+                      onChange={(e) => setUpdatedName(e.target.value)}
+                      placeholder='New client name'
+                    />
+                    <label className='flex items-center gap-2 text-sm'>
+                      <input
+                        type='checkbox'
+                        checked={updatedIsCompany}
+                        onChange={(e) => setUpdatedIsCompany(e.target.checked)}
+                      />
+                      Is Company
+                    </label>
+
+                    {updatedIsCompany && (
+                      <>
+                        <Input
+                          value={updatedAddress}
+                          onChange={(e) => setUpdatedAddress(e.target.value)}
+                          placeholder='Company address'
+                        />
+                        <Input
+                          value={updatedTaxNumber}
+                          onChange={(e) => setUpdatedTaxNumber(e.target.value)}
+                          placeholder='Tax number'
+                        />
+                      </>
+                    )}
+                  </div>
+
                   <div className='grid grid-cols-2 gap-2'>
                     <Button
                       onClick={() => updateClient(selectedId)}
-                      disabled={!updatedName.trim()}
+                      disabled={
+                        !updatedName.trim() ||
+                        (updatedIsCompany &&
+                          (!updatedAddress.trim() || !updatedTaxNumber.trim()))
+                      }
                     >
                       Update
                     </Button>
+
                     <Button
                       variant='ghost'
                       onClick={() => {
@@ -177,6 +263,9 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
                       onClick={() => {
                         setSelectedId(c._id);
                         setUpdatedName(c.clientName ?? '');
+                        setUpdatedIsCompany(c.isCompany ?? false);
+                        setUpdatedAddress(c.address ?? '');
+                        setUpdatedTaxNumber(c.taxNumber ?? '');
                       }}
                       disabled={!!c.deletedAt}
                     >

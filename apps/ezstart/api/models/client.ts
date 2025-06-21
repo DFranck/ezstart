@@ -7,6 +7,7 @@ const clientSchema = new Schema(
   {
     clientName: { type: String },
     address: { type: String },
+    isCompany: { type: Boolean },
     phone: { type: String },
     taxNumber: { type: String },
     notes: { type: String },

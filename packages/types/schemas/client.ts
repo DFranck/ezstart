@@ -6,7 +6,7 @@ import { listingQuerySchema } from './listing';
 export const baseClientSchema = z.object({
   clientName: z.string().min(1, 'Client name is required'),
   address: z.string().optional(),
-  isCompany: z.boolean().default(true),
+  isCompany: z.boolean(),
   phone: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -43,6 +43,7 @@ export type ClientId = z.infer<typeof clientIdSchema>;
 
 // Output
 export const clientSchema = baseClientSchema.extend({
+  taxNumber: z.string().optional(),
   _id: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
