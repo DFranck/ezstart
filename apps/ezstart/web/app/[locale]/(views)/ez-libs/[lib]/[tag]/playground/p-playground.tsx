@@ -53,7 +53,7 @@ export default function PPlayground() {
             fakeTagCode={fakeTagCode}
             fakeAliasCode={fakeAliasCode}
           />
-          <Div size={'none'}>
+          <Div>
             <Span>
               <Label htmlFor='loremCount' className='whitespace-nowrap'>
                 Lorem count:

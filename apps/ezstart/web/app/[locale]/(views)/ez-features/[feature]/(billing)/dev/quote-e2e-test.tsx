@@ -21,7 +21,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
   const { exec, error } = useApiAction();
 
   const fetchQuotes = async (f = filter) => {
-    let query: any = {};
+    const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchQuotes(${f})`);

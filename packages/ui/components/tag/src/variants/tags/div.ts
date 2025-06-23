@@ -19,7 +19,6 @@ export const divIntent = intentContainer;
 
 export const divLayout = {
   default: '',
-  none: '',
   col: 'flex flex-col gap-2 md:gap-4 lg:gap-6',
   row: 'flex flex-row gap-2 md:gap-4 lg:gap-6 items-center justify-between',
   grid: 'grid gap-2 md:gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-2 ',

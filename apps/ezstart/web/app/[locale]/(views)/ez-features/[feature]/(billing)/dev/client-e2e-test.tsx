@@ -26,7 +26,7 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   // Log helper
 
   const fetchClients = async (f = filter) => {
-    let query: any = {};
+    const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchClients(${f})`);

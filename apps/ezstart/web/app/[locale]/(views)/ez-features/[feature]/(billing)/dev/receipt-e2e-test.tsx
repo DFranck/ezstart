@@ -21,7 +21,7 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
   const { exec, error } = useApiAction();
 
   const fetchReceipts = async (f = filter) => {
-    let query: any = {};
+    const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchReceipts(${f})`);

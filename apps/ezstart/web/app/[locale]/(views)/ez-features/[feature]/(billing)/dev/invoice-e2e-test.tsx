@@ -19,7 +19,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
   const { exec, error } = useApiAction();
 
   const fetchInvoices = async (f = filter) => {
-    let query: any = {};
+    const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
     // pushLog(`fetchInvoices(${f})`);
