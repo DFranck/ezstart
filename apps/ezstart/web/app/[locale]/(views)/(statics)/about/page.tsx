@@ -25,10 +25,11 @@ import Link from 'next/link';
 export default function AboutPage() {
   const t = useTranslations('about');
 
-  const timeline = t.raw('timeline') as TimelineItem[];
-  const skills = t.raw('skills') as string[];
-  const values = t.raw('values') as string[];
-  const interests = t.raw('interests') as string[];
+  const timeline = (t.raw('timeline') ?? []) as TimelineItem[];
+
+  const skills = (t.raw('skills') ?? []) as string[];
+  const values = (t.raw('values') ?? []) as string[];
+  const interests = (t.raw('interests') ?? []) as string[];
 
   return (
     <Main withHeaderOffset className='text-center'>
