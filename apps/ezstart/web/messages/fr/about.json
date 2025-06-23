@@ -1,59 +1,61 @@
 {
-  "title": "À propos",
-  "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance. J’aide les équipes tech à poser des bases solides, modernes et scalables — en combinant développement, architecture et stratégie produit.",
-  "paragraph": "Mon approche est pragmatique, avec une attention particulière au typage, à la maintenabilité et à l’outillage DevOps.",
+  "about": {
+    "title": "À propos",
+    "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance. J’aide les équipes tech à poser des bases solides, modernes et scalables — en combinant développement, architecture et stratégie produit.",
+    "paragraph": "Mon approche est pragmatique, avec une attention particulière au typage, à la maintenabilité et à l’outillage DevOps.",
 
-  "timelineTitle": "Mon parcours",
-  "timeline": [
-    {
-      "year": "2015",
-      "title": "Premiers pas front-end",
-      "description": "HTML, CSS, JS, jQuery. Premières interfaces."
-    },
-    {
-      "year": "2018",
-      "title": "Full-Stack confirmé",
-      "description": "Node.js, Express, MongoDB, React. Freelance."
-    },
-    {
-      "year": "2021",
-      "title": "Lead Dev & CTO Freelance",
-      "description": "Architecture, CI/CD, TDD, refontes complexes."
-    },
-    {
-      "year": "2024",
-      "title": "Création d’EzStart",
-      "description": "Base technique scalable, composants & SaaS internes."
-    }
-  ],
+    "timelineTitle": "Mon parcours",
+    "timeline": [
+      {
+        "year": "2015",
+        "title": "Premiers pas front-end",
+        "description": "HTML, CSS, JS, jQuery. Premières interfaces."
+      },
+      {
+        "year": "2018",
+        "title": "Full-Stack confirmé",
+        "description": "Node.js, Express, MongoDB, React. Freelance."
+      },
+      {
+        "year": "2021",
+        "title": "Lead Dev & CTO Freelance",
+        "description": "Architecture, CI/CD, TDD, refontes complexes."
+      },
+      {
+        "year": "2024",
+        "title": "Création d’EzStart",
+        "description": "Base technique scalable, composants & SaaS internes."
+      }
+    ],
 
-  "approachTitle": "Mon approche",
-  "skillsTitle": "Compétences clés",
-  "skills": [
-    "Next.js / React / Tailwind",
-    "Node.js / tRPC / Prisma",
-    "CI/CD (Vercel, Railway, GitHub Actions)",
-    "Testing (Jest, Vitest)",
-    "Design System & UI composables"
-  ],
-  "valuesTitle": "Philosophie",
-  "values": [
-    "Code lisible, typé, testé",
-    "Architecture modulaire",
-    "Types partagés front/back",
-    "Performance & accessibilité"
-  ],
-  "interestsTitle": "Sujets qui m’inspirent",
-  "interests": [
-    "SaaS B2B",
-    "Blockchain utilitaire",
-    "Finance éthique",
-    "DevOps moderne"
-  ],
+    "approachTitle": "Mon approche",
+    "skillsTitle": "Compétences clés",
+    "skills": [
+      "Next.js / React / Tailwind",
+      "Node.js / tRPC / Prisma",
+      "CI/CD (Vercel, Railway, GitHub Actions)",
+      "Testing (Jest, Vitest)",
+      "Design System & UI composables"
+    ],
+    "valuesTitle": "Philosophie",
+    "values": [
+      "Code lisible, typé, testé",
+      "Architecture modulaire",
+      "Types partagés front/back",
+      "Performance & accessibilité"
+    ],
+    "interestsTitle": "Sujets qui m’inspirent",
+    "interests": [
+      "SaaS B2B",
+      "Blockchain utilitaire",
+      "Finance éthique",
+      "DevOps moderne"
+    ],
 
-  "outroTitle": "Pourquoi EzStart ?",
-  "outroParagraph1": "EzStart est née d’un besoin concret : disposer d’un socle fiable et scalable pour démarrer les projets rapidement, sans sacrifier la qualité.",
-  "outroParagraph2": "Je m’en sers aujourd’hui pour mes missions client, mes composants open-source et mes projets SaaS.",
-  "outroCTA": "Besoin d’un MVP ? D’une refonte technique ? D’un CTO externalisé ? Parlons-en.",
-  "cta": "Me contacter →"
+    "outroTitle": "Pourquoi EzStart ?",
+    "outroParagraph1": "EzStart est née d’un besoin concret : disposer d’un socle fiable et scalable pour démarrer les projets rapidement, sans sacrifier la qualité.",
+    "outroParagraph2": "Je m’en sers aujourd’hui pour mes missions client, mes composants open-source et mes projets SaaS.",
+    "outroCTA": "Besoin d’un MVP ? D’une refonte technique ? D’un CTO externalisé ? Parlons-en.",
+    "cta": "Me contacter →"
+  }
 }
