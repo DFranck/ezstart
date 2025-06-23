@@ -1,52 +1,59 @@
 {
-  "about": {
-    "title": "À propos de moi",
-    "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance, fondateur d’EzStart LLC. J’aide les startups et entreprises à créer des bases techniques solides, scalables et bien structurées, en combinant code, architecture et accompagnement stratégique.",
-    "timelineTitle": "Mon parcours",
-    "timeline": [
-      {
-        "year": "2015",
-        "title": "Premiers pas front-end",
-        "description": "Initiation autodidacte à HTML/CSS, puis premières interfaces avec JavaScript et jQuery."
-      },
-      {
-        "year": "2018",
-        "title": "Full-Stack confirmé",
-        "description": "Node.js, Express, MongoDB, React. Premiers projets freelance et industrialisation des pratiques de dev."
-      },
-      {
-        "year": "2021",
-        "title": "Lead Dev & CTO Freelance",
-        "description": "Pilotage technique, choix d’archi, monorepos, TDD, CI/CD. Accompagnement de plusieurs équipes."
-      },
-      {
-        "year": "2024",
-        "title": "Création d’EzStart LLC",
-        "description": "Structuration de mon offre, open-source, SaaS, starter fullstack TypeScript et UI réutilisable."
-      }
-    ],
-    "skillsTitle": "Compétences clés",
-    "skills": [
-      "TypeScript fullstack (React, Next.js, Node.js)",
-      "Architecture modulaire & monorepos",
-      "CI/CD (GitHub Actions, Vercel, Railway)",
-      "Zod, tRPC, Prisma, Auth.js",
-      "Testing (Jest, Vitest, Storybook)",
-      "Design System & composants UI réutilisables"
-    ],
-    "valuesTitle": "Philosophie & principes",
-    "values": [
-      "Code lisible, typé et maintenable",
-      "Composants réutilisables & logique isolée",
-      "Séparation front/back stricte & types partagés",
-      "Accessibilité, performance & tests par défaut"
-    ],
-    "interestsTitle": "Sujets qui m’inspirent",
-    "interests": [
-      "SaaS B2B & architecture produit",
-      "Décentralisation & blockchain utilitaire",
-      "Finance responsable & tech éthique",
-      "Veille constante sur les outils Dev/DevOps"
-    ]
-  }
+  "title": "À propos",
+  "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance. J’aide les équipes tech à poser des bases solides, modernes et scalables — en combinant développement, architecture et stratégie produit.",
+  "paragraph": "Mon approche est pragmatique, avec une attention particulière au typage, à la maintenabilité et à l’outillage DevOps.",
+
+  "timelineTitle": "Mon parcours",
+  "timeline": [
+    {
+      "year": "2015",
+      "title": "Premiers pas front-end",
+      "description": "HTML, CSS, JS, jQuery. Premières interfaces."
+    },
+    {
+      "year": "2018",
+      "title": "Full-Stack confirmé",
+      "description": "Node.js, Express, MongoDB, React. Freelance."
+    },
+    {
+      "year": "2021",
+      "title": "Lead Dev & CTO Freelance",
+      "description": "Architecture, CI/CD, TDD, refontes complexes."
+    },
+    {
+      "year": "2024",
+      "title": "Création d’EzStart",
+      "description": "Base technique scalable, composants & SaaS internes."
+    }
+  ],
+
+  "approachTitle": "Mon approche",
+  "skillsTitle": "Compétences clés",
+  "skills": [
+    "Next.js / React / Tailwind",
+    "Node.js / tRPC / Prisma",
+    "CI/CD (Vercel, Railway, GitHub Actions)",
+    "Testing (Jest, Vitest)",
+    "Design System & UI composables"
+  ],
+  "valuesTitle": "Philosophie",
+  "values": [
+    "Code lisible, typé, testé",
+    "Architecture modulaire",
+    "Types partagés front/back",
+    "Performance & accessibilité"
+  ],
+  "interestsTitle": "Sujets qui m’inspirent",
+  "interests": [
+    "SaaS B2B",
+    "Blockchain utilitaire",
+    "Finance éthique",
+    "DevOps moderne"
+  ],
+
+  "outroTitle": "Pourquoi EzStart ?",
+  "outroParagraph1": "EzStart est née d’un besoin concret : disposer d’un socle fiable et scalable pour démarrer les projets rapidement, sans sacrifier la qualité.",
+  "outroParagraph2": "Je m’en sers aujourd’hui pour mes missions client, mes composants open-source et mes projets SaaS.",
+  "outroCTA": "Besoin d’un MVP ? D’une refonte technique ? D’un CTO externalisé ? Parlons-en.",
+  "cta": "Me contacter →"
 }

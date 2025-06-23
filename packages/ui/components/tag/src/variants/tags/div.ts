@@ -32,6 +32,10 @@ export const divVariantConfig = {
   intent: intentContainer,
   size: divSize,
   layout: divLayout,
+  withHeaderOffset: {
+    true: 'mt-[71px]',
+    false: '',
+  },
 } as const;
 
 // --- Default variants
@@ -40,6 +44,7 @@ export const DEFAULT_DIV_VARIANTS = {
   intent: 'default',
   size: 'md',
   layout: 'center',
+  withHeaderOffset: false,
 } as const;
 
 // --- cva
@@ -62,4 +67,5 @@ export const divVariantsMeta = Object.fromEntries(
   intent: string[];
   size: string[];
   layout: string[];
+  withHeaderOffset: string[];
 };
