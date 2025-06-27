@@ -3,13 +3,13 @@ import { SectionContact } from '@/app/[locale]/(home)/section-contact';
 import { SectionTrust } from '@/app/[locale]/(home)/section-trust';
 import { SectionVision } from '@/app/[locale]/(home)/section-vision';
 import { Badge } from '@/components/Badge';
-import { ServiceCard } from '@/components/ServiceCard';
 import { Button, Main } from '@ezstart/ui/components';
 import Link from 'next/link';
 import AboutSection from './(home)/AboutSection';
 import ExpertiseSection from './(home)/ExpertiseSection';
 import { HeroSection } from './(home)/HeroSection';
 import ProjectsSection from './(home)/ProjectsSection';
+import ServicesSection from './(home)/ServicesSection';
 export default function Page() {
   return (
     <Main className='text-center'>
@@ -17,40 +17,7 @@ export default function Page() {
       <AboutSection id='about' />
       <ExpertiseSection id='expertise' />
       <ProjectsSection id='projets' />
-
-      {/* Services */}
-      <section id='services' className='max-w-5xl mx-auto py-16 space-y-6'>
-        <h2 className='text-3xl font-semibold text-center'>Mes services</h2>
-        <p className='text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto'>
-          J'interviens à différents niveaux de maturité produit, que ce soit
-          pour démarrer un projet, refondre une base technique ou accompagner
-          une équipe dans la durée.
-        </p>
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-          <ServiceCard
-            title='⚙️ Audit technique'
-            description='Analyse de votre base existante, CI/CD, sécurité et architecture. Livrable documenté et recommandations.'
-          />
-          <ServiceCard
-            title='🚀 Création de MVP'
-            description='Déploiement rapide d’un socle solide : Auth, API, dashboard, tests, CI/CD, dev ready.'
-          />
-          <ServiceCard
-            title='♻️ Refonte & clean architecture'
-            description='Reprise structurée d’un existant pour le rendre stable, typé, scalable.'
-          />
-          <ServiceCard
-            title='🧭 CTO as a Service'
-            description='Support technique long-terme, revue de code, roadmap, coaching dev.'
-          />
-        </div>
-        <div className='text-center pt-6'>
-          <Link href='/services'>
-            <Button variant='outline'>Voir tous les services</Button>
-          </Link>
-        </div>
-      </section>
-
+      <ServicesSection id='services' />
       {/* Confiance */}
       <section
         id='confiance'

@@ -1,7 +1,8 @@
 'use client';
 
-import { LI } from '@ezstart/ui/components';
+import { H3, LI, P, UL } from '@ezstart/ui/components';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type ProjectCardProps = {
   title: string;
@@ -37,44 +38,44 @@ export function ProjectCard({
       )}
 
       <div className='flex-1'>
-        <h3 className='text-xl font-bold text-gray-800 dark:text-white mb-1'>
-          {title}
-        </h3>
+        <H3 size={'h5'}>{title}</H3>
         {subtitle && (
-          <p className='text-sm text-gray-500 dark:text-gray-400 mb-1'>
+          <P variant={'description'} size={'xs'}>
             {subtitle}
-          </p>
+          </P>
         )}
-        <p className='text-gray-600 dark:text-gray-400 text-sm'>
+        <P size={'xs'} className='text-justify py-4'>
           {description}
-        </p>
+        </P>
 
         {Array.isArray(tech) && tech.length > 0 && (
-          <div className='mt-3 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400'>
+          <UL className='text-xs' size={'default'} layout={'row'}>
             {tech.map((t) => (
-              <span
+              <LI
+                variant={'card'}
+                size={'default'}
+                className='py-1 px-2 whitespace-nowrap'
                 key={t}
-                className='px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800'
               >
                 {t}
-              </span>
+              </LI>
             ))}
-          </div>
+          </UL>
         )}
       </div>
 
       <div className='mt-4'>
         {link ? (
-          <a
+          <Link
             href={link}
             target='_blank'
             rel='noopener noreferrer'
             className='text-cyan-600 text-sm hover:underline'
           >
             Voir le projet →
-          </a>
+          </Link>
         ) : isPrivate ? (
-          <span className='text-sm text-gray-400 italic'>Projet privé</span>
+          <P variant={'description'}>Projet privé</P>
         ) : null}
       </div>
     </LI>

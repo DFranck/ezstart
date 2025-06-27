@@ -39,13 +39,35 @@
         "image": "https://hydro.cosmos.network/opengraph-image.jpg?70d2905d0b108c25",
         "tech": [
           "Next.js",
-          "wagmi",
           "CosmJS",
           "CosmosKit",
-          "Zod",
-          "PocketBase"
+          "Supabase",
+          "Interchain UI",
+          "Cosmos"
         ],
         "private": true
+      }
+    ]
+  },
+  "ServicesSection": {
+    "title": "Mes services",
+    "intro": "J'interviens à différents niveaux de maturité produit, que ce soit pour démarrer un projet, refondre une base technique ou accompagner une équipe dans la durée.",
+    "services": [
+      {
+        "title": "⚙️ Audit technique",
+        "description": "Analyse de votre base existante, CI/CD, sécurité et architecture. Livrable documenté et recommandations."
+      },
+      {
+        "title": "🚀 Création de MVP",
+        "description": "Déploiement rapide d’un socle solide : Auth, API, dashboard, tests, CI/CD, dev ready."
+      },
+      {
+        "title": "♻️ Refonte & clean architecture",
+        "description": "Reprise structurée d’un existant pour le rendre stable, typé, scalable."
+      },
+      {
+        "title": "🧭 CTO as a Service",
+        "description": "Support technique long-terme, revue de code, roadmap, coaching dev."
       }
     ]
   },
