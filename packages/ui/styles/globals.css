@@ -6,6 +6,7 @@
 
 @import 'tw-animate-css';
 @import './skeleton.css';
+@import './gradient-animation.css';
 @custom-variant dark (&:is(.dark *));
 
 :root {

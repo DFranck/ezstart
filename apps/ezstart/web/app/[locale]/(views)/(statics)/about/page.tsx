@@ -32,16 +32,21 @@ export default function AboutPage() {
   const interests = (t.raw('interests') ?? []) as string[];
 
   return (
-    <Main withHeaderOffset className='text-center'>
+    <Main className='text-center'>
       {/* Intro */}
-      <Section layout='grid'>
-        <Div>
+      <Section
+        size={'full'}
+        layout='grid'
+        className='bg-gradient-to-t from-primary to-background'
+      >
+        <Div className='flex justify-center items-center relative'>
           <Image
             src='/images/franck_no_background.png'
             alt='Franck Dufournet'
-            width={180}
-            height={180}
-            className='rounded-full shadow-md'
+            width={300}
+            height={300}
+            className='rounded-full object-cover shadow-md bg-primary'
+            sizes='h-full w-full'
           />
         </Div>
         <Div className='text-justify'>

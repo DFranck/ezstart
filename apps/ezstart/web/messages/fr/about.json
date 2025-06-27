@@ -1,8 +1,8 @@
 {
   "about": {
     "title": "À propos",
-    "intro": "Je suis Franck Dufournet, développeur fullstack & CTO freelance. J’aide les équipes tech à poser des bases solides, modernes et scalables — en combinant développement, architecture et stratégie produit.",
-    "paragraph": "Mon approche est pragmatique, avec une attention particulière au typage, à la maintenabilité et à l’outillage DevOps.",
+    "intro": "Je suis Franck Dufournet, développeur fullstack et créateur d’EzStart. J’aide les équipes tech à poser des fondations modernes, typées et scalables — avec un regard pragmatique sur le code comme sur l’architecture.",
+    "paragraph": "Mon approche est directe : typage strict, outils bien choisis, et composants réutilisables. J’interviens là où la qualité du socle est stratégique pour livrer vite et bien.",
 
     "timelineTitle": "Mon parcours",
     "timeline": [
@@ -14,17 +14,17 @@
       {
         "year": "2018",
         "title": "Full-Stack confirmé",
-        "description": "Node.js, Express, MongoDB, React. Freelance."
+        "description": "Node.js, Express, MongoDB, React. Projets freelance end-to-end."
       },
       {
         "year": "2021",
-        "title": "Lead Dev & CTO Freelance",
-        "description": "Architecture, CI/CD, TDD, refontes complexes."
+        "title": "Lead technique freelance",
+        "description": "Refontes complexes, CI/CD, TDD, montée en qualité sur produits existants."
       },
       {
         "year": "2024",
-        "title": "Création d’EzStart",
-        "description": "Base technique scalable, composants & SaaS internes."
+        "title": "EzStart",
+        "description": "Base technique modulaire pour coder proprement et livrer vite."
       }
     ],
 
@@ -33,29 +33,29 @@
     "skills": [
       "Next.js / React / Tailwind",
       "Node.js / tRPC / Prisma",
-      "CI/CD (Vercel, Railway, GitHub Actions)",
-      "Testing (Jest, Vitest)",
-      "Design System & UI composables"
+      "CI/CD (GitHub Actions, Vercel, Railway)",
+      "Tests solides (Jest, Vitest)",
+      "Design system & composants réutilisables"
     ],
     "valuesTitle": "Philosophie",
     "values": [
       "Code lisible, typé, testé",
-      "Architecture modulaire",
+      "Architecture claire & modulaire",
       "Types partagés front/back",
-      "Performance & accessibilité"
+      "Performance & accessibilité by design"
     ],
     "interestsTitle": "Sujets qui m’inspirent",
     "interests": [
-      "SaaS B2B",
-      "Blockchain utilitaire",
-      "Finance éthique",
-      "DevOps moderne"
+      "SaaS B2B orientés produit",
+      "Blockchain utile (Cosmos, CosmWasm)",
+      "Finance éthique & projets à impact",
+      "DevOps pragmatique"
     ],
 
     "outroTitle": "Pourquoi EzStart ?",
-    "outroParagraph1": "EzStart est née d’un besoin concret : disposer d’un socle fiable et scalable pour démarrer les projets rapidement, sans sacrifier la qualité.",
-    "outroParagraph2": "Je m’en sers aujourd’hui pour mes missions client, mes composants open-source et mes projets SaaS.",
-    "outroCTA": "Besoin d’un MVP ? D’une refonte technique ? D’un CTO externalisé ? Parlons-en.",
+    "outroParagraph1": "EzStart est né d’un besoin concret : poser un socle fiable pour aller vite sans compromettre la qualité.",
+    "outroParagraph2": "Je m’en sers aujourd’hui dans mes missions, mes composants open-source et mes projets SaaS.",
+    "outroCTA": "Besoin d’un MVP, d’une refonte ou d’un socle robuste ? Écrivons ensemble la bonne base.",
     "cta": "Me contacter →"
   }
 }
