@@ -1,37 +1,21 @@
 'use client';
-import { SectionContact } from '@/app/[locale]/(home)/section/section-contact';
-import { SectionTrust } from '@/app/[locale]/(home)/section/section-trust';
-import { SectionVision } from '@/app/[locale]/(home)/section/section-vision';
-import { SectionHero } from '@/app/[locale]/(home)/section/SectionHero';
+import { SectionContact } from '@/app/[locale]/(home)/section-contact';
+import { SectionTrust } from '@/app/[locale]/(home)/section-trust';
+import { SectionVision } from '@/app/[locale]/(home)/section-vision';
 import { Badge } from '@/components/Badge';
 import { ProjectCard } from '@/components/ProjectCard';
 import { ServiceCard } from '@/components/ServiceCard';
-import { Button, Main, Section } from '@ezstart/ui/components';
+import { Button, Main } from '@ezstart/ui/components';
 import Link from 'next/link';
-import SectionAbout from './(home)/section/SectionAbout';
+import AboutSection from './(home)/AboutSection';
+import ExpertiseSection from './(home)/ExpertiseSection';
+import { HeroSection } from './(home)/HeroSection';
 export default function Page() {
   return (
     <Main className='text-center'>
-      <SectionHero />
-      <SectionAbout />
-      <Section id='expertise'>
-        <h2 className='text-3xl font-semibold text-center'>Mon expertise</h2>
-        <ul className='grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300'>
-          <li>
-            ⚙️ Architecture scalable et modulaire (monorepo, tRPC, Zod, Prisma)
-          </li>
-          <li>
-            🚀 Livraison continue avec GitHub Actions, Docker, Vercel, CI/CD
-          </li>
-          <li>🧪 Code maintenable (testing, coverage, conventions strictes)</li>
-          <li>
-            🌐 Fullstack JavaScript / TypeScript (Next.js, Express, API
-            REST/GraphQL)
-          </li>
-          <li>🔐 Intégration auth, RBAC, sécurité applicative</li>
-          <li>🧠 Accompagnement technique en tant que CTO freelance</li>
-        </ul>
-      </Section>
+      <HeroSection id='hero' />
+      <AboutSection id='about' />
+      <ExpertiseSection id='expertise' />
 
       {/* Projets */}
       <section id='projets' className='max-w-5xl mx-auto space-y-6'>

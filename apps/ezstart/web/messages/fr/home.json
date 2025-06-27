@@ -1,24 +1,23 @@
 {
-  "SectionHero": {
-    "title": "Des bases solides. Des projets qui scalent.",
-    "subtitle": "EzStart, votre socle technique pour des produits durables.",
-    "description": "J'accompagne startups, agences et équipes tech dans la création de bases solides, fiables et modernes — du front au back en passant par le DevOps."
-  },
-  "SectionHero2": {
-    "title": "Développez mieux. Livrez plus vite.",
-    "subtitle": " Avec EzStart.",
-    "description": "  J’aide les startups et entreprises à bâtir des fondations techniques modernes, fiables et prêtes à scaler — en tant que freelance ou CTO externalisé."
-  },
-  "SectionHero3": {
+  "HeroSection": {
     "title": "Lancez vite. Construisez bien.",
-    "subtitle": "CTO freelance & développeur fullstack à vos côtés.",
-    "description": "De la base de données à l’auth, du déploiement au dashboard : je structure vos projets avec une stack moderne, typée et maintenable."
+    "subtitle": "Votre partenaire technique pour des produits web durables.",
+    "description": "J’aide startups et équipes tech à poser les bons choix dès le départ : stack, architecture, outils, CI/CD, bonnes pratiques. Un accompagnement fullstack pragmatique, du front au back, jusqu’au déploiement sans complexité inutile."
   },
-  "SectionAbout": {
+  "AboutSection": {
     "title": "À propos",
-    "paragraph1": "Je suis Franck Dufournet, développeur fullstack & CTO freelance, fondateur de <strong>EzStart LLC</strong>. J’aide les équipes tech à construire des bases modernes, durables et typées — pour livrer plus sereinement.",
-    "paragraph2": "Mon rôle va au-delà du code : j’interviens aussi sur l’architecture, l’outillage DevOps, les choix de services et la stratégie produit. Une approche complète, pour des projets qui scalent vraiment.",
+    "paragraph1": "Je suis Franck Dufournet, développeur fullstack et fondateur de <strong>EzStart LLC</strong>. J’accompagne les équipes tech dans la mise en place de fondations modernes, typées et maintenables pour coder mieux et livrer plus sereinement.",
+    "paragraph2": "Mon rôle ne s’arrête pas au code. J’interviens aussi sur l’architecture, les outils, la CI/CD et les choix techniques clés. Une approche pragmatique, pour des produits web durables et prêts à scaler.",
     "cta": "En savoir plus →"
+  },
+  "ExpertiseSection": {
+    "title": "Mon expertise",
+    "item1": "⚙️ Architecture scalable & modulaire (monorepo, tRPC, Zod, Prisma)",
+    "item2": "🚀 Déploiement fluide avec GitHub Actions, Docker, Vercel, CI/CD",
+    "item3": "🧪 Code maintenable & testé (Jest, conventions strictes, coverage)",
+    "item4": "🌐 Stack fullstack JavaScript/TypeScript (Next.js, Express, API REST/GraphQL)",
+    "item5": "🔐 Auth, RBAC & sécurité applicative dès la conception",
+    "item6": "🧠 Accompagnement stratégique sur vos choix techniques et produits"
   },
   "vision": {
     "title": "Une architecture pensée pour durer",
