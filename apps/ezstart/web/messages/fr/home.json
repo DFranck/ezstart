@@ -19,6 +19,36 @@
     "item5": "🔐 Auth, RBAC & sécurité applicative dès la conception",
     "item6": "🧠 Accompagnement stratégique sur vos choix techniques et produits"
   },
+  "ProjectsSection": {
+    "title": "Quelques projets",
+    "projects": [
+      {
+        "title": "EventoApp.io",
+        "subtitle": "Création et vente d’événements",
+        "description": "SaaS complet permettant aux organisateurs de créer des événements, vendre des billets et gérer les paiements avec Stripe Connect. PWA responsive développée avec Next.js, Express, MongoDB et CI/CD Vercel.",
+        "link": "https://www.evento-app.io/",
+        "image": "https://evento-media-bucket.s3.ap-southeast-2.amazonaws.com/og-image.jpg",
+        "tech": ["Next.js", "Express", "MongoDB", "Stripe", "CI/CD"],
+        "private": false
+      },
+      {
+        "title": "Hydro Marketplace",
+        "subtitle": "NFT Web3 sur Cosmos",
+        "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. Frontend développé avec Next.js, wagmi, CosmosKit et Interchain UI. Intégration complète Web3 avec wallet connect, smart contracts CosmWasm, et affichage dynamique on-chain.",
+        "link": "https://hydro.cosmos.network/",
+        "image": "https://hydro.cosmos.network/opengraph-image.jpg?70d2905d0b108c25",
+        "tech": [
+          "Next.js",
+          "wagmi",
+          "CosmJS",
+          "CosmosKit",
+          "Zod",
+          "PocketBase"
+        ],
+        "private": true
+      }
+    ]
+  },
   "vision": {
     "title": "Une architecture pensée pour durer",
     "intro": "Trop de projets souffrent d’une dette technique évitable. EzStart est né d’un besoin simple : bâtir une base claire, modulaire et durable qui respecte les meilleures pratiques du développement moderne. Chaque projet mérite une architecture saine, prévisible et facile à faire évoluer.",

@@ -3,36 +3,20 @@ import { SectionContact } from '@/app/[locale]/(home)/section-contact';
 import { SectionTrust } from '@/app/[locale]/(home)/section-trust';
 import { SectionVision } from '@/app/[locale]/(home)/section-vision';
 import { Badge } from '@/components/Badge';
-import { ProjectCard } from '@/components/ProjectCard';
 import { ServiceCard } from '@/components/ServiceCard';
 import { Button, Main } from '@ezstart/ui/components';
 import Link from 'next/link';
 import AboutSection from './(home)/AboutSection';
 import ExpertiseSection from './(home)/ExpertiseSection';
 import { HeroSection } from './(home)/HeroSection';
+import ProjectsSection from './(home)/ProjectsSection';
 export default function Page() {
   return (
     <Main className='text-center'>
       <HeroSection id='hero' />
       <AboutSection id='about' />
       <ExpertiseSection id='expertise' />
-
-      {/* Projets */}
-      <section id='projets' className='max-w-5xl mx-auto space-y-6'>
-        <h2 className='text-3xl font-semibold text-center'>Quelques projets</h2>
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-          <ProjectCard
-            title='EzStart — Starter moderne fullstack'
-            description='Base de code complète pour démarrer un projet avec Next.js, Express, Prisma, Auth, CI/CD, tests.'
-            link='https://github.com/DFranck/ezstart'
-          />
-          <ProjectCard
-            title='Portfolio personnel'
-            description='Site 100% statique optimisé pour SEO, en i18n et animable avec Framer Motion. Utilisé pour me présenter auprès de clients tech exigeants.'
-            link='https://dfranck.netlify.app/'
-          />
-        </div>
-      </section>
+      <ProjectsSection id='projets' />
 
       {/* Services */}
       <section id='services' className='max-w-5xl mx-auto py-16 space-y-6'>

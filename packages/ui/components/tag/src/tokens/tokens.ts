@@ -86,7 +86,7 @@ export const variantContainer = {
   outline: cn(containerCommonClasses, 'border shadow-sm rounded'),
   card: cn(
     containerCommonClasses,
-    'bg-muted border shadow-sm text-card-foreground rounded'
+    'bg-secondary border shadow-sm text-secondary-foreground rounded'
   ),
 } as const;
 
