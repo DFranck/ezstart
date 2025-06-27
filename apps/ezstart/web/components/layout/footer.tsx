@@ -18,7 +18,6 @@ export function Footer() {
       tabIndex={-1}
       withFixedMobilebar
     >
-      {/* Col gauche */}
       <div className='flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center'>
         <span className='text-xs opacity-70 select-none'>
           {t('copyright', { year: new Date().getFullYear() })}
@@ -28,7 +27,6 @@ export function Footer() {
           {t('legalNotices')}
         </Link>
       </div>
-      {/* Col droite */}
       <div className='flex gap-3 items-center'>
         <Link
           href='https://github.com/DFranck/ez-start'

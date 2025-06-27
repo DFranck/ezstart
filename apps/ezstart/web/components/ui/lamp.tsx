@@ -31,10 +31,7 @@ export const LampContainer = ({
   className?: string;
 }) => {
   return (
-    <Section
-      size={'full'}
-      className={cn('relative z-0 overflow-x-hidden', className)}
-    >
+    <Section className={cn('relative z-0 overflow-x-hidden', className)}>
       <div className='relative  flex flex-col items-center px-5 overflow-y-clip'>
         <div className='absolute top-0 left-0 right-0 z-0 flex w-full items-start justify-center   isolate'>
           <motion.div

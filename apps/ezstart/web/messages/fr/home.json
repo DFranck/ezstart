@@ -71,6 +71,13 @@
       }
     ]
   },
+  "ContactSection": {
+    "title": "Vous avez un projet\u00a0?",
+    "description": "Je suis disponible pour des missions ponctuelles, un accompagnement CTO, ou la création de bases techniques robustes. Parlons de vos objectifs, et voyons comment EzStart peut vous aider.",
+    "ctaEmail": "Me contacter",
+    "ctaLinkedIn": "LinkedIn",
+    "ctaMore": "Plus d'infos"
+  },
   "vision": {
     "title": "Une architecture pensée pour durer",
     "intro": "Trop de projets souffrent d’une dette technique évitable. EzStart est né d’un besoin simple : bâtir une base claire, modulaire et durable qui respecte les meilleures pratiques du développement moderne. Chaque projet mérite une architecture saine, prévisible et facile à faire évoluer.",
