@@ -27,7 +27,7 @@
         "subtitle": "Création et vente d’événements",
         "description": "SaaS complet permettant aux organisateurs de créer des événements, vendre des billets et gérer les paiements avec Stripe Connect. PWA responsive développée avec Next.js, Express, MongoDB et CI/CD Vercel.",
         "link": "https://www.evento-app.io/",
-        "image": "https://evento-media-bucket.s3.ap-southeast-2.amazonaws.com/og-image.jpg",
+        "src": "https://evento-media-bucket.s3.ap-southeast-2.amazonaws.com/og-image.jpg",
         "tech": ["Next.js", "Express", "MongoDB", "Stripe", "CI/CD"],
         "private": false
       },
@@ -36,7 +36,7 @@
         "subtitle": "NFT Web3 sur Cosmos",
         "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. Frontend développé avec Next.js, wagmi, CosmosKit et Interchain UI. Intégration complète Web3 avec wallet connect, smart contracts CosmWasm, et affichage dynamique on-chain.",
         "link": "https://hydro.cosmos.network/",
-        "image": "https://hydro.cosmos.network/opengraph-image.jpg?70d2905d0b108c25",
+        "src": "https://hydro.cosmos.network/opengraph-image.jpg?70d2905d0b108c25",
         "tech": [
           "Next.js",
           "CosmJS",
@@ -88,28 +88,5 @@
       " Accessibilité, typage strict, tests et conventions"
     ],
     "footer": "Ne plus jamais repartir de zéro. Toujours avancer avec des fondations saines."
-  },
-  "trust": {
-    "title": "Une communauté qui grandit",
-    "intro": "EzStart alimente des projets modernes, des composants open-source et une base technique adoptée par une communauté d'exigence.",
-    "points": [
-      { "icon": "⭐", "label": "GitHub stars", "value": "{stars}+" },
-      { "icon": "📦", "label": "npm downloads", "value": "{downloads}+" },
-      { "icon": "📈", "label": "projets actifs", "value": "15+" },
-      { "icon": "🧑‍💻", "label": "TypeScript coverage", "value": "100%" },
-      { "icon": "⚙️", "label": "Automated workflows", "value": "CI/CD" },
-      {
-        "icon": "🧪",
-        "label": "Composants validés",
-        "value": "Testé & scalable"
-      }
-    ],
-    "footer": "La qualité, ce n'est pas une option. C'est la base."
-  },
-  "section-contact": {
-    "title": "Vous avez un projet ?",
-    "description": "Que ce soit pour démarrer vite, refondre proprement ou construire une architecture durable, je peux vous aider à poser les bonnes fondations.",
-    "cta": "Me contacter",
-    "github": "Voir la base sur GitHub"
   }
 }

@@ -20,14 +20,14 @@ export const headerVariantConfig = {
   },
   position: {
     static: '',
-    sticky: 'sticky top-0 left-0 right-0 z-30',
-    fixed: 'fixed top-0 left-0 right-0 z-30',
-    absolute: 'absolute top-0 left-0 right-0 z-30',
+    sticky: 'sticky top-0 left-0 right-0 ',
+    fixed: 'fixed top-0 left-0 right-0 ',
+    absolute: 'absolute top-0 left-0 right-0 ',
   },
 } as const;
 
 // 👇 cva utilise la config
-export const headerVariants = cva('flex container mx-auto w-full', {
+export const headerVariants = cva('flex container mx-auto w-full z-50', {
   variants: headerVariantConfig,
   defaultVariants: {
     variant: 'default',

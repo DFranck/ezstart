@@ -15,7 +15,7 @@ const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
     subtitle?: string;
     description: string;
     link: string | null;
-    image?: string;
+    src?: string;
     tech?: string[];
     private?: boolean;
   }[];

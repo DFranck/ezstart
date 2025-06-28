@@ -1,5 +1,6 @@
 'use client';
 
+import { FlippingGallery } from '@/components/ui/flipping-gallery';
 import {
   Button,
   Card,
@@ -24,17 +25,23 @@ import { SkillsSection } from './SkillsSection';
 
 export default function AboutPage() {
   const t = useTranslations('about');
-
+  const p = useTranslations('ProjectsSection');
+  const projects = p.raw('projects') as {
+    title: string;
+    subtitle?: string;
+    description: string;
+    link: string | null;
+    src: string;
+    tech?: string[];
+    private?: boolean;
+  }[];
   const timeline = (t.raw('timeline') ?? []) as TimelineItem[];
-
-  const skills = (t.raw('skills') ?? []) as string[];
-  const values = (t.raw('values') ?? []) as string[];
-  const interests = (t.raw('interests') ?? []) as string[];
 
   return (
     <Main>
       <HeroSection />
       <SkillsSection />
+      <FlippingGallery items={projects} />
       <Section>
         <H2 className='text-3xl font-semibold text-center'>
           {t('timelineTitle')}
@@ -55,17 +62,6 @@ export default function AboutPage() {
         </UL>
       </Section>
 
-      {/* Thématiques */}
-      <Section>
-        <H2>{t('approachTitle')}</H2>
-        <Div layout='grid' className='md:grid-cols-3 lg:grid-cols-3'>
-          <CardFactory title={t('skillsTitle')} items={skills} />
-          <CardFactory title={t('valuesTitle')} items={values} />
-          <CardFactory title={t('interestsTitle')} items={interests} />
-        </Div>
-      </Section>
-
-      {/* Outro */}
       <Section>
         <H2>{t('outroTitle')}</H2>
         <P>{t('outroParagraph1')}</P>

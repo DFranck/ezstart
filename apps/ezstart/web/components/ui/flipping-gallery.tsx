@@ -4,27 +4,27 @@ import { Icon } from '@ezstart/ui/components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-type Testimonial = {
-  quote: string;
-  name: string;
-  designation: string;
+type Item = {
+  description: string;
+  title: string;
+  subtitle?: string;
   src: string;
 };
-export const AnimatedTestimonials = ({
-  testimonials,
+export const FlippingGallery = ({
+  items,
   autoplay = false,
 }: {
-  testimonials: Testimonial[];
+  items: Item[];
   autoplay?: boolean;
 }) => {
   const [active, setActive] = useState(0);
 
   const handleNext = () => {
-    setActive((prev) => (prev + 1) % testimonials.length);
+    setActive((prev) => (prev + 1) % items.length);
   };
 
   const handlePrev = () => {
-    setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setActive((prev) => (prev - 1 + items.length) % items.length);
   };
 
   const isActive = (index: number) => {
@@ -43,13 +43,13 @@ export const AnimatedTestimonials = ({
   };
   return (
     <div className='mx-auto max-w-sm px-4 py-20 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12'>
-      <div className='relative grid grid-cols-1 gap-20 md:grid-cols-2'>
+      <div className='relative grid grid-cols-1 md:gap-20 md:grid-cols-2'>
         <div>
           <div className='relative h-80 w-full'>
             <AnimatePresence>
-              {testimonials.map((testimonial, index) => (
+              {items.map((item, index) => (
                 <motion.div
-                  key={testimonial.src}
+                  key={item.src}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -61,9 +61,7 @@ export const AnimatedTestimonials = ({
                     scale: isActive(index) ? 1 : 0.95,
                     z: isActive(index) ? 0 : -100,
                     rotate: isActive(index) ? 0 : randomRotateY(),
-                    zIndex: isActive(index)
-                      ? 40
-                      : testimonials.length + 2 - index,
+                    zIndex: isActive(index) ? 40 : items.length + 2 - index,
                     y: isActive(index) ? [0, -80, 0] : 0,
                   }}
                   exit={{
@@ -79,8 +77,8 @@ export const AnimatedTestimonials = ({
                   className='absolute inset-0 origin-bottom'
                 >
                   <img
-                    src={testimonial.src}
-                    alt={testimonial.name}
+                    src={item.src}
+                    alt={item.title}
                     width={500}
                     height={500}
                     draggable={false}
@@ -112,13 +110,13 @@ export const AnimatedTestimonials = ({
             }}
           >
             <h3 className='text-2xl font-bold text-black dark:text-white'>
-              {testimonials[active].name}
+              {items[active].title}
             </h3>
             <p className='text-sm text-gray-500 dark:text-neutral-500'>
-              {testimonials[active].designation}
+              {items[active].subtitle}
             </p>
-            <motion.p className='mt-8 text-lg text-gray-500 dark:text-neutral-300'>
-              {testimonials[active].quote.split(' ').map((word, index) => (
+            <motion.p className='mt-4 text-sm md:text-lg text-gray-500 dark:text-neutral-300'>
+              {items[active].description.split(' ').map((word, index) => (
                 <motion.span
                   key={index}
                   initial={{
@@ -143,7 +141,7 @@ export const AnimatedTestimonials = ({
               ))}
             </motion.p>
           </motion.div>
-          <div className='flex gap-4 pt-12 md:pt-0'>
+          <div className='flex gap-4 pt-4 md:pt-0'>
             <button
               onClick={handlePrev}
               className='group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800'

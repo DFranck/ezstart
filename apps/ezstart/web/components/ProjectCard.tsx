@@ -9,7 +9,7 @@ type ProjectCardProps = {
   subtitle?: string;
   description: string;
   link?: string | null;
-  image?: string;
+  src?: string;
   tech?: string[];
   private?: boolean;
 };
@@ -19,16 +19,16 @@ export function ProjectCard({
   subtitle,
   description,
   link,
-  image,
+  src,
   tech,
   private: isPrivate,
 }: ProjectCardProps) {
   return (
     <LI variant={'outline'} layout={'col'} className='p-6'>
-      {image && (
+      {src && (
         <div className='relative w-full h-40 mb-4 rounded overflow-hidden'>
           <Image
-            src={image}
+            src={src}
             alt={title}
             fill
             className='object-cover'
