@@ -14,3 +14,4 @@ export * from './select';
 export * from './sonner';
 export * from './tabs';
 export * from './tag';
+export * from './text-gradient';

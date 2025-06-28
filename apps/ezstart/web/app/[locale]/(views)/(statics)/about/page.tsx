@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
   Div,
-  H1,
   H2,
   H3,
   Icon,
@@ -19,8 +18,9 @@ import {
   UL,
 } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import Link from 'next/link';
+import HeroSection from './HeroSection';
+import { SkillsSection } from './SkillsSection';
 
 export default function AboutPage() {
   const t = useTranslations('about');
@@ -32,31 +32,9 @@ export default function AboutPage() {
   const interests = (t.raw('interests') ?? []) as string[];
 
   return (
-    <Main className='text-center'>
-      {/* Intro */}
-      <Section
-        size={'full'}
-        layout='grid'
-        className='bg-gradient-to-t from-primary to-background'
-      >
-        <Div className='flex justify-center items-center relative'>
-          <Image
-            src='/images/franck_no_background.png'
-            alt='Franck Dufournet'
-            width={300}
-            height={300}
-            className='rounded-full object-cover shadow-md bg-primary'
-            sizes='h-full w-full'
-          />
-        </Div>
-        <Div className='text-justify'>
-          <H1>{t('title')}</H1>
-          <P>{t('intro')}</P>
-          <P className='text-lg leading-relaxed'>{t('paragraph')}</P>
-        </Div>
-      </Section>
-
-      {/* Timeline */}
+    <Main>
+      <HeroSection />
+      <SkillsSection />
       <Section>
         <H2 className='text-3xl font-semibold text-center'>
           {t('timelineTitle')}

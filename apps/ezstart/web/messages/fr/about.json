@@ -1,9 +1,21 @@
 {
   "about": {
-    "title": "À propos",
-    "intro": "Je suis Franck Dufournet, développeur fullstack et créateur d’EzStart. J’aide les équipes tech à poser des fondations modernes, typées et scalables — avec un regard pragmatique sur le code comme sur l’architecture.",
-    "paragraph": "Mon approche est directe : typage strict, outils bien choisis, et composants réutilisables. J’interviens là où la qualité du socle est stratégique pour livrer vite et bien.",
-
+    "title": "Franck Dufournet",
+    "intro": " Hello reader! I'm",
+    "skillsShowcase": [
+      {
+        "first": "Développement frontend.",
+        "second": "Interfaces modernes et dynamiques"
+      },
+      {
+        "first": "Développement full stack.",
+        "second": "Du backend aux interfaces web"
+      },
+      {
+        "first": "Lead développeur.",
+        "second": "Architecture modulaire & stratégie produit"
+      }
+    ],
     "timelineTitle": "Mon parcours",
     "timeline": [
       {

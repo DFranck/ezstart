@@ -1,0 +1,114 @@
+{
+  "skills": [
+    {
+      "category": "Design",
+      "items": [
+        {
+          "name": "Figma",
+          "className": "optimal",
+          "icon": "custom:Figma"
+        }
+      ]
+    },
+    {
+      "category": "Frontend",
+      "items": [
+        {
+          "name": "Next.js",
+          "className": "optimal",
+          "icon": "custom:Nextjs"
+        },
+        {
+          "name": "React.js",
+          "className": "optimal",
+          "icon": "custom:Reactjs"
+        },
+        {
+          "name": "Typescript",
+          "className": "optimal",
+          "icon": "custom:Typescript"
+        },
+        {
+          "name": "Redux.js",
+          "className": "sub",
+          "icon": "custom:Redux"
+        },
+        {
+          "name": "Zustand.js",
+          "className": "sub",
+          "icon": "custom:Zustand"
+        },
+        {
+          "name": "Tailwind",
+          "className": "optimal",
+          "icon": "custom:Tailwind"
+        },
+        {
+          "name": "Sass",
+          "className": "optimal",
+          "icon": "custom:Sass"
+        }
+      ]
+    },
+    {
+      "category": "Backend",
+      "items": [
+        {
+          "name": "Node.js",
+          "className": "sub",
+          "icon": "fa:FaNodeJs"
+        },
+        {
+          "name": "express.js",
+          "className": "optimal",
+          "icon": "custom:Expressjs"
+        },
+        {
+          "name": "prisma",
+          "className": "optimal",
+          "icon": "custom:Prisma"
+        },
+        {
+          "name": "auth.js",
+          "className": "optimal",
+          "icon": "custom:Authjs"
+        },
+        {
+          "name": "API REST",
+          "className": "optimal",
+          "icon": "fa:FaPlug"
+        },
+        {
+          "name": "MongoDB",
+          "className": "optimal",
+          "icon": "custom:Mongodb"
+        }
+      ]
+    },
+    {
+      "category": "Other",
+      "items": [
+        {
+          "name": "GitHub",
+          "className": "optimal",
+          "icon": "fa:FaGithub"
+        },
+        {
+          "name": "Jest",
+          "className": "sub",
+          "icon": "custom:Jest"
+        },
+        {
+          "name": "Zod",
+          "className": "optimal",
+          "icon": "custom:Zod"
+        },
+        {
+          "name": "Npm",
+          "className": "sub",
+          "icon": "fa:FaNpm"
+        }
+      ]
+    }
+  ]
+}
