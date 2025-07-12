@@ -41,7 +41,7 @@ export const listingContainersLayout = {
   col: 'flex flex-col gap-2 ',
   row: 'flex flex-row flex-wrap gap-2 items-center',
   grid: 'grid gap-4 md:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2',
-  center: 'flex flex-col items-center justify-center gap-4 md:gap-6 lg:gap-8',
+  center: 'flex flex-col items-center justify-center gap-2',
   menu: 'flex flex-col py-1 md:py-1 px-2 md:px-2 gap-2 ',
 } as const;
 

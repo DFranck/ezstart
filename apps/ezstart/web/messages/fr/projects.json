@@ -1,0 +1,65 @@
+{
+  "ProjectsSection": {
+    "title": "Projets",
+    "projects": [
+      {
+        "title": "EventoApp.io",
+        "subtitle": "Création et vente d’événements",
+        "roles": ["CTO", "Fullstack"],
+        "description": "Plateforme complète de création d’événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l’intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d’une API REST modulaire. L’app permet de créer des événements avec RSVP personnalisés, co-hôtes, uploads média, chat à venir, et découverte via filtres d’intérêts. Déploiement automatisé via CI/CD.",
+        "link": "https://www.evento-app.io/",
+        "src": "/images/www.evento-app.io.png",
+        "tech": [
+          "Next.js",
+          "React.js",
+          "TypeScript",
+          "Zustand",
+          "Express.js",
+          "MongoDB",
+          "API REST",
+          "CI/CD",
+          "Socket.io"
+        ]
+      },
+      {
+        "title": "Hydro Marketplace",
+        "subtitle": "NFT Web3 sur Cosmos",
+        "roles": ["Frontend"],
+        "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
+        "link": "https://hydro.cosmos.network/",
+        "src": "/images/hydro.cosmos.network.png",
+        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
+      }
+    ],
+    "moreProjects": [
+      {
+        "title": "EventoApp.io",
+        "subtitle": "Création et vente d’événements",
+        "roles": ["CTO", "Fullstack"],
+        "description": "Plateforme complète de création d’événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l’intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d’une API REST modulaire. L’app permet de créer des événements avec RSVP personnalisés, co-hôtes, uploads média, chat à venir, et découverte via filtres d’intérêts. Déploiement automatisé via CI/CD.",
+        "link": "https://www.evento-app.io/",
+        "src": "/images/www.evento-app.io.png",
+        "tech": [
+          "Next.js",
+          "React.js",
+          "TypeScript",
+          "Zustand",
+          "Express.js",
+          "MongoDB",
+          "API REST",
+          "CI/CD",
+          "Socket.io"
+        ]
+      },
+      {
+        "title": "Hydro Marketplace",
+        "subtitle": "NFT Web3 sur Cosmos",
+        "roles": ["Frontend"],
+        "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
+        "link": "https://hydro.cosmos.network/",
+        "src": "/images/hydro.cosmos.network.png",
+        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
+      }
+    ]
+  }
+}

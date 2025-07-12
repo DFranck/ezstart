@@ -21,16 +21,16 @@ export const gradientColors = [
 
 export type GradientColor = (typeof gradientColors)[number];
 type Props = {
-  from: GradientColor;
-  to: GradientColor;
+  from?: GradientColor;
+  to?: GradientColor;
   speed?: number;
   children: React.ReactNode;
   className?: string;
 };
 
 export const TextGradient = ({
-  from,
-  to,
+  from = 'primary',
+  to = 'primary',
   children,
   className,
   speed,

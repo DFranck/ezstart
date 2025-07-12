@@ -3,9 +3,14 @@ import { IconProps } from '../types';
 const Authjs = (props: IconProps) => {
   return (
     <svg
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
       viewBox='0 0 50 56'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
@@ -41,8 +46,8 @@ const Authjs = (props: IconProps) => {
           y2='10.2304'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#39EAB8' />
-          <stop offset='1' stop-color='#20ACF0' />
+          <stop stopColor='#39EAB8' />
+          <stop offset='1' stopColor='#20ACF0' />
         </linearGradient>
         <linearGradient
           id='paint1_linear_221_1043'
@@ -52,8 +57,8 @@ const Authjs = (props: IconProps) => {
           y2='13.5363'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#1CB3E6' />
-          <stop offset='1' stop-color='#21ABF2' />
+          <stop stopColor='#1CB3E6' />
+          <stop offset='1' stopColor='#21ABF2' />
         </linearGradient>
         <linearGradient
           id='paint2_linear_221_1043'
@@ -63,8 +68,8 @@ const Authjs = (props: IconProps) => {
           y2='44.4141'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#A623D9' />
-          <stop offset='1' stop-color='#9559DF' />
+          <stop stopColor='#A623D9' />
+          <stop offset='1' stopColor='#9559DF' />
         </linearGradient>
         <linearGradient
           id='paint3_linear_221_1043'
@@ -74,8 +79,8 @@ const Authjs = (props: IconProps) => {
           y2='41.217'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#DE66EB' />
-          <stop offset='1' stop-color='#B628E3' />
+          <stop stopColor='#DE66EB' />
+          <stop offset='1' stopColor='#B628E3' />
         </linearGradient>
         <linearGradient
           id='paint4_linear_221_1043'
@@ -85,8 +90,8 @@ const Authjs = (props: IconProps) => {
           y2='31.9334'
           gradientUnits='userSpaceOnUse'
         >
-          <stop stop-color='#F95C04' />
-          <stop offset='0.69' stop-color='#FEAF02' />
+          <stop stopColor='#F95C04' />
+          <stop offset='0.69' stopColor='#FEAF02' />
         </linearGradient>
       </defs>
     </svg>

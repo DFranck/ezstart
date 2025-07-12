@@ -8,7 +8,7 @@ import {
   Section,
   UL,
 } from '@ezstart/ui/components';
-import { useEffect, useRef } from 'react';
+import { useDevice } from '@ezstart/ui/hooks';
 import skillData from './skills.json';
 
 type SkillCategory = {
@@ -22,64 +22,36 @@ type SkillCategory = {
   }[];
 };
 
-export const SkillsSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+type Props = {
+  id?: string;
+};
 
-  useEffect(() => {
-    const h2Observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('slideInFromLeft');
-        }
-      },
-      { threshold: 1 }
-    );
-
-    const articleObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('slideInFromBottom');
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    if (sectionRef.current) {
-      const h2 = sectionRef.current.querySelector('h2');
-      if (h2) h2Observer.observe(h2);
-
-      sectionRef.current
-        .querySelectorAll('article')
-        .forEach((el) => articleObserver.observe(el));
-    }
-
-    return () => {
-      h2Observer.disconnect();
-      articleObserver.disconnect();
-    };
-  }, []);
+export const SkillsSection = ({ id }: Props) => {
+  const { isMobile } = useDevice();
 
   return (
-    <Section id='skills-section' ref={sectionRef}>
+    <Section id={id} size={isMobile ? 'xs' : 'lg'}>
       <H2>Skills</H2>
       <UL
         layout='grid'
-        className='md:grid-cols-2 lg:grid-cols-4 w-full'
+        className='grid-cols-2 md:grid-cols-4 lg:grid-cols-4 w-full'
         size={'xs'}
       >
         {skillData.skills.map((cat: SkillCategory, index) => (
           <LI key={index} className='items-start'>
             <article className='w-full'>
-              <UL className='w-full'>
-                <H3 size='h5'>{cat.category}</H3>
+              <UL className='w-full py-4 px-2 md:py-4 ' size={'xs'}>
+                <H3 size='h5' className='text-center md:text-start'>
+                  {cat.category}
+                </H3>
                 {cat.items.map((item, idx) => (
                   <LI
                     key={idx}
                     className={'flex-nowrap whitespace-nowrap' + item.className}
                   >
-                    {item.icon && <Icon name={item.icon as KnownIconName} />}
+                    {item.icon && (
+                      <Icon size={20} name={item.icon as KnownIconName} />
+                    )}
                     {item.name}
                   </LI>
                 ))}

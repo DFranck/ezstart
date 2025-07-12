@@ -3,9 +3,14 @@ import { IconProps } from '../types';
 const Figma = (props: IconProps) => {
   return (
     <svg
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
       role='img'
       aria-label='Figma logo'
       viewBox='0 0 32 32'

@@ -17,7 +17,7 @@ const ServicesSection: FC<Props> = ({ className, ...rest }) => {
   const services = t.raw('services') as Service[];
 
   return (
-    <Section className={className} {...rest}>
+    <Section className={className} {...rest} size='sm'>
       <H2>{t('title')}</H2>
       <P className='max-w-2xl'>{t('intro')}</P>
 

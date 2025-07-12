@@ -5,15 +5,23 @@
     "links": [
       {
         "label": "Github",
+        "icon": "fa:FaGithub",
         "href": "https://github.com/DFranck"
       },
       {
         "label": "Linkedin",
+        "icon": "fa:FaLinkedin",
         "href": "https://www.linkedin.com/in/franckdufournet"
       },
       {
         "label": "Mail",
+        "icon": "fa:FaEnvelope",
         "href": "mailto:franckdufournet@hotmail.fr"
+      },
+      {
+        "label": "Whatsapp",
+        "icon": "fa:FaWhatsapp",
+        "href": "https://wa.me/33760173980"
       }
     ]
   }

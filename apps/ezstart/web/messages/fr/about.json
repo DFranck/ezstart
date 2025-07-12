@@ -1,7 +1,7 @@
 {
   "about": {
     "title": "Franck Dufournet",
-    "intro": " Hello reader! I'm",
+    "subtitle": "EzStart",
     "skillsShowcase": [
       {
         "first": "Développement frontend.",
@@ -15,59 +15,6 @@
         "first": "Lead développeur.",
         "second": "Architecture modulaire & stratégie produit"
       }
-    ],
-    "timelineTitle": "Mon parcours",
-    "timeline": [
-      {
-        "year": "2015",
-        "title": "Premiers pas front-end",
-        "description": "HTML, CSS, JS, jQuery. Premières interfaces."
-      },
-      {
-        "year": "2018",
-        "title": "Full-Stack confirmé",
-        "description": "Node.js, Express, MongoDB, React. Projets freelance end-to-end."
-      },
-      {
-        "year": "2021",
-        "title": "Lead technique freelance",
-        "description": "Refontes complexes, CI/CD, TDD, montée en qualité sur produits existants."
-      },
-      {
-        "year": "2024",
-        "title": "EzStart",
-        "description": "Base technique modulaire pour coder proprement et livrer vite."
-      }
-    ],
-
-    "approachTitle": "Mon approche",
-    "skillsTitle": "Compétences clés",
-    "skills": [
-      "Next.js / React / Tailwind",
-      "Node.js / tRPC / Prisma",
-      "CI/CD (GitHub Actions, Vercel, Railway)",
-      "Tests solides (Jest, Vitest)",
-      "Design system & composants réutilisables"
-    ],
-    "valuesTitle": "Philosophie",
-    "values": [
-      "Code lisible, typé, testé",
-      "Architecture claire & modulaire",
-      "Types partagés front/back",
-      "Performance & accessibilité by design"
-    ],
-    "interestsTitle": "Sujets qui m’inspirent",
-    "interests": [
-      "SaaS B2B orientés produit",
-      "Blockchain utile (Cosmos, CosmWasm)",
-      "Finance éthique & projets à impact",
-      "DevOps pragmatique"
-    ],
-
-    "outroTitle": "Pourquoi EzStart ?",
-    "outroParagraph1": "EzStart est né d’un besoin concret : poser un socle fiable pour aller vite sans compromettre la qualité.",
-    "outroParagraph2": "Je m’en sers aujourd’hui dans mes missions, mes composants open-source et mes projets SaaS.",
-    "outroCTA": "Besoin d’un MVP, d’une refonte ou d’un socle robuste ? Écrivons ensemble la bonne base.",
-    "cta": "Me contacter →"
+    ]
   }
 }

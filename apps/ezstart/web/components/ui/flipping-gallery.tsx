@@ -10,6 +10,7 @@ type Item = {
   subtitle?: string;
   src: string;
 };
+
 export const FlippingGallery = ({
   items,
   autoplay = false,
@@ -18,6 +19,21 @@ export const FlippingGallery = ({
   autoplay?: boolean;
 }) => {
   const [active, setActive] = useState(0);
+  const [rotations, setRotations] = useState<number[]>([]);
+
+  // Fix random rotations at mount
+  useEffect(() => {
+    setRotations(items.map(() => Math.floor(Math.random() * 21) - 10));
+  }, [items]);
+
+  useEffect(() => {
+    if (autoplay) {
+      const interval = setInterval(() => {
+        setActive((prev) => (prev + 1) % items.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [autoplay, items.length]);
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % items.length);
@@ -27,20 +43,10 @@ export const FlippingGallery = ({
     setActive((prev) => (prev - 1 + items.length) % items.length);
   };
 
-  const isActive = (index: number) => {
-    return index === active;
-  };
+  const isActive = (index: number) => index === active;
 
-  useEffect(() => {
-    if (autoplay) {
-      const interval = setInterval(handleNext, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [autoplay]);
+  if (rotations.length !== items.length) return null; // hydrate wait
 
-  const randomRotateY = () => {
-    return Math.floor(Math.random() * 21) - 10;
-  };
   return (
     <div className='mx-auto max-w-sm px-4 py-20 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12'>
       <div className='relative grid grid-cols-1 md:gap-20 md:grid-cols-2'>
@@ -54,13 +60,13 @@ export const FlippingGallery = ({
                     opacity: 0,
                     scale: 0.9,
                     z: -100,
-                    rotate: randomRotateY(),
+                    rotate: rotations[index],
                   }}
                   animate={{
                     opacity: isActive(index) ? 1 : 0.7,
                     scale: isActive(index) ? 1 : 0.95,
                     z: isActive(index) ? 0 : -100,
-                    rotate: isActive(index) ? 0 : randomRotateY(),
+                    rotate: isActive(index) ? 0 : rotations[index],
                     zIndex: isActive(index) ? 40 : items.length + 2 - index,
                     y: isActive(index) ? [0, -80, 0] : 0,
                   }}
@@ -68,7 +74,7 @@ export const FlippingGallery = ({
                     opacity: 0,
                     scale: 0.9,
                     z: 100,
-                    rotate: randomRotateY(),
+                    rotate: rotations[index],
                   }}
                   transition={{
                     duration: 0.4,
@@ -89,25 +95,14 @@ export const FlippingGallery = ({
             </AnimatePresence>
           </div>
         </div>
+
         <div className='flex flex-col justify-between py-4'>
           <motion.div
             key={active}
-            initial={{
-              y: 20,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-            exit={{
-              y: -20,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: 'easeInOut',
-            }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
             <h3 className='text-2xl font-bold text-black dark:text-white'>
               {items[active].title}
@@ -141,6 +136,7 @@ export const FlippingGallery = ({
               ))}
             </motion.p>
           </motion.div>
+
           <div className='flex gap-4 pt-4 md:pt-0'>
             <button
               onClick={handlePrev}

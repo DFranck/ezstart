@@ -1,8 +1,8 @@
 {
   "HeroSection": {
-    "title": "Lancez vite. Construisez bien.",
-    "subtitle": "Votre partenaire technique pour des produits web durables.",
-    "description": "J’aide startups et équipes tech à poser les bons choix dès le départ : stack, architecture, outils, CI/CD, bonnes pratiques. Un accompagnement fullstack pragmatique, du front au back, jusqu’au déploiement sans complexité inutile."
+    "title": "EzStart",
+    "subtitle": "Freelance tech pour startups ambitieuses.",
+    "description": "J’accompagne vos projets web de A à Z : stack moderne, code propre, déploiement fluide. L’objectif : aller vite sans sacrifier la qualité."
   },
   "AboutSection": {
     "title": "À propos",
@@ -12,81 +12,38 @@
   },
   "ExpertiseSection": {
     "title": "Mon expertise",
-    "item1": "⚙️ Architecture scalable & modulaire (monorepo, tRPC, Zod, Prisma)",
-    "item2": "🚀 Déploiement fluide avec GitHub Actions, Docker, Vercel, CI/CD",
-    "item3": "🧪 Code maintenable & testé (Jest, conventions strictes, coverage)",
-    "item4": "🌐 Stack fullstack JavaScript/TypeScript (Next.js, Express, API REST/GraphQL)",
-    "item5": "🔐 Auth, RBAC & sécurité applicative dès la conception",
-    "item6": "🧠 Accompagnement stratégique sur vos choix techniques et produits"
+    "item1": "⚙️ Architecture modulaire et réutilisable (monorepo, composants dynamiques, cva, ezTag/ezIcon)",
+    "item2": "📦 Intégration Web3 & smart contracts (query/execute CosmWasm, actions NFT dynamiques)",
+    "item3": "🚀 CI/CD et déploiement multi-environnement (Vercel, AWS Beanstalk, GitHub Actions)",
+    "item4": "🧪 Code propre et testable (conventions strictes, typage fort, Jest, Zod, validation runtime)",
+    "item5": "🌐 Stack fullstack moderne (Next.js, Express, Supabase, MongoDB, Mailjet, REST API)",
+    "item6": "🎯 Accompagnement complet : PWA, design system, stratégie produit, DNS/Wix, hosting, SEO"
   },
-  "ProjectsSection": {
-    "title": "Quelques projets",
-    "projects": [
-      {
-        "title": "EventoApp.io",
-        "subtitle": "Création et vente d’événements",
-        "description": "SaaS complet permettant aux organisateurs de créer des événements, vendre des billets et gérer les paiements avec Stripe Connect. PWA responsive développée avec Next.js, Express, MongoDB et CI/CD Vercel.",
-        "link": "https://www.evento-app.io/",
-        "src": "https://evento-media-bucket.s3.ap-southeast-2.amazonaws.com/og-image.jpg",
-        "tech": ["Next.js", "Express", "MongoDB", "Stripe", "CI/CD"],
-        "private": false
-      },
-      {
-        "title": "Hydro Marketplace",
-        "subtitle": "NFT Web3 sur Cosmos",
-        "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. Frontend développé avec Next.js, wagmi, CosmosKit et Interchain UI. Intégration complète Web3 avec wallet connect, smart contracts CosmWasm, et affichage dynamique on-chain.",
-        "link": "https://hydro.cosmos.network/",
-        "src": "https://hydro.cosmos.network/opengraph-image.jpg?70d2905d0b108c25",
-        "tech": [
-          "Next.js",
-          "CosmJS",
-          "CosmosKit",
-          "Supabase",
-          "Interchain UI",
-          "Cosmos"
-        ],
-        "private": true
-      }
-    ]
-  },
+
   "ServicesSection": {
-    "title": "Mes services",
-    "intro": "J'interviens à différents niveaux de maturité produit, que ce soit pour démarrer un projet, refondre une base technique ou accompagner une équipe dans la durée.",
+    "title": "Domaines d'intervention",
+    "intro": "Selon les besoins du projet ou l'état de la base existante, j'interviens sur différents volets techniques ou stratégiques.",
     "services": [
       {
-        "title": "⚙️ Audit technique",
-        "description": "Analyse de votre base existante, CI/CD, sécurité et architecture. Livrable documenté et recommandations."
+        "title": "⚙️ Audit & diagnostic",
+        "description": "Analyse technique d’un codebase, architecture, stack, pratiques CI/CD et sécurité."
       },
       {
-        "title": "🚀 Création de MVP",
-        "description": "Déploiement rapide d’un socle solide : Auth, API, dashboard, tests, CI/CD, dev ready."
+        "title": "🚀 Mise en place d’un socle technique",
+        "description": "Création d’une base stable pour démarrer un projet : stack front/back, API, auth, déploiement, tests."
       },
       {
-        "title": "♻️ Refonte & clean architecture",
-        "description": "Reprise structurée d’un existant pour le rendre stable, typé, scalable."
+        "title": "♻️ Refonte progressive",
+        "description": "Restructuration d’un existant : typage, séparation des responsabilités, simplification de la logique métier, meilleure scalabilité."
       },
       {
-        "title": "🧭 CTO as a Service",
-        "description": "Support technique long-terme, revue de code, roadmap, coaching dev."
+        "title": "🧭 Accompagnement tech",
+        "description": "Soutien ponctuel ou régulier : relecture de code, structuration d’équipe, revue de choix techniques, suivi produit."
       }
     ]
   },
   "ContactSection": {
     "title": "Vous avez un projet\u00a0?",
-    "description": "Je suis disponible pour des missions ponctuelles, un accompagnement CTO, ou la création de bases techniques robustes. Parlons de vos objectifs, et voyons comment EzStart peut vous aider.",
-    "ctaEmail": "Me contacter",
-    "ctaLinkedIn": "LinkedIn",
-    "ctaMore": "Plus d'infos"
-  },
-  "vision": {
-    "title": "Une architecture pensée pour durer",
-    "intro": "Trop de projets souffrent d’une dette technique évitable. EzStart est né d’un besoin simple : bâtir une base claire, modulaire et durable qui respecte les meilleures pratiques du développement moderne. Chaque projet mérite une architecture saine, prévisible et facile à faire évoluer.",
-    "points": [
-      "Stack moderne (TypeScript, React, Next.js, Express)",
-      "Architecture modulaire et scalable",
-      "Intégration fluide des outils standards (Zod, CI/CD…)",
-      " Accessibilité, typage strict, tests et conventions"
-    ],
-    "footer": "Ne plus jamais repartir de zéro. Toujours avancer avec des fondations saines."
+    "description": "Je suis disponible pour des missions ponctuelles ou long terme, un accompagnement CTO, ou du developpement. Parlons de vos objectifs, et voyons comment je peut vous aider."
   }
 }

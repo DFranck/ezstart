@@ -3,9 +3,14 @@ import { IconProps } from '../types';
 const Sass = (props: IconProps) => {
   return (
     <svg
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
       role='img'
       xmlns='http://www.w3.org/2000/svg'
       aria-label='Sass'

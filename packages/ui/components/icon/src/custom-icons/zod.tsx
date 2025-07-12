@@ -3,9 +3,14 @@ import { IconProps } from '../types';
 const Zod = (props: IconProps) => {
   return (
     <svg
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
       viewBox='0 0 58 48'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
@@ -44,9 +49,9 @@ const Zod = (props: IconProps) => {
           width='58'
           height='47.6782'
           filterUnits='userSpaceOnUse'
-          color-interpolation-filters='sRGB'
+          colorInterpolationFilters='sRGB'
         >
-          <feFlood flood-opacity='0' result='BackgroundImageFix' />
+          <feFlood floodOpacity='0' result='BackgroundImageFix' />
           <feColorMatrix
             in='SourceAlpha'
             type='matrix'

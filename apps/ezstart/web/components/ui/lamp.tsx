@@ -1,5 +1,5 @@
 'use client';
-import { Section } from '@ezstart/ui/components';
+import { Div, Section } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -74,7 +74,7 @@ export const LampContainer = ({
             className='absolute top-0 z-50 h-0.5 w-[30rem] bg-cyan-400'
           />
         </div>
-        <div className='z-50'>{children}</div>
+        <Div className='z-50 min-h-80'>{children}</Div>
       </div>
     </Section>
   );

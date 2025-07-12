@@ -1,7 +1,8 @@
 'use client';
 
-import type { LucideProps } from 'lucide-react';
+import { HelpCircle, type LucideProps } from 'lucide-react';
 import React, { lazy, Suspense, useMemo } from 'react';
+import { customIconMap } from '../custom-icons';
 import type { IconProps } from '../types';
 
 export function Icon({
@@ -10,8 +11,20 @@ export function Icon({
   rotate,
   className,
   style,
+  size = 16,
   ...props
 }: IconProps) {
+  if (!name) {
+    console.warn(`[Icon] name is falsy → rendering fallback`, {
+      name,
+      type: typeof name,
+      isNull: name === null,
+      isUndefined: typeof name === 'undefined',
+      isEmptyString: name === '',
+    });
+    return <HelpCircle size={size} className='text-gray-400' />;
+  }
+
   const [prefix, iconName] = name.includes(':')
     ? name.split(':')
     : ['lucide', name];
@@ -23,46 +36,66 @@ export function Icon({
       switch (prefix) {
         case 'lucide': {
           const mod = await import('lucide-react');
-          return { default: mod[iconName as keyof typeof mod] };
+          return {
+            default: mod[
+              iconName as keyof typeof mod
+            ] as React.ComponentType<LucideProps>,
+          };
         }
         case 'fa': {
           const mod = await import('react-icons/fa');
-          return { default: mod[iconName as keyof typeof mod] };
+          return {
+            default: mod[
+              iconName as keyof typeof mod
+            ] as React.ComponentType<LucideProps>,
+          };
         }
         case 'custom': {
-          const mod = await import(`../custom-icons/${iconName.toLowerCase()}`);
-          return { default: mod.default };
+          const component =
+            customIconMap[iconName as keyof typeof customIconMap];
+          console.log('component', iconName);
+          if (!component) {
+            throw new Error(`Unknown custom icon: ${iconName}`);
+          }
+          return { default: component as React.ComponentType<LucideProps> };
         }
+
         default: {
-          throw new Error(`Unknown icon library: ${prefix}`);
+          console.warn(
+            `Unknown icon library: ${prefix}, falling back to Lucide 'HelpCircle'`
+          );
+          const mod = await import('lucide-react');
+          return {
+            default: mod.HelpCircle,
+          };
         }
       }
     });
   }, [name]);
 
-  const fallbackSize = props.size ?? 20;
-  const iconSize = props.size ?? fallbackSize;
+  const tailwindSize = `w-[${size}px] h-[${size}px] min-w-[${size}px] min-h-[${size}px]`;
 
   const finalStyle =
-    rotate != null || iconSize != null
+    rotate != null || size != null
       ? {
           ...style,
           ...(rotate != null && { transform: `rotate(${rotate}deg)` }),
-          ...(iconSize != null && {
-            width: iconSize,
-            height: iconSize,
-            minWidth: iconSize,
-            minHeight: iconSize,
+          ...(size != null && {
+            width: size,
+            height: size,
+            minWidth: size,
+            minHeight: size,
           }),
         }
       : style;
+
   return (
     <Suspense
       fallback={
         <span
           style={{
-            width: fallbackSize,
-            height: fallbackSize,
+            width: size,
+            height: size,
             display: 'inline-block',
           }}
         />
@@ -70,7 +103,7 @@ export function Icon({
     >
       <DynamicIcon
         {...props}
-        className={[className, spin && 'animate-spin']
+        className={[tailwindSize, className, spin && 'animate-spin']
           .filter(Boolean)
           .join(' ')}
         style={finalStyle}

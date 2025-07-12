@@ -6,8 +6,14 @@ export default function Ezstart(props: IconProps) {
       {...props}
       viewBox='0 0 34 34'
       xmlns='http://www.w3.org/2000/svg'
-      height={props.size}
-      width={props.size}
+      className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
     >
       <circle cx='17' cy='17' r='17' fill='url(#paint0_linear_100_80)' />
       <path d='M30.2307 16.4994C30.8974 16.8843 30.8974 17.8465 30.2307 18.2314L10.1826 29.8062C9.51597 30.1911 8.68264 29.7099 8.68264 28.9401L8.68264 5.79062C8.68264 5.02082 9.51597 4.5397 10.1826 4.9246L30.2307 16.4994Z' />

@@ -1,16 +1,6 @@
 {
   "skills": [
     {
-      "category": "Design",
-      "items": [
-        {
-          "name": "Figma",
-          "className": "optimal",
-          "icon": "custom:Figma"
-        }
-      ]
-    },
-    {
       "category": "Frontend",
       "items": [
         {
@@ -34,7 +24,7 @@
           "icon": "custom:Redux"
         },
         {
-          "name": "Zustand.js",
+          "name": "Zustand",
           "className": "sub",
           "icon": "custom:Zustand"
         },
@@ -47,6 +37,11 @@
           "name": "Sass",
           "className": "optimal",
           "icon": "custom:Sass"
+        },
+        {
+          "name": "CosmosKit",
+          "className": "sub",
+          "icon": "custom:CosmosKit"
         }
       ]
     },
@@ -62,6 +57,11 @@
           "name": "express.js",
           "className": "optimal",
           "icon": "custom:Expressjs"
+        },
+        {
+          "name": "socket.io",
+          "className": "sub",
+          "icon": "custom:Socketio"
         },
         {
           "name": "prisma",
@@ -82,6 +82,21 @@
           "name": "MongoDB",
           "className": "optimal",
           "icon": "custom:Mongodb"
+        },
+        {
+          "name": "Supabase",
+          "className": "sub",
+          "icon": "custom:Supabase"
+        }
+      ]
+    },
+    {
+      "category": "Design",
+      "items": [
+        {
+          "name": "Figma",
+          "className": "optimal",
+          "icon": "custom:Figma"
         }
       ]
     },
@@ -107,6 +122,11 @@
           "name": "Npm",
           "className": "sub",
           "icon": "fa:FaNpm"
+        },
+        {
+          "name": "CI/CD",
+          "className": "optimal",
+          "icon": "fa:FaCogs"
         }
       ]
     }

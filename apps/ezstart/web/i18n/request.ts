@@ -13,7 +13,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale;
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale;
 
-  const [common, header, footer, nav, home, legal, contact, about] =
+  const [common, header, footer, nav, home, legal, contact, about, projects] =
     await Promise.all([
       import(`../messages/${locale}/common.json`),
       import(`../messages/${locale}/header.json`),
@@ -23,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       import(`../messages/${locale}/legal-notices.json`),
       import(`../messages/${locale}/contact.json`),
       import(`../messages/${locale}/about.json`),
+      import(`../messages/${locale}/projects.json`),
     ]);
 
   return {
@@ -36,6 +37,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       legal.default,
       contact.default,
       about.default,
+      projects.default,
     ]),
   };
 });

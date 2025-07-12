@@ -1,5 +1,6 @@
 'use client';
-import { H2, H3 } from '@ezstart/ui/components';
+import { Div, H2, H3 } from '@ezstart/ui/components';
+import { cn } from '@ezstart/ui/lib';
 import { useEffect, useState } from 'react';
 
 type Skill = {
@@ -29,14 +30,17 @@ export function SkillShowcase({ skills }: SkillShowcaseProps) {
   }, [skills.length]);
 
   return (
-    <div className='skill-showcase mt-6 overflow-hidden'>
+    <Div size={'default'} className='skill-showcase overflow-hidden w-full'>
       <H2 size='h4' className={animate ? 'slideInFromLeft' : ''}>
         {skills[index].first}
       </H2>
-
-      <H3 size='h5' className={animate ? 'slideInFromRight' : ''}>
+      <H3
+        size='h5'
+        variant={'description'}
+        className={cn(animate ? 'slideInFromRight' : '')}
+      >
         {skills[index].second}
       </H3>
-    </div>
+    </Div>
   );
 }

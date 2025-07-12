@@ -1,15 +1,20 @@
 import { IconProps } from '../types';
 
-export default function TypeScript(props: IconProps) {
+export default function Typescript(props: IconProps) {
   return (
     <svg
       viewBox='0 0 512 512'
       xmlns='http://www.w3.org/2000/svg'
       aria-label='TypeScript'
       role='img'
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
     >
       <rect width='512' height='512' rx='15%' fill='#3178c6' />
       <path

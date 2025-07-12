@@ -1,55 +1,65 @@
+'use client';
+
 import { SkillShowcase } from '@/components/JobShowing';
-import { MacbookScroll } from '@/components/ui/macbook-scroll';
-import {
-  Div,
-  H1,
-  Icon,
-  P,
-  Section,
-  TextGradient,
-} from '@ezstart/ui/components';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import { Div, H1, Section, TextGradient } from '@ezstart/ui/components';
+import { useDevice } from '@ezstart/ui/hooks';
+import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import ContactsList from '../contact/components/contactsList';
 
-const HeroSection = () => {
+type Props = { id?: string };
+
+const HeroSection = ({ id }: Props) => {
   const t = useTranslations('about');
+  const { isMobile } = useDevice();
   const skillsShowcase = t.raw('skillsShowcase') as Array<{
     first: string;
     second: string;
   }>;
+
+  const image = (
+    <Image
+      src='/images/franck_no_background.png'
+      alt='Franck Dufournet'
+      width={isMobile ? 150 : 500}
+      height={isMobile ? 150 : 500}
+      className='rounded-full object-cover shadow-md bg-primary z-10 ratio-square max-w-80'
+    />
+  );
+
+  const content = (
+    <>
+      <H1 size={'giant'} className={cn(isMobile ? 'text-center' : 'text-wrap')}>
+        <TextGradient from='ezstart' speed={5}>
+          {t('title')}
+        </TextGradient>
+      </H1>
+      <SkillShowcase skills={skillsShowcase} />
+      <ContactsList />
+    </>
+  );
+
   return (
-    <Section size={'full'}>
-      <MacbookScroll
-        badge={<Icon name='custom:Ezstart' size={40} />}
-        content={
-          <Div size='xs' layout={'row'}>
-            <Div size={'xs'} className='items-start'>
-              <Div layout={'row'} size={'default'}>
-                <Div size={'default'} className='items-start'>
-                  <P size={'xs'} className='hello'>
-                    {t('intro')}
-                  </P>
-                  <H1>
-                    <TextGradient from='ezstart' to='ring' speed={5}>
-                      {t('title')}
-                    </TextGradient>
-                  </H1>
-                </Div>
-                <Image
-                  src='/images/franck_no_background.png'
-                  alt='Franck Dufournet'
-                  width={150}
-                  height={150}
-                  className='rounded-full object-cover shadow-md bg-primary'
-                  sizes='h-full w-full'
-                />
-              </Div>
-              <SkillShowcase skills={skillsShowcase} />
-            </Div>
+    <AuroraBackground id={id}>
+      <Section
+        size={isMobile ? 'xs' : 'full'}
+        className={cn(isMobile && 'py-20')}
+      >
+        {isMobile ? (
+          <Div size='xs'>
+            {image}
+            {content}
           </Div>
-        }
-      />
-    </Section>
+        ) : (
+          <Div layout='row' className='max-w-4xl'>
+            <Div size='xs'>{content}</Div>
+            {image}
+          </Div>
+        )}
+      </Section>
+    </AuroraBackground>
   );
 };
 

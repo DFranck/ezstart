@@ -12,7 +12,7 @@ const ExpertiseSection: FC<Props> = ({ className, ...rest }) => {
   const items = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6'] as const;
 
   return (
-    <Section className={className} {...rest}>
+    <Section className={className} {...rest} size='sm'>
       <H2>{t('title')}</H2>
       <UL layout='grid' size={'xs'}>
         {items.map((key) => (

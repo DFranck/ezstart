@@ -11,7 +11,7 @@ const AboutSection: FC<Props> = ({ className, ...rest }) => {
   const t = useTranslations('AboutSection');
 
   return (
-    <Section className={className} {...rest}>
+    <Section className={className} {...rest} size='sm'>
       <H2>{t('title')}</H2>
       <P className='text-center'>
         {t.rich('paragraph1', {

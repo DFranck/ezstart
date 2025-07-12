@@ -10,7 +10,7 @@ export const HeroSection: FC<Props> = ({ className, ...rest }) => {
 
   return (
     <AuroraBackground {...rest}>
-      <Section className={className}>
+      <Section className={className} size={'sm'}>
         <H1 size='giant'>{t('title')}</H1>
         <H3>{t('subtitle')}</H3>
         <H5 variant='description' size='h6'>

@@ -5,7 +5,7 @@ import { cn } from '@ezstart/ui/lib';
 import { motion, MotionValue, useScroll, useTransform } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 
-const debug = false;
+const debug = true;
 
 export const MacbookScroll = ({
   src,
@@ -25,8 +25,7 @@ export const MacbookScroll = ({
   const ref = useRef<HTMLDivElement>(null);
   const [vh, setVh] = useState(0);
   const { isMobile, isTablet } = useDevice();
-  console.log('isMobile', isMobile);
-  console.log('isTablet', isTablet);
+
   const config = isMobile
     ? {
         scaleXRange: [1.2, 1.2],
@@ -46,9 +45,9 @@ export const MacbookScroll = ({
       : {
           scaleXRange: [1.2, 1.5],
           scaleYRange: [0.6, 1.5],
-          translateFactor: 1.2,
+          translateFactor: 1.8,
           scale: 1,
-          minHeight: 'min-h-[95vh]',
+          minHeight: 'min-h-[110vh]',
         };
 
   const { scrollYProgress } = useScroll({
@@ -62,18 +61,23 @@ export const MacbookScroll = ({
   //    - config.scaleXRange = [1.2, 1.5] → expands width
   //    - config.scaleYRange = [0.6, 1.5] → expands height
   // The scaling stops once scrollYProgress > 0.3
-  const scaleX = useTransform(scrollYProgress, [0, 0.3], config.scaleXRange);
-  const scaleY = useTransform(scrollYProgress, [0, 0.3], config.scaleYRange);
+  const scaleX = useTransform(scrollYProgress, [0, 0.4], config.scaleXRange);
+  const scaleY = useTransform(scrollYProgress, [0, 0.4], config.scaleYRange);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setVh(window.innerHeight);
-    }
+    const updateVh = () => setVh(window.innerHeight);
+    updateVh();
+    window.addEventListener('resize', updateVh);
+    return () => window.removeEventListener('resize', updateVh);
   }, []);
 
   const lidHeight = 384 * config.scale;
-  const translateHeight = vh * config.translateFactor - lidHeight / 2;
-  const translate = useTransform(scrollYProgress, [0, 1], [0, translateHeight]);
+  const translateHeight = vh * config.translateFactor - vh;
+  const translate = useTransform(
+    scrollYProgress,
+    [0, 0.8],
+    [0, translateHeight]
+  );
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
   const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -83,7 +87,7 @@ export const MacbookScroll = ({
     <div
       ref={ref}
       className={cn(
-        'flex shrink-0 scale-60 transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-80  md:scale-100 md:py-24 mb-[40vh] md:mb-[80vh]',
+        'flex shrink-0 scale-60 transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-80  md:scale-100 md:py-24 mb-[40vh]',
         minHeight,
         debug && ' bg-red-500/50'
       )}
@@ -231,7 +235,7 @@ export const Lid = ({
         ) : (
           <img
             src={src as string}
-            alt={alt as string}
+            alt={alt ?? ''}
             className='absolute inset-0 h-full w-full rounded-lg object-cover object-left-top'
           />
         )}

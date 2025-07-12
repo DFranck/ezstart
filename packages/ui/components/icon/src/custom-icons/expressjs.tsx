@@ -4,9 +4,14 @@ const Expressjs = (props: IconProps) => {
   return (
     <svg
       fill={props.fill ? `hsl(var(--${props.fill}))` : 'currentColor'}
-      height={props.size || 24}
-      width={props.size || 24}
       className={props.className}
+      style={{
+        width: props.size || 24,
+        height: props.size || 24,
+        minWidth: props.size || 24,
+        minHeight: props.size || 24,
+        ...props.style,
+      }}
       viewBox='0 0 24 24'
       role='img'
       xmlns='http://www.w3.org/2000/svg'
