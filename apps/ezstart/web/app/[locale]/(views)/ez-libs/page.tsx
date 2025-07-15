@@ -1,24 +1,27 @@
 'use client';
-import { H1, H2, Main, Section } from '@ezstart/ui/components';
+import { H1, H2, Main, P, Section } from '@ezstart/ui/components';
+import { useTranslations } from 'next-intl';
 import { LibSection } from './[lib]/components/section-lib';
-import { libMeta } from './[lib]/meta/lib-meta';
-import { LibId, LibMeta } from './[lib]/types';
 
 export default function EzLibs() {
+  const t = useTranslations('libraries');
+  const libraries = t.raw('items') as Array<{
+    title: string;
+    subtitle: string;
+    description: string;
+    link: string;
+    src: string;
+    tech: string[];
+  }>;
   return (
     <Main withHeaderOffset>
       <Section size={'xl'}>
-        <H1>EzLibs</H1>
-        <H2 size={'h3'}>
-          Check out my libraries, play with them, then install them!
-        </H2>
+        <H1>{t('title')}</H1>
+        <H2 size={'h3'}>{t('subtitle')}</H2>
+        <P variant={'description'}>{t('description')}</P>
       </Section>
-      {(Object.entries(libMeta) as [LibId, LibMeta][]).map(([libId], index) => (
-        <LibSection
-          key={libId}
-          libId={libId}
-          variant={index % 2 === 1 ? undefined : 'primary'}
-        />
+      {libraries.map((lib, index) => (
+        <LibSection key={lib.title} lib={lib} index={index} />
       ))}
     </Main>
   );

@@ -1,5 +1,5 @@
 'use client';
-import { getMeta } from '@/utils/get-meta';
+
 import {
   Button,
   Div,
@@ -10,40 +10,34 @@ import {
   SectionVariant,
 } from '@ezstart/ui/components';
 import Link from 'next/link';
-import { LibId } from '../types';
+
 interface LibSectionProps {
-  libId: LibId;
+  lib: {
+    title: string;
+    subtitle: string;
+    description: string;
+    link: string;
+    src: string;
+    tech: string[];
+  };
+  index?: number;
   variant?: SectionVariant;
 }
-export const LibSection = ({ libId, variant }: LibSectionProps) => {
-  const { name, description, github, status } = getMeta('lib', libId);
 
+export const LibSection = ({ lib, variant }: LibSectionProps) => {
   return (
-    <Section variant={variant}>
-      <H3 size='h2'>{name}</H3>
-      <H4 size={'h5'}>{description}</H4>
-      <Div layout={'grid'}>
-        <Button asChild variant={variant ? 'secondary' : 'default'}>
-          <Link href={'/ez-libs/' + name.toLowerCase()}>
+    <Section variant={variant} id={lib.title.toLowerCase()}>
+      <H3 size='h2'>{lib.title}</H3>
+      <H4 size={'h5'}>{lib.subtitle}</H4>
+      <p className='text-muted-foreground'>{lib.description}</p>
+
+      <Div layout={'grid'} className='gap-4 mt-4'>
+        <Button asChild>
+          <Link href={lib.link}>
             <Icon name='lucide:Book' />
-            {name} documentation
+            Voir {lib.title}
           </Link>
         </Button>
-        {github && (
-          <Button
-            asChild
-            variant={'outline'}
-            className={
-              variant &&
-              'bg-primary text-primary-foreground hover:bg-secondary/10 hover:text-primary-foreground'
-            }
-          >
-            <Link href={github} target='_blank'>
-              <Icon name='lucide:Github' />
-              {name} code
-            </Link>
-          </Button>
-        )}
       </Div>
     </Section>
   );
