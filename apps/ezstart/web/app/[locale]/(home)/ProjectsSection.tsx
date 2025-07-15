@@ -9,9 +9,9 @@ import { FC, HTMLAttributes } from 'react';
 type Props = HTMLAttributes<HTMLElement>;
 
 const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
-  const t = useTranslations('ProjectsSection');
+  const t = useTranslations('projects');
   const { isMobile } = useDevice();
-  const projects = t.raw('projects') as {
+  const projects = t.raw('items') as {
     title: string;
     subtitle?: string;
     roles?: string[];

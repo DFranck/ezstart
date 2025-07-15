@@ -22,11 +22,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
       // paths
       // "/"
       import(`../messages/${locale}/home/home.json`),
+      import(`../messages/${locale}/home/skills.json`),
+      import(`../messages/${locale}/home/projects.json`),
+      import(`../messages/${locale}/home/contact.json`),
       // "/legal-notices"
       import(`../messages/${locale}/legal-notices.json`),
       // maping content
       import(`../messages/${locale}/contact.json`),
-      import(`../messages/${locale}/projects.json`),
       import(`../messages/${locale}/libraries.json`),
     ]);
 

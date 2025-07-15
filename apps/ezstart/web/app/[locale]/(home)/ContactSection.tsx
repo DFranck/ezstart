@@ -9,11 +9,11 @@ import ContactsList from '../(views)/(statics)/contact/components/contactsList';
 type Props = HTMLAttributes<HTMLElement>;
 
 const ContactSection: FC<Props> = ({ className, ...rest }) => {
-  const t = useTranslations('ContactSection');
+  const t = useTranslations('contact');
 
   return (
     <LampContainer className={` ${className ?? ''}`} {...rest}>
-      <H2 className='md:text-center'>{t('title')}</H2>
+      <H2 className='md:text-center'>{t('subtitle')}</H2>
       <P>{t('description')}</P>
       <ContactsList className='justify-center' />
     </LampContainer>

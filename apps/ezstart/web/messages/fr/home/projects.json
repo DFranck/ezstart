@@ -1,7 +1,7 @@
 {
-  "ProjectsSection": {
+  "projects": {
     "title": "Projets",
-    "projects": [
+    "items": [
       {
         "title": "EventoApp.io",
         "subtitle": "Création et vente d’événements",

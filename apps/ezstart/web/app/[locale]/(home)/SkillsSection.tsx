@@ -27,7 +27,7 @@ type Props = {
 };
 
 export const SkillsSection = ({ id }: Props) => {
-  const t = useTranslations('home.skills');
+  const t = useTranslations('skills');
   const { isMobile } = useDevice();
 
   return (
