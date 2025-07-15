@@ -1,0 +1,35 @@
+{
+  "home": {
+    "hero": {
+      "title": "Franck Dufournet",
+      "subtitle": "EzStart",
+      "skillsShowcase": [
+        {
+          "first": "Développement frontend.",
+          "second": "Interfaces modernes et dynamiques"
+        },
+        {
+          "first": "Développement full stack.",
+          "second": "Du backend aux interfaces web"
+        },
+        {
+          "first": "Lead développeur.",
+          "second": "Architecture modulaire & stratégie produit"
+        }
+      ]
+    },
+    "skills": {
+      "title": "Competences",
+      "categories": {
+        "Frontend": "Frontend",
+        "Backend": "Backend",
+        "Design": "Design",
+        "Other": "Autres"
+      }
+    },
+    "contact": {
+      "title": "Vous avez un projet\u00a0?",
+      "description": "Je suis disponible pour des missions ponctuelles ou long terme, un accompagnement CTO, ou du developpement. Parlons de vos objectifs, et voyons comment je peut vous aider."
+    }
+  }
+}

@@ -45,7 +45,7 @@ export const MacbookScroll = ({
       : {
           scaleXRange: [1.2, 1.5],
           scaleYRange: [0.6, 1.5],
-          translateFactor: 1.8,
+          translateFactor: 1.5,
           scale: 1,
           minHeight: 'min-h-[110vh]',
         };
@@ -72,10 +72,10 @@ export const MacbookScroll = ({
   }, []);
 
   const lidHeight = 384 * config.scale;
-  const translateHeight = vh * config.translateFactor - vh;
+  const translateHeight = (vh / 3) * config.translateFactor;
   const translate = useTransform(
     scrollYProgress,
-    [0, 0.8],
+    [0, 0.6],
     [0, translateHeight]
   );
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
@@ -229,7 +229,12 @@ export const Lid = ({
       >
         <div className='absolute inset-0 rounded-lg' />
         {content ? (
-          <div className=' h-full w-full overflow-auto rounded-lg bg-background '>
+          <div
+            className={cn(
+              ' h-full w-full overflow-auto rounded-lg bg-background ',
+              { 'bg-yellow-500': debug }
+            )}
+          >
             {content}
           </div>
         ) : (

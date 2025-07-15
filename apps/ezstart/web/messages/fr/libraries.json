@@ -1,0 +1,25 @@
+{
+  "LibsSection": {
+    "title": "Mes Librairies",
+    "libs": [
+      {
+        "title": "Tag",
+        "subtitle": "Préstyled most common html tags",
+        "roles": ["Owner"],
+        "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita molestiae consequatur fugiat veniam in quisquam sed dignissimos nesciunt perferendis est.",
+        "link": "https://www.evento-app.io/",
+        "src": "/images/www.evento-app.io.png",
+        "tech": ["Next.js", "React.js", "TypeScript", "CI/CD"]
+      },
+      {
+        "title": "Icon",
+        "subtitle": "Merged Lucide and Fontawsome Icon + custom colorfull",
+        "roles": ["Owner"],
+        "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita molestiae consequatur fugiat veniam in quisquam sed dignissimos nesciunt perferendis est.",
+        "link": "https://hydro.cosmos.network/",
+        "src": "/images/hydro.cosmos.network.png",
+        "tech": ["Next.js", "React.js", "TypeScript", "CI/CD"]
+      }
+    ]
+  }
+}

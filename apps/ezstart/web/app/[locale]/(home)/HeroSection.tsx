@@ -12,7 +12,7 @@ import ContactsList from '../(views)/(statics)/contact/components/contactsList';
 type Props = { id?: string };
 
 const HeroSection = ({ id }: Props) => {
-  const t = useTranslations('about');
+  const t = useTranslations('home.hero');
   const { isMobile } = useDevice();
   const skillsShowcase = t.raw('skillsShowcase') as Array<{
     first: string;

@@ -1,4 +1,3 @@
-// components/Skills.tsx
 import skillData from '@/public/json/skills.json';
 import {
   H2,
@@ -10,6 +9,7 @@ import {
   UL,
 } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
+import { useTranslations } from 'next-intl';
 
 type SkillCategory = {
   category: string;
@@ -27,11 +27,12 @@ type Props = {
 };
 
 export const SkillsSection = ({ id }: Props) => {
+  const t = useTranslations('home.skills');
   const { isMobile } = useDevice();
 
   return (
     <Section id={id} size={isMobile ? 'xs' : 'lg'}>
-      <H2>Skills</H2>
+      <H2>{t('title')}</H2>
       <UL
         layout='grid'
         className='grid-cols-2 md:grid-cols-4 lg:grid-cols-4 w-full'
@@ -42,7 +43,7 @@ export const SkillsSection = ({ id }: Props) => {
             <article className='w-full'>
               <UL className='w-full py-4 px-2 md:py-4 ' size={'xs'}>
                 <H3 size='h5' className='text-center md:text-start'>
-                  {cat.category}
+                  {t(`categories.${cat.category}`, { default: cat.category })}
                 </H3>
                 {cat.items.map((item, idx) => (
                   <LI

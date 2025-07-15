@@ -13,31 +13,34 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale;
   const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale;
 
-  const [common, header, footer, nav, home, legal, contact, about, projects] =
+  const [header, footer, nav, home, legal, contact, projects, libraries] =
     await Promise.all([
-      import(`../messages/${locale}/common.json`),
+      // layout
       import(`../messages/${locale}/header.json`),
       import(`../messages/${locale}/footer.json`),
       import(`../messages/${locale}/nav.json`),
-      import(`../messages/${locale}/home.json`),
+      // paths
+      // "/"
+      import(`../messages/${locale}/home/home.json`),
+      // "/legal-notices"
       import(`../messages/${locale}/legal-notices.json`),
+      // maping content
       import(`../messages/${locale}/contact.json`),
-      import(`../messages/${locale}/about.json`),
       import(`../messages/${locale}/projects.json`),
+      import(`../messages/${locale}/libraries.json`),
     ]);
 
   return {
     locale,
     messages: merge.all([
-      common.default,
       header.default,
       footer.default,
       nav.default,
       home.default,
       legal.default,
       contact.default,
-      about.default,
       projects.default,
+      libraries.default,
     ]),
   };
 });
