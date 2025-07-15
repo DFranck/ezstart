@@ -17,7 +17,10 @@ const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
     roles?: string[];
     description: string;
     link: string | null;
-    src?: string;
+    src?: {
+      desktop: string;
+      mobile: string;
+    };
     tech?: string[];
     private?: boolean;
   }[];

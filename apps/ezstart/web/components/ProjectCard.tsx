@@ -22,7 +22,10 @@ type ProjectCardProps = {
   roles?: string[];
   description: string;
   link?: string | null;
-  src?: string;
+  src?: {
+    desktop: string;
+    mobile: string;
+  };
   tech?: string[];
   private?: boolean;
 };
@@ -62,7 +65,7 @@ export function ProjectCard({
       {src && (
         <div className='max-h-56 md:max-h-96 overflow-y-auto rounded'>
           <Image
-            src={src}
+            src={isMobile ? src.mobile : src.desktop}
             alt={title}
             width={500}
             height={300}

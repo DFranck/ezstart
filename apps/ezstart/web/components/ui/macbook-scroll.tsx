@@ -5,7 +5,7 @@ import { cn } from '@ezstart/ui/lib';
 import { motion, MotionValue, useScroll, useTransform } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 
-const debug = true;
+const debug = false;
 
 export const MacbookScroll = ({
   src,
@@ -231,8 +231,8 @@ export const Lid = ({
         {content ? (
           <div
             className={cn(
-              ' h-full w-full overflow-auto rounded-lg bg-background ',
-              { 'bg-yellow-500': debug }
+              ' h-full w-full overflow-auto rounded-lg bg-background flex flex-col items-center justify-center',
+              { 'bg-pink-500/50': debug }
             )}
           >
             {content}

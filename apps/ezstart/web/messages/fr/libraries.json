@@ -1,24 +1,24 @@
 {
-  "LibsSection": {
+  "libraries": {
     "title": "Mes Librairies",
-    "libs": [
+    "items": [
       {
         "title": "Tag",
-        "subtitle": "Préstyled most common html tags",
+        "subtitle": "Polymorphic & Semantic HTML Tag System",
         "roles": ["Owner"],
-        "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita molestiae consequatur fugiat veniam in quisquam sed dignissimos nesciunt perferendis est.",
-        "link": "https://www.evento-app.io/",
-        "src": "/images/www.evento-app.io.png",
-        "tech": ["Next.js", "React.js", "TypeScript", "CI/CD"]
+        "description": "EzTag est un système de composants React polymorphiques et typés pour gérer facilement les balises HTML avec des styles et variantes Tailwind via `cva()`. Il fournit des alias JSX comme `<H1 />`, `<Section />` ou `<Main />`, tout en garantissant une sémantique propre, l’accessibilité et une mise en page réutilisable. Idéal pour construire une UI modulaire et scalable.",
+        "link": "/libraries/tag",
+        "src": "/images/libraries/ez-tag.png",
+        "tech": ["React.js", "TypeScript", "Tailwind", "cva()"]
       },
       {
         "title": "Icon",
-        "subtitle": "Merged Lucide and Fontawsome Icon + custom colorfull",
+        "subtitle": "Dynamic, Lazy-loaded Multi-Library Icon Component",
         "roles": ["Owner"],
-        "description": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita molestiae consequatur fugiat veniam in quisquam sed dignissimos nesciunt perferendis est.",
-        "link": "https://hydro.cosmos.network/",
-        "src": "/images/hydro.cosmos.network.png",
-        "tech": ["Next.js", "React.js", "TypeScript", "CI/CD"]
+        "description": "EzIcon est un composant React d’icônes dynamique et lazy-loadé, capable de fusionner plusieurs bibliothèques (`lucide-react`, `react-icons/fa`, et des icônes custom). Il supporte le chargement à la demande, la rotation, l’animation spin, et une nomenclature typée (`lucide:Search`, `fa:FaGithub`, `custom:myLogo`). Conçu pour réduire le bundle et garder un DX propre.",
+        "link": "/libraries/icon",
+        "src": "/images/libraries/ez-icon.png",
+        "tech": ["React.js", "TypeScript", "Lucide", "FontAwesome", "CI/CD"]
       }
     ]
   }

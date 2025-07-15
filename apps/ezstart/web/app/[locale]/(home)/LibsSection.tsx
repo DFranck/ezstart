@@ -1,5 +1,5 @@
+import { FlippingGallery } from '@/components/ui/flipping-gallery';
 import { MacbookScroll } from '@/components/ui/macbook-scroll';
-import { Div } from '@ezstart/ui/components';
 import { useTranslations } from 'next-intl';
 
 type Props = {
@@ -7,11 +7,11 @@ type Props = {
 };
 
 const LibsSection = ({ id }: Props) => {
-  const t = useTranslations('LibsSection');
+  const t = useTranslations('libraries');
   return (
     <MacbookScroll
       title={t('title')}
-      content={<Div size={'xs'}>Here is my libs</Div>}
+      content={<FlippingGallery items={t.raw('items')} autoplay />}
     />
   );
 };

@@ -53,7 +53,6 @@ export function Icon({
         case 'custom': {
           const component =
             customIconMap[iconName as keyof typeof customIconMap];
-          console.log('component', iconName);
           if (!component) {
             throw new Error(`Unknown custom icon: ${iconName}`);
           }

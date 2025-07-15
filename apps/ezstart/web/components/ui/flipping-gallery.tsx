@@ -1,7 +1,9 @@
 'use client';
 
-import { Icon } from '@ezstart/ui/components';
+import { Button, H3, Icon, P } from '@ezstart/ui/components';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 type Item = {
@@ -9,8 +11,9 @@ type Item = {
   title: string;
   subtitle?: string;
   src: string;
+  link?: string;
 };
-
+export const MotionP = motion.create(P);
 export const FlippingGallery = ({
   items,
   autoplay = false,
@@ -18,6 +21,7 @@ export const FlippingGallery = ({
   items: Item[];
   autoplay?: boolean;
 }) => {
+  const t = useTranslations('common');
   const [active, setActive] = useState(0);
   const [rotations, setRotations] = useState<number[]>([]);
 
@@ -48,10 +52,10 @@ export const FlippingGallery = ({
   if (rotations.length !== items.length) return null; // hydrate wait
 
   return (
-    <div className='mx-auto max-w-sm px-4 py-20 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12'>
+    <div className='mx-auto max-w-sm px-4 font-sans antialiased md:max-w-4xl '>
       <div className='relative grid grid-cols-1 md:gap-20 md:grid-cols-2'>
-        <div>
-          <div className='relative h-80 w-full'>
+        <div className='flex items-center justify-center'>
+          <div className='relative h-3/4 w-full '>
             <AnimatePresence>
               {items.map((item, index) => (
                 <motion.div
@@ -96,21 +100,22 @@ export const FlippingGallery = ({
           </div>
         </div>
 
-        <div className='flex flex-col justify-between py-4'>
+        <div className='flex flex-col gap-4 justify-between py-4'>
           <motion.div
+            className='flex flex-col gap-2'
             key={active}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
-            <h3 className='text-2xl font-bold text-black dark:text-white'>
-              {items[active].title}
-            </h3>
-            <p className='text-sm text-gray-500 dark:text-neutral-500'>
-              {items[active].subtitle}
-            </p>
-            <motion.p className='mt-4 text-sm md:text-lg text-gray-500 dark:text-neutral-300'>
+            <H3 size={'h5'}>{items[active].title}</H3>
+            <P size={'xs'}>{items[active].subtitle}</P>
+            <MotionP
+              size={'xs'}
+              variant={'description'}
+              className='line-clamp-4'
+            >
               {items[active].description.split(' ').map((word, index) => (
                 <motion.span
                   key={index}
@@ -134,7 +139,14 @@ export const FlippingGallery = ({
                   {word}&nbsp;
                 </motion.span>
               ))}
-            </motion.p>
+            </MotionP>
+            {items[active].link && (
+              <Button asChild>
+                <Link href={items[active].link || ''} rel='noopener noreferrer'>
+                  <span>{t('learnMore')}</span>
+                </Link>
+              </Button>
+            )}
           </motion.div>
 
           <div className='flex gap-4 pt-4 md:pt-0'>
