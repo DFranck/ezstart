@@ -1,5 +1,6 @@
 'use client';
 
+import skillsJson from '@/public/json/skills.json';
 import { mapProjectTechToSkills } from '@/utils/map-project-tech-to-skills';
 import {
   Div,
@@ -13,7 +14,6 @@ import {
 import { useDevice } from '@ezstart/ui/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
-import skillsJson from '../app/[locale]/(views)/(statics)/about/skills.json';
 import { ReadMoreText } from './ReadMoreText';
 
 type ProjectCardProps = {

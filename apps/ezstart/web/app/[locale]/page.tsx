@@ -1,18 +1,15 @@
 'use client';
 import { Main } from '@ezstart/ui/components';
 import ContactSection from './(home)/ContactSection';
+import HeroSection from './(home)/HeroSection';
 import ProjectsSection from './(home)/ProjectsSection';
-import HeroSection from './(views)/(statics)/about/HeroSection';
-import { SkillsSection } from './(views)/(statics)/about/SkillsSection';
+import { SkillsSection } from './(home)/SkillsSection';
 export default function Page() {
   return (
     <Main className='text-center'>
       <HeroSection id='hero' />
       <SkillsSection id='skills' />
-      {/* <AboutSection id='about' /> */}
-      {/* <ExpertiseSection id='expertise' /> */}
       <ProjectsSection id='projets' />
-      {/* <ServicesSection id='services' /> */}
       <ContactSection id='contact' />
     </Main>
   );

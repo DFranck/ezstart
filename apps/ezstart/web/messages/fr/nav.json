@@ -3,19 +3,6 @@
     { "label": "Accueil", "href": "/" },
 
     {
-      "label": "À propos",
-      "href": "/about"
-    },
-
-    {
-      "menuLabel": "Services",
-      "menu": [
-        { "label": "Offres", "href": "/services" },
-        { "label": "Tarifs", "href": "/tarifs" }
-      ]
-    },
-
-    {
       "menuLabel": "Libraries",
       "menu": [
         { "label": "Toutes les libs", "href": "/ez-libs" },
@@ -30,11 +17,6 @@
         { "label": "Projets internes", "href": "/ez-features" },
         { "label": "Billing", "href": "/ez-features/ezbilling" }
       ]
-    },
-
-    {
-      "label": "Blog",
-      "href": "/blog"
     },
 
     {

@@ -29,6 +29,15 @@
         "link": "https://hydro.cosmos.network/",
         "src": "/images/hydro.cosmos.network.png",
         "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
+      },
+      {
+        "title": "Lima Prod",
+        "subtitle": "Production video, France, Vietnam, Asie",
+        "roles": ["Frontend"],
+        "description": "Portfolio wix for ",
+        "link": "https://hydro.cosmos.network/",
+        "src": "/images/hydro.cosmos.network.png",
+        "tech": []
       }
     ],
     "moreProjects": [

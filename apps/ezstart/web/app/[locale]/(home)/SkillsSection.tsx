@@ -1,4 +1,5 @@
 // components/Skills.tsx
+import skillData from '@/public/json/skills.json';
 import {
   H2,
   H3,
@@ -9,7 +10,6 @@ import {
   UL,
 } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
-import skillData from './skills.json';
 
 type SkillCategory = {
   category: string;
