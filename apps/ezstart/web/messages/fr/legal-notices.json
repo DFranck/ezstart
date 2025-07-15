@@ -1,15 +1,15 @@
 {
   "legal-notices": {
     "title": "Mentions légales",
-    "intro": "Bienvenue sur EzStart, starter kit Next.js & React. Retrouvez ici toutes les informations légales et contacts importants.",
+    "intro": "EzStart LLC est la société éditrice de ce site et représente l’entité légale de Franck Dufournet pour ses activités de développement web, création de logiciels et services numériques. Retrouvez ci-dessous toutes les informations légales et contacts importants.",
     "sections": [
       {
         "id": "editor",
         "title": "Éditeur du site",
-        "content": "Nom/Société : [À compléter]\nStatut : [À compléter, ex : Auto-entrepreneur, SASU, ...]\nAdresse : [À compléter]\nSIREN/SIRET : [À compléter]",
+        "content": "Nom/Société : EzStart LLC\nStatut : Limited Liability Company (LLC)\nSiège social : 7442, 1021 E Lincolnway, Cheyenne, WY, Laramie, US, 82001\nAdresse opérationnelle : 188/A22-A23 Nguyen Van Huong, Ho Chi Minh City, VN, 700000\nResponsable légal : Franck Dufournet (100% propriétaire)\nTéléphone : +84 33 453 2954\nLinkedIn : https://www.linkedin.com/in/franck-dufournet-239446151/",
         "link": {
           "label": "Contact direct",
-          "href": "mailto:contact@ezstart.app"
+          "href": "mailto:franckdufournet@hotmail.fr"
         }
       },
       {
@@ -20,24 +20,24 @@
       {
         "id": "intellectual-property",
         "title": "Propriété intellectuelle",
-        "content": "Le code source, le contenu et les éléments visuels d’EzStart sont sous licence MIT, sauf mention contraire. Merci de toujours vérifier le README du dépôt.",
+        "content": "Le code source, le contenu et les éléments visuels présents sur ce site sont protégés. Sauf mention contraire, ils sont sous licence MIT ou restent la propriété de leur auteur. Merci de toujours vérifier le README du dépôt.",
         "link": {
           "label": "Voir le dépôt GitHub",
-          "href": "https://github.com/DFranck/ez-start"
+          "href": "https://github.com/DFranck/ezstart"
         }
       },
       {
         "id": "privacy",
         "title": "Données personnelles",
-        "content": "Aucune donnée personnelle n’est collectée sans votre consentement explicite.\n[À compléter si cookies, analytics, ou formulaire de contact sont ajoutés.]\nPour toute demande ou retrait de données, contactez-nous."
+        "content": "Aucune donnée personnelle n’est collectée sans votre consentement explicite.\nSi des cookies, analytics ou formulaires de contact sont ajoutés, une mise à jour sera effectuée.\nPour toute demande ou retrait de données, contactez-nous."
       },
       {
         "id": "contact",
         "title": "Contact & signalement",
         "content": "Vous pouvez contacter le responsable légal pour toute question, signalement ou demande de retrait à l’adresse suivante :",
         "link": {
-          "label": "legal@ezstart.app",
-          "href": "mailto:legal@ezstart.app"
+          "label": "franckdufournet@hotmail.fr",
+          "href": "mailto:franckdufournet@hotmail.fr"
         }
       }
     ]

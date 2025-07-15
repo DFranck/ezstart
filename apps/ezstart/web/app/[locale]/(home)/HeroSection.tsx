@@ -7,7 +7,7 @@ import { useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import ContactsList from '../(views)/(statics)/contact/components/contactsList';
+import ContactsList from '../../../components/contactsList';
 
 type Props = { id?: string };
 

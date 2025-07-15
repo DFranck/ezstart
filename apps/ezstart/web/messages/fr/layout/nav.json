@@ -5,7 +5,7 @@
     {
       "menuLabel": "Libraries",
       "menu": [
-        { "label": "Toutes les libs", "href": "/ez-libs" },
+        { "label": "Mes Librairies", "href": "/ez-libs" },
         { "label": "Tag", "href": "/ez-libs/eztag" },
         { "label": "Icon", "href": "/ez-libs/ezicon" }
       ]
@@ -17,11 +17,6 @@
         { "label": "Projets internes", "href": "/ez-features" },
         { "label": "Billing", "href": "/ez-features/ezbilling" }
       ]
-    },
-
-    {
-      "label": "Contact",
-      "href": "/contact"
     }
   ]
 }

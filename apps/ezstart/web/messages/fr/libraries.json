@@ -1,13 +1,15 @@
 {
   "libraries": {
     "title": "Mes Librairies",
+    "subtitle": "Des composants réutilisables et optimisés pour un développement plus rapide et plus propre.",
+    "description": "Chaque librairie EzStart est pensée pour améliorer la productivité, garder un codebase élégant et réduire la complexité. Polymorphiques, typées et modulaires, elles s’intègrent facilement dans n’importe quel projet React/Next.js.",
     "items": [
       {
         "title": "Tag",
         "subtitle": "Polymorphic & Semantic HTML Tag System",
         "roles": ["Owner"],
         "description": "EzTag est un système de composants React polymorphiques et typés pour gérer facilement les balises HTML avec des styles et variantes Tailwind via `cva()`. Il fournit des alias JSX comme `<H1 />`, `<Section />` ou `<Main />`, tout en garantissant une sémantique propre, l’accessibilité et une mise en page réutilisable. Idéal pour construire une UI modulaire et scalable.",
-        "link": "/libraries/tag",
+        "link": "/ez-libs/eztag",
         "src": "/images/libraries/ez-tag.png",
         "tech": ["React.js", "TypeScript", "Tailwind", "cva()"]
       },
@@ -16,7 +18,7 @@
         "subtitle": "Dynamic, Lazy-loaded Multi-Library Icon Component",
         "roles": ["Owner"],
         "description": "EzIcon est un composant React d’icônes dynamique et lazy-loadé, capable de fusionner plusieurs bibliothèques (`lucide-react`, `react-icons/fa`, et des icônes custom). Il supporte le chargement à la demande, la rotation, l’animation spin, et une nomenclature typée (`lucide:Search`, `fa:FaGithub`, `custom:myLogo`). Conçu pour réduire le bundle et garder un DX propre.",
-        "link": "/libraries/icon",
+        "link": "/ez-libs/ezicon",
         "src": "/images/libraries/ez-icon.png",
         "tech": ["React.js", "TypeScript", "Lucide", "FontAwesome", "CI/CD"]
       }
