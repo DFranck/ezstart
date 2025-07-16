@@ -30,23 +30,20 @@ export const MacbookScroll = ({
     ? {
         scaleXRange: [1.2, 1.2],
         scaleYRange: [0.6, 1.2],
-        translateFactor: 1.5,
-        scale: 0.6,
-        minHeight: 'min-h-[100vh]',
+        translateFactor: 2,
+        minHeight: 'min-h-[60vh]',
       }
     : isTablet
       ? {
           scaleXRange: [1.2, 1.5],
           scaleYRange: [0.6, 1.5],
           translateFactor: 1.3,
-          scale: 0.6,
           minHeight: 'min-h-[110vh]',
         }
       : {
           scaleXRange: [1.2, 1.5],
           scaleYRange: [0.6, 1.5],
           translateFactor: 1.5,
-          scale: 1,
           minHeight: 'min-h-[110vh]',
         };
 
@@ -71,7 +68,6 @@ export const MacbookScroll = ({
     return () => window.removeEventListener('resize', updateVh);
   }, []);
 
-  const lidHeight = 384 * config.scale;
   const translateHeight = (vh / 3) * config.translateFactor;
   const translate = useTransform(
     scrollYProgress,
@@ -87,7 +83,7 @@ export const MacbookScroll = ({
     <div
       ref={ref}
       className={cn(
-        'flex shrink-0 scale-60 transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-80  md:scale-100 md:py-24 mb-[40vh]',
+        'flex shrink-0 scale-70  transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-80  md:scale-100 md:py-24 mb-[40vh]',
         minHeight,
         debug && ' bg-red-500/50'
       )}

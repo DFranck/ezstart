@@ -13,8 +13,10 @@ export default function MobileNavbar() {
   const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
 
   useClickOutside(mobileMenuRef, () => {
+    if (burgerRef.current?.contains(event?.target as Node)) return;
     if (isMobile && isOpen) {
       setIsOpen(false);
     }
@@ -46,7 +48,11 @@ export default function MobileNavbar() {
             <Icon name='custom:Ezstart' />
           </Link>
 
-          <Burger isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+          <Burger
+            isOpen={isOpen}
+            onClick={() => setIsOpen(!isOpen)}
+            ref={burgerRef}
+          />
 
           <Link
             href='/profile'

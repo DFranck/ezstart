@@ -28,7 +28,7 @@ const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
   return (
     <Section className={className} {...rest} size={isMobile ? 'xs' : 'lg'}>
       <H2>{t('title')}</H2>
-      <UL className='md:gap-6' size={'xs'}>
+      <UL className='gap-4 md:gap-8' size={'xs'}>
         {projects.map((project) => (
           <ProjectCard key={project.title} {...project} />
         ))}

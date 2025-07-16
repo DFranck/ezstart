@@ -3,6 +3,7 @@
 import skillsJson from '@/public/json/skills.json';
 import { mapProjectTechToSkills } from '@/utils/map-project-tech-to-skills';
 import {
+  Button,
   Div,
   H3,
   Icon,
@@ -44,7 +45,7 @@ export function ProjectCard({
   const techList = tech ? mapProjectTechToSkills(tech, skillsJson.skills) : [];
   return (
     <LI variant={'outline'} layout={'col'} className='p-2'>
-      <Div layout={'row'} size={'xs'}>
+      <Div layout={'grid'} size={'xs'}>
         <Div size={'default'} layout={'default'}>
           <H3 size={'h5'}>{title}</H3>
           {subtitle && (
@@ -53,16 +54,20 @@ export function ProjectCard({
             </P>
           )}
         </Div>
-        <Div size={'default'} layout={'default'}>
+        <Div
+          size={'default'}
+          layout={'row'}
+          className='justify-center md:justify-end'
+        >
           {roles?.map((role) => (
-            <H3 size={'h5'} key={role}>
+            <Button size={'sm'} key={role} className='cursor-default'>
               {role}
-            </H3>
+            </Button>
           ))}
         </Div>
       </Div>
 
-      {src && (
+      {src && !isMobile && (
         <div className='max-h-56 md:max-h-96 overflow-y-auto rounded'>
           <Image
             src={isMobile ? src.mobile : src.desktop}

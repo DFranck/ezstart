@@ -17,7 +17,7 @@
         "title": "Icon",
         "subtitle": "Dynamic, Lazy-loaded Multi-Library Icon Component",
         "roles": ["Owner"],
-        "description": "EzIcon est un composant React d’icônes dynamique et lazy-loadé, capable de fusionner plusieurs bibliothèques (`lucide-react`, `react-icons/fa`, et des icônes custom). Il supporte le chargement à la demande, la rotation, l’animation spin, et une nomenclature typée (`lucide:Search`, `fa:FaGithub`, `custom:myLogo`). Conçu pour réduire le bundle et garder un DX propre.",
+        "description": "EzIcon est un composant React d’icônes dynamique et lazy-loader, capable de fusionner plusieurs bibliothèques (`lucide-react`, `react-icons/fa`, et des icônes custom). Il supporte le chargement à la demande, la rotation, l’animation spin, et une nomenclature typée (`lucide:Search`, `fa:FaGithub`, `custom:myLogo`). Conçu pour réduire le bundle et garder un DX propre.",
         "link": "/ez-libs/ezicon",
         "src": "/images/libraries/ez-icon.png",
         "tech": ["React.js", "TypeScript", "Lucide", "FontAwesome", "CI/CD"]
