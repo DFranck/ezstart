@@ -37,17 +37,19 @@ export function Icon({
         case 'lucide': {
           const mod = await import('lucide-react');
           return {
-            default: mod[
-              iconName as keyof typeof mod
-            ] as React.ComponentType<LucideProps>,
+            default:
+              (mod[
+                iconName as keyof typeof mod
+              ] as React.ComponentType<LucideProps>) || mod.HelpCircle,
           };
         }
         case 'fa': {
           const mod = await import('react-icons/fa');
           return {
-            default: mod[
-              iconName as keyof typeof mod
-            ] as React.ComponentType<LucideProps>,
+            default:
+              (mod[
+                iconName as keyof typeof mod
+              ] as React.ComponentType<LucideProps>) || mod.FaCircle,
           };
         }
         case 'custom': {

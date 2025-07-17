@@ -37,8 +37,8 @@ export default async function LocaleLayout(props: {
 
   return (
     <html lang={locale} suppressHydrationWarning className=''>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col h-full`}
+      <body 
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <Providers messages={messages} locale={locale} timeZone={timeZone}>
           <ClientLayout>{children}</ClientLayout>

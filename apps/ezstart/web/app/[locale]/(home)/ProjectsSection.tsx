@@ -1,6 +1,8 @@
 'use client';
 
 import { ProjectCard } from '@/components/ProjectCard';
+import { ProjectType } from '@/types/projects';
+import { getTranslationArray } from '@/utils/get-translation-array';
 import { H2, Section, UL } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { useTranslations } from 'next-intl';
@@ -9,28 +11,15 @@ import { FC, HTMLAttributes } from 'react';
 type Props = HTMLAttributes<HTMLElement>;
 
 const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
-  const t = useTranslations('projects');
   const { isMobile } = useDevice();
-  const projects = t.raw('items') as {
-    title: string;
-    subtitle?: string;
-    roles?: string[];
-    description: string;
-    link: string | null;
-    src?: {
-      desktop: string;
-      mobile: string;
-    };
-    tech?: string[];
-    private?: boolean;
-  }[];
-
+  const t = useTranslations('projects');
+  const projects = getTranslationArray<ProjectType>(t, 'items');
   return (
     <Section className={className} {...rest} size={isMobile ? 'xs' : 'lg'}>
       <H2>{t('title')}</H2>
       <UL className='gap-4 md:gap-8' size={'xs'}>
         {projects.map((project) => (
-          <ProjectCard key={project.title} {...project} />
+          <ProjectCard key={project.title} project={project} />
         ))}
       </UL>
     </Section>

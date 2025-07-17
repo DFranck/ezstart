@@ -4,7 +4,6 @@ import { customIconMap } from './custom-icons';
 
 export const lucideIconNames = new Set(Object.keys(lucide));
 export const faIconNames = new Set(Object.keys(fa));
-
 export type CustomIconName = keyof typeof customIconMap;
 
 export type KnownIconName =

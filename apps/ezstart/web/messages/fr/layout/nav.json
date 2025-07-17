@@ -6,8 +6,8 @@
       "menuLabel": "Libraries",
       "menu": [
         { "label": "Mes Librairies", "href": "/ez-libs" },
-        { "label": "Tag", "href": "/ez-libs/eztag" },
-        { "label": "Icon", "href": "/ez-libs/ezicon" }
+        { "label": "Tag", "href": "/ez-libs/tag" },
+        { "label": "Icon", "href": "/ez-libs/icon" }
       ]
     },
 

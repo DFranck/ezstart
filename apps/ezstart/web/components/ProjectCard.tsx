@@ -1,77 +1,50 @@
 'use client';
 
-import skillsJson from '@/public/json/skills.json';
-import { mapProjectTechToSkills } from '@/utils/map-project-tech-to-skills';
-import {
-  Button,
-  Div,
-  H3,
-  Icon,
-  isValidIconName,
-  LI,
-  P,
-  UL,
-} from '@ezstart/ui/components';
+import { ProjectType } from '@/types/projects';
+import { Button, Div, H3, LI, P } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ReadMoreText } from './ReadMoreText';
+import TechList from './TechList';
 
-type ProjectCardProps = {
-  title: string;
-  subtitle?: string;
-  roles?: string[];
-  description: string;
-  link?: string | null;
-  src?: {
-    desktop: string;
-    mobile: string;
-  };
-  tech?: string[];
-  private?: boolean;
+type Props = {
+  project: ProjectType;
 };
 
-export function ProjectCard({
-  title,
-  subtitle,
-  roles,
-  description,
-  link,
-  src,
-  tech,
-  private: isPrivate,
-}: ProjectCardProps) {
+export function ProjectCard({ project }: Props) {
   const { isMobile } = useDevice();
-  const techList = tech ? mapProjectTechToSkills(tech, skillsJson.skills) : [];
+
   return (
-    <LI variant={'outline'} layout={'col'} className='p-2'>
-      <Div layout={'grid'} size={'xs'}>
-        <Div size={'default'} layout={'default'}>
-          <H3 size={'h5'}>{title}</H3>
-          {subtitle && (
-            <P variant={'description'} size={'xs'} className='text-left'>
-              {subtitle}
+    <LI variant='outline' layout='col' className='p-2'>
+      <Div layout='grid' size='xs'>
+        <Div size='default' layout='default'>
+          <H3 size='h5'>{project.title}</H3>
+          {project.subtitle && (
+            <P variant='description' size='xs' className='text-left'>
+              {project.subtitle}
             </P>
           )}
         </Div>
+
         <Div
-          size={'default'}
-          layout={'row'}
+          size='default'
+          layout='row'
           className='justify-center md:justify-end'
         >
-          {roles?.map((role) => (
-            <Button size={'sm'} key={role} className='cursor-default'>
+          {project.roles?.map((role) => (
+            <Button size='sm' key={role} className='cursor-default'>
               {role}
             </Button>
           ))}
         </Div>
       </Div>
 
-      {src && !isMobile && (
+      {project.src && !isMobile && (
         <div className='max-h-56 md:max-h-96 overflow-y-auto rounded'>
           <Image
-            src={isMobile ? src.mobile : src.desktop}
-            alt={title}
+            src={isMobile ? project.src.mobile : project.src.desktop}
+            alt={project.title}
             width={500}
             height={300}
             className='w-full h-auto object-contain'
@@ -79,45 +52,26 @@ export function ProjectCard({
         </div>
       )}
 
-      <Div size={'xs'}>
+      <Div size='xs'>
         <ReadMoreText
-          text={description}
-          className='text-justify text-xs text-muted-foreground '
+          text={project.description}
+          className='text-justify text-xs text-muted-foreground'
         />
-
-        {techList.length > 0 && (
-          <UL className='text-xs' layout={'row'} size={'default'}>
-            {techList.map((tech) => (
-              <LI
-                key={tech.name}
-                variant={isMobile ? 'default' : 'card'}
-                size={'default'}
-                className='py-1 px-2 whitespace-nowrap flex items-center gap-2'
-              >
-                {isValidIconName(tech.icon) ? (
-                  <Icon name={tech.icon} size={20} />
-                ) : (
-                  <Icon name='lucide:HelpCircle' size={20} />
-                )}
-                {!isMobile && tech.name}
-              </LI>
-            ))}
-          </UL>
-        )}
+        <TechList tech={project.tech ?? []} />
       </Div>
 
-      <Div size={'xs'}>
-        {link ? (
+      <Div size='xs'>
+        {project.link ? (
           <Link
-            href={link}
+            href={project.link}
             target='_blank'
             rel='noopener noreferrer'
             className='text-cyan-600 text-sm hover:underline'
           >
             Voir le projet →
           </Link>
-        ) : isPrivate ? (
-          <P variant={'description'}>Projet privé</P>
+        ) : project.private ? (
+          <P variant='description'>Projet privé</P>
         ) : null}
       </Div>
     </LI>

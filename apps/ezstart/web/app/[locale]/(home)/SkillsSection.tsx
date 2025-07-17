@@ -1,4 +1,5 @@
 import skillData from '@/public/json/skills.json';
+import { SkillsType } from '@/types/skills';
 import {
   H2,
   H3,
@@ -10,17 +11,6 @@ import {
 } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { useTranslations } from 'next-intl';
-
-type SkillCategory = {
-  category: string;
-  items: {
-    name: string;
-    className?: string;
-    icon?: string;
-    iconProps?: string;
-    imgProps?: string;
-  }[];
-};
 
 type Props = {
   id?: string;
@@ -38,7 +28,7 @@ export const SkillsSection = ({ id }: Props) => {
         className='grid-cols-2 md:grid-cols-4 lg:grid-cols-4 w-full'
         size={'xs'}
       >
-        {skillData.skills.map((cat: SkillCategory, index) => (
+        {skillData.skills.map((cat: SkillsType, index) => (
           <LI key={index} className='items-start'>
             <article className='w-full'>
               <UL className='w-full py-4 px-2 md:py-4 ' size={'xs'}>

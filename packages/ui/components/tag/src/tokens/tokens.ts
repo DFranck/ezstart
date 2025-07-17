@@ -95,7 +95,7 @@ export const variantText = {
   default: '',
   link: cn(
     textCommonClasses,
-    'inline-block mt-4 text-cyan-600 hover:underline cursor-pointer'
+    'inline-block text-cyan-600 hover:underline cursor-pointer'
   ),
   description: cn(textCommonClasses, 'italic text-muted-foreground font-light'),
 } as const;

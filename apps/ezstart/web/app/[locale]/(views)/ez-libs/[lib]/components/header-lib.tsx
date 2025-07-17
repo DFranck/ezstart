@@ -1,33 +1,45 @@
-import { getMeta } from '@/utils/get-meta';
-import {
-  Button,
-  Div,
-  H1,
-  H3,
-  Icon,
-  Section,
-  Span,
-} from '@ezstart/ui/components';
-import Link from 'next/link';
-import { LibId } from '../types';
+import TechList from '@/components/TechList';
+import { LibraryType } from '@/types/libs';
+import { getTranslationArray } from '@/utils/get-translation-array';
+import { Div, H3, H4, P, Section } from '@ezstart/ui/components';
+import { useDevice } from '@ezstart/ui/hooks';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
-export const HeaderLib = ({ lib }: { lib: LibId }) => {
-  const { name, description, github, status } = getMeta('lib', lib);
+export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
+  const { isMobile } = useDevice();
+  const t = useTranslations('libraries');
+  const libraries = getTranslationArray<LibraryType>(t, 'items');
+
+  const lib = libraries.find(
+    (lib) => lib.title.toLowerCase() === libTitle.toLowerCase()
+  );
+
+  if (!lib) {
+    return <p>Librairie introuvable</p>;
+  }
+
   return (
-    <Section layout={'grid'} size='lg'>
-      <Span>
-        <H1>{name}</H1>
-      </Span>
-      <Div>
-        <H3>{description}</H3>
-        {github && (
-          <Button asChild>
-            <Link target='_blank' rel='noopener noreferrer' href={github}>
-              <Icon name='lucide:Github' />
-              README
-            </Link>
-          </Button>
-        )}
+    <Section
+      id={lib.title.toLowerCase()}
+      layout={'grid'}
+      size={isMobile ? 'xs' : undefined}
+    >
+      <Div size={'full'} className='relative aspect-square lg:aspect-auto'>
+        <Image
+          fill
+          src={lib.src}
+          alt={lib.title}
+          className='object-cover aspect-square rounded shadow'
+        />
+      </Div>
+      <Div layout={'col'} className='gap-4'>
+        <Div size={'xs'}>
+          <H3 size='h2'>{lib.title}</H3>
+          <H4 size={'h5'}>{lib.subtitle}</H4>
+          <P variant={'description'}>{lib.description}</P>
+        </Div>
+        <TechList tech={lib.tech} />
       </Div>
     </Section>
   );

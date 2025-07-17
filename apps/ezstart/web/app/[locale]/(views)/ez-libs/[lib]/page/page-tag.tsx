@@ -24,7 +24,7 @@ const EzTagPage = () => {
 
   return (
     <Main withHeaderOffset>
-      <HeaderLib lib='eztag' />
+      <HeaderLib libTitle='tag' />
       <Section variant={'primary'}>
         <UL layout={'grid'} className='xl:grid-cols-3'>
           {shownTags
