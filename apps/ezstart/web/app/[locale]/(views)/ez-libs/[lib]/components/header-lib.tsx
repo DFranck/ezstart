@@ -1,20 +1,19 @@
 import TechList from '@/components/TechList';
 import { LibraryType } from '@/types/libs';
 import { getTranslationArray } from '@/utils/get-translation-array';
-import { Div, H3, H4, P, Section } from '@ezstart/ui/components';
+import { Button, Div, H3, H4, Icon, P, Section } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const { isMobile } = useDevice();
   const t = useTranslations('libraries');
   const libraries = getTranslationArray<LibraryType>(t, 'items');
-
   const lib = libraries.find(
     (lib) => lib.title.toLowerCase() === libTitle.toLowerCase()
   );
-
   if (!lib) {
     return <p>Librairie introuvable</p>;
   }
@@ -40,6 +39,24 @@ export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
           <P variant={'description'}>{lib.description}</P>
         </Div>
         <TechList tech={lib.tech} />
+        <Div size={'default'} layout={'center'} className='flex-row'>
+          {lib.links.github && (
+            <Button asChild>
+              <Link href={lib.links.github || ''}>
+                <Icon name='fa:FaGithub' />
+                GitHub
+              </Link>
+            </Button>
+          )}
+          {lib.links.npm && (
+            <Button asChild>
+              <Link href={lib.links.npm || ''}>
+                <Icon name='fa:FaNpm' />
+                NPM
+              </Link>
+            </Button>
+          )}
+        </Div>
       </Div>
     </Section>
   );

@@ -39,7 +39,7 @@ const EzIconPage = () => {
   return (
     <Main withHeaderOffset>
       <HeaderLib libTitle='icon' />
-      <Section layout='col' className='gap-4'>
+      <Section layout='col'>
         <P>{lib.content?.description}</P>
         <UL size={'default'} className='w-full'>
           {contentItems.map((item) => (
@@ -54,9 +54,7 @@ const EzIconPage = () => {
           ))}
         </UL>
         <H3>{lib.content?.title}</H3>
-        {customIcons.length === 0 ? (
-          <P>Aucune icône custom pour l’instant</P>
-        ) : (
+        {customIcons.length > 0 && (
           <UL size={'default'} layout='row' className='justify-center'>
             {customIcons.map((name) => (
               <LI

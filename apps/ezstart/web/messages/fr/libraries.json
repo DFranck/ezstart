@@ -13,10 +13,15 @@
         "links": {
           "local": "/ez-libs/tag",
           "github": "https://github.com/ezstart/ez-tag",
-          "npm": "https://www.npmjs.com/package/ez-tag"
+          "npm": ""
         },
         "src": "/images/libraries/ez-tag.png",
-        "tech": ["React.js", "TypeScript", "Tailwind", "cva()"]
+        "tech": ["React.js", "TypeScript", "Tailwind", "cva()"],
+        "content": {
+          "title": "Tags actuellement disponibles",
+          "subtitle": "✅ Les tags supportés par le design system sont affichés ci-dessous. Testez les tags!",
+          "description": ""
+        }
       },
       {
         "title": "Icon",
@@ -27,7 +32,7 @@
         "links": {
           "local": "/ez-libs/icon",
           "github": "https://github.com/ezstart/ez-icon",
-          "npm": "https://www.npmjs.com/package/ez-icon"
+          "npm": ""
         },
         "tech": ["React.js", "TypeScript", "Lucide", "FontAwesome", "CI/CD"],
         "content": {
