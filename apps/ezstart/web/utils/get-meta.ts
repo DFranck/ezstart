@@ -1,8 +1,6 @@
 import { featureMeta } from '@/app/[locale]/(views)/ez-features/[feature]/meta/feature-meta';
-import { libMeta } from '@/app/[locale]/(views)/ez-libs/[lib]/meta/lib-meta';
 
 export const meta = {
-  lib: libMeta,
   feature: featureMeta,
 } as const;
 
