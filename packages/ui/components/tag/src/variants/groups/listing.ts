@@ -29,8 +29,8 @@ export const listingContainersSize = {
 
 export const listingItemsSize = {
   default: '',
-  xs: 'px-1 py-2',
-  sm: 'px-2 py-3',
+  xs: 'px-2 py-1',
+  sm: 'px-3 py-2',
 } as const;
 
 export const listingContainersIntent = intentContainer;
