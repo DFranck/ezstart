@@ -1,6 +1,6 @@
 'use client';
 
-import { ProjectType } from '@/types/projects';
+import { ProjectItem } from '@/types/projects';
 import { Button, Div, H3, LI, P } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import Image from 'next/image';
@@ -9,7 +9,7 @@ import { ReadMoreText } from './ReadMoreText';
 import TechList from './TechList';
 
 type Props = {
-  project: ProjectType;
+  project: ProjectItem;
 };
 
 export function ProjectCard({ project }: Props) {
@@ -40,7 +40,7 @@ export function ProjectCard({ project }: Props) {
         </Div>
       </Div>
 
-      {project.src && !isMobile && (
+      {project.src && (
         <div className='max-h-56 md:max-h-96 overflow-y-auto rounded'>
           <Image
             src={isMobile ? project.src.mobile : project.src.desktop}

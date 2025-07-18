@@ -9,6 +9,8 @@ type BillingContextType = {
   quotes: Quote[];
   receipts: Receipt[];
   loading: boolean;
+  selectedClient: Client | null;
+  setSelectedClient: (client: Client | null) => void;
   refetchAll: () => Promise<void>;
 };
 

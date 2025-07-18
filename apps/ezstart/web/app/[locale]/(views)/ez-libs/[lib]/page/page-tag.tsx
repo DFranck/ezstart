@@ -1,5 +1,5 @@
 'use client';
-import { LibraryType } from '@/types/libs';
+import { LibraryItem } from '@/types/library';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import {
   H3,
@@ -18,7 +18,7 @@ import { HeaderLib } from '../components/header-lib';
 
 const EzTagPage = () => {
   const t = useTranslations('libraries');
-  const libraries = getTranslationArray<LibraryType>(t, 'items');
+  const libraries = getTranslationArray<LibraryItem>(t, 'items');
   const lib = libraries.find((lib) => lib.title.toLowerCase() === 'tag');
 
   const headingTagSet = new Set(HEADING_TAGS);

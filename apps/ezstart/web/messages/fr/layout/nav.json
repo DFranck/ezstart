@@ -12,10 +12,10 @@
     },
 
     {
-      "menuLabel": "Features",
+      "menuLabel": "Fonctionnalités",
       "menu": [
-        { "label": "Projets internes", "href": "/ez-features" },
-        { "label": "Billing", "href": "/ez-features/ezbilling" }
+        { "label": "Mes Fonctionnalités", "href": "/ez-features" },
+        { "label": "Billing", "href": "/ez-features/ez-billing" }
       ]
     }
   ]

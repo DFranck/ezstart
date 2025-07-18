@@ -2,11 +2,9 @@
 
 import { useBillingContext } from '@/contexts/billing-context';
 import { BillingProvider } from '@/providers/billing-provider';
-import { H1, LayoutWithAside } from '@ezstart/ui/components';
-import { useDevice } from '@ezstart/ui/hooks';
+import { Button, H1, H2, Header, Icon, Main } from '@ezstart/ui/components';
+import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
-import ClientCard from './components/client-card';
-import NavBilling from './components/nav-billing';
 
 export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -17,24 +15,30 @@ export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
 };
 
 const BillingLayoutWithData = ({ children }: { children: React.ReactNode }) => {
-  const { clients } = useBillingContext();
-  const { isMobile } = useDevice();
+  const { selectedClient, setSelectedClient } = useBillingContext();
   return (
-    <LayoutWithAside
-      asideAbsoluteOnMobile
-      topHeaderLeftContent={
-        <H1 size={'h5'} asChild className='text-start'>
-          <Link href='/ez-features/ezbilling'>EzBilling</Link>
-        </H1>
-      }
-      topHeaderCenterContent={!isMobile && <NavBilling />}
-      mainHeaderRightContent={isMobile && <NavBilling />}
-      disableMainHeaderBurger
-      asideContent={clients.map((c) => (
-        <ClientCard key={c._id} client={c} />
-      ))}
-    >
-      {children}
-    </LayoutWithAside>
+    <>
+      <Header
+        className={cn('h-14 bg-muted border-y sticky top-0')}
+        leftContent={
+          <H1 size={'h5'} asChild className='text-start w-fit'>
+            <Link href='/ez-features/ez-billing'>EzBilling</Link>
+          </H1>
+        }
+        centerContent={
+          selectedClient ? (
+            <Button onClick={() => setSelectedClient(null)} variant={'ghost'}>
+              <H2 size={'h5'}>{selectedClient.clientName}</H2>
+            </Button>
+          ) : null
+        }
+        rightContent={
+          <Button>
+            <Icon name='fa:FaPlus' /> New client
+          </Button>
+        }
+      />
+      <Main>{children}</Main>
+    </>
   );
 };

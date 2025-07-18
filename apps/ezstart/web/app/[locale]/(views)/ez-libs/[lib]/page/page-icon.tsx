@@ -1,6 +1,6 @@
 'use client';
 
-import { LibContentLink, LibraryType } from '@/types/libs';
+import { LibContentLink, LibraryItem } from '@/types/library';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import {
   customIconMap,
@@ -20,7 +20,7 @@ import { HeaderLib } from '../components/header-lib';
 
 const EzIconPage = () => {
   const t = useTranslations('libraries');
-  const libraries = getTranslationArray<LibraryType>(t, 'items');
+  const libraries = getTranslationArray<LibraryItem>(t, 'items');
   const lib = libraries.find((lib) => lib.title.toLowerCase() === 'icon');
   const contentItems = getTranslationArray<LibContentLink>(
     lib?.content,

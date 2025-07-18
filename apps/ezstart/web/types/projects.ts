@@ -1,4 +1,4 @@
-export type ProjectType = {
+export type ProjectItem = {
   title: string;
   subtitle?: string;
   roles?: string[];

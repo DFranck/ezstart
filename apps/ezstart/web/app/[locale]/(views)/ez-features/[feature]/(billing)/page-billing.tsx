@@ -1,15 +1,29 @@
 'use client';
-import { H1, Section } from '@ezstart/ui/components';
+import { useBillingContext } from '@/contexts/billing-context';
+import { H2, LI, P, Section, UL } from '@ezstart/ui/components';
+import ClientCard from './components/client-card';
 
 export const BillingPage = () => {
+  const { clients, selectedClient, setSelectedClient } = useBillingContext();
+  const isClients = clients.length > 0;
   return (
     <>
-      <Section size={'full'}>
-        <H1>EzBilling</H1>
-        <p className='text-lg text-muted-foreground'>
-          Manage invoices, clients, payments and quotes — all in one place.
-        </p>
-      </Section>
+      {!selectedClient && (
+        <Section>
+          {isClients ? (
+            <H2>Select a client</H2>
+          ) : (
+            <P>Create your first client to start</P>
+          )}
+          <UL layout={'row'}>
+            {clients.map((client) => (
+              <LI key={client._id} onClick={() => setSelectedClient(client)}>
+                <ClientCard client={client} />
+              </LI>
+            ))}
+          </UL>
+        </Section>
+      )}
     </>
   );
 };

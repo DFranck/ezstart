@@ -1,7 +1,7 @@
 'use client';
 
 import { ProjectCard } from '@/components/ProjectCard';
-import { ProjectType } from '@/types/projects';
+import { ProjectItem } from '@/types/projects';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import { H2, Section, UL } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
@@ -13,7 +13,7 @@ type Props = HTMLAttributes<HTMLElement>;
 const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
   const { isMobile } = useDevice();
   const t = useTranslations('projects');
-  const projects = getTranslationArray<ProjectType>(t, 'items');
+  const projects = getTranslationArray<ProjectItem>(t, 'items');
   return (
     <Section className={className} {...rest} size={isMobile ? 'xs' : 'lg'}>
       <H2>{t('title')}</H2>

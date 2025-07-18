@@ -24,6 +24,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     contact,
     legal,
     libraries,
+    features,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -39,6 +40,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
     import(`../messages/${locale}/legal-notices.json`),
     import(`../messages/${locale}/libraries.json`),
+    import(`../messages/${locale}/features.json`),
   ]);
 
   return {
@@ -54,6 +56,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       contact.default,
       legal.default,
       libraries.default,
+      features.default,
     ]),
   };
 });

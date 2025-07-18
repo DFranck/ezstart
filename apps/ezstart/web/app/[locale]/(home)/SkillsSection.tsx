@@ -1,5 +1,5 @@
 import skillData from '@/public/json/skills.json';
-import { SkillsType } from '@/types/skills';
+import { Skills } from '@/types/skill';
 import {
   H2,
   H3,
@@ -28,7 +28,7 @@ export const SkillsSection = ({ id }: Props) => {
         className='grid-cols-2 md:grid-cols-4 lg:grid-cols-4 w-full'
         size={'xs'}
       >
-        {skillData.skills.map((cat: SkillsType, index) => (
+        {skillData.skills.map((cat: Skills, index) => (
           <LI key={index} className='items-start'>
             <article className='w-full'>
               <UL className='w-full py-4 px-2 md:py-4 ' size={'xs'}>

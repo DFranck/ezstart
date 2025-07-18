@@ -1,5 +1,5 @@
 import TechList from '@/components/TechList';
-import { LibraryType } from '@/types/libs';
+import { LibraryItem } from '@/types/library';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import { Button, Div, H3, H4, Icon, P, Section } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const { isMobile } = useDevice();
   const t = useTranslations('libraries');
-  const libraries = getTranslationArray<LibraryType>(t, 'items');
+  const libraries = getTranslationArray<LibraryItem>(t, 'items');
   const lib = libraries.find(
     (lib) => lib.title.toLowerCase() === libTitle.toLowerCase()
   );

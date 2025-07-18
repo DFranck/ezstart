@@ -4,10 +4,10 @@ import Link from 'next/link';
 const NavBilling = () => {
   return (
     <Nav>
-      <UL layout={'menu'} className='flex-row justify-between' size={'default'}>
+      <UL layout={'menu'} size={'default'}>
         <LI>
           <Link
-            href='/ez-features/ezbilling/clients'
+            href='/ez-features/ez-billing/clients'
             className='flex gap-2 items-center'
           >
             <Icon size={14} name='lucide:Users' />
@@ -16,7 +16,7 @@ const NavBilling = () => {
         </LI>
         <LI>
           <Link
-            href='/ez-features/ezbilling/quotes'
+            href='/ez-features/ez-billing/quotes'
             className='flex gap-2 items-center'
           >
             <Icon size={14} name='fa:FaQuestion' />
@@ -25,7 +25,7 @@ const NavBilling = () => {
         </LI>
         <LI>
           <Link
-            href='/ez-features/ezbilling/invoices'
+            href='/ez-features/ez-billing/invoices'
             className='flex gap-2 items-center'
           >
             <Icon size={14} name='fa:FaFileInvoice' />
@@ -34,7 +34,7 @@ const NavBilling = () => {
         </LI>
         <LI>
           <Link
-            href='/ez-features/ezbilling/receipts'
+            href='/ez-features/ez-billing/receipts'
             className='flex gap-2 items-center'
           >
             <Icon size={14} name='fa:FaReceipt' />

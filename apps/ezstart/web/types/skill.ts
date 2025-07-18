@@ -1,4 +1,4 @@
-export interface SkillType {
+export interface SkillItem {
   name: string;
   className?: string;
   icon?: string;
@@ -6,7 +6,7 @@ export interface SkillType {
   imgProps?: string;
 }
 
-export type SkillsType = {
+export type Skills = {
   category: string;
-  items: SkillType[];
+  items: SkillItem[];
 };

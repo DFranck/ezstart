@@ -16,6 +16,7 @@ export const BillingProvider = ({
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const fetchClients = useCallback(async () => {
     const data = await exec<Client[]>(() => callApi('/api/clients', {}));
@@ -61,6 +62,8 @@ export const BillingProvider = ({
         receipts,
         loading,
         refetchAll,
+        selectedClient,
+        setSelectedClient,
       }}
     >
       {children}

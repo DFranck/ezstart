@@ -7,7 +7,7 @@ import ProjectsSection from './(home)/ProjectsSection';
 import { SkillsSection } from './(home)/SkillsSection';
 export default function Page() {
   return (
-    <Main className='text-center'>
+    <Main className='text-center overflow-hidden'>
       <HeroSection id='hero-home' />
       <SkillsSection id='skills-home' />
       <ProjectsSection id='projets-home' />

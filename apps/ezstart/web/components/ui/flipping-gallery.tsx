@@ -1,24 +1,18 @@
 'use client';
 
+import { LibraryItem } from '@/types/library';
 import { Button, H3, Icon, P } from '@ezstart/ui/components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-type Item = {
-  description: string;
-  title: string;
-  subtitle?: string;
-  src: string;
-  link?: string;
-};
 export const MotionP = motion.create(P);
 export const FlippingGallery = ({
   items,
   autoplay = false,
 }: {
-  items: Item[];
+  items: LibraryItem[];
   autoplay?: boolean;
 }) => {
   const t = useTranslations('common');
@@ -140,9 +134,12 @@ export const FlippingGallery = ({
                 </motion.span>
               ))}
             </MotionP>
-            {items[active].link && (
+            {items[active].links.local && (
               <Button asChild>
-                <Link href={items[active].link || ''} rel='noopener noreferrer'>
+                <Link
+                  href={items[active].links.local || ''}
+                  rel='noopener noreferrer'
+                >
                   <span>{t('learnMore')}</span>
                 </Link>
               </Button>

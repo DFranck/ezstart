@@ -12,7 +12,7 @@
         "description": "EzTag est un système de composants React polymorphiques et typés pour gérer facilement les balises HTML avec des styles et variantes Tailwind via `cva()`. Il fournit des alias JSX comme `<H1 />`, `<Section />` ou `<Main />`, tout en garantissant une sémantique propre, l’accessibilité et une mise en page réutilisable. Idéal pour construire une UI modulaire et scalable.",
         "links": {
           "local": "/ez-libs/tag",
-          "github": "https://github.com/ezstart/ez-tag",
+          "github": "https://github.com/DFranck/ezstart/tree/master/packages/ui/components/tag",
           "npm": ""
         },
         "src": "/images/libraries/ez-tag.png",
@@ -31,7 +31,7 @@
         "roles": ["Owner"],
         "links": {
           "local": "/ez-libs/icon",
-          "github": "https://github.com/ezstart/ez-icon",
+          "github": "https://github.com/DFranck/ezstart/tree/master/packages/ui/components/icon",
           "npm": ""
         },
         "tech": ["React.js", "TypeScript", "Lucide", "FontAwesome", "CI/CD"],
