@@ -1,8 +1,8 @@
 import { getInvoicesQuerySchema } from '@ezstart/types';
 import express, { Router } from 'express';
 
+import { validateQuery } from '@ezstart/api-core';
 import * as controllers from '../controllers/invoice';
-import { validateQuery } from '../middlewares/validate-query';
 const router: Router = express.Router();
 
 router

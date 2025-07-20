@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from '@ezstart/api-core';
+import { infer as ZodInfer } from 'zod';
 import { quoteStatusEnum } from '../../enums';
 import {
   baseBillingDocSchema,
@@ -14,7 +15,7 @@ export const updateQuoteSchema = createQuoteSchema.partial();
 export const quoteSchema = withBillingOutputFields(createQuoteSchema);
 export const getQuotesQuerySchema = getBillingDocsQuerySchema(quoteStatusEnum);
 
-export type Quote = z.infer<typeof quoteSchema>;
-export type UpdateQuote = z.infer<typeof updateQuoteSchema>;
-export type CreateQuote = z.infer<typeof createQuoteSchema>;
-export type GetQuotesQuery = z.infer<typeof getQuotesQuerySchema>;
+export type Quote = ZodInfer<typeof quoteSchema>;
+export type UpdateQuote = ZodInfer<typeof updateQuoteSchema>;
+export type CreateQuote = ZodInfer<typeof createQuoteSchema>;
+export type GetQuotesQuery = ZodInfer<typeof getQuotesQuerySchema>;

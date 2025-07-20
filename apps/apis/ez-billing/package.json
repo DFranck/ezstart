@@ -1,5 +1,5 @@
 {
-  "name": "api-boilerplate",
+  "name": "api-ez-billing",
   "version": "0.0.1",
   "main": "dist/server.js",
   "scripts": {

@@ -9,6 +9,9 @@
     "dev": "tsc -b --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "@ezstart/api-core": "workspace:*"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

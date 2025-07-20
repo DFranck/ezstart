@@ -1,7 +1,7 @@
-import { z } from 'zod';
-
+import { z } from '@ezstart/api-core';
+import { infer as ZodInfer } from 'zod';
 export const invoiceStatusEnum = z.enum(['draft', 'sent', 'paid']);
-export type InvoiceStatus = z.infer<typeof invoiceStatusEnum>;
+export type InvoiceStatus = ZodInfer<typeof invoiceStatusEnum>;
 
 export const quoteStatusEnum = z.enum([
   'draft',
@@ -9,10 +9,10 @@ export const quoteStatusEnum = z.enum([
   'accepted',
   'rejected',
 ]);
-export type QuoteStatus = z.infer<typeof quoteStatusEnum>;
+export type QuoteStatus = ZodInfer<typeof quoteStatusEnum>;
 
 export const receiptStatusEnum = z.enum(['issued', 'refunded']);
-export type ReceiptStatus = z.infer<typeof receiptStatusEnum>;
+export type ReceiptStatus = ZodInfer<typeof receiptStatusEnum>;
 
 export const currencyEnum = z.enum([
   'USD', // US Dollar
@@ -26,4 +26,4 @@ export const currencyEnum = z.enum([
   'CNY', // Chinese Yuan
   'CHF', // Swiss Franc
 ]);
-export type Currency = z.infer<typeof currencyEnum>;
+export type Currency = ZodInfer<typeof currencyEnum>;

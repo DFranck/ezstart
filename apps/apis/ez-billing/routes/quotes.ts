@@ -1,7 +1,7 @@
+import { validateQuery } from '@ezstart/api-core';
 import { getQuotesQuerySchema } from '@ezstart/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/quote';
-import { validateQuery } from '../middlewares/validate-query';
 
 const router: Router = express.Router();
 

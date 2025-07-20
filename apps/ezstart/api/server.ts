@@ -1,16 +1,14 @@
-import 'dotenv/config';
-import './cron/setup-cron';
-import { connectToDb } from './db/connect';
-import app from './index';
-const PORT = process.env.PORT || 5000;
+import { connectToMongo, createApp, startServer } from '@ezstart/api-core';
+import routes from './routes';
 
-connectToDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 API running on port ${PORT}`);
-    });
-  })
+const app = createApp();
+
+app.use('/api', routes);
+app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }));
+
+connectToMongo('boilerplate')
+  .then(() => startServer(app, './routes/index.ts', 5000))
   .catch((err) => {
-    console.error('❌ Failed to connect to database:', err);
+    console.error('❌ Failed to start EzStart API', err);
     process.exit(1);
   });

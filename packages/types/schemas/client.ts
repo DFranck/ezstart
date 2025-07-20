@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from '@ezstart/api-core';
+import type { infer as ZodInfer } from 'zod';
 import { listingQuerySchema } from './listing';
 
 // -----------------------------------
@@ -13,33 +14,14 @@ export const baseClientSchema = z.object({
 
 // -----------------------------------
 // 🟢 INPUTS (create/update)
-export const billingClientSchema = baseClientSchema
-  .extend({
-    taxNumber: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.isCompany) {
-      if (!data.taxNumber || data.taxNumber.trim() === '') {
-        ctx.addIssue({
-          path: ['taxNumber'],
-          message: 'Tax number is required for companies.',
-          code: z.ZodIssueCode.custom,
-        });
-      }
-      if (!data.address || data.address.trim() === '') {
-        ctx.addIssue({
-          path: ['address'],
-          message: 'Address is required for companies.',
-          code: z.ZodIssueCode.custom,
-        });
-      }
-    }
-  });
+export const billingClientSchema = baseClientSchema.extend({
+  taxNumber: z.string().optional(),
+});
 
 export const clientIdSchema = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId'),
 });
-export type ClientId = z.infer<typeof clientIdSchema>;
+export type ClientId = ZodInfer<typeof clientIdSchema>;
 
 // Output
 export const clientSchema = baseClientSchema.extend({
@@ -53,11 +35,11 @@ export const clientSchema = baseClientSchema.extend({
 // -----------------------------------
 // 🟡 QUERY (listing/filter)
 export const getClientsQuerySchema = listingQuerySchema.extend({});
-export type GetClientsQuery = z.infer<typeof getClientsQuerySchema>;
+export type GetClientsQuery = ZodInfer<typeof getClientsQuerySchema>;
 
 // BASE
-export type BaseClient = z.infer<typeof baseClientSchema>;
+export type BaseClient = ZodInfer<typeof baseClientSchema>;
 // Inputs
-export type BillingClient = z.infer<typeof billingClientSchema>;
+export type BillingClient = ZodInfer<typeof billingClientSchema>;
 // Output
-export type Client = z.infer<typeof clientSchema>;
+export type Client = ZodInfer<typeof clientSchema>;

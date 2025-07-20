@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { infer as ZodInfer } from 'zod';
 import { invoiceStatusEnum } from '../../enums';
 import {
   baseBillingDocSchema,
@@ -14,7 +14,7 @@ export const invoiceSchema = withBillingOutputFields(createInvoiceSchema);
 export const getInvoicesQuerySchema =
   getBillingDocsQuerySchema(invoiceStatusEnum);
 
-export type UpdateInvoice = z.infer<typeof updateInvoiceSchema>;
-export type CreateInvoice = z.infer<typeof createInvoiceSchema>;
-export type Invoice = z.infer<typeof invoiceSchema>;
-export type GetInvoicesQuery = z.infer<typeof getInvoicesQuerySchema>;
+export type UpdateInvoice = ZodInfer<typeof updateInvoiceSchema>;
+export type CreateInvoice = ZodInfer<typeof createInvoiceSchema>;
+export type Invoice = ZodInfer<typeof invoiceSchema>;
+export type GetInvoicesQuery = ZodInfer<typeof getInvoicesQuerySchema>;

@@ -1,7 +1,7 @@
 import { getReceiptsQuerySchema } from '@ezstart/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/receipt';
-import { validateQuery } from '../middlewares/validate-query';
+import { validateQuery } from '@ezstart/api-core';
 const router: Router = express.Router();
 
 router

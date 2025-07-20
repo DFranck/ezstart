@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { z } from '@ezstart/api-core';
+import { infer as ZodInfer } from 'zod';
 import { receiptStatusEnum } from '../../enums';
 import {
   baseBillingDocSchema,
@@ -15,7 +16,7 @@ export const receiptSchema = withBillingOutputFields(createReceiptSchema);
 export const getReceiptsQuerySchema =
   getBillingDocsQuerySchema(receiptStatusEnum);
 
-export type Receipt = z.infer<typeof receiptSchema>;
-export type UpdateReceipt = z.infer<typeof updateReceiptSchema>;
-export type CreateReceipt = z.infer<typeof createReceiptSchema>;
-export type GetReceiptsQuery = z.infer<typeof getReceiptsQuerySchema>;
+export type Receipt = ZodInfer<typeof receiptSchema>;
+export type UpdateReceipt = ZodInfer<typeof updateReceiptSchema>;
+export type CreateReceipt = ZodInfer<typeof createReceiptSchema>;
+export type GetReceiptsQuery = ZodInfer<typeof getReceiptsQuerySchema>;

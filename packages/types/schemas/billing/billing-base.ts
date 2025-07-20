@@ -1,4 +1,4 @@
-import { z, ZodEnum, ZodObject, ZodRawShape } from 'zod';
+import { z, ZodEnum, infer as ZodInfer, ZodObject, ZodRawShape } from 'zod';
 import { currencyEnum } from '../../enums';
 import { listingQuerySchema } from '../listing';
 
@@ -7,12 +7,12 @@ export const baseLineItemSchema = z.object({
   quantity: z.number().min(1),
   price: z.number().min(0),
 });
-export type BaseLineItem = z.infer<typeof baseLineItemSchema>;
+export type BaseLineItem = ZodInfer<typeof baseLineItemSchema>;
 
 export const lineItemSchema = baseLineItemSchema.extend({
   _id: z.string(),
 });
-export type LineItem = z.infer<typeof lineItemSchema>;
+export type LineItem = ZodInfer<typeof lineItemSchema>;
 
 export const exchangeRateSchema = z.object({
   from: currencyEnum,
@@ -31,7 +31,7 @@ export const baseBillingDocSchema = z.object({
   terms: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
 });
-export type BaseBillingDoc = z.infer<typeof baseBillingDocSchema>;
+export type BaseBillingDoc = ZodInfer<typeof baseBillingDocSchema>;
 
 export function withBillingOutputFields<T extends ZodRawShape>(
   schema: ZodObject<T>
