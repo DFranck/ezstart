@@ -1,19 +1,19 @@
-# 📦 @workspace/eslint-config
+# 📦 monitor-api
 
-No description provided.
+Backend API service for monitor-
 
 ## 🚀 Getting Started
 
 ```bash
 # 1️⃣ Clone only this package
 git clone <your-repo-url>
-cd eslint-config
+cd api
 
 # 2️⃣ Install dependencies
 pnpm install
 
 # 3️⃣ Run the package
-pnpm build
+pnpm start
 ```
 
 ## 📂 Project Structure

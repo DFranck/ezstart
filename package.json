@@ -5,7 +5,8 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "dev:ezstart": "turbo run dev --filter='apps/ezstart/*'  --filter='packages/*'",
+    "gen:readme": "node scripts/generate-readmes.js",
+    "gen:structure": "node scripts/generate-structures.js",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

@@ -1,19 +1,19 @@
-# 📦 @workspace/eslint-config
+# 📦 @ezstart/types
 
-No description provided.
+Shared TypeScript types for the project
 
 ## 🚀 Getting Started
 
 ```bash
 # 1️⃣ Clone only this package
 git clone <your-repo-url>
-cd eslint-config
+cd types
 
 # 2️⃣ Install dependencies
 pnpm install
 
 # 3️⃣ Run the package
-pnpm build
+pnpm dev
 ```
 
 ## 📂 Project Structure

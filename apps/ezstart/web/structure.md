@@ -1,0 +1,171 @@
+# Project structure for apps\ezstart\web
+
+- .env.local
+- .gitignore
+- app/
+  - favicon.ico
+  - [locale]/
+    - (home)/
+      - ContactSection.tsx
+      - HeroSection.tsx
+      - LibsSection.tsx
+      - ProjectsSection.tsx
+      - SkillsSection.tsx
+    - (views)/
+      - (statics)/
+        - legal-notices/
+          - page.tsx
+      - ez-features/
+        - page.tsx
+        - [feature]/
+          - (billing)/
+            - clients/
+              - page.tsx
+            - components/
+              - client-card.tsx
+              - nav-billing.tsx
+            - dev/
+              - client-e2e-test.tsx
+              - components/
+                - log.tsx
+              - e2e-playground.tsx
+              - invoice-e2e-test.tsx
+              - page.tsx
+              - quote-e2e-test.tsx
+              - receipt-e2e-test.tsx
+            - invoices/
+              - page.tsx
+            - layout-billing.tsx
+            - page-billing.tsx
+            - quotes/
+              - page.tsx
+            - README.md
+            - receipts/
+              - page.tsx
+          - components/
+            - section-feature.tsx
+          - layout.tsx
+          - page.tsx
+      - ez-libs/
+        - page.tsx
+        - [lib]/
+          - (Icon)/
+            - IconPlayground.tsx
+          - components/
+            - header-lib.tsx
+            - section-lib.tsx
+          - page/
+            - page-icon.tsx
+            - page-tag.tsx
+          - page.tsx
+          - [tag]/
+            - components/
+              - playground-code-view.tsx
+              - playground-variant-selects.tsx
+            - page.tsx
+            - playground/
+              - div-playground.tsx
+              - heading-playground.tsx
+              - listing-playground.tsx
+              - p-playground.tsx
+              - section-playground.tsx
+              - span-playground.tsx
+            - utils/
+              - build-fake-tag.ts
+              - generate-lorem.ts
+    - client-layout.tsx
+    - layout.tsx
+    - page.tsx
+- components/
+  - Badge.tsx
+  - contactsList.tsx
+  - IconGallery.tsx
+  - JobShowing.tsx
+  - layout/
+    - footer.tsx
+    - header/
+      - header-controls.tsx
+      - header.tsx
+      - local-switcher.tsx
+      - theme-switcher.tsx
+    - mobile-nav-bar.tsx
+    - mobile-nav-menu.tsx
+    - nav-menu.tsx
+  - ProjectCard.tsx
+  - providers.tsx
+  - ReadMoreText.tsx
+  - ServiceCard.tsx
+  - TechList.tsx
+  - ui/
+    - aurora-background.tsx
+    - background-gradient-animation.tsx
+    - flipping-gallery.tsx
+    - lamp.tsx
+    - macbook-scroll.tsx
+- components.json
+- contexts/
+  - billing-context.ts
+- eslint.config.js
+- hooks/
+  - useExternalStats.ts
+  - useNavLinks.ts
+- i18n/
+  - navigation.ts
+  - request.ts
+  - routing.ts
+- messages/
+  - fr/
+    - common.json
+    - features.json
+    - home/
+      - contact.json
+      - home.json
+      - projects.json
+      - skills.json
+    - layout/
+      - footer.json
+      - header.json
+      - nav.json
+    - legal-notices.json
+    - libraries.json
+- middleware.ts
+- next-env.d.ts
+- next.config.mjs
+- package.json
+- postcss.config.mjs
+- providers/
+  - billing-provider.tsx
+- public/
+  - images/
+    - about_hero.png
+    - franck_no_background.png
+    - libraries/
+      - ez-icon.png
+      - ez-tag.png
+    - projects/
+      - evento-app.io-desktop.png
+      - evento-app.io-mobile.png
+      - hydro.cosmos.network-desktop.png
+      - hydro.cosmos.network-mobile.png
+      - lima-prod-desktop.png
+      - lima-prod-mobile.png
+      - transplantation-arbres-desktop.png
+      - transplantation-arbres-mobile.png
+  - json/
+    - skills.json
+- README.md
+- structure.md
+- tsconfig.json
+- tsconfig.tsbuildinfo
+- types/
+  - feature.ts
+  - item.ts
+  - library.ts
+  - projects.ts
+  - skill.ts
+- utils/
+  - call-api.ts
+  - capitalize.ts
+  - get-api-url.ts
+  - get-translation-array.ts
+  - map-project-tech-to-skills.ts

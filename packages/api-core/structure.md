@@ -1,0 +1,32 @@
+# Project structure for packages\api-core
+
+- descriptions.json
+- package.json
+- README.md
+- src/
+  - controller-factory/
+    - make-create-controller.ts
+    - make-delete-controller.ts
+    - make-get-by-id-controller.ts
+    - make-get-list-controller.ts
+    - make-restore-controller.ts
+    - make-update-controller.ts
+  - index.ts
+  - infra/
+    - connectToMongo.ts
+    - createApp.ts
+    - startServer.ts
+  - middlewares/
+    - validate-params.ts
+    - validate-query.ts
+  - openapi/
+    - index.ts
+    - openapi-compatible.ts
+    - route-with-doc.ts
+    - strip-incompatible.ts
+    - z-object-helper.ts
+    - zod-extended.ts
+  - types/
+    - express-aug.d.ts
+- structure.md
+- tsconfig.json

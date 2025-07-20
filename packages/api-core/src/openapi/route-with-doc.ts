@@ -2,7 +2,7 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { RequestHandler, Router } from 'express';
 import { ZodTypeAny } from 'zod';
-import { openApiCompatible } from './openapi';
+import { openApiCompatible } from './openapi-compatible';
 
 type RouteDocOptions = {
   summary: string;
