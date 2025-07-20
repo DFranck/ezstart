@@ -3,6 +3,7 @@
 - .env
 - controllers/
 - cron/
+- description.json
 - jest.config.js
 - middlewares/
 - models/
@@ -10,18 +11,8 @@
 - README.md
 - routes/
   - index.ts
-- scripts/
-  - updateExchangeRates.ts
 - server.ts
 - services/
 - structure.md
 - swagger-output.json
 - tsconfig.json
-- utils/
-  - calculate-totals.ts
-  - fetch-exchange-rate.ts
-  - generate-next-number.ts
-  - get-latest-exchange-rate.ts
-  - mongoose/
-    - find-with-query.ts
-    - to-api-object.ts

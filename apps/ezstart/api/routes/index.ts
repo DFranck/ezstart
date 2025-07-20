@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 
 const router: Router = express.Router();
+export const globalRegistry = [];
 
 router.get('/test', (_, res) => {
   res.json({

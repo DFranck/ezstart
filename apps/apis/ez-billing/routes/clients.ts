@@ -8,7 +8,6 @@ import {
   billingClientSchema,
   clientSchema,
   getClientsQuerySchema,
-  mongoIdSchema,
   paramsMongoIdSchema,
 } from '@ezstart/types';
 import express, { Router } from 'express';
@@ -55,23 +54,27 @@ docRouter.put('/:id', controllers.updateClientController, {
   summary: 'Update Client',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
+  paramsSchema: paramsMongoIdSchema,
   responseSchema: clientSchema,
 });
 
 docRouter.delete('/:id', controllers.softDeleteClientController, {
   summary: 'Soft delete Client',
   tags: ['Clients'],
+  paramsSchema: paramsMongoIdSchema,
 });
 
 docRouter.post('/:id/restore', controllers.restoreClientController, {
   summary: 'Restore Client',
   tags: ['Clients'],
+  paramsSchema: paramsMongoIdSchema,
   responseSchema: clientSchema,
 });
 
 docRouter.delete('/:id/hard-delete', controllers.hardDeleteClientController, {
   summary: 'Hard delete Client',
   tags: ['Clients'],
+  paramsSchema: paramsMongoIdSchema,
 });
 
 export default router;

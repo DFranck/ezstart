@@ -1,4 +1,5 @@
 import type { ZodTypeAny } from 'zod';
+import { checkMissingDescriptions } from './check-missing-descriptions';
 import { stripIncompatible } from './strip-incompatible';
 
 /**
@@ -13,9 +14,8 @@ export function openApiCompatible<T extends ZodTypeAny>(
 ): T {
   const clean = stripIncompatible(schema);
 
-  // Debug (facultatif)
-  console.log('🔍 SCHEMA TYPE:', clean._def?.typeName);
-  console.log('🔍 HAS OPENAPI?', typeof (clean as any).openapi);
+  // 🔍 Vérifie si on a des champs sans `.describe()`
+  checkMissingDescriptions(clean, name);
 
   // @ts-ignore après patch openapi existe
   return clean.openapi?.(name) ?? clean;

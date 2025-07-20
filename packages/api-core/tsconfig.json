@@ -5,7 +5,7 @@
     "rootDir": ".",
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "../types/zod-extended.ts"],
   "files": ["src/types/express-aug.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

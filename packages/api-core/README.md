@@ -19,7 +19,6 @@ pnpm dev
 ## 📂 Project Structure
 
 ### 📁 Quick Overview
-
 - **controller-factory/** → Factory helpers to generate standard CRUD controllers
 - **infra/** → Infrastructure utilities (MongoDB connection, app bootstrap, server start)
 - **middlewares/** → Express middlewares for request validation (params, query, body)
