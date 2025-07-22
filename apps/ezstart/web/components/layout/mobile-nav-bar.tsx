@@ -1,6 +1,6 @@
 'use client';
 
-import { Burger, Icon } from '@ezstart/ui/components';
+import { Burger, Button, Icon } from '@ezstart/ui/components';
 import { useClickOutside, useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import { useLocale } from 'next-intl';
@@ -53,14 +53,15 @@ export default function MobileNavbar() {
             onClick={() => setIsOpen(!isOpen)}
             ref={burgerRef}
           />
-
-          <Link
-            href='/profile'
-            className='w-full flex justify-center py-2'
-            aria-disabled
+          <Button
+            variant={'ghost'}
+            onClick={(e) => {
+              alert('Not implemented yet');
+              e.stopPropagation();
+            }}
           >
             <Icon name='fa:FaUser' />
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

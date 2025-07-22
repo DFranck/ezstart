@@ -40,6 +40,14 @@
           "href": "mailto:franckdufournet@hotmail.fr"
         }
       }
-    ]
+    ],
+    "cta-disabled": {
+      "description": "Un bouton de navigation désactivé avec un message d’alerte quand la fonctionnalité n’est pas encore implémentée.",
+      "code": "<Button asChild onClick={(e) => { e.preventDefault(); alert('Not implemented yet'); }}>\n  <Link href='/profile' className='w-full flex justify-center py-2' aria-disabled='true'>\n    <Icon name='fa:FaUser' />\n  </Link>\n</Button>"
+    },
+    "cta-ready": {
+      "description": "Un bouton de navigation actif qui mène vers /profile quand la fonctionnalité est prête.",
+      "code": "<Button asChild>\n  <Link href='/profile' className='w-full flex justify-center py-2'>\n    <Icon name='fa:FaUser' />\n  </Link>\n</Button>"
+    }
   }
 }
