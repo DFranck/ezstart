@@ -20,6 +20,7 @@
     - validate-params.ts
     - validate-query.ts
   - openapi/
+    - check-missing-descriptions.ts
     - index.ts
     - openapi-compatible.ts
     - route-with-doc.ts

@@ -1,33 +1,20 @@
-import { z } from '@ezstart/api-core';
-import { withExample } from '@ezstart/api-core/src/openapi/z-object-helper';
 import type { infer as ZodInfer } from 'zod';
+import { z } from '../zod-extended'; // version étendue avec openapi
 import { listingQuerySchema } from './listing';
 
 // -----------------------------------
 // 🟢 BASE (never used alone)
 export const baseClientSchema = z.object({
-  clientName: withExample(
-    z
-      .string()
-      .min(1, 'Client name is required')
-      .describe('Full name of the client or company'),
-    'ACME Corp'
-  ),
+  clientName: z
+    .string()
+    .min(1, 'Client name is required')
+    .describe('Full name of the client or company'),
 
-  address: withExample(
-    z.string().optional().describe('Postal address of the client'),
-    '123 Main St, Paris'
-  ),
+  address: z.string().optional().describe('Postal address of the client'),
 
-  isCompany: withExample(
-    z.boolean().describe('true if company, false if individual'),
-    true
-  ),
+  isCompany: z.boolean().describe('true if company, false if individual'),
 
-  phone: withExample(
-    z.string().optional().describe('Phone number of the client'),
-    '+33 6 12 34 56 78'
-  ),
+  phone: z.string().optional().describe('Phone number of the client'),
 
   notes: z.string().optional().describe('Internal notes about the client'),
 });
@@ -35,29 +22,26 @@ export const baseClientSchema = z.object({
 // -----------------------------------
 // 🟢 INPUTS (create/update)
 export const billingClientSchema = baseClientSchema.extend({
-  taxNumber: withExample(
-    z
-      .string()
-      .optional()
-      .describe('Optional VAT / tax identification number of the client'),
-    'FR123456789'
-  ),
+  taxNumber: z
+    .string()
+    .optional()
+    .describe('Optional VAT / tax identification number of the client'),
 });
 
 export const clientIdSchema = z.object({
-  id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId'),
+  id: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
+    .describe('MongoDB ObjectId (24 hex chars)'),
 });
 export type ClientId = ZodInfer<typeof clientIdSchema>;
 
 // Output
 export const clientSchema = baseClientSchema.extend({
-  taxNumber: withExample(
-    z
-      .string()
-      .optional()
-      .describe('Optional VAT / tax identification number of the client'),
-    'FR123456789'
-  ),
+  taxNumber: z
+    .string()
+    .optional()
+    .describe('Optional VAT / tax identification number of the client'),
 
   _id: z
     .string()

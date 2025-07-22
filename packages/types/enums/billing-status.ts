@@ -1,5 +1,5 @@
-import { z } from '@ezstart/api-core';
 import { infer as ZodInfer } from 'zod';
+import { z } from '../zod-extended';
 export const invoiceStatusEnum = z.enum(['draft', 'sent', 'paid']);
 export type InvoiceStatus = ZodInfer<typeof invoiceStatusEnum>;
 

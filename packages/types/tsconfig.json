@@ -6,6 +6,7 @@
     "declaration": true,
     "emitDeclarationOnly": false
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.d.ts"],
+  "files": ["express/aug.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

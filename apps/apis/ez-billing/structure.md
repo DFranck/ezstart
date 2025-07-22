@@ -62,7 +62,6 @@
     - receipt.custom.services.ts
     - receipt.services.ts
 - structure.md
-- swagger-output.json
 - tsconfig.json
 - utils/
   - calculate-totals.ts

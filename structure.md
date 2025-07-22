@@ -70,7 +70,6 @@
           - receipt.custom.services.ts
           - receipt.services.ts
       - structure.md
-      - swagger-output.json
       - tsconfig.json
       - utils/
         - calculate-totals.ts
@@ -90,20 +89,14 @@
   - ezstart/
     - api/
       - .env
-      - controllers/
-      - cron/
       - description.json
       - jest.config.js
-      - middlewares/
-      - models/
       - package.json
       - README.md
       - routes/
         - index.ts
       - server.ts
-      - services/
       - structure.md
-      - swagger-output.json
       - tsconfig.json
     - web/
       - .env.local
@@ -333,6 +326,7 @@
         - validate-params.ts
         - validate-query.ts
       - openapi/
+        - check-missing-descriptions.ts
         - index.ts
         - openapi-compatible.ts
         - route-with-doc.ts
@@ -358,7 +352,7 @@
       - index.ts
       - user-role.ts
     - express/
-      - index.d.ts
+      - aug.d.ts
     - index.ts
     - package.json
     - README.md

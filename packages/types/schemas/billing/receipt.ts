@@ -1,6 +1,6 @@
-import { z } from '@ezstart/api-core';
 import { infer as ZodInfer } from 'zod';
 import { receiptStatusEnum } from '../../enums';
+import { z } from '../../zod-extended';
 import {
   baseBillingDocSchema,
   getBillingDocsQuerySchema,

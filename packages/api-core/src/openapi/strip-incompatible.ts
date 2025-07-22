@@ -1,5 +1,5 @@
+import { z } from '@ezstart/types';
 import type { ZodTypeAny } from 'zod';
-import { z } from './zod-extended';
 
 /**
  * Dépile les schémas incompatibles avec Swagger :

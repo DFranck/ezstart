@@ -7,7 +7,7 @@
   - index.ts
   - user-role.ts
 - express/
-  - index.d.ts
+  - aug.d.ts
 - index.ts
 - package.json
 - README.md

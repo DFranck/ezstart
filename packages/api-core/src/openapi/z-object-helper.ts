@@ -1,5 +1,5 @@
+import { z } from '@ezstart/types';
 import { ZodTypeAny } from 'zod';
-import { z } from './zod-extended';
 
 /**
  * ✅ Crée un z.object + enregistre automatiquement son openapi(name)

@@ -1,4 +1,4 @@
-import { z } from '@ezstart/api-core';
+import { z } from '../../zod-extended';
 import { infer as ZodInfer } from 'zod';
 import { quoteStatusEnum } from '../../enums';
 import {

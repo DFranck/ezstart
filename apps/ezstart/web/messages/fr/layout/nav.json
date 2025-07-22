@@ -9,14 +9,6 @@
         { "label": "Tag", "href": "/ez-libs/tag" },
         { "label": "Icon", "href": "/ez-libs/icon" }
       ]
-    },
-
-    {
-      "menuLabel": "Fonctionnalités",
-      "menu": [
-        { "label": "Mes Fonctionnalités", "href": "/ez-features" },
-        { "label": "Billing", "href": "/ez-features/ez-billing" }
-      ]
     }
   ]
 }

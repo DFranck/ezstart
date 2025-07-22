@@ -1,5 +1,5 @@
-import { z } from '@ezstart/api-core';
 import type { infer as ZodInfer } from 'zod';
+import { z } from '../zod-extended';
 
 export const listingQuerySchema = z.object({
   includeDeleted: z

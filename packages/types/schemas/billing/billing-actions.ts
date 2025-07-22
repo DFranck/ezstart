@@ -1,5 +1,5 @@
-import { z } from '@ezstart/api-core';
 import { infer as ZodInfer } from 'zod';
+import { z } from '../../zod-extended';
 export const addLineItemSchema = z.object({
   label: z.string().min(1, 'Label is required'),
   quantity: z.number().min(1),
