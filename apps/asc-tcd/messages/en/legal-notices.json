@@ -1,0 +1,53 @@
+{
+  "legal-notices": {
+    "title": "Legal Notices",
+    "intro": "EzStart LLC is the publisher of this site and represents the legal entity of Franck Dufournet for his web development, software creation, and digital services activities. Below you will find all the legal information and important contacts.",
+    "sections": [
+      {
+        "id": "editor",
+        "title": "Site Publisher",
+        "content": "Name/Company: EzStart LLC\nStatus: Limited Liability Company (LLC)\nRegistered office: 7442, 1021 E Lincolnway, Cheyenne, WY, Laramie, US, 82001\nOperational address: 188/A22-A23 Nguyen Van Huong, Ho Chi Minh City, VN, 700000\nLegal representative: Franck Dufournet (100% owner)\nPhone: +84 33 453 2954\nLinkedIn: https://www.linkedin.com/in/franck-dufournet-239446151/",
+        "link": {
+          "label": "Direct contact",
+          "href": "mailto:franckdufournet@hotmail.fr"
+        }
+      },
+      {
+        "id": "hosting",
+        "title": "Hosting",
+        "content": "Provider: Vercel Inc.\nAddress: 440 N Barranca Ave #4133, Covina, CA 91723, USA\nWebsite: https://vercel.com"
+      },
+      {
+        "id": "intellectual-property",
+        "title": "Intellectual Property",
+        "content": "The source code, content, and visual elements on this site are protected. Unless otherwise stated, they are under the MIT license or remain the property of their author. Please always check the repository README.",
+        "link": {
+          "label": "View the GitHub repository",
+          "href": "https://github.com/DFranck/ezstart"
+        }
+      },
+      {
+        "id": "privacy",
+        "title": "Personal Data",
+        "content": "No personal data is collected without your explicit consent.\nIf cookies, analytics, or contact forms are added, an update will be made.\nFor any request or data removal, please contact us."
+      },
+      {
+        "id": "contact",
+        "title": "Contact & Reporting",
+        "content": "You can contact the legal representative for any questions, reports, or removal requests at the following address:",
+        "link": {
+          "label": "franckdufournet@hotmail.fr",
+          "href": "mailto:franckdufournet@hotmail.fr"
+        }
+      }
+    ],
+    "cta-disabled": {
+      "description": "A disabled navigation button with an alert message when the feature is not yet implemented.",
+      "code": "<Button asChild onClick={(e) => { e.preventDefault(); alert('Not implemented yet'); }}>\n  <Link href='/profile' className='w-full flex justify-center py-2' aria-disabled='true'>\n    <Icon name='fa:FaUser' />\n  </Link>\n</Button>"
+    },
+    "cta-ready": {
+      "description": "An active navigation button that leads to /profile when the feature is ready.",
+      "code": "<Button asChild>\n  <Link href='/profile' className='w-full flex justify-center py-2'>\n    <Icon name='fa:FaUser' />\n  </Link>\n</Button>"
+    }
+  }
+}
