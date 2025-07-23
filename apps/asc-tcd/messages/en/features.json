@@ -1,0 +1,19 @@
+{
+  "features": {
+    "title": "Mes Fonctionnalités",
+    "subtitle": "",
+    "description": "",
+    "notFound": "Fonctionnalité introuvable",
+    "items": [
+      {
+        "title": "EzBilling",
+        "description": "Système de facturation simple et flexible pour votre SaaS. Gérez vos abonnements, vos factures et vos paiements grâce à une API claire et des hooks d'interface utilisateur personnalisables.",
+        "links": {
+          "local": "/ez-features/ez-billing",
+          "github": "https://github.com/DFranck/ezstart/tree/master/apps/ez-billing",
+          "npm": ""
+        }
+      }
+    ]
+  }
+}
