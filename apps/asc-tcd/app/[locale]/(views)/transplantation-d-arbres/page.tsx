@@ -70,7 +70,7 @@ export default function PageTransplantationArbres() {
         </Div>
         <Div size={'default'} className='relative aspect-video'>
           <video
-            src='/videos/bergerac-2023.mp4'
+            src='/videos/bergerac-2023-web.mp4'
             poster='/images/professionnel.jpg'
             controls
             playsInline
