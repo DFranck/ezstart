@@ -108,7 +108,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
 
         <article
           className={`relative p-[4vmin] transition-opacity duration-1000 ease-in-out ${
-            current === index ? 'opacity-100 visible' : 'opacity-5  0 '
+            current === index ? 'opacity-100 visible' : 'opacity-50 '
           }`}
         >
           <h2 className='text-lg md:text-2xl lg:text-4xl font-semibold  relative'>

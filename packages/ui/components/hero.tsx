@@ -58,7 +58,7 @@ export const Hero = ({
           className='absolute top-0 left-0 w-full h-full object-cover'
         />
       ) : null}
-      {overlay && <div className='absolute inset-0 bg-black/40' />}
+      {overlay && <div className='absolute inset-0 bg-black/30' />}
     </>
   );
 
