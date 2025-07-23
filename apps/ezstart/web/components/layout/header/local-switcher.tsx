@@ -3,18 +3,13 @@
 import { routing } from '@/i18n/routing';
 import { capitalize } from '@/utils/capitalize';
 import { Dropdown, DropdownItem, Icon } from '@ezstart/ui/components';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 
 export function LocaleSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
   const currentLocale = useLocale();
-  const t = useTranslations();
-
-  const langNames = new Intl.DisplayNames([currentLocale], {
-    type: 'language',
-  });
 
   const items: DropdownItem[] = routing.locales.map((code) => {
     const nativeName = new Intl.DisplayNames([code], { type: 'language' }).of(

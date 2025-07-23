@@ -1,5 +1,6 @@
 import { useNavLinks } from '@/hooks/useNavLinks';
 import { Button, Dropdown } from '@ezstart/ui/components';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -23,7 +24,7 @@ export function NavMenu({
 }: NavMenuProps) {
   const router = useRouter();
   const links = useNavLinks();
-
+  const currentLocale = useLocale();
   return (
     <nav className={className}>
       {links.map((item, i) =>
@@ -36,7 +37,11 @@ export function NavMenu({
               label: sub.label,
               value: sub.href,
               onSelect: () => {
-                router.push(sub.href);
+                const targetHref =
+                  sub.href === '/'
+                    ? `/${currentLocale}`
+                    : `/${currentLocale}${sub.href}`;
+                router.push(targetHref);
                 setIsOpen?.(false);
               },
             }))}
@@ -48,7 +53,11 @@ export function NavMenu({
             asChild
             onClick={() => setIsOpen?.(false)}
           >
-            <Link href={item.href}>{item.label}</Link>
+            <Link
+              href={`/${currentLocale}${item.href === '/' ? '' : item.href}`}
+            >
+              {item.label}
+            </Link>
           </Button>
         )
       )}
