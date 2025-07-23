@@ -70,10 +70,9 @@ export default function PageTransplantationArbres() {
         </Div>
         <Div size={'default'} className='relative aspect-video'>
           <video
-            src='/videos/transplantation-hero.mp4'
-            poster='/images/transplantation-hero.jpg'
+            src='/videos/bergerac-2023.mp4'
+            poster='/images/professionnel.jpg'
             controls
-            autoPlay
             playsInline
             className='absolute top-0 left-0 w-full h-full object-cover'
           />

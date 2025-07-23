@@ -2,8 +2,8 @@
 import { defineRouting } from 'next-intl/routing';
 
 export const routing = defineRouting({
-  locales: ['fr', 'en'],
-  defaultLocale: 'en',
+  locales: ['fr'],
+  defaultLocale: 'fr',
   localeDetection: true,
 });
 
@@ -13,8 +13,8 @@ export function getTimeZoneFromLocale(locale: AppLocale): string {
   switch (locale) {
     case 'fr':
       return 'Europe/Paris';
-    case 'en':
-      return 'America/New_York';
+    // case 'en':
+    //   return 'America/New_York';
     default:
       return 'UTC';
   }

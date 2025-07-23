@@ -22,17 +22,18 @@ export default function Page() {
       <Hero
         title='Solution environmental pensée et crées pour vous'
         subtitle='ASC'
-        videoSrc='/videos/hero-background.mp4'
-        overlay={false}
+        videoSrc='/videos/sunlight-and-green-tree-leaves.mp4'
+        // overlay={false}
       />
       {/* Services Section */}
       <Section layout={'grid'} className='md:grid-cols-2'>
-        <Div className='relative aspect-video ' size={'full'}>
+        <Div className='relative aspect-auto hidden md:block' size={'full'}>
           <Image
-            src='/images/image.png'
+            src='/images/benefice.jpg'
             alt='ASC Logo'
-            fill
-            className='mx-auto'
+            width={500}
+            height={750}
+            className='rounded-md'
           />
         </Div>
         <Div size='xs'>

@@ -42,12 +42,12 @@ export function startServer(app: express.Express, opts: StartServerOptions) {
       },
       servers: [{ url: basePath }],
     });
-    app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc));
+    app.use('/api', swaggerUi.serve, swaggerUi.setup(openApiDoc));
   }
 
   app.listen(port, () => {
     const url = `http://localhost:${port}`;
     console.log(`🚀 ${serviceName} running on ${url}${basePath}`);
-    if (registries.length > 0) console.log(`📖 Docs available at ${url}/docs`);
+    if (registries.length > 0) console.log(`📖 Docs available at ${url}/api`);
   });
 }
