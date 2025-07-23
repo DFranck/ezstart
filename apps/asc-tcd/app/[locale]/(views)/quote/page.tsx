@@ -42,20 +42,19 @@ export default function PageQuote() {
       "Demande de devis - Transplantation d'arbres"
     );
     const body = encodeURIComponent(
-      `Nom de l'organisme : ${form.organisation}\n` +
-        `Contact : ${form.contactName}\n` +
-        `Email : ${form.email}\n` +
-        `Téléphone : ${form.phone}\n` +
-        `Nombre de végétaux : ${form.nbPlants}\n` +
-        `Types : ${[
-          form.types.trees && 'Arbres et arbustes',
-          form.types.hedges && 'Haies et thorbaces',
-          form.types.plants && 'Plantes (linaire, grasses, fruitières, etc.)',
-        ]
-          .filter(Boolean)
-          .join(', ')}\n` +
-        `Date souhaitée : ${form.date}\n` +
-        `Distance de déplacement : ${form.distance} km`
+      `✅ **Nouvelle demande de devis – Transplantation d'arbres**\n\n` +
+        `*Organisation* : ${form.organisation}\n` +
+        `*Contact* : ${form.contactName}\n` +
+        `*Email* : ${form.email}\n` +
+        `*Téléphone* : ${form.phone || 'Non renseigné'}\n\n` +
+        `*Nombre de végétaux* : ${form.nbPlants || 'Non précisé'}\n` +
+        `*Types sélectionnés* :\n` +
+        `${form.types.trees ? '   - Arbres et arbustes\n' : ''}` +
+        `${form.types.hedges ? '   - Haies et thorbaces\n' : ''}` +
+        `${form.types.plants ? '   - Plantes diverses\n' : ''}\n` +
+        `*Date souhaitée* : ${form.date || 'Non précisée'}\n` +
+        `*Distance de déplacement* : ${form.distance || 'Non précisée'} km\n\n` +
+        `---\nEnvoyé automatiquement depuis le formulaire ASC-TCD`
     );
 
     // Mailto direct (simple)
