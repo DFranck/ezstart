@@ -4,24 +4,27 @@ import {
   Button,
   Div,
   H2,
+  Hero,
   Icon,
   Main,
   P,
   Section,
 } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
-import { cn } from '@ezstart/ui/lib';
 import Image from 'next/image';
 import Link from 'next/link';
-import HeroSection from './(home)/HeroSection';
 
 export default function Page() {
-  const { isDesktop } = useDevice();
+  const { isDesktop, isMobile } = useDevice();
   return (
-    <Main withHeaderOffset className={cn({ 'mt-32': isDesktop })}>
+    <Main>
       {/* Hero Section */}
-      <HeroSection />
-
+      <Hero
+        title='Solution environmental pensée et crées pour vous'
+        subtitle='ASC'
+        videoSrc='/videos/hero-background.mp4'
+        overlay={false}
+      />
       {/* Services Section */}
       <Section layout={'grid'} className='md:grid-cols-2'>
         <Div className='relative aspect-video ' size={'full'}>
@@ -47,48 +50,37 @@ export default function Page() {
           </P>
 
           {/* CTA Buttons */}
-          <div className='flex justify-center gap-4 mt-6'>
-            <Button asChild variant='ghost'>
+          <Div size={'xs'} layout={'row'} className='flex-wrap justify-center'>
+            {/* <Button asChild variant='ghost'>
               <Link href='/calculatrice-sequestration-carbone'>
                 <Icon name='lucide:Calculator' className='mr-2' />
                 Calculatrice ECP
               </Link>
-            </Button>
+            </Button> */}
             <Button asChild variant='outline'>
               <Link href='/transplantation-d-arbres'>
                 <Icon name='lucide:TreePine' className='mr-2' />
                 Transplantation
               </Link>
             </Button>
-            <Button asChild>
+            {/* <Button asChild>
               <Link href='/consulting'>
                 <Icon name='fa:FaUserFriends' className='mr-2' />
                 Consulting
               </Link>
-            </Button>
-          </div>
+            </Button> */}
+          </Div>
         </Div>
-      </Section>
-
-      {/* Engagements */}
-      <Section className='bg-gray-50 py-12 text-center'>
-        <H2 className='text-3xl font-bold'>Nos engagements</H2>
-        <P className='mt-4 max-w-2xl mx-auto'>
-          ASC TCD s'engage à fournir des solutions innovantes et durables pour
-          un avenir plus vert. Nous sommes dédiés à la préservation de
-          l'environnement et à la création de villes résilientes.
-        </P>
       </Section>
 
       {/* Contact Section */}
       <Section className='py-12 text-center'>
         <H2 className='text-3xl font-bold'>Contactez-nous</H2>
         <P className='mt-2'>
-          Pour toute question ou demande de devis, n'hésitez pas à nous
-          contacter.
+          Pour toute question, n'hésitez pas à nous contacter.
         </P>
         <Button asChild className='mt-4'>
-          <Link href='https://www.asc-tcd.com/contact'>
+          <Link href='mailto:as-tsc'>
             <Icon name='lucide:Mail' className='mr-2' />
             Contact
           </Link>

@@ -1,13 +1,13 @@
 'use client';
 
-import { Burger, Button, Icon } from '@ezstart/ui/components';
+import { Burger } from '@ezstart/ui/components';
 import { useClickOutside, useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import { useLocale } from 'next-intl';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { MobileNavMenu } from './mobile-nav-menu';
-
 export default function MobileNavbar() {
   const { isMobile } = useDevice();
   const locale = useLocale();
@@ -43,9 +43,15 @@ export default function MobileNavbar() {
       </div>
 
       <div className=' shadow-md'>
-        <div className='grid grid-cols-3 items-center w-full '>
+        <div className='grid grid-cols-2 items-center w-full '>
           <Link href={`/${locale}`} className='w-full flex justify-center py-2'>
-            <Icon name='custom:Ezstart' />
+            <Image
+              src='/images/logo.png'
+              alt='ASC Logo'
+              width={32}
+              height={32}
+              className='mx-auto'
+            />
           </Link>
 
           <Burger
@@ -53,7 +59,7 @@ export default function MobileNavbar() {
             onClick={() => setIsOpen(!isOpen)}
             ref={burgerRef}
           />
-          <Button
+          {/* <Button
             variant={'ghost'}
             onClick={(e) => {
               alert('Not implemented yet');
@@ -61,7 +67,7 @@ export default function MobileNavbar() {
             }}
           >
             <Icon name='fa:FaUser' />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>
