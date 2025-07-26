@@ -7,7 +7,7 @@ import {
 } from './billing-base';
 
 export const createInvoiceSchema = baseBillingDocSchema.extend({
-  status: invoiceStatusEnum.default('draft'),
+  status: invoiceStatusEnum.default('draft').describe('TODO'),
 });
 export const updateInvoiceSchema = createInvoiceSchema.partial();
 export const invoiceSchema = withBillingOutputFields(createInvoiceSchema);

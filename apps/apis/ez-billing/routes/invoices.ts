@@ -1,8 +1,12 @@
 import {
+  addLineItemSchema,
+  assignClientSchema,
+  clientIdSchema,
   createInvoiceSchema,
   getInvoicesQuerySchema,
   invoiceSchema,
   paramsMongoIdSchema,
+  removeLineItemSchema,
   updateInvoiceSchema,
 } from '@ezstart/types';
 import express, { Router } from 'express';
@@ -26,45 +30,92 @@ docRouter.post('invoices/', controllers.createInvoiceController, {
 });
 
 docRouter.get('invoices/', validateQuery(getInvoicesQuerySchema), {
-  summary: 'List invoices',
+  summary: 'List Invoices',
   tags: ['Invoices'],
   querySchema: getInvoicesQuerySchema,
   responseSchema: invoiceSchema.array(),
 });
 
 docRouter.get('invoices/:id', controllers.getInvoiceByIdController, {
-  summary: 'Get invoice by id',
+  summary: 'Get Invoice by id',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: invoiceSchema,
 });
 
 docRouter.put('invoices/:id', controllers.updateInvoiceController, {
-  summary: 'Update invoice by id',
+  summary: 'Update Invoice by id',
   tags: ['Invoices'],
   bodySchema: updateInvoiceSchema,
   paramsSchema: paramsMongoIdSchema,
   responseSchema: invoiceSchema,
 });
 
-router
-  // .post('/', controllers.createInvoiceController)
-  // .get(
-  //   '/',
-  //   validateQuery(getInvoicesQuerySchema),
-  //   controllers.getInvoicesController
-  // )
-  // .get('/:id', controllers.getInvoiceByIdController)
-  // .put('/:id', controllers.updateInvoiceController)
-  .delete('/:id', controllers.softDeleteInvoiceController)
-  .post('/:id/restore', controllers.restoreInvoiceController)
-  .delete('/:id/hard-delete', controllers.hardDeleteInvoiceController)
+docRouter.delete('invoices/:id', controllers.softDeleteInvoiceController, {
+  summary: 'Soft delete Invoice',
+  tags: ['Invoices'],
+  paramsSchema: paramsMongoIdSchema,
+});
 
-  // Relations & actions
-  .post('/:id/assign-client', controllers.assignClientToInvoiceController)
-  .post('/:id/add-line-item', controllers.addLineItemToInvoiceController)
-  .post('/:id/remove-line-item', controllers.removeLineItemToInvoiceController)
-  // Special
-  .post('/:id/mark-paid', controllers.markInvoiceAsPaidController);
+docRouter.post('invoices/:id/restore', controllers.restoreInvoiceController, {
+  summary: 'Restore Invoice',
+  tags: ['Invoices'],
+  paramsSchema: paramsMongoIdSchema,
+  responseSchema: invoiceSchema,
+});
+
+docRouter.delete(
+  'invoices/:id/hard-delete',
+  controllers.hardDeleteInvoiceController,
+  {
+    summary: 'Hard delete Invoice',
+    tags: ['Invoices'],
+    paramsSchema: paramsMongoIdSchema,
+  }
+);
+
+docRouter.post(
+  'invoices/:id/assign-client',
+  controllers.assignClientToInvoiceController,
+  {
+    summary: 'Assign Client to Invoice',
+    tags: ['Invoices'],
+    bodySchema: assignClientSchema,
+    paramsSchema: clientIdSchema,
+    responseSchema: invoiceSchema,
+  }
+);
+docRouter.post(
+  'invoices/:id/add-line-item',
+  controllers.addLineItemToInvoiceController,
+  {
+    summary: 'Add line Item to Invoice',
+    tags: ['Invoices'],
+    bodySchema: addLineItemSchema,
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: invoiceSchema,
+  }
+);
+docRouter.post(
+  'invoices/:id/remove-line-item',
+  controllers.removeLineItemToInvoiceController,
+  {
+    summary: 'Remove line Item from Invoice',
+    tags: ['Invoices'],
+    bodySchema: removeLineItemSchema,
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: invoiceSchema,
+  }
+);
+docRouter.post(
+  'invoices/:id/mark-paid',
+  controllers.markInvoiceAsPaidController,
+  {
+    summary: 'Mark Invoice as paid',
+    tags: ['Invoices'],
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: invoiceSchema,
+  }
+);
 
 export default router;

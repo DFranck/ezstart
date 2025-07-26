@@ -3,9 +3,9 @@ import { currencyEnum } from '../../enums';
 import { listingQuerySchema } from '../listing';
 
 export const baseLineItemSchema = z.object({
-  label: z.string().min(1, 'Label is required'),
-  quantity: z.number().min(1),
-  price: z.number().min(0),
+  label: z.string().min(1, 'Label is required').describe('TODO'),
+  quantity: z.number().min(1).describe('TODO'),
+  price: z.number().min(0).describe('TODO'),
 });
 export type BaseLineItem = ZodInfer<typeof baseLineItemSchema>;
 
@@ -27,12 +27,12 @@ export const baseBillingDocSchema = z.object({
     .string()
     .min(1, 'Client is required')
     .describe('User id from mongo _id'),
-  items: z.array(baseLineItemSchema).min(1),
+  items: z.array(baseLineItemSchema).min(1).describe('TODO'),
   currency: currencyEnum.describe('Billing using currency'),
-  dueDate: z.string().optional(),
-  notes: z.string().optional(),
-  terms: z.string().optional(),
-  taxRate: z.number().min(0).max(100).optional(),
+  dueDate: z.string().optional().describe('TODO'),
+  notes: z.string().optional().describe('TODO'),
+  terms: z.string().optional().describe('TODO'),
+  taxRate: z.number().min(0).max(100).optional().describe('TODO'),
 });
 export type BaseBillingDoc = ZodInfer<typeof baseBillingDocSchema>;
 
@@ -40,16 +40,16 @@ export function withBillingOutputFields<T extends ZodRawShape>(
   schema: ZodObject<T>
 ) {
   return schema.extend({
-    _id: z.string(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
-    deletedAt: z.string().optional(),
-    items: z.array(lineItemSchema),
-    documentNumber: z.string(),
-    exchangeRate: exchangeRateSchema,
-    subtotal: z.number(),
-    taxAmount: z.number(),
-    total: z.number(),
+    _id: z.string().describe('TODO'),
+    createdAt: z.string().describe('TODO'),
+    updatedAt: z.string().describe('TODO'),
+    deletedAt: z.string().optional().describe('TODO'),
+    items: z.array(lineItemSchema).describe('TODO'),
+    documentNumber: z.string().describe('TODO'),
+    exchangeRate: exchangeRateSchema.describe('TODO'),
+    subtotal: z.number().describe('TODO'),
+    taxAmount: z.number().describe('TODO'),
+    total: z.number().describe('TODO'),
   });
 }
 
@@ -57,8 +57,8 @@ export function getBillingDocsQuerySchema<
   T extends ZodEnum<[string, ...string[]]>,
 >(statusEnum: T) {
   return listingQuerySchema.extend({
-    clientId: z.string().optional(),
-    status: statusEnum.optional(),
-    currency: currencyEnum.optional(),
+    clientId: z.string().optional().describe('TODO'),
+    status: statusEnum.optional().describe('TODO'),
+    currency: currencyEnum.optional().describe('TODO'),
   });
 }

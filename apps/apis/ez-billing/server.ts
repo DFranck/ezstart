@@ -1,7 +1,7 @@
 import { connectToMongo, createApp, startServer } from '@ezstart/api-core';
 import routes, { globalRegistry } from './routes';
 
-const app = createApp();
+export const app = createApp();
 
 connectToMongo('ez-billing')
   .then(() =>
