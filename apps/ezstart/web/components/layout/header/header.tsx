@@ -3,6 +3,7 @@
 import { Burger, H2, Icon, Tag } from '@ezstart/ui/components';
 import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { MobileNavMenu } from '../mobile-nav-menu';
@@ -12,6 +13,7 @@ import { HeaderControls } from './header-controls';
 export default function Header() {
   const { isDesktop, isTablet } = useDevice();
   const [isOpen, setIsOpen] = useState(false);
+  const currentLocale = useLocale();
   const scrollY = useOnScroll();
   const isTop = scrollY === 0;
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,7 @@ export default function Header() {
           }
         )}
       >
-        <Link href='/' className='flex items-center gap-2'>
+        <Link href={`/${currentLocale}/`} className='flex items-center gap-2'>
           <Icon name='custom:Ezstart' size={24} />
           <H2 size={'h4'}>EzStart</H2>
         </Link>

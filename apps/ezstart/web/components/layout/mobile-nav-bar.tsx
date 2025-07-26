@@ -10,7 +10,7 @@ import { MobileNavMenu } from './mobile-nav-menu';
 
 export default function MobileNavbar() {
   const { isMobile } = useDevice();
-  const locale = useLocale();
+  const currentLocale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
@@ -44,7 +44,10 @@ export default function MobileNavbar() {
 
       <div className=' shadow-md'>
         <div className='grid grid-cols-3 items-center w-full '>
-          <Link href={`/${locale}`} className='w-full flex justify-center py-2'>
+          <Link
+            href={`/${currentLocale}`}
+            className='w-full flex justify-center py-2'
+          >
             <Icon name='custom:Ezstart' />
           </Link>
 
