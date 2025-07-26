@@ -1,7 +1,6 @@
 import {
   addLineItemSchema,
   assignClientSchema,
-  clientIdSchema,
   createInvoiceSchema,
   getInvoicesQuerySchema,
   invoiceSchema,
@@ -21,29 +20,29 @@ export const invoiceRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(invoiceRegistry, router);
 
-docRouter.post('invoices/', controllers.createInvoiceController, {
-  summary: 'Create an invoice',
+docRouter.post('/invoices/', controllers.createInvoiceController, {
+  summary: 'Create an Invoice',
   tags: ['Invoices'],
   bodySchema: invoiceSchema,
   responseSchema: createInvoiceSchema,
   status: 201,
 });
 
-docRouter.get('invoices/', validateQuery(getInvoicesQuerySchema), {
+docRouter.get('/invoices/', validateQuery(getInvoicesQuerySchema), {
   summary: 'List Invoices',
   tags: ['Invoices'],
   querySchema: getInvoicesQuerySchema,
   responseSchema: invoiceSchema.array(),
 });
 
-docRouter.get('invoices/:id', controllers.getInvoiceByIdController, {
+docRouter.get('/invoices/:id', controllers.getInvoiceByIdController, {
   summary: 'Get Invoice by id',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: invoiceSchema,
 });
 
-docRouter.put('invoices/:id', controllers.updateInvoiceController, {
+docRouter.put('/invoices/:id', controllers.updateInvoiceController, {
   summary: 'Update Invoice by id',
   tags: ['Invoices'],
   bodySchema: updateInvoiceSchema,
@@ -51,13 +50,13 @@ docRouter.put('invoices/:id', controllers.updateInvoiceController, {
   responseSchema: invoiceSchema,
 });
 
-docRouter.delete('invoices/:id', controllers.softDeleteInvoiceController, {
+docRouter.delete('/invoices/:id', controllers.softDeleteInvoiceController, {
   summary: 'Soft delete Invoice',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('invoices/:id/restore', controllers.restoreInvoiceController, {
+docRouter.post('/invoices/:id/restore', controllers.restoreInvoiceController, {
   summary: 'Restore Invoice',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
@@ -65,7 +64,7 @@ docRouter.post('invoices/:id/restore', controllers.restoreInvoiceController, {
 });
 
 docRouter.delete(
-  'invoices/:id/hard-delete',
+  '/invoices/:id/hard-delete',
   controllers.hardDeleteInvoiceController,
   {
     summary: 'Hard delete Invoice',
@@ -75,18 +74,7 @@ docRouter.delete(
 );
 
 docRouter.post(
-  'invoices/:id/assign-client',
-  controllers.assignClientToInvoiceController,
-  {
-    summary: 'Assign Client to Invoice',
-    tags: ['Invoices'],
-    bodySchema: assignClientSchema,
-    paramsSchema: clientIdSchema,
-    responseSchema: invoiceSchema,
-  }
-);
-docRouter.post(
-  'invoices/:id/add-line-item',
+  '/invoices/:id/add-line-item',
   controllers.addLineItemToInvoiceController,
   {
     summary: 'Add line Item to Invoice',
@@ -97,7 +85,7 @@ docRouter.post(
   }
 );
 docRouter.post(
-  'invoices/:id/remove-line-item',
+  '/invoices/:id/remove-line-item',
   controllers.removeLineItemToInvoiceController,
   {
     summary: 'Remove line Item from Invoice',
@@ -108,11 +96,22 @@ docRouter.post(
   }
 );
 docRouter.post(
-  'invoices/:id/mark-paid',
+  '/invoices/:id/mark-paid',
   controllers.markInvoiceAsPaidController,
   {
     summary: 'Mark Invoice as paid',
     tags: ['Invoices'],
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: invoiceSchema,
+  }
+);
+docRouter.post(
+  '/invoices/:id/assign-client',
+  controllers.assignClientToInvoiceController,
+  {
+    summary: 'Assign Client to Invoice',
+    tags: ['Invoices'],
+    bodySchema: assignClientSchema,
     paramsSchema: paramsMongoIdSchema,
     responseSchema: invoiceSchema,
   }

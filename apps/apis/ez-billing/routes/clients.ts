@@ -18,7 +18,7 @@ export const clientsRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(clientsRegistry, router);
 
-docRouter.post('clients/', controllers.createClientController, {
+docRouter.post('/clients/', controllers.createClientController, {
   summary: 'Create a Client',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
@@ -27,7 +27,7 @@ docRouter.post('clients/', controllers.createClientController, {
 });
 
 docRouter.get(
-  'clients/',
+  '/clients/',
   validateQuery(getClientsQuerySchema),
   controllers.getClientsController,
   {
@@ -39,7 +39,7 @@ docRouter.get(
 );
 
 docRouter.get(
-  'clients/:id',
+  '/clients/:id',
   validateParams(paramsMongoIdSchema),
   controllers.getClientByIdController,
   {
@@ -50,7 +50,7 @@ docRouter.get(
   }
 );
 
-docRouter.put('clients/:id', controllers.updateClientController, {
+docRouter.put('/clients/:id', controllers.updateClientController, {
   summary: 'Update Client',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
@@ -58,13 +58,13 @@ docRouter.put('clients/:id', controllers.updateClientController, {
   responseSchema: clientSchema,
 });
 
-docRouter.delete('clients/:id', controllers.softDeleteClientController, {
+docRouter.delete('/clients/:id', controllers.softDeleteClientController, {
   summary: 'Soft delete Client',
   tags: ['Clients'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('clients/:id/restore', controllers.restoreClientController, {
+docRouter.post('/clients/:id/restore', controllers.restoreClientController, {
   summary: 'Restore Client',
   tags: ['Clients'],
   paramsSchema: paramsMongoIdSchema,
@@ -72,7 +72,7 @@ docRouter.post('clients/:id/restore', controllers.restoreClientController, {
 });
 
 docRouter.delete(
-  'clients/:id/hard-delete',
+  '/clients/:id/hard-delete',
   controllers.hardDeleteClientController,
   {
     summary: 'Hard delete Client',
