@@ -132,7 +132,6 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router) {
       responses,
     });
 
-    // 👉 Ajout normal au router Express
     (router as any)[method](path, ...middlewares);
   }
 

@@ -18,7 +18,7 @@ export const clientsRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(clientsRegistry, router);
 
-docRouter.post('/', controllers.createClientController, {
+docRouter.post('clients/', controllers.createClientController, {
   summary: 'Create a Client',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
@@ -27,7 +27,7 @@ docRouter.post('/', controllers.createClientController, {
 });
 
 docRouter.get(
-  '/',
+  'clients/',
   validateQuery(getClientsQuerySchema),
   controllers.getClientsController,
   {
@@ -39,7 +39,7 @@ docRouter.get(
 );
 
 docRouter.get(
-  '/:id',
+  'clients/:id',
   validateParams(paramsMongoIdSchema),
   controllers.getClientByIdController,
   {
@@ -50,7 +50,7 @@ docRouter.get(
   }
 );
 
-docRouter.put('/:id', controllers.updateClientController, {
+docRouter.put('clients/:id', controllers.updateClientController, {
   summary: 'Update Client',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
@@ -58,23 +58,27 @@ docRouter.put('/:id', controllers.updateClientController, {
   responseSchema: clientSchema,
 });
 
-docRouter.delete('/:id', controllers.softDeleteClientController, {
+docRouter.delete('clients/:id', controllers.softDeleteClientController, {
   summary: 'Soft delete Client',
   tags: ['Clients'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('/:id/restore', controllers.restoreClientController, {
+docRouter.post('clients/:id/restore', controllers.restoreClientController, {
   summary: 'Restore Client',
   tags: ['Clients'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: clientSchema,
 });
 
-docRouter.delete('/:id/hard-delete', controllers.hardDeleteClientController, {
-  summary: 'Hard delete Client',
-  tags: ['Clients'],
-  paramsSchema: paramsMongoIdSchema,
-});
+docRouter.delete(
+  'clients/:id/hard-delete',
+  controllers.hardDeleteClientController,
+  {
+    summary: 'Hard delete Client',
+    tags: ['Clients'],
+    paramsSchema: paramsMongoIdSchema,
+  }
+);
 
 export default router;

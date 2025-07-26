@@ -1,5 +1,5 @@
 import type { infer as ZodInfer } from 'zod';
-import { z } from '../zod-extended'; // version étendue avec openapi
+import { z } from '../zod-extended';
 import { listingQuerySchema } from './listing';
 
 // -----------------------------------

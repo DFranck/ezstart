@@ -23,9 +23,12 @@ export const exchangeRateSchema = z.object({
 });
 
 export const baseBillingDocSchema = z.object({
-  clientId: z.string().min(1, 'Client is required'),
+  clientId: z
+    .string()
+    .min(1, 'Client is required')
+    .describe('User id from mongo _id'),
   items: z.array(baseLineItemSchema).min(1),
-  currency: currencyEnum,
+  currency: currencyEnum.describe('Billing using currency'),
   dueDate: z.string().optional(),
   notes: z.string().optional(),
   terms: z.string().optional(),

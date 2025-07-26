@@ -1,11 +1,11 @@
 import express, { Router } from 'express';
 import clientRoutes, { clientsRegistry } from './clients';
-import invoiceRoutes from './invoices';
+import invoiceRoutes, { invoiceRegistry } from './invoices';
 import quoteRoutes from './quotes';
 import receiptRoutes from './receipts';
 
 const router: Router = express.Router();
-export const globalRegistry = [clientsRegistry];
+export const globalRegistry = [clientsRegistry, invoiceRegistry];
 
 router
   .use('/clients', clientRoutes)
