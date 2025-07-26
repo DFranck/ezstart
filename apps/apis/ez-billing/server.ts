@@ -9,7 +9,7 @@ connectToMongo('ez-billing')
       routes,
       registries: globalRegistry,
       serviceName: 'EzBilling',
-      port: 5555,
+      port: 8001,
     })
   )
   .catch((err) => {

@@ -11,8 +11,8 @@ connectToMongo('boilerplate')
     startServer(app, {
       routes,
       registries: globalRegistry,
-      serviceName: 'EzBilling',
-      port: 8888,
+      serviceName: 'EzStart',
+      port: 8000,
     })
   )
   .catch((err) => {
