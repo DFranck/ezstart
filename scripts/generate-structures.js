@@ -94,7 +94,7 @@ function generateTree(dir, depth = 0, maxDepth = Infinity, root = dir) {
           root,
           path.join(fullPath, 'structure.md')
         );
-        tree += `${indent}- ${entry.name}/ → [structure.md](./${relativeLink.replace(/\\\\/g, '/')})\n`;
+        tree += `${indent}- ${entry.name}/ → [structure.md](./${relativeLink.replace(/\\/g, '/')})\n`;
         continue; // stop ici
       }
 

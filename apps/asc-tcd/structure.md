@@ -1,6 +1,5 @@
-# Project structure for apps\ezstart\web
+# Project structure for apps\asc-tcd
 
-- .env.local
 - .gitignore
 - app/
   - favicon.ico
@@ -12,74 +11,12 @@
       - ProjectsSection.tsx
       - SkillsSection.tsx
     - (views)/
-      - (statics)/
-        - legal-notices/
-          - page.tsx
-      - ez-features/
+      - legal-notices/
         - page.tsx
-        - [feature]/
-          - (auth)/
-            - layout-auth.tsx
-            - page-auth.tsx
-          - (billing)/
-            - clients/
-              - page.tsx
-            - components/
-              - client-card.tsx
-              - nav-billing.tsx
-            - contexts/
-              - billing-context.ts
-            - dev/
-              - client-e2e-test.tsx
-              - components/
-                - log.tsx
-              - e2e-playground.tsx
-              - invoice-e2e-test.tsx
-              - page.tsx
-              - quote-e2e-test.tsx
-              - receipt-e2e-test.tsx
-            - invoices/
-              - page.tsx
-            - layout-billing.tsx
-            - page-billing.tsx
-            - providers/
-              - billing-provider.tsx
-            - quotes/
-              - page.tsx
-            - README.md
-            - receipts/
-              - page.tsx
-          - components/
-            - section-feature.tsx
-          - layout.tsx
-          - page.tsx
-      - ez-libs/
+      - quote/
         - page.tsx
-        - [lib]/
-          - (Icon)/
-            - IconPlayground.tsx
-          - components/
-            - header-lib.tsx
-            - section-lib.tsx
-          - page/
-            - page-icon.tsx
-            - page-tag.tsx
-          - page.tsx
-          - [tag]/
-            - components/
-              - playground-code-view.tsx
-              - playground-variant-selects.tsx
-            - page.tsx
-            - playground/
-              - div-playground.tsx
-              - heading-playground.tsx
-              - listing-playground.tsx
-              - p-playground.tsx
-              - section-playground.tsx
-              - span-playground.tsx
-            - utils/
-              - build-fake-tag.ts
-              - generate-lorem.ts
+      - transplantation-d-arbres/
+        - page.tsx
     - client-layout.tsx
     - layout.tsx
     - page.tsx
@@ -112,6 +49,24 @@
 - components.json
 - contexts/
   - billing-context.ts
+- docs/
+  - modified_image (1).png
+  - modified_image (10).png
+  - modified_image (11).png
+  - modified_image (12).png
+  - modified_image (13).png
+  - modified_image (14).png
+  - modified_image (15).png
+  - modified_image (16).png
+  - modified_image (17).png
+  - modified_image (2).png
+  - modified_image (3).png
+  - modified_image (4).png
+  - modified_image (5).png
+  - modified_image (6).png
+  - modified_image (7).png
+  - modified_image (8).png
+  - modified_image (9).png
 - eslint.config.js
 - hooks/
   - useExternalStats.ts
@@ -159,10 +114,16 @@
 - public/
   - images/
     - about_hero.png
+    - benefice.jpg
+    - evolution-sequestration-carbon.jpg
     - franck_no_background.png
+    - image.png
     - libraries/
       - ez-icon.png
       - ez-tag.png
+    - logo.png
+    - particulier.jpg
+    - professionnel.jpg
     - projects/
       - evento-app.io-desktop.png
       - evento-app.io-mobile.png
@@ -172,12 +133,12 @@
       - lima-prod-mobile.png
       - transplantation-arbres-desktop.png
       - transplantation-arbres-mobile.png
-      - zephyrus-desktop.png
-      - zephyrus-mobile.png
+    - secteur-public.jpg
   - json/
     - skills.json
-- README.md
-- structure.md
+  - videos/
+    - bergerac-2023-web.mp4
+    - hero-background.mp4
 - tsconfig.json
 - tsconfig.tsbuildinfo
 - types/
@@ -192,3 +153,4 @@
   - get-api-url.ts
   - get-translation-array.ts
   - map-project-tech-to-skills.ts
+- web/ → [structure.md](./web/structure.md)

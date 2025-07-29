@@ -1,18 +1,15 @@
 #!/usr/bin/env node
-const { execSync } = require('child_process');
 const fs = require('fs');
+const fse = require('fs-extra');
 const path = require('path');
-const os = require('os');
+const { execSync } = require('child_process');
 const { findPackages } = require('./utils/findPackages');
+const ora = require('ora');
 
-// Repos
-const PRIVATE_REPO = 'git@github.com:DFranck/ezstart.git';
+// 📦 Config
+const ROOT = process.cwd();
+const EXPORT_DIR = path.join(path.dirname(ROOT), '.public-export');
 const PUBLIC_REPO = 'git@github.com:DFranck/ezstart-public.git';
-
-// ✅ Sous Windows → on utilise un dossier local temporaire
-const WORKDIR = path.resolve(process.cwd(), '.public-build');
-
-// Charger la whitelist des NAMES de packages.json
 const WHITELIST_NAMES = require('./public-whitelist.json');
 
 function run(cmd, options = {}) {
@@ -20,42 +17,39 @@ function run(cmd, options = {}) {
   execSync(cmd, { stdio: 'inherit', shell: true, ...options });
 }
 
-function cleanPackage(packageDir) {
-  const pkgJsonPath = path.join(packageDir, 'package.json');
+function cleanPackage(pkgDir) {
+  const pkgJsonPath = path.join(pkgDir, 'package.json');
+  if (!fs.existsSync(pkgJsonPath)) return;
+
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
   const pkgName = pkg.name;
 
   if (WHITELIST_NAMES.includes(pkgName)) {
-    console.log(`✅ Keep FULL package: ${pkgName} (${packageDir})`);
-    return; // on garde tout
+    console.log(`✅ Keep FULL package: ${pkgName}`);
+    return; // Ne rien supprimer
   }
 
   console.log(`❌ Clean partial package: ${pkgName}`);
 
-  const entries = fs.readdirSync(packageDir, { withFileTypes: true });
+  const entries = fs.readdirSync(pkgDir, { withFileTypes: true });
 
   for (const entry of entries) {
-    const fullPath = path.join(packageDir, entry.name);
+    const fullPath = path.join(pkgDir, entry.name);
 
-    // on garde seulement README.md et structure.md
-    if (
-      entry.isFile() &&
-      (entry.name === 'README.md' || entry.name === 'structure.md')
-    ) {
-      console.log(`📄 Keep doc: ${pkgName}/${entry.name}`);
+    // On garde les fichiers Markdown uniquement
+    if (entry.isFile() && entry.name.endsWith('.md')) {
+      console.log(`📄 Keep .md file: ${pkgName}/${entry.name}`);
       continue;
     }
 
-    // sinon, on supprime
+    // Supprime tout le reste (fichiers & dossiers)
     fs.rmSync(fullPath, { recursive: true, force: true });
   }
 }
 
-function cleanNonWhitelistedPackages(root) {
-  const packages = findPackages(root);
-
+function cleanNonWhitelistedPackages(rootDir) {
+  const packages = findPackages(rootDir);
   console.log(`🔍 Found ${packages.length} packages`);
-
   packages.forEach((pkgDir) => {
     try {
       cleanPackage(pkgDir);
@@ -65,38 +59,56 @@ function cleanNonWhitelistedPackages(root) {
   });
 }
 
-// === Main script ===
 (async () => {
-  console.log(`🚀 Sync public started`);
+  console.log('🚀 Starting local public export & push');
 
-  // 0️⃣ Nettoyer ou créer le WORKDIR
-  if (fs.existsSync(WORKDIR)) {
-    console.log(`🗑 Cleaning old build dir: ${WORKDIR}`);
-    fs.rmSync(WORKDIR, { recursive: true, force: true });
+  // 1. Clean previous export
+  if (fs.existsSync(EXPORT_DIR)) {
+    console.log(`🗑 Removing old export: ${EXPORT_DIR}`);
+    fs.rmSync(EXPORT_DIR, { recursive: true, force: true });
   }
 
-  // 1️⃣ Clone le repo privé dans le WORKDIR
-  run(`git clone --depth=1 ${PRIVATE_REPO} "${WORKDIR}"`);
-  process.chdir(WORKDIR);
+  // 2. Copy everything from current repo
+  console.log(`📦 Copying current repo to: ${EXPORT_DIR}`);
+  const spinner = ora(`📦 Copying current repo to: ${EXPORT_DIR}`).start();
 
-  // 2️⃣ Clean les packages non whitelistés
-  cleanNonWhitelistedPackages(WORKDIR);
+  try {
+    await fse.copy(ROOT, EXPORT_DIR);
+    spinner.succeed(`✅ Copied repo to: ${EXPORT_DIR}`);
+  } catch (err) {
+    spinner.fail('❌ Failed to copy repo');
+    throw err;
+  }
 
-  // 3️⃣ Reset historique → commit unique
-  run(`git checkout --orphan public-snapshot`);
+  // 3. Clean non-whitelisted packages
+  process.chdir(EXPORT_DIR);
+  cleanNonWhitelistedPackages(EXPORT_DIR);
+
+  // 4. Init new git repo
+  run(`git init`);
+  try {
+    run(`git remote remove origin`);
+  } catch (err) {
+    console.warn('⚠️ No existing origin to remove');
+  }
+  run(`git remote add origin ${PUBLIC_REPO}`);
+  run(`git checkout -b main`);
   run(`git add .`);
   run(
     `git commit -m "Public snapshot ${new Date().toISOString().slice(0, 10)}"`
   );
 
-  // 4️⃣ Push forcé vers le repo public
-  run(`git push --force ${PUBLIC_REPO} public-snapshot:main`);
+  // 5. Push to public repo
+  run(`git push --force origin main`);
 
-  console.log('✅ Repo public updated with filtered snapshot');
-
-  // 5️⃣ Supprimer le WORKDIR pour ne rien laisser traîner
-  console.log(`🧹 Cleaning temp build dir...`);
-  process.chdir('..');
-  fs.rmSync(WORKDIR, { recursive: true, force: true });
-  console.log(`✨ Temp build dir removed`);
+  try {
+    fs.rmSync(EXPORT_DIR, { recursive: true, force: true });
+    console.log(`🧹 Cleaned up export directory: ${EXPORT_DIR}`);
+  } catch (err) {
+    console.warn(
+      `⚠️ Failed to clean export directory: ${EXPORT_DIR}`,
+      err.message
+    );
+  }
+  console.log(`✅ Public repo updated → ${PUBLIC_REPO}`);
 })();

@@ -6,15 +6,17 @@
 - .gitignore
 - .npmrc
 - apps/
-  - asc-tcd/
-    - web/ → [structure.md](./apps\asc-tcd\web\structure.md)
+  - asc-tcd/ → [structure.md](./apps/asc-tcd/structure.md)
   - ez-billing/
-    - api/ → [structure.md](./apps\ez-billing\api\structure.md)
+    - api/ → [structure.md](./apps/ez-billing/api/structure.md)
   - ezstart/
-    - api/ → [structure.md](./apps\ezstart\api\structure.md)
-    - web/ → [structure.md](./apps\ezstart\web\structure.md)
+    - api/ → [structure.md](./apps/ezstart/api/structure.md)
+    - web/ → [structure.md](./apps/ezstart/web/structure.md)
   - monitor/
-    - api/ → [structure.md](./apps\monitor\api\structure.md)
+    - api/ → [structure.md](./apps/monitor/api/structure.md)
+  - td/
+    - docs/
+    - game/
 - docs/
   - billing/
     - core-features.md
@@ -25,11 +27,11 @@
   - usage-global-css.md
 - package.json
 - packages/
-  - api-core/ → [structure.md](./packages\api-core\structure.md)
-  - eslint-config/ → [structure.md](./packages\eslint-config\structure.md)
-  - types/ → [structure.md](./packages\types\structure.md)
-  - typescript-config/ → [structure.md](./packages\typescript-config\structure.md)
-  - ui/ → [structure.md](./packages\ui\structure.md)
+  - api-core/ → [structure.md](./packages/api-core/structure.md)
+  - eslint-config/ → [structure.md](./packages/eslint-config/structure.md)
+  - types/ → [structure.md](./packages/types/structure.md)
+  - typescript-config/ → [structure.md](./packages/typescript-config/structure.md)
+  - ui/ → [structure.md](./packages/ui/structure.md)
 - pnpm-lock.yaml
 - pnpm-workspace.yaml
 - README.md
