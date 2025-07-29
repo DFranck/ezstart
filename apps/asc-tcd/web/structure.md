@@ -140,8 +140,6 @@
   - videos/
     - bergerac-2023-web.mp4
     - hero-background.mp4
-    - sunlight-and-green-tree-leaves.mp4
-    - transplantation-hero.mp4
 - README.md
 - structure.md
 - tsconfig.json

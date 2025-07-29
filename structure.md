@@ -6,7 +6,8 @@
 - .gitignore
 - .npmrc
 - apps/
-  - asc-tcd/ → [structure.md](./apps/asc-tcd/structure.md)
+  - asc-tcd/
+    - web/ → [structure.md](./apps/asc-tcd/web/structure.md)
   - ez-billing/
     - api/ → [structure.md](./apps/ez-billing/api/structure.md)
   - ezstart/
