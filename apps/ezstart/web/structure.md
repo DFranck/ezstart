@@ -18,17 +18,23 @@
       - ez-features/
         - page.tsx
         - [feature]/
+<<<<<<< HEAD
           - (auth)/
             - layout-auth.tsx
             - page-auth.tsx
+=======
+>>>>>>> master
           - (billing)/
             - clients/
               - page.tsx
             - components/
               - client-card.tsx
               - nav-billing.tsx
+<<<<<<< HEAD
             - contexts/
               - billing-context.ts
+=======
+>>>>>>> master
             - dev/
               - client-e2e-test.tsx
               - components/
@@ -42,8 +48,11 @@
               - page.tsx
             - layout-billing.tsx
             - page-billing.tsx
+<<<<<<< HEAD
             - providers/
               - billing-provider.tsx
+=======
+>>>>>>> master
             - quotes/
               - page.tsx
             - README.md
@@ -110,6 +119,11 @@
     - lamp.tsx
     - macbook-scroll.tsx
 - components.json
+<<<<<<< HEAD
+=======
+- contexts/
+  - billing-context.ts
+>>>>>>> master
 - eslint.config.js
 - hooks/
   - useExternalStats.ts
@@ -119,6 +133,7 @@
   - request.ts
   - routing.ts
 - messages/
+<<<<<<< HEAD
   - en/
     - common.json
     - features.json
@@ -133,6 +148,8 @@
       - nav.json
     - legal-notices.json
     - libraries.json
+=======
+>>>>>>> master
   - fr/
     - common.json
     - features.json
@@ -152,6 +169,11 @@
 - next.config.mjs
 - package.json
 - postcss.config.mjs
+<<<<<<< HEAD
+=======
+- providers/
+  - billing-provider.tsx
+>>>>>>> master
 - public/
   - images/
     - about_hero.png

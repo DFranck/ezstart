@@ -1,0 +1,21 @@
+import express, { Router } from 'express';
+import clientRoutes, { clientsRegistry } from './clients';
+import invoiceRoutes, { invoiceRegistry } from './invoices';
+import quoteRoutes, { quotesRegistry } from './quotes';
+import receiptRoutes, { receiptRegistry } from './receipts';
+
+const router: Router = express.Router();
+export const globalRegistry = [
+  clientsRegistry,
+  invoiceRegistry,
+  quotesRegistry,
+  receiptRegistry,
+];
+
+router
+  .use('/clients', clientRoutes)
+  .use('/invoices', invoiceRoutes)
+  .use('/quotes', quoteRoutes)
+  .use('/receipts', receiptRoutes);
+
+export default router;

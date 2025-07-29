@@ -1,10 +1,18 @@
 'use client';
 
+<<<<<<< HEAD
 import { useBillingContext } from '@/app/[locale]/(views)/ez-features/[feature]/(billing)/contexts/billing-context';
 import { Button, H1, H2, Header, Icon, Main } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
 import { BillingProvider } from './providers/billing-provider';
+=======
+import { useBillingContext } from '@/contexts/billing-context';
+import { BillingProvider } from '@/providers/billing-provider';
+import { Button, H1, H2, Header, Icon, Main } from '@ezstart/ui/components';
+import { cn } from '@ezstart/ui/lib';
+import Link from 'next/link';
+>>>>>>> master
 
 export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
   return (

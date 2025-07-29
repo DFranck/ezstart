@@ -2,6 +2,7 @@
 
 - components/
   - accordion.tsx
+<<<<<<< HEAD
   - aceternity-carousel.tsx
   - burger.tsx
   - button.tsx
@@ -10,6 +11,13 @@
   - dropdown.tsx
   - header.tsx
   - hero.tsx
+=======
+  - burger.tsx
+  - button.tsx
+  - card.tsx
+  - dropdown.tsx
+  - header.tsx
+>>>>>>> master
   - icon/
     - index.ts
     - README.md
