@@ -6,31 +6,32 @@
 - **Warcraft III TDs** (placement libre, pathing)
 - **Legion TD / Element TD** (PvP via envoi d’unités)
 
-## 🔁 Core Gameplay Loop
+## 🔁 Core Gameplay Loop 
 
-1. **Phase de Taverne (achat)**
+Toute les actions sont faisables à n'importe quel moment, mais certaines n'ont d'effet que lors de la loop suivante.
 
-   - Shop aléatoire type **Battlegrounds** : x tours/unités aléatoires disponibles
-   - Achat de tours placeable sur son terrain
-   -
-   - Achat de tours + achat d’unités PvP type **Legion TD / Element TD** à envoyer chez les adversaire et augmenter notre income
+1. **Taverne (achat)**
 
-2. **Phase de Placement**
+   - Shop aléatoire type **Battlegrounds** : x tours + unités aléatoires disponibles
+   - Achat de tours pour les placer sur le terrain à n'importe quelle moment de la loop tant que l'espace de placement est libre
+   - Achat d’unités pour immédiatement augmenter le pull des unités envoyé lors de la prochaine loop et augmenter son propre income
 
-   - Placement libre des tours type **Warcraft III TDs** entre un point d’entrée et de sortie fixes
-   - Le pathing est généré automatiquement (A\*)
+2. **Placement**
 
-3. **Phase de Combat**
+   - Placement libre des tours entre un point d’entrée et de sortie fixes
+   - Le pathing est généré automatiquement et recalculer lors de la pose d'une nouvelle tour (A\*)
+
+3. **Combat**
 
    - Les unités ennemies arrivent
    - Les tours tentent de les tuer
    - Chaque unité qui passe = perte de HP
    - Chaque kill = instant gold gain
 
-4. **Fin de round**
+4. **Fin de loop**
    - Gain de gold (income)
    - Nouveau shop
-   - Vague suivante plus forte
+   - Vague suivante part
 
 ## 🏁 Conditions de victoire
 
@@ -40,7 +41,7 @@
 ## ⚔️ PvP et économie
 
 - Envoyer des unités chez le voisin direct / un joueur aléatoire / un duel aléatoire / tout le monde soit y compris
-- Tu dépenses de l’or → tu gagnes +income mais affaiblis ta défense
+- Tu dépenses de l’or pour des unités→ tu gagnes +income mais affaiblis ta défense
 - Gold par kill est fixe / income augmente à chaque round
 
 ## 🔄 Rejouabilité
