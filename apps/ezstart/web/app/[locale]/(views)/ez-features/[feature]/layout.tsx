@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { LayoutAuth } from './(auth)/layout-auth';
 import { LayoutBilling } from './(billing)/layout-billing';
 
 export default async function FeatureLayout({
@@ -9,10 +10,11 @@ export default async function FeatureLayout({
   children: React.ReactNode;
 }) {
   const { feature } = await params;
-  console.log('feature layout', feature);
   switch (feature) {
-    case 'ez-billing':
+    case 'billing':
       return <LayoutBilling children={children} />;
+    case 'auth':
+      return <LayoutAuth children={children} />;
     default:
       notFound();
   }

@@ -26,7 +26,7 @@
       },
       {
         "title": "Hydro Marketplace",
-        "subtitle": "NFT Web3 sur Cosmos",
+        "subtitle": "NFT Web3 sur CosmosHub",
         "roles": ["Frontend"],
         "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
         "link": "https://hydro.cosmos.network/",
@@ -48,6 +48,18 @@
         },
         "tech": ["Next.js", "React.js", "TypeScript", "API REST", "SEO"],
         "private": false
+      },
+      {
+        "title": "Zephyrus",
+        "subtitle": "NFT Web3 sur CosmosHub",
+        "roles": ["Frontend"],
+        "description": "Aggregateur de NFT Web3 sur CosmosHub. J'ai participé en tant que Frontend Developer avec Next.js, React.js, TypeScript, CosmosKit. Le but étant de simplifier et gamifier l'utilisation de https://hydro.cosmos.network/",
+        "link": "https://zephyrus-dev.vercel.app/",
+        "src": {
+          "desktop": "/images/projects/zephyrus-desktop.png",
+          "mobile": "/images/projects/zephyrus-mobile.png"
+        },
+        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit"]
       },
       {
         "title": "Lima Prod",

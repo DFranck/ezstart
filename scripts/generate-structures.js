@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { findPackages } = require('./findPackages');
+const { findPackages } = require('./utils/findPackages');
 
 const DESCRIPTIONS = {};
 
@@ -75,8 +75,7 @@ function generateQuickOverview(pkgDir, descriptionsFromJson = {}) {
   );
 }
 
-// ✅ Génère un arbre complet du package
-function generateTree(dir, depth = 0, maxDepth = Infinity) {
+function generateTree(dir, depth = 0, maxDepth = Infinity, root = dir) {
   const indent = '  '.repeat(depth);
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -86,14 +85,29 @@ function generateTree(dir, depth = 0, maxDepth = Infinity) {
     const fullPath = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
+      const pkgJsonPath = path.join(fullPath, 'package.json');
+
+      // ✅ Si c'est un package → stop et mettre un lien
+      if (fs.existsSync(pkgJsonPath)) {
+        // chemin relatif du lien depuis le root
+        const relativeLink = path.relative(
+          root,
+          path.join(fullPath, 'structure.md')
+        );
+        tree += `${indent}- ${entry.name}/ → [structure.md](./${relativeLink.replace(/\\\\/g, '/')})\n`;
+        continue; // stop ici
+      }
+
+      // Sinon on continue
       tree += `${indent}- ${entry.name}/\n`;
       if (depth < maxDepth) {
-        tree += generateTree(fullPath, depth + 1, maxDepth);
+        tree += generateTree(fullPath, depth + 1, maxDepth, root);
       }
     } else {
       tree += `${indent}- ${entry.name}\n`;
     }
   }
+
   return tree;
 }
 
@@ -130,10 +144,10 @@ function updateReadmeWithStructure(pkgDir, descriptionsFromJson = {}) {
 
 // ✅ Génère structure.md du package
 function generatePackageStructure(pkgDir, root) {
-  const tree = generateTree(pkgDir, 0, Infinity);
+  const tree = generateTree(pkgDir, 0, Infinity); // on garde full profondeur pour les packages
   const mdContent = `# Project structure for ${path.relative(root, pkgDir)}\n\n${tree}`;
   fs.writeFileSync(path.join(pkgDir, 'structure.md'), mdContent);
-  console.log(`✅ Generated structure.md for ${pkgDir}`);
+  console.log(`✅ Generated structure.md for ${pkgDir} (profondeur infinie)`);
 }
 
 // ✅ Point d’entrée
@@ -143,22 +157,18 @@ function main() {
 
   const packages = findPackages(root);
 
-  // 1️⃣ Vue globale du monorepo
+  // 1️⃣ Vue globale du monorepo → 2 niveaux max
   const rootTree = generateTree(root, 0, 2);
   fs.writeFileSync(
     path.join(root, 'structure.md'),
     `# Monorepo structure\n\n${rootTree}`
   );
-  console.log(`✅ Generated root structure.md`);
+  console.log(`✅ Generated root structure.md (2 niveaux max)`);
 
-  // 2️⃣ Pour chaque package → charge descriptions.json AVANT
+  // 2️⃣ Pour chaque package → profondeur infinie
   packages.forEach((pkg) => {
-    generatePackageStructure(pkg, root);
-
-    // ✅ charge les descriptions locales
+    generatePackageStructure(pkg, root); // utilise Infinity
     const descriptionsFromJson = loadPackageDescriptions(pkg);
-
-    // ✅ passe les descriptions locales
     updateReadmeWithStructure(pkg, descriptionsFromJson);
   });
 

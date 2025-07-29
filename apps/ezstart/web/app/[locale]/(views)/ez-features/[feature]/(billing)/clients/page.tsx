@@ -1,6 +1,6 @@
 'use client';
 
-import { useBillingContext } from '@/contexts/billing-context';
+import { useBillingContext } from '@/app/[locale]/(views)/ez-features/[feature]/(billing)/contexts/billing-context';
 
 const page = () => {
   const { clients } = useBillingContext();

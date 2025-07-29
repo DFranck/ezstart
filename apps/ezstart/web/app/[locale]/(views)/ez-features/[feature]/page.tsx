@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { AuthPage } from './(auth)/page-auth';
 import { BillingPage } from './(billing)/page-billing';
 
 export default async function FeaturePage({
@@ -7,11 +8,12 @@ export default async function FeaturePage({
   params: Promise<{ feature: string }>;
 }) {
   const { feature } = await params;
-  console.log('feature page', feature);
 
   switch (feature) {
-    case 'ez-billing':
+    case 'billing':
       return <BillingPage />;
+    case 'auth':
+      return <AuthPage />;
     default:
       notFound();
   }

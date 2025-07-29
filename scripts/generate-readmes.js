@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { findPackages } = require('./findPackages');
+const { findPackages } = require('./utils/findPackages');
 
 function autoDescriptionFromName(pkgName) {
   if (pkgName.includes('api'))

@@ -4,17 +4,16 @@ import { useBillingContext } from '@/app/[locale]/(views)/ez-features/[feature]/
 import { Button, H1, H2, Header, Icon, Main } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
-import { BillingProvider } from './providers/billing-provider';
 
-export const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
+export const LayoutAuth = ({ children }: { children: React.ReactNode }) => {
   return (
-    <BillingProvider>
-      <BillingLayoutWithData>{children}</BillingLayoutWithData>
-    </BillingProvider>
+    // <BillingProvider>
+    <>{children}</>
+    // </BillingProvider>
   );
 };
 
-const BillingLayoutWithData = ({ children }: { children: React.ReactNode }) => {
+const AuthLayoutWithData = ({ children }: { children: React.ReactNode }) => {
   const { selectedClient, setSelectedClient } = useBillingContext();
   return (
     <>

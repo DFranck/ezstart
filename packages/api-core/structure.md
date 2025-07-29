@@ -26,7 +26,6 @@
     - route-with-doc.ts
     - strip-incompatible.ts
     - z-object-helper.ts
-    - zod-extended.ts
   - types/
     - express-aug.d.ts
 - structure.md

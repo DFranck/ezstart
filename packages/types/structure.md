@@ -23,9 +23,11 @@
   - index.ts
   - listing.ts
   - mongo-id.ts
+  - user.ts
 - structure.md
 - tsconfig.json
 - tsconfig.tsbuildinfo
 - validators/
   - index.ts
   - is-api-error.ts
+- zod-extended.ts

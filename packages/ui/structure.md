@@ -2,11 +2,14 @@
 
 - components/
   - accordion.tsx
+  - aceternity-carousel.tsx
   - burger.tsx
   - button.tsx
   - card.tsx
+  - carousel.tsx
   - dropdown.tsx
   - header.tsx
+  - hero.tsx
   - icon/
     - index.ts
     - README.md

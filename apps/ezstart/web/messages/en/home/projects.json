@@ -50,6 +50,18 @@
         "private": false
       },
       {
+        "title": "Zephyrus",
+        "subtitle": "Web3 NFT Aggregator on CosmosHub",
+        "roles": ["Frontend"],
+        "description": "NFT aggregator on CosmosHub. I contributed as a Frontend Developer using Next.js, React.js, TypeScript, and CosmosKit. The goal was to simplify and gamify the user experience of https://hydro.cosmos.network/",
+        "link": "https://zephyrus-dev.vercel.app/",
+        "src": {
+          "desktop": "/images/projects/zephyrus-desktop.png",
+          "mobile": "/images/projects/zephyrus-mobile.png"
+        },
+        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit"]
+      },
+      {
         "title": "Lima Prod",
         "subtitle": "Video production, France, Vietnam, Asia",
         "roles": ["Frontend", "SEO"],
