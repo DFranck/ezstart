@@ -1,0 +1,36 @@
+{
+  "name": "ezstart",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "gen:readme": "node scripts/generate-readmes.js",
+    "gen:structure": "node scripts/generate-structures.js",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "jest": {
+    "projects": [
+      "<rootDir>/apps/ezstart/api"
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.1",
+    "ts-jest": "^29.3.4",
+    "turbo": "^2.4.2",
+    "typescript": "5.7.3"
+  },
+  "packageManager": "pnpm@10.12.2+sha256.07b2396c6c99a93b75b5f9ce22be9285c3b2533c49fec51b349d44798cf56b82",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.29.0",
+    "zod": "^3.25.28"
+  }
+}

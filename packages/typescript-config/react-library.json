@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "React Library",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["react", "react/jsx-runtime"],
+    "lib": ["DOM", "ESNext", "DOM.Iterable"]
+  }
+}

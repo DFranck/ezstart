@@ -1,0 +1,66 @@
+{
+  "projects": {
+    "title": "Projets",
+    "items": [
+      {
+        "title": "EventoApp.io",
+        "subtitle": "Création et vente d’événements",
+        "roles": ["CTO", "Fullstack"],
+        "description": "Plateforme complète de création d’événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l’intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d’une API REST modulaire. L’app permet de créer des événements avec RSVP personnalisés, co-hôtes, uploads média, chat à venir, et découverte via filtres d’intérêts. Déploiement automatisé via CI/CD.",
+        "link": "https://www.evento-app.io/",
+        "src": {
+          "desktop": "/images/projects/evento-app.io-desktop.png",
+          "mobile": "/images/projects/evento-app.io-mobile.png"
+        },
+        "tech": [
+          "Next.js",
+          "React.js",
+          "TypeScript",
+          "Zustand",
+          "Express.js",
+          "MongoDB",
+          "API REST",
+          "CI/CD",
+          "Socket.io"
+        ]
+      },
+      {
+        "title": "Hydro Marketplace",
+        "subtitle": "NFT Web3 sur Cosmos",
+        "roles": ["Frontend"],
+        "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
+        "link": "https://hydro.cosmos.network/",
+        "src": {
+          "desktop": "/images/projects/hydro.cosmos.network-desktop.png",
+          "mobile": "/images/projects/hydro.cosmos.network-mobile.png"
+        },
+        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
+      },
+      {
+        "title": "Transplantation Arbres",
+        "subtitle": "Catalogue en ligne",
+        "roles": ["CTO", "Fullstack"],
+        "description": "Développement d’un site vitrine multilingue (FR/EN) présentant les équipements de transplantation d’arbres. Ajout et optimisation de sections produits (catalogue avec filtres, fiche produit), amélioration du SEO (balises title, meta descriptions, Open Graph), et mise à jour fluide du contenu via CMS. Travail full‑stack incluant intégration front adaptée mobile/desktop, gestion i18n, et gestion de formulaire de devis.",
+        "link": "https://www.transplantation-arbres.fr",
+        "src": {
+          "desktop": "/images/projects/transplantation-arbres-desktop.png",
+          "mobile": "/images/projects/transplantation-arbres-mobile.png"
+        },
+        "tech": ["Next.js", "React.js", "TypeScript", "API REST", "SEO"],
+        "private": false
+      },
+      {
+        "title": "Lima Prod",
+        "subtitle": "Production vidéo, France, Vietnam, Asie",
+        "roles": ["Frontend", "SEO"],
+        "description": "Refonte partielle du site Wix pour Lima Prod. J'ai ajouté et structuré de nouvelles sections afin d'améliorer la lisibilité du contenu, optimisé le référencement naturel (SEO) en modifiant les métadonnées (title, description, images OG) et en travaillant sur la hiérarchie des balises. L'objectif était de mieux positionner le site sur les moteurs de recherche et d'offrir une meilleure expérience utilisateur.",
+        "link": "https://www.limaprod.fr/",
+        "src": {
+          "desktop": "/images/projects/lima-prod-desktop.png",
+          "mobile": "/images/projects/lima-prod-mobile.png"
+        },
+        "tech": ["Wix", "SEO", "OG Metadata"]
+      }
+    ]
+  }
+}

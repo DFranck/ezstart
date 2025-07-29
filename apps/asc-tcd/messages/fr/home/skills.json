@@ -1,0 +1,11 @@
+{
+  "skills": {
+    "title": "Competences",
+    "categories": {
+      "Frontend": "Frontend",
+      "Backend": "Backend",
+      "Design": "Design",
+      "Other": "Autres"
+    }
+  }
+}

@@ -1,0 +1,106 @@
+# Project structure for packages\ui
+
+- components/
+  - accordion.tsx
+  - burger.tsx
+  - button.tsx
+  - card.tsx
+  - dropdown.tsx
+  - header.tsx
+  - icon/
+    - index.ts
+    - README.md
+    - src/
+      - components/
+        - icon.tsx
+      - custom-icons/
+        - authjs.tsx
+        - cosmoskit.tsx
+        - expressjs.tsx
+        - ezstart.tsx
+        - figma.tsx
+        - index.ts
+        - jest.tsx
+        - mongodb.tsx
+        - nextjs.tsx
+        - prisma.tsx
+        - reactjs.tsx
+        - redux.tsx
+        - sass.tsx
+        - socketio.tsx
+        - supabase.tsx
+        - tailwind.tsx
+        - typescript.tsx
+        - zod.tsx
+        - zustand.tsx
+      - icon-suggestions.ts
+      - types.ts
+      - utils/
+        - isValidIconName.ts
+  - index.ts
+  - input.tsx
+  - label.tsx
+  - layout-with-aside.tsx
+  - modal.tsx
+  - nav.tsx
+  - select.tsx
+  - sonner.tsx
+  - tabs.tsx
+  - tag/
+    - index.ts
+    - README.md
+    - src/
+      - aliases.tsx
+      - components/
+        - tag.tsx
+      - tokens/
+        - tokens.ts
+      - types.ts
+      - utils/
+        - create-alias.tsx
+        - merge-variant-strings.ts
+      - variants/
+        - groups/
+          - heading.ts
+          - layout.ts
+          - listing.ts
+          - typography.ts
+        - index.ts
+        - tags/
+          - aside.ts
+          - div.ts
+          - footer.ts
+          - header.ts
+          - main.ts
+          - nav.ts
+          - p.ts
+          - section.ts
+          - span.ts
+  - text-gradient.tsx
+- components.json
+- eslint.config.js
+- hooks/
+  - index.ts
+  - use-api-action.ts
+  - use-click-outside.ts
+  - use-device.ts
+  - use-in-view.ts
+  - use-on-scroll.ts
+- lib/
+  - index.ts
+  - utils.ts
+- package.json
+- postcss.config.mjs
+- README.md
+- structure.md
+- styles/
+  - globals.css
+  - gradient-animation.css
+  - skeleton.css
+  - slide-in-animation.css
+  - text-gradient-animation.css
+- templates/
+  - index.ts
+  - QuotePdfTemplate.tsx
+- tsconfig.json
+- tsconfig.lint.json

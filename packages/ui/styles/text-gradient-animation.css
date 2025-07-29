@@ -1,0 +1,24 @@
+.text-gradient {
+  background: linear-gradient(
+    270deg,
+    var(--text-gradient-from, rgb(255, 0, 255)),
+    var(--text-gradient-via, #00fe26),
+    var(--text-gradient-to, rgb(255, 0, 255))
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  animation: moveGradient var(--gradient-speed, 10s) linear infinite;
+}
+
+@keyframes moveGradient {
+  0% {
+    background-position: 200% 50%;
+  }
+
+  100% {
+    background-position: -200% 50%;
+  }
+}

@@ -1,0 +1,31 @@
+# Project structure for packages\types
+
+- api/
+  - errors.ts
+- enums/
+  - billing-status.ts
+  - index.ts
+  - user-role.ts
+- express/
+  - aug.d.ts
+- index.ts
+- package.json
+- README.md
+- schemas/
+  - billing/
+    - billing-actions.ts
+    - billing-base.ts
+    - index.ts
+    - invoice.ts
+    - quote.ts
+    - receipt.ts
+  - client.ts
+  - index.ts
+  - listing.ts
+  - mongo-id.ts
+- structure.md
+- tsconfig.json
+- tsconfig.tsbuildinfo
+- validators/
+  - index.ts
+  - is-api-error.ts

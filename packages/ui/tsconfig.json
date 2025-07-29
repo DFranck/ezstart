@@ -1,0 +1,14 @@
+// @ezstart/packages/ui/tsconfig.json
+{
+  "extends": "@workspace/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "composite": true,
+    "module": "esnext",
+    "declarationDir": "./dist/types",
+    "moduleResolution": "bundler",
+    "baseUrl": "."
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

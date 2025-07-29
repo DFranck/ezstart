@@ -1,0 +1,11 @@
+{
+  "skills": {
+    "title": "Skills",
+    "categories": {
+      "Frontend": "Frontend",
+      "Backend": "Backend",
+      "Design": "Design",
+      "Other": "Other"
+    }
+  }
+}
