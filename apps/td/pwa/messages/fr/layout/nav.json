@@ -1,0 +1,14 @@
+{
+  "links": [
+    { "label": "Accueil", "href": "/" },
+
+    {
+      "menuLabel": "Librairies",
+      "menu": [
+        { "label": "Mes Librairies", "href": "/ez-libs" },
+        { "label": "Tag", "href": "/ez-libs/tag" },
+        { "label": "Icon", "href": "/ez-libs/icon" }
+      ]
+    }
+  ]
+}

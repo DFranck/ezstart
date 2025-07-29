@@ -11,6 +11,16 @@ const ROOT = process.cwd();
 const EXPORT_DIR = path.join(path.dirname(ROOT), '.public-export');
 const PUBLIC_REPO = 'git@github.com:DFranck/ezstart-public.git';
 const WHITELIST_NAMES = require('./public-whitelist.json');
+const IGNORE_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.turbo',
+  '.vscode',
+  '.next',
+  'dist',
+  'build',
+  'coverage',
+]);
 
 function run(cmd, options = {}) {
   console.log(`▶ ${cmd}`);
@@ -73,7 +83,14 @@ function cleanNonWhitelistedPackages(rootDir) {
   const spinner = ora(`📦 Copying current repo to: ${EXPORT_DIR}`).start();
 
   try {
-    await fse.copy(ROOT, EXPORT_DIR);
+    await fse.copy(ROOT, EXPORT_DIR, {
+      filter: (src) => {
+        const relative = path.relative(ROOT, src);
+        const parts = relative.split(path.sep);
+        return !parts.some((part) => IGNORE_DIRS.has(part));
+      },
+    });
+
     spinner.succeed(`✅ Copied repo to: ${EXPORT_DIR}`);
   } catch (err) {
     spinner.fail('❌ Failed to copy repo');
