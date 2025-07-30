@@ -20,6 +20,7 @@
   - monitor/
     - api/ → [structure.md](./apps/monitor/api/structure.md)
   - td/
+    - api/ → [structure.md](./apps/td/api/structure.md)
     - docs/
       - game-design.md
     - pwa/ → [structure.md](./apps/td/pwa/structure.md)

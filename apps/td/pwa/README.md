@@ -26,9 +26,7 @@ Read the full gameplay logic, mechanics, and balance strategy here:
 👉 [📄 game-design.md](../docs/game-design.md)
 
 <!-- AUTO:PROJECT_STRUCTURE:START -->
-
 ## 📂 Project Structure
 
 👉 See the full structure here: [structure.md](./structure.md)
-
 <!-- AUTO:PROJECT_STRUCTURE:END -->

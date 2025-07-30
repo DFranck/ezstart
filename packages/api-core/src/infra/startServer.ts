@@ -3,6 +3,7 @@ import {
   OpenAPIRegistry,
 } from '@asteasolutions/zod-to-openapi';
 import express from 'express';
+import { createServer, Server as HTTPServer } from 'http';
 import swaggerUi from 'swagger-ui-express';
 
 type StartServerOptions = {
@@ -11,19 +12,23 @@ type StartServerOptions = {
   basePath?: string;
   serviceName?: string;
   port?: number;
+  onHttpServerReady?: (server: HTTPServer) => void; // 👈 Ajout
 };
 
-export function startServer(app: express.Express, opts: StartServerOptions) {
+export function startServer(
+  app: express.Express,
+  opts: StartServerOptions
+): HTTPServer {
   const {
     routes,
     registries = [],
     basePath = '/api',
     serviceName = 'API',
     port = 5000,
+    onHttpServerReady,
   } = opts;
 
   app.use(basePath, routes);
-
   app.get(`${basePath}/health`, (_, res) =>
     res.status(200).json({ status: 'ok' })
   );
@@ -32,7 +37,6 @@ export function startServer(app: express.Express, opts: StartServerOptions) {
     const generator = new OpenApiGeneratorV3(
       registries.flatMap((r) => r.definitions)
     );
-
     const openApiDoc = generator.generateDocument({
       openapi: '3.0.0',
       info: {
@@ -42,12 +46,20 @@ export function startServer(app: express.Express, opts: StartServerOptions) {
       },
       servers: [{ url: basePath }],
     });
+
     app.use('/api', swaggerUi.serve, swaggerUi.setup(openApiDoc));
   }
 
-  app.listen(port, () => {
+  const server = createServer(app);
+  server.listen(port, () => {
     const url = `http://localhost:${port}`;
     console.log(`🚀 ${serviceName} running on ${url}${basePath}`);
     if (registries.length > 0) console.log(`📖 Docs available at ${url}/api`);
   });
+
+  if (onHttpServerReady) {
+    onHttpServerReady(server);
+  }
+
+  return server;
 }

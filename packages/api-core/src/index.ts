@@ -6,6 +6,7 @@ export * from './controller-factory/make-restore-controller';
 export * from './controller-factory/make-update-controller';
 export * from './infra/connectToMongo';
 export * from './infra/createApp';
+export * from './infra/createSocketServer';
 export * from './infra/startServer';
 export * from './middlewares/validate-params';
 export * from './middlewares/validate-query';

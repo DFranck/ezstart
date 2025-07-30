@@ -89,6 +89,7 @@
   - use-on-scroll.ts
 - lib/
   - index.ts
+  - logger.ts
   - utils.ts
 - package.json
 - postcss.config.mjs
