@@ -1,8 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { findPackages } = require('./utils/findPackages');
+import fs from 'fs';
+import path from 'path';
+import { findPackages } from './utils/findPackages';
+import { replaceAutoSection } from './utils/replaceAutoSection';
 
-const DESCRIPTIONS = {};
+const DESCRIPTIONS: Record<string, string> = {};
 
 const IGNORE_DIRS = new Set([
   'node_modules',
@@ -14,38 +15,30 @@ const IGNORE_DIRS = new Set([
   'build',
 ]);
 
-/**
- * ✅ Tente de charger les descriptions locales du package
- * - Cherche descriptions.json dans le package
- * - Retourne {} si non trouvé
- */
-function loadPackageDescriptions(pkgDir) {
+function loadPackageDescriptions(pkgDir: string): Record<string, string> {
   const descPath = path.join(pkgDir, 'descriptions.json');
   const jsPath = path.join(pkgDir, 'descriptions.js');
 
   if (fs.existsSync(descPath)) {
     try {
       return JSON.parse(fs.readFileSync(descPath, 'utf-8'));
-    } catch (err) {
+    } catch {
       console.warn(`⚠️ Invalid JSON in ${descPath}, skipping`);
-      return {};
     }
   }
 
   if (fs.existsSync(jsPath)) {
     try {
       return require(jsPath);
-    } catch (err) {
+    } catch {
       console.warn(`⚠️ Cannot load ${jsPath}, skipping`);
-      return {};
     }
   }
 
-  return {}; // pas de mapping dispo
+  return {};
 }
 
-// ✅ Liste uniquement les dossiers racine de src/
-function getRootSrcDirs(pkgDir) {
+function getRootSrcDirs(pkgDir: string): string[] {
   const srcPath = path.join(pkgDir, 'src');
   if (!fs.existsSync(srcPath)) return [];
 
@@ -55,8 +48,10 @@ function getRootSrcDirs(pkgDir) {
     .map((e) => e.name);
 }
 
-// ✅ Génère Quick Overview à partir du fichier descriptions du package
-function generateQuickOverview(pkgDir, descriptionsFromJson = {}) {
+function generateQuickOverview(
+  pkgDir: string,
+  descriptionsFromJson: Record<string, string> = {}
+): string {
   const dirs = getRootSrcDirs(pkgDir);
   if (!dirs.length) return '';
 
@@ -75,11 +70,16 @@ function generateQuickOverview(pkgDir, descriptionsFromJson = {}) {
   );
 }
 
-function generateTree(dir, depth = 0, maxDepth = Infinity, root = dir) {
+function generateTree(
+  dir: string,
+  depth = 0,
+  maxDepth = Infinity,
+  root: string = dir
+): string {
   const indent = '  '.repeat(depth);
   const entries = fs.readdirSync(dir, { withFileTypes: true });
-
   let tree = '';
+
   for (const entry of entries) {
     if (IGNORE_DIRS.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
@@ -87,18 +87,15 @@ function generateTree(dir, depth = 0, maxDepth = Infinity, root = dir) {
     if (entry.isDirectory()) {
       const pkgJsonPath = path.join(fullPath, 'package.json');
 
-      // ✅ Si c'est un package → stop et mettre un lien
       if (fs.existsSync(pkgJsonPath)) {
-        // chemin relatif du lien depuis le root
         const relativeLink = path.relative(
           root,
           path.join(fullPath, 'structure.md')
         );
         tree += `${indent}- ${entry.name}/ → [structure.md](./${relativeLink.replace(/\\/g, '/')})\n`;
-        continue; // stop ici
+        continue;
       }
 
-      // Sinon on continue
       tree += `${indent}- ${entry.name}/\n`;
       if (depth < maxDepth) {
         tree += generateTree(fullPath, depth + 1, maxDepth, root);
@@ -111,63 +108,52 @@ function generateTree(dir, depth = 0, maxDepth = Infinity, root = dir) {
   return tree;
 }
 
-// ✅ Met à jour le README du package
-function updateReadmeWithStructure(pkgDir, descriptionsFromJson = {}) {
+function updateReadmeWithStructure(
+  pkgDir: string,
+  descriptionsFromJson: Record<string, string> = {}
+): void {
   const readmePath = path.join(pkgDir, 'README.md');
   const structureLink = `👉 See the full structure here: [structure.md](./structure.md)`;
   const quickOverview = generateQuickOverview(pkgDir, descriptionsFromJson);
 
-  // 📝 Si pas de README → on en crée un minimal
   if (!fs.existsSync(readmePath)) {
-    const base = `# 📦 ${path.basename(pkgDir)}\n\nNo description provided.\n`;
+    const base = `# 📦 ${path.basename(pkgDir)}\n`;
     fs.writeFileSync(readmePath, base, 'utf-8');
   }
 
-  let readmeContent = fs.readFileSync(readmePath, 'utf-8');
+  if (quickOverview) {
+    replaceAutoSection(readmePath, 'QUICK_OVERVIEW', quickOverview.trim());
+  }
 
-  // 🔄 SUPPRIME tous les anciens blocs "Project Structure" ou "Quick Overview"
-  readmeContent = readmeContent
-    .replace(/(## 📂 Project Structure[\s\S]*?)(?=\n##|\n#|$)/g, '')
-    .replace(/(### 📁 Quick Overview[\s\S]*?)(?=\n##|\n#|$)/g, '');
-
-  // ✅ Nouveau bloc complet
-  let newSection = `## 📂 Project Structure\n\n`;
-  if (quickOverview) newSection += quickOverview + '\n';
-  newSection += `${structureLink}\n`;
-
-  // Ajoute le nouveau bloc **à la fin**
-  readmeContent = readmeContent.trim() + '\n\n' + newSection.trim() + '\n';
-
-  fs.writeFileSync(readmePath, readmeContent, 'utf-8');
-  console.log(`✅ Overwritten Project Structure section for ${pkgDir}`);
+  replaceAutoSection(
+    readmePath,
+    'PROJECT_STRUCTURE',
+    `## 📂 Project Structure\n\n${structureLink}`
+  );
 }
 
-// ✅ Génère structure.md du package
-function generatePackageStructure(pkgDir, root) {
-  const tree = generateTree(pkgDir, 0, Infinity); // on garde full profondeur pour les packages
+function generatePackageStructure(pkgDir: string, root: string): void {
+  const tree = generateTree(pkgDir, 0, Infinity);
   const mdContent = `# Project structure for ${path.relative(root, pkgDir)}\n\n${tree}`;
   fs.writeFileSync(path.join(pkgDir, 'structure.md'), mdContent);
-  console.log(`✅ Generated structure.md for ${pkgDir} (profondeur infinie)`);
+  console.log(`✅ Generated structure.md for ${pkgDir}`);
 }
 
-// ✅ Point d’entrée
-function main() {
+function main(): void {
   const root = process.argv[2] || process.cwd();
   console.log(`📦 Scanning repo at: ${root}`);
 
   const packages = findPackages(root);
 
-  // 1️⃣ Vue globale du monorepo → 2 niveaux max
   const rootTree = generateTree(root, 0, 2);
   fs.writeFileSync(
     path.join(root, 'structure.md'),
     `# Monorepo structure\n\n${rootTree}`
   );
-  console.log(`✅ Generated root structure.md (2 niveaux max)`);
+  console.log(`✅ Generated root structure.md`);
 
-  // 2️⃣ Pour chaque package → profondeur infinie
   packages.forEach((pkg) => {
-    generatePackageStructure(pkg, root); // utilise Infinity
+    generatePackageStructure(pkg, root);
     const descriptionsFromJson = loadPackageDescriptions(pkg);
     updateReadmeWithStructure(pkg, descriptionsFromJson);
   });

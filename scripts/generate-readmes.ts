@@ -1,8 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { findPackages } = require('./utils/findPackages');
+import fs from 'fs';
+import path from 'path';
+import { findPackages } from './utils/findPackages';
+import { replaceAutoSection } from './utils/replaceAutoSection';
 
-function autoDescriptionFromName(pkgName) {
+function autoDescriptionFromName(pkgName: string): string {
   if (pkgName.includes('api'))
     return `Backend API service for ${pkgName.replace(/api[-_]?/, '')}`;
   if (pkgName.includes('web'))
@@ -12,7 +13,8 @@ function autoDescriptionFromName(pkgName) {
     return `Shared TypeScript types for the project`;
   return 'No description provided.';
 }
-function detectRunCommand(pkgJsonPath) {
+
+function detectRunCommand(pkgJsonPath: string): string {
   if (!fs.existsSync(pkgJsonPath)) return 'pnpm build';
 
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
@@ -22,58 +24,51 @@ function detectRunCommand(pkgJsonPath) {
   if (scripts.start) return 'pnpm start';
   if (scripts.build) return 'pnpm build';
 
-  return 'pnpm build'; // fallback
+  return 'pnpm build';
 }
 
-function createBaseReadme(pkgDir) {
+function getReadmeSections(pkgDir: string): Record<string, string> {
   const pkgJsonPath = path.join(pkgDir, 'package.json');
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
-
   const pkgName = pkgJson.name || path.basename(pkgDir);
   const description = pkgJson.description || autoDescriptionFromName(pkgName);
   const runCmd = detectRunCommand(pkgJsonPath);
+  const relativePathFromRoot = path
+    .relative(process.cwd(), pkgDir)
+    .replace(/\\/g, '/');
 
-  const standaloneFolder = path.basename(pkgDir); // <- juste le dernier dossier
-
-  return `# 📦 ${pkgName}
-
-${description}
-
-## 🚀 Getting Started
-
-\`\`\`bash
-# 1️⃣ Clone only this package
-git clone <your-repo-url>
-cd ${standaloneFolder}
+  return {
+    TITLE: `# 📦 ${pkgName}`,
+    DESC: `${description}`,
+    GETTING_STARTED: `\`\`\`bash
+# 1️⃣ Clone the public repo and move to this package if it's public
+git clone https://github.com/DFranck/ezstart-public.git
+cd ${relativePathFromRoot}
 
 # 2️⃣ Install dependencies
 pnpm install
 
 # 3️⃣ Run the package
 ${runCmd}
-\`\`\`
-`;
+\`\`\``,
+  };
 }
 
-function ensureReadme(pkgDir) {
+function ensureReadme(pkgDir: string): void {
   const readmePath = path.join(pkgDir, 'README.md');
+  const sections = getReadmeSections(pkgDir);
 
-  if (!fs.existsSync(readmePath)) {
-    const baseReadme = createBaseReadme(pkgDir);
-    fs.writeFileSync(readmePath, baseReadme, 'utf-8');
-    console.log(`✅ Created README.md for ${pkgDir}`);
-  } else {
-    console.log(`➡️  README.md already exists for ${pkgDir}, skipped`);
+  for (const [sectionName, content] of Object.entries(sections)) {
+    replaceAutoSection(readmePath, sectionName, content);
   }
 }
 
-function main() {
+function main(): void {
   const root = process.argv[2] || process.cwd();
   console.log(`📦 Scanning repo at: ${root}`);
 
   const packages = findPackages(root);
-
-  packages.forEach((pkg) => ensureReadme(pkg));
+  packages.forEach(ensureReadme);
 
   console.log(`🎉 Done!`);
 }

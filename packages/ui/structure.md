@@ -12,7 +12,6 @@
   - hero.tsx
   - icon/
     - index.ts
-    - README.md
     - src/
       - components/
         - icon.tsx
@@ -51,7 +50,6 @@
   - tabs.tsx
   - tag/
     - index.ts
-    - README.md
     - src/
       - aliases.tsx
       - components/

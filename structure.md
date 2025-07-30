@@ -10,6 +10,10 @@
     - web/ → [structure.md](./apps/asc-tcd/web/structure.md)
   - ez-billing/
     - api/ → [structure.md](./apps/ez-billing/api/structure.md)
+    - docs/
+      - core-features.md
+      - global-ux.md
+      - post-core-roadmap.md
   - ezstart/
     - api/ → [structure.md](./apps/ezstart/api/structure.md)
     - web/ → [structure.md](./apps/ezstart/web/structure.md)
@@ -17,15 +21,8 @@
     - api/ → [structure.md](./apps/monitor/api/structure.md)
   - td/
     - docs/
-    - game/
-- docs/
-  - billing/
-    - core-features.md
-    - global-ux.md
-    - post-core-roadmap.md
-  - iStripper/
-    - idea.md
-  - usage-global-css.md
+      - game-design.md
+    - pwa/ → [structure.md](./apps/td/pwa/structure.md)
 - package.json
 - packages/
   - api-core/ → [structure.md](./packages/api-core/structure.md)
@@ -37,13 +34,14 @@
 - pnpm-workspace.yaml
 - README.md
 - scripts/
-  - generate-readmes.js
-  - generate-structures.js
+  - export-to-public.ts
+  - generate-readmes.ts
+  - generate-structures.ts
   - public-whitelist.json
   - sync-public.js
   - utils/
-    - findPackages.js
-    - findSection.js
+    - findPackages.ts
+    - replaceAutoSection.ts
 - structure.md
 - tsconfig.json
 - turbo.json

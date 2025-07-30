@@ -31,22 +31,26 @@ Un **Tower Defense PvP dynamique à ⚠️ 8 joueurs** :
 > Toutes les actions sont disponibles à tout moment, mais certaines prennent effet lors de la prochaine boucle.
 
 ### 1. Taverne (Shop RNG)
+
 - Shop avec **tours** et **unités** aléatoires
-🤔 Les tours peuvent être stockées en main temporairement (max X ?) pour affiner le pathing ou les synergies.
+  🤔 Les tours peuvent être stockées en main temporairement (max X ?) pour affiner le pathing ou les synergies.
 - ⚠️ Unit buy = envoi auto dans la prochaine loop
 - ⚠️ Tour buy = va dans ta "main", pose possible à tout moment.
 
 ### 2. Placement (Pathing dynamique)
+
 - Placement libre sur la carte (spawn ➝ exit)
 - Le path est recalculé à chaque tour posée
 - Objectif : rallonger le chemin + optimiser les DPS
 
 ### 3. Combat (temps réel)
+
 - Les unités de l’adversaire arrivent en flux continu
 - Chaque unité tuée = gold immédiat
 - Chaque unité qui passe = perte de HP
 
 ### 4. Tick suivant
+
 - Nouveau shop RNG
 - Gain de gold passif basé sur l’income
 - Lancement automatique de la prochaine vague
@@ -134,4 +138,5 @@ Un **Tower Defense PvP dynamique à ⚠️ 8 joueurs** :
 - 🤔 Upgrades de tour (fusion, synergie, passif ?)
 - 🤔 Gestion d’économie (hard cap, intérêt ?)
 - 🤔 Possibilité de vendre ses tours ?
-
+- 🤔 les tours peuvent avoir des forment différentes à la Tétris pour complexifier le positionnement?
+- 🤔 les tours sont construite dynamqiuement, addition aléatoire de forme, type, action, bonus?

@@ -46,7 +46,6 @@
               - billing-provider.tsx
             - quotes/
               - page.tsx
-            - README.md
             - receipts/
               - page.tsx
           - components/

@@ -1,4 +1,4 @@
-# Project structure for apps\ezstart\web
+# Project structure for apps\td\pwa
 
 - .env.local
 - .gitignore
@@ -46,7 +46,6 @@
               - billing-provider.tsx
             - quotes/
               - page.tsx
-            - README.md
             - receipts/
               - page.tsx
           - components/

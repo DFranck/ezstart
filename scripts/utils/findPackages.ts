@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const DEFAULT_IGNORE_DIRS = new Set([
+export const DEFAULT_IGNORE_DIRS = new Set([
   'node_modules',
   '.git',
   '.turbo',
@@ -12,33 +12,28 @@ const DEFAULT_IGNORE_DIRS = new Set([
   'coverage',
 ]);
 
-/**
- * 🔍 Trouve tous les sous-projets contenant un `package.json`
- *
- * @param {string} rootDir - Chemin de départ (généralement process.cwd())
- * @param {Object} options
- * @param {boolean} [options.includeRootIfHasPackageJson=true] - Inclure le root s'il contient un package.json
- * @param {Set<string>} [options.ignoreDirs] - Dossiers à ignorer
- * @returns {string[]} Liste absolue des chemins des projets
- */
-function findPackages(rootDir, options = {}) {
+export function findPackages(
+  rootDir: string,
+  options: {
+    includeRootIfHasPackageJson?: boolean;
+    ignoreDirs?: Set<string>;
+  } = {}
+): string[] {
   const {
     includeRootIfHasPackageJson = true,
     ignoreDirs = DEFAULT_IGNORE_DIRS,
   } = options;
 
-  const found = new Set();
+  const found = new Set<string>();
 
-  function recurse(dir) {
+  function recurse(dir: string) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-
       if (!entry.isDirectory()) continue;
       if (ignoreDirs.has(entry.name)) continue;
 
-      // ✅ Si ce dossier est un projet → on le garde
       if (fs.existsSync(path.join(fullPath, 'package.json'))) {
         found.add(fullPath);
       } else {
@@ -47,7 +42,6 @@ function findPackages(rootDir, options = {}) {
     }
   }
 
-  // ✅ Si le root lui-même est un projet → on l’ajoute directement
   if (
     includeRootIfHasPackageJson &&
     fs.existsSync(path.join(rootDir, 'package.json'))
@@ -60,18 +54,13 @@ function findPackages(rootDir, options = {}) {
   return Array.from(found);
 }
 
-/**
- * ✅ Détermine si c’est un monorepo ou un projet simple
- */
-function detectRepoType(rootDir = process.cwd()) {
+export function detectRepoType(rootDir: string = process.cwd()): {
+  type: 'monorepo' | 'single' | 'empty';
+  packages: string[];
+} {
   const pkgs = findPackages(rootDir);
   if (pkgs.length > 1) return { type: 'monorepo', packages: pkgs };
   if (pkgs.length === 1 && pkgs[0] === rootDir)
     return { type: 'single', packages: pkgs };
   return { type: 'empty', packages: [] };
 }
-
-module.exports = {
-  findPackages,
-  detectRepoType,
-};
