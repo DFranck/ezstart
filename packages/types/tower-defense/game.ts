@@ -1,4 +1,5 @@
-import { mongoIdSchema } from '../common';
+import { generateMock } from '@anatine/zod-mock';
+import { listingQuerySchema, mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 import { playerSchema } from './player';
 import { shopItemSchema } from './shop-item';
@@ -14,4 +15,14 @@ export const gameSchema = z.object({
   updatedAt: z.string().describe('ISO timestamp'),
 });
 
+export const mockGame = generateMock(gameSchema);
+export const mockGames = generateMock(z.array(gameSchema));
+export const getGamesQuerySchema = listingQuerySchema.extend({
+  phase: z
+    .enum(['waiting', 'playing', 'ended'])
+    .optional()
+    .describe('Filter by current game phase'),
+});
+
 export type Game = Infer<typeof gameSchema>;
+export type GetGamesQuery = Infer<typeof getGamesQuerySchema>;

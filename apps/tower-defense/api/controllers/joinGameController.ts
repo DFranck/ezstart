@@ -1,21 +1,22 @@
 // controllers/joinGameController.ts
+import { mongoIdSchema } from '@ezstart/types';
 import { Request, Response } from 'express';
-import { z } from 'zod';
 import { joinGameService } from '../services/joinGameService';
 
-const joinGameSchema = z.object({
-  gameId: z.string().min(1),
-  playerId: z.string().min(1),
-});
-
 export async function joinGameController(req: Request, res: Response) {
-  const parsed = joinGameSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(422).json({ error: 'Validation error', details: parsed.error.errors });
-  }
-
   try {
-    const result = await joinGameService(parsed.data);
+    const parsed = mongoIdSchema.safeParse(req.body?.playerId);
+    if (!parsed.success) {
+      return res
+        .status(422)
+        .json({ error: 'Validation error', details: parsed.error.errors });
+    }
+    const game = req.params.id;
+    if (!game) return res.status(422).json({ error: 'Missing game ID' });
+    const result = await joinGameService({
+      gameId: game,
+      playerId: parsed.data,
+    });
     return res.status(200).json({
       success: true,
       ...result, // ex: { playerId, gameId, joinedAt }

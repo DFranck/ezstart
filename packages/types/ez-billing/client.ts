@@ -1,6 +1,6 @@
 import type { infer as ZodInfer } from 'zod';
+import { listingQuerySchema } from '../common/listingQuerySchema';
 import { z } from '../zod-extended';
-import { listingQuerySchema } from './listing';
 
 // -----------------------------------
 // 🟢 BASE (never used alone)

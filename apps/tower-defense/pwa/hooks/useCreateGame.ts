@@ -13,7 +13,7 @@ export function useCreateGame() {
   const createGame = async (playerName: CreateGamePayload) => {
     setLoading(true);
     try {
-      const res = await callApi<CreateGameResponse>('/api/games/', {
+      const res = await callApi<CreateGameResponse>('/api/games', {
         method: 'POST',
         body: playerName,
       });

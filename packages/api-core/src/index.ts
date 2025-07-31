@@ -28,3 +28,7 @@ export { openApiCompatible } from './openapi/openapi-compatible';
 export { createRouterWithDoc } from './openapi/route-with-doc';
 export { stripIncompatible } from './openapi/strip-incompatible';
 export { zObjectWithAutoOpenApi } from './openapi/z-object-helper';
+
+// Utils
+export { findWithQuery } from './utils/find-with-query';
+export { toApiObject } from './utils/to-api-object';

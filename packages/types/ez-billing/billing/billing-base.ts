@@ -1,6 +1,6 @@
 import { z, ZodEnum, infer as ZodInfer, ZodObject, ZodRawShape } from 'zod';
+import { listingQuerySchema } from '../../common/listingQuerySchema';
 import { currencyEnum } from '../enums';
-import { listingQuerySchema } from '../listing';
 
 export const baseLineItemSchema = z.object({
   label: z.string().min(1, 'Label is required').describe('TODO'),
