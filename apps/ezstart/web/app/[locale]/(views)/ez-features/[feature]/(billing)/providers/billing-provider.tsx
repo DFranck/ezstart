@@ -1,7 +1,7 @@
 'use client';
-import { callApi } from '@/utils/call-api';
 import { Client, Invoice, Quote, Receipt } from '@ezstart/types';
 import { useApiAction } from '@ezstart/ui/hooks';
+import { callApi } from '@ezstart/ui/utils';
 import { useCallback, useEffect, useState } from 'react';
 import { BillingContext } from '../contexts/billing-context';
 export const BillingProvider = ({

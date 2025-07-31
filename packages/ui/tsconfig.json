@@ -16,6 +16,7 @@
     "components/**/*",
     "hooks/**/*",
     "lib/**/*",
+    "utils/**/*",
     "templates/**/*",
     "index.ts"
   ],

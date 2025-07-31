@@ -1,7 +1,7 @@
 'use client';
-import { callApi } from '@/utils/call-api';
 import { Client, Invoice, Quote, Receipt } from '@ezstart/types';
 import { useApiAction } from '@ezstart/ui/hooks';
+import { callApi } from '@ezstart/ui/utils';
 import { useCallback, useEffect, useState } from 'react';
 import { BillingContext } from '../contexts/billing-context';
 export const BillingProvider = ({
@@ -19,23 +19,23 @@ export const BillingProvider = ({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const fetchClients = useCallback(async () => {
-    const data = await exec<Client[]>(() => callApi('/api/clients', {}));
-    setClients(data ?? []);
+    const clients = await exec<Client[]>(() => callApi('/api/clients', {}));
+    setClients(clients ?? []);
   }, [exec]);
 
   const fetchInvoices = useCallback(async () => {
-    const data = await exec<Invoice[]>(() => callApi('/api/invoices', {}));
-    setInvoices(data ?? []);
+    const invoices = await exec<Invoice[]>(() => callApi('/api/invoices', {}));
+    setInvoices(invoices ?? []);
   }, [exec]);
 
   const fetchQuotes = useCallback(async () => {
-    const data = await exec<Quote[]>(() => callApi('/api/quotes', {}));
-    setQuotes(data ?? []);
+    const quotes = await exec<Quote[]>(() => callApi('/api/quotes', {}));
+    setQuotes(quotes ?? []);
   }, [exec]);
 
   const fetchReceipts = useCallback(async () => {
-    const data = await exec<Receipt[]>(() => callApi('/api/receipts', {}));
-    setReceipts(data ?? []);
+    const receipts = await exec<Receipt[]>(() => callApi('/api/receipts', {}));
+    setReceipts(receipts ?? []);
   }, [exec]);
 
   const refetchAll = useCallback(async () => {

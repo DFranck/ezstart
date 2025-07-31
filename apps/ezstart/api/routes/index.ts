@@ -1,13 +1,9 @@
 import express, { Router } from 'express';
+import testsRoutes, { testsRegistry } from './test';
 
 const router: Router = express.Router();
-export const globalRegistry = [];
+export const globalRegistry = [testsRegistry];
 
-router.get('/test', (_, res) => {
-  res.json({
-    message: '✅ Test route is working!',
-    timestamp: new Date().toISOString(),
-  });
-});
+router.use('/tests', testsRoutes);
 
 export default router;

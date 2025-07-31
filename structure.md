@@ -1,4 +1,4 @@
-# Project structure for 
+# Project structure for
 
 - .eslintrc.js
 - .gitattributes
@@ -20,13 +20,12 @@
     - web/ → [structure.md](./apps/ezstart/web/structure.md)
   - monitor/
     - api/ → [structure.md](./apps/monitor/api/structure.md)
-  - td/
-    - api/ → [structure.md](./apps/td/api/structure.md)
+  - tower-defense/
+    - api/ → [structure.md](./apps/tower-defense/api/structure.md)
     - docs/
       - game-design.md
       - technical_doc.md
-    - pwa/ → [structure.md](./apps/td/pwa/structure.md)
-    - types/
+    - pwa/ → [structure.md](./apps/tower-defense/pwa/structure.md)
 - eslint.config.js
 - package.json
 - packages/

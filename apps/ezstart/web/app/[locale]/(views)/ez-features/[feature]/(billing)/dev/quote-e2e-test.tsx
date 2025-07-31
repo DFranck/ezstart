@@ -1,5 +1,5 @@
 'use client';
-import { callApi } from '@/utils/call-api';
+import { callApi } from '@ezstart/ui/utils';
 import { Quote } from '@ezstart/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';

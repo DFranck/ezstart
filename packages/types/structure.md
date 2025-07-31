@@ -2,16 +2,9 @@
 
 - api/
   - errors.ts
-- enums/
-  - billing-status.ts
-  - index.ts
-  - user-role.ts
 - express/
   - aug.d.ts
-- index.ts
-- package.json
-- README.md
-- schemas/
+- ez-billing/
   - billing/
     - billing-actions.ts
     - billing-base.ts
@@ -20,11 +13,27 @@
     - quote.ts
     - receipt.ts
   - client.ts
+  - enums/
+    - billing-status.ts
+    - index.ts
+    - user-role.ts
   - index.ts
   - listing.ts
   - mongo-id.ts
   - user.ts
+- index.ts
+- package.json
+- README.md
 - structure.md
+- tower-defense/
+  - game-state.ts
+  - index.ts
+  - mob.ts
+  - player.ts
+  - position.ts
+  - rpc.ts
+  - shop-item.ts
+  - tower.ts
 - tsconfig.json
 - tsconfig.tsbuildinfo
 - validators/
