@@ -1,8 +1,8 @@
 'use client';
 
 import { routing } from '@/i18n/routing';
-import { capitalize } from '@/utils/capitalize';
 import { Dropdown, DropdownItem, Icon } from '@ezstart/ui/components';
+import { capitalize } from '@ezstart/ui/utils';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 
