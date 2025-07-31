@@ -1,7 +1,9 @@
+import { mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 
 export const mobSchema = z.object({
-  id: z.string().describe('Unique ID of the mob'),
+  _id: mongoIdSchema,
+  name: z.string().describe('Name of the mob'),
   type: z.enum(['goblin', 'wolf', 'boss']).describe('Type of mob'),
   hp: z.number().describe('Health points of the mob'),
   speed: z.number().describe('Speed of movement'),

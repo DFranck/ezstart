@@ -1,9 +1,10 @@
+import { mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 import { playerSchema } from './player';
 import { shopItemSchema } from './shop-item';
 
 export const gameSchema = z.object({
-  _id: z.string().describe('MongoDB Game ID'),
+  _id: mongoIdSchema,
   players: z.array(playerSchema).describe('List of players'),
   tick: z.number().describe('Current tick number'),
   map: z.array(z.array(z.string())).describe('2D map representation'),

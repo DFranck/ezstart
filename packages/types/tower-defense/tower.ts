@@ -1,8 +1,10 @@
+import { mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 import { positionSchema } from './position';
 
 export const towerSchema = z.object({
-  id: z.string().describe('Unique ID of the tower'),
+  _id: mongoIdSchema,
+  name: z.string().describe('Name of the tower'),
   type: z.enum(['archer', 'bomb', 'ice']).describe('Type of tower'),
   position: positionSchema.describe('Tower position on the map'),
   damage: z.number().describe('Damage dealt by the tower'),
