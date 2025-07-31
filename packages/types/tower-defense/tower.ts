@@ -1,3 +1,4 @@
+import { generateMock } from '@anatine/zod-mock';
 import { mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 import { positionSchema } from './position';
@@ -12,3 +13,5 @@ export const towerSchema = z.object({
 });
 
 export type Tower = Infer<typeof towerSchema>;
+export const mockTower = generateMock(towerSchema);
+export const mockTowers = generateMock(z.array(towerSchema));

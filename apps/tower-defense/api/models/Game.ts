@@ -1,4 +1,6 @@
 import { Schema, model } from 'mongoose';
+import { mobSchema } from './Mob';
+import { towerSchema } from './Tower';
 
 const gameSchema = new Schema(
   {
@@ -7,21 +9,20 @@ const gameSchema = new Schema(
     map: { type: [[String]], required: true },
     shop: [
       {
-        id: String,
-        unit: {
-          id: String,
-          type: {
-            type: String,
-            enum: ['archer', 'bomb', 'ice'],
-            required: true,
-          },
-          damage: Number,
-          range: Number,
-          cost: Number,
+        name: { type: String, required: true },
+        type: { type: String, enum: ['tower', 'unit'], required: true },
+        price: { type: Number, required: true },
+        tower: {
+          type: towerSchema,
+          required: false,
         },
-        price: Number,
+        unit: {
+          type: mobSchema,
+          required: false,
+        },
       },
     ],
+
     phase: {
       type: String,
       enum: ['waiting', 'playing', 'finished'],

@@ -5,7 +5,6 @@ import { towerSchema } from './Tower';
 
 export const playerSchema = new Schema(
   {
-    id: { type: String, required: true }, // pour correspondre à Zod
     name: { type: String, required: true },
     gold: { type: Number, required: true },
     income: { type: Number, required: true },

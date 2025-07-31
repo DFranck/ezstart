@@ -1,17 +1,18 @@
 import {
   CreateGamePayload,
   CreateGameResponse,
-  mockPlayer,
+  mockPlayers,
 } from '@ezstart/types';
 import { Game } from '../models/Game';
 
 export async function createGameService(
   input: CreateGamePayload
 ): Promise<CreateGameResponse> {
-  const player = mockPlayer();
+  const players = mockPlayers();
+  const playerIds = players.map((p) => p._id);
   const game = await Game.create({
     playerName: input.playerName,
-    players: [player._id],
+    players: playerIds,
   });
 
   return {

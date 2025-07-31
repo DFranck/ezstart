@@ -59,4 +59,3 @@
 - tsconfig.tsbuildinfo
 - utils/
   - get-translation-array.ts
-  - map-project-tech-to-skills.ts

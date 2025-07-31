@@ -6,6 +6,9 @@
   - callApiOptions.ts
   - httpMethod.ts
   - index.ts
+- common/
+  - index.ts
+  - mongoIdSchema.ts
 - express/
   - aug.d.ts
 - ez-billing/
@@ -31,6 +34,7 @@
 - structure.md
 - tower-defense/
   - game-state.ts
+  - game.ts
   - index.ts
   - mob.ts
   - player.ts
@@ -40,6 +44,9 @@
   - tower.ts
 - tsconfig.json
 - tsconfig.tsbuildinfo
+- utils/
+  - index.ts
+  - zodToMongoose.ts
 - validators/
   - index.ts
   - is-api-error.ts

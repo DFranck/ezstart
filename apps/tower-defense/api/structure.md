@@ -3,12 +3,15 @@
 - .env
 - controllers/
   - createGameController.ts
+  - getGameByIdController.ts
 - description.json
 - eslint.config.js
 - jest.config.js
 - models/
   - Game.ts
+  - Mob.ts
   - Player.ts
+  - Tower.ts
 - package.json
 - README.md
 - routes/
@@ -19,5 +22,6 @@
 - server.ts
 - services/
   - createGameService.ts
+  - getGameByIdService.ts
 - structure.md
 - tsconfig.json

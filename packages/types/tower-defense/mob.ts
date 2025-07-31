@@ -1,3 +1,4 @@
+import { generateMock } from '@anatine/zod-mock';
 import { mongoIdSchema } from '../common';
 import { z, type Infer } from '../zod-extended';
 
@@ -11,3 +12,5 @@ export const mobSchema = z.object({
 });
 
 export type Mob = Infer<typeof mobSchema>;
+export const mockMob = generateMock(mobSchema);
+export const mockMobs = generateMock(z.array(mobSchema));
