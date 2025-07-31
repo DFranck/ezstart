@@ -2,7 +2,7 @@
  * @file apps/ezstart/api/controllers/invoice/invoice.controller.test.ts
  */
 import request from 'supertest';
-import app from '../../index';
+import { app } from '../../server';
 import * as services from '../../services/invoice';
 jest.mock('../../services/invoice');
 

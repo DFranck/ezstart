@@ -8,8 +8,11 @@
     "dev": "turbo dev",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
+    "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
-    "lint": "turbo lint",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
+    "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "jest": {
@@ -22,6 +25,7 @@
     "@types/jest": "^29.5.14",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "eslint": "^9.27.0",
     "fs-extra": "^11.3.0",
     "jest": "^29.7.0",
     "ora": "^5.4.1",

@@ -2,8 +2,8 @@
  * @file apps/ezstart/api/controllers/client/client.controller.test.ts
  */
 import request from 'supertest';
-import app from '../../index';
 import * as services from '../../services/client';
+import { app } from '../../server';
 jest.mock('../../services/client');
 
 describe('Client Controller (integration)', () => {

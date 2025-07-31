@@ -2,7 +2,7 @@
  * @file apps/ezstart/api/controllers/quote/quote.controller.test.ts
  */
 import request from 'supertest';
-import app from '../../index';
+import { app } from '../../server';
 import * as services from '../../services/quote';
 jest.mock('../../services/quote');
 
