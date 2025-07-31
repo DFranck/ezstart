@@ -5,6 +5,7 @@
 - .github/
 - .gitignore
 - .npmrc
+- apis.config.md
 - apps/
   - asc-tcd/
     - web/ → [structure.md](./apps/asc-tcd/web/structure.md)
@@ -23,7 +24,10 @@
     - api/ → [structure.md](./apps/td/api/structure.md)
     - docs/
       - game-design.md
+      - technical_doc.md
     - pwa/ → [structure.md](./apps/td/pwa/structure.md)
+    - types/
+- eslint.config.js
 - package.json
 - packages/
   - api-core/ → [structure.md](./packages/api-core/structure.md)
@@ -35,7 +39,9 @@
 - pnpm-workspace.yaml
 - README.md
 - scripts/
+  - check-typecheck.ts
   - export-to-public.ts
+  - generate-apis-config.ts
   - generate-readmes.ts
   - generate-structures.ts
   - public-whitelist.json

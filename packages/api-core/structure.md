@@ -15,6 +15,7 @@
   - infra/
     - connectToMongo.ts
     - createApp.ts
+    - createSocketServer.ts
     - startServer.ts
   - middlewares/
     - validate-params.ts

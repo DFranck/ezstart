@@ -8,6 +8,7 @@
     "dev": "turbo dev",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
+    "gen:api-config": "tsx scripts/generate-apis-config.ts",
     "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
     "lint": "turbo run lint",

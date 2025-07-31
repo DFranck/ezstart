@@ -2,6 +2,7 @@
 
 - .env
 - description.json
+- eslint.config.js
 - jest.config.js
 - package.json
 - README.md

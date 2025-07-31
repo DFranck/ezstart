@@ -8,6 +8,11 @@
     "dev": "tsc -b --watch",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@ezstart/types": "workspace:*",

@@ -24,6 +24,7 @@
 - cron/
   - setup-cron.ts
   - update-exchange-rates.ts
+- eslint.config.js
 - jest.config.js
 - models/
   - billing/

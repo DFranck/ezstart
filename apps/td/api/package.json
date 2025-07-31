@@ -4,7 +4,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only server.ts",
+    "dev": "tsx watch server.ts",
     "prebuild": "pnpm --filter @ezstart/types build",
     "build": "tsc",
     "start": "node dist/server.js",
