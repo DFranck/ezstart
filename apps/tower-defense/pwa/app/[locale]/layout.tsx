@@ -1,4 +1,4 @@
-import { Providers } from '@/components/providers';
+import { Providers } from '@/providers/providers';
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
 import { Toaster } from '@ezstart/ui/components';
 import '@ezstart/ui/globals.css';

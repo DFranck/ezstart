@@ -27,7 +27,6 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router) {
     options: RouteDocOptions
   ) {
     const requestDoc: any = {};
-
     // ✅ BODY
     if (options.bodySchema) {
       requestDoc.body = {

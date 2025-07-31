@@ -1,13 +1,23 @@
 # Project structure for apps\tower-defense\api
 
 - .env
+- controllers/
+  - createGameController.ts
 - description.json
 - eslint.config.js
 - jest.config.js
+- models/
+  - Game.ts
+  - Player.ts
 - package.json
 - README.md
 - routes/
+  - games.ts
   - index.ts
+  - lobbies.ts
+  - post-games.ts
 - server.ts
+- services/
+  - createGameService.ts
 - structure.md
 - tsconfig.json

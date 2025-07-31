@@ -1,7 +1,11 @@
 # Project structure for packages\types
 
 - api/
-  - errors.ts
+  - apiError.ts
+  - apiResponse.ts
+  - callApiOptions.ts
+  - httpMethod.ts
+  - index.ts
 - express/
   - aug.d.ts
 - ez-billing/

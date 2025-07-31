@@ -6,15 +6,16 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:ezstart": "turbo run dev --filter=web-ezstart...",
+    "dev:td": "turbo run dev --filter=pwa-tower-defense... --filter=api-tower-defense...",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
     "gen:api-config": "tsx scripts/generate-apis-config.ts",
     "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
     "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "typecheck": "turbo run typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "prune": "ts-prune -p tsconfig.json > prune-report.txt",
+    "typecheck": "turbo run typecheck"
   },
   "jest": {
     "projects": [
@@ -32,6 +33,7 @@
     "ora": "^5.4.1",
     "prettier": "^3.5.1",
     "ts-jest": "^29.3.4",
+    "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
     "turbo": "^2.4.2",
     "typescript": "5.7.3"

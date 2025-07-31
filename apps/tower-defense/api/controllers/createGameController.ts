@@ -1,14 +1,9 @@
-import express from 'express';
-export const createGameController = (
-  req: express.Request,
-  res: express.Response
-) => {
-  const { playerName } = req.body;
+import { makeCreateController } from '@ezstart/api-core';
+import { createGameSchema } from '@ezstart/types';
+import { createGameService } from '../services/createGameService';
 
-  res.json({
-    gameId: 'abc123',
-    playerId: 'p1',
-    playerName,
-    timestamp: new Date().toISOString(),
-  });
-};
+export const createGameController = makeCreateController(
+  createGameSchema,
+  createGameService,
+  'games:create'
+);

@@ -5,13 +5,16 @@ import { z, type Infer } from '../zod-extended';
 export const createGameSchema = z.object({
   playerName: z.string().describe('Initial player name'),
 });
-export const createGameResponseSchema = z.object({
-  gameId: z.string(),
-  playerId: z.string(),
-  playerName: z.string(),
-  timestamp: z.string(),
-});
 export type CreateGamePayload = Infer<typeof createGameSchema>;
+
+// 🔵 Ce que le BACK renvoie
+export const createGameResponseSchema = z.object({
+  gameId: z.string().describe('Game ID'),
+  playerId: z.string().describe('Player ID'),
+  playerName: z.string().describe('Player name'),
+  timestamp: z.string().describe('ISO timestamp'),
+});
+export type CreateGameResponse = Infer<typeof createGameResponseSchema>;
 
 // ---- connect_to_game
 export const connectToGameSchema = z.object({

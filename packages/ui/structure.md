@@ -106,3 +106,8 @@
   - QuotePdfTemplate.tsx
 - tsconfig.json
 - tsconfig.lint.json
+- utils/
+  - call-api.ts
+  - capitalize.ts
+  - get-api-url.ts
+  - index.ts

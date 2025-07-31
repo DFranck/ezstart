@@ -16,7 +16,7 @@ connectToMongo('tower-defense')
     startServer(app, {
       routes,
       registries: globalRegistry,
-      serviceName: 'EzStart',
+      serviceName: 'TowerDefense',
       port: 8002,
       onHttpServerReady: (server) => {
         createSocketServer(server, {

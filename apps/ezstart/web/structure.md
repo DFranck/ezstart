@@ -186,8 +186,5 @@
   - projects.ts
   - skill.ts
 - utils/
-  - call-api.ts
-  - capitalize.ts
-  - get-api-url.ts
   - get-translation-array.ts
   - map-project-tech-to-skills.ts

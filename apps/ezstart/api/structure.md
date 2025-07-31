@@ -8,6 +8,7 @@
 - README.md
 - routes/
   - index.ts
+  - test.ts
 - server.ts
 - structure.md
 - tsconfig.json
