@@ -15,6 +15,7 @@ type HeroSectionProps = {
   layout?: HeroLayout; // <--- NEW
   mediaPosition?: HeroMediaPosition; // <--- NEW
   videoSrc?: string;
+  posterSrc?: string;
   imageSrc?: string;
   textureSrc?: string;
   title?: React.ReactNode;
@@ -31,6 +32,7 @@ export const Hero = ({
   layout = 'center', // default centré
   mediaPosition = 'left',
   videoSrc,
+  posterSrc,
   imageSrc,
   textureSrc,
   title,
@@ -51,6 +53,7 @@ export const Hero = ({
           loop
           muted
           playsInline
+          poster={posterSrc}
           className='absolute top-0 left-0 w-full h-full object-cover'
         />
       ) : imageSrc ? (

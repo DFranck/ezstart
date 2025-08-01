@@ -23,6 +23,7 @@ export default function Page() {
         title='Solution environmental pensée et crées pour vous'
         subtitle='ASC'
         videoSrc='/videos/hero-background-web.mp4'
+        posterSrc='/images/hero-background-web-poster.png'
         // overlay={false}
       />
       {/* Services Section */}

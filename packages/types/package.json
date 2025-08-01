@@ -11,8 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.4",
-    "mongoose": "^8.15.1"
+    "@asteasolutions/zod-to-openapi": "^7.3.4"
   },
   "keywords": [],
   "author": "",
