@@ -7,10 +7,6 @@
   - [locale]/
     - (home)/
       - ContactSection.tsx
-      - HeroSection.tsx
-      - LibsSection.tsx
-      - ProjectsSection.tsx
-      - SkillsSection.tsx
     - (views)/
       - legal-notices/
         - page.tsx
@@ -23,6 +19,7 @@
     - page.tsx
 - components/
   - Badge.tsx
+  - BoutiqueCta.tsx
   - contactsList.tsx
   - IconGallery.tsx
   - JobShowing.tsx
@@ -36,15 +33,12 @@
     - mobile-nav-bar.tsx
     - mobile-nav-menu.tsx
     - nav-menu.tsx
-  - ProjectCard.tsx
   - providers.tsx
   - ReadMoreText.tsx
   - ServiceCard.tsx
-  - TechList.tsx
   - ui/
     - aurora-background.tsx
     - background-gradient-animation.tsx
-    - flipping-gallery.tsx
     - lamp.tsx
     - macbook-scroll.tsx
 - components.json
@@ -111,7 +105,14 @@
 - public/
   - images/
     - benefice.jpg
+    - bergerac-2023-web.png
     - evolution-sequestration-carbon.jpg
+    - fond-noisy.jpg
+    - giphy.gif
+    - hero-background-web-poster.png
+    - hero-home.jpg
+    - hero-transplantation.jpg
+    - hero-transplantation.webp
     - image.png
     - logo.png
     - particulier.jpg
@@ -119,7 +120,8 @@
     - secteur-public.jpg
   - videos/
     - bergerac-2023-web.mp4
-    - hero-background.mp4
+    - hero-background-web.mp4
+    - petite-transplanteuse-web.mp4
 - README.md
 - structure.md
 - tsconfig.json

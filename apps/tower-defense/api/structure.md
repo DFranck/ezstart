@@ -4,6 +4,10 @@
 - controllers/
   - createGameController.ts
   - getGameByIdController.ts
+  - getGamesController.ts
+  - joinGameController.ts
+  - leaveGameController.ts
+  - startGameController.ts
 - description.json
 - eslint.config.js
 - jest.config.js
@@ -17,11 +21,13 @@
 - routes/
   - games.ts
   - index.ts
-  - lobbies.ts
-  - post-games.ts
 - server.ts
 - services/
   - createGameService.ts
   - getGameByIdService.ts
+  - getGamesService.ts
+  - joinGameService.ts
+  - leaveGameService.ts
+  - startGameService.ts
 - structure.md
 - tsconfig.json

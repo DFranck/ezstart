@@ -17,6 +17,8 @@
     - layout.tsx
     - lobby/
       - components/
+        - JoinGameButton.tsx
+        - LeaveGameButton.tsx
         - LobbyPlayersList.tsx
         - StartGameButton.tsx
       - [gameId]/
@@ -32,6 +34,7 @@
   - useGame.ts
   - useGameSocket.ts
   - useJoinGame.ts
+  - useLeaveGame.ts
   - usePlayerActions.ts
 - i18n/
   - navigation.ts

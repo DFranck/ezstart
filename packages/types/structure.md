@@ -8,6 +8,7 @@
   - index.ts
 - common/
   - index.ts
+  - listingQuerySchema.ts
   - mongoIdSchema.ts
 - express/
   - aug.d.ts
@@ -25,7 +26,6 @@
     - index.ts
     - user-role.ts
   - index.ts
-  - listing.ts
   - mongo-id.ts
   - user.ts
 - index.ts
@@ -44,9 +44,6 @@
   - tower.ts
 - tsconfig.json
 - tsconfig.tsbuildinfo
-- utils/
-  - index.ts
-  - zodToMongoose.ts
 - validators/
   - index.ts
   - is-api-error.ts

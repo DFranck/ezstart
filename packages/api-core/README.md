@@ -27,6 +27,7 @@ pnpm dev
 - **middlewares/** → Express middlewares for request validation (params, query, body)
 - **openapi/** → Helpers for integrating Zod schemas with Swagger/OpenAPI
 - **types/** → Augmented Express types and shared TypeScript definitions
+- **utils/** → No description provided
 <!-- AUTO:QUICK_OVERVIEW:END -->
 
 <!-- AUTO:PROJECT_STRUCTURE:START -->

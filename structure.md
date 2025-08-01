@@ -23,8 +23,8 @@
   - tower-defense/
     - api/ → [structure.md](./apps/tower-defense/api/structure.md)
     - docs/
-      - game-design.md
-      - technical_doc.md
+      - GDD.md
+      - TDD.md
     - pwa/ → [structure.md](./apps/tower-defense/pwa/structure.md)
 - eslint.config.js
 - package.json

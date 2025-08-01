@@ -28,5 +28,8 @@
     - z-object-helper.ts
   - types/
     - express-aug.d.ts
+  - utils/
+    - find-with-query.ts
+    - to-api-object.ts
 - structure.md
 - tsconfig.json

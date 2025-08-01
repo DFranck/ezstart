@@ -208,7 +208,7 @@
 ```
 
 ## 🗂️ `api-tower-defense`
-📁 Path: `apps/td/api`
+📁 Path: `apps/tower-defense/api`
 
 ### package.json
 
@@ -227,8 +227,9 @@
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
-    "@ezstart/types": "workspace:*",
     "@ezstart/api-core": "workspace:*",
+    "@ezstart/types": "workspace:*",
+    "@ezstart/ui": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.19.2",
@@ -239,7 +240,6 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@workspace/eslint-config": "workspace:*",
     "@types/cors": "^2.8.18",
     "@types/express": "^4.17.21",
     "@types/express-serve-static-core": "^4.19.6",
@@ -249,6 +249,7 @@
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/supertest": "^6.0.3",
+    "@workspace/eslint-config": "workspace:*",
     "jest": "^29.7.0",
     "supertest": "^7.1.1",
     "ts-jest": "^29.3.4",
@@ -588,15 +589,17 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:ezstart": "turbo run dev --filter=web-ezstart...",
+    "dev:asc": "turbo run dev --filter=web-asc-tcd...",
+    "dev:td": "turbo run dev --filter=pwa-tower-defense... --filter=api-tower-defense...",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
     "gen:api-config": "tsx scripts/generate-apis-config.ts",
     "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
     "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "typecheck": "turbo run typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "prune": "ts-prune -p tsconfig.json > prune-report.txt",
+    "typecheck": "turbo run typecheck"
   },
   "jest": {
     "projects": [
@@ -614,6 +617,7 @@
     "ora": "^5.4.1",
     "prettier": "^3.5.1",
     "ts-jest": "^29.3.4",
+    "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
     "turbo": "^2.4.2",
     "typescript": "5.7.3"

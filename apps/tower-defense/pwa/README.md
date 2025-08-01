@@ -23,7 +23,7 @@ pnpm dev
 ## 🎮 Game Design
 
 Read the full gameplay logic, mechanics, and balance strategy here:  
-👉 [📄 game-design.md](../docs/game-design.md)
+👉 [📄 game-design.md](../docs/GDD.md)
 
 <!-- AUTO:PROJECT_STRUCTURE:START -->
 ## 📂 Project Structure
