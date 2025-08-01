@@ -79,11 +79,7 @@ export default function PageTransplantationArbres() {
         imageSrc='/images/hero-transplantation.jpg'
         overlay={false}
       ></Hero>
-      <P className='italic absolute text-white bottom-4 right-4' size={'xs'}>
-        Ne coupez plus vos arbres, transplantez-les!
-        <br />
-        "Pour que les arbres d'aujourd'hui soient ceux de demain." AS
-      </P>
+
       <Section layout={'grid'}>
         <Div size={'default'}>
           <video
