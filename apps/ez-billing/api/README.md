@@ -25,3 +25,12 @@ pnpm dev
 
 👉 See the full structure here: [structure.md](./structure.md)
 <!-- AUTO:PROJECT_STRUCTURE:END -->
+
+<!-- AUTO:TYPES:START -->
+### 🧾 Domain Types for `ez-billing`
+
+- [client.ts](../../packages/types/ez-billing/client.ts)
+- [index.ts](../../packages/types/ez-billing/index.ts)
+- [mongo-id.ts](../../packages/types/ez-billing/mongo-id.ts)
+- [user.ts](../../packages/types/ez-billing/user.ts)
+<!-- AUTO:TYPES:END -->

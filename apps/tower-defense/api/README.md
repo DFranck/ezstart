@@ -25,3 +25,17 @@ pnpm dev
 
 👉 See the full structure here: [structure.md](./structure.md)
 <!-- AUTO:PROJECT_STRUCTURE:END -->
+
+<!-- AUTO:TYPES:START -->
+### 🧾 Domain Types for `tower-defense`
+
+- [game-state.ts](../../packages/types/tower-defense/game-state.ts)
+- [game.ts](../../packages/types/tower-defense/game.ts)
+- [index.ts](../../packages/types/tower-defense/index.ts)
+- [mob.ts](../../packages/types/tower-defense/mob.ts)
+- [player.ts](../../packages/types/tower-defense/player.ts)
+- [position.ts](../../packages/types/tower-defense/position.ts)
+- [rpc.ts](../../packages/types/tower-defense/rpc.ts)
+- [shop-item.ts](../../packages/types/tower-defense/shop-item.ts)
+- [tower.ts](../../packages/types/tower-defense/tower.ts)
+<!-- AUTO:TYPES:END -->

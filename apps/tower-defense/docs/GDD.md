@@ -13,7 +13,7 @@
 
 Un **Tower Defense PvP dynamique à ⚠️ 8 joueurs** :
 
-- Chaque joueur **achète des tours et des unités** dans un **shop RNG**.
+- Chaque joueur **achète des tours et des unités** dans un **shop RNG (Random Number Generator)**.
 - Toutes les ⚠️ 30 secondes, les unités achetées sont envoyées.
 - Aucune phase figée : tu **défends, attaques, places, achètes** en temps réel.
 
