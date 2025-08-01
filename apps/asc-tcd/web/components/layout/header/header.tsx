@@ -50,7 +50,11 @@ export default function Header() {
             className='mx-auto'
           />
           <Div size={'default'} className='gap-0'>
-            <H2 size={'h5'} className='font-light font-mono text-left'>
+            <H2
+              size={'h5'}
+              className='font-light font-mono text-left md:text-2xl'
+              style={{ fontFamily: `'Cambria', Georgia, serif` }}
+            >
               ASC
             </H2>
             <P size={'xs'} className='italic'>

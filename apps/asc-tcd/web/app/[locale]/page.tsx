@@ -20,10 +20,16 @@ export default function Page() {
     <Main>
       {/* Hero Section */}
       <Hero
-        title='Solution environmental pensée et crées pour vous'
-        subtitle='ASC'
-        videoSrc='/videos/hero-background-web.mp4'
-        posterSrc='/images/hero-background-web-poster.png'
+        title='Solutions environnementales pensées et créées pour vous'
+        subtitle={
+          <span style={{ fontFamily: `'Cambria', Georgia, serif` }}>ASC</span>
+        }
+        imageSrc='/images/hero-home.jpg'
+        paragraph={
+          <P className='mt-2 text-white' variant={'description'}>
+            "Ne coupons plus les arbres, transplantons les"
+          </P>
+        }
         // overlay={false}
       />
       {/* Services Section */}
@@ -51,26 +57,31 @@ export default function Page() {
             durable.
           </P>
 
+          <Div
+            className='relative aspect-auto mt-4 md:hidden scale-105'
+            size={'full'}
+          >
+            <Image
+              src='/images/benefice.jpg'
+              alt='ASC Logo'
+              width={500}
+              height={750}
+              className='rounded-md'
+            />
+          </Div>
+          <P className='mt-2' variant={'description'}>
+            "Ne coupons plus les arbres, transplantons les"
+          </P>
+          <img src={'/images/giphy.gif'} alt='cutting trees' />
+
           {/* CTA Buttons */}
           <Div size={'xs'} layout={'row'} className='flex-wrap justify-center'>
-            {/* <Button asChild variant='ghost'>
-              <Link href='/calculatrice-sequestration-carbone'>
-                <Icon name='lucide:Calculator' className='mr-2' />
-                Calculatrice ECP
-              </Link>
-            </Button> */}
             <Button asChild variant='outline'>
               <Link href='/transplantation-d-arbres'>
                 <Icon name='lucide:TreePine' className='mr-2' />
                 Transplantation
               </Link>
             </Button>
-            {/* <Button asChild>
-              <Link href='/consulting'>
-                <Icon name='fa:FaUserFriends' className='mr-2' />
-                Consulting
-              </Link>
-            </Button> */}
           </Div>
         </Div>
       </Section>

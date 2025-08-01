@@ -1,5 +1,5 @@
 import { useNavLinks } from '@/hooks/useNavLinks';
-import { Button, Dropdown } from '@ezstart/ui/components';
+import { Button, Dropdown, Icon } from '@ezstart/ui/components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -43,7 +43,11 @@ export function NavMenu({
           />
         ) : (
           <Button
-            variant={variant}
+            variant={
+              'href' in item && item.href.startsWith('http')
+                ? 'default'
+                : variant
+            }
             key={item.href}
             asChild
             onClick={() => setIsOpen?.(false)}
@@ -51,6 +55,7 @@ export function NavMenu({
             {'href' in item && item.href.startsWith('http') ? (
               <a href={item.href} target='_blank' rel='noopener noreferrer'>
                 {item.label}
+                <Icon name='lucide:ExternalLink' />
               </a>
             ) : (
               <Link href={item.href}>{item.label}</Link>

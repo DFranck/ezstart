@@ -80,14 +80,16 @@ export const Hero = ({
   const TextContent = (
     <Div
       className={cn(
-        'relative z-10 text-center md:text-left space-y-4 p-6 md:p-10',
+        'relative z-10 text-center md:text-left space-y-4 p-6 md:p-10 max-w-5xl',
         { 'text-white': videoSrc || imageSrc }
       )}
     >
       {subtitle && (
-        <P className='uppercase tracking-widest text-sm'>{subtitle}</P>
+        <P className='uppercase tracking-widest text-center' size={'h1'}>
+          {subtitle}
+        </P>
       )}
-      {title && <H1 className='md:text-center'>{title}</H1>}
+      {title && <H1 className='md:text-center italic'>{title}</H1>}
       {paragraph && <P className='max-w-2xl'>{paragraph}</P>}
       {children}
     </Div>
@@ -97,7 +99,10 @@ export const Hero = ({
     <Section
       id={id}
       size={size}
-      className={cn('relative max-w-none overflow-hidden', className)}
+      className={cn(
+        'relative max-w-none overflow-hidden min-h-[80vh]',
+        className
+      )}
     >
       {/* ✅ Mode center : média en arrière-plan */}
       {layout === 'center' && (
