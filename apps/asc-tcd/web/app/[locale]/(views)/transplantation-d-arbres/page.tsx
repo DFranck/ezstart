@@ -70,7 +70,7 @@ export default function PageTransplantationArbres() {
         <Div size={'default'} layout={'grid'} className='max-w-7xl gap-'>
           <Div size={'default'}>
             <video
-              src='/videos/petite-transplanteuse.mp4'
+              src='/videos/petite-transplanteuse-web.mp4'
               autoPlay
               loop
               muted
