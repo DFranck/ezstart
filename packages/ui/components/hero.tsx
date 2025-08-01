@@ -16,6 +16,7 @@ type HeroSectionProps = {
   mediaPosition?: HeroMediaPosition; // <--- NEW
   videoSrc?: string;
   imageSrc?: string;
+  textureSrc?: string;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   paragraph?: React.ReactNode;
@@ -31,6 +32,7 @@ export const Hero = ({
   mediaPosition = 'left',
   videoSrc,
   imageSrc,
+  textureSrc,
   title,
   subtitle,
   paragraph,
@@ -58,6 +60,15 @@ export const Hero = ({
           className='absolute top-0 left-0 w-full h-full object-cover'
         />
       ) : null}
+
+      {textureSrc && (
+        <img
+          src={textureSrc}
+          alt='Texture overlay'
+          className='absolute inset-0 w-full h-full object-cover opacity-30 z-[1] pointer-events-none'
+        />
+      )}
+
       {overlay && <div className='absolute inset-0 bg-black/30' />}
     </>
   );

@@ -7,6 +7,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "dev:ezstart": "turbo run dev --filter=web-ezstart...",
+    "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:td": "turbo run dev --filter=pwa-tower-defense... --filter=api-tower-defense...",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",

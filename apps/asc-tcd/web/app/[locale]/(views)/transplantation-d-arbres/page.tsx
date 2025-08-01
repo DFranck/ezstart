@@ -13,9 +13,31 @@ import {
 import { useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 
 export default function PageTransplantationArbres() {
   const { isDesktop } = useDevice();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && !video.paused) {
+          video.pause();
+        }
+      },
+      { threshold: 0.25 } // Ajuste selon la zone visible avant de stopper
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.unobserve(video);
+    };
+  }, []);
   const carouselSlides: any[] = [
     {
       title: 'Particulier',
@@ -40,17 +62,33 @@ export default function PageTransplantationArbres() {
       <Hero
         title="Transplantation d’arbres matures et déplacement d'arbres sur chantier."
         subtitle='ASC TCD'
+        textureSrc='/images/fond-noisy.jpg'
         // imageSrc='/images/transplantation-hero.jpg'
         overlay={false}
       >
-        <P>
-          La transplantation d’arbres matures permet de sauvegarder le
-          patrimoine arboré existant tout en accompagnant les projets urbains.
-        </P>
-        <P>
-          Sur chantier ou en milieu naturel. ASC TCD assure le déplacement et la
-          reprise racinaire de l’arbre.
-        </P>
+        <Div size={'default'} layout={'grid'} className='max-w-7xl gap-'>
+          <Div size={'default'}>
+            <video
+              src='/videos/petite-transplanteuse.mp4'
+              autoPlay
+              loop
+              muted
+              playsInline
+              className=''
+            />
+          </Div>
+          <Div className='text-center'>
+            <P>
+              La transplantation d’arbres matures permet de sauvegarder le
+              patrimoine arboré existant tout en accompagnant les projets
+              urbains.
+            </P>
+            <P>
+              Sur chantier ou en milieu naturel. ASC TCD assure le déplacement
+              et la reprise racinaire de l’arbre.
+            </P>
+          </Div>
+        </Div>
       </Hero>
       <P className='italic absolute text-white bottom-4 right-4' size={'xs'}>
         Ne coupez plus vos arbres, transplantez-les!
@@ -70,8 +108,9 @@ export default function PageTransplantationArbres() {
         </Div>
         <Div size={'default'} className='relative aspect-video'>
           <video
+            ref={videoRef}
             src='/videos/bergerac-2023-web.mp4'
-            poster='/images/professionnel.jpg'
+            poster='/images/bergerac-2023-web.png'
             controls
             playsInline
             className='absolute top-0 left-0 w-full h-full object-cover'
