@@ -1,5 +1,6 @@
 'use client';
 
+import BoutiqueCta from '@/components/BoutiqueCta';
 import {
   ACarousel,
   Button,
@@ -87,6 +88,7 @@ export default function PageTransplantationArbres() {
               Sur chantier ou en milieu naturel. ASC TCD assure le déplacement
               et la reprise racinaire de l’arbre.
             </P>
+            <BoutiqueCta />
           </Div>
         </Div>
       </Hero>

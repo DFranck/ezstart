@@ -5,6 +5,10 @@
       "label": "Transplantation d'arbres",
       "href": "/transplantation-d-arbres"
     },
+    {
+      "label": "Boutique",
+      "href": "https://www.transplantation-arbres.fr/fr"
+    },
     { "label": "Devis", "href": "/quote" }
   ]
 }

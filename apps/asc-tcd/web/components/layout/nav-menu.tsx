@@ -48,7 +48,13 @@ export function NavMenu({
             asChild
             onClick={() => setIsOpen?.(false)}
           >
-            <Link href={item.href}>{item.label}</Link>
+            {'href' in item && item.href.startsWith('http') ? (
+              <a href={item.href} target='_blank' rel='noopener noreferrer'>
+                {item.label}
+              </a>
+            ) : (
+              <Link href={item.href}>{item.label}</Link>
+            )}
           </Button>
         )
       )}
