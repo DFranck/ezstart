@@ -3,6 +3,7 @@
 import CreateGameButton from '@/components/CreateGameButton'
 import { LoginSection } from '@/components/LoginSection'
 import { usePlayerStore } from '@/stores/usePlayerStore'
+import { extractPlayerId } from '@/utils/extractPlayerId'
 import { Button, H1, Icon, LI, Main, P, Section, Span, UL } from '@ezstart/ui/components'
 import { isDebug, logger } from '@ezstart/ui/lib'
 import { callApi } from '@ezstart/ui/utils'
@@ -50,7 +51,8 @@ export default function Page() {
           ) : (
             <UL>
               {waitingGames.map(game => {
-                const alreadyJoined = game.players.some(p => p.toString() === player?._id)
+                const alreadyJoined = game.players.some(p => extractPlayerId(p) === player?._id)
+                logger.debug('alreadyJoined', alreadyJoined)
                 return (
                   <LI key={game._id} size={'xs'}>
                     <Span>{game.players.length}/8 players </Span>

@@ -9,9 +9,21 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
   if (game.phase !== 'waiting') throw new Error('Cannot leave an active game')
 
   const index = game.players.findIndex(p => p.playerId.toString() === playerId)
+
   if (index !== -1) {
     game.players.splice(index, 1)
-    await game.save()
+
+    if (game.players.length === 0) {
+      await game.deleteOne()
+      logger.debug('Game deleted because it had no more players', { gameId })
+      return {
+        gameId,
+        deleted: true,
+        leftAt: new Date().toISOString(),
+      }
+    } else {
+      await game.save()
+    }
   }
 
   return {
