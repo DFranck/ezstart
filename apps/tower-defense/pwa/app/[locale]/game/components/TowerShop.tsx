@@ -1,11 +1,11 @@
 // /app/[locale]/game/components/TowerShop.tsx
-'use client';
+'use client'
 
-import { TOWER_LIST } from '@tower-defense/config';
-import { useGameState } from '@/stores/useGameState';
+import { TOWER_LIST } from '@tower-defense/config'
+import { useGameState } from '@/stores/useGameState'
 
 export function TowerShop() {
-  const { setDraggedTower } = useGameState();
+  const { setDraggedTower } = useGameState()
 
   return (
     <div className="flex gap-2">
@@ -19,5 +19,5 @@ export function TowerShop() {
         </button>
       ))}
     </div>
-  );
+  )
 }

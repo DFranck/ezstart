@@ -3,9 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "types": ["jest", "node"],
-    "typeRoots": ["../../../packages/types", "./node_modules/@types"]
+    "types": ["jest", "node"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../../packages/types/**/*.d.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

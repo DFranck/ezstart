@@ -1,9 +1,9 @@
-import express, { Router } from 'express';
-import gamesRoutes, { gamesRegistry } from './games';
+import express, { Router } from 'express'
+import gamesRoutes, { gamesRegistry } from './games'
+import playerRoutes, { playersRegistry } from './players'
+const router: Router = express.Router()
+export const globalRegistry = [gamesRegistry, playersRegistry]
 
-const router: Router = express.Router();
-export const globalRegistry = [gamesRegistry];
+router.use('/games', gamesRoutes).use('/players', playerRoutes)
 
-router.use('/games', gamesRoutes);
-
-export default router;
+export default router

@@ -1,24 +1,14 @@
-import {
-  CreateGamePayload,
-  CreateGameResponse,
-  mockPlayers,
-} from '@tower-defense/types';
-import { Game } from '../models/Game';
+import { logger } from '@ezstart/ui/lib'
+import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
+import { GameModel } from '../models/Game'
 
-export async function createGameService(
-  input: CreateGamePayload
-): Promise<CreateGameResponse> {
-  const players = mockPlayers();
-  const playerIds = players.map((p) => p._id);
-  const game = await Game.create({
+export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
+  logger.debug('createGameService', input)
+  const game = await GameModel.create({
     playerName: input.playerName,
-    players: playerIds,
-  });
+  })
 
   return {
     gameId: game._id.toString(),
-    playerId: game._id.toString(),
-    playerName: input.playerName,
-    timestamp: game.createdAt.toISOString(),
-  };
+  }
 }

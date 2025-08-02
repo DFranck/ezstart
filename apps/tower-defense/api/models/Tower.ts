@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema } from 'mongoose'
 
 export const towerSchema = new Schema(
   {
@@ -12,6 +12,6 @@ export const towerSchema = new Schema(
     range: { type: Number, required: true },
   },
   { _id: false }
-);
+)
 
-export const Tower = model('Tower', towerSchema);
+export const Tower = model('Tower', towerSchema)

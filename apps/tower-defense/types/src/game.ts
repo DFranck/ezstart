@@ -1,19 +1,14 @@
-import { generateMock } from '@anatine/zod-mock';
-import {
-  listingQuerySchema,
-  mongoIdSchema,
-  z,
-  type Infer,
-} from '@ezstart/types';
-import { GAME_PHASES } from '@tower-defense/config';
-import { playerSchema } from './player';
-import { towerShopItemSchema } from './tower-shop-item';
-import { unitShopItemSchema } from './unit-shop-item';
+import { generateMock } from '@anatine/zod-mock'
+import { listingQuerySchema, mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { GAME_PHASES } from '@tower-defense/config'
+import { gamePlayerSchema } from './game-player'
+import { towerShopItemSchema } from './tower-shop-item'
+import { unitShopItemSchema } from './unit-shop-item'
 
 export const gameSchema = z.object({
   _id: mongoIdSchema,
   host: mongoIdSchema.optional().describe('ID of the host player'),
-  players: z.array(playerSchema).describe('List of players'),
+  players: z.array(gamePlayerSchema).describe('List of players'),
   tick: z.number().describe('Current tick number'),
   map: z.array(z.array(z.string())).describe('2D map representation'),
   shopTowers: z.array(towerShopItemSchema).describe('RNG list of towers'),
@@ -21,16 +16,13 @@ export const gameSchema = z.object({
   phase: z.enum(GAME_PHASES).describe('Game phase'),
   createdAt: z.string().describe('ISO timestamp'),
   updatedAt: z.string().describe('ISO timestamp'),
-});
+})
 
-export const mockGame = generateMock(gameSchema);
-export const mockGames = generateMock(z.array(gameSchema));
+export const mockGame = generateMock(gameSchema)
+export const mockGames = generateMock(z.array(gameSchema))
 export const getGamesQuerySchema = listingQuerySchema.extend({
-  phase: z
-    .enum(GAME_PHASES)
-    .optional()
-    .describe('Filter by current game phase'),
-});
+  phase: z.enum(GAME_PHASES).optional().describe('Filter by current game phase'),
+})
 
-export type Game = Infer<typeof gameSchema>;
-export type GetGamesQuery = Infer<typeof getGamesQuerySchema>;
+export type Game = Infer<typeof gameSchema>
+export type GetGamesQuery = Infer<typeof getGamesQuerySchema>

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema } from 'mongoose'
 
 export const mobSchema = new Schema(
   {
@@ -12,6 +12,6 @@ export const mobSchema = new Schema(
     },
   },
   { _id: false }
-);
+)
 
-export const Mob = model('Mob', mobSchema);
+export const Mob = model('Mob', mobSchema)

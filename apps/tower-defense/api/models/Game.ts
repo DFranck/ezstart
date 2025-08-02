@@ -1,35 +1,34 @@
-import { Schema, model } from 'mongoose';
-import { mobSchema } from './Mob';
-import { towerSchema } from './Tower';
+import { DEFAULT_PHASE, GAME_PHASES } from '@tower-defense/config'
+import { Schema, model } from 'mongoose'
+import { gamePlayerSchema } from './GamePlayer'
+import { mobSchema } from './Mob'
+import { towerSchema } from './Tower'
 
 const gameSchema = new Schema(
   {
     host: { type: Schema.Types.ObjectId, ref: 'Player', required: false },
-    players: [{ type: Schema.Types.ObjectId, ref: 'Player', required: true }],
+    players: { type: [gamePlayerSchema], required: true },
     tick: { type: Number, default: 0 },
     map: { type: [[String]], required: true },
-    shop: [
+    shopTowers: [
       {
-        type: { type: String, enum: ['tower', 'unit'], required: true },
         price: { type: Number, required: true },
-        tower: {
-          type: towerSchema,
-          required: false,
-        },
-        unit: {
-          type: mobSchema,
-          required: false,
-        },
+        tower: towerSchema,
       },
     ],
-
+    shopUnits: [
+      {
+        price: { type: Number, required: true },
+        unit: mobSchema,
+      },
+    ],
     phase: {
       type: String,
-      enum: ['waiting', 'playing', 'finished'],
-      default: 'waiting',
+      enum: GAME_PHASES,
+      default: DEFAULT_PHASE,
     },
   },
   { timestamps: true }
-);
+)
 
-export const Game = model('Game', gameSchema);
+export const GameModel = model('Game', gameSchema)

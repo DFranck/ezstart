@@ -1,21 +1,21 @@
 // hooks/useCreateGame.ts
-'use client';
+'use client'
 
-import { callApi } from '@ezstart/ui/utils';
+import { callApi } from '@ezstart/ui/utils'
 
 export function useJoinGame() {
-  const joinGame = async (gameId: string, playerId: string) => {
+  const joinGame = async (gameId: string, playerName: string) => {
     try {
       const res = await callApi(`/api/games/${gameId}/join`, {
         method: 'POST',
-        body: { playerId },
-      });
+        body: { playerName },
+      })
 
-      if (!res.ok) throw new Error('Failed to join game');
+      if (!res.ok) throw new Error('Failed to join game')
     } catch (err) {
-      console.error('[games:join]', err);
+      console.error('[games:join]', err)
     }
-  };
+  }
 
-  return { joinGame };
+  return { joinGame }
 }

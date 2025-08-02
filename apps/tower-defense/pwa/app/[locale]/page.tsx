@@ -1,9 +1,11 @@
-'use client';
+'use client'
 
+import CreateGameButton from '@/components/CreateGameButton'
+import { LoginSection } from '@/components/LoginSection'
+import { usePlayerStore } from '@/stores/usePlayerStore'
 import {
   H1,
   Icon,
-  Input,
   LI,
   Main,
   P,
@@ -13,72 +15,62 @@ import {
   TooltipContent,
   TooltipTrigger,
   UL,
-} from '@ezstart/ui/components';
-import { isDebug, logger } from '@ezstart/ui/lib';
-import { callApi } from '@ezstart/ui/utils';
-import { mockGames, type Game } from '@tower-defense/types';
-import { useEffect, useState } from 'react';
-import { JoinGameButton } from './lobby/components/JoinGameButton';
+} from '@ezstart/ui/components'
+import { isDebug, logger } from '@ezstart/ui/lib'
+import { callApi } from '@ezstart/ui/utils'
+import { mockGames, type Game } from '@tower-defense/types'
+import { useEffect, useState } from 'react'
+import { JoinGameButton } from '../../components/JoinGameButton'
 
 export default function Page() {
-  const [playerName, setPlayerName] = useState('');
-  const [games, setGames] = useState<Game[]>([]);
-  const [isloading, setIsLoading] = useState(true);
+  const [games, setGames] = useState<Game[]>([])
+  const { player } = usePlayerStore()
+  const [isloading, setIsLoading] = useState(true)
   useEffect(() => {
     const fetchGames = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       if (isDebug() === true) {
-        setGames(mockGames);
+        setGames(mockGames)
       } else {
-        const res = await callApi('/api/games');
+        const res = await callApi('/api/games')
         if (res.ok) {
-          const waitingGames = (res.data as Game[]).filter(
-            (game) => game.phase === 'waiting'
-          );
-          logger.debug('waitingGames', waitingGames);
-          setGames(waitingGames);
+          const waitingGames = (res.data as Game[]).filter(game => game.phase === 'waiting')
+          logger.debug('waitingGames', waitingGames)
+          setGames(waitingGames)
         }
       }
-      setIsLoading(false);
-    };
+      setIsLoading(false)
+    }
 
-    fetchGames();
-  }, []);
+    fetchGames()
+  }, [])
 
   return (
     <Main>
       <Section size={'xl'}>
-        <H1 className='md:text-center'>Tower Defense</H1>
-        <Input
-          className='w-fit'
-          placeholder='Player name'
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-        />
+        <H1 className="md:text-center">Tower Defense</H1>
+        <LoginSection />
       </Section>
       {isloading ? (
         <Icon name={'fa:FaSpinner'} spin />
       ) : (
         <Section size={'xs'}>
-          {/* <CreateGameButton playerName={playerName} /> */}
-          {!isloading && games.length === 0 ? (
+          {player && <CreateGameButton playerName={player.name} />}
+          {!isloading || !player || games.length === 0 ? (
             <P variant={'description'}>No open games. Create one!</P>
           ) : (
             <UL>
-              {games.map((game) => (
+              {games.map(game => (
                 <LI key={game._id} size={'xs'}>
                   <Tooltip>
                     <TooltipTrigger>
                       <Span>{game.players.length}/8 players </Span>
-                      <JoinGameButton
-                        gameId={game._id}
-                        playerName={playerName}
-                      />
+                      <JoinGameButton gameId={game._id} playerName={player.name} />
                     </TooltipTrigger>
                     <TooltipContent>
                       <UL>
-                        {game.players.map((player) => (
-                          <LI key={player._id} marker={'dash'}>
+                        {game.players.map(player => (
+                          <LI key={`${player.playerId}-${player.name}`} marker={'dash'}>
                             {player.name}
                           </LI>
                         ))}
@@ -92,5 +84,5 @@ export default function Page() {
         </Section>
       )}
     </Main>
-  );
+  )
 }

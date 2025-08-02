@@ -1,19 +1,15 @@
-// models/Player.ts
-import { Schema, model } from 'mongoose';
-import { mobSchema } from './Mob';
-import { towerSchema } from './Tower';
+import { Schema, model } from 'mongoose'
 
-export const playerSchema = new Schema(
+const playerSchema = new Schema(
   {
-    name: { type: String, required: true },
-    gold: { type: Number, required: true },
-    income: { type: Number, required: true },
-    hp: { type: Number, required: true },
-    hand: { type: [towerSchema], required: true, default: [] },
-    placedTowers: { type: [towerSchema], required: true, default: [] },
-    incomingUnits: { type: [mobSchema], required: true, default: [] },
+    userId: { type: String, required: false, unique: true, sparse: true },
+    name: { type: String, required: true, unique: true },
+    gamesPlayed: { type: Number, default: 0 },
+    gamesWon: { type: Number, default: 0 },
+    rank: { type: Number, default: 1000 },
+    // Plus tard : userId: ObjectId, email, etc.
   },
   { timestamps: true }
-);
+)
 
-export const Player = model('Player', playerSchema);
+export const PlayerModel = model('Player', playerSchema)
