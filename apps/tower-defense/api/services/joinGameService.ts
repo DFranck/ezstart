@@ -1,5 +1,6 @@
 // services/joinGameService.ts
 import { logger } from '@ezstart/ui/lib'
+import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer'
 import { GameModel } from '../models/Game'
 import { PlayerModel } from '../models/Player'
 
@@ -15,7 +16,7 @@ export async function joinGameService({ gameId, playerId }: { gameId: string; pl
   const alreadyJoined = game.players.some(p => p.toString() === playerId)
   if (alreadyJoined) return { gameId, playerId, joinedAt: new Date().toISOString() }
 
-  game.players.push(player._id as any)
+  game.players.push(createDefaultGamePlayer({ playerId: player._id, name: player.name }))
   await game.save()
 
   return {

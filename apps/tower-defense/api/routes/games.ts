@@ -45,6 +45,7 @@ docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameContr
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
+  bodySchema: paramsMongoIdSchema,
   paramsSchema: paramsMongoIdSchema,
   responseSchema: gameSchema,
 })

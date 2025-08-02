@@ -2,11 +2,14 @@
 
 import { callApi } from '@ezstart/ui/utils'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export function useLeaveGame() {
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const leaveGame = async (gameId: string, playerId: string) => {
     try {
+      setLoading(true)
       const res = await callApi(`/api/games/${gameId}/leave`, {
         method: 'POST',
         body: { playerId },
@@ -16,8 +19,10 @@ export function useLeaveGame() {
       router.push('/')
     } catch (err) {
       console.error('[games:leave]', err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  return { leaveGame }
+  return { leaveGame, loading }
 }
