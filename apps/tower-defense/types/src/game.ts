@@ -7,14 +7,17 @@ import {
 } from '@ezstart/types';
 import { GAME_PHASES } from '@tower-defense/config';
 import { playerSchema } from './player';
-import { shopItemSchema } from './shop-item';
+import { towerShopItemSchema } from './tower-shop-item';
+import { unitShopItemSchema } from './unit-shop-item';
 
 export const gameSchema = z.object({
   _id: mongoIdSchema,
+  host: mongoIdSchema.optional().describe('ID of the host player'),
   players: z.array(playerSchema).describe('List of players'),
   tick: z.number().describe('Current tick number'),
   map: z.array(z.array(z.string())).describe('2D map representation'),
-  shop: z.array(shopItemSchema).describe('Available shop items'),
+  shopTowers: z.array(towerShopItemSchema).describe('RNG list of towers'),
+  shopUnits: z.array(unitShopItemSchema).describe('Fixed list of units'),
   phase: z.enum(GAME_PHASES).describe('Game phase'),
   createdAt: z.string().describe('ISO timestamp'),
   updatedAt: z.string().describe('ISO timestamp'),

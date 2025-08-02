@@ -9,7 +9,7 @@ import {
   createGameResponseSchema,
   gameSchema,
   getGamesQuerySchema,
-} from '@tower-defense/types/dist/src';
+} from '@tower-defense/types';
 import express from 'express';
 import { createGameController } from '../controllers/createGameController';
 import { getGameByIdController } from '../controllers/getGameByIdController';

@@ -1,8 +1,6 @@
 import { useCreateGame } from '@/hooks/useCreateGame';
 import {
   Button,
-  Div,
-  Input,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -10,33 +8,33 @@ import {
 
 type Props = {
   playerName: string;
-  setPlayerName: (playerName: string) => void;
 };
 
-const CreateGameButton = ({ playerName, setPlayerName }: Props) => {
+const CreateGameButton = ({ playerName }: Props) => {
   const { createGame } = useCreateGame();
+  const isDisabled = !playerName;
+
   return (
-    <Div layout={'grid'}>
-      <Input
-        placeholder='Player name'
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-      />
-      <Tooltip>
-        <TooltipTrigger>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div>
           <Button
+            onClick={() => {
+              if (isDisabled) return;
+              createGame({ playerName });
+            }}
+            disabled={isDisabled}
             className='w-full'
-            onClick={() => createGame({ playerName: playerName })}
-            disabled={!playerName}
           >
             Create New Game
           </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          {!playerName && 'Please enter a player name'}
-        </TooltipContent>
-      </Tooltip>
-    </Div>
+        </div>
+      </TooltipTrigger>
+
+      {isDisabled && (
+        <TooltipContent>Please enter a player name</TooltipContent>
+      )}
+    </Tooltip>
   );
 };
 

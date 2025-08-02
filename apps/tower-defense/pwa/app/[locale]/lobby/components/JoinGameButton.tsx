@@ -1,19 +1,25 @@
 'use client';
 
-import { Button } from '@ezstart/ui/components';
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@ezstart/ui/components';
 import { callApi } from '@ezstart/ui/utils';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function JoinGameButton({
-  gameId,
-  playerName,
-}: {
+type Props = {
   gameId: string;
   playerName: string;
-}) {
+};
+
+export function JoinGameButton({ gameId, playerName }: Props) {
   const [loading, setLoading] = useState(false);
+  const isDisabled = !playerName;
   const router = useRouter();
+
   const joinGame = async () => {
     setLoading(true);
     try {
@@ -23,7 +29,6 @@ export function JoinGameButton({
       });
 
       if (!response.ok) throw new Error('Failed to join game');
-
       router.push(`/lobby/${gameId}`);
     } catch (err) {
       console.error('[games:join]', err);
@@ -32,9 +37,27 @@ export function JoinGameButton({
     }
   };
 
+  if (isDisabled) {
+    // Rendu spécial quand désactivé (Tooltip fonctionnel, pas de <button> dans <button>)
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {/* Le wrapper ne doit PAS être un bouton */}
+          <span className='w-full block'>
+            <Button disabled className='w-full'>
+              Join the Game
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>Please enter a player name</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  // Rendu normal sans Tooltip si actif
   return (
-    <Button onClick={joinGame} disabled={loading}>
-      {loading ? 'Joining...' : 'Join Game'}
+    <Button onClick={joinGame} disabled={loading} className='w-full'>
+      {loading ? 'Joining...' : 'Join the Game'}
     </Button>
   );
 }

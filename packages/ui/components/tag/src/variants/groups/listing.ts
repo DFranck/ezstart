@@ -1,6 +1,7 @@
 // Path: ez-libs/ez-tag/components/listingVariants.ts
 
 import { cva } from 'class-variance-authority';
+import { isDebug } from '../../../../../lib';
 import {
   intentContainer,
   intentText,
@@ -72,19 +73,19 @@ export const listingItemsVariantConfig = {
 
 // --- CVA
 export const listingContainersVariants = {
-  ul: cva('', {
+  ul: cva(`${isDebug() ? 'bg-yellow-500/50' : ''}`, {
     variants: listingContainersVariantConfig,
     defaultVariants: {
       variant: 'default',
       intent: 'default',
-      size: 'lg',
+      size: 'default',
       layout: 'col',
     },
   }),
 };
 
 export const listingItemsVariants = {
-  li: cva('flex gap-2', {
+  li: cva(`${isDebug() ? 'bg-green-500/50' : ''} flex gap-2`, {
     variants: listingItemsVariantConfig,
     defaultVariants: {
       variant: 'default',

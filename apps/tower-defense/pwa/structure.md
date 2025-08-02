@@ -12,6 +12,7 @@
         - MobSpawner.tsx
         - PlayerStatsPanel.tsx
         - TowerPlacer.tsx
+        - TowerShop.tsx
       - [gameId]/
         - page.tsx
     - layout.tsx
@@ -27,6 +28,8 @@
     - post-game/
       - [gameId]/
         - page.tsx
+- components/
+  - CreateGameButton.tsx
 - components.json
 - eslint.config.js
 - hooks/
@@ -56,7 +59,7 @@
   - json/
 - README.md
 - stores/
-  - gameStore.ts
+  - useGameState.ts
 - structure.md
 - tsconfig.json
 - tsconfig.tsbuildinfo

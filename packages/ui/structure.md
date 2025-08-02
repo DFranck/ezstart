@@ -7,6 +7,7 @@
   - button.tsx
   - card.tsx
   - carousel.tsx
+  - debugBanner.tsx
   - dropdown.tsx
   - header.tsx
   - hero.tsx
@@ -78,6 +79,7 @@
           - section.ts
           - span.ts
   - text-gradient.tsx
+  - tooltip.tsx
 - components.json
 - eslint.config.js
 - hooks/
@@ -88,6 +90,7 @@
   - use-in-view.ts
   - use-on-scroll.ts
 - lib/
+  - debug.ts
   - index.ts
   - logger.ts
   - utils.ts

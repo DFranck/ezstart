@@ -1,4 +1,5 @@
 import { cva } from 'class-variance-authority';
+import { isDebug } from '../../../../../lib';
 import { intentContainer, variantContainer } from '../../tokens/tokens';
 import { createAlias } from '../../utils/create-alias';
 
@@ -48,7 +49,7 @@ export const DEFAULT_DIV_VARIANTS = {
 } as const;
 
 // --- cva
-export const divVariants = cva('', {
+export const divVariants = cva(`${isDebug() ? 'bg-red-500/50' : ''}`, {
   variants: divVariantConfig,
   defaultVariants: DEFAULT_DIV_VARIANTS,
 });

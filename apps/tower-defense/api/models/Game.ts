@@ -4,6 +4,7 @@ import { towerSchema } from './Tower';
 
 const gameSchema = new Schema(
   {
+    host: { type: Schema.Types.ObjectId, ref: 'Player', required: false },
     players: [{ type: Schema.Types.ObjectId, ref: 'Player', required: true }],
     tick: { type: Number, default: 0 },
     map: { type: [[String]], required: true },

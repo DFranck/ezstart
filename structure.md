@@ -47,6 +47,7 @@
 - README.md
 - scripts/
   - check-typecheck.ts
+  - clean.ts
   - export-to-public.ts
   - generate-apis-config.ts
   - generate-readmes-types.ts

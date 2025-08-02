@@ -9,7 +9,7 @@ export const spanVariantConfig = {
 } as const;
 
 export const DEFAULT_SPAN_VARIANTS = {
-  size: 'xs',
+  size: 'default',
   intent: 'default',
   layout: 'inline',
 } as const;
