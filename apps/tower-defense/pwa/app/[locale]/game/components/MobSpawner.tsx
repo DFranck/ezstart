@@ -1,18 +1,45 @@
 // game/components/MobSpawner.tsx
-
-import { Game } from '@ezstart/types';
+'use client';
+import {
+  Button,
+  Div,
+  H6,
+  P,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@ezstart/ui/components';
+import { logger } from '@ezstart/ui/lib';
+import { Game, mockMobs } from '@tower-defense/types';
 
 type MobSpawnerProps = {
   game: Game;
 };
 
 export function MobSpawner({ game }: MobSpawnerProps) {
+  const mobs = mockMobs;
+  logger.debug('mobs', mobs);
   return (
-    <div className='border p-4 rounded bg-muted'>
-      <h2 className='text-lg font-bold mb-2'>Send Mobs</h2>
-      <p className='text-sm text-muted-foreground'>
-        Mob spawner UI coming soon...
-      </p>
-    </div>
+    <Div size={'xs'} layout={'grid'}>
+      {mobs.map((mob) => (
+        <Div size={'xs'} variant={'card'} layout={'col'} key={mob._id}>
+          <H6 className='line-clamp-1'>{mob.name}</H6>
+          <P>{mob.type}</P>
+          <P>hp:{mob.hp}</P>
+          <P>speed:{mob.speed}</P>
+          <P>
+            effects:
+            {mob.effects?.map((e) => (
+              <Tooltip key={e}>
+                <TooltipTrigger asChild>
+                  <Button name={e}>{e}</Button>
+                </TooltipTrigger>
+                <TooltipContent>{`This is ${e}`}</TooltipContent>
+              </Tooltip>
+            ))}
+          </P>
+        </Div>
+      ))}
+    </Div>
   );
 }

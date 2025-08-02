@@ -107,37 +107,15 @@ Les types `Game`, `Player`, `Mob`, `Tower`, `GameState`, etc. sont centralisés 
 
 ## 👉 [`packages/types/tower-defense/`](../../../packages/types/tower-defense/)
 
-## ⏱️ Phases du jeu
+## 📡 API REST
 
-Le jeu est découpé en **cycles fixes de 30 secondes**, synchronisés par le backend. Chaque tick inclut :
+La documentation complète des routes REST est disponible ici :
 
-1. **Income phase** : gain d’or en fonction des tours/rounds précédents
-2. **Shop phase** : apparition de nouveaux items/tours (si implémenté)
-3. **Send phase** : chaque joueur peut envoyer des mobs aux autres
-4. **Build phase** : placement de tours sur la map
+👉 [Swagger UI](http://localhost:3000/api-docs)
 
-## Chaque phase peut être enrichie dans le moteur `engine/` selon les besoins d'équilibrage ou de design.
+## 🔁 Flows détaillés
 
-## 🔁 Cycle de rendu frontend
-
-L’interface du joueur se met à jour **à chaque tick serveur** via `socket.emit('state_update')`.
-
-- L’état est injecté dans `gameStore.ts`
-- Les composants clés s’abonnent à des slices (`useGame`, `usePlayer`)
-- Le canvas (`GameCanvas`) est ré-rendu dynamiquement
-- Les actions locales sont validées en local et synchronisées ensuite (`usePlayerActions`)
-
----
-
-## 🛣️ Roadmap technique (draft)
-
-- [x] Base backend API Express + Socket.IO
-- [x] Setup frontend PWA responsive
-- [x] Store Zustand typé
-- [x] Hooks Socket + Actions
-- [x] Structure de tick centralisée
-- [ ] Moteur de loop (`engine/`)
-- [ ] Logique de scoring / fin de partie
-- [ ] UI pour mobile optimisée
-- [ ] Gestion audio (bruitages, alertes)
-- [ ] Système de matchmaking (later)
+- [🏠 Home (pré-game)](../docs/flows/pre-game-home.md)
+- [🧍 Lobby (pré-game)](../docs/flows/pre-game-lobby.md)
+- [🎮 Partie en cours (`/game/:gameId`)](./flows/in-game.md)
+- [📊 Résultat de partie (`/post-game/:gameId`)](./flows/post-game.md)

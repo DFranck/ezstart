@@ -2,7 +2,7 @@ import {
   CreateGamePayload,
   CreateGameResponse,
   mockPlayers,
-} from '@ezstart/types';
+} from '@tower-defense/types';
 import { Game } from '../models/Game';
 
 export async function createGameService(

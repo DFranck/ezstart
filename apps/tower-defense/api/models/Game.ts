@@ -9,7 +9,6 @@ const gameSchema = new Schema(
     map: { type: [[String]], required: true },
     shop: [
       {
-        name: { type: String, required: true },
         type: { type: String, enum: ['tower', 'unit'], required: true },
         price: { type: Number, required: true },
         tower: {

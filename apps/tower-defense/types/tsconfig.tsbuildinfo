@@ -1,0 +1,1 @@
+{"root":["./game.ts","./index.ts","./mob.ts","./player.ts","./position.ts","./rpc.ts","./shop-item.ts","./tower.ts"],"errors":true,"version":"5.7.3"}

@@ -1,4 +1,4 @@
-import { z, type Infer } from '../zod-extended';
+import { z, type Infer } from '@ezstart/types';
 
 export const positionSchema = z.object({
   x: z.number().describe('Position X'),

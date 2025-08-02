@@ -1,5 +1,5 @@
 import { findWithQuery } from '@ezstart/api-core';
-import { Game as GameType, GetGamesQuery } from '@ezstart/types';
+import { Game as GameType, GetGamesQuery } from '@tower-defense/types';
 import { Game } from '../models/Game';
 
 export async function getGamesService(

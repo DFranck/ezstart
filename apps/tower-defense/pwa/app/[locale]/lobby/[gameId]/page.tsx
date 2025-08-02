@@ -1,6 +1,6 @@
 // app/[locale]/lobby/[gameId]/page.tsx
-import { mockPlayers } from '@ezstart/types';
 import { callApi } from '@ezstart/ui/utils';
+import { mockPlayers } from '@tower-defense/types';
 import { notFound } from 'next/navigation';
 import { LeaveGameButton } from '../components/LeaveGameButton';
 import { LobbyPlayersList } from '../components/LobbyPlayersList';

@@ -7,10 +7,10 @@ import { useState } from 'react';
 
 export function JoinGameButton({
   gameId,
-  playerId,
+  playerName,
 }: {
   gameId: string;
-  playerId: string;
+  playerName: string;
 }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -19,7 +19,7 @@ export function JoinGameButton({
     try {
       const response = await callApi(`/api/games/${gameId}/join`, {
         method: 'POST',
-        body: { playerId },
+        body: { playerName },
       });
 
       if (!response.ok) throw new Error('Failed to join game');

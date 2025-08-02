@@ -4,12 +4,12 @@ import {
   validateParams,
   validateQuery,
 } from '@ezstart/api-core';
+import { paramsMongoIdSchema } from '@ezstart/types';
 import {
   createGameResponseSchema,
   gameSchema,
   getGamesQuerySchema,
-  paramsMongoIdSchema,
-} from '@ezstart/types';
+} from '@tower-defense/types/dist/src';
 import express from 'express';
 import { createGameController } from '../controllers/createGameController';
 import { getGameByIdController } from '../controllers/getGameByIdController';

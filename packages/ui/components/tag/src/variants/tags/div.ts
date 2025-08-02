@@ -42,8 +42,8 @@ export const divVariantConfig = {
 export const DEFAULT_DIV_VARIANTS = {
   variant: 'default',
   intent: 'default',
-  size: 'md',
-  layout: 'center',
+  size: 'default',
+  layout: 'default',
   withHeaderOffset: false,
 } as const;
 

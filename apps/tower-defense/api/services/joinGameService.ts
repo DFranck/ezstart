@@ -1,5 +1,5 @@
 // services/joinGameService.ts
-import { mockPlayer } from '@ezstart/types';
+import { mockPlayer } from '@tower-defense/types';
 import { Game } from '../models/Game';
 
 export async function joinGameService({

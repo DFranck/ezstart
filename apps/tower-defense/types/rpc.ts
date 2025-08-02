@@ -1,5 +1,5 @@
 // @ezstart/types/tower-defense/rpc.ts
-import { z, type Infer } from '../zod-extended';
+import { z, type Infer } from '@ezstart/types';
 
 // ---- create_game
 export const createGameSchema = z.object({

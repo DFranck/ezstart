@@ -1,6 +1,5 @@
 import { generateMock } from '@anatine/zod-mock';
-import { mongoIdSchema } from '../common';
-import { z, type Infer } from '../zod-extended';
+import { mongoIdSchema, z, type Infer } from '@ezstart/types';
 import { positionSchema } from './position';
 
 export const towerSchema = z.object({
@@ -10,6 +9,9 @@ export const towerSchema = z.object({
   position: positionSchema.describe('Tower position on the map'),
   damage: z.number().describe('Damage dealt by the tower'),
   range: z.number().describe('Attack range of the tower'),
+  shape: z
+    .array(z.array(z.boolean()))
+    .describe('2D shape of the tower, true = occupied cell'),
 });
 
 export type Tower = Infer<typeof towerSchema>;

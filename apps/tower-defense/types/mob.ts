@@ -1,6 +1,5 @@
 import { generateMock } from '@anatine/zod-mock';
-import { mongoIdSchema } from '../common';
-import { z, type Infer } from '../zod-extended';
+import { mongoIdSchema, z, type Infer } from '@ezstart/types';
 
 export const mobSchema = z.object({
   _id: mongoIdSchema,
@@ -8,7 +7,9 @@ export const mobSchema = z.object({
   type: z.enum(['goblin', 'wolf', 'boss']).describe('Type of mob'),
   hp: z.number().describe('Health points of the mob'),
   speed: z.number().describe('Speed of movement'),
-  effects: z.array(z.string()).optional().describe('Status effects applied'),
+  effects: z
+    .array(z.enum(['poisoned', 'burning', 'invisible', 'healed']))
+    .optional(),
 });
 
 export type Mob = Infer<typeof mobSchema>;

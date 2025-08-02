@@ -1,6 +1,5 @@
 import { generateMock } from '@anatine/zod-mock';
-import { mongoIdSchema } from '../common';
-import { z, type Infer } from '../zod-extended';
+import { mongoIdSchema, z, type Infer } from '@ezstart/types';
 import { mobSchema } from './mob';
 import { towerSchema } from './tower';
 

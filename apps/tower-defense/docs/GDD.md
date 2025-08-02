@@ -139,4 +139,6 @@ Un **Tower Defense PvP dynamique à ⚠️ 8 joueurs** :
 - 🤔 Gestion d’économie (hard cap, intérêt ?)
 - 🤔 Possibilité de vendre ses tours ?
 - 🤔 les tours peuvent avoir des forment différentes à la Tétris pour complexifier le positionnement?
-- 🤔 les tours sont construite dynamqiuement, addition aléatoire de forme, type, action, bonus?
+- 🤔 les tours sont construite dynamiquement, addition aléatoire de forme, type, action, bonus?
+- 🤔 les unités sont construit dynamiquement, addition aléatoire de forme, type, action, bonus?
+- 🤔 Le spawn des mobs peut être déplacer par les adversaires?

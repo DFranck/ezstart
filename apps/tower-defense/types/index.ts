@@ -1,5 +1,4 @@
 export * from './game';
-export * from './game-state';
 export * from './mob';
 export * from './player';
 export * from './position';

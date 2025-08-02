@@ -1,4 +1,5 @@
-import { mockShopItems } from '@ezstart/types';
+import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config';
+import { mockShopItems } from '@tower-defense/types';
 import { Types } from 'mongoose';
 import { Game } from '../models/Game';
 
@@ -12,7 +13,7 @@ export async function startGameService({ gameId }: { gameId: string }) {
 
   game.set(
     'map',
-    Array.from({ length: 10 }, () => Array(10).fill('grass'))
+    Array.from({ length: ZONE_HEIGHT }, () => Array(ZONE_WIDTH).fill('grass'))
   );
 
   game.set(

@@ -22,10 +22,18 @@
     - api/ → [structure.md](./apps/monitor/api/structure.md)
   - tower-defense/
     - api/ → [structure.md](./apps/tower-defense/api/structure.md)
+    - config/ → [structure.md](./apps/tower-defense/config/structure.md)
     - docs/
+      - flows/
+        - in-game-canvas.md
+        - in-game.md
+        - post-game.md
+        - pre-game-home.md
+        - pre-game-lobby.md
       - GDD.md
       - TDD.md
     - pwa/ → [structure.md](./apps/tower-defense/pwa/structure.md)
+    - types/ → [structure.md](./apps/tower-defense/types/structure.md)
 - eslint.config.js
 - package.json
 - packages/
@@ -41,6 +49,7 @@
   - check-typecheck.ts
   - export-to-public.ts
   - generate-apis-config.ts
+  - generate-readmes-types.ts
   - generate-readmes.ts
   - generate-structures.ts
   - public-whitelist.json
