@@ -1,99 +1,89 @@
-'use client';
+'use client'
 
-import { useEffect, useRef, useState } from 'react';
-import { Button } from './button';
-import { LI, UL } from './tag';
+import { useEffect, useRef, useState } from 'react'
+import { Button } from './button'
+import { LI, UL } from './tag'
 
 export interface DropdownItem {
-  label: string;
-  value: string;
-  onSelect?: () => void;
+  label: string
+  value: string
+  onSelect?: () => void
 }
 
 export interface DropdownProps {
-  label: React.ReactNode;
-  items: DropdownItem[];
-  variant?:
-    | 'default'
-    | 'ghost'
-    | 'secondary'
-    | 'outline'
-    | 'destructive'
-    | 'link'
-    | null;
+  label: React.ReactNode
+  items: DropdownItem[]
+  variant?: 'default' | 'ghost' | 'secondary' | 'outline' | 'destructive' | 'link' | null
 }
 
 export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLUListElement>(null)
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
 
-  const menuId = 'dropdown-menu';
+  const menuId = 'dropdown-menu'
 
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Handle keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!open) return;
+      if (!open) return
 
       if (e.key === 'Escape') {
-        setOpen(false);
-        buttonRef.current?.focus();
+        setOpen(false)
+        buttonRef.current?.focus()
       }
 
       if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setFocusedIndex((i) => (i === null ? 0 : (i + 1) % items.length));
+        e.preventDefault()
+        setFocusedIndex(i => (i === null ? 0 : (i + 1) % items.length))
       }
 
       if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setFocusedIndex((i) =>
+        e.preventDefault()
+        setFocusedIndex(i =>
           i === null ? items.length - 1 : (i - 1 + items.length) % items.length
-        );
+        )
       }
 
       if (e.key === 'Enter' && focusedIndex != null) {
-        const item = items[focusedIndex];
-        item?.onSelect?.();
-        setOpen(false);
+        const item = items[focusedIndex]
+        item?.onSelect?.()
+        setOpen(false)
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, items, focusedIndex]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, items, focusedIndex])
 
   // Manage focus when menu opens
   useEffect(() => {
     if (open) {
-      setFocusedIndex(null);
+      setFocusedIndex(null)
     }
-  }, [open]);
+  }, [open])
 
   return (
-    <div ref={containerRef} className='relative inline-block text-left'>
+    <div ref={containerRef} className="relative inline-block text-left">
       <Button
         variant={variant}
         ref={buttonRef}
-        onClick={() => setOpen((o) => !o)}
-        className='w-full'
-        aria-haspopup='menu'
+        onClick={() => setOpen(o => !o)}
+        className="w-full"
+        aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
       >
@@ -103,23 +93,23 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
       {open && (
         <UL
           id={menuId}
-          role='menu'
+          role="menu"
           ref={menuRef}
           variant={'outline'}
           layout={'menu'}
-          className='absolute right-0 z-50 focus:outline-none bg-background '
+          className="absolute right-0 z-50 focus:outline-none bg-background "
         >
           {items.map(({ label, onSelect, value }, i) => (
             <Button
               key={value}
               variant={'ghost'}
               asChild
-              className='w-full justify-start mb-0'
-              role='menuitem'
+              className="w-full justify-start mb-0"
+              role="menuitem"
               size={'sm'}
               onClick={() => {
-                onSelect?.();
-                setOpen(false);
+                onSelect?.()
+                setOpen(false)
               }}
               tabIndex={-1}
             >
@@ -129,5 +119,5 @@ export function Dropdown({ label, items, variant = 'ghost' }: DropdownProps) {
         </UL>
       )}
     </div>
-  );
+  )
 }
