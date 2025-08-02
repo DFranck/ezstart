@@ -15,7 +15,7 @@ import { JoinGameButton } from '../../components/JoinGameButton'
 export default function Page() {
   const [waitingGames, setWaitingGames] = useState<Game[]>([])
   const { player } = usePlayerStore()
-  const [isloading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   useEffect(() => {
     const fetchGames = async () => {
       setIsLoading(true)
@@ -35,41 +35,45 @@ export default function Page() {
     fetchGames()
   }, [])
 
+  if (isLoading) {
+    return (
+      <Main>
+        <Icon name={'fa:FaSpinner'} spin />
+      </Main>
+    )
+  }
+
   return (
     <Main>
       <Section size={'xl'}>
         <H1 className="md:text-center">Tower Defense</H1>
         <LoginSection />
       </Section>
-      {isloading ? (
-        <Icon name={'fa:FaSpinner'} spin />
-      ) : (
-        <Section size={'xs'}>
-          {player && <CreateGameButton playerId={player._id} />}
-          {!isloading && waitingGames.length === 0 ? (
-            <P variant={'description'}>No open lobbies. Create one!</P>
-          ) : (
-            <UL>
-              {waitingGames.map(game => {
-                const alreadyJoined = game.players.some(p => extractPlayerId(p) === player?._id)
-                logger.debug('alreadyJoined', alreadyJoined)
-                return (
-                  <LI key={game._id} size={'xs'}>
-                    <Span>{game.players.length}/8 players </Span>
-                    {!alreadyJoined ? (
-                      <JoinGameButton gameId={game._id} playerId={player?._id ?? ''} />
-                    ) : (
-                      <Button asChild>
-                        <Link href={`/lobby/${game._id}`}>Return to lobby</Link>
-                      </Button>
-                    )}
-                  </LI>
-                )
-              })}
-            </UL>
-          )}
-        </Section>
-      )}
+      <Section size={'xs'}>
+        {player && <CreateGameButton playerId={player._id} />}
+        {waitingGames.length === 0 ? (
+          <P variant={'description'}>No open lobbies. Create one!</P>
+        ) : (
+          <UL>
+            {waitingGames.map(game => {
+              const alreadyJoined = game.players.some(p => extractPlayerId(p) === player?._id)
+              logger.debug('alreadyJoined', alreadyJoined)
+              return (
+                <LI key={game._id} size={'xs'}>
+                  <Span>{game.players.length}/8 players </Span>
+                  {!alreadyJoined ? (
+                    <JoinGameButton gameId={game._id} playerId={player?._id ?? ''} />
+                  ) : (
+                    <Button asChild>
+                      <Link href={`/lobby/${game._id}`}>Return to lobby</Link>
+                    </Button>
+                  )}
+                </LI>
+              )
+            })}
+          </UL>
+        )}
+      </Section>
     </Main>
   )
 }

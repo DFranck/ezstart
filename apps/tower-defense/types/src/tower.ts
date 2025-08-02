@@ -3,13 +3,11 @@ import { mongoIdSchema, z, type Infer } from '@ezstart/types'
 import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
 import { damageTypeSchema } from './damage'
 import { elementalTypeSchema } from './elements'
-import { positionSchema } from './position'
 
 export const towerSchema = z.object({
   _id: mongoIdSchema,
   name: z.string().min(1).max(50).describe('Name of the tower'),
   elementalType: elementalTypeSchema.describe('Elemental type of tower'),
-  position: positionSchema.describe('Tower position on the map'),
   damage: z.number().min(1).max(500).describe('Damage dealt by the tower'),
   damageType: damageTypeSchema.describe('Damage type of the tower'),
   speed: z.number().min(0.1).max(3).describe('Attack speed of the tower (attacks/sec)'),
@@ -28,5 +26,18 @@ export const towerSchema = z.object({
 })
 
 export type Tower = Infer<typeof towerSchema>
-export const mockTower = generateMock(towerSchema)
-export const mockTowers = generateMock(z.array(towerSchema))
+
+function getRandomShape(): boolean[][] {
+  const shape = SHAPE_VALUES[Math.floor(Math.random() * SHAPE_VALUES.length)]
+  return JSON.parse(JSON.stringify(shape)) // simple deep clone
+}
+
+export const mockTowers: Tower[] = Array.from({ length: 5 }, () => ({
+  ...generateMock(towerSchema),
+  shape: getRandomShape(),
+}))
+
+export const mockTower: Tower = {
+  ...generateMock(towerSchema),
+  shape: getRandomShape(),
+}

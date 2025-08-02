@@ -13,16 +13,16 @@ export function MobSpawner({ game }: MobSpawnerProps) {
   logger.debug('mobs', mobs)
   return (
     <Div size={'xs'} layout={'grid'}>
-      {mobs.map(mob => (
-        <Div size={'xs'} variant={'card'} layout={'col'} key={mob._id}>
+      {mobs.map((mob, index) => (
+        <Div size={'xs'} variant={'card'} layout={'col'} key={mob._id + index}>
           <H6 className="line-clamp-1">{mob.name}</H6>
-          <P>{mob.type}</P>
+
           <P>hp:{mob.hp}</P>
           <P>speed:{mob.speed}</P>
           <P>
             effects:
-            {mob.effects?.map(e => (
-              <Tooltip key={e}>
+            {mob.effects?.map((e, index) => (
+              <Tooltip key={e + index}>
                 <TooltipTrigger asChild>
                   <Button name={e}>{e}</Button>
                 </TooltipTrigger>
