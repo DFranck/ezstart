@@ -15,40 +15,11 @@ export function TowerShop({ game }: TowerShopProps) {
   const [towers] = useState(mockTowers)
   const ghostRef = useRef<HTMLDivElement>(null)
 
-  // Attach ghost follow and cleanup
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (ghostRef.current) {
-        ghostRef.current.style.left = `${e.clientX + 4}px`
-        ghostRef.current.style.top = `${e.clientY + 4}px`
-      }
-    }
-
-    const handleMouseUp = (e: MouseEvent) => {
-      const isCanvas = (e.target as HTMLElement).closest('canvas')
-      if (!isCanvas) {
-        setDraggedTower(null)
-        if (ghostRef.current) {
-          ghostRef.current.innerHTML = ''
-          ghostRef.current.style.display = 'none'
-        }
-      }
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [setDraggedTower])
-
   const renderGhost = (shape: boolean[][]) => {
     if (!ghostRef.current) return
     ghostRef.current.innerHTML = ''
     ghostRef.current.style.display = 'grid'
     ghostRef.current.style.gridTemplateColumns = `repeat(${shape[0].length}, ${TILE_SIZE}px)`
-
     shape.forEach(row =>
       row.forEach(cell => {
         const div = document.createElement('div')
@@ -60,22 +31,75 @@ export function TowerShop({ game }: TowerShopProps) {
     )
   }
 
-  const handleGrab = (towerIndex: number) => (e: React.MouseEvent) => {
-    e.preventDefault()
+  const startDraggingTower = (towerIndex: number, clientX: number, clientY: number) => {
     const tower = towers[towerIndex]
     setDraggedTower(tower)
     renderGhost(tower.shape)
+
+    if (ghostRef.current) {
+      ghostRef.current.style.left = `${clientX + 4}px`
+      ghostRef.current.style.top = `${clientY + 4}px`
+    }
   }
+
+  const handleMouseDown = (towerIndex: number) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    startDraggingTower(towerIndex, e.clientX, e.clientY)
+  }
+
+  const handleTouchStart = (towerIndex: number) => (e: React.TouchEvent) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    startDraggingTower(towerIndex, touch.clientX, touch.clientY)
+  }
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      if (ghostRef.current) {
+        ghostRef.current.style.left = `${clientX + 4}px`
+        ghostRef.current.style.top = `${clientY + 4}px`
+      }
+    }
+
+    const handleEnd = (e: MouseEvent | TouchEvent) => {
+      const target = (e.target as HTMLElement) ?? null
+      const isCanvas = target?.closest('canvas')
+
+      if (!isCanvas) {
+        setDraggedTower(null)
+        if (ghostRef.current) {
+          ghostRef.current.innerHTML = ''
+          ghostRef.current.style.display = 'none'
+        }
+      }
+    }
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseup', handleEnd)
+    window.addEventListener('touchmove', handleMove, { passive: false })
+    window.addEventListener('touchend', handleEnd)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleEnd)
+      window.removeEventListener('touchmove', handleMove)
+      window.removeEventListener('touchend', handleEnd)
+    }
+  }, [setDraggedTower])
 
   return (
     <div className="relative">
       <div ref={ghostRef} data-ghost className="pointer-events-none fixed z-50 opacity-90" />
+
       <div className="grid gap-2">
         {towers.map((tower, index) => (
           <div
             key={tower._id}
-            className="rounded shadow p-2 cursor-grab active:cursor-grabbing"
-            onMouseDown={handleGrab(index)}
+            className="rounded shadow p-2 cursor-grab active:cursor-grabbing touch-none"
+            onMouseDown={handleMouseDown(index)}
+            onTouchStart={handleTouchStart(index)}
           >
             <span className="text-xs font-medium">{tower.name}</span>
             <Div

@@ -1,7 +1,6 @@
 import { findPath } from '@/utils/pathfinding'
 import { computeCoveredCells } from '@/utils/shapeUtils'
 import { logger } from '@ezstart/ui/lib'
-import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { Mob, PlacedTower, Position, Tower } from '@tower-defense/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -47,11 +46,8 @@ export const useGameState = create<GameState>()(
       initPath: () =>
         set(s => {
           const blocked = s.towers.flatMap(t => t.coveredCells)
-          const path = findPath(
-            { x: 0, y: 0 }, // start
-            { x: ZONE_WIDTH - 1, y: ZONE_HEIGHT - 1 }, // end
-            blocked
-          )
+          const path = findPath(blocked)
+
           logger.debug('[initPath] blocked cells:', blocked)
           logger.debug('[initPath] found path:', path)
 
@@ -69,11 +65,7 @@ export const useGameState = create<GameState>()(
         set(s => {
           const nextTowers = [...s.towers, placed]
           const blocked = nextTowers.flatMap(t => t.coveredCells)
-          const newPath = findPath(
-            { x: 0, y: 0 },
-            { x: ZONE_WIDTH - 1, y: ZONE_HEIGHT - 1 },
-            blocked
-          )
+          const newPath = findPath(blocked)
 
           return {
             towers: nextTowers,
