@@ -4,7 +4,7 @@ import { playerSchema } from './player'
 
 // ---- create_game
 export const createGameSchema = z.object({
-  playerName: z.string().describe('Player name'),
+  playerId: z.string().describe('Player ID'),
 })
 export type CreateGamePayload = Infer<typeof createGameSchema>
 

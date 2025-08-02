@@ -1,47 +1,52 @@
-import { Model } from 'mongoose';
-import { toApiObject } from './to-api-object';
+import { Model } from 'mongoose'
+import { toApiObject } from './to-api-object'
+
+type FindWithQueryOptions = {
+  extraFilter?: Record<string, any>
+  projection?: Record<string, number>
+  sort?: Record<string, 1 | -1>
+  populate?: string[]
+}
 
 export async function findWithQuery<T>(
   model: Model<any>,
   query: any = {},
-  extraFilter: Record<string, any> = {},
-  projection: Record<string, number> = {},
-  sort: Record<string, 1 | -1> = { createdAt: -1 }
+  {
+    extraFilter = {},
+    projection = {},
+    sort = { createdAt: -1 },
+    populate = [],
+  }: FindWithQueryOptions = {}
 ): Promise<T[]> {
-  const {
-    page = 1,
-    limit = 20,
-    includeDeleted,
-    deletedOnly,
-    from,
-    to,
-    ...otherFilters
-  } = query;
+  const { page = 1, limit = 20, includeDeleted, deletedOnly, from, to, ...otherFilters } = query
 
-  const filter: Record<string, any> = { ...extraFilter };
+  const filter: Record<string, any> = { ...extraFilter }
 
   if (includeDeleted) {
   } else if (deletedOnly) {
-    filter.deletedAt = { $ne: null };
+    filter.deletedAt = { $ne: null }
   } else {
-    filter.deletedAt = null;
+    filter.deletedAt = null
   }
 
   if (from || to) {
-    filter.createdAt = {};
-    if (from) filter.createdAt.$gte = new Date(from);
-    if (to) filter.createdAt.$lte = new Date(to);
+    filter.createdAt = {}
+    if (from) filter.createdAt.$gte = new Date(from)
+    if (to) filter.createdAt.$lte = new Date(to)
   }
 
-  Object.assign(filter, otherFilters);
+  Object.assign(filter, otherFilters)
 
-  const skip = (page - 1) * limit;
-
-  const docs = await model
+  let queryBuilder = model
     .find(filter, projection)
     .sort(sort)
-    .skip(skip)
-    .limit(limit);
+    .skip((page - 1) * limit)
+    .limit(limit)
 
-  return docs.map(toApiObject);
+  for (const path of populate) {
+    queryBuilder = queryBuilder.populate(path)
+  }
+
+  const docs = await queryBuilder.exec()
+  return docs.map(toApiObject)
 }

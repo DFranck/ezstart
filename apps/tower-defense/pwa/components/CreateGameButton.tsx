@@ -2,18 +2,18 @@ import { useCreateGame } from '@/hooks/useCreateGame'
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@ezstart/ui/components'
 
 type Props = {
-  playerName: string
+  playerId: string
 }
 
-const CreateGameButton = ({ playerName }: Props) => {
+const CreateGameButton = ({ playerId }: Props) => {
   const { createGame } = useCreateGame()
-  const isDisabled = !playerName
+  const isDisabled = !playerId
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div>
-          <Button disabled={isDisabled} onClick={() => createGame({ playerName })}>
+          <Button disabled={isDisabled} onClick={() => createGame({ playerId })}>
             Create New Game
           </Button>
         </div>

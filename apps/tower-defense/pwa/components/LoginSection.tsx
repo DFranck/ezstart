@@ -2,7 +2,6 @@
 
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Icon, Input, Section, Span } from '@ezstart/ui/components'
-import { logger } from '@ezstart/ui/lib'
 import { useState } from 'react'
 
 export function LoginSection() {
@@ -17,7 +16,6 @@ export function LoginSection() {
       console.error('Failed to register player', err)
     }
   }
-  logger.debug('isPlayerStored', player)
   return (
     <Section className="flex flex-col gap-4">
       {!player ? (

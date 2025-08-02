@@ -1,14 +1,24 @@
 import { logger } from '@ezstart/ui/lib'
+import { DEFAULT_PHASE } from '@tower-defense/config'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
+import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer'
 import { GameModel } from '../models/Game'
-
+import { PlayerModel } from '../models/Player'
 export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
   logger.debug('createGameService', input)
-  const game = await GameModel.create({
-    playerName: input.playerName,
+
+  const player = await PlayerModel.findById(input.playerId)
+  if (!player) {
+    throw new Error('Player not found')
+  }
+
+  const newGame = await GameModel.create({
+    phase: DEFAULT_PHASE,
+    host: player._id,
+    players: [createDefaultGamePlayer({ playerId: player._id, name: player.name })],
   })
 
   return {
-    gameId: game._id.toString(),
+    gameId: newGame._id.toString(),
   }
 }
