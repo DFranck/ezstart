@@ -1,7 +1,7 @@
 'use client'
 
 import { useGameState } from '@/stores/useGameState'
-import { computeCoveredCells } from '@/utils/shapeUtils'
+import { computeCoveredCells, isColliding } from '@/utils/shapeUtils'
 import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { Position } from '@tower-defense/types'
 import { useEffect, useRef } from 'react'
@@ -48,14 +48,18 @@ export function GameCanvasCanvas() {
 
       // Ghost
       if (draggedTower && hoveredCellRef.current) {
-        ctx.fillStyle = 'rgba(74, 222, 128, 0.6)'
-        computeCoveredCells(
+        const cells = computeCoveredCells(
           hoveredCellRef.current.x,
           hoveredCellRef.current.y,
           draggedTower
-        ).forEach(({ x, y }) => {
+        )
+        const isInvalid = isColliding(cells, towers)
+
+        ctx.fillStyle = isInvalid ? 'rgba(239, 68, 68, 0.6)' : 'rgba(74, 222, 128, 0.6)' // rouge ou vert
+
+        for (const { x, y } of cells) {
           ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-        })
+        }
       }
     }
 
@@ -83,15 +87,28 @@ export function GameCanvasCanvas() {
   }
 
   const handleMouseUp = () => {
-    if (draggedTower && hoveredCellRef.current) {
-      placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)
-      setDraggedTower(null)
+    if (!draggedTower || !hoveredCellRef.current) return
 
-      const ghost = document.querySelector<HTMLDivElement>('[data-ghost]')
-      if (ghost) {
-        ghost.innerHTML = ''
-        ghost.style.display = 'none'
-      }
+    const cells = computeCoveredCells(
+      hoveredCellRef.current.x,
+      hoveredCellRef.current.y,
+      draggedTower
+    )
+
+    const isInvalid = isColliding(cells, towers)
+
+    if (isInvalid) {
+      console.warn('[handleMouseUp] Tower placement blocked due to collision.')
+      return // ❌ Ne place pas la tower
+    }
+
+    placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)
+    setDraggedTower(null)
+
+    const ghost = document.querySelector<HTMLDivElement>('[data-ghost]')
+    if (ghost) {
+      ghost.innerHTML = ''
+      ghost.style.display = 'none'
     }
   }
 
