@@ -1,6 +1,6 @@
 import { connectToMongo, createApp, createSocketServer, startServer } from '@ezstart/api-core'
 import routes, { globalRegistry } from './routes'
-import { joinGameSocket } from './sockets/joinGameSocket'
+import { setIO } from './socketInstance'
 const app = createApp()
 
 app.use('/api', routes)
@@ -14,11 +14,10 @@ connectToMongo('tower-defense')
       serviceName: 'TowerDefense',
       port: 8002,
       onHttpServerReady: server => {
-        createSocketServer(server, {
-          onConnection: (socket, io) => {
-            joinGameSocket(socket, io)
-          },
+        const io = createSocketServer(server, {
+          onConnection: (socket, io) => {},
         })
+        setIO(io)
       },
     })
   )

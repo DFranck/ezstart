@@ -1,4 +1,5 @@
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
+import { GamesProvider } from '@/providers/GamesProvider'
 import { Providers } from '@/providers/providers'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
@@ -42,7 +43,7 @@ export default async function LocaleLayout(props: {
       >
         <Providers messages={messages} locale={locale} timeZone={timeZone}>
           <DebugIndicator />
-          <>{children}</>
+          <GamesProvider>{children}</GamesProvider>
         </Providers>
         <Toaster />
       </body>

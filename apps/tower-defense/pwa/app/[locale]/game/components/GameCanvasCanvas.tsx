@@ -81,7 +81,7 @@ export function GameCanvasCanvas() {
       })
 
       // Towers
-      ctx.fillStyle = '#facc15'
+      ctx.fillStyle = '#facc99'
       towers.forEach(tower => {
         tower.coveredCells.forEach(({ x, y }) => {
           ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)

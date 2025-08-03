@@ -23,5 +23,6 @@ export async function joinGameService({ gameId, playerId }: { gameId: string; pl
     gameId: game._id.toString(),
     playerId: player._id.toString(),
     joinedAt: new Date().toISOString(),
+    players: game.players,
   }
 }

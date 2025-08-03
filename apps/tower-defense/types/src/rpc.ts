@@ -6,14 +6,20 @@ import { playerSchema } from './player'
 export const createGameSchema = z.object({
   playerId: z.string().describe('Player ID'),
 })
-export type CreateGamePayload = Infer<typeof createGameSchema>
-
-// 🔵 Ce que le BACK renvoie
 export const createGameResponseSchema = z.object({
   gameId: z.string().describe('Game ID'),
 })
+export type CreateGamePayload = Infer<typeof createGameSchema>
 export type CreateGameResponse = Infer<typeof createGameResponseSchema>
-
+// ---- join_game
+export const joinGameResponseSchema = z.object({
+  playerId: z.string().describe('Player ID'),
+  gameId: z.string().describe('Game ID'),
+  joinedAt: z.string().describe('ISO timestamp'),
+  players: z.array(playerSchema).describe('List of players'),
+})
+export type JoinGameResponse = Infer<typeof joinGameResponseSchema>
+//--------
 export const createOrFindPlayerSchema = z.object({
   name: z.string().describe('Player name'),
   userId: mongoIdSchema.optional(),

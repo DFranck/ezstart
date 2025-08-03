@@ -5,7 +5,12 @@ import {
   validateQuery,
 } from '@ezstart/api-core'
 import { paramsMongoIdSchema } from '@ezstart/types'
-import { createGameResponseSchema, gameSchema, getGamesQuerySchema } from '@tower-defense/types'
+import {
+  createGameResponseSchema,
+  gameSchema,
+  getGamesQuerySchema,
+  joinGameResponseSchema,
+} from '@tower-defense/types'
 import express from 'express'
 import { createGameController } from '../controllers/createGameController'
 import { getGameByIdController } from '../controllers/getGameByIdController'
@@ -48,7 +53,7 @@ docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameControl
   tags: ['Games'],
   bodySchema: paramsMongoIdSchema,
   paramsSchema: paramsMongoIdSchema,
-  responseSchema: gameSchema,
+  responseSchema: joinGameResponseSchema,
 })
 docRouter.post('/:id/leave', validateParams(paramsMongoIdSchema), leaveGameController, {
   summary: 'Leave a Game',
