@@ -1,7 +1,7 @@
 'use client'
 
 import { useGameState } from '@/stores/useGameState'
-import { Div } from '@ezstart/ui/components'
+import { Button, Div } from '@ezstart/ui/components'
 import { TILE_SIZE } from '@tower-defense/config'
 import { Game, mockTowers } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
@@ -12,7 +12,7 @@ type TowerShopProps = {
 
 export function TowerShop({ game }: TowerShopProps) {
   const setDraggedTower = useGameState(s => s.setDraggedTower)
-  const [towers] = useState(mockTowers)
+  const [towers, setTowers] = useState(() => mockTowers(5))
   const ghostRef = useRef<HTMLDivElement>(null)
 
   const renderGhost = (shape: boolean[][]) => {
@@ -93,15 +93,14 @@ export function TowerShop({ game }: TowerShopProps) {
     <div className="relative">
       <div ref={ghostRef} data-ghost className="pointer-events-none fixed z-50 opacity-90" />
 
-      <div className="grid gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {towers.map((tower, index) => (
           <div
             key={tower._id}
-            className="rounded shadow p-2 cursor-grab active:cursor-grabbing touch-none"
+            className="active:cursor-grabbing cursor-grab touch-none flex justify-center items-center"
             onMouseDown={handleMouseDown(index)}
             onTouchStart={handleTouchStart(index)}
           >
-            <span className="text-xs font-medium">{tower.name}</span>
             <Div
               className="inline-grid mt-1"
               style={{
@@ -113,13 +112,14 @@ export function TowerShop({ game }: TowerShopProps) {
                   <div
                     key={`${x}-${y}`}
                     style={{ width: TILE_SIZE, height: TILE_SIZE }}
-                    className={`rounded-sm ${cell ? 'bg-green-500' : 'bg-gray-400'}`}
+                    className={`rounded-sm ${cell ? 'bg-green-500' : 'bg-transparent'}`}
                   />
                 ))
               )}
             </Div>
           </div>
         ))}
+        <Button onClick={() => setTowers(mockTowers(5))}>Refresh</Button>
       </div>
     </div>
   )

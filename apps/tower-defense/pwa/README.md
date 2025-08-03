@@ -32,11 +32,9 @@ Read the full gameplay logic, mechanics, and balance strategy here:
 👉 [📄 game-design.md](../docs/GDD.md)
 
 <!-- AUTO:PROJECT_STRUCTURE:START -->
-
 ## 📂 Project Structure
 
 👉 See the full structure here: [structure.md](./structure.md)
-
 <!-- AUTO:PROJECT_STRUCTURE:END -->
 
 <!-- AUTO:TYPES:START -->

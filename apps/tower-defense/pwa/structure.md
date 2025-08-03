@@ -7,19 +7,19 @@
   - [locale]/
     - game/
       - components/
+        - Cell.tsx
         - GameCanvas.tsx
+        - GameCanvasCanvas.tsx
+        - GameInitializer.tsx
         - Hud.tsx
-        - MobSpawner.tsx
+        - MobShop.tsx
         - PlayerStatsPanel.tsx
-        - TowerPlacer.tsx
         - TowerShop.tsx
       - [gameId]/
         - page.tsx
     - layout.tsx
     - lobby/
       - components/
-        - JoinGameButton.tsx
-        - LeaveGameButton.tsx
         - LobbyPlayersList.tsx
         - StartGameButton.tsx
       - [gameId]/
@@ -30,12 +30,16 @@
         - page.tsx
 - components/
   - CreateGameButton.tsx
+  - JoinGameButton.tsx
+  - LeaveGameButton.tsx
+  - LoginSection.tsx
 - components.json
 - eslint.config.js
 - hooks/
   - useCreateGame.ts
   - useGame.ts
   - useGameSocket.ts
+  - useHydratedGameState.ts
   - useJoinGame.ts
   - useLeaveGame.ts
   - usePlayerActions.ts
@@ -55,13 +59,23 @@
   - GameProvider.tsx
   - providers.tsx
 - public/
-  - images/
+  - assets/
+    - images/
+    - sprites/
+      - icon/
+      - seamless/
+        - grass.png
+      - sprite-sheet/
   - json/
 - README.md
 - stores/
   - useGameState.ts
+  - usePlayerStore.ts
 - structure.md
 - tsconfig.json
 - tsconfig.tsbuildinfo
 - utils/
+  - extractPlayerId.ts
   - get-translation-array.ts
+  - pathfinding.ts
+  - shapeUtils.ts

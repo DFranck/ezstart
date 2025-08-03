@@ -5,6 +5,7 @@
 - .github/
 - .gitignore
 - .npmrc
+- .prettierignore
 - apis.config.md
 - apps/
   - asc-tcd/
@@ -44,6 +45,7 @@
   - ui/ → [structure.md](./packages/ui/structure.md)
 - pnpm-lock.yaml
 - pnpm-workspace.yaml
+- prettier.config.js
 - README.md
 - scripts/
   - check-typecheck.ts

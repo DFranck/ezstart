@@ -16,6 +16,7 @@
     - connectToMongo.ts
     - createApp.ts
     - createSocketServer.ts
+    - createTickerEngine.ts
     - startServer.ts
   - middlewares/
     - validate-params.ts

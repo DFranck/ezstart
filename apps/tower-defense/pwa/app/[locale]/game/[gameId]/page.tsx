@@ -22,14 +22,14 @@ export default async function GamePage(props: { params: { gameId: string } }) {
   return (
     <>
       <GameInitializer />
-      <div className="flex flex-col h-screen w-full bg-green-500/50">
+      <div className="flex flex-col h-screen w-full ">
         <Hud game={game} />
 
-        <div className="flex flex-1 flex-col-reverse md:flex-row justify-center bg-red-500/50">
+        <div className="flex flex-1 flex-col-reverse md:flex-row justify-center ">
           {/* <GameCanvas /> */}
           <GameCanvasCanvas />
 
-          <div className="w-full md:w-[300px] flex flex-col gap-4 p-4 bg-yellow-500/50">
+          <div className="w-full md:w-[300px] flex flex-col gap-4 p-4 ">
             <TowerShop game={game} />
             <MobShop game={game} />
             <PlayerStatsPanel game={game} />

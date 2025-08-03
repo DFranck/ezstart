@@ -9,23 +9,42 @@ import { isDebug, logger } from '@ezstart/ui/lib'
 import { callApi } from '@ezstart/ui/utils'
 import { mockGames, type Game } from '@tower-defense/types'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { JoinGameButton } from '../../components/JoinGameButton'
 
 export default function Page() {
   const [waitingGames, setWaitingGames] = useState<Game[]>([])
   const { player } = usePlayerStore()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   useEffect(() => {
+    if (!player?._id) return
     const fetchGames = async () => {
       setIsLoading(true)
       if (isDebug() === true) {
         setWaitingGames(mockGames)
       } else {
-        const res = await callApi('/api/games')
+        const res = await callApi('/api/games?phase=waiting&phase=playing')
         if (res.ok) {
           const waitingGames = (res.data as Game[]).filter(game => game.phase === 'waiting')
+          const playingGames = (res.data as Game[]).filter(game => game.phase === 'playing')
+          logger.debug('playingGames', playingGames)
           logger.debug('waitingGames', waitingGames)
+          logger.debug('Current player ID:', player?._id)
+          logger.debug(
+            'All player IDs in games:',
+            playingGames.flatMap(game => game.players.map(p => extractPlayerId(p)))
+          )
+
+          const activeGame = playingGames.find(game =>
+            game.players.some(p => extractPlayerId(p) === player?._id.toString())
+          )
+          if (activeGame) {
+            logger.debug('Redirecting to game', activeGame._id)
+            router.push(`/game/${activeGame._id}`)
+            return
+          }
           setWaitingGames(waitingGames)
         }
       }
@@ -33,7 +52,7 @@ export default function Page() {
     }
 
     fetchGames()
-  }, [])
+  }, [player?._id])
 
   if (isLoading) {
     return (

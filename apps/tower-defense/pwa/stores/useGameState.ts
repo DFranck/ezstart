@@ -1,6 +1,5 @@
 import { findPath } from '@/utils/pathfinding'
 import { computeCoveredCells } from '@/utils/shapeUtils'
-import { logger } from '@ezstart/ui/lib'
 import { Mob, PlacedTower, Position, Tower } from '@tower-defense/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -47,15 +46,10 @@ export const useGameState = create<GameState>()(
         set(s => {
           const blocked = s.towers.flatMap(t => t.coveredCells)
           const path = findPath(blocked)
-
-          logger.debug('[initPath] blocked cells:', blocked)
-          logger.debug('[initPath] found path:', path)
-
           return { path }
         }),
       placeTowerAt: (x, y, tower) => {
         const coveredCells = computeCoveredCells(x, y, tower)
-        console.log('[STORE] Placing tower at', x, y, coveredCells)
         const placed: PlacedTower = {
           ...tower,
           origin: { x, y },
@@ -77,12 +71,7 @@ export const useGameState = create<GameState>()(
     }),
     {
       name: 'game-state', // Clé dans localStorage
-      onRehydrateStorage: () => state => {
-        console.log('draggedTower', state?.draggedTower)
-        console.log('towers', state?.towers)
-        console.log('path', state?.path)
-        console.log('toSendMobs', state?.toSendMobs)
-      },
+      onRehydrateStorage: () => state => {},
       partialize: state => ({
         towers: state.towers,
         path: state.path,

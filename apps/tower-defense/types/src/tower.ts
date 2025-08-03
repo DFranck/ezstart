@@ -32,10 +32,12 @@ function getRandomShape(): boolean[][] {
   return JSON.parse(JSON.stringify(shape)) // simple deep clone
 }
 
-export const mockTowers: Tower[] = Array.from({ length: 5 }, () => ({
-  ...generateMock(towerSchema),
-  shape: getRandomShape(),
-}))
+export function mockTowers(count: number): Tower[] {
+  return Array.from({ length: count }, () => ({
+    ...generateMock(towerSchema),
+    shape: getRandomShape(),
+  }))
+}
 
 export const mockTower: Tower = {
   ...generateMock(towerSchema),

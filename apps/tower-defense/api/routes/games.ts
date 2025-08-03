@@ -22,6 +22,7 @@ const docRouter = createRouterWithDoc(gamesRegistry, router)
 docRouter.get('/', validateQuery(getGamesQuerySchema), getGamesController, {
   summary: 'List Games',
   tags: ['Games'],
+  querySchema: getGamesQuerySchema,
   responseSchema: gameSchema.array(),
 })
 docRouter.post('/', createGameController, {

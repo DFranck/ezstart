@@ -21,7 +21,12 @@ export const gameSchema = z.object({
 export const mockGame = generateMock(gameSchema)
 export const mockGames = generateMock(z.array(gameSchema))
 export const getGamesQuerySchema = listingQuerySchema.extend({
-  phase: z.enum(GAME_PHASES).optional().describe('Filter by current game phase'),
+  phase: z
+    .union([
+      z.enum(GAME_PHASES).optional().describe('Game phase'),
+      z.array(z.enum(GAME_PHASES)).describe('List of game phases'),
+    ])
+    .optional(),
 })
 
 export type Game = Infer<typeof gameSchema>

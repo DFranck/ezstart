@@ -9,6 +9,7 @@
   - gameConfig.ts
   - gamePhases.ts
   - index.ts
+  - shapes.ts
   - targeting.ts
 - structure.md
 - tsconfig.json

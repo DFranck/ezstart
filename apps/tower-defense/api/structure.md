@@ -7,12 +7,17 @@
   - getGamesController.ts
   - joinGameController.ts
   - leaveGameController.ts
+  - player/
+    - playerController.ts
   - startGameController.ts
 - description.json
 - eslint.config.js
 - jest.config.js
+- lib/
+  - createDefaultGamePlayer.ts
 - models/
   - Game.ts
+  - GamePlayer.ts
   - Mob.ts
   - Player.ts
   - Tower.ts
@@ -21,6 +26,7 @@
 - routes/
   - games.ts
   - index.ts
+  - players.ts
 - server.ts
 - services/
   - createGameService.ts
@@ -28,6 +34,12 @@
   - getGamesService.ts
   - joinGameService.ts
   - leaveGameService.ts
+  - player/
+    - playerService.ts
   - startGameService.ts
+- sockets/
+  - joinGameSocket.ts
 - structure.md
+- tickers/
+  - tickerEngine.ts
 - tsconfig.json

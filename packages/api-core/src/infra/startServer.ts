@@ -1,24 +1,18 @@
-import {
-  OpenApiGeneratorV3,
-  OpenAPIRegistry,
-} from '@asteasolutions/zod-to-openapi';
-import express from 'express';
-import { createServer, Server as HTTPServer } from 'http';
-import swaggerUi from 'swagger-ui-express';
+import { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
+import express from 'express'
+import { createServer, Server as HTTPServer } from 'http'
+import swaggerUi from 'swagger-ui-express'
 
 type StartServerOptions = {
-  routes: express.Router;
-  registries?: OpenAPIRegistry[];
-  basePath?: string;
-  serviceName?: string;
-  port?: number;
-  onHttpServerReady?: (server: HTTPServer) => void; // 👈 Ajout
-};
+  routes: express.Router
+  registries?: OpenAPIRegistry[]
+  basePath?: string
+  serviceName?: string
+  port?: number
+  onHttpServerReady?: (server: HTTPServer) => void
+}
 
-export function startServer(
-  app: express.Express,
-  opts: StartServerOptions
-): HTTPServer {
+export function startServer(app: express.Express, opts: StartServerOptions): HTTPServer {
   const {
     routes,
     registries = [],
@@ -26,17 +20,13 @@ export function startServer(
     serviceName = 'API',
     port = 5000,
     onHttpServerReady,
-  } = opts;
+  } = opts
 
-  app.use(basePath, routes);
-  app.get(`${basePath}/health`, (_, res) =>
-    res.status(200).json({ status: 'ok' })
-  );
+  app.use(basePath, routes)
+  app.get(`${basePath}/health`, (_, res) => res.status(200).json({ status: 'ok' }))
 
   if (registries.length > 0) {
-    const generator = new OpenApiGeneratorV3(
-      registries.flatMap((r) => r.definitions)
-    );
+    const generator = new OpenApiGeneratorV3(registries.flatMap(r => r.definitions))
     const openApiDoc = generator.generateDocument({
       openapi: '3.0.0',
       info: {
@@ -45,21 +35,21 @@ export function startServer(
         description: `Auto-generated docs for ${serviceName}`,
       },
       servers: [{ url: basePath }],
-    });
+    })
 
-    app.use('/api', swaggerUi.serve, swaggerUi.setup(openApiDoc));
+    app.use('/api', swaggerUi.serve, swaggerUi.setup(openApiDoc))
   }
 
-  const server = createServer(app);
+  const server = createServer(app)
   server.listen(port, () => {
-    const url = `http://localhost:${port}`;
-    console.log(`🚀 ${serviceName} running on ${url}${basePath}`);
-    if (registries.length > 0) console.log(`📖 Docs available at ${url}/api`);
-  });
+    const url = `http://localhost:${port}`
+    console.log(`🚀 ${serviceName} running on ${url}${basePath}`)
+    if (registries.length > 0) console.log(`📖 Docs available at ${url}/api`)
+  })
 
   if (onHttpServerReady) {
-    onHttpServerReady(server);
+    onHttpServerReady(server)
   }
 
-  return server;
+  return server
 }
