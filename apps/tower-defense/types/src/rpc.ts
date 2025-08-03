@@ -27,8 +27,8 @@ export const createOrFindPlayerSchema = z.object({
 export type CreateOrFindPlayerPayload = Infer<typeof createOrFindPlayerSchema>
 
 export const playerResponseSchema = playerSchema.extend({
-  player: playerSchema,
-  isNew: z.boolean(),
+  player: playerSchema.describe('Player'),
+  isNew: z.boolean().describe('true if new player, false if existing player'),
 })
 
 export type PlayerResponse = Infer<typeof playerResponseSchema>

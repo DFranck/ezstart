@@ -16,7 +16,7 @@ import { createGameController } from '../controllers/createGameController'
 import { getGameByIdController } from '../controllers/getGameByIdController'
 import { getGamesController } from '../controllers/getGamesController'
 import { joinGameController } from '../controllers/joinGameController'
-import { leaveGameController } from '../controllers/leaveGameController'
+import { leaveLobbyController } from '../controllers/leaveLobbyController'
 import { startGameController } from '../controllers/startGameController'
 
 export const gamesRegistry = new OpenAPIRegistry()
@@ -55,7 +55,7 @@ docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameControl
   paramsSchema: paramsMongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })
-docRouter.post('/:id/leave', validateParams(paramsMongoIdSchema), leaveGameController, {
+docRouter.post('/:id/leave-lobby', validateParams(paramsMongoIdSchema), leaveLobbyController, {
   summary: 'Leave a Game',
   tags: ['Games'],
   paramsSchema: paramsMongoIdSchema,

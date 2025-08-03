@@ -5,7 +5,7 @@ import { GameModel } from '../models/Game'
 import { PlayerModel } from '../models/Player'
 
 export async function joinGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
-  logger.debug('joinGameService', { gameId, playerId })
+  
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
   if (game.phase !== 'waiting') throw new Error('Cannot join an active game')

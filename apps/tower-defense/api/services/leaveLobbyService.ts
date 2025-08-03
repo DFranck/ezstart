@@ -1,9 +1,13 @@
 import { logger } from '@ezstart/ui/lib'
 import { GameModel } from '../models/Game'
 
-export async function leaveGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
-  logger.debug('leaveGameService', { gameId, playerId })
-
+export async function leaveLobbyService({
+  gameId,
+  playerId,
+}: {
+  gameId: string
+  playerId: string
+}) {
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
   if (game.phase !== 'waiting') throw new Error('Cannot leave an active game')

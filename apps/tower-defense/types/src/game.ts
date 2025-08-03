@@ -26,7 +26,8 @@ export const getGamesQuerySchema = listingQuerySchema.extend({
       z.enum(GAME_PHASES).optional().describe('Game phase'),
       z.array(z.enum(GAME_PHASES)).describe('List of game phases'),
     ])
-    .optional(),
+    .optional()
+    .describe('Filter by game phase'),
 })
 
 export type Game = Infer<typeof gameSchema>

@@ -1,12 +1,9 @@
-import { logger } from '@ezstart/ui/lib'
 import { DEFAULT_PHASE } from '@tower-defense/config'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
 import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer'
 import { GameModel } from '../models/Game'
 import { PlayerModel } from '../models/Player'
 export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
-  logger.debug('createGameService', input)
-
   const player = await PlayerModel.findById(input.playerId)
   if (!player) {
     throw new Error('Player not found')

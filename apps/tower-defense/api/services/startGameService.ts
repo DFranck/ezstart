@@ -5,7 +5,7 @@ import { Types } from 'mongoose'
 import { GameModel } from '../models/Game'
 
 export async function startGameService({ gameId }: { gameId: string }) {
-  logger.debug('startGameService', { gameId })
+  
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
   if (game.phase !== 'waiting') throw new Error('Game already started')
