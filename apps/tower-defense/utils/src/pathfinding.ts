@@ -1,4 +1,3 @@
-// src/utils/findPath.ts
 import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { Position } from '@tower-defense/types'
 
@@ -46,7 +45,7 @@ export function findPath(blocked: Position[]): Position[] {
     current = cameFrom.get(`${current.x},${current.y}`) || undefined
   }
 
-  if (path.length === 0 || path[0].x !== start.x || path[0].y !== start.y) {
+  if (path.length === 0 || !path[0] || path[0].x !== start.x || path[0].y !== start.y) {
     return []
   }
 

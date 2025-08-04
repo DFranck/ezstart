@@ -10,16 +10,9 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
   const [game, setGame] = useState<Game | null>(null)
 
   useEffect(() => {
-    socket.emit('joinGame', gameId)
-
     socket.on('gameState', (state: Game) => {
       setGame(state)
     })
-
-    return () => {
-      socket.emit('leaveGame', gameId)
-      socket.off('gameState')
-    }
   }, [gameId])
 
   return (

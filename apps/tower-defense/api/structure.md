@@ -6,12 +6,14 @@
   - getGameByIdController.ts
   - getGamesController.ts
   - joinGameController.ts
-  - leaveGameController.ts
+  - leaveLobbyController.ts
   - player/
     - playerController.ts
   - startGameController.ts
 - description.json
 - eslint.config.js
+- handlers/
+  - gameActions.ts
 - jest.config.js
 - lib/
   - createDefaultGamePlayer.ts
@@ -30,16 +32,22 @@
 - server.ts
 - services/
   - createGameService.ts
+  - gameActions/
+    - placeTower.ts
   - getGameByIdService.ts
   - getGamesService.ts
   - joinGameService.ts
-  - leaveGameService.ts
+  - leaveLobbyService.ts
   - player/
     - playerService.ts
   - startGameService.ts
+- socketInstance.ts
 - sockets/
   - joinGameSocket.ts
+  - registerSocketHandlers.ts
+  - startGameSocket.ts
 - structure.md
 - tickers/
+  - getGameTicker.ts
   - tickerEngine.ts
 - tsconfig.json

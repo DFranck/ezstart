@@ -1,6 +1,7 @@
 import { generateMock } from '@anatine/zod-mock'
 import { z, type Infer } from '@ezstart/types'
 import { mobSchema } from './mob'
+import { placedTowerSchema } from './placedTower'
 import { towerSchema } from './tower'
 
 export const gamePlayerSchema = z.object({
@@ -10,7 +11,7 @@ export const gamePlayerSchema = z.object({
   income: z.number().describe('Passive income'),
   hp: z.number().describe('Remaining HP'),
   hand: z.array(towerSchema).describe('Cards in hand'),
-  placedTowers: z.array(towerSchema).describe('Towers placed'),
+  placedTowers: z.array(placedTowerSchema).describe('Towers placed'),
   incomingUnits: z.array(mobSchema).describe('Units sent to this player'),
 })
 

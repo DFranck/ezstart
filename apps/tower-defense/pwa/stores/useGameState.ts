@@ -1,6 +1,5 @@
-import { findPath } from '@/utils/pathfinding'
-import { computeCoveredCells } from '@/utils/shapeUtils'
 import { Mob, PlacedTower, Position, Tower } from '@tower-defense/types'
+import { computeCoveredCells, findPath } from '@tower-defense/utils'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

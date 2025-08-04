@@ -12,7 +12,7 @@ type GameRoom<State> = {
 }
 
 const defaultInterval = 100
-const rooms = new Map<string, GameRoom<any>>() // tu peux le typer plus tard
+const rooms = new Map<string, GameRoom<any>>()
 
 export function createTickerEngine<State>(opts: TickerOptions<State>) {
   const { tickIntervalMs = defaultInterval, createInitialState, onTick } = opts
@@ -43,6 +43,12 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
       }
     }, tickIntervalMs)
   }
+  function mutate(gameId: string, fn: (state: State) => State) {
+    const room = rooms.get(gameId)
+    if (!room) return
+    const newState = fn(room.state)
+    room.state = newState
+  }
 
   function getState(gameId: string): State | undefined {
     return rooms.get(gameId)?.state
@@ -51,5 +57,6 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
   return {
     ensureRoom,
     getState,
+    mutate,
   }
 }

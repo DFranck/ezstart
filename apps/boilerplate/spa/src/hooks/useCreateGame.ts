@@ -1,0 +1,29 @@
+// hooks/useCreateGame.ts
+'use client'
+
+import { callApi } from '@ezstart/ui/utils'
+import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+export function useCreateGame() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  const createGame = async (playerId: CreateGamePayload) => {
+    setLoading(true)
+    try {
+      const res = await callApi<CreateGameResponse>('/api/games', {
+        method: 'POST',
+        body: playerId,
+      })
+
+      if (!res.ok) throw new Error('Failed to create game')
+      router.push(`/en/lobby/${res.data?.gameId}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { createGame, loading }
+}

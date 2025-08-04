@@ -8,7 +8,6 @@
     - game/
       - components/
         - Cell.tsx
-        - GameCanvas.tsx
         - GameCanvasCanvas.tsx
         - GameInitializer.tsx
         - Hud.tsx
@@ -16,6 +15,7 @@
         - PlayerStatsPanel.tsx
         - TowerShop.tsx
       - [gameId]/
+        - layout.tsx
         - page.tsx
     - layout.tsx
     - lobby/
@@ -34,6 +34,9 @@
   - LeaveGameButton.tsx
   - LoginSection.tsx
 - components.json
+- contexts/
+  - GameContext.ts
+  - GamesSocketContext.ts
 - eslint.config.js
 - hooks/
   - useCreateGame.ts
@@ -57,6 +60,7 @@
 - postcss.config.mjs
 - providers/
   - GameProvider.tsx
+  - GamesProvider.tsx
   - providers.tsx
 - public/
   - assets/
@@ -77,5 +81,3 @@
 - utils/
   - extractPlayerId.ts
   - get-translation-array.ts
-  - pathfinding.ts
-  - shapeUtils.ts

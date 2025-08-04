@@ -10,6 +10,10 @@
 - apps/
   - asc-tcd/
     - web/ → [structure.md](./apps/asc-tcd/web/structure.md)
+  - boilerplate/
+    - pwa/
+    - spa/ → [structure.md](./apps/boilerplate/spa/structure.md)
+    - web/
   - ez-billing/
     - api/ → [structure.md](./apps/ez-billing/api/structure.md)
     - docs/
@@ -35,6 +39,7 @@
       - TDD.md
     - pwa/ → [structure.md](./apps/tower-defense/pwa/structure.md)
     - types/ → [structure.md](./apps/tower-defense/types/structure.md)
+    - utils/ → [structure.md](./apps/tower-defense/utils/structure.md)
 - eslint.config.js
 - package.json
 - packages/

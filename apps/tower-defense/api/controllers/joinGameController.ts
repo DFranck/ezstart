@@ -1,4 +1,3 @@
-// controllers/joinGameController.ts
 import { mongoIdSchema } from '@ezstart/types'
 import { Request, Response } from 'express'
 import { joinGameService } from '../services/joinGameService'

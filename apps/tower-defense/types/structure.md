@@ -8,6 +8,7 @@
   - elements.ts
   - game-player.ts
   - game.ts
+  - gameActions.ts
   - index.ts
   - mob.ts
   - placedTower.ts

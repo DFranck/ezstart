@@ -1,6 +1,7 @@
 import { connectToMongo, createApp, createSocketServer, startServer } from '@ezstart/api-core'
 import routes, { globalRegistry } from './routes'
 import { setIO } from './socketInstance'
+import { registerSocketHandlers } from './sockets/registerSocketHandlers'
 const app = createApp()
 
 app.use('/api', routes)
@@ -15,7 +16,9 @@ connectToMongo('tower-defense')
       port: 8002,
       onHttpServerReady: server => {
         const io = createSocketServer(server, {
-          onConnection: (socket, io) => {},
+          onConnection: (socket, io) => {
+            registerSocketHandlers(socket, io)
+          },
         })
         setIO(io)
       },

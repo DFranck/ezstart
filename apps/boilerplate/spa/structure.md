@@ -1,0 +1,53 @@
+# Project structure for apps\boilerplate\spa
+
+- .gitignore
+- components.json
+- eslint.config.js
+- middleware.ts
+- next-env.d.ts
+- next.config.mjs
+- package.json
+- postcss.config.mjs
+- README.md
+- src/
+  - app/
+    - favicon.ico
+    - [locale]/
+      - layout.tsx
+      - page.tsx
+  - components/
+    - sonner.tsx
+  - contexts/
+  - hooks/
+    - useCreateGame.ts
+    - useGame.ts
+    - useGameSocket.ts
+    - useHydratedGameState.ts
+    - useJoinGame.ts
+    - useLeaveGame.ts
+    - usePlayerActions.ts
+  - i18n/
+    - navigation.ts
+    - request.ts
+    - routing.ts
+  - messages/
+    - en/
+      - common.json
+  - providers/
+    - providers.tsx
+  - public/
+    - assets/
+      - images/
+      - sprites/
+        - icon/
+        - seamless/
+        - sprite-sheet/
+    - json/
+  - stores/
+  - styles/
+    - globals.css
+  - utils/
+    - get-translation-array.ts
+- structure.md
+- tsconfig.json
+- tsconfig.tsbuildinfo

@@ -1,9 +1,10 @@
 'use client'
 
+import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
-import { computeCoveredCells, isColliding } from '@/utils/shapeUtils'
 import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
-import { Position } from '@tower-defense/types'
+import { placedTowerSchema, Position } from '@tower-defense/types'
+import { computeCoveredCells, isColliding } from '@tower-defense/utils'
 import { useEffect, useRef, useState } from 'react'
 
 export function GameCanvasCanvas() {
@@ -12,7 +13,7 @@ export function GameCanvasCanvas() {
   const draggedTower = useGameState(s => s.draggedTower)
   const setDraggedTower = useGameState(s => s.setDraggedTower)
   const placeTowerAt = useGameState(s => s.placeTowerAt)
-
+  const { game, sendAction } = useGame()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const hoveredCellRef = useRef<Position | null>(null)
   const [grassPattern, setGrassPattern] = useState<CanvasPattern | null>(null)
@@ -145,6 +146,11 @@ export function GameCanvasCanvas() {
     }
 
     placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)
+    sendAction({
+      type: 'placeTower',
+      payload: placedTowerSchema,
+    })
+
     setDraggedTower(null)
 
     const ghost = document.querySelector<HTMLDivElement>('[data-ghost]')

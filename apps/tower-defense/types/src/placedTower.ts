@@ -1,7 +1,11 @@
-import { Position } from './position'
-import { Tower } from './tower'
+// placed-tower.ts
+import { z, type Infer } from '@ezstart/types'
+import { positionSchema } from './position'
+import { towerSchema } from './tower'
 
-export type PlacedTower = Tower & {
-  origin: Position
-  coveredCells: Position[]
-}
+export const placedTowerSchema = towerSchema.extend({
+  origin: positionSchema,
+  coveredCells: z.array(positionSchema),
+})
+
+export type PlacedTower = Infer<typeof placedTowerSchema>
