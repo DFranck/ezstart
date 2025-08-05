@@ -1,4 +1,3 @@
-// placed-tower.ts
 import { z, type Infer } from '@ezstart/types'
 import { positionSchema } from './position'
 import { towerSchema } from './tower'

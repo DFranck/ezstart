@@ -19,6 +19,7 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
 
   function ensureRoom(gameId: string) {
     if (!rooms.has(gameId)) {
+      console.log(`[ticker] 🆕 Creating room for game: ${gameId}`)
       const initialState = createInitialState(gameId)
       const room: GameRoom<State> = {
         gameId,
@@ -33,6 +34,8 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
   function startTickLoop(gameId: string, initialState: State): NodeJS.Timeout {
     let state = initialState
     let tick = 0
+    console.log(`[⏱️ ticker] Started ticking for game ${gameId} every ${tickIntervalMs}ms`)
+
     return setInterval(() => {
       tick++
       state = onTick(gameId, state, tick)

@@ -20,5 +20,9 @@ export function createSocketServer(
     options.onConnection?.(socket, io)
   })
 
+  io.on('disconnect', socket => {
+    console.log('⚡ Socket disconnected:', socket.id)
+  })
+
   return io
 }
