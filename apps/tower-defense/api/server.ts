@@ -16,8 +16,8 @@ connectToMongo('tower-defense')
       port: 8002,
       onHttpServerReady: server => {
         const io = createSocketServer(server, {
-          onConnection: (socket, io) => {
-            registerSocketHandlers(socket, io)
+          onConnection: socket => {
+            registerSocketHandlers(socket)
           },
         })
         setIO(io)

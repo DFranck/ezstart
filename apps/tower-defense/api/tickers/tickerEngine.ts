@@ -15,7 +15,6 @@ export const ticker = createTickerEngine<Game>({
     updatedAt: new Date().toISOString(),
   }),
   onTick: (gameId, state, tick) => {
-    console.log(`[🔁 tick] Game ${gameId} - tick ${tick}`)
     return { ...state, tick }
   },
 })

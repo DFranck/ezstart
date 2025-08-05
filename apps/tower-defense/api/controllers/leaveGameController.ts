@@ -1,8 +1,8 @@
 import { mongoIdSchema } from '@ezstart/types'
 import { Request, Response } from 'express'
-import { leaveLobbyService } from '../services/leaveLobbyService'
+import { leaveGameService } from '../services/leaveGameService'
 
-export async function leaveLobbyController(req: Request, res: Response) {
+export async function leaveGameController(req: Request, res: Response) {
   const playerParsed = mongoIdSchema.safeParse(req.body?.playerId)
   if (!playerParsed.success) {
     return res.status(422).json({
@@ -15,7 +15,7 @@ export async function leaveLobbyController(req: Request, res: Response) {
   if (!gameId) return res.status(422).json({ error: 'Missing game ID' })
 
   try {
-    const result = await leaveLobbyService({
+    const result = await leaveGameService({
       gameId,
       playerId: playerParsed.data,
     })

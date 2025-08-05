@@ -52,7 +52,14 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
     const newState = fn(room.state)
     room.state = newState
   }
-
+  function destroyRoom(gameId: string): boolean {
+    const room = rooms.get(gameId)
+    if (!room) return false
+    clearInterval(room.interval)
+    rooms.delete(gameId)
+    console.log(`[🗑️ ticker] Destroyed room for gameId: ${gameId}`)
+    return true
+  }
   function getState(gameId: string): State | undefined {
     return rooms.get(gameId)?.state
   }
@@ -61,5 +68,6 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
     ensureRoom,
     getState,
     mutate,
+    destroyRoom,
   }
 }

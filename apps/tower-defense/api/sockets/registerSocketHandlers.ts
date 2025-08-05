@@ -1,21 +1,18 @@
-import type { Server as IOServer, Socket } from 'socket.io'
+import type { Socket } from 'socket.io'
 import { handleGameAction } from '../handlers/gameActions'
 import { getIO } from '../socketInstance'
 import { getGameTicker } from '../tickers/getGameTicker'
 import { ticker } from '../tickers/tickerEngine'
 
-export function registerSocketHandlers(socket: Socket, io: IOServer) {
-  getIO()
-
+export function registerSocketHandlers(socket: Socket) {
   console.log(`⚡ [socket] New connection: ${socket.id}`)
 
   socket.on('gameAction', ({ gameId, action }) => {
     console.log(`📩 [gameAction] from ${socket.id} | gameId: ${gameId}`)
     console.log('   ↳ Action:', action)
-    
+
     ticker.ensureRoom(gameId)
 
-    
     const result = handleGameAction(gameId, action)
 
     if (!result.success) {
@@ -31,7 +28,7 @@ export function registerSocketHandlers(socket: Socket, io: IOServer) {
     }
 
     console.log(`📤 [gameState] Broadcasting updated state to room: ${gameId}`)
-    io.to(gameId).emit('gameState', newState)
+    getIO().to(gameId).emit('gameState', newState)
   })
 
   socket.on('disconnect', () => {
