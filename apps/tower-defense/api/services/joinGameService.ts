@@ -13,10 +13,19 @@ export async function joinGameService({ gameId, playerId }: { gameId: string; pl
   const player = await PlayerModel.findById(playerId)
   if (!player) throw new Error('Player not found')
 
-  const alreadyJoined = game.players.some(p => p.toString() === playerId)
-  if (alreadyJoined) return { gameId, playerId, joinedAt: new Date().toISOString() }
+  const alreadyJoined = game.players.some(p => p.playerId.toString() === playerId)
+  if (alreadyJoined) {
+    return { 
+      gameId, 
+      playerId, 
+      playerName: player.name,
+      joinedAt: new Date().toISOString(),
+      players: game.players
+    }
+  }
 
-  game.players.push(createDefaultGamePlayer({ playerId: player._id, name: player.name }))
+  const newGamePlayer = createDefaultGamePlayer({ playerId: player._id, name: player.name })
+  game.players.push(newGamePlayer)
   await game.save()
 
   // Synchroniser le ticker avec les données mises à jour
@@ -29,6 +38,7 @@ export async function joinGameService({ gameId, playerId }: { gameId: string; pl
   return {
     gameId: game._id.toString(),
     playerId: player._id.toString(),
+    playerName: player.name,
     joinedAt: new Date().toISOString(),
     players: game.players,
   }

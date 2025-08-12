@@ -1,7 +1,7 @@
 'use client'
 
 import { useJoinGame } from '@/hooks/useJoinGame'
-import { Button } from '@ezstart/ui/components'
+import { LoadingButton } from './LoadingButton'
 
 type Props = {
   gameId: string
@@ -13,8 +13,14 @@ export function JoinGameButton({ gameId, playerId }: Props) {
   const isDisabled = !playerId
 
   return (
-    <Button onClick={() => joinGame(gameId, playerId)} disabled={isDisabled || loading}>
+    <LoadingButton
+      loading={loading}
+      disabled={isDisabled}
+      onClick={() => joinGame(gameId, playerId)}
+      loadingText="Joining game..."
+      icon="fa:FaSignInAlt"
+    >
       Join the Game
-    </Button>
+    </LoadingButton>
   )
 }

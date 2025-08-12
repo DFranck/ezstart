@@ -3,19 +3,20 @@ import { GameModel } from '../models/Game'
 import { checkEndGame } from '../utils/checkEndGame';
 import { getIO } from '../socketInstance';
 import { syncTickerWithDatabase } from '../tickers/tickerEngine'
+import { updatePlayerStatusService } from './updatePlayerStatusService'
 
 export async function leaveGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
 
-  const index = game.players.findIndex(p => p.playerId.toString() === playerId)
-
-  if (index === -1) return { gameId, left: false }
+  const playerIndex = game.players.findIndex(p => p.playerId.toString() === playerId)
+  if (playerIndex === -1) return { gameId, left: false }
 
   const isLobby = game.phase === 'waiting'
 
   if (isLobby) {
-    game.players.splice(index, 1)
+    // En lobby : supprimer le joueur
+    game.players.splice(playerIndex, 1)
 
     if (game.players.length === 0) {
       await game.deleteOne()
@@ -27,10 +28,8 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
       }
     }
   } else {
-    const player = game.players[index]
-    if (!player) return { gameId, left: false }
-
-    player.status = 'left'
+    // En jeu : marquer comme 'left' au lieu de supprimer
+    await updatePlayerStatusService({ gameId, playerId, status: 'left' })
     checkEndGame(gameId)
     getIO().to(gameId).emit('gameState', game)
   }
@@ -46,5 +45,6 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
     gameId,
     leftAt: new Date().toISOString(),
     status: isLobby ? 'removed' : 'left',
+    players: game.players, // Retourner la liste des joueurs restants
   }
 }
