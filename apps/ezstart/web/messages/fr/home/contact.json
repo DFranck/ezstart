@@ -24,6 +24,11 @@
         "label": "Whatsapp",
         "icon": "fa:FaWhatsapp",
         "href": "https://wa.me/33760173980"
+      },
+      {
+        "label": "Malt",
+        "icon": "custom:Malt",
+        "href": "https://www.malt.fr/profile/franckdufournet1"
       }
     ]
   }
