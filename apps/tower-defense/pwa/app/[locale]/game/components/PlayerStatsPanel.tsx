@@ -1,6 +1,6 @@
 // game/components/PlayerStatsPanel.tsx
 
-import { Game } from '@ezstart/types'
+import { Game } from '@tower-defense/types'
 
 type PlayerStatsPanelProps = {
   game: Game

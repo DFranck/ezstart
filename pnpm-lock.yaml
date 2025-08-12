@@ -130,6 +130,9 @@ importers:
 
   apps/boilerplate/spa:
     dependencies:
+      '@ezstart/ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.14
         version: 2.1.15(@types/react-dom@19.1.7(@types/react@19.1.9))(@types/react@19.1.9)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

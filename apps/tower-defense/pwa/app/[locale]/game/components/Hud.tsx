@@ -1,6 +1,6 @@
 'use client'
 
-import { Game } from '@ezstart/types'
+import { Game } from '@tower-defense/types'
 
 export function Hud({ game }: { game: Game }) {
   const tick = game.tick
