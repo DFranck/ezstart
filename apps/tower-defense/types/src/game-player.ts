@@ -1,9 +1,9 @@
 import { generateMock } from '@anatine/zod-mock'
 import { z, type Infer } from '@ezstart/types'
 import { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from '@tower-defense/config'
-import { mobSchema } from './mob'
-import { placedTowerSchema } from './placedTower'
-import { towerSchema } from './tower'
+import { mobSchema } from './mob.js'
+import { placedTowerSchema } from './placedTower.js'
+import { towerSchema } from './tower.js'
 
 export const gamePlayerSchema = z.object({
   playerId: z.string().describe('Player MongoDB ID'),

@@ -1,11 +1,11 @@
 import { generateMock } from '@anatine/zod-mock'
-import { mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { z, type Infer } from '@ezstart/types'
 import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
-import { damageTypeSchema } from './damage'
-import { elementalTypeSchema } from './elements'
+import { damageTypeSchema } from './damage.js'
+import { elementalTypeSchema } from './elements.js'
 
 export const towerSchema = z.object({
-  _id: mongoIdSchema,
+  _id: z.string(),
   name: z.string().min(1).max(50).describe('Name of the tower'),
   elementalType: elementalTypeSchema.describe('Elemental type of tower'),
   damage: z.number().min(1).max(500).describe('Damage dealt by the tower'),

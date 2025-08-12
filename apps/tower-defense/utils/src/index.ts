@@ -1,3 +1,3 @@
-export { computeCoveredCells } from './computeCoveredCells'
-export { findPath } from './findPath'
-export { isColliding } from './isColliding'
+export { computeCoveredCells } from './computeCoveredCells.js'
+export { findPath } from './findPath.js'
+export { isColliding } from './isColliding.js'

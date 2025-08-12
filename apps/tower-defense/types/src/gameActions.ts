@@ -1,4 +1,4 @@
-import { Tower } from './tower'
+import { Tower } from './tower.js'
 export type GameAction = {
   type: 'placeTower'
   payload: {

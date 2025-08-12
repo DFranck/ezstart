@@ -1,5 +1,4 @@
-import { Model } from 'mongoose'
-import { toApiObject } from './to-api-object'
+import { toApiObject } from './to-api-object.js'
 
 type FindWithQueryOptions = {
   extraFilter?: Record<string, any>
@@ -9,7 +8,7 @@ type FindWithQueryOptions = {
 }
 
 export async function findWithQuery<T>(
-  model: Model<any>,
+  model: any,
   query: any = {},
   {
     extraFilter = {},

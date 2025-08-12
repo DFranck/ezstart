@@ -1,9 +1,9 @@
 import { generateMock } from '@anatine/zod-mock'
 import { listingQuerySchema, mongoIdSchema, z, type Infer } from '@ezstart/types'
 import { GAME_PHASES } from '@tower-defense/config'
-import { gamePlayerSchema } from './game-player'
-import { towerShopItemSchema } from './tower-shop-item'
-import { unitShopItemSchema } from './unit-shop-item'
+import { gamePlayerSchema } from './game-player.js'
+import { towerShopItemSchema } from './tower-shop-item.js'
+import { unitShopItemSchema } from './unit-shop-item.js'
 
 export const gameSchema = z.object({
   _id: mongoIdSchema,

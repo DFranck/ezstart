@@ -1,9 +1,15 @@
-export * from './damages'
-export * from './effects'
-export * from './elements'
-export { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from './gameConfig'
-export { DEFAULT_GOLD, DEFAULT_HP, DEFAULT_INCOME, DEFAULT_PHASE, GAME_PHASES } from './gamePhases'
-export type { GamePhase } from './gamePhases'
-export { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from './playerStatus'
-export * from './shapes'
-export * from './targeting'
+export * from './damages.js'
+export * from './effects.js'
+export * from './elements.js'
+export { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from './gameConfig.js'
+export {
+  DEFAULT_GOLD,
+  DEFAULT_HP,
+  DEFAULT_INCOME,
+  DEFAULT_PHASE,
+  GAME_PHASES,
+} from './gamePhases.js'
+export type { GamePhase } from './gamePhases.js'
+export { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from './playerStatus.js'
+export * from './shapes.js'
+export * from './targeting.js'

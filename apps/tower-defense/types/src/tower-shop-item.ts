@@ -1,6 +1,6 @@
 import { generateMock } from '@anatine/zod-mock';
 import { z, type Infer } from '@ezstart/types';
-import { towerSchema } from './tower';
+import { towerSchema } from './tower.js';
 
 export const towerShopItemSchema = z.object({
   price: z.number(),

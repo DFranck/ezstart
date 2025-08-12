@@ -5,21 +5,20 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --concurrency 50",
     "dev:ezstart": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:td": "turbo run dev --filter=pwa-tower-defense... --filter=api-tower-defense...",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:types": "tsx scripts/generate-readmes-types.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
-    "gen:api-config": "tsx scripts/generate-apis-config.ts",
+    "gen:config": "tsx scripts/generate-config.ts",
     "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
     "lint": "turbo run lint",
     "prune": "ts-prune -p tsconfig.json > prune-report.txt",
     "typecheck": "turbo run typecheck",
-  "clean": "tsx scripts/clean.ts"
-
+    "clean": "tsx scripts/clean.ts"
   },
   "jest": {
     "projects": [

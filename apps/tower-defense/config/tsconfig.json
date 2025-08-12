@@ -1,9 +1,12 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
-    "composite": true,
-    "outDir": "dist"
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

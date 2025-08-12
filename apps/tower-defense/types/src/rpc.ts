@@ -1,6 +1,6 @@
 // @ezstart/types/tower-defense/rpc.ts
 import { mongoIdSchema, z, type Infer } from '@ezstart/types'
-import { playerSchema } from './player'
+import { playerSchema } from './player.js'
 
 // ---- create_game
 export const createGameSchema = z.object({

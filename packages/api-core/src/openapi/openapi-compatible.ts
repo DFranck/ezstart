@@ -1,6 +1,6 @@
-import type { ZodTypeAny } from 'zod';
-import { checkMissingDescriptions } from './check-missing-descriptions';
-import { stripIncompatible } from './strip-incompatible';
+import type { ZodTypeAny } from 'zod'
+import { checkMissingDescriptions } from './check-missing-descriptions.js'
+import { stripIncompatible } from './strip-incompatible.js'
 
 /**
  * ✅ Rends un schéma Zod compatible Swagger :
@@ -8,15 +8,12 @@ import { stripIncompatible } from './strip-incompatible';
  * - convertit les nativeEnum
  * - ajoute `.openapi(name)` si dispo
  */
-export function openApiCompatible<T extends ZodTypeAny>(
-  schema: T,
-  name: string
-): T {
-  const clean = stripIncompatible(schema);
+export function openApiCompatible<T extends ZodTypeAny>(schema: T, name: string): T {
+  const clean = stripIncompatible(schema)
 
   // 🔍 Vérifie si on a des champs sans `.describe()`
-  checkMissingDescriptions(clean, name);
+  checkMissingDescriptions(clean, name)
 
   // @ts-ignore après patch openapi existe
-  return clean.openapi?.(name) ?? clean;
+  return clean.openapi?.(name) ?? clean
 }
