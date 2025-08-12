@@ -1,13 +1,13 @@
-'use client';
-import { LibraryItem } from '@/types/library';
-import { getTranslationArray } from '@/utils/get-translation-array';
-import { H1, H2, Main, P, Section } from '@ezstart/ui/components';
-import { useTranslations } from 'next-intl';
-import { LibSection } from './[lib]/components/section-lib';
+'use client'
+import { LibraryItem } from '@/types/library'
+import { getTranslationArray } from '@/utils/get-translation-array'
+import { H1, H2, Main, P, Section } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
+import { LibSection } from './[lib]/components/section-lib'
 
 export default function EzLibs() {
-  const t = useTranslations('libraries');
-  const libraries = getTranslationArray<LibraryItem>(t, 'items');
+  const t = useTranslations('libraries')
+  const libraries = getTranslationArray<LibraryItem>(t, 'items')
   return (
     <Main withHeaderOffset>
       <Section size={'xl'}>
@@ -19,5 +19,5 @@ export default function EzLibs() {
         <LibSection key={lib.title} lib={lib} index={index} />
       ))}
     </Main>
-  );
+  )
 }

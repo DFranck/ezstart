@@ -1,52 +1,40 @@
-'use client';
+'use client'
 
-import { LibraryContentLink, LibraryItem } from '@/types/library';
-import { getTranslationArray } from '@/utils/get-translation-array';
-import {
-  customIconMap,
-  H3,
-  Icon,
-  LI,
-  Main,
-  P,
-  Section,
-  UL,
-} from '@ezstart/ui/components';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { useMemo } from 'react';
-import IconPlayground from '../(Icon)/IconPlayground';
-import { HeaderLib } from '../components/header-lib';
+import { LibraryContentLink, LibraryItem } from '@/types/library'
+import { getTranslationArray } from '@/utils/get-translation-array'
+import { customIconMap, H3, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useMemo } from 'react'
+import IconPlayground from '../(Icon)/IconPlayground'
+import { HeaderLib } from '../components/header-lib'
 
 const EzIconPage = () => {
-  const t = useTranslations('libraries');
-  const libraries = getTranslationArray<LibraryItem>(t, 'items');
-  const lib = libraries.find((lib) => lib.title.toLowerCase() === 'icon');
-  const contentItems = getTranslationArray<LibraryContentLink>(
-    lib?.content,
-    'items'
-  );
-  const customIcons = useMemo(() => Object.keys(customIconMap), []);
+  const t = useTranslations('libraries')
+  const libraries = getTranslationArray<LibraryItem>(t, 'items')
+  const lib = libraries.find(lib => lib.title.toLowerCase() === 'icon')
+  const contentItems = getTranslationArray<LibraryContentLink>(lib?.content, 'items')
+  const customIcons = useMemo(() => Object.keys(customIconMap), [])
 
   if (!lib) {
     return (
       <Main withHeaderOffset>
         <p>{t('notFound')}</p>
       </Main>
-    );
+    )
   }
 
   return (
     <Main withHeaderOffset>
-      <HeaderLib libTitle='icon' />
-      <Section layout='col'>
+      <HeaderLib libTitle="icon" />
+      <Section layout="col" size={'xl'}>
         <P>{lib.content?.description}</P>
-        <UL size={'default'} className='w-full'>
-          {contentItems.map((item) => (
+        <UL size={'default'} className="w-full">
+          {contentItems.map(item => (
             <LI key={item.title}>
               {item.title}:{' '}
               <P asChild variant={'link'}>
-                <Link href={item.url} target='_blank' rel='noopener noreferrer'>
+                <Link href={item.url} target="_blank" rel="noopener noreferrer">
                   {item.url}
                 </Link>
               </P>
@@ -55,16 +43,11 @@ const EzIconPage = () => {
         </UL>
         <H3>{lib.content?.title}</H3>
         {customIcons.length > 0 && (
-          <UL size={'default'} layout='row' className='justify-center'>
-            {customIcons.map((name) => (
-              <LI
-                key={name}
-                layout={'center'}
-                size={'sm'}
-                className='md:w-28 aspect-square'
-              >
+          <UL size={'default'} layout="row" className="justify-center">
+            {customIcons.map(name => (
+              <LI key={name} layout={'center'} size={'sm'} className="md:w-28 aspect-square">
                 <Icon name={`custom:${name}` as any} size={32} />
-                <P className='text-xs text-center'>{name}</P>
+                <P className="text-xs text-center">{name}</P>
               </LI>
             ))}
           </UL>
@@ -72,7 +55,7 @@ const EzIconPage = () => {
         <IconPlayground title={lib.content?.subtitle as string} />
       </Section>
     </Main>
-  );
-};
+  )
+}
 
-export default EzIconPage;
+export default EzIconPage
