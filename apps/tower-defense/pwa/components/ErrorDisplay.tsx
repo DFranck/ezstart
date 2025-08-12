@@ -8,19 +8,42 @@ interface Props {
   errors: ErrorState[]
   onClearError: (timestamp: number) => void
   onClearAll: () => void
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  maxErrors?: number
+  autoHideDelay?: number
 }
 
-export function ErrorDisplay({ errors, onClearError, onClearAll }: Props) {
+export function ErrorDisplay({ 
+  errors, 
+  onClearError, 
+  onClearAll, 
+  position = 'top-right',
+  maxErrors = 5,
+  autoHideDelay = 10000
+}: Props) {
   const [visibleErrors, setVisibleErrors] = useState<ErrorState[]>([])
 
   useEffect(() => {
-    setVisibleErrors(errors)
-  }, [errors])
+    setVisibleErrors(errors.slice(0, maxErrors))
+  }, [errors, maxErrors])
 
   if (errors.length === 0) return null
 
+  const getPositionClasses = () => {
+    switch (position) {
+      case 'top-left':
+        return 'top-4 left-4'
+      case 'bottom-right':
+        return 'bottom-4 right-4'
+      case 'bottom-left':
+        return 'bottom-4 left-4'
+      default:
+        return 'top-4 right-4'
+    }
+  }
+
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+    <div className={`fixed ${getPositionClasses()} z-50 space-y-2 max-w-md`}>
       {visibleErrors.map((error) => (
         <div
           key={error.timestamp}
