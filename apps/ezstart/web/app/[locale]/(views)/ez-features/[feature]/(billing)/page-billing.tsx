@@ -5,7 +5,7 @@ import ClientCard from './components/client-card';
 
 export const BillingPage = () => {
   const { clients, selectedClient, setSelectedClient } = useBillingContext();
-  const isClients = clients.length > 0;
+  const isClients = clients && clients.length > 0;
   return (
     <>
       {!selectedClient && (
@@ -16,7 +16,7 @@ export const BillingPage = () => {
             <P>Create your first client to start</P>
           )}
           <UL layout={'row'}>
-            {clients.map((client) => (
+            {clients?.map((client) => (
               <LI key={client._id} onClick={() => setSelectedClient(client)}>
                 <ClientCard client={client} />
               </LI>
