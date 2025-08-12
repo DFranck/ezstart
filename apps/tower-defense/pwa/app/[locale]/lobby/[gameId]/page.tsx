@@ -2,8 +2,7 @@ import { logger } from '@ezstart/ui/lib'
 import { callApi } from '@ezstart/ui/utils'
 import { notFound } from 'next/navigation'
 import { LeaveGameButton } from '../../../../components/LeaveGameButton'
-import { LobbyPlayersList } from '../components/LobbyPlayersList'
-import { StartGameButton } from '../components/StartGameButton'
+import { LobbyWrapper } from './LobbyWrapper'
 
 export default async function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
   const { gameId } = await params
@@ -12,12 +11,14 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
 
   const game = res.data
   logger.debug('game', game)
+  
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Lobby: {gameId}</h1>
-      <LobbyPlayersList players={game.players} />
-      <StartGameButton gameId={gameId} />
-      <LeaveGameButton gameId={gameId} />
+    <div className="p-4 max-w-2xl mx-auto">
+      <LobbyWrapper game={game} gameId={gameId} />
+      
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <LeaveGameButton gameId={gameId} />
+      </div>
     </div>
   )
 }
