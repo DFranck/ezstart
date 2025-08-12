@@ -10,7 +10,7 @@ interface LoadingButtonProps {
   children: ReactNode
   loadingText?: string
   variant?: 'default' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'default' | 'sm' | 'lg' | 'icon'
   className?: string
   icon?: string
   loadingIcon?: string
@@ -24,7 +24,7 @@ export function LoadingButton({
   children,
   loadingText,
   variant = 'default',
-  size = 'md',
+  size = 'default',
   className = '',
   icon,
   loadingIcon = 'fa:FaSpinner',
@@ -44,7 +44,7 @@ export function LoadingButton({
     >
       {displayIcon && (
         <Icon
-          name={displayIcon}
+          name={displayIcon as any}
           className={`mr-2 ${loading && showSpinner ? 'animate-spin' : ''}`}
         />
       )}

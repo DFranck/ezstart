@@ -79,7 +79,6 @@ export function LoginSection() {
             disabled={isLoggingIn}
           />
           <LoadingButton
-            type="submit"
             loading={isLoggingIn}
             disabled={!name.trim()}
             loadingText="Logging in..."

@@ -22,6 +22,10 @@ export async function updatePlayerStatusService({
   }
 
   const player = game.players[playerIndex]
+  if (!player) {
+    throw new Error('Player not found in game')
+  }
+
   const previousStatus = player.status
   
   // Mettre à jour le statut

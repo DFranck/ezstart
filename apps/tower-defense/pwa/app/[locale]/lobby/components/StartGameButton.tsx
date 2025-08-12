@@ -24,7 +24,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   
-  const { executeWithRetry, isRetrying } = useNetworkRetry({
+  const { executeWithRetry, isRetrying, retryCount } = useNetworkRetry({
     maxRetries: 3,
     delay: 1000,
     backoff: true
@@ -37,7 +37,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
       
       const response = await executeWithRetry(
         () => callApi(`/api/games/${gameId}/start`, { method: 'POST' }),
-        (error, attempt) => {
+        (error: Error, attempt: number) => {
           console.warn(`[startGame] Attempt ${attempt} failed:`, error)
         }
       )

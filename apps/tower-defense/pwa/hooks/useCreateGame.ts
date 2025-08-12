@@ -43,7 +43,7 @@ export function useCreateGame() {
       )
 
       if (!response.ok) {
-        const errorMessage = response.error || 'Failed to create game'
+        const errorMessage = 'Failed to create game'
         throw new Error(errorMessage)
       }
 

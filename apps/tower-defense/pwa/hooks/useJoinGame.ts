@@ -45,7 +45,7 @@ export function useJoinGame() {
       )
 
       if (!response.ok) {
-        const errorMessage = response.error || 'Failed to join game'
+        const errorMessage = 'Failed to join game'
         throw new Error(errorMessage)
       }
 
