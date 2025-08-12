@@ -19,25 +19,25 @@ import Zod from './zod'
 import Zustand from './zustand'
 
 export const customIconMap = {
-  Figma,
-  Ezstart,
-  Nextjs,
-  Reactjs,
-  Tailwind,
+  Authjs,
+  CosmosKit,
   Expressjs,
-  Sass,
-  Zod,
+  Ezstart,
+  Figma,
   Jest,
   Malt,
-  Typescript,
   Mongodb,
-  Authjs,
+  Nextjs,
   Prisma,
+  Reactjs,
   Redux,
-  Zustand,
-  CosmosKit,
-  Supabase,
+  Sass,
   Socketio,
+  Supabase,
+  Tailwind,
+  Typescript,
+  Zod,
+  Zustand,
 } as const
 
 export type CustomIconName = keyof typeof customIconMap
