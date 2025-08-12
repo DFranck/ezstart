@@ -46,5 +46,6 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
     gameId,
     leftAt: new Date().toISOString(),
     status: isLobby ? 'removed' : 'left',
+    players: game.players, // Retourner la liste des joueurs restants
   }
 }
