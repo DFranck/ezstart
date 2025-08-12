@@ -2,6 +2,7 @@ import { logger } from '@ezstart/ui/lib'
 import { GameModel } from '../models/Game'
 import { checkEndGame } from '../utils/checkEndGame';
 import { getIO } from '../socketInstance';
+import { syncTickerWithDatabase } from '../tickers/tickerEngine'
 
 export async function leaveGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
   const game = await GameModel.findById(gameId)
@@ -35,6 +36,11 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
   }
 
   await game.save()
+
+  // Synchroniser le ticker avec les données mises à jour
+  await syncTickerWithDatabase(gameId)
+  
+  logger.debug(`[leaveGameService] Player ${playerId} left game ${gameId}. Remaining players: ${game.players.length}`)
 
   return {
     gameId,

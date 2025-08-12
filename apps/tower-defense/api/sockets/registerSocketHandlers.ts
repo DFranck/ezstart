@@ -2,16 +2,18 @@ import type { Socket } from 'socket.io'
 import { handleGameAction } from '../handlers/gameActions'
 import { getIO } from '../socketInstance'
 import { getGameTicker } from '../tickers/getGameTicker'
-import { ticker } from '../tickers/tickerEngine'
+import { syncTickerWithDatabase, ticker } from '../tickers/tickerEngine'
 
 export function registerSocketHandlers(socket: Socket) {
   console.log(`⚡ [socket] New connection: ${socket.id}`)
 
-  socket.on('gameAction', ({ gameId, action }) => {
+  socket.on('gameAction', async ({ gameId, action }) => {
     console.log(`📩 [gameAction] from ${socket.id} | gameId: ${gameId}`)
     console.log('   ↳ Action:', action)
 
+    // S'assurer que la room existe et est synchronisée avec la DB
     ticker.ensureRoom(gameId)
+    await syncTickerWithDatabase(gameId)
 
     const result = handleGameAction(gameId, action)
 

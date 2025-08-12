@@ -3,9 +3,9 @@ import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { mockShopItems } from '@tower-defense/types'
 import { Types } from 'mongoose'
 import { GameModel } from '../models/Game'
+import { syncTickerWithDatabase } from '../tickers/tickerEngine'
 
 export async function startGameService({ gameId }: { gameId: string }) {
-  
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
   if (game.phase !== 'waiting') throw new Error('Game already started')
@@ -29,5 +29,11 @@ export async function startGameService({ gameId }: { gameId: string }) {
   game.updatedAt = new Date()
 
   await game.save()
+
+  // Synchroniser le ticker avec les données mises à jour
+  await syncTickerWithDatabase(gameId)
+
+  logger.debug(`[startGameService] Game ${gameId} started with ${game.players.length} players`)
+
   return game
 }
