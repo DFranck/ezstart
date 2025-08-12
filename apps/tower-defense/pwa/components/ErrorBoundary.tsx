@@ -53,15 +53,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </div>
             <div className="mt-4 text-center">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Une erreur s'est produite
+                Une erreur s&apos;est produite
               </h3>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Désolé, quelque chose s'est mal passé. Veuillez rafraîchir la page.
+                Désolé, quelque chose s&apos;est mal passé. Veuillez rafraîchir la page.
               </p>
               {this.state.error && (
                 <details className="mt-4 text-left">
                   <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400">
-                    Détails de l'erreur
+                    Détails de l&apos;erreur
                   </summary>
                   <pre className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded overflow-auto">
                     {this.state.error.message}

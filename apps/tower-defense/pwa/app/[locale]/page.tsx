@@ -69,7 +69,7 @@ export default function Page() {
   }, [player?._id, router, addError])
 
   // Polling intelligent pour les mises à jour
-  const { data: gamesData, loading: isPolling } = usePolling(fetchGames, {
+  const { loading: isPolling } = usePolling(fetchGames, {
     interval: 10000, // Poll toutes les 10 secondes
     enabled: !!player?._id && !isInitialLoading,
     maxRetries: 2,
