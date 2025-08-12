@@ -1,9 +1,9 @@
 {
-  "name": "pwa-tower-defense",
+  "name": "tower-defense-pwa",
   "description": "Competitive multiplayer Tower Defense game. Combines RNG shop mechanics (auto-battler style), dynamic pathing with free tower placement, and unit-sending PvP (old school Warcraft TD). Players build, defend, and attack in a real-time loop with evolving income. High replayability and skill-based late game.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "type": "module",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "next dev --turbopack -p 3100",
     "build": "node scripts/generate-pwa-icons.js && next build",
@@ -11,7 +11,9 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "generate-icons": "node scripts/generate-pwa-icons.js"
+    "generate-icons": "node scripts/generate-pwa-icons.js",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
     "@ezstart/types": "workspace:*",
