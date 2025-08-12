@@ -1,5 +1,4 @@
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
-import { GamesProvider } from '@/providers/GamesProvider'
 import { Providers } from '@/providers/providers'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
@@ -7,8 +6,9 @@ import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
-import DebugIndicator from '../../../../../packages/ui/components/debugBanner'
+
 import { PWAInstallPrompt } from '../../components/PWAInstallPrompt'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))
@@ -75,12 +75,14 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
-        <Providers messages={messages} locale={locale} timeZone={timeZone}>
-          <DebugIndicator />
-          <GamesProvider>{children}</GamesProvider>
-        </Providers>
-        <Toaster />
-        <PWAInstallPrompt />
+        <ErrorBoundary>
+          <Providers messages={messages} locale={locale} timeZone={timeZone}>
+
+            {children}
+          </Providers>
+          <Toaster />
+          <PWAInstallPrompt />
+        </ErrorBoundary>
       </body>
     </html>
   )

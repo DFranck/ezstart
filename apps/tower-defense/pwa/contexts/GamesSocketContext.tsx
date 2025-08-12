@@ -74,5 +74,8 @@ export function useGamesSocket() {
   if (!context) {
     throw new Error('useGamesSocket must be used within a GamesSocketProvider')
   }
-  return context.socket!
+  if (!context.socket) {
+    throw new Error('Socket not initialized')
+  }
+  return context.socket
 }
