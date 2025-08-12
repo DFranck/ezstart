@@ -1,13 +1,13 @@
 // app/[locale]/lobby/components/LobbyPlayersList.tsx
 'use client'
 
-import { Player } from '@tower-defense/types'
+import { GamePlayer } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
-import { useGamesSocket } from '../../../../../contexts/GamesSocketContext'
+import { useGamesSocket } from '../../../../contexts/GamesSocketContext'
 import { WaitingPlayerCard } from './WaitingPlayerCard'
 
 type Props = {
-  players: Player[]
+  players: GamePlayer[]
   gameId: string
   currentUserId?: string
   hostId?: string
@@ -20,24 +20,24 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
 
   useEffect(() => {
     // Écouter les mises à jour de la liste des joueurs
-    socket.on('lobby:playersUpdated', (updatedPlayers: Player[]) => {
+    socket.on('lobby:playersUpdated', (updatedPlayers: GamePlayer[]) => {
       setPlayers(updatedPlayers)
     })
 
     // Écouter les joueurs qui rejoignent
-    socket.on('lobby:playerJoined', (newPlayer: Player) => {
+    socket.on('lobby:playerJoined', (newPlayer: GamePlayer) => {
       setPlayers(prev => [...prev, newPlayer])
     })
 
     // Écouter les joueurs qui partent
     socket.on('lobby:playerLeft', (playerId: string) => {
-      setPlayers(prev => prev.filter(p => p._id !== playerId))
+      setPlayers(prev => prev.filter(p => p.playerId !== playerId))
     })
 
     // Écouter les changements de statut
-    socket.on('lobby:playerStatusChanged', ({ playerId, status, message }) => {
+    socket.on('lobby:playerStatusChanged', ({ playerId, status, message }: { playerId: string; status: 'active' | 'eliminated' | 'disconnected' | 'left'; message?: string }) => {
       setPlayers(prev => prev.map(p => 
-        p._id === playerId ? { ...p, status } : p
+        p.playerId === playerId ? { ...p, status } : p
       ))
       
       if (message) {
@@ -54,7 +54,7 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
     })
 
     // Écouter la suppression du jeu
-    socket.on('lobby:gameDeleted', ({ gameId: deletedGameId }) => {
+    socket.on('lobby:gameDeleted', ({ gameId: deletedGameId }: { gameId: string }) => {
       if (deletedGameId === gameId) {
         // Rediriger vers la page d'accueil si le jeu a été supprimé
         window.location.href = '/'
@@ -109,10 +109,10 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           <h4 className="text-sm font-medium text-green-600 dark:text-green-400">🟢 Online</h4>
           {activePlayers.map(player => (
             <WaitingPlayerCard
-              key={player._id}
+              key={player.playerId}
               player={player}
-              isHost={player._id === hostId}
-              isCurrentUser={player._id === currentUserId}
+              isHost={player.playerId === hostId}
+              isCurrentUser={player.playerId === currentUserId}
             />
           ))}
         </div>
@@ -124,10 +124,10 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           <h4 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">🟡 Disconnected</h4>
           {disconnectedPlayers.map(player => (
             <WaitingPlayerCard
-              key={player._id}
+              key={player.playerId}
               player={player}
-              isHost={player._id === hostId}
-              isCurrentUser={player._id === currentUserId}
+              isHost={player.playerId === hostId}
+              isCurrentUser={player.playerId === currentUserId}
             />
           ))}
         </div>
@@ -139,10 +139,10 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">⚫ Others</h4>
           {otherPlayers.map(player => (
             <WaitingPlayerCard
-              key={player._id}
+              key={player.playerId}
               player={player}
-              isHost={player._id === hostId}
-              isCurrentUser={player._id === currentUserId}
+              isHost={player.playerId === hostId}
+              isCurrentUser={player.playerId === currentUserId}
             />
           ))}
         </div>
@@ -153,7 +153,7 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
       )}
       
       {/* Bouton de reconnexion si le joueur actuel est déconnecté */}
-      {currentUserId && disconnectedPlayers.some(p => p._id === currentUserId) && (
+      {currentUserId && disconnectedPlayers.some(p => p.playerId === currentUserId) && (
         <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded">
           <p className="text-sm text-yellow-700 mb-2">
             You appear to be disconnected. Click below to reconnect:

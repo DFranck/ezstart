@@ -1,9 +1,9 @@
 'use client'
 
-import { Player } from '@tower-defense/types'
+import { GamePlayer } from '@tower-defense/types'
 
 type Props = {
-  player: Player
+  player: GamePlayer
   isHost: boolean
   isCurrentUser: boolean
 }

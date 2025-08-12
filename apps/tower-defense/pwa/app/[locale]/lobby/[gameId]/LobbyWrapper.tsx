@@ -1,7 +1,7 @@
 'use client'
 
 import { Game } from '@tower-defense/types'
-import { useCurrentUser } from '../../../../../hooks/useCurrentUser'
+import { useCurrentUser } from '../../../../hooks/useCurrentUser'
 import { LobbyPlayersList } from '../components/LobbyPlayersList'
 import { StartGameButton } from '../components/StartGameButton'
 
@@ -30,7 +30,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
   }
 
   const isHost = game.host === user._id
-  const currentPlayer = game.players.find(p => p._id === user._id)
+  const currentPlayer = game.players.find(p => p.playerId === user._id)
 
   // Si le joueur n'est pas dans la partie, l'ajouter
   if (!currentPlayer) {

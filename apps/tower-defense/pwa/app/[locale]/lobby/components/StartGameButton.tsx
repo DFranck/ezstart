@@ -4,8 +4,8 @@ import { Button } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { useGamesSocket } from '../../../../../contexts/GamesSocketContext'
-import { useNetworkRetry } from '../../../../../hooks/useNetworkRetry'
+import { useGamesSocket } from '../../../../contexts/GamesSocketContext'
+import { useNetworkRetry } from '../../../../hooks/useNetworkRetry'
 
 type Props = {
   gameId: string
@@ -27,7 +27,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const { executeWithRetry, isRetrying, retryCount } = useNetworkRetry({
     maxRetries: 3,
     delay: 1000,
-    backoff: true
+    backoff: 2
   })
 
   const startGame = async () => {
@@ -36,10 +36,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
       setError(null)
       
       const response = await executeWithRetry(
-        () => callApi(`/api/games/${gameId}/start`, { method: 'POST' }),
-        (error: Error, attempt: number) => {
-          console.warn(`[startGame] Attempt ${attempt} failed:`, error)
-        }
+        () => callApi(`/api/games/${gameId}/start`, { method: 'POST' })
       )
 
       if (!response?.ok) {

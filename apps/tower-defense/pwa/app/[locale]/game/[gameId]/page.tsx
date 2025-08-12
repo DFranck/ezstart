@@ -10,9 +10,9 @@ import { MobShop } from '../components/MobShop'
 import { PlayerStatsPanel } from '../components/PlayerStatsPanel'
 import { TowerShop } from '../components/TowerShop'
 
-export default async function GamePage(props: { params: { gameId: string } }) {
+export default async function GamePage(props: { params: Promise<{ gameId: string }> }) {
   const { params } = props
-  const { gameId } = await Promise.resolve(params)
+  const { gameId } = await params
 
   const res = await callApi(`/api/games/${gameId}`)
   if (!res.ok) return notFound()

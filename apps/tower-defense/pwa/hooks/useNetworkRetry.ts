@@ -1,63 +1,74 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
-interface RetryConfig {
+interface RetryOptions {
   maxRetries?: number
   delay?: number
-  backoff?: boolean
+  backoff?: number
 }
 
-export function useNetworkRetry(config: RetryConfig = {}) {
-  const { maxRetries = 3, delay = 1000, backoff = true } = config
-  const [isRetrying, setIsRetrying] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
+interface RetryState {
+  retryCount: number
+  isRetrying: boolean
+  lastError: Error | null
+}
 
-  const executeWithRetry = useCallback(async <T>(
-    operation: () => Promise<T>,
-    onError?: (error: Error, attempt: number) => void
-  ): Promise<T> => {
-    let lastError: Error
-    let currentDelay = delay
+export function useNetworkRetry(options: RetryOptions = {}) {
+  const { maxRetries = 3, delay = 1000, backoff = 2 } = options
+  const [state, setState] = useState<RetryState>({
+    retryCount: 0,
+    isRetrying: false,
+    lastError: null,
+  })
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        setIsRetrying(attempt > 1)
-        setRetryCount(attempt - 1)
-        
-        const result = await operation()
-        
-        // Reset on success
-        setIsRetrying(false)
-        setRetryCount(0)
-        
-        return result
-      } catch (error) {
-        lastError = error as Error
-        
-        if (onError) {
-          onError(lastError, attempt)
-        }
-        
-        // Don't wait on last attempt
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, currentDelay))
+  const executeWithRetry = useCallback(
+    async <T>(operation: () => Promise<T>): Promise<T> => {
+      let lastError: Error
+      let attempt = 0
+
+      while (attempt <= maxRetries) {
+        try {
+          setState(prev => ({ ...prev, isRetrying: attempt > 0, retryCount: attempt }))
           
-          if (backoff) {
-            currentDelay *= 2 // Exponential backoff
+          if (attempt > 0) {
+            // Attendre avec backoff exponentiel
+            const waitTime = delay * Math.pow(backoff, attempt - 1)
+            await new Promise(resolve => setTimeout(resolve, waitTime))
           }
+
+          const result = await operation()
+          
+          // Succès, réinitialiser l'état
+          setState({ retryCount: 0, isRetrying: false, lastError: null })
+          return result
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error))
+          attempt++
+
+          if (attempt > maxRetries) {
+            // Échec final
+            setState({ retryCount: attempt - 1, isRetrying: false, lastError })
+            throw lastError
+          }
+
+          // Continuer avec le prochain essai
+          setState(prev => ({ ...prev, lastError }))
         }
       }
-    }
-    
-    setIsRetrying(false)
-    setRetryCount(0)
-    throw lastError!
-  }, [maxRetries, delay, backoff])
+
+      throw lastError!
+    },
+    [maxRetries, delay, backoff]
+  )
+
+  const reset = useCallback(() => {
+    setState({ retryCount: 0, isRetrying: false, lastError: null })
+  }, [])
 
   return {
+    ...state,
     executeWithRetry,
-    isRetrying,
-    retryCount
+    reset,
   }
 }
