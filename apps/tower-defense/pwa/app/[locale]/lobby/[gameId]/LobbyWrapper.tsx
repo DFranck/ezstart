@@ -60,6 +60,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
         gameId={gameId} 
         isHost={isHost}
         playerCount={game.players.length}
+        currentUserId={user._id}
       />
     </div>
   )

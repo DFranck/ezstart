@@ -33,16 +33,30 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
       setPlayers(prev => prev.filter(p => p._id !== playerId))
     })
 
-    // Rejoindre la room du lobby
-    socket.emit('lobby:join', { gameId })
+    // Écouter la suppression du jeu
+    socket.on('lobby:gameDeleted', ({ gameId: deletedGameId }) => {
+      if (deletedGameId === gameId) {
+        // Rediriger vers la page d'accueil si le jeu a été supprimé
+        window.location.href = '/'
+      }
+    })
+
+    // Rejoindre la room du lobby avec le playerId
+    if (currentUserId) {
+      socket.emit('lobby:join', { gameId, playerId: currentUserId })
+    }
 
     return () => {
       socket.off('lobby:playersUpdated')
       socket.off('lobby:playerJoined')
       socket.off('lobby:playerLeft')
-      socket.emit('lobby:leave', { gameId })
+      socket.off('lobby:gameDeleted')
+      
+      if (currentUserId) {
+        socket.emit('lobby:leave', { gameId, playerId: currentUserId })
+      }
     }
-  }, [socket, gameId])
+  }, [socket, gameId, currentUserId])
 
   return (
     <div className="mt-4 space-y-2">
