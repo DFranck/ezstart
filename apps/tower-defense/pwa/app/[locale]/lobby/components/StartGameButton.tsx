@@ -5,6 +5,7 @@ import { callApi } from '@ezstart/ui/utils'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useGamesSocket } from '../../../../../contexts/GamesSocketContext'
+import { useNetworkRetry } from '../../../../../hooks/useNetworkRetry'
 
 type Props = {
   gameId: string
@@ -19,17 +20,27 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const [countdown, setCountdown] = useState<number | null>(null)
   const [isStarting, setIsStarting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [socketConnected, setSocketConnected] = useState(true)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  const { executeWithRetry, isRetrying } = useNetworkRetry({
+    maxRetries: 3,
+    delay: 1000,
+    backoff: true
+  })
 
   const startGame = async () => {
     try {
       setIsStarting(true)
       setError(null)
       
-      const response = await callApi(`/api/games/${gameId}/start`, {
-        method: 'POST',
-      })
+      const response = await executeWithRetry(
+        () => callApi(`/api/games/${gameId}/start`, { method: 'POST' }),
+        (error, attempt) => {
+          console.warn(`[startGame] Attempt ${attempt} failed:`, error)
+        }
+      )
 
       if (!response?.ok) {
         throw new Error('Game could not be started')
@@ -52,7 +63,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     setError(null)
     
     // Notifier les autres joueurs du compte à rebours
-    if (currentUserId) {
+    if (currentUserId && socketConnected) {
       socket.emit('lobby:startCountdown', { gameId, playerId: currentUserId })
     }
 
@@ -73,12 +84,23 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     setCountdown(null)
     
     // Notifier les autres joueurs de l'annulation
-    if (currentUserId) {
+    if (currentUserId && socketConnected) {
       socket.emit('lobby:cancelCountdown', { gameId, playerId: currentUserId })
     }
   }
 
   useEffect(() => {
+    // Vérifier la connexion Socket.IO
+    const checkSocketConnection = () => {
+      setSocketConnected(socket.connected)
+    }
+    
+    checkSocketConnection()
+    
+    // Écouter les événements de connexion
+    socket.on('connect', checkSocketConnection)
+    socket.on('disconnect', checkSocketConnection)
+    
     // Écouter les événements de lobby
     socket.on('lobby:playerLeft', cancelCountdown)
     socket.on('lobby:playerJoined', cancelCountdown)
@@ -99,6 +121,8 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     })
 
     return () => {
+      socket.off('connect')
+      socket.off('disconnect')
       socket.off('lobby:playerLeft')
       socket.off('lobby:playerJoined')
       socket.off('lobby:countdownStarted')
@@ -134,15 +158,21 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
         </div>
       )}
       
+      {!socketConnected && (
+        <div className="p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded text-sm">
+          ⚠️ Connection lost. Some features may not work properly.
+        </div>
+      )}
+      
       <Button 
         onClick={initiateCountdown} 
-        disabled={countdown !== null || isStarting || !canStart}
+        disabled={countdown !== null || isStarting || isRetrying || !canStart}
         className="w-full"
       >
         {countdown !== null 
           ? `Starting in ${countdown}s...` 
-          : isStarting 
-            ? 'Starting game...'
+          : isStarting || isRetrying
+            ? `Starting game...${isRetrying ? ` (Retry ${retryCount + 1}/3)` : ''}`
             : `Start Game (${playerCount}/${minPlayers} players)`
         }
       </Button>

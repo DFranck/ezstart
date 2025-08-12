@@ -15,6 +15,7 @@ type Props = {
 
 export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserId, hostId }: Props) {
   const [players, setPlayers] = useState(initialPlayers)
+  const [statusMessages, setStatusMessages] = useState<Record<string, string>>({})
   const socket = useGamesSocket()
 
   useEffect(() => {
@@ -31,6 +32,25 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
     // Écouter les joueurs qui partent
     socket.on('lobby:playerLeft', (playerId: string) => {
       setPlayers(prev => prev.filter(p => p._id !== playerId))
+    })
+
+    // Écouter les changements de statut
+    socket.on('lobby:playerStatusChanged', ({ playerId, status, message }) => {
+      setPlayers(prev => prev.map(p => 
+        p._id === playerId ? { ...p, status } : p
+      ))
+      
+      if (message) {
+        setStatusMessages(prev => ({ ...prev, [playerId]: message }))
+        // Effacer le message après 5 secondes
+        setTimeout(() => {
+          setStatusMessages(prev => {
+            const newMessages = { ...prev }
+            delete newMessages[playerId]
+            return newMessages
+          })
+        }, 5000)
+      }
     })
 
     // Écouter la suppression du jeu
@@ -50,6 +70,7 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
       socket.off('lobby:playersUpdated')
       socket.off('lobby:playerJoined')
       socket.off('lobby:playerLeft')
+      socket.off('lobby:playerStatusChanged')
       socket.off('lobby:gameDeleted')
       
       if (currentUserId) {
@@ -58,20 +79,92 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
     }
   }, [socket, gameId, currentUserId])
 
+  // Fonction pour tenter une reconnexion
+  const handleReconnect = () => {
+    if (currentUserId) {
+      socket.emit('lobby:reconnect', { gameId, playerId: currentUserId })
+    }
+  }
+
+  const activePlayers = players.filter(p => p.status === 'active')
+  const disconnectedPlayers = players.filter(p => p.status === 'disconnected')
+  const otherPlayers = players.filter(p => p.status !== 'active' && p.status !== 'disconnected')
+
   return (
-    <div className="mt-4 space-y-2">
-      <h3 className="text-lg font-semibold mb-3">Players ({players.length})</h3>
-      {players.length === 0 ? (
+    <div className="mt-4 space-y-4">
+      <h3 className="text-lg font-semibold mb-3">
+        Players ({activePlayers.length} online, {players.length} total)
+      </h3>
+      
+      {/* Messages de statut */}
+      {Object.entries(statusMessages).map(([playerId, message]) => (
+        <div key={playerId} className="p-2 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">
+          {message}
+        </div>
+      ))}
+      
+      {/* Joueurs actifs */}
+      {activePlayers.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-green-600 dark:text-green-400">🟢 Online</h4>
+          {activePlayers.map(player => (
+            <WaitingPlayerCard
+              key={player._id}
+              player={player}
+              isHost={player._id === hostId}
+              isCurrentUser={player._id === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Joueurs déconnectés */}
+      {disconnectedPlayers.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">🟡 Disconnected</h4>
+          {disconnectedPlayers.map(player => (
+            <WaitingPlayerCard
+              key={player._id}
+              player={player}
+              isHost={player._id === hostId}
+              isCurrentUser={player._id === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+      
+      {/* Autres statuts */}
+      {otherPlayers.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">⚫ Others</h4>
+          {otherPlayers.map(player => (
+            <WaitingPlayerCard
+              key={player._id}
+              player={player}
+              isHost={player._id === hostId}
+              isCurrentUser={player._id === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+      
+      {players.length === 0 && (
         <p className="text-gray-400 italic">No players yet...</p>
-      ) : (
-        players.map(player => (
-          <WaitingPlayerCard
-            key={player._id}
-            player={player}
-            isHost={player._id === hostId}
-            isCurrentUser={player._id === currentUserId}
-          />
-        ))
+      )}
+      
+      {/* Bouton de reconnexion si le joueur actuel est déconnecté */}
+      {currentUserId && disconnectedPlayers.some(p => p._id === currentUserId) && (
+        <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded">
+          <p className="text-sm text-yellow-700 mb-2">
+            You appear to be disconnected. Click below to reconnect:
+          </p>
+          <button
+            onClick={handleReconnect}
+            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+          >
+            Reconnect
+          </button>
+        </div>
       )}
     </div>
   )
