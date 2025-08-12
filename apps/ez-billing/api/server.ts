@@ -1,7 +1,7 @@
-import { connectToMongo, createApp, startServer } from '@ezstart/api-core';
-import routes, { globalRegistry } from './routes';
+import { connectToMongo, createApp, startServer } from '@ezstart/api-core'
+import routes, { globalRegistry } from './routes'
 
-export const app = createApp();
+export const app = createApp()
 
 connectToMongo('ez-billing')
   .then(() =>
@@ -9,10 +9,10 @@ connectToMongo('ez-billing')
       routes,
       registries: globalRegistry,
       serviceName: 'EzBilling',
-      port: 8001,
+      port: 8888,
     })
   )
-  .catch((err) => {
-    console.error('❌ Failed to start EzBilling API', err);
-    process.exit(1);
-  });
+  .catch(err => {
+    console.error('❌ Failed to start EzBilling API', err)
+    process.exit(1)
+  })

@@ -34,3 +34,4 @@
     - to-api-object.ts
 - structure.md
 - tsconfig.json
+- tsconfig.tsbuildinfo

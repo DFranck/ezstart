@@ -6,7 +6,6 @@
 - .gitignore
 - .npmrc
 - .prettierignore
-- apis.config.md
 - apps/
   - asc-tcd/
     - web/ → [structure.md](./apps/asc-tcd/web/structure.md)
@@ -41,6 +40,7 @@
     - types/ → [structure.md](./apps/tower-defense/types/structure.md)
     - utils/ → [structure.md](./apps/tower-defense/utils/structure.md)
 - eslint.config.js
+- monorepo-config.md
 - package.json
 - packages/
   - api-core/ → [structure.md](./packages/api-core/structure.md)
@@ -56,7 +56,7 @@
   - check-typecheck.ts
   - clean.ts
   - export-to-public.ts
-  - generate-apis-config.ts
+  - generate-config.ts
   - generate-readmes-types.ts
   - generate-readmes.ts
   - generate-structures.ts
@@ -66,5 +66,6 @@
     - findPackages.ts
     - replaceAutoSection.ts
 - structure.md
+- templates/
 - tsconfig.json
 - turbo.json

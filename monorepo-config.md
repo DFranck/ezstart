@@ -1793,14 +1793,7 @@ This document contains all configuration files for the monorepo packages.
   "name": "@workspace/typescript-config",
   "version": "0.0.1",
   "private": true,
-  "license": "MIT",
-  "files": [
-    "base.json",
-    "api.json",
-    "package.json",
-    "nextjs.json",
-    "react-library.json"
-  ],
+  "license": "PROPRIETARY",
   "publishConfig": {
     "access": "public"
   }
@@ -1861,30 +1854,57 @@ This document contains all configuration files for the monorepo packages.
 ```json
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "API Configuration",
+  "display": "Node/Express + React JSX (API)",
   "extends": "./base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true
+  }
+}
+```
+
+### base.json
+
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
+  "compilerOptions": {
+    "paths": {
+      "@ezstart/ui/*": [
+        "./packages/ui/src/*"
+      ],
+      "@ezstart/ui": [
+        "./packages/libs/ez-icon/src/index.ts"
+      ]
+    },
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": [
+      "es2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "NodeNext",
+    "moduleDetection": "force",
     "moduleResolution": "NodeNext",
-    "types": [
-      "node"
-    ]
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  }
 }
 ```
 
@@ -1893,56 +1913,20 @@ This document contains all configuration files for the monorepo packages.
 ```json
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Next.js Configuration",
+  "display": "Next.js",
   "extends": "./base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/utils/*": [
-        "./utils/*"
-      ]
-    }
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "jsx": "preserve",
+    "noEmit": true
+  }
 }
 ```
 
@@ -1953,14 +1937,7 @@ This document contains all configuration files for the monorepo packages.
   "name": "@workspace/typescript-config",
   "version": "0.0.1",
   "private": true,
-  "license": "MIT",
-  "files": [
-    "base.json",
-    "api.json",
-    "package.json",
-    "nextjs.json",
-    "react-library.json"
-  ],
+  "license": "PROPRIETARY",
   "publishConfig": {
     "access": "public"
   }

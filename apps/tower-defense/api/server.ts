@@ -13,7 +13,7 @@ connectToMongo('tower-defense')
       routes,
       registries: globalRegistry,
       serviceName: 'TowerDefense',
-      port: 8002,
+      port: 8888,
       onHttpServerReady: server => {
         const io = createSocketServer(server, {
           onConnection: socket => {

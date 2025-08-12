@@ -24,6 +24,7 @@
         - figma.tsx
         - index.ts
         - jest.tsx
+        - malt.tsx
         - mongodb.tsx
         - nextjs.tsx
         - prisma.tsx

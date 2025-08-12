@@ -6,7 +6,7 @@
   - getGameByIdController.ts
   - getGamesController.ts
   - joinGameController.ts
-  - leaveLobbyController.ts
+  - leaveGameController.ts
   - player/
     - playerController.ts
   - startGameController.ts
@@ -21,7 +21,9 @@
   - Game.ts
   - GamePlayer.ts
   - Mob.ts
+  - PlacedTower.ts
   - Player.ts
+  - Position.ts
   - Tower.ts
 - package.json
 - README.md
@@ -37,17 +39,17 @@
   - getGameByIdService.ts
   - getGamesService.ts
   - joinGameService.ts
-  - leaveLobbyService.ts
+  - leaveGameService.ts
   - player/
     - playerService.ts
   - startGameService.ts
 - socketInstance.ts
 - sockets/
-  - joinGameSocket.ts
   - registerSocketHandlers.ts
-  - startGameSocket.ts
 - structure.md
 - tickers/
   - getGameTicker.ts
   - tickerEngine.ts
 - tsconfig.json
+- utils/
+  - checkEndGame.ts
