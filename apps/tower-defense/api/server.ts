@@ -1,5 +1,5 @@
 import { connectToMongo, createApp, createSocketServer, startServer } from '@ezstart/api-core'
-import routes, { globalRegistry } from './routes'
+import routes, { globalRegistry } from './routes/index.js'
 import { setIO } from './socketInstance'
 import { registerSocketHandlers } from './sockets/registerSocketHandlers'
 const app = createApp()
