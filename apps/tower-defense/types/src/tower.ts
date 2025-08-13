@@ -15,7 +15,7 @@ export const towerSchema = z.object({
   shape: z
     .array(z.array(z.boolean()))
     .refine(
-      shape => SHAPE_VALUES.some(allowed => JSON.stringify(allowed) === JSON.stringify(shape)),
+      shape => SHAPE_VALUES.some((allowed: boolean[][]) => JSON.stringify(allowed) === JSON.stringify(shape)),
       { message: 'Shape must match predefined Tetris shapes' }
     )
     .describe('2D shape of the tower (must match Tetris shape)'),
