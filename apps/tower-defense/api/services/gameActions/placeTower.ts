@@ -1,4 +1,4 @@
-import type { Tower } from '@tower-defense/types'
+import type { GamePlayer, Tower } from '@tower-defense/types'
 import { computeCoveredCells, isColliding } from '@tower-defense/utils'
 import { ticker } from '../../tickers/tickerEngine'
 
@@ -31,7 +31,7 @@ export function placeTower(
   const coveredCells = computeCoveredCells(x, y, tower)
 
   ticker.mutate(gameId, state => {
-    const players = state.players.map(p => {
+    const players = state.players.map((p: GamePlayer) => {
       if (p.playerId !== playerId) return p
 
       const placedTower = {
