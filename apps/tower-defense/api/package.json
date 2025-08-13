@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch server.ts",
-    "prebuild": "pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
+    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",

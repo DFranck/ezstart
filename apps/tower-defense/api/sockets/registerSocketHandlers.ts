@@ -1,11 +1,11 @@
 import type { Socket } from 'socket.io'
-import { handleGameAction } from '../handlers/gameActions'
-import { getIO } from '../socketInstance'
-import { getGameTicker } from '../tickers/getGameTicker'
-import { syncTickerWithDatabase, ticker } from '../tickers/tickerEngine'
-import { GameModel } from '../models/Game'
-import { PlayerModel } from '../models/Player'
-import { updatePlayerStatusService } from '../services/updatePlayerStatusService'
+import { handleGameAction } from '../handlers/gameActions.js'
+import { getIO } from '../socketInstance.js'
+import { getGameTicker } from '../tickers/getGameTicker.js'
+import { syncTickerWithDatabase, ticker } from '../tickers/tickerEngine.js'
+import { GameModel } from '../models/Game.js'
+import { PlayerModel } from '../models/Player.js'
+import { updatePlayerStatusService } from '../services/updatePlayerStatusService.js'
 
 // Map pour tracker les connexions actives
 const activeConnections = new Map<string, { socketId: string; gameId: string; playerId: string }>()

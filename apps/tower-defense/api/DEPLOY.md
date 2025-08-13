@@ -1,74 +1,121 @@
-# Déploiement API Tower Defense sur Render
+# 🚀 Déploiement API Tower Defense sur Render
 
-## Configuration Render
+## 📋 Configuration Render (Meilleure Pratique)
 
-### Service Type
+### ⚙️ Paramètres du Service
 
-- **Type** : Web Service
-- **Instance** : Free (0.1 CPU, 512 MB)
-- **Region** : Oregon (US West)
+**Type de Service :** Web Service  
+**Instance :** Free (0.1 CPU, 512 MB)  
+**Région :** Oregon (US West)  
 
-### Repository
+### 🔧 Configuration Build & Deploy
 
-- **URL** : https://github.com/DFranck/ezstart
-- **Branch** : master
-- **Root Directory** : (vide - utilise la racine du monorepo)
+#### Repository
+- **URL :** `https://github.com/DFranck/ezstart`
+- **Branch :** `master`
+- **Credentials :** `franckdufournet@hotmail.fr`
 
-### Build Configuration
+#### ⭐ Configuration Optimale (Recommandée)
 
-```bash
-# Build Command
-pnpm install --frozen-lockfile && pnpm --filter api-tower-defense build
-
-# Start Command
-pnpm --filter api-tower-defense start
+```
+Root Directory: apps/tower-defense/api
+Build Command: pnpm install --frozen-lockfile && pnpm build
+Start Command: pnpm start
 ```
 
-### Auto-Deploy
+### 📦 Dépendances Monorepo
 
-- **Trigger** : On Commit (automatique)
-- **Service ID** : srv-d0dnr81r0fns739erehg
-- **URL** : https://ezstart-api.onrender.com
+L'API dépend des packages workspace suivants (construits dans l'ordre) :
 
-## Dépendances Monorepo
+1. `@ezstart/types` - Types communs
+2. `@ezstart/api-core` - Core API utilities
+3. `@ezstart/ui` - Composants UI
+4. `@tower-defense/config` - Configuration du jeu
+5. `@tower-defense/types` - Types spécifiques au jeu
+6. `@tower-defense/utils` - Utilitaires du jeu
 
-L'API dépend des packages suivants qui doivent être construits dans cet ordre :
-
-1. `@ezstart/types`
-2. `@ezstart/api-core`
-3. `@ezstart/ui`
-4. `@tower-defense/config`
-5. `@tower-defense/types`
-6. `@tower-defense/utils`
-7. `api-tower-defense`
-
-## Script Prebuild
+### 🔄 Script Prebuild
 
 Le script `prebuild` dans `package.json` gère automatiquement la construction des dépendances :
 
 ```json
 {
-  "prebuild": "pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build"
+  "scripts": {
+    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  }
 }
 ```
 
-## Variables d'Environnement
+### 🌍 Variables d'Environnement
 
-À configurer dans Render :
+**Obligatoires :**
+- `MONGODB_URI` - URI de connexion MongoDB
+- `PORT` - Port du serveur (généralement 10000 sur Render)
 
-- `MONGODB_URI` : URI de connexion MongoDB
-- `NODE_ENV` : production
+**Optionnelles :**
+- `NODE_ENV` - Environnement (production)
+- `CORS_ORIGIN` - Origines CORS autorisées
 
-## Troubleshooting
+### 🚀 Processus de Déploiement
 
-### Erreurs courantes :
+1. **Installation :** `pnpm install --frozen-lockfile`
+2. **Prebuild :** Construction des packages workspace
+3. **Build :** Compilation TypeScript → JavaScript
+4. **Start :** Démarrage du serveur Node.js
 
-1. **Module not found** : Vérifier que tous les packages workspace sont construits
-2. **ES Module imports** : Utiliser les extensions `.js` pour les imports relatifs
-3. **Port binding** : L'API écoute sur le port 8888
+### 🔍 Dépannage
 
-### Logs
+#### Erreurs Communes
 
-- Vérifier les logs Render pour diagnostiquer les problèmes
-- Les erreurs de build apparaissent dans les logs de construction
-- Les erreurs runtime apparaissent dans les logs de démarrage
+**❌ Module not found :**
+- Vérifier que le `prebuild` s'exécute correctement
+- S'assurer que tous les packages workspace sont construits
+
+**❌ TypeScript errors :**
+- Vérifier les types `any` → remplacer par des types explicites
+- S'assurer que les imports ont les extensions `.js`
+
+**❌ ES Module errors :**
+- Tous les imports relatifs doivent avoir l'extension `.js`
+- Vérifier que `"type": "module"` est dans `package.json`
+
+#### Logs Utiles
+
+```bash
+# Vérifier la construction locale
+pnpm --filter api-tower-defense build
+
+# Tester le démarrage local
+pnpm --filter api-tower-defense start
+
+# Vérifier les types
+pnpm --filter api-tower-defense typecheck
+```
+
+### 📊 Monitoring
+
+- **URL de l'API :** `https://ezstart-api.onrender.com`
+- **Logs :** Disponibles dans le dashboard Render
+- **Health Check :** `/health` endpoint
+
+### 🔄 Auto-Deploy
+
+- **Activé :** Oui
+- **Trigger :** Push sur la branche `master`
+- **Filtres :** Seuls les changements dans `apps/tower-defense/api` déclenchent un rebuild
+
+---
+
+## 🎯 Configuration Alternative (Ancienne)
+
+⚠️ **Déconseillée** - Utiliser la configuration optimale ci-dessus
+
+```
+Root Directory: (vide)
+Build Command: pnpm install --frozen-lockfile && pnpm --filter api-tower-defense build
+Start Command: pnpm --filter api-tower-defense start
+```
+
+Cette configuration fonctionne mais est moins performante car elle télécharge tout le monorepo.

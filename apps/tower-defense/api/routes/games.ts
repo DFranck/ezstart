@@ -12,12 +12,12 @@ import {
   joinGameResponseSchema,
 } from '@tower-defense/types'
 import express from 'express'
-import { createGameController } from '../controllers/createGameController'
-import { getGameByIdController } from '../controllers/getGameByIdController'
-import { getGamesController } from '../controllers/getGamesController'
-import { joinGameController } from '../controllers/joinGameController'
-import { leaveGameController } from '../controllers/leaveGameController'
-import { startGameController } from '../controllers/startGameController'
+import { createGameController } from '../controllers/createGameController.js'
+import { getGameByIdController } from '../controllers/getGameByIdController.js'
+import { getGamesController } from '../controllers/getGamesController.js'
+import { joinGameController } from '../controllers/joinGameController.js'
+import { leaveGameController } from '../controllers/leaveGameController.js'
+import { startGameController } from '../controllers/startGameController.js'
 
 export const gamesRegistry = new OpenAPIRegistry()
 const router = express.Router()
