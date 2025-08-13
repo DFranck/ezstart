@@ -1,5 +1,5 @@
 import { GameAction } from '@tower-defense/types'
-import { getGameTicker } from '../tickers/getGameTicker'
+import { getGameTicker } from '../tickers/getGameTicker.js'
 
 export function handleGameAction(gameId: string, action: GameAction) {
   const ticker = getGameTicker(gameId)

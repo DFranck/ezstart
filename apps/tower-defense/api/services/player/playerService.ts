@@ -1,6 +1,6 @@
 import { logger } from '@ezstart/ui/lib'
 import { CreateOrFindPlayerPayload, Player } from '@tower-defense/types'
-import { PlayerModel } from '../../models/Player'
+import { PlayerModel } from '../../models/Player.js'
 
 function transformPlayerId(player: any): Player {
   const { _id, ...rest } = player

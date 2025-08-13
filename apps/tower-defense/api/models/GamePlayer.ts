@@ -1,8 +1,8 @@
 import { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from '@tower-defense/config'
 import { Schema } from 'mongoose'
-import { mobSchema } from './Mob'
-import { placedTowerSchema } from './PlacedTower'
-import { towerSchema } from './Tower'
+import { mobSchema } from './Mob.js'
+import { placedTowerSchema } from './PlacedTower.js'
+import { towerSchema } from './Tower.js'
 
 export const gamePlayerSchema = new Schema(
   {

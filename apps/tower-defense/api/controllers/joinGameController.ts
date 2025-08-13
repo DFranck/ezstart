@@ -1,7 +1,7 @@
 import { mongoIdSchema } from '@ezstart/types'
 import { Request, Response } from 'express'
-import { joinGameService } from '../services/joinGameService'
-import { getIO } from '../socketInstance'
+import { joinGameService } from '../services/joinGameService.js'
+import { getIO } from '../socketInstance.js'
 
 export async function joinGameController(req: Request, res: Response) {
   try {

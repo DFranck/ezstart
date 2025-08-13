@@ -1,8 +1,8 @@
 import { DEFAULT_PHASE } from '@tower-defense/config'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
-import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer'
-import { GameModel } from '../models/Game'
-import { PlayerModel } from '../models/Player'
+import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
+import { GameModel } from '../models/Game.js'
+import { PlayerModel } from '../models/Player.js'
 export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
   const player = await PlayerModel.findById(input.playerId)
   if (!player) {

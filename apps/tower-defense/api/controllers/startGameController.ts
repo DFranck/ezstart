@@ -1,6 +1,6 @@
 // controllers/startGameController.ts
 import { Request, Response } from 'express';
-import { startGameService } from '../services/startGameService';
+import { startGameService } from '../services/startGameService.js';
 
 export async function startGameController(req: Request, res: Response) {
   try {

@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/ui/lib'
-import { GameModel } from '../models/Game'
+import { GameModel } from '../models/Game.js'
 
 export async function getGameByIdService(gameId: string) {
  

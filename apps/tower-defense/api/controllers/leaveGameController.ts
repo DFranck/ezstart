@@ -1,7 +1,7 @@
 import { mongoIdSchema } from '@ezstart/types'
 import { Request, Response } from 'express'
-import { leaveGameService } from '../services/leaveGameService'
-import { getIO } from '../socketInstance'
+import { leaveGameService } from '../services/leaveGameService.js'
+import { getIO } from '../socketInstance.js'
 
 export async function leaveGameController(req: Request, res: Response) {
   const playerParsed = mongoIdSchema.safeParse(req.body?.playerId)

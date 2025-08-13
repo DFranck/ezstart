@@ -1,8 +1,8 @@
 import { DEFAULT_PHASE, GAME_PHASES } from '@tower-defense/config'
 import { Schema, model } from 'mongoose'
-import { gamePlayerSchema } from './GamePlayer'
-import { mobSchema } from './Mob'
-import { towerSchema } from './Tower'
+import { gamePlayerSchema } from './GamePlayer.js'
+import { mobSchema } from './Mob.js'
+import { towerSchema } from './Tower.js'
 
 const gameSchema = new Schema(
   {

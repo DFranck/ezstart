@@ -1,6 +1,6 @@
 import { Tower } from '@tower-defense/types'
-import { canPlaceTowerAt, placeTower } from '../services/gameActions/placeTower'
-import { ticker } from './tickerEngine'
+import { canPlaceTowerAt, placeTower } from '../services/gameActions/placeTower.js'
+import { ticker } from './tickerEngine.js'
 
 export function getGameTicker(gameId: string) {
   const state = ticker.getState(gameId)

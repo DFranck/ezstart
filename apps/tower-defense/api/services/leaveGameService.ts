@@ -1,9 +1,9 @@
 import { logger } from '@ezstart/ui/lib'
-import { GameModel } from '../models/Game'
-import { checkEndGame } from '../utils/checkEndGame';
-import { getIO } from '../socketInstance';
-import { syncTickerWithDatabase } from '../tickers/tickerEngine'
-import { updatePlayerStatusService } from './updatePlayerStatusService'
+import { GameModel } from '../models/Game.js'
+import { checkEndGame } from '../utils/checkEndGame.js';
+import { getIO } from '../socketInstance.js';
+import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
+import { updatePlayerStatusService } from './updatePlayerStatusService.js'
 
 export async function leaveGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
   const game = await GameModel.findById(gameId)

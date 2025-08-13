@@ -2,8 +2,8 @@ import { logger } from '@ezstart/ui/lib'
 import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { mockShopItems } from '@tower-defense/types'
 import { Types } from 'mongoose'
-import { GameModel } from '../models/Game'
-import { syncTickerWithDatabase } from '../tickers/tickerEngine'
+import { GameModel } from '../models/Game.js'
+import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 
 // Map pour tracker les jeux en cours de démarrage (anti-race condition)
 const startingGames = new Set<string>()

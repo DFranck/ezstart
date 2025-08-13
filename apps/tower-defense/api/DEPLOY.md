@@ -6,11 +6,12 @@
 
 **Type de Service :** Web Service  
 **Instance :** Free (0.1 CPU, 512 MB)  
-**Région :** Oregon (US West)  
+**Région :** Oregon (US West)
 
 ### 🔧 Configuration Build & Deploy
 
 #### Repository
+
 - **URL :** `https://github.com/DFranck/ezstart`
 - **Branch :** `master`
 - **Credentials :** `franckdufournet@hotmail.fr`
@@ -51,10 +52,12 @@ Le script `prebuild` dans `package.json` gère automatiquement la construction d
 ### 🌍 Variables d'Environnement
 
 **Obligatoires :**
+
 - `MONGODB_URI` - URI de connexion MongoDB
 - `PORT` - Port du serveur (généralement 10000 sur Render)
 
 **Optionnelles :**
+
 - `NODE_ENV` - Environnement (production)
 - `CORS_ORIGIN` - Origines CORS autorisées
 
@@ -70,14 +73,17 @@ Le script `prebuild` dans `package.json` gère automatiquement la construction d
 #### Erreurs Communes
 
 **❌ Module not found :**
+
 - Vérifier que le `prebuild` s'exécute correctement
 - S'assurer que tous les packages workspace sont construits
 
 **❌ TypeScript errors :**
+
 - Vérifier les types `any` → remplacer par des types explicites
 - S'assurer que les imports ont les extensions `.js`
 
 **❌ ES Module errors :**
+
 - Tous les imports relatifs doivent avoir l'extension `.js`
 - Vérifier que `"type": "module"` est dans `package.json`
 

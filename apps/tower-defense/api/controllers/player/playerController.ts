@@ -1,6 +1,6 @@
 import { logger } from '@ezstart/ui/lib'
 import { Request, Response } from 'express'
-import { findOrCreatePlayer } from '../../services/player/playerService'
+import { findOrCreatePlayer } from '../../services/player/playerService.js'
 
 export async function createOrFindPlayerController(req: Request, res: Response) {
   logger.debug('createOrFindPlayerController', req.body)

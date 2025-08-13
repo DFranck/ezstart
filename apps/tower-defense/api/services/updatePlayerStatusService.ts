@@ -1,6 +1,6 @@
 import { logger } from '@ezstart/ui/lib'
-import { GameModel } from '../models/Game'
-import { syncTickerWithDatabase } from '../tickers/tickerEngine'
+import { GameModel } from '../models/Game.js'
+import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 
 export async function updatePlayerStatusService({ 
   gameId, 

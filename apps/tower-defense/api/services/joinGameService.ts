@@ -1,9 +1,9 @@
 // services/joinGameService.ts
 import { logger } from '@ezstart/ui/lib'
-import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer'
-import { GameModel } from '../models/Game'
-import { PlayerModel } from '../models/Player'
-import { syncTickerWithDatabase } from '../tickers/tickerEngine'
+import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
+import { GameModel } from '../models/Game.js'
+import { PlayerModel } from '../models/Player.js'
+import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 
 export async function joinGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
   const game = await GameModel.findById(gameId)

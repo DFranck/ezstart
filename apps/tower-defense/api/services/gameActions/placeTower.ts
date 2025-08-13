@@ -1,6 +1,6 @@
 import type { GamePlayer, Tower } from '@tower-defense/types'
 import { computeCoveredCells, isColliding } from '@tower-defense/utils'
-import { ticker } from '../../tickers/tickerEngine'
+import { ticker } from '../../tickers/tickerEngine.js'
 
 export function canPlaceTowerAt(
   gameId: string,

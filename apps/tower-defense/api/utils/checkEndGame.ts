@@ -1,6 +1,6 @@
 import type { GamePlayer } from '@tower-defense/types'
-import { GameModel } from '../models/Game'
-import { ticker } from '../tickers/tickerEngine'
+import { GameModel } from '../models/Game.js'
+import { ticker } from '../tickers/tickerEngine.js'
 
 export async function checkEndGame(gameId: string) {
   const state = ticker.getState(gameId)
