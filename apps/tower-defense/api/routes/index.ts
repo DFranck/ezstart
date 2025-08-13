@@ -1,6 +1,6 @@
 import express, { Router } from 'express'
-import gamesRoutes, { gamesRegistry } from './games'
-import playerRoutes, { playersRegistry } from './players'
+import gamesRoutes, { gamesRegistry } from './games.js'
+import playerRoutes, { playersRegistry } from './players.js'
 const router: Router = express.Router()
 export const globalRegistry = [gamesRegistry, playersRegistry]
 
