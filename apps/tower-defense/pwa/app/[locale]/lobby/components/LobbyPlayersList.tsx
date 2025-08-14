@@ -3,7 +3,7 @@
 
 import { GamePlayer } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
-import { useGamesSocket } from '../../../../contexts/GamesSocketContext'
+import { useGamesSocket } from '../../../../contexts/GamesContext'
 import { WaitingPlayerCard } from './WaitingPlayerCard'
 
 type Props = {
@@ -13,7 +13,12 @@ type Props = {
   hostId?: string
 }
 
-export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserId, hostId }: Props) {
+export function LobbyPlayersList({
+  players: initialPlayers,
+  gameId,
+  currentUserId,
+  hostId,
+}: Props) {
   const [players, setPlayers] = useState(initialPlayers)
   const [statusMessages, setStatusMessages] = useState<Record<string, string>>({})
   const socket = useGamesSocket()
@@ -35,23 +40,32 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
     })
 
     // Écouter les changements de statut
-    socket.on('lobby:playerStatusChanged', ({ playerId, status, message }: { playerId: string; status: 'active' | 'eliminated' | 'disconnected' | 'left'; message?: string }) => {
-      setPlayers(prev => prev.map(p => 
-        p.playerId === playerId ? { ...p, status } : p
-      ))
-      
-      if (message) {
-        setStatusMessages(prev => ({ ...prev, [playerId]: message }))
-        // Effacer le message après 5 secondes
-        setTimeout(() => {
-          setStatusMessages(prev => {
-            const newMessages = { ...prev }
-            delete newMessages[playerId]
-            return newMessages
-          })
-        }, 5000)
+    socket.on(
+      'lobby:playerStatusChanged',
+      ({
+        playerId,
+        status,
+        message,
+      }: {
+        playerId: string
+        status: 'active' | 'eliminated' | 'disconnected' | 'left'
+        message?: string
+      }) => {
+        setPlayers(prev => prev.map(p => (p.playerId === playerId ? { ...p, status } : p)))
+
+        if (message) {
+          setStatusMessages(prev => ({ ...prev, [playerId]: message }))
+          // Effacer le message après 5 secondes
+          setTimeout(() => {
+            setStatusMessages(prev => {
+              const newMessages = { ...prev }
+              delete newMessages[playerId]
+              return newMessages
+            })
+          }, 5000)
+        }
       }
-    })
+    )
 
     // Écouter la suppression du jeu
     socket.on('lobby:gameDeleted', ({ gameId: deletedGameId }: { gameId: string }) => {
@@ -72,7 +86,7 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
       socket.off('lobby:playerLeft')
       socket.off('lobby:playerStatusChanged')
       socket.off('lobby:gameDeleted')
-      
+
       if (currentUserId) {
         socket.emit('lobby:leave', { gameId, playerId: currentUserId })
       }
@@ -95,14 +109,17 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
       <h3 className="text-lg font-semibold mb-3">
         Players ({activePlayers.length} online, {players.length} total)
       </h3>
-      
+
       {/* Messages de statut */}
       {Object.entries(statusMessages).map(([playerId, message]) => (
-        <div key={playerId} className="p-2 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm">
+        <div
+          key={playerId}
+          className="p-2 bg-blue-100 border border-blue-400 text-blue-700 rounded text-sm"
+        >
           {message}
         </div>
       ))}
-      
+
       {/* Joueurs actifs */}
       {activePlayers.length > 0 && (
         <div className="space-y-2">
@@ -117,11 +134,13 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           ))}
         </div>
       )}
-      
+
       {/* Joueurs déconnectés */}
       {disconnectedPlayers.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">🟡 Disconnected</h4>
+          <h4 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+            🟡 Disconnected
+          </h4>
           {disconnectedPlayers.map(player => (
             <WaitingPlayerCard
               key={player.playerId}
@@ -132,7 +151,7 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           ))}
         </div>
       )}
-      
+
       {/* Autres statuts */}
       {otherPlayers.length > 0 && (
         <div className="space-y-2">
@@ -147,11 +166,9 @@ export function LobbyPlayersList({ players: initialPlayers, gameId, currentUserI
           ))}
         </div>
       )}
-      
-      {players.length === 0 && (
-        <p className="text-gray-400 italic">No players yet...</p>
-      )}
-      
+
+      {players.length === 0 && <p className="text-gray-400 italic">No players yet...</p>}
+
       {/* Bouton de reconnexion si le joueur actuel est déconnecté */}
       {currentUserId && disconnectedPlayers.some(p => p.playerId === currentUserId) && (
         <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded">

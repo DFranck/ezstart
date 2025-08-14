@@ -1,15 +1,17 @@
-/**
- * Get base API URL depending on the environment (Node or Browser).
- */
 export const getApiUrl = (): string => {
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === 'undefined'
 
-  if (isServer) {
-    return process.env.API_URL?.replace(/\/$/, '') || 'http://localhost:5000';
+  const baseUrl = isServer
+    ? process.env.API_URL?.replace(/\/$/, '') || 'http://localhost:8888'
+    : process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') || 'http://localhost:8888'
+
+  const isClient = !isServer
+  const isPageHttps = isClient && window.location.protocol === 'https:'
+  const isApiHttp = baseUrl.startsWith('http://')
+
+  if (isClient && isPageHttps && isApiHttp) {
+    return '/api-proxy'
   }
 
-  return (
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ||
-    'http://localhost:5000'
-  );
-};
+  return baseUrl
+}

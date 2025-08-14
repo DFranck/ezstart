@@ -1,5 +1,5 @@
 {
-  "name": "tower-defense-pwa",
+  "name": "web-tower-defense",
   "description": "Competitive multiplayer Tower Defense game. Combines RNG shop mechanics (auto-battler style), dynamic pathing with free tower placement, and unit-sending PvP (old school Warcraft TD). Players build, defend, and attack in a real-time loop with evolving income. High replayability and skill-based late game.",
   "version": "1.0.0",
   "type": "module",

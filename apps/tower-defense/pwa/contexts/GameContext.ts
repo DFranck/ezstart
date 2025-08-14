@@ -1,17 +1,21 @@
 'use client'
 
-import type { Game } from '@tower-defense/types'
+import type { Game, GameAction } from '@tower-defense/types'
 import { createContext, useContext } from 'react'
 
 type GameContextType = {
   game: Game | null
-  sendAction: (action: any) => void
+  sendAction: (action: GameAction) => void
 }
 
-export const GameContext = createContext<GameContextType | undefined>(undefined)
+const GameContext = createContext<GameContextType | undefined>(undefined)
 
 export const useGame = () => {
   const ctx = useContext(GameContext)
-  if (!ctx) throw new Error('useGame must be used within GameProvider')
+  if (!ctx) {
+    throw new Error('useGame must be used within a GameProvider')
+  }
   return ctx
 }
+
+export { GameContext }

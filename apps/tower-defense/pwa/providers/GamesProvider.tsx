@@ -1,28 +1,32 @@
 'use client'
 
-import { useGamesSocket } from '@/contexts/GamesSocketContext'
+import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import { JoinGameResponse } from '@tower-defense/types'
 import { useEffect } from 'react'
 
 export function GamesProvider({ children }: { children: React.ReactNode }) {
-  try {
-    const socket = useGamesSocket()
+  const socket = useGamesSocketInstance()
 
-    useEffect(() => {
-      if (socket) {
-        socket.on('playerJoined', (data: JoinGameResponse) => {
-          console.log('[socket] playerJoined', data)
-        })
+  useEffect(() => {
+    // Événements globaux des jeux
+    socket.on('playerJoined', (data: JoinGameResponse) => {
+      console.log('[GamesProvider] playerJoined', data)
+    })
 
-        return () => {
-          socket.off('playerJoined')
-        }
-      }
-    }, [socket])
+    socket.on('gameCreated', (data: any) => {
+      console.log('[GamesProvider] gameCreated', data)
+    })
 
-    return children
-  } catch (error) {
-    console.error('[GamesProvider] Error:', error)
-    return children
-  }
+    socket.on('gameDeleted', (data: any) => {
+      console.log('[GamesProvider] gameDeleted', data)
+    })
+
+    return () => {
+      socket.off('playerJoined')
+      socket.off('gameCreated')
+      socket.off('gameDeleted')
+    }
+  }, [socket])
+
+  return children
 }

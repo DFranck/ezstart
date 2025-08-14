@@ -1,16 +1,19 @@
 'use client'
 
-import { useGamesSocket } from '@/contexts/GamesSocketContext'
+import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import type { Game, GameAction } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { GameContext } from '../contexts/GameContext'
 
 export function GameProvider({ gameId, children }: { gameId: string; children: React.ReactNode }) {
-  const socket = useGamesSocket()
+  const socket = useGamesSocketInstance()
   const [game, setGame] = useState<Game | null>(null)
 
   useEffect(() => {
+    // Rejoindre la room du jeu
+    socket.emit('game:join', { gameId })
+
     socket.on('gameState', (state: Game) => {
       setGame(state)
     })
@@ -21,10 +24,12 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
     })
 
     return () => {
+      // Quitter la room du jeu
+      socket.emit('game:leave', { gameId })
       socket.off('gameState')
       socket.off('actionRejected')
     }
-  }, [gameId])
+  }, [socket, gameId])
 
   return (
     <GameContext.Provider

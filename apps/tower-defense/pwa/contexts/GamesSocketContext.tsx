@@ -10,12 +10,7 @@ interface GamesSocketContextType {
   disconnect: () => void
 }
 
-const GamesSocketContext = createContext<GamesSocketContextType>({
-  socket: null,
-  isConnected: false,
-  connect: () => {},
-  disconnect: () => {},
-})
+const GamesSocketContext = createContext<GamesSocketContextType | null>(null)
 
 export function GamesSocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null)
@@ -39,7 +34,7 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
       setIsConnected(false)
     })
 
-    newSocket.on('error', (error) => {
+    newSocket.on('error', error => {
       console.error('[GamesSocket] Error:', error)
     })
 
@@ -74,6 +69,11 @@ export function useGamesSocket() {
   if (!context) {
     throw new Error('useGamesSocket must be used within a GamesSocketProvider')
   }
+  return context
+}
+
+export function useGamesSocketInstance() {
+  const context = useGamesSocket()
   if (!context.socket) {
     throw new Error('Socket not initialized')
   }

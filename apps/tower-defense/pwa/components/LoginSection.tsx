@@ -1,20 +1,15 @@
 'use client'
 
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Button, Icon, Input, Section, Span } from '@ezstart/ui/components'
+import { Icon, Input, Section, Span } from '@ezstart/ui/components'
+import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
-import { useErrorHandler } from '../hooks/useErrorHandler'
 import { LoadingButton } from './LoadingButton'
 
 export function LoginSection() {
   const { player, register, reset } = usePlayerStore()
   const [name, setName] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
-  
-  const { addError } = useErrorHandler({
-    maxRetries: 2,
-    retryDelay: 1000
-  })
 
   const validateName = (name: string) => {
     if (!name.trim()) {
@@ -34,30 +29,36 @@ export function LoginSection() {
 
   const handleLogin = async () => {
     if (!name.trim()) return
-    
-    try {
-      setIsLoggingIn(true)
-      
-      // Validation côté client
-      validateName(name)
-      
-      await register(name.trim())
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to register player'
-      addError(errorMessage, false)
-      console.error('Failed to register player', err)
-    } finally {
-      setIsLoggingIn(false)
-    }
+
+    validateName(name)
+
+    return runWithFeedback({
+      action: async () => {
+        const player = await register(name.trim())
+        return player
+      },
+      toastLoading: { message: 'Logging in...' },
+      toastSuccess: { message: `Welcome, ${name.trim()}!` },
+      toastError: { message: 'Failed to login' },
+      onLoadingChange: setIsLoggingIn,
+      onError: err => {
+        console.error('Failed to register player', err)
+      },
+    })
   }
 
   const handleLogout = () => {
-    try {
-      reset()
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to logout'
-      addError(errorMessage, false)
-    }
+    return runWithFeedback({
+      action: async () => {
+        reset()
+        return true
+      },
+      toastSuccess: { message: 'Logged out successfully' },
+      toastError: { message: 'Failed to logout' },
+      onError: err => {
+        console.error('Failed to logout', err)
+      },
+    })
   }
 
   return (
@@ -93,11 +94,7 @@ export function LoginSection() {
             <Icon name="fa:FaUserCheck" className="text-green-500" />
             Connected as {player.name}
           </Span>
-          <LoadingButton
-            variant="outline"
-            onClick={handleLogout}
-            icon="fa:FaSignOutAlt"
-          >
+          <LoadingButton variant="outline" onClick={handleLogout} icon="fa:FaSignOutAlt">
             Logout
           </LoadingButton>
         </>

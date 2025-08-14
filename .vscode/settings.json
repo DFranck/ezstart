@@ -25,14 +25,5 @@
     "editor.formatOnSave": true
   },
   "spellright.language": ["en"],
-  "spellright.documentTypes": [
-    "plaintext",
-    "markdown",
-    "latex",
-    "javascript",
-    "typescript",
-    "html",
-    "css",
-    "json"
-  ]
+  "spellright.documentTypes": ["plaintext", "markdown", "latex", "javascript", "html", "css"]
 }

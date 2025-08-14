@@ -7,8 +7,9 @@ import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
-import { PWAInstallPrompt } from '../../components/PWAInstallPrompt'
+import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { PWAInstallPrompt } from '../../components/PWAInstallPrompt'
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))
@@ -44,7 +45,10 @@ export default async function LocaleLayout(props: {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Tower Defense" />
-        <meta name="description" content="Competitive multiplayer Tower Defense game with RNG shop mechanics and PvP battles" />
+        <meta
+          name="description"
+          content="Competitive multiplayer Tower Defense game with RNG shop mechanics and PvP battles"
+        />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/icons/browserconfig.xml" />
@@ -63,22 +67,27 @@ export default async function LocaleLayout(props: {
         <meta name="twitter:url" content="https://tower-defense.vercel.app" />
         <meta name="twitter:title" content="Tower Defense" />
         <meta name="twitter:description" content="Competitive multiplayer Tower Defense game" />
-        <meta name="twitter:image" content="https://tower-defense.vercel.app/icons/icon-192x192.png" />
+        <meta
+          name="twitter:image"
+          content="https://tower-defense.vercel.app/icons/icon-192x192.png"
+        />
         <meta name="twitter:creator" content="@towerdefense" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Tower Defense" />
         <meta property="og:description" content="Competitive multiplayer Tower Defense game" />
         <meta property="og:site_name" content="Tower Defense" />
         <meta property="og:url" content="https://tower-defense.vercel.app" />
-        <meta property="og:image" content="https://tower-defense.vercel.app/icons/icon-192x192.png" />
+        <meta
+          property="og:image"
+          content="https://tower-defense.vercel.app/icons/icon-192x192.png"
+        />
       </head>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <ErrorBoundary>
           <Providers messages={messages} locale={locale} timeZone={timeZone}>
-
-            {children}
+            <GamesSocketProvider>{children}</GamesSocketProvider>
           </Providers>
           <Toaster />
           <PWAInstallPrompt />

@@ -1,19 +1,14 @@
 // hooks/useCreateGame.ts
 'use client'
 
-import { callApi } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@ezstart/ui/utils'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useErrorHandler } from './useErrorHandler'
 
 export function useCreateGame() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const { executeWithRetry, addError } = useErrorHandler({
-    maxRetries: 3,
-    retryDelay: 1000
-  })
 
   const validatePayload = (payload: CreateGamePayload) => {
     if (!payload.playerId) {
@@ -25,47 +20,38 @@ export function useCreateGame() {
   }
 
   const createGame = async (payload: CreateGamePayload) => {
-    try {
-      // Validation côté client
-      validatePayload(payload)
-      
-      setLoading(true)
-      
-      const response = await executeWithRetry(
-        () => callApi<CreateGameResponse>('/api/games', {
+    validatePayload(payload)
+
+    return runWithFeedback({
+      action: async () => {
+        const response = await callApi<CreateGameResponse>('/api/games', {
           method: 'POST',
           body: payload,
-        }),
-        (error, attempt) => {
-          console.warn(`[createGame] Attempt ${attempt} failed:`, error)
-          addError(`Failed to create game (attempt ${attempt}/3)`, true)
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create game')
         }
-      )
 
-      if (!response.ok) {
-        const errorMessage = 'Failed to create game'
-        throw new Error(errorMessage)
-      }
+        if (!response.data?.gameId) {
+          throw new Error('Invalid response: missing game ID')
+        }
 
-      if (!response.data?.gameId) {
-        throw new Error('Invalid response: missing game ID')
-      }
+        // Redirection vers le lobby
+        router.push(`/en/lobby/${response.data.gameId}`)
 
-      // Redirection vers le lobby
-      router.push(`/en/lobby/${response.data.gameId}`)
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      addError(errorMessage, false)
-      throw error
-    } finally {
-      setLoading(false)
-    }
+        return response.data
+      },
+      toastLoading: { message: 'Creating game...' },
+      toastSuccess: { message: 'Game created successfully!' },
+      toastError: { message: 'Failed to create game' },
+      onLoadingChange: setLoading,
+      throwOnError: true,
+    })
   }
 
-  return { 
-    createGame, 
+  return {
+    createGame,
     loading,
-    error: null // Les erreurs sont gérées par useErrorHandler
   }
 }

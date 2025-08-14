@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 export interface ErrorState {
   message: string
@@ -25,11 +25,11 @@ export function useErrorHandler(config: ErrorHandlerConfig = {}) {
       message: typeof error === 'string' ? error : error.message,
       code: error instanceof Error ? error.name : undefined,
       retryable,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
-    
+
     setErrors(prev => [...prev, errorState])
-    
+
     // Auto-remove error after 10 seconds
     setTimeout(() => {
       setErrors(prev => prev.filter(e => e.timestamp !== errorState.timestamp))
@@ -44,40 +44,43 @@ export function useErrorHandler(config: ErrorHandlerConfig = {}) {
     setErrors([])
   }, [])
 
-  const executeWithRetry = useCallback(async <T>(
-    operation: () => Promise<T>,
-    onError?: (error: Error, attempt: number) => void
-  ): Promise<T> => {
-    let lastError: Error
+  const executeWithRetry = useCallback(
+    async <T>(
+      operation: () => Promise<T>,
+      onError?: (error: Error, attempt: number) => void
+    ): Promise<T> => {
+      let lastError: Error
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        if (attempt > 1) {
-          setIsRetrying(true)
-          await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt - 1)))
-        }
-        
-        const result = await operation()
-        setIsRetrying(false)
-        return result
-      } catch (error) {
-        lastError = error as Error
-        
-        if (onError) {
-          onError(lastError, attempt)
-        }
-        
-        if (attempt === maxRetries) {
-          addError(lastError, false)
-        } else {
-          addError(`Attempt ${attempt} failed: ${lastError.message}`, true)
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          if (attempt > 1) {
+            setIsRetrying(true)
+            await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt - 1)))
+          }
+
+          const result = await operation()
+          setIsRetrying(false)
+          return result
+        } catch (error) {
+          lastError = error as Error
+
+          if (onError) {
+            onError(lastError, attempt)
+          }
+
+          if (attempt === maxRetries) {
+            addError(lastError, false)
+          } else {
+            addError(`Attempt ${attempt} failed: ${lastError.message}`, true)
+          }
         }
       }
-    }
-    
-    setIsRetrying(false)
-    throw lastError!
-  }, [maxRetries, retryDelay, addError])
+
+      setIsRetrying(false)
+      throw lastError!
+    },
+    [maxRetries, retryDelay, addError]
+  )
 
   return {
     errors,
@@ -85,6 +88,6 @@ export function useErrorHandler(config: ErrorHandlerConfig = {}) {
     addError,
     clearError,
     clearAllErrors,
-    executeWithRetry
+    executeWithRetry,
   }
 }
