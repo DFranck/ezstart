@@ -19,7 +19,7 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
   const connect = () => {
     if (socket?.connected) return
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+    const newSocket = io(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888', {
       transports: ['websocket', 'polling'],
       autoConnect: true,
     })

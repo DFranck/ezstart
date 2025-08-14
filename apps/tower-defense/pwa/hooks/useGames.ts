@@ -1,5 +1,6 @@
 'use client'
 
+import { usePlayerStore } from '@/stores/usePlayerStore'
 import { extractPlayerId } from '@/utils/extractPlayerId'
 import { isDebug, logger } from '@ezstart/ui/lib'
 import { callApi, runWithFeedback } from '@ezstart/ui/utils'
@@ -17,6 +18,7 @@ export function useGames(options: UseGamesOptions = {}) {
   const { autoRedirect = true, pollingInterval = 10000, enablePolling = true } = options
 
   const router = useRouter()
+  const { player } = usePlayerStore()
   const [waitingGames, setWaitingGames] = useState<Game[]>([])
   const [allGames, setAllGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -160,11 +162,12 @@ export function useGames(options: UseGamesOptions = {}) {
       if (now - lastFetchTime.current < pollingInterval) return
 
       lastFetchTime.current = now
-      await fetchGamesSilent()
+      // Passer le playerId du store au polling
+      await fetchGamesSilent(player?._id)
     }, pollingInterval)
 
     return () => clearInterval(interval)
-  }, [fetchGamesSilent, enablePolling, pollingInterval])
+  }, [fetchGamesSilent, enablePolling, pollingInterval, player?._id])
 
   // Chargement initial avec feedback
   const fetchGames = useCallback(

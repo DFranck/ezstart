@@ -30,7 +30,7 @@ export const usePlayerStore = create<PlayerStore>()(
       reset: () => set({ player: null }),
     }),
     {
-      name: 'tower-defense-player',
+      name: 'player',
       partialize: state => ({ player: state.player }), // uniquement le player
     }
   )

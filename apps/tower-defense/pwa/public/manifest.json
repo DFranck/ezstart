@@ -86,22 +86,7 @@
       ]
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/gameplay-1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Gameplay screenshot showing tower placement and enemy waves"
-    },
-    {
-      "src": "/screenshots/gameplay-2.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile gameplay showing the shop and tower selection"
-    }
-  ],
+  "screenshots": [],
   "related_applications": [],
   "prefer_related_applications": false
 }
