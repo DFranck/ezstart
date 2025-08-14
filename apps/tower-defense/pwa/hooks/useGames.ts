@@ -67,7 +67,7 @@ export function useGames(options: UseGamesOptions = {}) {
           // Vérifier si le joueur est dans une partie active
           if (autoRedirect && playerId) {
             const activeGame = playingGames.find(game =>
-              game.players.some(p => extractPlayerId(p) === playerId)
+              game.players.some(p => p._id === playerId)
             )
 
             if (activeGame) {
@@ -105,7 +105,7 @@ export function useGames(options: UseGamesOptions = {}) {
         // Vérifier si le joueur est dans une partie active
         if (autoRedirect && playerId) {
           const activeGame = playingGames.find(game =>
-            game.players.some(p => extractPlayerId(p) === playerId)
+            game.players.some(p => p._id === playerId)
           )
 
           if (activeGame) {
