@@ -4,8 +4,7 @@ import CreateGameButton from '@/components/CreateGameButton'
 import { LoginSection } from '@/components/LoginSection'
 import { useGames } from '@/hooks/useGames'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { extractPlayerId } from '@/utils/extractPlayerId'
-import { Button, H1, Icon, LI, Main, P, Section, Span, UL } from '@ezstart/ui/components'
+import { Button, H1, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
 import { logger } from '@ezstart/ui/lib'
 import { Game } from '@tower-defense/types'
 import Link from 'next/link'
@@ -77,10 +76,9 @@ export default function Page() {
 
               <UL>
                 {waitingGames.map((game: Game) => {
-                  const alreadyJoined = game.players.some(
-                    (p: any) => extractPlayerId(p) === player?._id
-                  )
-                  const activePlayers = game.players.filter((p: any) => p.status === 'active')
+                  const alreadyJoined =
+                    game.players?.some(playerInGame => playerInGame.player._id === player?._id) ??
+                    false
 
                   logger.debug('alreadyJoined', alreadyJoined)
 
@@ -91,16 +89,7 @@ export default function Page() {
                       className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Span className="font-medium">
-                            {activePlayers.length}/{game.players.length} players
-                          </Span>
-                          {activePlayers.length < game.players.length && (
-                            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
-                              {game.players.length - activePlayers.length} disconnected
-                            </span>
-                          )}
-                        </div>
+                        <div className="flex items-center gap-4"></div>
 
                         {!alreadyJoined ? (
                           <JoinGameButton gameId={game._id} playerId={player?._id ?? ''} />

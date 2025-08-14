@@ -1,14 +1,15 @@
 import { generateMock } from '@anatine/zod-mock'
 import { listingQuerySchema, mongoIdSchema, z, type Infer } from '@ezstart/types'
 import { GAME_PHASES } from '@tower-defense/config'
-import { gamePlayerSchema } from './game-player.js'
+import { inGamePlayerSchema } from './in-game-player.js'
 import { towerShopItemSchema } from './tower-shop-item.js'
 import { unitShopItemSchema } from './unit-shop-item.js'
 
+// Schéma pour les détails d'un jeu (avec les InGamePlayer complets)
 export const gameSchema = z.object({
   _id: mongoIdSchema,
   host: mongoIdSchema.optional().describe('ID of the host player'),
-  players: z.array(gamePlayerSchema).describe('List of players'),
+  players: z.array(inGamePlayerSchema).describe('List of players in game'),
   tick: z.number().describe('Current tick number'),
   map: z.array(z.array(z.string())).describe('2D map representation'),
   shopTowers: z.array(towerShopItemSchema).describe('RNG list of towers'),

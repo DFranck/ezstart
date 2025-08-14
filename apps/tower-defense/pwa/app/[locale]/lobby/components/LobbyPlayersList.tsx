@@ -1,13 +1,12 @@
 // app/[locale]/lobby/components/LobbyPlayersList.tsx
 'use client'
 
-import { GamePlayer } from '@tower-defense/types'
+import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
+import { InGamePlayer } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
-import { useGamesSocket } from '../../../../contexts/GamesContext'
 import { WaitingPlayerCard } from './WaitingPlayerCard'
-
 type Props = {
-  players: GamePlayer[]
+  players: InGamePlayer[]
   gameId: string
   currentUserId?: string
   hostId?: string
@@ -21,22 +20,28 @@ export function LobbyPlayersList({
 }: Props) {
   const [players, setPlayers] = useState(initialPlayers)
   const [statusMessages, setStatusMessages] = useState<Record<string, string>>({})
-  const socket = useGamesSocket()
+  const socket = useGamesSocketInstance()
+
+  // Fonction utilitaire pour obtenir l'ID du joueur
+  const getPlayerId = (player: any) => {
+    if (!player || !player.player) return null
+    return typeof player.player === 'string' ? player.player : player.player._id
+  }
 
   useEffect(() => {
     // Écouter les mises à jour de la liste des joueurs
-    socket.on('lobby:playersUpdated', (updatedPlayers: GamePlayer[]) => {
+    socket.on('lobby:playersUpdated', (updatedPlayers: InGamePlayer[]) => {
       setPlayers(updatedPlayers)
     })
 
     // Écouter les joueurs qui rejoignent
-    socket.on('lobby:playerJoined', (newPlayer: GamePlayer) => {
+    socket.on('lobby:playerJoined', (newPlayer: InGamePlayer) => {
       setPlayers(prev => [...prev, newPlayer])
     })
 
     // Écouter les joueurs qui partent
     socket.on('lobby:playerLeft', (playerId: string) => {
-      setPlayers(prev => prev.filter(p => p.playerId !== playerId))
+      setPlayers(prev => prev.filter(p => getPlayerId(p) !== playerId))
     })
 
     // Écouter les changements de statut
@@ -51,7 +56,12 @@ export function LobbyPlayersList({
         status: 'active' | 'eliminated' | 'disconnected' | 'left'
         message?: string
       }) => {
-        setPlayers(prev => prev.map(p => (p.playerId === playerId ? { ...p, status } : p)))
+        setPlayers(prev =>
+          prev.map(p => {
+            const currentPlayerId = getPlayerId(p)
+            return currentPlayerId === playerId ? { ...p, status } : p
+          })
+        )
 
         if (message) {
           setStatusMessages(prev => ({ ...prev, [playerId]: message }))
@@ -100,9 +110,11 @@ export function LobbyPlayersList({
     }
   }
 
-  const activePlayers = players.filter(p => p.status === 'active')
-  const disconnectedPlayers = players.filter(p => p.status === 'disconnected')
-  const otherPlayers = players.filter(p => p.status !== 'active' && p.status !== 'disconnected')
+  const activePlayers = players.filter(p => p.status === 'active' && getPlayerId(p))
+  const disconnectedPlayers = players.filter(p => p.status === 'disconnected' && getPlayerId(p))
+  const otherPlayers = players.filter(
+    p => p.status !== 'active' && p.status !== 'disconnected' && getPlayerId(p)
+  )
 
   return (
     <div className="mt-4 space-y-4">
@@ -124,14 +136,17 @@ export function LobbyPlayersList({
       {activePlayers.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-green-600 dark:text-green-400">🟢 Online</h4>
-          {activePlayers.map(player => (
-            <WaitingPlayerCard
-              key={player.playerId}
-              player={player}
-              isHost={player.playerId === hostId}
-              isCurrentUser={player.playerId === currentUserId}
-            />
-          ))}
+          {activePlayers.map(player => {
+            const playerId = getPlayerId(player)
+            return (
+              <WaitingPlayerCard
+                key={player._id}
+                player={player}
+                isHost={playerId === hostId}
+                isCurrentUser={playerId === currentUserId}
+              />
+            )
+          })}
         </div>
       )}
 
@@ -141,14 +156,17 @@ export function LobbyPlayersList({
           <h4 className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
             🟡 Disconnected
           </h4>
-          {disconnectedPlayers.map(player => (
-            <WaitingPlayerCard
-              key={player.playerId}
-              player={player}
-              isHost={player.playerId === hostId}
-              isCurrentUser={player.playerId === currentUserId}
-            />
-          ))}
+          {disconnectedPlayers.map(player => {
+            const playerId = getPlayerId(player)
+            return (
+              <WaitingPlayerCard
+                key={player._id}
+                player={player}
+                isHost={playerId === hostId}
+                isCurrentUser={playerId === currentUserId}
+              />
+            )
+          })}
         </div>
       )}
 
@@ -156,21 +174,24 @@ export function LobbyPlayersList({
       {otherPlayers.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">⚫ Others</h4>
-          {otherPlayers.map(player => (
-            <WaitingPlayerCard
-              key={player.playerId}
-              player={player}
-              isHost={player.playerId === hostId}
-              isCurrentUser={player.playerId === currentUserId}
-            />
-          ))}
+          {otherPlayers.map(player => {
+            const playerId = getPlayerId(player)
+            return (
+              <WaitingPlayerCard
+                key={player._id}
+                player={player}
+                isHost={playerId === hostId}
+                isCurrentUser={playerId === currentUserId}
+              />
+            )
+          })}
         </div>
       )}
 
       {players.length === 0 && <p className="text-gray-400 italic">No players yet...</p>}
 
       {/* Bouton de reconnexion si le joueur actuel est déconnecté */}
-      {currentUserId && disconnectedPlayers.some(p => p.playerId === currentUserId) && (
+      {currentUserId && disconnectedPlayers.some(p => getPlayerId(p) === currentUserId) && (
         <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded">
           <p className="text-sm text-yellow-700 mb-2">
             You appear to be disconnected. Click below to reconnect:

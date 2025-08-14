@@ -1,10 +1,10 @@
 'use client'
 
+import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import { Button } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { useGamesSocket } from '../../../../contexts/GamesContext'
 import { useNetworkRetry } from '../../../../hooks/useNetworkRetry'
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
 
 export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: Props) {
   const router = useRouter()
-  const socket = useGamesSocket()
+  const socket = useGamesSocketInstance()
   const [countdown, setCountdown] = useState<number | null>(null)
   const [isStarting, setIsStarting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -76,6 +76,9 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   }
 
   const cancelCountdown = () => {
+    // Éviter les appels multiples
+    if (countdown === null) return
+
     clearTimeout(timeoutRef.current!)
     clearInterval(intervalRef.current!)
     setCountdown(null)

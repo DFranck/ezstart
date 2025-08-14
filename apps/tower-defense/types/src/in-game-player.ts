@@ -1,13 +1,15 @@
 import { generateMock } from '@anatine/zod-mock'
-import { z, type Infer } from '@ezstart/types'
+import { mongoIdSchema, z, type Infer } from '@ezstart/types'
 import { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from '@tower-defense/config'
 import { mobSchema } from './mob.js'
 import { placedTowerSchema } from './placedTower.js'
+import { playerSchema } from './player.js'
 import { towerSchema } from './tower.js'
 
-export const gamePlayerSchema = z.object({
-  playerId: z.string().describe('Player MongoDB ID'),
-  name: z.string().describe('Snapshot of player name'),
+export const inGamePlayerSchema = z.object({
+  _id: mongoIdSchema,
+  gameId: mongoIdSchema.describe('Game ID'),
+  player: playerSchema.describe('Player details'),
   status: z.enum(PLAYER_STATUS).default(DEFAULT_PLAYER_STATUS).describe('Player status'),
   gold: z.number().describe('Current gold'),
   income: z.number().describe('Passive income'),
@@ -15,8 +17,10 @@ export const gamePlayerSchema = z.object({
   hand: z.array(towerSchema).describe('Cards in hand'),
   placedTowers: z.array(placedTowerSchema).describe('Towers placed'),
   incomingUnits: z.array(mobSchema).describe('Units sent to this player'),
+  createdAt: z.string().describe('ISO timestamp'),
+  updatedAt: z.string().describe('ISO timestamp'),
 })
 
-export type GamePlayer = Infer<typeof gamePlayerSchema>
-export const mockGamePlayer = generateMock(gamePlayerSchema)
-export const mockGamePlayers = generateMock(z.array(gamePlayerSchema))
+export type InGamePlayer = Infer<typeof inGamePlayerSchema>
+export const mockInGamePlayer = generateMock(inGamePlayerSchema)
+export const mockInGamePlayers = generateMock(z.array(inGamePlayerSchema))

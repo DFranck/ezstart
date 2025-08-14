@@ -1,13 +1,13 @@
 import { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from '@tower-defense/config'
-import { Schema } from 'mongoose'
+import { Schema, model } from 'mongoose'
 import { mobSchema } from './Mob.js'
 import { placedTowerSchema } from './PlacedTower.js'
 import { towerSchema } from './Tower.js'
 
-export const gamePlayerSchema = new Schema(
+const inGamePlayerSchema = new Schema(
   {
-    playerId: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-    name: { type: String, required: true },
+    gameId: { type: Schema.Types.ObjectId, ref: 'Game', required: true },
+    player: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
     status: {
       type: String,
       enum: PLAYER_STATUS,
@@ -21,5 +21,10 @@ export const gamePlayerSchema = new Schema(
     placedTowers: { type: [placedTowerSchema], required: true, default: [] },
     incomingUnits: { type: [mobSchema], required: true, default: [] },
   },
-  { _id: false }
+  { timestamps: true }
 )
+
+// Index composé pour s'assurer qu'un joueur ne peut être qu'une fois dans une partie
+inGamePlayerSchema.index({ gameId: 1, player: 1 }, { unique: true })
+
+export const InGamePlayerModel = model('InGamePlayer', inGamePlayerSchema)

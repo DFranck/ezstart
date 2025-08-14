@@ -1,15 +1,16 @@
 import { logger } from '@ezstart/ui/lib'
 import { GameModel } from '../models/Game.js'
-import { checkEndGame } from '../utils/checkEndGame.js';
-import { getIO } from '../socketInstance.js';
+import { InGamePlayerModel } from '../models/InGamePlayer.js'
+import { getIO } from '../socketInstance.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
+import { checkEndGame } from '../utils/checkEndGame.js'
 import { updatePlayerStatusService } from './updatePlayerStatusService.js'
 
 export async function leaveGameService({ gameId, playerId }: { gameId: string; playerId: string }) {
   const game = await GameModel.findById(gameId)
   if (!game) throw new Error('Game not found')
 
-  const playerIndex = game.players.findIndex(p => p.playerId.toString() === playerId)
+  const playerIndex = game.players.findIndex(p => p.toString() === playerId)
   if (playerIndex === -1) return { gameId, left: false }
 
   const isLobby = game.phase === 'waiting'
@@ -17,6 +18,9 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
   if (isLobby) {
     // En lobby : supprimer le joueur
     game.players.splice(playerIndex, 1)
+
+    // Supprimer aussi l'entrée InGamePlayer
+    await InGamePlayerModel.deleteOne({ gameId, player: playerId })
 
     if (game.players.length === 0) {
       await game.deleteOne()
@@ -38,8 +42,10 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
 
   // Synchroniser le ticker avec les données mises à jour
   await syncTickerWithDatabase(gameId)
-  
-  logger.debug(`[leaveGameService] Player ${playerId} left game ${gameId}. Remaining players: ${game.players.length}`)
+
+  logger.debug(
+    `[leaveGameService] Player ${playerId} left game ${gameId}. Remaining players: ${game.players.length}`
+  )
 
   return {
     gameId,

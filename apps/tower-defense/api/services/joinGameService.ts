@@ -2,6 +2,7 @@
 import { logger } from '@ezstart/ui/lib'
 import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
 import { GameModel } from '../models/Game.js'
+import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 
@@ -13,20 +14,27 @@ export async function joinGameService({ gameId, playerId }: { gameId: string; pl
   const player = await PlayerModel.findById(playerId)
   if (!player) throw new Error('Player not found')
 
-  const alreadyJoined = game.players.some(p => p.playerId.toString() === playerId)
+  const alreadyJoined = game.players.some(p => p.toString() === playerId)
   if (alreadyJoined) {
-    return { 
-      gameId, 
-      playerId, 
+    return {
+      gameId,
+      playerId,
       playerName: player.name,
       joinedAt: new Date().toISOString(),
-      players: game.players
+      players: game.players,
     }
   }
 
-  const newGamePlayer = createDefaultGamePlayer({ playerId: player._id, name: player.name })
-  game.players.push(newGamePlayer)
+  // Ajouter le joueur à la partie
+  game.players.push(player._id)
   await game.save()
+
+  // Créer l'entrée InGamePlayer
+  await InGamePlayerModel.create({
+    gameId: game._id,
+    player: player._id,
+    ...createDefaultGamePlayer({ playerId: player._id, name: player.name }),
+  })
 
   // Synchroniser le ticker avec les données mises à jour
   await syncTickerWithDatabase(gameId)

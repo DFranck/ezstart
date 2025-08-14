@@ -1,12 +1,13 @@
 import { logger } from '@ezstart/ui/lib'
 import { GameModel } from '../models/Game.js'
+import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 
-export async function updatePlayerStatusService({ 
-  gameId, 
-  playerId, 
-  status 
-}: { 
+export async function updatePlayerStatusService({
+  gameId,
+  playerId,
+  status,
+}: {
   gameId: string
   playerId: string
   status: 'active' | 'disconnected' | 'eliminated' | 'left'
@@ -16,24 +17,17 @@ export async function updatePlayerStatusService({
     throw new Error('Game not found')
   }
 
-  const playerIndex = game.players.findIndex(p => p.playerId.toString() === playerId)
-  if (playerIndex === -1) {
+  // Vérifier que le joueur est dans la partie
+  const playerInGame = await InGamePlayerModel.findOne({ gameId, player: playerId })
+  if (!playerInGame) {
     throw new Error('Player not found in game')
   }
 
-  const player = game.players[playerIndex]
-  if (!player) {
-    throw new Error('Player not found in game')
-  }
+  const previousStatus = playerInGame.status
 
-  const previousStatus = player.status
-  
-  // Mettre à jour le statut
-  player.status = status
-  game.players[playerIndex] = player
-
-  // Sauvegarder les changements
-  await game.save()
+  // Mettre à jour le statut dans InGamePlayer
+  playerInGame.status = status
+  await playerInGame.save()
 
   // Synchroniser le ticker avec les données mises à jour
   await syncTickerWithDatabase(gameId)
@@ -47,6 +41,6 @@ export async function updatePlayerStatusService({
     playerId,
     previousStatus,
     newStatus: status,
-    player: player
+    player: playerInGame,
   }
 }

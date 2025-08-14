@@ -1,7 +1,7 @@
 'use client'
 
+import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Game } from '@tower-defense/types'
-import { useCurrentUser } from '../../../../hooks/useCurrentUser'
 import { LobbyPlayersList } from '../components/LobbyPlayersList'
 import { StartGameButton } from '../components/StartGameButton'
 
@@ -11,17 +11,9 @@ type Props = {
 }
 
 export function LobbyWrapper({ game, gameId }: Props) {
-  const { user, loading } = useCurrentUser()
+  const { player } = usePlayerStore()
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    )
-  }
-
-  if (!user) {
+  if (!player) {
     return (
       <div className="text-center p-8">
         <p className="text-red-500">You must be logged in to join this lobby</p>
@@ -29,8 +21,12 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
-  const isHost = game.host === user._id
-  const currentPlayer = game.players.find(p => p.playerId === user._id)
+  const isHost = game.host === player._id
+
+  const currentPlayer = game.players.find(p => {
+    const playerId = typeof p.player === 'string' ? p.player : p.player._id
+    return playerId === player._id
+  })
 
   // Si le joueur n'est pas dans la partie, l'ajouter
   if (!currentPlayer) {
@@ -48,19 +44,19 @@ export function LobbyWrapper({ game, gameId }: Props) {
       <div className="text-center mb-4">
         <span className="text-sm text-gray-500">Game ID: {gameId}</span>
       </div>
-      
-      <LobbyPlayersList 
-        players={game.players} 
+
+      <LobbyPlayersList
+        players={game.players}
         gameId={gameId}
-        currentUserId={user._id}
+        currentUserId={player._id}
         hostId={game.host}
       />
-      
-      <StartGameButton 
-        gameId={gameId} 
+
+      <StartGameButton
+        gameId={gameId}
         isHost={isHost}
         playerCount={game.players.length}
-        currentUserId={user._id}
+        currentUserId={player._id}
       />
     </div>
   )
