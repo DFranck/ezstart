@@ -16,12 +16,9 @@ export function createSocketServer(
   console.log('🧩 Socket.IO server initialized')
 
   io.on('connection', socket => {
-    console.log('⚡ New socket connected:', socket.id)
-    options.onConnection?.(socket, io)
-  })
+    console.log(`⚡ Socket.IO server New connection: ${socket.id}`)
 
-  io.on('disconnect', socket => {
-    console.log('⚡ Socket disconnected:', socket.id)
+    options.onConnection?.(socket, io)
   })
 
   return io

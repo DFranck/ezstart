@@ -11,7 +11,7 @@ import { updatePlayerStatusService } from '../services/updatePlayerStatusService
 const activeConnections = new Map<string, { socketId: string; gameId: string; playerId: string }>()
 
 export function registerSocketHandlers(socket: Socket) {
-  console.log(`⚡ [socket] New connection: ${socket.id}`)
+  
 
   // Lobby handlers
   socket.on('lobby:join', async ({ gameId, playerId }) => {
