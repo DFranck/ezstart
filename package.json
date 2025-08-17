@@ -9,6 +9,7 @@
     "dev:ezstart": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:td": "turbo run dev --filter=web-tower-defense... --filter=api-tower-defense...",
+    "dev:fengshui": "turbo run dev --filter=web-fengshui...",
     "gen:readme": "tsx scripts/generate-readmes.ts",
     "gen:types": "tsx scripts/generate-readmes-types.ts",
     "gen:structure": "tsx scripts/generate-structures.ts",
