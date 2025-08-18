@@ -203,7 +203,7 @@ function StepperHeader({
                       {/* Icône de l'étape */}
                       <div
                         className={cn(
-                          'w-10 h-10 rounded-full border-2 flex items-center justify-center mr-3 transition-all',
+                          'min-w-10 h-10 rounded-full border-2 flex items-center justify-center mr-3 transition-all',
                           isActive
                             ? 'bg-blue-500 border-blue-500 text-white'
                             : isCompleted
@@ -329,7 +329,7 @@ export function StepSummary() {
 
           return (
             <div key={step.id} className="flex items-center space-x-2 text-sm">
-              <Icon name={step.icon as KnownIconName} className="w-4 h-4 text-gray-500" />
+              <Icon name={step.icon as KnownIconName} size={16} className=" text-gray-500" />
               <span className="font-medium">{step.title}:</span>
               <span className="text-gray-600">
                 {typeof data === 'object' ? 'Données sauvegardées' : String(data)}

@@ -1,50 +1,47 @@
-'use client';
-import { MouseEvent, ReactNode } from 'react';
+'use client'
 
-type ModalProps = {
-  open: boolean;
-  onClose: () => void;
-  children: ReactNode;
-  disableCloseButton?: boolean;
-  disableClickOut?: boolean;
-};
+import { cn } from '../lib/utils'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog'
 
-function Modal({
-  open,
+export const Modal = ({
+  isOpen,
   onClose,
+  className,
   children,
-  disableCloseButton = false,
-  disableClickOut = false,
-}: ModalProps) {
-  if (!open) return null;
-
-  function handleOverlayClick(e: MouseEvent<HTMLDivElement>) {
-    if (disableClickOut) return;
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  }
-
+  noCross,
+  title: propTitle,
+  description: propDescription,
+}: {
+  isOpen: boolean
+  onClose?: () => void
+  className?: string
+  children: React.ReactNode
+  noCross?: boolean
+  title?: string | React.ReactNode
+  description?: string | React.ReactNode
+}) => {
   return (
-    <div
-      className='fixed inset-0 bg-background/40 backdrop-blur flex items-center justify-center z-50'
-      onClick={handleOverlayClick}
-    >
-      <div className='bg-background border rounded-xl shadow-xl p-8 min-w-[340px] relative'>
-        {!disableCloseButton && (
-          <button
-            className='absolute top-2 right-2'
-            onClick={onClose}
-            aria-label='Close modal'
-          >
-            &times;
-          </button>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose?.()}>
+      <DialogContent
+        className={cn(
+          'max-h-[80vh] max-w-[98vw] flex flex-col overflow-hidden bg-background/70 backdrop-blur-sm shadow-2xl',
+          className
         )}
-        {children}
-      </div>
-    </div>
-  );
-}
+        showCloseButton={!noCross}
+      >
+        <DialogHeader>
+          <DialogTitle>
+            {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
+          </DialogTitle>
+          {propDescription && (
+            <DialogDescription id="modal-description">{propDescription}</DialogDescription>
+          )}
+        </DialogHeader>
 
-export { Modal };
-export type { ModalProps };
+        <div className="overflow-auto" style={{ maxHeight: 'calc(70vh - 6rem)' }}>
+          {children}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
