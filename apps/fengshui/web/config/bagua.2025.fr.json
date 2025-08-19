@@ -1,0 +1,55 @@
+{
+  "year": 2025,
+  "locale": "fr-FR",
+  "rotationOffsetDeg": 0,
+  "sectors": {
+    "N": {
+      "title": "Carrière",
+      "element": "Eau",
+      "summary": "Projets, introspection, spiritualité",
+      "tips": ["Favoriser l'écoulement", "Objets métal"]
+    },
+    "NE": {
+      "title": "Études",
+      "element": "Terre",
+      "summary": "Sagesse, développement intérieur",
+      "tips": ["Couleurs terre", "Éclairage doux"]
+    },
+    "E": {
+      "title": "Expansion",
+      "element": "Bois",
+      "summary": "Croissance, créativité",
+      "tips": ["Plantes", "Matériaux bois"]
+    },
+    "SE": {
+      "title": "Prospérité",
+      "element": "Bois",
+      "summary": "Réussite, renommée",
+      "tips": ["Verte abondance", "Objets eau"]
+    },
+    "S": {
+      "title": "Notoriété",
+      "element": "Feu",
+      "summary": "Passion, dynamisme",
+      "tips": ["Éclairage", "Triangulaires/rouges"]
+    },
+    "SO": {
+      "title": "Relations",
+      "element": "Terre",
+      "summary": "Amour, amitié, générosité",
+      "tips": ["Paires d'objets", "Tons terre"]
+    },
+    "O": {
+      "title": "Précision",
+      "element": "Métal",
+      "summary": "Analyse, logique",
+      "tips": ["Objets métal", "Ordre/rigueur"]
+    },
+    "NO": {
+      "title": "Créativité",
+      "element": "Métal",
+      "summary": "Réseaux, aides extérieures",
+      "tips": ["Sphères métal", "Objets ronds"]
+    }
+  }
+}
