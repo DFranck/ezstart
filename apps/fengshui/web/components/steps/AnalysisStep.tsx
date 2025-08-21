@@ -75,6 +75,8 @@ export default function AnalysisStep() {
                 size={wheelSize}
                 config={cfg || undefined}
                 labelOffset={8}
+                cardsMode="all"
+                cardsRadiusPct={50}
               />
             </section>
 

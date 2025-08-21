@@ -31,8 +31,10 @@ export default function BaguaSectorCard({
     <div
       className="pointer-events-auto absolute z-20"
       style={{
-        left: `calc(${xPct}% + ${offset?.x ?? 10}px)`,
-        top: `calc(${yPct}% + ${offset?.y ?? -10}px)`,
+        position: 'absolute',
+        left: `${xPct}%`,
+        top: `${yPct}%`,
+        transform: 'translate(-50%, -50%)',
       }}
     >
       <div

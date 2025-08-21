@@ -1,9 +1,12 @@
+/* path: /components/BaguaWheel.tsx */
 'use client'
 
 import { Direction, DIRECTIONS } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { useId, useMemo, useRef, useState } from 'react'
 import BaguaSectorCard from '../BaguaSectorCard'
+
+type CardsMode = 'hover' | 'all'
 
 type BaguaWheelProps = {
   src: string
@@ -14,6 +17,9 @@ type BaguaWheelProps = {
   config?: YearBaguaConfig
   /** distance supplémentaire des labels vs le cercle (peut être négative) */
   labelOffset?: number
+  /** 'hover' (par défaut) = 1 seule card; 'all' = toutes les cards */
+  cardsMode?: CardsMode
+  cardsRadiusPct?: number
 }
 
 function degToRad(d: number) {
@@ -38,6 +44,16 @@ function sectorPath(
   return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${sweep} ${x2} ${y2} Z`
 }
 
+function applyRotation(x: number, y: number, cx: number, cy: number, deg: number) {
+  const rad = (deg * Math.PI) / 180
+  const dx = x - cx
+  const dy = y - cy
+  return {
+    x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
+    y: cy + dx * Math.sin(rad) + dy * Math.cos(rad),
+  }
+}
+
 export default function BaguaWheel({
   src,
   bearingFromNorth,
@@ -46,6 +62,8 @@ export default function BaguaWheel({
   insetRatio = 1.0,
   config,
   labelOffset = 6,
+  cardsMode = 'hover',
+  cardsRadiusPct,
 }: BaguaWheelProps) {
   const clipId = useId()
   const cx = 50
@@ -57,32 +75,27 @@ export default function BaguaWheel({
     [bearingFromNorth, config?.rotationOffsetDeg]
   )
 
+  // image centrée/insérée dans le cercle
   const s = Math.min(r * Math.SQRT2 * insetRatio, 100)
   const imgX = cx - s / 2
   const imgY = cy - s / 2
 
+  // rayon des labels/cards (limité pour ne pas sortir du viewbox)
   const baseLabelR = r + labelOffset
   const labelR = Math.min(baseLabelR, 45)
+  const cardR = cardsRadiusPct ?? labelR
 
-  // uniquement labels interactifs
+  // état hover/pin inchangé
   const [hoverLabelDir, setHoverLabelDir] = useState<Direction | null>(null)
   const [pinnedDir, setPinnedDir] = useState<Direction | null>(null)
   const activeDir = pinnedDir ?? hoverLabelDir
-  function applyRotation(x: number, y: number, cx: number, cy: number, deg: number) {
-    const rad = (deg * Math.PI) / 180
-    const dx = x - cx
-    const dy = y - cy
-    return {
-      x: cx + dx * Math.cos(rad) - dy * Math.sin(rad),
-      y: cy + dx * Math.sin(rad) + dy * Math.cos(rad),
-    }
-  }
   const hoverTimeout = useRef<number | null>(null)
-  const clearHover = () => {
+
+  const clearHoverSoon = () => {
     if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current)
     hoverTimeout.current = window.setTimeout(() => {
       if (!pinnedDir) setHoverLabelDir(null)
-    }, 60) // 60–100ms
+    }, 60)
   }
 
   const labelPos = (i: number) => {
@@ -93,15 +106,35 @@ export default function BaguaWheel({
     return { a, tx, ty }
   }
 
+  // 👉 position des CARDS (au rayon cardR), puis passage en repère global via rot
+  const cardPosGlobal = useMemo(() => {
+    return DIRECTIONS.map((dir, i) => {
+      const a = i * 45
+      const svgA = 90 - a
+      const tx = cx + cardR * Math.cos(degToRad(svgA))
+      const ty = cy - cardR * Math.sin(degToRad(svgA))
+      const { x, y } = applyRotation(tx, ty, cx, cy, rot)
+      return { dir, xPct: x, yPct: y }
+    })
+  }, [cardR, rot])
+
+  // positions pré-calculées en repère GLOBAL (post-rotation) pour placer les cards
+  const cardsPositions = useMemo(() => {
+    return DIRECTIONS.map((dir, i) => {
+      const { a, tx, ty } = labelPos(i)
+      const p = applyRotation(tx, ty, cx, cy, rot)
+      return { dir, a, xPct: p.x, yPct: p.y }
+    })
+  }, [rot]) // labelR, cx, cy et r ne bougent pas pendant le rendu
+
   return (
     <div
       className="mx-auto bg-white/70 backdrop-blur rounded-2xl shadow-xl border border-white/20 p-6"
       style={{ width: size }}
     >
       <div
-        className="relative" // wrapper de positionnement de la card
+        className="relative"
         onMouseLeave={() => {
-          // sort vraiment de la zone
           if (!pinnedDir) setHoverLabelDir(null)
         }}
       >
@@ -123,7 +156,7 @@ export default function BaguaWheel({
             data-bagua="plan"
           />
 
-          {/* Overlay tourné */}
+          {/* Overlay tourné (triangles + labels) */}
           <g transform={`rotate(${rot}, ${cx}, ${cy})`} data-bagua="overlay">
             {DIRECTIONS.map((_, i) => {
               const start = i * 45 - 22.5
@@ -161,7 +194,7 @@ export default function BaguaWheel({
                     if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current)
                     setHoverLabelDir(dir)
                   }}
-                  onMouseLeave={clearHover}
+                  onMouseLeave={clearHoverSoon}
                   onClick={() => setPinnedDir(curr => (curr === dir ? null : dir))}
                   style={{ cursor: 'pointer' }}
                 >
@@ -172,31 +205,42 @@ export default function BaguaWheel({
           </g>
         </svg>
 
-        {activeDir &&
-          config &&
-          (() => {
-            const i = DIRECTIONS.indexOf(activeDir)
-            const { tx, ty } = labelPos(i)
-
-            // Appliquer la rotation pour passer au repère global
-            const { x, y } = applyRotation(tx, ty, cx, cy, rot)
-
-            return (
-              <BaguaSectorCard
-                dir={activeDir}
-                cfg={config}
-                xPct={x}
-                yPct={y}
-                offset={{ x: 0, y: 0 }}
-                onMouseEnter={() => {
-                  if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current)
-                  setHoverLabelDir(activeDir)
-                }}
-                onMouseLeave={clearHover}
-              />
-            )
-          })()}
+        {/* ====== CARTES ====== */}
+        {config && (
+          <>
+            {cardsMode === 'hover'
+              ? activeDir && (
+                  <BaguaSectorCard
+                    key={`card-${activeDir}`}
+                    dir={activeDir}
+                    cfg={config}
+                    xPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)].xPct}
+                    yPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)].yPct}
+                    offset={{ x: 0, y: 0 }}
+                    onMouseEnter={() => {
+                      /* ... */
+                    }}
+                    onMouseLeave={clearHoverSoon}
+                  />
+                )
+              : cardPosGlobal.map(({ dir, xPct, yPct }) => (
+                  <BaguaSectorCard
+                    key={`card-${dir}`}
+                    dir={dir}
+                    cfg={config}
+                    xPct={xPct}
+                    yPct={yPct}
+                    offset={{ x: 0, y: 0 }}
+                    onMouseEnter={() => {
+                      /* ... */
+                    }}
+                    onMouseLeave={clearHoverSoon}
+                  />
+                ))}
+          </>
+        )}
       </div>
+
       <p className="mt-3 text-center text-sm text-gray-600">
         Orientation : <strong>{Math.round(rot)}°</strong> depuis le Nord.
       </p>
