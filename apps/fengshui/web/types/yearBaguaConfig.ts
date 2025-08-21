@@ -1,17 +1,22 @@
-import { BaguaTheme } from './baguaTheme'
-import { Direction } from './directions'
+import { YearBaguaSector } from './baguaTheme'
+import { Cardinal } from './directions'
 
 export interface YearBaguaConfig {
-  /** Année du set (ex: 2025) */
   year: number
-  /** Locale du contenu (ex: "fr-FR") */
   locale: string
-  /**
-   * Décalage (en degrés) appliqué à la cartographie des directions -> thèmes.
-   * Utile si, pour l'année, on veut "tourner" la répartition (ex: étoiles volantes).
-   * 0 = mapping classique (N = Carrière, etc.)
-   */
-  rotationOffsetDeg: number
-  /** Thèmes par direction cardinale */
-  sectors: Record<Direction, BaguaTheme>
+  /** Décalage global (degrés) appliqué à la roue */
+  rotationOffsetDeg?: number
+  /** Réglages d’affichage facultatifs */
+  ui?: {
+    labelRadiusPct?: number // rayon des libellés/points cardinaux
+    cardsRadiusPct?: number // rayon d’ancrage des cards autour de la roue
+    grid?: {
+      showTriangulation?: boolean
+      showLoShu?: boolean
+      stroke?: string
+      dasharray?: string
+      width?: number
+    }
+  }
+  sectors: Record<Cardinal, YearBaguaSector>
 }
