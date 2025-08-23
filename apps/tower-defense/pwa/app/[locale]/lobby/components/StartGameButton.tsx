@@ -21,6 +21,9 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const [isStarting, setIsStarting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [socketConnected, setSocketConnected] = useState(true)
+  const [readyPlayers, setReadyPlayers] = useState<Set<string>>(new Set())
+  const [showReadyCheck, setShowReadyCheck] = useState(false)
+  const [isReady, setIsReady] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -53,10 +56,51 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     }
   }
 
+  const initiateReadyCheck = () => {
+    console.log('[StartGameButton] Initiating ready check:', { gameId, playerId: currentUserId })
+    setShowReadyCheck(true)
+    setReadyPlayers(new Set())
+    setIsReady(false)
+    setError(null)
+    
+    // Notifier les autres joueurs du ready check
+    if (currentUserId && socketConnected) {
+      console.log('[StartGameButton] Emitting lobby:startReadyCheck')
+      socket.emit('lobby:startReadyCheck', { gameId, playerId: currentUserId })
+    } else {
+      console.warn('[StartGameButton] Cannot emit ready check - missing userId or socket disconnected')
+    }
+  }
+
+  const toggleReady = () => {
+    if (!currentUserId) return
+    
+    const newReadyState = !isReady
+    setIsReady(newReadyState)
+    
+    if (socketConnected) {
+      socket.emit('lobby:playerReady', { 
+        gameId, 
+        playerId: currentUserId, 
+        ready: newReadyState 
+      })
+    }
+  }
+
+  const cancelReadyCheck = () => {
+    setShowReadyCheck(false)
+    setReadyPlayers(new Set())
+    setIsReady(false)
+    
+    if (currentUserId && socketConnected) {
+      socket.emit('lobby:cancelReadyCheck', { gameId, playerId: currentUserId })
+    }
+  }
+
   const initiateCountdown = () => {
     if (countdown !== null || isStarting) return // prevent double click
 
-    setCountdown(5)
+    setCountdown(10)
     setError(null)
 
     // Notifier les autres joueurs du compte à rebours
@@ -72,7 +116,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
       clearInterval(intervalRef.current!)
       setCountdown(null)
       startGame()
-    }, 5000)
+    }, 10000)
   }
 
   const cancelCountdown = () => {
@@ -97,16 +141,48 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
 
     checkSocketConnection()
 
-    // Écouter les événements de connexion
+    // Les événements de connexion sont déjà gérés par LobbyPlayersList
+    // On écoute juste les changements de connexion
     socket.on('connect', checkSocketConnection)
     socket.on('disconnect', checkSocketConnection)
 
     // Écouter les événements de lobby
-    socket.on('lobby:playerLeft', cancelCountdown)
-    socket.on('lobby:playerJoined', cancelCountdown)
+    socket.on('lobby:playerLeft', () => {
+      cancelCountdown()
+      cancelReadyCheck()
+    })
+    socket.on('lobby:playerJoined', () => {
+      cancelCountdown()
+      cancelReadyCheck()
+    })
+    
+    // Ready check events
+    socket.on('lobby:readyCheckStarted', () => {
+      console.log('[StartGameButton] Ready check started received')
+      setShowReadyCheck(true)
+      setReadyPlayers(new Set())
+      setIsReady(false)
+    })
+    socket.on('lobby:readyCheckCancelled', () => {
+      console.log('[StartGameButton] Ready check cancelled received')
+      setShowReadyCheck(false)
+      setReadyPlayers(new Set())
+      setIsReady(false)
+    })
+    socket.on('lobby:playerReadyUpdate', ({ playerId, ready, readyPlayerIds }: {
+      playerId: string
+      ready: boolean
+      readyPlayerIds: string[]
+    }) => {
+      console.log('[StartGameButton] Player ready update received:', { playerId, ready, readyPlayerIds })
+      setReadyPlayers(new Set(readyPlayerIds))
+    })
+    
+    // Countdown events
     socket.on('lobby:countdownStarted', () => {
       if (countdown === null) {
-        setCountdown(5)
+        setShowReadyCheck(false) // Hide ready check when countdown starts
+        setCountdown(10)
         intervalRef.current = setInterval(() => {
           setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0))
         }, 1000)
@@ -125,6 +201,9 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
       socket.off('disconnect')
       socket.off('lobby:playerLeft')
       socket.off('lobby:playerJoined')
+      socket.off('lobby:readyCheckStarted')
+      socket.off('lobby:readyCheckCancelled')
+      socket.off('lobby:playerReadyUpdate')
       socket.off('lobby:countdownStarted')
       socket.off('lobby:countdownCancelled')
       socket.off('error')
@@ -136,12 +215,37 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   // Seul le host peut démarrer la partie
   if (!isHost) {
     return (
-      <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Waiting for host to start the game...
-        </p>
-        {countdown !== null && (
-          <p className="text-lg font-bold mt-2">Starting in {countdown}s...</p>
+      <div className="mt-4 space-y-2">
+        {countdown !== null ? (
+          <div className="p-4 bg-orange-100 border border-orange-400 rounded text-center">
+            <p className="text-lg font-bold text-orange-700">Starting in {countdown}s...</p>
+            <p className="text-sm text-orange-600">Get ready! Game will begin automatically</p>
+          </div>
+        ) : showReadyCheck ? (
+          <div className="space-y-2">
+            <div className="p-3 bg-blue-100 border border-blue-400 rounded text-center">
+              <p className="text-sm font-semibold text-blue-700 mb-2">Ready Check</p>
+              <p className="text-xs text-blue-600">
+                {readyPlayers.size} / {playerCount} players ready
+              </p>
+            </div>
+            <Button
+              onClick={toggleReady}
+              className={`w-full ${
+                isReady 
+                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              {isReady ? '✓ Ready' : 'Ready?'}
+            </Button>
+          </div>
+        ) : (
+          <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Waiting for host to start the game...
+            </p>
+          </div>
         )}
       </div>
     )
@@ -149,6 +253,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
 
   const minPlayers = 2 // Minimum de joueurs requis
   const canStart = playerCount >= minPlayers
+  const allReady = readyPlayers.size === playerCount && canStart
 
   return (
     <div className="mt-4 space-y-2">
@@ -162,17 +267,79 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
         </div>
       )}
 
-      <Button
-        onClick={initiateCountdown}
-        disabled={countdown !== null || isStarting || isRetrying || !canStart}
-        className="w-full"
-      >
-        {countdown !== null
-          ? `Starting in ${countdown}s...`
-          : isStarting || isRetrying
-            ? `Starting game...${isRetrying ? ` (Retry ${retryCount + 1}/3)` : ''}`
-            : `Start Game (${playerCount}/${minPlayers} players)`}
-      </Button>
+      {countdown !== null ? (
+        <div className="space-y-2">
+          <div className="p-4 bg-orange-100 border border-orange-400 rounded text-center">
+            <p className="text-lg font-bold text-orange-700">Starting in {countdown}s...</p>
+            <p className="text-sm text-orange-600">Game will begin automatically</p>
+          </div>
+          <Button
+            onClick={cancelCountdown}
+            variant="outline"
+            className="w-full border-red-300 text-red-600 hover:bg-red-50"
+          >
+            Cancel Start
+          </Button>
+        </div>
+      ) : showReadyCheck ? (
+        <div className="space-y-2">
+          <div className="p-3 bg-blue-100 border border-blue-400 rounded text-center">
+            <p className="text-sm font-semibold text-blue-700 mb-1">Ready Check</p>
+            <p className="text-xs text-blue-600 mb-2">
+              {readyPlayers.size} / {playerCount} players ready
+            </p>
+            {allReady && (
+              <p className="text-xs text-green-600 font-medium">✓ All players ready!</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Button
+              onClick={toggleReady}
+              className={`w-full ${
+                isReady 
+                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              }`}
+            >
+              {isReady ? '✓ Ready' : 'Ready?'}
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={initiateCountdown}
+                disabled={!allReady}
+                className="flex-1"
+              >
+                {allReady ? 'Start Game' : 'Waiting for players...'}
+              </Button>
+              <Button
+                onClick={cancelReadyCheck}
+                variant="outline"
+                className="px-3 border-red-300 text-red-600 hover:bg-red-50"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Button
+            onClick={initiateReadyCheck}
+            disabled={!canStart}
+            className="w-full bg-blue-500 hover:bg-blue-600"
+          >
+            Ready Check ({playerCount}/{minPlayers} players)
+          </Button>
+          <Button
+            onClick={initiateCountdown}
+            disabled={!canStart}
+            variant="outline"
+            className="w-full"
+          >
+            Quick Start (Skip ready check)
+          </Button>
+        </div>
+      )}
 
       {!canStart && (
         <p className="text-sm text-orange-500 text-center">

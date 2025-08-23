@@ -8,7 +8,6 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
-import { DebugPanelWrapper } from '../../components/DebugPanelWrapper'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import { PWAInstallPrompt } from '../../components/PWAInstallPrompt'
 
@@ -92,7 +91,7 @@ export default async function LocaleLayout(props: {
           </Providers>
           <Toaster />
           <PWAInstallPrompt />
-          <DebugPanelWrapper />
+          {/* <DebugPanelWrapper /> */}
         </ErrorBoundary>
       </body>
     </html>

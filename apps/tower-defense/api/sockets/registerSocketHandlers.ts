@@ -15,6 +15,9 @@ const activeConnections = new Map<string, { socketId: string; gameId: string; pl
 // Map pour tracker les countdowns actifs et éviter les annulations multiples
 const activeCountdowns = new Set<string>()
 
+// Map pour tracker les ready checks actifs
+const activeReadyChecks = new Map<string, Set<string>>()
+
 export function registerSocketHandlers(socket: Socket) {
   // Lobby handlers
   socket.on('lobby:join', async ({ gameId, playerId }) => {
@@ -99,6 +102,17 @@ export function registerSocketHandlers(socket: Socket) {
       if (playerId) {
         // Marquer le joueur comme ayant quitté
         await updatePlayerStatusService({ gameId, playerId, status: 'left' })
+        
+        // Nettoyer le ready check si actif
+        const readyPlayers = activeReadyChecks.get(gameId)
+        if (readyPlayers) {
+          readyPlayers.delete(playerId)
+          getIO().to(`lobby:${gameId}`).emit('lobby:playerReadyUpdate', {
+            playerId,
+            ready: false,
+            readyPlayerIds: Array.from(readyPlayers)
+          })
+        }
         
         // Notifier les autres joueurs
         socket.to(`lobby:${gameId}`).emit('lobby:playerLeft', playerId)
@@ -223,6 +237,92 @@ export function registerSocketHandlers(socket: Socket) {
       })
   })
 
+  // Ready check handlers
+  socket.on('lobby:startReadyCheck', async ({ gameId, playerId }) => {
+    logger.debug(`✓ [lobby:startReadyCheck] ${socket.id} starting ready check for: ${gameId}`)
+
+    try {
+      const game = await GameModel.findById(gameId)
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' })
+        return
+      }
+
+      if (game.host?.toString() !== playerId) {
+        socket.emit('error', { message: 'Only the host can start ready check' })
+        return
+      }
+
+      // Initialiser le ready check pour cette partie
+      activeReadyChecks.set(gameId, new Set())
+
+      // Notifier tous les joueurs du lobby (y compris l'émetteur)
+      const socketsInRoom = await getIO().in(`lobby:${gameId}`).fetchSockets()
+      logger.debug(`🔍 [lobby:startReadyCheck] Sockets in room lobby:${gameId}: ${socketsInRoom.length}`)
+      
+      getIO().to(`lobby:${gameId}`).emit('lobby:readyCheckStarted')
+      socket.emit('lobby:readyCheckStarted') // S'assurer que l'host reçoit aussi l'événement
+      logger.debug(`✅ [lobby:startReadyCheck] Ready check started for game: ${gameId}`)
+    } catch (error) {
+      logger.error('[lobby:startReadyCheck] Error:', error)
+      socket.emit('error', { message: 'Failed to start ready check' })
+    }
+  })
+
+  socket.on('lobby:cancelReadyCheck', async ({ gameId, playerId }) => {
+    logger.debug(`❌ [lobby:cancelReadyCheck] ${socket.id} cancelling ready check for: ${gameId}`)
+
+    try {
+      const game = await GameModel.findById(gameId)
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' })
+        return
+      }
+
+      if (game.host?.toString() !== playerId) {
+        socket.emit('error', { message: 'Only the host can cancel ready check' })
+        return
+      }
+
+      // Supprimer le ready check
+      activeReadyChecks.delete(gameId)
+
+      // Notifier tous les joueurs du lobby (y compris l'émetteur)
+      getIO().to(`lobby:${gameId}`).emit('lobby:readyCheckCancelled')
+      socket.emit('lobby:readyCheckCancelled') // S'assurer que l'host reçoit aussi l'événement
+      logger.debug(`✅ [lobby:cancelReadyCheck] Ready check cancelled for game: ${gameId}`)
+    } catch (error) {
+      logger.error('[lobby:cancelReadyCheck] Error:', error)
+      socket.emit('error', { message: 'Failed to cancel ready check' })
+    }
+  })
+
+  socket.on('lobby:playerReady', ({ gameId, playerId, ready }) => {
+    logger.debug(`👍 [lobby:playerReady] ${socket.id} player ${playerId} ready: ${ready}`)
+
+    const readyPlayers = activeReadyChecks.get(gameId)
+    if (!readyPlayers) {
+      socket.emit('error', { message: 'No active ready check' })
+      return
+    }
+
+    // Mettre à jour l'état du joueur
+    if (ready) {
+      readyPlayers.add(playerId)
+    } else {
+      readyPlayers.delete(playerId)
+    }
+
+    // Notifier tous les joueurs de la mise à jour
+    getIO().to(`lobby:${gameId}`).emit('lobby:playerReadyUpdate', {
+      playerId,
+      ready,
+      readyPlayerIds: Array.from(readyPlayers)
+    })
+
+    logger.debug(`✅ [lobby:playerReady] Updated ready state for game ${gameId}: ${readyPlayers.size} players ready`)
+  })
+
   // Game action handlers
   socket.on('gameAction', async ({ gameId, action }) => {
     logger.debug(`📩 [gameAction] from ${socket.id} | gameId: ${gameId}`)
@@ -261,6 +361,17 @@ export function registerSocketHandlers(socket: Socket) {
       try {
         // Marquer le joueur comme déconnecté (pas supprimer)
         await updatePlayerStatusService({ gameId, playerId, status: 'disconnected' })
+
+        // Nettoyer le ready check si actif
+        const readyPlayers = activeReadyChecks.get(gameId)
+        if (readyPlayers) {
+          readyPlayers.delete(playerId)
+          getIO().to(`lobby:${gameId}`).emit('lobby:playerReadyUpdate', {
+            playerId,
+            ready: false,
+            readyPlayerIds: Array.from(readyPlayers)
+          })
+        }
 
         // Notifier les autres joueurs
         const game = await GameModel.findById(gameId)
