@@ -15,6 +15,7 @@ export const gameSchema = z.object({
   shopTowers: z.array(towerShopItemSchema).describe('RNG list of towers'),
   shopUnits: z.array(unitShopItemSchema).describe('Fixed list of units'),
   phase: z.enum(GAME_PHASES).describe('Game phase'),
+  startedAt: z.string().optional().describe('ISO timestamp when game started'),
   createdAt: z.string().describe('ISO timestamp'),
   updatedAt: z.string().describe('ISO timestamp'),
 })

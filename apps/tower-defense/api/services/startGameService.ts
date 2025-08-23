@@ -34,6 +34,7 @@ export async function startGameService({ gameId }: { gameId: string }) {
 
     game.phase = 'playing'
     game.tick = 0
+    game.startedAt = new Date()
 
     game.set(
       'map',

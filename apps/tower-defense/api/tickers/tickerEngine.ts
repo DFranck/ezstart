@@ -12,6 +12,7 @@ export const ticker = createTickerEngine<Game>({
     tick: 0,
     host: undefined,
     phase: 'waiting',
+    startedAt: undefined,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }),
@@ -57,6 +58,7 @@ export async function syncTickerWithDatabase(gameId: string) {
     tick: currentTick, // Garder le tick du ticker, pas celui de la DB
     host: gameData.host?.toString(),
     phase: gameData.phase || 'waiting',
+    startedAt: gameData.startedAt?.toISOString(),
     createdAt: gameData.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: gameData.updatedAt?.toISOString() || new Date().toISOString(),
   }))

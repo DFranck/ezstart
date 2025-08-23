@@ -11,10 +11,10 @@ export function GameTimer({ game }: GameTimerProps) {
   const [elapsedTime, setElapsedTime] = useState('00:00')
 
   useEffect(() => {
-    if (!game?.createdAt) return
+    if (!game?.startedAt) return
 
     const updateTimer = () => {
-      const startTime = new Date(game.createdAt).getTime()
+      const startTime = new Date(game.startedAt).getTime()
       const now = Date.now()
       const elapsed = Math.floor((now - startTime) / 1000)
 
@@ -28,7 +28,7 @@ export function GameTimer({ game }: GameTimerProps) {
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [game?.createdAt])
+  }, [game?.startedAt])
 
   if (!game || game.phase !== 'playing') {
     return null
