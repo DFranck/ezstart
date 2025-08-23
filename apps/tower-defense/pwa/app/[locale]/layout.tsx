@@ -8,8 +8,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
+import { PWAInstallPrompt } from '@ezstart/ui/components'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
-import { PWAInstallPrompt } from '../../components/PWAInstallPrompt'
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))
@@ -90,7 +90,10 @@ export default async function LocaleLayout(props: {
             <GamesSocketProvider>{children}</GamesSocketProvider>
           </Providers>
           <Toaster />
-          <PWAInstallPrompt />
+          <PWAInstallPrompt 
+            appName="Tower Defense"
+            description="Installez l'application pour un accès rapide et une meilleure expérience de jeu"
+          />
           {/* <DebugPanelWrapper /> */}
         </ErrorBoundary>
       </body>

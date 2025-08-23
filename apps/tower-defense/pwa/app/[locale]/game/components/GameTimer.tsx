@@ -1,0 +1,42 @@
+'use client'
+
+import { Game } from '@tower-defense/types'
+import { useEffect, useState } from 'react'
+
+interface GameTimerProps {
+  game: Game
+}
+
+export function GameTimer({ game }: GameTimerProps) {
+  const [elapsedTime, setElapsedTime] = useState('00:00')
+
+  useEffect(() => {
+    if (!game?.createdAt) return
+
+    const updateTimer = () => {
+      const startTime = new Date(game.createdAt).getTime()
+      const now = Date.now()
+      const elapsed = Math.floor((now - startTime) / 1000)
+
+      const minutes = Math.floor(elapsed / 60)
+      const seconds = elapsed % 60
+
+      setElapsedTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+    }
+
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [game?.createdAt])
+
+  if (!game || game.phase !== 'playing') {
+    return null
+  }
+
+  return (
+    <div className="bg-gray-800 text-white px-3 py-1 rounded-md font-mono text-sm">
+      <span className="text-gray-400">Temps:</span> {elapsedTime}
+    </div>
+  )
+}

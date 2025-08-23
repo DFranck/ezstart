@@ -2,6 +2,7 @@
 
 import { Game } from '@tower-defense/types'
 import { GameMenu } from './GameMenu'
+import { GameTimer } from './GameTimer'
 
 export function Hud({ game }: { game: Game }) {
   const tick = game.tick
@@ -18,7 +19,7 @@ export function Hud({ game }: { game: Game }) {
       {/* Stats du jeu */}
       <div className="order-2 md:order-1 flex flex-wrap items-center gap-4">
         <div className="font-bold">Phase: {phase}</div>
-        <div>Tick: {tick}</div>
+        <GameTimer game={game} />
         <div>Gold: {player.gold}</div>
         <div>HP: {player.hp}</div>
         {/* <div>Income: {player.income}</div>
