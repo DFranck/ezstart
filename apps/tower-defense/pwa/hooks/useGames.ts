@@ -1,6 +1,6 @@
 'use client'
 
-import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
+import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { extractPlayerId } from '@/utils/extractPlayerId'
 import { isDebug, logger } from '@ezstart/ui/lib'
@@ -20,7 +20,7 @@ export function useGames(options: UseGamesOptions = {}) {
 
   const router = useRouter()
   const { player } = usePlayerStore()
-  const socket = useGamesSocketInstance()
+  const { socket } = useGamesSocket()
   const [waitingGames, setWaitingGames] = useState<Game[]>([])
   const [allGames, setAllGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -194,6 +194,8 @@ export function useGames(options: UseGamesOptions = {}) {
 
   // Écouter les événements socket pour les mises à jour temps réel
   useEffect(() => {
+    if (!socket) return
+
     // Nouvelle game créée
     const handleGameCreated = (newGame: Game) => {
       logger.debug('Game created via socket', newGame)
@@ -239,16 +241,25 @@ export function useGames(options: UseGamesOptions = {}) {
       }
     }
 
+    // Game terminée
+    const handleGameEnded = (data: { gameId: string }) => {
+      logger.debug('Game ended via socket', data.gameId)
+      setWaitingGames(prev => prev.filter(game => game._id !== data.gameId))
+      setAllGames(prev => prev.filter(game => game._id !== data.gameId))
+    }
+
     socket.on('gameCreated', handleGameCreated)
     socket.on('gameDeleted', handleGameDeleted)
     socket.on('gameStarted', handleGameStarted)
     socket.on('lobby:gameStarted', handleGameStarted)
+    socket.on('gameEnded', handleGameEnded)
 
     return () => {
       socket.off('gameCreated', handleGameCreated)
       socket.off('gameDeleted', handleGameDeleted)  
       socket.off('gameStarted', handleGameStarted)
       socket.off('lobby:gameStarted', handleGameStarted)
+      socket.off('gameEnded', handleGameEnded)
     }
   }, [socket, player?._id, router, autoRedirect, allGames])
 

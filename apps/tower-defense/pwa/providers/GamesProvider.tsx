@@ -1,13 +1,15 @@
 'use client'
 
-import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
+import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { JoinGameResponse } from '@tower-defense/types'
 import { useEffect } from 'react'
 
 export function GamesProvider({ children }: { children: React.ReactNode }) {
-  const socket = useGamesSocketInstance()
+  const { socket } = useGamesSocket()
 
   useEffect(() => {
+    if (!socket) return
+
     // Événements globaux des jeux
     socket.on('playerJoined', (data: JoinGameResponse) => {
       console.log('[GamesProvider] playerJoined', data)
