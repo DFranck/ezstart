@@ -22,6 +22,12 @@ export default async function GamePage(props: { params: Promise<{ gameId: string
 
   const game: Game = res.data
   logger.debug('game', game)
+
+  // Rediriger vers 404 si la game est finie
+  if (game.phase === 'finished') {
+    return notFound()
+  }
+
   return (
     <>
       <GameInitializer />

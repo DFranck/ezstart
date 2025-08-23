@@ -13,8 +13,6 @@ export async function checkEndGame(gameId: string) {
   if (active.length <= 1 && state.phase !== 'finished') {
     console.log(`[game:end] Game ${gameId} finished.`)
 
-    ticker.destroyRoom(gameId)
-
     const gameDoc = await GameModel.findById(gameId)
     if (gameDoc) {
       gameDoc.phase = 'finished'
@@ -30,7 +28,7 @@ export async function checkEndGame(gameId: string) {
       // Mettre à jour les stats des joueurs
       await updatePlayerStatsService(finalRankings)
 
-      // Émettre l'événement de fin de game
+      // Émettre l'événement de fin de game AVANT de détruire la room
       const io = getIO()
       io.to(gameId).emit('gameFinished', {
         gameId,
@@ -41,5 +39,8 @@ export async function checkEndGame(gameId: string) {
       // Émettre aussi un événement global pour mettre à jour la home page
       io.emit('gameEnded', { gameId })
     }
+
+    // Détruire la room ticker APRÈS avoir envoyé les événements
+    ticker.destroyRoom(gameId)
   }
 }

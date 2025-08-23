@@ -63,6 +63,11 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
       console.info('[GameProvider] playerStatusChanged', payload)
     }
 
+    const onGameFinished = (payload: any) => {
+      console.info('[GameProvider] gameFinished', payload)
+      // Le GameMenu s'occupe déjà de la redirection, on log juste ici
+    }
+
     // ---- Brancher tous les listeners AVANT de join ----
     socket.on('gameState', onGameState)
     socket.on('actionRejected', onActionRejected)
@@ -78,6 +83,7 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
     socket.on('playerJoined', onPlayerJoined)
     socket.on('playerLeft', onPlayerLeft)
     socket.on('playerStatusChanged', onPlayerStatusChanged)
+    socket.on('gameFinished', onGameFinished)
 
     // ---- Join après connexion (sinon event perdu) ----
     const doJoin = () => {
@@ -109,6 +115,7 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
       socket.off('playerJoined', onPlayerJoined)
       socket.off('playerLeft', onPlayerLeft)
       socket.off('playerStatusChanged', onPlayerStatusChanged)
+      socket.off('gameFinished', onGameFinished)
     }
   }, [socket, gameId])
 
