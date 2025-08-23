@@ -53,48 +53,62 @@ export function registerSocketHandlers(socket: Socket) {
       // Tracker la connexion
       activeConnections.set(socket.id, { socketId: socket.id, gameId, playerId })
 
-      // Si le joueur était déconnecté, le remettre actif
+      // Gérer le statut du joueur qui rejoint
       if (playerId) {
         const gamePlayer = await InGamePlayerModel.findOne({ gameId, player: playerId })
-        if (gamePlayer && gamePlayer.status === 'disconnected') {
+        if (gamePlayer && (gamePlayer.status === 'disconnected' || gamePlayer.status === 'left')) {
+          // Joueur qui revient après déconnexion ou après avoir quitté
           await updatePlayerStatusService({ gameId, playerId, status: 'active' })
           const player = await PlayerModel.findById(playerId)
+          const message = gamePlayer.status === 'disconnected' ? 'reconnected' : 'rejoined'
           socket.to(`lobby:${gameId}`).emit('lobby:playerStatusChanged', {
             playerId,
             status: 'active',
-            message: `${player?.name || 'Player'} reconnected`,
+            message: `${player?.name || 'Player'} ${message}`,
           })
-        } else {
-          // Nouveau joueur qui rejoint
-          const player = await PlayerModel.findById(playerId)
-          socket.to(`lobby:${gameId}`).emit('lobby:playerJoined', {
-            _id: playerId,
-            name: player?.name || `Player ${playerId.slice(0, 6)}`,
-          })
+        } else if (!gamePlayer) {
+          // Nouveau joueur qui rejoint pour la première fois - chercher son InGamePlayer complet
+          const inGamePlayer = await InGamePlayerModel.findOne({ gameId, player: playerId }).populate('player').exec()
+          if (inGamePlayer) {
+            socket.to(`lobby:${gameId}`).emit('lobby:playerJoined', inGamePlayer)
+          }
         }
       }
 
-      // Envoyer la liste mise à jour à tous
-      getIO().to(`lobby:${gameId}`).emit('lobby:playersUpdated', game.players)
+      // Récupérer et envoyer la liste complète des InGamePlayers
+      const inGamePlayers = await InGamePlayerModel.find({ gameId }).populate('player').exec()
+      getIO().to(`lobby:${gameId}`).emit('lobby:playersUpdated', inGamePlayers)
     } catch (error) {
       logger.error('[lobby:join] Error:', error)
       socket.emit('error', { message: 'Failed to join lobby' })
     }
   })
 
-  socket.on('lobby:leave', ({ gameId, playerId }) => {
-    // Vérifier si le socket est dans la room avant de la quitter
-    const rooms = Array.from(socket.rooms)
-    if (!rooms.includes(`lobby:${gameId}`)) {
-      logger.debug(`🏠 [lobby:leave] ${socket.id} not in lobby: ${gameId}`)
-      return
-    }
+  socket.on('lobby:leave', async ({ gameId, playerId }) => {
+    try {
+      // Vérifier si le socket est dans la room avant de la quitter
+      const rooms = Array.from(socket.rooms)
+      if (!rooms.includes(`lobby:${gameId}`)) {
+        logger.debug(`🏠 [lobby:leave] ${socket.id} not in lobby: ${gameId}`)
+        return
+      }
 
-    socket.leave(`lobby:${gameId}`)
-    activeConnections.delete(socket.id)
+      socket.leave(`lobby:${gameId}`)
+      activeConnections.delete(socket.id)
 
-    if (playerId) {
-      socket.to(`lobby:${gameId}`).emit('lobby:playerLeft', playerId)
+      if (playerId) {
+        // Marquer le joueur comme ayant quitté
+        await updatePlayerStatusService({ gameId, playerId, status: 'left' })
+        
+        // Notifier les autres joueurs
+        socket.to(`lobby:${gameId}`).emit('lobby:playerLeft', playerId)
+        
+        // Envoyer la liste mise à jour
+        const inGamePlayers = await InGamePlayerModel.find({ gameId }).populate('player').exec()
+        getIO().to(`lobby:${gameId}`).emit('lobby:playersUpdated', inGamePlayers)
+      }
+    } catch (error) {
+      logger.error('[lobby:leave] Error:', error)
     }
   })
 
@@ -128,7 +142,8 @@ export function registerSocketHandlers(socket: Socket) {
         // Notifier les autres joueurs
         const player = await PlayerModel.findById(playerId)
         const event = game.phase === 'waiting' ? 'lobby:playerStatusChanged' : 'playerStatusChanged'
-        socket.to(gameId).emit(event, {
+        const room = game.phase === 'waiting' ? `lobby:${gameId}` : gameId
+        socket.to(room).emit(event, {
           playerId,
           status: 'active',
           message: `${player?.name || 'Player'} reconnected`,
@@ -253,8 +268,9 @@ export function registerSocketHandlers(socket: Socket) {
           const player = await PlayerModel.findById(playerId)
           const event =
             game.phase === 'waiting' ? 'lobby:playerStatusChanged' : 'playerStatusChanged'
+          const room = game.phase === 'waiting' ? `lobby:${gameId}` : gameId
 
-          socket.to(gameId).emit(event, {
+          socket.to(room).emit(event, {
             playerId,
             status: 'disconnected',
             message: `${player?.name || 'Player'} disconnected`,

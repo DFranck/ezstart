@@ -11,5 +11,6 @@ export {
 } from './gamePhases.js'
 export type { GamePhase } from './gamePhases.js'
 export { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from './playerStatus.js'
+export type { PlayerStatus } from './playerStatus.js'
 export * from './shapes.js'
 export * from './targeting.js'

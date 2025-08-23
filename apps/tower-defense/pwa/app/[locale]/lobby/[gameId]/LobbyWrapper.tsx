@@ -1,17 +1,16 @@
+// app/[locale]/lobby/LobbyWrapper.tsx
 'use client'
 
+/* path: app/[locale]/lobby/LobbyWrapper.tsx */
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Game } from '@tower-defense/types'
+import { Game, InGamePlayer, Player } from '@tower-defense/types'
 import { LobbyPlayersList } from '../components/LobbyPlayersList'
 import { StartGameButton } from '../components/StartGameButton'
 
-type Props = {
-  game: Game
-  gameId: string
-}
+type Props = { game: Game; gameId: string }
 
 export function LobbyWrapper({ game, gameId }: Props) {
-  const { player } = usePlayerStore()
+  const player: Player | null = usePlayerStore(s => s.player)
 
   if (!player) {
     return (
@@ -21,16 +20,12 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
-  const isHost = game.host === player._id
+  const hostId = typeof game.host === 'string' ? game.host : game.host?._id
 
-  const currentPlayer = game.players.find(p => {
-    const playerId = typeof p.player === 'string' ? p.player : p.player._id
-    return playerId === player._id
-  })
+  const getPlayerId = (p: InGamePlayer) => (typeof p.player === 'string' ? p.player : p.player?._id)
 
-  // Si le joueur n'est pas dans la partie, l'ajouter
+  const currentPlayer = game.players.find(p => getPlayerId(p) === player._id)
   if (!currentPlayer) {
-    // TODO: Auto-join logic or redirect
     return (
       <div className="text-center p-8">
         <p className="text-orange-500">You are not part of this game</p>
@@ -38,10 +33,12 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
+  const isHost = hostId === player._id
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Game Lobby</h1>
-      <div className="text-center mb-4">
+      <h1 className="text-3xl font-bold text-center mb-2">Game Lobby</h1>
+      <div className="text-center mb-6">
         <span className="text-sm text-gray-500">Game ID: {gameId}</span>
       </div>
 
@@ -49,7 +46,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
         players={game.players}
         gameId={gameId}
         currentUserId={player._id}
-        hostId={game.host}
+        hostId={hostId}
       />
 
       <StartGameButton

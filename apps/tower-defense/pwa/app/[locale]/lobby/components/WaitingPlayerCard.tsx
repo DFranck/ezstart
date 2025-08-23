@@ -1,108 +1,61 @@
+// app/[locale]/lobby/components/WaitingPlayerCard.tsx
 'use client'
 
+/* path: app/[locale]/lobby/components/WaitingPlayerCard.tsx */
 import { InGamePlayer } from '@tower-defense/types'
+import { useMemo } from 'react'
 
 type Props = {
   player: InGamePlayer
-  isHost: boolean
-  isCurrentUser: boolean
+  isHost?: boolean
+  isCurrentUser?: boolean
+}
+
+const statusChip = (status: InGamePlayer['status']) => {
+  switch (status) {
+    case 'active':
+      return 'bg-green-100 text-green-700'
+    case 'disconnected':
+      return 'bg-yellow-100 text-yellow-700'
+    case 'eliminated':
+      return 'bg-red-100 text-red-700'
+    default:
+      return 'bg-gray-100 text-gray-700'
+  }
 }
 
 export function WaitingPlayerCard({ player, isHost, isCurrentUser }: Props) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-500'
-      case 'disconnected':
-        return 'bg-yellow-500'
-      case 'eliminated':
-        return 'bg-red-500'
-      case 'left':
-        return 'bg-gray-500'
-      default:
-        return 'bg-gray-400'
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'Online'
-      case 'disconnected':
-        return 'Disconnected'
-      case 'eliminated':
-        return 'Eliminated'
-      case 'left':
-        return 'Left'
-      default:
-        return 'Unknown'
-    }
-  }
-
-  const isDisconnected = player.status === 'disconnected'
-  const isEliminated = player.status === 'eliminated'
-  const isLeft = player.status === 'left'
+  const name = useMemo(() => {
+    if (typeof player.player === 'string') return player.player
+    return player.player?.name ?? 'Unknown'
+  }, [player])
 
   return (
-    <div
-      className={`p-3 border rounded transition-colors ${
-        isCurrentUser
-          ? 'bg-blue-500/20 border-blue-500/50'
-          : isDisconnected
-            ? 'bg-yellow-500/10 border-yellow-500/30 opacity-70'
-            : isEliminated
-              ? 'bg-red-500/10 border-red-500/30 opacity-60'
-              : isLeft
-                ? 'bg-gray-500/10 border-gray-500/30 opacity-50'
-                : 'bg-white/10 border-white/20'
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span
-            className={`font-medium ${isDisconnected || isEliminated || isLeft ? 'line-through' : ''}`}
-          >
-            {typeof player.player === 'object' && player.player?.name
-              ? player.player.name
-              : 'Unknown Player'}
-          </span>
-          {isCurrentUser && (
-            <span className="text-xs bg-green-500 px-2 py-1 rounded text-white">You</span>
-          )}
+    <li className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0">
+          {name.charAt(0).toUpperCase()}
         </div>
-        <div className="flex items-center gap-2">
-          {isHost && (
-            <span className="text-xs bg-yellow-500 px-2 py-1 rounded text-black font-medium">
-              Host
-            </span>
-          )}
-          <div className="flex items-center gap-1">
-            <div
-              className={`w-2 h-2 rounded-full ${getStatusColor(player.status)} ${
-                player.status === 'active' ? 'animate-pulse' : ''
-              }`}
-            />
-            <span className="text-xs text-gray-500">{getStatusText(player.status)}</span>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium truncate">{name}</span>
+            {isHost && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
+                HOST
+              </span>
+            )}
+            {isCurrentUser && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">YOU</span>
+            )}
+          </div>
+          <div className="text-xs text-gray-500">
+            Gold: {player.gold} • Income: {player.income} • HP: {player.hp}
           </div>
         </div>
       </div>
-
-      {/* Informations supplémentaires pour les joueurs déconnectés */}
-      {isDisconnected && (
-        <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
-          ⚠️ Can reconnect anytime
-        </div>
-      )}
-
-      {isEliminated && (
-        <div className="mt-2 text-xs text-red-600 dark:text-red-400">
-          💀 Eliminated from the game
-        </div>
-      )}
-
-      {isLeft && (
-        <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">🚪 Left the game</div>
-      )}
-    </div>
+      <span className={`text-xs px-2 py-1 rounded ${statusChip(player.status)}`}>
+        {player.status}
+      </span>
+    </li>
   )
 }
