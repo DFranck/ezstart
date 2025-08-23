@@ -3,6 +3,7 @@
 import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import { Button } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
+import type { InGamePlayer } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useNetworkRetry } from '../../../../hooks/useNetworkRetry'
@@ -24,6 +25,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const [readyPlayers, setReadyPlayers] = useState<Set<string>>(new Set())
   const [showReadyCheck, setShowReadyCheck] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [activePlayerCount, setActivePlayerCount] = useState(playerCount)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -100,34 +102,25 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   const initiateCountdown = () => {
     if (countdown !== null || isStarting) return // prevent double click
 
-    setCountdown(10)
+    console.log('[StartGameButton] Initiating countdown')
     setError(null)
 
-    // Notifier les autres joueurs du compte à rebours
+    // Notifier TOUS les joueurs (y compris l'host) du compte à rebours
     if (currentUserId && socketConnected) {
       socket.emit('lobby:startCountdown', { gameId, playerId: currentUserId })
     }
-
-    intervalRef.current = setInterval(() => {
-      setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0))
-    }, 1000)
-
-    timeoutRef.current = setTimeout(() => {
-      clearInterval(intervalRef.current!)
-      setCountdown(null)
-      startGame()
-    }, 10000)
   }
 
   const cancelCountdown = () => {
     // Éviter les appels multiples
     if (countdown === null) return
 
+    console.log('[StartGameButton] Cancelling countdown')
     clearTimeout(timeoutRef.current!)
     clearInterval(intervalRef.current!)
     setCountdown(null)
 
-    // Notifier les autres joueurs de l'annulation
+    // Notifier TOUS les joueurs de l'annulation
     if (currentUserId && socketConnected) {
       socket.emit('lobby:cancelCountdown', { gameId, playerId: currentUserId })
     }
@@ -141,12 +134,27 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
 
     checkSocketConnection()
 
-    // Les événements de connexion sont déjà gérés par LobbyPlayersList
-    // On écoute juste les changements de connexion
-    socket.on('connect', checkSocketConnection)
+    // S'assurer qu'on est dans la room lobby pour recevoir les événements
+    if (currentUserId && socket.connected) {
+      socket.emit('lobby:join', { gameId, playerId: currentUserId })
+    }
+
+    // Écouter les événements de connexion
+    socket.on('connect', () => {
+      checkSocketConnection()
+      if (currentUserId) {
+        socket.emit('lobby:join', { gameId, playerId: currentUserId })
+      }
+    })
     socket.on('disconnect', checkSocketConnection)
 
-    // Écouter les événements de lobby
+    // Écouter les événements de lobby et mettre à jour le compteur de joueurs
+    socket.on('lobby:playersUpdated', (players: InGamePlayer[]) => {
+      const activePlayers = players.filter(p => p.status === 'active')
+      setActivePlayerCount(activePlayers.length)
+      console.log('[StartGameButton] Active players updated:', activePlayers.length)
+    })
+    
     socket.on('lobby:playerLeft', () => {
       cancelCountdown()
       cancelReadyCheck()
@@ -180,15 +188,53 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     
     // Countdown events
     socket.on('lobby:countdownStarted', () => {
+      console.log('[StartGameButton] Countdown started event received')
       if (countdown === null) {
         setShowReadyCheck(false) // Hide ready check when countdown starts
         setCountdown(10)
+        
+        // Clear any existing intervals/timeouts
+        clearInterval(intervalRef.current!)
+        clearTimeout(timeoutRef.current!)
+        
         intervalRef.current = setInterval(() => {
-          setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0))
+          setCountdown(prev => {
+            console.log('[StartGameButton] Countdown tick:', prev)
+            if (prev === null) return null
+            if (prev <= 1) {
+              console.log('[StartGameButton] Countdown ending')
+              clearInterval(intervalRef.current!)
+              return 0
+            }
+            return prev - 1
+          })
         }, 1000)
+        
+        // Timeout pour lancer le jeu automatiquement
+        timeoutRef.current = setTimeout(() => {
+          console.log('[StartGameButton] Countdown timeout reached, starting game')
+          clearInterval(intervalRef.current!)
+          setCountdown(null)
+          if (isHost) {
+            startGame()
+          }
+        }, 10000)
       }
     })
-    socket.on('lobby:countdownCancelled', cancelCountdown)
+    socket.on('lobby:countdownCancelled', () => {
+      console.log('[StartGameButton] Countdown cancelled event received')
+      clearTimeout(timeoutRef.current!)
+      clearInterval(intervalRef.current!)
+      setCountdown(null)
+    })
+
+    // Écouter le démarrage du jeu
+    socket.on('lobby:gameStarted', ({ gameId: startedGameId }: { gameId: string }) => {
+      console.log('[StartGameButton] Game started, redirecting to game page')
+      if (startedGameId === gameId) {
+        router.push(`/game/${gameId}`)
+      }
+    })
 
     // Écouter les erreurs
     socket.on('error', (errorData: { message: string }) => {
@@ -199,6 +245,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
     return () => {
       socket.off('connect')
       socket.off('disconnect')
+      socket.off('lobby:playersUpdated')
       socket.off('lobby:playerLeft')
       socket.off('lobby:playerJoined')
       socket.off('lobby:readyCheckStarted')
@@ -206,11 +253,12 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
       socket.off('lobby:playerReadyUpdate')
       socket.off('lobby:countdownStarted')
       socket.off('lobby:countdownCancelled')
+      socket.off('lobby:gameStarted')
       socket.off('error')
       clearTimeout(timeoutRef.current!)
       clearInterval(intervalRef.current!)
     }
-  }, [socket, countdown])
+  }, [socket, gameId, currentUserId])
 
   // Seul le host peut démarrer la partie
   if (!isHost) {
@@ -226,7 +274,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
             <div className="p-3 bg-blue-100 border border-blue-400 rounded text-center">
               <p className="text-sm font-semibold text-blue-700 mb-2">Ready Check</p>
               <p className="text-xs text-blue-600">
-                {readyPlayers.size} / {playerCount} players ready
+                {readyPlayers.size} / {activePlayerCount} players ready
               </p>
             </div>
             <Button
@@ -252,8 +300,8 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
   }
 
   const minPlayers = 2 // Minimum de joueurs requis
-  const canStart = playerCount >= minPlayers
-  const allReady = readyPlayers.size === playerCount && canStart
+  const canStart = activePlayerCount >= minPlayers
+  const allReady = readyPlayers.size === activePlayerCount && canStart
 
   return (
     <div className="mt-4 space-y-2">
@@ -286,7 +334,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
           <div className="p-3 bg-blue-100 border border-blue-400 rounded text-center">
             <p className="text-sm font-semibold text-blue-700 mb-1">Ready Check</p>
             <p className="text-xs text-blue-600 mb-2">
-              {readyPlayers.size} / {playerCount} players ready
+              {readyPlayers.size} / {activePlayerCount} players ready
             </p>
             {allReady && (
               <p className="text-xs text-green-600 font-medium">✓ All players ready!</p>
@@ -328,7 +376,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
             disabled={!canStart}
             className="w-full bg-blue-500 hover:bg-blue-600"
           >
-            Ready Check ({playerCount}/{minPlayers} players)
+            Ready Check ({activePlayerCount}/{minPlayers} players)
           </Button>
           <Button
             onClick={initiateCountdown}
@@ -343,7 +391,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
 
       {!canStart && (
         <p className="text-sm text-orange-500 text-center">
-          Need at least {minPlayers} players to start
+          Need at least {minPlayers} players to start ({activePlayerCount} active)
         </p>
       )}
     </div>

@@ -52,7 +52,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
       <StartGameButton
         gameId={gameId}
         isHost={isHost}
-        playerCount={game.players.length}
+        playerCount={game.players.filter(p => p.status === 'active').length}
         currentUserId={player._id}
       />
     </div>

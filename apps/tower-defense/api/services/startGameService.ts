@@ -3,7 +3,10 @@ import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { mockShopItems } from '@tower-defense/types'
 import { Types } from 'mongoose'
 import { GameModel } from '../models/Game.js'
+import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
+import { getGameTicker } from '../tickers/getGameTicker.js'
+import { getIO } from '../socketInstance.js'
 
 // Map pour tracker les jeux en cours de démarrage (anti-race condition)
 const startingGames = new Set<string>()
@@ -22,8 +25,9 @@ export async function startGameService({ gameId }: { gameId: string }) {
     if (!game) throw new Error('Game not found')
     if (game.phase !== 'waiting') throw new Error('Game already started')
 
-    // Vérifier qu'il y a au moins 2 joueurs
-    const activePlayers = game.players.filter(p => p.status === 'active')
+    // Vérifier qu'il y a au moins 2 joueurs actifs via InGamePlayer
+    const inGamePlayers = await InGamePlayerModel.find({ gameId }).populate('player')
+    const activePlayers = inGamePlayers.filter(p => p.status === 'active')
     if (activePlayers.length < 2) {
       throw new Error('Need at least 2 active players to start')
     }
@@ -52,9 +56,34 @@ export async function startGameService({ gameId }: { gameId: string }) {
     // Synchroniser le ticker avec les données mises à jour
     await syncTickerWithDatabase(gameId)
 
-    logger.debug(`[startGameService] Game ${gameId} started with ${activePlayers.length} active players`)
+    // Démarrer le ticker pour ce jeu
+    const { ticker } = await import('../tickers/tickerEngine.js')
+    ticker.ensureRoom(gameId)
 
-    return game
+    // Obtenir l'état initial du jeu depuis le ticker
+    const gameTicker = getGameTicker(gameId)
+    const initialGameState = gameTicker?.getState()
+
+    if (initialGameState) {
+      logger.debug(`[startGameService] Broadcasting initial game state to room: ${gameId}`)
+      // Broadcaster l'état initial à tous les joueurs qui rejoignent le jeu
+      getIO().to(gameId).emit('gameState', initialGameState)
+      
+      // Notifier les joueurs dans le lobby que le jeu a commencé
+      getIO().to(`lobby:${gameId}`).emit('lobby:gameStarted', {
+        gameId,
+        phase: 'playing'
+      })
+    }
+
+    logger.debug(`[startGameService] Game ${gameId} started with ${activePlayers.length} active players`)
+    logger.debug(`[startGameService] Active players:`, activePlayers.map(p => ({
+      id: p._id,
+      name: typeof p.player === 'object' ? p.player.name : p.player,
+      status: p.status
+    })))
+
+    return { game, activePlayers }
   } finally {
     // Toujours retirer le jeu de la liste des jeux en cours de démarrage
     startingGames.delete(gameId)

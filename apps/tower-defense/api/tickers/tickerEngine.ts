@@ -22,17 +22,22 @@ export const ticker = createTickerEngine<Game>({
 // Fonction pour synchroniser l'état du ticker avec la base de données
 export async function syncTickerWithDatabase(gameId: string) {
   const { GameModel } = await import('../models/Game')
+  const { InGamePlayerModel } = await import('../models/InGamePlayer')
+  
   const game = await GameModel.findById(gameId)
-
   if (!game) {
     console.warn(`[ticker] Game ${gameId} not found in database`)
     return false
   }
 
+  // Récupérer les InGamePlayers avec les données complètes
+  const inGamePlayers = await InGamePlayerModel.find({ gameId }).populate('player').exec()
+  
   console.log(`[ticker] 🔄 Syncing ticker state with database for game ${gameId}`)
-  console.log(`[ticker] Players in DB: ${game.players.length}`)
+  console.log(`[ticker] InGamePlayers in DB: ${inGamePlayers.length}`)
+  console.log(`[ticker] Active players:`, inGamePlayers.filter(p => p.status === 'active').length)
 
-  // Convertir le document MongoDB en objet JavaScript simple et forcer le type
+  // Convertir le document MongoDB en objet JavaScript simple
   const gameData = game.toObject() as any
 
   // Récupérer l'état actuel du ticker
@@ -41,7 +46,7 @@ export async function syncTickerWithDatabase(gameId: string) {
 
   ticker.mutate(gameId, () => ({
     _id: gameData._id.toString(),
-    players: gameData.players || [],
+    players: inGamePlayers, // Utiliser les InGamePlayers au lieu des Player references
     map: gameData.map || [],
     shopTowers: gameData.shopTowers || [],
     shopUnits: gameData.shopUnits || [],
@@ -52,5 +57,6 @@ export async function syncTickerWithDatabase(gameId: string) {
     updatedAt: gameData.updatedAt?.toISOString() || new Date().toISOString(),
   }))
 
+  console.log(`[ticker] ✅ Ticker synchronized for game ${gameId} with ${inGamePlayers.length} players`)
   return true
 }

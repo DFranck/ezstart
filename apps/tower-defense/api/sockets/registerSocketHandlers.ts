@@ -187,8 +187,9 @@ export function registerSocketHandlers(socket: Socket) {
           return
         }
 
-        // Notifier tous les joueurs du lobby
+        // Notifier tous les joueurs du lobby (y compris l'émetteur)
         getIO().to(`lobby:${gameId}`).emit('lobby:countdownStarted')
+        socket.emit('lobby:countdownStarted') // S'assurer que l'émetteur reçoit aussi
         logger.debug(`✅ [lobby:startCountdown] Countdown started for game: ${gameId}`)
       })
       .catch(error => {
@@ -221,8 +222,9 @@ export function registerSocketHandlers(socket: Socket) {
           return
         }
 
-        // Notifier tous les joueurs du lobby
+        // Notifier tous les joueurs du lobby (y compris l'émetteur)
         getIO().to(`lobby:${gameId}`).emit('lobby:countdownCancelled')
+        socket.emit('lobby:countdownCancelled') // S'assurer que l'émetteur reçoit aussi
         logger.debug(`✅ [lobby:cancelCountdown] Countdown cancelled for game: ${gameId}`)
 
         // Retirer du set après un délai pour permettre de nouveaux countdowns
@@ -321,6 +323,43 @@ export function registerSocketHandlers(socket: Socket) {
     })
 
     logger.debug(`✅ [lobby:playerReady] Updated ready state for game ${gameId}: ${readyPlayers.size} players ready`)
+  })
+
+  // Game handlers
+  socket.on('game:join', async ({ gameId }) => {
+    logger.debug(`🎮 [game:join] ${socket.id} joining game: ${gameId}`)
+
+    try {
+      const game = await GameModel.findById(gameId)
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' })
+        return
+      }
+
+      // Rejoindre la room du jeu
+      socket.join(gameId)
+
+      // Si le jeu est en cours, envoyer l'état actuel
+      if (game.phase === 'playing') {
+        const gameTicker = getGameTicker(gameId)
+        const gameState = gameTicker?.getState()
+        
+        if (gameState) {
+          socket.emit('gameState', gameState)
+          logger.debug(`🎮 [game:join] Sent current game state to ${socket.id}`)
+        }
+      }
+
+      logger.debug(`✅ [game:join] ${socket.id} successfully joined game: ${gameId}`)
+    } catch (error) {
+      logger.error('[game:join] Error:', error)
+      socket.emit('error', { message: 'Failed to join game' })
+    }
+  })
+
+  socket.on('game:leave', ({ gameId }) => {
+    logger.debug(`🚪 [game:leave] ${socket.id} leaving game: ${gameId}`)
+    socket.leave(gameId)
   })
 
   // Game action handlers

@@ -6,12 +6,13 @@ export async function startGameController(req: Request, res: Response) {
   try {
     const gameId = req.params.id;
     if (!gameId) return res.status(422).json({ error: 'Missing game ID' });
-    const game = await startGameService({ gameId });
+    const result = await startGameService({ gameId });
     return res.status(200).json({
       success: true,
-      gameId: game._id.toString(),
-      phase: game.phase,
-      startedAt: game.updatedAt.toISOString(),
+      gameId: result.game._id.toString(),
+      phase: result.game.phase,
+      startedAt: result.game.updatedAt.toISOString(),
+      playersCount: result.activePlayers.length,
     });
   } catch (err) {
     console.error('[games:start]', err);
