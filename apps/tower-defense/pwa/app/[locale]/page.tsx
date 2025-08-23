@@ -14,7 +14,7 @@ import { JoinGameButton } from '../../components/JoinGameButton'
 export default function Page() {
   const { player } = usePlayerStore()
 
-  const { waitingGames, isLoading, error, fetchGames, refreshGames } = useGames({
+  const { waitingGames, allGames, isLoading, error, fetchGames, refreshGames } = useGames({
     autoRedirect: true,
     pollingInterval: 10000,
     enablePolling: !!player?._id,
@@ -52,6 +52,39 @@ export default function Page() {
         <Section size={'xs'}>
           <CreateGameButton playerId={player._id} />
 
+          {/* Games en cours où le joueur peut se reconnecter */}
+          {(() => {
+            const playingGames = allGames.filter(game => 
+              game.phase === 'playing' && 
+              game.players?.some(inGamePlayer => inGamePlayer.player._id === player._id)
+            )
+            
+            return playingGames.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-3 text-orange-600">Your Active Games</h2>
+                <UL>
+                  {playingGames.map((game: Game) => (
+                    <LI
+                      key={game._id}
+                      size={'xs'}
+                      className="p-3 border rounded-lg bg-orange-50 border-orange-200"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Icon name="fa:FaPlay" className="text-orange-600" />
+                          <span className="font-medium">Game in progress</span>
+                        </div>
+                        <Button asChild variant="default">
+                          <Link href={`/game/${game._id}`}>Reconnect</Link>
+                        </Button>
+                      </div>
+                    </LI>
+                  ))}
+                </UL>
+              </div>
+            )
+          })()}
+
           {waitingGames.length === 0 ? (
             <div className="text-center py-8">
               <P variant={'description'}>No open lobbies. Create one!</P>
@@ -77,7 +110,7 @@ export default function Page() {
               <UL>
                 {waitingGames.map((game: Game) => {
                   const alreadyJoined =
-                    game.players?.some(playerInGame => playerInGame.player._id === player?._id) ??
+                    game.players?.some(inGamePlayer => inGamePlayer.player._id === player?._id) ??
                     false
 
                   logger.debug('alreadyJoined', alreadyJoined)

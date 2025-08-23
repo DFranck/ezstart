@@ -1,5 +1,6 @@
 'use client'
 
+import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { extractPlayerId } from '@/utils/extractPlayerId'
 import { isDebug, logger } from '@ezstart/ui/lib'
@@ -19,6 +20,7 @@ export function useGames(options: UseGamesOptions = {}) {
 
   const router = useRouter()
   const { player } = usePlayerStore()
+  const socket = useGamesSocketInstance()
   const [waitingGames, setWaitingGames] = useState<Game[]>([])
   const [allGames, setAllGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -67,7 +69,7 @@ export function useGames(options: UseGamesOptions = {}) {
           // Vérifier si le joueur est dans une partie active
           if (autoRedirect && playerId) {
             const activeGame = playingGames.find(game =>
-              game.players.some(p => p._id === playerId)
+              game.players.some(inGamePlayer => inGamePlayer.player._id === playerId)
             )
 
             if (activeGame) {
@@ -105,7 +107,7 @@ export function useGames(options: UseGamesOptions = {}) {
         // Vérifier si le joueur est dans une partie active
         if (autoRedirect && playerId) {
           const activeGame = playingGames.find(game =>
-            game.players.some(p => p._id === playerId)
+            game.players.some(inGamePlayer => inGamePlayer.player._id === playerId)
           )
 
           if (activeGame) {
@@ -189,6 +191,66 @@ export function useGames(options: UseGamesOptions = {}) {
     },
     [fetchGamesWithFeedback]
   )
+
+  // Écouter les événements socket pour les mises à jour temps réel
+  useEffect(() => {
+    // Nouvelle game créée
+    const handleGameCreated = (newGame: Game) => {
+      logger.debug('Game created via socket', newGame)
+      if (newGame.phase === 'waiting') {
+        setWaitingGames(prev => {
+          const gameExists = prev.some(game => game._id === newGame._id)
+          return gameExists ? prev : [...prev, newGame]
+        })
+      }
+      setAllGames(prev => {
+        const gameExists = prev.some(game => game._id === newGame._id)
+        return gameExists ? prev : [...prev, newGame]
+      })
+    }
+
+    // Game supprimée
+    const handleGameDeleted = (data: { gameId: string }) => {
+      logger.debug('Game deleted via socket', data.gameId)
+      setWaitingGames(prev => prev.filter(game => game._id !== data.gameId))
+      setAllGames(prev => prev.filter(game => game._id !== data.gameId))
+    }
+
+    // Game démarrée (la retirer des waiting games mais la garder pour la reconnexion)
+    const handleGameStarted = (data: { gameId: string, game?: Game }) => {
+      logger.debug('Game started via socket', data.gameId)
+      setWaitingGames(prev => prev.filter(game => game._id !== data.gameId))
+      
+      // Si on a les données de la game, la marquer comme 'playing' dans allGames
+      if (data.game) {
+        setAllGames(prev => prev.map(game => 
+          game._id === data.gameId 
+            ? { ...game, phase: 'playing' }
+            : game
+        ))
+      }
+      
+      // Vérifier si le joueur était dans cette game pour le rediriger
+      if (autoRedirect && player?._id) {
+        const gameToCheck = data.game || allGames.find(g => g._id === data.gameId)
+        if (gameToCheck?.players.some(inGamePlayer => inGamePlayer.player._id === player._id)) {
+          router.push(`/game/${data.gameId}`)
+        }
+      }
+    }
+
+    socket.on('gameCreated', handleGameCreated)
+    socket.on('gameDeleted', handleGameDeleted)
+    socket.on('gameStarted', handleGameStarted)
+    socket.on('lobby:gameStarted', handleGameStarted)
+
+    return () => {
+      socket.off('gameCreated', handleGameCreated)
+      socket.off('gameDeleted', handleGameDeleted)  
+      socket.off('gameStarted', handleGameStarted)
+      socket.off('lobby:gameStarted', handleGameStarted)
+    }
+  }, [socket, player?._id, router, autoRedirect, allGames])
 
   return {
     waitingGames,

@@ -74,6 +74,12 @@ export async function startGameService({ gameId }: { gameId: string }) {
         gameId,
         phase: 'playing'
       })
+
+      // Émettre un événement global pour mettre à jour la home page
+      getIO().emit('gameStarted', {
+        gameId,
+        game: await GameModel.findById(gameId).populate('players host')
+      })
     }
 
     logger.debug(`[startGameService] Game ${gameId} started with ${activePlayers.length} active players`)

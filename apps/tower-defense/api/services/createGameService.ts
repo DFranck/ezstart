@@ -4,6 +4,7 @@ import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
+import { getIO } from '../socketInstance.js'
 
 export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
   const player = await PlayerModel.findById(input.playerId)
@@ -23,6 +24,10 @@ export async function createGameService(input: CreateGamePayload): Promise<Creat
     player: player._id,
     ...createDefaultGamePlayer({ playerId: player._id, name: player.name }),
   })
+
+  // Émettre l'événement de création de game
+  const populatedGame = await GameModel.findById(newGame._id).populate('players host')
+  getIO().emit('gameCreated', populatedGame)
 
   return {
     gameId: newGame._id.toString(),
