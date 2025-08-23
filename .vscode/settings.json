@@ -8,6 +8,8 @@
     "Pixi",
     "Tetris",
     "Tétris",
+    "tetromino",
+    "TETROMINO",
     "turbopack"
   ],
   "editor.formatOnSave": true,

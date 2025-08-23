@@ -1,8 +1,11 @@
+// path: @tower-defense/types/src/tower.ts
 import { generateMock } from '@anatine/zod-mock'
 import { z, type Infer } from '@ezstart/types'
 import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
 import { damageTypeSchema } from './damage.js'
 import { elementalTypeSchema } from './elements.js'
+
+type BoolGrid = boolean[][]
 
 export const towerSchema = z.object({
   _id: z.string(),
@@ -15,7 +18,11 @@ export const towerSchema = z.object({
   shape: z
     .array(z.array(z.boolean()))
     .refine(
-      shape => SHAPE_VALUES.some(allowed => JSON.stringify(allowed) === JSON.stringify(shape)),
+      (shape: BoolGrid) =>
+        SHAPE_VALUES.some(
+          (allowed: readonly (readonly boolean[])[]) =>
+            JSON.stringify(allowed) === JSON.stringify(shape)
+        ),
       { message: 'Shape must match predefined Tetris shapes' }
     )
     .describe('2D shape of the tower (must match Tetris shape)'),
@@ -29,7 +36,7 @@ export type Tower = Infer<typeof towerSchema>
 
 function getRandomShape(): boolean[][] {
   const shape = SHAPE_VALUES[Math.floor(Math.random() * SHAPE_VALUES.length)]
-  return JSON.parse(JSON.stringify(shape)) // simple deep clone
+  return JSON.parse(JSON.stringify(shape)) as boolean[][]
 }
 
 export function mockTowers(count: number): Tower[] {
