@@ -12,8 +12,15 @@ type TowerShopProps = {
 
 export function TowerShop({ game }: TowerShopProps) {
   const setDraggedTower = useGameState(s => s.setDraggedTower)
-  const [towers, setTowers] = useState(() => mockTowers(5))
+  const [towers, setTowers] = useState<any[]>([])
+  const [isClient, setIsClient] = useState(false)
   const ghostRef = useRef<HTMLDivElement>(null)
+
+  // Initialiser les towers côté client seulement pour éviter l'hydratation mismatch
+  useEffect(() => {
+    setIsClient(true)
+    setTowers(mockTowers(5))
+  }, [])
 
   const renderGhost = (shape: boolean[][]) => {
     if (!ghostRef.current) return
@@ -88,6 +95,22 @@ export function TowerShop({ game }: TowerShopProps) {
       window.removeEventListener('touchend', handleEnd)
     }
   }, [setDraggedTower])
+
+  // Afficher un placeholder pendant l'hydratation
+  if (!isClient) {
+    return (
+      <div className="relative">
+        <div className="grid grid-cols-2 gap-2">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div
+              key={i}
+              className="flex justify-center items-center h-16 bg-gray-100 rounded animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative">

@@ -3,7 +3,7 @@
 import { useGameState } from '@/stores/useGameState'
 import { Button, Div, H6 } from '@ezstart/ui/components'
 import { Game, mockMobs } from '@tower-defense/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Props = {
   game: Game
@@ -11,7 +11,27 @@ type Props = {
 
 export function MobShop({ game }: Props) {
   const { addMobToSend, toSendMobs } = useGameState()
-  const [mobs] = useState(mockMobs)
+  const [mobs, setMobs] = useState<any[]>([])
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+    setMobs(mockMobs)
+  }, [])
+
+  if (!isClient) {
+    return (
+      <Div layout="col" className="gap-4 p-4 bg-muted rounded-xl">
+        <H6>Mobs à acheter</H6>
+        <div className="grid grid-cols-2 gap-2">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-20 bg-gray-100 rounded animate-pulse" />
+          ))}
+        </div>
+      </Div>
+    )
+  }
+
   return (
     <Div layout="col" className="gap-4 p-4 bg-muted rounded-xl">
       <H6>Mobs à acheter</H6>
