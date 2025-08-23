@@ -5,6 +5,7 @@ import { Button, Div } from '@ezstart/ui/components'
 import { TILE_SIZE } from '@tower-defense/config'
 import { Game, mockTowers } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
+import { Tower } from './Tower'
 
 type TowerShopProps = {
   game: Game
@@ -21,7 +22,9 @@ export function TowerShop({ game }: TowerShopProps) {
     setIsClient(true)
     setTowers(mockTowers(5))
   }, [])
-
+  useEffect(() => {
+    console.log('Current towers:', towers)
+  }, [towers])
   const renderGhost = (shape: boolean[][]) => {
     if (!ghostRef.current) return
     ghostRef.current.innerHTML = ''
@@ -124,21 +127,8 @@ export function TowerShop({ game }: TowerShopProps) {
             onMouseDown={handleMouseDown(index)}
             onTouchStart={handleTouchStart(index)}
           >
-            <Div
-              className="inline-grid mt-1"
-              style={{
-                gridTemplateColumns: `repeat(${Math.max(...tower.shape.map(r => r.length))}, ${TILE_SIZE}px)`,
-              }}
-            >
-              {tower.shape.flatMap((row, y) =>
-                row.map((cell, x) => (
-                  <div
-                    key={`${x}-${y}`}
-                    style={{ width: TILE_SIZE, height: TILE_SIZE }}
-                    className={`rounded-sm ${cell ? 'bg-green-500' : 'bg-transparent'}`}
-                  />
-                ))
-              )}
+            <Div className="inline-grid mt-1">
+              <Tower tower={tower} />
             </Div>
           </div>
         ))}

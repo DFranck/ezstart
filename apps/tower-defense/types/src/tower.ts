@@ -10,7 +10,14 @@ type BoolGrid = boolean[][]
 export const towerSchema = z.object({
   _id: z.string(),
   name: z.string().min(1).max(50).describe('Name of the tower'),
-  elementalType: elementalTypeSchema.describe('Elemental type of tower'),
+  elementalType: z
+    .union([
+      elementalTypeSchema, // mono-type
+      z
+        .tuple([elementalTypeSchema, elementalTypeSchema])
+        .refine(([a, b]) => a !== b, { message: 'Dual type must contain two different types' }),
+    ])
+    .describe('Elemental type of the tower'),
   damage: z.number().min(1).max(500).describe('Damage dealt by the tower'),
   damageType: damageTypeSchema.describe('Damage type of the tower'),
   speed: z.number().min(0.1).max(3).describe('Attack speed of the tower (attacks/sec)'),
