@@ -35,6 +35,13 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
     })
 
     newSocket.on('error', error => {
+      // Ignorer les erreurs vides qui ne sont pas utiles
+      if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
+        console.debug('[GamesSocket] Empty error received (ignored)')
+        return
+      }
+      
+      // Log seulement les vraies erreurs avec du contenu
       console.error('[GamesSocket] Error:', error)
     })
 

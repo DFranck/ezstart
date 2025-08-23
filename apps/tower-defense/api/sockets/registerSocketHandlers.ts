@@ -100,8 +100,11 @@ export function registerSocketHandlers(socket: Socket) {
       activeConnections.delete(socket.id)
 
       if (playerId) {
-        // Marquer le joueur comme ayant quitté
-        await updatePlayerStatusService({ gameId, playerId, status: 'left' })
+        // Marquer le joueur comme ayant quitté seulement si la game est encore en attente
+        const game = await GameModel.findById(gameId)
+        if (game && game.phase === 'waiting') {
+          await updatePlayerStatusService({ gameId, playerId, status: 'left' })
+        }
         
         // Nettoyer le ready check si actif
         const readyPlayers = activeReadyChecks.get(gameId)

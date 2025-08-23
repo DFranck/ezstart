@@ -56,7 +56,7 @@ export default function Page() {
           {(() => {
             const playingGames = allGames.filter(game => 
               game.phase === 'playing' && 
-              game.players?.some(inGamePlayer => inGamePlayer.player._id === player._id)
+              game.players?.some(inGamePlayer => inGamePlayer?.player?._id === player._id)
             )
             
             return playingGames.length > 0 && (
@@ -110,7 +110,7 @@ export default function Page() {
               <UL>
                 {waitingGames.map((game: Game) => {
                   const alreadyJoined =
-                    game.players?.some(inGamePlayer => inGamePlayer.player._id === player?._id) ??
+                    game.players?.some(inGamePlayer => inGamePlayer?.player?._id === player?._id) ??
                     false
 
                   logger.debug('alreadyJoined', alreadyJoined)

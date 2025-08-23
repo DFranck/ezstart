@@ -1,5 +1,6 @@
 import { createTickerEngine } from '@ezstart/api-core'
 import type { Game } from '@tower-defense/types'
+import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'
 
 export const ticker = createTickerEngine<Game>({
   createInitialState: gameId => ({
@@ -14,7 +15,10 @@ export const ticker = createTickerEngine<Game>({
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }),
-  onTick: (gameId, state, tick) => {
+  onTick: async (gameId, state, tick) => {
+    // Vérifier les éliminations à chaque tick
+    await checkPlayerEliminationService(gameId)
+    
     return { ...state, tick }
   },
 })

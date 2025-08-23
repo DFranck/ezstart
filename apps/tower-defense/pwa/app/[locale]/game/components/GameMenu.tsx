@@ -23,7 +23,7 @@ export function GameMenu({ gameId }: GameMenuProps) {
     try {
       const response = await callApi(`/api/games/${gameId}/leave`, {
         method: 'POST',
-        body: JSON.stringify({ playerId: player._id }),
+        body: { playerId: player._id },
       })
 
       if (response.ok) {
@@ -50,12 +50,24 @@ export function GameMenu({ gameId }: GameMenuProps) {
       // Si c'est notre joueur qui est parti, ne pas rediriger car on le fait déjà
     }
 
+    const handlePlayerEliminated = (data: any) => {
+      console.log('Player eliminated:', data)
+      
+      // Si c'est notre joueur qui est éliminé, le rediriger
+      if (data.playerId === player?._id) {
+        console.log('You have been eliminated! Redirecting to home...')
+        router.push('/')
+      }
+    }
+
     socket.on('gameFinished', handleGameFinished)
     socket.on('playerLeft', handlePlayerLeft)
+    socket.on('playerEliminated', handlePlayerEliminated)
 
     return () => {
       socket.off('gameFinished', handleGameFinished)
       socket.off('playerLeft', handlePlayerLeft)
+      socket.off('playerEliminated', handlePlayerEliminated)
     }
   }, [socket, router])
 

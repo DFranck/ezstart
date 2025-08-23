@@ -1,4 +1,5 @@
 import { GameAction } from '@tower-defense/types'
+import { takeDamage } from '../services/gameActions/takeDamage.js'
 import { getGameTicker } from '../tickers/getGameTicker.js'
 
 export function handleGameAction(gameId: string, action: GameAction) {
@@ -23,6 +24,11 @@ export function handleGameAction(gameId: string, action: GameAction) {
       console.log(`[handleGameAction] ✅ Placing tower for ${playerId} at ${x},${y}`)
       ticker.placeTower(playerId, x, y, towerType)
       return { success: true }
+    }
+
+    case 'takeDamage': {
+      const result = takeDamage(gameId, action.payload)
+      return result
     }
 
     default:

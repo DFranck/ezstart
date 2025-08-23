@@ -5,7 +5,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 3100",
+    "dev": "node scripts/dev-with-port.js",
+    "dev:port": "next dev --turbopack -p 3100",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -21,6 +22,7 @@
     "framer-motion": "^12.10.1",
     "next": "^15.2.3",
     "next-intl": "^4.1.0",
+    "next-pwa": "^5.6.0",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

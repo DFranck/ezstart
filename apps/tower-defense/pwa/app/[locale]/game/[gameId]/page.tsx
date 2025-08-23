@@ -15,7 +15,10 @@ export default async function GamePage(props: { params: Promise<{ gameId: string
   const { gameId } = await params
 
   const res = await callApi(`/api/games/${gameId}`)
-  if (!res.ok) return notFound()
+  if (!res.ok) {
+    console.log('Game API error:', res.status, res.statusText)
+    return notFound()
+  }
 
   const game: Game = res.data
   logger.debug('game', game)

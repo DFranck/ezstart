@@ -69,7 +69,7 @@ export function useGames(options: UseGamesOptions = {}) {
           // Vérifier si le joueur est dans une partie active
           if (autoRedirect && playerId) {
             const activeGame = playingGames.find(game =>
-              game.players.some(inGamePlayer => inGamePlayer.player._id === playerId)
+              game.players.some(inGamePlayer => inGamePlayer?.player?._id === playerId)
             )
 
             if (activeGame) {
@@ -107,7 +107,7 @@ export function useGames(options: UseGamesOptions = {}) {
         // Vérifier si le joueur est dans une partie active
         if (autoRedirect && playerId) {
           const activeGame = playingGames.find(game =>
-            game.players.some(inGamePlayer => inGamePlayer.player._id === playerId)
+            game.players.some(inGamePlayer => inGamePlayer?.player?._id === playerId)
           )
 
           if (activeGame) {
@@ -235,7 +235,7 @@ export function useGames(options: UseGamesOptions = {}) {
       // Vérifier si le joueur était dans cette game pour le rediriger
       if (autoRedirect && player?._id) {
         const gameToCheck = data.game || allGames.find(g => g._id === data.gameId)
-        if (gameToCheck?.players.some(inGamePlayer => inGamePlayer.player._id === player._id)) {
+        if (gameToCheck?.players.some(inGamePlayer => inGamePlayer?.player?._id === player._id)) {
           router.push(`/game/${data.gameId}`)
         }
       }
