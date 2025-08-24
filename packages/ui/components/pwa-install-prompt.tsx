@@ -30,6 +30,7 @@ export function PWAInstallPrompt({
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
     // Vérifier si l'app est déjà installée
@@ -86,13 +87,14 @@ export function PWAInstallPrompt({
   const handleDismiss = () => {
     setShowInstallPrompt(false)
     setDeferredPrompt(null)
+    setIsDismissed(true)
   }
 
   // Bouton de test temporaire en développement
   const isDev = process.env.NODE_ENV === 'development'
 
   // Ne pas afficher si l'app est déjà installée ou si pas de prompt (sauf en dev)
-  if (isInstalled || (!showInstallPrompt && !isDev)) {
+  if (isInstalled || (!showInstallPrompt && !isDev) || (isDev && isDismissed)) {
     return null
   }
 
@@ -127,7 +129,7 @@ export function PWAInstallPrompt({
           <Button
             size="sm"
             onClick={handleInstallClick}
-            disabled={isDev && !deferredPrompt}
+            disabled={!isDev && !deferredPrompt}
             className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
           >
             {installButtonText}
