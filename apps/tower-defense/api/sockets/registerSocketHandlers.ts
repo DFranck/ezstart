@@ -383,10 +383,13 @@ export function registerSocketHandlers(socket: Socket) {
       await syncTickerWithDatabase(gameId)
     }
 
+    console.log(`[Action] ${action.type} game ${gameId.slice(-6)}`)
     const result = await handleGameAction(gameId, action)
 
     if (!result.success) {
-      socket.emit('actionRejected', { reason: result.reason })
+      const reason = 'reason' in result ? result.reason : 'Unknown error'
+      console.log(`[Action] ❌ ${action.type} rejected: ${reason}`)
+      socket.emit('actionRejected', { reason })
       return
     }
 
@@ -395,7 +398,7 @@ export function registerSocketHandlers(socket: Socket) {
       return
     }
 
-    console.log(`[gameAction] Broadcasting gameState with ${newState.activeMobs?.length || 0} mobs`)
+    console.log(`[Action] ✅ ${action.type} success - tick ${newState.tick}, ${newState.activeMobs?.length || 0} mobs`)
     getIO().to(gameId).emit('gameState', { ...newState, _reason: `gameAction:${action.type}` })
   })
 

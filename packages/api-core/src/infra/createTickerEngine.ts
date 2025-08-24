@@ -63,10 +63,14 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
   function getState(gameId: string): State | undefined {
     return rooms.get(gameId)?.state
   }
+  function getRoomTick(gameId: string): number {
+    return rooms.get(gameId)?.tick || 0
+  }
 
   return {
     ensureRoom,
     getState,
+    getRoomTick,
     mutate,
     destroyRoom,
   }

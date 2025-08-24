@@ -31,6 +31,10 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
 
     // Position cible (prochaine case du path)
     const targetCell = path[mob.pathIndex]
+    if (!targetCell) {
+      console.warn(`[moveMobs] Invalid pathIndex ${mob.pathIndex} for path length ${path.length}`)
+      return null
+    }
     
     // Calculer le mouvement vers la position cible
     const dx = targetCell.x - mob.position.x
@@ -61,7 +65,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
   }).filter(Boolean) as ActiveMob[] // Supprimer les mobs null
 }
 
-export const ticker = createTickerEngine<Game>({
+export const ticker = createTickerEngine<any>({
   tickIntervalMs: 500, // 500ms = 2 ticks/sec pour le dev (au lieu de 100ms = 10 ticks/sec)
   createInitialState: gameId => ({
     _id: gameId,
@@ -84,10 +88,11 @@ export const ticker = createTickerEngine<Game>({
     // Déplacer les mobs
     const updatedMobs = moveMobs(state.activeMobs, state.players)
     
-    // Debug: log si on a des mobs
+    // Log seulement si on a des mobs ou tous les 10 ticks
     if (state.activeMobs && state.activeMobs.length > 0) {
-      console.log(`[Ticker] Moving ${state.activeMobs.length} mobs for game ${gameId}`)
-      console.log(`[Ticker] State has _id: ${!!state._id}, players: ${state.players?.length}`)
+      console.log(`[Ticker] Tick ${tick} game ${gameId.slice(-6)} - Moving ${state.activeMobs.length} mobs`)
+    } else if (tick % 10 === 0) {
+      console.log(`[Ticker] Tick ${tick} game ${gameId.slice(-6)} - No mobs`)
     }
     
     const newState = { 
@@ -126,19 +131,21 @@ export async function syncTickerWithDatabase(gameId: string) {
 
   // Récupérer l'état actuel du ticker
   const currentTickerState = ticker.getState(gameId)
-  const currentTick = currentTickerState?.tick || 0
+  const realTick = ticker.getRoomTick(gameId) // Le vrai tick du ticker qui tourne !
   const currentActiveMobs = currentTickerState?.activeMobs || []
+  
+  console.log(`[syncTickerWithDatabase] Real tick: ${realTick}, state tick: ${currentTickerState?.tick || 0}`)
 
   ticker.mutate(gameId, (currentState) => {
-    // Si on a déjà un état avec des mobs, préserver tout l'état existant et juste mettre à jour les données DB
-    if (currentState && currentState._id && currentState.activeMobs && currentState.activeMobs.length > 0) {
-      console.log(`[syncTickerWithDatabase] Preserving existing state with ${currentState.activeMobs.length} mobs`)
+    // Si on a déjà un état valide, préserver l'état existant (tick, mobs) et juste mettre à jour les données DB
+    if (currentState && currentState._id && currentState.tick > 0) {
+      console.log(`[syncTickerWithDatabase] Preserving existing state with ${currentState.activeMobs.length} mobs, tick: ${currentState.tick}`)
       return {
         ...currentState,
         players: inGamePlayers.map(igp => ({
           player: igp.player ? {
             _id: igp.player._id?.toString(),
-            name: igp.player.name,
+            name: (igp.player as any).name,
           } : null,
           status: igp.status,
           gold: igp.gold,
@@ -148,6 +155,7 @@ export async function syncTickerWithDatabase(gameId: string) {
           placedTowers: igp.placedTowers || [],
           incomingUnits: igp.incomingUnits || [],
         })),
+        tick: Math.max(realTick, currentState.tick), // Utiliser le vrai tick !
         updatedAt: new Date().toISOString(),
       }
     }
@@ -158,7 +166,7 @@ export async function syncTickerWithDatabase(gameId: string) {
       players: inGamePlayers.map(igp => ({
         player: igp.player ? {
           _id: igp.player._id?.toString(),
-          name: igp.player.name,
+          name: (igp.player as any).name,
         } : null,
         status: igp.status,
         gold: igp.gold,
@@ -172,7 +180,7 @@ export async function syncTickerWithDatabase(gameId: string) {
       shopTowers: gameData.shopTowers || [],
       shopUnits: gameData.shopUnits || [],
       activeMobs: currentActiveMobs,
-      tick: Math.max(currentTick, currentState?.tick || 0), // Préserver le tick le plus élevé
+      tick: Math.max(realTick, currentState?.tick || 0), // Utiliser le vrai tick du ticker !
       host: gameData.host?.toString(),
       phase: gameData.phase || 'waiting',
       startedAt: gameData.startedAt?.toISOString(),
