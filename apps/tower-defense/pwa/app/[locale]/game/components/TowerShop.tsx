@@ -22,9 +22,6 @@ export function TowerShop({ game }: TowerShopProps) {
     setIsClient(true)
     setTowers(mockTowers(5))
   }, [])
-  useEffect(() => {
-    console.log('Current towers:', towers)
-  }, [towers])
   const renderGhost = (shape: boolean[][]) => {
     if (!ghostRef.current) return
     ghostRef.current.innerHTML = ''

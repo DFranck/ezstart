@@ -1,4 +1,6 @@
+import { Mob } from './mob.js'
 import { Tower } from './tower.js'
+
 export type GameAction = 
   | {
       type: 'placeTower'
@@ -14,5 +16,13 @@ export type GameAction =
       payload: {
         playerId: string
         damage: number
+      }
+    }
+  | {
+      type: 'spawnMob'
+      payload: {
+        mobType: Mob
+        targetPlayerId: string
+        fromPlayerId: string
       }
     }

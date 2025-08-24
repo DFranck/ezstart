@@ -4,7 +4,7 @@ import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
-import { InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
+import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
 import { computeCoveredCells, findPath, isColliding } from '@tower-defense/utils'
 import { useEffect, useRef, useState } from 'react'
 
@@ -44,6 +44,12 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     : selectedPlayer
       ? findPath(selectedPlayer.placedTowers.flatMap((t: any) => t.coveredCells))
       : []
+
+  // Récupérer les mobs actifs qui ciblent ce joueur
+  const targetPlayerId = isCurrentPlayer ? currentPlayer?._id : selectedPlayerId
+  const activeMobs: ActiveMob[] = game?.activeMobs?.filter(mob => 
+    mob.targetPlayerId === targetPlayerId
+  ) || []
 
   // S'assurer qu'on a un path pour le joueur actuel
   useEffect(() => {
@@ -143,6 +149,35 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         }
       }
 
+      // Mobs actifs
+      ctx.fillStyle = '#dc2626' // Rouge pour les mobs
+      activeMobs.forEach(mob => {
+        const centerX = mob.position.x * TILE_SIZE + TILE_SIZE / 2
+        const centerY = mob.position.y * TILE_SIZE + TILE_SIZE / 2
+        const radius = TILE_SIZE * 0.3
+
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
+        ctx.fill()
+
+        // Barre de vie si le mob a pris des dégâts
+        if (mob.currentHp < mob.mob.hp) {
+          const hpRatio = mob.currentHp / mob.mob.hp
+          const barWidth = TILE_SIZE * 0.8
+          const barHeight = 4
+          const barX = mob.position.x * TILE_SIZE + (TILE_SIZE - barWidth) / 2
+          const barY = mob.position.y * TILE_SIZE - 8
+
+          // Fond de la barre de vie
+          ctx.fillStyle = '#4b5563'
+          ctx.fillRect(barX, barY, barWidth, barHeight)
+
+          // Barre de vie actuelle
+          ctx.fillStyle = hpRatio > 0.5 ? '#16a34a' : hpRatio > 0.25 ? '#eab308' : '#dc2626'
+          ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight)
+        }
+      })
+
       // Bordure pour indiquer quel joueur on regarde
       if (!isCurrentPlayer && selectedPlayer) {
         ctx.strokeStyle = '#ff6b6b'
@@ -158,7 +193,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
     loop()
     return () => cancelAnimationFrame(frameId)
-  }, [towers, path, draggedTower, grassPattern, isCurrentPlayer, selectedPlayer])
+  }, [towers, path, draggedTower, grassPattern, isCurrentPlayer, selectedPlayer, activeMobs])
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isCurrentPlayer) return // Pas d'interaction sur les canvas des adversaires

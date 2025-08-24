@@ -10,7 +10,7 @@ export function canPlaceTowerAt(
   tower: Tower
 ): boolean {
   const game = ticker.getState(gameId)
-  if (!game) return false
+  if (!game || !game.players || !Array.isArray(game.players)) return false
   
   const player = game.players.find((p: any) => 
     p.player?._id?.toString() === playerId || p.playerId === playerId
@@ -34,6 +34,11 @@ export async function placeTower(
 
   // 1. Mettre à jour le ticker (état en mémoire)
   ticker.mutate(gameId, state => {
+    if (!state.players || !Array.isArray(state.players)) {
+      console.warn(`[placeTower] Invalid players array for game ${gameId}`)
+      return state
+    }
+    
     const players = state.players.map((p: any) => {
       if ((p.player?._id?.toString() || p.playerId) !== playerId) return p
 

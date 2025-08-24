@@ -1,7 +1,6 @@
 import { callApi } from '@ezstart/ui/utils'
 import { notFound } from 'next/navigation'
 
-import { logger } from '@ezstart/ui/lib'
 import { Game } from '@tower-defense/types'
 import { GameCanvasCanvas } from '../components/GameCanvasCanvas'
 import { GameInitializer } from '../components/GameInitializer'
@@ -16,12 +15,11 @@ export default async function GamePage(props: { params: Promise<{ gameId: string
 
   const res = await callApi(`/api/games/${gameId}`)
   if (!res.ok) {
-    console.log('Game API error:', res.status, res.statusText)
+    console.log('Game API error:', res.status)
     return notFound()
   }
 
   const game: Game = res.data
-  logger.debug('game', game)
 
   // Rediriger vers 404 si la game est finie
   if (game.phase === 'finished') {

@@ -128,7 +128,7 @@ export function registerSocketHandlers(socket: Socket) {
   })
 
   socket.on('lobby:reconnect', async ({ gameId, playerId }) => {
-    logger.debug(`🔄 [lobby:reconnect] ${socket.id} reconnecting to game: ${gameId}`)
+    // Reconnecting silently
 
     try {
       const game = await GameModel.findById(gameId)
@@ -165,7 +165,7 @@ export function registerSocketHandlers(socket: Socket) {
         })
       }
 
-      logger.debug(`✅ [lobby:reconnect] ${socket.id} successfully reconnected to game: ${gameId}`)
+      // Successfully reconnected
     } catch (error) {
       logger.error('[lobby:reconnect] Error:', error)
       socket.emit('error', { message: 'Failed to reconnect' })
@@ -328,7 +328,7 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game handlers
   socket.on('game:join', async ({ gameId }) => {
-    logger.debug(`🎮 [game:join] ${socket.id} joining game: ${gameId}`)
+    // Joining game silently
 
     try {
       const game = await GameModel.findById(gameId)
@@ -340,17 +340,22 @@ export function registerSocketHandlers(socket: Socket) {
       // Rejoindre la room du jeu
       socket.join(gameId)
 
-      // Si le jeu est en cours, synchroniser et envoyer l'état actuel
+      // Si le jeu est en cours, envoyer l'état actuel
       if (game.phase === 'playing') {
-        // S'assurer que le ticker est synchronisé
+        // S'assurer que la room existe
         ticker.ensureRoom(gameId)
-        await syncTickerWithDatabase(gameId)
+        
+        // Synchroniser avec DB seulement si l'état est vide (pas de mobs actifs)
+        const currentState = getGameTicker(gameId)?.getState()
+        if (!currentState || !currentState._id || !currentState.players || currentState.players.length === 0) {
+          await syncTickerWithDatabase(gameId)
+        }
         
         const gameTicker = getGameTicker(gameId)
         const gameState = gameTicker?.getState()
         
         if (gameState) {
-          socket.emit('gameState', gameState)
+          socket.emit('gameState', { ...gameState, _reason: 'game:join' })
         } else {
           logger.warn(`[game:join] No game state available for ${gameId}`)
         }
@@ -370,9 +375,13 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game action handlers
   socket.on('gameAction', async ({ gameId, action }) => {
-    // S'assurer que la room existe et est synchronisée avec la DB
+    // S'assurer que la room existe
     ticker.ensureRoom(gameId)
-    await syncTickerWithDatabase(gameId)
+    
+    // Synchroniser seulement pour certaines actions qui le nécessitent
+    if (action.type === 'placeTower') {
+      await syncTickerWithDatabase(gameId)
+    }
 
     const result = await handleGameAction(gameId, action)
 
@@ -386,7 +395,8 @@ export function registerSocketHandlers(socket: Socket) {
       return
     }
 
-    getIO().to(gameId).emit('gameState', newState)
+    console.log(`[gameAction] Broadcasting gameState with ${newState.activeMobs?.length || 0} mobs`)
+    getIO().to(gameId).emit('gameState', { ...newState, _reason: `gameAction:${action.type}` })
   })
 
   // Gestion des déconnexions

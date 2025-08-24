@@ -30,11 +30,9 @@ export async function updatePlayerStatusService({
   await playerInGame.save()
 
   // Synchroniser le ticker avec les données mises à jour
-  await syncTickerWithDatabase(gameId)
+  // await syncTickerWithDatabase(gameId) // Temporarily disabled to prevent mob state corruption
 
-  logger.debug(
-    `[updatePlayerStatusService] Player ${playerId} status changed from ${previousStatus} to ${status} in game ${gameId}`
-  )
+  // Player status updated silently
 
   return {
     gameId,

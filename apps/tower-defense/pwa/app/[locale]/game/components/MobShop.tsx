@@ -1,6 +1,8 @@
 'use client'
 
+import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
+import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Div, H6 } from '@ezstart/ui/components'
 import { Game, mockMobs } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
@@ -10,7 +12,9 @@ type Props = {
 }
 
 export function MobShop({ game }: Props) {
-  const { addMobToSend, toSendMobs } = useGameState()
+  const { game: currentGame, sendAction } = useGame()
+  const currentPlayer = usePlayerStore(s => s.player)
+  const { toSendMobs } = useGameState()
   const [mobs, setMobs] = useState<any[]>([])
   const [isClient, setIsClient] = useState(false)
 
@@ -18,6 +22,29 @@ export function MobShop({ game }: Props) {
     setIsClient(true)
     setMobs(mockMobs)
   }, [])
+
+  const handleBuyMob = (mob: any) => {
+    if (!currentPlayer || !currentGame) return
+    
+    // Trouver tous les joueurs adversaires (pas soi-même)
+    const opponents = currentGame.players?.filter(p => 
+      p.player?._id && p.player._id !== currentPlayer._id
+    ) || []
+    
+    // Envoyer un mob à chaque adversaire
+    opponents.forEach(opponent => {
+      if (opponent.player?._id) {
+        sendAction({
+          type: 'spawnMob',
+          payload: {
+            mobType: mob,
+            targetPlayerId: opponent.player._id,
+            fromPlayerId: currentPlayer._id,
+          },
+        })
+      }
+    })
+  }
 
   if (!isClient) {
     return (
@@ -41,7 +68,7 @@ export function MobShop({ game }: Props) {
             {/* <img src={mob.imageUrl} alt={mob.name} className="w-12 h-12 mx-auto" /> */}
             <span className="text-sm text-center">{mob.name}</span>
             {/* <span className="text-xs text-center">💰 {mob.reward}</span> */}
-            <Button size="sm" onClick={() => addMobToSend(mob)} className="mt-1">
+            <Button size="sm" onClick={() => handleBuyMob(mob)} className="mt-1">
               Buy
             </Button>
           </Div>

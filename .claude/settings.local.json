@@ -6,7 +6,10 @@
       "Bash(node:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm dev:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

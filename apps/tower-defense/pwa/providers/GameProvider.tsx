@@ -3,6 +3,7 @@
 import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { useGameSync } from '@/hooks/useGameSync'
 import { usePlayerStore } from '@/stores/usePlayerStore'
+import { logger } from '@ezstart/ui/lib'
 import type { PlayerStatus } from '@tower-defense/config'
 import type { Game, GameAction, InGamePlayer, JoinGameResponse } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
@@ -20,17 +21,48 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
   const [game, setGame] = useState<Game | null>(null)
   const joinedOnce = useRef(false)
 
-
   useEffect(() => {
     if (!socket) return
 
     // ---- Handlers (stables) ----
-    const onGameState = (state: Game) => {
+    const onGameState = (state: Game & { _reason?: string }) => {
       // Ignorer les états invalides (probablement dus au Hot Refresh)
       if (!state || !state._id || !state.players || state.players.length === 0) {
-        console.warn('[GameProvider] Invalid gameState received, ignoring')
+        console.warn('[GameProvider] Invalid gameState received, ignoring', {
+          hasState: !!state,
+          hasId: !!state?._id,
+          hasPlayers: !!state?.players,
+          playersLength: state?.players?.length,
+          activeMobsLength: state?.activeMobs?.length,
+        })
         return
       }
+
+      // Log complet du gameState pour debug
+      logger.debug(`[GameProvider] 🎮 GameState received ${state._reason ? `(${state._reason})` : ''}:`, {
+        gameId: state._id,
+        tick: state.tick,
+        phase: state.phase,
+        playersCount: state.players?.length,
+        players: state.players?.map(p => ({
+          playerId: p.player?._id,
+          name: p.player?.name,
+          status: p.status,
+          hp: p.hp,
+          gold: p.gold,
+          towersCount: p.placedTowers?.length || 0,
+        })),
+        activeMobsCount: state.activeMobs?.length,
+        activeMobs:
+          state.activeMobs?.map(m => ({
+            id: m.id,
+            name: m.mob.name,
+            targetPlayer: m.targetPlayerId,
+            position: m.position,
+            hp: `${m.currentHp}/${m.mob.hp}`,
+          })) || [],
+        updatedAt: state.updatedAt,
+      })
 
       // Mettre à jour l'état
       setGame(prevGame => {
@@ -120,7 +152,7 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
     // ---- Cleanup propre ----
     return () => {
       clearTimeout(checkStateTimeout)
-      
+
       if (joinedOnce.current && currentPlayer) {
         socket.emit('game:leave', { gameId })
         // Pas besoin de lobby:leave pour une reconnexion
