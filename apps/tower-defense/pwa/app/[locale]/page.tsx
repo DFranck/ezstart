@@ -23,7 +23,7 @@ export default function Page() {
   // Chargement initial
   useEffect(() => {
     if (player?._id) {
-      fetchGames(player._id)
+      fetchGames(player?._id)
     }
   }, [player?._id, fetchGames])
 
@@ -50,13 +50,13 @@ export default function Page() {
 
       {player && (
         <Section size={'xs'}>
-          <CreateGameButton playerId={player._id} />
+          <CreateGameButton playerId={player?._id} />
 
           {/* Games en cours où le joueur peut se reconnecter */}
           {(() => {
             const playingGames = allGames.filter(game => 
               game.phase === 'playing' && 
-              game.players?.some(inGamePlayer => inGamePlayer?.player?._id === player._id)
+              game.players?.some(inGamePlayer => inGamePlayer?.player?._id === player?._id)
             )
             
             return playingGames.length > 0 && (

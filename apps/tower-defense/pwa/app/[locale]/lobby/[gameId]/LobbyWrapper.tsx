@@ -24,7 +24,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
 
   const getPlayerId = (p: InGamePlayer) => (typeof p.player === 'string' ? p.player : p.player?._id)
 
-  const currentPlayer = game.players.find(p => getPlayerId(p) === player._id)
+  const currentPlayer = game.players.find(p => getPlayerId(p) === player?._id)
   if (!currentPlayer) {
     return (
       <div className="text-center p-8">
@@ -33,7 +33,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
-  const isHost = hostId === player._id
+  const isHost = hostId === player?._id
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -45,7 +45,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
       <LobbyPlayersList
         players={game.players}
         gameId={gameId}
-        currentUserId={player._id}
+        currentUserId={player?._id}
         hostId={hostId}
       />
 
@@ -53,7 +53,7 @@ export function LobbyWrapper({ game, gameId }: Props) {
         gameId={gameId}
         isHost={isHost}
         playerCount={game.players.filter(p => p.status === 'active').length}
-        currentUserId={player._id}
+        currentUserId={player?._id}
       />
     </div>
   )

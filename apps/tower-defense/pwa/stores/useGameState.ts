@@ -36,6 +36,7 @@ export const useGameState = create<GameState>()(
           towers: [],
           path: [],
           draggedTower: null,
+          toSendMobs: [],
         })),
       setDraggedTower: tower => set({ draggedTower: tower }),
 
@@ -45,6 +46,7 @@ export const useGameState = create<GameState>()(
         set(s => {
           const blocked = s.towers.flatMap(t => t.coveredCells)
           const path = findPath(blocked)
+          console.log('[GameState] Recalculating path', { towersCount: s.towers.length, pathLength: path.length, blocked })
           return { path }
         }),
       placeTowerAt: (x, y, tower) => {
@@ -72,8 +74,6 @@ export const useGameState = create<GameState>()(
       name: 'game-state', // Clé dans localStorage
       onRehydrateStorage: () => state => {},
       partialize: state => ({
-        towers: state.towers,
-        path: state.path,
         toSendMobs: state.toSendMobs,
       }),
     }

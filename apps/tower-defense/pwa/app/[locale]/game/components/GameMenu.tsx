@@ -23,7 +23,7 @@ export function GameMenu({ gameId }: GameMenuProps) {
     try {
       const response = await callApi(`/api/games/${gameId}/leave`, {
         method: 'POST',
-        body: { playerId: player._id },
+        body: { playerId: player?._id },
       })
 
       if (response.ok) {

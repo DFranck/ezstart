@@ -342,14 +342,20 @@ export function registerSocketHandlers(socket: Socket) {
       // Rejoindre la room du jeu
       socket.join(gameId)
 
-      // Si le jeu est en cours, envoyer l'état actuel
+      // Si le jeu est en cours, synchroniser et envoyer l'état actuel
       if (game.phase === 'playing') {
+        // S'assurer que le ticker est synchronisé
+        ticker.ensureRoom(gameId)
+        await syncTickerWithDatabase(gameId)
+        
         const gameTicker = getGameTicker(gameId)
         const gameState = gameTicker?.getState()
         
         if (gameState) {
+          logger.debug(`🎮 [game:join] Sending game state with ${gameState.players?.length || 0} players to ${socket.id}`)
           socket.emit('gameState', gameState)
-          logger.debug(`🎮 [game:join] Sent current game state to ${socket.id}`)
+        } else {
+          logger.warn(`🎮 [game:join] No game state available for ${gameId}`)
         }
       }
 
