@@ -21,7 +21,25 @@ export function PlayersViewMenu({
   if (!game || !currentPlayer || !currentPlayerId) return null
 
   const players = game.players || []
-  const otherPlayers = players.filter(p => p.player?._id !== currentPlayerId)
+  
+  // Debug: vérifier les données
+  console.log('[PlayersViewMenu] Debug info:', {
+    currentPlayerId,
+    currentPlayerStoreId: currentPlayer?._id,
+    allPlayers: players.map(p => ({
+      id: p.player?._id,
+      name: p.player?.name,
+      towers: p.placedTowers?.length || 0,
+      status: p.status
+    }))
+  })
+  
+  // Filtrer seulement les joueurs actifs et qui ne sont pas le joueur actuel
+  const otherPlayers = players.filter(p => 
+    p.player?._id !== currentPlayerId && 
+    p.status === 'active' &&
+    p.player?._id // S'assurer que l'ID existe
+  )
   const currentPlayerData = players.find(p => p.player?._id === currentPlayerId)
 
   return (
@@ -58,7 +76,8 @@ export function PlayersViewMenu({
             }`}
             title={`Joueur ${index + 1}: ${player.placedTowers?.length || 0} tours`}
           >
-            <Icon name="fa:FaUser" size={16} />J{index + 1} ({player.placedTowers?.length || 0})
+            <Icon name="fa:FaUser" size={16} />
+            {player.player?.name || `J${index + 1}`} ({player.placedTowers?.length || 0})
           </Button>
         ))}
       </div>

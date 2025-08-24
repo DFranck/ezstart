@@ -30,20 +30,18 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   // Trouver les données du joueur sélectionné
   const selectedPlayer: InGamePlayer | null = selectedPlayerId
-    ? game?.players?.find(p => p.player?._id === selectedPlayerId) || null 
+    ? game?.players?.find(p => p.player?._id === selectedPlayerId) || null
     : null
 
   const isCurrentPlayer = selectedPlayerId === currentPlayer?._id
-  
+
   // Utiliser les données locales pour le joueur actuel, sinon les données serveur
-  const towers: PlacedTower[] = isCurrentPlayer 
-    ? localTowers 
-    : selectedPlayer?.placedTowers || []
-  
+  const towers: PlacedTower[] = isCurrentPlayer ? localTowers : selectedPlayer?.placedTowers || []
+
   // Calculer le path pour le joueur sélectionné
   const path: Position[] = isCurrentPlayer
     ? localPath
-    : selectedPlayer 
+    : selectedPlayer
       ? findPath(selectedPlayer.placedTowers.flatMap((t: any) => t.coveredCells))
       : []
 
@@ -95,14 +93,14 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           if (!pathSet.has(key)) {
             ctx.save()
             ctx.translate(x * TILE_SIZE, y * TILE_SIZE)
-            
+
             if (grassPattern) {
               ctx.fillStyle = grassPattern
             } else {
               // Fallback si la texture n'est pas chargée
               ctx.fillStyle = '#90EE90' // Vert clair
             }
-            
+
             ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE)
             ctx.restore()
           }
@@ -123,7 +121,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         // Tours des adversaires - couleur différente
         ctx.fillStyle = '#ff9999'
       }
-      
+
       towers.forEach(tower => {
         tower.coveredCells.forEach(({ x, y }) => {
           ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
@@ -165,7 +163,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isCurrentPlayer) return // Pas d'interaction sur les canvas des adversaires
-    
+
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return
     const x = Math.floor((e.clientX - rect.left) / TILE_SIZE)
@@ -195,7 +193,13 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       return
     }
 
-    console.log('[MultiPlayerCanvas] Placing tower at', hoveredCellRef.current.x, hoveredCellRef.current.y, 'for player', currentPlayer?._id)
+    console.log(
+      '[MultiPlayerCanvas] Placing tower at',
+      hoveredCellRef.current.x,
+      hoveredCellRef.current.y,
+      'for player',
+      currentPlayer?._id
+    )
 
     // 1. Placer la tour localement pour feedback immédiat
     placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)
@@ -238,15 +242,15 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     <div className="relative">
       {/* Label du joueur */}
       <div className="absolute -top-8 left-0 z-10">
-        <div className={`px-3 py-1 rounded text-sm font-medium ${
-          isCurrentPlayer 
-            ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-            : 'bg-red-100 text-red-800 border border-red-300'
-        }`}>
+        <div
+          className={`px-3 py-1 rounded text-sm font-medium ${
+            isCurrentPlayer
+              ? 'bg-blue-100 text-blue-800 border border-blue-300'
+              : 'bg-red-100 text-red-800 border border-red-300'
+          }`}
+        >
           {isCurrentPlayer ? `${currentPlayer?.name || 'Vous'}` : `Adversaire`}
-          <span className="ml-2 text-xs opacity-75">
-            ({towers.length} tours placées)
-          </span>
+          <span className="ml-2 text-xs opacity-75">({towers.length} tours placées)</span>
         </div>
       </div>
 
@@ -254,9 +258,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ref={canvasRef}
         width={ZONE_WIDTH * TILE_SIZE}
         height={ZONE_HEIGHT * TILE_SIZE}
-        className={`block border-2 ${
-          isCurrentPlayer ? 'border-blue-400' : 'border-red-400'
-        }`}
+        className={`block border-2 ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         style={{ cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default' }}
