@@ -46,7 +46,6 @@ export function registerSocketHandlers(socket: Socket) {
       // Vérifier si le socket est déjà dans la room
       const rooms = Array.from(socket.rooms)
       if (rooms.includes(`lobby:${gameId}`)) {
-        logger.debug(`🏠 [lobby:join] ${socket.id} already in lobby: ${gameId}`)
         return
       }
 
@@ -92,7 +91,6 @@ export function registerSocketHandlers(socket: Socket) {
       // Vérifier si le socket est dans la room avant de la quitter
       const rooms = Array.from(socket.rooms)
       if (!rooms.includes(`lobby:${gameId}`)) {
-        logger.debug(`🏠 [lobby:leave] ${socket.id} not in lobby: ${gameId}`)
         return
       }
 
@@ -352,14 +350,13 @@ export function registerSocketHandlers(socket: Socket) {
         const gameState = gameTicker?.getState()
         
         if (gameState) {
-          logger.debug(`🎮 [game:join] Sending game state with ${gameState.players?.length || 0} players to ${socket.id}`)
           socket.emit('gameState', gameState)
         } else {
-          logger.warn(`🎮 [game:join] No game state available for ${gameId}`)
+          logger.warn(`[game:join] No game state available for ${gameId}`)
         }
       }
 
-      logger.debug(`✅ [game:join] ${socket.id} successfully joined game: ${gameId}`)
+      // Successfully joined game
     } catch (error) {
       logger.error('[game:join] Error:', error)
       socket.emit('error', { message: 'Failed to join game' })
@@ -373,35 +370,27 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game action handlers
   socket.on('gameAction', async ({ gameId, action }) => {
-    logger.debug(`📩 [gameAction] from ${socket.id} | gameId: ${gameId}`)
-    logger.debug('   ↳ Action:', action)
-
     // S'assurer que la room existe et est synchronisée avec la DB
     ticker.ensureRoom(gameId)
     await syncTickerWithDatabase(gameId)
 
-    const result = handleGameAction(gameId, action)
+    const result = await handleGameAction(gameId, action)
 
     if (!result.success) {
-      logger.warn(`❌ [gameAction] Rejected: ${result.reason}`)
       socket.emit('actionRejected', { reason: result.reason })
       return
     }
 
     const newState = getGameTicker(gameId)?.getState()
     if (!newState) {
-      logger.warn(`❌ [gameAction] No new state found after action`)
       return
     }
 
-    logger.debug(`📤 [gameState] Broadcasting updated state to room: ${gameId}`)
     getIO().to(gameId).emit('gameState', newState)
   })
 
   // Gestion des déconnexions
   socket.on('disconnect', async () => {
-    logger.debug(`❌ [socket] Disconnected: ${socket.id}`)
-
     const connection = activeConnections.get(socket.id)
     if (connection) {
       const { gameId, playerId } = connection
@@ -435,8 +424,6 @@ export function registerSocketHandlers(socket: Socket) {
             message: `${player?.name || 'Player'} disconnected`,
           })
         }
-
-        logger.debug(`🔌 [disconnect] Player ${playerId} marked as disconnected in game ${gameId}`)
       } catch (error) {
         logger.error('[disconnect] Error updating player status:', error)
       }

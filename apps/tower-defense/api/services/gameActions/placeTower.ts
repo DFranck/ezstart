@@ -10,26 +10,12 @@ export function canPlaceTowerAt(
   tower: Tower
 ): boolean {
   const game = ticker.getState(gameId)
-  if (!game) {
-    console.log('[canPlaceTowerAt] Game not found:', gameId)
-    return false
-  }
-
-  console.log('[canPlaceTowerAt] Looking for player:', playerId)
-  console.log('[canPlaceTowerAt] Available players in ticker:', game.players.map((p: any) => ({ 
-    playerId: p.playerId, 
-    playerObjectId: p.player?._id, 
-    hasPlayer: !!p.player,
-    structure: Object.keys(p) 
-  })))
+  if (!game) return false
   
   const player = game.players.find((p: any) => 
     p.player?._id?.toString() === playerId || p.playerId === playerId
   )
-  if (!player) {
-    console.log('[canPlaceTowerAt] Player not found:', playerId)
-    return false
-  }
+  if (!player) return false
 
   const towers = player.placedTowers
   const cells = computeCoveredCells(x, y, tower)
@@ -37,23 +23,17 @@ export function canPlaceTowerAt(
   return !isColliding(cells, towers)
 }
 
-export function placeTower(
+export async function placeTower(
   gameId: string,
   playerId: string,
   x: number,
   y: number,
   tower: Tower
-): void {
-  console.log('[placeTower] Placing tower for player:', playerId, 'at', x, y)
+): Promise<void> {
   const coveredCells = computeCoveredCells(x, y, tower)
 
+  // 1. Mettre à jour le ticker (état en mémoire)
   ticker.mutate(gameId, state => {
-    console.log('[placeTower] Players in state:', state.players.map((p: any) => ({ 
-      playerId: p.playerId,
-      playerObjectId: p.player?._id,
-      hasPlayer: !!p.player 
-    })))
-    
     const players = state.players.map((p: any) => {
       if ((p.player?._id?.toString() || p.playerId) !== playerId) return p
 
@@ -75,4 +55,26 @@ export function placeTower(
       updatedAt: new Date().toISOString(),
     }
   })
+
+  // 2. Mettre à jour la base de données pour persistance
+  try {
+    const { InGamePlayerModel } = await import('../../models/InGamePlayer.js')
+    
+    // Adapter les types pour MongoDB
+    const placedTower = {
+      ...tower,
+      elementalType: Array.isArray(tower.elementalType) 
+        ? tower.elementalType[0] // Prendre le premier élément si c'est un array
+        : tower.elementalType,
+      origin: { x, y },
+      coveredCells,
+    }
+
+    await InGamePlayerModel.findOneAndUpdate(
+      { gameId, player: playerId },
+      { $push: { placedTowers: placedTower } }
+    )
+  } catch (error) {
+    console.error('[placeTower] Failed to save tower to database:', error)
+  }
 }

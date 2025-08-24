@@ -21,13 +21,11 @@ export function useGameSync() {
       const serverTowers = myPlayerData.placedTowers
       const localTowers = useGameState.getState().towers
       
-      // Synchroniser seulement si le serveur a plus de tours (évite les conflits)
-      if (serverTowers.length > localTowers.length) {
-        console.log('[GameSync] Server has more towers, synchronizing', {
-          server: serverTowers.length,
-          local: localTowers.length
-        })
-        
+      // Synchroniser si le serveur a un état différent (pas seulement plus de tours)
+      const serverTowersString = JSON.stringify(serverTowers.map(t => ({ x: t.origin.x, y: t.origin.y, type: t.type })))
+      const localTowersString = JSON.stringify(localTowers.map(t => ({ x: t.origin.x, y: t.origin.y, type: t.type })))
+      
+      if (serverTowersString !== localTowersString) {
         useGameState.setState({
           towers: serverTowers,
         })

@@ -3,6 +3,7 @@
 import { useGame } from '@/contexts/GameContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Icon } from '@ezstart/ui/components'
+import { useEffect, useState } from 'react'
 
 interface PlayersViewMenuProps {
   selectedPlayerId: string | null
@@ -17,22 +18,18 @@ export function PlayersViewMenu({
 }: PlayersViewMenuProps) {
   const { game } = useGame()
   const currentPlayer = usePlayerStore(s => s.player)
+  const [renderKey, setRenderKey] = useState(0)
+
+  // Forcer un re-render quand game.players change
+  useEffect(() => {
+    if (game?.players) {
+      setRenderKey(prev => prev + 1)
+    }
+  }, [game?.players, game?.updatedAt])
 
   if (!game || !currentPlayer || !currentPlayerId) return null
 
   const players = game.players || []
-  
-  // Debug: vérifier les données
-  console.log('[PlayersViewMenu] Debug info:', {
-    currentPlayerId,
-    currentPlayerStoreId: currentPlayer?._id,
-    allPlayers: players.map(p => ({
-      id: p.player?._id,
-      name: p.player?.name,
-      towers: p.placedTowers?.length || 0,
-      status: p.status
-    }))
-  })
   
   // Filtrer seulement les joueurs actifs et qui ne sont pas le joueur actuel
   const otherPlayers = players.filter(p => 

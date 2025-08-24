@@ -38,9 +38,7 @@ export async function syncTickerWithDatabase(gameId: string) {
   // Récupérer les InGamePlayers avec les données complètes
   const inGamePlayers = await InGamePlayerModel.find({ gameId }).populate('player').exec()
   
-  console.log(`[ticker] 🔄 Syncing ticker state with database for game ${gameId}`)
-  console.log(`[ticker] InGamePlayers in DB: ${inGamePlayers.length}`)
-  console.log(`[ticker] Active players:`, inGamePlayers.filter(p => p.status === 'active').length)
+  // Syncing with database silently
 
   // Convertir le document MongoDB en objet JavaScript simple
   const gameData = game.toObject() as any
@@ -51,7 +49,20 @@ export async function syncTickerWithDatabase(gameId: string) {
 
   ticker.mutate(gameId, () => ({
     _id: gameData._id.toString(),
-    players: inGamePlayers, // Utiliser les InGamePlayers au lieu des Player references
+    players: inGamePlayers.map(igp => ({
+      player: igp.player ? {
+        _id: igp.player._id?.toString(),
+        name: igp.player.name,
+        // Autres propriétés du player si nécessaire
+      } : null,
+      status: igp.status,
+      gold: igp.gold,
+      income: igp.income,
+      hp: igp.hp,
+      hand: igp.hand || [],
+      placedTowers: igp.placedTowers || [],
+      incomingUnits: igp.incomingUnits || [],
+    })),
     map: gameData.map || [],
     shopTowers: gameData.shopTowers || [],
     shopUnits: gameData.shopUnits || [],
@@ -63,6 +74,6 @@ export async function syncTickerWithDatabase(gameId: string) {
     updatedAt: gameData.updatedAt?.toISOString() || new Date().toISOString(),
   }))
 
-  console.log(`[ticker] ✅ Ticker synchronized for game ${gameId} with ${inGamePlayers.length} players`)
+  // Ticker synchronized successfully
   return true
 }

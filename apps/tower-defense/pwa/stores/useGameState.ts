@@ -46,7 +46,7 @@ export const useGameState = create<GameState>()(
         set(s => {
           const blocked = s.towers.flatMap(t => t.coveredCells)
           const path = findPath(blocked)
-          console.log('[GameState] Recalculating path', { towersCount: s.towers.length, pathLength: path.length, blocked })
+          // Path recalculated
           return { path }
         }),
       placeTowerAt: (x, y, tower) => {

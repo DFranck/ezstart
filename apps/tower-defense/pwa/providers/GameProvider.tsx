@@ -26,17 +26,19 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
 
     // ---- Handlers (stables) ----
     const onGameState = (state: Game) => {
-      // State complet côté jeu
-      console.debug('[GameProvider] Received gameState update', {
-        playersCount: state.players?.length || 0,
-        phase: state.phase,
-        gameId: state._id,
-        players: state.players?.map(p => ({
-          id: p.player?._id || 'unknown',
-          towers: p.placedTowers?.length || 0
-        })) || []
+      // Ignorer les états invalides (probablement dus au Hot Refresh)
+      if (!state || !state._id || !state.players || state.players.length === 0) {
+        console.warn('[GameProvider] Invalid gameState received, ignoring')
+        return
+      }
+
+      // Mettre à jour l'état
+      setGame(prevGame => {
+        if (prevGame?.updatedAt === state.updatedAt) {
+          return prevGame
+        }
+        return { ...state }
       })
-      setGame(state)
     }
 
     const onActionRejected = ({ reason }: { reason: string }) => {
@@ -46,33 +48,30 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
 
     // ---- LOBBY events (utiles même quand on est dans GameProvider) ----
     const onLobbySnapshot = ({ players }: SnapshotPayload) => {
-      console.debug('[GameProvider] lobby:snapshot', { playersCount: players.length, players })
+      // Silent handler
     }
     const onLobbyPlayersUpdated = (players: InGamePlayer[]) => {
-      console.debug('[GameProvider] lobby:playersUpdated', {
-        playersCount: players.length,
-        players,
-      })
+      // Silent handler
     }
     const onLobbyPlayerJoined = (p: PlayerJoinedPayload) => {
-      console.info('[GameProvider] lobby:playerJoined', p)
+      // Silent handler
     }
     const onLobbyPlayerLeft = (playerId: PlayerLeftPayload) => {
-      console.info('[GameProvider] lobby:playerLeft', { playerId })
+      // Silent handler
     }
     const onLobbyPlayerStatusChanged = (payload: PlayerStatusChangedPayload) => {
-      console.info('[GameProvider] lobby:playerStatusChanged', payload)
+      // Silent handler
     }
 
     // ---- GAME-scoped presence (si tu les émets côté serveur) ----
     const onPlayerJoined = (p: PlayerJoinedPayload) => {
-      console.info('[GameProvider] playerJoined', p)
+      // Silent handler
     }
     const onPlayerLeft = (playerId: PlayerLeftPayload) => {
-      console.info('[GameProvider] playerLeft', { playerId })
+      // Silent handler
     }
     const onPlayerStatusChanged = (payload: PlayerStatusChangedPayload) => {
-      console.info('[GameProvider] playerStatusChanged', payload)
+      // Silent handler
     }
 
     const onGameFinished = (payload: any) => {
@@ -101,16 +100,27 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
     const doJoin = () => {
       if (joinedOnce.current || !currentPlayer) return
       joinedOnce.current = true
-      console.log('[GameProvider] Joining game as player:', currentPlayer?._id)
+      // Joining game silently
       socket.emit('game:join', { gameId })
       // Reconnexion au lobby (pour les jeux en cours)
       socket.emit('lobby:reconnect', { gameId, playerId: currentPlayer?._id })
     }
 
+    // Join immédiatement si connecté, sinon attendre la connexion
     socket.connected ? doJoin() : socket.once('connect', doJoin)
+
+    // Hot Refresh : forcer une reconnexion si le state devient invalide
+    const checkStateTimeout = setTimeout(() => {
+      if (!game || !game._id || !game.players || game.players.length === 0) {
+        joinedOnce.current = false // Reset pour permettre une nouvelle connexion
+        doJoin()
+      }
+    }, 2000) // Attendre 2 secondes après l'initialisation
 
     // ---- Cleanup propre ----
     return () => {
+      clearTimeout(checkStateTimeout)
+      
       if (joinedOnce.current && currentPlayer) {
         socket.emit('game:leave', { gameId })
         // Pas besoin de lobby:leave pour une reconnexion

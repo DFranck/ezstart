@@ -48,7 +48,6 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
   // S'assurer qu'on a un path pour le joueur actuel
   useEffect(() => {
     if (isCurrentPlayer && localPath.length === 0) {
-      console.log('[MultiPlayerCanvas] Initializing path for current player')
       initPath()
     }
   }, [isCurrentPlayer, localPath.length, initPath])
@@ -189,17 +188,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     const isInvalid = isColliding(cells, towers)
 
     if (isInvalid) {
-      console.warn('[handleMouseUp] Tower placement blocked due to collision.')
       return
     }
-
-    console.log(
-      '[MultiPlayerCanvas] Placing tower at',
-      hoveredCellRef.current.x,
-      hoveredCellRef.current.y,
-      'for player',
-      currentPlayer?._id
-    )
 
     // 1. Placer la tour localement pour feedback immédiat
     placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)

@@ -12,12 +12,7 @@ export function GameCanvasCanvas() {
   // Toujours afficher le canvas du joueur actuel par défaut
   const displayedPlayerId = selectedPlayerId || currentPlayer?._id || null
   
-  console.log('[GameCanvasCanvas] Debug:', {
-    currentPlayerId: currentPlayer?._id,
-    selectedPlayerId,
-    displayedPlayerId,
-    currentPlayerName: currentPlayer?.name
-  })
+  // Canvas rendering for player display
 
   return (
     <div className="relative">

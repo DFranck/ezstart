@@ -8,8 +8,8 @@ export function getGameTicker(gameId: string) {
 
   return {
     getState: () => ticker.getState(gameId),
-    placeTower: (playerId: string, x: number, y: number, tower: Tower) =>
-      placeTower(gameId, playerId, x, y, tower),
+    placeTower: async (playerId: string, x: number, y: number, tower: Tower) =>
+      await placeTower(gameId, playerId, x, y, tower),
     canPlaceTowerAt: (playerId: string, x: number, y: number, tower: Tower) =>
       canPlaceTowerAt(gameId, playerId, x, y, tower),
   }
