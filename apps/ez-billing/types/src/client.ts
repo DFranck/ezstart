@@ -17,23 +17,43 @@ export const baseClientSchema = z.object({
     .min(1, 'Client name is required')
     .describe('Full name of the client or company'),
 
-  address: z.string().optional().describe('Postal address of the client'),
-
-  isCompany: z.boolean().describe('true if company, false if individual'),
+  email: z
+    .string()
+    .email('Invalid email format')
+    .optional()
+    .or(z.literal(''))
+    .describe('Email address of the client'),
 
   phone: z.string().optional().describe('Phone number of the client'),
 
+  isCompany: z.boolean().default(false).describe('true if company, false if individual'),
+
+  // Address fields
+  address: z.string().optional().describe('Street address'),
+  city: z.string().optional().describe('City'),
+  postalCode: z.string().optional().describe('Postal/ZIP code'),
+  country: z.string().optional().describe('Country'),
+
+  // Company specific fields
+  companyRegistrationNumber: z
+    .string()
+    .optional()
+    .describe('Company registration number (SIRET, etc.)'),
+
+  taxNumber: z
+    .string()
+    .optional()
+    .describe('VAT / tax identification number'),
+
+  // Additional info
+  website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
+  
   notes: z.string().optional().describe('Internal notes about the client'),
 });
 
 // -----------------------------------
 // 🟢 INPUTS (create/update)
-export const billingClientSchema = baseClientSchema.extend({
-  taxNumber: z
-    .string()
-    .optional()
-    .describe('Optional VAT / tax identification number of the client'),
-});
+export const billingClientSchema = baseClientSchema;
 
 export const clientIdSchema = z.object({
   id: z
@@ -45,11 +65,6 @@ export type ClientId = ZodInfer<typeof clientIdSchema>;
 
 // Output
 export const clientSchema = baseClientSchema.extend({
-  taxNumber: z
-    .string()
-    .optional()
-    .describe('Optional VAT / tax identification number of the client'),
-
   _id: z
     .string()
     .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')

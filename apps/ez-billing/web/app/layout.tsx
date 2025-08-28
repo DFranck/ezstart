@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
+import { Toaster } from 'sonner';
 import '@ezstart/ui/globals.css';
 
 const fontSans = Geist({
@@ -19,7 +20,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={`${fontSans.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
