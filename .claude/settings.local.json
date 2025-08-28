@@ -9,7 +9,15 @@
       "Bash(git reset:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(pnpm install:*)",
+      "Bash(sed:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(taskkill:*)",
+      "Bash(convert:*)",
+      "Bash(dir)",
+      "Bash(xcopy:*)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

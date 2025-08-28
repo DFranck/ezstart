@@ -3,7 +3,7 @@ import {
   GetReceiptsQuery,
   Receipt,
   updateReceiptSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import {
   createReceiptService,
   getReceiptByIdService,

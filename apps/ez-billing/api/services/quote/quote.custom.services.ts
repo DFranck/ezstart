@@ -1,4 +1,4 @@
-import { AddLineItem, Quote } from '@ezstart/types';
+import { AddLineItem, Quote } from '@ez-billing/types';
 import { QuoteModel } from '../../models/billing/quote';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 

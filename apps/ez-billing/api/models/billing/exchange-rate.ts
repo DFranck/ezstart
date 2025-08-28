@@ -1,4 +1,4 @@
-import { currencyEnum } from '@ezstart/types';
+import { currencyEnum } from '@ez-billing/types';
 import { Schema, model } from 'mongoose';
 
 const ExchangeRateSchema = new Schema({

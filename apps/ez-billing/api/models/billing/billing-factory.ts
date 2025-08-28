@@ -1,4 +1,4 @@
-import { currencyEnum } from '@ezstart/types';
+import { currencyEnum } from '@ez-billing/types';
 import { Schema } from 'mongoose';
 import { baseLineItemSchema } from './billing-base';
 

@@ -12,7 +12,7 @@ import {
   receiptSchema,
   removeLineItemSchema,
   updateInvoiceSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/receipt';
 export const receiptRegistry = new OpenAPIRegistry();

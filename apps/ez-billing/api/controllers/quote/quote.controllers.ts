@@ -3,7 +3,7 @@ import {
   GetQuotesQuery,
   Quote,
   updateQuoteSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import {
   createQuoteService,
   getQuoteByIdService,

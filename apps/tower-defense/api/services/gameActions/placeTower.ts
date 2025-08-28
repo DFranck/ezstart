@@ -61,25 +61,5 @@ export async function placeTower(
     }
   })
 
-  // 2. Mettre à jour la base de données pour persistance
-  try {
-    const { InGamePlayerModel } = await import('../../models/InGamePlayer.js')
-    
-    // Adapter les types pour MongoDB
-    const placedTower = {
-      ...tower,
-      elementalType: Array.isArray(tower.elementalType) 
-        ? tower.elementalType[0] // Prendre le premier élément si c'est un array
-        : tower.elementalType,
-      origin: { x, y },
-      coveredCells,
-    }
-
-    await InGamePlayerModel.findOneAndUpdate(
-      { gameId, player: playerId },
-      { $push: { placedTowers: placedTower } }
-    )
-  } catch (error) {
-    console.error('[placeTower] Failed to save tower to database:', error)
-  }
+  // Towers restent en mémoire dans le ticker - pas de DB pendant le gameplay
 }

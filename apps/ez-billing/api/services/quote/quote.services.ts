@@ -3,7 +3,7 @@ import {
   GetQuotesQuery,
   Quote,
   UpdateQuote,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import { QuoteModel } from '../../models/billing/quote';
 import { calculateTotals } from '../../utils/calculate-totals';
 import { generateNextNumber } from '../../utils/generate-next-number';

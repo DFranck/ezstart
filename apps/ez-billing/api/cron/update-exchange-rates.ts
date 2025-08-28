@@ -1,4 +1,4 @@
-import { Currency, currencyEnum } from '@ezstart/types';
+import { Currency, currencyEnum } from '@ez-billing/types';
 import ExchangeRate from '../models/billing/exchange-rate';
 import { fetchExchangeRate } from '../utils/fetch-exchange-rate';
 const pairs: [Currency, Currency][] = currencyEnum.options

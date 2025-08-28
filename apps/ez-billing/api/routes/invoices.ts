@@ -7,7 +7,7 @@ import {
   paramsMongoIdSchema,
   removeLineItemSchema,
   updateInvoiceSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import express, { Router } from 'express';
 
 import {

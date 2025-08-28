@@ -3,7 +3,7 @@ import {
   assignClientSchema,
   mongoIdSchema,
   removeLineItemSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import { Request, Response } from 'express';
 import {
   addLineItemToReceiptService,

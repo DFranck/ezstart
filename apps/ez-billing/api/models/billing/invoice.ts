@@ -1,4 +1,4 @@
-import { Invoice } from '@ezstart/types';
+import { Invoice } from '@ez-billing/types';
 import { model } from 'mongoose';
 import { createBillingDocSchema } from './billing-factory';
 

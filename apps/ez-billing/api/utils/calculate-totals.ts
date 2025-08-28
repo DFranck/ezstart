@@ -1,4 +1,4 @@
-import { BaseLineItem } from '@ezstart/types';
+import { BaseLineItem } from '@ez-billing/types';
 
 export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
   const subtotal = items.reduce(

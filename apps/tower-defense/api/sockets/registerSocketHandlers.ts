@@ -340,24 +340,29 @@ export function registerSocketHandlers(socket: Socket) {
       // Rejoindre la room du jeu
       socket.join(gameId)
 
-      // Si le jeu est en cours, envoyer l'état actuel
+      // Si le jeu est en cours, envoyer l'état actuel du ticker
       if (game.phase === 'playing') {
         // S'assurer que la room existe
         ticker.ensureRoom(gameId)
         
-        // Synchroniser avec DB seulement si l'état est vide (pas de mobs actifs)
-        const currentState = getGameTicker(gameId)?.getState()
-        if (!currentState || !currentState._id || !currentState.players || currentState.players.length === 0) {
-          await syncTickerWithDatabase(gameId)
-        }
-        
         const gameTicker = getGameTicker(gameId)
         const gameState = gameTicker?.getState()
         
-        if (gameState) {
+        if (gameState && gameState._id) {
+          // État ticker valide - envoyer directement
           socket.emit('gameState', { ...gameState, _reason: 'game:join' })
         } else {
-          logger.warn(`[game:join] No game state available for ${gameId}`)
+          // Ticker vide (serveur redémarré?) - sync depuis DB puis envoyer
+          console.warn(`[game:join] Ticker empty for active game ${gameId} - syncing from DB`)
+          await syncTickerWithDatabase(gameId)
+          
+          const refreshedState = getGameTicker(gameId)?.getState()
+          if (refreshedState) {
+            socket.emit('gameState', { ...refreshedState, _reason: 'game:join' })
+          } else {
+            logger.error(`[game:join] Failed to restore game state for ${gameId}`)
+            socket.emit('error', { message: 'Game state unavailable' })
+          }
         }
       }
 
@@ -378,10 +383,7 @@ export function registerSocketHandlers(socket: Socket) {
     // S'assurer que la room existe
     ticker.ensureRoom(gameId)
     
-    // Synchroniser seulement pour certaines actions qui le nécessitent
-    if (action.type === 'placeTower') {
-      await syncTickerWithDatabase(gameId)
-    }
+    // Pas de sync DB pendant le gameplay - tout reste en mémoire
 
     console.log(`[Action] ${action.type} game ${gameId.slice(-6)}`)
     const result = await handleGameAction(gameId, action)

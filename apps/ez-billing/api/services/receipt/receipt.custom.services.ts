@@ -1,4 +1,4 @@
-import { AddLineItem, Receipt } from '@ezstart/types';
+import { AddLineItem, Receipt } from '@ez-billing/types';
 import { ReceiptModel } from '../../models/billing/receipt';
 import { toApiObject } from '../../utils/mongoose/to-api-object';
 

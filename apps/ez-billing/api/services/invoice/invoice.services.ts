@@ -3,7 +3,7 @@ import {
   GetInvoicesQuery,
   Invoice,
   UpdateInvoice,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import { InvoiceModel } from '../../models/billing/invoice';
 import { calculateTotals } from '../../utils/calculate-totals';
 import { generateNextNumber } from '../../utils/generate-next-number';

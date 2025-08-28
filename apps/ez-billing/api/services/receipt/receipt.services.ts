@@ -3,7 +3,7 @@ import {
   GetReceiptsQuery,
   Receipt,
   UpdateReceipt,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import { ReceiptModel } from '../../models/billing/receipt';
 import { calculateTotals } from '../../utils/calculate-totals';
 import { generateNextNumber } from '../../utils/generate-next-number';

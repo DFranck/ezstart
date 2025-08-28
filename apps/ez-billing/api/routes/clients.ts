@@ -9,7 +9,7 @@ import {
   clientSchema,
   getClientsQuerySchema,
   paramsMongoIdSchema,
-} from '@ezstart/types';
+} from '@ez-billing/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/client/client.controllers';
 

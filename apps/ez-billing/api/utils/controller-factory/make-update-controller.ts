@@ -1,4 +1,4 @@
-import { mongoIdSchema } from '@ezstart/types';
+import { mongoIdSchema } from '@ez-billing/types';
 import { Request, Response } from 'express';
 import { ZodSchema } from 'zod';
 
