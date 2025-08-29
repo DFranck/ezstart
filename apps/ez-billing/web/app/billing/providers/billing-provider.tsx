@@ -1,5 +1,5 @@
 'use client';
-import { Client, Invoice, Quote, Receipt } from '@ezstart/types';
+import { Client, Invoice, Quote, Receipt } from '@ez-billing/types';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { callApi } from '@ezstart/ui/utils';
 import { useCallback, useEffect, useState } from 'react';

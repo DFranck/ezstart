@@ -1,6 +1,6 @@
 'use client';
 
-import { Client, Invoice, Quote, Receipt } from '@ezstart/types';
+import { Client, Invoice, Quote, Receipt } from '@ez-billing/types';
 import { createContext, useContext } from 'react';
 
 type BillingContextType = {

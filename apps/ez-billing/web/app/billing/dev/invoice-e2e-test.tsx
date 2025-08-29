@@ -1,6 +1,6 @@
 'use client';
 import { callApi } from '@ezstart/ui/utils';
-import { Invoice } from '@ezstart/types';
+import { Invoice } from '@ez-billing/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';

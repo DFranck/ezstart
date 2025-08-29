@@ -1,4 +1,4 @@
-import { Client } from '@ezstart/types';
+import { Client } from '@ez-billing/types';
 import {
   Card,
   CardContent,

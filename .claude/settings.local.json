@@ -17,7 +17,9 @@
       "Bash(convert:*)",
       "Bash(dir)",
       "Bash(xcopy:*)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

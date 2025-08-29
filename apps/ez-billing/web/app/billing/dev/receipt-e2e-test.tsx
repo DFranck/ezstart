@@ -1,5 +1,5 @@
 'use client';
-import { Receipt } from '@ezstart/types';
+import { Receipt } from '@ez-billing/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { callApi } from '@ezstart/ui/utils';

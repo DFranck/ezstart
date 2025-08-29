@@ -53,7 +53,34 @@ export const baseClientSchema = z.object({
 
 // -----------------------------------
 // 🟢 INPUTS (create/update)
-export const billingClientSchema = baseClientSchema;
+export const billingClientSchema = z.object({
+  clientName: z
+    .string()
+    .min(1, 'Client name is required')
+    .describe('Full name of the client or company'),
+  email: z
+    .string()
+    .email('Invalid email format')
+    .optional()
+    .or(z.literal(''))
+    .describe('Email address of the client'),
+  phone: z.string().optional().describe('Phone number of the client'),
+  isCompany: z.boolean().optional().describe('true if company, false if individual'),
+  address: z.string().optional().describe('Street address'),
+  city: z.string().optional().describe('City'),
+  postalCode: z.string().optional().describe('Postal/ZIP code'),
+  country: z.string().optional().describe('Country'),
+  companyRegistrationNumber: z
+    .string()
+    .optional()
+    .describe('Company registration number (SIRET, etc.)'),
+  taxNumber: z
+    .string()
+    .optional()
+    .describe('VAT / tax identification number'),
+  website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
+  notes: z.string().optional().describe('Internal notes about the client'),
+});
 
 export const clientIdSchema = z.object({
   id: z

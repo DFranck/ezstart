@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev --concurrency 50",
-    "dev:billing": "turbo run dev --filter=web-ezstart... --filter=web-ez-billing... --filter=api-ez-billing...",
+    "dev:billing": "turbo run dev --filter=web-ez-billing... --filter=api-ez-billing...",
     "dev:ez": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:td": "turbo run dev --filter=web-tower-defense... --filter=api-tower-defense...",

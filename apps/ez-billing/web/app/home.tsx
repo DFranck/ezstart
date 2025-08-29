@@ -7,7 +7,6 @@ import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
 import { useState } from 'react';
 import ClientCard from './billing/components/client-card';
-import { ClientModal } from '@/components/client-modal';
 
 const HomePage = () => {
   return (
@@ -303,12 +302,6 @@ const HomeWithData = () => {
         )}
       </Main>
 
-      <ClientModal
-        open={isClientModalOpen}
-        onOpenChange={setIsClientModalOpen}
-        client={selectedClient}
-        onSuccess={refetchAll}
-      />
     </>
   );
 };

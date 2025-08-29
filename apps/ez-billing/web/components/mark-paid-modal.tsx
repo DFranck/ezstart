@@ -1,0 +1,106 @@
+'use client';
+
+import { CreateReceipt, Invoice } from '@ez-billing/types';
+import { Button, H3, Input, Label, Modal, Section, TextArea } from '@ezstart/ui/components';
+import { callApi, runWithFeedback } from '@ezstart/ui/utils';
+import { useState } from 'react';
+import { LoadingButton } from './loading-button';
+
+interface MarkPaidModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  invoice: Invoice;
+  onSave: () => void;
+}
+
+export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [formData, setFormData] = useState<CreateReceipt>({
+    clientId: invoice.clientId,
+    items: invoice.items.map(item => ({
+      label: item.label,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+    currency: invoice.currency,
+    notes: `Payment received for invoice ${invoice.documentNumber}`,
+    terms: '',
+    taxRate: invoice.taxRate,
+    status: 'issued',
+    paymentDate: new Date().toISOString().split('T')[0],
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    return runWithFeedback({
+      action: async () => {
+        // Create receipt
+        const receiptRes = await callApi('/api/receipts', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!receiptRes.ok) throw new Error('Failed to create receipt');
+
+        // Update invoice status to paid
+        const invoiceRes = await callApi(`/api/invoices/${invoice._id}`, {
+          method: 'PUT',
+          body: { status: 'paid' },
+        });
+        if (!invoiceRes.ok) throw new Error('Failed to update invoice status');
+
+        onSave();
+        onClose();
+      },
+      toastLoading: { message: 'Marking invoice as paid...' },
+      toastSuccess: { message: 'Invoice marked as paid and receipt created' },
+      toastError: { message: 'Failed to mark invoice as paid' },
+      onLoadingChange: setIsLoading,
+    });
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <Section className="p-6 max-w-2xl">
+        <H3>Mark Invoice as Paid</H3>
+        <p className="text-gray-600 mb-4">
+          This will create a receipt and mark the invoice as paid.
+        </p>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Payment Date</Label>
+            <Input
+              type="date"
+              value={formData.paymentDate}
+              onChange={(e) => setFormData({...formData, paymentDate: e.target.value})}
+              required
+            />
+          </div>
+
+          <div>
+            <Label>Notes</Label>
+            <TextArea
+              value={formData.notes}
+              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
+              Cancel
+            </Button>
+            <LoadingButton 
+              loading={isLoading} 
+              type="submit"
+            >
+              Mark as Paid
+            </LoadingButton>
+          </div>
+        </form>
+      </Section>
+    </Modal>
+  );
+}

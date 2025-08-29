@@ -1,6 +1,6 @@
 'use client';
 
-import { Client, Invoice, Quote, Receipt } from '@ez-billing/types';
+import { Client, Invoice, Quote, Receipt, Company } from '@ez-billing/types';
 import { createContext, useContext } from 'react';
 
 type BillingContextType = {
@@ -8,6 +8,7 @@ type BillingContextType = {
   invoices: Invoice[];
   quotes: Quote[];
   receipts: Receipt[];
+  companies: Company[];
   loading: boolean;
   selectedClient: Client | null;
   setSelectedClient: (client: Client | null) => void;
