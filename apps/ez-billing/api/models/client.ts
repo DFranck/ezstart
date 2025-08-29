@@ -5,11 +5,17 @@ type ClientDocument = BillingClient & Document;
 
 const clientSchema = new Schema(
   {
-    clientName: { type: String },
-    address: { type: String },
-    isCompany: { type: Boolean },
+    clientName: { type: String, required: true },
+    email: { type: String },
     phone: { type: String },
+    isCompany: { type: Boolean, default: false },
+    address: { type: String },
+    city: { type: String },
+    postalCode: { type: String },
+    country: { type: String },
+    companyRegistrationNumber: { type: String },
     taxNumber: { type: String },
+    website: { type: String },
     notes: { type: String },
     deletedAt: { type: String, default: null },
   },

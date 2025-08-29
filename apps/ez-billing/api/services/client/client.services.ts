@@ -7,7 +7,8 @@ export async function createClientService(
   data: BillingClient
 ): Promise<Client> {
   const client = new ClientModel(data);
-  return toApiObject(client.save());
+  const savedClient = await client.save();
+  return toApiObject(savedClient);
 }
 
 export async function getClientByIdService(id: string): Promise<Client | null> {

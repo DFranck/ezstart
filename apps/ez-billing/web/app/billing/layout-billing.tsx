@@ -2,9 +2,11 @@
 
 import { useBillingContext } from '@/contexts/billing-context';
 import { BillingProvider } from '@/providers/billing-provider';
+import { ClientModal } from '@/components/client-modal';
 import { Button, H1, H2, Header, Icon, Main } from '@ezstart/ui/components';
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -15,7 +17,9 @@ const LayoutBilling = ({ children }: { children: React.ReactNode }) => {
 };
 
 const BillingLayoutWithData = ({ children }: { children: React.ReactNode }) => {
-  const { selectedClient, setSelectedClient } = useBillingContext();
+  const { selectedClient, setSelectedClient, refetchAll } = useBillingContext();
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  
   return (
     <>
       <Header
@@ -33,12 +37,18 @@ const BillingLayoutWithData = ({ children }: { children: React.ReactNode }) => {
           ) : null
         }
         rightContent={
-          <Button>
+          <Button onClick={() => setIsClientModalOpen(true)}>
             <Icon name='fa:FaPlus' /> New client
           </Button>
         }
       />
       <Main>{children}</Main>
+      
+      <ClientModal
+        isOpen={isClientModalOpen}
+        onClose={() => setIsClientModalOpen(false)}
+        onSave={refetchAll}
+      />
     </>
   );
 };
