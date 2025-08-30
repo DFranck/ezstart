@@ -37,14 +37,14 @@ export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModa
     return runWithFeedback({
       action: async () => {
         // Create receipt
-        const receiptRes = await callApi('/api/receipts', {
+        const receiptRes = await callApi('/receipts', {
           method: 'POST',
           body: formData,
         });
         if (!receiptRes.ok) throw new Error('Failed to create receipt');
 
         // Update invoice status to paid
-        const invoiceRes = await callApi(`/api/invoices/${invoice._id}`, {
+        const invoiceRes = await callApi(`/invoices/${invoice._id}`, {
           method: 'PUT',
           body: { status: 'paid' },
         });

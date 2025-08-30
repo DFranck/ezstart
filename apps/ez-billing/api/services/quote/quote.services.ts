@@ -12,7 +12,19 @@ import { toApiObject } from '../../utils/mongoose/to-api-object';
 import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
-  const exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
+  let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
+  
+  // Provide a default exchange rate if none exists
+  if (!exchangeRate) {
+    exchangeRate = {
+      from: data.currency,
+      to: 'USD',
+      rate: 1.0, // Default 1:1 rate
+      source: 'default',
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+  
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('quote');
   const doc = new QuoteModel({

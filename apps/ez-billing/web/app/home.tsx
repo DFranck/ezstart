@@ -6,7 +6,7 @@ import { Button, H1, H2, Header, Icon, LI, Main, P, Section, UL } from '@ezstart
 import { cn } from '@ezstart/ui/lib';
 import Link from 'next/link';
 import { useState } from 'react';
-import ClientCard from './billing/components/client-card';
+import ClientCard from './dashboard/components/client-card';
 
 const HomePage = () => {
   return (

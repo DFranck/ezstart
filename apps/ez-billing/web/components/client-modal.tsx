@@ -37,13 +37,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     return runWithFeedback({
       action: async () => {
         if (client) {
-          const res = await callApi(`/api/clients/${client._id}`, {
+          const res = await callApi(`/clients/${client._id}`, {
             method: 'PUT',
             body: formData,
           });
           if (!res.ok) throw new Error('Failed to update client');
         } else {
-          const res = await callApi('/api/clients', {
+          const res = await callApi('/clients', {
             method: 'POST',
             body: formData,
           });

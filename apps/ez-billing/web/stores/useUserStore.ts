@@ -28,7 +28,7 @@ export const useUserStore = create<UserStore>()(
         const trimmedUsername = username.toLowerCase().trim()
         
         // First try to get existing user
-        const getRes = await callApi<UserResponse>(`/api/users/${trimmedUsername}`, {
+        const getRes = await callApi<UserResponse>(`/users/${trimmedUsername}`, {
           method: 'GET',
         })
 
@@ -39,7 +39,7 @@ export const useUserStore = create<UserStore>()(
         }
 
         // If user doesn't exist, create new one
-        const createRes = await callApi<UserResponse>('/api/users', {
+        const createRes = await callApi<UserResponse>('/users', {
           method: 'POST',
           body: { username: trimmedUsername },
         })

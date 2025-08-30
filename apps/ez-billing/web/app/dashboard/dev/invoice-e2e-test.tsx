@@ -1,18 +1,16 @@
 'use client';
-import { Receipt } from '@ez-billing/types';
+import { callApi } from '@ezstart/ui/utils';
+import { Invoice } from '@ez-billing/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
-import { callApi } from '@ezstart/ui/utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
 type Props = {
   pushLog: (msg: string) => void;
   filter?: 'active' | 'deletedOnly' | 'all';
 };
-
-export function ReceiptE2ETest({ pushLog, filter }: Props) {
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
+export function InvoiceE2ETest({ pushLog, filter }: Props) {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -20,165 +18,153 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
 
   const { exec, error } = useApiAction();
 
-  const fetchReceipts = async (f = filter) => {
+  const fetchInvoices = async (f = filter) => {
     const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
-    pushLog(`fetchReceipts(${f})`);
-    const data = await exec<Receipt[]>(() =>
-      callApi<Receipt[]>('/api/receipts', { query })
+    // pushLog(`fetchInvoices(${f})`);
+    const data = await exec<Invoice[]>(() =>
+      callApi<Invoice[]>('/invoices', { query })
     );
-    setReceipts(data ?? []);
-    pushLog(`GET /api/receipts → ${JSON.stringify(data)}`);
+    setInvoices(data ?? []);
+    // pushLog(`GET /invoices → ${JSON.stringify(data)}`);
   };
 
-  const createReceipt = async () => {
+  const createInvoice = async () => {
     pushLog(
-      `POST /api/receipts { clientId: "${clientId}", notes: "${notes}" }`
+      `POST /invoices { clientId: "${clientId}", notes: "${notes}" }`
     );
-    const data = await exec<Receipt>(() =>
-      callApi<Receipt>('/api/receipts', {
+    const data = await exec<Invoice>(() =>
+      callApi<Invoice>('/invoices', {
         method: 'POST',
         body: {
           clientId: clientId.trim(),
           items: [{ label: 'Test Item', quantity: 1, price: 42 }],
           currency: 'EUR',
           notes: notes.trim(),
-          status: 'issued',
-          taxRate: 10,
+          status: 'draft',
+          taxRate: 20,
         },
       })
     );
-    pushLog(`POST → ${JSON.stringify(data)}`);
+    // pushLog(`POST → ${JSON.stringify(data)}`);
     if (data) {
       setClientId('');
       setNotes('');
-      fetchReceipts();
-      toast.success('Receipt created!');
+      fetchInvoices();
+      toast.success('Invoice created!');
     }
   };
 
-  const getReceiptById = async (id: string) => {
-    pushLog(`GET /api/receipts/${id}`);
-    const data = await exec<Receipt>(() =>
-      callApi<Receipt>(`/api/receipts/${id}`)
+  const getInvoiceById = async (id: string) => {
+    pushLog(`GET /invoices/${id}`);
+    const data = await exec<Invoice>(() =>
+      callApi<Invoice>(`/invoices/${id}`)
     );
-    pushLog(`GET → ${JSON.stringify(data)}`);
-    if (data) alert(`Receipt: ${JSON.stringify(data, null, 2)}`);
+    // pushLog(`GET → ${JSON.stringify(data)}`);
+    if (data) alert(`Invoice: ${JSON.stringify(data, null, 2)}`);
   };
 
-  const updateReceipt = async (id: string) => {
-    pushLog(`PUT /api/receipts/${id} { notes: "${updatedNotes}" }`);
-    const data = await exec<Receipt>(() =>
-      callApi<Receipt>(`/api/receipts/${id}`, {
+  const updateInvoice = async (id: string) => {
+    pushLog(`PUT /invoices/${id} { notes: "${updatedNotes}" }`);
+    const data = await exec<Invoice>(() =>
+      callApi<Invoice>(`/invoices/${id}`, {
         method: 'PUT',
         body: { notes: updatedNotes },
       })
     );
-    pushLog(`PUT → ${JSON.stringify(data)}`);
+    // pushLog(`PUT → ${JSON.stringify(data)}`);
     if (data) {
-      fetchReceipts();
+      fetchInvoices();
       setUpdatedNotes('');
       setSelectedId(null);
-      toast.success('Receipt updated!');
+      toast.success('Invoice updated!');
     }
   };
 
-  const deleteReceipt = async (id: string) => {
-    pushLog(`DELETE /api/receipts/${id}`);
-    await exec(() => callApi(`/api/receipts/${id}`, { method: 'DELETE' }));
-    fetchReceipts();
-    toast.success('Receipt deleted!');
+  const deleteInvoice = async (id: string) => {
+    pushLog(`DELETE /invoices/${id}`);
+    await exec(() => callApi(`/invoices/${id}`, { method: 'DELETE' }));
+    fetchInvoices();
+    toast.success('Invoice deleted!');
   };
 
-  const restoreReceipt = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/restore`);
+  const restoreInvoice = async (id: string) => {
+    pushLog(`POST /invoices/${id}/restore`);
     await exec(() =>
-      callApi(`/api/receipts/${id}/restore`, { method: 'POST' })
+      callApi(`/invoices/${id}/restore`, { method: 'POST' })
     );
-    fetchReceipts();
-    toast.success('Receipt restored!');
+    fetchInvoices();
+    toast.success('Invoice restored!');
   };
 
-  const hardDeleteReceipt = async (id: string) => {
-    pushLog(`DELETE /api/receipts/${id}/hard-delete`);
+  const hardDeleteInvoice = async (id: string) => {
+    pushLog(`DELETE /invoices/${id}/hard-delete`);
     await exec(() =>
-      callApi(`/api/receipts/${id}/hard-delete`, { method: 'DELETE' })
+      callApi(`/invoices/${id}/hard-delete`, { method: 'DELETE' })
     );
-    fetchReceipts();
-    toast.success('Receipt hard deleted!');
+    fetchInvoices();
+    toast.success('Invoice hard deleted!');
   };
 
   const assignClient = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/assign-client`);
-    const data = await exec<Receipt>(() =>
-      callApi(`/api/receipts/${id}/assign-client`, {
+    pushLog(`POST /invoices/${id}/assign-client`);
+    const data = await exec<Invoice>(() =>
+      callApi(`/invoices/${id}/assign-client`, {
         method: 'POST',
         body: { clientId: clientId.trim() },
       })
     );
-    fetchReceipts();
+    // pushLog(`assignClient → ${JSON.stringify(data)}`);
+    fetchInvoices();
     setClientId('');
-    pushLog(`assignClient → ${JSON.stringify(data)}`);
-    if (data?.clientId) {
-      toast.success('Client assigned!');
-    }
+    toast.success('Client assigned!');
   };
 
   const addLineItem = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/add-line-item`);
-    const data = await exec<Receipt>(() =>
-      callApi(`/api/receipts/${id}/add-line-item`, {
+    pushLog(`POST /invoices/${id}/add-line-item`);
+    const data = await exec<Invoice>(() =>
+      callApi(`/invoices/${id}/add-line-item`, {
         method: 'POST',
         body: { label: 'LineX', quantity: 1, price: 11 },
       })
     );
-    pushLog(`addLineItem → ${JSON.stringify(data)}`);
-    fetchReceipts();
-    toast.success('Line item added!');
+    // pushLog(`addLineItem → ${JSON.stringify(data)}`);
+    fetchInvoices();
+    toast.success('line item added!');
   };
 
   const removeLineItem = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/remove-line-item`);
-    const receipt = receipts.find((q) => q._id === id);
-    const firstItem = receipt?.items?.[0];
+    pushLog(`POST /invoices/${id}/remove-line-item`);
+    const invoice = invoices.find((i) => i._id === id);
+    const firstItem = invoice?.items?.[0];
     if (!firstItem) return pushLog('No item to remove');
     await exec(() =>
-      callApi(`/api/receipts/${id}/remove-line-item`, {
+      callApi(`/invoices/${id}/remove-line-item`, {
         method: 'POST',
         body: { itemId: firstItem._id },
       })
     );
-    fetchReceipts();
-    toast.success('Line item removed!');
+    fetchInvoices();
+    toast.success('line item removed!');
   };
 
-  // NEW: Accept/Reject actions
-  const issueReceipt = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/mark-issued`);
+  const markPaid = async (id: string) => {
+    pushLog(`POST /invoices/${id}/mark-paid`);
     await exec(() =>
-      callApi(`/api/receipts/${id}/mark-issued`, { method: 'POST' })
+      callApi(`/invoices/${id}/mark-paid`, { method: 'POST' })
     );
-    fetchReceipts();
-    toast.success('Receipt issued!');
-  };
-
-  const refundReceipt = async (id: string) => {
-    pushLog(`POST /api/receipts/${id}/mark-refunded`);
-    await exec(() =>
-      callApi(`/api/receipts/${id}/mark-refunded`, { method: 'POST' })
-    );
-    fetchReceipts();
-    toast.success('Receipt refunded!');
+    fetchInvoices();
+    toast.success('Invoice marked as paid!');
   };
 
   useEffect(() => {
-    fetchReceipts();
-    // eslint-disable-next-line
+    fetchInvoices();
   }, [filter]);
 
   return (
     <>
+      {' '}
       {error && (
         <pre className='text-destructive col-span-2 text-center'>{error}</pre>
       )}
@@ -194,18 +180,18 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
           placeholder='notes'
         />
         <div className='grid grid-cols-2 md:flex gap-2'>
-          <Button onClick={createReceipt}>Create</Button>
-          <Button onClick={() => fetchReceipts()}>Reload</Button>
+          <Button onClick={createInvoice}>Create</Button>
+          <Button onClick={() => fetchInvoices()}>Reload</Button>
         </div>
       </div>
       <UL className='p-0 pt-2'>
-        {receipts.map((q) => (
+        {invoices.map((inv) => (
           <LI
-            key={q._id}
+            key={inv._id}
             className='flex flex-col md:flex-row items-center justify-between gap-2'
             variant={'card'}
           >
-            {selectedId === q._id ? (
+            {selectedId === inv._id ? (
               // Bloc édition inline
               <div className='flex flex-col md:flex-row gap-2 w-full'>
                 <Input
@@ -215,7 +201,7 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
                 />
                 <div className='grid grid-cols-2 gap-2'>
                   <Button
-                    onClick={() => updateReceipt(selectedId)}
+                    onClick={() => updateInvoice(selectedId)}
                     disabled={!updatedNotes.trim()}
                   >
                     Update Note
@@ -235,11 +221,11 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
               <>
                 <span
                   className='cursor-pointer font-mono text-xs truncate max-w-xs'
-                  title={JSON.stringify(q, null, 2)}
-                  onClick={() => getReceiptById(q._id)}
+                  title={JSON.stringify(inv, null, 2)}
+                  onClick={() => getInvoiceById(inv._id)}
                 >
-                  {_idShort(q._id)}
-                  {q.deletedAt && (
+                  {_idShort(inv._id)}
+                  {inv.deletedAt && (
                     <span className='ml-1 text-red-500 text-xs'>(deleted)</span>
                   )}
                 </span>
@@ -248,8 +234,8 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
                     size='sm'
                     variant='outline'
                     onClick={() => {
-                      setSelectedId(q._id);
-                      setUpdatedNotes(q.notes ?? '');
+                      setSelectedId(inv._id);
+                      setUpdatedNotes(inv.notes ?? '');
                     }}
                   >
                     Update Note
@@ -257,47 +243,36 @@ export function ReceiptE2ETest({ pushLog, filter }: Props) {
                   <Button
                     size='sm'
                     variant='destructive'
-                    onClick={() => deleteReceipt(q._id)}
-                    disabled={!!q.deletedAt}
+                    onClick={() => deleteInvoice(inv._id)}
+                    disabled={!!inv.deletedAt}
                   >
                     Soft Delete
                   </Button>
-                  <Button size='sm' onClick={() => assignClient(q._id)}>
+                  <Button size='sm' onClick={() => assignClient(inv._id)}>
                     Assign Client
                   </Button>
-                  <Button size='sm' onClick={() => addLineItem(q._id)}>
+                  <Button size='sm' onClick={() => addLineItem(inv._id)}>
                     Add Item
                   </Button>
-                  <Button size='sm' onClick={() => removeLineItem(q._id)}>
+                  <Button size='sm' onClick={() => removeLineItem(inv._id)}>
                     Remove Item
                   </Button>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    onClick={() => issueReceipt(q._id)}
-                  >
-                    Issue
+                  <Button size='sm' onClick={() => markPaid(inv._id)}>
+                    Mark Paid
                   </Button>
-                  <Button
-                    size='sm'
-                    variant='destructive'
-                    onClick={() => refundReceipt(q._id)}
-                  >
-                    Refound
-                  </Button>
-                  {q.deletedAt && (
+                  {inv.deletedAt && (
                     <>
                       <Button
                         size='sm'
                         variant='outline'
-                        onClick={() => restoreReceipt(q._id)}
+                        onClick={() => restoreInvoice(inv._id)}
                       >
                         Restore
                       </Button>
                       <Button
                         size='sm'
                         variant='destructive'
-                        onClick={() => hardDeleteReceipt(q._id)}
+                        onClick={() => hardDeleteInvoice(inv._id)}
                       >
                         Hard Delete
                       </Button>

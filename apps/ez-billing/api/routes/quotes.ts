@@ -2,6 +2,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   validateQuery,
+  validateParams,
 } from '@ezstart/api-core';
 import {
   addLineItemSchema,
@@ -20,29 +21,29 @@ export const quotesRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(quotesRegistry, router);
 
-docRouter.post('/quotes/', controllers.createQuoteController, {
+docRouter.post('/', controllers.createQuoteController, {
   summary: 'Create a Quote',
   tags: ['Quotes'],
-  bodySchema: quoteSchema,
-  responseSchema: createQuoteSchema,
+  bodySchema: createQuoteSchema,
+  responseSchema: quoteSchema,
   status: 201,
 });
 
-docRouter.get('/quotes/', validateQuery(getQuotesQuerySchema), {
+docRouter.get('/', validateQuery(getQuotesQuerySchema), controllers.getQuotesController, {
   summary: 'List Quotes',
   tags: ['Quotes'],
   querySchema: getQuotesQuerySchema,
   responseSchema: quoteSchema.array(),
 });
 
-docRouter.get('/quotes/:id', controllers.getQuoteByIdController, {
+docRouter.get('/:id', validateParams(paramsMongoIdSchema), controllers.getQuoteByIdController, {
   summary: 'Get Quote by id',
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: quoteSchema,
 });
 
-docRouter.put('/quotes/:id', controllers.updateQuoteController, {
+docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateQuoteController, {
   summary: 'Update Quote by id',
   tags: ['Quotes'],
   bodySchema: updateInvoiceSchema,
@@ -50,13 +51,13 @@ docRouter.put('/quotes/:id', controllers.updateQuoteController, {
   responseSchema: quoteSchema,
 });
 
-docRouter.delete('/quotes/:id', controllers.softDeleteQuoteController, {
+docRouter.delete('/:id', validateParams(paramsMongoIdSchema), controllers.softDeleteQuoteController, {
   summary: 'Soft delete Quote',
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('/quotes/:id/restore', controllers.restoreQuoteController, {
+docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.restoreQuoteController, {
   summary: 'Restore Quote',
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,
@@ -64,7 +65,8 @@ docRouter.post('/quotes/:id/restore', controllers.restoreQuoteController, {
 });
 
 docRouter.delete(
-  '/quotes/:id/hard-delete',
+  '/:id/hard-delete',
+  validateParams(paramsMongoIdSchema),
   controllers.hardDeleteQuoteController,
   {
     summary: 'Hard delete Quote',
@@ -74,7 +76,8 @@ docRouter.delete(
 );
 
 docRouter.post(
-  '/quotes/:id/add-line-item',
+  '/:id/add-line-item',
+  validateParams(paramsMongoIdSchema),
   controllers.addLineItemToQuoteController,
   {
     summary: 'Add line Item to Quote',
@@ -85,7 +88,8 @@ docRouter.post(
   }
 );
 docRouter.post(
-  '/quotes/:id/remove-line-item',
+  '/:id/remove-line-item',
+  validateParams(paramsMongoIdSchema),
   controllers.removeLineItemFromQuoteController,
   {
     summary: 'Remove line Item from Quote',
@@ -96,7 +100,8 @@ docRouter.post(
   }
 );
 docRouter.post(
-  '/quotes/:id/assign-client',
+  '/:id/assign-client',
+  validateParams(paramsMongoIdSchema),
   controllers.assignClientToQuoteController,
   {
     summary: 'Assign Client to Quote',
@@ -106,13 +111,13 @@ docRouter.post(
     responseSchema: quoteSchema,
   }
 );
-docRouter.post('/quotes/:id/accept', controllers.acceptQuoteController, {
+docRouter.post('/:id/accept', validateParams(paramsMongoIdSchema), controllers.acceptQuoteController, {
   summary: 'Accept a Quote',
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: quoteSchema,
 });
-docRouter.post('/quotes/:id/reject', controllers.rejectQuoteController, {
+docRouter.post('/:id/reject', validateParams(paramsMongoIdSchema), controllers.rejectQuoteController, {
   summary: 'Reject a Quote',
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,

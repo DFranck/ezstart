@@ -11,7 +11,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (user) {
-      redirect('/billing');
+      redirect('/dashboard');
     }
   }, [user]);
 

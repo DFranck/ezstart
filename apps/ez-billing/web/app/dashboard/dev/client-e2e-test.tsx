@@ -31,11 +31,11 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
     if (f === 'all') query.includeDeleted = true;
     pushLog(`fetchClients(${f})`);
     const data = await exec<Client[]>(() =>
-      callApi<BillingClient[]>('/api/clients', { query })
+      callApi<BillingClient[]>('/clients', { query })
     );
     if (data) setClients(data);
     else setClients([]);
-    pushLog(`GET /api/clients → ${JSON.stringify(data)}`);
+    pushLog(`GET /clients → ${JSON.stringify(data)}`);
   };
 
   const createClient = async () => {
@@ -46,10 +46,10 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
       taxNumber: isCompany ? taxNumber : undefined,
     };
 
-    pushLog(`POST /api/clients ${JSON.stringify(payload)}`);
+    pushLog(`POST /clients ${JSON.stringify(payload)}`);
 
     const data = await exec<BillingClient>(() =>
-      callApi<BillingClient>('/api/clients', {
+      callApi<BillingClient>('/clients', {
         method: 'POST',
         body: payload,
       })
@@ -66,18 +66,18 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   };
 
   const getClientById = async (id: string) => {
-    pushLog(`GET /api/clients/${id}`);
+    pushLog(`GET /clients/${id}`);
     const data = await exec<Client>(() =>
-      callApi<Client>(`/api/clients/${id}`)
+      callApi<Client>(`/clients/${id}`)
     );
     pushLog(`GET → ${JSON.stringify(data)}`);
     if (data) alert(`Client: ${JSON.stringify(data, null, 2)}`);
   };
 
   const updateClient = async (id: string) => {
-    pushLog(`PUT /api/clients/${id} { clientName: "${updatedName}" }`);
+    pushLog(`PUT /clients/${id} { clientName: "${updatedName}" }`);
     const data = await exec<BillingClient>(() =>
-      callApi<BillingClient>(`/api/clients/${id}`, {
+      callApi<BillingClient>(`/clients/${id}`, {
         method: 'PUT',
         body: {
           clientName: updatedName,
@@ -97,23 +97,23 @@ export function ClientE2ETest({ pushLog, filter }: Props) {
   };
 
   const deleteClient = async (id: string) => {
-    pushLog(`DELETE /api/clients/${id}`);
-    await exec(() => callApi(`/api/clients/${id}`, { method: 'DELETE' }));
+    pushLog(`DELETE /clients/${id}`);
+    await exec(() => callApi(`/clients/${id}`, { method: 'DELETE' }));
     fetchClients();
     toast.success('Client deleted!');
   };
 
   const restoreClient = async (id: string) => {
-    pushLog(`POST /api/clients/${id}/restore`);
-    await exec(() => callApi(`/api/clients/${id}/restore`, { method: 'POST' }));
+    pushLog(`POST /clients/${id}/restore`);
+    await exec(() => callApi(`/clients/${id}/restore`, { method: 'POST' }));
     fetchClients();
     toast.success('Client restored!');
   };
 
   const hardDeleteClient = async (id: string) => {
-    pushLog(`DELETE /api/clients/${id}/hard-delete`);
+    pushLog(`DELETE /clients/${id}/hard-delete`);
     await exec(() =>
-      callApi(`/api/clients/${id}/hard-delete`, { method: 'DELETE' })
+      callApi(`/clients/${id}/hard-delete`, { method: 'DELETE' })
     );
     fetchClients();
     toast.success('Client hard deleted!');

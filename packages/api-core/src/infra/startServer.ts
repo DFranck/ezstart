@@ -16,14 +16,14 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   const {
     routes,
     registries = [],
-    basePath = '/api',
+    basePath = '',
     serviceName = 'API',
     port = 5000,
     onHttpServerReady,
   } = opts
 
-  app.use(basePath, routes)
-  app.get(`${basePath}/health`, (_, res) => res.status(200).json({ status: 'ok' }))
+  app.use(basePath || '/', routes)
+  app.get('/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
   if (registries.length > 0) {
     const generator = new OpenApiGeneratorV3(registries.flatMap(r => r.definitions))
@@ -34,17 +34,17 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
         version: '1.0.0',
         description: `Auto-generated docs for ${serviceName}`,
       },
-      servers: [{ url: basePath }],
+      servers: [{ url: basePath || '/' }],
     })
 
-    app.use('/api', swaggerUi.serve, swaggerUi.setup(openApiDoc))
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc))
   }
 
   const server = createServer(app)
   server.listen(port, () => {
     const url = `http://localhost:${port}`
-    console.log(`🚀 ${serviceName} running on ${url}${basePath}`)
-    if (registries.length > 0) console.log(`📖 Docs available at ${url}/api`)
+    console.log(`🚀 ${serviceName} running on ${url}${basePath || '/'}`)
+    if (registries.length > 0) console.log(`📖 Docs available at ${url}/docs`)
   })
 
   if (onHttpServerReady) {

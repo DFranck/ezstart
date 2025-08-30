@@ -1,8 +1,8 @@
 'use client';
-import { callApi } from '@ezstart/ui/utils';
-import { Quote } from '@ez-billing/types';
+import { Receipt } from '@ez-billing/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
+import { callApi } from '@ezstart/ui/utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,8 +11,8 @@ type Props = {
   filter?: 'active' | 'deletedOnly' | 'all';
 };
 
-export function QuoteE2ETest({ pushLog, filter }: Props) {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+export function ReceiptE2ETest({ pushLog, filter }: Props) {
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -20,30 +20,32 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
 
   const { exec, error } = useApiAction();
 
-  const fetchQuotes = async (f = filter) => {
+  const fetchReceipts = async (f = filter) => {
     const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
-    pushLog(`fetchQuotes(${f})`);
-    const data = await exec<Quote[]>(() =>
-      callApi<Quote[]>('/api/quotes', { query })
+    pushLog(`fetchReceipts(${f})`);
+    const data = await exec<Receipt[]>(() =>
+      callApi<Receipt[]>('/receipts', { query })
     );
-    setQuotes(data ?? []);
-    pushLog(`GET /api/quotes → ${JSON.stringify(data)}`);
+    setReceipts(data ?? []);
+    pushLog(`GET /receipts → ${JSON.stringify(data)}`);
   };
 
-  const createQuote = async () => {
-    pushLog(`POST /api/quotes { clientId: "${clientId}", notes: "${notes}" }`);
-    const data = await exec<Quote>(() =>
-      callApi<Quote>('/api/quotes', {
+  const createReceipt = async () => {
+    pushLog(
+      `POST /receipts { clientId: "${clientId}", notes: "${notes}" }`
+    );
+    const data = await exec<Receipt>(() =>
+      callApi<Receipt>('/receipts', {
         method: 'POST',
         body: {
           clientId: clientId.trim(),
           items: [{ label: 'Test Item', quantity: 1, price: 42 }],
           currency: 'EUR',
           notes: notes.trim(),
-          status: 'draft',
-          taxRate: 16,
+          status: 'issued',
+          taxRate: 10,
         },
       })
     );
@@ -51,117 +53,127 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
     if (data) {
       setClientId('');
       setNotes('');
-      fetchQuotes();
-      toast.success('Quote created!');
+      fetchReceipts();
+      toast.success('Receipt created!');
     }
   };
 
-  const getQuoteById = async (id: string) => {
-    pushLog(`GET /api/quotes/${id}`);
-    const data = await exec<Quote>(() => callApi<Quote>(`/api/quotes/${id}`));
+  const getReceiptById = async (id: string) => {
+    pushLog(`GET /receipts/${id}`);
+    const data = await exec<Receipt>(() =>
+      callApi<Receipt>(`/receipts/${id}`)
+    );
     pushLog(`GET → ${JSON.stringify(data)}`);
-    if (data) alert(`Quote: ${JSON.stringify(data, null, 2)}`);
+    if (data) alert(`Receipt: ${JSON.stringify(data, null, 2)}`);
   };
 
-  const updateQuote = async (id: string) => {
-    pushLog(`PUT /api/quotes/${id} { notes: "${updatedNotes}" }`);
-    const data = await exec<Quote>(() =>
-      callApi<Quote>(`/api/quotes/${id}`, {
+  const updateReceipt = async (id: string) => {
+    pushLog(`PUT /receipts/${id} { notes: "${updatedNotes}" }`);
+    const data = await exec<Receipt>(() =>
+      callApi<Receipt>(`/receipts/${id}`, {
         method: 'PUT',
         body: { notes: updatedNotes },
       })
     );
     pushLog(`PUT → ${JSON.stringify(data)}`);
     if (data) {
-      fetchQuotes();
+      fetchReceipts();
       setUpdatedNotes('');
       setSelectedId(null);
-      toast.success('Quote updated!');
+      toast.success('Receipt updated!');
     }
   };
 
-  const deleteQuote = async (id: string) => {
-    pushLog(`DELETE /api/quotes/${id}`);
-    await exec(() => callApi(`/api/quotes/${id}`, { method: 'DELETE' }));
-    fetchQuotes();
-    toast.success('Quote deleted!');
+  const deleteReceipt = async (id: string) => {
+    pushLog(`DELETE /receipts/${id}`);
+    await exec(() => callApi(`/receipts/${id}`, { method: 'DELETE' }));
+    fetchReceipts();
+    toast.success('Receipt deleted!');
   };
 
-  const restoreQuote = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/restore`);
-    await exec(() => callApi(`/api/quotes/${id}/restore`, { method: 'POST' }));
-    fetchQuotes();
-    toast.success('Quote restored!');
-  };
-
-  const hardDeleteQuote = async (id: string) => {
-    pushLog(`DELETE /api/quotes/${id}/hard-delete`);
+  const restoreReceipt = async (id: string) => {
+    pushLog(`POST /receipts/${id}/restore`);
     await exec(() =>
-      callApi(`/api/quotes/${id}/hard-delete`, { method: 'DELETE' })
+      callApi(`/receipts/${id}/restore`, { method: 'POST' })
     );
-    fetchQuotes();
-    toast.success('Quote hard deleted!');
+    fetchReceipts();
+    toast.success('Receipt restored!');
+  };
+
+  const hardDeleteReceipt = async (id: string) => {
+    pushLog(`DELETE /receipts/${id}/hard-delete`);
+    await exec(() =>
+      callApi(`/receipts/${id}/hard-delete`, { method: 'DELETE' })
+    );
+    fetchReceipts();
+    toast.success('Receipt hard deleted!');
   };
 
   const assignClient = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/assign-client`);
-    const data = await exec<Quote>(() =>
-      callApi(`/api/quotes/${id}/assign-client`, {
+    pushLog(`POST /receipts/${id}/assign-client`);
+    const data = await exec<Receipt>(() =>
+      callApi(`/receipts/${id}/assign-client`, {
         method: 'POST',
         body: { clientId: clientId.trim() },
       })
     );
-    pushLog(`assignClient → ${JSON.stringify(data)}`);
-    fetchQuotes();
+    fetchReceipts();
     setClientId('');
-    toast.success('Client assigned!');
+    pushLog(`assignClient → ${JSON.stringify(data)}`);
+    if (data?.clientId) {
+      toast.success('Client assigned!');
+    }
   };
 
   const addLineItem = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/add-line-item`);
-    const data = await exec<Quote>(() =>
-      callApi(`/api/quotes/${id}/add-line-item`, {
+    pushLog(`POST /receipts/${id}/add-line-item`);
+    const data = await exec<Receipt>(() =>
+      callApi(`/receipts/${id}/add-line-item`, {
         method: 'POST',
         body: { label: 'LineX', quantity: 1, price: 11 },
       })
     );
     pushLog(`addLineItem → ${JSON.stringify(data)}`);
-    fetchQuotes();
+    fetchReceipts();
     toast.success('Line item added!');
   };
 
   const removeLineItem = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/remove-line-item`);
-    const quote = quotes.find((q) => q._id === id);
-    const firstItem = quote?.items?.[0];
+    pushLog(`POST /receipts/${id}/remove-line-item`);
+    const receipt = receipts.find((q) => q._id === id);
+    const firstItem = receipt?.items?.[0];
     if (!firstItem) return pushLog('No item to remove');
     await exec(() =>
-      callApi(`/api/quotes/${id}/remove-line-item`, {
+      callApi(`/receipts/${id}/remove-line-item`, {
         method: 'POST',
         body: { itemId: firstItem._id },
       })
     );
-    fetchQuotes();
+    fetchReceipts();
     toast.success('Line item removed!');
   };
 
   // NEW: Accept/Reject actions
-  const acceptQuote = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/accept`);
-    await exec(() => callApi(`/api/quotes/${id}/accept`, { method: 'POST' }));
-    fetchQuotes();
-    toast.success('Quote accepted!');
+  const issueReceipt = async (id: string) => {
+    pushLog(`POST /receipts/${id}/mark-issued`);
+    await exec(() =>
+      callApi(`/receipts/${id}/mark-issued`, { method: 'POST' })
+    );
+    fetchReceipts();
+    toast.success('Receipt issued!');
   };
 
-  const rejectQuote = async (id: string) => {
-    pushLog(`POST /api/quotes/${id}/reject`);
-    await exec(() => callApi(`/api/quotes/${id}/reject`, { method: 'POST' }));
-    fetchQuotes();
-    toast.success('Quote rejected!');
+  const refundReceipt = async (id: string) => {
+    pushLog(`POST /receipts/${id}/mark-refunded`);
+    await exec(() =>
+      callApi(`/receipts/${id}/mark-refunded`, { method: 'POST' })
+    );
+    fetchReceipts();
+    toast.success('Receipt refunded!');
   };
 
   useEffect(() => {
-    fetchQuotes();
+    fetchReceipts();
     // eslint-disable-next-line
   }, [filter]);
 
@@ -182,12 +194,12 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
           placeholder='notes'
         />
         <div className='grid grid-cols-2 md:flex gap-2'>
-          <Button onClick={createQuote}>Create</Button>
-          <Button onClick={() => fetchQuotes()}>Reload</Button>
+          <Button onClick={createReceipt}>Create</Button>
+          <Button onClick={() => fetchReceipts()}>Reload</Button>
         </div>
       </div>
       <UL className='p-0 pt-2'>
-        {quotes.map((q) => (
+        {receipts.map((q) => (
           <LI
             key={q._id}
             className='flex flex-col md:flex-row items-center justify-between gap-2'
@@ -203,7 +215,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
                 />
                 <div className='grid grid-cols-2 gap-2'>
                   <Button
-                    onClick={() => updateQuote(selectedId)}
+                    onClick={() => updateReceipt(selectedId)}
                     disabled={!updatedNotes.trim()}
                   >
                     Update Note
@@ -224,7 +236,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
                 <span
                   className='cursor-pointer font-mono text-xs truncate max-w-xs'
                   title={JSON.stringify(q, null, 2)}
-                  onClick={() => getQuoteById(q._id)}
+                  onClick={() => getReceiptById(q._id)}
                 >
                   {_idShort(q._id)}
                   {q.deletedAt && (
@@ -245,7 +257,7 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
                   <Button
                     size='sm'
                     variant='destructive'
-                    onClick={() => deleteQuote(q._id)}
+                    onClick={() => deleteReceipt(q._id)}
                     disabled={!!q.deletedAt}
                   >
                     Soft Delete
@@ -262,30 +274,30 @@ export function QuoteE2ETest({ pushLog, filter }: Props) {
                   <Button
                     size='sm'
                     variant='outline'
-                    onClick={() => acceptQuote(q._id)}
+                    onClick={() => issueReceipt(q._id)}
                   >
-                    Accept
+                    Issue
                   </Button>
                   <Button
                     size='sm'
                     variant='destructive'
-                    onClick={() => rejectQuote(q._id)}
+                    onClick={() => refundReceipt(q._id)}
                   >
-                    Reject
+                    Refound
                   </Button>
                   {q.deletedAt && (
                     <>
                       <Button
                         size='sm'
                         variant='outline'
-                        onClick={() => restoreQuote(q._id)}
+                        onClick={() => restoreReceipt(q._id)}
                       >
                         Restore
                       </Button>
                       <Button
                         size='sm'
                         variant='destructive'
-                        onClick={() => hardDeleteQuote(q._id)}
+                        onClick={() => hardDeleteReceipt(q._id)}
                       >
                         Hard Delete
                       </Button>

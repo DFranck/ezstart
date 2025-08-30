@@ -44,9 +44,9 @@ export function StatusChangeModal({
   const [newStatus, setNewStatus] = useState(currentStatus);
 
   const apiEndpoints = {
-    invoice: '/api/invoices',
-    quote: '/api/quotes',
-    receipt: '/api/receipts',
+    invoice: '/invoices',
+    quote: '/quotes',
+    receipt: '/receipts',
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -25,11 +25,11 @@ export const BillingProvider = ({
     setLoading(true);
     try {
       const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes] = await Promise.all([
-        callApi<Client[]>('/api/clients', {}),
-        callApi<Invoice[]>('/api/invoices', {}),
-        callApi<Quote[]>('/api/quotes', {}),
-        callApi<Receipt[]>('/api/receipts', {}),
-        callApi<{companies: Company[]}>(`/api/companies/user/${user._id}`, {}),
+        callApi<Client[]>('/clients', {}),
+        callApi<Invoice[]>('/invoices', {}),
+        callApi<Quote[]>('/quotes', {}),
+        callApi<Receipt[]>('/receipts', {}),
+        callApi<{companies: Company[]}>(`/companies/user/${user._id}`, {}),
       ]);
       
       if (clientsRes.ok && clientsRes.data) setClients(clientsRes.data);

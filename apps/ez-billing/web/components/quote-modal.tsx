@@ -65,13 +65,13 @@ export function QuoteModal({ isOpen, onClose, clients, quote, onSave }: QuoteMod
     return runWithFeedback({
       action: async () => {
         if (quote) {
-          const res = await callApi(`/api/quotes/${quote._id}`, {
+          const res = await callApi(`/quotes/${quote._id}`, {
             method: 'PUT',
             body: formData,
           });
           if (!res.ok) throw new Error('Failed to update quote');
         } else {
-          const res = await callApi('/api/quotes', {
+          const res = await callApi('/quotes', {
             method: 'POST',
             body: formData,
           });

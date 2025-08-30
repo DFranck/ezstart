@@ -19,22 +19,22 @@ export const BillingProvider = ({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const fetchClients = useCallback(async () => {
-    const data = await exec<Client[]>(() => callApi('/api/clients', {}));
+    const data = await exec<Client[]>(() => callApi('/clients', {}));
     setClients(data ?? []);
   }, [exec]);
 
   const fetchInvoices = useCallback(async () => {
-    const data = await exec<Invoice[]>(() => callApi('/api/invoices', {}));
+    const data = await exec<Invoice[]>(() => callApi('/invoices', {}));
     setInvoices(data ?? []);
   }, [exec]);
 
   const fetchQuotes = useCallback(async () => {
-    const data = await exec<Quote[]>(() => callApi('/api/quotes', {}));
+    const data = await exec<Quote[]>(() => callApi('/quotes', {}));
     setQuotes(data ?? []);
   }, [exec]);
 
   const fetchReceipts = useCallback(async () => {
-    const data = await exec<Receipt[]>(() => callApi('/api/receipts', {}));
+    const data = await exec<Receipt[]>(() => callApi('/receipts', {}));
     setReceipts(data ?? []);
   }, [exec]);
 

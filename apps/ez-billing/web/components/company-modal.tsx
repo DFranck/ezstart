@@ -41,13 +41,13 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
     return runWithFeedback({
       action: async () => {
         if (company) {
-          const res = await callApi(`/api/companies/${company._id}`, {
+          const res = await callApi(`/companies/${company._id}`, {
             method: 'PUT',
             body: dataToSend,
           });
           if (!res.ok) throw new Error('Failed to update company');
         } else {
-          const res = await callApi('/api/companies', {
+          const res = await callApi('/companies', {
             method: 'POST',
             body: dataToSend,
           });

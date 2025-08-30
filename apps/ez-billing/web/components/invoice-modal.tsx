@@ -67,13 +67,13 @@ export function InvoiceModal({ isOpen, onClose, clients, invoice, onSave }: Invo
     return runWithFeedback({
       action: async () => {
         if (invoice) {
-          const res = await callApi(`/api/invoices/${invoice._id}`, {
+          const res = await callApi(`/invoices/${invoice._id}`, {
             method: 'PUT',
             body: formData,
           });
           if (!res.ok) throw new Error('Failed to update invoice');
         } else {
-          const res = await callApi('/api/invoices', {
+          const res = await callApi('/invoices', {
             method: 'POST',
             body: formData,
           });

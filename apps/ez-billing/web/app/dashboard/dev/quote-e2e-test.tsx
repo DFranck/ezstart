@@ -1,16 +1,18 @@
 'use client';
 import { callApi } from '@ezstart/ui/utils';
-import { Invoice } from '@ez-billing/types';
+import { Quote } from '@ez-billing/types';
 import { Button, Input, LI, UL } from '@ezstart/ui/components';
 import { useApiAction } from '@ezstart/ui/hooks';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
 type Props = {
   pushLog: (msg: string) => void;
   filter?: 'active' | 'deletedOnly' | 'all';
 };
-export function InvoiceE2ETest({ pushLog, filter }: Props) {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+
+export function QuoteE2ETest({ pushLog, filter }: Props) {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -18,24 +20,22 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
 
   const { exec, error } = useApiAction();
 
-  const fetchInvoices = async (f = filter) => {
+  const fetchQuotes = async (f = filter) => {
     const query: any = {};
     if (f === 'deletedOnly') query.deletedOnly = true;
     if (f === 'all') query.includeDeleted = true;
-    // pushLog(`fetchInvoices(${f})`);
-    const data = await exec<Invoice[]>(() =>
-      callApi<Invoice[]>('/api/invoices', { query })
+    pushLog(`fetchQuotes(${f})`);
+    const data = await exec<Quote[]>(() =>
+      callApi<Quote[]>('/quotes', { query })
     );
-    setInvoices(data ?? []);
-    // pushLog(`GET /api/invoices → ${JSON.stringify(data)}`);
+    setQuotes(data ?? []);
+    pushLog(`GET /quotes → ${JSON.stringify(data)}`);
   };
 
-  const createInvoice = async () => {
-    pushLog(
-      `POST /api/invoices { clientId: "${clientId}", notes: "${notes}" }`
-    );
-    const data = await exec<Invoice>(() =>
-      callApi<Invoice>('/api/invoices', {
+  const createQuote = async () => {
+    pushLog(`POST /quotes { clientId: "${clientId}", notes: "${notes}" }`);
+    const data = await exec<Quote>(() =>
+      callApi<Quote>('/quotes', {
         method: 'POST',
         body: {
           clientId: clientId.trim(),
@@ -43,128 +43,130 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
           currency: 'EUR',
           notes: notes.trim(),
           status: 'draft',
-          taxRate: 20,
+          taxRate: 16,
         },
       })
     );
-    // pushLog(`POST → ${JSON.stringify(data)}`);
+    pushLog(`POST → ${JSON.stringify(data)}`);
     if (data) {
       setClientId('');
       setNotes('');
-      fetchInvoices();
-      toast.success('Invoice created!');
+      fetchQuotes();
+      toast.success('Quote created!');
     }
   };
 
-  const getInvoiceById = async (id: string) => {
-    pushLog(`GET /api/invoices/${id}`);
-    const data = await exec<Invoice>(() =>
-      callApi<Invoice>(`/api/invoices/${id}`)
-    );
-    // pushLog(`GET → ${JSON.stringify(data)}`);
-    if (data) alert(`Invoice: ${JSON.stringify(data, null, 2)}`);
+  const getQuoteById = async (id: string) => {
+    pushLog(`GET /quotes/${id}`);
+    const data = await exec<Quote>(() => callApi<Quote>(`/quotes/${id}`));
+    pushLog(`GET → ${JSON.stringify(data)}`);
+    if (data) alert(`Quote: ${JSON.stringify(data, null, 2)}`);
   };
 
-  const updateInvoice = async (id: string) => {
-    pushLog(`PUT /api/invoices/${id} { notes: "${updatedNotes}" }`);
-    const data = await exec<Invoice>(() =>
-      callApi<Invoice>(`/api/invoices/${id}`, {
+  const updateQuote = async (id: string) => {
+    pushLog(`PUT /quotes/${id} { notes: "${updatedNotes}" }`);
+    const data = await exec<Quote>(() =>
+      callApi<Quote>(`/quotes/${id}`, {
         method: 'PUT',
         body: { notes: updatedNotes },
       })
     );
-    // pushLog(`PUT → ${JSON.stringify(data)}`);
+    pushLog(`PUT → ${JSON.stringify(data)}`);
     if (data) {
-      fetchInvoices();
+      fetchQuotes();
       setUpdatedNotes('');
       setSelectedId(null);
-      toast.success('Invoice updated!');
+      toast.success('Quote updated!');
     }
   };
 
-  const deleteInvoice = async (id: string) => {
-    pushLog(`DELETE /api/invoices/${id}`);
-    await exec(() => callApi(`/api/invoices/${id}`, { method: 'DELETE' }));
-    fetchInvoices();
-    toast.success('Invoice deleted!');
+  const deleteQuote = async (id: string) => {
+    pushLog(`DELETE /quotes/${id}`);
+    await exec(() => callApi(`/quotes/${id}`, { method: 'DELETE' }));
+    fetchQuotes();
+    toast.success('Quote deleted!');
   };
 
-  const restoreInvoice = async (id: string) => {
-    pushLog(`POST /api/invoices/${id}/restore`);
-    await exec(() =>
-      callApi(`/api/invoices/${id}/restore`, { method: 'POST' })
-    );
-    fetchInvoices();
-    toast.success('Invoice restored!');
+  const restoreQuote = async (id: string) => {
+    pushLog(`POST /quotes/${id}/restore`);
+    await exec(() => callApi(`/quotes/${id}/restore`, { method: 'POST' }));
+    fetchQuotes();
+    toast.success('Quote restored!');
   };
 
-  const hardDeleteInvoice = async (id: string) => {
-    pushLog(`DELETE /api/invoices/${id}/hard-delete`);
+  const hardDeleteQuote = async (id: string) => {
+    pushLog(`DELETE /quotes/${id}/hard-delete`);
     await exec(() =>
-      callApi(`/api/invoices/${id}/hard-delete`, { method: 'DELETE' })
+      callApi(`/quotes/${id}/hard-delete`, { method: 'DELETE' })
     );
-    fetchInvoices();
-    toast.success('Invoice hard deleted!');
+    fetchQuotes();
+    toast.success('Quote hard deleted!');
   };
 
   const assignClient = async (id: string) => {
-    pushLog(`POST /api/invoices/${id}/assign-client`);
-    const data = await exec<Invoice>(() =>
-      callApi(`/api/invoices/${id}/assign-client`, {
+    pushLog(`POST /quotes/${id}/assign-client`);
+    const data = await exec<Quote>(() =>
+      callApi(`/quotes/${id}/assign-client`, {
         method: 'POST',
         body: { clientId: clientId.trim() },
       })
     );
-    // pushLog(`assignClient → ${JSON.stringify(data)}`);
-    fetchInvoices();
+    pushLog(`assignClient → ${JSON.stringify(data)}`);
+    fetchQuotes();
     setClientId('');
     toast.success('Client assigned!');
   };
 
   const addLineItem = async (id: string) => {
-    pushLog(`POST /api/invoices/${id}/add-line-item`);
-    const data = await exec<Invoice>(() =>
-      callApi(`/api/invoices/${id}/add-line-item`, {
+    pushLog(`POST /quotes/${id}/add-line-item`);
+    const data = await exec<Quote>(() =>
+      callApi(`/quotes/${id}/add-line-item`, {
         method: 'POST',
         body: { label: 'LineX', quantity: 1, price: 11 },
       })
     );
-    // pushLog(`addLineItem → ${JSON.stringify(data)}`);
-    fetchInvoices();
-    toast.success('line item added!');
+    pushLog(`addLineItem → ${JSON.stringify(data)}`);
+    fetchQuotes();
+    toast.success('Line item added!');
   };
 
   const removeLineItem = async (id: string) => {
-    pushLog(`POST /api/invoices/${id}/remove-line-item`);
-    const invoice = invoices.find((i) => i._id === id);
-    const firstItem = invoice?.items?.[0];
+    pushLog(`POST /quotes/${id}/remove-line-item`);
+    const quote = quotes.find((q) => q._id === id);
+    const firstItem = quote?.items?.[0];
     if (!firstItem) return pushLog('No item to remove');
     await exec(() =>
-      callApi(`/api/invoices/${id}/remove-line-item`, {
+      callApi(`/quotes/${id}/remove-line-item`, {
         method: 'POST',
         body: { itemId: firstItem._id },
       })
     );
-    fetchInvoices();
-    toast.success('line item removed!');
+    fetchQuotes();
+    toast.success('Line item removed!');
   };
 
-  const markPaid = async (id: string) => {
-    pushLog(`POST /api/invoices/${id}/mark-paid`);
-    await exec(() =>
-      callApi(`/api/invoices/${id}/mark-paid`, { method: 'POST' })
-    );
-    fetchInvoices();
-    toast.success('Invoice marked as paid!');
+  // NEW: Accept/Reject actions
+  const acceptQuote = async (id: string) => {
+    pushLog(`POST /quotes/${id}/accept`);
+    await exec(() => callApi(`/quotes/${id}/accept`, { method: 'POST' }));
+    fetchQuotes();
+    toast.success('Quote accepted!');
+  };
+
+  const rejectQuote = async (id: string) => {
+    pushLog(`POST /quotes/${id}/reject`);
+    await exec(() => callApi(`/quotes/${id}/reject`, { method: 'POST' }));
+    fetchQuotes();
+    toast.success('Quote rejected!');
   };
 
   useEffect(() => {
-    fetchInvoices();
+    fetchQuotes();
+    // eslint-disable-next-line
   }, [filter]);
 
   return (
     <>
-      {' '}
       {error && (
         <pre className='text-destructive col-span-2 text-center'>{error}</pre>
       )}
@@ -180,18 +182,18 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
           placeholder='notes'
         />
         <div className='grid grid-cols-2 md:flex gap-2'>
-          <Button onClick={createInvoice}>Create</Button>
-          <Button onClick={() => fetchInvoices()}>Reload</Button>
+          <Button onClick={createQuote}>Create</Button>
+          <Button onClick={() => fetchQuotes()}>Reload</Button>
         </div>
       </div>
       <UL className='p-0 pt-2'>
-        {invoices.map((inv) => (
+        {quotes.map((q) => (
           <LI
-            key={inv._id}
+            key={q._id}
             className='flex flex-col md:flex-row items-center justify-between gap-2'
             variant={'card'}
           >
-            {selectedId === inv._id ? (
+            {selectedId === q._id ? (
               // Bloc édition inline
               <div className='flex flex-col md:flex-row gap-2 w-full'>
                 <Input
@@ -201,7 +203,7 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
                 />
                 <div className='grid grid-cols-2 gap-2'>
                   <Button
-                    onClick={() => updateInvoice(selectedId)}
+                    onClick={() => updateQuote(selectedId)}
                     disabled={!updatedNotes.trim()}
                   >
                     Update Note
@@ -221,11 +223,11 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
               <>
                 <span
                   className='cursor-pointer font-mono text-xs truncate max-w-xs'
-                  title={JSON.stringify(inv, null, 2)}
-                  onClick={() => getInvoiceById(inv._id)}
+                  title={JSON.stringify(q, null, 2)}
+                  onClick={() => getQuoteById(q._id)}
                 >
-                  {_idShort(inv._id)}
-                  {inv.deletedAt && (
+                  {_idShort(q._id)}
+                  {q.deletedAt && (
                     <span className='ml-1 text-red-500 text-xs'>(deleted)</span>
                   )}
                 </span>
@@ -234,8 +236,8 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
                     size='sm'
                     variant='outline'
                     onClick={() => {
-                      setSelectedId(inv._id);
-                      setUpdatedNotes(inv.notes ?? '');
+                      setSelectedId(q._id);
+                      setUpdatedNotes(q.notes ?? '');
                     }}
                   >
                     Update Note
@@ -243,36 +245,47 @@ export function InvoiceE2ETest({ pushLog, filter }: Props) {
                   <Button
                     size='sm'
                     variant='destructive'
-                    onClick={() => deleteInvoice(inv._id)}
-                    disabled={!!inv.deletedAt}
+                    onClick={() => deleteQuote(q._id)}
+                    disabled={!!q.deletedAt}
                   >
                     Soft Delete
                   </Button>
-                  <Button size='sm' onClick={() => assignClient(inv._id)}>
+                  <Button size='sm' onClick={() => assignClient(q._id)}>
                     Assign Client
                   </Button>
-                  <Button size='sm' onClick={() => addLineItem(inv._id)}>
+                  <Button size='sm' onClick={() => addLineItem(q._id)}>
                     Add Item
                   </Button>
-                  <Button size='sm' onClick={() => removeLineItem(inv._id)}>
+                  <Button size='sm' onClick={() => removeLineItem(q._id)}>
                     Remove Item
                   </Button>
-                  <Button size='sm' onClick={() => markPaid(inv._id)}>
-                    Mark Paid
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onClick={() => acceptQuote(q._id)}
+                  >
+                    Accept
                   </Button>
-                  {inv.deletedAt && (
+                  <Button
+                    size='sm'
+                    variant='destructive'
+                    onClick={() => rejectQuote(q._id)}
+                  >
+                    Reject
+                  </Button>
+                  {q.deletedAt && (
                     <>
                       <Button
                         size='sm'
                         variant='outline'
-                        onClick={() => restoreInvoice(inv._id)}
+                        onClick={() => restoreQuote(q._id)}
                       >
                         Restore
                       </Button>
                       <Button
                         size='sm'
                         variant='destructive'
-                        onClick={() => hardDeleteInvoice(inv._id)}
+                        onClick={() => hardDeleteQuote(q._id)}
                       >
                         Hard Delete
                       </Button>

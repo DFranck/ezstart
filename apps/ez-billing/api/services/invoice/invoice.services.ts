@@ -14,7 +14,19 @@ import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
 export async function createInvoiceService(
   data: CreateInvoice
 ): Promise<Invoice> {
-  const exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
+  let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
+  
+  // Provide a default exchange rate if none exists
+  if (!exchangeRate) {
+    exchangeRate = {
+      from: data.currency,
+      to: 'USD',
+      rate: 1.0, // Default 1:1 rate
+      source: 'default',
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+  
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('invoice');
   const doc = new InvoiceModel({

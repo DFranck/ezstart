@@ -2,16 +2,17 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   validateQuery,
+  validateParams,
 } from '@ezstart/api-core';
 import {
   addLineItemSchema,
   assignClientSchema,
-  createQuoteSchema,
+  createReceiptSchema,
   getReceiptsQuerySchema,
   paramsMongoIdSchema,
   receiptSchema,
   removeLineItemSchema,
-  updateInvoiceSchema,
+  updateReceiptSchema,
 } from '@ez-billing/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/receipt';
@@ -19,64 +20,66 @@ export const receiptRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(receiptRegistry, router);
 
-docRouter.post('/receipts/', controllers.createReceiptController, {
-  summary: 'Create a Quote',
+docRouter.post('/', controllers.createReceiptController, {
+  summary: 'Create a Receipt',
   tags: ['Receipts'],
-  bodySchema: receiptSchema,
-  responseSchema: createQuoteSchema,
+  bodySchema: createReceiptSchema,
+  responseSchema: receiptSchema,
   status: 201,
 });
 
-docRouter.get('/receipts/', validateQuery(getReceiptsQuerySchema), {
+docRouter.get('/', validateQuery(getReceiptsQuerySchema), controllers.getReceiptsController, {
   summary: 'List Receipts',
   tags: ['Receipts'],
   querySchema: getReceiptsQuerySchema,
   responseSchema: receiptSchema.array(),
 });
 
-docRouter.get('/receipts/:id', controllers.getReceiptByIdController, {
-  summary: 'Get Quote by id',
+docRouter.get('/:id', validateParams(paramsMongoIdSchema), controllers.getReceiptByIdController, {
+  summary: 'Get Receipt by id',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: receiptSchema,
 });
 
-docRouter.put('/receipts/:id', controllers.updateReceiptController, {
-  summary: 'Update Quote by id',
+docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateReceiptController, {
+  summary: 'Update Receipt by id',
   tags: ['Receipts'],
-  bodySchema: updateInvoiceSchema,
+  bodySchema: updateReceiptSchema,
   paramsSchema: paramsMongoIdSchema,
   responseSchema: receiptSchema,
 });
 
-docRouter.delete('/receipts/:id', controllers.softDeleteReceiptController, {
-  summary: 'Soft delete Quote',
+docRouter.delete('/:id', validateParams(paramsMongoIdSchema), controllers.softDeleteReceiptController, {
+  summary: 'Soft delete Receipt',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('/receipts/:id/restore', controllers.restoreReceiptController, {
-  summary: 'Restore Quote',
+docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.restoreReceiptController, {
+  summary: 'Restore Receipt',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: receiptSchema,
 });
 
 docRouter.delete(
-  '/receipts/:id/hard-delete',
+  '/:id/hard-delete',
+  validateParams(paramsMongoIdSchema),
   controllers.hardDeleteReceiptController,
   {
-    summary: 'Hard delete Quote',
+    summary: 'Hard delete Receipt',
     tags: ['Receipts'],
     paramsSchema: paramsMongoIdSchema,
   }
 );
 
 docRouter.post(
-  '/receipts/:id/add-line-item',
+  '/:id/add-line-item',
+  validateParams(paramsMongoIdSchema),
   controllers.addLineItemToReceiptController,
   {
-    summary: 'Add line Item to Quote',
+    summary: 'Add line Item to Receipt',
     tags: ['Receipts'],
     bodySchema: addLineItemSchema,
     paramsSchema: paramsMongoIdSchema,
@@ -84,10 +87,11 @@ docRouter.post(
   }
 );
 docRouter.post(
-  '/receipts/:id/remove-line-item',
+  '/:id/remove-line-item',
+  validateParams(paramsMongoIdSchema),
   controllers.removeLineItemFromReceiptController,
   {
-    summary: 'Remove line Item from Quote',
+    summary: 'Remove line Item from Receipt',
     tags: ['Receipts'],
     bodySchema: removeLineItemSchema,
     paramsSchema: paramsMongoIdSchema,
@@ -95,10 +99,11 @@ docRouter.post(
   }
 );
 docRouter.post(
-  '/receipts/:id/assign-client',
+  '/:id/assign-client',
+  validateParams(paramsMongoIdSchema),
   controllers.assignClientToReceiptController,
   {
-    summary: 'Assign Client to Quote',
+    summary: 'Assign Client to Receipt',
     tags: ['Receipts'],
     bodySchema: assignClientSchema,
     paramsSchema: paramsMongoIdSchema,
@@ -106,20 +111,22 @@ docRouter.post(
   }
 );
 docRouter.post(
-  '/receipts/:id/mark-issued',
+  '/:id/mark-issued',
+  validateParams(paramsMongoIdSchema),
   controllers.markReceiptAsIssuedController,
   {
-    summary: 'Accept a Quote',
+    summary: 'Mark Receipt as Issued',
     tags: ['Receipts'],
     paramsSchema: paramsMongoIdSchema,
     responseSchema: receiptSchema,
   }
 );
 docRouter.post(
-  '/receipts/:id/mark-refunded',
+  '/:id/mark-refunded',
+  validateParams(paramsMongoIdSchema),
   controllers.markReceiptAsRefundedController,
   {
-    summary: 'Reject a Quote',
+    summary: 'Mark Receipt as Refunded',
     tags: ['Receipts'],
     paramsSchema: paramsMongoIdSchema,
     responseSchema: receiptSchema,
