@@ -8,6 +8,7 @@ export const quoteStatusEnum = z.enum([
   'sent',
   'accepted',
   'rejected',
+  'converted',
 ]);
 export type QuoteStatus = ZodInfer<typeof quoteStatusEnum>;
 

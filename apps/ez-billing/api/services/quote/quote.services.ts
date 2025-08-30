@@ -1,6 +1,8 @@
 import {
+  ConvertQuoteToInvoice,
   CreateQuote,
   GetQuotesQuery,
+  Invoice,
   Quote,
   UpdateQuote,
 } from '@ez-billing/types';
@@ -97,4 +99,53 @@ export async function restoreQuoteService(id: string): Promise<Quote | null> {
   );
 
   return doc ? toApiObject<Quote>(doc) : null;
+}
+
+export async function convertQuoteToInvoiceService(
+  quoteId: string,
+  conversionData: ConvertQuoteToInvoice
+): Promise<Invoice | null> {
+  // Import here to avoid circular dependency
+  const { InvoiceModel } = await import('../../models/billing/invoice');
+  const { generateNextNumber } = await import('../../utils/generate-next-number');
+  
+  // Get the quote
+  const quote = await QuoteModel.findById(quoteId);
+  if (!quote || quote.deletedAt) {
+    return null;
+  }
+
+  // Check if quote can be converted (not already converted)
+  if (quote.status === 'converted') {
+    throw new Error('Quote has already been converted to invoice');
+  }
+
+  // Create the invoice from quote data
+  const invoiceDocumentNumber = await generateNextNumber('invoice');
+  const invoiceData = {
+    clientId: quote.clientId,
+    items: quote.items,
+    currency: quote.currency,
+    exchangeRate: quote.exchangeRate,
+    dueDate: conversionData.dueDate || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+    notes: conversionData.notes || quote.notes,
+    taxRate: conversionData.taxRate ?? quote.taxRate,
+    status: 'draft',
+    quoteId: quote._id.toString(),
+    documentNumber: invoiceDocumentNumber,
+    subtotal: quote.subtotal,
+    taxAmount: quote.taxAmount,
+    total: quote.total,
+  };
+
+  // Create the invoice
+  const invoiceDoc = new InvoiceModel(invoiceData);
+  const savedInvoice = await invoiceDoc.save();
+
+  // Update quote status to 'converted'
+  await QuoteModel.findByIdAndUpdate(quoteId, {
+    status: 'converted'
+  });
+
+  return toApiObject<Invoice>(savedInvoice);
 }

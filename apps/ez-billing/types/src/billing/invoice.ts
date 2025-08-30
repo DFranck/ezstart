@@ -1,4 +1,4 @@
-import { type Infer as ZodInfer } from '@ezstart/types';
+import { z, type Infer as ZodInfer } from '@ezstart/types';
 import { invoiceStatusEnum } from '../enums/index.js';
 import {
   baseBillingDocSchema,
@@ -8,6 +8,7 @@ import {
 
 export const createInvoiceSchema = baseBillingDocSchema.extend({
   status: invoiceStatusEnum.default('draft').describe('Invoice status'),
+  quoteId: z.string().optional().describe('Reference to the quote this invoice was created from'),
 });
 export const updateInvoiceSchema = createInvoiceSchema.partial();
 export const invoiceSchema = withBillingOutputFields(createInvoiceSchema);

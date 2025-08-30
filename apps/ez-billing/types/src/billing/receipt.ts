@@ -9,6 +9,7 @@ import {
 export const createReceiptSchema = baseBillingDocSchema.extend({
   status: receiptStatusEnum.default('issued').describe('Receipt status'),
   paymentDate: z.string().optional().describe('Date when payment was received (ISO date string)'),
+  invoiceId: z.string().optional().describe('Reference to the invoice this receipt was generated from'),
 });
 export const updateReceiptSchema = createReceiptSchema.partial();
 export const receiptSchema = withBillingOutputFields(createReceiptSchema);

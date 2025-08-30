@@ -7,8 +7,10 @@ import {
 import {
   addLineItemSchema,
   assignClientSchema,
+  convertQuoteToInvoiceSchema,
   createQuoteSchema,
   getQuotesQuerySchema,
+  invoiceSchema,
   paramsMongoIdSchema,
   quoteSchema,
   removeLineItemSchema,
@@ -122,6 +124,14 @@ docRouter.post('/:id/reject', validateParams(paramsMongoIdSchema), controllers.r
   tags: ['Quotes'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: quoteSchema,
+});
+docRouter.post('/:id/convert-to-invoice', validateParams(paramsMongoIdSchema), controllers.convertQuoteToInvoiceController, {
+  summary: 'Convert Quote to Invoice',
+  tags: ['Quotes'],
+  bodySchema: convertQuoteToInvoiceSchema,
+  paramsSchema: paramsMongoIdSchema,
+  responseSchema: invoiceSchema,
+  status: 201,
 });
 
 export default router;

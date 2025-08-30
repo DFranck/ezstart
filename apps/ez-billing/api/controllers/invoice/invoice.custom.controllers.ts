@@ -63,8 +63,13 @@ export async function markInvoiceAsPaidController(req: Request, res: Response) {
       .status(400)
       .json({ error: 'Invalid invoice ID', details: parseId.error.errors });
   }
-  const invoice = await markInvoiceAsPaidService(parseId.data);
-  return res.status(200).json(invoice);
+  const result = await markInvoiceAsPaidService(parseId.data);
+  if (!result) {
+    return res.status(404).json({ error: 'Invoice not found' });
+  }
+  
+  // Return both invoice and receipt (if created)
+  return res.status(200).json(result);
 }
 
 export async function removeLineItemToInvoiceController(
