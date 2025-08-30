@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { BillingClient, Client } from '@ez-billing/types'
 import {
   Button,
+  Checkbox,
   Input,
   Label,
   Modal,
@@ -43,6 +44,10 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     website: client?.website || '',
     notes: client?.notes || '',
   })
+
+  const [showFullAddress, setShowFullAddress] = useState(
+    !!(client?.city || client?.postalCode || client?.country)
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,7 +108,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
       <form
         id="client-form"
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-1"
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium text-gray-700 mb-2 block">Client Name *</Label>
@@ -174,35 +179,52 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
           />
         </div>
 
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">City</Label>
-          <Input
-            value={formData.city}
-            onChange={e => setFormData({ ...formData, city: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="New York"
-          />
+        <div className="lg:col-span-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="showFullAddress"
+              checked={showFullAddress}
+              onCheckedChange={(checked: boolean) => setShowFullAddress(checked)}
+            />
+            <Label htmlFor="showFullAddress" className="text-sm text-gray-700">
+              Add detailed address (city, postal code, country)
+            </Label>
+          </div>
         </div>
 
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Postal Code</Label>
-          <Input
-            value={formData.postalCode}
-            onChange={e => setFormData({ ...formData, postalCode: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="10001"
-          />
-        </div>
+        {showFullAddress && (
+          <>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">City</Label>
+              <Input
+                value={formData.city}
+                onChange={e => setFormData({ ...formData, city: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="New York"
+              />
+            </div>
 
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">Country</Label>
-          <Input
-            value={formData.country}
-            onChange={e => setFormData({ ...formData, country: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="United States"
-          />
-        </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Postal Code</Label>
+              <Input
+                value={formData.postalCode}
+                onChange={e => setFormData({ ...formData, postalCode: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="10001"
+              />
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Country</Label>
+              <Input
+                value={formData.country}
+                onChange={e => setFormData({ ...formData, country: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="United States"
+              />
+            </div>
+          </>
+        )}
 
         {formData.isCompany && (
           <>

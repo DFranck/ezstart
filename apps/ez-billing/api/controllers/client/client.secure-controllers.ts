@@ -1,12 +1,81 @@
 import { Request, Response } from 'express';
 import { BillingClient } from '@ez-billing/types';
 import {
+  createClientService,
   getClientByIdService,
+  getClientsService,
   updateClientService,
   softDeleteClientService,
   restoreClientService,
   hardDeleteClientService,
 } from '../../services/client';
+
+/**
+ * Secure controller to create a client
+ * Ensures userId matches authenticated user
+ */
+export async function createSecureClientController(req: Request, res: Response) {
+  try {
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Authentication required'
+      });
+    }
+
+    const clientData: BillingClient = req.body;
+
+    // Ensure userId in body matches authenticated user
+    if (clientData.userId && clientData.userId !== userId) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Cannot create client for another user'
+      });
+    }
+
+    // Force userId to match authenticated user
+    const secureClientData = { ...clientData, userId };
+
+    const client = await createClientService(secureClientData);
+
+    res.status(201).json(client);
+  } catch (error) {
+    console.error('Error in createSecureClientController:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to create client'
+    });
+  }
+}
+
+/**
+ * Secure controller to get all clients for authenticated user
+ * Only returns clients belonging to the authenticated user
+ */
+export async function getSecureClientsController(req: Request, res: Response) {
+  try {
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Authentication required'
+      });
+    }
+
+    const clients = await getClientsService({ userId });
+
+    res.json(clients);
+  } catch (error) {
+    console.error('Error in getSecureClientsController:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to retrieve clients'
+    });
+  }
+}
 
 /**
  * Secure controller to get client by ID

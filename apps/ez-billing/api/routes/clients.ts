@@ -21,8 +21,8 @@ export const clientsRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(clientsRegistry, router);
 
-docRouter.post('/', controllers.createClientController, {
-  summary: 'Create a Client',
+docRouter.post('/', authMiddleware, secureControllers.createSecureClientController, {
+  summary: 'Create a Client (authenticated)',
   tags: ['Clients'],
   bodySchema: billingClientSchema,
   responseSchema: clientSchema,
@@ -31,12 +31,11 @@ docRouter.post('/', controllers.createClientController, {
 
 docRouter.get(
   '/',
-  validateQuery(getClientsQuerySchema),
-  controllers.getClientsController,
+  authMiddleware,
+  secureControllers.getSecureClientsController,
   {
-    summary: 'List Clients by User ID',
+    summary: 'List Clients (authenticated)',
     tags: ['Clients'],
-    querySchema: getClientsQuerySchema,
     responseSchema: clientSchema.array(),
   }
 );

@@ -32,11 +32,26 @@ export async function callApi<T = any>(
   const isStringBody = typeof body === 'string'
   const isJsonBody = !isFormUrlEncoded && !isStringBody
 
+  // Get userId from localStorage for authentication header
+  let userId: string | null = null
+  if (typeof window !== 'undefined') {
+    try {
+      const userStore = localStorage.getItem('ez-billing-user')
+      if (userStore) {
+        const parsed = JSON.parse(userStore)
+        userId = parsed.state?.user?._id || null
+      }
+    } catch {
+      userId = null
+    }
+  }
+
   try {
     const res = await fetch(url, {
       method,
       headers: {
         ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
+        ...(userId ? { 'X-User-Id': userId } : {}),
         ...headers,
       },
       body: isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,

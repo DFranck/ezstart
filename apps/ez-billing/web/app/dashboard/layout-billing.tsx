@@ -23,19 +23,40 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
   return (
     <>
       <Header
-        className={cn('h-14 bg-muted border-y sticky top-0')}
+        className={cn('h-16 bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm')}
         leftContent={
-          <H1 size={'h5'} asChild className='text-start w-fit'>
-            <Link href='/dashboard'>EzBilling</Link>
-          </H1>
+          <div className="flex items-center space-x-4">
+            <H1 size={'h5'} asChild className='text-start w-fit font-bold text-gray-900'>
+              <Link href='/dashboard' className="hover:text-blue-600 transition-colors">
+                EzBilling
+              </Link>
+            </H1>
+          </div>
         }
         rightContent={
-          <Button onClick={() => setIsClientModalOpen(true)}>
-            <Icon name='fa:FaPlus' /> New client
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button 
+              onClick={() => setIsClientModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
+            >
+              <Icon name='fa:FaPlus' className="mr-2" /> 
+              New Client
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = '/';
+              }}
+              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <Icon name='fa:FaSignOutAlt' className="mr-2" />
+              Logout
+            </Button>
+          </div>
         }
       />
-      <Main>{children}</Main>
+      <Main className="bg-gray-50 min-h-screen">{children}</Main>
       
       <ClientModal
         isOpen={isClientModalOpen}
