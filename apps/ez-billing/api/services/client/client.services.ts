@@ -11,8 +11,15 @@ export async function createClientService(
   return toApiObject(savedClient);
 }
 
-export async function getClientByIdService(id: string): Promise<Client | null> {
-  return ClientModel.findOne({ _id: id, deletedAt: null });
+export async function getClientByIdService(
+  id: string, 
+  userId?: string
+): Promise<Client | null> {
+  const filter: any = { _id: id, deletedAt: null };
+  if (userId) {
+    filter.userId = userId;
+  }
+  return ClientModel.findOne(filter);
 }
 
 export async function getClientsService(
@@ -22,24 +29,41 @@ export async function getClientsService(
 }
 
 export async function hardDeleteClientService(
-  id: string
+  id: string,
+  userId?: string
 ): Promise<Client | null> {
-  return ClientModel.findByIdAndDelete(id);
+  const filter: any = { _id: id };
+  if (userId) {
+    filter.userId = userId;
+  }
+  return ClientModel.findOneAndDelete(filter);
 }
 
-export async function restoreClientService(id: string): Promise<Client | null> {
-  return ClientModel.findByIdAndUpdate(
-    id,
+export async function restoreClientService(
+  id: string,
+  userId?: string
+): Promise<Client | null> {
+  const filter: any = { _id: id };
+  if (userId) {
+    filter.userId = userId;
+  }
+  return ClientModel.findOneAndUpdate(
+    filter,
     { deletedAt: null, updatedAt: new Date().toISOString() },
     { new: true }
   );
 }
 
 export async function softDeleteClientService(
-  id: string
+  id: string,
+  userId?: string
 ): Promise<Client | null> {
-  return ClientModel.findByIdAndUpdate(
-    id,
+  const filter: any = { _id: id };
+  if (userId) {
+    filter.userId = userId;
+  }
+  return ClientModel.findOneAndUpdate(
+    filter,
     { deletedAt: new Date().toISOString() },
     { new: true }
   );
@@ -47,7 +71,12 @@ export async function softDeleteClientService(
 
 export async function updateClientService(
   id: string,
-  data: Partial<BillingClient>
+  data: Partial<BillingClient>,
+  userId?: string
 ): Promise<Client | null> {
-  return ClientModel.findByIdAndUpdate(id, data, { new: true });
+  const filter: any = { _id: id };
+  if (userId) {
+    filter.userId = userId;
+  }
+  return ClientModel.findOneAndUpdate(filter, data, { new: true });
 }

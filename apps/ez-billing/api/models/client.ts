@@ -5,6 +5,7 @@ type ClientDocument = BillingClient & Document;
 
 const clientSchema = new Schema(
   {
+    userId: { type: String, required: true, index: true },
     clientName: { type: String, required: true },
     email: { type: String },
     phone: { type: String },

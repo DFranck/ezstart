@@ -12,6 +12,11 @@ const listingQuerySchema = z.object({
 // -----------------------------------
 // 🟢 BASE (never used alone)
 export const baseClientSchema = z.object({
+  userId: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
+    .describe('User who owns this client'),
+
   clientName: z
     .string()
     .min(1, 'Client name is required')
@@ -54,6 +59,10 @@ export const baseClientSchema = z.object({
 // -----------------------------------
 // 🟢 INPUTS (create/update)
 export const billingClientSchema = z.object({
+  userId: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
+    .describe('User who owns this client'),
   clientName: z
     .string()
     .min(1, 'Client name is required')
@@ -111,7 +120,12 @@ export const clientSchema = baseClientSchema.extend({
 
 // -----------------------------------
 // 🟡 QUERY (listing/filter)
-export const getClientsQuerySchema = listingQuerySchema.extend({});
+export const getClientsQuerySchema = listingQuerySchema.extend({
+  userId: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
+    .describe('Filter clients by user ID'),
+});
 export type GetClientsQuery = ZodInfer<typeof getClientsQuerySchema>;
 
 // BASE

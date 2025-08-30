@@ -12,6 +12,9 @@ import {
 } from '@ez-billing/types';
 import express, { Router } from 'express';
 import * as controllers from '../controllers/client/client.controllers';
+import * as secureControllers from '../controllers/client/client.secure-controllers';
+import { authMiddleware } from '../middleware/auth';
+import { z } from 'zod';
 
 export const clientsRegistry = new OpenAPIRegistry();
 
@@ -31,7 +34,7 @@ docRouter.get(
   validateQuery(getClientsQuerySchema),
   controllers.getClientsController,
   {
-    summary: 'List Clients',
+    summary: 'List Clients by User ID',
     tags: ['Clients'],
     querySchema: getClientsQuerySchema,
     responseSchema: clientSchema.array(),
@@ -40,42 +43,63 @@ docRouter.get(
 
 docRouter.get(
   '/:id',
+  authMiddleware,
   validateParams(paramsMongoIdSchema),
-  controllers.getClientByIdController,
+  secureControllers.getSecureClientByIdController,
   {
-    summary: 'Get Client by ID',
+    summary: 'Get Client by ID (authenticated)',
     tags: ['Clients'],
     paramsSchema: paramsMongoIdSchema,
     responseSchema: clientSchema,
   }
 );
 
-docRouter.put('/:id', controllers.updateClientController, {
-  summary: 'Update Client',
-  tags: ['Clients'],
-  bodySchema: billingClientSchema,
-  paramsSchema: paramsMongoIdSchema,
-  responseSchema: clientSchema,
-});
+docRouter.put(
+  '/:id',
+  authMiddleware,
+  validateParams(paramsMongoIdSchema),
+  secureControllers.updateSecureClientController,
+  {
+    summary: 'Update Client (authenticated)',
+    tags: ['Clients'],
+    bodySchema: billingClientSchema,
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: clientSchema,
+  }
+);
 
-docRouter.delete('/:id', controllers.softDeleteClientController, {
-  summary: 'Soft delete Client',
-  tags: ['Clients'],
-  paramsSchema: paramsMongoIdSchema,
-});
+docRouter.delete(
+  '/:id',
+  authMiddleware,
+  validateParams(paramsMongoIdSchema),
+  secureControllers.softDeleteSecureClientController,
+  {
+    summary: 'Soft delete Client (authenticated)',
+    tags: ['Clients'],
+    paramsSchema: paramsMongoIdSchema,
+  }
+);
 
-docRouter.post('/:id/restore', controllers.restoreClientController, {
-  summary: 'Restore Client',
-  tags: ['Clients'],
-  paramsSchema: paramsMongoIdSchema,
-  responseSchema: clientSchema,
-});
+docRouter.post(
+  '/:id/restore',
+  authMiddleware,
+  validateParams(paramsMongoIdSchema),
+  secureControllers.restoreSecureClientController,
+  {
+    summary: 'Restore Client (authenticated)',
+    tags: ['Clients'],
+    paramsSchema: paramsMongoIdSchema,
+    responseSchema: clientSchema,
+  }
+);
 
 docRouter.delete(
   '/:id/hard-delete',
-  controllers.hardDeleteClientController,
+  authMiddleware,
+  validateParams(paramsMongoIdSchema),
+  secureControllers.hardDeleteSecureClientController,
   {
-    summary: 'Hard delete Client',
+    summary: 'Hard delete Client (authenticated)',
     tags: ['Clients'],
     paramsSchema: paramsMongoIdSchema,
   }
