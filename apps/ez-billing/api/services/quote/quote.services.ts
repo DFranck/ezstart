@@ -23,7 +23,7 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
       to: 'USD',
       rate: 1.0, // Default 1:1 rate
       source: 'default',
-      fetchedAt: new Date().toISOString(),
+      fetchedAt: new Date(),
     };
   }
   
@@ -132,6 +132,8 @@ export async function convertQuoteToInvoiceService(
   // Create the invoice from quote data
   const invoiceDocumentNumber = await generateNextNumber('invoice');
   const invoiceData = {
+    userId: quote.userId,
+    companyId: quote.companyId,
     clientId: quote.clientId,
     items: quote.items,
     currency: quote.currency,

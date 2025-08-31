@@ -7,6 +7,7 @@ import { QuoteModal } from '@/components/quote-modal';
 import { MarkPaidModal } from '@/components/mark-paid-modal';
 import { Button, H1, H2, H3, P, Section, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Icon } from '@ezstart/ui/components';
 import { Client, Invoice, Quote, Receipt } from '@ez-billing/types';
+import { getBillingPermissions } from '@/utils/billing-permissions';
 import { useState, useEffect } from 'react';
 import { redirect, useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +18,7 @@ const ClientDashboardPage = () => {
   const clientId = params.clientId as string;
   
   const { user } = useUserStore();
-  const { clients, invoices, quotes, receipts, refetchAll, loading } = useBillingContext();
+  const { clients, invoices, quotes, receipts, companies, refetchAll, loading } = useBillingContext();
   
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -65,6 +66,23 @@ const ClientDashboardPage = () => {
   const handleMarkPaid = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setIsMarkPaidModalOpen(true);
+  };
+
+  const handleConvertToInvoice = (quote: Quote) => {
+    // Create invoice from quote data
+    const invoiceData = {
+      clientId: quote.clientId,
+      companyId: quote.companyId,
+      items: quote.items,
+      currency: quote.currency,
+      notes: quote.notes,
+      terms: quote.terms,
+      taxRate: quote.taxRate,
+      status: 'draft' as const,
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+    };
+    setEditingInvoice(invoiceData as any);
+    setIsInvoiceModalOpen(true);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -183,27 +201,36 @@ const ClientDashboardPage = () => {
                           {new Date(invoice.createdAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 min-w-[120px]">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEditInvoice(invoice)}
-                              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
-                            >
-                              <Icon name="lucide:Edit" className="w-3 h-3 sm:mr-1" />
-                              <span className="hidden sm:inline">Edit</span>
-                            </Button>
-                            {invoice.status !== 'paid' && (
-                              <Button 
-                                size="sm"
-                                onClick={() => handleMarkPaid(invoice)}
-                                className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors whitespace-nowrap"
-                              >
-                                <Icon name="lucide:CheckCircle" className="w-3 h-3 sm:mr-1" />
-                                <span className="hidden sm:inline">Mark Paid</span>
-                              </Button>
-                            )}
-                          </div>
+                          {(() => {
+                            const permissions = getBillingPermissions(invoice, 'invoice');
+                            return (
+                              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 min-w-[120px]">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleEditInvoice(invoice)}
+                                  disabled={!permissions.canEdit}
+                                  title={!permissions.canEdit ? permissions.reason : undefined}
+                                  className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium border border-gray-300 rounded-md transition-colors whitespace-nowrap ${
+                                    permissions.canEdit ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'
+                                  }`}
+                                >
+                                  <Icon name="lucide:Edit" className="w-3 h-3 sm:mr-1" />
+                                  <span className="hidden sm:inline">Edit</span>
+                                </Button>
+                                {permissions.canMarkAsPaid && (
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => handleMarkPaid(invoice)}
+                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors whitespace-nowrap"
+                                  >
+                                    <Icon name="lucide:CheckCircle" className="w-3 h-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">Mark Paid</span>
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -267,15 +294,36 @@ const ClientDashboardPage = () => {
                           {quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : '-'}
                         </TableCell>
                         <TableCell>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleEditQuote(quote)}
-                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap min-w-[60px]"
-                          >
-                            <Icon name="lucide:Edit" className="w-3 h-3 sm:mr-1" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </Button>
+                          {(() => {
+                            const permissions = getBillingPermissions(quote, 'quote');
+                            return (
+                              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 min-w-[120px]">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleEditQuote(quote)}
+                                  disabled={!permissions.canEdit}
+                                  title={!permissions.canEdit ? permissions.reason : undefined}
+                                  className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium border border-gray-300 rounded-md transition-colors whitespace-nowrap ${
+                                    permissions.canEdit ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'
+                                  }`}
+                                >
+                                  <Icon name="lucide:Edit" className="w-3 h-3 sm:mr-1" />
+                                  <span className="hidden sm:inline">Edit</span>
+                                </Button>
+                                {permissions.canConvertToInvoice && (
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => handleConvertToInvoice(quote)}
+                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors whitespace-nowrap"
+                                  >
+                                    <Icon name="lucide:ArrowRight" className="w-3 h-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">Invoice</span>
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -352,6 +400,7 @@ const ClientDashboardPage = () => {
         onClose={() => setIsInvoiceModalOpen(false)}
         invoice={editingInvoice}
         clients={clients}
+        companies={companies}
         onSave={refetchAll}
       />
       
@@ -360,6 +409,7 @@ const ClientDashboardPage = () => {
         onClose={() => setIsQuoteModalOpen(false)}
         quote={editingQuote}
         clients={clients}
+        companies={companies}
         onSave={refetchAll}
       />
 
@@ -368,6 +418,7 @@ const ClientDashboardPage = () => {
           isOpen={isMarkPaidModalOpen}
           onClose={() => setIsMarkPaidModalOpen(false)}
           invoice={selectedInvoice}
+          companies={companies}
           onSave={refetchAll}
         />
       )}

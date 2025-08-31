@@ -1,6 +1,6 @@
 'use client'
 
-import { BaseLineItem, Client, CreateInvoice, Currency, Invoice } from '@ez-billing/types'
+import { BaseLineItem, Client, Company, CreateInvoice, Currency, Invoice } from '@ez-billing/types'
 import {
   Button,
   Checkbox,
@@ -29,6 +29,7 @@ interface InvoiceModalProps {
   isOpen: boolean
   onClose: () => void
   clients: Client[]
+  companies: Company[]
   invoice?: Invoice
   onSave: () => void
   clientId?: string // Optional: if we're in a specific client context
@@ -44,6 +45,7 @@ export function InvoiceModal({
   isOpen,
   onClose,
   clients,
+  companies,
   invoice,
   onSave,
   clientId,
@@ -54,6 +56,7 @@ export function InvoiceModal({
   const [formData, setFormData] = useState<CreateInvoice>({
     clientId:
       invoice?.clientId || clientId || (clients.length > 0 && clients[0] ? clients[0]._id : ''),
+    companyId: invoice?.companyId || '',
     items: invoice?.items?.map(item => ({
       label: item.label,
       quantity: item.quantity,
@@ -168,6 +171,26 @@ export function InvoiceModal({
               </Select>
             </div>
           )}
+
+          <div>
+            <Label>Bill on behalf of</Label>
+            <Select
+              value={formData.companyId || 'personal'}
+              onValueChange={value => setFormData({ ...formData, companyId: value === 'personal' ? '' : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select billing entity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">Personal (your name)</SelectItem>
+                {companies?.map(company => (
+                  <SelectItem key={company._id} value={company._id}>
+                    {company.companyName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div>
             <Label>Currency</Label>

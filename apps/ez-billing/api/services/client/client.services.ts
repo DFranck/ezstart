@@ -27,9 +27,9 @@ export async function getClientsService(
 ): Promise<Client[]> {
   let deletedAtFilter = {};
   
-  if (query.deletedOnly === 'true' || query.deletedOnly === true) {
+  if (query.deletedOnly === true) {
     deletedAtFilter = { deletedAt: { $ne: null } };
-  } else if (query.includeDeleted !== 'true' && query.includeDeleted !== true) {
+  } else if (query.includeDeleted !== true) {
     deletedAtFilter = { deletedAt: null };
   }
   

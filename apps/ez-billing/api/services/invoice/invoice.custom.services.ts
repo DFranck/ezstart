@@ -58,6 +58,8 @@ export async function markInvoiceAsPaidService(
 
     const receiptDocumentNumber = await generateNextNumber('receipt');
     const receiptData = {
+      userId: updatedInvoice.userId,
+      companyId: updatedInvoice.companyId,
       clientId: updatedInvoice.clientId,
       items: updatedInvoice.items,
       currency: updatedInvoice.currency,

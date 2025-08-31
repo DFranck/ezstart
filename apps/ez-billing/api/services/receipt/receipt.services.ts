@@ -23,7 +23,7 @@ export async function createReceiptService(
       to: 'USD',
       rate: 1.0, // Default 1:1 rate
       source: 'default',
-      fetchedAt: new Date().toISOString(),
+      fetchedAt: new Date(),
     };
   }
   

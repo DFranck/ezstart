@@ -15,12 +15,13 @@ import {
   updateReceiptSchema,
 } from '@ez-billing/types';
 import express, { Router } from 'express';
-import * as controllers from '../controllers/receipt';
+import * as secureControllers from '../controllers/receipt/receipt.secure-controllers';
+import { authMiddleware } from '../middleware/auth';
 export const receiptRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(receiptRegistry, router);
 
-docRouter.post('/', controllers.createReceiptController, {
+docRouter.post('/', authMiddleware, secureControllers.createSecureReceiptController, {
   summary: 'Create a Receipt',
   tags: ['Receipts'],
   bodySchema: createReceiptSchema,
@@ -28,21 +29,21 @@ docRouter.post('/', controllers.createReceiptController, {
   status: 201,
 });
 
-docRouter.get('/', validateQuery(getReceiptsQuerySchema), controllers.getReceiptsController, {
+docRouter.get('/', authMiddleware, validateQuery(getReceiptsQuerySchema), secureControllers.getSecureReceiptsController, {
   summary: 'List Receipts',
   tags: ['Receipts'],
   querySchema: getReceiptsQuerySchema,
   responseSchema: receiptSchema.array(),
 });
 
-docRouter.get('/:id', validateParams(paramsMongoIdSchema), controllers.getReceiptByIdController, {
+docRouter.get('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.getSecureReceiptByIdController, {
   summary: 'Get Receipt by id',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: receiptSchema,
 });
 
-docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateReceiptController, {
+docRouter.put('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.updateSecureReceiptController, {
   summary: 'Update Receipt by id',
   tags: ['Receipts'],
   bodySchema: updateReceiptSchema,
@@ -50,13 +51,13 @@ docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateRec
   responseSchema: receiptSchema,
 });
 
-docRouter.delete('/:id', validateParams(paramsMongoIdSchema), controllers.softDeleteReceiptController, {
+docRouter.delete('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.softDeleteSecureReceiptController, {
   summary: 'Soft delete Receipt',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.restoreReceiptController, {
+docRouter.post('/:id/restore', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.restoreSecureReceiptController, {
   summary: 'Restore Receipt',
   tags: ['Receipts'],
   paramsSchema: paramsMongoIdSchema,
@@ -65,8 +66,9 @@ docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.
 
 docRouter.delete(
   '/:id/hard-delete',
+  authMiddleware,
   validateParams(paramsMongoIdSchema),
-  controllers.hardDeleteReceiptController,
+  secureControllers.hardDeleteSecureReceiptController,
   {
     summary: 'Hard delete Receipt',
     tags: ['Receipts'],
@@ -74,63 +76,6 @@ docRouter.delete(
   }
 );
 
-docRouter.post(
-  '/:id/add-line-item',
-  validateParams(paramsMongoIdSchema),
-  controllers.addLineItemToReceiptController,
-  {
-    summary: 'Add line Item to Receipt',
-    tags: ['Receipts'],
-    bodySchema: addLineItemSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: receiptSchema,
-  }
-);
-docRouter.post(
-  '/:id/remove-line-item',
-  validateParams(paramsMongoIdSchema),
-  controllers.removeLineItemFromReceiptController,
-  {
-    summary: 'Remove line Item from Receipt',
-    tags: ['Receipts'],
-    bodySchema: removeLineItemSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: receiptSchema,
-  }
-);
-docRouter.post(
-  '/:id/assign-client',
-  validateParams(paramsMongoIdSchema),
-  controllers.assignClientToReceiptController,
-  {
-    summary: 'Assign Client to Receipt',
-    tags: ['Receipts'],
-    bodySchema: assignClientSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: receiptSchema,
-  }
-);
-docRouter.post(
-  '/:id/mark-issued',
-  validateParams(paramsMongoIdSchema),
-  controllers.markReceiptAsIssuedController,
-  {
-    summary: 'Mark Receipt as Issued',
-    tags: ['Receipts'],
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: receiptSchema,
-  }
-);
-docRouter.post(
-  '/:id/mark-refunded',
-  validateParams(paramsMongoIdSchema),
-  controllers.markReceiptAsRefundedController,
-  {
-    summary: 'Mark Receipt as Refunded',
-    tags: ['Receipts'],
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: receiptSchema,
-  }
-);
+// Custom actions temporarily removed - will be added to secure controllers if needed
 
 export default router;

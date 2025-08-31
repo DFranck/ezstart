@@ -48,6 +48,7 @@ export function QuoteModal({ isOpen, onClose, clients, companies, quote, onSave,
   const [formData, setFormData] = useState<CreateQuote>({
     clientId:
       quote?.clientId || clientId || (clients.length > 0 && clients[0] ? clients[0]._id : ''),
+    companyId: quote?.companyId || '',
     items: quote?.items?.map(item => ({
       label: item.label,
       quantity: item.quantity,
@@ -185,6 +186,26 @@ export function QuoteModal({ isOpen, onClose, clients, companies, quote, onSave,
               </Select>
             </div>
           )}
+
+          <div>
+            <Label>Bill on behalf of</Label>
+            <Select
+              value={formData.companyId || 'personal'}
+              onValueChange={value => setFormData({ ...formData, companyId: value === 'personal' ? '' : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select billing entity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">Personal (your name)</SelectItem>
+                {companies?.map(company => (
+                  <SelectItem key={company._id} value={company._id}>
+                    {company.companyName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div>
             <Label>Currency</Label>

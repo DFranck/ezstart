@@ -1,2 +1,1 @@
-export * from './quote.controllers';
-export * from './quote.custom.controllers';
+export * from './quote.secure-controllers';

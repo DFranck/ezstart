@@ -16,12 +16,13 @@ import {
   validateQuery,
   validateParams,
 } from '@ezstart/api-core';
-import * as controllers from '../controllers/invoice';
+import * as secureControllers from '../controllers/invoice/invoice.secure-controllers';
+import { authMiddleware } from '../middleware/auth';
 export const invoiceRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(invoiceRegistry, router);
 
-docRouter.post('/', controllers.createInvoiceController, {
+docRouter.post('/', authMiddleware, secureControllers.createSecureInvoiceController, {
   summary: 'Create an Invoice',
   tags: ['Invoices'],
   bodySchema: createInvoiceSchema,
@@ -29,21 +30,21 @@ docRouter.post('/', controllers.createInvoiceController, {
   status: 201,
 });
 
-docRouter.get('/', validateQuery(getInvoicesQuerySchema), controllers.getInvoicesController, {
+docRouter.get('/', authMiddleware, validateQuery(getInvoicesQuerySchema), secureControllers.getSecureInvoicesController, {
   summary: 'List Invoices',
   tags: ['Invoices'],
   querySchema: getInvoicesQuerySchema,
   responseSchema: invoiceSchema.array(),
 });
 
-docRouter.get('/:id', validateParams(paramsMongoIdSchema), controllers.getInvoiceByIdController, {
+docRouter.get('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.getSecureInvoiceByIdController, {
   summary: 'Get Invoice by id',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
   responseSchema: invoiceSchema,
 });
 
-docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateInvoiceController, {
+docRouter.put('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.updateSecureInvoiceController, {
   summary: 'Update Invoice by id',
   tags: ['Invoices'],
   bodySchema: updateInvoiceSchema,
@@ -51,13 +52,13 @@ docRouter.put('/:id', validateParams(paramsMongoIdSchema), controllers.updateInv
   responseSchema: invoiceSchema,
 });
 
-docRouter.delete('/:id', validateParams(paramsMongoIdSchema), controllers.softDeleteInvoiceController, {
+docRouter.delete('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.softDeleteSecureInvoiceController, {
   summary: 'Soft delete Invoice',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
 });
 
-docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.restoreInvoiceController, {
+docRouter.post('/:id/restore', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.restoreSecureInvoiceController, {
   summary: 'Restore Invoice',
   tags: ['Invoices'],
   paramsSchema: paramsMongoIdSchema,
@@ -66,8 +67,9 @@ docRouter.post('/:id/restore', validateParams(paramsMongoIdSchema), controllers.
 
 docRouter.delete(
   '/:id/hard-delete',
+  authMiddleware,
   validateParams(paramsMongoIdSchema),
-  controllers.hardDeleteInvoiceController,
+  secureControllers.hardDeleteSecureInvoiceController,
   {
     summary: 'Hard delete Invoice',
     tags: ['Invoices'],
@@ -75,52 +77,12 @@ docRouter.delete(
   }
 );
 
-docRouter.post(
-  '/:id/add-line-item',
-  validateParams(paramsMongoIdSchema),
-  controllers.addLineItemToInvoiceController,
-  {
-    summary: 'Add line Item to Invoice',
-    tags: ['Invoices'],
-    bodySchema: addLineItemSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: invoiceSchema,
-  }
-);
-docRouter.post(
-  '/:id/remove-line-item',
-  validateParams(paramsMongoIdSchema),
-  controllers.removeLineItemToInvoiceController,
-  {
-    summary: 'Remove line Item from Invoice',
-    tags: ['Invoices'],
-    bodySchema: removeLineItemSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: invoiceSchema,
-  }
-);
-docRouter.post(
-  '/:id/mark-paid',
-  validateParams(paramsMongoIdSchema),
-  controllers.markInvoiceAsPaidController,
-  {
-    summary: 'Mark Invoice as paid',
-    tags: ['Invoices'],
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: invoiceSchema,
-  }
-);
-docRouter.post(
-  '/:id/assign-client',
-  validateParams(paramsMongoIdSchema),
-  controllers.assignClientToInvoiceController,
-  {
-    summary: 'Assign Client to Invoice',
-    tags: ['Invoices'],
-    bodySchema: assignClientSchema,
-    paramsSchema: paramsMongoIdSchema,
-    responseSchema: invoiceSchema,
-  }
-);
+docRouter.post('/:id/mark-paid', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.markInvoiceAsPaidSecureController, {
+  summary: 'Mark Invoice as Paid',
+  tags: ['Invoices'],
+  paramsSchema: paramsMongoIdSchema,
+});
+
+// Custom actions temporarily removed - will be added to secure controllers if needed
 
 export default router;

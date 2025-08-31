@@ -1,7 +1,7 @@
 'use client';
 
-import { CreateReceipt, Invoice } from '@ez-billing/types';
-import { Button, H3, Input, Label, Modal, Section, TextArea } from '@ezstart/ui/components';
+import { Company, CreateReceipt, Invoice } from '@ez-billing/types';
+import { Button, H3, Input, Label, Modal, Section, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components';
 import { callApi, runWithFeedback } from '@ezstart/ui/utils';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
@@ -10,14 +10,16 @@ interface MarkPaidModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoice: Invoice;
+  companies: Company[];
   onSave: () => void;
 }
 
-export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModalProps) {
+export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: MarkPaidModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState<CreateReceipt>({
     clientId: invoice.clientId,
+    companyId: invoice.companyId || '',
     items: invoice.items.map(item => ({
       label: item.label,
       quantity: item.quantity,
@@ -82,6 +84,26 @@ export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModa
       }
     >
       <form id="mark-paid-form" onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Bill on behalf of</Label>
+            <Select
+              value={formData.companyId || 'personal'}
+              onValueChange={value => setFormData({ ...formData, companyId: value === 'personal' ? '' : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select billing entity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">Personal (your name)</SelectItem>
+                {companies?.map(company => (
+                  <SelectItem key={company._id} value={company._id}>
+                    {company.companyName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <Label>Payment Date</Label>
             <Input
