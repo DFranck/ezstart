@@ -20,14 +20,20 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
   return (
     <>
       <Header
-        className={cn('h-16 bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm')}
+        className={cn('h-20 backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-50 shadow-lg')}
         leftContent={
           <div className="flex items-center space-x-4">
-            <H1 size={'h5'} asChild className="text-start w-fit font-bold text-gray-900">
-              <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                EzBilling
-              </Link>
-            </H1>
+            <Link href="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <Icon name="lucide:Receipt" className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <H1 size={'h5'} className="text-start w-fit font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
+                  EZ-Billing
+                </H1>
+                <p className="text-xs text-gray-500 -mt-1">Professional Billing</p>
+              </div>
+            </Link>
           </div>
         }
         rightContent={
@@ -35,28 +41,27 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
             <Button
               variant="outline"
               asChild
-              className="border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg transition-colors"
+              className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80 font-medium px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Link href="/dashboard/settings">
-                <Icon name="lucide:Settings" className="mr-2" />
+                <Icon name="lucide:Settings" className="mr-2 w-4 h-4" />
                 Settings
               </Link>
             </Button>
             <Button
-              variant="outline"
               onClick={() => {
                 localStorage.clear()
                 window.location.href = '/'
               }}
-              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 font-medium px-4 py-2 rounded-lg transition-colors"
+              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-medium px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              <Icon name="fa:FaSignOutAlt" className="mr-2" />
+              <Icon name="lucide:LogOut" className="mr-2 w-4 h-4" />
               Logout
             </Button>
           </div>
         }
       />
-      <Main className="bg-gray-50 min-h-screen">{children}</Main>
+      <Main className="bg-gradient-to-br from-indigo-50 via-white to-cyan-50 min-h-screen">{children}</Main>
     </>
   )
 }

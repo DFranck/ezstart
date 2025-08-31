@@ -1,7 +1,7 @@
 'use client'
 
 import { useUserStore } from '@/stores/useUserStore'
-import { Icon, Input, Section, Span } from '@ezstart/ui/components'
+import { Icon, Input, Span } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
 import { LoadingButton } from './loading-button'
@@ -61,43 +61,53 @@ export function LoginSection() {
   }
 
   return (
-    <Section className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {!user ? (
         <form
           onSubmit={e => {
             e.preventDefault()
             handleLogin()
           }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          className="space-y-4"
         >
           <Input
-            placeholder="Username"
+            placeholder="Enter your username"
             value={username}
             onChange={e => setUsername(e.target.value)}
-            className="w-fit"
+            className="w-full text-center"
             maxLength={20}
             disabled={isLoggingIn}
           />
           <LoadingButton
             loading={isLoggingIn}
             disabled={!username.trim()}
-            loadingText="Logging in..."
-            icon="fa:FaSignInAlt"
+            loadingText="Signing in..."
+            className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
+            <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-2" />
             Continue
           </LoadingButton>
         </form>
       ) : (
-        <>
-          <Span className="text-lg font-semibold flex items-center gap-2">
-            <Icon name="fa:FaUserCheck" className="text-green-500" />
-            Connected as {user.username}
-          </Span>
-          <LoadingButton variant="outline" onClick={handleLogout} icon="fa:FaSignOutAlt">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+              <Icon name="lucide:Check" className="w-4 h-4 text-white" />
+            </div>
+            <Span className="text-lg font-semibold text-green-700">
+              Connected as {user.username}
+            </Span>
+          </div>
+          <LoadingButton 
+            variant="outline" 
+            onClick={handleLogout}
+            className="w-full border-gray-300 hover:border-gray-400"
+          >
+            <Icon name="lucide:LogOut" className="w-4 h-4 mr-2" />
             Logout
           </LoadingButton>
-        </>
+        </div>
       )}
-    </Section>
+    </div>
   )
 }
