@@ -5,9 +5,9 @@ import { CompanyModal } from '@/components/company-modal'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
+import { callBillingApi } from '@/utils/call-billing-api'
 import { Client, Company } from '@ez-billing/types'
 import { Button, Icon } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -70,9 +70,9 @@ const DashboardPage = () => {
 
     try {
       if (deleteDialog.type === 'company') {
-        await callApi(`/companies/${deleteDialog.item._id}`, { method: 'DELETE' })
+        await callBillingApi(`/companies/${deleteDialog.item._id}`, { method: 'DELETE' })
       } else {
-        await callApi(`/clients/${deleteDialog.item._id}`, { method: 'DELETE' })
+        await callBillingApi(`/clients/${deleteDialog.item._id}`, { method: 'DELETE' })
       }
       refetchAll()
     } catch (error) {

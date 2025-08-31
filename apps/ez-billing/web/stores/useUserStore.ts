@@ -1,4 +1,4 @@
-import { callApi } from '@ezstart/ui/utils'
+import { callBillingApi } from '../utils/call-billing-api'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -28,7 +28,7 @@ export const useUserStore = create<UserStore>()(
         const trimmedUsername = username.toLowerCase().trim()
         
         // First try to get existing user
-        const getRes = await callApi<UserResponse>(`/users/${trimmedUsername}`, {
+        const getRes = await callBillingApi<UserResponse>(`/users/${trimmedUsername}`, {
           method: 'GET',
         })
 
@@ -39,7 +39,7 @@ export const useUserStore = create<UserStore>()(
         }
 
         // If user doesn't exist, create new one
-        const createRes = await callApi<UserResponse>('/users', {
+        const createRes = await callBillingApi<UserResponse>('/users', {
           method: 'POST',
           body: { username: trimmedUsername },
         })

@@ -21,7 +21,8 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback } from '@ezstart/ui/utils'
+import { callBillingApi } from '../utils/call-billing-api'
 import { useState } from 'react'
 import { LoadingButton } from './loading-button'
 
@@ -104,13 +105,13 @@ export function InvoiceModal({
     return runWithFeedback({
       action: async () => {
         if (invoice) {
-          const res = await callApi(`/invoices/${invoice._id}`, {
+          const res = await callBillingApi(`/invoices/${invoice._id}`, {
             method: 'PUT',
             body: formData,
           })
           if (!res.ok) throw new Error('Failed to update invoice')
         } else {
-          const res = await callApi('/invoices', {
+          const res = await callBillingApi('/invoices', {
             method: 'POST',
             body: formData,
           })

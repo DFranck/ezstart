@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback } from '@ezstart/ui/utils'
+import { callBillingApi } from '../utils/call-billing-api'
 import { useState } from 'react'
 import { LoadingButton } from './loading-button'
 
@@ -55,13 +56,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     return runWithFeedback({
       action: async () => {
         if (client) {
-          const res = await callApi(`/clients/${client._id}`, {
+          const res = await callBillingApi(`/clients/${client._id}`, {
             method: 'PUT',
             body: formData,
           })
           if (!res.ok) throw new Error('Failed to update client')
         } else {
-          const res = await callApi('/clients', {
+          const res = await callBillingApi('/clients', {
             method: 'POST',
             body: formData,
           })

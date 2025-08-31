@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, H2, H3, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/ui/utils'
+import { callBillingApi } from '../../../utils/call-billing-api'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
 import { useEffect, useState } from 'react'
 import { DeletedItemsManager } from './components/deleted-items-manager'
@@ -20,19 +20,19 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       const [clients, companies, quotes, invoices, receipts] = await Promise.all([
-        callApi('/clients?deletedOnly=true'),
-        callApi('/companies?deletedOnly=true'),
-        callApi('/quotes?deletedOnly=true'),
-        callApi('/invoices?deletedOnly=true'),
-        callApi('/receipts?deletedOnly=true'),
+        callBillingApi('/clients?deletedOnly=true'),
+        callBillingApi('/companies?deletedOnly=true'),
+        callBillingApi('/quotes?deletedOnly=true'),
+        callBillingApi('/invoices?deletedOnly=true'),
+        callBillingApi('/receipts?deletedOnly=true'),
       ])
 
       setDeletedItems({
-        clients: Array.isArray(clients) ? clients : [],
-        companies: Array.isArray(companies) ? companies : [],
-        quotes: Array.isArray(quotes) ? quotes : [],
-        invoices: Array.isArray(invoices) ? invoices : [],
-        receipts: Array.isArray(receipts) ? receipts : [],
+        clients: clients.ok && Array.isArray(clients.data) ? clients.data : [],
+        companies: companies.ok && Array.isArray(companies.data) ? companies.data : [],
+        quotes: quotes.ok && Array.isArray(quotes.data) ? quotes.data : [],
+        invoices: invoices.ok && Array.isArray(invoices.data) ? invoices.data : [],
+        receipts: receipts.ok && Array.isArray(receipts.data) ? receipts.data : [],
       })
     } catch (error) {
       console.error('Error loading deleted items:', error)
@@ -47,7 +47,7 @@ export default function SettingsPage() {
 
   const handleRestore = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}/restore`, { method: 'POST' })
+      await callBillingApi(`/${type}/${id}/restore`, { method: 'POST' })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error restoring ${type}:`, error)
@@ -56,7 +56,7 @@ export default function SettingsPage() {
 
   const handleHardDelete = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}?permanent=true`, { method: 'DELETE' })
+      await callBillingApi(`/${type}/${id}?permanent=true`, { method: 'DELETE' })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)

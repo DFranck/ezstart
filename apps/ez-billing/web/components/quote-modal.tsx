@@ -21,7 +21,8 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback } from '@ezstart/ui/utils'
+import { callBillingApi } from '../utils/call-billing-api'
 import { useState } from 'react'
 import { LoadingButton } from './loading-button'
 
@@ -94,13 +95,13 @@ export function QuoteModal({ isOpen, onClose, clients, companies, quote, onSave,
     return runWithFeedback({
       action: async () => {
         if (quote) {
-          const res = await callApi(`/quotes/${quote._id}`, {
+          const res = await callBillingApi(`/quotes/${quote._id}`, {
             method: 'PUT',
             body: formData,
           })
           if (!res.ok) throw new Error('Failed to update quote')
         } else {
-          const res = await callApi('/quotes', {
+          const res = await callBillingApi('/quotes', {
             method: 'POST',
             body: formData,
           })

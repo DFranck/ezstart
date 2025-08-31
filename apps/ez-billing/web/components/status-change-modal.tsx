@@ -1,7 +1,8 @@
 'use client';
 
 import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
-import { callApi, runWithFeedback } from '@ezstart/ui/utils';
+import { runWithFeedback } from '@ezstart/ui/utils';
+import { callBillingApi } from '../utils/call-billing-api';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
 
@@ -58,7 +59,7 @@ export function StatusChangeModal({
 
     return runWithFeedback({
       action: async () => {
-        const res = await callApi(`${apiEndpoints[documentType]}/${documentId}`, {
+        const res = await callBillingApi(`${apiEndpoints[documentType]}/${documentId}`, {
           method: 'PUT',
           body: { status: newStatus },
         });

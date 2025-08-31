@@ -2,7 +2,7 @@
 import { BillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
-import { callApi } from '@ezstart/ui/utils'
+import { callBillingApi } from '../utils/call-billing-api'
 import { useCallback, useEffect, useState } from 'react'
 
 export const BillingProvider = ({ children }: { children: React.ReactNode }) => {
@@ -21,18 +21,18 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
     setLoading(true)
     try {
       const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes] = await Promise.all([
-        callApi<Client[]>('/clients', {}),
-        callApi<Invoice[]>('/invoices', {}),
-        callApi<Quote[]>('/quotes', {}),
-        callApi<Receipt[]>('/receipts', {}),
-        callApi<{ companies: Company[] }>(`/companies/user/${user._id}`, {}),
+        callBillingApi<Client[]>('/clients', {}),
+        callBillingApi<Invoice[]>('/invoices', {}),
+        callBillingApi<Quote[]>('/quotes', {}),
+        callBillingApi<Receipt[]>('/receipts', {}),
+        callBillingApi<Company[]>('/companies', {}),
       ])
 
       if (clientsRes.ok && clientsRes.data) setClients(clientsRes.data)
       if (invoicesRes.ok && invoicesRes.data) setInvoices(invoicesRes.data)
       if (quotesRes.ok && quotesRes.data) setQuotes(quotesRes.data)
       if (receiptsRes.ok && receiptsRes.data) setReceipts(receiptsRes.data)
-      if (companiesRes.ok && companiesRes.data) setCompanies(companiesRes.data.companies)
+      if (companiesRes.ok && companiesRes.data) setCompanies(companiesRes.data)
     } finally {
       setLoading(false)
     }

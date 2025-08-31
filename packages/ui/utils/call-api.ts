@@ -14,13 +14,14 @@ export type CallApiOptions = {
   body?: any
   headers?: Record<string, string>
   signal?: AbortSignal
+  userId?: string
 }
 
 export async function callApi<T = any>(
   endpoint: string,
   options: CallApiOptions = {}
 ): Promise<ApiResponse<T>> {
-  const { method = 'GET', query, body, headers = {}, signal } = options
+  const { method = 'GET', query, body, headers = {}, signal, userId } = options
 
   let url = `${getApiUrl()}${endpoint}`
   if (query && Object.keys(query).length > 0) {
@@ -31,20 +32,6 @@ export async function callApi<T = any>(
   const isFormUrlEncoded = body instanceof URLSearchParams
   const isStringBody = typeof body === 'string'
   const isJsonBody = !isFormUrlEncoded && !isStringBody
-
-  // Get userId from localStorage for authentication header
-  let userId: string | null = null
-  if (typeof window !== 'undefined') {
-    try {
-      const userStore = localStorage.getItem('ez-billing-user')
-      if (userStore) {
-        const parsed = JSON.parse(userStore)
-        userId = parsed.state?.user?._id || null
-      }
-    } catch {
-      userId = null
-    }
-  }
 
   try {
     const res = await fetch(url, {
