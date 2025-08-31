@@ -39,11 +39,20 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
 }
 
 export async function getQuotesService(
-  query: GetQuotesQuery
+  query: GetQuotesQuery & { includeDeleted?: boolean; deletedOnly?: boolean }
 ): Promise<Quote[]> {
+  let deletedAtFilter = {};
+  
+  if (query.deletedOnly) {
+    deletedAtFilter = { deletedAt: { $ne: null } };
+  } else if (!query.includeDeleted) {
+    deletedAtFilter = { deletedAt: null };
+  }
+  
   const docs = await findWithQuery(QuoteModel, query, {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
+    ...deletedAtFilter,
   });
   return docs.map(toApiObject);
 }

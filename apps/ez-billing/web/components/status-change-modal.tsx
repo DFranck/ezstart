@@ -74,11 +74,28 @@ export function StatusChangeModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Section className="p-6 max-w-md">
-        <H3>Change {documentType} Status</H3>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Change ${documentType} Status`}
+      description={`Update the status of this ${documentType}`}
+      footer={
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <LoadingButton 
+            loading={isLoading} 
+            type="submit"
+            disabled={newStatus === currentStatus}
+            form="status-change-form"
+          >
+            Update Status
+          </LoadingButton>
+        </div>
+      }
+    >
+      <form id="status-change-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>New Status</Label>
             <Select
@@ -93,20 +110,7 @@ export function StatusChangeModal({
             </Select>
           </div>
 
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={onClose} disabled={isLoading}>
-              Cancel
-            </Button>
-            <LoadingButton 
-              loading={isLoading} 
-              type="submit"
-              disabled={newStatus === currentStatus}
-            >
-              Update Status
-            </LoadingButton>
-          </div>
         </form>
-      </Section>
     </Modal>
   );
 }

@@ -61,14 +61,27 @@ export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModa
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Section className="p-6 max-w-2xl">
-        <H3>Mark Invoice as Paid</H3>
-        <p className="text-gray-600 mb-4">
-          This will create a receipt and mark the invoice as paid.
-        </p>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Mark Invoice as Paid"
+      description="This will create a receipt and mark the invoice as paid."
+      footer={
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <LoadingButton 
+            loading={isLoading} 
+            type="submit"
+            form="mark-paid-form"
+          >
+            Mark as Paid
+          </LoadingButton>
+        </div>
+      }
+    >
+      <form id="mark-paid-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Payment Date</Label>
             <Input
@@ -88,19 +101,7 @@ export function MarkPaidModal({ isOpen, onClose, invoice, onSave }: MarkPaidModa
             />
           </div>
 
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={onClose} disabled={isLoading}>
-              Cancel
-            </Button>
-            <LoadingButton 
-              loading={isLoading} 
-              type="submit"
-            >
-              Mark as Paid
-            </LoadingButton>
-          </div>
         </form>
-      </Section>
     </Modal>
   );
 }

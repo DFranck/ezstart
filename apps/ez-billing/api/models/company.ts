@@ -16,6 +16,7 @@ const companySchema = new Schema(
     companyRegistrationNumber: { type: String },
     taxNumber: { type: String },
     website: { type: String },
+    deletedAt: { type: String, default: null },
   },
   { timestamps: true }
 );

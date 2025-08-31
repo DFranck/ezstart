@@ -44,6 +44,16 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
             </Button>
             <Button 
               variant="outline"
+              asChild
+              className="border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <Link href="/dashboard/settings">
+                <Icon name='lucide:Settings' className="mr-2" />
+                Settings
+              </Link>
+            </Button>
+            <Button 
+              variant="outline"
               onClick={() => {
                 localStorage.clear();
                 window.location.href = '/';

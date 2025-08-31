@@ -6,6 +6,7 @@ import { useBillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
 import { Client, Company } from '@ez-billing/types'
 import { Button, H1, H2, H3, Icon, P, Section } from '@ezstart/ui/components'
+import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import ClientCard from './components/client-card'
@@ -53,6 +54,28 @@ const DashboardPage = () => {
     router.push(`/dashboard/${client._id}`)
   }
 
+  const handleDeleteCompany = async (company: Company) => {
+    if (confirm(`Are you sure you want to delete "${company.companyName}"? This can be undone from Settings.`)) {
+      try {
+        await callApi(`/companies/${company._id}`, { method: 'DELETE' })
+        refetchAll()
+      } catch (error) {
+        console.error('Error deleting company:', error)
+      }
+    }
+  }
+
+  const handleDeleteClient = async (client: Client) => {
+    if (confirm(`Are you sure you want to delete "${client.clientName}"? This can be undone from Settings.`)) {
+      try {
+        await callApi(`/clients/${client._id}`, { method: 'DELETE' })
+        refetchAll()
+      } catch (error) {
+        console.error('Error deleting client:', error)
+      }
+    }
+  }
+
   if (loading) return <div>Loading...</div>
 
   return (
@@ -76,16 +99,41 @@ const DashboardPage = () => {
         {hasCompanies ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {companies.map(company => (
-              <div
-                key={company._id}
-                className="p-6 bg-gradient-to-br from-green-50 to-blue-50 border border-gray-200 rounded-xl hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-105"
-                onClick={() => handleEditCompany(company)}
-              >
-                <H3 className="text-lg font-semibold text-gray-900 mb-2">{company.companyName}</H3>
-                <P className="text-gray-600 text-sm mb-1">{company.email}</P>
-                <P className="text-gray-500 text-sm">
-                  {company.city}, {company.country}
-                </P>
+              <div key={company._id} className="relative group">
+                <div
+                  className="p-6 bg-gradient-to-br from-green-50 to-blue-50 border border-gray-200 rounded-xl hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-105"
+                  onClick={() => handleEditCompany(company)}
+                >
+                  <H3 className="text-lg font-semibold text-gray-900 mb-2">{company.companyName}</H3>
+                  <P className="text-gray-600 text-sm mb-1">{company.email}</P>
+                  <P className="text-gray-500 text-sm">
+                    {company.city}, {company.country}
+                  </P>
+                </div>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-white shadow-sm border border-gray-300 hover:bg-gray-50"
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleEditCompany(company)
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-white shadow-sm border border-red-300 text-red-600 hover:bg-red-50"
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleDeleteCompany(company)
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -116,17 +164,30 @@ const DashboardPage = () => {
                   <div onClick={() => handleClientClick(client)} className="cursor-pointer">
                     <ClientCard client={client} />
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm border border-gray-300 hover:bg-gray-50"
-                    onClick={e => {
-                      e.stopPropagation()
-                      handleEditClient(client)
-                    }}
-                  >
-                    Edit
-                  </Button>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-white shadow-sm border border-gray-300 hover:bg-gray-50"
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleEditClient(client)
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-white shadow-sm border border-red-300 text-red-600 hover:bg-red-50"
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleDeleteClient(client)
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
