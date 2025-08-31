@@ -1,6 +1,6 @@
 'use client'
 
-import { BaseLineItem, Client, CreateQuote, Currency, Quote } from '@ez-billing/types'
+import { BaseLineItem, Client, Company, CreateQuote, Currency, Quote } from '@ez-billing/types'
 import {
   Button,
   Checkbox,
@@ -29,6 +29,7 @@ interface QuoteModalProps {
   isOpen: boolean
   onClose: () => void
   clients: Client[]
+  companies: Company[]
   quote?: Quote
   onSave: () => void
   clientId?: string // Optional: if we're in a specific client context
@@ -40,7 +41,7 @@ const currencies: { value: Currency; label: string }[] = [
   { value: 'GBP', label: 'GBP - British Pound' },
 ]
 
-export function QuoteModal({ isOpen, onClose, clients, quote, onSave, clientId }: QuoteModalProps) {
+export function QuoteModal({ isOpen, onClose, clients, companies, quote, onSave, clientId }: QuoteModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(false)
 

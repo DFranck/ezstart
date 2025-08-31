@@ -9,7 +9,9 @@ export function createBillingDocSchema(
 ) {
   return new Schema(
     {
+      userId: { type: String, required: true },
       clientId: { type: String, required: true },
+      companyId: { type: String, required: false }, // Optional: facturer au nom d'une company
       items: { type: [baseLineItemSchema], required: true },
       currency: { type: String, enum: currencyEnum.options, default: 'USD' },
       exchangeRate: {

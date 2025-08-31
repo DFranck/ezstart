@@ -27,3 +27,4 @@ export * from './tag'
 export * from './text-gradient'
 export * from './textarea'
 export * from './tooltip'
+export * from "./alert-dialog"

@@ -5,7 +5,6 @@
       "Bash(npm run dev:*)",
       "Bash(node:*)",
       "Bash(pnpm build:*)",
-      "Bash(pnpm dev:*)",
       "Bash(git reset:*)",
       "Bash(cat:*)",
       "Bash(find:*)",

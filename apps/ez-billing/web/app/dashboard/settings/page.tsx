@@ -28,11 +28,11 @@ export default function SettingsPage() {
       ])
 
       setDeletedItems({
-        clients: clients || [],
-        companies: companies || [],
-        quotes: quotes || [],
-        invoices: invoices || [],
-        receipts: receipts || [],
+        clients: Array.isArray(clients) ? clients : [],
+        companies: Array.isArray(companies) ? companies : [],
+        quotes: Array.isArray(quotes) ? quotes : [],
+        invoices: Array.isArray(invoices) ? invoices : [],
+        receipts: Array.isArray(receipts) ? receipts : [],
       })
     } catch (error) {
       console.error('Error loading deleted items:', error)

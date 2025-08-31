@@ -32,10 +32,18 @@ export const exchangeRateSchema = z.object({
 });
 
 export const baseBillingDocSchema = z.object({
+  userId: z
+    .string()
+    .min(1, 'User ID is required')
+    .describe('User who created this billing document'),
   clientId: z
     .string()
     .min(1, 'Client is required')
     .describe('Client identifier from mongo _id'),
+  companyId: z
+    .string()
+    .optional()
+    .describe('Optional company identifier - bill on behalf of this company'),
   items: z.array(baseLineItemSchema).min(1).describe('List of billing line items'),
   currency: currencyEnum.describe('Currency used for billing'),
   dueDate: z.string().optional().describe('Due date for payment (ISO date string)'),

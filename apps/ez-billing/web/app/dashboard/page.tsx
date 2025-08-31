@@ -2,6 +2,7 @@
 
 import { ClientModal } from '@/components/client-modal'
 import { CompanyModal } from '@/components/company-modal'
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
 import { Client, Company } from '@ez-billing/types'
@@ -21,6 +22,11 @@ const DashboardPage = () => {
   const [editingClient, setEditingClient] = useState<Client | undefined>(undefined)
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    type: 'company' | 'client'
+    item: Company | Client | null
+  }>({ isOpen: false, type: 'client', item: null })
 
   if (!user) {
     redirect('/')
@@ -54,25 +60,26 @@ const DashboardPage = () => {
     router.push(`/dashboard/${client._id}`)
   }
 
-  const handleDeleteCompany = async (company: Company) => {
-    if (confirm(`Are you sure you want to delete "${company.companyName}"? This can be undone from Settings.`)) {
-      try {
-        await callApi(`/companies/${company._id}`, { method: 'DELETE' })
-        refetchAll()
-      } catch (error) {
-        console.error('Error deleting company:', error)
-      }
-    }
+  const handleDeleteCompany = (company: Company) => {
+    setDeleteDialog({ isOpen: true, type: 'company', item: company })
   }
 
-  const handleDeleteClient = async (client: Client) => {
-    if (confirm(`Are you sure you want to delete "${client.clientName}"? This can be undone from Settings.`)) {
-      try {
-        await callApi(`/clients/${client._id}`, { method: 'DELETE' })
-        refetchAll()
-      } catch (error) {
-        console.error('Error deleting client:', error)
+  const handleDeleteClient = (client: Client) => {
+    setDeleteDialog({ isOpen: true, type: 'client', item: client })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.item) return
+    
+    try {
+      if (deleteDialog.type === 'company') {
+        await callApi(`/companies/${deleteDialog.item._id}`, { method: 'DELETE' })
+      } else {
+        await callApi(`/clients/${deleteDialog.item._id}`, { method: 'DELETE' })
       }
+      refetchAll()
+    } catch (error) {
+      console.error(`Error deleting ${deleteDialog.type}:`, error)
     }
   }
 
@@ -104,7 +111,9 @@ const DashboardPage = () => {
                   className="p-6 bg-gradient-to-br from-green-50 to-blue-50 border border-gray-200 rounded-xl hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-105"
                   onClick={() => handleEditCompany(company)}
                 >
-                  <H3 className="text-lg font-semibold text-gray-900 mb-2">{company.companyName}</H3>
+                  <H3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {company.companyName}
+                  </H3>
                   <P className="text-gray-600 text-sm mb-1">{company.email}</P>
                   <P className="text-gray-500 text-sm">
                     {company.city}, {company.country}
@@ -151,6 +160,13 @@ const DashboardPage = () => {
       <Section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <H2 className="text-xl font-semibold text-gray-900">Your Clients</H2>
+          <Button
+            onClick={() => setIsClientModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm"
+          >
+            <Icon name="fa:FaPlus" className="mr-2" />
+            New Client
+          </Button>
         </div>
 
         {isClients ? (
@@ -215,6 +231,18 @@ const DashboardPage = () => {
         onClose={handleClientModalClose}
         client={editingClient}
         onSave={refetchAll}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, type: 'client', item: null })}
+        onConfirm={confirmDelete}
+        title={`Delete ${deleteDialog.type === 'company' ? 'Company' : 'Client'}`}
+        description={`Are you sure you want to delete "${
+          deleteDialog.item ? 
+            (deleteDialog.type === 'company' ? (deleteDialog.item as Company).companyName : (deleteDialog.item as Client).clientName) 
+            : ''
+        }"? This can be undone from Settings.`}
       />
     </div>
   )

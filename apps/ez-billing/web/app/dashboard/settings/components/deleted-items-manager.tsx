@@ -1,6 +1,8 @@
 'use client'
 
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { Button, Card, H4 } from '@ezstart/ui/components'
+import { useState } from 'react'
 
 interface DeletedItemsManagerProps<T extends { _id: string; deletedAt?: string }> {
   title: string
@@ -21,7 +23,14 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
   onRestore,
   onHardDelete,
 }: DeletedItemsManagerProps<T>) {
-  if (items.length === 0) {
+  // Ensure items is always an array
+  const safeItems = Array.isArray(items) ? items : []
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    item: T | null
+  }>({ isOpen: false, item: null })
+  
+  if (safeItems.length === 0) {
     return (
       <Card className="p-4">
         <H4>{title}</H4>
@@ -47,9 +56,9 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
 
   return (
     <Card className="p-4">
-      <H4>{title} ({items.length})</H4>
+      <H4>{title} ({safeItems.length})</H4>
       <div className="mt-4 space-y-3">
-        {items.map((item) => (
+        {safeItems.map((item) => (
           <div key={item._id} className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex-1">
               <div className="font-medium">{getDisplayName(item)}</div>
@@ -70,11 +79,7 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  if (confirm(`Are you sure you want to permanently delete this ${type.slice(0, -1)}? This action cannot be undone.`)) {
-                    onHardDelete(item._id)
-                  }
-                }}
+                onClick={() => setDeleteDialog({ isOpen: true, item })}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 Delete Forever
@@ -83,6 +88,21 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
           </div>
         ))}
       </div>
+      
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, item: null })}
+        onConfirm={() => {
+          if (deleteDialog.item) {
+            onHardDelete(deleteDialog.item._id)
+          }
+        }}
+        title="Permanently Delete Item"
+        description={`Are you sure you want to permanently delete "${
+          deleteDialog.item ? getDisplayName(deleteDialog.item) : ''
+        }"? This action cannot be undone.`}
+        confirmText="Delete Forever"
+      />
     </Card>
   )
 }

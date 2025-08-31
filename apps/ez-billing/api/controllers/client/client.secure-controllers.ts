@@ -65,7 +65,8 @@ export async function getSecureClientsController(req: Request, res: Response) {
       });
     }
 
-    const clients = await getClientsService({ userId });
+    const query = { ...req.query, userId };
+    const clients = await getClientsService(query);
 
     res.json(clients);
   } catch (error) {

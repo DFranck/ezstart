@@ -23,9 +23,22 @@ export async function getClientByIdService(
 }
 
 export async function getClientsService(
-  query: GetClientsQuery
+  query: GetClientsQuery & { includeDeleted?: boolean; deletedOnly?: boolean; userId?: string }
 ): Promise<Client[]> {
-  return findWithQuery(ClientModel, query);
+  let deletedAtFilter = {};
+  
+  if (query.deletedOnly === 'true' || query.deletedOnly === true) {
+    deletedAtFilter = { deletedAt: { $ne: null } };
+  } else if (query.includeDeleted !== 'true' && query.includeDeleted !== true) {
+    deletedAtFilter = { deletedAt: null };
+  }
+  
+  const baseQuery = { ...query };
+  delete baseQuery.includeDeleted;
+  delete baseQuery.deletedOnly;
+  
+  const docs = await findWithQuery(ClientModel, baseQuery, deletedAtFilter);
+  return docs.map(toApiObject);
 }
 
 export async function hardDeleteClientService(
