@@ -1,314 +1,314 @@
-import { Request, Response } from 'express';
-import { 
-  CreateQuote, 
-  GetQuotesQuery, 
+import {
+  CreateQuote,
+  GetQuotesQuery,
   UpdateQuote,
   addLineItemSchema,
   assignClientSchema,
   convertQuoteToInvoiceSchema,
   removeLineItemSchema,
-} from '@ez-billing/types';
+} from '@ez-billing/types'
+import { Response } from 'express'
 import {
-  createQuoteService,
-  getQuoteByIdService,
-  getQuotesService,
-  hardDeleteQuoteService,
-  restoreQuoteService,
-  softDeleteQuoteService,
-  updateQuoteService,
   acceptQuoteService,
   addLineItemToQuoteService,
   assignClientToQuoteService,
   convertQuoteToInvoiceService,
+  createQuoteService,
+  getQuoteByIdService,
+  getQuotesService,
+  hardDeleteQuoteService,
   rejectQuoteService,
   removeLineItemToQuoteService,
-} from '../../services/quote';
-import { AuthRequest, getAuthenticatedUserId } from '../../types/auth';
-import { validateBillingAction, BillingPermissionError } from '../../utils/billing-permissions';
+  restoreQuoteService,
+  softDeleteQuoteService,
+  updateQuoteService,
+} from '../../services/quote'
+import { AuthRequest, getAuthenticatedUserId } from '../../types/auth'
+import { BillingPermissionError, validateBillingAction } from '../../utils/billing-permissions'
 
 export async function createSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const userId = getAuthenticatedUserId(req);
+    const userId = getAuthenticatedUserId(req)
 
-    const quoteData: CreateQuote = req.body;
+    const quoteData: CreateQuote = req.body
 
     // Ensure userId in body matches authenticated user
     if (quoteData.userId && quoteData.userId !== userId) {
       return res.status(403).json({
         error: 'Forbidden',
-        message: 'Cannot create quote for another user'
-      });
+        message: 'Cannot create quote for another user',
+      })
     }
 
     // Force userId to match authenticated user
-    const secureQuoteData = { ...quoteData, userId };
+    const secureQuoteData = { ...quoteData, userId }
 
-    const quote = await createQuoteService(secureQuoteData);
+    const quote = await createQuoteService(secureQuoteData)
 
-    res.status(201).json(quote);
+    res.status(201).json(quote)
   } catch (error) {
-    console.error('Error in createSecureQuoteController:', error);
+    console.error('Error in createSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to create quote'
-    });
+      message: 'Failed to create quote',
+    })
   }
 }
 
 export async function getSecureQuotesController(req: AuthRequest, res: Response) {
   try {
-    const userId = req.userId;
-    
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
-    const query = { ...req.query, userId } as GetQuotesQuery & { userId: string };
-    const quotes = await getQuotesService(query);
+    const query = { ...req.query, userId } as GetQuotesQuery & { userId: string }
+    const quotes = await getQuotesService(query)
 
-    res.json(quotes);
+    res.json(quotes)
   } catch (error) {
-    console.error('Error in getSecureQuotesController:', error);
+    console.error('Error in getSecureQuotesController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to retrieve quotes'
-    });
+      message: 'Failed to retrieve quotes',
+    })
   }
 }
 
 export async function getSecureQuoteByIdController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
-    const quote = await getQuoteByIdService(id);
+    const quote = await getQuoteByIdService(id)
 
     if (!quote || quote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to access it'
-      });
+        message: 'Quote does not exist or you do not have permission to access it',
+      })
     }
 
-    res.json(quote);
+    res.json(quote)
   } catch (error) {
-    console.error('Error in getSecureQuoteByIdController:', error);
+    console.error('Error in getSecureQuoteByIdController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to retrieve quote'
-    });
+      message: 'Failed to retrieve quote',
+    })
   }
 }
 
 export async function updateSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
-    const updateData: UpdateQuote = req.body;
+    const updateData: UpdateQuote = req.body
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {
       return res.status(403).json({
         error: 'Forbidden',
-        message: 'Cannot change quote ownership'
-      });
+        message: 'Cannot change quote ownership',
+      })
     }
 
     // First verify the quote belongs to the user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to update it'
-      });
+        message: 'Quote does not exist or you do not have permission to update it',
+      })
     }
 
     // Validate that this quote can be edited
     try {
-      validateBillingAction(existingQuote, 'quote', 'edit');
+      validateBillingAction(existingQuote, 'quote', 'edit')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const quote = await updateQuoteService(id, updateData);
+    const quote = await updateQuoteService(id, updateData)
 
     if (!quote) {
       return res.status(404).json({
         error: 'Quote not found',
-        message: 'Quote does not exist'
-      });
+        message: 'Quote does not exist',
+      })
     }
 
-    res.json(quote);
+    res.json(quote)
   } catch (error) {
-    console.error('Error in updateSecureQuoteController:', error);
+    console.error('Error in updateSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to update quote'
-    });
+      message: 'Failed to update quote',
+    })
   }
 }
 
 export async function softDeleteSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // First verify the quote belongs to the user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to delete it'
-      });
+        message: 'Quote does not exist or you do not have permission to delete it',
+      })
     }
 
     // Validate that this quote can be deleted
     try {
-      validateBillingAction(existingQuote, 'quote', 'delete');
+      validateBillingAction(existingQuote, 'quote', 'delete')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const quote = await softDeleteQuoteService(id);
+    const quote = await softDeleteQuoteService(id)
 
     if (!quote) {
       return res.status(404).json({
         error: 'Quote not found',
-        message: 'Quote does not exist'
-      });
+        message: 'Quote does not exist',
+      })
     }
 
-    res.status(204).send(); // No content
+    res.status(204).send() // No content
   } catch (error) {
-    console.error('Error in softDeleteSecureQuoteController:', error);
+    console.error('Error in softDeleteSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to delete quote'
-    });
+      message: 'Failed to delete quote',
+    })
   }
 }
 
 export async function restoreSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // For restore, we need to check the quote even if it's deleted
     // so we'll verify ownership after restoring or modify the service to check ownership
-    const quote = await restoreQuoteService(id);
+    const quote = await restoreQuoteService(id)
 
     if (!quote) {
       return res.status(404).json({
         error: 'Quote not found',
-        message: 'Quote does not exist'
-      });
+        message: 'Quote does not exist',
+      })
     }
 
     // Verify ownership after restore
     if (quote.userId !== userId) {
       // If user doesn't own it, soft delete it again and deny access
-      await softDeleteQuoteService(id);
+      await softDeleteQuoteService(id)
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to restore it'
-      });
+        message: 'Quote does not exist or you do not have permission to restore it',
+      })
     }
 
-    res.json(quote);
+    res.json(quote)
   } catch (error) {
-    console.error('Error in restoreSecureQuoteController:', error);
+    console.error('Error in restoreSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to restore quote'
-    });
+      message: 'Failed to restore quote',
+    })
   }
 }
 
 export async function hardDeleteSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // First verify the quote belongs to the user (even if deleted)
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to delete it'
-      });
+        message: 'Quote does not exist or you do not have permission to delete it',
+      })
     }
 
-    const quote = await hardDeleteQuoteService(id);
+    const quote = await hardDeleteQuoteService(id)
 
     if (!quote) {
       return res.status(404).json({
         error: 'Quote not found',
-        message: 'Quote does not exist'
-      });
+        message: 'Quote does not exist',
+      })
     }
 
     res.json({
       message: 'Quote permanently deleted',
-      quote
-    });
+      quote,
+    })
   } catch (error) {
-    console.error('Error in hardDeleteSecureQuoteController:', error);
+    console.error('Error in hardDeleteSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to permanently delete quote'
-    });
+      message: 'Failed to permanently delete quote',
+    })
   }
 }
 
@@ -316,303 +316,303 @@ export async function hardDeleteSecureQuoteController(req: AuthRequest, res: Res
 
 export async function assignClientToSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to modify it'
-      });
+        message: 'Quote does not exist or you do not have permission to modify it',
+      })
     }
 
     // Validate can edit
     try {
-      validateBillingAction(existingQuote, 'quote', 'edit');
+      validateBillingAction(existingQuote, 'quote', 'edit')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const parseClient = assignClientSchema.safeParse(req.body);
+    const parseClient = assignClientSchema.safeParse(req.body)
     if (!parseClient.success) {
-      return res.status(422).json({ 
-        error: 'Validation error', 
-        details: parseClient.error.errors 
-      });
+      return res.status(422).json({
+        error: 'Validation error',
+        details: parseClient.error.errors,
+      })
     }
 
-    const quote = await assignClientToQuoteService(id, parseClient.data.clientId);
-    res.json(quote);
+    const quote = await assignClientToQuoteService(id, parseClient.data.clientId)
+    res.json(quote)
   } catch (error) {
-    console.error('Error in assignClientToSecureQuoteController:', error);
+    console.error('Error in assignClientToSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to assign client to quote'
-    });
+      message: 'Failed to assign client to quote',
+    })
   }
 }
 
 export async function addLineItemToSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user and can be edited
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to modify it'
-      });
+        message: 'Quote does not exist or you do not have permission to modify it',
+      })
     }
 
     try {
-      validateBillingAction(existingQuote, 'quote', 'edit');
+      validateBillingAction(existingQuote, 'quote', 'edit')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const parseItem = addLineItemSchema.safeParse(req.body);
+    const parseItem = addLineItemSchema.safeParse(req.body)
     if (!parseItem.success) {
-      return res.status(422).json({ 
-        error: 'Validation error', 
-        details: parseItem.error.errors 
-      });
+      return res.status(422).json({
+        error: 'Validation error',
+        details: parseItem.error.errors,
+      })
     }
 
-    const quote = await addLineItemToQuoteService(id, parseItem.data);
-    res.json(quote);
+    const quote = await addLineItemToQuoteService(id, parseItem.data)
+    res.json(quote)
   } catch (error) {
-    console.error('Error in addLineItemToSecureQuoteController:', error);
+    console.error('Error in addLineItemToSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to add line item to quote'
-    });
+      message: 'Failed to add line item to quote',
+    })
   }
 }
 
 export async function removeLineItemFromSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user and can be edited
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to modify it'
-      });
+        message: 'Quote does not exist or you do not have permission to modify it',
+      })
     }
 
     try {
-      validateBillingAction(existingQuote, 'quote', 'edit');
+      validateBillingAction(existingQuote, 'quote', 'edit')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const parseItem = removeLineItemSchema.safeParse(req.body);
+    const parseItem = removeLineItemSchema.safeParse(req.body)
     if (!parseItem.success) {
-      return res.status(422).json({ 
-        error: 'Validation error', 
-        details: parseItem.error.errors 
-      });
+      return res.status(422).json({
+        error: 'Validation error',
+        details: parseItem.error.errors,
+      })
     }
 
-    const quote = await removeLineItemToQuoteService(id, parseItem.data.itemId);
-    res.json(quote);
+    const quote = await removeLineItemToQuoteService(id, parseItem.data.itemId)
+    res.json(quote)
   } catch (error) {
-    console.error('Error in removeLineItemFromSecureQuoteController:', error);
+    console.error('Error in removeLineItemFromSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to remove line item from quote'
-    });
+      message: 'Failed to remove line item from quote',
+    })
   }
 }
 
 export async function acceptSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to modify it'
-      });
+        message: 'Quote does not exist or you do not have permission to modify it',
+      })
     }
 
     try {
-      validateBillingAction(existingQuote, 'quote', 'accept');
+      validateBillingAction(existingQuote, 'quote', 'accept')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const quote = await acceptQuoteService(id);
-    res.json(quote);
+    const quote = await acceptQuoteService(id)
+    res.json(quote)
   } catch (error) {
-    console.error('Error in acceptSecureQuoteController:', error);
+    console.error('Error in acceptSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to accept quote'
-    });
+      message: 'Failed to accept quote',
+    })
   }
 }
 
 export async function rejectSecureQuoteController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to modify it'
-      });
+        message: 'Quote does not exist or you do not have permission to modify it',
+      })
     }
 
     try {
-      validateBillingAction(existingQuote, 'quote', 'reject');
+      validateBillingAction(existingQuote, 'quote', 'reject')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const quote = await rejectQuoteService(id);
-    res.json(quote);
+    const quote = await rejectQuoteService(id)
+    res.json(quote)
   } catch (error) {
-    console.error('Error in rejectSecureQuoteController:', error);
+    console.error('Error in rejectSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to reject quote'
-    });
+      message: 'Failed to reject quote',
+    })
   }
 }
 
 export async function convertQuoteToInvoiceSecureController(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const userId = req.userId;
-    
+    const { id } = req.params
+    const userId = req.userId
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+        message: 'Authentication required',
+      })
     }
 
     // Verify quote belongs to user
-    const existingQuote = await getQuoteByIdService(id);
+    const existingQuote = await getQuoteByIdService(id)
     if (!existingQuote || existingQuote.userId !== userId) {
       return res.status(404).json({
         error: 'Quote not found or access denied',
-        message: 'Quote does not exist or you do not have permission to convert it'
-      });
+        message: 'Quote does not exist or you do not have permission to convert it',
+      })
     }
 
     try {
-      validateBillingAction(existingQuote, 'quote', 'convertToInvoice');
+      validateBillingAction(existingQuote, 'quote', 'convertToInvoice')
     } catch (error) {
       if (error instanceof BillingPermissionError) {
         return res.status(403).json({
           error: 'Action forbidden',
-          message: error.message
-        });
+          message: error.message,
+        })
       }
-      throw error;
+      throw error
     }
 
-    const parseBody = convertQuoteToInvoiceSchema.safeParse(req.body);
+    const parseBody = convertQuoteToInvoiceSchema.safeParse(req.body)
     if (!parseBody.success) {
-      return res.status(422).json({ 
-        error: 'Validation error', 
-        details: parseBody.error.errors 
-      });
+      return res.status(422).json({
+        error: 'Validation error',
+        details: parseBody.error.errors,
+      })
     }
 
-    const invoice = await convertQuoteToInvoiceService(id, parseBody.data);
+    const invoice = await convertQuoteToInvoiceService(id, parseBody.data)
     if (!invoice) {
-      return res.status(404).json({ 
-        error: 'Quote not found or already deleted' 
-      });
+      return res.status(404).json({
+        error: 'Quote not found or already deleted',
+      })
     }
 
-    res.status(201).json(invoice);
+    res.status(201).json(invoice)
   } catch (error: any) {
-    console.error('Error in convertQuoteToInvoiceSecureController:', error);
+    console.error('Error in convertQuoteToInvoiceSecureController:', error)
     res.status(500).json({
       error: 'Internal server error',
-      message: error.message || 'Failed to convert quote to invoice'
-    });
+      message: error.message || 'Failed to convert quote to invoice',
+    })
   }
 }

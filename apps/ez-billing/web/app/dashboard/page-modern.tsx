@@ -6,10 +6,11 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { useBillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
 import { Client, Company } from '@ez-billing/types'
-import { Button, Icon } from '@ezstart/ui/components'
+import { Button, H1, H2, H3, Icon, P, Section } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import ClientCard from './components/client-card'
 
 const DashboardPage = () => {
   const router = useRouter()
@@ -67,7 +68,7 @@ const DashboardPage = () => {
 
   const confirmDelete = async () => {
     if (!deleteDialog.item) return
-
+    
     try {
       if (deleteDialog.type === 'company') {
         await callApi(`/companies/${deleteDialog.item._id}`, { method: 'DELETE' })
@@ -104,9 +105,9 @@ const DashboardPage = () => {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
                 Dashboard
               </h1>
-              <p className="text-gray-600 mt-1">Welcome back, {user.username}</p>
+              <p className="text-gray-600 mt-1">Welcome back, {user.name}</p>
             </div>
-
+            
             {/* Stats Preview */}
             <div className="hidden lg:flex items-center space-x-6">
               <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
@@ -120,7 +121,7 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </div>
-
+              
               <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
@@ -138,45 +139,32 @@ const DashboardPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
-            onClick={() => setIsCompanyModalOpen(true)}
-          >
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
+               onClick={() => setIsCompanyModalOpen(true)}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <Icon name="lucide:Building2" className="w-8 h-8" />
-                <Icon
-                  name="lucide:ArrowRight"
-                  className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
-                />
+                <Icon name="lucide:ArrowRight" className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform" />
               </div>
               <h3 className="text-xl font-bold mb-2">Create Company</h3>
-              <p className="text-indigo-100 text-sm">
-                Set up your business profile and billing information
-              </p>
+              <p className="text-indigo-100 text-sm">Set up your business profile and billing information</p>
             </div>
           </div>
-
-          <div
-            className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
-            onClick={() => setIsClientModalOpen(true)}
-          >
+          
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
+               onClick={() => setIsClientModalOpen(true)}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <Icon name="lucide:UserPlus" className="w-8 h-8" />
-                <Icon
-                  name="lucide:ArrowRight"
-                  className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
-                />
+                <Icon name="lucide:ArrowRight" className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform" />
               </div>
               <h3 className="text-xl font-bold mb-2">Add New Client</h3>
-              <p className="text-cyan-100 text-sm">
-                Add clients to start creating invoices and quotes
-              </p>
+              <p className="text-cyan-100 text-sm">Add clients to start creating invoices and quotes</p>
             </div>
           </div>
         </div>
@@ -209,15 +197,14 @@ const DashboardPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {companies.map(company => (
                   <div key={company._id} className="group relative">
-                    <div
-                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-indigo-200 group-hover:-translate-y-1"
-                      onClick={() => handleEditCompany(company)}
-                    >
+                    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-indigo-200 group-hover:-translate-y-1"
+                         onClick={() => handleEditCompany(company)}>
+                      
                       {/* Company Icon */}
                       <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center mb-4">
                         <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
                       </div>
-
+                      
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                         {company.companyName}
                       </h3>
@@ -225,7 +212,7 @@ const DashboardPage = () => {
                       <p className="text-gray-500 text-sm line-clamp-1">
                         {company.city}, {company.country}
                       </p>
-
+                      
                       {/* Floating Actions */}
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <Button
@@ -261,9 +248,7 @@ const DashboardPage = () => {
                   <Icon name="lucide:Building2" className="w-10 h-10 text-indigo-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No companies yet</h3>
-                <p className="text-gray-500 mb-6">
-                  Create your first company to start professional billing
-                </p>
+                <p className="text-gray-500 mb-6">Create your first company to start professional billing</p>
                 <Button
                   onClick={() => setIsCompanyModalOpen(true)}
                   className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-6 py-3 rounded-xl"
@@ -304,18 +289,15 @@ const DashboardPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {clients?.map(client => (
                   <div key={client._id} className="group relative">
-                    <div
-                      onClick={() => handleClientClick(client)}
+                    <div 
+                      onClick={() => handleClientClick(client)} 
                       className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-cyan-200 group-hover:-translate-y-1"
                     >
                       {/* Client Avatar */}
                       <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-xl flex items-center justify-center mb-4">
-                        <Icon
-                          name={client.isCompany ? 'lucide:Building' : 'lucide:User'}
-                          className="w-6 h-6 text-white"
-                        />
+                        <Icon name={client.isCompany ? "lucide:Building" : "lucide:User"} className="w-6 h-6 text-white" />
                       </div>
-
+                      
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                         {client.clientName}
                       </h3>
@@ -323,20 +305,18 @@ const DashboardPage = () => {
                       <p className="text-gray-500 text-sm line-clamp-1">
                         {client.city}, {client.country}
                       </p>
-
+                      
                       {/* Client Type Badge */}
                       <div className="absolute top-3 right-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            client.isCompany
-                              ? 'bg-purple-100 text-purple-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}
-                        >
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          client.isCompany 
+                            ? 'bg-purple-100 text-purple-700' 
+                            : 'bg-green-100 text-green-700'
+                        }`}>
                           {client.isCompany ? 'Company' : 'Individual'}
                         </span>
                       </div>
-
+                      
                       {/* Floating Actions */}
                       <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <Button
@@ -372,9 +352,7 @@ const DashboardPage = () => {
                   <Icon name="lucide:Users" className="w-10 h-10 text-cyan-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No clients yet</h3>
-                <p className="text-gray-500 mb-6">
-                  Add your first client to start creating invoices and quotes
-                </p>
+                <p className="text-gray-500 mb-6">Add your first client to start creating invoices and quotes</p>
                 <Button
                   onClick={() => setIsClientModalOpen(true)}
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-xl"
@@ -409,10 +387,8 @@ const DashboardPage = () => {
         onConfirm={confirmDelete}
         title={`Delete ${deleteDialog.type === 'company' ? 'Company' : 'Client'}`}
         description={`Are you sure you want to delete "${
-          deleteDialog.item
-            ? deleteDialog.type === 'company'
-              ? (deleteDialog.item as Company).companyName
-              : (deleteDialog.item as Client).clientName
+          deleteDialog.item ? 
+            (deleteDialog.type === 'company' ? (deleteDialog.item as Company).companyName : (deleteDialog.item as Client).clientName) 
             : ''
         }"? This can be undone from Settings.`}
       />
