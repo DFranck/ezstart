@@ -25,19 +25,11 @@ export async function getClientByIdService(
 export async function getClientsService(
   query: GetClientsQuery & { includeDeleted?: boolean; deletedOnly?: boolean; userId?: string }
 ): Promise<Client[]> {
-  let deletedAtFilter = {};
-  
-  if (query.deletedOnly === true) {
-    deletedAtFilter = { deletedAt: { $ne: null } };
-  } else if (query.includeDeleted !== true) {
-    deletedAtFilter = { deletedAt: null };
-  }
-  
   const baseQuery = { ...query };
   delete baseQuery.includeDeleted;
-  delete baseQuery.deletedOnly;
+  // Don't delete deletedOnly - let findWithQuery handle it
   
-  const docs = await findWithQuery(ClientModel, baseQuery, deletedAtFilter);
+  const docs = await findWithQuery(ClientModel, baseQuery);
   return docs.map(toApiObject);
 }
 
@@ -77,7 +69,10 @@ export async function softDeleteClientService(
   }
   return ClientModel.findOneAndUpdate(
     filter,
-    { deletedAt: new Date().toISOString() },
+    { 
+      deletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
     { new: true }
   );
 }

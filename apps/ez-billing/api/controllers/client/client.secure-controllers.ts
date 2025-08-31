@@ -158,12 +158,13 @@ export async function updateSecureClientController(req: Request, res: Response) 
 }
 
 /**
- * Secure controller to soft delete client
+ * Secure controller to delete client (soft or hard based on permanent query param)
  * Only deletes client if it belongs to the authenticated user
  */
 export async function softDeleteSecureClientController(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    const { permanent } = req.query;
     const userId = req.userId;
     
     if (!userId) {
@@ -173,16 +174,31 @@ export async function softDeleteSecureClientController(req: Request, res: Respon
       });
     }
 
-    const client = await softDeleteClientService(id, userId);
+    if (permanent === 'true') {
+      // Hard delete
+      const client = await hardDeleteClientService(id, userId);
+      
+      if (!client) {
+        return res.status(404).json({
+          error: 'Client not found or access denied',
+          message: 'Client does not exist or you do not have permission to delete it'
+        });
+      }
+      
+      res.json({ message: 'Client permanently deleted', client });
+    } else {
+      // Soft delete
+      const client = await softDeleteClientService(id, userId);
 
-    if (!client) {
-      return res.status(404).json({
-        error: 'Client not found or access denied',
-        message: 'Client does not exist or you do not have permission to delete it'
-      });
+      if (!client) {
+        return res.status(404).json({
+          error: 'Client not found or access denied',
+          message: 'Client does not exist or you do not have permission to delete it'
+        });
+      }
+
+      res.status(204).send(); // No content
     }
-
-    res.status(204).send(); // No content
   } catch (error) {
     console.error('Error in softDeleteSecureClientController:', error);
     res.status(500).json({
