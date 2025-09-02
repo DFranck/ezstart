@@ -1,0 +1,60 @@
+{
+  "year": 2025,
+  "locale": "fr-FR",
+  "stars": {
+    "N": {
+      "star": "Violence",
+      "element": "Métal",
+      "status": "mauvaise",
+      "remedies": ["Élément Bois", "Élément Eau"]
+    },
+    "NE": {
+      "star": "Malchance",
+      "element": "Terre",
+      "status": "mauvaise",
+      "remedies": ["Cure de sel", "Pieces en métal"]
+    },
+    "E": {
+      "star": "Multiplicative",
+      "element": "Feu",
+      "status": "bonne",
+      "remedies": ["Bougies"]
+    },
+    "SE": {
+      "star": "Réussite, renommée, prospérité",
+      "element": "Eau",
+      "status": "bonne",
+      "remedies": ["Paire de poissons"]
+    },
+    "S": {
+      "star": "6 Céleste (richesse, pouvoir, succès)",
+      "element": "Métal",
+      "status": "bonne",
+      "remedies": ["Carillon métal", "Grenouille", "Quartz"]
+    },
+    "SO": {
+      "star": "Prospérité future",
+      "element": "Terre",
+      "status": "bonne",
+      "remedies": []
+    },
+    "O": {
+      "star": "Éducation & harmonie",
+      "element": "",
+      "status": "bonne",
+      "remedies": ["Eau en mouvement"]
+    },
+    "NO": {
+      "star": "Querelles",
+      "element": "Bois",
+      "status": "mauvaise",
+      "remedies": ["Feu", "Metal", "Terre", "Pierres précieuses"]
+    },
+    "C": {
+      "star": "Maladie",
+      "element": "",
+      "status": "mauvaise",
+      "remedies": ["Bouddha", "Pièces chinoises nouées"]
+    }
+  }
+}

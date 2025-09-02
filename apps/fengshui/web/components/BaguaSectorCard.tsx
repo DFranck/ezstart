@@ -28,7 +28,7 @@ export default function BaguaSectorCard({
   onMouseEnter,
   onMouseLeave,
 }: Props) {
-  const s = cfg.sectors[dir]
+  const s = cfg.orientations[dir]
   if (!s) return null
 
   // Couleur d’accent (priorité à colorHex de la config, sinon par élément)
@@ -97,7 +97,7 @@ export default function BaguaSectorCard({
             style={{ backgroundColor: `${accent}14` }}
             aria-hidden
           >
-            <Icon name={s.icon} className="h-4 w-4" style={{ color: accent }} />
+            <Icon name={s.icon as any} className="h-4 w-4" style={{ color: accent }} />
           </span>
         )}
 

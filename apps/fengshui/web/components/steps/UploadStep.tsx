@@ -3,7 +3,7 @@
 
 import { PlanUploader } from '@/components/PlanUploader'
 import type { UploadStepData } from '@/types/bagua'
-import { Icon, StepContent } from '@ezstart/ui/components'
+import { Icon, StepContent, useStepper } from '@ezstart/ui/components'
 
 /**
  * UploadStep
@@ -31,7 +31,10 @@ const UploadStep = () => {
 
   return (
     <StepContent stepId="upload">
-      {(data: UploadStepData, updateData) => (
+      {(data: UploadStepData, updateData) => {
+        const { nextStep } = useStepper()
+        
+        return (
         <div className="mx-auto w-full px-3 sm:px-4 lg:px-0 max-w-2xl">
           <div className="mb-6 sm:mb-8">
             <div className="flex items-center gap-3">
@@ -62,6 +65,8 @@ const UploadStep = () => {
                     position: { x: 0, y: 0 },
                   },
                 })
+                // Passer automatiquement à l'étape suivante
+                setTimeout(() => nextStep(), 100)
               }}
               // Optional minimal-crop intent (ignored if PlanUploader doesn't support it)
               {...uploaderOptions}
@@ -87,7 +92,8 @@ const UploadStep = () => {
             )}
           </div>
         </div>
-      )}
+        )
+      }}
     </StepContent>
   )
 }

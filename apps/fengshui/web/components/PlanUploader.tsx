@@ -3,7 +3,7 @@
 
 import { getCroppedImg } from '@/utils/image'
 import { Button, Icon } from '@ezstart/ui/components'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Cropper from 'react-easy-crop'
 
@@ -24,7 +24,6 @@ interface PlanUploaderProps {
 }
 
 type CropPixels = { width: number; height: number; x: number; y: number }
-type AspectPreset = 'free' | '1:1' | '4:3' | '16:9' | 'custom'
 
 /* ------------------------------------------------------------------------------------------
  * Component
@@ -34,93 +33,21 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
 
-  // Infos image native (utile pour fallback crop)
-  const [mediaSize, setMediaSize] = useState<{
-    naturalWidth: number
-    naturalHeight: number
-  } | null>(null)
-
-  // Éditeur
+  // États simplifiés pour l'édition
   const [isEditing, setIsEditing] = useState(false)
   const [rotation, setRotation] = useState(0)
   const [zoom, setZoom] = useState(1)
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropPixels | null>(null)
+  
+  // Contrôle de la taille du crop
+  const [cropWidth, setCropWidth] = useState(300)
+  const [cropHeight, setCropHeight] = useState(200)
 
-  // Ratio / cadre
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [preset, setPreset] = useState<AspectPreset>('free')
-  const [customAspect, setCustomAspect] = useState<number>(NaN) // ex: 2.35 = 21:9
-  const [cropSize, setCropSize] = useState<{ width: number; height: number }>()
-  const [maxBox, setMaxBox] = useState<{ width: number; height: number }>({ width: 0, height: 420 })
-
-  // Utils
-  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
-
-  // Ratio effectif (undefined = libre)
-  const aspect = useMemo<number | undefined>(() => {
-    if (preset === 'free') return undefined
-    if (preset === '1:1') return 1
-    if (preset === '4:3') return 4 / 3
-    if (preset === '16:9') return 16 / 9
-    if (preset === 'custom' && Number.isFinite(customAspect) && customAspect > 0)
-      return customAspect
-    return undefined
-  }, [preset, customAspect])
-
-  // Responsive : calcule la boîte disponible et initialise/contraint cropSize
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => {
-      const w = Math.round(entry.contentRect.width)
-      setMaxBox({ width: w, height: 420 })
-      setCropSize(cs => {
-        if (!cs) {
-          const initH = Math.min(Math.round(w * 0.6), 420)
-          const initW = aspect ? Math.round(initH * aspect) : w
-          return { width: clamp(initW, 40, w), height: clamp(initH, 40, 420) }
-        }
-        const newW = clamp(cs.width, 40, w)
-        const newH = clamp(cs.height, 40, 420)
-        return { width: newW, height: newH }
-      })
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [aspect])
-
-  // Quand le ratio change : recalcule l’autre dimension
-  useEffect(() => {
-    if (!cropSize) return
-    setCropSize(cs => {
-      if (!cs) return cs
-      if (aspect === undefined) return cs // libre
-      const newW = clamp(Math.round(cs.height * aspect), 40, maxBox.width)
-      const newH = clamp(Math.round(newW / aspect), 40, maxBox.height)
-      return { width: newW, height: newH }
-    })
-  }, [aspect, maxBox.width, maxBox.height, cropSize])
-
-  // Contrôles taille cadre
-  const setHeightPx = (h: number) => {
-    setCropSize(cs => {
-      if (!cs) return cs
-      const height = clamp(h, 40, maxBox.height)
-      if (aspect === undefined) return { ...cs, height }
-      const width = clamp(Math.round(height * aspect), 40, maxBox.width)
-      return { width, height: clamp(Math.round(width / aspect), 40, maxBox.height) }
-    })
-  }
-
-  const setWidthPx = (w: number) => {
-    setCropSize(cs => {
-      if (!cs) return cs
-      const width = clamp(w, 40, maxBox.width)
-      if (aspect === undefined) return { ...cs, width }
-      const height = clamp(Math.round(width / aspect), 40, maxBox.height)
-      return { width, height }
-    })
+  // Fonction pour ajuster automatiquement le crop aux bords
+  const fitToBounds = () => {
+    setZoom(1)
+    setCrop({ x: 0, y: 0 })
   }
 
   // DnD
@@ -144,7 +71,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
         }
         reader.readAsDataURL(file)
       } else {
-        // PDF: pas d’édition image; on passe direct au parent
+        // PDF: pas d'édition image; on passe direct au parent
         setPreview('/api/pdf-preview')
         onPlanUpload(file, '/api/pdf-preview', {
           rotation: 0,
@@ -180,28 +107,14 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
   }, [])
 
   const handleApply = useCallback(async () => {
-    if (!uploadedFile || !preview) return
+    if (!uploadedFile || !preview || !croppedAreaPixels) return
 
-    const fallback =
-      mediaSize &&
-      ({
-        x: 0,
-        y: 0,
-        width: mediaSize.naturalWidth,
-        height: mediaSize.naturalHeight,
-      } as CropPixels)
-
-    const area = croppedAreaPixels ?? fallback
-    if (!area) return
-
-    // getCroppedImg découpe DANS le canvas déjà pivoté → bitmap final "baked"
-    const { file: outFile, dataUrl } = await getCroppedImg(preview, area, rotation)
+    const { file: outFile, dataUrl } = await getCroppedImg(preview, croppedAreaPixels, rotation)
 
     setUploadedFile(outFile)
     setPreview(dataUrl)
     setIsEditing(false)
 
-    // L’image résultante EST déjà pivotée → on repart à 0 pour une éventuelle réédition
     setRotation(0)
     setZoom(1)
     setCrop({ x: 0, y: 0 })
@@ -210,10 +123,15 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
       rotation: 0,
       scale: 1,
       position: { x: 0, y: 0 },
-      crop: { x: area.x, y: area.y, width: area.width, height: area.height },
+      crop: {
+        x: croppedAreaPixels.x,
+        y: croppedAreaPixels.y,
+        width: croppedAreaPixels.width,
+        height: croppedAreaPixels.height,
+      },
       zoom,
     })
-  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, mediaSize])
+  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload])
 
   const handleCancel = () => {
     setRotation(0)
@@ -222,10 +140,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
     setIsEditing(false)
   }
 
-  const isImage = useMemo(
-    () => Boolean(uploadedFile && uploadedFile.type.startsWith('image/')),
-    [uploadedFile]
-  )
+  const isImage = Boolean(uploadedFile && uploadedFile.type.startsWith('image/'))
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -280,22 +195,18 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
               </button>
             </div>
 
-            {/* ÉDITEUR IMAGE */}
+            {/* ÉDITEUR IMAGE SIMPLIFIÉ */}
             {preview && isImage && (
               <div className="space-y-4">
                 {/* Viewer */}
-                <div
-                  ref={containerRef}
-                  className="relative w-full overflow-hidden rounded border bg-white"
-                  style={{ height: 420 }}
-                >
+                <div className="relative w-full overflow-hidden rounded border bg-white" style={{ height: 420 }}>
                   <Cropper
                     image={preview}
                     crop={crop}
                     zoom={zoom}
                     rotation={rotation}
-                    aspect={aspect} // ratio verrouillable (undefined = libre)
-                    cropSize={cropSize} // cadre redimensionnable
+                    aspect={undefined}
+                    cropSize={{ width: cropWidth, height: cropHeight }}
                     restrictPosition={false}
                     onCropChange={setCrop}
                     onZoomChange={setZoom}
@@ -303,208 +214,171 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
                     onCropComplete={onCropComplete}
                     objectFit="contain"
                     showGrid
-                    onMediaLoaded={ms => {
-                      // taille native pour fallback + init zone complète
-                      setMediaSize({
-                        naturalWidth: ms.naturalWidth,
-                        naturalHeight: ms.naturalHeight,
-                      })
-                      setCroppedAreaPixels({
-                        x: 0,
-                        y: 0,
-                        width: ms.naturalWidth,
-                        height: ms.naturalHeight,
-                      })
-                    }}
                   />
                   <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                    {isEditing ? 'Mode édition' : 'Plan chargé'}
+                    Ajustez votre plan
                   </div>
                 </div>
 
-                {/* Controls */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                  {/* Presets & Custom Ratio */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:Ratio" className="w-4 h-4" /> Ratio
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(['free', '1:1', '4:3', '16:9', 'custom'] as AspectPreset[]).map(p => (
-                        <Button
-                          key={p}
-                          size="sm"
-                          variant={preset === p ? 'default' : 'outline'}
-                          onClick={() => setPreset(p)}
-                          aria-pressed={preset === p}
-                          type="button"
-                        >
-                          {p === 'free' ? 'Libre' : p.toUpperCase()}
-                        </Button>
-                      ))}
-                    </div>
-
-                    {preset === 'custom' && (
-                      <div className="mt-3 flex items-center gap-2">
-                        <label className="text-sm text-gray-600" htmlFor="ratioInput">
-                          Ratio (w/h) :
-                        </label>
-                        <input
-                          id="ratioInput"
-                          type="number"
-                          step="0.01"
-                          min="0.1"
-                          value={Number.isFinite(customAspect) ? customAspect : ''}
-                          onChange={e => setCustomAspect(parseFloat(e.target.value))}
-                          className="w-24 rounded border px-2 py-1 text-sm"
-                          placeholder="ex : 2.35"
-                          aria-label="Ratio personnalisé largeur/hauteur"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Crop height */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:Crop" className="w-4 h-4" /> Crop height
-                    </h3>
-                    <input
-                      type="range"
-                      min={40}
-                      max={maxBox.height}
-                      step={1}
-                      value={cropSize?.height ?? 0}
-                      onChange={e => setHeightPx(Number(e.target.value))}
-                      className="w-full"
-                      aria-label="Hauteur du cadre de recadrage"
-                    />
-                    <div className="mt-2 flex items-center gap-2">
+                {/* Contrôles simplifiés */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Zoom */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Icon name="lucide:ZoomIn" className="w-4 h-4" />
+                        Zoom
+                      </h3>
                       <input
-                        type="number"
-                        className="w-24 rounded border px-2 py-1 text-sm"
-                        value={cropSize?.height ?? 0}
-                        onChange={e => setHeightPx(parseInt(e.target.value || '0', 10))}
-                        aria-label="Saisir la hauteur du cadre en pixels"
+                        type="range"
+                        min={1}
+                        max={3}
+                        step={0.1}
+                        value={zoom}
+                        onChange={e => setZoom(Number(e.target.value))}
+                        className="w-full"
                       />
-                      <span className="text-xs text-gray-600">px</span>
+                      <div className="text-center text-sm text-gray-600 mt-2">{zoom.toFixed(1)}x</div>
                     </div>
-                  </div>
 
-                  {/* Crop width (désactivée si ratio verrouillé) */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:Crop" className="w-4 h-4" /> Crop width
-                    </h3>
-                    <input
-                      type="range"
-                      min={40}
-                      max={maxBox.width}
-                      step={1}
-                      value={cropSize?.width ?? 0}
-                      onChange={e => setWidthPx(Number(e.target.value))}
-                      className="w-full"
-                      aria-label="Largeur du cadre de recadrage"
-                      disabled={aspect !== undefined}
-                    />
-                    <div className="mt-2 flex items-center gap-2">
-                      <input
-                        type="number"
-                        className="w-24 rounded border px-2 py-1 text-sm"
-                        value={cropSize?.width ?? 0}
-                        onChange={e => setWidthPx(parseInt(e.target.value || '0', 10))}
-                        aria-label="Saisir la largeur du cadre en pixels"
-                        disabled={aspect !== undefined}
-                      />
-                      <span className="text-xs text-gray-600">px</span>
-                    </div>
-                    {aspect !== undefined && (
-                      <p className="text-xs text-gray-500 mt-1">Width verrouillée par le ratio.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Zoom / Rotation */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:Maximize" className="w-4 h-4" />
-                      Zoom
-                    </h3>
-                    <input
-                      type="range"
-                      min={1}
-                      max={3}
-                      step={0.01}
-                      value={zoom}
-                      onChange={e => setZoom(Number(e.target.value))}
-                      className="w-full"
-                      aria-label="Zoom"
-                    />
-                    <div className="text-xs text-gray-600 mt-1">{zoom.toFixed(2)}x</div>
-                  </div>
-
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                      Rotation
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setRotation(r => r - 90)}
-                        type="button"
-                      >
-                        <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                        -90°
-                      </Button>
-                      <span className="text-sm font-medium text-gray-600 w-16 text-center">
-                        {rotation}°
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setRotation(r => r + 90)}
-                        type="button"
-                      >
+                    {/* Rotation */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                         <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                        +90°
-                      </Button>
+                        Rotation
+                      </h3>
+                      <div className="flex items-center justify-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setRotation(r => r - 90)}
+                          type="button"
+                        >
+                          <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                        </Button>
+                        <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">
+                          {rotation}°
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setRotation(r => r + 90)}
+                          type="button"
+                        >
+                          <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Presets de taille */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Icon name="lucide:Maximize2" className="w-4 h-4" />
+                        Presets
+                      </h3>
+                      <div className="space-y-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={fitToBounds}
+                          type="button"
+                          className="w-full"
+                        >
+                          <Icon name="lucide:Maximize2" className="w-4 h-4 mr-2" />
+                          Ajuster aux bords
+                        </Button>
+                        <div className="grid grid-cols-2 gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setCropWidth(600); setCropHeight(200) }}
+                            type="button"
+                            className="text-xs"
+                          >
+                            Plan allongé
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setCropWidth(300); setCropHeight(300) }}
+                            type="button"
+                            className="text-xs"
+                          >
+                            Carré
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Rappel des presets (boutons rapides) */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <Icon name="lucide:Shapes" className="w-4 h-4" />
-                      Presets rapides
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(['free', '1:1', '4:3', '16:9'] as AspectPreset[]).map(p => (
-                        <Button
-                          key={`quick-${p}`}
-                          size="sm"
-                          variant={preset === p ? 'default' : 'outline'}
-                          onClick={() => setPreset(p)}
-                          aria-pressed={preset === p}
-                          type="button"
-                        >
-                          {p === 'free' ? 'Libre' : p.toUpperCase()}
-                        </Button>
-                      ))}
+                  {/* Contrôles de taille du rectangle */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Largeur du rectangle */}
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Icon name="lucide:ArrowLeftRight" className="w-4 h-4" />
+                        Largeur du rectangle
+                      </h3>
+                      <input
+                        type="range"
+                        min={50}
+                        max={800}
+                        step={10}
+                        value={cropWidth}
+                        onChange={e => setCropWidth(Number(e.target.value))}
+                        className="w-full mb-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          className="w-20 rounded border px-2 py-1 text-sm"
+                          value={cropWidth}
+                          onChange={e => setCropWidth(Number(e.target.value) || 50)}
+                          min={50}
+                          max={800}
+                        />
+                        <span className="text-xs text-gray-600">px</span>
+                      </div>
+                    </div>
+
+                    {/* Hauteur du rectangle */}
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Icon name="lucide:ArrowUpDown" className="w-4 h-4" />
+                        Hauteur du rectangle
+                      </h3>
+                      <input
+                        type="range"
+                        min={50}
+                        max={400}
+                        step={10}
+                        value={cropHeight}
+                        onChange={e => setCropHeight(Number(e.target.value))}
+                        className="w-full mb-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          className="w-20 rounded border px-2 py-1 text-sm"
+                          value={cropHeight}
+                          onChange={e => setCropHeight(Number(e.target.value) || 50)}
+                          min={50}
+                          max={400}
+                        />
+                        <span className="text-xs text-gray-600">px</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button onClick={handleApply} className="flex-1" type="button">
-                    <Icon name="lucide:Check" className="w-4 h-4" />
-                    Appliquer
+                    <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
+                    Valider le crop
                   </Button>
                   <Button variant="outline" onClick={handleCancel} type="button">
-                    <Icon name="lucide:X" className="w-4 h-4" />
+                    <Icon name="lucide:X" className="w-4 h-4 mr-2" />
                     Annuler
                   </Button>
                 </div>
