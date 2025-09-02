@@ -100,6 +100,21 @@ const ClientDashboardPage = () => {
     setIsQuoteModalOpen(true)
   }
 
+  const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    try {
+      const { callBillingApi } = await import('@/utils/call-billing-api')
+      await callBillingApi(`/invoices/${invoice._id}`, {
+        method: 'PATCH',
+        body: { status: 'sent' }
+      })
+      refetchAll()
+    } catch (error) {
+      console.error('Error sending invoice:', error)
+      alert('Error sending invoice')
+    }
+  }
+
   const handleMarkPaid = (invoice: Invoice, e?: React.MouseEvent) => {
     e?.stopPropagation() // ⬅️ prevent opening preview
     setSelectedInvoice(invoice)
@@ -397,6 +412,16 @@ const ClientDashboardPage = () => {
                             >
                               <Icon name="lucide:Edit" className="w-4 h-4" />
                             </Button>
+                            {permissions.canSend && (
+                              <Button
+                                size="sm"
+                                onClick={e => handleSendInvoice(invoice, e)}
+                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                <Icon name="lucide:Send" className="w-4 h-4 mr-1" />
+                                Send
+                              </Button>
+                            )}
                             {permissions.canMarkAsPaid && (
                               <Button
                                 size="sm"

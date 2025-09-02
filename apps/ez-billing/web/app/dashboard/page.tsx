@@ -114,60 +114,7 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-      {/* Header with glass effect */}
-      <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
-                Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Welcome back, {user.username}</p>
-            </div>
-
-            {/* Stats Preview */}
-            <div className="hidden lg:flex items-center space-x-6">
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-                    <Icon name="lucide:Building2" className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{companies?.length || 0}</p>
-                    <p className="text-sm text-gray-500">Companies</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
-                    <Icon name="lucide:Users" className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{clients?.length || 0}</p>
-                    <p className="text-sm text-gray-500">Clients</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                    <Icon name="lucide:CreditCard" className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{paymentMethods?.length || 0}</p>
-                    <p className="text-sm text-gray-500">Payment Methods</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -603,7 +550,7 @@ const DashboardPage = () => {
             : ''
         }"? This can be undone from Settings.`}
       />
-    </div>
+    </>
   )
 }
 

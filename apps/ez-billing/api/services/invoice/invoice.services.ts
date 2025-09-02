@@ -80,10 +80,23 @@ export async function updateInvoiceService(
   id: string,
   data: UpdateInvoice
 ): Promise<Invoice | null> {
-  const totals = calculateTotals(data.items ?? [], data.taxRate ?? 0);
+  // Only recalculate totals if items or taxRate are being updated
+  const shouldRecalculateTotals = data.items !== undefined || data.taxRate !== undefined;
+  
+  let updateData = { ...data };
+  if (shouldRecalculateTotals) {
+    const existingInvoice = await InvoiceModel.findById(id);
+    if (existingInvoice) {
+      const items = data.items ?? existingInvoice.items ?? [];
+      const taxRate = data.taxRate ?? existingInvoice.taxRate ?? 0;
+      const totals = calculateTotals(items, taxRate);
+      updateData = { ...updateData, ...totals };
+    }
+  }
+
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
-    { ...data, ...totals },
+    updateData,
     { new: true }
   );
   return doc ? toApiObject<Invoice>(doc) : null;

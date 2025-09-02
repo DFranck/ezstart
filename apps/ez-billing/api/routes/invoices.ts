@@ -52,6 +52,8 @@ docRouter.put('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secur
   responseSchema: invoiceSchema,
 });
 
+router.patch('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.updateSecureInvoiceController);
+
 docRouter.delete('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.softDeleteSecureInvoiceController, {
   summary: 'Soft delete Invoice',
   tags: ['Invoices'],

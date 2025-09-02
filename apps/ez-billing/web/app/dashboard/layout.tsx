@@ -20,15 +20,23 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
   return (
     <>
       <Header
-        className={cn('h-20 backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-50 shadow-lg')}
+        className={cn(
+          'h-20 backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-50 shadow-lg'
+        )}
         leftContent={
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-xl flex items-center justify-center">
                 <Icon name="lucide:Receipt" className="w-5 h-5 text-white" />
               </div>
               <div>
-                <H1 size={'h5'} className="text-start w-fit font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
+                <H1
+                  size={'h5'}
+                  className="text-start w-fit font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent"
+                >
                   EZ-Billing
                 </H1>
                 <p className="text-xs text-gray-500 -mt-1">Professional Billing</p>
@@ -61,7 +69,9 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
           </div>
         }
       />
-      <Main className="bg-gradient-to-br from-indigo-50 via-white to-cyan-50 min-h-screen">{children}</Main>
+      <Main className="bg-gradient-to-br from-indigo-50 via-white to-cyan-50 min-h-screen">
+        {children}
+      </Main>
     </>
   )
 }

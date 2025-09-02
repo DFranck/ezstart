@@ -1,19 +1,19 @@
-import { cva } from 'class-variance-authority';
-import { sizeText, variantText } from '../../tokens/tokens';
-import { createAlias } from '../../utils/create-alias';
+import { cva } from 'class-variance-authority'
+import { sizeText, variantText } from '../../tokens/tokens'
+import { createAlias } from '../../utils/create-alias'
 
 // --- Tags
-export const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+export const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const
 
 // --- Variants
 export const baseHeadingClasses =
-  'font-display font-bold !leading-[1.3] text-center md:text-left';
+  'font-display font-bold !leading-[1.3] text-center md:text-left mb-2'
 
 // --- Config
 export const headingVariantConfig = {
   variant: variantText,
   size: sizeText,
-};
+}
 
 // --- cva
 export const headingVariants = {
@@ -59,26 +59,23 @@ export const headingVariants = {
       size: 'h6',
     },
   }),
-};
+}
 
 // --- Alias
-export const H1 = createAlias('h1');
-export const H2 = createAlias('h2');
-export const H3 = createAlias('h3');
-export const H4 = createAlias('h4');
-export const H5 = createAlias('h5');
-export const H6 = createAlias('h6');
+export const H1 = createAlias('h1')
+export const H2 = createAlias('h2')
+export const H3 = createAlias('h3')
+export const H4 = createAlias('h4')
+export const H5 = createAlias('h5')
+export const H6 = createAlias('h6')
 
 // --- Meta for playground/devtools
 export const headingVariantsMeta = Object.fromEntries(
-  HEADING_TAGS.map((tag) => [
+  HEADING_TAGS.map(tag => [
     tag,
     {
       variant: Object.keys(headingVariantConfig.variant),
       size: Object.keys(headingVariantConfig.size),
     },
   ])
-) as Record<
-  keyof typeof headingVariants,
-  { variant: string[]; size: string[] }
->;
+) as Record<keyof typeof headingVariants, { variant: string[]; size: string[] }>
