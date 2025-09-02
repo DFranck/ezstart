@@ -1,7 +1,7 @@
 'use client'
 import { BillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
-import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
+import { Client, Company, Invoice, Quote, Receipt, PaymentMethod } from '@ez-billing/types'
 import { callBillingApi } from '../utils/call-billing-api'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -13,6 +13,7 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
@@ -20,12 +21,13 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
     if (!user) return
     setLoading(true)
     try {
-      const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes] = await Promise.all([
+      const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes, paymentMethodsRes] = await Promise.all([
         callBillingApi<Client[]>('/clients', {}),
         callBillingApi<Invoice[]>('/invoices', {}),
         callBillingApi<Quote[]>('/quotes', {}),
         callBillingApi<Receipt[]>('/receipts', {}),
         callBillingApi<Company[]>('/companies', {}),
+        callBillingApi<PaymentMethod[]>('/payment-methods', {}),
       ])
 
       if (clientsRes.ok && clientsRes.data) setClients(clientsRes.data)
@@ -33,6 +35,7 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
       if (quotesRes.ok && quotesRes.data) setQuotes(quotesRes.data)
       if (receiptsRes.ok && receiptsRes.data) setReceipts(receiptsRes.data)
       if (companiesRes.ok && companiesRes.data) setCompanies(companiesRes.data)
+      if (paymentMethodsRes.ok && paymentMethodsRes.data) setPaymentMethods(paymentMethodsRes.data)
     } finally {
       setLoading(false)
     }
@@ -50,6 +53,7 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
         quotes,
         receipts,
         companies,
+        paymentMethods,
         loading,
         refetchAll,
         selectedClient,

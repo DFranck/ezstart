@@ -1,82 +1,113 @@
-'use client';
+// /app/(views)/billing/clients/[clientId]/page.tsx
+// Path comment ↑ as per your convention.
 
-import { useBillingContext } from '@/contexts/billing-context';
-import { useUserStore } from '@/stores/useUserStore';
-import { InvoiceModal } from '@/components/invoice-modal';
-import { QuoteModal } from '@/components/quote-modal';
-import { MarkPaidModal } from '@/components/mark-paid-modal';
-import { Button, H1, H2, H3, P, Section, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Icon } from '@ezstart/ui/components';
-import { Client, Invoice, Quote, Receipt } from '@ez-billing/types';
-import { getBillingPermissions } from '@/utils/billing-permissions';
-import { useState, useEffect } from 'react';
-import { redirect, useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
+'use client'
+
+import { InvoiceModal } from '@/components/invoice-modal'
+import { MarkPaidModal } from '@/components/mark-paid-modal'
+import { PaymentMethodModal } from '@/components/payment-method-modal'
+import { QuoteModal } from '@/components/quote-modal'
+import { useBillingContext } from '@/contexts/billing-context'
+import { useUserStore } from '@/stores/useUserStore'
+import { getBillingPermissions } from '@/utils/billing-permissions'
+import { Client, Company, Invoice, Quote, Receipt, PaymentMethod } from '@ez-billing/types'
+import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { useInvoicePDF } from '@ezstart/ui/hooks'
+import { InvoicePDF, type PDFInvoiceData } from '@ezstart/ui/templates'
+import Link from 'next/link'
+import { redirect, useParams } from 'next/navigation'
+import React, { useState, useCallback } from 'react'
+
+/** Discriminated union for preview */
+type PreviewKind = 'invoice' | 'quote' | 'receipt'
+type PreviewDoc = (Invoice | Quote | Receipt) & { _id: string }
+type PreviewState = { isOpen: boolean; kind?: PreviewKind; doc?: PreviewDoc }
+
+const getDocTitle = (kind: PreviewKind, doc: PreviewDoc) =>
+  `${kind.charAt(0).toUpperCase() + kind.slice(1)} #${(doc as any).documentNumber ?? doc._id}`
+
+const getPdfUrl = (kind: PreviewKind, doc: PreviewDoc) => {
+  // Prefer explicit url if your doc already carries one
+  const explicit = (doc as any).pdfUrl as string | undefined
+  if (explicit) return explicit
+
+  // Fallback: REST endpoint convention
+  const base = kind === 'invoice' ? 'invoices' : kind === 'quote' ? 'quotes' : 'receipts'
+  // If you mount the API elsewhere, update here:
+  return `/api/billing/${base}/${doc._id}/pdf`
+}
 
 const ClientDashboardPage = () => {
-  const router = useRouter();
-  const params = useParams();
-  const clientId = params.clientId as string;
-  
-  const { user } = useUserStore();
-  const { clients, invoices, quotes, receipts, companies, refetchAll, loading } = useBillingContext();
-  
-  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-  const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined);
-  const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined);
-  
+  const params = useParams()
+  const clientId = params.clientId as string
+
+  const { user } = useUserStore()
+  const { clients, invoices, quotes, receipts, companies, paymentMethods, refetchAll, loading } =
+    useBillingContext()
+
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false)
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
+  const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false)
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined)
+  const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined)
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined)
+
+  // ⬇️ NEW: PDF preview modal state
+  const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
+
   if (!user) {
-    redirect('/');
-    return null;
+    redirect('/')
+    return null
   }
 
-  const client = clients.find((c: Client) => c._id === clientId);
-  
+  const client = clients.find((c: Client) => c._id === clientId)
+
   if (!loading && !client) {
-    redirect('/dashboard');
-    return null;
+    redirect('/dashboard')
+    return null
   }
 
-  const clientInvoices = invoices.filter((invoice: Invoice) => invoice.clientId === clientId);
-  const clientQuotes = quotes.filter((quote: Quote) => quote.clientId === clientId);
-  const clientReceipts = receipts.filter((receipt: Receipt) => receipt.clientId === clientId);
+  const clientInvoices = invoices.filter((invoice: Invoice) => invoice.clientId === clientId)
+  const clientQuotes = quotes.filter((quote: Quote) => quote.clientId === clientId)
+  const clientReceipts = receipts.filter((receipt: Receipt) => receipt.clientId === clientId)
 
-  // Calculate stats
   const totalRevenue = clientInvoices
     .filter(inv => inv.status === 'paid')
-    .reduce((sum, inv) => sum + inv.total, 0);
+    .reduce((sum, inv) => sum + inv.total, 0)
   const pendingAmount = clientInvoices
     .filter(inv => inv.status === 'sent')
-    .reduce((sum, inv) => sum + inv.total, 0);
+    .reduce((sum, inv) => sum + inv.total, 0)
 
   const handleCreateInvoice = () => {
-    setEditingInvoice(undefined);
-    setIsInvoiceModalOpen(true);
-  };
+    setEditingInvoice(undefined)
+    setIsInvoiceModalOpen(true)
+  }
 
   const handleCreateQuote = () => {
-    setEditingQuote(undefined);
-    setIsQuoteModalOpen(true);
-  };
+    setEditingQuote(undefined)
+    setIsQuoteModalOpen(true)
+  }
 
-  const handleEditInvoice = (invoice: Invoice) => {
-    setEditingInvoice(invoice);
-    setIsInvoiceModalOpen(true);
-  };
+  const handleEditInvoice = (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    setEditingInvoice(invoice)
+    setIsInvoiceModalOpen(true)
+  }
 
-  const handleEditQuote = (quote: Quote) => {
-    setEditingQuote(quote);
-    setIsQuoteModalOpen(true);
-  };
+  const handleEditQuote = (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    setEditingQuote(quote)
+    setIsQuoteModalOpen(true)
+  }
 
-  const handleMarkPaid = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setIsMarkPaidModalOpen(true);
-  };
+  const handleMarkPaid = (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    setSelectedInvoice(invoice)
+    setIsMarkPaidModalOpen(true)
+  }
 
-  const handleConvertToInvoice = (quote: Quote) => {
+  const handleConvertToInvoice = (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
     const invoiceData = {
       clientId: quote.clientId,
       companyId: quote.companyId,
@@ -87,10 +118,18 @@ const ClientDashboardPage = () => {
       taxRate: quote.taxRate,
       status: 'draft' as const,
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    };
-    setEditingInvoice(invoiceData as any);
-    setIsInvoiceModalOpen(true);
-  };
+    }
+    setEditingInvoice(invoiceData as any)
+    setIsInvoiceModalOpen(true)
+  }
+
+  // ⬇️ NEW: open preview helpers
+  const openPreview = (kind: PreviewKind, doc: PreviewDoc) => {
+    setPreview({ isOpen: true, kind, doc })
+  }
+
+  const closePreview = () => setPreview({ isOpen: false })
+
 
   if (loading) {
     return (
@@ -111,11 +150,14 @@ const ClientDashboardPage = () => {
       {/* Header */}
       <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4 group"
           >
-            <Icon name="lucide:ArrowLeft" className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <Icon
+              name="lucide:ArrowLeft"
+              className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform"
+            />
             Back to Dashboard
           </Link>
 
@@ -123,70 +165,85 @@ const ClientDashboardPage = () => {
             {/* Client Info */}
             <div className="flex-1">
               <div className="flex items-center space-x-4 mb-4">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                  client?.isCompany 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-500'
-                }`}>
-                  <Icon 
-                    name={client?.isCompany ? "lucide:Building" : "lucide:User"} 
-                    className="w-8 h-8 text-white" 
+                <div
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                    client?.isCompany
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                      : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                  }`}
+                >
+                  <Icon
+                    name={client?.isCompany ? 'lucide:Building' : 'lucide:User'}
+                    className="w-8 h-8 text-white"
                   />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">{client?.clientName}</h1>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      client?.isCompany 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'bg-cyan-100 text-cyan-700'
-                    }`}>
-                      <Icon name={client?.isCompany ? 'lucide:Building2' : 'lucide:User'} className="w-3 h-3 mr-1" />
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        client?.isCompany
+                          ? 'bg-purple-100 text-purple-700'
+                          : 'bg-cyan-100 text-cyan-700'
+                      }`}
+                    >
+                      <Icon
+                        name={client?.isCompany ? 'lucide:Building2' : 'lucide:User'}
+                        className="w-3 h-3 mr-1"
+                      />
                       {client?.isCompany ? 'Company' : 'Individual'}
                     </span>
                   </div>
                 </div>
               </div>
-              
+
               {/* Contact Info */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {client?.email && (
                   <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                     <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-gray-400" />
-                    <a href={`mailto:${client.email}`} className="hover:text-indigo-600 transition-colors">
+                    <a
+                      href={`mailto:${client.email}`}
+                      className="hover:text-indigo-600 transition-colors"
+                    >
                       {client.email}
                     </a>
                   </div>
                 )}
-                
+
                 {client?.phone && (
                   <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                     <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-gray-400" />
-                    <a href={`tel:${client.phone}`} className="hover:text-indigo-600 transition-colors">
+                    <a
+                      href={`tel:${client.phone}`}
+                      className="hover:text-indigo-600 transition-colors"
+                    >
                       {client.phone}
                     </a>
                   </div>
                 )}
-                
+
                 {client?.address && (
                   <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                     <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>{client.city}, {client.country}</span>
+                    <span>
+                      {client.city}, {client.country}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex space-x-3">
-              <Button 
-                onClick={handleCreateQuote} 
+              <Button
+                onClick={handleCreateQuote}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               >
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                 New Quote
               </Button>
-              <Button 
+              <Button
                 onClick={handleCreateInvoice}
                 className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               >
@@ -198,9 +255,9 @@ const ClientDashboardPage = () => {
         </div>
       </div>
 
+      {/* Body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Stats Cards */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
@@ -208,28 +265,24 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:DollarSign" className="w-6 h-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">
-                  ${totalRevenue.toFixed(2)}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
                 <p className="text-sm text-gray-500">Total Revenue</p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl flex items-center justify-center">
                 <Icon name="lucide:Clock" className="w-6 h-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">
-                  ${pendingAmount.toFixed(2)}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">${pendingAmount.toFixed(2)}</p>
                 <p className="text-sm text-gray-500">Pending</p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
@@ -241,7 +294,7 @@ const ClientDashboardPage = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
@@ -255,7 +308,7 @@ const ClientDashboardPage = () => {
           </div>
         </div>
 
-        {/* Invoices Section */}
+        {/* Invoices */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-8">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
@@ -273,74 +326,93 @@ const ClientDashboardPage = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="p-6">
             {clientInvoices.length > 0 ? (
               <div className="space-y-4">
-                {clientInvoices.map((invoice) => (
-                  <div key={invoice._id} className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                          <Icon name="lucide:FileEdit" className="w-6 h-6 text-white" />
+                {clientInvoices.map(invoice => {
+                  const permissions = getBillingPermissions(invoice, 'invoice')
+                  return (
+                    <div
+                      key={invoice._id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        openPreview('invoice', invoice)
+                        console.log('clicked')
+                      }}
+                      onKeyDown={e =>
+                        (e.key === 'Enter' || e.key === ' ') && openPreview('invoice', invoice)
+                      }
+                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
+                            <Icon name="lucide:FileEdit" className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              #{invoice.documentNumber}
+                            </h3>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  invoice.status === 'paid'
+                                    ? 'bg-green-100 text-green-800'
+                                    : invoice.status === 'sent'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {invoice.status}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {new Date(invoice.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">#{invoice.documentNumber}</h3>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
-                              invoice.status === 'sent' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {invoice.status}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              {new Date(invoice.createdAt).toLocaleDateString()}
-                            </span>
+
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">
+                              ${invoice.total} {invoice.currency}
+                            </p>
+                          </div>
+
+                          {/* Action buttons: stop propagation so they don't open preview */}
+                          <div
+                            className="flex space-x-2"
+                            onClick={e => e.stopPropagation()}
+                            onKeyDown={e => e.stopPropagation()}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={e => handleEditInvoice(invoice, e)}
+                              disabled={!permissions.canEdit}
+                              title={!permissions.canEdit ? permissions.reason : undefined}
+                              className="hover:bg-gray-50"
+                            >
+                              <Icon name="lucide:Edit" className="w-4 h-4" />
+                            </Button>
+                            {permissions.canMarkAsPaid && (
+                              <Button
+                                size="sm"
+                                onClick={e => handleMarkPaid(invoice, e)}
+                                className="bg-green-500 hover:bg-green-600 text-white"
+                              >
+                                <Icon name="lucide:CheckCircle" className="w-4 h-4 mr-1" />
+                                Mark Paid
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">
-                            ${invoice.total} {invoice.currency}
-                          </p>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          {(() => {
-                            const permissions = getBillingPermissions(invoice, 'invoice');
-                            return (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleEditInvoice(invoice)}
-                                  disabled={!permissions.canEdit}
-                                  title={!permissions.canEdit ? permissions.reason : undefined}
-                                  className="hover:bg-gray-50"
-                                >
-                                  <Icon name="lucide:Edit" className="w-4 h-4" />
-                                </Button>
-                                {permissions.canMarkAsPaid && (
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => handleMarkPaid(invoice)}
-                                    className="bg-green-500 hover:bg-green-600 text-white"
-                                  >
-                                    <Icon name="lucide:CheckCircle" className="w-4 h-4 mr-1" />
-                                    Mark Paid
-                                  </Button>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -361,7 +433,7 @@ const ClientDashboardPage = () => {
           </div>
         </div>
 
-        {/* Quotes Section */}
+        {/* Quotes */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-8">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
@@ -379,78 +451,97 @@ const ClientDashboardPage = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="p-6">
             {clientQuotes.length > 0 ? (
               <div className="space-y-4">
-                {clientQuotes.map((quote) => (
-                  <div key={quote._id} className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
-                          <Icon name="lucide:FileText" className="w-6 h-6 text-white" />
+                {clientQuotes.map(quote => {
+                  const permissions = getBillingPermissions(quote, 'quote')
+                  return (
+                    <div
+                      key={quote._id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openPreview('quote', quote)}
+                      onKeyDown={e =>
+                        (e.key === 'Enter' || e.key === ' ') && openPreview('quote', quote)
+                      }
+                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-emerald-300"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
+                            <Icon name="lucide:FileText" className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              #{quote.documentNumber}
+                            </h3>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  quote.status === 'accepted'
+                                    ? 'bg-green-100 text-green-800'
+                                    : quote.status === 'rejected'
+                                      ? 'bg-red-100 text-red-800'
+                                      : quote.status === 'sent'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {quote.status}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {new Date(quote.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                Valid until:{' '}
+                                {quote.validUntil
+                                  ? new Date(quote.validUntil).toLocaleDateString()
+                                  : '-'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">#{quote.documentNumber}</h3>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              quote.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                              quote.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              quote.status === 'sent' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {quote.status}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              {new Date(quote.createdAt).toLocaleDateString()}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              Valid until: {quote.validUntil ? new Date(quote.validUntil).toLocaleDateString() : '-'}
-                            </span>
+
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">
+                              ${quote.total} {quote.currency}
+                            </p>
+                          </div>
+
+                          <div
+                            className="flex space-x-2"
+                            onClick={e => e.stopPropagation()}
+                            onKeyDown={e => e.stopPropagation()}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={e => handleEditQuote(quote, e)}
+                              disabled={!permissions.canEdit}
+                              title={!permissions.canEdit ? permissions.reason : undefined}
+                              className="hover:bg-gray-50"
+                            >
+                              <Icon name="lucide:Edit" className="w-4 h-4" />
+                            </Button>
+                            {permissions.canConvertToInvoice && (
+                              <Button
+                                size="sm"
+                                onClick={e => handleConvertToInvoice(quote, e)}
+                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-1" />
+                                Invoice
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">
-                            ${quote.total} {quote.currency}
-                          </p>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          {(() => {
-                            const permissions = getBillingPermissions(quote, 'quote');
-                            return (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleEditQuote(quote)}
-                                  disabled={!permissions.canEdit}
-                                  title={!permissions.canEdit ? permissions.reason : undefined}
-                                  className="hover:bg-gray-50"
-                                >
-                                  <Icon name="lucide:Edit" className="w-4 h-4" />
-                                </Button>
-                                {permissions.canConvertToInvoice && (
-                                  <Button 
-                                    size="sm"
-                                    onClick={() => handleConvertToInvoice(quote)}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white"
-                                  >
-                                    <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-1" />
-                                    Invoice
-                                  </Button>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -471,7 +562,7 @@ const ClientDashboardPage = () => {
           </div>
         </div>
 
-        {/* Receipts Section */}
+        {/* Receipts */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
@@ -489,33 +580,50 @@ const ClientDashboardPage = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="p-6">
             {clientReceipts.length > 0 ? (
               <div className="space-y-4">
-                {clientReceipts.map((receipt) => (
-                  <div key={receipt._id} className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                {clientReceipts.map(receipt => (
+                  <div
+                    key={receipt._id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openPreview('receipt', receipt)}
+                    onKeyDown={e =>
+                      (e.key === 'Enter' || e.key === ' ') && openPreview('receipt', receipt)
+                    }
+                    className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-fuchsia-300"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
                           <Icon name="lucide:Receipt" className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">#{receipt.documentNumber}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            #{receipt.documentNumber}
+                          </h3>
                           <div className="flex items-center space-x-4 mt-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              receipt.status === 'refunded' ? 'bg-red-100 text-red-800' :
-                              'bg-green-100 text-green-800'
-                            }`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                receipt.status === 'refunded'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}
+                            >
                               {receipt.status}
                             </span>
                             <span className="text-sm text-gray-500">
-                              Payment: {receipt.paymentDate ? new Date(receipt.paymentDate).toLocaleDateString() : '-'}
+                              Payment:{' '}
+                              {receipt.paymentDate
+                                ? new Date(receipt.paymentDate).toLocaleDateString()
+                                : '-'}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
                         <p className="text-2xl font-bold text-gray-900">
                           ${receipt.total} {receipt.currency}
@@ -531,23 +639,28 @@ const ClientDashboardPage = () => {
                   <Icon name="lucide:Receipt" className="w-10 h-10 text-purple-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No receipts yet</h3>
-                <p className="text-gray-500">Receipts are generated automatically when invoices are paid</p>
+                <p className="text-gray-500">
+                  Receipts are generated automatically when invoices are paid
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* CRUD Modals */}
       <InvoiceModal
         isOpen={isInvoiceModalOpen}
         onClose={() => setIsInvoiceModalOpen(false)}
         invoice={editingInvoice}
         clients={clients}
         companies={companies}
+        paymentMethods={paymentMethods}
         onSave={refetchAll}
+        onManagePaymentMethods={() => {}}
+        clientId={clientId}
       />
-      
+
       <QuoteModal
         isOpen={isQuoteModalOpen}
         onClose={() => setIsQuoteModalOpen(false)}
@@ -566,8 +679,283 @@ const ClientDashboardPage = () => {
           onSave={refetchAll}
         />
       )}
-    </div>
-  );
-};
 
-export default ClientDashboardPage;
+
+      {/* ⬇️ NEW: PDF Preview Modal */}
+      <PreviewPdfModal
+        isOpen={preview.isOpen}
+        kind={preview.kind}
+        doc={preview.doc}
+        paymentMethods={paymentMethods}
+        onClose={closePreview}
+      />
+    </div>
+  )
+}
+
+export default ClientDashboardPage
+
+/** Convertit les données pour le template PDF */
+function convertToInvoicePDFData(
+  invoice: Invoice,
+  client: Client,
+  company?: Company,
+  paymentMethod?: PaymentMethod
+): PDFInvoiceData {
+  return {
+    documentNumber: invoice.documentNumber || invoice._id,
+    createdAt: invoice.createdAt,
+    dueDate: invoice.dueDate,
+    status: invoice.status,
+    currency: invoice.currency,
+    subtotal: invoice.subtotal,
+    taxAmount: invoice.taxAmount,
+    total: invoice.total,
+    items: invoice.items.map(item => ({
+      label: item.label,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+    client: {
+      clientName: client.clientName,
+      email: client.email,
+      phone: client.phone,
+      address: client.address,
+      city: client.city,
+      country: client.country,
+      postalCode: client.postalCode,
+    },
+    company: company
+      ? {
+          companyName: company.companyName,
+          email: company.email,
+          phone: company.phone,
+          address: company.address,
+          city: company.city,
+          country: company.country,
+          postalCode: company.postalCode,
+          taxNumber: company.taxNumber,
+        }
+      : undefined,
+    notes: invoice.notes,
+    terms: invoice.terms || "Payment due upon receipt. Late payment penalties may apply in accordance with applicable regulations.",
+    paymentDetails: paymentMethod ? {
+      methodName: paymentMethod.name,
+      type: paymentMethod.type,
+      // Crypto fields
+      walletAddress: paymentMethod.walletAddress,
+      currency: paymentMethod.currency,
+      network: paymentMethod.network,
+      // Bank fields
+      bankName: paymentMethod.bankName,
+      accountNumber: paymentMethod.accountNumber,
+      iban: paymentMethod.iban,
+      swift: paymentMethod.swift,
+      routingNumber: paymentMethod.routingNumber,
+      // Digital payment fields
+      email: paymentMethod.email,
+      username: paymentMethod.username,
+      // Instructions
+      instructions: paymentMethod.instructions,
+    } : undefined,
+  }
+}
+
+/** Lightweight, reusable PDF preview modal */
+function PreviewPdfModal({
+  isOpen,
+  onClose,
+  kind,
+  doc,
+  paymentMethods,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  kind?: PreviewKind
+  doc?: PreviewDoc
+  paymentMethods: PaymentMethod[]
+}) {
+  const { downloadInvoicePDF, isGenerating } = useInvoicePDF()
+  const { clients, companies } = useBillingContext()
+  const [pdfBlob, setPdfBlob] = useState<string | null>(null)
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+
+  const generatePDFData = () => {
+    if (kind !== 'invoice') return null
+    
+    const invoice = doc as Invoice
+    const client = clients.find(c => c._id === invoice.clientId)
+    const company = invoice.companyId ? companies.find(c => c._id === invoice.companyId) : undefined
+    
+    if (!client) return null
+    
+    const selectedPaymentMethod = paymentMethods.find(p => p.isDefault) || paymentMethods[0]
+    return convertToInvoicePDFData(invoice, client, company, selectedPaymentMethod)
+  }
+
+  const handleGeneratePreview = useCallback(async () => {
+    if (kind !== 'invoice') {
+      alert("PDF generation is only available for invoices at the moment")
+      return
+    }
+
+    const pdfData = generatePDFData()
+    if (!pdfData) {
+      alert('Client not found')
+      return
+    }
+
+    setIsGeneratingPreview(true)
+    try {
+      const { pdf } = await import('@react-pdf/renderer')
+      const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+      const url = URL.createObjectURL(blob)
+      setPdfBlob(url)
+    } catch (error) {
+      console.error('Error generating PDF preview:', error)
+      alert('Error generating PDF preview')
+    } finally {
+      setIsGeneratingPreview(false)
+    }
+  }, [kind, doc, clients, companies])
+
+  const handleDownloadPDF = async () => {
+    const pdfData = generatePDFData()
+    if (!pdfData) {
+      alert('Client not found')
+      return
+    }
+
+    try {
+      const invoice = doc as Invoice
+      await downloadInvoicePDF(<InvoicePDF data={pdfData} />, invoice.documentNumber || invoice._id)
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      alert('Error downloading PDF')
+    }
+  }
+
+  // Nettoyer l'URL quand le modal se ferme
+  const handleClose = () => {
+    if (pdfBlob) {
+      URL.revokeObjectURL(pdfBlob)
+      setPdfBlob(null)
+    }
+    onClose()
+  }
+
+  // Générer le preview automatiquement à l'ouverture
+  React.useEffect(() => {
+    if (isOpen && kind === 'invoice' && !pdfBlob && !isGeneratingPreview && doc && clients.length > 0) {
+      handleGeneratePreview()
+    }
+  }, [isOpen, kind, pdfBlob, isGeneratingPreview, doc, clients, handleGeneratePreview])
+
+  if (!isOpen || !kind || !doc) return null
+
+  const title = getDocTitle(kind, doc)
+  const pdfUrl = getPdfUrl(kind, doc)
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={
+        <>
+          <Icon
+            name={
+              kind === 'invoice'
+                ? 'lucide:FileEdit'
+                : kind === 'quote'
+                  ? 'lucide:FileText'
+                  : 'lucide:Receipt'
+            }
+            className="w-5 h-5 mr-2 text-gray-600"
+          />
+          <span className="font-semibold">{title}</span>
+        </>
+      }
+      description="Click outside or press Esc to close"
+      footer={
+        <div className="flex items-center justify-between w-full">
+          <span className="text-xs text-gray-500 truncate">{pdfUrl}</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => window.open(pdfUrl, '_blank', 'noopener,noreferrer')}
+              className="hover:bg-gray-50"
+            >
+              <Icon name="lucide:ExternalLink" className="w-4 h-4 mr-2" />
+              Open in New Tab
+            </Button>
+            <Button variant="outline" onClick={() => window.print()} className="hover:bg-gray-50">
+              <Icon name="lucide:Printer" className="w-4 h-4 mr-2" />
+              Print
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleGeneratePreview}
+              disabled={isGeneratingPreview}
+              className="hover:bg-gray-50"
+            >
+              <Icon 
+                name={isGeneratingPreview ? "lucide:Loader2" : "lucide:Eye"} 
+                className={`w-4 h-4 mr-2 ${isGeneratingPreview ? 'animate-spin' : ''}`} 
+              />
+              {isGeneratingPreview ? 'Génération...' : 'Refresh Preview'}
+            </Button>
+            <Button
+              onClick={handleDownloadPDF}
+              disabled={isGenerating || !pdfBlob}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Icon 
+                name={isGenerating ? "lucide:Loader2" : "lucide:Download"} 
+                className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`} 
+              />
+              {isGenerating ? 'Téléchargement...' : 'Download PDF'}
+            </Button>
+          </div>
+        </div>
+      }
+      className="max-w-[1100px] w-[98vw]"
+    >
+      {/* PDF container */}
+      <div className="rounded-lg border bg-white overflow-hidden">
+        {pdfBlob ? (
+          <iframe
+            src={`${pdfBlob}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+            className="w-full"
+            style={{ minHeight: '70vh' }}
+            title={`${title} – PDF preview`}
+          />
+        ) : (
+          <div
+            className="flex flex-col items-center justify-center p-12 text-center"
+            style={{ minHeight: '70vh' }}
+          >
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6">
+              <Icon 
+                name={isGeneratingPreview ? "lucide:Loader2" : "lucide:FileText"} 
+                className={`w-10 h-10 text-blue-500 ${isGeneratingPreview ? 'animate-spin' : ''}`} 
+              />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {isGeneratingPreview ? 'Generating PDF Preview...' : 'Instant PDF Generation'}
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-md">
+              {isGeneratingPreview 
+                ? 'Please wait while we generate your PDF preview...'
+                : `Click "Refresh Preview" to generate and preview your ${kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt'} PDF.`
+              }
+            </p>
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <Icon name="lucide:Zap" className="w-4 h-4 text-yellow-500" />
+              <span>Client-side generation • No server required</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
