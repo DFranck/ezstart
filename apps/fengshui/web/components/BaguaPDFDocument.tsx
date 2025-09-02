@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   orientation: {
     fontSize: 11,
     color: '#6b7280',
-    fontWeight: 'semibold',
+    fontWeight: 'bold',
   },
   sectorsTitle: {
     fontSize: 16,
@@ -81,17 +81,14 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   sectorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
     paddingBottom: 8,
-    borderBottom: '1px solid #f3f4f6',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
   },
   sectorTitle: {
     fontSize: 14,
@@ -116,7 +113,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-    fontWeight: 'semibold',
+    fontWeight: 'bold',
   },
   sectorSummary: {
     fontSize: 10,
@@ -142,7 +139,6 @@ const styles = StyleSheet.create({
   keywords: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
     marginBottom: 12,
   },
   keyword: {
@@ -154,7 +150,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 6,
-    fontWeight: 'medium',
+    marginRight: 6,
+    marginBottom: 6,
+    fontWeight: 'bold',
   },
   listItem: {
     fontSize: 9,
@@ -177,10 +175,6 @@ const styles = StyleSheet.create({
     borderLeftColor: '#f59e0b',
   },
   footer: {
-    position: 'absolute',
-    bottom: 25,
-    left: 30,
-    right: 30,
     textAlign: 'center',
     fontSize: 8,
     color: '#9ca3af',
@@ -197,10 +191,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     marginBottom: 18,
-    shadowColor: '#0369a1',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   baguaBaseSectionTitle: {
     fontSize: 12,
@@ -230,7 +220,6 @@ const styles = StyleSheet.create({
   },
   cyclesContainer: {
     flexDirection: 'row',
-    gap: 8,
     marginTop: 6,
   },
   cycleItem: {
@@ -241,6 +230,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 8,
     textAlign: 'center',
+    marginRight: 8,
   },
   cycleTitle: {
     fontSize: 8,
@@ -251,7 +241,7 @@ const styles = StyleSheet.create({
   cycleText: {
     fontSize: 8,
     color: '#0369a1',
-    fontWeight: 'medium',
+    fontWeight: 'bold',
   },
   // Stars Section (temporary)
   starsSection: {
@@ -259,10 +249,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     marginBottom: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   starsSectionTitle: {
     fontSize: 12,
@@ -320,32 +306,31 @@ function getElementColor(element: string): string {
 }
 
 export default function BaguaPDFDocument({ config, planImage, bearingFromNorth }: Props) {
-  // Grouper les secteurs par pages (2 secteurs par page pour éviter les coupures)
+  // 2 secteurs par page pour éviter les coupures
   const sectorsPerPage = 2
   const pages: Direction[][] = []
-
   for (let i = 0; i < DIRECTIONS_WITH_CENTER.length; i += sectorsPerPage) {
     pages.push(DIRECTIONS_WITH_CENTER.slice(i, i + sectorsPerPage))
   }
 
   return (
     <Document>
-      {/* Page de couverture */}
+      {/* Couverture */}
       <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Header (fixe) */}
+        <View style={styles.header} fixed>
           <Text style={styles.title}>Analyse Feng Shui Bagua</Text>
           <Text style={styles.subtitle}>
             Rapport détaillé de votre espace selon les principes du Feng Shui
           </Text>
         </View>
 
-        {/* Plan image */}
+        {/* Plan */}
         {planImage && (
           <View style={styles.planSection}>
             <Image src={planImage} style={styles.planImage} />
             <Text style={styles.orientation}>
-              Orientation : {Math.round(bearingFromNorth)} degres depuis le Nord
+              Orientation : {Math.round(bearingFromNorth)} degrés depuis le Nord
             </Text>
           </View>
         )}
@@ -362,32 +347,29 @@ export default function BaguaPDFDocument({ config, planImage, bearingFromNorth }
           }}
         >
           <Text style={styles.sectorsTitle}>Sommaire des orientations</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: 8,
-            }}
-          >
-            {DIRECTIONS_WITH_CENTER.map((dir: Direction) => {
-              const sector = config.orientations[dir]
-              if (!sector) return null
 
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {DIRECTIONS_WITH_CENTER.map((dir: Direction, idx) => {
+              const sector = (config as any).orientations[dir]
+              if (!sector) return null
               const elementColor = getElementColor(sector.element)
 
+              // 2 tuiles par ligne, sans gap
+              const isRight = idx % 2 === 1
               return (
                 <View
                   key={dir}
                   style={{
-                    flex: '1 1 45%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    width: '48%',
+                    marginRight: isRight ? 0 : '4%',
                     marginBottom: 10,
                     padding: 8,
                     backgroundColor: '#f8fafc',
                     borderRadius: 8,
                     borderWidth: 1,
                     borderColor: '#e2e8f0',
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}
                 >
                   <View
@@ -422,184 +404,193 @@ export default function BaguaPDFDocument({ config, planImage, bearingFromNorth }
           </View>
         </View>
 
-        {/* Footer première page */}
-        <View style={styles.footer}>
+        {/* Footer (fixe) */}
+        <View
+          style={[styles.footer, { position: 'absolute', left: 30, right: 30, bottom: 25 }]}
+          fixed
+        >
           <Text>
-            Rapport genere le {new Date().toLocaleDateString('fr-FR')} - Feng Shui Bagua Analysis -
+            Rapport généré le {new Date().toLocaleDateString('fr-FR')} • Feng Shui Bagua Analysis •
             Configuration {config.year || '2025'}
           </Text>
         </View>
       </Page>
 
-      {/* Pages des secteurs (2 par page) */}
+      {/* Pages secteurs */}
       {pages.map((pageDirections, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
-          <Text style={[styles.sectorsTitle, { marginBottom: 20 }]}>
+          <Text style={[styles.sectorsTitle, { marginBottom: 20 }]} fixed>
             Orientations Bagua - Page {pageIndex + 2}
           </Text>
 
-          {pageDirections.map((dir: Direction) => {
-            const sector = config.orientations[dir]
-            if (!sector) return null
+          <View style={{ marginTop: 60 }}>
+            {pageDirections.map((dir: Direction) => {
+              const sector = (config as any).orientations[dir]
+              if (!sector) return null
+              const elementColor = getElementColor(sector.element)
 
-            const elementColor = getElementColor(sector.element)
-
-            return (
-              <View
-                key={dir}
-                style={[styles.sectorCard, { borderTopColor: elementColor, marginBottom: 25 }]}
-                break={false} // Empêche la coupure du secteur
-              >
-                {/* Header du secteur */}
-                <View style={styles.sectorHeader}>
-                  <Text style={styles.sectorTitle}>{sector.title}</Text>
-                  <Text style={styles.sectorElement}>{sector.element}</Text>
-                  <Text style={styles.sectorDirection}>{dir}</Text>
-                </View>
-
-                {sector.summary && <Text style={styles.sectorSummary}>{sector.summary}</Text>}
-
-                {/* Mots-clés */}
-                {sector.keywords && sector.keywords.length > 0 && (
-                  <View>
-                    <Text style={styles.sectionTitle}>Mots-clés</Text>
-                    <View style={styles.keywords}>
-                      {sector.keywords.map((keyword: string) => (
-                        <Text key={keyword} style={styles.keyword}>
-                          {keyword}
-                        </Text>
-                      ))}
-                    </View>
+              return (
+                <View
+                  key={dir}
+                  style={[
+                    styles.sectorCard,
+                    { borderTopColor: elementColor, borderTopWidth: 3, marginBottom: 25 },
+                  ]}
+                  wrap={false}
+                  minPresenceAhead={120} // pousse la carte si l'espace restant est trop petit
+                >
+                  {/* Header */}
+                  <View style={styles.sectorHeader}>
+                    <Text style={styles.sectorTitle}>{sector.title}</Text>
+                    <Text style={styles.sectorElement}>{sector.element}</Text>
+                    <Text style={styles.sectorDirection}>{dir}</Text>
                   </View>
-                )}
 
-                {/* BAGUA DE BASE - Section permanente */}
-                <View style={styles.baguaBaseSection}>
-                  <Text style={styles.baguaBaseSectionTitle}>Bagua de Base (permanent)</Text>
+                  {sector.summary && <Text style={styles.sectorSummary}>{sector.summary}</Text>}
 
-                  {/* Activateurs de base */}
-                  {sector.enhancers && sector.enhancers.length > 0 && (
-                    <View style={{ marginBottom: 12 }}>
-                      <Text style={styles.baseSectionTitle}>Activateurs naturels</Text>
-                      {sector.enhancers.map((enhancer: string, index: number) => (
-                        <Text key={index} style={styles.baseListItem}>
-                          • {enhancer}
-                        </Text>
-                      ))}
+                  {/* Keywords */}
+                  {sector.keywords && sector.keywords.length > 0 && (
+                    <View>
+                      <Text style={styles.sectionTitle}>Mots-clés</Text>
+                      <View style={styles.keywords}>
+                        {sector.keywords.map((k: string) => (
+                          <Text key={k} style={styles.keyword}>
+                            • {k}
+                          </Text>
+                        ))}
+                      </View>
                     </View>
                   )}
 
-                  {/* Matières favorables */}
-                  {sector.matiere && (
-                    <View style={{ marginBottom: 12 }}>
-                      <Text style={styles.baseSectionTitle}>Matieres favorables</Text>
-                      <Text style={styles.baseListItem}>{sector.matiere}</Text>
-                    </View>
-                  )}
+                  {/* BAGUA BASE */}
+                  <View style={styles.baguaBaseSection} wrap={false}>
+                    <Text style={styles.baguaBaseSectionTitle}>Bagua de base (permanent)</Text>
 
-                  {/* Cycles des éléments */}
-                  <View style={{ marginBottom: 8 }}>
-                    <Text style={styles.baseSectionTitle}>Cycles des 5 elements</Text>
-                    <View style={styles.cyclesContainer}>
-                      <View style={styles.cycleItem}>
-                        <Text style={styles.cycleTitle}>Nourri par</Text>
-                        <Text style={styles.cycleText}>{sector.nourisher}</Text>
-                      </View>
-                      <View style={styles.cycleItem}>
-                        <Text style={styles.cycleTitle}>Controle par</Text>
-                        <Text style={styles.cycleText}>{sector.controller}</Text>
-                      </View>
-                      <View style={styles.cycleItem}>
-                        <Text style={styles.cycleTitle}>Affaibli par</Text>
-                        <Text style={styles.cycleText}>{sector.weakenedBy}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                {/* ÉTOILES VOLANTES - Section temporaire */}
-                {sector.star && (
-                  <View
-                    style={[
-                      styles.starsSection,
-                      {
-                        backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
-                        borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.starsSectionTitle,
-                        { color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' },
-                      ]}
-                    >
-                      Etoile Volante 2025 ({sector.star.status})
-                    </Text>
-
-                    <View style={{ marginBottom: 8 }}>
-                      <Text style={styles.starTitle}>{sector.star.star}</Text>
-                      {sector.star.element && (
-                        <Text style={styles.starElement}>Element : {sector.star.element}</Text>
-                      )}
-                    </View>
-
-                    {sector.star.remedies.length > 0 && (
-                      <View>
-                        <Text style={styles.starSectionTitle}>Remedes specifiques 2025</Text>
-                        {sector.star.remedies.map((remedy: string, index: number) => (
-                          <Text key={index} style={styles.starListItem}>
-                            • {remedy}
+                    {sector.enhancers && sector.enhancers.length > 0 && (
+                      <View style={{ marginBottom: 12 }}>
+                        <Text style={styles.baseSectionTitle}>Activateurs naturels</Text>
+                        {sector.enhancers.map((e: string, i: number) => (
+                          <Text key={i} style={styles.baseListItem}>
+                            • {e}
                           </Text>
                         ))}
                       </View>
                     )}
-                  </View>
-                )}
 
-                {/* Autres sections (si nécessaires) */}
-                {sector.tips && sector.tips.length > 0 && (
-                  <View>
-                    <Text style={styles.sectionTitle}>Conseils</Text>
-                    {sector.tips.map((tip: string, index: number) => (
-                      <Text key={index} style={styles.listItem}>
-                        • {tip}
+                    {sector.matiere && (
+                      <View style={{ marginBottom: 12 }}>
+                        <Text style={styles.baseSectionTitle}>Matières favorables</Text>
+                        <Text style={styles.baseListItem}>{sector.matiere}</Text>
+                      </View>
+                    )}
+
+                    <View style={{ marginBottom: 8 }}>
+                      <Text style={styles.baseSectionTitle}>Cycles des 5 éléments</Text>
+                      <View style={styles.cyclesContainer}>
+                        <View style={styles.cycleItem}>
+                          <Text style={styles.cycleTitle}>Nourri par</Text>
+                          <Text style={styles.cycleText}>{sector.nourisher}</Text>
+                        </View>
+                        <View style={styles.cycleItem}>
+                          <Text style={styles.cycleTitle}>Contrôlé par</Text>
+                          <Text style={styles.cycleText}>{sector.controller}</Text>
+                        </View>
+                        <View style={[styles.cycleItem, { marginRight: 0 }]}>
+                          <Text style={styles.cycleTitle}>Affaibli par</Text>
+                          <Text style={styles.cycleText}>{sector.weakenedBy}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* STARS 2025 */}
+                  {sector.star && (
+                    <View
+                      style={[
+                        styles.starsSection,
+                        {
+                          backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
+                          borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
+                        },
+                      ]}
+                      wrap={false}
+                    >
+                      <Text
+                        style={[
+                          styles.starsSectionTitle,
+                          { color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' },
+                        ]}
+                      >
+                        Étoile volante 2025 ({sector.star.status})
                       </Text>
-                    ))}
-                  </View>
-                )}
 
-                {sector.avoid && sector.avoid.length > 0 && (
-                  <View>
-                    <Text style={styles.sectionTitle}>A eviter</Text>
-                    {sector.avoid.map((item: string, index: number) => (
-                      <Text key={index} style={styles.listItem}>
-                        • {item}
-                      </Text>
-                    ))}
-                  </View>
-                )}
+                      <View style={{ marginBottom: 8 }}>
+                        <Text style={styles.starTitle}>{sector.star.star}</Text>
+                        {sector.star.element && (
+                          <Text style={styles.starElement}>Élément : {sector.star.element}</Text>
+                        )}
+                      </View>
 
-                {sector.symbols && sector.symbols.length > 0 && (
-                  <View>
-                    <Text style={styles.sectionTitle}>Symboles</Text>
-                    <Text style={styles.listItem}>{sector.symbols.join(', ')}</Text>
-                  </View>
-                )}
+                      {sector.star.remedies && sector.star.remedies.length > 0 && (
+                        <View>
+                          <Text style={styles.starSectionTitle}>Remèdes spécifiques 2025</Text>
+                          {sector.star.remedies.map((r: string, i: number) => (
+                            <Text key={i} style={styles.starListItem}>
+                              • {r}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  )}
 
-                {sector.notes && (
-                  <View style={styles.notes}>
-                    <Text>{sector.notes}</Text>
-                  </View>
-                )}
-              </View>
-            )
-          })}
+                  {/* Conseils / À éviter / Symboles / Notes */}
+                  {sector.tips && sector.tips.length > 0 && (
+                    <View>
+                      <Text style={styles.sectionTitle}>Conseils</Text>
+                      {sector.tips.map((t: string, i: number) => (
+                        <Text key={i} style={styles.listItem}>
+                          • {t}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
 
-          {/* Footer pages secteurs */}
-          <View style={styles.footer}>
+                  {sector.avoid && sector.avoid.length > 0 && (
+                    <View>
+                      <Text style={styles.sectionTitle}>À éviter</Text>
+                      {sector.avoid.map((a: string, i: number) => (
+                        <Text key={i} style={styles.listItem}>
+                          • {a}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {sector.symbols && sector.symbols.length > 0 && (
+                    <View>
+                      <Text style={styles.sectionTitle}>Symboles</Text>
+                      <Text style={styles.listItem}>{sector.symbols.join(', ')}</Text>
+                    </View>
+                  )}
+
+                  {sector.notes && (
+                    <View style={styles.notes}>
+                      <Text>{sector.notes}</Text>
+                    </View>
+                  )}
+                </View>
+              )
+            })}
+          </View>
+
+          {/* Footer (fixe) */}
+          <View
+            style={[styles.footer, { position: 'absolute', left: 30, right: 30, bottom: 25 }]}
+            fixed
+          >
             <Text>
-              Page {pageIndex + 2} / {pages.length + 1} - Feng Shui Bagua Analysis
+              Page {pageIndex + 2} / {pages.length + 1} • Feng Shui Bagua Analysis
             </Text>
           </View>
         </Page>
