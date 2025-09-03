@@ -22,8 +22,8 @@ export function useGameSync() {
       const localTowers = useGameState.getState().towers
       
       // Synchroniser si le serveur a un état différent (pas seulement plus de tours)
-      const serverTowersString = JSON.stringify(serverTowers.map(t => ({ x: t.origin.x, y: t.origin.y, type: t.type })))
-      const localTowersString = JSON.stringify(localTowers.map(t => ({ x: t.origin.x, y: t.origin.y, type: t.type })))
+      const serverTowersString = JSON.stringify(serverTowers.map(t => ({ x: t.origin.x, y: t.origin.y, name: t.name })))
+      const localTowersString = JSON.stringify(localTowers.map(t => ({ x: t.origin.x, y: t.origin.y, name: t.name })))
       
       if (serverTowersString !== localTowersString) {
         useGameState.setState({
