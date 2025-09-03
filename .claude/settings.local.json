@@ -18,7 +18,8 @@
       "Bash(xcopy:*)",
       "Bash(copy:*)",
       "Bash(npx tsc:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

@@ -14,6 +14,7 @@ export function GameTimer({ game }: GameTimerProps) {
     if (!game?.startedAt) return
 
     const updateTimer = () => {
+      if (!game.startedAt) return
       const startTime = new Date(game.startedAt).getTime()
       const now = Date.now()
       const elapsed = Math.floor((now - startTime) / 1000)
