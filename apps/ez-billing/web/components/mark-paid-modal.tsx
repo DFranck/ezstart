@@ -6,6 +6,7 @@ import { runWithFeedback } from '@ezstart/ui/utils';
 import { callBillingApi } from '../utils/call-billing-api';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
+import { useUserStore } from '@/stores/useUserStore';
 
 interface MarkPaidModalProps {
   isOpen: boolean;
@@ -16,9 +17,11 @@ interface MarkPaidModalProps {
 }
 
 export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: MarkPaidModalProps) {
+  const { user } = useUserStore();
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState<CreateReceipt>({
+    userId: user?._id || '',
     clientId: invoice.clientId,
     companyId: invoice.companyId || '',
     items: invoice.items.map(item => ({
