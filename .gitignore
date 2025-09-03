@@ -38,3 +38,6 @@ npm-debug.log*
 note.md
 .vercel
 .env*.local
+
+# TypeScript build info
+*.tsbuildinfo
