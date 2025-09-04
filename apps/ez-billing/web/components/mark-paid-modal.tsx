@@ -3,7 +3,8 @@
 import { Company, CreateReceipt, Invoice } from '@ez-billing/types';
 import { Button, H3, Input, Label, Modal, Section, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
-import { callBillingApi } from '../utils/call-billing-api';
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
 import { useUserStore } from '@/stores/useUserStore';
@@ -43,15 +44,17 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
     return runWithFeedback({
       action: async () => {
         // Create receipt
-        const receiptRes = await callBillingApi('/receipts', {
+        const receiptRes = await callApi('/receipts', {
           method: 'POST',
+            userId: getUserId(),
           body: formData,
         });
         if (!receiptRes.ok) throw new Error('Failed to create receipt');
 
         // Update invoice status to paid
-        const invoiceRes = await callBillingApi(`/invoices/${invoice._id}`, {
+        const invoiceRes = await callApi(`/invoices/${invoice._id}`, {
           method: 'PUT',
+            userId: getUserId(),
           body: { status: 'paid' },
         });
         if (!invoiceRes.ok) throw new Error('Failed to update invoice status');

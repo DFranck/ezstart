@@ -18,7 +18,8 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
-import { callBillingApi } from '../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 interface PaymentMethodModalProps {
@@ -104,14 +105,16 @@ export function PaymentMethodModal({
     return runWithFeedback({
       action: async () => {
         if (paymentMethod) {
-          const res = await callBillingApi(`/payment-methods/${paymentMethod._id}`, {
+          const res = await callApi(`/payment-methods/${paymentMethod._id}`, {
             method: 'PUT',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to update payment method')
         } else {
-          const res = await callBillingApi('/payment-methods', {
+          const res = await callApi('/payment-methods', {
             method: 'POST',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to create payment method')

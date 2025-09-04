@@ -1,7 +1,8 @@
 'use client'
 
 import { Button, Icon, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
-import { callBillingApi } from '../../../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../../../utils/get-user-id'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
 import { useEffect, useState } from 'react'
 import { DeletedItemsManager } from './components/deleted-items-manager'
@@ -20,11 +21,11 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       const [clients, companies, quotes, invoices, receipts] = await Promise.all([
-        callBillingApi('/clients?deletedOnly=true'),
-        callBillingApi('/companies?deletedOnly=true'),
-        callBillingApi('/quotes?deletedOnly=true'),
-        callBillingApi('/invoices?deletedOnly=true'),
-        callBillingApi('/receipts?deletedOnly=true'),
+        callApi('/clients?deletedOnly=true'),
+        callApi('/companies?deletedOnly=true'),
+        callApi('/quotes?deletedOnly=true'),
+        callApi('/invoices?deletedOnly=true'),
+        callApi('/receipts?deletedOnly=true'),
       ])
 
       setDeletedItems({
@@ -47,7 +48,10 @@ export default function SettingsPage() {
 
   const handleRestore = async (type: string, id: string) => {
     try {
-      await callBillingApi(`/${type}/${id}/restore`, { method: 'POST' })
+      await callApi(`/${type}/${id}/restore`, { 
+            method: 'POST',
+            userId: getUserId(),
+          })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error restoring ${type}:`, error)
@@ -56,7 +60,10 @@ export default function SettingsPage() {
 
   const handleHardDelete = async (type: string, id: string) => {
     try {
-      await callBillingApi(`/${type}/${id}/hard-delete`, { method: 'DELETE' })
+      await callApi(`/${type}/${id}/hard-delete`, { 
+            method: 'DELETE',
+            userId: getUserId(),
+          })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)

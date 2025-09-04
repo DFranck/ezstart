@@ -6,7 +6,8 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
-import { callBillingApi } from '@/utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, PaymentMethod } from '@ez-billing/types'
 import { Button, Icon } from '@ezstart/ui/components'
 import { redirect, useRouter } from 'next/navigation'
@@ -87,11 +88,20 @@ const DashboardPage = () => {
 
     try {
       if (deleteDialog.type === 'company') {
-        await callBillingApi(`/companies/${deleteDialog.item._id}`, { method: 'DELETE' })
+        await callApi(`/companies/${deleteDialog.item._id}`, { 
+            method: 'DELETE',
+            userId: getUserId(),
+          })
       } else if (deleteDialog.type === 'client') {
-        await callBillingApi(`/clients/${deleteDialog.item._id}`, { method: 'DELETE' })
+        await callApi(`/clients/${deleteDialog.item._id}`, { 
+            method: 'DELETE',
+            userId: getUserId(),
+          })
       } else if (deleteDialog.type === 'payment-method') {
-        await callBillingApi(`/payment-methods/${deleteDialog.item._id}`, { method: 'DELETE' })
+        await callApi(`/payment-methods/${deleteDialog.item._id}`, { 
+            method: 'DELETE',
+            userId: getUserId(),
+          })
       }
       refetchAll()
     } catch (error) {

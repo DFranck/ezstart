@@ -25,7 +25,8 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
-import { callBillingApi } from '../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 interface QuoteModalProps {
@@ -110,14 +111,16 @@ export function QuoteModal({
     return runWithFeedback({
       action: async () => {
         if (quote) {
-          const res = await callBillingApi(`/quotes/${quote._id}`, {
+          const res = await callApi(`/quotes/${quote._id}`, {
             method: 'PUT',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to update quote')
         } else {
-          const res = await callBillingApi('/quotes', {
+          const res = await callApi('/quotes', {
             method: 'POST',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to create quote')

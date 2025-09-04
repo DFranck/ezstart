@@ -4,7 +4,8 @@ import { useUserStore } from '@/stores/useUserStore'
 import { Company, CreateCompany } from '@ez-billing/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
-import { callBillingApi } from '../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 import { useState, useEffect } from 'react'
 import { LoadingButton } from './loading-button'
 
@@ -64,14 +65,16 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
     return runWithFeedback({
       action: async () => {
         if (company) {
-          const res = await callBillingApi(`/companies/${company._id}`, {
+          const res = await callApi(`/companies/${company._id}`, {
             method: 'PUT',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to update company')
         } else {
-          const res = await callBillingApi('/companies', {
+          const res = await callApi('/companies', {
             method: 'POST',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to create company')

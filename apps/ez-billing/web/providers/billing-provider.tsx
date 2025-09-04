@@ -1,9 +1,10 @@
 'use client'
 import { BillingContext } from '@/contexts/billing-context'
 import { useUserStore } from '@/stores/useUserStore'
-import { Client, Company, Invoice, Quote, Receipt, PaymentMethod } from '@ez-billing/types'
-import { callBillingApi } from '../utils/call-billing-api'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
 import { useCallback, useEffect, useState } from 'react'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 
 export const BillingProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUserStore()
@@ -21,14 +22,16 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
     if (!user) return
     setLoading(true)
     try {
-      const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes, paymentMethodsRes] = await Promise.all([
-        callBillingApi<Client[]>('/clients', {}),
-        callBillingApi<Invoice[]>('/invoices', {}),
-        callBillingApi<Quote[]>('/quotes', {}),
-        callBillingApi<Receipt[]>('/receipts', {}),
-        callBillingApi<Company[]>('/companies', {}),
-        callBillingApi<PaymentMethod[]>('/payment-methods', {}),
-      ])
+      const userId = getUserId()
+      const [clientsRes, invoicesRes, quotesRes, receiptsRes, companiesRes, paymentMethodsRes] =
+        await Promise.all([
+          callApi<Client[]>('/clients', { userId }),
+          callApi<Invoice[]>('/invoices', { userId }),
+          callApi<Quote[]>('/quotes', { userId }),
+          callApi<Receipt[]>('/receipts', { userId }),
+          callApi<Company[]>('/companies', { userId }),
+          callApi<PaymentMethod[]>('/payment-methods', { userId }),
+        ])
 
       if (clientsRes.ok && clientsRes.data) setClients(clientsRes.data)
       if (invoicesRes.ok && invoicesRes.data) setInvoices(invoicesRes.data)

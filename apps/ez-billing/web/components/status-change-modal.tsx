@@ -2,7 +2,8 @@
 
 import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
-import { callBillingApi } from '../utils/call-billing-api';
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
 
@@ -59,8 +60,9 @@ export function StatusChangeModal({
 
     return runWithFeedback({
       action: async () => {
-        const res = await callBillingApi(`${apiEndpoints[documentType]}/${documentId}`, {
+        const res = await callApi(`${apiEndpoints[documentType]}/${documentId}`, {
           method: 'PUT',
+            userId: getUserId(),
           body: { status: newStatus },
         });
         if (!res.ok) throw new Error(`Failed to update ${documentType} status`);

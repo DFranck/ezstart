@@ -17,7 +17,8 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
-import { callBillingApi } from '../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 interface ClientModalProps {
@@ -57,14 +58,16 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     return runWithFeedback({
       action: async () => {
         if (client) {
-          const res = await callBillingApi(`/clients/${client._id}`, {
+          const res = await callApi(`/clients/${client._id}`, {
             method: 'PUT',
+            userId: getUserId(),
             body: formData,
           })
           if (!res.ok) throw new Error('Failed to update client')
         } else {
-          const res = await callBillingApi('/clients', {
+          const res = await callApi('/clients', {
             method: 'POST',
+            userId: getUserId(),
             body: formData,
           })
           if (!res.ok) throw new Error('Failed to create client')

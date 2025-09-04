@@ -23,7 +23,8 @@ import {
   TextArea,
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
-import { callBillingApi } from '../utils/call-billing-api'
+import { callApi } from '@ezstart/ui/utils'
+import { getUserId } from '../utils/get-user-id'
 import { useState, useEffect } from 'react'
 import { LoadingButton } from './loading-button'
 import { useUserStore } from '@/stores/useUserStore'
@@ -139,14 +140,16 @@ export function InvoiceModal({
     return runWithFeedback({
       action: async () => {
         if (invoice) {
-          const res = await callBillingApi(`/invoices/${invoice._id}`, {
+          const res = await callApi(`/invoices/${invoice._id}`, {
             method: 'PUT',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to update invoice')
         } else {
-          const res = await callBillingApi('/invoices', {
+          const res = await callApi('/invoices', {
             method: 'POST',
+            userId: getUserId(),
             body: dataToSend,
           })
           if (!res.ok) throw new Error('Failed to create invoice')
