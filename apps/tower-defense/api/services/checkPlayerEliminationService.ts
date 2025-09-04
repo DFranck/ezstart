@@ -6,7 +6,7 @@ import { updatePlayerStatsService } from './updatePlayerStatsService.js'
 
 /**
  * Vérifie si des joueurs doivent être éliminés (HP <= 0)
- * et met à jour leur statut en 'defeated'
+ * et met à jour leur statut en 'eliminated'
  */
 export async function checkPlayerEliminationService(gameId: string) {
   try {
@@ -21,16 +21,16 @@ export async function checkPlayerEliminationService(gameId: string) {
     for (const inGamePlayer of activePlayers) {
       if (inGamePlayer.hp <= 0) {
         // Marquer comme éliminé
-        inGamePlayer.status = 'defeated'
+        inGamePlayer.status = 'eliminated'
         await inGamePlayer.save()
 
         eliminatedPlayers.push({
           playerId: inGamePlayer.player._id,
-          playerName: inGamePlayer.player.name,
+          playerName: typeof inGamePlayer.player === 'object' ? (inGamePlayer.player as any).name : String(inGamePlayer.player),
           hp: inGamePlayer.hp
         })
 
-        logger.debug(`Player ${inGamePlayer.player.name} eliminated (HP: ${inGamePlayer.hp})`)
+        logger.debug(`Player ${typeof inGamePlayer.player === 'object' ? (inGamePlayer.player as any).name : String(inGamePlayer.player)} eliminated (HP: ${inGamePlayer.hp})`)
       }
     }
 

@@ -4,7 +4,11 @@ import {
   validateParams,
   validateQuery,
 } from '@ezstart/api-core'
-import { paramsMongoIdSchema } from '@ezstart/types'
+import { mongoIdSchema, z } from '@ezstart/types'
+
+const paramsMongoIdSchema = z.object({
+  id: mongoIdSchema
+})
 import {
   createGameResponseSchema,
   gameSchema,
@@ -39,26 +43,26 @@ docRouter.post('/', createGameController, {
 docRouter.get('/:id', validateParams(paramsMongoIdSchema), getGameByIdController, {
   summary: 'Get a Game',
   tags: ['Games'],
-  paramsSchema: paramsMongoIdSchema,
+  paramsSchema: mongoIdSchema,
   responseSchema: gameSchema,
 })
 docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameController, {
   summary: 'Start a Game',
   tags: ['Games'],
-  paramsSchema: paramsMongoIdSchema,
+  paramsSchema: mongoIdSchema,
   responseSchema: gameSchema,
 })
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
-  bodySchema: paramsMongoIdSchema,
-  paramsSchema: paramsMongoIdSchema,
+  bodySchema: mongoIdSchema,
+  paramsSchema: mongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })
 docRouter.post('/:id/leave', validateParams(paramsMongoIdSchema), leaveGameController, {
   summary: 'Leave a Game',
   tags: ['Games'],
-  paramsSchema: paramsMongoIdSchema,
+  paramsSchema: mongoIdSchema,
 })
 
 export default router

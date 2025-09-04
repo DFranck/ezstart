@@ -86,7 +86,7 @@ export async function startGameService({ gameId }: { gameId: string }) {
     logger.debug(`[startGameService] Game ${gameId} started with ${activePlayers.length} active players`)
     logger.debug(`[startGameService] Active players:`, activePlayers.map(p => ({
       id: p._id,
-      name: typeof p.player === 'object' ? p.player.name : p.player,
+      name: typeof p.player === 'object' ? (p.player as any).name : String(p.player),
       status: p.status
     })))
 

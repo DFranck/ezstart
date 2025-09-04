@@ -1,4 +1,4 @@
-import type { GamePlayer } from '@tower-defense/types'
+import type { InGamePlayer } from '@tower-defense/types'
 import { GameModel } from '../models/Game.js'
 import { updatePlayerStatsService } from '../services/updatePlayerStatsService.js'
 import { getIO } from '../socketInstance.js'
@@ -8,7 +8,7 @@ export async function checkEndGame(gameId: string) {
   const state = ticker.getState(gameId)
   if (!state) return
 
-  const active = state.players.filter((p: GamePlayer) => p.status === 'active')
+  const active = state.players.filter((p: InGamePlayer) => p.status === 'active')
 
   if (active.length <= 1 && state.phase !== 'finished') {
     console.log(`[game:end] Game ${gameId} finished.`)
@@ -19,7 +19,7 @@ export async function checkEndGame(gameId: string) {
       await gameDoc.save()
 
       // Calculer les rankings finaux
-      const finalRankings = state.players.map((p: GamePlayer, index: number) => ({
+      const finalRankings = state.players.map((p: InGamePlayer, index: number) => ({
         playerId: p.player._id,
         rank: index + 1,
         status: p.status,

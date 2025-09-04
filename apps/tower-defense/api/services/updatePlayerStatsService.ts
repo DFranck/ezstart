@@ -3,7 +3,7 @@ import { PlayerModel } from '../models/Player.js'
 export interface GameResult {
   playerId: string
   rank: number
-  status: 'active' | 'left' | 'defeated'
+  status: 'active' | 'left' | 'eliminated'
 }
 
 export async function updatePlayerStatsService(gameResults: GameResult[]) {
