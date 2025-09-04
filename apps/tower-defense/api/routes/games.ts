@@ -43,26 +43,26 @@ docRouter.post('/', createGameController, {
 docRouter.get('/:id', validateParams(paramsMongoIdSchema), getGameByIdController, {
   summary: 'Get a Game',
   tags: ['Games'],
-  paramsSchema: mongoIdSchema,
+  paramsSchema: paramsMongoIdSchema,
   responseSchema: gameSchema,
 })
 docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameController, {
   summary: 'Start a Game',
   tags: ['Games'],
-  paramsSchema: mongoIdSchema,
+  paramsSchema: paramsMongoIdSchema,
   responseSchema: gameSchema,
 })
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
   bodySchema: mongoIdSchema,
-  paramsSchema: mongoIdSchema,
+  paramsSchema: paramsMongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })
 docRouter.post('/:id/leave', validateParams(paramsMongoIdSchema), leaveGameController, {
   summary: 'Leave a Game',
   tags: ['Games'],
-  paramsSchema: mongoIdSchema,
+  paramsSchema: paramsMongoIdSchema,
 })
 
 export default router
