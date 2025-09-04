@@ -41,3 +41,6 @@ note.md
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Claude settings
+.claude/settings.local.json
