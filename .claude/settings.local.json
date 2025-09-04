@@ -181,7 +181,13 @@
       "Read(/D:\\ez-hub\\@ezstart\\apps\\ez-billing\\web/**)",
       "Read(/D:\\ez-hub\\@ezstart\\apps\\ez-billing\\web\\components/**)",
       "Read(/D:\\ez-hub\\@ezstart\\apps\\ez-billing\\web/**)",
-      "Read(/D:\\ez-hub\\@ezstart\\apps\\ez-billing\\web/**)"
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\ez-billing\\web/**)",
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api\\routes/**)",
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api\\routes/**)",
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
+      "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
+      "Read(/D:\\ez-hub\\@ezstart/**)"
     ],
     "deny": [],
     "ask": []
