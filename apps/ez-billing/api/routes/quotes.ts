@@ -17,8 +17,8 @@ import {
   updateInvoiceSchema,
 } from '@ez-billing/types';
 import express, { Router } from 'express';
-import * as secureControllers from '../controllers/quote/quote.secure-controllers';
-import { authMiddleware } from '../middleware/auth';
+import * as secureControllers from '../controllers/quote/quote.secure-controllers.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 export const quotesRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();

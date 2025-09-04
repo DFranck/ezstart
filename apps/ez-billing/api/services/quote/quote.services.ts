@@ -6,12 +6,12 @@ import {
   Quote,
   UpdateQuote,
 } from '@ez-billing/types';
-import { QuoteModel } from '../../models/billing/quote';
-import { calculateTotals } from '../../utils/calculate-totals';
-import { generateNextNumber } from '../../utils/generate-next-number';
-import { findWithQuery } from '../../utils/mongoose/find-with-query';
-import { toApiObject } from '../../utils/mongoose/to-api-object';
-import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
+import { QuoteModel } from '../../models/billing/quote.js';
+import { calculateTotals } from '../../utils/calculate-totals.js';
+import { generateNextNumber } from '../../utils/generate-next-number.js';
+import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
+import { toApiObject } from '../../utils/mongoose/to-api-object.js';
+import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');

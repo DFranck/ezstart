@@ -1,6 +1,6 @@
 import { AddLineItem, Quote } from '@ez-billing/types';
-import { QuoteModel } from '../../models/billing/quote';
-import { toApiObject } from '../../utils/mongoose/to-api-object';
+import { QuoteModel } from '../../models/billing/quote.js';
+import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
 export async function assignClientToQuoteService(
   id: string,

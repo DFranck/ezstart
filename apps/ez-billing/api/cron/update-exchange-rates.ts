@@ -1,6 +1,6 @@
 import { Currency, currencyEnum } from '@ez-billing/types';
-import ExchangeRate from '../models/billing/exchange-rate';
-import { fetchExchangeRate } from '../utils/fetch-exchange-rate';
+import ExchangeRate from '../models/billing/exchange-rate.js';
+import { fetchExchangeRate } from '../utils/fetch-exchange-rate.js';
 const pairs: [Currency, Currency][] = currencyEnum.options
   .filter((c) => c !== 'USD')
   .map((c) => [c as Currency, 'USD' as Currency]);

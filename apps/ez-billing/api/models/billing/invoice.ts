@@ -1,6 +1,6 @@
 import { Invoice } from '@ez-billing/types';
 import { model } from 'mongoose';
-import { createBillingDocSchema } from './billing-factory';
+import { createBillingDocSchema } from './billing-factory.js';
 
 export const InvoiceModel = model<Invoice>(
   'Invoice',

@@ -22,9 +22,9 @@ import {
   restoreQuoteService,
   softDeleteQuoteService,
   updateQuoteService,
-} from '../../services/quote'
-import { AuthRequest, getAuthenticatedUserId } from '../../types/auth'
-import { BillingPermissionError, validateBillingAction } from '../../utils/billing-permissions'
+} from '../../services/quote/index.js';
+import { AuthRequest, getAuthenticatedUserId } from '../../types/auth.js';
+import { BillingPermissionError, validateBillingAction } from '../../utils/billing-permissions.js';
 
 export async function createSecureQuoteController(req: AuthRequest, res: Response) {
   try {

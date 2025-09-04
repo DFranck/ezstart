@@ -4,12 +4,12 @@ import {
   Invoice,
   UpdateInvoice,
 } from '@ez-billing/types';
-import { InvoiceModel } from '../../models/billing/invoice';
-import { calculateTotals } from '../../utils/calculate-totals';
-import { generateNextNumber } from '../../utils/generate-next-number';
-import { findWithQuery } from '../../utils/mongoose/find-with-query';
-import { toApiObject } from '../../utils/mongoose/to-api-object';
-import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate';
+import { InvoiceModel } from '../../models/billing/invoice.js';
+import { calculateTotals } from '../../utils/calculate-totals.js';
+import { generateNextNumber } from '../../utils/generate-next-number.js';
+import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
+import { toApiObject } from '../../utils/mongoose/to-api-object.js';
+import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 
 export async function createInvoiceService(
   data: CreateInvoice

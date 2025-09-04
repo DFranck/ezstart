@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
-import { InvoiceModel } from '../models/billing/invoice';
-import { QuoteModel } from '../models/billing/quote';
-import { ReceiptModel } from '../models/billing/receipt';
+import { InvoiceModel } from '../models/billing/invoice.js';
+import { QuoteModel } from '../models/billing/quote.js';
+import { ReceiptModel } from '../models/billing/receipt.js';
 
 export async function generateNextNumber(
   type: 'invoice' | 'quote' | 'receipt'

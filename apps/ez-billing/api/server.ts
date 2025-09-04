@@ -1,5 +1,5 @@
 import { connectToMongo, createApp, startServer } from '@ezstart/api-core'
-import routes, { globalRegistry } from './routes'
+import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp()
 

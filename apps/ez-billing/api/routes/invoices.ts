@@ -16,8 +16,8 @@ import {
   validateQuery,
   validateParams,
 } from '@ezstart/api-core';
-import * as secureControllers from '../controllers/invoice/invoice.secure-controllers';
-import { authMiddleware } from '../middleware/auth';
+import * as secureControllers from '../controllers/invoice/invoice.secure-controllers.js';
+import { authMiddleware } from '../middleware/auth.js';
 export const invoiceRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(invoiceRegistry, router);

@@ -8,8 +8,8 @@ import {
   restoreReceiptService,
   softDeleteReceiptService,
   updateReceiptService,
-} from '../../services/receipt';
-import { AuthRequest } from '../../types/auth';
+} from '../../services/receipt/index.js';
+import { AuthRequest } from '../../types/auth.js';
 
 export async function createSecureReceiptController(req: AuthRequest, res: Response) {
   try {

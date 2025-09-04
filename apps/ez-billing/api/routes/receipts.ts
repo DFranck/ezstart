@@ -15,8 +15,8 @@ import {
   updateReceiptSchema,
 } from '@ez-billing/types';
 import express, { Router } from 'express';
-import * as secureControllers from '../controllers/receipt/receipt.secure-controllers';
-import { authMiddleware } from '../middleware/auth';
+import * as secureControllers from '../controllers/receipt/receipt.secure-controllers.js';
+import { authMiddleware } from '../middleware/auth.js';
 export const receiptRegistry = new OpenAPIRegistry();
 const router: Router = express.Router();
 const docRouter = createRouterWithDoc(receiptRegistry, router);

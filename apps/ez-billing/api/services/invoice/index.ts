@@ -1,2 +1,2 @@
-export * from './invoice.custom.services';
-export * from './invoice.services';
+export * from './invoice.custom.services.js';
+export * from './invoice.services.js';

@@ -6,8 +6,8 @@ import {
   getCompanyById,
   restoreCompany,
   updateCompany,
-} from '../controllers/company/index.js'
-import { authMiddleware } from '../middleware/auth.js'
+} from '../controllers/company/index.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router()
 

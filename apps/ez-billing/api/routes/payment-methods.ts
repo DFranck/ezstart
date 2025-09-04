@@ -6,8 +6,8 @@ import {
   getPaymentMethodById,
   restorePaymentMethod,
   updatePaymentMethod,
-} from '../controllers/payment-method/index.js'
-import { authMiddleware } from '../middleware/auth.js'
+} from '../controllers/payment-method/index.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router()
 

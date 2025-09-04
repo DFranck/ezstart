@@ -1,7 +1,7 @@
 import { BillingClient, Client, GetClientsQuery } from '@ez-billing/types';
-import { ClientModel } from '../../models/client';
-import { findWithQuery } from '../../utils/mongoose/find-with-query';
-import { toApiObject } from '../../utils/mongoose/to-api-object';
+import { ClientModel } from '../../models/client.js';
+import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
+import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
 export async function createClientService(
   data: BillingClient

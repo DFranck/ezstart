@@ -56,7 +56,7 @@ export default function SettingsPage() {
 
   const handleHardDelete = async (type: string, id: string) => {
     try {
-      await callBillingApi(`/${type}/${id}?permanent=true`, { method: 'DELETE' })
+      await callBillingApi(`/${type}/${id}/hard-delete`, { method: 'DELETE' })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)

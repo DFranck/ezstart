@@ -1,6 +1,6 @@
 import { AddLineItem, Invoice, Receipt } from '@ez-billing/types';
-import { InvoiceModel } from '../../models/billing/invoice';
-import { toApiObject } from '../../utils/mongoose/to-api-object';
+import { InvoiceModel } from '../../models/billing/invoice.js';
+import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
 export async function assignClientToInvoiceService(
   id: string,

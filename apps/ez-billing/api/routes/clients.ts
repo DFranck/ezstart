@@ -11,9 +11,8 @@ import {
   paramsMongoIdSchema,
 } from '@ez-billing/types';
 import express, { Router } from 'express';
-import * as controllers from '../controllers/client/client.controllers';
-import * as secureControllers from '../controllers/client/client.secure-controllers';
-import { authMiddleware } from '../middleware/auth';
+import * as secureControllers from '../controllers/client/client.secure-controllers.js';
+import { authMiddleware } from '../middleware/auth.js';
 import { z } from 'zod';
 
 export const clientsRegistry = new OpenAPIRegistry();

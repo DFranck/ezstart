@@ -1,6 +1,6 @@
 import { currencyEnum } from '@ez-billing/types';
 import { Schema } from 'mongoose';
-import { baseLineItemSchema } from './billing-base';
+import { baseLineItemSchema } from './billing-base.js';
 
 export function createBillingDocSchema(
   extra: Record<string, any>,

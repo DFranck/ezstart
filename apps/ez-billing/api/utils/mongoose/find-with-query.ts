@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { toApiObject } from './to-api-object';
+import { toApiObject } from './to-api-object.js';
 
 export async function findWithQuery<T>(
   model: Model<any>,

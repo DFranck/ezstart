@@ -8,10 +8,10 @@ import {
   restoreInvoiceService,
   softDeleteInvoiceService,
   updateInvoiceService,
-} from '../../services/invoice';
-import { markInvoiceAsPaidService } from '../../services/invoice/invoice.custom.services';
-import { AuthRequest } from '../../types/auth';
-import { validateBillingAction, BillingPermissionError } from '../../utils/billing-permissions';
+} from '../../services/invoice/index.js';
+import { markInvoiceAsPaidService } from '../../services/invoice/invoice.custom.services.js';
+import { AuthRequest } from '../../types/auth.js';
+import { validateBillingAction, BillingPermissionError } from '../../utils/billing-permissions.js';
 
 export async function createSecureInvoiceController(req: AuthRequest, res: Response) {
   try {

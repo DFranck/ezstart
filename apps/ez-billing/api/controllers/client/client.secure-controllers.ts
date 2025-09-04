@@ -8,7 +8,7 @@ import {
   softDeleteClientService,
   restoreClientService,
   hardDeleteClientService,
-} from '../../services/client';
+} from '../../services/client/index.js';
 
 /**
  * Secure controller to create a client
