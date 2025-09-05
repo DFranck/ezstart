@@ -25,6 +25,11 @@ export function NavMenu({
   const router = useRouter();
   const links = useNavLinks();
   const currentLocale = useLocale();
+
+  const isExternalLink = (href: string) => {
+    return href.startsWith('http://') || href.startsWith('https://');
+  };
+
   return (
     <nav className={className}>
       {links.map((item, i) =>
@@ -37,11 +42,15 @@ export function NavMenu({
               label: sub.label,
               value: sub.href,
               onSelect: () => {
-                const targetHref =
-                  sub.href === '/'
-                    ? `/${currentLocale}`
-                    : `/${currentLocale}${sub.href}`;
-                router.push(targetHref);
+                if (isExternalLink(sub.href)) {
+                  window.open(sub.href, '_blank', 'noopener,noreferrer');
+                } else {
+                  const targetHref =
+                    sub.href === '/'
+                      ? `/${currentLocale}`
+                      : `/${currentLocale}${sub.href}`;
+                  router.push(targetHref);
+                }
                 setIsOpen?.(false);
               },
             }))}
@@ -53,11 +62,21 @@ export function NavMenu({
             asChild
             onClick={() => setIsOpen?.(false)}
           >
-            <Link
-              href={`/${currentLocale}${item.href === '/' ? '' : item.href}`}
-            >
-              {item.label}
-            </Link>
+            {isExternalLink(item.href) ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                href={`/${currentLocale}${item.href === '/' ? '' : item.href}`}
+              >
+                {item.label}
+              </Link>
+            )}
           </Button>
         )
       )}
