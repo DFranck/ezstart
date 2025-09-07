@@ -125,11 +125,11 @@ const DashboardPage = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-4 sm:p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
             onClick={() => setIsCompanyModalOpen(true)}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
@@ -141,7 +141,7 @@ const DashboardPage = () => {
                   className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-2">Create Company</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Create Company</h3>
               <p className="text-indigo-100 text-sm">
                 Set up your business profile and billing information
               </p>
@@ -149,7 +149,7 @@ const DashboardPage = () => {
           </div>
 
           <div
-            className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl p-4 sm:p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
             onClick={() => setIsClientModalOpen(true)}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
@@ -161,7 +161,7 @@ const DashboardPage = () => {
                   className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-2">Add New Client</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Add New Client</h3>
               <p className="text-cyan-100 text-sm">
                 Add clients to start creating invoices and quotes
               </p>
@@ -169,7 +169,7 @@ const DashboardPage = () => {
           </div>
 
           <div
-            className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 sm:p-6 text-white relative overflow-hidden group cursor-pointer transform hover:scale-105 transition-all duration-300"
             onClick={() => setIsPaymentMethodModalOpen(true)}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
@@ -181,7 +181,7 @@ const DashboardPage = () => {
                   className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
                 />
               </div>
-              <h3 className="text-xl font-bold mb-2">Add Payment Method</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Add Payment Method</h3>
               <p className="text-emerald-100 text-sm">
                 Configure how you receive payments from clients
               </p>
@@ -191,34 +191,34 @@ const DashboardPage = () => {
 
         {/* Companies Section */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:Building2" className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <Icon name="lucide:Building2" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Your Companies</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Companies</h2>
                   <p className="text-sm text-gray-500">Manage your business entities</p>
                 </div>
               </div>
               <Button
                 onClick={() => setIsCompanyModalOpen(true)}
-                className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-3 py-2 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
-                Add Company
+                <Icon name="lucide:Plus" className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Add Company</span>
               </Button>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {hasCompanies ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {companies.map(company => (
                   <div key={company._id} className="group relative">
                     <div
-                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-indigo-200 group-hover:-translate-y-1"
+                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-indigo-200 group-hover:-translate-y-1"
                       onClick={() => handleEditCompany(company)}
                     >
                       {/* Company Icon */}
@@ -226,7 +226,7 @@ const DashboardPage = () => {
                         <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
                       </div>
 
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                         {company.companyName}
                       </h3>
                       <p className="text-gray-600 text-sm mb-1 line-clamp-1">{company.email}</p>
@@ -286,34 +286,34 @@ const DashboardPage = () => {
 
         {/* Payment Methods Section */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:CreditCard" className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                  <Icon name="lucide:CreditCard" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Your Payment Methods</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Payment Methods</h2>
                   <p className="text-sm text-gray-500">Configure how you receive payments</p>
                 </div>
               </div>
               <Button
                 onClick={() => setIsPaymentMethodModalOpen(true)}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-3 py-2 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
-                Add Payment Method
+                <Icon name="lucide:Plus" className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Add Payment Method</span>
               </Button>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {paymentMethods.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {paymentMethods.map(paymentMethod => (
                   <div key={paymentMethod._id} className="group relative">
                     <div
-                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-green-200 group-hover:-translate-y-1"
+                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-green-200 group-hover:-translate-y-1"
                       onClick={() => handleEditPaymentMethod(paymentMethod)}
                     >
                       {/* Payment Method Icon */}
@@ -413,35 +413,35 @@ const DashboardPage = () => {
 
         {/* Clients Section */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-          <div className="p-6 border-b border-gray-100">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:Users" className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
+                  <Icon name="lucide:Users" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Your Clients</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Clients</h2>
                   <p className="text-sm text-gray-500">Click on a client to manage their billing</p>
                 </div>
               </div>
               <Button
                 onClick={() => setIsClientModalOpen(true)}
-                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium px-3 py-2 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <Icon name="lucide:UserPlus" className="w-4 h-4 mr-2" />
-                Add Client
+                <Icon name="lucide:UserPlus" className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Add Client</span>
               </Button>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {isClients ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {clients?.map(client => (
                   <div key={client._id} className="group relative">
                     <div
                       onClick={() => handleClientClick(client)}
-                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-cyan-200 group-hover:-translate-y-1"
+                      className="bg-gradient-to-br from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-cyan-200 group-hover:-translate-y-1"
                     >
                       {/* Client Avatar */}
                       <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-xl flex items-center justify-center mb-4">
@@ -451,7 +451,7 @@ const DashboardPage = () => {
                         />
                       </div>
 
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                         {client.clientName}
                       </h3>
                       <p className="text-gray-600 text-sm mb-1 line-clamp-1">{client.email}</p>

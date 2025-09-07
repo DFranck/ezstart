@@ -45,15 +45,15 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
           </div>
         }
         rightContent={
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <Button
               variant="outline"
               asChild
-              className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80 font-medium px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+              className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80 font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Link href="/dashboard/settings">
-                <Icon name="lucide:Settings" className="mr-2 w-4 h-4" />
-                Settings
+                <Icon name="lucide:Settings" className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Settings</span>
               </Link>
             </Button>
             <Button
@@ -61,10 +61,10 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
                 localStorage.clear()
                 window.location.href = '/'
               }}
-              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-medium px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              <Icon name="lucide:LogOut" className="mr-2 w-4 h-4" />
-              Logout
+              <Icon name="lucide:LogOut" className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         }
