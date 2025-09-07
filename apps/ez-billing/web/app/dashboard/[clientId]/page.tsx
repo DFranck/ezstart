@@ -144,10 +144,10 @@ const ClientDashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full overflow-x-hidden">
       {/* Header */}
       <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
           <Link
             href="/dashboard"
             className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4 group"
@@ -159,12 +159,12 @@ const ClientDashboardPage = () => {
             Back to Dashboard
           </Link>
 
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 sm:gap-6">
             {/* Client Info */}
             <div className="flex-1">
-              <div className="flex items-center space-x-4 mb-4">
+              <div className="flex items-center space-x-3 sm:space-x-4 mb-4">
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
                     client?.isCompany
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500'
                       : 'bg-gradient-to-r from-cyan-500 to-blue-500'
@@ -172,11 +172,11 @@ const ClientDashboardPage = () => {
                 >
                   <Icon
                     name={client?.isCompany ? 'lucide:Building' : 'lucide:User'}
-                    className="w-8 h-8 text-white"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-white"
                   />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{client?.clientName}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{client?.clientName}</h1>
                   <div className="flex items-center space-x-2 mt-1">
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -196,7 +196,7 @@ const ClientDashboardPage = () => {
               </div>
 
               {/* Contact Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {client?.email && (
                   <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                     <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-gray-400" />
@@ -233,20 +233,20 @@ const ClientDashboardPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <Button
                 onClick={handleCreateQuote}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               >
-                <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                New Quote
+                <Icon name="lucide:FileText" className="w-4 h-4 sm:mr-2" />
+                <span className="ml-2 sm:ml-0">New Quote</span>
               </Button>
               <Button
                 onClick={handleCreateInvoice}
-                className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               >
-                <Icon name="lucide:FileEdit" className="w-4 h-4 mr-2" />
-                New Invoice
+                <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
+                <span className="ml-2 sm:ml-0">New Invoice</span>
               </Button>
             </div>
           </div>
@@ -254,68 +254,68 @@ const ClientDashboardPage = () => {
       </div>
 
       {/* Body */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 w-full">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:DollarSign" className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
+                <Icon name="lucide:DollarSign" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
-                <p className="text-sm text-gray-500">Total Revenue</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
+                <p className="text-xs sm:text-sm text-gray-500">Total Revenue</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:Clock" className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl flex items-center justify-center">
+                <Icon name="lucide:Clock" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">${pendingAmount.toFixed(2)}</p>
-                <p className="text-sm text-gray-500">Pending</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">${pendingAmount.toFixed(2)}</p>
+                <p className="text-xs sm:text-sm text-gray-500">Pending</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:FileEdit" className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
+                <Icon name="lucide:FileEdit" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{clientInvoices.length}</p>
-                <p className="text-sm text-gray-500">Invoices</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{clientInvoices.length}</p>
+                <p className="text-xs sm:text-sm text-gray-500">Invoices</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:FileText" className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+                <Icon name="lucide:FileText" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{clientQuotes.length}</p>
-                <p className="text-sm text-gray-500">Quotes</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{clientQuotes.length}</p>
+                <p className="text-xs sm:text-sm text-gray-500">Quotes</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Invoices */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-8">
-          <div className="p-6 border-b border-gray-100">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-6 sm:mb-8">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:FileEdit" className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                  <Icon name="lucide:FileEdit" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Invoices</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Invoices</h2>
                   <p className="text-sm text-gray-500">{clientInvoices.length} total invoices</p>
                 </div>
               </div>
@@ -325,7 +325,7 @@ const ClientDashboardPage = () => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {clientInvoices.length > 0 ? (
               <div className="space-y-4">
                 {clientInvoices.map(invoice => {
@@ -342,18 +342,18 @@ const ClientDashboardPage = () => {
                       onKeyDown={e =>
                         (e.key === 'Enter' || e.key === ' ') && openPreview('invoice', invoice)
                       }
-                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300"
+                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                            <Icon name="lucide:FileEdit" className="w-6 h-6 text-white" />
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-center space-x-2 sm:space-x-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
+                            <Icon name="lucide:FileEdit" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                               #{invoice.documentNumber}
                             </h3>
-                            <div className="flex items-center space-x-4 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 sm:space-x-4 sm:gap-0 mt-1">
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                   invoice.status === 'paid'
@@ -365,23 +365,23 @@ const ClientDashboardPage = () => {
                               >
                                 {invoice.status}
                               </span>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 {new Date(invoice.createdAt).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0">
+                          <div className="text-left sm:text-right">
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                               ${invoice.total} {invoice.currency}
                             </p>
                           </div>
 
                           {/* Action buttons: stop propagation so they don't open preview */}
                           <div
-                            className="flex space-x-2"
+                            className="flex flex-wrap gap-2 justify-start sm:justify-end"
                             onClick={e => e.stopPropagation()}
                             onKeyDown={e => e.stopPropagation()}
                           >
@@ -401,8 +401,9 @@ const ClientDashboardPage = () => {
                                 onClick={e => handleMarkPaid(invoice, e)}
                                 className="bg-green-500 hover:bg-green-600 text-white"
                               >
-                                <Icon name="lucide:CheckCircle" className="w-4 h-4 mr-1" />
-                                Mark Paid
+                                <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
+                                <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
+                                <span className="inline xs:hidden sm:inline md:hidden">Paid</span>
                               </Button>
                             )}
                           </div>
@@ -432,8 +433,8 @@ const ClientDashboardPage = () => {
         </div>
 
         {/* Quotes */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-8">
-          <div className="p-6 border-b border-gray-100">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-6 sm:mb-8">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
