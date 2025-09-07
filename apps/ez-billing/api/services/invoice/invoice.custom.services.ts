@@ -27,7 +27,12 @@ export async function addLineItemToInvoiceService(
 }
 
 export async function markInvoiceAsPaidService(
-  id: string
+  id: string,
+  options?: {
+    companyId?: string;
+    paymentDate?: string;
+    notes?: string;
+  }
 ): Promise<{ invoice: Invoice; receipt?: Receipt } | null> {
   // Get the invoice first to check current status
   const invoice = await InvoiceModel.findById(id);
@@ -59,15 +64,15 @@ export async function markInvoiceAsPaidService(
     const receiptDocumentNumber = await generateNextNumber('receipt');
     const receiptData = {
       userId: updatedInvoice.userId,
-      companyId: updatedInvoice.companyId,
+      companyId: options?.companyId || updatedInvoice.companyId,
       clientId: updatedInvoice.clientId,
       items: updatedInvoice.items,
       currency: updatedInvoice.currency,
       exchangeRate: updatedInvoice.exchangeRate,
-      notes: `Receipt for invoice ${updatedInvoice.documentNumber}`,
+      notes: options?.notes || `Receipt for invoice ${updatedInvoice.documentNumber}`,
       status: 'issued',
       invoiceId: updatedInvoice._id.toString(),
-      paymentDate: new Date().toISOString(),
+      paymentDate: options?.paymentDate ? new Date(options.paymentDate).toISOString() : new Date().toISOString(),
       documentNumber: receiptDocumentNumber,
       subtotal: updatedInvoice.subtotal,
       taxAmount: updatedInvoice.taxAmount,

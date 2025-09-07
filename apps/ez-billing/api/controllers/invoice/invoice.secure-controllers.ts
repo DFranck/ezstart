@@ -327,7 +327,7 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
       });
     }
 
-    const result = await markInvoiceAsPaidService(id);
+    const result = await markInvoiceAsPaidService(id, req.body);
 
     if (!result) {
       return res.status(404).json({

@@ -43,21 +43,17 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
 
     return runWithFeedback({
       action: async () => {
-        // Create receipt
-        const receiptRes = await callApi('/receipts', {
+        // Use the dedicated mark-paid endpoint that handles both invoice update and receipt creation
+        const markPaidRes = await callApi(`/invoices/${invoice._id}/mark-paid`, {
           method: 'POST',
-            userId: getUserId(),
-          body: formData,
+          userId: getUserId(),
+          body: {
+            companyId: formData.companyId,
+            paymentDate: formData.paymentDate,
+            notes: formData.notes,
+          },
         });
-        if (!receiptRes.ok) throw new Error('Failed to create receipt');
-
-        // Update invoice status to paid
-        const invoiceRes = await callApi(`/invoices/${invoice._id}`, {
-          method: 'PUT',
-            userId: getUserId(),
-          body: { status: 'paid' },
-        });
-        if (!invoiceRes.ok) throw new Error('Failed to update invoice status');
+        if (!markPaidRes.ok) throw new Error('Failed to mark invoice as paid');
 
         onSave();
         onClose();
