@@ -12,7 +12,7 @@ import { getBillingPermissions } from '@/utils/billing-permissions'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
-import { InvoicePDF, type PDFInvoiceData } from '@ezstart/ui/templates'
+import { InvoicePDF, type PDFInvoiceData, ReceiptPDF, type PDFReceiptData } from '@ezstart/ui/templates'
 import Link from 'next/link'
 import { redirect, useParams } from 'next/navigation'
 import React, { useState } from 'react'
@@ -690,7 +690,7 @@ const ClientDashboardPage = () => {
 
 export default ClientDashboardPage
 
-/** Convertit les données pour le template PDF */
+/** Convertit les données pour le template PDF Invoice */
 function convertToInvoicePDFData(
   invoice: Invoice,
   client: Client,
@@ -733,6 +733,49 @@ function convertToInvoicePDFData(
   }
 }
 
+/** Convertit les données pour le template PDF Receipt */
+function convertToReceiptPDFData(
+  receipt: Receipt,
+  client: Client,
+  company?: Company
+): PDFReceiptData {
+  return {
+    documentNumber: receipt.documentNumber || receipt._id,
+    createdAt: receipt.createdAt,
+    paymentDate: receipt.paymentDate,
+    status: receipt.status,
+    currency: receipt.currency,
+    subtotal: receipt.subtotal,
+    taxAmount: receipt.taxAmount,
+    total: receipt.total,
+    items: receipt.items.map(item => ({
+      label: item.label,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+    client: {
+      clientName: client.clientName,
+      email: client.email,
+      phone: client.phone,
+      address: client.address,
+      city: client.city,
+      country: client.country,
+    },
+    company: company
+      ? {
+          companyName: company.companyName,
+          email: company.email,
+          phone: company.phone,
+          address: company.address,
+          city: company.city,
+          country: company.country,
+        }
+      : undefined,
+    notes: receipt.notes,
+    invoiceReference: receipt.invoiceId ? `INV-${receipt.invoiceId}` : undefined,
+  }
+}
+
 /** Lightweight, reusable PDF preview modal */
 function PreviewPdfModal({
   isOpen,
@@ -753,24 +796,31 @@ function PreviewPdfModal({
   // ALL HOOKS MUST BE BEFORE ANY CONDITIONAL RETURNS
   // Générer le preview automatiquement à l'ouverture
   React.useEffect(() => {
-    if (isOpen && kind === 'invoice' && !pdfBlob && !isGeneratingPreview && doc) {
+    if (isOpen && (kind === 'invoice' || kind === 'receipt') && !pdfBlob && !isGeneratingPreview && doc) {
       const generatePreview = async () => {
-        if (kind !== 'invoice') {
+        if (kind !== 'invoice' && kind !== 'receipt') {
           return
         }
 
-        const invoice = doc as Invoice
-        const client = clients.find(c => c._id === invoice.clientId)
-        const company = invoice.companyId ? companies.find(c => c._id === invoice.companyId) : undefined
+        const document = doc as Invoice | Receipt
+        const client = clients.find(c => c._id === document.clientId)
+        const company = document.companyId ? companies.find(c => c._id === document.companyId) : undefined
 
         if (!client) return
-
-        const pdfData = convertToInvoicePDFData(invoice, client, company)
 
         setIsGeneratingPreview(true)
         try {
           const { pdf } = await import('@react-pdf/renderer')
-          const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+          let blob: Blob
+          
+          if (kind === 'invoice') {
+            const pdfData = convertToInvoicePDFData(document as Invoice, client, company)
+            blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+          } else {
+            const pdfData = convertToReceiptPDFData(document as Receipt, client, company)
+            blob = await pdf(<ReceiptPDF data={pdfData} />).toBlob()
+          }
+          
           const url = URL.createObjectURL(blob)
           setPdfBlob(url)
         } catch (error) {
@@ -789,20 +839,24 @@ function PreviewPdfModal({
   const pdfUrl = getPdfUrl(kind, doc)
 
   const generatePDFData = () => {
-    if (kind !== 'invoice') return null
+    if (kind !== 'invoice' && kind !== 'receipt') return null
 
-    const invoice = doc as Invoice
-    const client = clients.find(c => c._id === invoice.clientId)
-    const company = invoice.companyId ? companies.find(c => c._id === invoice.companyId) : undefined
+    const document = doc as Invoice | Receipt
+    const client = clients.find(c => c._id === document.clientId)
+    const company = document.companyId ? companies.find(c => c._id === document.companyId) : undefined
 
     if (!client) return null
 
-    return convertToInvoicePDFData(invoice, client, company)
+    if (kind === 'invoice') {
+      return convertToInvoicePDFData(document as Invoice, client, company)
+    } else {
+      return convertToReceiptPDFData(document as Receipt, client, company)
+    }
   }
 
   const handleGeneratePreview = async () => {
-    if (kind !== 'invoice') {
-      alert("La génération PDF n'est disponible que pour les factures pour le moment")
+    if (kind !== 'invoice' && kind !== 'receipt') {
+      alert("La génération PDF n'est disponible que pour les factures et reçus")
       return
     }
 
@@ -815,7 +869,14 @@ function PreviewPdfModal({
     setIsGeneratingPreview(true)
     try {
       const { pdf } = await import('@react-pdf/renderer')
-      const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+      let blob: Blob
+      
+      if (kind === 'invoice') {
+        blob = await pdf(<InvoicePDF data={pdfData as PDFInvoiceData} />).toBlob()
+      } else {
+        blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+      }
+      
       const url = URL.createObjectURL(blob)
       setPdfBlob(url)
     } catch (error) {
@@ -835,8 +896,26 @@ function PreviewPdfModal({
     }
 
     try {
-      const invoice = doc as Invoice
-      await downloadInvoicePDF(<InvoicePDF data={pdfData} />, invoice.documentNumber || invoice._id)
+      const document = doc as Invoice | Receipt
+      const fileName = document.documentNumber || document._id
+      
+      if (kind === 'invoice') {
+        await downloadInvoicePDF(<InvoicePDF data={pdfData as PDFInvoiceData} />, fileName)
+      } else {
+        // For receipts, use the same download mechanism but with receipt template
+        const { pdf } = await import('@react-pdf/renderer')
+        const blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+        
+        // Create download link
+        const url = URL.createObjectURL(blob)
+        const link = window.document.createElement('a')
+        link.href = url
+        link.download = `receipt-${fileName}.pdf`
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }
     } catch (error) {
       console.error('Erreur téléchargement PDF:', error)
       alert('Erreur lors du téléchargement du PDF')
