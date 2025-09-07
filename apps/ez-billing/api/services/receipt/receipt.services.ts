@@ -28,7 +28,7 @@ export async function createReceiptService(
   }
   
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
-  const documentNumber = await generateNextNumber('receipt');
+  const documentNumber = await generateNextNumber('receipt', data.userId);
   const doc = new ReceiptModel({
     ...data,
     documentNumber,
@@ -92,7 +92,11 @@ export async function updateReceiptService(
 export async function restoreReceiptService(
   id: string
 ): Promise<Receipt | null> {
-  const newDocumentNumber = await generateNextNumber('receipt');
+  // First get the existing receipt to retrieve its userId
+  const existingDoc = await ReceiptModel.findById(id);
+  if (!existingDoc) return null;
+
+  const newDocumentNumber = await generateNextNumber('receipt', existingDoc.userId);
   const doc = await ReceiptModel.findByIdAndUpdate(
     id,
     {

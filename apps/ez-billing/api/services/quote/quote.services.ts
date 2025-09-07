@@ -28,7 +28,7 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
   }
   
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
-  const documentNumber = await generateNextNumber('quote');
+  const documentNumber = await generateNextNumber('quote', data.userId);
   const doc = new QuoteModel({
     ...data,
     documentNumber,
@@ -97,7 +97,11 @@ export async function updateQuoteService(
 }
 
 export async function restoreQuoteService(id: string): Promise<Quote | null> {
-  const newDocumentNumber = await generateNextNumber('quote');
+  // First get the existing quote to retrieve its userId
+  const existingDoc = await QuoteModel.findById(id);
+  if (!existingDoc) return null;
+
+  const newDocumentNumber = await generateNextNumber('quote', existingDoc.userId);
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     {
@@ -130,7 +134,7 @@ export async function convertQuoteToInvoiceService(
   }
 
   // Create the invoice from quote data
-  const invoiceDocumentNumber = await generateNextNumber('invoice');
+  const invoiceDocumentNumber = await generateNextNumber('invoice', quote.userId);
   const invoiceData = {
     userId: quote.userId,
     companyId: quote.companyId,

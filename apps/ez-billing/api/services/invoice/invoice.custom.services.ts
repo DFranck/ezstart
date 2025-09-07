@@ -61,7 +61,7 @@ export async function markInvoiceAsPaidService(
     const { ReceiptModel } = await import('../../models/billing/receipt');
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
-    const receiptDocumentNumber = await generateNextNumber('receipt');
+    const receiptDocumentNumber = await generateNextNumber('receipt', updatedInvoice.userId);
     const receiptData = {
       userId: updatedInvoice.userId,
       companyId: options?.companyId || updatedInvoice.companyId,

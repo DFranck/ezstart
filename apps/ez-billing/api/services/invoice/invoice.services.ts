@@ -28,7 +28,7 @@ export async function createInvoiceService(
   }
   
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
-  const documentNumber = await generateNextNumber('invoice');
+  const documentNumber = await generateNextNumber('invoice', data.userId);
   const doc = new InvoiceModel({
     ...data,
     documentNumber,
@@ -105,7 +105,11 @@ export async function updateInvoiceService(
 export async function restoreInvoiceService(
   id: string
 ): Promise<Invoice | null> {
-  const newDocumentNumber = await generateNextNumber('invoice');
+  // First get the existing invoice to retrieve its userId
+  const existingDoc = await InvoiceModel.findById(id);
+  if (!existingDoc) return null;
+
+  const newDocumentNumber = await generateNextNumber('invoice', existingDoc.userId);
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
     {

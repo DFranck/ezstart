@@ -4,7 +4,8 @@ import { QuoteModel } from '../models/billing/quote.js';
 import { ReceiptModel } from '../models/billing/receipt.js';
 
 export async function generateNextNumber(
-  type: 'invoice' | 'quote' | 'receipt'
+  type: 'invoice' | 'quote' | 'receipt',
+  userId: string
 ): Promise<string> {
   const prefixMap = {
     invoice: 'INV',
@@ -24,6 +25,7 @@ export async function generateNextNumber(
 
   const last = (await Model.findOne({
     documentNumber: { $regex: `^${prefix}` },
+    userId: userId,
     deletedAt: null,
   })
     .sort({ createdAt: -1 })
