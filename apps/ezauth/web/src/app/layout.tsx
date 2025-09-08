@@ -10,7 +10,7 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50 flex items-center justify-center">

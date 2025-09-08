@@ -8,7 +8,7 @@ interface RegisterFormProps {
   redirect_uri?: string | null
 }
 
-export function RegisterForm({ app, redirect_uri }: RegisterFormProps): JSX.Element {
+export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     username: '',

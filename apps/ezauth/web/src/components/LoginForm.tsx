@@ -8,7 +8,7 @@ interface LoginFormProps {
   redirect_uri?: string | null
 }
 
-export function LoginForm({ app, redirect_uri }: LoginFormProps): JSX.Element {
+export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''

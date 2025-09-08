@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { LoginForm } from '@/components/LoginForm'
 
-export default function LoginPage(): JSX.Element {
+function LoginContent() {
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
   const redirect_uri = searchParams.get('redirect_uri')
@@ -33,5 +33,13 @@ export default function LoginPage(): JSX.Element {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }

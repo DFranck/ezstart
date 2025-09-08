@@ -3,8 +3,9 @@
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { RegisterForm } from '@/components/RegisterForm'
+import { Suspense } from 'react'
 
-export default function RegisterPage(): JSX.Element {
+function RegisterContent() {
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
 
@@ -34,5 +35,13 @@ export default function RegisterPage(): JSX.Element {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   )
 }
