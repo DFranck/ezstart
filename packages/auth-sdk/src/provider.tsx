@@ -10,10 +10,21 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 interface AuthProviderProps {
   children: ReactNode
-  config: AuthClientConfig
+  appName: string
 }
 
-export function AuthProvider({ children, config }: AuthProviderProps) {
+export function AuthProvider({ children, appName }: AuthProviderProps) {
+  // Auto-configuration based on environment
+  const config: AuthClientConfig = {
+    baseURL: process.env.NODE_ENV === 'production' 
+      ? 'https://ezauth-oblm.onrender.com/api/auth'
+      : 'http://localhost:8081/api/auth',
+    appName,
+    redirectUri: typeof window !== 'undefined' 
+      ? `${window.location.origin}/auth/callback`
+      : '/auth/callback'
+  }
+  
   const client = new AuthClient(config)
   const store = useAuthStore()
 
