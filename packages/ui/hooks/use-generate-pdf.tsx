@@ -8,8 +8,8 @@ interface UseGeneratePDFOptions {
 }
 
 interface UseGeneratePDFReturn {
-  generatePDF: (component: React.ReactElement<DocumentProps>) => Promise<void>
-  downloadPDF: (component: React.ReactElement<DocumentProps>, filename?: string) => Promise<void>
+  generatePDF: (component: any) => Promise<void>
+  downloadPDF: (component: any, filename?: string) => Promise<void>
   isGenerating: boolean
   error: Error | null
 }
@@ -18,7 +18,7 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const generatePDF = async (component: React.ReactElement<DocumentProps>): Promise<void> => {
+  const generatePDF = async (component: any): Promise<void> => {
     setIsGenerating(true)
     setError(null)
 
@@ -35,7 +35,7 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
     }
   }
 
-  const downloadPDF = async (component: React.ReactElement<DocumentProps>, filename?: string): Promise<void> => {
+  const downloadPDF = async (component: any, filename?: string): Promise<void> => {
     setIsGenerating(true)
     setError(null)
 
