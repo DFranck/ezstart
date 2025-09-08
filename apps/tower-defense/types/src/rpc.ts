@@ -22,7 +22,7 @@ export type JoinGameResponse = Infer<typeof joinGameResponseSchema>
 //--------
 export const createOrFindPlayerSchema = z.object({
   name: z.string().describe('Player name'),
-  userId: mongoIdSchema.optional(),
+  userId: z.string().describe('User ID from EZAuth'),
 })
 export type CreateOrFindPlayerPayload = Infer<typeof createOrFindPlayerSchema>
 

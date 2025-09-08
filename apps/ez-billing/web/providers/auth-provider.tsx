@@ -6,9 +6,9 @@ export const EZAuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthProvider
       config={{
-        baseURL: 'http://localhost:8006/api/auth',
+        baseURL: 'http://localhost:8081/api/auth',
         appName: 'ez-billing',
-        redirectUri: 'http://localhost:3200/auth/callback',
+        redirectUri: 'http://localhost:3000/auth/callback',
       }}
     >
       {children as any}

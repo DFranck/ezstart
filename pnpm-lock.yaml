@@ -796,6 +796,9 @@ importers:
 
   apps/tower-defense/pwa:
     dependencies:
+      '@ezstart/auth-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/auth-sdk
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types

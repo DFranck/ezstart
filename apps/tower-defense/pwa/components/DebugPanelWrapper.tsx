@@ -35,7 +35,7 @@ export function DebugPanelWrapper() {
           )}
           <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
             <button
-              onClick={() => register('TestPlayer')}
+              onClick={() => register('TestPlayer', 'debug-user-id')}
               style={{
                 padding: '4px 8px',
                 background: '#4CAF50',

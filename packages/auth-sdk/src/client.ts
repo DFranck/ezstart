@@ -1,4 +1,4 @@
-import type { LoginRequest, RegisterRequest, AuthToken, AuthUser } from '@ezstart/ezauth-types'
+import type { AuthToken, AuthUser } from '@ezstart/ezauth-types'
 
 export interface AuthClientConfig {
   baseURL: string
@@ -18,10 +18,10 @@ export class AuthClient {
     const params = new URLSearchParams({
       app: this.config.appName,
       redirect_uri: this.config.redirectUri,
-      ...additionalParams
+      ...additionalParams,
     })
-    
-    const authUrl = `http://localhost:8004/login?${params.toString()}`
+
+    const authUrl = `http://localhost:8080/login?${params.toString()}`
     window.location.href = authUrl
   }
 
@@ -30,9 +30,9 @@ export class AuthClient {
     const params = new URLSearchParams({
       app: this.config.appName,
       redirect_uri: this.config.redirectUri,
-      ...additionalParams
+      ...additionalParams,
     })
-    
+
     const authUrl = `http://localhost:8004/register?${params.toString()}`
     window.location.href = authUrl
   }
@@ -47,12 +47,12 @@ export class AuthClient {
       body: JSON.stringify({
         code,
         app: this.config.appName,
-        redirect_uri: this.config.redirectUri
-      })
+        redirect_uri: this.config.redirectUri,
+      }),
     })
 
     const result = await response.json()
-    
+
     if (!response.ok) {
       throw new Error(result.error || 'Token exchange failed')
     }
@@ -61,7 +61,7 @@ export class AuthClient {
       access_token: result.access_token,
       token_type: result.token_type,
       expires_in: result.expires_in,
-      user: result.user
+      user: result.user,
     }
   }
 
@@ -69,12 +69,12 @@ export class AuthClient {
   async getCurrentUser(accessToken: string): Promise<AuthUser> {
     const response = await fetch(`${this.config.baseURL}/me`, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
+        Authorization: `Bearer ${accessToken}`,
+      },
     })
 
     const result = await response.json()
-    
+
     if (!response.ok) {
       throw new Error(result.error || 'Failed to get user info')
     }
@@ -92,8 +92,8 @@ export class AuthClient {
         },
         body: JSON.stringify({
           token: accessToken,
-          app: this.config.appName
-        })
+          app: this.config.appName,
+        }),
       })
 
       const result = await response.json()

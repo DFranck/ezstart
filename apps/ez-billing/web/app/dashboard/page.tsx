@@ -5,11 +5,11 @@ import { CompanyModal } from '@/components/company-modal'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import { useBillingContext } from '@/contexts/billing-context'
-import { useAuth } from '@ezstart/auth-sdk'
-import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, PaymentMethod } from '@ez-billing/types'
+import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Icon } from '@ezstart/ui/components'
+import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -27,7 +27,9 @@ const DashboardPage = () => {
     item: Company | Client | PaymentMethod | null
   }>({ isOpen: false, type: 'client', item: null })
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
-  const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(undefined)
+  const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(
+    undefined
+  )
 
   if (!isAuthenticated || !user) {
     redirect('/')
@@ -88,20 +90,20 @@ const DashboardPage = () => {
 
     try {
       if (deleteDialog.type === 'company') {
-        await callApi(`/companies/${deleteDialog.item._id}`, { 
-            method: 'DELETE',
-            userId: getUserId(),
-          })
+        await callApi(`/companies/${deleteDialog.item._id}`, {
+          method: 'DELETE',
+          userId: getUserId(),
+        })
       } else if (deleteDialog.type === 'client') {
-        await callApi(`/clients/${deleteDialog.item._id}`, { 
-            method: 'DELETE',
-            userId: getUserId(),
-          })
+        await callApi(`/clients/${deleteDialog.item._id}`, {
+          method: 'DELETE',
+          userId: getUserId(),
+        })
       } else if (deleteDialog.type === 'payment-method') {
-        await callApi(`/payment-methods/${deleteDialog.item._id}`, { 
-            method: 'DELETE',
-            userId: getUserId(),
-          })
+        await callApi(`/payment-methods/${deleteDialog.item._id}`, {
+          method: 'DELETE',
+          userId: getUserId(),
+        })
       }
       refetchAll()
     } catch (error) {
@@ -293,7 +295,9 @@ const DashboardPage = () => {
                   <Icon name="lucide:CreditCard" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Payment Methods</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                    Your Payment Methods
+                  </h2>
                   <p className="text-sm text-gray-500">Configure how you receive payments</p>
                 </div>
               </div>
@@ -318,13 +322,15 @@ const DashboardPage = () => {
                     >
                       {/* Payment Method Icon */}
                       <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center mb-4">
-                        <Icon 
+                        <Icon
                           name={
-                            paymentMethod.type === 'crypto_wallet' ? 'lucide:Wallet' :
-                            paymentMethod.type === 'bank_transfer' ? 'lucide:Building' :
-                            'lucide:CreditCard'
-                          } 
-                          className="w-6 h-6 text-white" 
+                            paymentMethod.type === 'crypto_wallet'
+                              ? 'lucide:Wallet'
+                              : paymentMethod.type === 'bank_transfer'
+                                ? 'lucide:Building'
+                                : 'lucide:CreditCard'
+                          }
+                          className="w-6 h-6 text-white"
                         />
                       </div>
 
@@ -338,27 +344,25 @@ const DashboardPage = () => {
                           </span>
                         )}
                       </div>
-                      
+
                       <p className="text-gray-600 text-sm mb-1 capitalize">
                         {paymentMethod.type.replace('_', ' ')}
                       </p>
-                      
+
                       {paymentMethod.type === 'crypto_wallet' && (
                         <p className="text-gray-500 text-sm line-clamp-1 font-mono">
                           {paymentMethod.currency} • {paymentMethod.network}
                         </p>
                       )}
-                      
+
                       {paymentMethod.type === 'bank_transfer' && (
                         <p className="text-gray-500 text-sm line-clamp-1">
                           {paymentMethod.bankName}
                         </p>
                       )}
 
-                      {(['paypal', 'wise', 'revolut'].includes(paymentMethod.type)) && (
-                        <p className="text-gray-500 text-sm line-clamp-1">
-                          {paymentMethod.email}
-                        </p>
+                      {['paypal', 'wise', 'revolut'].includes(paymentMethod.type) && (
+                        <p className="text-gray-500 text-sm line-clamp-1">{paymentMethod.email}</p>
                       )}
 
                       {/* Floating Actions */}

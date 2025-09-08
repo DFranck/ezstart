@@ -3,7 +3,7 @@ import routes, { globalRegistry } from './routes/index.js'
 import { setIO } from './socketInstance.js'
 import { registerSocketHandlers } from './sockets/registerSocketHandlers.js'
 const app = createApp()
-
+const PORT = process.env.PORT || 3101
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
@@ -13,7 +13,7 @@ connectToMongo('tower-defense')
       routes,
       registries: globalRegistry,
       serviceName: 'TowerDefense',
-      port: 8888,
+      port: Number(PORT),
       onHttpServerReady: server => {
         const io = createSocketServer(server, {
           onConnection: socket => {
