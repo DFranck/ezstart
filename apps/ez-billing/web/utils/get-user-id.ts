@@ -1,13 +1,13 @@
 /**
- * Get userId from localStorage for EZ-Billing authentication
+ * Get userId from EZAuth authentication storage
  */
 export function getUserId(): string | undefined {
   if (typeof window === 'undefined') return undefined
   
   try {
-    const userStore = localStorage.getItem('ez-billing-user')
-    if (userStore) {
-      const parsed = JSON.parse(userStore)
+    const authData = localStorage.getItem('ezauth-storage')
+    if (authData) {
+      const parsed = JSON.parse(authData)
       return parsed.state?.user?._id || undefined
     }
   } catch {

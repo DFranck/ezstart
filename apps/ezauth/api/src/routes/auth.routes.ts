@@ -1,15 +1,21 @@
-import { Router } from 'express'
+import { createRouterWithDoc, OpenAPIRegistry, z } from '@ezstart/api-core'
 import { AuthService } from '../services/auth.service.js'
 import { 
-  LoginRequestSchema, 
-  RegisterRequestSchema, 
-  TokenRequestSchema 
-} from '../types/auth.js'
+  LoginRequestSchema,
+  RegisterRequestSchema,
+  TokenRequestSchema,
+  AuthResponseSchema,
+  UserResponseSchema,
+  TokenVerifyResponseSchema
+} from '@ezstart/ezauth-types'
+import express, { Router } from 'express'
 
-const router: Router = Router()
+export const authRegistry = new OpenAPIRegistry()
+const router: Router = express.Router()
+const docRouter = createRouterWithDoc(authRegistry, router)
 
-// POST /api/auth/register - Register new user
-router.post('/register', async (req, res) => {
+// Register new user
+const registerController = async (req: any, res: any) => {
   try {
     const data = RegisterRequestSchema.parse(req.body)
     const authCode = await AuthService.register(data)
@@ -27,10 +33,10 @@ router.post('/register', async (req, res) => {
       error: error instanceof Error ? error.message : 'Registration failed'
     })
   }
-})
+}
 
-// POST /api/auth/login - Login user
-router.post('/login', async (req, res) => {
+// Login user  
+const loginController = async (req: any, res: any) => {
   try {
     const data = LoginRequestSchema.parse(req.body)
     const authCode = await AuthService.login(data)
@@ -48,12 +54,14 @@ router.post('/login', async (req, res) => {
       error: error instanceof Error ? error.message : 'Login failed'
     })
   }
-})
+}
 
-// POST /api/auth/token - Exchange code for token
-router.post('/token', async (req, res) => {
+// Exchange code for token
+const tokenController = async (req: any, res: any) => {
   try {
+    console.log('📋 Token exchange request body:', req.body)
     const data = TokenRequestSchema.parse(req.body)
+    console.log('✅ Parsed token request data:', data)
     const token = await AuthService.exchangeCodeForToken(data)
     
     res.json({
@@ -67,10 +75,10 @@ router.post('/token', async (req, res) => {
       error: error instanceof Error ? error.message : 'Token exchange failed'
     })
   }
-})
+}
 
-// GET /api/auth/me - Get current user info
-router.get('/me', async (req, res) => {
+// Get current user info
+const meController = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization
     if (!authHeader?.startsWith('Bearer ')) {
@@ -95,10 +103,10 @@ router.get('/me', async (req, res) => {
       error: error instanceof Error ? error.message : 'Invalid token'
     })
   }
-})
+}
 
-// POST /api/auth/verify - Verify token validity
-router.post('/verify', async (req, res) => {
+// Verify token validity
+const verifyController = async (req: any, res: any) => {
   try {
     const { token, app } = req.body
     
@@ -140,6 +148,55 @@ router.post('/verify', async (req, res) => {
       error: error instanceof Error ? error.message : 'Invalid token'
     })
   }
+}
+
+// Define API routes with documentation
+docRouter.post('/register', registerController, {
+  summary: 'Register new user',
+  tags: ['Auth'],
+  bodySchema: RegisterRequestSchema,
+  responseSchema: AuthResponseSchema.extend({
+    code: z.string(),
+    expires_at: z.string()
+  })
+})
+
+docRouter.post('/login', loginController, {
+  summary: 'Login user',
+  tags: ['Auth'],
+  bodySchema: LoginRequestSchema,
+  responseSchema: AuthResponseSchema.extend({
+    code: z.string(),
+    expires_at: z.string()
+  })
+})
+
+docRouter.post('/token', tokenController, {
+  summary: 'Exchange code for token',
+  tags: ['Auth'],
+  bodySchema: TokenRequestSchema,
+  responseSchema: AuthResponseSchema.extend({
+    access_token: z.string(),
+    token_type: z.literal('Bearer'),
+    expires_in: z.number(),
+    user: z.object({}).passthrough()
+  })
+})
+
+docRouter.get('/me', meController, {
+  summary: 'Get current user',
+  tags: ['Auth'],
+  responseSchema: UserResponseSchema
+})
+
+docRouter.post('/verify', verifyController, {
+  summary: 'Verify token',
+  tags: ['Auth'],
+  bodySchema: z.object({
+    token: z.string().min(1),
+    app: z.string().optional()
+  }),
+  responseSchema: TokenVerifyResponseSchema
 })
 
 export default router

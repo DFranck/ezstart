@@ -1,21 +1,23 @@
 'use client'
 
-import { LoginSection } from '@/components/login-section'
-import { useUserStore } from '@/stores/useUserStore'
+import { EZAuthLoginSection } from '@/components/ezauth-login-section'
+import { useAuth } from '@ezstart/auth-sdk'
 import { H1, H3, Icon, P } from '@ezstart/ui/components'
 import { redirect } from 'next/navigation'
 import { useEffect } from 'react'
+import { cleanupOldAuth } from '@/utils/cleanup-old-auth'
 
 export default function HomePage() {
-  const { user } = useUserStore()
+  const { user, isAuthenticated } = useAuth()
 
   useEffect(() => {
-    if (user) {
+    cleanupOldAuth()
+    if (isAuthenticated && user) {
       redirect('/dashboard')
     }
-  }, [user])
+  }, [isAuthenticated, user])
 
-  if (user) {
+  if (isAuthenticated && user) {
     return null
   }
 
@@ -80,7 +82,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Get Started</h2>
             <p className="text-gray-600">Enter your username to begin</p>
           </div>
-          <LoginSection />
+          <EZAuthLoginSection />
         </div>
 
         {/* Footer */}

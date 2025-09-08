@@ -1,13 +1,13 @@
 'use client'
 import { BillingContext } from '@/contexts/billing-context'
-import { useUserStore } from '@/stores/useUserStore'
+import { useAuth } from '@ezstart/auth-sdk'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
 import { useCallback, useEffect, useState } from 'react'
 import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '../utils/get-user-id'
 
 export const BillingProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useUserStore()
+  const { user, isAuthenticated } = useAuth()
 
   const [clients, setClients] = useState<Client[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
@@ -19,7 +19,7 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
   const refetchAll = useCallback(async () => {
-    if (!user) return
+    if (!user || !isAuthenticated) return
     setLoading(true)
     try {
       const userId = getUserId()
@@ -42,11 +42,11 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, isAuthenticated])
 
   useEffect(() => {
     refetchAll()
-  }, [user?.username]) // Only depend on username to avoid infinite loops
+  }, [user?._id, isAuthenticated, refetchAll]) // Trigger when user changes or auth state changes
 
   return (
     <BillingContext.Provider

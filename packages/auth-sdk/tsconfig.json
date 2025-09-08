@@ -1,18 +1,10 @@
 {
-  "extends": "../../packages/typescript-config/base.json",
+  "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "target": "ES2020",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -67,3 +67,54 @@
 - Monorepo utilise pnpm workspaces
 - TypeScript avec configurations partagées
 - Architecture microservices avec packages partagés
+
+## EZAuth - Système d'Authentification Centralisé
+
+### Architecture
+- **Service API** : `apps/ezauth/api` - Service standalone sur port 8001
+- **Client SDK** : `packages/auth-sdk` - Package réutilisable avec React hooks
+- **Base de données** : MongoDB partagée avec collections séparées (`auth_users`, `auth_codes`)
+
+### Flow OAuth2
+1. **Redirect** → EZAuth service (`/login?app=ez-billing&redirect_uri=...`)
+2. **Auth** → Utilisateur se connecte/enregistre
+3. **Callback** → Retour avec code d'autorisation (`/auth/callback?code=...`)
+4. **Exchange** → Code → JWT token (7 jours)
+5. **SSO** → Token valide sur toutes les apps
+
+### Intégration dans les Apps
+```tsx
+// 1. Ajouter dépendance
+"@ezstart/auth-sdk": "workspace:*"
+
+// 2. Setup client
+import { AuthProvider, AuthClient } from '@ezstart/auth-sdk'
+const authClient = new AuthClient({
+  baseURL: 'http://localhost:8001/api/auth',
+  appName: 'ez-billing', // ou 'tower-defense'
+  redirectUri: 'http://localhost:3000/auth/callback'
+})
+
+// 3. Provider
+<AuthProvider client={authClient}>
+  <App />
+</AuthProvider>
+
+// 4. Hooks
+import { useAuth, useUser } from '@ezstart/auth-sdk'
+const { user, isAuthenticated, login, logout } = useAuth()
+```
+
+### Endpoints API
+- `GET /health` - Health check
+- `POST /api/auth/register` - Inscription
+- `POST /api/auth/login` - Connexion
+- `POST /api/auth/token` - Échange code → token
+- `GET /api/auth/me` - Info utilisateur (protégé)
+- `POST /api/auth/verify` - Validation token
+
+### Migration depuis système actuel
+1. **Remplacer** AuthProvider actuel par EZAuth
+2. **Créer** page `/auth/callback` dans chaque app
+3. **Single Sign-On** automatique entre toutes les apps
+

@@ -186,7 +186,9 @@
       "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
       "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
       "Read(/D:\\ez-hub\\@ezstart\\apps\\tower-defense\\api/**)",
-      "Read(/D:\\ez-hub\\@ezstart/**)"
+      "Read(/D:\\ez-hub\\@ezstart/**)",
+      "Bash(PORT=8003 pnpm dev)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []

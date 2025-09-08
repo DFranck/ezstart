@@ -5,7 +5,7 @@ import { CompanyModal } from '@/components/company-modal'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import { useBillingContext } from '@/contexts/billing-context'
-import { useUserStore } from '@/stores/useUserStore'
+import { useAuth } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, PaymentMethod } from '@ez-billing/types'
@@ -15,7 +15,7 @@ import { useState } from 'react'
 
 const DashboardPage = () => {
   const router = useRouter()
-  const { user } = useUserStore()
+  const { user, isAuthenticated } = useAuth()
   const { clients, companies, paymentMethods, refetchAll, loading } = useBillingContext()
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
@@ -29,7 +29,7 @@ const DashboardPage = () => {
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
   const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(undefined)
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     redirect('/')
     return null
   }

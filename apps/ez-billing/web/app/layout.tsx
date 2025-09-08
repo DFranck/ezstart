@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { AuthWrapper } from './auth-wrapper';
 import '@ezstart/ui/globals.css';
 
 const fontSans = Geist({
@@ -24,7 +25,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        {children}
+        <AuthWrapper>
+          {children}
+        </AuthWrapper>
         <Toaster />
       </body>
     </html>

@@ -7,7 +7,7 @@ import { InvoiceModal } from '@/components/invoice-modal'
 import { MarkPaidModal } from '@/components/mark-paid-modal'
 import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
-import { useUserStore } from '@/stores/useUserStore'
+import { useAuth } from '@ezstart/auth-sdk'
 import { getBillingPermissions } from '@/utils/billing-permissions'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
@@ -40,7 +40,7 @@ const ClientDashboardPage = () => {
   const params = useParams()
   const clientId = params.clientId as string
 
-  const { user } = useUserStore()
+  const { user, isAuthenticated } = useAuth()
   const { clients, invoices, quotes, receipts, companies, refetchAll, paymentMethods, loading } =
     useBillingContext()
 
@@ -54,7 +54,7 @@ const ClientDashboardPage = () => {
   // ⬇️ NEW: PDF preview modal state
   const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
 
-  if (!user) {
+  if (!user || !isAuthenticated) {
     redirect('/')
     return null
   }

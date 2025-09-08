@@ -9,7 +9,7 @@ import {
   AuthToken, 
   AuthCode,
   JWTPayload 
-} from '../types/auth.js'
+} from '@ezstart/ezauth-types'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
@@ -45,8 +45,13 @@ export class AuthService {
 
   // Login user
   static async login(data: LoginRequest): Promise<AuthCode> {
-    // Find user
-    const user = await AuthUserModel.findOne({ email: data.email })
+    // Find user by email OR username
+    const user = await AuthUserModel.findOne({
+      $or: [
+        { email: data.email },
+        { username: data.email } // Allow using email field for username too
+      ]
+    })
     if (!user) {
       throw new Error('Invalid credentials')
     }
@@ -70,6 +75,12 @@ export class AuthService {
 
   // Exchange code for token
   static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
+    console.log('🔍 Looking for auth code with:', {
+      code: data.code,
+      app: data.app,
+      redirect_uri: data.redirect_uri
+    })
+    
     // Find and validate auth code
     const authCode = await AuthCodeModel.findOne({
       code: data.code,
@@ -78,7 +89,25 @@ export class AuthService {
       expiresAt: { $gt: new Date() }
     })
 
+    console.log('📄 Found auth code:', authCode ? {
+      id: authCode._id,
+      code: authCode.code,
+      app: authCode.app,
+      redirectUri: authCode.redirectUri,
+      isUsed: authCode.isUsed,
+      expiresAt: authCode.expiresAt
+    } : 'null')
+
     if (!authCode) {
+      // Let's also check what codes exist in DB for debugging
+      const allCodes = await AuthCodeModel.find({ app: data.app }).sort({ createdAt: -1 }).limit(3)
+      console.log('🔍 Recent codes for app:', allCodes.map(c => ({
+        code: c.code,
+        app: c.app,
+        isUsed: c.isUsed,
+        expiresAt: c.expiresAt,
+        createdAt: c.createdAt
+      })))
       throw new Error('Invalid or expired authorization code')
     }
 

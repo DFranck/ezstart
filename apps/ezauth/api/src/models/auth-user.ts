@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose'
 import bcrypt from 'bcryptjs'
-import { AuthUser } from '../types/auth.js'
+import { AuthUser } from '@ezstart/ezauth-types'
 
 export interface AuthUserDocument extends Document {
   email: string
@@ -56,7 +56,7 @@ const authUserSchema = new Schema<AuthUserDocument>({
   },
   apps: [{
     type: String,
-    enum: ['ez-billing', 'tower-defense', 'admin'], // Add more apps as needed
+    enum: ['ez-billing', 'tower-defense', 'admin', 'ezstart'], // Add more apps as needed
   }],
 }, {
   timestamps: true,

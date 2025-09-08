@@ -1,27 +1,25 @@
 {
   "name": "@ezstart/auth-sdk",
-  "version": "0.1.0",
-  "description": "EZStart authentication SDK for client applications",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.0.0",
+  "description": "EZAuth React SDK for authentication",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "@ezstart/ezauth-types": "workspace:*",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "typescript": "^5.2.2",
-    "react": "^18.2.0"
+    "@workspace/typescript-config": "workspace:*",
+    "@types/react": "^18",
+    "react": "^18",
+    "typescript": "^5.6.2"
   },
   "peerDependencies": {
-    "react": ">=18.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    }
+    "react": "^18"
   }
 }
