@@ -1,5 +1,6 @@
 import { z, type Infer as ZodInfer } from '@ezstart/types'
 
+// EZAuth Types - Centralized Authentication System
 // User types
 export const AuthUserSchema = z.object({
   _id: z.string(),
