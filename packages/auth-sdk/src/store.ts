@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AuthUser } from '@ezstart/ezauth-types'
+import type { AuthUser } from './types.js'
 
 export interface AuthState {
   user: AuthUser | null

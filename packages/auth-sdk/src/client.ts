@@ -1,4 +1,4 @@
-import type { AuthToken, AuthUser } from '@ezstart/ezauth-types'
+import type { AuthToken, AuthUser } from './types.js'
 
 export interface AuthClientConfig {
   baseURL: string

@@ -8,8 +8,5 @@
     "composite": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../apps/ezauth/types" }
-  ]
+  "exclude": ["node_modules", "dist"]
 }

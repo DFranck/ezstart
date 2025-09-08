@@ -9,5 +9,5 @@ export type { AuthState } from './store.js'
 // Provider and hooks
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
-// Re-export types from ezauth-types
-export type { AuthUser, AuthToken, LoginRequest, RegisterRequest } from '@ezstart/ezauth-types'
+// Re-export types
+export type { AuthUser, AuthToken, LoginRequest, RegisterRequest } from './types.js'
