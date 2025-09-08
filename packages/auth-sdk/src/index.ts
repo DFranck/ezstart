@@ -1,5 +1,5 @@
 // Client
-export { AuthClient } from './client.js'
+export { AuthClient, createAuthClient } from './client.js'
 export type { AuthClientConfig } from './client.js'
 
 // Store

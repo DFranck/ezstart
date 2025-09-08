@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react'
-import { AuthClient, AuthClientConfig } from './client.js'
+import { createContext, ReactNode, useContext, useEffect } from 'react'
+import { AuthClient, createAuthClient } from './client.js'
 import { useAuthStore } from './store.js'
 
 interface AuthContextValue {
@@ -14,18 +14,12 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, appName }: AuthProviderProps) {
-  // Auto-configuration based on environment
-  const config: AuthClientConfig = {
-    baseURL: process.env.NODE_ENV === 'production' 
-      ? 'https://ezauth-oblm.onrender.com/api/auth'
-      : 'http://localhost:8081/api/auth',
+  // Auto-configuration using environment detection
+  const client = createAuthClient({
     appName,
-    redirectUri: typeof window !== 'undefined' 
-      ? `${window.location.origin}/auth/callback`
-      : '/auth/callback'
-  }
-  
-  const client = new AuthClient(config)
+    redirectUri:
+      typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
+  })
   const store = useAuthStore()
 
   // Auto-verify token on mount and periodically (but NOT on callback pages)
@@ -59,11 +53,7 @@ export function AuthProvider({ children, appName }: AuthProviderProps) {
     }
   }, [store.accessToken, client, store])
 
-  return (
-    <AuthContext.Provider value={{ client }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={{ client }}>{children}</AuthContext.Provider>
 }
 
 export function useAuthContext() {
@@ -118,12 +108,12 @@ export function useAuth() {
     user: store.user,
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
-    
+
     // Actions
     login,
     register,
     logout: store.logout,
     handleCallback,
-    verifyAndRefresh
+    verifyAndRefresh,
   }
 }

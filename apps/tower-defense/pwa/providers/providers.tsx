@@ -5,12 +5,6 @@ import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import * as React from 'react'
 
-const authConfig = {
-  baseURL: 'http://localhost:8081/api/auth',
-  appName: 'tower-defense',
-  redirectUri: 'http://localhost:3100/auth/callback'
-}
-
 export function Providers({
   children,
   messages,
@@ -23,7 +17,7 @@ export function Providers({
   timeZone: string
 }) {
   return (
-    <AuthProvider config={authConfig}>
+    <AuthProvider appName="tower-defense">
       <NextThemesProvider
         attribute="class"
         defaultTheme="system"

@@ -1,16 +1,35 @@
 import type { AuthToken, AuthUser } from './types.js'
 
 export interface AuthClientConfig {
-  baseURL: string
+  baseURL?: string
   appName: string
   redirectUri: string
 }
 
+// Helper to get the correct URLs based on environment
+function getEZAuthUrls() {
+  const isProduction = process.env.NODE_ENV === 'production'
+  
+  return {
+    apiBaseURL: isProduction 
+      ? 'https://ezauth-oblm.onrender.com/api/auth'
+      : 'http://localhost:8081/api/auth',
+    webBaseURL: isProduction
+      ? 'https://ezauth.vercel.app'
+      : 'http://localhost:8080'
+  }
+}
+
 export class AuthClient {
   private config: AuthClientConfig
+  private urls: ReturnType<typeof getEZAuthUrls>
 
   constructor(config: AuthClientConfig) {
-    this.config = config
+    this.urls = getEZAuthUrls()
+    this.config = {
+      ...config,
+      baseURL: config.baseURL || this.urls.apiBaseURL
+    }
   }
 
   // Redirect to EZAuth login page
@@ -21,7 +40,7 @@ export class AuthClient {
       ...additionalParams,
     })
 
-    const authUrl = `http://localhost:8080/login?${params.toString()}`
+    const authUrl = `${this.urls.webBaseURL}/login?${params.toString()}`
     window.location.href = authUrl
   }
 
@@ -33,9 +52,10 @@ export class AuthClient {
       ...additionalParams,
     })
 
-    const authUrl = `http://localhost:8004/register?${params.toString()}`
+    const authUrl = `${this.urls.webBaseURL}/register?${params.toString()}`
     window.location.href = authUrl
   }
+  
 
   // Exchange authorization code for access token
   async exchangeCode(code: string): Promise<AuthToken> {
@@ -102,4 +122,9 @@ export class AuthClient {
       return false
     }
   }
+}
+
+// Helper function to create AuthClient with auto-configured URLs
+export function createAuthClient(config: Omit<AuthClientConfig, 'baseURL'> & { baseURL?: string }) {
+  return new AuthClient(config)
 }
