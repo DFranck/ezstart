@@ -19,7 +19,8 @@
       "Bash(npx tsc:*)",
       "Bash(curl:*)",
       "Bash(git push:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(pnpm turbo build:*)"
     ],
     "deny": [],
     "ask": []
