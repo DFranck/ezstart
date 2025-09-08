@@ -6,7 +6,7 @@ import { persist } from 'zustand/middleware'
 
 type PlayerStore = {
   player: Player | null
-  register: (name: string, userId?: string) => Promise<Player>
+  register: (name: string, userId: string) => Promise<Player>
   reset: () => void
 }
 
@@ -15,7 +15,7 @@ export const usePlayerStore = create<PlayerStore>()(
     set => ({
       player: null,
 
-      register: async (name: string, userId?: string) => {
+      register: async (name: string, userId: string) => {
         const res = await callApi<PlayerResponse>('/api/players', {
           method: 'POST',
           body: { name, userId },

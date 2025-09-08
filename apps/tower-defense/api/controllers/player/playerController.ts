@@ -10,6 +10,10 @@ export async function createOrFindPlayerController(req: Request, res: Response) 
     return res.status(400).json({ error: 'Invalid or missing name' })
   }
 
+  if (!userId || typeof userId !== 'string') {
+    return res.status(400).json({ error: 'Invalid or missing userId' })
+  }
+
   try {
     const result = await findOrCreatePlayer({ name, userId })
     return res.status(result.isNew ? 201 : 200).json(result)
