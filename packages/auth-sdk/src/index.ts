@@ -10,4 +10,13 @@ export type { AuthState } from './store.js'
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
 // Re-export types
-export type { AuthUser, AuthToken, LoginRequest, RegisterRequest } from './types.js'
+export type { 
+  AuthUser, 
+  AuthToken, 
+  LoginRequest, 
+  RegisterRequest, 
+  TokenRequest,
+  AuthCode,
+  AuthCodeResponse,
+  JWTPayload 
+} from './types.js'

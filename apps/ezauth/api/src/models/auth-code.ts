@@ -7,6 +7,8 @@ interface AuthCodeDocument extends Document {
   redirectUri?: string
   expiresAt: Date
   isUsed: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
 const authCodeSchema = new Schema<AuthCodeDocument>({

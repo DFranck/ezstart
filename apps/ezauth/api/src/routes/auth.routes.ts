@@ -1,13 +1,10 @@
 import { createRouterWithDoc, OpenAPIRegistry, z } from '@ezstart/api-core'
 import { AuthService } from '../services/auth.service.js'
 import { 
-  LoginRequestSchema,
-  RegisterRequestSchema,
-  TokenRequestSchema,
-  AuthResponseSchema,
-  UserResponseSchema,
-  TokenVerifyResponseSchema
-} from '@ezstart/ezauth-types'
+  LoginRequest,
+  RegisterRequest,
+  TokenRequest
+} from '@ezstart/auth-sdk'
 import express, { Router } from 'express'
 
 export const authRegistry = new OpenAPIRegistry()
@@ -17,7 +14,7 @@ const docRouter = createRouterWithDoc(authRegistry, router)
 // Register new user
 const registerController = async (req: any, res: any) => {
   try {
-    const data = RegisterRequestSchema.parse(req.body)
+    const data = req.body as RegisterRequest
     const authCode = await AuthService.register(data)
     
     res.status(201).json({
@@ -38,7 +35,7 @@ const registerController = async (req: any, res: any) => {
 // Login user  
 const loginController = async (req: any, res: any) => {
   try {
-    const data = LoginRequestSchema.parse(req.body)
+    const data = req.body as LoginRequest
     const authCode = await AuthService.login(data)
     
     res.json({
@@ -60,7 +57,7 @@ const loginController = async (req: any, res: any) => {
 const tokenController = async (req: any, res: any) => {
   try {
     console.log('📋 Token exchange request body:', req.body)
-    const data = TokenRequestSchema.parse(req.body)
+    const data = req.body as TokenRequest
     console.log('✅ Parsed token request data:', data)
     const token = await AuthService.exchangeCodeForToken(data)
     
@@ -150,53 +147,11 @@ const verifyController = async (req: any, res: any) => {
   }
 }
 
-// Define API routes with documentation
-docRouter.post('/register', registerController, {
-  summary: 'Register new user',
-  tags: ['Auth'],
-  bodySchema: RegisterRequestSchema,
-  responseSchema: AuthResponseSchema.extend({
-    code: z.string(),
-    expires_at: z.string()
-  })
-})
-
-docRouter.post('/login', loginController, {
-  summary: 'Login user',
-  tags: ['Auth'],
-  bodySchema: LoginRequestSchema,
-  responseSchema: AuthResponseSchema.extend({
-    code: z.string(),
-    expires_at: z.string()
-  })
-})
-
-docRouter.post('/token', tokenController, {
-  summary: 'Exchange code for token',
-  tags: ['Auth'],
-  bodySchema: TokenRequestSchema,
-  responseSchema: AuthResponseSchema.extend({
-    access_token: z.string(),
-    token_type: z.literal('Bearer'),
-    expires_in: z.number(),
-    user: z.object({}).passthrough()
-  })
-})
-
-docRouter.get('/me', meController, {
-  summary: 'Get current user',
-  tags: ['Auth'],
-  responseSchema: UserResponseSchema
-})
-
-docRouter.post('/verify', verifyController, {
-  summary: 'Verify token',
-  tags: ['Auth'],
-  bodySchema: z.object({
-    token: z.string().min(1),
-    app: z.string().optional()
-  }),
-  responseSchema: TokenVerifyResponseSchema
-})
+// Define API routes (simplified without schemas for now)
+router.post('/register', registerController)
+router.post('/login', loginController)  
+router.post('/token', tokenController)
+router.get('/me', meController)
+router.post('/verify', verifyController)
 
 export default router

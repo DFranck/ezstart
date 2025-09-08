@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { LoginRequest } from '@ezstart/ezauth-types'
+import type { LoginRequest } from '@ezstart/auth-sdk'
 
 interface LoginFormProps {
   app: string

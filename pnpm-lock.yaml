@@ -362,9 +362,9 @@ importers:
       '@ezstart/api-core':
         specifier: workspace:*
         version: link:../../../packages/api-core
-      '@ezstart/ezauth-types':
+      '@ezstart/auth-sdk':
         specifier: workspace:*
-        version: link:../types
+        version: link:../../../packages/auth-sdk
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -412,24 +412,11 @@ importers:
         specifier: ^5.2.2
         version: 5.9.2
 
-  apps/ezauth/types:
-    dependencies:
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../../../packages/types
-    devDependencies:
-      '@workspace/typescript-config':
-        specifier: workspace:*
-        version: link:../../../packages/typescript-config
-      typescript:
-        specifier: ^5.6.2
-        version: 5.9.2
-
   apps/ezauth/web:
     dependencies:
-      '@ezstart/ezauth-types':
+      '@ezstart/auth-sdk':
         specifier: workspace:*
-        version: link:../types
+        version: link:../../../packages/auth-sdk
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.21(postcss@8.5.6)
@@ -977,9 +964,6 @@ importers:
 
   packages/auth-sdk:
     dependencies:
-      '@ezstart/ezauth-types':
-        specifier: workspace:*
-        version: link:../../apps/ezauth/types
       zustand:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@18.3.24)(react@18.3.1)

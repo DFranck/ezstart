@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@ezstart/api-core": "workspace:*",
-    "@ezstart/ezauth-types": "workspace:*",
+    "@ezstart/auth-sdk": "workspace:*",
     "express": "^4.18.2",
     "mongoose": "^8.0.0",
     "jsonwebtoken": "^9.0.2",

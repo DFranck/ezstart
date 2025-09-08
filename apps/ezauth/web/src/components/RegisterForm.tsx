@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { RegisterRequest } from '@ezstart/ezauth-types'
+import type { RegisterRequest } from '@ezstart/auth-sdk'
 
 interface RegisterFormProps {
   app: string

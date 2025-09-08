@@ -43,3 +43,27 @@ export interface TokenRequest {
   app: string
   redirect_uri?: string
 }
+
+export interface AuthCode {
+  code: string
+  userId: string
+  app: string
+  redirect_uri?: string
+  expiresAt: Date
+  used: boolean
+  createdAt: Date
+}
+
+export interface AuthCodeResponse {
+  code: string
+  expires_at: string
+}
+
+export interface JWTPayload {
+  userId: string
+  email: string
+  username: string
+  apps: string[]
+  iat?: number
+  exp?: number
+}

@@ -6,17 +6,18 @@ import {
   LoginRequest, 
   RegisterRequest, 
   TokenRequest, 
-  AuthToken, 
+  AuthToken,
   AuthCode,
-  JWTPayload 
-} from '@ezstart/ezauth-types'
+  AuthCodeResponse,
+  JWTPayload
+} from '@ezstart/auth-sdk'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
 
 export class AuthService {
   // Register new user
-  static async register(data: RegisterRequest): Promise<AuthCode> {
+  static async register(data: RegisterRequest): Promise<AuthCodeResponse> {
     // Check if user already exists
     const existingUser = await AuthUserModel.findOne({
       $or: [{ email: data.email }, { username: data.username }]
@@ -44,7 +45,7 @@ export class AuthService {
   }
 
   // Login user
-  static async login(data: LoginRequest): Promise<AuthCode> {
+  static async login(data: LoginRequest): Promise<AuthCodeResponse> {
     // Find user by email OR username
     const user = await AuthUserModel.findOne({
       $or: [
@@ -159,7 +160,7 @@ export class AuthService {
   }
 
   // Private: Generate auth code
-  private static async generateAuthCode(userId: string, app: string, redirectUri?: string): Promise<AuthCode> {
+  private static async generateAuthCode(userId: string, app: string, redirectUri?: string): Promise<AuthCodeResponse> {
     const code = crypto.randomBytes(32).toString('hex')
     
     const authCode = new AuthCodeModel({
