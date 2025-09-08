@@ -103,7 +103,7 @@ export function Icon({
       }
     >
       <DynamicIcon
-        {...props}
+        {...(props as Omit<LucideProps, 'children'>)}
         className={[tailwindSize, className, spin && 'animate-spin']
           .filter(Boolean)
           .join(' ')}

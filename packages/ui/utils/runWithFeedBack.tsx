@@ -53,7 +53,7 @@ export async function runWithFeedback<T>({
               unstyled: true,
             }
           )
-        : toast.loading(toastLoading?.message ?? ' ', {
+        : toast.loading(String(toastLoading?.message ?? ' '), {
             duration: toastLoading?.duration ?? 999_999,
           })
 
@@ -63,7 +63,7 @@ export async function runWithFeedback<T>({
     if (toastId) toast.dismiss(toastId)
 
     if (toastSuccess !== false) {
-      toast.success(toastSuccess?.message ?? '', {
+      toast.success(String(toastSuccess?.message ?? ''), {
         duration: toastSuccess?.duration,
         unstyled: isMinimal(toastSuccess),
         className: isMinimal(toastSuccess)
@@ -78,7 +78,7 @@ export async function runWithFeedback<T>({
     if (toastId) toast.dismiss(toastId)
 
     if (toastError !== false) {
-      toast.error(toastError?.message ?? '', {
+      toast.error(String(toastError?.message ?? ''), {
         duration: toastError?.duration,
         unstyled: isMinimal(toastError),
         className: isMinimal(toastError)

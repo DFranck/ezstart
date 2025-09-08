@@ -1,6 +1,5 @@
 import { pdf, type DocumentProps } from '@react-pdf/renderer'
-import { useState } from 'react'
-import type { JSXElementConstructor, ReactElement } from 'react'
+import React, { useState } from 'react'
 
 interface UseGeneratePDFOptions {
   filename?: string
@@ -9,8 +8,8 @@ interface UseGeneratePDFOptions {
 }
 
 interface UseGeneratePDFReturn {
-  generatePDF: (component: ReactElement<DocumentProps, string | JSXElementConstructor<any>>) => Promise<void>
-  downloadPDF: (component: ReactElement<DocumentProps, string | JSXElementConstructor<any>>, filename?: string) => Promise<void>
+  generatePDF: (component: React.ReactElement<DocumentProps>) => Promise<void>
+  downloadPDF: (component: React.ReactElement<DocumentProps>, filename?: string) => Promise<void>
   isGenerating: boolean
   error: Error | null
 }
@@ -19,7 +18,7 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const generatePDF = async (component: ReactElement<DocumentProps, string | JSXElementConstructor<any>>): Promise<void> => {
+  const generatePDF = async (component: React.ReactElement<DocumentProps>): Promise<void> => {
     setIsGenerating(true)
     setError(null)
 
@@ -36,7 +35,7 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
     }
   }
 
-  const downloadPDF = async (component: ReactElement<DocumentProps, string | JSXElementConstructor<any>>, filename?: string): Promise<void> => {
+  const downloadPDF = async (component: React.ReactElement<DocumentProps>, filename?: string): Promise<void> => {
     setIsGenerating(true)
     setError(null)
 
@@ -84,7 +83,7 @@ export function useInvoicePDF() {
   })
 
   const downloadInvoicePDF = async (
-    component: ReactElement<DocumentProps, string | JSXElementConstructor<any>>,
+    component: React.ReactElement<DocumentProps>,
     documentNumber: string
   ) => {
     const filename = `invoice-${documentNumber}.pdf`
