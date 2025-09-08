@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import type { RegisterRequest } from '@ezstart/auth-sdk'
+import { useState } from 'react'
 
 interface RegisterFormProps {
   app: string
@@ -14,7 +14,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
     username: '',
     password: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -32,15 +32,20 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
         firstName: formData.firstName || undefined,
         lastName: formData.lastName || undefined,
         app,
-        redirect_uri: redirect_uri || undefined
+        redirect_uri: redirect_uri || undefined,
       }
 
-      const response = await fetch('http://localhost:8005/api/auth/register', {
+      const apiUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://ezauth-oblm.onrender.com/api/auth/register'
+          : 'http://localhost:8081/api/auth/register'
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerData)
+        body: JSON.stringify(registerData),
       })
 
       const result = await response.json()
@@ -56,11 +61,10 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
         window.location.href = url.toString()
       } else {
         // Default redirect for development
-        const devUrl = new URL(`http://localhost:3000/auth/callback`)
+        const devUrl = new URL(`http://localhost:8080/auth/callback`)
         devUrl.searchParams.set('code', result.code)
         window.location.href = devUrl.toString()
       }
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -75,7 +79,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           {error}
         </div>
       )}
-      
+
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email *
@@ -85,7 +89,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           type="email"
           required
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={e => setFormData({ ...formData, email: e.target.value })}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           placeholder="your@email.com"
         />
@@ -100,7 +104,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           type="text"
           required
           value={formData.username}
-          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+          onChange={e => setFormData({ ...formData, username: e.target.value })}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           placeholder="username"
         />
@@ -115,7 +119,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             id="firstName"
             type="text"
             value={formData.firstName}
-            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+            onChange={e => setFormData({ ...formData, firstName: e.target.value })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
             placeholder="John"
           />
@@ -128,7 +132,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             id="lastName"
             type="text"
             value={formData.lastName}
-            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+            onChange={e => setFormData({ ...formData, lastName: e.target.value })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
             placeholder="Doe"
           />
@@ -145,7 +149,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           required
           minLength={6}
           value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          onChange={e => setFormData({ ...formData, password: e.target.value })}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           placeholder="••••••••"
         />

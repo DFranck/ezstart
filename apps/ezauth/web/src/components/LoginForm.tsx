@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import type { LoginRequest } from '@ezstart/auth-sdk'
+import { useState } from 'react'
 
 interface LoginFormProps {
   app: string
@@ -11,7 +11,7 @@ interface LoginFormProps {
 export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -26,15 +26,20 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         email: formData.email,
         password: formData.password,
         app,
-        redirect_uri: redirect_uri || undefined
+        redirect_uri: redirect_uri || undefined,
       }
 
-      const response = await fetch('http://localhost:8006/api/auth/login', {
+      const apiUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://ezauth-oblm.onrender.com/api/auth/login'
+          : 'http://localhost:8081/api/auth/login'
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginData)
+        body: JSON.stringify(loginData),
       })
 
       const result = await response.json()
@@ -50,11 +55,10 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         window.location.href = url.toString()
       } else {
         // Default redirect for development
-        const devUrl = new URL(`http://localhost:3000/auth/callback`)
+        const devUrl = new URL(`http://localhost:8080/auth/callback`)
         devUrl.searchParams.set('code', result.code)
         window.location.href = devUrl.toString()
       }
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -69,7 +73,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           {error}
         </div>
       )}
-      
+
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email or Username
@@ -79,7 +83,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           type="text"
           required
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={e => setFormData({ ...formData, email: e.target.value })}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           placeholder="your@email.com or username"
         />
@@ -94,7 +98,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           type="password"
           required
           value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          onChange={e => setFormData({ ...formData, password: e.target.value })}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           placeholder="••••••••"
         />
