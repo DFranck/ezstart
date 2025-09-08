@@ -1,23 +1,41 @@
 'use client'
 
 import type { LoginRequest } from '@ezstart/auth-sdk'
+import {
+  Button,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+} from '@ezstart/ui/components'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 interface LoginFormProps {
   app: string
   redirect_uri?: string | null
 }
 
+type FormData = {
+  email: string
+  password: string
+}
+
 export function LoginForm({ app, redirect_uri }: LoginFormProps) {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<FormData>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  const onSubmit = async (formData: FormData) => {
     setLoading(true)
     setError('')
 
@@ -67,50 +85,46 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email or Username
-        </label>
-        <input
-          id="email"
-          type="text"
-          required
-          value={formData.email}
-          onChange={e => setFormData({ ...formData, email: e.target.value })}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          placeholder="your@email.com or username"
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email or Username</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="your@email.com or username" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          value={formData.password}
-          onChange={e => setFormData({ ...formData, password: e.target.value })}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          placeholder="••••••••"
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-gray-400"
-      >
-        {loading ? 'Signing in...' : 'Sign in'}
-      </button>
-    </form>
+        <Button type="submit" disabled={loading} className="w-full" variant={"ezstart"}>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </Button>
+      </form>
+    </Form>
   )
 }

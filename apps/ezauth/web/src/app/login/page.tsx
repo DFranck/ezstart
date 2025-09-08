@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import { LoginForm } from '@/components/LoginForm'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
 function LoginContent() {
   const searchParams = useSearchParams()
@@ -11,28 +12,30 @@ function LoginContent() {
   const redirect_uri = searchParams.get('redirect_uri')
 
   return (
-    <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">EZAuth</h1>
-        <p className="mt-2 text-gray-600">
-          Sign in to access <span className="font-medium text-primary-600">{app}</span>
-        </p>
-      </div>
+    <Card className="max-w-md w-full">
+      <CardHeader className="text-center">
+        <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
+        <CardDescription>
+          Sign in to access <span className="font-medium text-primary">{app}</span>
+        </CardDescription>
+      </CardHeader>
 
-      <LoginForm app={app} redirect_uri={redirect_uri} />
+      <CardContent className="space-y-6">
+        <LoginForm app={app} redirect_uri={redirect_uri} />
 
-      <div className="text-center">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link 
-            href={`/register?${searchParams.toString()}`}
-            className="text-primary-600 hover:text-primary-500 font-medium"
-          >
-            Sign up
-          </Link>
-        </p>
-      </div>
-    </div>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link
+              href={`/register?${searchParams.toString()}`}
+              className="text-primary hover:text-primary/80 font-medium"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

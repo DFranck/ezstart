@@ -6,6 +6,13 @@
 - **TOUJOURS** utiliser/créer des composants agnostiques au maximum
 - **PRIORITÉ** aux packages partagés du monorepo avant toute création spécifique
 
+### Bonnes Pratiques UI/UX
+- **JAMAIS** utiliser des balises HTML natives (`<input>`, `<button>`, `<label>`) 
+- **TOUJOURS** utiliser les composants du package `@ezstart/ui/components` (Input, Button, Label, Card, etc.)
+- **JAMAIS** utiliser des couleurs hardcodées (`bg-red-50`, `text-gray-600`)
+- **TOUJOURS** utiliser des classes sémantiques (`bg-destructive/15`, `text-muted-foreground`, `text-primary`)
+- **TOUJOURS** laisser les composants gérer leurs propres styles et couleurs
+
 ### Structure Monorepo
 ```
 @ezstart/
@@ -50,6 +57,24 @@
 - Configs API communes → `packages/config`
 - Types spécifiques EZ-Billing → `apps/ez-billing/types`
 - Composants UI réutilisables → `packages/ui` (si existe)
+
+### Configuration Standardisée des Apps Web
+- **Tailwind Config** : Toujours utiliser la config minimale standardisée :
+```js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/ui/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+}
+```
+- **Globals CSS** : Toujours importer le CSS du package UI :
+```css
+@import "@ezstart/ui/globals.css";
+```
+- **Dépendances** : Toujours ajouter `"@ezstart/ui": "workspace:*"` dans package.json
 
 ### Commandes Importantes
 - Build : `pnpm build`

@@ -6,14 +6,10 @@ export const metadata: Metadata = {
   description: 'EZStart centralized authentication service',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <body className="min-h-screen bg-background text-foreground flex items-center justify-center mx-2">
         {children}
       </body>
     </html>

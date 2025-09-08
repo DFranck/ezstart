@@ -1,26 +1,47 @@
 'use client'
 
 import type { RegisterRequest } from '@ezstart/auth-sdk'
+import {
+  Button,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+} from '@ezstart/ui/components'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 interface RegisterFormProps {
   app: string
   redirect_uri?: string | null
 }
 
+interface FormData {
+  email: string
+  username: string
+  password: string
+  firstName: string
+  lastName: string
+}
+
 export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
-  const [formData, setFormData] = useState({
-    email: '',
-    username: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<FormData>({
+    defaultValues: {
+      email: '',
+      username: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+    },
+  })
+
+  const onSubmit = async (formData: FormData) => {
     setLoading(true)
     setError('')
 
@@ -73,96 +94,90 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email *
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={formData.email}
-          onChange={e => setFormData({ ...formData, email: e.target.value })}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          placeholder="your@email.com"
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email *</FormLabel>
+              <FormControl>
+                <Input type="email" required placeholder="your@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div>
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-          Username *
-        </label>
-        <input
-          id="username"
-          type="text"
-          required
-          value={formData.username}
-          onChange={e => setFormData({ ...formData, username: e.target.value })}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          placeholder="username"
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username *</FormLabel>
+              <FormControl>
+                <Input type="text" required placeholder="username" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-            First Name
-          </label>
-          <input
-            id="firstName"
-            type="text"
-            value={formData.firstName}
-            onChange={e => setFormData({ ...formData, firstName: e.target.value })}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-            placeholder="John"
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="John" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-        <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-            Last Name
-          </label>
-          <input
-            id="lastName"
-            type="text"
-            value={formData.lastName}
-            onChange={e => setFormData({ ...formData, lastName: e.target.value })}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-            placeholder="Doe"
-          />
-        </div>
-      </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password *
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          minLength={6}
-          value={formData.password}
-          onChange={e => setFormData({ ...formData, password: e.target.value })}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          placeholder="••••••••"
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password *</FormLabel>
+              <FormControl>
+                <Input type="password" required minLength={6} placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+              <p className="mt-1 text-xs text-muted-foreground">Minimum 6 characters</p>
+            </FormItem>
+          )}
         />
-        <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
-      </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-gray-400"
-      >
-        {loading ? 'Creating account...' : 'Create account'}
-      </button>
-    </form>
+        <Button type="submit" disabled={loading} className="w-full" variant={'ezstart'}>
+          {loading ? 'Creating account...' : 'Create account'}
+        </Button>
+      </form>
+    </Form>
   )
 }

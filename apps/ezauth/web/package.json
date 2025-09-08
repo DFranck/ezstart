@@ -4,18 +4,19 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --port 8080",
+    "dev": "next dev --turbopack --port 8080",
     "lint": "next lint",
     "start": "next start"
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
+    "@ezstart/ui": "workspace:*",
     "autoprefixer": "^10.4.19",
     "next": "15.5.2",
     "postcss": "^8.4.38",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "tailwindcss": "^3.4.1"
+    "react-hook-form": "^7.54.3"
   },
   "devDependencies": {
     "@types/node": "^20",
