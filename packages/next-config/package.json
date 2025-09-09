@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/next-config",
+  "version": "0.0.1",
+  "description": "Shared Next.js configurations for @ezstart monorepo",
+  "main": "./base.js",
+  "type": "module",
+  "exports": {
+    ".": "./base.js",
+    "./base": "./base.js",
+    "./pwa": "./pwa.js"
+  },
+  "files": [
+    "base.js",
+    "pwa.js"
+  ],
+  "peerDependencies": {
+    "next": "^15.0.0"
+  },
+  "devDependencies": {
+    "next": "^15.5.2",
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}
