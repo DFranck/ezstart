@@ -12,7 +12,7 @@ async function isPortFree(port) {
   });
 }
 
-async function findFreePort(startPort = 3500) {
+async function findFreePort(startPort = 4000) {
   let port = startPort;
   while (!(await isPortFree(port))) {
     port++;
@@ -21,7 +21,8 @@ async function findFreePort(startPort = 3500) {
 }
 
 async function startDev() {
-  const port = await findFreePort(3500);
+  const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+  const port = await findFreePort(preferredPort);
   console.log(`🚀 Starting dev server on port ${port}`);
   
   const child = spawn('next', ['dev', '--turbopack', '-p', port.toString()], {
