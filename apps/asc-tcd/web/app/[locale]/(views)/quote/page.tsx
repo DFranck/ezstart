@@ -1,6 +1,6 @@
 'use client';
 
-import { Main, Section } from '@ezstart/ui/components';
+import { Button, Checkbox, Input, Label, Main, Section } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { useState } from 'react';
 
@@ -77,132 +77,132 @@ export default function PageQuote() {
       <Section>
         <form onSubmit={handleSubmit} className=' grid  md:grid-cols-2 gap-4'>
           <div>
-            <label className='block text-sm font-medium'>
-              Nom de l’organisme
-            </label>
-            <input
+            <Label htmlFor='organisation'>
+              Nom de l'organisme
+            </Label>
+            <Input
+              id='organisation'
               type='text'
               value={form.organisation}
               onChange={(e) => handleChange('organisation', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
               required
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>Nom du contact</label>
-            <input
+            <Label htmlFor='contactName'>Nom du contact</Label>
+            <Input
+              id='contactName'
               type='text'
               value={form.contactName}
               onChange={(e) => handleChange('contactName', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
               required
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>E-mail</label>
-            <input
+            <Label htmlFor='email'>E-mail</Label>
+            <Input
+              id='email'
               type='email'
               value={form.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
               required
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>Téléphone</label>
-            <input
+            <Label htmlFor='phone'>Téléphone</Label>
+            <Input
+              id='phone'
               type='tel'
               value={form.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>
+            <Label htmlFor='nbPlants'>
               Nombre de végétaux à transplanter
-            </label>
-            <input
+            </Label>
+            <Input
+              id='nbPlants'
               type='number'
               min={1}
               value={form.nbPlants}
               onChange={(e) => handleChange('nbPlants', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>
+            <Label>
               Types de végétaux
-            </label>
+            </Label>
             <div className='flex flex-col gap-1 mt-2'>
-              <label className='flex items-center gap-2'>
-                <input
-                  type='checkbox'
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='trees'
                   checked={form.types.trees}
-                  onChange={(e) =>
-                    handleChange('types.trees', e.target.checked)
+                  onCheckedChange={(checked) =>
+                    handleChange('types.trees', checked)
                   }
                 />
-                Arbres et arbustes
-              </label>
-              <label className='flex items-center gap-2'>
-                <input
-                  type='checkbox'
+                <Label htmlFor='trees'>Arbres et arbustes</Label>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='hedges'
                   checked={form.types.hedges}
-                  onChange={(e) =>
-                    handleChange('types.hedges', e.target.checked)
+                  onCheckedChange={(checked) =>
+                    handleChange('types.hedges', checked)
                   }
                 />
-                Haies et thorbaces
-              </label>
-              <label className='flex items-center gap-2'>
-                <input
-                  type='checkbox'
+                <Label htmlFor='hedges'>Haies et thorbaces</Label>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='plants'
                   checked={form.types.plants}
-                  onChange={(e) =>
-                    handleChange('types.plants', e.target.checked)
+                  onCheckedChange={(checked) =>
+                    handleChange('types.plants', checked)
                   }
                 />
-                Plantes (linaire, grasses, fruitières, etc.)
-              </label>
+                <Label htmlFor='plants'>Plantes (linaire, grasses, fruitières, etc.)</Label>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>
+            <Label htmlFor='date'>
               Date de transplantation souhaitée
-            </label>
-            <input
+            </Label>
+            <Input
+              id='date'
               type='date'
               value={form.date}
               onChange={(e) => handleChange('date', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>
+            <Label htmlFor='distance'>
               Distance du déplacement (km)
-            </label>
-            <input
+            </Label>
+            <Input
+              id='distance'
               type='number'
               min={0}
               value={form.distance}
               onChange={(e) => handleChange('distance', e.target.value)}
-              className='w-full mt-1 border rounded-md px-3 py-2'
             />
           </div>
 
-          <button
+          <Button
             type='submit'
-            className='w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition md:col-span-2'
+            className='md:col-span-2'
           >
             Envoyer
-          </button>
+          </Button>
         </form>{' '}
       </Section>
     </Main>

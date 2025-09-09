@@ -1,7 +1,7 @@
 'use client';
 
 import type { KnownIconName } from '@ezstart/ui/components';
-import { Icon, Tag } from '@ezstart/ui/components';
+import { Icon, Input, Tag } from '@ezstart/ui/components';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
 
@@ -49,12 +49,12 @@ export const IconGallery = ({
       <Tag as='h1'>{title}</Tag>
 
       {searchable && (
-        <input
+        <Input
           type='text'
           placeholder='Search icon...'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className='mb-4 border p-1 w-full max-w-xs'
+          className='mb-4 w-full max-w-xs'
         />
       )}
 

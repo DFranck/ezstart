@@ -2,7 +2,7 @@
 'use client'
 
 import { getCroppedImg } from '@/utils/image'
-import { Button, Icon } from '@ezstart/ui/components'
+import { Button, Icon, Input } from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Cropper from 'react-easy-crop'
@@ -329,9 +329,9 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
                         className="w-full mb-2"
                       />
                       <div className="flex items-center gap-2">
-                        <input
+                        <Input
                           type="number"
-                          className="w-20 rounded border px-2 py-1 text-sm"
+                          className="w-20 text-sm"
                           value={cropWidth}
                           onChange={e => setCropWidth(Number(e.target.value) || 50)}
                           min={50}
@@ -357,9 +357,9 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
                         className="w-full mb-2"
                       />
                       <div className="flex items-center gap-2">
-                        <input
+                        <Input
                           type="number"
-                          className="w-20 rounded border px-2 py-1 text-sm"
+                          className="w-20 text-sm"
                           value={cropHeight}
                           onChange={e => setCropHeight(Number(e.target.value) || 50)}
                           min={50}
