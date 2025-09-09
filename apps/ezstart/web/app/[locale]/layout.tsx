@@ -1,4 +1,4 @@
-import { Providers } from '@/components/providers';
+import { WebProviders } from '@ezstart/web-core/providers';
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
 import { PWAInstallPrompt, Toaster } from '@ezstart/ui/components';
 import '@ezstart/ui/globals.css';
@@ -63,9 +63,9 @@ export default async function LocaleLayout(props: {
       <body 
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
-        <Providers messages={messages} locale={locale} timeZone={timeZone}>
+        <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
           <ClientLayout>{children}</ClientLayout>
-        </Providers>
+        </WebProviders>
         <Toaster />
         <PWAInstallPrompt appName="EZStart" />
       </body>

@@ -575,6 +575,9 @@ importers:
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
+      '@ezstart/web-core':
+        specifier: workspace:*
+        version: link:../../../packages/web-core
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.14
         version: 2.1.15(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
