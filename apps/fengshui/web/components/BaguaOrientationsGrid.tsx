@@ -3,7 +3,7 @@
 
 import { DIRECTIONS_WITH_CENTER, Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Icon } from '@ezstart/ui/components'
+import { Icon, Button } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 type Props = {
@@ -48,19 +48,21 @@ export default function BaguaOrientationsGrid({ config }: Props) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-900">Orientations Bagua</h2>
         <div className="flex gap-2">
-          <button
+          <Button
             onClick={expandAll}
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            variant="link"
+            className="text-sm text-blue-600 hover:text-blue-800 transition-colors p-0 h-auto"
           >
             Tout ouvrir
-          </button>
+          </Button>
           <span className="text-gray-300">•</span>
-          <button
+          <Button
             onClick={collapseAll}
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            variant="link"
+            className="text-sm text-blue-600 hover:text-blue-800 transition-colors p-0 h-auto"
           >
             Tout fermer
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -114,9 +116,10 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
       style={{ borderTopColor: accent, borderTopWidth: '3px' }}
     >
       {/* Header cliquable */}
-      <button
+      <Button
         onClick={onToggle}
-        className="w-full p-4 text-left hover:bg-gray-50/50 transition-colors rounded-t-2xl"
+        variant="ghost"
+        className="w-full p-4 text-left hover:bg-gray-50/50 transition-colors rounded-t-2xl h-auto justify-start"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -153,7 +156,7 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
             className="w-5 h-5 text-gray-400 transition-transform"
           />
         </div>
-      </button>
+      </Button>
 
       {/* Contenu développable */}
       {isExpanded && (

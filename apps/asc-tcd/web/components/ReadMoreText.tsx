@@ -1,6 +1,6 @@
 'use client';
 
-import { P } from '@ezstart/ui/components';
+import { Button, P } from '@ezstart/ui/components';
 import { useState } from 'react';
 
 type ReadMoreTextProps = {
@@ -25,12 +25,13 @@ export const ReadMoreText = ({
     <P variant={variant ? variant : undefined} className={className}>
       {displayText}
       {isLong && (
-        <button
+        <Button
           onClick={() => setExpanded((prev) => !prev)}
-          className='text-primary font-semibold ml-1 cursor-pointer'
+          variant="link"
+          className='ml-1 p-0 h-auto font-semibold'
         >
           {expanded ? 'Read less' : 'Read more'}
-        </button>
+        </Button>
       )}
     </P>
   );

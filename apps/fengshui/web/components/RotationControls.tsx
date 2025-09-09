@@ -18,13 +18,15 @@ export function RotationControls({ rotationAngle, onRotate, onReset }: RotationC
       <div className="flex items-center justify-center space-x-3 text-blue-700 mb-4">
         <Icon name="lucide:RotateCw" className="w-5 h-5" />
         <span className="font-medium">Faites tourner l'orientation du Bagua</span>
-        <button
+        <Button
           onClick={onReset}
+          variant="ghost"
+          size="sm"
           className="flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
         >
           <Icon name="lucide:RotateCcw" className="w-4 h-4" />
           <span>Reset</span>
-        </button>
+        </Button>
       </div>
 
       {/* Contrôles de rotation */}

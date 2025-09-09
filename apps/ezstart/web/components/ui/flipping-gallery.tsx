@@ -147,24 +147,28 @@ export const FlippingGallery = ({
           </motion.div>
 
           <div className='flex gap-4 pt-4 md:pt-0'>
-            <button
+            <Button
               onClick={handlePrev}
+              variant="ghost"
+              size="sm"
               className='group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800'
             >
               <Icon
                 name='fa:FaArrowLeft'
                 className='h-5 w-5 text-black transition-transform duration-300 group-hover/button:rotate-12 dark:text-neutral-400'
               />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleNext}
+              variant="ghost"
+              size="sm"
               className='group/button flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-neutral-800'
             >
               <Icon
                 name='fa:FaArrowRight'
                 className='h-5 w-5 text-black transition-transform duration-300 group-hover/button:-rotate-12 dark:text-neutral-400'
               />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@
 import { loadBaguaConfig } from '@/config/loadBaguaConfig'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Icon, StepContent, StepSummary, useStepper } from '@ezstart/ui/components'
+import { Icon, StepContent, StepSummary, useStepper, Button } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
 import BaguaWheel from './BaguaWheel'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
@@ -81,7 +81,7 @@ export default function AnalysisStep() {
                       Explorez les secteurs Bagua et leurs recommandations pour harmoniser votre espace
                     </p>
                   </div>
-                  <button
+                  <Button
                     className="ml-4 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleGeneratePDF}
                     disabled={!cfg || isGenerating}
@@ -94,7 +94,7 @@ export default function AnalysisStep() {
                     <span className="hidden sm:inline">
                       {isGenerating ? 'Génération...' : 'PDF'}
                     </span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

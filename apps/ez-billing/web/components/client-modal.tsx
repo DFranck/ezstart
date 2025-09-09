@@ -13,6 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState, useEffect } from 'react'
@@ -438,7 +439,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-cyan-500" />
               Notes
             </Label>
-            <textarea
+            <Textarea
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
               className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"

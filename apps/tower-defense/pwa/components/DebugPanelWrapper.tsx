@@ -2,7 +2,7 @@
 
 import { useGames } from '@/hooks/useGames'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { DebugPanel } from '@ezstart/ui/components'
+import { DebugPanel, Button } from '@ezstart/ui/components'
 import { Game } from '@tower-defense/types'
 
 export function DebugPanelWrapper() {
@@ -34,8 +34,9 @@ export function DebugPanelWrapper() {
             </>
           )}
           <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
-            <button
+            <Button
               onClick={() => register('TestPlayer', 'debug-user-id')}
+              size="sm"
               style={{
                 padding: '4px 8px',
                 background: '#4CAF50',
@@ -47,9 +48,10 @@ export function DebugPanelWrapper() {
               }}
             >
               Register Test
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={reset}
+              size="sm"
               style={{
                 padding: '4px 8px',
                 background: '#f44336',
@@ -61,7 +63,7 @@ export function DebugPanelWrapper() {
               }}
             >
               Reset
-            </button>
+            </Button>
           </div>
         </div>
       ),
@@ -77,8 +79,9 @@ export function DebugPanelWrapper() {
           <div>Games count: {waitingGames.length}</div>
           <div>Error: {error ? '❌' : '✅'}</div>
           {error && <div style={{ color: '#ff6b6b' }}>{error}</div>}
-          <button
+          <Button
             onClick={() => player?._id && fetchGames(player._id)}
+            size="sm"
             style={{
               padding: '4px 8px',
               background: '#2196F3',
@@ -90,7 +93,7 @@ export function DebugPanelWrapper() {
             }}
           >
             Refresh Games
-          </button>
+          </Button>
         </div>
       ),
     },

@@ -2,7 +2,7 @@
 'use client'
 
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
-import { Icon, StepContent, useStepper } from '@ezstart/ui/components'
+import { Icon, StepContent, useStepper, Button } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 const CardinalPointsStep = () => {
@@ -70,13 +70,15 @@ const CardinalPointsStep = () => {
                 <div className="flex items-center justify-center space-x-3 text-blue-700 mb-4">
                   <Icon name="lucide:RotateCw" className="w-5 h-5" />
                   <span className="font-medium">Faites tourner l&apos;orientation</span>
-                  <button
+                  <Button
                     onClick={resetRotation}
+                    variant="ghost"
+                    size="sm"
                     className="flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
                   >
                     <Icon name="lucide:RotateCcw" className="w-4 h-4" />
                     <span>Reset</span>
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="text-center mb-4">
@@ -87,51 +89,57 @@ const CardinalPointsStep = () => {
                 </div>
 
                 <div className="flex items-center justify-center space-x-2 mb-4">
-                  <button
+                  <Button
                     onClick={() => handleRotate(rotationAngle - 45)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg"
                     title="−45°"
                   >
                     <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleRotate(rotationAngle - 10)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg"
                     title="−10°"
                   >
                     <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleRotate(rotationAngle - 1)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg"
                     title="−1°"
                   >
                     <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </button>
+                  </Button>
 
                   <div className="w-px h-8 bg-gray-300 mx-2" />
 
-                  <button
+                  <Button
                     onClick={() => handleRotate(rotationAngle + 1)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg"
                     title="+1°"
                   >
                     <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleRotate(rotationAngle + 10)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg"
                     title="+10°"
                   >
                     <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleRotate(rotationAngle + 45)}
+                    size="sm"
                     className="w-10 h-10 grid place-items-center bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-lg"
                     title="+45°"
                   >
                     <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
 
                 <p className="text-gray-600 text-sm text-center">

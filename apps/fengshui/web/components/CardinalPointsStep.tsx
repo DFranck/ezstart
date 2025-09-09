@@ -1,7 +1,7 @@
 'use client'
 
 import { FENGSHUI_SECTORS, FengShuiSector } from '@/lib/fengshui-data'
-import { Icon } from '@ezstart/ui/components'
+import { Icon, Button } from '@ezstart/ui/components'
 import { useMemo, useState } from 'react'
 import { RotationControls } from './RotationControls'
 
@@ -152,7 +152,7 @@ export function CardinalPointsStep({ uploadedPlan, onNextStep }: CardinalPointsS
 
       {/* Bouton suivant */}
       <div className="text-center">
-        <button
+        <Button
           onClick={handleNextStep}
           className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
         >
@@ -160,7 +160,7 @@ export function CardinalPointsStep({ uploadedPlan, onNextStep }: CardinalPointsS
             <Icon name="lucide:ArrowRight" className="w-5 h-5" />
             <span>Continuer vers l'analyse</span>
           </div>
-        </button>
+        </Button>
       </div>
     </div>
   )

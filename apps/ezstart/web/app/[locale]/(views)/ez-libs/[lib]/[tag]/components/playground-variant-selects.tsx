@@ -6,6 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Label,
 } from '@ezstart/ui/components';
 
 type PlaygroundVariantSelectsProps = {
@@ -25,9 +26,9 @@ export function PlaygroundVariantSelects({
     <div className={`grid gap-3 md:grid-cols-${columns}`}>
       {Object.entries(meta).map(([variantName, values]) => (
         <div key={variantName} className='flex flex-col gap-1'>
-          <label className='text-xs font-medium text-neutral-400'>
+          <Label className='text-xs font-medium text-neutral-400'>
             {variantName}
-          </label>
+          </Label>
           <Select
             value={selected[variantName]}
             onValueChange={(v: string) => onChange(variantName, v)}

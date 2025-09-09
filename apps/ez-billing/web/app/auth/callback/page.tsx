@@ -1,5 +1,6 @@
 'use client'
 import { useAuth } from '@ezstart/auth-sdk'
+import { Button } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 
@@ -111,12 +112,11 @@ function CallbackContent() {
         </div>
         <p className="text-red-600 font-semibold">Authentication failed</p>
         <p className="text-gray-600 text-sm mb-4">{error}</p>
-        <button 
+        <Button 
           onClick={() => router.push('/')}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
           Go Back
-        </button>
+        </Button>
       </div>
     </div>
   )
