@@ -31,6 +31,6 @@ http
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Monitor is running\n');
   })
-  .listen(process.env.PORT || 3000, () => {
+  .listen(process.env.PORT || 1111, () => {
     console.log('✅ Monitor service bound to port');
   });
