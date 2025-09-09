@@ -1,4 +1,12 @@
 {
-  "extends": "@workspace/typescript-config/types.json",
-  "files": ["express/aug.d.ts"]
+  "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["node_modules", "dist"]
 }
