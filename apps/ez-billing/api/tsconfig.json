@@ -5,12 +5,7 @@
     "rootDir": ".",
     "types": ["jest", "node"],
     "typeRoots": ["../../../packages/types", "./node_modules/@types"],
-    "strict": false,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "strict": false
   },
   "include": ["**/*.ts", "**/*.tsx", "../../../packages/types/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]

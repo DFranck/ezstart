@@ -8,9 +8,11 @@
     "start": "node --loader ts-node/esm index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@ezstart/api-core": "workspace:*",
     "node-fetch": "^3.3.2"
   },
   "keywords": [],
