@@ -27,6 +27,10 @@ export interface PDFReceiptData {
     city?: string
     country?: string
     postalCode?: string
+    contactPersonName?: string
+    contactPersonEmail?: string
+    contactPersonPhone?: string
+    contactPersonTitle?: string
   }
   company?: {
     companyName: string
@@ -289,6 +293,17 @@ export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => (
           <Text style={styles.addressTitle}>TO</Text>
           <View>
             <Text style={styles.addressText}>{data.client.clientName}</Text>
+            
+            {/* Contact Person Info - Priority over company contact info */}
+            {data.client.contactPersonName && (
+              <>
+                <Text style={styles.addressText}>{data.client.contactPersonName}</Text>
+                {data.client.contactPersonTitle && (
+                  <Text style={styles.addressText}>{data.client.contactPersonTitle}</Text>
+                )}
+              </>
+            )}
+            
             {data.client.address && (
               <Text style={styles.addressText}>{data.client.address}</Text>
             )}
@@ -297,11 +312,17 @@ export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => (
                 {[data.client.city, data.client.country].filter(Boolean).join(', ')}
               </Text>
             )}
-            {data.client.email && (
-              <Text style={styles.addressText}>{data.client.email}</Text>
+            
+            {/* Use contact person email/phone if available, otherwise use company info */}
+            {(data.client.contactPersonEmail || data.client.email) && (
+              <Text style={styles.addressText}>
+                {data.client.contactPersonEmail || data.client.email}
+              </Text>
             )}
-            {data.client.phone && (
-              <Text style={styles.addressText}>{data.client.phone}</Text>
+            {(data.client.contactPersonPhone || data.client.phone) && (
+              <Text style={styles.addressText}>
+                {data.client.contactPersonPhone || data.client.phone}
+              </Text>
             )}
           </View>
         </View>

@@ -1,6 +1,5 @@
 'use client'
 
-import { useUserStore } from '@/stores/useUserStore'
 import { Company, CreateCompany } from '@ez-billing/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
@@ -17,11 +16,10 @@ interface CompanyModalProps {
 }
 
 export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalProps) {
-  const { user } = useUserStore()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<CreateCompany>({
-    userId: user?._id || '',
+    userId: '',
     companyName: company?.companyName || '',
     email: company?.email || '',
     phone: company?.phone || '',
@@ -41,7 +39,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
   // Update form data when company changes
   useEffect(() => {
     setFormData({
-      userId: user?._id || '',
+      userId: '',
       companyName: company?.companyName || '',
       email: company?.email || '',
       phone: company?.phone || '',
@@ -54,13 +52,14 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
       website: company?.website || '',
     })
     setShowFullAddress(!!(company?.city || company?.postalCode || company?.country))
-  }, [company, user])
+  }, [company])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
+    const userId = getUserId()
+    if (!userId) return
 
-    const dataToSend = { ...formData, userId: user._id }
+    const dataToSend = { ...formData, userId }
 
     return runWithFeedback({
       action: async () => {

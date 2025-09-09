@@ -16,6 +16,11 @@ const clientSchema = new Schema(
     country: { type: String },
     companyRegistrationNumber: { type: String },
     taxNumber: { type: String },
+    // Contact person fields (for companies)
+    contactPersonName: { type: String },
+    contactPersonEmail: { type: String },
+    contactPersonPhone: { type: String },
+    contactPersonTitle: { type: String },
     website: { type: String },
     notes: { type: String },
     deletedAt: { type: String, default: null },

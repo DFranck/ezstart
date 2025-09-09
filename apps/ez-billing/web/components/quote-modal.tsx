@@ -1,6 +1,5 @@
 'use client'
 
-import { useUserStore } from '@/stores/useUserStore'
 import { BaseLineItem, Client, Company, CreateQuote, Currency, Quote } from '@ez-billing/types'
 import {
   Button,
@@ -54,12 +53,11 @@ export function QuoteModal({
   onSave,
   clientId,
 }: QuoteModalProps) {
-  const { user } = useUserStore()
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(false)
 
   const [formData, setFormData] = useState<CreateQuote>({
-    userId: '', // Will be set in handleSubmit
+    userId: '',
     clientId:
       quote?.clientId || clientId || (clients.length > 0 && clients[0] ? clients[0]._id : ''),
     companyId: quote?.companyId || '',
@@ -104,9 +102,8 @@ export function QuoteModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
 
-    const dataToSend = { ...formData, userId: user._id }
+    const dataToSend = { ...formData, userId: getUserId() }
 
     return runWithFeedback({
       action: async () => {

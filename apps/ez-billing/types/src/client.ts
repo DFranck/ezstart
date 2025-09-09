@@ -50,6 +50,17 @@ export const baseClientSchema = z.object({
     .optional()
     .describe('VAT / tax identification number'),
 
+  // Contact person fields (for companies)
+  contactPersonName: z.string().optional().describe('Name of the main contact person'),
+  contactPersonEmail: z
+    .string()
+    .email('Invalid email format')
+    .optional()
+    .or(z.literal(''))
+    .describe('Email of the contact person'),
+  contactPersonPhone: z.string().optional().describe('Phone of the contact person'),
+  contactPersonTitle: z.string().optional().describe('Job title of the contact person'),
+
   // Additional info
   website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
   
@@ -87,6 +98,16 @@ export const billingClientSchema = z.object({
     .string()
     .optional()
     .describe('VAT / tax identification number'),
+  // Contact person fields (for companies)
+  contactPersonName: z.string().optional().describe('Name of the main contact person'),
+  contactPersonEmail: z
+    .string()
+    .email('Invalid email format')
+    .optional()
+    .or(z.literal(''))
+    .describe('Email of the contact person'),
+  contactPersonPhone: z.string().optional().describe('Phone of the contact person'),
+  contactPersonTitle: z.string().optional().describe('Job title of the contact person'),
   website: z.string().url().optional().or(z.literal('')).describe('Website URL'),
   notes: z.string().optional().describe('Internal notes about the client'),
 });

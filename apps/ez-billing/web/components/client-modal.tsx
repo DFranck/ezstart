@@ -1,6 +1,5 @@
 'use client'
 
-import { useUserStore } from '@/stores/useUserStore'
 import { BillingClient, Client } from '@ez-billing/types'
 import {
   Button,
@@ -16,7 +15,7 @@ import {
   SelectValue,
 } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
@@ -29,11 +28,10 @@ interface ClientModalProps {
 }
 
 export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProps) {
-  const { user } = useUserStore()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<BillingClient>({
-    userId: client?.userId || user?._id || '',
+    userId: client?.userId || '',
     clientName: client?.clientName || '',
     email: client?.email || '',
     phone: client?.phone || '',
@@ -44,6 +42,10 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     country: client?.country || '',
     companyRegistrationNumber: client?.companyRegistrationNumber || '',
     taxNumber: client?.taxNumber || '',
+    contactPersonName: client?.contactPersonName || '',
+    contactPersonEmail: client?.contactPersonEmail || '',
+    contactPersonPhone: client?.contactPersonPhone || '',
+    contactPersonTitle: client?.contactPersonTitle || '',
     website: client?.website || '',
     notes: client?.notes || '',
   })
@@ -51,6 +53,30 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
   const [showFullAddress, setShowFullAddress] = useState(
     !!(client?.city || client?.postalCode || client?.country)
   )
+
+  // Update form data when client changes
+  useEffect(() => {
+    setFormData({
+      userId: client?.userId || '',
+      clientName: client?.clientName || '',
+      email: client?.email || '',
+      phone: client?.phone || '',
+      isCompany: client?.isCompany || false,
+      address: client?.address || '',
+      city: client?.city || '',
+      postalCode: client?.postalCode || '',
+      country: client?.country || '',
+      companyRegistrationNumber: client?.companyRegistrationNumber || '',
+      taxNumber: client?.taxNumber || '',
+      contactPersonName: client?.contactPersonName || '',
+      contactPersonEmail: client?.contactPersonEmail || '',
+      contactPersonPhone: client?.contactPersonPhone || '',
+      contactPersonTitle: client?.contactPersonTitle || '',
+      website: client?.website || '',
+      notes: client?.notes || '',
+    })
+    setShowFullAddress(!!(client?.city || client?.postalCode || client?.country))
+  }, [client])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -337,6 +363,71 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                   onChange={e => setFormData({ ...formData, taxNumber: e.target.value })}
                   className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
                   placeholder="TAX123456789"
+                />
+              </div>
+            </>
+          )}
+
+          {formData.isCompany && (
+            <>
+              <div className="lg:col-span-2 border-t border-cyan-200/50 pt-6 mt-2">
+                <div className="flex items-center mb-4">
+                  <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-cyan-500" />
+                  <h4 className="text-lg font-semibold text-gray-900">Contact Person</h4>
+                  <span className="ml-2 text-sm text-gray-500">(Optional)</span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-cyan-500" />
+                  Contact Name
+                </Label>
+                <Input
+                  value={formData.contactPersonName}
+                  onChange={e => setFormData({ ...formData, contactPersonName: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  placeholder="Jean-Baptiste"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                  <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-cyan-500" />
+                  Job Title
+                </Label>
+                <Input
+                  value={formData.contactPersonTitle}
+                  onChange={e => setFormData({ ...formData, contactPersonTitle: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  placeholder="Project Manager"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                  <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-cyan-500" />
+                  Contact Email
+                </Label>
+                <Input
+                  type="email"
+                  value={formData.contactPersonEmail}
+                  onChange={e => setFormData({ ...formData, contactPersonEmail: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  placeholder="jean-baptiste@company.com"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                  <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-cyan-500" />
+                  Contact Phone
+                </Label>
+                <Input
+                  value={formData.contactPersonPhone}
+                  onChange={e => setFormData({ ...formData, contactPersonPhone: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  placeholder="+33 6 12 34 56 78"
                 />
               </div>
             </>

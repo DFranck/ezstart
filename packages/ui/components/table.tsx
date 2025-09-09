@@ -13,11 +13,7 @@ Table.displayName = 'Table'
 
 export const TableHeader = forwardRef<HTMLTableSectionElement, ComponentProps<'thead'>>(
   ({ className, ...props }, ref) => (
-    <thead
-      ref={ref}
-      className={`bg-gray-50 ${className || ''}`}
-      {...props}
-    />
+    <thead ref={ref} className={`bg-gray-50 ${className || ''}`} {...props} />
   )
 )
 TableHeader.displayName = 'TableHeader'
@@ -35,11 +31,7 @@ TableBody.displayName = 'TableBody'
 
 export const TableRow = forwardRef<HTMLTableRowElement, ComponentProps<'tr'>>(
   ({ className, ...props }, ref) => (
-    <tr
-      ref={ref}
-      className={`hover:bg-gray-50 ${className || ''}`}
-      {...props}
-    />
+    <tr ref={ref} className={`hover:bg-gray-50 ${className || ''}`} {...props} />
   )
 )
 TableRow.displayName = 'TableRow'
@@ -48,7 +40,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, ComponentProps<'th'>>(
   ({ className, ...props }, ref) => (
     <th
       ref={ref}
-      className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${className || ''}`}
+      className={`px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${className || ''}`}
       {...props}
     />
   )
@@ -59,7 +51,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, ComponentProps<'td'>>(
   ({ className, ...props }, ref) => (
     <td
       ref={ref}
-      className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${className || ''}`}
+      className={`px-3 py-2 whitespace-nowrap text-sm text-gray-900 ${className || ''}`}
       {...props}
     />
   )

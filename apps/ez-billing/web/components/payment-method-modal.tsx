@@ -1,6 +1,5 @@
 'use client'
 
-import { useUserStore } from '@/stores/useUserStore'
 import { CreatePaymentMethod, PaymentMethod, PaymentMethodType } from '@ez-billing/types'
 import {
   Button,
@@ -45,11 +44,10 @@ export function PaymentMethodModal({
   paymentMethod,
   onSave,
 }: PaymentMethodModalProps) {
-  const { user } = useUserStore()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<CreatePaymentMethod>({
-    userId: user?._id || '',
+    userId: '',
     name: '',
     type: paymentMethod?.type || 'bank_transfer',
     bankName: paymentMethod?.bankName || '',
@@ -72,7 +70,7 @@ export function PaymentMethodModal({
       t => t.value === (paymentMethod?.type || 'bank_transfer')
     )
     setFormData({
-      userId: user?._id || '',
+      userId: '',
       name: selectedType?.label || '',
       type: paymentMethod?.type || 'bank_transfer',
       bankName: paymentMethod?.bankName || '',
@@ -88,17 +86,16 @@ export function PaymentMethodModal({
       instructions: paymentMethod?.instructions || '',
       isDefault: paymentMethod?.isDefault || false,
     })
-  }, [paymentMethod, user])
+  }, [paymentMethod])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
 
     // Auto-generate name from type
     const selectedType = paymentMethodTypes.find(t => t.value === formData.type)
     const dataToSend = {
       ...formData,
-      userId: user._id,
+      userId: getUserId(),
       name: selectedType?.label || formData.type,
     }
 
