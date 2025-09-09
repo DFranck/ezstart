@@ -3,14 +3,17 @@
 
 'use client'
 
+import DashboardSection from '@/components/DashboardSection'
+import { InvoiceCard, QuoteCard, ReceiptCard } from '@/components/DocumentCard'
 import { InvoiceModal } from '@/components/invoice-modal'
 import { MarkPaidModal } from '@/components/mark-paid-modal'
 import { QuoteModal } from '@/components/quote-modal'
+import StatsCard from '@/components/StatsCard'
 import { useBillingContext } from '@/contexts/billing-context'
 import { getBillingPermissions } from '@/utils/billing-permissions'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Icon, Modal, P } from '@ezstart/ui/components'
+import { Button, Card, CardContent, CardHeader, H1, Icon, Modal, P } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import {
@@ -205,22 +208,22 @@ const ClientDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center w-full">
+      <div className="min-h-screen  flex items-center justify-center w-full">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
             <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-full opacity-20 animate-pulse"></div>
           </div>
-          <p className="text-gray-600 font-medium">Loading client dashboard...</p>
+          <p className="text-foreground/60 font-medium">Loading client dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full overflow-x-hidden w-full">
+    <>
       {/* Header */}
-      <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
+      <div>
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
           <Link
             href="/dashboard"
@@ -233,9 +236,9 @@ const ClientDashboardPage = () => {
             Back to Dashboard
           </Link>
 
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 sm:gap-6">
+          <Card>
             {/* Client Info */}
-            <div className="flex-1">
+            <CardHeader className="flex-1">
               <div className="flex items-center space-x-3 sm:space-x-4 mb-4">
                 <div
                   className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
@@ -250,9 +253,7 @@ const ClientDashboardPage = () => {
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {client?.clientName}
-                  </h1>
+                  <H1 size={'h3'}>{client?.clientName}</H1>
                   <div className="flex items-center space-x-2 mt-1">
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -274,8 +275,8 @@ const ClientDashboardPage = () => {
               {/* Contact Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {client?.email && (
-                  <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                    <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                    <Icon name="lucide:Mail" className="w-4 h-4 mr-2 " />
                     <a
                       href={`mailto:${client.email}`}
                       className="hover:text-indigo-600 transition-colors"
@@ -286,8 +287,8 @@ const ClientDashboardPage = () => {
                 )}
 
                 {client?.phone && (
-                  <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                    <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                    <Icon name="lucide:Phone" className="w-4 h-4 mr-2 " />
                     <a
                       href={`tel:${client.phone}`}
                       className="hover:text-indigo-600 transition-colors"
@@ -298,8 +299,8 @@ const ClientDashboardPage = () => {
                 )}
 
                 {client?.address && (
-                  <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                    <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-gray-400" />
+                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                    <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 " />
                     <P>
                       {client.address && <span>{client.address}</span>}
                       {client.city && client.country && (
@@ -311,10 +312,10 @@ const ClientDashboardPage = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </CardHeader>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <Button
                 onClick={handleCreateQuote}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
@@ -329,435 +330,165 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
                 <span className="ml-2 sm:ml-0">New Invoice</span>
               </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
       {/* Body */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 w-full">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full">
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
-            <div className="flex items-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:DollarSign" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  ${totalRevenue.toFixed(2)}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">Total Revenue</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
-            <div className="flex items-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:Clock" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  ${pendingAmount.toFixed(2)}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">Pending</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
-            <div className="flex items-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:FileEdit" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  {clientInvoices.length}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">Invoices</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg">
-            <div className="flex items-center">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
-                <Icon name="lucide:FileText" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  {clientQuotes.length}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">Quotes</p>
-              </div>
-            </div>
-          </div>
+          <StatsCard
+            title="Total Revenue"
+            value={`$${totalRevenue.toFixed(2)}`}
+            icon="lucide:DollarSign"
+            iconGradient="bg-gradient-to-r from-green-400 to-emerald-400"
+          />
+          <StatsCard
+            title="Pending"
+            value={`$${pendingAmount.toFixed(2)}`}
+            icon="lucide:Clock"
+            iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
+          />
+          <StatsCard
+            title="Invoices"
+            value={clientInvoices.length.toString()}
+            icon="lucide:FileEdit"
+            iconGradient="bg-gradient-to-r from-blue-400 to-indigo-400"
+          />
+          <StatsCard
+            title="Quotes"
+            value={clientQuotes.length.toString()}
+            icon="lucide:FileText"
+            iconGradient="bg-gradient-to-r from-purple-400 to-pink-400"
+          />
         </div>
 
         {/* Invoices */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-6 sm:mb-8">
-          <div className="p-4 sm:p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:FileEdit" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">Invoices</h2>
-                  <p className="text-sm text-gray-500">{clientInvoices.length} total invoices</p>
-                </div>
-              </div>
-              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                {clientInvoices.length}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            {clientInvoices.length > 0 ? (
+        <DashboardSection
+          title="Invoices"
+          description={`${clientInvoices.length} total invoices`}
+          icon="lucide:FileEdit"
+          iconGradient="bg-gradient-to-r from-blue-500 to-indigo-500"
+          onAdd={handleCreateInvoice}
+          addButtonText="Create Invoice"
+          addButtonIcon="lucide:Plus"
+          addButtonGradient="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+          isEmpty={clientInvoices.length === 0}
+          emptyState={{
+            icon: 'lucide:FileEdit',
+            iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-500',
+            title: 'No invoices yet',
+            description: 'Create your first invoice to get started',
+            buttonText: 'Create First Invoice'
+          }}
+        >
+          {clientInvoices.length > 0 && (
               <div className="space-y-4">
                 {clientInvoices.map(invoice => {
                   const permissions = getBillingPermissions(invoice, 'invoice')
                   return (
-                    <div
+                    <InvoiceCard
                       key={invoice._id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => {
-                        openPreview('invoice', invoice)
-                        console.log('clicked')
-                      }}
-                      onKeyDown={e =>
-                        (e.key === 'Enter' || e.key === ' ') && openPreview('invoice', invoice)
-                      }
-                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center space-x-2 sm:space-x-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                            <Icon
-                              name="lucide:FileEdit"
-                              className="w-5 h-5 sm:w-6 sm:h-6 text-white"
-                            />
-                          </div>
-                          <div>
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                              #{invoice.documentNumber}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-2 sm:space-x-4 sm:gap-0 mt-1">
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  invoice.status === 'paid'
-                                    ? 'bg-green-100 text-green-800'
-                                    : invoice.status === 'sent'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                }`}
-                              >
-                                {invoice.status}
-                              </span>
-                              <span className="text-xs sm:text-sm text-gray-500">
-                                {new Date(invoice.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0">
-                          <div className="text-left sm:text-right">
-                            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                              ${invoice.total} {invoice.currency}
-                            </p>
-                          </div>
-
-                          {/* Action buttons: stop propagation so they don't open preview */}
-                          <div
-                            className="flex flex-wrap gap-2 justify-start sm:justify-end"
-                            onClick={e => e.stopPropagation()}
-                            onKeyDown={e => e.stopPropagation()}
-                          >
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={e => handleEditInvoice(invoice, e)}
-                              disabled={!permissions.canEdit}
-                              title={!permissions.canEdit ? permissions.reason : undefined}
-                              className={cn('hover:bg-gray-50', { hidden: !permissions.canEdit })}
-                            >
-                              <Icon name="lucide:Edit" className="w-4 h-4" />
-                            </Button>
-                            {permissions.canSend && (
-                              <Button
-                                size="sm"
-                                onClick={e => handleSendInvoice(invoice, e)}
-                                className="bg-blue-500 hover:bg-blue-600 text-white"
-                              >
-                                <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
-                                <span className="hidden xs:inline sm:hidden md:inline">Send</span>
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={e => handleDownloadInvoice(invoice, e)}
-                              className="hover:bg-gray-50"
-                            >
-                              <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
-                              <span className="hidden xs:inline sm:hidden md:inline">Download</span>
-                            </Button>
-                            {permissions.canMarkAsPaid && (
-                              <Button
-                                size="sm"
-                                onClick={e => handleMarkPaid(invoice, e)}
-                                className="bg-green-500 hover:bg-green-600 text-white"
-                              >
-                                <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
-                                <span className="hidden xs:inline sm:hidden md:inline">
-                                  Mark Paid
-                                </span>
-                                <span className="inline xs:hidden sm:inline md:hidden">Paid</span>
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      documentNumber={invoice.documentNumber}
+                      status={invoice.status}
+                      createdAt={invoice.createdAt}
+                      total={invoice.total}
+                      currency={invoice.currency}
+                      permissions={permissions}
+                      onClick={() => openPreview('invoice', invoice)}
+                      onEdit={e => handleEditInvoice(invoice, e)}
+                      onSend={e => handleSendInvoice(invoice, e)}
+                      onDownload={e => handleDownloadInvoice(invoice, e)}
+                      onMarkPaid={e => handleMarkPaid(invoice, e)}
+                    />
                   )
                 })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon name="lucide:FileEdit" className="w-10 h-10 text-blue-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No invoices yet</h3>
-                <p className="text-gray-500 mb-6">Create your first invoice to get started</p>
-                <Button
-                  onClick={handleCreateInvoice}
-                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium px-6 py-3 rounded-xl"
-                >
-                  <Icon name="lucide:FileEdit" className="w-4 h-4 mr-2" />
-                  Create First Invoice
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </DashboardSection>
 
         {/* Quotes */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-6 sm:mb-8">
-          <div className="p-4 sm:p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:FileText" className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Quotes</h2>
-                  <p className="text-sm text-gray-500">{clientQuotes.length} total quotes</p>
-                </div>
-              </div>
-              <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                {clientQuotes.length}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-6">
-            {clientQuotes.length > 0 ? (
+        <DashboardSection
+          title="Quotes"
+          description={`${clientQuotes.length} total quotes`}
+          icon="lucide:FileText"
+          iconGradient="bg-gradient-to-r from-green-500 to-emerald-500"
+          onAdd={handleCreateQuote}
+          addButtonText="Create Quote"
+          addButtonIcon="lucide:Plus"
+          addButtonGradient="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+          isEmpty={clientQuotes.length === 0}
+          emptyState={{
+            icon: 'lucide:FileText',
+            iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-500',
+            title: 'No quotes yet',
+            description: 'Create your first quote to get started',
+            buttonText: 'Create First Quote'
+          }}
+        >
+          {clientQuotes.length > 0 && (
               <div className="space-y-4">
                 {clientQuotes.map(quote => {
                   const permissions = getBillingPermissions(quote, 'quote')
                   return (
-                    <div
+                    <QuoteCard
                       key={quote._id}
-                      role="button"
-                      tabIndex={0}
+                      documentNumber={quote.documentNumber}
+                      status={quote.status}
+                      createdAt={quote.createdAt}
+                      total={quote.total}
+                      currency={quote.currency}
+                      validUntil={quote.validUntil}
+                      permissions={permissions}
                       onClick={() => openPreview('quote', quote)}
-                      onKeyDown={e =>
-                        (e.key === 'Enter' || e.key === ' ') && openPreview('quote', quote)
-                      }
-                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-emerald-300"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
-                            <Icon name="lucide:FileText" className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              #{quote.documentNumber}
-                            </h3>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  quote.status === 'accepted'
-                                    ? 'bg-green-100 text-green-800'
-                                    : quote.status === 'rejected'
-                                      ? 'bg-red-100 text-red-800'
-                                      : quote.status === 'sent'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-gray-100 text-gray-800'
-                                }`}
-                              >
-                                {quote.status}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                {new Date(quote.createdAt).toLocaleDateString()}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                Valid until:{' '}
-                                {quote.validUntil
-                                  ? new Date(quote.validUntil).toLocaleDateString()
-                                  : '-'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">
-                              ${quote.total} {quote.currency}
-                            </p>
-                          </div>
-
-                          <div
-                            className="flex space-x-2"
-                            onClick={e => e.stopPropagation()}
-                            onKeyDown={e => e.stopPropagation()}
-                          >
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={e => handleEditQuote(quote, e)}
-                              disabled={!permissions.canEdit}
-                              title={!permissions.canEdit ? permissions.reason : undefined}
-                              className="hover:bg-gray-50"
-                            >
-                              <Icon name="lucide:Edit" className="w-4 h-4" />
-                            </Button>
-                            {permissions.canConvertToInvoice && (
-                              <Button
-                                size="sm"
-                                onClick={e => handleConvertToInvoice(quote, e)}
-                                className="bg-blue-500 hover:bg-blue-600 text-white"
-                              >
-                                <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-1" />
-                                Invoice
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      onEdit={e => handleEditQuote(quote, e)}
+                      onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
+                    />
                   )
                 })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon name="lucide:FileText" className="w-10 h-10 text-green-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No quotes yet</h3>
-                <p className="text-gray-500 mb-6">Create your first quote to get started</p>
-                <Button
-                  onClick={handleCreateQuote}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-6 py-3 rounded-xl"
-                >
-                  <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                  Create First Quote
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </DashboardSection>
 
         {/* Receipts */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Icon name="lucide:Receipt" className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Receipts</h2>
-                  <p className="text-sm text-gray-500">{clientReceipts.length} total receipts</p>
-                </div>
-              </div>
-              <span className="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
-                {clientReceipts.length}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-6">
-            {clientReceipts.length > 0 ? (
+        <DashboardSection
+          title="Receipts"
+          description={`${clientReceipts.length} total receipts`}
+          icon="lucide:Receipt"
+          iconGradient="bg-gradient-to-r from-purple-500 to-pink-500"
+          onAdd={() => {}}
+          addButtonText=""
+          addButtonIcon="lucide:Plus"
+          addButtonGradient="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hidden"
+          isEmpty={clientReceipts.length === 0}
+          emptyState={{
+            icon: 'lucide:Receipt',
+            iconBg: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-500',
+            title: 'No receipts yet',
+            description: 'Receipts are generated automatically when invoices are paid',
+            buttonText: ''
+          }}
+          className="mb-0"
+        >
+          {clientReceipts.length > 0 && (
               <div className="space-y-4">
                 {clientReceipts.map(receipt => (
-                  <div
+                  <ReceiptCard
                     key={receipt._id}
-                    role="button"
-                    tabIndex={0}
+                    documentNumber={receipt.documentNumber}
+                    status={receipt.status}
+                    createdAt={receipt.createdAt}
+                    total={receipt.total}
+                    currency={receipt.currency}
+                    paymentDate={receipt.paymentDate}
                     onClick={() => openPreview('receipt', receipt)}
-                    onKeyDown={e =>
-                      (e.key === 'Enter' || e.key === ' ') && openPreview('receipt', receipt)
-                    }
-                    className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-fuchsia-300"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
-                          <Icon name="lucide:Receipt" className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            #{receipt.documentNumber}
-                          </h3>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                receipt.status === 'refunded'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-green-100 text-green-800'
-                              }`}
-                            >
-                              {receipt.status}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              Payment:{' '}
-                              {receipt.paymentDate
-                                ? new Date(receipt.paymentDate).toLocaleDateString()
-                                : '-'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${receipt.total} {receipt.currency}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  />
                 ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon name="lucide:Receipt" className="w-10 h-10 text-purple-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No receipts yet</h3>
-                <p className="text-gray-500">
-                  Receipts are generated automatically when invoices are paid
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </DashboardSection>
       </div>
 
       {/* CRUD Modals */}
@@ -797,7 +528,7 @@ const ClientDashboardPage = () => {
         doc={preview.doc}
         onClose={closePreview}
       />
-    </div>
+    </>
   )
 }
 
@@ -1111,7 +842,7 @@ function PreviewPdfModal({
                   ? 'lucide:FileText'
                   : 'lucide:Receipt'
             }
-            className="w-5 h-5 mr-2 text-gray-600"
+            className="w-5 h-5 mr-2 text-foreground/60"
           />
           <span className="font-semibold">{title}</span>
         </>
@@ -1172,7 +903,7 @@ function PreviewPdfModal({
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {isGeneratingPreview ? 'Generating PDF Preview...' : 'Instant PDF Generation'}
             </h3>
-            <p className="text-gray-600 mb-6 max-w-md">
+            <p className="text-foreground/60 mb-6 max-w-md">
               {isGeneratingPreview
                 ? 'Please wait while we generate your PDF preview...'
                 : `Click "Refresh Preview" to generate and preview your ${kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt'} PDF.`}

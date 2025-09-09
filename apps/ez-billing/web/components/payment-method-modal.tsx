@@ -15,9 +15,8 @@ import {
   SelectValue,
   TextArea,
 } from '@ezstart/ui/components'
-import { runWithFeedback } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
-import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
@@ -150,39 +149,51 @@ export function PaymentMethodModal({
         return (
           <>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Bank Name</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-green-500" />
+                Bank Name
+              </Label>
               <Input
                 value={formData.bankName || ''}
                 onChange={e => setFormData({ ...formData, bankName: e.target.value })}
                 placeholder="JPMorgan Chase, BNP Paribas..."
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Account Number</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-green-500" />
+                Account Number
+              </Label>
               <Input
                 value={formData.accountNumber || ''}
                 onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
                 placeholder="1234567890"
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">IBAN</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-green-500" />
+                IBAN
+              </Label>
               <Input
                 value={formData.iban || ''}
                 onChange={e => setFormData({ ...formData, iban: e.target.value })}
                 placeholder="FR14 2004 1010 0505 0001 3M02 606"
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">SWIFT/BIC Code</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-green-500" />
+                SWIFT/BIC Code
+              </Label>
               <Input
                 value={formData.swift || ''}
                 onChange={e => setFormData({ ...formData, swift: e.target.value })}
                 placeholder="BNPAFRPP"
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
           </>
@@ -191,33 +202,40 @@ export function PaymentMethodModal({
       case 'crypto_wallet':
         return (
           <>
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="lg:col-span-2">
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-green-500" />
                 Wallet Address *
               </Label>
               <Input
                 value={formData.walletAddress || ''}
                 onChange={e => setFormData({ ...formData, walletAddress: e.target.value })}
                 placeholder="cosmos1abc123def456ghi789jkl012mno345pqr678stu"
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl font-mono text-sm"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Network</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-green-500" />
+                Network
+              </Label>
               <Input
                 value={formData.network || ''}
                 onChange={e => setFormData({ ...formData, network: e.target.value })}
                 placeholder="Cosmos Hub, Ethereum, Bitcoin..."
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">Currency/Token</Label>
+              <Label className="text-sm font-medium mb-3 block flex items-center">
+                <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-green-500" />
+                Currency/Token
+              </Label>
               <Input
                 value={formData.currency || ''}
                 onChange={e => setFormData({ ...formData, currency: e.target.value })}
                 placeholder="USDC, ETH, BTC, ATOM..."
-                className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
           </>
@@ -227,28 +245,39 @@ export function PaymentMethodModal({
       case 'wise':
       case 'revolut':
         return (
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">Email Address</Label>
-            <Input
-              type="email"
-              value={formData.email || ''}
-              onChange={e => setFormData({ ...formData, email: e.target.value })}
-              placeholder="your.email@example.com"
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
-            />
+          <div className="lg:col-span-2">
+            <Label className="text-sm font-medium mb-3 block flex items-center">
+              <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-green-500" />
+              Email Address
+            </Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Icon name="lucide:Mail" className="w-5 h-5 text-foreground/60 z-10" />
+              </div>
+              <Input
+                type="email"
+                value={formData.email || ''}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                placeholder="your.email@example.com"
+                className="w-full pl-12 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              />
+            </div>
           </div>
         )
 
       default:
         return (
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">Account Details</Label>
+          <div className="lg:col-span-2">
+            <Label className="text-sm font-medium mb-3 block flex items-center">
+              <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-green-500" />
+              Account Details
+            </Label>
             <TextArea
               value={formData.instructions || ''}
               onChange={e => setFormData({ ...formData, instructions: e.target.value })}
               placeholder="Enter account details, instructions, or any relevant information..."
               rows={3}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+              className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
             />
           </div>
         )
@@ -262,12 +291,12 @@ export function PaymentMethodModal({
       title={paymentMethod ? 'Edit Payment Method' : 'Add Payment Method'}
       description="Configure how you want to receive payments from your clients"
       footer={
-        <div className="flex gap-3 justify-end bg-white/70 backdrop-blur-sm border-t border-white/20 p-6 -m-6 mt-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80"
+            className="backdrop-blur-sm hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
             Cancel
@@ -277,7 +306,7 @@ export function PaymentMethodModal({
             type="submit"
             disabled={formData.type === 'crypto_wallet' && !formData.walletAddress}
             form="payment-method-form"
-            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={paymentMethod ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {paymentMethod ? 'Update' : 'Add'} Payment Method
@@ -285,60 +314,63 @@ export function PaymentMethodModal({
         </div>
       }
     >
-      <div className="bg-gradient-to-br from-green-50/50 via-white to-emerald-50/50 rounded-2xl p-6 border border-white/20">
-        <form id="payment-method-form" onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
-              <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-green-500" />
-              Payment Type *
-            </Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value: PaymentMethodType) =>
-                setFormData({ ...formData, type: value })
-              }
-            >
-              <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethodTypes.map(type => (
-                  <SelectItem key={type.value} value={type.value}>
-                    <div className="flex items-center">
-                      <Icon name={type.icon} className="w-4 h-4 mr-2 text-green-500" />
-                      {type.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <form
+        id="payment-method-form"
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6 m-1"
+      >
+        <div className="lg:col-span-2">
+          <Label className="text-sm font-medium mb-3 flex items-center">
+            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-green-500" />
+            Payment Type *
+          </Label>
+          <Select
+            value={formData.type}
+            onValueChange={(value: PaymentMethodType) => setFormData({ ...formData, type: value })}
+          >
+            <SelectTrigger className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {paymentMethodTypes.map(type => (
+                <SelectItem key={type.value} value={type.value}>
+                  <div className="flex items-center">
+                    <Icon name={type.icon} className="w-4 h-4 mr-2 text-green-500" />
+                    {type.label}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Icon
-                name={selectedType?.icon || 'lucide:Settings'}
-                className="w-5 h-5 mr-2 text-green-500"
-              />
-              {selectedType?.label} Details
-            </h4>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">{renderFieldsForType()}</div>
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">
-              Additional Instructions
-            </Label>
-            <TextArea
-              value={formData.instructions || ''}
-              onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-              placeholder="Any special instructions for payments..."
-              rows={2}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl"
+        <div className="lg:col-span-2 border-t border-green-200/50 pt-6 mt-2">
+          <div className="flex items-center mb-4">
+            <Icon
+              name={selectedType?.icon || 'lucide:Settings'}
+              className="w-5 h-5 mr-2 text-green-500"
             />
+            <h4 className="text-lg font-semibold ">{selectedType?.label} Details</h4>
           </div>
+        </div>
+        {renderFieldsForType()}
 
-          <div className="bg-green-50/50 backdrop-blur-sm rounded-xl p-4 border border-green-200/30">
+        <div className="lg:col-span-2">
+          <Label className="text-sm font-medium mb-3 block flex items-center">
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-green-500" />
+            Additional Instructions
+          </Label>
+          <TextArea
+            value={formData.instructions || ''}
+            onChange={e => setFormData({ ...formData, instructions: e.target.value })}
+            placeholder="Any special instructions for payments..."
+            rows={2}
+            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[80px] resize-none"
+          />
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="p-4 border rounded-md">
             <div className="flex items-center space-x-3">
               <Checkbox
                 id="isDefault"
@@ -350,15 +382,15 @@ export function PaymentMethodModal({
               />
               <Label
                 htmlFor="isDefault"
-                className="text-sm font-medium text-gray-700 cursor-pointer"
+                className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-green-500 inline" />
+                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-green-500" />
                 Make this my default payment method
               </Label>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </Modal>
   )
 }

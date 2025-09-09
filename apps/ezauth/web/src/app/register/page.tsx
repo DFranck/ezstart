@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
   Span,
+  ThemeSwitcher,
 } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -18,7 +19,10 @@ function RegisterContent() {
   const app = searchParams.get('app') || 'ezstart'
 
   return (
-    <Card className="max-w-md w-full">
+    <Card className="max-w-md w-full relative">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription>

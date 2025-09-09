@@ -30,7 +30,6 @@ export function WebProviders({
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
-      enableColorScheme
     >
       <AuthProvider appName={appName}>
         {messages && locale && timeZone ? (
@@ -49,7 +48,7 @@ export function WebProviders({
   )
 }
 
-// Pour les apps sans i18n
+// Pour les apps sans i18n avec sync theme depuis URL
 export function SimpleWebProviders({
   children,
   appName,
@@ -58,8 +57,45 @@ export function SimpleWebProviders({
   appName: string
 }) {
   return (
-    <WebProviders appName={appName}>
+    <SimpleThemeProvider>
+      <AuthProvider appName={appName}>
+        {children}
+      </AuthProvider>
+    </SimpleThemeProvider>
+  )
+}
+
+// Composant séparé pour gérer le theme sync une seule fois
+function SimpleThemeProvider({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+    
+    // Sync theme depuis URL une seule fois au mount
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const themeParam = urlParams.get('theme')
+      if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
+        // Force le theme depuis l'URL sans affecter le defaultTheme
+        document.documentElement.setAttribute('data-theme', themeParam)
+        if (themeParam === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else if (themeParam === 'light') {
+          document.documentElement.classList.remove('dark')
+        }
+      }
+    }
+  }, [])
+
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       {children}
-    </WebProviders>
+    </NextThemesProvider>
   )
 }

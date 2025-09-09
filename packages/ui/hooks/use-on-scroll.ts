@@ -1,28 +1,28 @@
-'use client';
-import { useEffect, useState } from 'react';
+'use client'
+import { useEffect, useState } from 'react'
 
 export function useOnScroll(throttleMs = 100): number {
-  const [scrollY, setScrollY] = useState(0);
+  const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return
 
-    let timeout: ReturnType<typeof setTimeout> | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null
 
     const handleScroll = () => {
-      if (timeout) return;
+      if (timeout) return
       timeout = setTimeout(() => {
-        setScrollY(window.scrollY);
-        timeout = null;
-      }, throttleMs);
-    };
+        setScrollY(window.scrollY)
+        timeout = null
+      }, throttleMs)
+    }
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll)
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [throttleMs]);
+      window.removeEventListener('scroll', handleScroll)
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [throttleMs])
 
-  return scrollY;
+  return scrollY
 }

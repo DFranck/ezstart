@@ -1,8 +1,8 @@
+import { SimpleWebProviders } from '@/providers/web-providers'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
-import { AuthWrapper } from './auth-wrapper'
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -16,14 +16,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body
-        className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50`}
-      >
-        <AuthWrapper>{children}</AuthWrapper>
+      <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
+        <SimpleWebProviders appName="ez-billing">{children}</SimpleWebProviders>
         <Toaster />
       </body>
     </html>

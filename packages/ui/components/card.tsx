@@ -10,7 +10,8 @@ const cardVariants = cva(
       variant: {
         default: 'bg-card',
         ghost: 'bg-transparent border-transparent shadow-none',
-        floating: 'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg',
+        floating:
+          'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg shadow-foreground/10',
         dark: 'bg-foreground border-foreground shadow-2xl text-background',
         premium:
           'bg-gradient-to-r from-indigo-50 via-white to-cyan-50 border-indigo-200/30 shadow-xl',

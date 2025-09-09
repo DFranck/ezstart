@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center w-full">
+      <div className="min-h-screen  flex items-center justify-center w-full">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
   const totalDeleted = Object.values(deletedItems).reduce((sum, items) => sum + items.length, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full">
+    <div className="min-h-screen  w-full">
       {/* Header with glass effect */}
       <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

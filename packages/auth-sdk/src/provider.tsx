@@ -69,8 +69,8 @@ export function useAuth() {
   const { client } = useAuthContext()
   const store = useAuthStore()
 
-  const login = () => {
-    client.redirectToLogin()
+  const login = (additionalParams?: Record<string, string>) => {
+    client.redirectToLogin(additionalParams)
   }
 
   const register = () => {
