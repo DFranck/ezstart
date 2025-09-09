@@ -50,6 +50,7 @@ export const baseBillingDocSchema = z.object({
   notes: z.string().optional().describe('Additional notes for the billing document'),
   terms: z.string().optional().describe('Payment terms and conditions'),
   taxRate: z.number().min(0).max(100).optional().describe('Tax rate percentage (0-100)'),
+  paymentMethodId: z.string().optional().describe('Payment method identifier for this invoice'),
 });
 export type BaseBillingDoc = ZodInfer<typeof baseBillingDocSchema>;
 

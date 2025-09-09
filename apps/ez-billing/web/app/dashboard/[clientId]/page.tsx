@@ -7,12 +7,17 @@ import { InvoiceModal } from '@/components/invoice-modal'
 import { MarkPaidModal } from '@/components/mark-paid-modal'
 import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
-import { useAuth } from '@ezstart/auth-sdk'
 import { getBillingPermissions } from '@/utils/billing-permissions'
-import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
+import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
-import { InvoicePDF, type PDFInvoiceData, ReceiptPDF, type PDFReceiptData } from '@ezstart/ui/templates'
+import {
+  InvoicePDF,
+  ReceiptPDF,
+  type PDFInvoiceData,
+  type PDFReceiptData,
+} from '@ezstart/ui/templates'
 import Link from 'next/link'
 import { redirect, useParams } from 'next/navigation'
 import React, { useState } from 'react'
@@ -105,6 +110,72 @@ const ClientDashboardPage = () => {
     setIsMarkPaidModalOpen(true)
   }
 
+  const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    
+    try {
+      const { callApi } = await import('@ezstart/ui/utils')
+      const { getUserId } = await import('../../../utils/get-user-id')
+      
+      const response = await callApi(`/invoices/${invoice._id}`, {
+        method: 'PATCH',
+        userId: getUserId(),
+        body: {
+          status: 'sent'
+        }
+      })
+
+      if (response.ok) {
+        // Refresh data
+        window.location.reload()
+      } else {
+        alert('Failed to send invoice')
+      }
+    } catch (error) {
+      console.error('Error sending invoice:', error)
+      alert('Error sending invoice')
+    }
+  }
+
+  const handleDownloadInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+    
+    try {
+      const client = clients.find(c => c._id === invoice.clientId)
+      const company = invoice.companyId ? companies.find(c => c._id === invoice.companyId) : undefined
+      
+      if (!client) {
+        alert('Client not found')
+        return
+      }
+
+      const pdfData = convertToInvoicePDFData(invoice, client, company, paymentMethods)
+      const fileName = invoice.documentNumber || invoice._id
+      
+      const { pdf } = await import('@react-pdf/renderer')
+      const { InvoicePDF } = await import('@ezstart/ui/templates')
+      
+      const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+      
+      // Create download link
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${fileName}.pdf`
+      
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Cleanup
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading invoice:', error)
+      alert('Error downloading invoice')
+    }
+  }
+
   const handleConvertToInvoice = (quote: Quote, e?: React.MouseEvent) => {
     e?.stopPropagation() // ⬅️ prevent opening preview
     const invoiceData = {
@@ -176,7 +247,9 @@ const ClientDashboardPage = () => {
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{client?.clientName}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                    {client?.clientName}
+                  </h1>
                   <div className="flex items-center space-x-2 mt-1">
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -263,7 +336,9 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:DollarSign" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">${totalRevenue.toFixed(2)}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                  ${totalRevenue.toFixed(2)}
+                </p>
                 <p className="text-xs sm:text-sm text-gray-500">Total Revenue</p>
               </div>
             </div>
@@ -275,7 +350,9 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:Clock" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">${pendingAmount.toFixed(2)}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                  ${pendingAmount.toFixed(2)}
+                </p>
                 <p className="text-xs sm:text-sm text-gray-500">Pending</p>
               </div>
             </div>
@@ -287,7 +364,9 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:FileEdit" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{clientInvoices.length}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                  {clientInvoices.length}
+                </p>
                 <p className="text-xs sm:text-sm text-gray-500">Invoices</p>
               </div>
             </div>
@@ -299,7 +378,9 @@ const ClientDashboardPage = () => {
                 <Icon name="lucide:FileText" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{clientQuotes.length}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                  {clientQuotes.length}
+                </p>
                 <p className="text-xs sm:text-sm text-gray-500">Quotes</p>
               </div>
             </div>
@@ -347,7 +428,10 @@ const ClientDashboardPage = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center space-x-2 sm:space-x-4">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center">
-                            <Icon name="lucide:FileEdit" className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            <Icon
+                              name="lucide:FileEdit"
+                              className="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                            />
                           </div>
                           <div>
                             <h3 className="text-base sm:text-lg font-semibold text-gray-900">
@@ -395,6 +479,29 @@ const ClientDashboardPage = () => {
                             >
                               <Icon name="lucide:Edit" className="w-4 h-4" />
                             </Button>
+                            {permissions.canSend && (
+                              <Button
+                                size="sm"
+                                onClick={e => handleSendInvoice(invoice, e)}
+                                className="bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
+                                <span className="hidden xs:inline sm:hidden md:inline">
+                                  Send
+                                </span>
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={e => handleDownloadInvoice(invoice, e)}
+                              className="hover:bg-gray-50"
+                            >
+                              <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+                              <span className="hidden xs:inline sm:hidden md:inline">
+                                Download
+                              </span>
+                            </Button>
                             {permissions.canMarkAsPaid && (
                               <Button
                                 size="sm"
@@ -402,7 +509,9 @@ const ClientDashboardPage = () => {
                                 className="bg-green-500 hover:bg-green-600 text-white"
                               >
                                 <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
-                                <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
+                                <span className="hidden xs:inline sm:hidden md:inline">
+                                  Mark Paid
+                                </span>
                                 <span className="inline xs:hidden sm:inline md:hidden">Paid</span>
                               </Button>
                             )}
@@ -694,7 +803,8 @@ export default ClientDashboardPage
 function convertToInvoicePDFData(
   invoice: Invoice,
   client: Client,
-  company?: Company
+  company?: Company,
+  paymentMethods?: PaymentMethod[]
 ): PDFInvoiceData {
   return {
     documentNumber: invoice.documentNumber || invoice._id,
@@ -717,6 +827,10 @@ function convertToInvoicePDFData(
       address: client.address,
       city: client.city,
       country: client.country,
+      contactPersonName: client.contactPersonName,
+      contactPersonEmail: client.contactPersonEmail,
+      contactPersonPhone: client.contactPersonPhone,
+      contactPersonTitle: client.contactPersonTitle,
     },
     company: company
       ? {
@@ -730,6 +844,28 @@ function convertToInvoicePDFData(
       : undefined,
     notes: invoice.notes,
     terms: invoice.terms,
+    paymentDetails: invoice.paymentMethodId && paymentMethods 
+      ? (() => {
+          const paymentMethod = paymentMethods.find(pm => pm._id === invoice.paymentMethodId)
+          if (!paymentMethod) return undefined
+          
+          return {
+            methodName: paymentMethod.name,
+            type: paymentMethod.type,
+            walletAddress: paymentMethod.type === 'crypto_wallet' ? paymentMethod.walletAddress : undefined,
+            currency: paymentMethod.type === 'crypto_wallet' ? paymentMethod.currency : undefined,
+            network: paymentMethod.type === 'crypto_wallet' ? paymentMethod.network : undefined,
+            bankName: paymentMethod.type === 'bank_transfer' ? paymentMethod.bankName : undefined,
+            accountNumber: paymentMethod.type === 'bank_transfer' ? paymentMethod.accountNumber : undefined,
+            iban: paymentMethod.type === 'bank_transfer' ? paymentMethod.iban : undefined,
+            swift: paymentMethod.type === 'bank_transfer' ? paymentMethod.swift : undefined,
+            routingNumber: paymentMethod.type === 'bank_transfer' ? paymentMethod.routingNumber : undefined,
+            email: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type) ? paymentMethod.email : undefined,
+            username: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type) ? paymentMethod.username : undefined,
+            instructions: paymentMethod.instructions,
+          }
+        })()
+      : undefined,
   }
 }
 
@@ -760,6 +896,10 @@ function convertToReceiptPDFData(
       address: client.address,
       city: client.city,
       country: client.country,
+      contactPersonName: client.contactPersonName,
+      contactPersonEmail: client.contactPersonEmail,
+      contactPersonPhone: client.contactPersonPhone,
+      contactPersonTitle: client.contactPersonTitle,
     },
     company: company
       ? {
@@ -789,14 +929,20 @@ function PreviewPdfModal({
   doc?: PreviewDoc
 }) {
   const { downloadInvoicePDF, isGenerating } = useInvoicePDF()
-  const { clients, companies } = useBillingContext()
+  const { clients, companies, paymentMethods } = useBillingContext()
   const [pdfBlob, setPdfBlob] = useState<string | null>(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
 
   // ALL HOOKS MUST BE BEFORE ANY CONDITIONAL RETURNS
   // Générer le preview automatiquement à l'ouverture
   React.useEffect(() => {
-    if (isOpen && (kind === 'invoice' || kind === 'receipt') && !pdfBlob && !isGeneratingPreview && doc) {
+    if (
+      isOpen &&
+      (kind === 'invoice' || kind === 'receipt') &&
+      !pdfBlob &&
+      !isGeneratingPreview &&
+      doc
+    ) {
       const generatePreview = async () => {
         if (kind !== 'invoice' && kind !== 'receipt') {
           return
@@ -804,7 +950,9 @@ function PreviewPdfModal({
 
         const document = doc as Invoice | Receipt
         const client = clients.find(c => c._id === document.clientId)
-        const company = document.companyId ? companies.find(c => c._id === document.companyId) : undefined
+        const company = document.companyId
+          ? companies.find(c => c._id === document.companyId)
+          : undefined
 
         if (!client) return
 
@@ -812,15 +960,15 @@ function PreviewPdfModal({
         try {
           const { pdf } = await import('@react-pdf/renderer')
           let blob: Blob
-          
+
           if (kind === 'invoice') {
-            const pdfData = convertToInvoicePDFData(document as Invoice, client, company)
+            const pdfData = convertToInvoicePDFData(document as Invoice, client, company, paymentMethods)
             blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
           } else {
             const pdfData = convertToReceiptPDFData(document as Receipt, client, company)
             blob = await pdf(<ReceiptPDF data={pdfData} />).toBlob()
           }
-          
+
           const url = URL.createObjectURL(blob)
           setPdfBlob(url)
         } catch (error) {
@@ -831,7 +979,7 @@ function PreviewPdfModal({
       }
       generatePreview()
     }
-  }, [isOpen, kind, pdfBlob, isGeneratingPreview, doc, clients, companies])
+  }, [isOpen, kind, pdfBlob, isGeneratingPreview, doc, clients, companies, paymentMethods])
 
   if (!isOpen || !kind || !doc) return null
 
@@ -843,12 +991,14 @@ function PreviewPdfModal({
 
     const document = doc as Invoice | Receipt
     const client = clients.find(c => c._id === document.clientId)
-    const company = document.companyId ? companies.find(c => c._id === document.companyId) : undefined
+    const company = document.companyId
+      ? companies.find(c => c._id === document.companyId)
+      : undefined
 
     if (!client) return null
 
     if (kind === 'invoice') {
-      return convertToInvoicePDFData(document as Invoice, client, company)
+      return convertToInvoicePDFData(document as Invoice, client, company, paymentMethods)
     } else {
       return convertToReceiptPDFData(document as Receipt, client, company)
     }
@@ -870,13 +1020,13 @@ function PreviewPdfModal({
     try {
       const { pdf } = await import('@react-pdf/renderer')
       let blob: Blob
-      
+
       if (kind === 'invoice') {
         blob = await pdf(<InvoicePDF data={pdfData as PDFInvoiceData} />).toBlob()
       } else {
         blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
       }
-      
+
       const url = URL.createObjectURL(blob)
       setPdfBlob(url)
     } catch (error) {
@@ -886,7 +1036,6 @@ function PreviewPdfModal({
       setIsGeneratingPreview(false)
     }
   }
-
 
   const handleDownloadPDF = async () => {
     const pdfData = generatePDFData()
@@ -898,14 +1047,14 @@ function PreviewPdfModal({
     try {
       const document = doc as Invoice | Receipt
       const fileName = document.documentNumber || document._id
-      
+
       if (kind === 'invoice') {
         await downloadInvoicePDF(<InvoicePDF data={pdfData as PDFInvoiceData} />, fileName)
       } else {
         // For receipts, use the same download mechanism but with receipt template
         const { pdf } = await import('@react-pdf/renderer')
         const blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
-        
+
         // Create download link
         const url = URL.createObjectURL(blob)
         const link = window.document.createElement('a')
@@ -930,7 +1079,6 @@ function PreviewPdfModal({
     }
     onClose()
   }
-
 
   return (
     <Modal
@@ -958,20 +1106,8 @@ function PreviewPdfModal({
       }
       footer={
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs text-gray-500 truncate">{pdfUrl}</span>
+          {/* <span className="text-xs text-gray-500 truncate">{pdfUrl}</span> */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => window.open(pdfUrl, '_blank', 'noopener,noreferrer')}
-              className="hover:bg-gray-50"
-            >
-              <Icon name="lucide:ExternalLink" className="w-4 h-4 mr-2" />
-              Open in New Tab
-            </Button>
-            <Button variant="outline" onClick={() => window.print()} className="hover:bg-gray-50">
-              <Icon name="lucide:Printer" className="w-4 h-4 mr-2" />
-              Print
-            </Button>
             <Button
               variant="outline"
               onClick={handleGeneratePreview}
@@ -1001,19 +1137,15 @@ function PreviewPdfModal({
       className="max-w-[1100px] w-[98vw]"
     >
       {/* PDF container */}
-      <div className="rounded-lg border bg-white overflow-hidden">
+      <div className="">
         {pdfBlob ? (
           <iframe
             src={`${pdfBlob}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-            className="w-full"
-            style={{ minHeight: '70vh' }}
+            className="w-full h-[50vh]"
             title={`${title} – PDF preview`}
           />
         ) : (
-          <div
-            className="flex flex-col items-center justify-center p-12 text-center"
-            style={{ minHeight: '70vh' }}
-          >
+          <div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6">
               <Icon
                 name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:FileText'}
