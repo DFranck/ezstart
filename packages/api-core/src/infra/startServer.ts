@@ -47,6 +47,22 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
     if (registries.length > 0) console.log(`📖 Docs available at ${url}/docs`)
   })
 
+  // Graceful shutdown handling
+  const signals = ['SIGINT', 'SIGTERM'] as const
+  signals.forEach(signal => {
+    process.on(signal, () => {
+      console.log(`\n📴 Received ${signal}. Gracefully shutting down server...`)
+      server.close((err) => {
+        if (err) {
+          console.error('❌ Error during server shutdown:', err)
+          process.exit(1)
+        }
+        console.log('✅ Server closed successfully')
+        process.exit(0)
+      })
+    })
+  })
+
   if (onHttpServerReady) {
     onHttpServerReady(server)
   }

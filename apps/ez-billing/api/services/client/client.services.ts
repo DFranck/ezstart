@@ -19,7 +19,8 @@ export async function getClientByIdService(
   if (userId) {
     filter.userId = userId;
   }
-  return ClientModel.findOne(filter);
+  const doc = await ClientModel.findOne(filter);
+  return doc ? toApiObject(doc) : null;
 }
 
 export async function getClientsService(
@@ -86,5 +87,6 @@ export async function updateClientService(
   if (userId) {
     filter.userId = userId;
   }
-  return ClientModel.findOneAndUpdate(filter, data, { new: true });
+  const doc = await ClientModel.findOneAndUpdate(filter, data, { new: true });
+  return doc ? toApiObject(doc) : null;
 }
