@@ -124,6 +124,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -191,6 +197,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
@@ -426,6 +438,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.21(postcss@8.5.6)
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
       next:
         specifier: 15.5.2
         version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -454,6 +469,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -606,6 +627,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -658,6 +685,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
@@ -874,6 +907,12 @@ importers:
       '@workspace/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@workspace/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@workspace/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config

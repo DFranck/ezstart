@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./base.js",
-    "./base": "./base.js"
+    "./base": "./base.js",
+    "./base.js": "./base.js"
   },
   "files": [
     "base.js"
