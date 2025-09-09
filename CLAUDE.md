@@ -58,23 +58,35 @@
 - Types spécifiques EZ-Billing → `apps/ez-billing/types`
 - Composants UI réutilisables → `packages/ui` (si existe)
 
-### Configuration Standardisée des Apps Web
-- **Tailwind Config** : Toujours utiliser la config minimale standardisée :
-```js
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../packages/ui/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-}
-```
-- **Globals CSS** : Toujours importer le CSS du package UI :
-```css
-@import "@ezstart/ui/globals.css";
-```
-- **Dépendances** : Toujours ajouter `"@ezstart/ui": "workspace:*"` dans package.json
+## Configuration Standardisée - Maximum de Réutilisabilité ✅
+
+### Apps Web - Configuration 100% Centralisée
+Toutes les apps web (`ezauth/web`, `ez-billing/web`, `fengshui/web`, etc.) utilisent **exactement** la même configuration :
+
+- **Tailwind Config** : `tailwind.config.js` → `@workspace/tailwind-config/base.js`
+- **PostCSS Config** : `postcss.config.mjs` → `@ezstart/ui/postcss.config`
+- **ESLint Config** : `eslint.config.js` → `@workspace/eslint-config/next-js`
+- **CSS Globals** : `@import "@ezstart/ui/globals.css"`
+- **Scripts standardisés** : `lint`, `lint:fix`, `typecheck`
+- **Dépendances** : `"@ezstart/ui": "workspace:*"`
+
+### APIs - Configuration 100% Centralisée
+Toutes les APIs (`ezauth/api`, `ez-billing/api`, `monitor/api`, etc.) utilisent **exactement** la même configuration :
+
+- **TypeScript Config** : `tsconfig.json` → `@workspace/typescript-config/api.json`
+- **Base commune** : `@ezstart/api-core` pour infrastructure partagée
+- **Structure standardisée** : `outDir: "dist"`, `rootDir: "."`, includes/excludes identiques
+- **Types harmonisés** : `["node"]` + `["jest"]` selon les projets avec tests
+
+### Packages Centralisés de Configuration
+- `@workspace/tailwind-config` - Configs Tailwind partagées
+- `@workspace/eslint-config` - Règles ESLint partagées  
+- `@workspace/typescript-config` - Configs TypeScript partagées
+- `@ezstart/ui` - Composants, styles et configs CSS/PostCSS
+- `@ezstart/api-core` - Infrastructure API partagée
+
+### Propagation Automatique des Changements
+✨ **Toute modification** dans les packages centralisés se propage **automatiquement** à tous les projets. Une seule source de vérité pour l'ensemble du monorepo !
 
 ### Commandes Importantes
 - Build : `pnpm build`
