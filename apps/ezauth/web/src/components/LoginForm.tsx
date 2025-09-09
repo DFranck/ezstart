@@ -121,7 +121,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={loading} className="w-full" variant={"ezstart"}>
+        <Button type="submit" disabled={loading} className="w-full" variant={'ezstart'}>
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
