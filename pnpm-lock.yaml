@@ -700,6 +700,9 @@ importers:
 
   apps/monitor/api:
     dependencies:
+      '@ezstart/api-core':
+        specifier: workspace:*
+        version: link:../../../packages/api-core
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
