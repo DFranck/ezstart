@@ -1,3 +1,5 @@
+'use client'
+
 import { pdf, type DocumentProps } from '@react-pdf/renderer'
 import React, { useState } from 'react'
 
