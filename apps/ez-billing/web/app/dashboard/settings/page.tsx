@@ -1,10 +1,10 @@
 'use client'
 
-import { Button, Icon, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/ui/utils'
-import { getUserId } from '../../../utils/get-user-id'
 import { Client, Company, Invoice, Quote, Receipt } from '@ez-billing/types'
+import { Icon, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
+import { callApi } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
+import { getUserId } from '../../../utils/get-user-id'
 import { DeletedItemsManager } from './components/deleted-items-manager'
 
 export default function SettingsPage() {
@@ -48,10 +48,10 @@ export default function SettingsPage() {
 
   const handleRestore = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}/restore`, { 
-            method: 'POST',
-            userId: getUserId(),
-          })
+      await callApi(`/${type}/${id}/restore`, {
+        method: 'POST',
+        userId: getUserId(),
+      })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error restoring ${type}:`, error)
@@ -60,10 +60,10 @@ export default function SettingsPage() {
 
   const handleHardDelete = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}/hard-delete`, { 
-            method: 'DELETE',
-            userId: getUserId(),
-          })
+      await callApi(`/${type}/${id}/hard-delete`, {
+        method: 'DELETE',
+        userId: getUserId(),
+      })
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)
@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center w-full">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
   const totalDeleted = Object.values(deletedItems).reduce((sum, items) => sum + items.length, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full">
       {/* Header with glass effect */}
       <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -96,7 +96,9 @@ export default function SettingsPage() {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
                 Settings
               </h1>
-              <p className="text-gray-600 mt-1">Manage your account settings and recover deleted items</p>
+              <p className="text-gray-600 mt-1">
+                Manage your account settings and recover deleted items
+              </p>
             </div>
 
             {/* Quick Stats */}
@@ -120,14 +122,19 @@ export default function SettingsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="deleted-items" className="space-y-8">
           <TabsList className="bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg">
-            <TabsTrigger 
-              value="deleted-items" 
+            <TabsTrigger
+              value="deleted-items"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
             >
               <Icon name="lucide:Trash2" className="w-4 h-4 mr-2" />
-              Deleted Items {totalDeleted > 0 && <span className="ml-2 px-2 py-1 bg-red-500/20 text-red-700 rounded-full text-xs font-medium">({totalDeleted})</span>}
+              Deleted Items{' '}
+              {totalDeleted > 0 && (
+                <span className="ml-2 px-2 py-1 bg-red-500/20 text-red-700 rounded-full text-xs font-medium">
+                  ({totalDeleted})
+                </span>
+              )}
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="account"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
             >
@@ -145,7 +152,9 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">Recover Deleted Items</h2>
-                    <p className="text-sm text-gray-500">Items shown here have been deleted but can be restored or permanently removed</p>
+                    <p className="text-sm text-gray-500">
+                      Items shown here have been deleted but can be restored or permanently removed
+                    </p>
                   </div>
                 </div>
               </div>
@@ -157,8 +166,8 @@ export default function SettingsPage() {
                   type="clients"
                   getDisplayName={(item: Client) => item.clientName}
                   getDescription={(item: Client) => item.email || 'No email'}
-                  onRestore={(id) => handleRestore('clients', id)}
-                  onHardDelete={(id) => handleHardDelete('clients', id)}
+                  onRestore={id => handleRestore('clients', id)}
+                  onHardDelete={id => handleHardDelete('clients', id)}
                 />
 
                 <DeletedItemsManager
@@ -167,8 +176,8 @@ export default function SettingsPage() {
                   type="companies"
                   getDisplayName={(item: Company) => item.companyName}
                   getDescription={(item: Company) => item.email || 'No email'}
-                  onRestore={(id) => handleRestore('companies', id)}
-                  onHardDelete={(id) => handleHardDelete('companies', id)}
+                  onRestore={id => handleRestore('companies', id)}
+                  onHardDelete={id => handleHardDelete('companies', id)}
                 />
 
                 <DeletedItemsManager
@@ -177,8 +186,8 @@ export default function SettingsPage() {
                   type="quotes"
                   getDisplayName={(item: Quote) => item.documentNumber}
                   getDescription={(item: Quote) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={(id) => handleRestore('quotes', id)}
-                  onHardDelete={(id) => handleHardDelete('quotes', id)}
+                  onRestore={id => handleRestore('quotes', id)}
+                  onHardDelete={id => handleHardDelete('quotes', id)}
                 />
 
                 <DeletedItemsManager
@@ -187,8 +196,8 @@ export default function SettingsPage() {
                   type="invoices"
                   getDisplayName={(item: Invoice) => item.documentNumber}
                   getDescription={(item: Invoice) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={(id) => handleRestore('invoices', id)}
-                  onHardDelete={(id) => handleHardDelete('invoices', id)}
+                  onRestore={id => handleRestore('invoices', id)}
+                  onHardDelete={id => handleHardDelete('invoices', id)}
                 />
 
                 <DeletedItemsManager
@@ -197,8 +206,8 @@ export default function SettingsPage() {
                   type="receipts"
                   getDisplayName={(item: Receipt) => item.documentNumber}
                   getDescription={(item: Receipt) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={(id) => handleRestore('receipts', id)}
-                  onHardDelete={(id) => handleHardDelete('receipts', id)}
+                  onRestore={id => handleRestore('receipts', id)}
+                  onHardDelete={id => handleHardDelete('receipts', id)}
                 />
               </div>
             </div>
@@ -213,11 +222,13 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
-                    <p className="text-sm text-gray-500">Manage your account preferences and security</p>
+                    <p className="text-sm text-gray-500">
+                      Manage your account preferences and security
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <div className="text-center py-12">
                   <div className="w-20 h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">

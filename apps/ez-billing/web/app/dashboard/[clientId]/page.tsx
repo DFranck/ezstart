@@ -10,8 +10,9 @@ import { useBillingContext } from '@/contexts/billing-context'
 import { getBillingPermissions } from '@/utils/billing-permissions'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { Button, Icon, Modal, P } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
+import { cn } from '@ezstart/ui/lib'
 import {
   InvoicePDF,
   ReceiptPDF,
@@ -112,22 +113,22 @@ const ClientDashboardPage = () => {
 
   const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
     e?.stopPropagation() // ⬅️ prevent opening preview
-    
+
     try {
       const { callApi } = await import('@ezstart/ui/utils')
       const { getUserId } = await import('../../../utils/get-user-id')
-      
+
       const response = await callApi(`/invoices/${invoice._id}`, {
         method: 'PATCH',
         userId: getUserId(),
         body: {
-          status: 'sent'
-        }
+          status: 'sent',
+        },
       })
 
       if (response.ok) {
         // Refresh data
-        window.location.reload()
+        await refetchAll()
       } else {
         alert('Failed to send invoice')
       }
@@ -139,11 +140,13 @@ const ClientDashboardPage = () => {
 
   const handleDownloadInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
     e?.stopPropagation() // ⬅️ prevent opening preview
-    
+
     try {
       const client = clients.find(c => c._id === invoice.clientId)
-      const company = invoice.companyId ? companies.find(c => c._id === invoice.companyId) : undefined
-      
+      const company = invoice.companyId
+        ? companies.find(c => c._id === invoice.companyId)
+        : undefined
+
       if (!client) {
         alert('Client not found')
         return
@@ -151,23 +154,23 @@ const ClientDashboardPage = () => {
 
       const pdfData = convertToInvoicePDFData(invoice, client, company, paymentMethods)
       const fileName = invoice.documentNumber || invoice._id
-      
+
       const { pdf } = await import('@react-pdf/renderer')
       const { InvoicePDF } = await import('@ezstart/ui/templates')
-      
+
       const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
-      
+
       // Create download link
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.download = `invoice-${fileName}.pdf`
-      
+
       // Trigger download
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       // Cleanup
       URL.revokeObjectURL(url)
     } catch (error) {
@@ -202,7 +205,7 @@ const ClientDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center w-full">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -215,7 +218,7 @@ const ClientDashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 w-full overflow-x-hidden w-full">
       {/* Header */}
       <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
@@ -297,9 +300,14 @@ const ClientDashboardPage = () => {
                 {client?.address && (
                   <div className="flex items-center text-sm text-gray-600 bg-white/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                     <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>
-                      {client.city}, {client.country}
-                    </span>
+                    <P>
+                      {client.address && <span>{client.address}</span>}
+                      {client.city && client.country && (
+                        <span>
+                          {client.city}, {client.country}
+                        </span>
+                      )}
+                    </P>
                   </div>
                 )}
               </div>
@@ -423,7 +431,7 @@ const ClientDashboardPage = () => {
                       onKeyDown={e =>
                         (e.key === 'Enter' || e.key === ' ') && openPreview('invoice', invoice)
                       }
-                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300"
+                      className="bg-gradient-to-r from-white to-gray-50 border border-gray-200/60 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center space-x-2 sm:space-x-4">
@@ -475,7 +483,7 @@ const ClientDashboardPage = () => {
                               onClick={e => handleEditInvoice(invoice, e)}
                               disabled={!permissions.canEdit}
                               title={!permissions.canEdit ? permissions.reason : undefined}
-                              className="hover:bg-gray-50"
+                              className={cn('hover:bg-gray-50', { hidden: !permissions.canEdit })}
                             >
                               <Icon name="lucide:Edit" className="w-4 h-4" />
                             </Button>
@@ -486,9 +494,7 @@ const ClientDashboardPage = () => {
                                 className="bg-blue-500 hover:bg-blue-600 text-white"
                               >
                                 <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
-                                <span className="hidden xs:inline sm:hidden md:inline">
-                                  Send
-                                </span>
+                                <span className="hidden xs:inline sm:hidden md:inline">Send</span>
                               </Button>
                             )}
                             <Button
@@ -498,9 +504,7 @@ const ClientDashboardPage = () => {
                               className="hover:bg-gray-50"
                             >
                               <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
-                              <span className="hidden xs:inline sm:hidden md:inline">
-                                Download
-                              </span>
+                              <span className="hidden xs:inline sm:hidden md:inline">Download</span>
                             </Button>
                             {permissions.canMarkAsPaid && (
                               <Button
@@ -844,28 +848,36 @@ function convertToInvoicePDFData(
       : undefined,
     notes: invoice.notes,
     terms: invoice.terms,
-    paymentDetails: invoice.paymentMethodId && paymentMethods 
-      ? (() => {
-          const paymentMethod = paymentMethods.find(pm => pm._id === invoice.paymentMethodId)
-          if (!paymentMethod) return undefined
-          
-          return {
-            methodName: paymentMethod.name,
-            type: paymentMethod.type,
-            walletAddress: paymentMethod.type === 'crypto_wallet' ? paymentMethod.walletAddress : undefined,
-            currency: paymentMethod.type === 'crypto_wallet' ? paymentMethod.currency : undefined,
-            network: paymentMethod.type === 'crypto_wallet' ? paymentMethod.network : undefined,
-            bankName: paymentMethod.type === 'bank_transfer' ? paymentMethod.bankName : undefined,
-            accountNumber: paymentMethod.type === 'bank_transfer' ? paymentMethod.accountNumber : undefined,
-            iban: paymentMethod.type === 'bank_transfer' ? paymentMethod.iban : undefined,
-            swift: paymentMethod.type === 'bank_transfer' ? paymentMethod.swift : undefined,
-            routingNumber: paymentMethod.type === 'bank_transfer' ? paymentMethod.routingNumber : undefined,
-            email: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type) ? paymentMethod.email : undefined,
-            username: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type) ? paymentMethod.username : undefined,
-            instructions: paymentMethod.instructions,
-          }
-        })()
-      : undefined,
+    paymentDetails:
+      invoice.paymentMethodId && paymentMethods
+        ? (() => {
+            const paymentMethod = paymentMethods.find(pm => pm._id === invoice.paymentMethodId)
+            if (!paymentMethod) return undefined
+
+            return {
+              methodName: paymentMethod.name,
+              type: paymentMethod.type,
+              walletAddress:
+                paymentMethod.type === 'crypto_wallet' ? paymentMethod.walletAddress : undefined,
+              currency: paymentMethod.type === 'crypto_wallet' ? paymentMethod.currency : undefined,
+              network: paymentMethod.type === 'crypto_wallet' ? paymentMethod.network : undefined,
+              bankName: paymentMethod.type === 'bank_transfer' ? paymentMethod.bankName : undefined,
+              accountNumber:
+                paymentMethod.type === 'bank_transfer' ? paymentMethod.accountNumber : undefined,
+              iban: paymentMethod.type === 'bank_transfer' ? paymentMethod.iban : undefined,
+              swift: paymentMethod.type === 'bank_transfer' ? paymentMethod.swift : undefined,
+              routingNumber:
+                paymentMethod.type === 'bank_transfer' ? paymentMethod.routingNumber : undefined,
+              email: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type)
+                ? paymentMethod.email
+                : undefined,
+              username: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type)
+                ? paymentMethod.username
+                : undefined,
+              instructions: paymentMethod.instructions,
+            }
+          })()
+        : undefined,
   }
 }
 
@@ -962,7 +974,12 @@ function PreviewPdfModal({
           let blob: Blob
 
           if (kind === 'invoice') {
-            const pdfData = convertToInvoicePDFData(document as Invoice, client, company, paymentMethods)
+            const pdfData = convertToInvoicePDFData(
+              document as Invoice,
+              client,
+              company,
+              paymentMethods
+            )
             blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
           } else {
             const pdfData = convertToReceiptPDFData(document as Receipt, client, company)

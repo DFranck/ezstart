@@ -1,7 +1,15 @@
 'use client'
 
 import { LoginForm } from '@/components/LoginForm'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  P,
+  Span,
+} from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -16,7 +24,7 @@ function LoginContent() {
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription>
-          Sign in to access <span className="font-medium text-primary">{app}</span>
+          Sign in to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
       </CardHeader>
 
@@ -24,7 +32,7 @@ function LoginContent() {
         <LoginForm app={app} redirect_uri={redirect_uri} />
 
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">
+          <P size={'xs'}>
             Don't have an account?{' '}
             <Link
               href={`/register?${searchParams.toString()}`}
@@ -32,7 +40,7 @@ function LoginContent() {
             >
               Sign up
             </Link>
-          </p>
+          </P>
         </div>
       </CardContent>
     </Card>

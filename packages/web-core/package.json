@@ -1,0 +1,49 @@
+{
+  "name": "@ezstart/web-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared web infrastructure for EZStart projects",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./providers": {
+      "import": "./dist/providers.js",
+      "require": "./dist/providers.js",
+      "types": "./dist/providers.d.ts"
+    },
+    "./i18n": {
+      "import": "./dist/i18n/index.js",
+      "require": "./dist/i18n/index.js",
+      "types": "./dist/i18n/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@ezstart/auth-sdk": "workspace:*",
+    "next-intl": "^4.3.7",
+    "next-themes": "^0.4.6"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "next": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "keywords": ["ezstart", "web", "providers", "i18n"],
+  "author": "EZStart",
+  "license": "MIT"
+}

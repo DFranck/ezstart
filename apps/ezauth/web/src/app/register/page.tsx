@@ -1,7 +1,14 @@
 'use client'
 
 import { RegisterForm } from '@/components/RegisterForm'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Span,
+} from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -15,7 +22,7 @@ function RegisterContent() {
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription>
-          Create account to access <span className="font-medium text-primary">{app}</span>
+          Create account to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
       </CardHeader>
 

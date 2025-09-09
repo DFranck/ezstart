@@ -2,7 +2,8 @@
 
 import { useBillingContext } from '@/contexts/billing-context'
 import { BillingProvider } from '@/providers/billing-provider'
-import { Button, H1, Header, Icon, Main } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
+import { Button, H1, Header, Icon } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import Link from 'next/link'
 
@@ -16,7 +17,7 @@ const LayoutDashboard = ({ children }: { children: React.ReactNode }) => {
 
 const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) => {
   const { refetchAll } = useBillingContext()
-
+  const { user } = useAuth()
   return (
     <>
       <Header
@@ -69,9 +70,7 @@ const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) =>
           </div>
         }
       />
-      <Main className="bg-gradient-to-br from-indigo-50 via-white to-cyan-50 min-h-screen">
-        {children}
-      </Main>
+      {children}
     </>
   )
 }

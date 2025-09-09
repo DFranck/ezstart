@@ -1,35 +1,31 @@
-import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
-import { Toaster } from 'sonner';
-import { AuthWrapper } from './auth-wrapper';
-import '@ezstart/ui/globals.css';
+import '@ezstart/ui/globals.css'
+import type { Metadata } from 'next'
+import { Geist } from 'next/font/google'
+import { Toaster } from 'sonner'
+import { AuthWrapper } from './auth-wrapper'
 
 const fontSans = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
-});
+})
 
 export const metadata: Metadata = {
   title: 'EZ Billing',
   description: 'Simple billing management',
-};
+}
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        <AuthWrapper>
-          {children}
-        </AuthWrapper>
+      <body
+        className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50`}
+      >
+        <AuthWrapper>{children}</AuthWrapper>
         <Toaster />
       </body>
     </html>
-  );
+  )
 }
