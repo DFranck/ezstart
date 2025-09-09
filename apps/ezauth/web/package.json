@@ -12,6 +12,7 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "autoprefixer": "^10.4.19",
+    "deepmerge": "^4.3.1",
     "next": "15.5.2",
     "postcss": "^8.4.38",
     "react": "^19.1.1",
@@ -22,8 +23,10 @@
     "@types/node": "^20",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "@workspace/typescript-config": "workspace:*",
     "@workspace/eslint-config": "workspace:*",
+    "@workspace/next-config": "workspace:*",
+    "@workspace/tailwind-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
   }
 }

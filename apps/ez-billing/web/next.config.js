@@ -1,0 +1,1 @@
+export { baseConfig as default } from '@workspace/next-config/base.js'

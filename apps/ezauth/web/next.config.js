@@ -1,9 +1,12 @@
+import { baseConfig } from '@workspace/next-config/base.js'
+import deepmerge from 'deepmerge'
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = deepmerge(baseConfig, {
   transpilePackages: ['@ezstart/auth-sdk'],
   eslint: {
     ignoreDuringBuilds: true
   }
-}
+})
 
-module.exports = nextConfig
+export default nextConfig
