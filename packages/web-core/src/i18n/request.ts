@@ -1,5 +1,5 @@
 import { getRequestConfig } from 'next-intl/server'
-import { defaultRouting } from './routing'
+import { defaultRouting } from './routing.js'
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale
@@ -9,7 +9,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   }
 
   return {
-    locale,
+    locale: locale!,
     messages: (await import(`../../messages/${locale}.json`)).default,
   }
 })
@@ -26,7 +26,7 @@ export function createRequestConfig(messagesPath?: string) {
     const messagePath = messagesPath || `../../messages/${locale}.json`
     
     return {
-      locale,
+      locale: locale!,
       messages: (await import(messagePath)).default,
     }
   })

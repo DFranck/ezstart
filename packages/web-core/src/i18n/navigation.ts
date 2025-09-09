@@ -1,5 +1,5 @@
 import { createNavigation } from 'next-intl/navigation'
-import { defaultRouting } from './routing'
+import { defaultRouting } from './routing.js'
 
 export const { Link, redirect, usePathname, useRouter } =
   createNavigation(defaultRouting)

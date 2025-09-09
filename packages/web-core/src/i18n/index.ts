@@ -1,4 +1,4 @@
-export { defaultRouting, getTimeZoneFromLocale, createRouting } from './routing'
-export { Link, redirect, usePathname, useRouter, createCustomNavigation } from './navigation'  
-export { default as request, createRequestConfig } from './request'
-export type { AppLocale } from './routing'
+export { defaultRouting, getTimeZoneFromLocale, createRouting } from './routing.js'
+export { Link, redirect, usePathname, useRouter, createCustomNavigation } from './navigation.js'  
+export { default as request, createRequestConfig } from './request.js'
+export type { AppLocale } from './routing.js'
