@@ -61,14 +61,36 @@
 ## Configuration Standardisée - Maximum de Réutilisabilité ✅
 
 ### Apps Web - Configuration 100% Centralisée
-Toutes les apps web (`ezauth/web`, `ez-billing/web`, `fengshui/web`, etc.) utilisent **exactement** la même configuration :
+Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`) utilisent **exactement** la même configuration :
 
+#### Configuration de Base :
 - **Tailwind Config** : `tailwind.config.js` → `@workspace/tailwind-config/base.js`
 - **PostCSS Config** : `postcss.config.mjs` → `@ezstart/ui/postcss.config`
 - **ESLint Config** : `eslint.config.js` → `@workspace/eslint-config/next-js`
+- **TypeScript Config** : `tsconfig.json` → `@workspace/typescript-config/next.json`
 - **CSS Globals** : `@import "@ezstart/ui/globals.css"`
 - **Scripts standardisés** : `lint`, `lint:fix`, `typecheck`
-- **Dépendances** : `"@ezstart/ui": "workspace:*"`
+
+#### Providers et Infrastructure :
+- **Web Core** : `"@ezstart/web-core": "workspace:*"`
+- **UI Components** : `"@ezstart/ui": "workspace:*"`
+- **WebProviders** : Pour apps avec i18n (ezstart)
+  ```tsx
+  import { WebProviders } from '@ezstart/web-core/providers'
+  <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
+  ```
+- **SimpleWebProviders** : Pour apps sans i18n (ezauth, ez-billing, fengshui, tower-defense)
+  ```tsx
+  import { SimpleWebProviders } from '@ezstart/web-core/providers'
+  <SimpleWebProviders appName="fengshui">
+  ```
+
+#### Avantages de @ezstart/web-core :
+- 🔐 **Auth centralisée** avec @ezstart/auth-sdk
+- 🎨 **Theme management** avec next-themes
+- 🌍 **i18n support** avec next-intl (si nécessaire)
+- ⚡ **SSR/SSG optimized** avec client/server boundaries
+- 🏗️ **Architecture unifiée** pour toutes les apps web
 
 ### APIs - Configuration 100% Centralisée
 Toutes les APIs (`ezauth/api`, `ez-billing/api`, `monitor/api`, etc.) utilisent **exactement** la même configuration :
@@ -82,8 +104,11 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `monitor/api`, etc.) utilisent 
 - `@workspace/tailwind-config` - Configs Tailwind partagées
 - `@workspace/eslint-config` - Règles ESLint partagées  
 - `@workspace/typescript-config` - Configs TypeScript partagées
+- `@workspace/next-config` - Configs Next.js partagées
 - `@ezstart/ui` - Composants, styles et configs CSS/PostCSS
+- `@ezstart/web-core` - Infrastructure web partagée (providers, auth, themes)
 - `@ezstart/api-core` - Infrastructure API partagée
+- `@ezstart/auth-sdk` - SDK d'authentification centralisé
 
 ### Propagation Automatique des Changements
 ✨ **Toute modification** dans les packages centralisés se propage **automatiquement** à tous les projets. Une seule source de vérité pour l'ensemble du monorepo !

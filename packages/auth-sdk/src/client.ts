@@ -8,15 +8,26 @@ export interface AuthClientConfig {
 
 // Helper to get the correct URLs based on environment
 function getEZAuthUrls() {
-  const isProduction = process.env.NODE_ENV === 'production'
-  
-  return {
-    apiBaseURL: isProduction 
-      ? 'https://ezauth-oblm.onrender.com/api/auth'
-      : 'http://localhost:8081/api/auth',
-    webBaseURL: isProduction
-      ? 'https://ezauth.vercel.app'
-      : 'http://localhost:8080'
+  // Check if we're in browser or server
+  if (typeof window !== 'undefined') {
+    // In browser, check the current hostname
+    const hostname = window.location.hostname
+    const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
+    
+    return {
+      apiBaseURL: isProduction 
+        ? 'https://ezauth-oblm.onrender.com/api/auth'
+        : 'http://localhost:8001/api/auth',
+      webBaseURL: isProduction
+        ? 'https://ezauth.vercel.app'
+        : 'http://localhost:8080'
+    }
+  } else {
+    // On server, use a safe default (production URLs)
+    return {
+      apiBaseURL: 'https://ezauth-oblm.onrender.com/api/auth',
+      webBaseURL: 'https://ezauth.vercel.app'
+    }
   }
 }
 

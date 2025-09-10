@@ -1,42 +1,42 @@
-import { WebProviders } from '@ezstart/web-core/providers';
-import { getTimeZoneFromLocale, routing } from '@/i18n/routing';
-import { PWAInstallPrompt, Toaster } from '@ezstart/ui/components';
-import '@ezstart/ui/globals.css';
-import { hasLocale } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { notFound } from 'next/navigation';
-import ClientLayout from './client-layout';
+import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
+import { PWAInstallPrompt, Toaster } from '@ezstart/ui/components'
+import '@ezstart/ui/globals.css'
+import { WebProviders } from '@ezstart/web-core/providers'
+import { hasLocale } from 'next-intl'
+import { getMessages, setRequestLocale } from 'next-intl/server'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { notFound } from 'next/navigation'
+import ClientLayout from './client-layout'
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+  return routing.locales.map(locale => ({ locale }))
 }
 
 const fontSans = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
-});
+})
 
 const fontMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
-});
+})
 
 export default async function LocaleLayout(props: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
-  const { children, params } = props;
-  const { locale } = await params;
+  const { children, params } = props
+  const { locale } = await params
 
-  if (!hasLocale(routing.locales, locale)) notFound();
-  setRequestLocale(locale);
+  if (!hasLocale(routing.locales, locale)) notFound()
+  setRequestLocale(locale)
 
-  const messages = await getMessages();
-  const timeZone = getTimeZoneFromLocale(locale);
+  const messages = await getMessages()
+  const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning className=''>
+    <html lang={locale} suppressHydrationWarning className="">
       <head>
         <meta name="application-name" content="EZStart" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -60,7 +60,7 @@ export default async function LocaleLayout(props: {
         <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#000000" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
-      <body 
+      <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
@@ -70,5 +70,5 @@ export default async function LocaleLayout(props: {
         <PWAInstallPrompt appName="EZStart" />
       </body>
     </html>
-  );
+  )
 }

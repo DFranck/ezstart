@@ -14,13 +14,21 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, appName }: AuthProviderProps) {
-  // Auto-configuration using environment detection
-  const client = createAuthClient({
-    appName,
-    redirectUri:
-      typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
-  })
   const store = useAuthStore()
+  
+  // Create client lazily to avoid SSR issues
+  const getClient = () => {
+    const redirectUri = typeof window !== 'undefined' 
+      ? `${window.location.origin}/auth/callback`
+      : '/auth/callback'
+    
+    return createAuthClient({
+      appName,
+      redirectUri,
+    })
+  }
+  
+  const client = getClient()
 
   // Auto-verify token on mount and periodically (but NOT on callback pages)
   useEffect(() => {
