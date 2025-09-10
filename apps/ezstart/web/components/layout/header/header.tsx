@@ -12,7 +12,17 @@ import { NavMenu } from '../nav-menu'
 export default function Header() {
   const { isDesktop, isTablet } = useDevice()
   const [isOpen, setIsOpen] = useState(false)
-  const currentLocale = useLocale()
+  
+  // SSR-safe locale handling
+  let currentLocale = 'en'
+  try {
+    currentLocale = useLocale()
+  } catch (error) {
+    console.warn('useLocale failed, using fallback:', error)
+    // Fallback to default locale
+    currentLocale = 'en'
+  }
+  
   const scrollY = useOnScroll()
   const isTop = scrollY === 0
   const mobileMenuRef = useRef<HTMLDivElement>(null)

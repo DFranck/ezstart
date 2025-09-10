@@ -24,15 +24,7 @@ export function ClientProviders({
   timeZone,
   appName,
 }: ClientProvidersProps) {
-  // Debug pour voir pourquoi le contexte intl n'est pas disponible
-  if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
-    console.log('ClientProviders props:', { 
-      hasMessages: !!messages,
-      locale,
-      timeZone,
-      appName 
-    })
-  }
+  // Ensure NextIntlClientProvider is always available with proper fallbacks
 
   return (
     <NextThemesProvider
