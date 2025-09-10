@@ -25,7 +25,7 @@ async function startDev() {
   const port = await findFreePort(preferredPort);
   console.log(`🚀 Starting dev server on port ${port}`);
   
-  const child = spawn('next', ['dev', '--turbopack', '-p', port.toString()], {
+  const child = spawn('next', ['dev', '-p', port.toString()], {
     stdio: 'inherit',
     shell: true
   });
