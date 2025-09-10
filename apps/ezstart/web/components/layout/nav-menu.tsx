@@ -24,7 +24,15 @@ export function NavMenu({
 }: NavMenuProps) {
   const router = useRouter();
   const links = useNavLinks();
-  const currentLocale = useLocale();
+  
+  // SSR-safe locale handling
+  let currentLocale = 'en'
+  try {
+    currentLocale = useLocale()
+  } catch (error) {
+    console.warn('useLocale failed in NavMenu, using fallback:', error)
+    currentLocale = 'en'
+  }
 
   const isExternalLink = (href: string) => {
     return href.startsWith('http://') || href.startsWith('https://');

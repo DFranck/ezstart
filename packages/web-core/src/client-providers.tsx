@@ -24,7 +24,12 @@ export function ClientProviders({
   timeZone,
   appName,
 }: ClientProvidersProps) {
-  // Ensure NextIntlClientProvider is always available with proper fallbacks
+  // Force la disponibilité du contexte intl
+  const safeMessages = messages || {}
+  const safeLocale = locale || 'en'
+  const safeTimeZone = timeZone || 'UTC'
+  
+  // Debug logs removed for production
 
   return (
     <NextThemesProvider
@@ -34,24 +39,13 @@ export function ClientProviders({
       disableTransitionOnChange
     >
       <AuthProvider appName={appName}>
-        {messages && locale ? (
-          <NextIntlClientProvider
-            messages={messages}
-            locale={locale}
-            timeZone={timeZone || 'UTC'}
-          >
-            {children}
-          </NextIntlClientProvider>
-        ) : (
-          // Fallback avec des valeurs par défaut pour éviter le crash
-          <NextIntlClientProvider
-            messages={{}}
-            locale="en"
-            timeZone="UTC"
-          >
-            {children}
-          </NextIntlClientProvider>
-        )}
+        <NextIntlClientProvider
+          messages={safeMessages}
+          locale={safeLocale}
+          timeZone={safeTimeZone}
+        >
+          {children}
+        </NextIntlClientProvider>
       </AuthProvider>
     </NextThemesProvider>
   )

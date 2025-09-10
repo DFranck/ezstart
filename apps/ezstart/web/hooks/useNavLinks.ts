@@ -10,6 +10,15 @@ export type NavLink = { label: string; href: string };
 export type NavItem = NavLink | NavMenu;
 
 export const useNavLinks = (): NavItem[] => {
-  const messages = useMessages() as Record<string, any>;
+  // SSR-safe messages handling
+  let messages: Record<string, any> = {}
+  try {
+    messages = useMessages() as Record<string, any>
+  } catch (error) {
+    console.warn('useMessages failed in useNavLinks, using fallback:', error)
+    // Return empty array as fallback
+    return []
+  }
+  
   return Array.isArray(messages.links) ? messages.links : [];
 };
