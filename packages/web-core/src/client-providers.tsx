@@ -24,6 +24,16 @@ export function ClientProviders({
   timeZone,
   appName,
 }: ClientProvidersProps) {
+  // Debug pour voir pourquoi le contexte intl n'est pas disponible
+  if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+    console.log('ClientProviders props:', { 
+      hasMessages: !!messages,
+      locale,
+      timeZone,
+      appName 
+    })
+  }
+
   return (
     <NextThemesProvider
       attribute="class"
@@ -32,16 +42,23 @@ export function ClientProviders({
       disableTransitionOnChange
     >
       <AuthProvider appName={appName}>
-        {messages && locale && timeZone ? (
+        {messages && locale ? (
           <NextIntlClientProvider
             messages={messages}
             locale={locale}
-            timeZone={timeZone}
+            timeZone={timeZone || 'UTC'}
           >
             {children}
           </NextIntlClientProvider>
         ) : (
-          children
+          // Fallback avec des valeurs par défaut pour éviter le crash
+          <NextIntlClientProvider
+            messages={{}}
+            locale="en"
+            timeZone="UTC"
+          >
+            {children}
+          </NextIntlClientProvider>
         )}
       </AuthProvider>
     </NextThemesProvider>

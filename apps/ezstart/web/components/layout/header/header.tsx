@@ -1,36 +1,35 @@
-'use client';
+'use client'
 
-import { Burger, H2, Icon, Tag } from '@ezstart/ui/components';
-import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks';
-import { cn } from '@ezstart/ui/lib';
-import { useLocale } from 'next-intl';
-import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { MobileNavMenu } from '../mobile-nav-menu';
-import { NavMenu } from '../nav-menu';
-import { HeaderControls } from './header-controls';
+import { Burger, H2, Icon, Tag } from '@ezstart/ui/components'
+import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks'
+import { cn } from '@ezstart/ui/lib'
+import { useLocale } from 'next-intl'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+import { MobileNavMenu } from '../mobile-nav-menu'
+import { NavMenu } from '../nav-menu'
 
 export default function Header() {
-  const { isDesktop, isTablet } = useDevice();
-  const [isOpen, setIsOpen] = useState(false);
-  const currentLocale = useLocale();
-  const scrollY = useOnScroll();
-  const isTop = scrollY === 0;
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const { isDesktop, isTablet } = useDevice()
+  const [isOpen, setIsOpen] = useState(false)
+  const currentLocale = useLocale()
+  const scrollY = useOnScroll()
+  const isTop = scrollY === 0
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
   useClickOutside(mobileMenuRef, () => {
     if (isTablet && isOpen) {
-      setIsOpen(false);
+      setIsOpen(false)
     }
-  });
+  })
 
   useEffect(() => {
     if (!isTablet && isOpen) {
-      setIsOpen(false);
+      setIsOpen(false)
     }
-  }, [isTablet, isOpen]);
+  }, [isTablet, isOpen])
 
   return (
-    <Tag as='header' layout={'spaced'} position={'fixed'} className='flex-col'>
+    <Tag as="header" layout={'spaced'} position={'fixed'} className="flex-col">
       <div
         className={cn(
           ' py-4 pr-2 pl-4 md:px-6 flex items-center justify-between transition-all duration-300',
@@ -41,15 +40,15 @@ export default function Header() {
           }
         )}
       >
-        <Link href={`/${currentLocale}/`} className='flex items-center gap-2'>
-          <Icon name='custom:Ezstart' size={24} />
+        <Link href={`/${currentLocale}/`} className="flex items-center gap-2">
+          <Icon name="custom:Ezstart" size={24} />
           <H2 size={'h4'}>EzStart</H2>
         </Link>
 
-        {isDesktop && <NavMenu className='flex items-center gap-2' />}
+        {isDesktop && <NavMenu className="flex items-center gap-2" />}
 
-        <div className='flex items-center gap-2'>
-          <HeaderControls />
+        <div className="flex items-center gap-2">
+          {/* <HeaderControls /> */}
           {isTablet && <Burger setIsOpen={setIsOpen} isOpen={isOpen} />}
         </div>
       </div>
@@ -66,5 +65,5 @@ export default function Header() {
         </div>
       )}
     </Tag>
-  );
+  )
 }
