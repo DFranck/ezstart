@@ -1,4 +1,3 @@
-'use client';
 import { Main } from '@ezstart/ui/components';
 import ContactSection from './(home)/ContactSection';
 import HeroSection from './(home)/HeroSection';
