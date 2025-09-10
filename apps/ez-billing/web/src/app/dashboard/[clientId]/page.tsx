@@ -15,7 +15,6 @@ import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-bil
 import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Card, CardContent, CardHeader, H1, Icon, Modal, P } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
-import { cn } from '@ezstart/ui/lib'
 import {
   InvoicePDF,
   ReceiptPDF,
@@ -223,116 +222,115 @@ const ClientDashboardPage = () => {
   return (
     <>
       {/* Header */}
-      <div>
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4 group"
-          >
-            <Icon
-              name="lucide:ArrowLeft"
-              className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform"
-            />
-            Back to Dashboard
-          </Link>
 
-          <Card>
-            {/* Client Info */}
-            <CardHeader className="flex-1">
-              <div className="flex items-center space-x-3 sm:space-x-4 mb-4">
-                <div
-                  className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
-                    client?.isCompany
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                      : 'bg-gradient-to-r from-cyan-500 to-blue-500'
-                  }`}
-                >
-                  <Icon
-                    name={client?.isCompany ? 'lucide:Building' : 'lucide:User'}
-                    className="w-6 h-6 sm:w-8 sm:h-8 text-white"
-                  />
-                </div>
-                <div>
-                  <H1 size={'h3'}>{client?.clientName}</H1>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        client?.isCompany
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-cyan-100 text-cyan-700'
-                      }`}
-                    >
-                      <Icon
-                        name={client?.isCompany ? 'lucide:Building2' : 'lucide:User'}
-                        className="w-3 h-3 mr-1"
-                      />
-                      {client?.isCompany ? 'Company' : 'Individual'}
-                    </span>
-                  </div>
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4 group"
+        >
+          <Icon
+            name="lucide:ArrowLeft"
+            className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform"
+          />
+          Back to Dashboard
+        </Link>
+
+        <Card variant={'ghost'}>
+          {/* Client Info */}
+          <CardHeader className="flex-1">
+            <div className="flex items-center space-x-3 sm:space-x-4 mb-4">
+              <div
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
+                  client?.isCompany
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                }`}
+              >
+                <Icon
+                  name={client?.isCompany ? 'lucide:Building' : 'lucide:User'}
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-white"
+                />
+              </div>
+              <div>
+                <H1 size={'h3'}>{client?.clientName}</H1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      client?.isCompany
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-cyan-100 text-cyan-700'
+                    }`}
+                  >
+                    <Icon
+                      name={client?.isCompany ? 'lucide:Building2' : 'lucide:User'}
+                      className="w-3 h-3 mr-1"
+                    />
+                    {client?.isCompany ? 'Company' : 'Individual'}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              {/* Contact Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {client?.email && (
-                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
-                    <Icon name="lucide:Mail" className="w-4 h-4 mr-2 " />
-                    <a
-                      href={`mailto:${client.email}`}
-                      className="hover:text-indigo-600 transition-colors"
-                    >
-                      {client.email}
-                    </a>
-                  </div>
-                )}
+            {/* Contact Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {client?.email && (
+                <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                  <Icon name="lucide:Mail" className="w-4 h-4 mr-2 " />
+                  <a
+                    href={`mailto:${client.email}`}
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    {client.email}
+                  </a>
+                </div>
+              )}
 
-                {client?.phone && (
-                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
-                    <Icon name="lucide:Phone" className="w-4 h-4 mr-2 " />
-                    <a
-                      href={`tel:${client.phone}`}
-                      className="hover:text-indigo-600 transition-colors"
-                    >
-                      {client.phone}
-                    </a>
-                  </div>
-                )}
+              {client?.phone && (
+                <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                  <Icon name="lucide:Phone" className="w-4 h-4 mr-2 " />
+                  <a
+                    href={`tel:${client.phone}`}
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    {client.phone}
+                  </a>
+                </div>
+              )}
 
-                {client?.address && (
-                  <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
-                    <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 " />
-                    <P>
-                      {client.address && <span>{client.address}</span>}
-                      {client.city && client.country && (
-                        <span>
-                          {client.city}, {client.country}
-                        </span>
-                      )}
-                    </P>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
+              {client?.address && (
+                <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
+                  <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 " />
+                  <P>
+                    {client.address && <span>{client.address}</span>}
+                    {client.city && client.country && (
+                      <span>
+                        {client.city}, {client.country}
+                      </span>
+                    )}
+                  </P>
+                </div>
+              )}
+            </div>
+          </CardHeader>
 
-            {/* Action Buttons */}
-            <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-              <Button
-                onClick={handleCreateQuote}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-              >
-                <Icon name="lucide:FileText" className="w-4 h-4 sm:mr-2" />
-                <span className="ml-2 sm:ml-0">New Quote</span>
-              </Button>
-              <Button
-                onClick={handleCreateInvoice}
-                className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-              >
-                <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
-                <span className="ml-2 sm:ml-0">New Invoice</span>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Action Buttons */}
+          <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <Button
+              onClick={handleCreateQuote}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              <Icon name="lucide:FileText" className="w-4 h-4 sm:mr-2" />
+              <span className="ml-2 sm:ml-0">New Quote</span>
+            </Button>
+            <Button
+              onClick={handleCreateInvoice}
+              className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            >
+              <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
+              <span className="ml-2 sm:ml-0">New Invoice</span>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Body */}
@@ -381,30 +379,30 @@ const ClientDashboardPage = () => {
             iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-500',
             title: 'No invoices yet',
             description: 'Create your first invoice to get started',
-            buttonText: 'Create First Invoice'
+            buttonText: 'Create First Invoice',
           }}
         >
           {clientInvoices.length > 0 && (
-              <div className="space-y-4">
-                {clientInvoices.map(invoice => {
-                  const permissions = getBillingPermissions(invoice, 'invoice')
-                  return (
-                    <InvoiceCard
-                      key={invoice._id}
-                      documentNumber={invoice.documentNumber}
-                      status={invoice.status}
-                      createdAt={invoice.createdAt}
-                      total={invoice.total}
-                      currency={invoice.currency}
-                      permissions={permissions}
-                      onClick={() => openPreview('invoice', invoice)}
-                      onEdit={e => handleEditInvoice(invoice, e)}
-                      onSend={e => handleSendInvoice(invoice, e)}
-                      onDownload={e => handleDownloadInvoice(invoice, e)}
-                      onMarkPaid={e => handleMarkPaid(invoice, e)}
-                    />
-                  )
-                })}
+            <div className="space-y-4">
+              {clientInvoices.map(invoice => {
+                const permissions = getBillingPermissions(invoice, 'invoice')
+                return (
+                  <InvoiceCard
+                    key={invoice._id}
+                    documentNumber={invoice.documentNumber}
+                    status={invoice.status}
+                    createdAt={invoice.createdAt}
+                    total={invoice.total}
+                    currency={invoice.currency}
+                    permissions={permissions}
+                    onClick={() => openPreview('invoice', invoice)}
+                    onEdit={e => handleEditInvoice(invoice, e)}
+                    onSend={e => handleSendInvoice(invoice, e)}
+                    onDownload={e => handleDownloadInvoice(invoice, e)}
+                    onMarkPaid={e => handleMarkPaid(invoice, e)}
+                  />
+                )
+              })}
             </div>
           )}
         </DashboardSection>
@@ -425,29 +423,29 @@ const ClientDashboardPage = () => {
             iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-500',
             title: 'No quotes yet',
             description: 'Create your first quote to get started',
-            buttonText: 'Create First Quote'
+            buttonText: 'Create First Quote',
           }}
         >
           {clientQuotes.length > 0 && (
-              <div className="space-y-4">
-                {clientQuotes.map(quote => {
-                  const permissions = getBillingPermissions(quote, 'quote')
-                  return (
-                    <QuoteCard
-                      key={quote._id}
-                      documentNumber={quote.documentNumber}
-                      status={quote.status}
-                      createdAt={quote.createdAt}
-                      total={quote.total}
-                      currency={quote.currency}
-                      validUntil={quote.validUntil}
-                      permissions={permissions}
-                      onClick={() => openPreview('quote', quote)}
-                      onEdit={e => handleEditQuote(quote, e)}
-                      onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
-                    />
-                  )
-                })}
+            <div className="space-y-4">
+              {clientQuotes.map(quote => {
+                const permissions = getBillingPermissions(quote, 'quote')
+                return (
+                  <QuoteCard
+                    key={quote._id}
+                    documentNumber={quote.documentNumber}
+                    status={quote.status}
+                    createdAt={quote.createdAt}
+                    total={quote.total}
+                    currency={quote.currency}
+                    validUntil={quote.validUntil}
+                    permissions={permissions}
+                    onClick={() => openPreview('quote', quote)}
+                    onEdit={e => handleEditQuote(quote, e)}
+                    onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
+                  />
+                )
+              })}
             </div>
           )}
         </DashboardSection>
@@ -468,24 +466,24 @@ const ClientDashboardPage = () => {
             iconBg: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-500',
             title: 'No receipts yet',
             description: 'Receipts are generated automatically when invoices are paid',
-            buttonText: ''
+            buttonText: '',
           }}
           className="mb-0"
         >
           {clientReceipts.length > 0 && (
-              <div className="space-y-4">
-                {clientReceipts.map(receipt => (
-                  <ReceiptCard
-                    key={receipt._id}
-                    documentNumber={receipt.documentNumber}
-                    status={receipt.status}
-                    createdAt={receipt.createdAt}
-                    total={receipt.total}
-                    currency={receipt.currency}
-                    paymentDate={receipt.paymentDate}
-                    onClick={() => openPreview('receipt', receipt)}
-                  />
-                ))}
+            <div className="space-y-4">
+              {clientReceipts.map(receipt => (
+                <ReceiptCard
+                  key={receipt._id}
+                  documentNumber={receipt.documentNumber}
+                  status={receipt.status}
+                  createdAt={receipt.createdAt}
+                  total={receipt.total}
+                  currency={receipt.currency}
+                  paymentDate={receipt.paymentDate}
+                  onClick={() => openPreview('receipt', receipt)}
+                />
+              ))}
             </div>
           )}
         </DashboardSection>
@@ -855,7 +853,7 @@ function PreviewPdfModal({
       footer={
         <div className="flex items-center justify-between w-full">
           {/* <span className="text-xs text-gray-500 truncate">{pdfUrl}</span> */}
-          <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             <Button
               variant="outline"
               onClick={handleGeneratePreview}
@@ -887,11 +885,38 @@ function PreviewPdfModal({
       {/* PDF container */}
       <div className="">
         {pdfBlob ? (
-          <iframe
-            src={`${pdfBlob}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-            className="w-full h-[50vh]"
-            title={`${title} – PDF preview`}
-          />
+          <>
+            {/* Desktop PDF Preview */}
+            <iframe
+              src={`${pdfBlob}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+              className="hidden sm:block w-full h-[50vh]"
+              title={`${title} – PDF preview`}
+            />
+            {/* Mobile PDF Download */}
+            <div className="sm:hidden flex flex-col items-center justify-center p-8 text-center h-[50vh] bg-muted/20 rounded-lg">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4">
+                <Icon name="lucide:FileDown" className="w-8 h-8 text-blue-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Ready</h3>
+              <p className="text-foreground/60 mb-4 text-sm">
+                PDF preview is not supported on mobile. Download to view.
+              </p>
+              <Button
+                onClick={() => {
+                  const link = document.createElement('a')
+                  link.href = pdfBlob
+                  link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                }}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6">

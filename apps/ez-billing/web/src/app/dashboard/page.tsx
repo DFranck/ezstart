@@ -1,14 +1,14 @@
 'use client'
 
 import { ClientModal } from '@/components/client-modal'
-import ClientCard from '@/components/ClientCard'
+import ClientCard from '@/components/ClientCard_v2'
 import { CompanyModal } from '@/components/company-modal'
-import CompanyCard from '@/components/CompanyCard'
+import CompanyCard from '@/components/CompanyCard_v2'
 import DashboardSection from '@/components/DashboardSection'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import FirstActionCard from '@/components/FirstActionCard'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
-import PaymentMethodCard from '@/components/PaymentMethodCard'
+import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import StatsCard from '@/components/StatsCard'
 import { useBillingContext } from '@/contexts/billing-context'
 import { getUserId } from '@/utils/get-user-id'
@@ -146,7 +146,7 @@ const DashboardPage = () => {
 
   return (
     <Main>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         {/* Stats Section - Only show when there's data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <StatsCard
@@ -166,45 +166,49 @@ const DashboardPage = () => {
             value={allInvoices.length.toString()}
             icon="lucide:FileEdit"
             iconGradient="bg-gradient-to-r from-blue-400 to-indigo-400"
+            className="hidden"
           />
           <StatsCard
             title="Quotes"
             value={allQuotes.length.toString()}
             icon="lucide:FileText"
             iconGradient="bg-gradient-to-r from-purple-400 to-pink-400"
+            className="hidden"
           />
         </div>
         {/* Quick Actions - Only show when no data exists */}
-        <div className="flex gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {!hasCompanies && (
-            <FirstActionCard
-              title="Create Company"
-              description=" Set up your business profile and billing information"
-              setter={setIsCompanyModalOpen}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white "
-              descriptionClassName="text-indigo-100"
-            />
-          )}
+        {hasCompanies || hasClients || paymentMethods.length > 0 ? null : (
+          <div className="flex gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {!hasCompanies && (
+              <FirstActionCard
+                title="Create Company"
+                description=" Set up your business profile and billing information"
+                setter={setIsCompanyModalOpen}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white "
+                descriptionClassName="text-indigo-100"
+              />
+            )}
 
-          {!hasClients && (
-            <FirstActionCard
-              title="Create Client"
-              description="Add clients to start creating invoices and quotes"
-              setter={setIsClientModalOpen}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white "
-              descriptionClassName="text-cyan-100"
-            />
-          )}
-          {paymentMethods.length === 0 && (
-            <FirstActionCard
-              title="Add Payment Method"
-              description="Configure how you receive payments from clients"
-              setter={setIsClientModalOpen}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white "
-              descriptionClassName="text-emerald-100"
-            />
-          )}
-        </div>
+            {!hasClients && (
+              <FirstActionCard
+                title="Create Client"
+                description="Add clients to start creating invoices and quotes"
+                setter={setIsClientModalOpen}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white "
+                descriptionClassName="text-cyan-100"
+              />
+            )}
+            {paymentMethods.length === 0 && (
+              <FirstActionCard
+                title="Add Payment Method"
+                description="Configure how you receive payments from clients"
+                setter={setIsClientModalOpen}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white "
+                descriptionClassName="text-emerald-100"
+              />
+            )}
+          </div>
+        )}
         {/* Clients Section */}
         <DashboardSection
           title="Your Clients"
@@ -256,7 +260,7 @@ const DashboardPage = () => {
               buttonText: 'Create First Company',
             }}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1  gap-4 sm:gap-6">
               {companies.map(company => (
                 <CompanyCard
                   key={company._id}
@@ -287,7 +291,7 @@ const DashboardPage = () => {
               buttonText: 'Add First Payment Method',
             }}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2  gap-4 sm:gap-6">
               {paymentMethods.map(paymentMethod => (
                 <PaymentMethodCard
                   key={paymentMethod._id}

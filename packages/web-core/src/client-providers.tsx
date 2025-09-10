@@ -55,9 +55,11 @@ export function ClientProviders({
 export function SimpleClientProviders({
   children,
   appName,
+  redirectAfterLogin,
 }: {
   children: React.ReactNode
   appName: string
+  redirectAfterLogin?: string
 }) {
   return (
     <SimpleThemeProvider>

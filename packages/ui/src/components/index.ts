@@ -1,6 +1,7 @@
 export * from './accordion'
 export * from './aceternity-carousel'
 export * from './alert-dialog'
+export * from './badge'
 export * from './burger'
 export * from './button'
 export * from './card'

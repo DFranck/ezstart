@@ -1,0 +1,44 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@ezstart/auth-sdk'
+
+export default function AuthCallbackPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { processCallback } = useAuth()
+
+  useEffect(() => {
+    const code = searchParams.get('code')
+    const error = searchParams.get('error')
+
+    if (error) {
+      console.error('Auth error:', error)
+      router.push('/')
+      return
+    }
+
+    if (code) {
+      processCallback(code)
+        .then((redirectUrl) => {
+          router.push(redirectUrl)
+        })
+        .catch((err) => {
+          console.error('Callback processing failed:', err)
+          router.push('/')
+        })
+    } else {
+      router.push('/')
+    }
+  }, [searchParams, router, processCallback])
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Completing authentication...</p>
+      </div>
+    </div>
+  )
+}
