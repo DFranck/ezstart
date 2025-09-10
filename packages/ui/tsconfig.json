@@ -4,6 +4,7 @@
 
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "declarationDir": "./dist",
     "composite": true,
@@ -13,12 +14,7 @@
     "baseUrl": "."
   },
   "include": [
-    "components/**/*",
-    "hooks/**/*",
-    "lib/**/*",
-    "utils/**/*",
-    "templates/**/*",
-    "index.ts"
+    "src/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

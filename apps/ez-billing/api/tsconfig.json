@@ -2,11 +2,11 @@
   "extends": "@workspace/typescript-config/api.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "types": ["jest", "node"],
     "typeRoots": ["../../../packages/types", "./node_modules/@types"],
     "strict": false
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../../packages/types/**/*.d.ts"],
+  "include": ["src/**/*", "../../../packages/types/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
