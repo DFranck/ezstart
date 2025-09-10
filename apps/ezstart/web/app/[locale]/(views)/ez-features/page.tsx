@@ -1,11 +1,11 @@
 import { FeatureItem } from '@/types/feature';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import { H1, Main, Section } from '@ezstart/ui/components';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { FeatureSection } from './[feature]/components/section-feature';
 
-export default function EzFeaturesPage() {
-  const t = useTranslations('features');
+export default async function EzFeaturesPage() {
+  const t = await getTranslations('features');
   const features = getTranslationArray<FeatureItem>(t, 'items');
 
   return (

@@ -1,11 +1,11 @@
 import { LibraryItem } from '@/types/library'
 import { getTranslationArray } from '@/utils/get-translation-array'
 import { H1, H2, Main, P, Section } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LibSection } from './[lib]/components/section-lib'
 
-export default function EzLibs() {
-  const t = useTranslations('libraries')
+export default async function EzLibs() {
+  const t = await getTranslations('libraries')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   return (
     <Main withHeaderOffset>
