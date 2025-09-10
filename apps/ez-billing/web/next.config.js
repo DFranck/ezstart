@@ -1,1 +1,1 @@
-export { baseConfig as default } from '@workspace/next-config/base.js'
+export { baseConfig as default } from '@ezstart/next-config/base.js'

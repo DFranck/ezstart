@@ -15,6 +15,7 @@
   "dependencies": {
     "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
+    "@ezstart/web-core": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@tanstack/react-virtual": "^3.13.8",
     "deepmerge": "^4.3.1",
@@ -33,10 +34,10 @@
     "@types/node": "^20",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/next-config": "workspace:*",
-    "@workspace/tailwind-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@ezstart/eslint-config": "workspace:*",
+    "@ezstart/next-config": "workspace:*",
+    "@ezstart/tailwind-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
   }
 }

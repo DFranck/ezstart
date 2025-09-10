@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { cn } from '../lib';
-import { Button } from './button';
+import { cn } from '../lib'
+import { Button } from './button'
 
 export const Burger = ({
   setIsOpen,
@@ -9,23 +9,24 @@ export const Burger = ({
   className,
   ...props
 }: {
-  setIsOpen?: (isOpen: boolean) => void;
-  isOpen: boolean;
-  className?: string;
-  [key: string]: any;
+  setIsOpen?: (isOpen: boolean) => void
+  isOpen: boolean
+  className?: string
+  [key: string]: any
 }) => {
   const handleClick = () => {
     if (setIsOpen) {
-      setIsOpen(!isOpen);
+      setIsOpen(!isOpen)
     }
-  };
+  }
   return (
     <Button
       onClick={handleClick}
       size={'sm'}
       variant={'ghost'}
       className={cn(
-        'relative cursor-pointer flex flex-col justify-center items-center ',
+        'relative cursor-pointer flex flex-col justify-center items-center',
+        { 'pointer-events-none': isOpen },
         className
       )}
       {...props}
@@ -49,5 +50,5 @@ export const Burger = ({
         )}
       />
     </Button>
-  );
-};
+  )
+}

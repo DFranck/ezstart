@@ -1,4 +1,4 @@
-import skillsJson from '@/public/json/skills.json';
+import skillsJson from '../../public/json/skills.json';
 import { mapProjectTechToSkills } from '@/utils/map-project-tech-to-skills';
 import { Icon, LI, UL, isValidIconName } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';

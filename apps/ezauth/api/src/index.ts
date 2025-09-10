@@ -5,7 +5,7 @@ import authRoutes, { authRegistry } from './routes/auth.routes.js'
 // Load environment variables
 dotenv.config()
 
-const PORT = process.env.PORT || 8001
+const PORT = process.env.PORT || 8081
 
 // Create app with standard configuration
 const app = createApp()

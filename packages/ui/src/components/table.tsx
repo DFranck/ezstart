@@ -13,7 +13,7 @@ Table.displayName = 'Table'
 
 export const TableHeader = forwardRef<HTMLTableSectionElement, ComponentProps<'thead'>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={`bg-gray-50 ${className || ''}`} {...props} />
+    <thead ref={ref} className={`bg-muted ${className || ''}`} {...props} />
   )
 )
 TableHeader.displayName = 'TableHeader'
@@ -22,7 +22,7 @@ export const TableBody = forwardRef<HTMLTableSectionElement, ComponentProps<'tbo
   ({ className, ...props }, ref) => (
     <tbody
       ref={ref}
-      className={`bg-white divide-y divide-gray-200 ${className || ''}`}
+      className={`bg-muted/50 divide-y divide-gray-200 ${className || ''}`}
       {...props}
     />
   )
@@ -31,7 +31,7 @@ TableBody.displayName = 'TableBody'
 
 export const TableRow = forwardRef<HTMLTableRowElement, ComponentProps<'tr'>>(
   ({ className, ...props }, ref) => (
-    <tr ref={ref} className={`hover:bg-gray-50 ${className || ''}`} {...props} />
+    <tr ref={ref} className={`hover:bg-muted ${className || ''}`} {...props} />
   )
 )
 TableRow.displayName = 'TableRow'
@@ -40,7 +40,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, ComponentProps<'th'>>(
   ({ className, ...props }, ref) => (
     <th
       ref={ref}
-      className={`px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${className || ''}`}
+      className={`px-3 py-2 text-left text-xs font-medium text-foreground uppercase tracking-wider ${className || ''}`}
       {...props}
     />
   )

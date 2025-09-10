@@ -181,12 +181,12 @@ export function InvoiceModal({
       title={invoice ? 'Edit Invoice' : 'Create Invoice'}
       description={invoice ? 'Update invoice information' : 'Create a new invoice for your client'}
       footer={
-        <div className="flex gap-3 justify-end bg-white/70 backdrop-blur-sm border-t border-white/20 p-6 -m-6 mt-6">
+        <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+            className="bg-white/60 backdrop-blur-sm border-white/30  hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
             Cancel
@@ -209,7 +209,7 @@ export function InvoiceModal({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!clientId && (
               <div>
-                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:User" className="w-4 h-4 mr-2 text-indigo-500" />
                   Client *
                 </Label>
@@ -240,7 +240,7 @@ export function InvoiceModal({
             )}
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-indigo-500" />
                 Bill on behalf of
               </Label>
@@ -277,7 +277,7 @@ export function InvoiceModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-indigo-500" />
                 Payment Method
               </Label>
@@ -342,7 +342,7 @@ export function InvoiceModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-indigo-500" />
                 Currency
               </Label>
@@ -367,7 +367,7 @@ export function InvoiceModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-indigo-500" />
                 Due Date
               </Label>
@@ -385,7 +385,7 @@ export function InvoiceModal({
             </div>
 
             <div>
-              <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="">
                 <div className="flex items-center space-x-3 mb-4">
                   <Checkbox
                     id="showTaxes"
@@ -402,15 +402,15 @@ export function InvoiceModal({
                   />
                   <Label
                     htmlFor="showTaxes"
-                    className="text-sm font-medium text-gray-700 flex items-center cursor-pointer"
+                    className="text-sm font-medium  flex items-center cursor-pointer"
                   >
                     <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-orange-500" />
-                    Prices are excluding taxes (HT)
+                    Add Taxes
                   </Label>
                 </div>
                 {showTaxes && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                    <Label className="text-sm font-medium  mb-3 block flex items-center">
                       <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-orange-500" />
                       Tax Rate (%)
                     </Label>
@@ -426,7 +426,7 @@ export function InvoiceModal({
                           taxRate: parseFloat(e.target.value.replace(',', '.')) || 0,
                         })
                       }
-                      className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="w-full  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
                     />
                   </div>
                 )}
@@ -434,28 +434,28 @@ export function InvoiceModal({
             </div>
           </div>
 
-          <div className="bg-white/30 backdrop-blur-sm rounded-2xl border border-white/20">
+          <div>
             <div className="flex items-center mb-6">
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-purple-500" />
-              <H3 className="text-xl font-bold text-gray-900">Line Items</H3>
+              <H3 className="text-xl font-bold ">Line Items</H3>
             </div>
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/30 overflow-hidden">
+            <div className=" rounded-xl overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
-                    <TableHead className="font-semibold text-gray-700">
+                  <TableRow>
+                    <TableHead className="font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                         Description
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700">
+                    <TableHead className="font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
                         Qty
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700">
+                    <TableHead className="font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
                         Price
@@ -473,7 +473,7 @@ export function InvoiceModal({
                           value={item.label}
                           onChange={e => updateLineItem(index, 'label', e.target.value)}
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className="focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -491,7 +491,7 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className=" border-white/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -509,7 +509,7 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className=" backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -532,7 +532,7 @@ export function InvoiceModal({
               type="button"
               variant="outline"
               onClick={addLineItem}
-              className="mt-4 bg-white/60 backdrop-blur-sm border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 px-4 py-2 rounded-xl transition-all duration-200"
+              className="mt-4 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 px-4 py-2 rounded-xl transition-all duration-200"
             >
               <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
               Add Line Item
@@ -540,28 +540,28 @@ export function InvoiceModal({
           </div>
 
           {/* Totals */}
-          <div className="bg-gradient-to-r from-indigo-100/60 to-purple-100/60 backdrop-blur-sm p-6 rounded-2xl border border-white/30 shadow-lg">
+          <div>
             <div className="flex items-center mb-4">
               <Icon name="lucide:Calculator" className="w-5 h-5 mr-2 text-indigo-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Invoice Summary</h3>
+              <h3 className="text-lg font-semibold ">Invoice Summary</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm bg-white/40 backdrop-blur-sm rounded-lg p-3">
-                <span className="flex items-center font-medium text-gray-700">
+              <div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
+                <span className="flex items-center font-medium ">
                   <Icon name="lucide:Minus" className="w-4 h-4 mr-2" />
                   Subtotal:
                 </span>
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold ">
                   {subtotal.toFixed(2)} {formData.currency}
                 </span>
               </div>
               {showTaxes && (
-                <div className="flex justify-between items-center text-sm bg-white/40 backdrop-blur-sm rounded-lg p-3">
-                  <span className="flex items-center font-medium text-gray-700">
+                <div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
+                  <span className="flex items-center font-medium ">
                     <Icon name="lucide:Percent" className="w-4 h-4 mr-2" />
                     Tax ({formData.taxRate}%):
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold ">
                     {taxAmount.toFixed(2)} {formData.currency}
                   </span>
                 </div>
@@ -579,7 +579,7 @@ export function InvoiceModal({
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+            <Label className="text-sm font-medium  mb-3 block flex items-center">
               <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-indigo-500" />
               Notes
             </Label>
@@ -593,7 +593,7 @@ export function InvoiceModal({
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+            <Label className="text-sm font-medium  mb-3 block flex items-center">
               <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-indigo-500" />
               Terms & Conditions
             </Label>

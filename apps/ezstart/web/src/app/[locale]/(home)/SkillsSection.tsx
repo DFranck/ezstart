@@ -1,5 +1,5 @@
 'use client'
-import skillData from '@/public/json/skills.json'
+import skillData from '../../../../public/json/skills.json'
 import { Skills } from '@/types/skill'
 import { H2, H3, Icon, KnownIconName, LI, Section, UL } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'

@@ -1,6 +1,6 @@
+import type { AbstractIntlMessages, Locale } from 'next-intl'
 import * as React from 'react'
 import { ClientProviders, SimpleClientProviders } from './client-providers.js'
-import type { AbstractIntlMessages, Locale } from 'next-intl'
 
 export interface WebProvidersProps {
   children: React.ReactNode
@@ -19,9 +19,11 @@ export function WebProviders(props: WebProvidersProps) {
 export function SimpleWebProviders({
   children,
   appName,
+  redirectAfterLogin,
 }: {
   children: React.ReactNode
   appName: string
+  redirectAfterLogin?: string
 }) {
-  return <SimpleClientProviders appName={appName}>{children}</SimpleClientProviders>
+  return <SimpleClientProviders appName={appName} redirectAfterLogin={redirectAfterLogin}>{children}</SimpleClientProviders>
 }

@@ -30,6 +30,9 @@ function LoginContent() {
         <CardDescription>
           Sign in to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
+        <P variant={'description'} size={'xs'}>
+          🌟 <strong>One account, all EZStart apps!</strong>
+        </P>
       </CardHeader>
 
       <CardContent className="space-y-6">

@@ -18,14 +18,13 @@ const baseConfig = {
   },
 }
 
-const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
-const withPWAConfig = withPWA({
+const pwaConfig = withPWA({
   dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  buildExcludes: [/middleware-manifest\.json$/],
 })
 
-export default withPWAConfig(withNextIntl(baseConfig))
+export default withNextIntl(pwaConfig(baseConfig))

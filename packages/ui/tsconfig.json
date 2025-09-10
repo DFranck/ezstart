@@ -1,6 +1,6 @@
 // @ezstart/packages/ui/tsconfig.json
 {
-  "extends": "@workspace/typescript-config/react-library.json",
+  "extends": "@ezstart/typescript-config/react-library.json",
 
   "compilerOptions": {
     "outDir": "./dist",

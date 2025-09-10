@@ -7,6 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  P,
   Span,
   ThemeSwitcher,
 } from '@ezstart/ui/components'
@@ -28,6 +29,9 @@ function RegisterContent() {
         <CardDescription>
           Create account to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
+        <P variant={'description'} size={'xs'}>
+          🌟 <strong>One account, all EZStart apps!</strong>
+        </P>
       </CardHeader>
 
       <CardContent className="space-y-6">

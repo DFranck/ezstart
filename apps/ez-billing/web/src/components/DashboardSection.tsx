@@ -46,6 +46,7 @@ const DashboardSection = ({
               <div
                 className={cn(
                   'w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center',
+                  'hidden sm:flex',
                   iconGradient
                 )}
               >

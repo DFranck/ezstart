@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/tailwind-config",
+  "name": "@ezstart/tailwind-config",
   "version": "0.0.1",
   "description": "Shared Tailwind CSS configuration for @ezstart monorepo",
   "main": "./src/base.js",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "tailwindcss": "^4.1.11",
-    "@workspace/typescript-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
   }
 }

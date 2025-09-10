@@ -1,19 +1,11 @@
-import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
-import { Providers } from '@/providers/providers'
+import { SimpleWebProviders } from '@ezstart/web-core/providers'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
-import { hasLocale } from 'next-intl'
-import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { notFound } from 'next/navigation'
 
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { PWAInstallPrompt } from '@ezstart/ui/components'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
-
-export function generateStaticParams() {
-  return routing.locales.map(locale => ({ locale }))
-}
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -25,21 +17,10 @@ const fontMono = Geist_Mono({
   variable: '--font-mono',
 })
 
-export default async function LocaleLayout(props: {
-  children: React.ReactNode
-  params: Promise<{ locale: string }>
-}) {
-  const { children, params } = props
-  const { locale } = await params
-
-  if (!hasLocale(routing.locales, locale)) notFound()
-  setRequestLocale(locale)
-
-  const messages = await getMessages()
-  const timeZone = getTimeZoneFromLocale(locale)
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 
   return (
-    <html lang={locale} suppressHydrationWarning className="">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <meta name="application-name" content="Tower Defense" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -66,7 +47,7 @@ export default async function LocaleLayout(props: {
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:url" content="https://tower-defense.vercel.app" />
         <meta name="twitter:title" content="Tower Defense" />
-        <meta name="twitter:description" content="Competitive multiplayer Tower Defense game" />
+        <meta name="twitter:description" content="Competitive multilayer Tower Defense game" />
         <meta
           name="twitter:image"
           content="https://tower-defense.vercel.app/icons/icon-192x192.png"
@@ -86,15 +67,14 @@ export default async function LocaleLayout(props: {
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <ErrorBoundary>
-          <Providers messages={messages} locale={locale} timeZone={timeZone}>
+          <SimpleWebProviders appName="tower-defense">
             <GamesSocketProvider>{children}</GamesSocketProvider>
-          </Providers>
+          </SimpleWebProviders>
           <Toaster />
           <PWAInstallPrompt 
             appName="Tower Defense"
             description="Installez l'application pour un accès rapide et une meilleure expérience de jeu"
           />
-          {/* <DebugPanelWrapper /> */}
         </ErrorBoundary>
       </body>
     </html>

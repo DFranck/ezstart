@@ -1,5 +1,5 @@
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
 import '@ezstart/ui/globals.css'
+import { SimpleWebProviders } from '@ezstart/web-core/providers'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'

@@ -11,16 +11,11 @@
     "dev:ez": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui...",
-    "gen:readme": "tsx scripts/generate-readmes.ts",
-    "gen:types": "tsx scripts/generate-readmes-types.ts",
-    "gen:structure": "tsx scripts/generate-structures.ts",
-    "gen:config": "tsx scripts/generate-config.ts",
     "check:typecheck": "tsx scripts/check-typecheck.ts",
     "export:public": "tsx scripts/export-to-public.ts",
     "lint": "turbo run lint",
-    "prune": "ts-prune -p tsconfig.json > prune-report.txt",
     "typecheck": "turbo run typecheck",
-    "clean": "tsx scripts/clean.ts"
+    "check:ports": "netstat -ano | findstr \":3000 :3001 :4000 :4001 :5000 :5001 :6000 :6001 :7000 :7001 :8000 :8001 :8080 :8081 \""
   },
   "jest": {
     "projects": [
@@ -30,8 +25,8 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
-    "@workspace/eslint-config": "workspace:*",
-    "@workspace/typescript-config": "workspace:*",
+    "@ezstart/eslint-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
     "eslint": "^9.27.0",
     "fs-extra": "^11.3.0",
     "jest": "^29.7.0",

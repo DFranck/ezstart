@@ -13,20 +13,18 @@ function getEZAuthUrls() {
     // In browser, check the current hostname
     const hostname = window.location.hostname
     const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
-    
+
     return {
-      apiBaseURL: isProduction 
+      apiBaseURL: isProduction
         ? 'https://ezauth-oblm.onrender.com/api/auth'
-        : 'http://localhost:8001/api/auth',
-      webBaseURL: isProduction
-        ? 'https://ezauth.vercel.app'
-        : 'http://localhost:8080'
+        : 'http://localhost:8081/api/auth',
+      webBaseURL: isProduction ? 'https://ezauth.vercel.app' : 'http://localhost:8080',
     }
   } else {
     // On server, use a safe default (production URLs)
     return {
       apiBaseURL: 'https://ezauth-oblm.onrender.com/api/auth',
-      webBaseURL: 'https://ezauth.vercel.app'
+      webBaseURL: 'https://ezauth.vercel.app',
     }
   }
 }
@@ -39,7 +37,7 @@ export class AuthClient {
     this.urls = getEZAuthUrls()
     this.config = {
       ...config,
-      baseURL: config.baseURL || this.urls.apiBaseURL
+      baseURL: config.baseURL || this.urls.apiBaseURL,
     }
   }
 
@@ -66,7 +64,6 @@ export class AuthClient {
     const authUrl = `${this.urls.webBaseURL}/register?${params.toString()}`
     window.location.href = authUrl
   }
-  
 
   // Exchange authorization code for access token
   async exchangeCode(code: string): Promise<AuthToken> {

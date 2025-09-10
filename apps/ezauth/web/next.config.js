@@ -1,4 +1,4 @@
-import { baseConfig } from '@workspace/next-config/base.js'
+import { baseConfig } from '@ezstart/next-config/base.js'
 import deepmerge from 'deepmerge'
 
 /** @type {import('next').NextConfig} */

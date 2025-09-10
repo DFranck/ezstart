@@ -1,5 +1,5 @@
 import { Client } from '@ez-billing/types'
-import { Button, Card, CardContent, Icon } from '@ezstart/ui/components'
+import { Badge, Button, Card, CardContent, Icon } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
 type Props = {
@@ -39,15 +39,9 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
 
           {/* Client Type Badge */}
           <div className="absolute top-3 right-3">
-            <span
-              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                client.isCompany
-                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
-                  : 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-              }`}
-            >
+            <Badge variant={client.isCompany ? 'purple' : 'success'}>
               {client.isCompany ? 'Company' : 'Individual'}
-            </span>
+            </Badge>
           </div>
 
           {/* Floating Actions */}

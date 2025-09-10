@@ -22,9 +22,8 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
-import { runWithFeedback } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
-import { callApi } from '@ezstart/ui/utils'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
@@ -139,42 +138,13 @@ export function QuoteModal({
       title={quote ? 'Edit Quote' : 'Create Quote'}
       description={quote ? 'Update quote information' : 'Create a new quote for your client'}
       footer={
-        <div className="bg-white/70 backdrop-blur-sm border-t border-white/20 p-6 -m-6 mt-6 space-y-4">
-          {/* Totals */}
-          <div className="bg-gradient-to-r from-amber-100/60 to-orange-100/60 backdrop-blur-sm p-4 rounded-xl border border-white/30 shadow-lg">
-            <div className="flex items-center mb-3">
-              <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-amber-600" />
-              <h4 className="font-semibold text-gray-900">Quote Summary</h4>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm bg-white/40 backdrop-blur-sm rounded-lg p-2">
-                <span className="font-medium text-gray-700">Subtotal:</span>
-                <span className="font-semibold">
-                  {subtotal.toFixed(2)} {formData.currency}
-                </span>
-              </div>
-              {showTaxes && (
-                <div className="flex justify-between text-sm bg-white/40 backdrop-blur-sm rounded-lg p-2">
-                  <span className="font-medium text-gray-700">Tax ({formData.taxRate}%):</span>
-                  <span className="font-semibold">
-                    {taxAmount.toFixed(2)} {formData.currency}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-3 shadow">
-                <span className="font-bold">Total:</span>
-                <span className="font-bold text-lg">
-                  {total.toFixed(2)} {formData.currency}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="space-y-4">
           <div className="flex gap-3 justify-end">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="bg-white/60 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+              className="bg-white/60 backdrop-blur-sm border-white/30  hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Icon name="lucide:X" className="w-4 h-4 mr-2" />
               Cancel
@@ -193,12 +163,12 @@ export function QuoteModal({
         </div>
       }
     >
-      <div className="bg-gradient-to-br from-amber-50/50 via-white to-orange-50/50 rounded-2xl p-6 border border-white/20">
-        <form id="quote-form" onSubmit={handleSubmit} className="space-y-6">
+      <div className="">
+        <form id="quote-form" onSubmit={handleSubmit} className="space-y-6 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!clientId && (
               <div>
-                <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:User" className="w-4 h-4 mr-2 text-amber-500" />
                   Client *
                 </Label>
@@ -225,7 +195,7 @@ export function QuoteModal({
             )}
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-amber-500" />
                 Bill on behalf of
               </Label>
@@ -258,7 +228,7 @@ export function QuoteModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-amber-500" />
                 Currency
               </Label>
@@ -283,7 +253,7 @@ export function QuoteModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+              <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-amber-500" />
                 Valid Until
               </Label>
@@ -301,7 +271,7 @@ export function QuoteModal({
             </div>
 
             <div>
-              <div className="bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="">
                 <div className="flex items-center space-x-3 mb-4">
                   <Checkbox
                     id="showTaxes"
@@ -318,15 +288,15 @@ export function QuoteModal({
                   />
                   <Label
                     htmlFor="showTaxes"
-                    className="text-sm font-medium text-gray-700 flex items-center cursor-pointer"
+                    className="text-sm font-medium  flex items-center cursor-pointer"
                   >
                     <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-orange-500" />
-                    Prices are excluding taxes (HT)
+                    Add Taxes
                   </Label>
                 </div>
                 {showTaxes && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+                    <Label className="text-sm font-medium  mb-3 block flex items-center">
                       <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-orange-500" />
                       Tax Rate (%)
                     </Label>
@@ -347,28 +317,28 @@ export function QuoteModal({
             </div>
           </div>
 
-          <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+          <div>
             <div className="flex items-center mb-6">
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-orange-500" />
-              <H3 className="text-xl font-bold text-gray-900">Line Items</H3>
+              <H3 className="text-xl font-bold ">Line Items</H3>
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/30 overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-amber-500/10 to-orange-500/10">
-                    <TableHead className="font-semibold text-gray-700">
+                    <TableHead className="font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                         Description
                       </div>
                     </TableHead>
-                    <TableHead className="w-20 font-semibold text-gray-700">
+                    <TableHead className="w-20 font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
                         Qty
                       </div>
                     </TableHead>
-                    <TableHead className="w-24 font-semibold text-gray-700">
+                    <TableHead className="w-24 font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
                         Price
@@ -442,9 +412,37 @@ export function QuoteModal({
               Add Line Item
             </Button>
           </div>
-
+          {/* Totals */}
+          <div className="">
+            <div className="flex items-center mb-3">
+              <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-amber-600" />
+              <h4 className="font-semibold ">Quote Summary</h4>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
+                <span className="font-medium ">Subtotal:</span>
+                <span className="font-semibold">
+                  {subtotal.toFixed(2)} {formData.currency}
+                </span>
+              </div>
+              {showTaxes && (
+                <div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
+                  <span className="font-medium ">Tax ({formData.taxRate}%):</span>
+                  <span className="font-semibold">
+                    {taxAmount.toFixed(2)} {formData.currency}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-3 shadow">
+                <span className="font-bold">Total:</span>
+                <span className="font-bold text-lg">
+                  {total.toFixed(2)} {formData.currency}
+                </span>
+              </div>
+            </div>
+          </div>
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+            <Label className="text-sm font-medium  mb-3 block flex items-center">
               <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-amber-500" />
               Notes
             </Label>
@@ -458,7 +456,7 @@ export function QuoteModal({
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block flex items-center">
+            <Label className="text-sm font-medium  mb-3 block flex items-center">
               <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-amber-500" />
               Terms & Conditions
             </Label>

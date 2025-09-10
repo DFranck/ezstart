@@ -1,8 +1,6 @@
-'use client'
-
 import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
-import { useAuthStoreSSR } from './store.js'
+import { useAuthStore } from './store.js'
 
 interface AuthContextValue {
   client: AuthClient
@@ -16,20 +14,19 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, appName }: AuthProviderProps) {
-  const store = useAuthStoreSSR()
-  
+  const store = useAuthStore()
+
   // Create client lazily to avoid SSR issues
   const getClient = () => {
-    const redirectUri = typeof window !== 'undefined' 
-      ? `${window.location.origin}/auth/callback`
-      : '/auth/callback'
-    
+    const redirectUri =
+      typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'
+
     return createAuthClient({
       appName,
       redirectUri,
     })
   }
-  
+
   const client = getClient()
 
   // Auto-verify token on mount and periodically (but NOT on callback pages)
@@ -77,7 +74,7 @@ export function useAuthContext() {
 // Main auth hook
 export function useAuth() {
   const { client } = useAuthContext()
-  const store = useAuthStoreSSR()
+  const store = useAuthStore()
 
   const login = (additionalParams?: Record<string, string>) => {
     client.redirectToLogin(additionalParams)

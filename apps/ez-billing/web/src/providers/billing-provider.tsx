@@ -15,11 +15,14 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // Start with loading true until first fetch completes
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
   const refetchAll = useCallback(async () => {
-    if (!user || !isAuthenticated) return
+    if (!user || !isAuthenticated) {
+      setLoading(false) // Not loading if not authenticated
+      return
+    }
     setLoading(true)
     try {
       const userId = getUserId()

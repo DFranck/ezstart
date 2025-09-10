@@ -68,14 +68,13 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
 
       // Redirect with authorization code
       if (redirect_uri) {
+        console.log('🔀 Redirecting to:', redirect_uri)
         const url = new URL(redirect_uri)
         url.searchParams.set('code', result.code)
         window.location.href = url.toString()
       } else {
-        // Default redirect for development
-        const devUrl = new URL(`http://localhost:8080/auth/callback`)
-        devUrl.searchParams.set('code', result.code)
-        window.location.href = devUrl.toString()
+        console.error('❌ No redirect_uri provided! Cannot redirect after login.')
+        throw new Error('No redirect URL configured. Please provide redirect_uri parameter.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')

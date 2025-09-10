@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/next-config",
+  "name": "@ezstart/next-config",
   "version": "0.0.1",
   "description": "Shared Next.js configurations for @ezstart monorepo",
   "main": "./src/base.js",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "next": "^15.5.2",
-    "@workspace/typescript-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
   }
 }

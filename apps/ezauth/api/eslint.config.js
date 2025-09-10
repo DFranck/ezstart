@@ -1,2 +1,2 @@
-import { config as baseConfig } from '@workspace/eslint-config/base'
+import { config as baseConfig } from '@ezstart/eslint-config/base'
 export default baseConfig
