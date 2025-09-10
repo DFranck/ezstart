@@ -1,4 +1,3 @@
-'use client';
 import { FeatureItem } from '@/types/feature';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import { H1, Main, Section } from '@ezstart/ui/components';
