@@ -3,13 +3,13 @@ import { LibraryItem } from '@/types/library'
 import { getTranslationArray } from '@/utils/get-translation-array'
 import { Button, Div, H3, H4, Icon, P, Section } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Image from 'next/image'
 import Link from 'next/link'
 
 export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const { isMobile } = useDevice()
-  const t = useTranslations('libraries')
+  const t = useSafeTranslations('libraries')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === libTitle.toLowerCase())
   if (!lib) {

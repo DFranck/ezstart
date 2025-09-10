@@ -3,12 +3,12 @@
 import { Icon, Tag } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'
 
 export function Footer() {
   const { isMobile } = useDevice()
-  const t = useTranslations('footer')
+  const t = useSafeTranslations('footer')
   return (
     <Tag
       as="footer"

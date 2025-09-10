@@ -3,14 +3,14 @@ import skillData from '@/public/json/skills.json'
 import { Skills } from '@/types/skill'
 import { H2, H3, Icon, KnownIconName, LI, Section, UL } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 
 type Props = {
   id?: string
 }
 
 export const SkillsSection = ({ id }: Props) => {
-  const t = useTranslations('skills')
+  const t = useSafeTranslations('skills')
   const { isMobile } = useDevice()
 
   return (

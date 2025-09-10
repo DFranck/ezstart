@@ -3,13 +3,13 @@
 import ContactsList from '@/components/contactsList';
 import { LampContainer } from '@/components/ui/lamp';
 import { H2, P } from '@ezstart/ui/components';
-import { useTranslations } from 'next-intl';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { FC, HTMLAttributes } from 'react';
 
 type Props = HTMLAttributes<HTMLElement>;
 
 const ContactSection: FC<Props> = ({ className, ...rest }) => {
-  const t = useTranslations('contact');
+  const t = useSafeTranslations('contact');
 
   return (
     <LampContainer className={` ${className ?? ''}`} {...rest}>

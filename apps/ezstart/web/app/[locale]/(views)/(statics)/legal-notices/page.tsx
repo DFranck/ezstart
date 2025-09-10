@@ -1,5 +1,7 @@
+'use client';
+
 import { Button, H2, H3, Icon, Main, P, Section } from '@ezstart/ui/components';
-import { useTranslations } from 'next-intl';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import Link from 'next/link';
 
 type LegalSection = {
@@ -20,7 +22,7 @@ const icons: Record<string, React.ReactNode> = {
 };
 
 const LegalNoticesPage = () => {
-  const t = useTranslations('legal-notices');
+  const t = useSafeTranslations('legal-notices');
   const sections = t.raw('sections') as LegalSection[];
 
   return (

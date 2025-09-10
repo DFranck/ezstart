@@ -1,3 +1,5 @@
+'use client';
+
 import { FlippingGallery } from '@/components/ui/flipping-gallery';
 import { MacbookScroll } from '@/components/ui/macbook-scroll';
 import { useTranslations } from 'next-intl';

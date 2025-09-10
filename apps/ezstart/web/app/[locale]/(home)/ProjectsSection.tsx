@@ -5,14 +5,14 @@ import { ProjectItem } from '@/types/projects';
 import { getTranslationArray } from '@/utils/get-translation-array';
 import { H2, Section, UL } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
-import { useTranslations } from 'next-intl';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { FC, HTMLAttributes } from 'react';
 
 type Props = HTMLAttributes<HTMLElement>;
 
 const ProjectsSection: FC<Props> = ({ className, ...rest }) => {
   const { isMobile } = useDevice();
-  const t = useTranslations('projects');
+  const t = useSafeTranslations('projects');
   const projects = getTranslationArray<ProjectItem>(t, 'items');
   return (
     <Section className={className} {...rest} size={isMobile ? 'xs' : 'lg'}>

@@ -12,13 +12,13 @@ import {
   tagVariantsKeys,
   UL,
 } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'
 import { HeaderLib } from '../components/header-lib'
 
 const EzTagPage = () => {
-  const t = useTranslations('libraries')
-  const commonT = useTranslations('common')
+  const t = useSafeTranslations('libraries')
+  const commonT = useSafeTranslations('common')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === 'tag')
 

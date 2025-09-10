@@ -133,6 +133,8 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `monitor/api`, etc.) utilisent 
 ### Gestion des Processus Background
 - **TOUJOURS** tuer les processus background après utilisation avec `KillBash`
 - **NE JAMAIS** laisser des serveurs de développement tourner en arrière-plan
+- **PROBLÈME FRÉQUENT** : Les processus Node.js persistent même après `KillBash`, causant l'incrémentation des ports
+- **SOLUTION** : Utiliser Ctrl+C dans le terminal ou redémarrer VS Code pour tuer tous les processus Node.js
 - Utiliser `run_in_background: true` avec parcimonie et toujours nettoyer après
 - Vérifier avec `BashOutput` avant de tuer le processus
 - Exemple correct :

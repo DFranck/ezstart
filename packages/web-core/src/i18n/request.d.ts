@@ -1,4 +1,0 @@
-declare const _default: (params: import("next-intl/server", { with: { "resolution-mode": "import" } }).GetRequestConfigParams) => import("next-intl/server", { with: { "resolution-mode": "import" } }).RequestConfig | Promise<import("next-intl/server", { with: { "resolution-mode": "import" } }).RequestConfig>;
-export default _default;
-export declare function createRequestConfig(messagesPath?: string): (params: import("next-intl/server", { with: { "resolution-mode": "import" } }).GetRequestConfigParams) => import("next-intl/server", { with: { "resolution-mode": "import" } }).RequestConfig | Promise<import("next-intl/server", { with: { "resolution-mode": "import" } }).RequestConfig>;
-//# sourceMappingURL=request.d.ts.map

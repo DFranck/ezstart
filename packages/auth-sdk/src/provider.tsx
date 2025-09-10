@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
 import { useAuthStoreSSR } from './store.js'

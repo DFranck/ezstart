@@ -3,7 +3,7 @@
 import { LibraryItem } from '@/types/library';
 import { Button, H3, Icon, P } from '@ezstart/ui/components';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +15,7 @@ export const FlippingGallery = ({
   items: LibraryItem[];
   autoplay?: boolean;
 }) => {
-  const t = useTranslations('common');
+  const t = useSafeTranslations('common');
   const [active, setActive] = useState(0);
   const [rotations, setRotations] = useState<number[]>([]);
 

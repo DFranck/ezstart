@@ -3,14 +3,14 @@
 import { SkillShowcase } from '@/components/JobShowing'
 import { AuroraBackground } from '@/components/ui/aurora-background'
 import { Div, H1, Section, TextGradient } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Image from 'next/image'
 import ContactsList from '../../../components/contactsList'
 
 type Props = { id?: string }
 
 const HeroSection = ({ id }: Props) => {
-  const t = useTranslations('home.hero')
+  const t = useSafeTranslations('home.hero')
   const skillsShowcase = t.raw('skillsShowcase') as Array<{
     first: string
     second: string

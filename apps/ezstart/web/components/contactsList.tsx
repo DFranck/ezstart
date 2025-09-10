@@ -1,14 +1,14 @@
 import { Button, Icon, isValidIconName, LI, UL } from '@ezstart/ui/components';
 import { useDevice } from '@ezstart/ui/hooks';
 import { cn } from '@ezstart/ui/lib';
-import { useTranslations } from 'next-intl';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import Link from 'next/link';
 
 type Props = { className?: string };
 
 const ContactsList = ({ className }: Props) => {
   const { isMobile } = useDevice();
-  const t = useTranslations('contact');
+  const t = useSafeTranslations('contact');
   const links = t.raw('links') as {
     label: string;
     href: string;

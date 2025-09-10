@@ -3,14 +3,14 @@
 import { LibraryContentLink, LibraryItem } from '@/types/library'
 import { getTranslationArray } from '@/utils/get-translation-array'
 import { customIconMap, H3, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import IconPlayground from '../(Icon)/IconPlayground'
 import { HeaderLib } from '../components/header-lib'
 
 const EzIconPage = () => {
-  const t = useTranslations('libraries')
+  const t = useSafeTranslations('libraries')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === 'icon')
   const contentItems = getTranslationArray<LibraryContentLink>(lib?.content, 'items')

@@ -1,7 +1,8 @@
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
 import { PWAInstallPrompt, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
-import { WebProviders } from '@ezstart/web-core/providers'
+import { IntlProvider, ThemeProvider } from '@ezstart/web-core'
+import { AuthProvider } from '@ezstart/auth-sdk'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
@@ -63,9 +64,17 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
-        <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
-          <ClientLayout>{children}</ClientLayout>
-        </WebProviders>
+        <ThemeProvider>
+          <AuthProvider appName="ezstart">
+            <IntlProvider
+              messages={messages}
+              locale={locale}
+              timeZone={timeZone}
+            >
+              <ClientLayout>{children}</ClientLayout>
+            </IntlProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <Toaster />
         <PWAInstallPrompt appName="EZStart" />
       </body>
