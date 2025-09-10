@@ -1,13 +1,6 @@
-'use client'
-
-import { AuthProvider } from '@ezstart/auth-sdk'
-import {
-  AbstractIntlMessages,
-  Locale,
-  NextIntlClientProvider,
-} from 'next-intl'
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import * as React from 'react'
+import { ClientProviders, SimpleClientProviders } from './client-providers.js'
+import type { AbstractIntlMessages, Locale } from 'next-intl'
 
 export interface WebProvidersProps {
   children: React.ReactNode
@@ -17,38 +10,12 @@ export interface WebProvidersProps {
   appName: string
 }
 
-export function WebProviders({
-  children,
-  messages,
-  locale,
-  timeZone,
-  appName,
-}: WebProvidersProps) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <AuthProvider appName={appName}>
-        {messages && locale && timeZone ? (
-          <NextIntlClientProvider
-            messages={messages}
-            locale={locale}
-            timeZone={timeZone}
-          >
-            {children}
-          </NextIntlClientProvider>
-        ) : (
-          children
-        )}
-      </AuthProvider>
-    </NextThemesProvider>
-  )
+// Server-side wrapper qui utilise le composant client
+export function WebProviders(props: WebProvidersProps) {
+  return <ClientProviders {...props} />
 }
 
-// Pour les apps sans i18n avec sync theme depuis URL
+// Pour les apps sans i18n
 export function SimpleWebProviders({
   children,
   appName,
@@ -56,46 +23,5 @@ export function SimpleWebProviders({
   children: React.ReactNode
   appName: string
 }) {
-  return (
-    <SimpleThemeProvider>
-      <AuthProvider appName={appName}>
-        {children}
-      </AuthProvider>
-    </SimpleThemeProvider>
-  )
-}
-
-// Composant séparé pour gérer le theme sync une seule fois
-function SimpleThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-    
-    // Sync theme depuis URL une seule fois au mount
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const themeParam = urlParams.get('theme')
-      if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
-        // Force le theme depuis l'URL sans affecter le defaultTheme
-        document.documentElement.setAttribute('data-theme', themeParam)
-        if (themeParam === 'dark') {
-          document.documentElement.classList.add('dark')
-        } else if (themeParam === 'light') {
-          document.documentElement.classList.remove('dark')
-        }
-      }
-    }
-  }, [])
-
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-    </NextThemesProvider>
-  )
+  return <SimpleClientProviders appName={appName}>{children}</SimpleClientProviders>
 }
