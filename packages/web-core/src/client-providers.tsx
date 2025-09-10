@@ -72,21 +72,41 @@ function SimpleThemeProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     setMounted(true)
     
-    // Sync theme depuis URL une seule fois au mount
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const themeParam = urlParams.get('theme')
-      if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
-        // Force le theme depuis l'URL sans affecter le defaultTheme
-        document.documentElement.setAttribute('data-theme', themeParam)
-        if (themeParam === 'dark') {
-          document.documentElement.classList.add('dark')
-        } else if (themeParam === 'light') {
-          document.documentElement.classList.remove('dark')
+    // Sync theme depuis URL une seule fois au mount, mais seulement après hydratation
+    const syncThemeFromURL = () => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const themeParam = urlParams.get('theme')
+        if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
+          // Force le theme depuis l'URL sans affecter le defaultTheme
+          document.documentElement.setAttribute('data-theme', themeParam)
+          if (themeParam === 'dark') {
+            document.documentElement.classList.add('dark')
+          } else if (themeParam === 'light') {
+            document.documentElement.classList.remove('dark')
+          }
         }
       }
     }
+    
+    // Attendre un tick pour éviter les problèmes d'hydratation
+    const timeoutId = setTimeout(syncThemeFromURL, 0)
+    return () => clearTimeout(timeoutId)
   }, [])
+
+  // Éviter le flash pendant le mounting
+  if (!mounted) {
+    return (
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {children}
+      </NextThemesProvider>
+    )
+  }
 
   return (
     <NextThemesProvider

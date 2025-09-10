@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useEffect, useState } from 'react'
 import type { AuthUser } from './types.js'
 
 export interface AuthState {
@@ -53,3 +54,27 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 )
+
+// SSR-safe hook that waits for hydration
+export function useAuthStoreSSR() {
+  const [mounted, setMounted] = useState(false)
+  const store = useAuthStore()
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // Return default state during SSR
+  if (!mounted) {
+    return {
+      user: null,
+      accessToken: null,
+      isAuthenticated: false,
+      setAuth: store.setAuth,
+      logout: store.logout,
+      updateUser: store.updateUser,
+    }
+  }
+  
+  return store
+}

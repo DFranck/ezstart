@@ -3,7 +3,7 @@ export { AuthClient, createAuthClient } from './client.js'
 export type { AuthClientConfig } from './client.js'
 
 // Store
-export { useAuthStore } from './store.js'
+export { useAuthStore, useAuthStoreSSR } from './store.js'
 export type { AuthState } from './store.js'
 
 // Provider and hooks

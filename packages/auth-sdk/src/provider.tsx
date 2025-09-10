@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
-import { useAuthStore } from './store.js'
+import { useAuthStoreSSR } from './store.js'
 
 interface AuthContextValue {
   client: AuthClient
@@ -14,7 +14,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, appName }: AuthProviderProps) {
-  const store = useAuthStore()
+  const store = useAuthStoreSSR()
   
   // Create client lazily to avoid SSR issues
   const getClient = () => {
@@ -75,7 +75,7 @@ export function useAuthContext() {
 // Main auth hook
 export function useAuth() {
   const { client } = useAuthContext()
-  const store = useAuthStore()
+  const store = useAuthStoreSSR()
 
   const login = (additionalParams?: Record<string, string>) => {
     client.redirectToLogin(additionalParams)
