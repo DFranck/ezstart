@@ -657,6 +657,9 @@ importers:
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
+      '@ezstart/web-core':
+        specifier: workspace:*
+        version: link:../../../packages/web-core
       '@react-pdf/renderer':
         specifier: ^4.3.0
         version: 4.3.0(react@19.1.1)
@@ -829,7 +832,36 @@ importers:
         specifier: ^5.7.3
         version: 5.9.2
 
-  apps/tower-defense/pwa:
+  apps/tower-defense/types:
+    dependencies:
+      '@asteasolutions/zod-to-openapi':
+        specifier: ^7.3.4
+        version: 7.3.4(zod@3.25.76)
+      '@ezstart/types':
+        specifier: workspace:*
+        version: link:../../../packages/types
+      '@tower-defense/config':
+        specifier: workspace:*
+        version: link:../config
+    devDependencies:
+      '@anatine/zod-mock':
+        specifier: ^3.14.0
+        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)
+
+  apps/tower-defense/utils:
+    dependencies:
+      '@tower-defense/config':
+        specifier: workspace:*
+        version: link:../config
+      '@tower-defense/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.2
+
+  apps/tower-defense/web:
     dependencies:
       '@ezstart/auth-sdk':
         specifier: workspace:*
@@ -866,7 +898,7 @@ importers:
         version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       next-intl:
         specifier: ^4.1.0
-        version: 4.3.4(next@15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(typescript@5.9.2)
+        version: 4.3.7(next@15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(typescript@5.7.3)
       next-pwa:
         specifier: ^5.6.0
         version: 5.6.0(@babel/core@7.28.0)(@types/babel__core@7.20.5)(next@15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(webpack@5.101.1)
@@ -933,36 +965,7 @@ importers:
         version: 0.34.3
       typescript:
         specifier: ^5.7.3
-        version: 5.9.2
-
-  apps/tower-defense/types:
-    dependencies:
-      '@asteasolutions/zod-to-openapi':
-        specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../../../packages/types
-      '@tower-defense/config':
-        specifier: workspace:*
-        version: link:../config
-    devDependencies:
-      '@anatine/zod-mock':
-        specifier: ^3.14.0
-        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)
-
-  apps/tower-defense/utils:
-    dependencies:
-      '@tower-defense/config':
-        specifier: workspace:*
-        version: link:../config
-      '@tower-defense/types':
-        specifier: workspace:*
-        version: link:../types
-    devDependencies:
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.2
+        version: 5.7.3
 
   packages/api-core:
     dependencies:

@@ -1,4 +1,4 @@
-import { SimpleWebProviders } from '@/providers/web-providers'
+import { SimpleWebProviders } from '@ezstart/web-core/providers'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
