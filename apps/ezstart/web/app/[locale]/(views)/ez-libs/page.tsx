@@ -1,4 +1,3 @@
-'use client'
 import { LibraryItem } from '@/types/library'
 import { getTranslationArray } from '@/utils/get-translation-array'
 import { H1, H2, Main, P, Section } from '@ezstart/ui/components'
