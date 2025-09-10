@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./base": "./base.js",
-    "./next-js": "./next.js",
-    "./react-internal": "./react-internal.js"
+    "./base": "./src/base.js",
+    "./next-js": "./src/next.js",
+    "./react-internal": "./src/react-internal.js"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.1.7",

@@ -2,17 +2,17 @@
   "name": "@workspace/next-config",
   "version": "0.0.1",
   "description": "Shared Next.js configurations for @ezstart monorepo",
-  "main": "./base.js",
+  "main": "./src/base.js",
   "type": "module",
   "exports": {
-    ".": "./base.js",
-    "./base": "./base.js",
-    "./base.js": "./base.js",
-    "./pwa": "./pwa.js"
+    ".": "./src/base.js",
+    "./base": "./src/base.js",
+    "./base.js": "./src/base.js",
+    "./pwa": "./src/pwa.js"
   },
   "files": [
-    "base.js",
-    "pwa.js"
+    "src/base.js",
+    "src/pwa.js"
   ],
   "peerDependencies": {
     "next": "^15.0.0"

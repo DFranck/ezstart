@@ -2,15 +2,15 @@
   "name": "@workspace/tailwind-config",
   "version": "0.0.1",
   "description": "Shared Tailwind CSS configuration for @ezstart monorepo",
-  "main": "./base.js",
+  "main": "./src/base.js",
   "type": "module",
   "exports": {
-    ".": "./base.js",
-    "./base": "./base.js",
-    "./base.js": "./base.js"
+    ".": "./src/base.js",
+    "./base": "./src/base.js",
+    "./base.js": "./src/base.js"
   },
   "files": [
-    "base.js"
+    "src/base.js"
   ],
   "peerDependencies": {
     "tailwindcss": "^3.0.0 || ^4.0.0"
