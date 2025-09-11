@@ -70,16 +70,16 @@ const structure = {
     }
   }, null, 2),
   
-  [`apps/${appName}/web/tailwind.config.js`]: `import baseConfig from '@workspace/tailwind-config/base.js'
+  [`apps/${appName}/web/tailwind.config.js`]: `import baseConfig from '@ezstart/tailwind-config/base.js'
 export default baseConfig`,
 
   [`apps/${appName}/web/postcss.config.mjs`]: `export { default } from '@ezstart/ui/postcss.config';`,
   
-  [`apps/${appName}/web/eslint.config.js`]: `import { nextJsConfig } from "@workspace/eslint-config/next-js"
+  [`apps/${appName}/web/eslint.config.js`]: `import { nextJsConfig } from "@ezstart/eslint-config/next-js"
 export default nextJsConfig`,
 
   [`apps/${appName}/web/tsconfig.json`]: JSON.stringify({
-    "extends": "@workspace/typescript-config/next-js.json"
+    "extends": "@ezstart/typescript-config/next-js.json"
   }, null, 2),
 
   [`apps/${appName}/web/app/globals.css`]: `@import "@ezstart/ui/globals.css";`,
