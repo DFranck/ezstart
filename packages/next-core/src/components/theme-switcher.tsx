@@ -38,7 +38,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
         className="relative w-4 h-4"
         style={{
           transform: isAnimating ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         <Icon
