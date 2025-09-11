@@ -1,4 +1,5 @@
 'use client'
+import { Icon } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useAuth } from './provider.js'
@@ -36,7 +37,7 @@ function CallbackContent({
     console.log('🚀 [AuthCallbackPage] Current URL:', window.location.href)
     console.log('🚀 [AuthCallbackPage] searchParams:', Object.fromEntries(searchParams.entries()))
     console.log('🚀 [AuthCallbackPage] Current code state:', code)
-    
+
     const authCode = searchParams.get('code')
 
     if (authCode && !code) {
@@ -52,7 +53,12 @@ function CallbackContent({
       setStatus('error')
       setError('No authorization code found')
     } else {
-      console.log('⏭️ [AuthCallbackPage] Skipping extraction - authCode:', !!authCode, 'code state:', !!code)
+      console.log(
+        '⏭️ [AuthCallbackPage] Skipping extraction - authCode:',
+        !!authCode,
+        'code state:',
+        !!code
+      )
     }
   }, [searchParams, code])
 
@@ -67,7 +73,7 @@ function CallbackContent({
 
     // Global lock key based on the code to prevent multiple instances
     const lockKey = `auth_processing_${code}`
-    
+
     // Check if another instance is already processing this code
     if (typeof window !== 'undefined' && (window as any)[lockKey]) {
       console.log('🔒 Another instance already processing this code, skipping')
@@ -77,7 +83,7 @@ function CallbackContent({
     const processCallback = async () => {
       // Set global lock
       if (typeof window !== 'undefined') {
-        (window as any)[lockKey] = true
+        ;(window as any)[lockKey] = true
         console.log('🔒 Lock acquired for code processing')
       }
 
@@ -115,8 +121,8 @@ function CallbackContent({
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="flex flex-col items-center gap-4">
+          <Icon name="lucide:Loader2" className="w-18 h-18 bg-ezstart animate-spin" />
           <p className="text-muted-foreground">Processing authentication...</p>
         </div>
       </div>
