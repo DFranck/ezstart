@@ -39,7 +39,7 @@ export default nextJsConfig
 
 ### ⚛️ Internal React Packages (`react-internal`)
 
-For packages that contain React components (like `@ezstart/ui`, `@ezstart/web-core`):
+For packages that contain React components (like `@ezstart/ui`, `@ezstart/next-core`):
 
 ```js
 // eslint.config.js
@@ -156,7 +156,7 @@ export default [...config, {
 
 ### ✅ React Packages (React Internal Config)
 - **@ezstart/ui** - UI components library
-- **@ezstart/web-core** - Web infrastructure
+- **@ezstart/next-core** - Web infrastructure
 
 ## Configuration Architecture
 
@@ -391,5 +391,5 @@ When modifying rules:
 
 - [`@ezstart/typescript-config`](../typescript-config/README.md) - TypeScript configuration
 - [`@ezstart/next-config`](../next-config/README.md) - Next.js configuration  
-- [`@ezstart/web-core`](../web-core/README.md) - Web application infrastructure
+- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
 - [`@ezstart/ui`](../ui/README.md) - UI components that use this config

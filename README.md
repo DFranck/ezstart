@@ -47,7 +47,7 @@ All Next.js web applications use the **exact same** standardized configuration:
 
 | Configuration | Package/Source | Description |
 |---------------|----------------|-------------|
-| **React Providers** | [`@ezstart/web-core`](./packages/web-core/README.md) | SimpleWebProviders + WebProviders with EZAuth, Theming, i18n |
+| **React Providers** | [`@ezstart/next-core`](./packages/next-core/README.md) | SimpleWebProviders + WebProviders with EZAuth, Theming, i18n |
 | **UI Components** | [`@ezstart/ui`](./packages/ui/README.md) | UI components, global styles, PostCSS config |
 | **Tailwind Config** | [`@ezstart/tailwind-config`](./packages/tailwind-config/) | Centralized Tailwind configuration |
 | **ESLint Config** | [`@ezstart/eslint-config/next-js`](./packages/eslint-config/) | ESLint rules for Next.js |
@@ -71,7 +71,7 @@ All Node.js APIs use the **exact same** shared infrastructure:
 |---------------|----------------|-------------|
 | **ESLint Config** | [`@ezstart/eslint-config/base`](./packages/eslint-config/) | ESLint rules for APIs |
 | **TypeScript Config** | [`@ezstart/typescript-config/api.json`](./packages/typescript-config/) | TypeScript configuration for APIs |
-| **Base Infrastructure** | [`@ezstart/api-core`](./packages/api-core/) | Shared API infrastructure (Express, middleware, etc.) |
+| **Base Infrastructure** | [`@ezstart/express-core`](./packages/express-core/) | Shared API infrastructure (Express, middleware, etc.) |
 | **Common Types** | [`@ezstart/types`](./packages/types/) | Shared types between web and API |
 
 #### Available APIs
@@ -84,11 +84,11 @@ All Node.js APIs use the **exact same** shared infrastructure:
 ### 📦 Centralized Packages
 
 #### Web Infrastructure
-- [`@ezstart/web-core`](./packages/web-core/) - Standardized providers, React infrastructure
+- [`@ezstart/next-core`](./packages/next-core/) - Standardized providers, React infrastructure
 - [`@ezstart/ui`](./packages/ui/) - UI components, global styles, CSS configurations
 
 #### API Infrastructure  
-- [`@ezstart/api-core`](./packages/api-core/) - Express infrastructure, shared middleware
+- [`@ezstart/express-core`](./packages/express-core/) - Express infrastructure, shared middleware
 - [`@ezstart/auth-sdk`](./packages/auth-sdk/) - EZAuth client SDK with React hooks
 
 #### Shared Utilities
@@ -155,7 +155,7 @@ pnpm lint
 
 ### 📚 Documentation
 
-- [Web-Core Configuration](./packages/web-core/README.md) - Web application standardization
+- [Web-Core Configuration](./packages/next-core/README.md) - Web application standardization
 - [UI Components](./packages/ui/README.md) - Design system and components
 - [EZAuth SDK](./packages/auth-sdk/README.md) - Authentication integration
 - [Claude Instructions](./CLAUDE.md) - Development guide and best practices

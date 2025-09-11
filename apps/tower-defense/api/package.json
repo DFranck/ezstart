@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
+    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ezstart/api-core": "workspace:*",
+    "@ezstart/express-core": "workspace:*",
     "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@tower-defense/config": "workspace:*",

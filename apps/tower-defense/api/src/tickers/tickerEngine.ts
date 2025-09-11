@@ -1,4 +1,4 @@
-import { createTickerEngine } from '@ezstart/api-core'
+import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
 import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'

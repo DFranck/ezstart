@@ -193,12 +193,12 @@ const authClient = new AuthClient({
 })
 ```
 
-## Integration with @ezstart/web-core
+## Integration with @ezstart/next-core
 
-When using `@ezstart/web-core`, authentication is automatically configured:
+When using `@ezstart/next-core`, authentication is automatically configured:
 
 ```tsx
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
+import { SimpleWebProviders } from '@ezstart/next-core/providers'
 
 // Auth is automatically enabled
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -215,7 +215,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - ✅ **ez-billing/web** - Billing management
 - ✅ **tower-defense/web** - Tower Defense game  
 - ✅ **fengshui/web** - Feng Shui application
-- ✅ All apps via `@ezstart/web-core`
+- ✅ All apps via `@ezstart/next-core`
 
 ## Development
 
@@ -232,7 +232,7 @@ pnpm typecheck
 
 ## Related Packages
 
-- [`@ezstart/web-core`](../web-core/README.md) - Web application infrastructure
+- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
 - [`@ezstart/ui`](../ui/README.md) - UI components library
 - [EZAuth API](../../apps/ezauth/api/README.md) - Authentication service
 - [EZAuth Web](../../apps/ezauth/web/README.md) - Authentication interface

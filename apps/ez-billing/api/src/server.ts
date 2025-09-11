@@ -1,4 +1,4 @@
-import { connectToMongo, createApp, startServer } from '@ezstart/api-core'
+import { connectToMongo, createApp, startServer } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp()

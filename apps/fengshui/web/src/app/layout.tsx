@@ -1,4 +1,4 @@
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
+import { SimpleWebProviders } from '@ezstart/next-core/providers'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'

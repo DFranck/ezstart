@@ -86,20 +86,20 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
 - **Scripts standardisés** : `lint`, `typecheck` (script `dev` géré par Turbo)
 
 #### Providers et Infrastructure :
-- **Web Core** : `"@ezstart/web-core": "workspace:*"`
+- **Web Core** : `"@ezstart/next-core": "workspace:*"`
 - **UI Components** : `"@ezstart/ui": "workspace:*"`
 - **WebProviders** : Pour apps avec i18n (ezstart)
   ```tsx
-  import { WebProviders } from '@ezstart/web-core/providers'
+  import { WebProviders } from '@ezstart/next-core/providers'
   <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
   ```
 - **SimpleWebProviders** : Pour apps sans i18n (ezauth, ez-billing, fengshui, tower-defense)
   ```tsx
-  import { SimpleWebProviders } from '@ezstart/web-core/providers'
+  import { SimpleWebProviders } from '@ezstart/next-core/providers'
   <SimpleWebProviders appName="fengshui">
   ```
 
-#### Avantages de @ezstart/web-core :
+#### Avantages de @ezstart/next-core :
 - 🔐 **Auth centralisée** avec @ezstart/auth-sdk
 - 🎨 **Theme management** avec next-themes
 - 🌍 **i18n support** avec next-intl (si nécessaire)
@@ -111,7 +111,7 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent 
 
 - **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/base`
 - **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/api.json`
-- **Base commune** : `@ezstart/api-core` pour infrastructure partagée
+- **Base commune** : `@ezstart/express-core` pour infrastructure partagée
 - **Structure standardisée** : `outDir: "dist"`, `rootDir: "src"`, types harmonisés
 - **Scripts standardisés** : `lint`, `typecheck`, `dev`, `build`
 
@@ -141,8 +141,8 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - `types.json` - Configuration types
 - `@ezstart/next-config` - Configs Next.js partagées
 - `@ezstart/ui` - Composants, styles et configs CSS/PostCSS
-- `@ezstart/web-core` - Infrastructure web partagée (providers, auth, themes)
-- `@ezstart/api-core` - Infrastructure API partagée
+- `@ezstart/next-core` - Infrastructure web partagée (providers, auth, themes)
+- `@ezstart/express-core` - Infrastructure API partagée
 - `@ezstart/auth-sdk` - SDK d'authentification centralisé
 
 ### Propagation Automatique des Changements

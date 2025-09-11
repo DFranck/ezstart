@@ -1,15 +1,15 @@
-# @ezstart/web-core
+# @ezstart/next-core
 
-Central package for standardization and shared infrastructure of web applications in the @ezstart monorepo.
+Next.js infrastructure and providers for @ezstart web applications.
 
 ## Overview
 
-`@ezstart/web-core` provides standardized architecture and shared components for all Next.js web applications in the monorepo, ensuring consistency and reusability.
+`@ezstart/next-core` provides standardized Next.js architecture and shared components for all web applications in the monorepo, ensuring consistency and reusability.
 
 ## Installation
 
 ```bash
-pnpm add @ezstart/web-core
+pnpm add @ezstart/next-core
 ```
 
 ## Architecture
@@ -20,7 +20,7 @@ The package provides two approaches for provider integration:
 
 #### SimpleWebProviders (Recommended)
 ```tsx
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
+import { SimpleWebProviders } from '@ezstart/next-core/providers'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 #### WebProviders (Advanced)
 ```tsx
-import { WebProviders } from '@ezstart/web-core/providers'
+import { WebProviders } from '@ezstart/next-core/providers'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -76,7 +76,7 @@ Each web application must use centralized configurations:
 {
   "dependencies": {
     "@ezstart/ui": "workspace:*",
-    "@ezstart/web-core": "workspace:*"
+    "@ezstart/next-core": "workspace:*"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
@@ -134,7 +134,7 @@ export default createNextConfig({
 Recommended structure for `app/layout.tsx`:
 
 ```tsx
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
+import { SimpleWebProviders } from '@ezstart/next-core/providers'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 
@@ -198,7 +198,7 @@ The following applications use this architecture:
 
 1. **Add dependencies**
 ```bash
-pnpm add @ezstart/web-core @ezstart/ui
+pnpm add @ezstart/next-core @ezstart/ui
 ```
 
 2. **Replace providers**
@@ -234,7 +234,7 @@ pnpm typecheck
 ### Package structure
 
 ```
-packages/web-core/
+packages/next-core/
 ├── src/
 │   ├── providers.tsx      # Server-side provider
 │   ├── client-providers.tsx  # Client-side providers

@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/api-core": "workspace:*",
+    "@ezstart/express-core": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "express": "^4.18.2",
     "mongoose": "^8.0.0",

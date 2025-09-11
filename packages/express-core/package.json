@@ -1,6 +1,6 @@
 {
-  "name": "@ezstart/api-core",
-  "description": "",
+  "name": "@ezstart/express-core",
+  "description": "Express.js infrastructure and utilities for @ezstart API services",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

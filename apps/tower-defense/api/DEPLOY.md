@@ -29,7 +29,7 @@ Start Command: pnpm start
 L'API dépend des packages workspace suivants (construits dans l'ordre) :
 
 1. `@ezstart/types` - Types communs
-2. `@ezstart/api-core` - Core API utilities
+2. `@ezstart/express-core` - Core API utilities
 3. `@ezstart/ui` - Composants UI
 4. `@tower-defense/config` - Configuration du jeu
 5. `@tower-defense/types` - Types spécifiques au jeu
@@ -42,7 +42,7 @@ Le script `prebuild` dans `package.json` gère automatiquement la construction d
 ```json
 {
   "scripts": {
-    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/api-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
+    "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
     "build": "tsc",
     "start": "node dist/server.js"
   }

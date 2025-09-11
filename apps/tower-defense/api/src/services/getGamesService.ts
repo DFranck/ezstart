@@ -1,4 +1,4 @@
-import { findWithQuery } from '@ezstart/api-core'
+import { findWithQuery } from '@ezstart/express-core'
 import { Game, GetGamesQuery } from '@tower-defense/types'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'

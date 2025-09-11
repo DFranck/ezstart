@@ -16,7 +16,7 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
-    "@ezstart/web-core": "workspace:*",
+    "@ezstart/next-core": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",
     "framer-motion": "^12.10.1",
     "next": "^15.5.2",

@@ -1,4 +1,4 @@
-import { createApp, connectToMongo, startServer } from '@ezstart/api-core'
+import { createApp, connectToMongo, startServer } from '@ezstart/express-core'
 import dotenv from 'dotenv'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 

@@ -16,7 +16,7 @@
   "dependencies": {
     "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
-    "@ezstart/web-core": "workspace:*",
+    "@ezstart/next-core": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@tanstack/react-virtual": "^3.13.8",
     "deepmerge": "^4.3.1",

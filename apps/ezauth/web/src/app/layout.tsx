@@ -1,6 +1,6 @@
 'use client'
 
-import { SimpleWebProviders } from '@ezstart/web-core'
+import { SimpleWebProviders } from '@ezstart/next-core'
 import './globals.css'
 
 // Note: metadata must be exported from a non-client component

@@ -3,7 +3,7 @@ import {
   OpenAPIRegistry,
   validateParams,
   validateQuery,
-} from '@ezstart/api-core';
+} from '@ezstart/express-core';
 import {
   billingClientSchema,
   clientSchema,

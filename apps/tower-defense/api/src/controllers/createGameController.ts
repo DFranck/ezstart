@@ -1,4 +1,4 @@
-import { makeCreateController } from '@ezstart/api-core'
+import { makeCreateController } from '@ezstart/express-core'
 import { createGameSchema } from '@tower-defense/types'
 import { createGameService } from '../services/createGameService.js'
 

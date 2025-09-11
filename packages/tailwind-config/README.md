@@ -334,7 +334,7 @@ This package provides peer dependencies for:
 
 - [`@ezstart/ui`](../ui/README.md) - UI components that use this config
 - [`@ezstart/next-config`](../next-config/README.md) - Next.js configuration
-- [`@ezstart/web-core`](../web-core/README.md) - Web application infrastructure
+- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - ESLint configuration
 
 ## Best Practices

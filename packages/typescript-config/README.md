@@ -230,12 +230,12 @@ All API services use the API configuration:
 React component packages use the React library configuration:
 
 - **@ezstart/ui** → `react-library.json`
-- **@ezstart/web-core** → `base.json` (with JSX support)
+- **@ezstart/next-core** → `base.json` (with JSX support)
 
 ### ✅ Utility Packages (Library/Base Config)
 Utility and infrastructure packages:
 
-- **@ezstart/api-core** → `base.json`
+- **@ezstart/express-core** → `base.json`
 - **@ezstart/auth-sdk** → `base.json`
 - **@ezstart/types** → `types.json`
 
@@ -404,7 +404,7 @@ For large monorepos, project references can be configured:
   "references": [
     { "path": "../types" },
     { "path": "../ui" },
-    { "path": "../api-core" }
+    { "path": "../express-core" }
   ]
 }
 ```
@@ -429,12 +429,12 @@ import { Button } from '@/components/Button'
 #### 2. Module Resolution Issues
 ```typescript
 // ❌ Error: Module not found
-import { api } from '@ezstart/api-core'
+import { api } from '@ezstart/express-core'
 
 // ✅ Solution: Ensure package is in dependencies
 {
   "dependencies": {
-    "@ezstart/api-core": "workspace:*"
+    "@ezstart/express-core": "workspace:*"
   }
 }
 ```
@@ -623,5 +623,5 @@ This works well with the path mappings in our configurations.
 
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - ESLint configuration for TypeScript
 - [`@ezstart/types`](../types/README.md) - Shared TypeScript types
-- [`@ezstart/api-core`](../api-core/README.md) - Uses API configuration
-- [`@ezstart/web-core`](../web-core/README.md) - Uses base configuration
+- [`@ezstart/express-core`](../express-core/README.md) - Uses API configuration
+- [`@ezstart/next-core`](../next-core/README.md) - Uses base configuration

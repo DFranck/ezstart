@@ -1,10 +1,10 @@
-# @ezstart/api-core
+# @ezstart/express-core
 
-Centralized API infrastructure and utilities for all @ezstart backend services.
+Express.js infrastructure and utilities for @ezstart API services.
 
 ## Overview
 
-`@ezstart/api-core` provides shared infrastructure, middleware, and utilities that ensure consistency and reduce code duplication across all API services in the @ezstart monorepo.
+`@ezstart/express-core` provides shared Express.js infrastructure, middleware, and utilities that ensure consistency and reduce code duplication across all API services in the @ezstart monorepo.
 
 ## Installation
 
@@ -13,7 +13,7 @@ This package is automatically included in all @ezstart APIs via workspace depend
 ```json
 {
   "dependencies": {
-    "@ezstart/api-core": "workspace:*"
+    "@ezstart/express-core": "workspace:*"
   }
 }
 ```
@@ -23,8 +23,8 @@ This package is automatically included in all @ezstart APIs via workspace depend
 ### Basic API Setup
 
 ```typescript
-import { createApp, startServer } from '@ezstart/api-core/infra'
-import { validateBody, validateParams } from '@ezstart/api-core/middlewares'
+import { createApp, startServer } from '@ezstart/express-core/infra'
+import { validateBody, validateParams } from '@ezstart/express-core/middlewares'
 import { userSchema } from '@ezstart/types'
 
 const app = createApp({
@@ -47,7 +47,7 @@ startServer(app, { port: 8001 })
 ### CRUD Controller Factory
 
 ```typescript
-import { createCRUDController } from '@ezstart/api-core/controller-factory'
+import { createCRUDController } from '@ezstart/express-core/controller-factory'
 import { userSchema } from '@ezstart/types'
 import { User } from '../models/User'
 
@@ -65,7 +65,7 @@ app.use('/api', userController.router)
 ### 📁 Package Structure
 
 ```
-packages/api-core/src/
+packages/express-core/src/
 ├── controller-factory/     # Standard CRUD controller generators
 │   ├── create-controller.ts
 │   ├── crud-operations.ts
@@ -96,7 +96,7 @@ packages/api-core/src/
 #### App Bootstrap
 
 ```typescript
-import { createApp } from '@ezstart/api-core/infra'
+import { createApp } from '@ezstart/express-core/infra'
 
 const app = createApp({
   name: 'ezauth-api',
@@ -112,7 +112,7 @@ const app = createApp({
 #### MongoDB Connection
 
 ```typescript
-import { connectToMongoDB } from '@ezstart/api-core/infra'
+import { connectToMongoDB } from '@ezstart/express-core/infra'
 
 await connectToMongoDB({
   uri: process.env.MONGODB_URI,
@@ -123,7 +123,7 @@ await connectToMongoDB({
 #### Server Startup
 
 ```typescript
-import { startServer } from '@ezstart/api-core/infra'
+import { startServer } from '@ezstart/express-core/infra'
 
 startServer(app, {
   port: 8001,
@@ -136,7 +136,7 @@ startServer(app, {
 #### Request Validation
 
 ```typescript
-import { validateBody, validateParams, validateQuery } from '@ezstart/api-core/middlewares'
+import { validateBody, validateParams, validateQuery } from '@ezstart/express-core/middlewares'
 import { createUserSchema, userIdSchema } from '@ezstart/types'
 
 // Body validation
@@ -161,7 +161,7 @@ app.get('/users',
 #### Error Handling
 
 ```typescript
-import { errorHandler } from '@ezstart/api-core/middlewares'
+import { errorHandler } from '@ezstart/express-core/middlewares'
 
 // Global error handler (use at the end)
 app.use(errorHandler)
@@ -172,7 +172,7 @@ app.use(errorHandler)
 #### Basic CRUD Controller
 
 ```typescript
-import { createCRUDController } from '@ezstart/api-core/controller-factory'
+import { createCRUDController } from '@ezstart/express-core/controller-factory'
 
 const userController = createCRUDController({
   model: UserModel,
@@ -216,7 +216,7 @@ const userController = createCRUDController({
 #### Automatic Documentation
 
 ```typescript
-import { setupSwagger } from '@ezstart/api-core/openapi'
+import { setupSwagger } from '@ezstart/express-core/openapi'
 
 const app = createApp({ name: 'My API' })
 
@@ -231,7 +231,7 @@ setupSwagger(app, {
 #### Schema Integration
 
 ```typescript
-import { registerSchema } from '@ezstart/api-core/openapi'
+import { registerSchema } from '@ezstart/express-core/openapi'
 import { userSchema } from '@ezstart/types'
 
 // Register Zod schemas for OpenAPI
@@ -244,7 +244,7 @@ registerSchema('CreateUser', createUserSchema)
 #### Standardized Responses
 
 ```typescript
-import { success, error, paginated } from '@ezstart/api-core/utils'
+import { success, error, paginated } from '@ezstart/express-core/utils'
 
 // Success response
 res.json(success(userData, 'User created'))
@@ -259,7 +259,7 @@ res.json(paginated(users, { page: 1, total: 100 }))
 #### Type-Safe Request Helpers
 
 ```typescript
-import { TypedRequest } from '@ezstart/api-core/types'
+import { TypedRequest } from '@ezstart/express-core/types'
 
 interface CreateUserBody {
   email: string
@@ -320,9 +320,9 @@ Each API should use the centralized TypeScript configuration:
 
 ```typescript
 // src/index.ts
-import { createApp, startServer, connectToMongoDB } from '@ezstart/api-core/infra'
-import { validateBody, errorHandler } from '@ezstart/api-core/middlewares'
-import { createCRUDController } from '@ezstart/api-core/controller-factory'
+import { createApp, startServer, connectToMongoDB } from '@ezstart/express-core/infra'
+import { validateBody, errorHandler } from '@ezstart/express-core/middlewares'
+import { createCRUDController } from '@ezstart/express-core/controller-factory'
 import { userSchema } from '@ezstart/types'
 import { User } from './models/User'
 

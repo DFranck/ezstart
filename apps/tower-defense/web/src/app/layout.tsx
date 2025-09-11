@@ -1,4 +1,4 @@
-import { SimpleWebProviders } from '@ezstart/web-core/providers'
+import { SimpleWebProviders } from '@ezstart/next-core/providers'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { Geist, Geist_Mono } from 'next/font/google'

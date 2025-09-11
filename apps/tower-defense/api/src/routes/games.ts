@@ -3,7 +3,7 @@ import {
   OpenAPIRegistry,
   validateParams,
   validateQuery,
-} from '@ezstart/api-core'
+} from '@ezstart/express-core'
 import { mongoIdSchema, z } from '@ezstart/types'
 
 const paramsMongoIdSchema = z.object({

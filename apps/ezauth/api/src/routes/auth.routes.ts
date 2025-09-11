@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, z } from '@ezstart/api-core'
+import { createRouterWithDoc, OpenAPIRegistry, z } from '@ezstart/express-core'
 import { AuthService } from '../services/auth.service.js'
 import { 
   LoginRequest,

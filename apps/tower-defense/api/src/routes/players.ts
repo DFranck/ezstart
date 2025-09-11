@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry } from '@ezstart/api-core'
+import { createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { createOrFindPlayerSchema, playerResponseSchema } from '@tower-defense/types'
 import express from 'express'
 import { createOrFindPlayerController } from '../controllers/player/playerController.js'

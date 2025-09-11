@@ -15,7 +15,7 @@ import {
   OpenAPIRegistry,
   validateQuery,
   validateParams,
-} from '@ezstart/api-core';
+} from '@ezstart/express-core';
 import * as secureControllers from '../controllers/invoice/invoice.secure-controllers.js';
 import { authMiddleware } from '../middleware/auth.js';
 export const invoiceRegistry = new OpenAPIRegistry();

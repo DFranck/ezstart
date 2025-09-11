@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ez-billing/types": "workspace:*",
-    "@ezstart/api-core": "workspace:*",
+    "@ezstart/express-core": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.19.2",

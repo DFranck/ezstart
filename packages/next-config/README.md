@@ -64,7 +64,7 @@ export default createPWAConfig({
   - `@ezstart/ui`
   - `@ezstart/types`
   - `@ezstart/auth-sdk`
-  - `@ezstart/web-core`
+  - `@ezstart/next-core`
 
 ### 🔧 Development Features
 
@@ -254,7 +254,7 @@ This package provides peer dependencies for:
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - ESLint configuration
 - [`@ezstart/typescript-config`](../typescript-config/README.md) - TypeScript configuration
 - [`@ezstart/tailwind-config`](../tailwind-config/README.md) - Tailwind CSS configuration
-- [`@ezstart/web-core`](../web-core/README.md) - Web application infrastructure
+- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
 
 ## Best Practices
 

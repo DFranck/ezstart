@@ -427,8 +427,8 @@ All @ezstart applications and packages use these shared types:
 - **tower-defense/api** - Game state and player types
 
 ### ✅ Packages
-- **@ezstart/api-core** - Express types and validation
-- **@ezstart/web-core** - React props and component types
+- **@ezstart/express-core** - Express types and validation
+- **@ezstart/next-core** - React props and component types
 - **@ezstart/ui** - Component props and theme types
 
 ## 🏭 Code Generation
@@ -579,7 +579,7 @@ export * from './validators/post'
 
 ## Related Packages
 
-- [`@ezstart/api-core`](../api-core/README.md) - Uses these types for API validation
-- [`@ezstart/web-core`](../web-core/README.md) - Uses these types for React components
+- [`@ezstart/express-core`](../express-core/README.md) - Uses these types for API validation
+- [`@ezstart/next-core`](../next-core/README.md) - Uses these types for React components
 - [`@ezstart/ui`](../ui/README.md) - Uses these types for component props
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - TypeScript linting rules
