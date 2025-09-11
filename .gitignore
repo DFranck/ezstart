@@ -37,5 +37,7 @@ note.md
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude settings
+# Claude settings (only ignore truly local/private configs)
 .claude/settings.local.json
+.claude/**/local/**
+.claude/**/*.local.*
