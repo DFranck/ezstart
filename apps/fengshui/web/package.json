@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@ezstart/web-core": "workspace:*",

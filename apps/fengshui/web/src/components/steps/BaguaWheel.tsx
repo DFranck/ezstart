@@ -214,8 +214,8 @@ export default function BaguaWheel({
                     key={`card-${activeDir}`}
                     dir={activeDir}
                     cfg={config}
-                    xPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)].xPct}
-                    yPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)].yPct}
+                    xPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)]?.xPct || 0}
+                    yPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)]?.yPct || 0}
                     offset={{ x: 0, y: 0 }}
                     onMouseEnter={() => {
                       /* ... */

@@ -7,7 +7,7 @@ import { useAuth } from '@ezstart/auth-sdk'
 export default function AuthCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { processCallback } = useAuth()
+  const { handleCallback } = useAuth()
 
   useEffect(() => {
     const code = searchParams.get('code')
@@ -20,18 +20,18 @@ export default function AuthCallbackPage() {
     }
 
     if (code) {
-      processCallback(code)
-        .then((redirectUrl) => {
-          router.push(redirectUrl)
+      handleCallback(code)
+        .then(() => {
+          router.push('/')
         })
-        .catch((err) => {
+        .catch((err: Error) => {
           console.error('Callback processing failed:', err)
           router.push('/')
         })
     } else {
       router.push('/')
     }
-  }, [searchParams, router, processCallback])
+  }, [searchParams, router, handleCallback])
 
   return (
     <div className="flex items-center justify-center min-h-screen">

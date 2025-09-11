@@ -131,6 +131,10 @@ export function getSectorByAngle(angle: number): FengShuiSector {
 
   // Trouver le secteur le plus proche
   let closestSector = FENGSHUI_SECTORS[0]
+  if (!closestSector) {
+    throw new Error('No feng shui sectors available')
+  }
+  
   let minDifference = Math.abs(normalizedAngle - closestSector.angle)
 
   for (const sector of FENGSHUI_SECTORS) {
