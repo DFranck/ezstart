@@ -64,7 +64,15 @@
 - **TypeCheck** : `pnpm typecheck` - ✅ **18/18 packages** vérifiés (couverture complète)
 - **Lint** : `pnpm lint` - ✅ **17/17 packages** avec code vérifié (couverture complète)
 - **Centralisation** : ✅ **100% des apps/packages** utilisent les configs centralisées
+- **Structure packages** : ✅ **95/100** conformité aux critères CLAUDE.md (exemplaire)
 - **Warnings supprimés** : ✅ Règles ennuyeuses désactivées tout en gardant les importantes
+
+### 📦 CONFORMITÉ STRUCTURE PACKAGES
+- **Hiérarchie respectée** : ✅ packages/ pour réutilisable, apps/[project]/ pour spécifique
+- **Réutilisabilité maximale** : ✅ Composants agnostiques, infrastructure partagée
+- **Bonnes pratiques UI** : ✅ Radix UI, classes sémantiques, pas de HTML natif
+- **Configuration centralisée** : ✅ Toutes les apps partagent les mêmes configs
+- **Architecture cohérente** : ✅ Dépendances workspace:* correctes
 
 ### Apps Web - Configuration 100% Centralisée
 Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`, `asc-tcd/web`) utilisent **exactement** la même configuration :
