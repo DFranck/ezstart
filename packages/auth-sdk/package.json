@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -b --watch"
+    "dev": "tsc -b --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "zustand": "^4.5.5"
