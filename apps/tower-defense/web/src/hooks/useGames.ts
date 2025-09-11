@@ -2,7 +2,6 @@
 
 import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { extractPlayerId } from '@/utils/extractPlayerId'
 import { isDebug, logger } from '@ezstart/ui/lib'
 import { callApi, runWithFeedback } from '@ezstart/ui/utils'
 import { mockGames, type Game } from '@tower-defense/types'
@@ -219,19 +218,17 @@ export function useGames(options: UseGamesOptions = {}) {
     }
 
     // Game démarrée (la retirer des waiting games mais la garder pour la reconnexion)
-    const handleGameStarted = (data: { gameId: string, game?: Game }) => {
+    const handleGameStarted = (data: { gameId: string; game?: Game }) => {
       logger.debug('Game started via socket', data.gameId)
       setWaitingGames(prev => prev.filter(game => game._id !== data.gameId))
-      
+
       // Si on a les données de la game, la marquer comme 'playing' dans allGames
       if (data.game) {
-        setAllGames(prev => prev.map(game => 
-          game._id === data.gameId 
-            ? { ...game, phase: 'playing' }
-            : game
-        ))
+        setAllGames(prev =>
+          prev.map(game => (game._id === data.gameId ? { ...game, phase: 'playing' } : game))
+        )
       }
-      
+
       // Vérifier si le joueur était dans cette game pour le rediriger
       if (autoRedirect && player?._id) {
         const gameToCheck = data.game || allGames.find(g => g._id === data.gameId)
@@ -256,7 +253,7 @@ export function useGames(options: UseGamesOptions = {}) {
 
     return () => {
       socket.off('gameCreated', handleGameCreated)
-      socket.off('gameDeleted', handleGameDeleted)  
+      socket.off('gameDeleted', handleGameDeleted)
       socket.off('gameStarted', handleGameStarted)
       socket.off('lobby:gameStarted', handleGameStarted)
       socket.off('gameEnded', handleGameEnded)
