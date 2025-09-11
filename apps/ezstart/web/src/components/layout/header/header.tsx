@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { MobileNavMenu } from '../mobile-nav-menu'
 import { NavMenu } from '../nav-menu'
+import { HeaderControls } from './header-controls'
 
 export default function Header() {
   const { isDesktop, isTablet } = useDevice()
@@ -58,7 +59,7 @@ export default function Header() {
         {isDesktop && <NavMenu className="flex items-center gap-2" />}
 
         <div className="flex items-center gap-2">
-          {/* <HeaderControls /> */}
+          <HeaderControls />
           {isTablet && <Burger setIsOpen={setIsOpen} isOpen={isOpen} />}
         </div>
       </div>
