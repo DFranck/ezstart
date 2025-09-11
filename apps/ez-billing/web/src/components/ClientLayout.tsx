@@ -1,7 +1,8 @@
 'use client'
 
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, H1, Header, Icon, Main, ThemeSwitcher } from '@ezstart/ui/components'
+import { Button, H1, Header, Icon, Main } from '@ezstart/ui/components'
+import { ThemeSwitcher } from '@ezstart/next-core/components'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { ReactNode } from 'react'

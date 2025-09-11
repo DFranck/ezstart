@@ -2,8 +2,10 @@
 
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
-import { cn } from '../lib'
-import { Button, Icon } from './index'
+
+// Import depuis UI (composants agnostics)
+import { Button, Icon } from '@ezstart/ui/components'
+import { cn } from '@ezstart/ui/lib'
 
 export function ThemeSwitcher({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()

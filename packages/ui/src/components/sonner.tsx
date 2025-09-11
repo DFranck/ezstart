@@ -1,11 +1,12 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { Toaster as Sonner, ToasterProps } from 'sonner';
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme();
+interface ToasterPropsExtended extends ToasterProps {
+  theme?: 'light' | 'dark' | 'system'
+}
 
+const Toaster = ({ theme = 'system', ...props }: ToasterPropsExtended) => {
   return (
     <Sonner
       theme={theme as ToasterProps['theme']}

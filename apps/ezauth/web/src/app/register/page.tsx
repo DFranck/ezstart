@@ -9,8 +9,8 @@ import {
   CardTitle,
   P,
   Span,
-  ThemeSwitcher,
 } from '@ezstart/ui/components'
+import { ThemeSwitcher } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'

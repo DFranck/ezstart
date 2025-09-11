@@ -23,7 +23,10 @@ export async function callApi<T = any>(
 ): Promise<ApiResponse<T>> {
   const { method = 'GET', query, body, headers = {}, signal, userId } = options
 
-  let url = `${getApiUrl()}${endpoint}`
+  let url = `${getApiUrl({
+    serverUrl: process.env.API_URL,
+    clientUrl: process.env.CLIENT_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL // Backward compatibility
+  })}${endpoint}`
   if (query && Object.keys(query).length > 0) {
     const q = new URLSearchParams(query).toString()
     url += url.includes('?') ? `&${q}` : `?${q}`
