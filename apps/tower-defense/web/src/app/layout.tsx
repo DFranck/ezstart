@@ -3,9 +3,9 @@ import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { Geist, Geist_Mono } from 'next/font/google'
 
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { PWAInstallPrompt } from '@ezstart/ui/components'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -18,7 +18,6 @@ const fontMono = Geist_Mono({
 })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
@@ -71,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <GamesSocketProvider>{children}</GamesSocketProvider>
           </SimpleWebProviders>
           <Toaster />
-          <PWAInstallPrompt 
+          <PWAInstallPrompt
             appName="Tower Defense"
             description="Installez l'application pour un accès rapide et une meilleure expérience de jeu"
           />
