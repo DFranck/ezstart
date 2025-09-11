@@ -25,7 +25,7 @@ export async function callApi<T = any>(
 
   let url = `${getApiUrl({
     serverUrl: process.env.API_URL,
-    clientUrl: process.env.CLIENT_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL // Backward compatibility
+    clientUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   })}${endpoint}`
   if (query && Object.keys(query).length > 0) {
     const q = new URLSearchParams(query).toString()
