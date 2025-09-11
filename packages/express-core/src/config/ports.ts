@@ -5,7 +5,7 @@
 export const API_PORTS = {
   EZAUTH: 8081,
   EZ_BILLING: 4101,
-  TOWER_DEFENSE: 3101,
+  TOWER_DEFENSE: 4201,
 } as const
 
 /**

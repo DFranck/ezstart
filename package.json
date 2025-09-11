@@ -13,7 +13,8 @@
     "dev:fs": "turbo run dev --filter=web-fengshui...",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "check:ports": "netstat -ano | findstr \":3000 :3001 :4000 :4001 :5000 :5001 :6000 :6001 :7000 :7001 :8000 :8001 :8080 :8081 \""
+    "kill:ports": "powershell -ExecutionPolicy Bypass -File .\\scripts\\kill-ports.ps1",
+    "dev:status": "powershell -ExecutionPolicy Bypass -File .\\scripts\\dev-status.ps1"
   },
   "jest": {
     "projects": [

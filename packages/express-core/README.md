@@ -23,13 +23,7 @@ This package is automatically included in all @ezstart APIs via workspace depend
 ### Basic API Setup
 
 ```typescript
-import { 
-  createApp, 
-  connectToMongo, 
-  startServer, 
-  getApiPort,
-  Router 
-} from '@ezstart/express-core'
+import { createApp, connectToMongo, startServer, getApiPort, Router } from '@ezstart/express-core'
 
 const PORT = getApiPort('EZAUTH') // or 'EZ_BILLING', 'TOWER_DEFENSE'
 
@@ -67,7 +61,7 @@ import { User } from '../models/User'
 const userController = createCRUDController({
   model: User,
   schema: userSchema,
-  basePath: '/users'
+  basePath: '/users',
 })
 
 app.use('/api', userController.router)
@@ -141,13 +135,13 @@ await connectToMongo('database-name')
 import { startServer } from '@ezstart/express-core'
 
 startServer(app, {
-  routes,           // Express router
-  registries: [],   // OpenAPI registries array
+  routes, // Express router
+  registries: [], // OpenAPI registries array
   serviceName: 'MyAPI',
   port: 8001,
   onHttpServerReady: server => {
     // Optional: Setup Socket.io or other server extensions
-  }
+  },
 })
 ```
 
@@ -157,9 +151,9 @@ startServer(app, {
 import { getApiPort, API_PORTS } from '@ezstart/express-core'
 
 // Get standardized port for service
-const PORT = getApiPort('EZAUTH')     // 8081
+const PORT = getApiPort('EZAUTH') // 8081
 const PORT = getApiPort('EZ_BILLING') // 4101
-const PORT = getApiPort('TOWER_DEFENSE') // 3101
+const PORT = getApiPort('TOWER_DEFENSE') // 4201
 
 // Falls back to process.env.PORT if defined
 ```
@@ -183,22 +177,13 @@ import { validateBody, validateParams, validateQuery } from '@ezstart/express-co
 import { createUserSchema, userIdSchema } from '@ezstart/types'
 
 // Body validation
-app.post('/users', 
-  validateBody(createUserSchema),
-  handler
-)
+app.post('/users', validateBody(createUserSchema), handler)
 
-// Params validation  
-app.get('/users/:id',
-  validateParams(userIdSchema),
-  handler
-)
+// Params validation
+app.get('/users/:id', validateParams(userIdSchema), handler)
 
 // Query validation
-app.get('/users',
-  validateQuery(userQuerySchema),
-  handler
-)
+app.get('/users', validateQuery(userQuerySchema), handler)
 ```
 
 #### Error Handling
@@ -222,9 +207,9 @@ const userController = createCRUDController({
   schema: {
     create: createUserSchema,
     update: updateUserSchema,
-    params: userParamsSchema
+    params: userParamsSchema,
   },
-  basePath: '/users'
+  basePath: '/users',
 })
 
 // Provides: GET, POST, PUT, DELETE endpoints
@@ -248,9 +233,9 @@ const userController = createCRUDController({
       validateBody(resetPasswordSchema),
       async (req, res) => {
         // Custom logic
-      }
-    ]
-  }
+      },
+    ],
+  },
 })
 ```
 
@@ -267,7 +252,7 @@ setupSwagger(app, {
   title: 'My API',
   version: '1.0.0',
   description: 'API documentation',
-  path: '/docs'
+  path: '/docs',
 })
 ```
 
@@ -292,7 +277,7 @@ import { success, error, paginated } from '@ezstart/express-core/utils'
 // Success response
 res.json(success(userData, 'User created'))
 
-// Error response  
+// Error response
 res.status(400).json(error('Invalid data', 'VALIDATION_ERROR'))
 
 // Paginated response
@@ -319,8 +304,8 @@ app.post('/users', (req: TypedRequest<CreateUserBody>, res) => {
 All @ezstart APIs use this shared infrastructure:
 
 - ✅ **ezauth/api** - Authentication service (port 8081)
-- ✅ **ez-billing/api** - Billing management API (port 4101)  
-- ✅ **tower-defense/api** - Tower Defense game API (port 3101)
+- ✅ **ez-billing/api** - Billing management API (port 4101)
+- ✅ **tower-defense/api** - Tower Defense game API (port 4201)
 
 ### Standardized Features Across All APIs:
 
@@ -386,22 +371,22 @@ async function bootstrap() {
   // Connect to database
   await connectToMongoDB({
     uri: process.env.MONGODB_URI!,
-    dbName: 'my-app'
+    dbName: 'my-app',
   })
 
   // Create app
   const app = createApp({
     name: 'my-api',
-    version: '1.0.0'
+    version: '1.0.0',
   })
 
   // Add CRUD routes
   const userController = createCRUDController({
     model: User,
     schema: userSchema,
-    basePath: '/users'
+    basePath: '/users',
   })
-  
+
   app.use('/api', userController.router)
 
   // Custom routes
@@ -429,7 +414,7 @@ import { UserType } from '@ezstart/types'
 const userSchema = new mongoose.Schema<UserType>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 })
 
 export const User = mongoose.model<UserType>('User', userSchema)
@@ -440,6 +425,7 @@ export const User = mongoose.model<UserType>('User', userSchema)
 ### 1. Use Centralized Infrastructure
 
 ✅ **Do:** Use the provided infrastructure utilities
+
 ```typescript
 import { createApp, Router, getApiPort } from '@ezstart/express-core'
 
@@ -449,24 +435,27 @@ const PORT = getApiPort('EZAUTH')
 ```
 
 ❌ **Don't:** Import directly from express or hardcode values
+
 ```typescript
 import express from 'express' // Don't import express directly
-import dotenv from 'dotenv'   // Don't load dotenv manually
+import dotenv from 'dotenv' // Don't load dotenv manually
 
-const app = express()          // Manual setup
+const app = express() // Manual setup
 const router = express.Router() // Use centralized Router instead
-const PORT = 8081              // Use getApiPort() instead
-dotenv.config()                // Already done in createApp()
+const PORT = 8081 // Use getApiPort() instead
+dotenv.config() // Already done in createApp()
 ```
 
 ### 2. Validate All Inputs
 
 ✅ **Do:** Use validation middleware
+
 ```typescript
 app.post('/users', validateBody(userSchema), handler)
 ```
 
 ❌ **Don't:** Skip validation
+
 ```typescript
 app.post('/users', handler) // No validation
 ```
@@ -474,23 +463,29 @@ app.post('/users', handler) // No validation
 ### 3. Leverage Controller Factory
 
 ✅ **Do:** Use CRUD controller factory for standard operations
+
 ```typescript
 const controller = createCRUDController({ model, schema })
 ```
 
 ❌ **Don't:** Write repetitive CRUD code
+
 ```typescript
-app.get('/users', async (req, res) => { /* manual CRUD */ })
+app.get('/users', async (req, res) => {
+  /* manual CRUD */
+})
 ```
 
 ### 4. Consistent Error Handling
 
 ✅ **Do:** Use global error handler
+
 ```typescript
 app.use(errorHandler)
 ```
 
 ❌ **Don't:** Handle errors inconsistently
+
 ```typescript
 // Inconsistent error responses across routes
 ```

@@ -9,6 +9,9 @@ export type { AuthState } from './store.js'
 // Provider and hooks
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
+// Components
+export { AuthCallbackPage } from './auth-callback-page.js'
+
 // Re-export types
 export type { 
   AuthUser, 

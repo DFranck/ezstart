@@ -3,17 +3,20 @@
 ## Architecture et Bonnes Pratiques
 
 ### Principe de Base : Réutilisabilité Maximale
+
 - **TOUJOURS** utiliser/créer des composants agnostiques au maximum
 - **PRIORITÉ** aux packages partagés du monorepo avant toute création spécifique
 
 ### Bonnes Pratiques UI/UX
-- **JAMAIS** utiliser des balises HTML natives (`<input>`, `<button>`, `<label>`) 
+
+- **JAMAIS** utiliser des balises HTML natives (`<input>`, `<button>`, `<label>`)
 - **TOUJOURS** utiliser les composants du package `@ezstart/ui/components` (Input, Button, Label, Card, etc.)
 - **JAMAIS** utiliser des couleurs hardcodées (`bg-red-50`, `text-gray-600`)
 - **TOUJOURS** utiliser des classes sémantiques (`bg-destructive/15`, `text-muted-foreground`, `text-primary`)
 - **TOUJOURS** laisser les composants gérer leurs propres styles et couleurs
 
 ### Structure Monorepo
+
 ```
 @ezstart/
 ├── packages/           # Packages partagés entre tous les projets
@@ -41,17 +44,20 @@
 ### Règles de Développement
 
 #### 1. Hiérarchie des Packages
+
 1. **packages/** - Pour tout ce qui peut être réutilisé entre projets
 2. **apps/[project]/[shared]** - Pour ce qui est spécifique au projet mais partagé entre web/api
 3. **apps/[project]/web|api** - Seulement pour ce qui est vraiment spécifique à une couche
 
 #### 2. Avant de Créer Quoi Que Ce Soit
+
 - Vérifier si existe dans `packages/`
 - Vérifier si peut être généralisé pour `packages/`
 - Si spécifique au projet : vérifier si partageable entre web/api
 - Créer dans la couche la plus haute possible
 
 #### 3. Exemples Concrets
+
 - Types d'entités → `packages/types` ou `apps/[project]/types`
 - Utilitaires de validation → `packages/utils`
 - Configs API communes → `packages/config`
@@ -61,6 +67,7 @@
 ## Configuration Standardisée - Maximum de Réutilisabilité ✅
 
 ### ⚡ CONTRÔLE QUALITÉ GLOBAL
+
 - **TypeCheck** : `pnpm typecheck` - ✅ **18/18 packages** vérifiés (couverture complète)
 - **Lint** : `pnpm lint` - ✅ **17/17 packages** avec code vérifié (couverture complète)
 - **Centralisation** : ✅ **100% des apps/packages** utilisent les configs centralisées
@@ -68,16 +75,19 @@
 - **Warnings supprimés** : ✅ Règles ennuyeuses désactivées tout en gardant les importantes
 
 ### 📦 CONFORMITÉ STRUCTURE PACKAGES
+
 - **Hiérarchie respectée** : ✅ packages/ pour réutilisable, apps/[project]/ pour spécifique
 - **Réutilisabilité maximale** : ✅ Composants agnostiques, infrastructure partagée
 - **Bonnes pratiques UI** : ✅ Radix UI, classes sémantiques, pas de HTML natif
 - **Configuration centralisée** : ✅ Toutes les apps partagent les mêmes configs
-- **Architecture cohérente** : ✅ Dépendances workspace:* correctes
+- **Architecture cohérente** : ✅ Dépendances workspace:\* correctes
 
 ### Apps Web - Configuration 100% Centralisée
+
 Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`, `asc-tcd/web`) utilisent **exactement** la même configuration :
 
 #### Configuration de Base :
+
 - **Tailwind Config** : `tailwind.config.js` → `@ezstart/tailwind-config/base.js`
 - **PostCSS Config** : `postcss.config.mjs` → `@ezstart/ui/postcss.config`
 - **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/next-js`
@@ -86,6 +96,7 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
 - **Scripts standardisés** : `lint`, `typecheck` (script `dev` géré par Turbo)
 
 #### Providers et Infrastructure :
+
 - **Web Core** : `"@ezstart/next-core": "workspace:*"`
 - **UI Components** : `"@ezstart/ui": "workspace:*"`
 - **WebProviders** : Pour apps avec i18n (ezstart)
@@ -100,6 +111,7 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
   ```
 
 #### Avantages de @ezstart/next-core :
+
 - 🔐 **Auth centralisée** avec @ezstart/auth-sdk
 - 🎨 **Theme management** avec next-themes
 - 🌍 **i18n support** avec next-intl (si nécessaire)
@@ -107,6 +119,7 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
 - 🏗️ **Architecture unifiée** pour toutes les apps web
 
 ### APIs - Configuration 100% Centralisée
+
 Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même configuration :
 
 - **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/base`
@@ -116,17 +129,21 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent 
 - **Scripts standardisés** : `lint`, `typecheck`, `dev`, `build`
 
 ### Packages - Configuration 100% Centralisée
+
 Tous les packages utilisent les configurations centralisées selon leur type :
 
 #### Packages React (UI/Web-Core)
+
 - **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/react-internal`
 - **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/react-library.json` ou `base.json`
 
 #### Packages TypeScript (Auth-SDK, API-Core, Types)
+
 - **TypeScript Config uniquement** : `tsconfig.json` → `@ezstart/typescript-config/base.json`
 - **Pas d'ESLint** : Packages simples de types/config n'ont pas besoin de lint
 
 ### Packages Centralisés de Configuration
+
 - `@ezstart/tailwind-config` - Configs Tailwind partagées
 - `@ezstart/eslint-config` - Règles ESLint partagées avec 3 variantes :
   - `base.js` - Configuration de base (APIs, packages simples)
@@ -146,15 +163,18 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 - `@ezstart/auth-sdk` - SDK d'authentification centralisé
 
 ### Propagation Automatique des Changements
+
 ✨ **Toute modification** dans les packages centralisés se propage **automatiquement** à tous les projets. Une seule source de vérité pour l'ensemble du monorepo !
 
 ### Commandes Importantes
+
 - Build : `pnpm build`
-- TypeCheck : `pnpm typecheck` 
+- TypeCheck : `pnpm typecheck`
 - Lint : `pnpm lint`
 - Tests : vérifier dans chaque projet (pas de standard défini)
 
 ### Documentation README - Règles Obligatoires
+
 - **TOUJOURS** maintenir les README des packages à jour après chaque modification
 - **OBLIGATOIRE** pour tous les packages dans `/packages/` car utilisés par plusieurs apps
 - **README doit inclure** :
@@ -168,6 +188,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 - **Ajouter cette tâche** aux modifications de packages dans TodoWrite
 
 ### Git Commits - Règles Obligatoires
+
 - **TOUJOURS** commiter après chaque modification importante
 - **TOUJOURS** documenter les changements de manière détaillée dans le message
 - **TOUJOURS** mettre à jour CLAUDE.md pour mémoriser les nouvelles pratiques/règles
@@ -177,9 +198,10 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - `Co-Authored-By: Claude <noreply@anthropic.com>`
 - **Messages de commit** : descriptifs, professionnels, avec contexte et impact
 - **Structure recommandée** :
+
   ```
   type: brief description
-  
+
   - Detailed changes list
   - Technical modifications
   - Documentation updates
@@ -187,11 +209,13 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   ```
 
 ### Notes Techniques
+
 - Monorepo utilise pnpm workspaces
 - TypeScript avec configurations partagées
 - Architecture microservices avec packages partagés
 
 ### Gestion des Processus Background
+
 - **TOUJOURS** tuer les processus background après utilisation avec `KillBash`
 - **NE JAMAIS** laisser des serveurs de développement tourner en arrière-plan
 - **PROBLÈME FRÉQUENT** : Les processus Node.js persistent même après `KillBash`, causant l'incrémentation des ports
@@ -208,11 +232,13 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 ## EZAuth - Système d'Authentification Centralisé
 
 ### Architecture
+
 - **Service API** : `apps/ezauth/api` - Service standalone sur port 8001
 - **Client SDK** : `packages/auth-sdk` - Package réutilisable avec React hooks
 - **Base de données** : MongoDB partagée avec collections séparées (`auth_users`, `auth_codes`)
 
 ### Flow OAuth2
+
 1. **Redirect** → EZAuth service (`/login?app=ez-billing&redirect_uri=...`)
 2. **Auth** → Utilisateur se connecte/enregistre
 3. **Callback** → Retour avec code d'autorisation (`/auth/callback?code=...`)
@@ -220,6 +246,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 5. **SSO** → Token valide sur toutes les apps
 
 ### Intégration dans les Apps
+
 ```tsx
 // 1. Ajouter dépendance
 "@ezstart/auth-sdk": "workspace:*"
@@ -243,6 +270,7 @@ const { user, isAuthenticated, login, logout } = useAuth()
 ```
 
 ### Endpoints API
+
 - `GET /health` - Health check
 - `POST /api/auth/register` - Inscription
 - `POST /api/auth/login` - Connexion
@@ -251,6 +279,7 @@ const { user, isAuthenticated, login, logout } = useAuth()
 - `POST /api/auth/verify` - Validation token
 
 ### Migration depuis système actuel
+
 1. **Remplacer** AuthProvider actuel par EZAuth
 2. **Créer** page `/auth/callback` dans chaque app
 3. **Single Sign-On** automatique entre toutes les apps
@@ -262,6 +291,7 @@ const { user, isAuthenticated, login, logout } = useAuth()
 Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même infrastructure standardisée :
 
 #### Infrastructure Unifiée :
+
 - **App Bootstrap** : `createApp()` - Express app avec CORS, JSON parsing, dotenv automatique
 - **MongoDB Connection** : `connectToMongo('database-name')` - Connexion standardisée
 - **Server Startup** : `startServer(app, { routes, registries, serviceName, port })` - Démarrage avec OpenAPI
@@ -270,15 +300,16 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent 
 - **Validation** : `validateParams()`, `validateQuery()` - Middlewares partagés
 
 #### Exemple d'API Standardisée :
+
 ```typescript
-import { 
-  createApp, 
-  connectToMongo, 
-  startServer, 
+import {
+  createApp,
+  connectToMongo,
+  startServer,
   getApiPort,
   Router,
   createRouterWithDoc,
-  OpenAPIRegistry 
+  OpenAPIRegistry,
 } from '@ezstart/express-core'
 
 const PORT = getApiPort('EZAUTH') // 8081 avec fallback process.env.PORT
@@ -309,30 +340,33 @@ connectToMongo('ezauth')
 ```
 
 #### Ports Standardisés :
+
 - **ezauth** : Port 8081 (`getApiPort('EZAUTH')`)
-- **ez-billing** : Port 4101 (`getApiPort('EZ_BILLING')`)  
-- **tower-defense** : Port 3101 (`getApiPort('TOWER_DEFENSE')`)
+- **ez-billing** : Port 4101 (`getApiPort('EZ_BILLING')`)
+- **tower-defense** : Port 4201 (`getApiPort('TOWER_DEFENSE')`)
 
 #### Bonnes Pratiques APIs :
+
 ✅ **TOUJOURS** utiliser `createApp()` au lieu de `express()`  
 ✅ **TOUJOURS** utiliser `Router` depuis express-core  
 ✅ **JAMAIS** importer `express` directement  
 ✅ **JAMAIS** faire `dotenv.config()` manuellement  
 ✅ **TOUJOURS** utiliser `getApiPort()` pour les ports  
 ✅ **TOUJOURS** utiliser `connectToMongo()` pour MongoDB  
-✅ **TOUJOURS** utiliser `startServer()` avec OpenAPI  
+✅ **TOUJOURS** utiliser `startServer()` avec OpenAPI
 
 #### Validation Tests :
+
 - ✅ **TypeCheck** : `pnpm typecheck` - Toutes les APIs sans erreur
-- ✅ **Build** : `pnpm --filter "api-*" build` - Compilation réussie  
+- ✅ **Build** : `pnpm --filter "api-*" build` - Compilation réussie
 - ✅ **Startup** : Connexion MongoDB + serveur opérationnel
 - ✅ **Lint** : Warnings acceptables, aucune erreur bloquante
 
 ### Configuration Express-Core Package :
+
 - **config/ports.ts** : Configuration centralisée des ports
 - **infra/createApp.ts** : Bootstrap Express avec CORS automatique
 - **infra/connectToMongo.ts** : Connexion MongoDB standardisée
 - **infra/startServer.ts** : Démarrage serveur + OpenAPI
 - **middlewares/** : Validation params/query partagée
 - **openapi/** : Documentation automatique avec Zod
-
