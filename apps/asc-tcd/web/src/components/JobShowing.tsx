@@ -32,14 +32,14 @@ export function SkillShowcase({ skills }: SkillShowcaseProps) {
   return (
     <Div size={'default'} className='skill-showcase overflow-hidden w-full'>
       <H2 size='h4' className={animate ? 'slideInFromLeft' : ''}>
-        {skills[index].first}
+        {skills[index]?.first || ''}
       </H2>
       <H3
         size='h5'
         variant={'description'}
         className={cn(animate ? 'slideInFromRight' : '')}
       >
-        {skills[index].second}
+        {skills[index]?.second || ''}
       </H3>
     </Div>
   );

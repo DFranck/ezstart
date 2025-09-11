@@ -26,7 +26,7 @@ export default function PageTransplantationArbres() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting && !video.paused) {
+        if (entry && !entry.isIntersecting && !video.paused) {
           video.pause();
         }
       },
