@@ -496,6 +496,9 @@ importers:
 
   apps/fengshui/web:
     dependencies:
+      '@ezstart/auth-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/auth-sdk
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types
