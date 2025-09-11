@@ -9,6 +9,7 @@
     "dev": "tsc -b --watch",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
