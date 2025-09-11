@@ -14,6 +14,13 @@ export { createSocketServer } from './infra/createSocketServer.js'
 export { createTickerEngine } from './infra/createTickerEngine.js'
 export { startServer } from './infra/startServer.js'
 
+// Express exports for centralization
+export { Router } from 'express'
+export type { Request, Response, NextFunction, RequestHandler } from 'express'
+
+// Config
+export { API_PORTS, getApiPort } from './config/ports.js'
+
 // Middlewares
 export { validateParams } from './middlewares/validate-params.js'
 export { validateQuery } from './middlewares/validate-query.js'

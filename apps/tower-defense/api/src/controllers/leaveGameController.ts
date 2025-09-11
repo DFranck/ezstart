@@ -1,10 +1,11 @@
-import { ./common/mongo-id } from 'zod'
+import { z } from 'zod'
 import { Request, Response } from 'express'
 import { leaveGameService } from '../services/leaveGameService.js'
 import { getIO } from '../socketInstance.js'
 
 export async function leaveGameController(req: Request, res: Response) {
-  const playerParsed = ./common/mongo-id.safeParse(req.body?.playerId)
+  const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId')
+  const playerParsed = mongoId.safeParse(req.body?.playerId)
   if (!playerParsed.success) {
     return res.status(422).json({
       error: 'Validation error',

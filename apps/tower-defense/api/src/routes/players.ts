@@ -1,10 +1,9 @@
-import { createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { createOrFindPlayerSchema, playerResponseSchema } from '@tower-defense/types'
-import express from 'express'
 import { createOrFindPlayerController } from '../controllers/player/playerController.js'
 
 export const playersRegistry = new OpenAPIRegistry()
-const router = express.Router()
+const router = Router()
 const docRouter = createRouterWithDoc(playersRegistry, router)
 
 docRouter.post('/', createOrFindPlayerController, {

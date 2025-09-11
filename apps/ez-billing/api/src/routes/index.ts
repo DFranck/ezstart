@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import { Router } from '@ezstart/express-core';
 import clientRoutes, { clientsRegistry } from './clients.js';
 import companiesRoutes from './companies.js';
 import invoiceRoutes, { invoiceRegistry } from './invoices.js';
@@ -7,7 +7,7 @@ import quoteRoutes, { quotesRegistry } from './quotes.js';
 import receiptRoutes, { receiptRegistry } from './receipts.js';
 import usersRoutes from './users.js';
 
-const router: Router = express.Router();
+const router = Router();
 export const globalRegistry = [
   clientsRegistry,
   invoiceRegistry,

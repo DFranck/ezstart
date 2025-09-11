@@ -1,6 +1,6 @@
 // path: @tower-defense/types/src/tower.ts
 import { generateMock } from '@anatine/zod-mock'
-import { z, type Infer } from 'zod'
+import { z, type infer } from 'zod'
 import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
 import { damageTypeSchema } from './damage.js'
 import { elementalTypeSchema } from './elements.js'
@@ -39,7 +39,7 @@ export const towerSchema = z.object({
   description: z.string().max(200).optional().describe('Description of the tower'),
 })
 
-export type Tower = Infer<typeof towerSchema>
+export type Tower = z.infer<typeof towerSchema>
 
 function getRandomShape(): boolean[][] {
   const shape = SHAPE_VALUES[Math.floor(Math.random() * SHAPE_VALUES.length)]

@@ -3,6 +3,7 @@ import {
   OpenAPIRegistry,
   validateQuery,
   validateParams,
+  Router,
 } from '@ezstart/express-core';
 import {
   addLineItemSchema,
@@ -16,12 +17,11 @@ import {
   removeLineItemSchema,
   updateInvoiceSchema,
 } from '@ez-billing/types';
-import express, { Router } from 'express';
 import * as secureControllers from '../controllers/quote/quote.secure-controllers.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 export const quotesRegistry = new OpenAPIRegistry();
-const router: Router = express.Router();
+const router = Router();
 const docRouter = createRouterWithDoc(quotesRegistry, router);
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureQuoteController, {

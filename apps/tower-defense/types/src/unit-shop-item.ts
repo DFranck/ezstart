@@ -1,5 +1,5 @@
 import { generateMock } from '@anatine/zod-mock'
-import { z, type Infer } from 'zod'
+import { z, type infer } from 'zod'
 import { mobSchema } from './mob.js'
 
 export const unitShopItemSchema = z.object({
@@ -7,5 +7,5 @@ export const unitShopItemSchema = z.object({
   unit: mobSchema,
 })
 
-export type UnitShopItem = Infer<typeof unitShopItemSchema>
+export type UnitShopItem = z.infer<typeof unitShopItemSchema>
 export const mockUnitShopItem = () => generateMock(unitShopItemSchema)

@@ -255,3 +255,84 @@ const { user, isAuthenticated, login, logout } = useAuth()
 2. **Créer** page `/auth/callback` dans chaque app
 3. **Single Sign-On** automatique entre toutes les apps
 
+## APIs - Standardisation Express-Core ✅
+
+### Configuration 100% Centralisée avec @ezstart/express-core
+
+Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même infrastructure standardisée :
+
+#### Infrastructure Unifiée :
+- **App Bootstrap** : `createApp()` - Express app avec CORS, JSON parsing, dotenv automatique
+- **MongoDB Connection** : `connectToMongo('database-name')` - Connexion standardisée
+- **Server Startup** : `startServer(app, { routes, registries, serviceName, port })` - Démarrage avec OpenAPI
+- **Port Management** : `getApiPort('EZAUTH|EZ_BILLING|TOWER_DEFENSE')` - Configuration centralisée
+- **Router Export** : `Router` depuis express-core - Plus d'import express direct
+- **Validation** : `validateParams()`, `validateQuery()` - Middlewares partagés
+
+#### Exemple d'API Standardisée :
+```typescript
+import { 
+  createApp, 
+  connectToMongo, 
+  startServer, 
+  getApiPort,
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry 
+} from '@ezstart/express-core'
+
+const PORT = getApiPort('EZAUTH') // 8081 avec fallback process.env.PORT
+const app = createApp() // CORS + JSON + dotenv automatique
+
+// Routes avec OpenAPI
+const registry = new OpenAPIRegistry()
+const router = Router() // Router centralisé
+const docRouter = createRouterWithDoc(registry, router)
+
+app.use('/api/auth', router)
+app.get('/api/health', (_, res) => res.json({ status: 'ok' }))
+
+// Démarrage avec connexion MongoDB
+connectToMongo('ezauth')
+  .then(() =>
+    startServer(app, {
+      routes: router,
+      registries: [registry],
+      serviceName: 'EZAuth',
+      port: PORT,
+    })
+  )
+  .catch(err => {
+    console.error('❌ Failed to start API', err)
+    process.exit(1)
+  })
+```
+
+#### Ports Standardisés :
+- **ezauth** : Port 8081 (`getApiPort('EZAUTH')`)
+- **ez-billing** : Port 4101 (`getApiPort('EZ_BILLING')`)  
+- **tower-defense** : Port 3101 (`getApiPort('TOWER_DEFENSE')`)
+
+#### Bonnes Pratiques APIs :
+✅ **TOUJOURS** utiliser `createApp()` au lieu de `express()`  
+✅ **TOUJOURS** utiliser `Router` depuis express-core  
+✅ **JAMAIS** importer `express` directement  
+✅ **JAMAIS** faire `dotenv.config()` manuellement  
+✅ **TOUJOURS** utiliser `getApiPort()` pour les ports  
+✅ **TOUJOURS** utiliser `connectToMongo()` pour MongoDB  
+✅ **TOUJOURS** utiliser `startServer()` avec OpenAPI  
+
+#### Validation Tests :
+- ✅ **TypeCheck** : `pnpm typecheck` - Toutes les APIs sans erreur
+- ✅ **Build** : `pnpm --filter "api-*" build` - Compilation réussie  
+- ✅ **Startup** : Connexion MongoDB + serveur opérationnel
+- ✅ **Lint** : Warnings acceptables, aucune erreur bloquante
+
+### Configuration Express-Core Package :
+- **config/ports.ts** : Configuration centralisée des ports
+- **infra/createApp.ts** : Bootstrap Express avec CORS automatique
+- **infra/connectToMongo.ts** : Connexion MongoDB standardisée
+- **infra/startServer.ts** : Démarrage serveur + OpenAPI
+- **middlewares/** : Validation params/query partagée
+- **openapi/** : Documentation automatique avec Zod
+

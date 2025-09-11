@@ -1,7 +1,8 @@
-import { ./common/mongo-id, z, type Infer } from 'zod'
+import { z, type infer } from 'zod'
+import { mongoIdSchema } from './common/mongo-id.js'
 
 export const playerSchema = z.object({
-  _id: ./common/mongo-id.describe('Player id from mongo _id'),
+  _id: mongoIdSchema.describe('Player id from mongo _id'),
   userId: z.string().describe('User id from EZAuth'),
   name: z.string().min(1).describe('Unique display name'),
   gamesPlayed: z.number().default(0).describe('Number of games played'),
@@ -9,4 +10,4 @@ export const playerSchema = z.object({
   rank: z.number().default(1000).describe('Ranking'),
 })
 
-export type Player = Infer<typeof playerSchema>
+export type Player = z.infer<typeof playerSchema>

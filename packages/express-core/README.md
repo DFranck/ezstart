@@ -23,25 +23,38 @@ This package is automatically included in all @ezstart APIs via workspace depend
 ### Basic API Setup
 
 ```typescript
-import { createApp, startServer } from '@ezstart/express-core/infra'
-import { validateBody, validateParams } from '@ezstart/express-core/middlewares'
-import { userSchema } from '@ezstart/types'
+import { 
+  createApp, 
+  connectToMongo, 
+  startServer, 
+  getApiPort,
+  Router 
+} from '@ezstart/express-core'
 
-const app = createApp({
-  name: 'my-api',
-  version: '1.0.0'
-})
+const PORT = getApiPort('EZAUTH') // or 'EZ_BILLING', 'TOWER_DEFENSE'
 
-// Use validation middleware
-app.post('/users', 
-  validateBody(userSchema),
-  (req, res) => {
-    const userData = req.body // Typed and validated
-    res.json({ success: true })
-  }
-)
+// Create app with standard configuration (includes cors, json parsing, etc.)
+const app = createApp()
 
-startServer(app, { port: 8001 })
+// Setup routes using centralized Router
+const router = Router()
+router.get('/health', (_, res) => res.json({ status: 'ok' }))
+app.use('/api', router)
+
+// Connect to MongoDB and start server
+connectToMongo('my-database')
+  .then(() =>
+    startServer(app, {
+      routes: router,
+      registries: [], // OpenAPI registries
+      serviceName: 'MyService',
+      port: PORT,
+    })
+  )
+  .catch(err => {
+    console.error('❌ Failed to start API', err)
+    process.exit(1)
+  })
 ```
 
 ### CRUD Controller Factory
@@ -66,27 +79,33 @@ app.use('/api', userController.router)
 
 ```
 packages/express-core/src/
-├── controller-factory/     # Standard CRUD controller generators
-│   ├── create-controller.ts
-│   ├── crud-operations.ts
-│   └── types.ts
-├── infra/                 # Infrastructure utilities
-│   ├── app-bootstrap.ts   # Express app initialization
-│   ├── mongodb.ts         # MongoDB connection utilities
-│   └── server.ts          # Server startup utilities
-├── middlewares/           # Express middleware
-│   ├── validation.ts      # Request validation (body, params, query)
-│   ├── error-handler.ts   # Global error handling
-│   └── cors.ts           # CORS configuration
-├── openapi/              # OpenAPI/Swagger integration
-│   ├── schema-generator.ts
-│   └── swagger-setup.ts
-├── types/                # Type definitions
-│   ├── express.d.ts      # Extended Express types
-│   └── api.ts           # Common API types
-└── utils/               # Utility functions
-    ├── response.ts      # Standardized API responses
-    └── validation.ts    # Validation helpers
+├── config/                # Configuration
+│   └── ports.ts          # Centralized port configuration
+├── controller-factory/    # Standard CRUD controller generators
+│   ├── make-create-controller.ts
+│   ├── make-delete-controller.ts
+│   ├── make-get-by-id-controller.ts
+│   ├── make-get-list-controller.ts
+│   ├── make-restore-controller.ts
+│   └── make-update-controller.ts
+├── infra/                # Infrastructure utilities
+│   ├── connectToMongo.ts # MongoDB connection
+│   ├── createApp.ts      # Express app initialization (with cors)
+│   ├── createSocketServer.ts # Socket.io server creation
+│   ├── createTickerEngine.ts # Ticker engine for real-time updates
+│   └── startServer.ts    # Server startup with OpenAPI docs
+├── middlewares/          # Express middleware
+│   ├── validate-params.ts # Params validation
+│   └── validate-query.ts  # Query validation
+├── openapi/             # OpenAPI/Swagger integration
+│   ├── check-missing-descriptions.ts
+│   ├── openapi-compatible.ts
+│   ├── route-with-doc.ts # createRouterWithDoc utility
+│   ├── strip-incompatible.ts
+│   └── z-object-helper.ts
+└── utils/              # Utility functions
+    ├── find-with-query.ts # MongoDB query helper
+    └── to-api-object.ts   # Convert Mongoose to plain object
 ```
 
 ## Core Features
@@ -96,39 +115,63 @@ packages/express-core/src/
 #### App Bootstrap
 
 ```typescript
-import { createApp } from '@ezstart/express-core/infra'
+import { createApp } from '@ezstart/express-core'
 
-const app = createApp({
-  name: 'ezauth-api',
-  version: '1.0.0',
-  cors: true,
-  swagger: {
-    enabled: true,
-    path: '/docs'
-  }
-})
+// Creates Express app with built-in:
+// - CORS enabled
+// - JSON body parsing
+// - URL-encoded parsing
+// - dotenv config loaded
+const app = createApp()
 ```
 
 #### MongoDB Connection
 
 ```typescript
-import { connectToMongoDB } from '@ezstart/express-core/infra'
+import { connectToMongo } from '@ezstart/express-core'
 
-await connectToMongoDB({
-  uri: process.env.MONGODB_URI,
-  dbName: 'ezstart'
+// Connects to MongoDB with standard URI format
+await connectToMongo('database-name')
+// Uses process.env.MONGO_URL || 'mongodb://localhost:27017/'
+```
+
+#### Server Startup with OpenAPI
+
+```typescript
+import { startServer } from '@ezstart/express-core'
+
+startServer(app, {
+  routes,           // Express router
+  registries: [],   // OpenAPI registries array
+  serviceName: 'MyAPI',
+  port: 8001,
+  onHttpServerReady: server => {
+    // Optional: Setup Socket.io or other server extensions
+  }
 })
 ```
 
-#### Server Startup
+#### Port Configuration
 
 ```typescript
-import { startServer } from '@ezstart/express-core/infra'
+import { getApiPort, API_PORTS } from '@ezstart/express-core'
 
-startServer(app, {
-  port: 8001,
-  name: 'EZAuth API'
-})
+// Get standardized port for service
+const PORT = getApiPort('EZAUTH')     // 8081
+const PORT = getApiPort('EZ_BILLING') // 4101
+const PORT = getApiPort('TOWER_DEFENSE') // 3101
+
+// Falls back to process.env.PORT if defined
+```
+
+#### Express Router (Centralized)
+
+```typescript
+import { Router } from '@ezstart/express-core'
+
+// Use centralized Router export instead of express.Router()
+const router = Router()
+router.get('/health', (req, res) => res.json({ status: 'ok' }))
 ```
 
 ### 🛡️ Middleware
@@ -275,9 +318,22 @@ app.post('/users', (req: TypedRequest<CreateUserBody>, res) => {
 
 All @ezstart APIs use this shared infrastructure:
 
-- ✅ **ezauth/api** - Authentication service (port 8001)
+- ✅ **ezauth/api** - Authentication service (port 8081)
 - ✅ **ez-billing/api** - Billing management API (port 4101)  
 - ✅ **tower-defense/api** - Tower Defense game API (port 3101)
+
+### Standardized Features Across All APIs:
+
+- ✅ **Centralized Express app creation** via `createApp()`
+- ✅ **MongoDB connection** via `connectToMongo()`
+- ✅ **Server startup with OpenAPI** via `startServer()`
+- ✅ **Standardized port configuration** via `getApiPort()`
+- ✅ **Centralized Router export** - no direct `express` imports
+- ✅ **Built-in CORS** - configured in `createApp()`
+- ✅ **Automatic dotenv loading** - no manual `dotenv.config()`
+- ✅ **OpenAPI documentation** via `createRouterWithDoc()`
+- ✅ **Request validation** via `validateParams()` and `validateQuery()`
+- ✅ **Socket.io support** via `createSocketServer()` (tower-defense)
 
 ## Configuration
 
@@ -385,12 +441,22 @@ export const User = mongoose.model<UserType>('User', userSchema)
 
 ✅ **Do:** Use the provided infrastructure utilities
 ```typescript
-const app = createApp({ name: 'my-api' })
+import { createApp, Router, getApiPort } from '@ezstart/express-core'
+
+const app = createApp()
+const router = Router()
+const PORT = getApiPort('EZAUTH')
 ```
 
-❌ **Don't:** Create Express apps manually
+❌ **Don't:** Import directly from express or hardcode values
 ```typescript
-const app = express() // Manual setup
+import express from 'express' // Don't import express directly
+import dotenv from 'dotenv'   // Don't load dotenv manually
+
+const app = express()          // Manual setup
+const router = express.Router() // Use centralized Router instead
+const PORT = 8081              // Use getApiPort() instead
+dotenv.config()                // Already done in createApp()
 ```
 
 ### 2. Validate All Inputs

@@ -1,5 +1,6 @@
 import { generateMock } from '@anatine/zod-mock'
-import { listingQuerySchema, ./common/mongo-id, z, type Infer } from 'zod'
+import { z, type infer } from 'zod'
+import { mongoIdSchema } from './common/mongo-id.js'
 import { GAME_PHASES } from '@tower-defense/config'
 import { activeMobSchema } from './activeMob.js'
 import { inGamePlayerSchema } from './in-game-player.js'
@@ -8,8 +9,8 @@ import { unitShopItemSchema } from './unit-shop-item.js'
 
 // Schéma pour les détails d'un jeu (avec les InGamePlayer complets)
 export const gameSchema = z.object({
-  _id: ./common/mongo-id,
-  host: ./common/mongo-id.optional().describe('ID of the host player'),
+  _id: mongoIdSchema,
+  host: mongoIdSchema.optional().describe('ID of the host player'),
   players: z.array(inGamePlayerSchema).describe('List of players in game'),
   tick: z.number().describe('Current tick number'),
   map: z.array(z.array(z.string())).describe('2D map representation'),
@@ -24,7 +25,7 @@ export const gameSchema = z.object({
 
 export const mockGame = generateMock(gameSchema)
 export const mockGames = generateMock(z.array(gameSchema))
-export const getGamesQuerySchema = listingQuerySchema.extend({
+export const getGamesQuerySchema = z.object({
   phase: z
     .union([
       z.enum(GAME_PHASES).optional().describe('Game phase'),
@@ -34,5 +35,5 @@ export const getGamesQuerySchema = listingQuerySchema.extend({
     .describe('Filter by game phase'),
 })
 
-export type Game = Infer<typeof gameSchema>
-export type GetGamesQuery = Infer<typeof getGamesQuerySchema>
+export type Game = z.infer<typeof gameSchema>
+export type GetGamesQuery = z.infer<typeof getGamesQuerySchema>

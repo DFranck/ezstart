@@ -1,5 +1,6 @@
 import { generateMock } from '@anatine/zod-mock'
-import { ./common/mongo-id, z, type Infer } from 'zod'
+import { z, type infer } from 'zod'
+import { mongoIdSchema } from './common/mongo-id.js'
 import { DEFAULT_PLAYER_STATUS, PLAYER_STATUS } from '@tower-defense/config'
 import { mobSchema } from './mob.js'
 import { placedTowerSchema } from './placedTower.js'
@@ -7,8 +8,8 @@ import { playerSchema } from './player.js'
 import { towerSchema } from './tower.js'
 
 export const inGamePlayerSchema = z.object({
-  _id: ./common/mongo-id,
-  gameId: ./common/mongo-id.describe('Game ID'),
+  _id: mongoIdSchema,
+  gameId: mongoIdSchema.describe('Game ID'),
   player: playerSchema.describe('Player details'),
   status: z.enum(PLAYER_STATUS).default(DEFAULT_PLAYER_STATUS).describe('Player status'),
   gold: z.number().describe('Current gold'),
@@ -21,6 +22,6 @@ export const inGamePlayerSchema = z.object({
   updatedAt: z.string().describe('ISO timestamp'),
 })
 
-export type InGamePlayer = Infer<typeof inGamePlayerSchema>
+export type InGamePlayer = z.infer<typeof inGamePlayerSchema>
 export const mockInGamePlayer = generateMock(inGamePlayerSchema)
 export const mockInGamePlayers = generateMock(z.array(inGamePlayerSchema))

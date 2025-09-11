@@ -1,5 +1,5 @@
 import { generateMock } from '@anatine/zod-mock';
-import { z, type Infer } from 'zod';
+import { z, type infer } from 'zod';
 import { towerSchema } from './tower.js';
 
 export const towerShopItemSchema = z.object({
@@ -7,5 +7,5 @@ export const towerShopItemSchema = z.object({
   tower: towerSchema,
 });
 
-export type TowerShopItem = Infer<typeof towerShopItemSchema>;
+export type TowerShopItem = z.infer<typeof towerShopItemSchema>;
 export const mockTowerShopItem = () => generateMock(towerShopItemSchema);

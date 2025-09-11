@@ -1,14 +1,14 @@
-import { createRouterWithDoc, OpenAPIRegistry, z } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, z, Router } from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../services/auth.service.js'
 import { 
   LoginRequest,
   RegisterRequest,
   TokenRequest
 } from '@ezstart/auth-sdk'
-import express, { Router } from 'express'
 
 export const authRegistry = new OpenAPIRegistry()
-const router: Router = express.Router()
+const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(authRegistry, router)
 
 // Register new user

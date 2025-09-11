@@ -1,11 +1,12 @@
-import { ./common/mongo-id } from 'zod'
+import { z } from 'zod'
 import { Request, Response } from 'express'
 import { joinGameService } from '../services/joinGameService.js'
 import { getIO } from '../socketInstance.js'
 
 export async function joinGameController(req: Request, res: Response) {
   try {
-    const parsed = ./common/mongo-id.safeParse(req.body?.playerId)
+    const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId')
+    const parsed = mongoId.safeParse(req.body?.playerId)
     if (!parsed.success) {
       return res.status(422).json({ error: 'Validation error', details: parsed.error.errors })
     }

@@ -10,7 +10,6 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -22,7 +21,6 @@ function RegisterContent() {
   return (
     <Card className="max-w-md w-full relative">
       <div className="absolute top-4 right-4">
-        <ThemeSwitcher />
       </div>
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>

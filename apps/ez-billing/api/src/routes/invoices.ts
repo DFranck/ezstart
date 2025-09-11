@@ -8,18 +8,17 @@ import {
   removeLineItemSchema,
   updateInvoiceSchema,
 } from '@ez-billing/types';
-import express, { Router } from 'express';
-
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
   validateQuery,
   validateParams,
+  Router,
 } from '@ezstart/express-core';
 import * as secureControllers from '../controllers/invoice/invoice.secure-controllers.js';
 import { authMiddleware } from '../middleware/auth.js';
 export const invoiceRegistry = new OpenAPIRegistry();
-const router: Router = express.Router();
+const router = Router();
 const docRouter = createRouterWithDoc(invoiceRegistry, router);
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureInvoiceController, {

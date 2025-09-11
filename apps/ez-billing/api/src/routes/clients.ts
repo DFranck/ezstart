@@ -3,6 +3,7 @@ import {
   OpenAPIRegistry,
   validateParams,
   validateQuery,
+  Router,
 } from '@ezstart/express-core';
 import {
   billingClientSchema,
@@ -10,14 +11,13 @@ import {
   getClientsQuerySchema,
   paramsMongoIdSchema,
 } from '@ez-billing/types';
-import express, { Router } from 'express';
 import * as secureControllers from '../controllers/client/client.secure-controllers.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { z } from 'zod';
 
 export const clientsRegistry = new OpenAPIRegistry();
 
-const router: Router = express.Router();
+const router = Router();
 const docRouter = createRouterWithDoc(clientsRegistry, router);
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureClientController, {

@@ -3,11 +3,13 @@ import {
   OpenAPIRegistry,
   validateParams,
   validateQuery,
+  Router,
 } from '@ezstart/express-core'
-import { ./common/mongo-id, z } from 'zod'
+import { z } from 'zod'
 
+const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId')
 const paramsMongoIdSchema = z.object({
-  id: ./common/mongo-id
+  id: mongoId
 })
 import {
   createGameResponseSchema,
@@ -15,7 +17,6 @@ import {
   getGamesQuerySchema,
   joinGameResponseSchema,
 } from '@tower-defense/types'
-import express from 'express'
 import { createGameController } from '../controllers/createGameController.js'
 import { getGameByIdController } from '../controllers/getGameByIdController.js'
 import { getGamesController } from '../controllers/getGamesController.js'
@@ -24,7 +25,7 @@ import { leaveGameController } from '../controllers/leaveGameController.js'
 import { startGameController } from '../controllers/startGameController.js'
 
 export const gamesRegistry = new OpenAPIRegistry()
-const router = express.Router()
+const router = Router()
 
 const docRouter = createRouterWithDoc(gamesRegistry, router)
 
@@ -55,7 +56,7 @@ docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameContr
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
-  bodySchema: ./common/mongo-id,
+  bodySchema: z.object({ playerId: mongoId }),
   paramsSchema: paramsMongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })

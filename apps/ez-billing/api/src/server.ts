@@ -1,8 +1,8 @@
-import { connectToMongo, createApp, startServer } from '@ezstart/express-core'
+import { connectToMongo, createApp, startServer, getApiPort } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp()
-const PORT = process.env.PORT || 4101
+const PORT = getApiPort('EZ_BILLING')
 connectToMongo('ez-billing')
   .then(() =>
     startServer(app, {

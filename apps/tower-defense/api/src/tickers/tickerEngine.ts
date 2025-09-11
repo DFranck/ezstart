@@ -19,7 +19,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       }
 
       // Calculer le path du joueur cible
-      const blockedCells = targetPlayer.placedTowers.flatMap(t => t.coveredCells)
+      const blockedCells = targetPlayer.placedTowers.flatMap((t: any) => t.coveredCells)
       const path = findPath(blockedCells)
 
       console.log(

@@ -1,4 +1,4 @@
-import { z, type infer as ZodInfer } from 'zod';
+import { z } from 'zod';
 
 export const listingQuerySchema = z.object({
   includeDeleted: z
@@ -44,4 +44,4 @@ export const listingQuerySchema = z.object({
     .describe('Filter: createdAt <= to (ISO 8601 date)'),
 });
 
-export type ListingQuery = ZodInfer<typeof listingQuerySchema>;
+export type ListingQuery = z.infer<typeof listingQuerySchema>;

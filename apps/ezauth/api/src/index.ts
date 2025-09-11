@@ -1,11 +1,7 @@
-import { createApp, connectToMongo, startServer } from '@ezstart/express-core'
-import dotenv from 'dotenv'
+import { createApp, connectToMongo, startServer, getApiPort } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 
-// Load environment variables
-dotenv.config()
-
-const PORT = process.env.PORT || 8081
+const PORT = getApiPort('EZAUTH')
 
 // Create app with standard configuration
 const app = createApp()

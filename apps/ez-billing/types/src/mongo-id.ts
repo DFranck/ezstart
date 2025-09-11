@@ -7,6 +7,6 @@ export const paramsMongoIdSchema = z.object({
     .describe('MongoDB ObjectId (24 hex chars)'),
 });
 
-export const import { mongoIdSchema } from "../types/src/mongo-id" = z.string()
+export const mongoIdSchema = z.string()
   .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
   .describe('MongoDB ObjectId (24 hex chars)');
