@@ -1,16 +1,44 @@
+'use client'
+
 import { logger } from '@ezstart/ui/lib'
 import { callApi } from '@ezstart/ui/utils'
-import { notFound } from 'next/navigation'
 import { LeaveGameButton } from '../../../../components/LeaveGameButton'
 import { LobbyWrapper } from './LobbyWrapper'
+import { useEffect, useState } from 'react'
+import { notFound } from 'next/navigation'
+import { Game } from '@tower-defense/types'
 
-export default async function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
-  const { gameId } = await params
-  const res = await callApi(`/api/games/${gameId}`)
-  if (!res.ok) return notFound()
+export default function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
+  const [gameId, setGameId] = useState<string | null>(null)
+  const [game, setGame] = useState<Game | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  const game = res.data
-  logger.debug('game', game)
+  useEffect(() => {
+    params.then(({ gameId }) => {
+      setGameId(gameId)
+      
+      callApi(`/api/games/${gameId}`)
+        .then(res => {
+          if (res.ok) {
+            setGame(res.data)
+            logger.debug('game', res.data)
+          } else {
+            setError(true)
+          }
+        })
+        .catch(() => setError(true))
+        .finally(() => setLoading(false))
+    })
+  }, [params])
+
+  if (loading) {
+    return <div className="p-4 max-w-2xl mx-auto">Loading...</div>
+  }
+
+  if (error || !game || !gameId) {
+    return notFound()
+  }
   
   return (
     <div className="p-4 max-w-2xl mx-auto">
