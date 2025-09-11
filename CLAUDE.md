@@ -146,11 +146,23 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 - Lint : `pnpm lint`
 - Tests : vérifier dans chaque projet (pas de standard défini)
 
-### Git Commits
+### Git Commits - Règles Obligatoires
+- **TOUJOURS** commiter après chaque modification importante
+- **TOUJOURS** documenter les changements de manière détaillée dans le message
+- **TOUJOURS** mettre à jour CLAUDE.md pour mémoriser les nouvelles pratiques/règles
 - **NE JAMAIS** ajouter les lignes suivantes dans les commits :
   - `🤖 Generated with [Claude Code](https://claude.ai/code)`
   - `Co-Authored-By: Claude <noreply@anthropic.com>`
-- Faire des messages de commit simples et professionnels
+- **Messages de commit** : descriptifs, professionnels, avec contexte et impact
+- **Structure recommandée** :
+  ```
+  type: brief description
+  
+  - Detailed changes list
+  - Technical modifications
+  - Documentation updates
+  - Impact/results
+  ```
 
 ### Notes Techniques
 - Monorepo utilise pnpm workspaces
