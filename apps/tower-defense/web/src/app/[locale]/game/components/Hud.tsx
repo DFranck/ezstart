@@ -20,8 +20,8 @@ export function Hud({ game }: { game: Game }) {
       <div className="order-2 md:order-1 flex flex-wrap items-center gap-4">
         <div className="font-bold">Phase: {phase}</div>
         <GameTimer game={game} />
-        <div>Gold: {player.gold}</div>
-        <div>HP: {player.hp}</div>
+        <div>Gold: {player?.gold || 0}</div>
+        <div>HP: {player?.hp || 0}</div>
         {/* <div>Income: {player.income}</div>
         <div>Hand: {player.hand.length || 'empty'}</div>
         <div>Placed: {player.placedTowers.length || 'none'}</div>

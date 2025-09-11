@@ -39,9 +39,9 @@ export function useGames(options: UseGamesOptions = {}) {
     return games1.every((game1, index) => {
       const game2 = games2[index]
       return (
-        game1._id === game2._id &&
-        game1.phase === game2.phase &&
-        game1.players.length === game2.players.length
+        game1._id === game2?._id &&
+        game1.phase === game2?.phase &&
+        game1.players.length === game2?.players.length
       )
     })
   }, [])

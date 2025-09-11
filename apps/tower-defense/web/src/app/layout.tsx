@@ -5,7 +5,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { PWAInstallPrompt } from '@ezstart/ui/components'
-import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const fontSans = Geist({
   subsets: ['latin'],

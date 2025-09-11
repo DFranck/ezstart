@@ -79,7 +79,7 @@ export function useGamesSocket() {
   return context
 }
 
-export function useGamesSocketInstance() {
+export function useGamesSocketInstance(): Socket {
   const context = useGamesSocket()
   if (!context.socket) {
     throw new Error('Socket not initialized')

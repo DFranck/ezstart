@@ -26,7 +26,7 @@ export function TowerShop({ game }: TowerShopProps) {
     if (!ghostRef.current) return
     ghostRef.current.innerHTML = ''
     ghostRef.current.style.display = 'grid'
-    ghostRef.current.style.gridTemplateColumns = `repeat(${shape[0].length}, ${TILE_SIZE}px)`
+    ghostRef.current.style.gridTemplateColumns = `repeat(${shape[0]?.length || 0}, ${TILE_SIZE}px)`
     shape.forEach(row =>
       row.forEach(cell => {
         const div = document.createElement('div')
@@ -57,13 +57,15 @@ export function TowerShop({ game }: TowerShopProps) {
   const handleTouchStart = (towerIndex: number) => (e: React.TouchEvent) => {
     e.preventDefault()
     const touch = e.touches[0]
-    startDraggingTower(towerIndex, touch.clientX, touch.clientY)
+    if (touch) {
+      startDraggingTower(towerIndex, touch.clientX, touch.clientY)
+    }
   }
 
   useEffect(() => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      const clientX = 'touches' in e ? e.touches[0]?.clientX || 0 : e.clientX
+      const clientY = 'touches' in e ? e.touches[0]?.clientY || 0 : e.clientY
       if (ghostRef.current) {
         ghostRef.current.style.left = `${clientX + 4}px`
         ghostRef.current.style.top = `${clientY + 4}px`
