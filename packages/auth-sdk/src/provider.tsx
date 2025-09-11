@@ -77,12 +77,16 @@ export function useAuth() {
   const { client } = useAuthContext()
   const store = useAuthStore()
 
-  const login = (additionalParams?: Record<string, string>) => {
+  const login = (additionalParams?: Record<string, string>): Promise<never> => {
     client.redirectToLogin(additionalParams)
+    // Return a promise that never resolves since we're redirecting
+    return new Promise(() => {})
   }
 
-  const register = () => {
+  const register = (): Promise<never> => {
     client.redirectToRegister()
+    // Return a promise that never resolves since we're redirecting
+    return new Promise(() => {})
   }
 
   const handleCallback = async (code: string) => {

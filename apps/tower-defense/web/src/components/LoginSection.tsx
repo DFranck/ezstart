@@ -1,7 +1,7 @@
 'use client'
 
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { useAuth } from '@ezstart/auth-sdk'
+import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { Icon, Input, Section, Span } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
@@ -9,7 +9,7 @@ import { LoadingButton } from './LoadingButton'
 
 export function LoginSection() {
   const { player, register, reset } = usePlayerStore()
-  const { user, isAuthenticated, login, logout } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   const [name, setName] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [isCreatingPlayer, setIsCreatingPlayer] = useState(false)
@@ -98,14 +98,9 @@ export function LoginSection() {
     <Section className="flex flex-col gap-4">
       {!isAuthenticated ? (
         <div className="text-center">
-          <LoadingButton
-            onClick={() => login()}
-            loading={isLoggingIn}
-            loadingText="Redirecting..."
-            icon="fa:FaSignInAlt"
-          >
+          <LoginButton size="sm" loadingText="Redirecting to EZAuth...">
             Login with EZAuth
-          </LoadingButton>
+          </LoginButton>
         </div>
       ) : !player ? (
         <form

@@ -1,7 +1,9 @@
 'use client'
 
 import { LoginForm } from '@/components/LoginForm'
+import { ThemeSwitcher } from '@ezstart/next-core/components'
 import {
+  BackButton,
   Card,
   CardContent,
   CardDescription,
@@ -10,7 +12,6 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/next-core/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -22,6 +23,9 @@ function LoginContent() {
 
   return (
     <Card className="max-w-md w-full relative">
+      <div className="absolute top-4 left-4">
+        <BackButton />
+      </div>
       <div className="absolute top-4 right-4">
         <ThemeSwitcher />
       </div>

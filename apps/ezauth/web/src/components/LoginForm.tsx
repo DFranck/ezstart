@@ -72,13 +72,14 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         const url = new URL(redirect_uri)
         url.searchParams.set('code', result.code)
         window.location.href = url.toString()
+        // Don't set loading to false here since we're redirecting
+        return
       } else {
         console.error('❌ No redirect_uri provided! Cannot redirect after login.')
         throw new Error('No redirect URL configured. Please provide redirect_uri parameter.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
       setLoading(false)
     }
   }

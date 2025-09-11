@@ -11,6 +11,8 @@ export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
 // Components
 export { AuthCallbackPage } from './auth-callback-page.js'
+export { LoginButton } from './login-button.js'
+export type { LoginButtonProps } from './login-button.js'
 
 // Re-export types
 export type { 

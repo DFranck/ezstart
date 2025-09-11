@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zustand": "^4.5.5"
+    "zustand": "^4.5.5",
+    "@ezstart/ui": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",
