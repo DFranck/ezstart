@@ -1,10 +1,10 @@
 import { generateMock } from '@anatine/zod-mock'
-import { mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { ./common/mongo-id, z, type Infer } from 'zod'
 import { mobSchema } from './mob.js'
 import { positionSchema } from './position.js'
 
 export const activeMobSchema = z.object({
-  id: mongoIdSchema.describe('Unique ID for this active mob instance'),
+  id: ./common/mongo-id.describe('Unique ID for this active mob instance'),
   mob: mobSchema.describe('Base mob data'),
   currentHp: z.number().describe('Current health points'),
   position: z.object({
@@ -12,7 +12,7 @@ export const activeMobSchema = z.object({
     y: z.number().describe('Current y position (can be fractional)')
   }).describe('Current position on the map'),
   pathIndex: z.number().describe('Current index in the path array'),
-  targetPlayerId: mongoIdSchema.describe('Player this mob is targeting'),
+  targetPlayerId: ./common/mongo-id.describe('Player this mob is targeting'),
 })
 
 export type ActiveMob = Infer<typeof activeMobSchema>

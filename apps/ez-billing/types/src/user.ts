@@ -1,4 +1,4 @@
-import { z, type Infer as ZodInfer } from '@ezstart/types';
+import { z, type infer as ZodInfer } from 'zod';
 
 export const userBaseSchema = z.object({
   username: z.string().min(1).describe('Unique username lowercase'),

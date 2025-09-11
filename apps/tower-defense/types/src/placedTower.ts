@@ -1,4 +1,4 @@
-import { z, type Infer } from '@ezstart/types'
+import { z, type Infer } from 'zod'
 import { positionSchema } from './position.js'
 import { towerSchema } from './tower.js'
 

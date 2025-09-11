@@ -1,5 +1,5 @@
-import { z } from '@ezstart/types';
-import { ZodTypeAny } from 'zod';
+import { z } from '@ezstart/types'
+import { ZodTypeAny } from 'zod'
 
 /**
  * ✅ Crée un z.object + enregistre automatiquement son openapi(name)

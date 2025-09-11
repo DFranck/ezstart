@@ -4,10 +4,10 @@ import {
   validateParams,
   validateQuery,
 } from '@ezstart/express-core'
-import { mongoIdSchema, z } from '@ezstart/types'
+import { ./common/mongo-id, z } from 'zod'
 
 const paramsMongoIdSchema = z.object({
-  id: mongoIdSchema
+  id: ./common/mongo-id
 })
 import {
   createGameResponseSchema,
@@ -55,7 +55,7 @@ docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameContr
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
-  bodySchema: mongoIdSchema,
+  bodySchema: ./common/mongo-id,
   paramsSchema: paramsMongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })

@@ -1,11 +1,11 @@
-import { mongoIdSchema } from '@ezstart/types'
+import { ./common/mongo-id } from 'zod'
 import { Request, Response } from 'express'
 import { joinGameService } from '../services/joinGameService.js'
 import { getIO } from '../socketInstance.js'
 
 export async function joinGameController(req: Request, res: Response) {
   try {
-    const parsed = mongoIdSchema.safeParse(req.body?.playerId)
+    const parsed = ./common/mongo-id.safeParse(req.body?.playerId)
     if (!parsed.success) {
       return res.status(422).json({ error: 'Validation error', details: parsed.error.errors })
     }

@@ -1,7 +1,13 @@
 'use client';
-import { isApiError } from '@ezstart/types';
 import { useState } from 'react';
 import { toast } from 'sonner';
+
+// Inline ApiError type and validator (was from @ezstart/types)
+type ApiError = { error: string; [key: string]: any };
+
+function isApiError<T>(data: T | ApiError): data is ApiError {
+  return typeof data === 'object' && !!data && 'error' in data;
+}
 
 export function useApiAction() {
   const [error, setError] = useState<string | null>(null);

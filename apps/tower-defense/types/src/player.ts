@@ -1,7 +1,7 @@
-import { mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { ./common/mongo-id, z, type Infer } from 'zod'
 
 export const playerSchema = z.object({
-  _id: mongoIdSchema.describe('Player id from mongo _id'),
+  _id: ./common/mongo-id.describe('Player id from mongo _id'),
   userId: z.string().describe('User id from EZAuth'),
   name: z.string().min(1).describe('Unique display name'),
   gamesPlayed: z.number().default(0).describe('Number of games played'),

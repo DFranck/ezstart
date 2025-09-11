@@ -1,4 +1,4 @@
-import { z, type Infer as ZodInfer } from '@ezstart/types';
+import { z, type infer as ZodInfer } from 'zod';
 import type { ZodEnum, ZodObject, ZodRawShape } from 'zod';
 import { currencyEnum } from '../enums/index.js';
 

@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
-    "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@ezstart/next-core": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",

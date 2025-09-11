@@ -1,4 +1,4 @@
-import { z, type Infer as ZodInfer } from '@ezstart/types';
+import { z, type infer as ZodInfer } from 'zod';
 
 export const invoiceStatusEnum = z.enum(['draft', 'sent', 'paid']);
 export type InvoiceStatus = ZodInfer<typeof invoiceStatusEnum>;

@@ -1,4 +1,4 @@
-import { z } from '@ezstart/types';
+import { z } from 'zod';
 
 export const paramsMongoIdSchema = z.object({
   id: z
@@ -7,6 +7,6 @@ export const paramsMongoIdSchema = z.object({
     .describe('MongoDB ObjectId (24 hex chars)'),
 });
 
-export const mongoIdSchema = z.string()
+export const import { mongoIdSchema } from "../types/src/mongo-id" = z.string()
   .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
   .describe('MongoDB ObjectId (24 hex chars)');

@@ -1,9 +1,9 @@
 import { generateMock } from '@anatine/zod-mock'
-import { mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { ./common/mongo-id, z, type Infer } from 'zod'
 import { EFFECTS, ELEMENTAL_TYPES } from '@tower-defense/config'
 
 export const mobSchema = z.object({
-  _id: mongoIdSchema,
+  _id: ./common/mongo-id,
   name: z.string().describe('Name of the mob'),
   elementalType: z.enum(ELEMENTAL_TYPES).describe('Type of mob'),
   hp: z.number().describe('Health points of the mob'),

@@ -1,4 +1,4 @@
-import { z, type Infer as ZodInfer } from '@ezstart/types';
+import { z, type infer as ZodInfer } from 'zod';
 
 // Listing query schema (copied from common)
 const listingQuerySchema = z.object({

@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
-    "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@ezstart/next-core": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",

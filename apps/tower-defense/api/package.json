@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@ezstart/express-core": "workspace:*",
-    "@ezstart/types": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@tower-defense/config": "workspace:*",
     "@tower-defense/types": "workspace:*",

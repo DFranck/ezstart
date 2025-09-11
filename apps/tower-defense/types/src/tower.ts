@@ -1,6 +1,6 @@
 // path: @tower-defense/types/src/tower.ts
 import { generateMock } from '@anatine/zod-mock'
-import { z, type Infer } from '@ezstart/types'
+import { z, type Infer } from 'zod'
 import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
 import { damageTypeSchema } from './damage.js'
 import { elementalTypeSchema } from './elements.js'

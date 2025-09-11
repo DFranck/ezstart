@@ -1,5 +1,4 @@
-import type { infer as ZodInfer } from 'zod';
-import { z } from '../zod-extended';
+import { z, type infer as ZodInfer } from 'zod';
 
 export const listingQuerySchema = z.object({
   includeDeleted: z
@@ -8,8 +7,7 @@ export const listingQuerySchema = z.object({
       z.boolean().optional()
     )
     .describe('Include soft-deleted items in the results (true/false)')
-    .default(false)
-    .openapi({ example: true }),
+    .default(false),
 
   deletedOnly: z
     .preprocess(
@@ -17,8 +15,7 @@ export const listingQuerySchema = z.object({
       z.boolean().optional()
     )
     .describe('Return only soft-deleted items (true/false)')
-    .default(false)
-    .openapi({ example: false }),
+    .default(false),
 
   page: z
     .preprocess(
@@ -26,8 +23,7 @@ export const listingQuerySchema = z.object({
       z.number().min(1).optional()
     )
     .describe('Page number for pagination (min: 1)')
-    .default(1)
-    .openapi({ example: 2 }),
+    .default(1),
 
   limit: z
     .preprocess(
@@ -35,20 +31,17 @@ export const listingQuerySchema = z.object({
       z.number().min(1).max(100).optional()
     )
     .describe('Number of items per page (min: 1, max: 100)')
-    .default(20)
-    .openapi({ example: 50 }),
+    .default(20),
 
   from: z
     .string()
     .optional()
-    .describe('Filter: createdAt >= from (ISO 8601 date)')
-    .openapi({ example: '2025-01-01T00:00:00.000Z' }),
+    .describe('Filter: createdAt >= from (ISO 8601 date)'),
 
   to: z
     .string()
     .optional()
-    .describe('Filter: createdAt <= to (ISO 8601 date)')
-    .openapi({ example: '2025-01-31T23:59:59.999Z' }),
+    .describe('Filter: createdAt <= to (ISO 8601 date)'),
 });
 
 export type ListingQuery = ZodInfer<typeof listingQuerySchema>;

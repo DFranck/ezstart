@@ -1,10 +1,10 @@
-import { mongoIdSchema } from '@ezstart/types'
+import { ./common/mongo-id } from 'zod'
 import { Request, Response } from 'express'
 import { leaveGameService } from '../services/leaveGameService.js'
 import { getIO } from '../socketInstance.js'
 
 export async function leaveGameController(req: Request, res: Response) {
-  const playerParsed = mongoIdSchema.safeParse(req.body?.playerId)
+  const playerParsed = ./common/mongo-id.safeParse(req.body?.playerId)
   if (!playerParsed.success) {
     return res.status(422).json({
       error: 'Validation error',

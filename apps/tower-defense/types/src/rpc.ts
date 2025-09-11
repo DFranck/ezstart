@@ -1,5 +1,5 @@
 // @ezstart/types/tower-defense/rpc.ts
-import { mongoIdSchema, z, type Infer } from '@ezstart/types'
+import { ./common/mongo-id, z, type Infer } from 'zod'
 import { playerSchema } from './player.js'
 
 // ---- create_game

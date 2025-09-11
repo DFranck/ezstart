@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 export const baseConfig = {
   // Packages du monorepo à transpiler
-  transpilePackages: ['@ezstart/ui', '@ezstart/types', '@ezstart/auth-sdk'],
+  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk'],
   
   // Configuration ESLint standard
   eslint: {

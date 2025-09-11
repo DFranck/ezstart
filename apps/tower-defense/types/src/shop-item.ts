@@ -1,5 +1,5 @@
 import { generateMock } from '@anatine/zod-mock';
-import { z, type Infer } from '@ezstart/types';
+import { z, type Infer } from 'zod';
 import { mobSchema } from './mob.js';
 import { towerSchema } from './tower.js';
 

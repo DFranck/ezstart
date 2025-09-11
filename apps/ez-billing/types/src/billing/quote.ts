@@ -1,4 +1,4 @@
-import { z, type Infer as ZodInfer } from '@ezstart/types';
+import { z, type infer as ZodInfer } from 'zod';
 import { quoteStatusEnum } from '../enums/index.js';
 import {
   baseBillingDocSchema,
