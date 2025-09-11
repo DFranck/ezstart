@@ -154,10 +154,24 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 - Lint : `pnpm lint`
 - Tests : vérifier dans chaque projet (pas de standard défini)
 
+### Documentation README - Règles Obligatoires
+- **TOUJOURS** maintenir les README des packages à jour après chaque modification
+- **OBLIGATOIRE** pour tous les packages dans `/packages/` car utilisés par plusieurs apps
+- **README doit inclure** :
+  - Overview et description claire du package
+  - Installation et configuration
+  - Exemples d'usage avec code
+  - API Reference pour les packages complexes
+  - Applications qui utilisent le package
+  - Related packages et liens utiles
+- **Mettre à jour README AVANT** de commiter les changements du package
+- **Ajouter cette tâche** aux modifications de packages dans TodoWrite
+
 ### Git Commits - Règles Obligatoires
 - **TOUJOURS** commiter après chaque modification importante
 - **TOUJOURS** documenter les changements de manière détaillée dans le message
 - **TOUJOURS** mettre à jour CLAUDE.md pour mémoriser les nouvelles pratiques/règles
+- **TOUJOURS** mettre à jour README des packages avant commit
 - **NE JAMAIS** ajouter les lignes suivantes dans les commits :
   - `🤖 Generated with [Claude Code](https://claude.ai/code)`
   - `Co-Authored-By: Claude <noreply@anthropic.com>`
