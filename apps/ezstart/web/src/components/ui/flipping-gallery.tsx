@@ -103,14 +103,14 @@ export const FlippingGallery = ({
             exit={{ y: -20, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
-            <H3 size={'h5'}>{items[active].title}</H3>
-            <P size={'xs'}>{items[active].subtitle}</P>
+            <H3 size={'h5'}>{items[active]?.title || ''}</H3>
+            <P size={'xs'}>{items[active]?.subtitle || ''}</P>
             <MotionP
               size={'xs'}
               variant={'description'}
               className='line-clamp-4'
             >
-              {items[active].description.split(' ').map((word, index) => (
+              {(items[active]?.description || '').split(' ').map((word, index) => (
                 <motion.span
                   key={index}
                   initial={{
@@ -134,10 +134,10 @@ export const FlippingGallery = ({
                 </motion.span>
               ))}
             </MotionP>
-            {items[active].links.local && (
+            {items[active]?.links?.local && (
               <Button asChild>
                 <Link
-                  href={items[active].links.local || ''}
+                  href={items[active]?.links?.local || ''}
                   rel='noopener noreferrer'
                 >
                   <span>{t('learnMore')}</span>

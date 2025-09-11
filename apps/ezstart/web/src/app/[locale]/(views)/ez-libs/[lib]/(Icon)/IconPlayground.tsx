@@ -26,7 +26,10 @@ const IconPlayground = ({ title }: Props) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && filteredSuggestions.length > 0) {
       // si Enter → prend la première suggestion
-      handleSelect(filteredSuggestions[0])
+      const firstSuggestion = filteredSuggestions[0]
+      if (firstSuggestion) {
+        handleSelect(firstSuggestion)
+      }
     }
   }
 

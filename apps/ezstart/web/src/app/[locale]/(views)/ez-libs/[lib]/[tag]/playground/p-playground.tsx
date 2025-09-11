@@ -33,8 +33,8 @@ export default function PPlayground() {
   const [contentInput, setContentInput] = useState('lorem20');
   const content = (() => {
     const match = contentInput.match(/^lorem(\d+)$/i);
-    if (match) {
-      const count = parseInt(match[1], 20);
+    if (match && match[1]) {
+      const count = parseInt(match[1], 10);
       return generateLorem(count);
     }
     return contentInput;

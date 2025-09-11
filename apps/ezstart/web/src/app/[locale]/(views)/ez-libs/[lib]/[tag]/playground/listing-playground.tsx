@@ -12,8 +12,8 @@ import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
 import { buildFakeTag } from '../utils/build-fake-tag';
 
-const metaUL = listingVariantsMeta['ul'];
-const metaLI = listingVariantsMeta['li'];
+const metaUL = listingVariantsMeta['ul'] || {};
+const metaLI = listingVariantsMeta['li'] || {};
 
 export default function ListingPlayground() {
   const [selectedUL, setSelectedUL] = useState<Record<string, string>>(() => {
