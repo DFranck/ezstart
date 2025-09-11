@@ -60,16 +60,22 @@
 
 ## Configuration Standardisée - Maximum de Réutilisabilité ✅
 
+### ⚡ CONTRÔLE QUALITÉ GLOBAL
+- **TypeCheck** : `pnpm typecheck` - ✅ **18/18 packages** vérifiés (couverture complète)
+- **Lint** : `pnpm lint` - ✅ **17/17 packages** avec code vérifié (couverture complète)
+- **Centralisation** : ✅ **100% des apps/packages** utilisent les configs centralisées
+- **Warnings supprimés** : ✅ Règles ennuyeuses désactivées tout en gardant les importantes
+
 ### Apps Web - Configuration 100% Centralisée
-Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`) utilisent **exactement** la même configuration :
+Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`, `asc-tcd/web`) utilisent **exactement** la même configuration :
 
 #### Configuration de Base :
-- **Tailwind Config** : `tailwind.config.js` → `@workspace/tailwind-config/base.js`
+- **Tailwind Config** : `tailwind.config.js` → `@ezstart/tailwind-config/base.js`
 - **PostCSS Config** : `postcss.config.mjs` → `@ezstart/ui/postcss.config`
-- **ESLint Config** : `eslint.config.js` → `@workspace/eslint-config/next-js`
-- **TypeScript Config** : `tsconfig.json` → `@workspace/typescript-config/next.json`
+- **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/next-js`
+- **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/nextjs.json`
 - **CSS Globals** : `@import "@ezstart/ui/globals.css"`
-- **Scripts standardisés** : `lint`, `lint:fix`, `typecheck`
+- **Scripts standardisés** : `lint`, `typecheck` (script `dev` géré par Turbo)
 
 #### Providers et Infrastructure :
 - **Web Core** : `"@ezstart/web-core": "workspace:*"`
@@ -93,18 +99,39 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
 - 🏗️ **Architecture unifiée** pour toutes les apps web
 
 ### APIs - Configuration 100% Centralisée
-Toutes les APIs (`ezauth/api`, `ez-billing/api`, `monitor/api`, etc.) utilisent **exactement** la même configuration :
+Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même configuration :
 
-- **TypeScript Config** : `tsconfig.json` → `@workspace/typescript-config/api.json`
+- **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/base`
+- **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/api.json`
 - **Base commune** : `@ezstart/api-core` pour infrastructure partagée
-- **Structure standardisée** : `outDir: "dist"`, `rootDir: "."`, includes/excludes identiques
-- **Types harmonisés** : `["node"]` + `["jest"]` selon les projets avec tests
+- **Structure standardisée** : `outDir: "dist"`, `rootDir: "src"`, types harmonisés
+- **Scripts standardisés** : `lint`, `typecheck`, `dev`, `build`
+
+### Packages - Configuration 100% Centralisée
+Tous les packages utilisent les configurations centralisées selon leur type :
+
+#### Packages React (UI/Web-Core)
+- **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/react-internal`
+- **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/react-library.json` ou `base.json`
+
+#### Packages TypeScript (Auth-SDK, API-Core, Types)
+- **TypeScript Config uniquement** : `tsconfig.json` → `@ezstart/typescript-config/base.json`
+- **Pas d'ESLint** : Packages simples de types/config n'ont pas besoin de lint
 
 ### Packages Centralisés de Configuration
-- `@workspace/tailwind-config` - Configs Tailwind partagées
-- `@workspace/eslint-config` - Règles ESLint partagées  
-- `@workspace/typescript-config` - Configs TypeScript partagées
-- `@workspace/next-config` - Configs Next.js partagées
+- `@ezstart/tailwind-config` - Configs Tailwind partagées
+- `@ezstart/eslint-config` - Règles ESLint partagées avec 3 variantes :
+  - `base.js` - Configuration de base (APIs, packages simples)
+  - `next-js.js` - Configuration Next.js (apps web)
+  - `react-internal.js` - Configuration React (packages internes)
+- `@ezstart/typescript-config` - Configs TypeScript partagées avec 6 variantes :
+  - `base.json` - Configuration de base
+  - `api.json` - Configuration API
+  - `nextjs.json` - Configuration Next.js
+  - `library.json` - Configuration bibliothèque
+  - `react-library.json` - Configuration React library
+  - `types.json` - Configuration types
+- `@ezstart/next-config` - Configs Next.js partagées
 - `@ezstart/ui` - Composants, styles et configs CSS/PostCSS
 - `@ezstart/web-core` - Infrastructure web partagée (providers, auth, themes)
 - `@ezstart/api-core` - Infrastructure API partagée

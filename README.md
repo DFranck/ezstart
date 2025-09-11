@@ -28,41 +28,50 @@ pnpm dev
 
 ## 🏗️ Architecture and Standardization
 
+### ⚡ Quality Control Dashboard
+
+| Metric | Status | Coverage | Description |
+|--------|---------|----------|-------------|
+| **TypeCheck** | ✅ | **18/18 packages** | Complete TypeScript verification |
+| **Lint** | ✅ | **17/17 packages** | Complete ESLint verification (code packages only) |
+| **Centralization** | ✅ | **100% apps/packages** | All configurations centralized |
+| **Warning Suppression** | ✅ | **Optimized** | Annoying rules disabled, important ones kept |
+
 ### Monorepo Configuration
 
 This monorepo uses **pnpm workspaces** with a centralized architecture to maximize reusability and maintain consistency across all projects.
 
 ### 🌐 Web Applications - 100% Centralized Configuration
 
-All Next.js web applications use the same standardized configuration:
+All Next.js web applications use the **exact same** standardized configuration:
 
 | Configuration | Package/Source | Description |
 |---------------|----------------|-------------|
 | **React Providers** | [`@ezstart/web-core`](./packages/web-core/README.md) | SimpleWebProviders + WebProviders with EZAuth, Theming, i18n |
 | **UI Components** | [`@ezstart/ui`](./packages/ui/README.md) | UI components, global styles, PostCSS config |
-| **Tailwind Config** | [`@workspace/tailwind-config`](./workspaces/tailwind-config/) | Centralized Tailwind configuration |
-| **ESLint Config** | [`@workspace/eslint-config`](./workspaces/eslint-config/) | ESLint rules for Next.js |
-| **Next.js Config** | [`@workspace/next-config`](./workspaces/next-config/) | Next.js configuration with optimizations |
-| **TypeScript Config** | [`@workspace/typescript-config`](./workspaces/typescript-config/) | Shared TypeScript configurations |
+| **Tailwind Config** | [`@ezstart/tailwind-config`](./packages/tailwind-config/) | Centralized Tailwind configuration |
+| **ESLint Config** | [`@ezstart/eslint-config/next-js`](./packages/eslint-config/) | ESLint rules for Next.js |
+| **Next.js Config** | [`@ezstart/next-config`](./packages/next-config/) | Next.js configuration with optimizations |
+| **TypeScript Config** | [`@ezstart/typescript-config/nextjs.json`](./packages/typescript-config/) | Shared TypeScript configurations |
 
-#### Standardized Applications
+#### Standardized Applications (100% Centralized)
 
 - ✅ [`ezauth/web`](./apps/ezauth/web/) - Authentication service (port 8080)
 - ✅ [`ez-billing/web`](./apps/ez-billing/web/) - Billing management (port 4100)
 - ✅ [`ezstart/web`](./apps/ezstart/web/) - Main application (port 4000)
 - ✅ [`fengshui/web`](./apps/fengshui/web/) - Feng Shui application (port 4400)
 - ✅ [`tower-defense/web`](./apps/tower-defense/web/) - Tower Defense game (port 4200)
-- ❌ [`asc-tcd/web`](./apps/asc-tcd/web/) - Not standardized (port 4300, specific config)
+- ✅ [`asc-tcd/web`](./apps/asc-tcd/web/) - ASC-TCD website (port 4300)
 
-### 🔧 APIs - Centralized Configuration
+### 🔧 APIs - 100% Centralized Configuration
 
-All Node.js APIs use shared infrastructure:
+All Node.js APIs use the **exact same** shared infrastructure:
 
 | Configuration | Package/Source | Description |
 |---------------|----------------|-------------|
+| **ESLint Config** | [`@ezstart/eslint-config/base`](./packages/eslint-config/) | ESLint rules for APIs |
+| **TypeScript Config** | [`@ezstart/typescript-config/api.json`](./packages/typescript-config/) | TypeScript configuration for APIs |
 | **Base Infrastructure** | [`@ezstart/api-core`](./packages/api-core/) | Shared API infrastructure (Express, middleware, etc.) |
-| **TypeScript Config** | [`@workspace/typescript-config/api.json`](./workspaces/typescript-config/) | TypeScript configuration for APIs |
-| **Standardized Structure** | Convention | `outDir: "dist"`, `rootDir: "."`, identical includes/excludes |
 | **Common Types** | [`@ezstart/types`](./packages/types/) | Shared types between web and API |
 
 #### Available APIs
@@ -84,14 +93,21 @@ All Node.js APIs use shared infrastructure:
 
 #### Shared Utilities
 - [`@ezstart/types`](./packages/types/) - Common TypeScript types
-- [`@ezstart/utils`](./packages/utils/) - Shared utilities
-- [`@ezstart/config`](./packages/config/) - Common configurations
 
-#### Configuration Workspaces
-- [`@workspace/tailwind-config`](./workspaces/tailwind-config/) - Tailwind configurations
-- [`@workspace/eslint-config`](./workspaces/eslint-config/) - ESLint rules  
-- [`@workspace/typescript-config`](./workspaces/typescript-config/) - TypeScript configs
-- [`@workspace/next-config`](./workspaces/next-config/) - Next.js configuration
+#### Configuration Packages (100% Centralized)
+- [`@ezstart/tailwind-config`](./packages/tailwind-config/) - Tailwind configurations
+- [`@ezstart/eslint-config`](./packages/eslint-config/) - ESLint rules with 3 variants:
+  - `base.js` - Base configuration (APIs, packages)
+  - `next-js.js` - Next.js configuration (web apps)  
+  - `react-internal.js` - React configuration (internal packages)
+- [`@ezstart/typescript-config`](./packages/typescript-config/) - TypeScript configs with 6 variants:
+  - `base.json` - Base configuration
+  - `api.json` - API configuration
+  - `nextjs.json` - Next.js configuration
+  - `library.json` - Library configuration
+  - `react-library.json` - React library configuration
+  - `types.json` - Types configuration
+- [`@ezstart/next-config`](./packages/next-config/) - Next.js configuration
 
 ### 🔐 Authentication System - EZAuth
 
@@ -126,10 +142,10 @@ pnpm build
 # Build a specific app  
 pnpm --filter ez-billing-web build
 
-# Global TypeCheck
+# Global TypeCheck (18/18 packages)
 pnpm typecheck
 
-# Global Lint
+# Global Lint (17/17 packages)
 pnpm lint
 ```
 

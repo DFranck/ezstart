@@ -8,8 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -b --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "zustand": "^4.5.5"

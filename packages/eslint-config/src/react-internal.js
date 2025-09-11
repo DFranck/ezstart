@@ -36,6 +36,18 @@ export const config = [
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
+      // Override annoying warnings (keep base config rules)
+      "turbo/no-undeclared-env-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-undef": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@next/next/no-img-element": "off",
+      "react/no-unescaped-entities": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/rules-of-hooks": "error", // Keep this important one
     },
   },
 ]

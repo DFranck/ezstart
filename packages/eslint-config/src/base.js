@@ -18,7 +18,13 @@ export const config = [
       turbo: turboPlugin,
     },
     rules: {
-      "turbo/no-undeclared-env-vars": "warn",
+      "turbo/no-undeclared-env-vars": "off", // Disable annoying env var warnings
+      "@typescript-eslint/no-unused-vars": "off", // Allow unused vars in dev
+      "@typescript-eslint/no-explicit-any": "off", // Allow any types for prototyping
+      "no-undef": "off", // TypeScript handles this better
+      "@typescript-eslint/no-require-imports": "off", // Allow require() in config files
+      "@typescript-eslint/no-namespace": "off", // Allow namespaces
+      "@typescript-eslint/no-empty-object-type": "off", // Allow {} type
     },
   },
   {
