@@ -1,3 +1,84 @@
+# 🚀 Configuration Claude - @ezstart Monorepo
+
+## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
+
+### État Actuel (12/09/2025 - 18h30)
+
+**Monorepo 100% opérationnel avec :**
+- ✅ Tous les services sur ports 50xx (voir tableau ci-dessous)
+- ✅ Architecture .env standardisée (.env.example + .env.local)
+- ✅ TypeScript centralisé avec un seul `tsc -b --watch`
+- ✅ Configuration 100% partagée et optimisée
+
+### Comment Démarrer une Session de Développement
+
+#### Option 1: Mode Optimisé (RECOMMANDÉ)
+```bash
+# Terminal 1: Watcher TypeScript centralisé
+pnpm dev:types  # Lance tsc -b --watch pour TOUT le monorepo
+
+# Terminal 2: Tous les serveurs
+pnpm dev  # Lance tous les services sans tsc --watch individuel
+```
+**Résultat:** ~10-15 processus Node.js au lieu de 50+
+
+#### Option 2: Mode Simple
+```bash
+pnpm dev  # Lance tout (moins optimisé, plus de processus)
+```
+
+#### Option 3: Développement Ciblé
+```bash
+pnpm dev:billing  # EZ-Billing + EZAuth
+pnpm dev:td       # Tower Defense + EZAuth
+pnpm dev:ez       # EZStart seul
+```
+
+### Vérifier l'État des Services
+```bash
+pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
+```
+
+### Ports et URLs des Services
+
+| Service | Type | Port | URL | Status |
+|---------|------|------|-----|--------|
+| EZAuth | API | 5010 | http://localhost:5010 | ✅ Running |
+| EZAuth | Web | 5015 | http://localhost:5015 | ✅ Running |
+| EZ-Billing | API | 5020 | http://localhost:5020 | ✅ Running |
+| EZ-Billing | Web | 5025 | http://localhost:5025 | ✅ Running |
+| Tower Defense | API | 5030 | http://localhost:5030 | ✅ Running |
+| Tower Defense | Web | 5035 | http://localhost:5035 | ✅ Running |
+| EZStart | Web | 5045 | http://localhost:5045 | ✅ Running |
+| ASC-TCD | Web | 5055 | http://localhost:5055 | ✅ Running |
+| FengShui | Web | 5065 | http://localhost:5065 | ✅ Running |
+
+### Architecture .env Actuelle
+
+```
+📁 Chaque projet :
+├── .env.example    ← Template avec placeholders (committé)
+├── .env.local      ← Valeurs réelles (git-ignoré, chargé en priorité)
+└── ❌ PAS de .env  ← Évite la confusion
+```
+
+**Important:** express-core charge `.env.local` en priorité, puis `.env` en fallback
+
+### Processus Background Actuels
+
+Si tu reprends une session avec des processus déjà en cours :
+1. Vérifie avec `pnpm dev:status`
+2. Si besoin, tue tous les Node.js et relance
+3. Les IDs de processus background peuvent être vus avec BashOutput
+
+### Points Critiques à Respecter
+
+1. **JAMAIS** ajouter `tsc --watch` dans les scripts dev des packages
+2. **TOUJOURS** utiliser `.env.local` pour les secrets (jamais `.env`)
+3. **TOUJOURS** vérifier que `composite: true` est présent dans les tsconfig
+4. **TOUJOURS** utiliser les ports 50xx (pattern: APIs 50x0, Web 50x5)
+5. **TOUJOURS** utiliser les configs centralisées avant de créer du local
+
 # Configuration Claude - @ezstart Monorepo
 
 ## Architecture et Bonnes Pratiques
