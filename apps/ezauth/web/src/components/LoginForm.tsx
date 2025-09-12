@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  PasswordInput,
 } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -52,7 +53,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
       const apiUrl =
         process.env.NODE_ENV === 'production'
           ? 'https://ezauth-oblm.onrender.com/api/auth/login'
-          : 'http://localhost:8081/api/auth/login'
+          : 'http://localhost:5010/api/auth/login'
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -124,7 +125,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <PasswordInput placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

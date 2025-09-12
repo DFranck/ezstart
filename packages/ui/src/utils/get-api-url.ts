@@ -12,7 +12,7 @@ export const getApiUrl = (config: ApiUrlConfig = {}): string => {
     clientUrl,
     fallbackUrl = 'http://localhost:8888',
     useProxy = true,
-    proxyPath = '/api-proxy'
+    proxyPath = '/api-proxy',
   } = config
 
   const isServer = typeof window === 'undefined'
@@ -20,7 +20,7 @@ export const getApiUrl = (config: ApiUrlConfig = {}): string => {
   // Get base URL from config or environment variables
   const baseUrl = isServer
     ? (serverUrl || process.env.API_URL || fallbackUrl).replace(/\/$/, '')
-    : (clientUrl || process.env.CLIENT_API_URL || fallbackUrl).replace(/\/$/, '')
+    : (clientUrl || process.env.NEXT_PUBLIC_API_URL || fallbackUrl).replace(/\/$/, '')
 
   // Framework-agnostic HTTPS proxy logic
   const isClient = !isServer

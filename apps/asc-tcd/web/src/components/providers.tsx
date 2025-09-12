@@ -1,5 +1,6 @@
 'use client';
 
+import { AuthProvider } from '@ezstart/auth-sdk';
 import {
   AbstractIntlMessages,
   Locale,
@@ -20,20 +21,22 @@ export function Providers({
   timeZone: string;
 }) {
   return (
-    <NextThemesProvider
-      attribute='class'
-      defaultTheme='system'
-      enableSystem
-      disableTransitionOnChange
-      enableColorScheme
-    >
-      <NextIntlClientProvider
-        messages={messages}
-        locale={locale}
-        timeZone={timeZone}
+    <AuthProvider appName="asc-tcd">
+      <NextThemesProvider
+        attribute='class'
+        defaultTheme='system'
+        enableSystem
+        disableTransitionOnChange
+        enableColorScheme
       >
-        {children}
-      </NextIntlClientProvider>
-    </NextThemesProvider>
+        <NextIntlClientProvider
+          messages={messages}
+          locale={locale}
+          timeZone={timeZone}
+        >
+          {children}
+        </NextIntlClientProvider>
+      </NextThemesProvider>
+    </AuthProvider>
   );
 }

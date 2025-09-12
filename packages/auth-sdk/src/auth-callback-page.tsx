@@ -122,7 +122,7 @@ function CallbackContent({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Icon name="lucide:Loader2" className="w-18 h-18 bg-ezstart animate-spin" />
+          <Icon name="lucide:LoaderIcon" className="w-18 h-18 text-ezstart animate-spin" />
           <p className="text-muted-foreground">Processing authentication...</p>
         </div>
       </div>

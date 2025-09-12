@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  PasswordInput,
 } from '@ezstart/ui/components'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -166,7 +167,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             <FormItem>
               <FormLabel>Password *</FormLabel>
               <FormControl>
-                <Input type="password" required minLength={6} placeholder="••••••••" {...field} />
+                <PasswordInput required minLength={6} placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
               <p className="mt-1 text-xs text-muted-foreground">Minimum 6 characters</p>

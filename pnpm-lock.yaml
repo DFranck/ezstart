@@ -66,6 +66,9 @@ importers:
 
   apps/asc-tcd/web:
     dependencies:
+      '@ezstart/auth-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/auth-sdk
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -411,6 +414,9 @@ importers:
 
   apps/ezstart/web:
     dependencies:
+      '@ezstart/auth-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/auth-sdk
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -917,6 +923,9 @@ importers:
 
   packages/next-theme:
     dependencies:
+      '@ezstart/ui':
+        specifier: workspace:*
+        version: link:../ui
       next:
         specifier: ^15.0.0
         version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

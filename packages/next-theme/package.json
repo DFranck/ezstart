@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/ui": "workspace:*",
     "next-themes": "^0.4.6"
   },
   "peerDependencies": {
@@ -34,7 +35,12 @@
     "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.7.3"
   },
-  "keywords": ["ezstart", "next", "theme", "next-themes"],
+  "keywords": [
+    "ezstart",
+    "next",
+    "theme",
+    "next-themes"
+  ],
   "author": "EZStart",
   "license": "MIT"
 }

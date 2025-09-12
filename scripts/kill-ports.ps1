@@ -1,35 +1,81 @@
-Write-Host "Checking occupied ports..." -ForegroundColor Cyan
-Write-Host "Web apps: 4100 (ez-billing), 4200 (tower-defense), 4300 (asc-tcd), 4400 (fengshui), 8080 (ezauth)" -ForegroundColor Gray
-Write-Host "APIs: 4101 (ez-billing), 4201 (tower-defense), 8081 (ezauth)" -ForegroundColor Gray
-netstat -ano | findstr ":4100 :4101 :4200 :4201 :4300 :4400 :8080 :8081"
-
+Write-Host "=== Kill Ports & Node.js Processes ===" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Killing processes on development ports..." -ForegroundColor Yellow
 
-# Get all processes listening on our development ports
-$netstatOutput = netstat -ano | Select-String "LISTENING"
-# Only kill ports actually used by @ezstart projects
-$devPorts = @(":4100", ":4101", ":4200", ":4201", ":4300", ":4400", ":8080", ":8081")
+# Ask if user wants to kill all Node.js processes
+Write-Host "Options:" -ForegroundColor Yellow
+Write-Host "1. Kill only @ezstart ports (50xx range)" -ForegroundColor White
+Write-Host "2. Kill ALL Node.js processes (nuclear option)" -ForegroundColor Red
+Write-Host ""
+$choice = Read-Host "Enter choice (1 or 2, default is 1)"
 
-foreach ($line in $netstatOutput) {
-    foreach ($port in $devPorts) {
-        if ($line -match $port) {
-            # Extract PID (last column)
-            $parts = ($line -replace "\s+", " ").Trim() -split " "
-            $processId = $parts[-1]
-            if ($processId -and $processId -ne "0") {
-                try {
-                    Write-Host "Killing process $processId on port $port" -ForegroundColor Red
-                    Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
-                } catch {
-                    # Ignore errors
+if ($choice -eq "2") {
+    Write-Host ""
+    Write-Host "Killing ALL Node.js processes..." -ForegroundColor Red
+    
+    # Kill all node.exe processes
+    $nodeProcesses = Get-Process node -ErrorAction SilentlyContinue
+    if ($nodeProcesses) {
+        foreach ($process in $nodeProcesses) {
+            Write-Host "Killing Node.js process $($process.Id) - $($process.ProcessName)" -ForegroundColor Red
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+        }
+        Write-Host "All Node.js processes killed!" -ForegroundColor Green
+    } else {
+        Write-Host "No Node.js processes found." -ForegroundColor Gray
+    }
+} else {
+    Write-Host ""
+    Write-Host "Checking @ezstart ports (50xx range)..." -ForegroundColor Cyan
+    Write-Host "APIs: 5010 (ezauth), 5020 (ez-billing), 5030 (tower-defense)" -ForegroundColor Gray
+    Write-Host "Web apps: 5015 (ezauth), 5025 (ez-billing), 5035 (tower-defense)" -ForegroundColor Gray
+    Write-Host "Web apps: 5045 (ezstart), 5055 (asc-tcd), 5065 (fengshui)" -ForegroundColor Gray
+    
+    # Show current status
+    netstat -ano | findstr ":5010 :5015 :5020 :5025 :5030 :5035 :5045 :5055 :5065"
+    
+    Write-Host ""
+    Write-Host "Killing processes on development ports..." -ForegroundColor Yellow
+    
+    # Get all processes listening on our development ports
+    $netstatOutput = netstat -ano | Select-String "LISTENING"
+    # Updated ports to 50xx range
+    $devPorts = @(":5010", ":5015", ":5020", ":5025", ":5030", ":5035", ":5045", ":5055", ":5065")
+    
+    $killedAny = $false
+    foreach ($line in $netstatOutput) {
+        foreach ($port in $devPorts) {
+            if ($line -match $port) {
+                # Extract PID (last column)
+                $parts = ($line -replace "\s+", " ").Trim() -split " "
+                $processId = $parts[-1]
+                if ($processId -and $processId -ne "0") {
+                    try {
+                        Write-Host "Killing process $processId on port $port" -ForegroundColor Red
+                        Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+                        $killedAny = $true
+                    } catch {
+                        # Ignore errors
+                    }
                 }
             }
         }
     }
+    
+    if (-not $killedAny) {
+        Write-Host "No processes found on @ezstart ports." -ForegroundColor Gray
+    } else {
+        Write-Host "All @ezstart ports cleared!" -ForegroundColor Green
+    }
 }
 
 Write-Host ""
-Write-Host "All development ports cleared!" -ForegroundColor Green
-Write-Host "Final port check:" -ForegroundColor Cyan
-netstat -ano | findstr ":4100 :4101 :4200 :4201 :4300 :4400 :8080 :8081"
+Write-Host "Final port check (50xx range):" -ForegroundColor Cyan
+netstat -ano | findstr ":5010 :5015 :5020 :5025 :5030 :5035 :5045 :5055 :5065"
+
+$remaining = netstat -ano | findstr ":5010 :5015 :5020 :5025 :5030 :5035 :5045 :5055 :5065"
+if (-not $remaining) {
+    Write-Host "✅ All ports are free!" -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "Ready to run 'pnpm dev' or 'pnpm dev:types'" -ForegroundColor Green

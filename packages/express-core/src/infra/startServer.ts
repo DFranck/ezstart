@@ -1,7 +1,7 @@
 import { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
 import express from 'express'
 import { createServer, Server as HTTPServer } from 'http'
-import swaggerUi from 'swagger-ui-express'
+import * as swaggerUi from 'swagger-ui-express'
 
 type StartServerOptions = {
   routes: express.Router

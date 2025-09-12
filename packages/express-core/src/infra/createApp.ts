@@ -1,5 +1,5 @@
 import cors from 'cors';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import express, { Express } from 'express';
 
 // Load .env.local first (priority), then .env as fallback
