@@ -1,38 +1,40 @@
 'use client'
 
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import * as React from 'react'
+import { ThemeProvider as NextThemesProvider, type Attribute } from 'next-themes'
+import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 
 export interface ThemeProviderProps {
-  children: React.ReactNode
+  children: ReactNode
   defaultTheme?: string
   storageKey?: string
   enableSystem?: boolean
   disableTransitionOnChange?: boolean
+  attribute?: Attribute
 }
 
-/**
- * Standalone Theme Provider
- * Usage:
- * ```tsx
- * import { ThemeProvider } from '@ezstart/web-core/providers/theme'
- * 
- * <ThemeProvider>
- *   {children}
- * </ThemeProvider>
- * ```
- */
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   storageKey = 'theme',
   enableSystem = true,
   disableTransitionOnChange = true,
+  attribute = 'class',
   ...props
 }: ThemeProviderProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <div suppressHydrationWarning>{children}</div>
+  }
+
   return (
     <NextThemesProvider
-      attribute="class"
+      attribute={attribute}
       defaultTheme={defaultTheme}
       storageKey={storageKey}
       enableSystem={enableSystem}

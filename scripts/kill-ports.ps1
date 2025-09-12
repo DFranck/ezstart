@@ -1,12 +1,15 @@
 Write-Host "Checking occupied ports..." -ForegroundColor Cyan
-netstat -ano | findstr ":3000 :3100 :3101 :4000 :4100 :4101 :4200 :4201 :5000 :5100 :6000 :6100 :7000 :7100 :8000 :8001 :8080 :8081"
+Write-Host "Web apps: 4100 (ez-billing), 4200 (tower-defense), 4300 (asc-tcd), 4400 (fengshui), 8080 (ezauth)" -ForegroundColor Gray
+Write-Host "APIs: 4101 (ez-billing), 4201 (tower-defense), 8081 (ezauth)" -ForegroundColor Gray
+netstat -ano | findstr ":4100 :4101 :4200 :4201 :4300 :4400 :8080 :8081"
 
 Write-Host ""
 Write-Host "Killing processes on development ports..." -ForegroundColor Yellow
 
 # Get all processes listening on our development ports
 $netstatOutput = netstat -ano | Select-String "LISTENING"
-$devPorts = @(":3000", ":3100", ":3101", ":4000", ":4100", ":4101", ":4200", ":4201", ":5000", ":5100", ":6000", ":6100", ":7000", ":7100", ":8000", ":8001", ":8080", ":8081")
+# Only kill ports actually used by @ezstart projects
+$devPorts = @(":4100", ":4101", ":4200", ":4201", ":4300", ":4400", ":8080", ":8081")
 
 foreach ($line in $netstatOutput) {
     foreach ($port in $devPorts) {
@@ -29,4 +32,4 @@ foreach ($line in $netstatOutput) {
 Write-Host ""
 Write-Host "All development ports cleared!" -ForegroundColor Green
 Write-Host "Final port check:" -ForegroundColor Cyan
-netstat -ano | findstr ":3000 :3100 :3101 :4000 :4100 :4101 :4200 :4201 :5000 :5100 :6000 :6100 :7000 :7100 :8000 :8001 :8080 :8081"
+netstat -ano | findstr ":4100 :4101 :4200 :4201 :4300 :4400 :8080 :8081"

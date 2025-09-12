@@ -1,5 +1,5 @@
 // shared elements between headers
-import { ThemeSwitcher } from '@ezstart/next-core/components'
+import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { LocaleSwitcher } from './local-switcher'
 
 export function HeaderControls() {

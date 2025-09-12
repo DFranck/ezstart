@@ -11,4 +11,6 @@ const baseConfig = {
   },
 }
 
+// PWA retiré pour fengshui - on a validé que l'architecture fonctionne
+// Chaque app peut ajouter PWA individuellement si nécessaire
 export default baseConfig

@@ -1,5 +1,5 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-core'
+import { ThemeProvider } from '@ezstart/next-theme'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { Geist, Geist_Mono } from 'next/font/google'

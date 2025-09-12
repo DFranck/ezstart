@@ -1,6 +1,6 @@
 import '@ezstart/ui/globals.css'
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-core'
+import { ThemeProvider } from '@ezstart/next-theme'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'

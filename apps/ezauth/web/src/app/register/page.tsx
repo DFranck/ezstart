@@ -11,7 +11,7 @@ import {
   P,
   Span,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/next-core/components'
+import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'

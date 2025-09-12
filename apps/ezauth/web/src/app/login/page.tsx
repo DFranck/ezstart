@@ -1,7 +1,7 @@
 'use client'
 
 import { LoginForm } from '@/components/LoginForm'
-import { ThemeSwitcher } from '@ezstart/next-core/components'
+import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   BackButton,
   Card,

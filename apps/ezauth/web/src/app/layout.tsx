@@ -1,7 +1,7 @@
 'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-core'
+import { ThemeProvider } from '@ezstart/next-theme'
 import './globals.css'
 
 // Note: metadata must be exported from a non-client component

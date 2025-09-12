@@ -15,9 +15,10 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
-    "@ezstart/next-core": "workspace:*",
+    "@ezstart/next-theme": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",
     "framer-motion": "^12.10.1",
+    "lucide-react": "^0.469.0",
     "next": "^15.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
