@@ -19,7 +19,7 @@ export { Router } from 'express'
 export type { Request, Response, NextFunction, RequestHandler } from 'express'
 
 // Config
-export { API_PORTS, getApiPort } from './config/ports.js'
+export { getApiPort } from './config/ports.js'
 
 // Middlewares
 export { validateParams } from './middlewares/validate-params.js'

@@ -229,6 +229,45 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   3. KillBash pour terminer proprement
   ```
 
+## Configuration des Ports et .env - NOUVELLE ARCHITECTURE ✅
+
+### Système de Ports Standardisé (Implémenté le 12/09/2025)
+
+**Pattern 50xx :**
+- **APIs (50x0)** : EZAuth 5010, EZ-Billing 5020, Tower Defense 5030
+- **Web Apps (50x5)** : EZAuth 5015, EZ-Billing 5025, Tower Defense 5035
+- **Web Standalone** : EZStart 5045, ASC-TCD 5055, FengShui 5065
+
+### Architecture .env Standardisée
+
+**Structure par projet :**
+```
+📁 Chaque projet :
+├── .env.example    ← Template committé avec placeholders
+├── .env.local      ← Valeurs réelles (ignoré par git)
+└── ❌ PAS de .env  ← Supprimé pour éviter confusion
+```
+
+**Changements effectués :**
+1. ✅ Suppression des ports hardcodés dans `express-core`
+2. ✅ Migration de tous les `.env` vers `.env.local`
+3. ✅ Création de `.env.example` pour tous les projets
+4. ✅ Mise à jour `.gitignore` pour permettre `.env.example`
+5. ✅ Suppression des variables `NEXT_PUBLIC_EZAUTH_*` (auto-config dans auth-sdk)
+6. ✅ Mise à jour `auth-sdk/client.ts` avec nouveaux ports (5010/5015)
+7. ✅ Correction `express-core/index.ts` : suppression export `API_PORTS`
+
+**État actuel (après kill node.exe) :**
+- Monorepo prêt avec nouveaux ports
+- Lancer avec `pnpm dev` utilisera les ports 50xx
+- Tous les fichiers .env.local doivent avoir les bons ports
+- Script `dev-status.ps1` mis à jour avec nouveaux ports
+
+**À faire au prochain démarrage :**
+1. Vérifier que tous les .env.local ont les bons ports (50xx)
+2. Lancer `pnpm dev` pour démarrer avec nouveaux ports
+3. Tester avec `pnpm dev:status` pour confirmer
+
 ## EZAuth - Système d'Authentification Centralisé
 
 ### Architecture
