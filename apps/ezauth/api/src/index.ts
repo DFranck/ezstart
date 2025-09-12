@@ -1,7 +1,7 @@
 import { createApp, connectToMongo, startServer, getApiPort } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 
-const PORT = getApiPort('EZAUTH')
+const PORT = getApiPort()
 
 // Create app with standard configuration
 const app = createApp()

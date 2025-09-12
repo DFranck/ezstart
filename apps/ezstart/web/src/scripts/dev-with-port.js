@@ -21,7 +21,7 @@ async function findFreePort(startPort = 4000) {
 }
 
 async function startDev() {
-  const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+  const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : 5045;
   const port = await findFreePort(preferredPort);
   console.log(`🚀 Starting dev server on port ${port}`);
   

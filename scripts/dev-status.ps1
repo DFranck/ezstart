@@ -2,15 +2,15 @@ Write-Host "=== Development Server Status ===" -ForegroundColor Cyan
 Write-Host ""
 
 $projects = @(
-    @{Name="EZAuth API"; Port=8081; Path="apps/ezauth/api"},
-    @{Name="EZ-Billing API"; Port=4101; Path="apps/ez-billing/api"},
-    @{Name="Tower Defense API"; Port=4201; Path="apps/tower-defense/api"},
-    @{Name="EZStart Web"; Port=3000; Path="apps/ezstart/web"},
-    @{Name="EZAuth Web"; Port=4000; Path="apps/ezauth/web"},
-    @{Name="EZ-Billing Web"; Port=4100; Path="apps/ez-billing/web"},
-    @{Name="Tower Defense Web"; Port=4200; Path="apps/tower-defense/web"},
-    @{Name="ASC-TCD Web"; Port=5000; Path="apps/asc-tcd/web"},
-    @{Name="FengShui Web"; Port=6000; Path="apps/fengshui/web"}
+    @{Name="EZAuth API"; Port=5010; Path="apps/ezauth/api"},
+    @{Name="EZ-Billing API"; Port=5020; Path="apps/ez-billing/api"},
+    @{Name="Tower Defense API"; Port=5030; Path="apps/tower-defense/api"},
+    @{Name="EZStart Web"; Port=5045; Path="apps/ezstart/web"},
+    @{Name="EZAuth Web"; Port=5015; Path="apps/ezauth/web"},
+    @{Name="EZ-Billing Web"; Port=5025; Path="apps/ez-billing/web"},
+    @{Name="Tower Defense Web"; Port=5035; Path="apps/tower-defense/web"},
+    @{Name="ASC-TCD Web"; Port=5055; Path="apps/asc-tcd/web"},
+    @{Name="FengShui Web"; Port=5065; Path="apps/fengshui/web"}
 )
 
 foreach ($project in $projects) {

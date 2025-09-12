@@ -1,3 +1,5 @@
 'use client';
 
-export { ThemeSwitcher } from '@ezstart/next-theme/components';
+import { ThemeSwitcher as NextThemeThemeSwitcher } from '@ezstart/next-theme/components';
+
+export const ThemeSwitcher = NextThemeThemeSwitcher;

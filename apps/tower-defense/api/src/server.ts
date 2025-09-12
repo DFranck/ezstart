@@ -3,7 +3,7 @@ import routes, { globalRegistry } from './routes/index.js'
 import { setIO } from './socketInstance.js'
 import { registerSocketHandlers } from './sockets/registerSocketHandlers.js'
 const app = createApp()
-const PORT = getApiPort('TOWER_DEFENSE')
+const PORT = getApiPort()
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 

@@ -17,8 +17,8 @@ function getEZAuthUrls() {
     return {
       apiBaseURL: isProduction
         ? 'https://ezauth-oblm.onrender.com/api/auth'
-        : 'http://localhost:8081/api/auth',
-      webBaseURL: isProduction ? 'https://ezauth.vercel.app' : 'http://localhost:8080',
+        : 'http://localhost:5010/api/auth',
+      webBaseURL: isProduction ? 'https://ezauth.vercel.app' : 'http://localhost:5015',
     }
   } else {
     // On server, use a safe default (production URLs)

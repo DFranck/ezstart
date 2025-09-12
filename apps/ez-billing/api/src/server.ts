@@ -2,7 +2,7 @@ import { connectToMongo, createApp, startServer, getApiPort } from '@ezstart/exp
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp()
-const PORT = getApiPort('EZ_BILLING')
+const PORT = getApiPort()
 connectToMongo('ez-billing')
   .then(() =>
     startServer(app, {

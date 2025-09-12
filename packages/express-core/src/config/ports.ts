@@ -1,21 +1,18 @@
 /**
- * Centralized port configuration for all APIs in the monorepo
- * Each API should use its designated port for consistency
+ * Get the port for an API service from environment variables
+ * Pattern: 50x0 = APIs | 50x5 = Web Apps
+ * Each service should define its PORT in .env file for development
+ * 
+ * Development ports (defined in .env files):
+ * EZAuth API: 5010, EZ-Billing API: 5020, Tower Defense API: 5030
+ * EZAuth Web: 5015, EZ-Billing Web: 5025, Tower Defense Web: 5035
+ * EZStart Web: 5045, ASC-TCD Web: 5055, FengShui Web: 5065
  */
-export const API_PORTS = {
-  EZAUTH: 8081,
-  EZ_BILLING: 4101,
-  TOWER_DEFENSE: 4201,
-} as const
-
-/**
- * Get the port for a specific API service
- * Falls back to process.env.PORT if defined, otherwise uses the default
- */
-export function getApiPort(service: keyof typeof API_PORTS): number {
-  const envPort = process.env.PORT
-  if (envPort) {
-    return parseInt(envPort, 10)
+export function getApiPort(defaultPort = 3000): number {
+  const port = process.env.PORT
+  if (!port) {
+    console.warn(`⚠️ PORT not defined, using fallback: ${defaultPort}`)
+    return defaultPort
   }
-  return API_PORTS[service]
+  return parseInt(port, 10)
 }
