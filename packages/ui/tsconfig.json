@@ -15,6 +15,7 @@
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
+    "composite": true,
     "jsx": "react-jsx",
     "types": ["react", "react/jsx-runtime", "node"]
   },

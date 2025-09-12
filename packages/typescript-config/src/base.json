@@ -4,8 +4,7 @@
   "compilerOptions": {
     "paths": {
       "@ezstart/ui/*": ["./packages/ui/src/*"],
-      "@ezstart/ui": ["./packages/libs/ez-tag/src/index.ts"],
-      "@ezstart/ui": ["./packages/libs/ez-icon/src/index.ts"]
+      "@ezstart/ui": ["./packages/ui/src/index.ts"]
     },
     "declaration": true,
     "declarationMap": true,

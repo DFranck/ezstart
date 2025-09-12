@@ -64,6 +64,71 @@
 - Types spécifiques EZ-Billing → `apps/ez-billing/types`
 - Composants UI réutilisables → `packages/ui` (si existe)
 
+## 🚀 MONOREPO ULTRA-OPTIMISÉ - Architecture et Principes
+
+### Principe Fondamental : Partage et Centralisation Maximum
+
+**OBJECTIF :** Un monorepo avec le MAXIMUM de partage possible, MINIMUM de duplication, et MINIMUM de processus.
+
+### Architecture TypeScript Optimisée
+
+#### 1. Compilation Centralisée avec `tsc -b`
+
+**Configuration obligatoire :**
+- ✅ **UN SEUL** `tsc -b --watch` à la racine pour TOUT le monorepo
+- ✅ **tsconfig.json root** avec `references` vers tous les packages/apps
+- ✅ **`composite: true`** dans TOUS les tsconfig des packages
+- ❌ **JAMAIS** de `tsc --watch` dans les scripts dev des packages
+
+**Scripts optimisés :**
+```json
+// package.json root
+"dev:types": "tsc -b --watch",        // UN SEUL processus TypeScript
+"dev": "turbo dev --concurrency 50",   // Sans les tsc --watch
+"dev:optimized": "concurrently \"pnpm dev:types\" \"turbo dev\""
+```
+
+**Avantages :**
+- 1 processus TypeScript au lieu de 22+
+- Compilation intelligente des dépendances
+- Recompilation automatique en cascade
+
+#### 2. Hiérarchie des Configurations
+
+**Toujours vérifier et utiliser dans cet ordre :**
+1. Config centralisée dans `@ezstart/typescript-config`
+2. Config centralisée dans `@ezstart/eslint-config` 
+3. Config centralisée dans `@ezstart/tailwind-config`
+4. Créer une nouvelle config partagée si nécessaire
+5. En dernier recours seulement : config locale
+
+**Packages de configuration :**
+- `typescript-config` : 6 variantes (base, api, nextjs, library, react-library, types)
+- `eslint-config` : 3 variantes (base, next-js, react-internal)
+- `tailwind-config` : Config Tailwind partagée
+- `next-config` : Config Next.js partagée
+
+#### 3. Règles de Development
+
+**À vérifier systématiquement :**
+- ✅ Tous les packages utilisent une config TypeScript centralisée
+- ✅ `composite: true` présent dans tous les tsconfig
+- ✅ Target uniforme : ES2022 pour tout le monorepo
+- ✅ Pas de duplication de dépendances (vérifier pnpm-lock.yaml)
+- ✅ Scripts dev sans `tsc --watch` (géré au root)
+
+**Structure tsconfig.json pour packages :**
+```json
+{
+  "extends": "@ezstart/typescript-config/[variante].json",
+  "compilerOptions": {
+    "composite": true,  // OBLIGATOIRE pour tsc -b
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
+}
+```
+
 ## Configuration Standardisée - Maximum de Réutilisabilité ✅
 
 ### ⚡ CONTRÔLE QUALITÉ GLOBAL
