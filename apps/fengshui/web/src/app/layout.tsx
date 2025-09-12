@@ -1,4 +1,5 @@
-import { SimpleWebProviders } from '@ezstart/next-core/providers'
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { ThemeProvider } from '@ezstart/next-core'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -16,9 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body className={inter.className}>
-        <SimpleWebProviders appName="fengshui">
-          {children}
-        </SimpleWebProviders>
+        <ThemeProvider>
+          <AuthProvider appName="fengshui">
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

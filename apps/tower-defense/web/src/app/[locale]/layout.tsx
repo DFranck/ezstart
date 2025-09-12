@@ -1,4 +1,5 @@
-import { SimpleWebProviders } from '@ezstart/next-core/providers'
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { ThemeProvider } from '@ezstart/next-core'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { Geist, Geist_Mono } from 'next/font/google'
@@ -66,9 +67,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <ErrorBoundary>
-          <SimpleWebProviders appName="tower-defense">
-            <GamesSocketProvider>{children}</GamesSocketProvider>
-          </SimpleWebProviders>
+          <ThemeProvider>
+            <AuthProvider appName="tower-defense">
+              <GamesSocketProvider>{children}</GamesSocketProvider>
+            </AuthProvider>
+          </ThemeProvider>
           <Toaster />
           <PWAInstallPrompt
             appName="Tower Defense"

@@ -1,5 +1,6 @@
 import '@ezstart/ui/globals.css'
-import { SimpleWebProviders } from '@ezstart/next-core/providers'
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { ThemeProvider } from '@ezstart/next-core'
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
@@ -21,7 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        <SimpleWebProviders appName="ez-billing">{children}</SimpleWebProviders>
+        <ThemeProvider>
+          <AuthProvider appName="ez-billing">
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>
