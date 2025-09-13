@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ez-billing-api
+    env: node
+    buildCommand: pnpm install --frozen-lockfile && pnpm build --filter api-ez-billing
+    startCommand: pnpm --filter api-ez-billing start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health

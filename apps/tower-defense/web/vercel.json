@@ -1,0 +1,14 @@
+{
+  "buildCommand": "node src/scripts/generate-pwa-icons.js && pnpm build",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "apps/tower-defense/web/src/app/**": {
+      "maxDuration": 30
+    }
+  }
+}

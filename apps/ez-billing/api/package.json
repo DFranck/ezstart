@@ -8,6 +8,7 @@
     "prebuild": "pnpm --filter @ezstart/types build && pnpm --filter @ez-billing/types build",
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:prod": "pnpm build && node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --fix"

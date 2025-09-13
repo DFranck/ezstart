@@ -1,0 +1,21 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "apps/asc-tcd/web/src/app/**": {
+      "maxDuration": 30
+    }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/fr",
+      "statusCode": 302
+    }
+  ]
+}

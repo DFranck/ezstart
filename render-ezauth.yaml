@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ezauth-api
+    env: node
+    buildCommand: pnpm install --frozen-lockfile && pnpm build --filter api-ezauth
+    startCommand: pnpm --filter api-ezauth start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
