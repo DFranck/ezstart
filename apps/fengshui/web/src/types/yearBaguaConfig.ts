@@ -31,6 +31,7 @@ export interface BaguaStarsConfig {
 export interface BaguaStar {
   star: string
   element: string
+  color: 'text-green-500' | 'text-red-500'
   status: 'bonne' | 'mauvaise'
   remedies: string[]
 }
@@ -59,7 +60,7 @@ export interface YearBaguaConfig {
 // Orientation combinant base + étoile + compatibilité ancienne structure
 export interface CombinedOrientation extends BaguaBaseSector {
   star?: BaguaStar
-  
+
   // Propriétés héritées de l'ancienne structure pour compatibilité
   colorHex?: string
   keywords?: string[]

@@ -1,8 +1,8 @@
 'use client'
 
-import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
+import { Direction, DIRECTIONS } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 
 type Props = {
   config: YearBaguaConfig
@@ -13,234 +13,173 @@ type Props = {
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: 'Helvetica',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   },
   header: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
     paddingVertical: 15,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#1f2937',
-    marginBottom: 6,
-    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#6b7280',
-    textAlign: 'center',
     fontStyle: 'italic',
   },
-  wheelContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+  orientationSection: {
+    marginBottom: 30,
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
   },
-  planImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    marginBottom: 15,
-    borderWidth: 3,
-    borderColor: '#d1d5db',
-  },
-  orientationInfo: {
-    fontSize: 11,
-    color: '#6b7280',
+  orientationTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
-  sectorsGrid: {
+  orientationText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  sectionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  sectorCard: {
-    width: '31%',
-    marginBottom: 12,
+  sectionCard: {
+    width: '45%',
+    marginBottom: 20,
+    padding: 15,
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     borderRadius: 8,
-    padding: 10,
   },
-  sectorHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
-    paddingBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    marginBottom: 8,
   },
-  sectorDirection: {
-    fontSize: 9,
-    color: '#ffffff',
+  sectionDirection: {
+    fontSize: 16,
     fontWeight: 'bold',
-    paddingHorizontal: 6,
+    marginRight: 10,
+  },
+  sectionElement: {
+    fontSize: 12,
+    color: '#ffffff',
+    backgroundColor: '#6b7280',
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
-    marginRight: 6,
   },
-  sectorTitle: {
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  sectionKeywords: {
     fontSize: 10,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    flex: 1,
-  },
-  sectorElement: {
-    fontSize: 8,
     color: '#6b7280',
-    marginBottom: 4,
-    fontStyle: 'italic',
-  },
-  sectorKeywords: {
-    fontSize: 8,
-    color: '#4b5563',
-    marginBottom: 4,
-    lineHeight: 1.3,
-  },
-  sectorStar: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    borderRadius: 3,
-    marginTop: 4,
+    lineHeight: 1.4,
   },
   footer: {
-    textAlign: 'center',
-    fontSize: 8,
-    color: '#9ca3af',
+    marginTop: 30,
+    paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
-    paddingTop: 10,
-    marginTop: 20,
+    textAlign: 'center',
+  },
+  footerText: {
+    fontSize: 10,
+    color: '#9ca3af',
   },
 })
 
 function getElementColor(element: string): string {
   switch (element) {
     case 'Eau':
-      return '#0D47A1'
+      return '#0ea5e9'
     case 'Bois':
-      return '#2E7D32'
+      return '#22c55e'
     case 'Feu':
-      return '#D32F2F'
+      return '#ef4444'
     case 'Terre':
-      return '#8B7355'
+      return '#a16207'
     case 'Métal':
-      return '#757575'
+      return '#64748b'
     default:
-      return '#94a3b8'
+      return '#6b7280'
   }
 }
 
 export default function BaguaWheelPDF({ config, planImage, bearingFromNorth }: Props) {
+  if (!config) {
+    return (
+      <Document>
+        <Page size="A4" style={styles.page}>
+          <Text>Erreur : Configuration Bagua manquante</Text>
+        </Page>
+      </Document>
+    )
+  }
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>🏮 Analyse Feng Shui Bagua</Text>
-          <Text style={styles.subtitle}>
-            Vue d'ensemble de votre espace - Configuration {config.year || '2025'}
+          <Text style={styles.subtitle}>Configuration {config.year || '2025'}</Text>
+        </View>
+
+        {/* Orientation Info */}
+        <View style={styles.orientationSection}>
+          <Text style={styles.orientationTitle}>Orientation de votre plan</Text>
+          <Text style={styles.orientationText}>
+            Rotation : {Math.round(bearingFromNorth)}° depuis le Nord
+          </Text>
+          <Text style={styles.orientationText}>
+            Votre plan a été analysé selon les 8 directions du Bagua
           </Text>
         </View>
 
-        {/* Plan avec orientation */}
-        {planImage && (
-          <View style={styles.wheelContainer}>
-            <View style={{ alignItems: 'center' }}>
-              {/* Plan image avec bordure colorée */}
-              <View style={{
-                width: 200,
-                height: 200,
-                borderRadius: 100,
-                overflow: 'hidden',
-                borderWidth: 3,
-                borderColor: '#3b82f6',
-                marginBottom: 15
-              }}>
-                <Image src={planImage} style={{ width: 200, height: 200 }} />
-              </View>
-
-              <Text style={styles.orientationInfo}>
-                Orientation du plan : {Math.round(bearingFromNorth)}° depuis le Nord
-              </Text>
-
-              {/* Indicateurs de direction simples */}
-              <View style={{ flexDirection: 'row', marginTop: 10, gap: 20 }}>
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#ef4444', marginBottom: 4 }} />
-                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>N</Text>
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#22c55e', marginBottom: 4 }} />
-                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>E</Text>
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#f59e0b', marginBottom: 4 }} />
-                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>S</Text>
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#6366f1', marginBottom: 4 }} />
-                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>O</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Grille des secteurs avec résumé */}
-        <View style={styles.sectorsGrid}>
-          {DIRECTIONS_WITH_CENTER.map((dir: Direction) => {
-            const sector = (config as any).orientations[dir]
+        {/* Sections Bagua */}
+        <View style={styles.sectionsGrid}>
+          {DIRECTIONS.map((dir: Direction) => {
+            const sector = (config as any)?.orientations?.[dir]
             if (!sector) return null
-            const elementColor = getElementColor(sector.element)
 
             return (
-              <View key={dir} style={[styles.sectorCard, { borderTopColor: elementColor, borderTopWidth: 3 }]}>
-                {/* Header */}
-                <View style={styles.sectorHeader}>
-                  <View style={[styles.sectorDirection, { backgroundColor: elementColor }]}>
-                    <Text>{dir}</Text>
-                  </View>
-                  <Text style={styles.sectorTitle}>{sector.title}</Text>
-                </View>
-
-                {/* Element */}
-                <Text style={styles.sectorElement}>Élément : {sector.element}</Text>
-
-                {/* Keywords (max 3) */}
-                {sector.keywords && sector.keywords.length > 0 && (
-                  <Text style={styles.sectorKeywords}>
-                    {sector.keywords.slice(0, 3).join(' • ')}
+              <View key={dir} style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionDirection}>{dir}</Text>
+                  <Text
+                    style={[
+                      styles.sectionElement,
+                      { backgroundColor: getElementColor(sector.element) },
+                    ]}
+                  >
+                    {sector.element}
                   </Text>
-                )}
-
-                {/* Star status */}
-                {sector.star && (
-                  <View style={[
-                    styles.sectorStar,
-                    {
-                      backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
-                      color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
-                    }
-                  ]}>
-                    <Text>Étoile 2025 : {sector.star.status}</Text>
-                  </View>
+                </View>
+                <Text style={styles.sectionTitle}>{sector.title}</Text>
+                {sector.summary && <Text style={styles.sectionKeywords}>{sector.summary}</Text>}
+                {sector.keywords && sector.keywords.length > 0 && (
+                  <Text style={styles.sectionKeywords}>
+                    Mots-clés : {sector.keywords.slice(0, 3).join(', ')}
+                  </Text>
                 )}
               </View>
             )
@@ -249,11 +188,8 @@ export default function BaguaWheelPDF({ config, planImage, bearingFromNorth }: P
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>
+          <Text style={styles.footerText}>
             Rapport généré le {new Date().toLocaleDateString('fr-FR')} • Feng Shui Bagua Analysis
-          </Text>
-          <Text style={{ marginTop: 4 }}>
-            Pour une analyse détaillée, consultez le rapport complet
           </Text>
         </View>
       </Page>
