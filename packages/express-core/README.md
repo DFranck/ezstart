@@ -241,30 +241,69 @@ const userController = createCRUDController({
 
 ### 📊 OpenAPI/Swagger
 
-#### Automatic Documentation
+#### Route Documentation with createRouterWithDoc
 
 ```typescript
-import { setupSwagger } from '@ezstart/express-core/openapi'
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { userSchema, createUserSchema } from '@ezstart/types'
 
-const app = createApp({ name: 'My API' })
+const registry = new OpenAPIRegistry()
+const router = Router()
 
-setupSwagger(app, {
-  title: 'My API',
-  version: '1.0.0',
-  description: 'API documentation',
-  path: '/docs',
+// Create documented router with optional basePath for proper path prefixing
+const docRouter = createRouterWithDoc(registry, router, '/users')
+
+// Define routes with automatic OpenAPI documentation
+docRouter.get('/', getUsers, {
+  summary: 'List all users',
+  tags: ['Users'],
+  responseSchema: userSchema.array(),
+})
+
+docRouter.post('/', createUser, {
+  summary: 'Create a new user',
+  tags: ['Users'],
+  bodySchema: createUserSchema,
+  responseSchema: userSchema,
+  status: 201,
+})
+
+docRouter.get('/:id', getUser, {
+  summary: 'Get user by ID',
+  tags: ['Users'],
+  paramsSchema: z.object({ id: z.string() }),
+  responseSchema: userSchema,
+})
+
+// Use in startServer to generate Swagger UI
+startServer(app, {
+  routes: router,
+  registries: [registry],
+  basePath: '/api', // Optional: base path for all routes
+  serviceName: 'Users Service',
+  port: 5000,
 })
 ```
 
-#### Schema Integration
+#### Multiple Route Groups
 
 ```typescript
-import { registerSchema } from '@ezstart/express-core/openapi'
-import { userSchema } from '@ezstart/types'
+// Each route file creates its own registry with basePath
+const clientsRegistry = new OpenAPIRegistry()
+const clientRouter = Router()
+const clientDocRouter = createRouterWithDoc(clientsRegistry, clientRouter, '/clients')
 
-// Register Zod schemas for OpenAPI
-registerSchema('User', userSchema)
-registerSchema('CreateUser', createUserSchema)
+const invoicesRegistry = new OpenAPIRegistry()
+const invoiceRouter = Router()
+const invoiceDocRouter = createRouterWithDoc(invoicesRegistry, invoiceRouter, '/invoices')
+
+// Combine all registries in startServer
+startServer(app, {
+  routes: mainRouter,
+  registries: [clientsRegistry, invoicesRegistry],
+  basePath: '/api',
+  serviceName: 'My Service',
+})
 ```
 
 ### 🔧 Utilities
