@@ -19,7 +19,7 @@ import * as secureControllers from '../controllers/invoice/invoice.secure-contro
 import { authMiddleware } from '../middleware/auth.js';
 export const invoiceRegistry = new OpenAPIRegistry();
 const router = Router();
-const docRouter = createRouterWithDoc(invoiceRegistry, router);
+const docRouter = createRouterWithDoc(invoiceRegistry, router, '/invoices');
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureInvoiceController, {
   summary: 'Create an Invoice',
@@ -50,8 +50,6 @@ docRouter.put('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secur
   paramsSchema: paramsMongoIdSchema,
   responseSchema: invoiceSchema,
 });
-
-router.patch('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.updateSecureInvoiceController);
 
 docRouter.delete('/:id', authMiddleware, validateParams(paramsMongoIdSchema), secureControllers.softDeleteSecureInvoiceController, {
   summary: 'Soft delete Invoice',

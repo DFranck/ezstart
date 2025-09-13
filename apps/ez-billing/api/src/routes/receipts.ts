@@ -19,7 +19,7 @@ import * as secureControllers from '../controllers/receipt/receipt.secure-contro
 import { authMiddleware } from '../middleware/auth.js';
 export const receiptRegistry = new OpenAPIRegistry();
 const router = Router();
-const docRouter = createRouterWithDoc(receiptRegistry, router);
+const docRouter = createRouterWithDoc(receiptRegistry, router, '/receipts');
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureReceiptController, {
   summary: 'Create a Receipt',

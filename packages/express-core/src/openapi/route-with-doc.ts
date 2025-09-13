@@ -19,13 +19,14 @@ type RouteDocOptions = {
   }
 }
 
-export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router) {
+export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, basePath = '') {
   function addRouteWithDoc(
     method: 'get' | 'post' | 'put' | 'delete',
     path: string,
     middlewares: RequestHandler[],
     options: RouteDocOptions
   ) {
+    const fullPath = basePath + path
     const requestDoc: any = {}
     // ✅ BODY
     if (options.bodySchema) {
@@ -106,7 +107,7 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router) {
 
     registry.registerPath({
       method,
-      path,
+      path: fullPath,
       tags: options.tags ?? ['API'],
       summary: options.summary,
       request: Object.keys(requestDoc).length ? requestDoc : undefined,

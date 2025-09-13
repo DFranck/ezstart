@@ -22,7 +22,7 @@ import { authMiddleware } from '../middleware/auth.js';
 
 export const quotesRegistry = new OpenAPIRegistry();
 const router = Router();
-const docRouter = createRouterWithDoc(quotesRegistry, router);
+const docRouter = createRouterWithDoc(quotesRegistry, router, '/quotes');
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureQuoteController, {
   summary: 'Create a Quote',

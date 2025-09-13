@@ -12,6 +12,7 @@ connectToMongo('ez-billing')
     startServer(app, {
       routes,
       registries: globalRegistry,
+      basePath: '/api',
       serviceName: 'EzBilling',
       port: Number(PORT),
     })

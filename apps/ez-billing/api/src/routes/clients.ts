@@ -18,7 +18,7 @@ import { z } from 'zod';
 export const clientsRegistry = new OpenAPIRegistry();
 
 const router = Router();
-const docRouter = createRouterWithDoc(clientsRegistry, router);
+const docRouter = createRouterWithDoc(clientsRegistry, router, '/clients');
 
 docRouter.post('/', authMiddleware, secureControllers.createSecureClientController, {
   summary: 'Create a Client (authenticated)',
