@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node src/scripts/generate-pwa-icons.js && pnpm build",
+  "buildCommand": "pnpm build",
   "outputDirectory": ".next",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
