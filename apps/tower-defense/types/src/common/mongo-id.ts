@@ -5,3 +5,7 @@ export const mongoIdSchema = z
   .min(1, 'ID is required')
   .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
   .describe('MongoDB ObjectId');
+
+export const paramsMongoIdSchema = z.object({
+  id: mongoIdSchema.describe('Resource ID')
+});

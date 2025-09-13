@@ -1,10 +1,19 @@
-import { createRouterWithDoc, OpenAPIRegistry, z, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../services/auth.service.js'
-import { 
+import {
   LoginRequest,
   RegisterRequest,
-  TokenRequest
+  TokenRequest,
+  loginRequestSchema,
+  registerRequestSchema,
+  tokenRequestSchema,
+  verifyRequestSchema,
+  authCodeResponseSchema,
+  tokenResponseSchema,
+  userResponseSchema,
+  verifyResponseSchema,
+  errorResponseSchema
 } from '@ezstart/auth-sdk'
 
 export const authRegistry = new OpenAPIRegistry()
@@ -147,11 +156,56 @@ const verifyController = async (req: any, res: any) => {
   }
 }
 
-// Define API routes (simplified without schemas for now)
-router.post('/register', registerController)
-router.post('/login', loginController)  
-router.post('/token', tokenController)
-router.get('/me', meController)
-router.post('/verify', verifyController)
+// Define API routes with OpenAPI documentation
+docRouter.post('/register', registerController, {
+  summary: 'Register new user',
+  tags: ['Authentication'],
+  bodySchema: registerRequestSchema,
+  responseSchema: authCodeResponseSchema,
+  status: 201,
+  extraResponses: {
+    400: { description: 'Registration failed', schema: errorResponseSchema }
+  }
+})
+
+docRouter.post('/login', loginController, {
+  summary: 'Login user',
+  tags: ['Authentication'],
+  bodySchema: loginRequestSchema,
+  responseSchema: authCodeResponseSchema,
+  extraResponses: {
+    401: { description: 'Login failed', schema: errorResponseSchema }
+  }
+})
+
+docRouter.post('/token', tokenController, {
+  summary: 'Exchange authorization code for access token',
+  tags: ['Authentication'],
+  bodySchema: tokenRequestSchema,
+  responseSchema: tokenResponseSchema,
+  extraResponses: {
+    400: { description: 'Token exchange failed', schema: errorResponseSchema }
+  }
+})
+
+docRouter.get('/me', meController, {
+  summary: 'Get current user information',
+  tags: ['User'],
+  responseSchema: userResponseSchema,
+  extraResponses: {
+    401: { description: 'Invalid or missing token', schema: errorResponseSchema }
+  }
+})
+
+docRouter.post('/verify', verifyController, {
+  summary: 'Verify token validity',
+  tags: ['Authentication'],
+  bodySchema: verifyRequestSchema,
+  responseSchema: verifyResponseSchema,
+  extraResponses: {
+    401: { description: 'Invalid token', schema: errorResponseSchema },
+    403: { description: 'No app access', schema: errorResponseSchema }
+  }
+})
 
 export default router

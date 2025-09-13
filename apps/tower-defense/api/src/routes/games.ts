@@ -6,16 +6,13 @@ import {
   Router,
 } from '@ezstart/express-core'
 import { z } from 'zod'
-
-const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId')
-const paramsMongoIdSchema = z.object({
-  id: mongoId
-})
 import {
   createGameResponseSchema,
   gameSchema,
   getGamesQuerySchema,
   joinGameResponseSchema,
+  mongoIdSchema,
+  paramsMongoIdSchema,
 } from '@tower-defense/types'
 import { createGameController } from '../controllers/createGameController.js'
 import { getGameByIdController } from '../controllers/getGameByIdController.js'
@@ -56,7 +53,7 @@ docRouter.post('/:id/start', validateParams(paramsMongoIdSchema), startGameContr
 docRouter.post('/:id/join', validateParams(paramsMongoIdSchema), joinGameController, {
   summary: 'Join a Game',
   tags: ['Games'],
-  bodySchema: z.object({ playerId: mongoId }),
+  bodySchema: z.object({ playerId: mongoIdSchema.describe('Player ID to join the game') }),
   paramsSchema: paramsMongoIdSchema,
   responseSchema: joinGameResponseSchema,
 })

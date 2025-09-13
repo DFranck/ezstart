@@ -15,13 +15,27 @@ export { LoginButton } from './login-button'
 export type { LoginButtonProps } from './login-button'
 
 // Re-export types
-export type { 
-  AuthUser, 
-  AuthToken, 
-  LoginRequest, 
-  RegisterRequest, 
+export type {
+  AuthUser,
+  AuthToken,
+  LoginRequest,
+  RegisterRequest,
   TokenRequest,
   AuthCode,
   AuthCodeResponse,
-  JWTPayload 
+  JWTPayload
 } from './types'
+
+// Zod schemas for validation and OpenAPI
+export {
+  loginRequestSchema,
+  registerRequestSchema,
+  tokenRequestSchema,
+  verifyRequestSchema,
+  authUserSchema,
+  authCodeResponseSchema,
+  tokenResponseSchema,
+  userResponseSchema,
+  verifyResponseSchema,
+  errorResponseSchema
+} from './schemas'

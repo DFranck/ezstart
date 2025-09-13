@@ -1,4 +1,5 @@
 export * from './activeMob.js'
+export * from './common/mongo-id.js'
 export * from './damage.js'
 export * from './elements.js'
 export * from './game.js'
