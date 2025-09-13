@@ -1,18 +1,18 @@
 // Client
-export { AuthClient, createAuthClient } from './client.js'
-export type { AuthClientConfig } from './client.js'
+export { AuthClient, createAuthClient } from './client'
+export type { AuthClientConfig } from './client'
 
 // Store
-export { useAuthStore, useAuthStoreSSR } from './store.js'
-export type { AuthState } from './store.js'
+export { useAuthStore, useAuthStoreSSR } from './store'
+export type { AuthState } from './store'
 
 // Provider and hooks
-export { AuthProvider, useAuth, useAuthContext } from './provider.js'
+export { AuthProvider, useAuth, useAuthContext } from './provider'
 
 // Components
-export { AuthCallbackPage } from './auth-callback-page.js'
-export { LoginButton } from './login-button.js'
-export type { LoginButtonProps } from './login-button.js'
+export { AuthCallbackPage } from './auth-callback-page'
+export { LoginButton } from './login-button'
+export type { LoginButtonProps } from './login-button'
 
 // Re-export types
 export type { 
@@ -24,4 +24,4 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload 
-} from './types.js'
+} from './types'

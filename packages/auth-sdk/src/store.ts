@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useEffect, useState } from 'react'
-import type { AuthUser } from './types.js'
+import type { AuthUser } from './types'
 
 export interface AuthState {
   user: AuthUser | null

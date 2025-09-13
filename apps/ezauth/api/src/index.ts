@@ -8,7 +8,7 @@ const app = createApp()
 
 // API routes
 app.use('/api/auth', authRoutes)
-app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
+app.get('/api/health', (_: any, res: any) => res.status(200).json({ status: 'ok' }))
 
 // Start server with database connection
 connectToMongo('ezauth')
@@ -20,7 +20,7 @@ connectToMongo('ezauth')
       port: Number(PORT),
     })
   )
-  .catch(err => {
+  .catch((err: any) => {
     console.error('❌ Failed to start EZAuth API', err)
     process.exit(1)
   })
