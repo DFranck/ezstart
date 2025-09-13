@@ -8,11 +8,11 @@ import { Icon, StepContent, StepSummary, useStepper, Button } from '@ezstart/ui/
 import { useEffect, useRef, useState } from 'react'
 import BaguaWheel from './BaguaWheel'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
-import { useBaguaPDF } from '@/hooks/useBaguaPDF'
+import { BaguaPreviewModal } from '../BaguaPreviewModal'
 
 export default function AnalysisStep() {
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
-  const { generatePDF, isGenerating } = useBaguaPDF()
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   useEffect(() => {
     loadBaguaConfig(2025, 'fr-FR').then(setCfg).catch(console.error)
@@ -31,16 +31,9 @@ export default function AnalysisStep() {
         const rotationAngle = cardinalData.rotationAngle ?? 0
         const bearingFromNorth = cardinalData.bearingFromNorth ?? (rotationAngle + 90) % 360
 
-        // Fonction pour générer le PDF
-        const handleGeneratePDF = async () => {
-          if (!cfg) return
-          
-          await generatePDF({
-            config: cfg,
-            planImage: uploadData.preview,
-            bearingFromNorth,
-            filename: `analyse-bagua-${new Date().toISOString().split('T')[0]}.pdf`
-          })
+        // Fonction pour ouvrir la modale preview
+        const handleOpenPreview = () => {
+          setIsPreviewOpen(true)
         }
 
         // Taille responsive de la pizza
@@ -82,18 +75,12 @@ export default function AnalysisStep() {
                     </p>
                   </div>
                   <Button
-                    className="ml-4 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleGeneratePDF}
-                    disabled={!cfg || isGenerating}
+                    className="ml-4 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    onClick={handleOpenPreview}
+                    disabled={!cfg}
                   >
-                    {isGenerating ? (
-                      <Icon name="lucide:Loader2" className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Icon name="lucide:Download" className="w-4 h-4" />
-                    )}
-                    <span className="hidden sm:inline">
-                      {isGenerating ? 'Génération...' : 'PDF'}
-                    </span>
+                    <Icon name="lucide:Eye" className="w-4 h-4" />
+                    <span className="hidden sm:inline">Aperçu PDF</span>
                   </Button>
                 </div>
               </div>
@@ -127,6 +114,18 @@ export default function AnalysisStep() {
             <div className="mt-8">
               <StepSummary />
             </div>
+
+            {/* Preview Modal */}
+            {cfg && (
+              <BaguaPreviewModal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                config={cfg}
+                planImage={uploadData.preview}
+                bearingFromNorth={bearingFromNorth}
+              />
+            )}
+
           </div>
         )
       }}

@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
-    "@ezstart/ui": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
+    "@ezstart/ui": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",
     "framer-motion": "^12.10.1",
     "lucide-react": "^0.469.0",
@@ -27,13 +27,13 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/next-config": "workspace:*",
     "@ezstart/tailwind-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "typescript": "^5.7.3"
   }
 }
