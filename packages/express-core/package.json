@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -b --watch",
-    "build": "tsc",
+    "build": "tsc -b",
     "typecheck": "tsc --noEmit"
   },
   "exports": {

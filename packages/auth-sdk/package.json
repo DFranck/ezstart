@@ -6,7 +6,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "dev": "tsc -b --watch",
     "typecheck": "tsc --noEmit"
   },
