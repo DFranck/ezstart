@@ -380,11 +380,105 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - Impact/results
   ```
 
+## 🚀 DÉPLOIEMENT - Configuration Vercel & Render ✅
+
+### Configuration Vercel (Apps Web) - 100% Opérationnel
+
+**Stratégie de déploiement :**
+- ✅ **Root Directory** : `apps/[app]/web` (cible le sous-dossier du monorepo)
+- ✅ **Include files outside root directory** : COCHÉ (obligatoire pour monorepo)
+- ✅ **Build Command** : `pnpm build` (utilise le package.json local)
+
+**Build Commands optimisés dans package.json :**
+```json
+// Toutes les apps web ont cette structure optimisée
+"build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build"
+```
+
+**Apps Web déployées sur Vercel :**
+- **EZStart** : https://ezstart-web.vercel.app
+- **EZAuth** : https://ezauth-web.vercel.app
+- **EZ-Billing** : https://ez-billing-web.vercel.app
+- **Tower Defense** : https://tower-defense-web.vercel.app
+- **FengShui** : https://fengshui-web.vercel.app
+- **ASC-TCD** : https://asc-tcd-web.vercel.app
+
+### Configuration Render (APIs) - 100% Opérationnel
+
+**Stratégie de déploiement :**
+- ✅ **Repository** : https://github.com/DFranck/ezstart (racine du monorepo)
+- ✅ **Build Command** : `pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-[name]`
+- ✅ **Start Command** : `cd apps/[app]/api && node dist/[file].js`
+
+**Build Commands par API :**
+```bash
+# EZAuth API
+Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-ezauth
+Start: cd apps/ezauth/api && node dist/index.js
+
+# EZ-Billing API
+Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-ez-billing
+Start: cd apps/ez-billing/api && node dist/server.js
+
+# Tower Defense API
+Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-tower-defense
+Start: cd apps/tower-defense/api && node dist/server.js
+```
+
+**Variables d'environnement Render :**
+- `NODE_ENV=production`
+- `PORT=10000`
+- Health Check: `/api/health`
+
+### Build Filters Render (Optimisation) ✅
+
+**Pour éviter les rebuilds inutiles, configurer :**
+
+**EZAuth API - Included Paths :**
+```
+apps/ezauth/api/**
+packages/express-core/**
+packages/types/**
+packages/ui/**
+```
+
+**EZ-Billing API - Included Paths :**
+```
+apps/ez-billing/api/**
+packages/express-core/**
+packages/types/**
+```
+
+**Tower Defense API - Included Paths :**
+```
+apps/tower-defense/api/**
+packages/express-core/**
+packages/types/**
+```
+
+**Ignored Paths (pour toutes les APIs) :**
+```
+apps/ezstart/**
+apps/fengshui/**
+apps/asc-tcd/**
+packages/ui/** (sauf EZAuth)
+packages/auth-sdk/** (sauf si utilisé)
+```
+
+### Bonnes Pratiques Déploiement
+
+1. **Vercel** : Toujours cocher "Include files outside root directory"
+2. **Render** : Utiliser les Build Filters pour optimiser les déploiements
+3. **Monorepo** : Build les dépendances avant les apps (ordre important)
+4. **Health Checks** : Tous les endpoints `/api/health` configurés
+5. **Variables d'env** : Production settings appliquées
+
 ### Notes Techniques
 
 - Monorepo utilise pnpm workspaces
 - TypeScript avec configurations partagées
 - Architecture microservices avec packages partagés
+- Déploiements Vercel et Render 100% opérationnels
 
 ### Gestion des Processus Background
 
