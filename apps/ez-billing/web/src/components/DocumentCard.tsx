@@ -319,6 +319,7 @@ export function QuoteCard({
 // Specialized Receipt Card
 interface ReceiptCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
   paymentDate?: string
+  onDownload?: (e: React.MouseEvent) => void
 }
 
 export function ReceiptCard({
@@ -329,6 +330,7 @@ export function ReceiptCard({
   currency,
   paymentDate,
   onClick,
+  onDownload,
   className,
 }: ReceiptCardProps) {
   const statusConfig = {
@@ -357,6 +359,19 @@ export function ReceiptCard({
         <span className="text-sm text-muted-foreground">
           Payment: {paymentDate ? new Date(paymentDate).toLocaleDateString() : '-'}
         </span>
+      }
+      actions={
+        onDownload && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onDownload}
+            title="Download receipt"
+          >
+            <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+            <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+          </Button>
+        )
       }
     />
   )

@@ -181,6 +181,51 @@ const ClientDashboardPage = () => {
     }
   }
 
+  const handleDownloadReceipt = async (receipt: Receipt, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      const client = clients.find(c => c._id === receipt.clientId)
+      const company = receipt.companyId
+        ? companies.find(c => c._id === receipt.companyId)
+        : undefined
+
+      if (!client) {
+        alert('Client not found')
+        return
+      }
+
+      // Generate PDF data for receipt using the same function as modal
+      const receiptPDFData = convertToReceiptPDFData(receipt, client, company)
+
+      const fileName = receipt.documentNumber || receipt._id
+
+      const { pdf } = await import('@react-pdf/renderer')
+
+      const blob = await pdf(<ReceiptPDF data={receiptPDFData} />).toBlob()
+
+      // Create download link
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `receipt-${fileName}.pdf`
+
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Cleanup
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading receipt:', error)
+      console.error('Receipt data:', receipt)
+      console.error('Client data:', client)
+      console.error('Company data:', company)
+      alert(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   const handleConvertToInvoice = (quote: Quote, e?: React.MouseEvent) => {
     e?.stopPropagation() // ⬅️ prevent opening preview
     const invoiceData = {
@@ -482,6 +527,7 @@ const ClientDashboardPage = () => {
                   currency={receipt.currency}
                   paymentDate={receipt.paymentDate}
                   onClick={() => openPreview('receipt', receipt)}
+                  onDownload={e => handleDownloadReceipt(receipt, e)}
                 />
               ))}
             </div>
