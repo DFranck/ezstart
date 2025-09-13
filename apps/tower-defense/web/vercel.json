@@ -7,7 +7,7 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "apps/tower-defense/web/src/app/**": {
+    "src/app/**/*": {
       "maxDuration": 30
     }
   }

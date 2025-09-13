@@ -7,7 +7,7 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "apps/asc-tcd/web/src/app/**": {
+    "src/app/**/*": {
       "maxDuration": 30
     }
   },

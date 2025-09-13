@@ -7,7 +7,7 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "apps/ez-billing/web/src/app/**": {
+    "src/app/**/*": {
       "maxDuration": 30
     }
   }
