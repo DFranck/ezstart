@@ -10,7 +10,7 @@ import {
   AuthCode,
   AuthCodeResponse,
   JWTPayload
-} from '@ezstart/auth-sdk'
+} from '@ezstart/auth-sdk/server'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'

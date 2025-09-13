@@ -14,7 +14,7 @@ import {
   userResponseSchema,
   verifyResponseSchema,
   errorResponseSchema
-} from '@ezstart/auth-sdk'
+} from '@ezstart/auth-sdk/server'
 
 export const authRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()

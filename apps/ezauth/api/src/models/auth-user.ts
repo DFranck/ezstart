@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose'
 import bcrypt from 'bcryptjs'
-import { AuthUser } from '@ezstart/auth-sdk'
+import { AuthUser } from '@ezstart/auth-sdk/server'
 
 export interface AuthUserDocument extends Document {
   email: string
