@@ -3,6 +3,10 @@ import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp()
 const PORT = getApiPort()
+
+app.use('/api', routes)
+app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
+
 connectToMongo('ez-billing')
   .then(() =>
     startServer(app, {

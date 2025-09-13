@@ -274,6 +274,32 @@ Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent 
 - **Structure standardisée** : `outDir: "dist"`, `rootDir: "src"`, types harmonisés
 - **Scripts standardisés** : `lint`, `typecheck`, `dev`, `build`
 
+#### Bonnes Pratiques APIs - Préfixes Standardisés
+
+**✅ OBLIGATOIRE : Utiliser le préfixe `/api`**
+
+Toutes les APIs du monorepo DOIVENT utiliser le préfixe `/api` pour :
+- **Séparation claire** : distinction routes API vs assets/web
+- **Proxying** : facilite la configuration nginx/reverse proxy
+- **Standards** : convention universelle (Next.js, Express, etc.)
+- **Sécurité** : règles CORS/auth plus simples à appliquer
+
+**Structure API standardisée :**
+```typescript
+// Dans server.ts de chaque API
+app.use('/api', routes)
+app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
+```
+
+**URLs finales :**
+- EZAuth : `http://localhost:5010/api/auth/*`, `/api/health`
+- EZ-Billing : `http://localhost:5020/api/clients`, `/api/invoices`, `/api/health`
+- Tower Defense : `http://localhost:5030/api/*`, `/api/health`
+
+**✅ RESPECT DU PATTERN :**
+- `NEXT_PUBLIC_API_URL=http://localhost:50XX/api` dans les `.env.local`
+- Endpoints expose via `callApi('/clients')` → `GET /api/clients`
+
 ### Packages - Configuration 100% Centralisée
 
 Tous les packages utilisent les configurations centralisées selon leur type :
