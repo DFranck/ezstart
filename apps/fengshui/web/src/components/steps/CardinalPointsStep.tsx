@@ -151,30 +151,30 @@ const CardinalPointsStep = () => {
 
             {/* Roue */}
             <div className="relative flex justify-center items-center">
-              <div className="relative w-[600px] h-[600px]">
-                {/* Plan central */}
-                <div className="absolute w-48 h-48 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="relative w-[700px] h-[700px]">
+                {/* Plan central - même taille que le crop */}
+                <div className="absolute w-96 h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
                   <img
                     src={uploadData.preview}
                     alt="Plan uploadé"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-white"
                   />
-                  <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white p-4 text-center">
-                    <div className="text-lg font-bold mb-1">Votre Plan</div>
-                    <div className="text-xs opacity-75">Centre fixe</div>
+                  <div className="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-white p-4 text-center pointer-events-none">
+                    <div className="text-2xl font-bold mb-1 drop-shadow-lg">Votre Plan</div>
+                    <div className="text-sm opacity-90 drop-shadow-lg">Centre fixe</div>
                   </div>
                 </div>
 
                 {/* Points cardinaux */}
                 {cardinalPoints.map(({ direction, angle, label }) => {
                   const totalAngle = (angle + rotationAngle) * (Math.PI / 180)
-                  const radius = 250
+                  const radius = 280
                   const x = Math.cos(totalAngle) * radius
                   const y = Math.sin(totalAngle) * radius
                   return (
                     <div
                       key={direction}
-                      className="absolute w-16 h-16 rounded-full border-4 border-white shadow-xl bg-gradient-to-br from-blue-500 to-blue-600"
+                      className="absolute w-20 h-20 rounded-full border-4 border-white shadow-xl bg-gradient-to-br from-blue-500 to-blue-600"
                       style={{
                         left: '50%',
                         top: '50%',
@@ -183,8 +183,8 @@ const CardinalPointsStep = () => {
                       }}
                     >
                       <div className="h-full flex flex-col items-center justify-center text-white p-2 text-center">
-                        <div className="text-lg font-bold">{direction}</div>
-                        <div className="text-xs opacity-90">{label}</div>
+                        <div className="text-xl font-bold">{direction}</div>
+                        <div className="text-sm opacity-90">{label}</div>
                       </div>
                     </div>
                   )
@@ -203,16 +203,16 @@ const CardinalPointsStep = () => {
                   </defs>
                   {cardinalPoints.map(({ angle }) => {
                     const totalAngle = (angle + rotationAngle) * (Math.PI / 180)
-                    const radius = 250
+                    const radius = 280
                     const x = Math.cos(totalAngle) * radius
                     const y = Math.sin(totalAngle) * radius
                     return (
                       <line
                         key={angle}
-                        x1={300}
-                        y1={300}
-                        x2={300 + x}
-                        y2={300 + y}
+                        x1={350}
+                        y1={350}
+                        x2={350 + x}
+                        y2={350 + y}
                         stroke="url(#lineGradient)"
                         strokeWidth="2"
                       />
@@ -221,7 +221,7 @@ const CardinalPointsStep = () => {
                 </svg>
 
                 {/* Cercle */}
-                <div className="absolute w-[500px] h-[500px] rounded-full border-2 border-dashed border-gray-300 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute w-[560px] h-[560px] rounded-full border-2 border-dashed border-gray-300 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
               </div>
             </div>
           </div>
