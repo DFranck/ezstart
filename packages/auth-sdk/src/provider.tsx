@@ -1,7 +1,7 @@
 'use client'
 import { createContext, ReactNode, useContext, useEffect } from 'react'
-import { AuthClient, createAuthClient } from './client'
-import { useAuthStore } from './store'
+import { AuthClient, createAuthClient } from './client.js'
+import { useAuthStore } from './store.js'
 
 interface AuthContextValue {
   client: AuthClient

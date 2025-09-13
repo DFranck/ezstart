@@ -220,6 +220,10 @@ const ClientDashboardPage = () => {
     } catch (error) {
       console.error('Error downloading receipt:', error)
       console.error('Receipt data:', receipt)
+      const client = clients.find(c => c._id === receipt.clientId)
+      const company = receipt.companyId
+        ? companies.find(c => c._id === receipt.companyId)
+        : undefined
       console.error('Client data:', client)
       console.error('Company data:', company)
       alert(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)

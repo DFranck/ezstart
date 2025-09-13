@@ -1,18 +1,18 @@
 // Client
-export { AuthClient, createAuthClient } from './client'
-export type { AuthClientConfig } from './client'
+export { AuthClient, createAuthClient } from './client.js'
+export type { AuthClientConfig } from './client.js'
 
 // Store
-export { useAuthStore, useAuthStoreSSR } from './store'
-export type { AuthState } from './store'
+export { useAuthStore, useAuthStoreSSR } from './store.js'
+export type { AuthState } from './store.js'
 
 // Provider and hooks
-export { AuthProvider, useAuth, useAuthContext } from './provider'
+export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
 // Components
-export { AuthCallbackPage } from './auth-callback-page'
-export { LoginButton } from './login-button'
-export type { LoginButtonProps } from './login-button'
+export { AuthCallbackPage } from './auth-callback-page.js'
+export { LoginButton } from './login-button.js'
+export type { LoginButtonProps } from './login-button.js'
 
 // Re-export types
 export type {
@@ -24,7 +24,7 @@ export type {
   AuthCode,
   AuthCodeResponse,
   JWTPayload
-} from './types'
+} from './types.js'
 
 // Zod schemas for validation and OpenAPI
 export {
@@ -38,4 +38,4 @@ export {
   userResponseSchema,
   verifyResponseSchema,
   errorResponseSchema
-} from './schemas'
+} from './schemas.js'

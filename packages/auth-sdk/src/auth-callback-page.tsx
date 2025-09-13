@@ -2,7 +2,7 @@
 import { Icon } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
-import { useAuth } from './provider'
+import { useAuth } from './provider.js'
 
 interface AuthCallbackPageProps {
   /** Redirect path after successful authentication. Defaults to '/' */

@@ -1,4 +1,4 @@
-import type { AuthToken, AuthUser } from './types'
+import type { AuthToken, AuthUser } from './types.js'
 
 export interface AuthClientConfig {
   baseURL?: string
