@@ -1,6 +1,7 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import '@ezstart/ui/globals.css'
+import { cn } from '@ezstart/ui/lib'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './fengshui-colors.css'
@@ -32,11 +33,9 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={inter.className}>
+      <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
         <ThemeProvider>
-          <AuthProvider appName="fengshui">
-            {children}
-          </AuthProvider>
+          <AuthProvider appName="fengshui">{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>

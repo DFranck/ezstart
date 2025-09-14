@@ -17,11 +17,11 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
   const { theme } = useTheme()
   const pathname = usePathname()
   const isAnalyzePage = pathname === '/analyze'
-
+  const position = 'fixed'
   return (
     <>
       <Header
-        position="fixed"
+        position={position}
         leftContent={
           <div className="flex items-center space-x-4">
             <Link
@@ -53,7 +53,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
                 </Button>
               </Link>
             )}
-            {isAuthenticated ? (
+            {/* {isAuthenticated ? (
               <Button onClick={logout} variant="outline" size="sm">
                 <Icon name="lucide:LogOut" className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Déconnexion</span>
@@ -63,12 +63,14 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
                 <Icon name="lucide:LogIn" className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Connexion</span>
               </Button>
-            )}
+            )} */}
             <ThemeSwitcher />
           </div>
         }
       />
-      <Main>{children}</Main>
+      <Main withHeaderOffset={position === 'fixed' || position === 'sticky' ? true : false}>
+        {children}
+      </Main>
     </>
   )
 }

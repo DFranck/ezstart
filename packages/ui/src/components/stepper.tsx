@@ -1,8 +1,11 @@
 'use client'
 
 import { ReactNode, createContext, useContext, useState } from 'react'
+import { useOnScroll } from '../hooks'
 import { cn } from '../lib/utils'
+import { Button } from './button'
 import { Icon, KnownIconName } from './icon'
+import { Div, Span } from './tag'
 
 // Types
 export interface Step {
@@ -44,6 +47,7 @@ interface StepperProps {
   onStepChange?: (stepIndex: number, stepId: string) => void
   onComplete?: (allData: Record<string, any>) => void
   className?: string
+  withHeaderOffset?: boolean
   showStepNumbers?: boolean
   allowStepNavigation?: boolean
   children?: ReactNode
@@ -56,6 +60,7 @@ export function Stepper({
   onStepChange,
   onComplete,
   className,
+  withHeaderOffset = false,
   showStepNumbers = true,
   allowStepNavigation = true,
   children,
@@ -127,7 +132,7 @@ export function Stepper({
 
   return (
     <StepperContext.Provider value={contextValue}>
-      <div className={cn('w-full', className)}>
+      <Div className="flex-1 flex flex-col w-full mb-18">
         {/* Header avec les étapes */}
         <StepperHeader
           steps={steps}
@@ -135,21 +140,23 @@ export function Stepper({
           isStepCompleted={isStepCompleted}
           isStepAccessible={isStepAccessible}
           showStepNumbers={showStepNumbers}
+          withHeaderOffset={withHeaderOffset}
           onStepClick={allowStepNavigation ? goToStep : undefined}
         />
+        <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
+          {/* Contenu de l'étape actuelle */}
+          <div className="py-6">{children || steps[currentStep]?.component}</div>
 
-        {/* Contenu de l'étape actuelle */}
-        <div className="mt-8">{children || steps[currentStep]?.component}</div>
-
-        {/* Navigation */}
-        <StepperNavigation
-          currentStep={currentStep}
-          totalSteps={steps.length}
-          onNext={nextStep}
-          onPrevious={previousStep}
-          isLastStep={currentStep === steps.length - 1}
-        />
-      </div>
+          {/* Navigation */}
+          <StepperNavigation
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            onNext={nextStep}
+            onPrevious={previousStep}
+            isLastStep={currentStep === steps.length - 1}
+          />
+        </Div>
+      </Div>
     </StepperContext.Provider>
   )
 }
@@ -161,12 +168,14 @@ interface StepperHeaderProps {
   isStepCompleted: (stepIndex: number) => boolean
   isStepAccessible: (stepIndex: number) => boolean
   showStepNumbers: boolean
+  withHeaderOffset?: boolean
   onStepClick?: (stepIndex: number) => void
 }
 
 function StepperHeader({
   steps,
   currentStep,
+  withHeaderOffset,
   isStepCompleted,
   isStepAccessible,
   showStepNumbers,
@@ -174,155 +183,68 @@ function StepperHeader({
 }: StepperHeaderProps) {
   // progress ratio for mobile bar
   const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0
-
+  const scrollY = useOnScroll()
+  const isTop = scrollY === 0
   return (
-    <div className=" bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200">
-      {/* Mobile / small screens: horizontally scrollable pills */}
-      <div className="sm:hidden">
-        <div
-          role="tablist"
-          aria-label="Steps"
-          className="flex gap-3 px-4 py-3 overflow-x-auto snap-x snap-mandatory scroll-p-4 [-ms-overflow-style:none] [scrollbar-width:none]"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {steps.map((step, index) => {
-            const isActive = index === currentStep
-            const isCompleted = isStepCompleted(index)
-            const isAccessible = isStepAccessible(index)
+    <div
+      className={`sticky z-10 bg-background ${withHeaderOffset ? (isTop ? 'top-18' : 'top-14') : 'top-0'}`}
+    >
+      <div
+        role="tablist"
+        aria-label="Steps"
+        className="flex gap-3 px-2 py-3 overflow-x-auto snap-x snap-mandatory scroll-p-4 [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {steps.map((step, index) => {
+          const isActive = index === currentStep
+          const isCompleted = isStepCompleted(index)
+          const isAccessible = isStepAccessible(index)
 
-            return (
-              <button
-                key={step.id}
-                role="tab"
-                aria-selected={isActive}
-                aria-current={isActive ? 'step' : undefined}
-                aria-disabled={!isAccessible}
-                onClick={() => isAccessible && onStepClick?.(index)}
-                className={cn(
-                  'snap-start shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-all',
-                  isActive && 'border-blue-500 text-blue-700 bg-blue-50',
-                  !isActive &&
-                    (isCompleted
-                      ? 'border-green-500 text-green-700 bg-green-50'
-                      : 'border-gray-200 text-gray-600 bg-white'),
-                  !isAccessible && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                <span
+          return (
+            <Button
+              key={step.id}
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? 'step' : undefined}
+              aria-disabled={!isAccessible}
+              onClick={() => isAccessible && onStepClick?.(index)}
+              variant={isActive ? 'default' : isCompleted ? 'ezstart' : 'ghost'}
+            >
+              <Span className="relative flex items-center justify-center mr-2">
+                <Icon
+                  name="lucide:Check"
                   className={cn(
-                    'grid place-items-center w-8 h-8 rounded-full border',
-                    isActive
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : isCompleted
-                        ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-gray-300 text-gray-500'
+                    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+                    isCompleted && !isActive ? 'opacity-100' : 'opacity-0'
                   )}
-                >
-                  {isCompleted ? (
-                    <Icon name="lucide:Check" className="w-4 h-4" />
-                  ) : (
-                    <Icon name={step.icon as KnownIconName} className="w-4 h-4" />
+                />
+                <Icon
+                  name={step.icon as KnownIconName}
+                  className={cn(
+                    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0',
+                    isActive && 'opacity-100'
                   )}
-                </span>
-                {/* Title hidden on very small widths if it overflows naturally */}
-                <span className="whitespace-nowrap max-w-[12ch] truncate">{step.title}</span>
-                {showStepNumbers && (
-                  <span className="text-xs text-gray-500">
-                    ({index + 1}/{steps.length})
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Thin progress bar */}
-        <div className="h-1 w-full bg-gray-200">
-          <div
-            className="h-1 bg-blue-500 transition-[width] duration-300"
-            style={{ width: `${progress}%` }}
-            aria-hidden="true"
-          />
-        </div>
+                />
+              </Span>
+              {/* Title hidden on very small widths if it overflows naturally */}
+              <span className="whitespace-nowrap max-w-[12ch] truncate">{step.title}</span>
+              {showStepNumbers && (
+                <Span>
+                  ({index + 1}/{steps.length})
+                </Span>
+              )}
+            </Button>
+          )
+        })}
       </div>
 
-      {/* >= sm: original wide header with slight tweaks */}
-      <div className="hidden sm:block">
-        <div className="container mx-auto px-4 py-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between" role="tablist" aria-label="Steps">
-              {steps.map((step, index) => {
-                const isActive = index === currentStep
-                const isCompleted = isStepCompleted(index)
-                const isAccessible = isStepAccessible(index)
-                const isPast = index < currentStep
-
-                return (
-                  <div key={step.id} className="flex items-center flex-1">
-                    <div className="flex items-center flex-1">
-                      <button
-                        role="tab"
-                        aria-selected={isActive}
-                        aria-current={isActive ? 'step' : undefined}
-                        aria-disabled={!isAccessible}
-                        onClick={() => isAccessible && onStepClick?.(index)}
-                        className={cn(
-                          'flex items-center transition-all duration-200 text-left',
-                          isAccessible ? 'cursor-pointer' : 'cursor-not-allowed',
-                          isActive
-                            ? 'text-blue-600'
-                            : isPast || isCompleted
-                              ? 'text-green-600'
-                              : 'text-gray-400'
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            'min-w-10 h-10 rounded-full border-2 flex items-center justify-center mr-3 transition-all',
-                            isActive
-                              ? 'bg-blue-500 border-blue-500 text-white'
-                              : isCompleted || isPast
-                                ? 'bg-green-500 border-green-500 text-white'
-                                : 'border-gray-300'
-                          )}
-                        >
-                          {isCompleted ? (
-                            <Icon name="lucide:Check" className="w-5 h-5" />
-                          ) : (
-                            <Icon name={step.icon as KnownIconName} className="w-5 h-5" />
-                          )}
-                        </div>
-
-                        <div className="text-left">
-                          <div className="font-medium">{step.title}</div>
-                          {step.description && (
-                            <div className="text-xs opacity-75 hidden md:block">
-                              {step.description}
-                            </div>
-                          )}
-                          {showStepNumbers && (
-                            <div className="text-[11px] text-gray-500 mt-0.5 hidden lg:block">
-                              Step {index + 1} of {steps.length}
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    </div>
-
-                    {index < steps.length - 1 && (
-                      <div
-                        className={cn(
-                          'flex-1 h-1 mx-4 transition-all',
-                          isPast || isCompleted ? 'bg-green-500' : 'bg-gray-200'
-                        )}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
+      {/* Thin progress bar */}
+      <div className="h-1 w-full bg-muted">
+        <div
+          className="h-1 bg-ezstart transition-[width] duration-300"
+          style={{ width: `${progress}%` }}
+          aria-hidden="true"
+        />
       </div>
     </div>
   )
@@ -346,64 +268,26 @@ function StepperNavigation({
 }: StepperNavigationProps) {
   return (
     <>
-      {/* Desktop/tablet */}
-      <div className="hidden sm:flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-        <button
+      <div className="fixed bottom-0 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card">
+        <Button
           onClick={onPrevious}
           disabled={currentStep === 0}
-          className={cn(
-            'flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors',
-            currentStep === 0
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-          )}
+          variant={'outline'}
+          className={cn(currentStep === 0 && 'text-muted-foreground cursor-not-allowed')}
         >
           <Icon name="lucide:ArrowLeft" className="w-4 h-4" />
-          <span>Previous</span>
-        </button>
+          <span className="hidden sm:inline">Previous</span>
+        </Button>
 
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-muted-foreground">
           Step {currentStep + 1} of {totalSteps}
         </div>
 
-        <button
-          onClick={onNext}
-          className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
-        >
-          <span>{isLastStep ? 'Finish' : 'Next'}</span>
+        <Button onClick={onNext} variant={'ezstart'}>
+          <span className="hidden sm:inline">{isLastStep ? 'Finish' : 'Next'}</span>
           <Icon name={isLastStep ? 'lucide:Check' : 'lucide:ArrowRight'} className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
-
-      {/* Mobile bottom bar */}
-      <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={onPrevious}
-            disabled={currentStep === 0}
-            className={cn(
-              'flex-1 inline-flex justify-center items-center gap-2 h-11 rounded-lg border text-sm font-medium transition-all',
-              currentStep === 0
-                ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed'
-                : 'border-gray-300 text-gray-700 bg-white active:scale-[.99]'
-            )}
-          >
-            <Icon name="lucide:ArrowLeft" className="w-4 h-4" />
-            <span>Back</span>
-          </button>
-
-          <button
-            onClick={onNext}
-            className="flex-1 inline-flex justify-center items-center gap-2 h-11 rounded-lg text-sm font-medium bg-blue-600 text-white active:scale-[.99]"
-          >
-            <span>{isLastStep ? 'Finish' : 'Next'}</span>
-            <Icon name={isLastStep ? 'lucide:Check' : 'lucide:ArrowRight'} className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* spacer so content isn't hidden by mobile bar */}
-      <div className="h-16 sm:hidden" />
     </>
   )
 }
@@ -430,8 +314,8 @@ export function StepSummary() {
   const { stepData, steps } = useStepper()
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
-      <h3 className="font-semibold text-gray-800 mb-3">Résumé des étapes</h3>
+    <div className="bg-muted/50 rounded-lg p-4">
+      <h3 className="font-semibold text-foreground mb-3">Résumé des étapes</h3>
       <div className="space-y-2">
         {steps.map((step, index) => {
           const data = stepData[step.id]
@@ -439,9 +323,9 @@ export function StepSummary() {
 
           return (
             <div key={step.id} className="flex items-center space-x-2 text-sm">
-              <Icon name={step.icon as KnownIconName} size={16} className=" text-gray-500" />
+              <Icon name={step.icon as KnownIconName} size={16} className="text-muted-foreground" />
               <span className="font-medium">{step.title}:</span>
-              <span className="text-gray-600">
+              <span className="text-muted-foreground">
                 {typeof data === 'object' ? 'Données sauvegardées' : String(data)}
               </span>
             </div>

@@ -20,6 +20,7 @@ type Transformations = {
 
 interface PlanUploaderProps {
   onPlanUpload: (file: File, preview: string, transformations?: Transformations) => void
+  onEditingChange?: (isEditing: boolean) => void
   className?: string
 }
 
@@ -28,7 +29,7 @@ type CropPixels = { width: number; height: number; x: number; y: number }
 /* ------------------------------------------------------------------------------------------
  * Component
  * ----------------------------------------------------------------------------------------*/
-export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps) {
+export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: PlanUploaderProps) {
   // Fichier & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -39,7 +40,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
   const [zoom, setZoom] = useState(1)
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropPixels | null>(null)
-  
+
   // Contrôle de la taille du crop
   const [cropWidth, setCropWidth] = useState(300)
   const [cropHeight, setCropHeight] = useState(200)
@@ -64,6 +65,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
           const result = e.target?.result as string
           setPreview(result)
           setIsEditing(true)
+          onEditingChange?.(true)
           setRotation(0)
           setZoom(1)
           setCrop({ x: 0, y: 0 })
@@ -96,6 +98,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
     setUploadedFile(null)
     setPreview(null)
     setIsEditing(false)
+    onEditingChange?.(false)
     setRotation(0)
     setZoom(1)
     setCrop({ x: 0, y: 0 })
@@ -138,6 +141,7 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
     setZoom(1)
     setCrop({ x: 0, y: 0 })
     setIsEditing(false)
+    onEditingChange?.(false)
   }
 
   const isImage = Boolean(uploadedFile && uploadedFile.type.startsWith('image/'))
@@ -201,7 +205,10 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
             {preview && isImage && (
               <div className="space-y-4">
                 {/* Viewer */}
-                <div className="relative w-full overflow-hidden rounded border bg-white" style={{ height: 420 }}>
+                <div
+                  className="relative w-full overflow-hidden rounded border bg-white"
+                  style={{ height: 420 }}
+                >
                   <Cropper
                     image={preview}
                     crop={crop}
@@ -240,7 +247,9 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
                         onChange={e => setZoom(Number(e.target.value))}
                         className="w-full"
                       />
-                      <div className="text-center text-sm text-gray-600 mt-2">{zoom.toFixed(1)}x</div>
+                      <div className="text-center text-sm text-gray-600 mt-2">
+                        {zoom.toFixed(1)}x
+                      </div>
                     </div>
 
                     {/* Rotation */}
@@ -269,46 +278,6 @@ export function PlanUploader({ onPlanUpload, className = '' }: PlanUploaderProps
                         >
                           <Icon name="lucide:RotateCw" className="w-4 h-4" />
                         </Button>
-                      </div>
-                    </div>
-
-                    {/* Presets de taille */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Icon name="lucide:Maximize2" className="w-4 h-4" />
-                        Presets
-                      </h3>
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={fitToBounds}
-                          type="button"
-                          className="w-full"
-                        >
-                          <Icon name="lucide:Maximize2" className="w-4 h-4 mr-2" />
-                          Ajuster aux bords
-                        </Button>
-                        <div className="grid grid-cols-2 gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setCropWidth(600); setCropHeight(200) }}
-                            type="button"
-                            className="text-xs"
-                          >
-                            Plan allongé
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setCropWidth(300); setCropHeight(300) }}
-                            type="button"
-                            className="text-xs"
-                          >
-                            Carré
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   </div>
