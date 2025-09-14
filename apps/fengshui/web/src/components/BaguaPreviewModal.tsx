@@ -50,17 +50,23 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Utiliser dom-to-image qui est plus fiable pour les SVG
       console.log('Capturing element with dom-to-image...')
 
-      // dom-to-image.toPng est plus fiable que html2canvas pour les SVG
-      // Plus de padding, on capture exactement 600x600
-      const containerSize = 600 // BaguaWheel size exact
+      // dom-to-image.toPng avec haute résolution pour qualité PDF optimale
+      // Capture à 1200px (2x) puis scale down pour meilleure qualité
+      const containerSize = 600 // BaguaWheel size original
+      const captureSize = 1200 // Capture à 2x la résolution
+      const scaleFactor = captureSize / containerSize
+
       const dataUrl = await domtoimage.toPng(baguaRef.current, {
         quality: 1,
-        width: containerSize,
-        height: containerSize,
-        bgcolor: '#fff', // Fond blanc propre
+        width: captureSize,
+        height: captureSize,
+        bgcolor: '#ffffff', // Fond blanc propre
+        pixelRatio: 2, // Force haute résolution
         style: {
-          transform: 'scale(1)',
+          transform: `scale(${scaleFactor})`,
           transformOrigin: 'top left',
+          width: `${containerSize}px`,
+          height: `${containerSize}px`,
         },
         filter: node => {
           // Filtrer les éléments problématiques
@@ -87,9 +93,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
       await new Promise(resolve => {
         img.onload = () => {
-          canvas.width = containerSize
-          canvas.height = containerSize
-          ctx?.drawImage(img, 0, 0, containerSize, containerSize)
+          // Canvas à haute résolution pour PDF de qualité
+          canvas.width = captureSize
+          canvas.height = captureSize
+          // Dessiner l'image à sa résolution native (haute qualité)
+          ctx?.drawImage(img, 0, 0, captureSize, captureSize)
           resolve(undefined)
         }
         img.src = dataUrl
@@ -131,13 +139,18 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const originalCardsDisplay = cardsRef.current.style.display
       cardsRef.current.style.display = 'block'
 
-      // Capturer les cartes
+      // Capturer les cartes avec haute résolution
       const cardsDataUrl = await domtoimage.toPng(cardsRef.current, {
         quality: 1,
         bgcolor: 'transparent',
+        pixelRatio: 2, // Haute résolution pour les cartes aussi
+        width: 800 * 2, // Taille du conteneur * 2
+        height: 800 * 2,
         style: {
-          transform: 'scale(1)',
+          transform: 'scale(2)', // Scale 2x pour haute résolution
           transformOrigin: 'top left',
+          width: '800px',
+          height: '800px',
         },
       })
 
@@ -154,26 +167,24 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Dessiner les cartes sur le PDF en superposition avec l'image Bagua
       const cardsCanvas = document.createElement('canvas')
       const cardsCtx = cardsCanvas.getContext('2d')
-      cardsCanvas.width = canvas.width
+      cardsCanvas.width = canvas.width // Utilise la taille haute résolution
       cardsCanvas.height = canvas.height
 
-      // Dessiner l'image Bagua de base
+      // Dessiner l'image Bagua de base (haute résolution)
       cardsCtx?.drawImage(canvas, 0, 0)
 
-      // Superposer les cartes - aligner sur l'image Bagua
-      // L'image Bagua fait 600px dans un canvas de même taille
-      // Le conteneur des cartes fait 800px avec les cartes à cardRadius=280px du centre
-      const baguaImageSize = 600
-      const cardsContainerSize = 800
+      // Superposer les cartes - aligner sur l'image Bagua haute résolution
+      // L'image Bagua fait maintenant 1200px dans un canvas de même taille
+      // Le conteneur des cartes fait 1600px (800*2) avec les cartes proportionnelles
+      const baguaImageSize = captureSize // 1200px
+      const cardsContainerSize = 800 * 2 // 1600px (haute résolution)
 
-      // Échelle pour que les cartes soient proportionnelles à l'image Bagua
-      // Le BaguaWheel fait size=600, le conteneur des cartes fait 800px
-      // On veut que 260px dans le conteneur = le rayon approprié sur l'image
-      const scale = canvas.width / cardsContainerSize // Échelle 1:1 pour commencer
+      // Échelle pour que les cartes soient proportionnelles à l'image Bagua haute résolution
+      const scale = canvas.width / cardsContainerSize // Échelle adaptée à la haute résolution
       const cardsWidth = cardsImg.width * scale
       const cardsHeight = cardsImg.height * scale
 
-      // Centrer parfaitement sur l'image Bagua
+      // Centrer parfaitement sur l'image Bagua haute résolution
       const cardsX = (canvas.width - cardsWidth) / 2
       const cardsY = (canvas.height - cardsHeight) / 2
 
@@ -188,8 +199,8 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         combinedCanvas.height
       )
 
-      // Add the captured image - TAILLE MAXIMALE sur la page PDF
-      const imgData = combinedCanvas.toDataURL('image/png')
+      // Add the captured image - TAILLE MAXIMALE sur la page PDF avec qualité optimale
+      const imgData = combinedCanvas.toDataURL('image/png', 1.0) // Qualité PNG maximale
       // Utiliser quasiment toute la largeur A4 avec marges
       const maxWidth = 190 // 210mm - 40mm de marges (20mm de chaque côté)
       const imgWidth = maxWidth
@@ -197,7 +208,8 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const x = (210 - imgWidth) / 2 // Center on A4 width
       const y = 55
 
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight)
+      // Ajouter l'image avec compression optimale pour PDF
+      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
 
       // Add orientation info
       pdf.setFontSize(12)
