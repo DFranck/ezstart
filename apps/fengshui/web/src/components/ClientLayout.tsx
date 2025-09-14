@@ -21,7 +21,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
   return (
     <>
       <Header
-        position="sticky"
+        position="fixed"
         leftContent={
           <div className="flex items-center space-x-4">
             <Link
@@ -54,19 +54,12 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
               </Link>
             )}
             {isAuthenticated ? (
-              <Button
-                onClick={logout}
-                variant="outline"
-                size="sm"
-              >
+              <Button onClick={logout} variant="outline" size="sm">
                 <Icon name="lucide:LogOut" className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Déconnexion</span>
               </Button>
             ) : (
-              <Button
-                onClick={() => login({ theme: theme || 'system' })}
-                size="sm"
-              >
+              <Button onClick={() => login({ theme: theme || 'system' })} size="sm">
                 <Icon name="lucide:LogIn" className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Connexion</span>
               </Button>
@@ -75,7 +68,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
           </div>
         }
       />
-      <Main className="px-2 md:px-6">{children}</Main>
+      <Main>{children}</Main>
     </>
   )
 }
