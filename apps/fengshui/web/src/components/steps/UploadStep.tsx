@@ -3,7 +3,17 @@
 
 import { PlanUploader } from '@/components/PlanUploader'
 import type { UploadStepData } from '@/types/bagua'
-import { Icon, StepContent, useStepper } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H2,
+  Icon,
+  P,
+  StepContent,
+  useStepper,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useState } from 'react'
 
@@ -43,26 +53,24 @@ const UploadStep = () => {
         return (
           <div className="mx-auto w-full max-w-2xl ">
             {/* Header initial - masqué pendant l'upload/crop */}
-            <div
-              className={cn('mb-6 sm:mb-8', { hidden: hasUploadedContent && !isReturningToStep })}
+            <Card
+              variant={'ghost'}
+              className={cn('gap-2 max-w-lg mx-auto', {
+                hidden: hasUploadedContent && !isReturningToStep,
+              })}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary grid place-items-center shadow-sm">
-                  <Icon
-                    name="lucide:Upload"
-                    className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg sm:text-2xl font-bold text-foreground truncate">
-                    Étape 1 · Import de votre plan
-                  </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    Ajoutez le plan de votre appartement ou maison.
-                  </p>
-                </div>
-              </div>
-            </div>
+              <CardHeader className="flex items-center gap-2">
+                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
+                  <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
+                </Div>
+                <H2 size={'h5'} className="text-left">
+                  Étape 1 · Import de votre plan
+                </H2>
+              </CardHeader>
+              <CardContent className="">
+                <P variant={'description'}>Ajoutez le plan de votre appartement ou maison.</P>
+              </CardContent>
+            </Card>
 
             <PlanUploader
               // ↓ Keep the API you already use; we just pass through data in a minimal shape

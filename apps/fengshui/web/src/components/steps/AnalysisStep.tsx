@@ -4,12 +4,23 @@
 import { loadBaguaConfig } from '@/config/loadBaguaConfig'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Icon, StepContent, StepSummary, useStepper, Button } from '@ezstart/ui/components'
-import { useGeneratePDF } from '@ezstart/ui/hooks'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H2,
+  Icon,
+  P,
+  StepContent,
+  useStepper,
+} from '@ezstart/ui/components'
+import { cn } from '@ezstart/ui/lib'
 import { useEffect, useRef, useState } from 'react'
-import BaguaWheel from './BaguaWheel'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
+import BaguaWheel from './BaguaWheel'
 
 export default function AnalysisStep() {
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
@@ -63,30 +74,24 @@ export default function AnalysisStep() {
         return (
           <div className="mx-auto w-full max-w-7xl">
             {/* Header avec bouton PDF */}
-            <div className="mb-6 sm:mb-8">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-center flex-1">
-                    <div className="flex items-center justify-center gap-3 text-blue-700 mb-1 sm:mb-2">
-                      <Icon name="lucide:Map" className="w-5 h-5 sm:w-6 sm:h-6" />
-                      <span className="text-lg sm:text-xl font-bold">Analyse Bagua de votre plan</span>
-                    </div>
-                    <p className="text-sm sm:text-base text-gray-600">
-                      Explorez les secteurs Bagua et leurs recommandations pour harmoniser votre espace
-                    </p>
-                  </div>
-                  <Button
-                    className="ml-4 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    onClick={handleOpenPreview}
-                    disabled={!cfg}
-                  >
-                    <Icon name="lucide:Eye" className="w-4 h-4" />
-                    <span className="hidden sm:inline">Aperçu PDF</span>
-                  </Button>
-                </div>
-              </div>
-            </div>
 
+            <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto', {})}>
+              <CardHeader className="flex items-center gap-2">
+                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
+                  <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
+                </Div>
+                <H2 size={'h5'} className="text-left">
+                  Finish
+                </H2>
+              </CardHeader>
+              <CardContent className="">
+                <P variant={'description'}>Consultez cette pas ou téléchargez votre Analyse.</P>
+                <Button onClick={handleOpenPreview} variant={'ezstart'} disabled={!cfg}>
+                  <Icon name="lucide:Eye" className="w-4 h-4" />
+                  <span>Aperçu PDF</span>
+                </Button>
+              </CardContent>
+            </Card>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Colonne gauche : Roue Bagua */}
               <div className="lg:col-span-1">
@@ -111,11 +116,6 @@ export default function AnalysisStep() {
               </div>
             </div>
 
-            {/* Résumé (optionnel) */}
-            <div className="mt-8">
-              <StepSummary />
-            </div>
-
             {/* Preview Modal */}
             {cfg && (
               <BaguaPreviewModal
@@ -126,7 +126,6 @@ export default function AnalysisStep() {
                 bearingFromNorth={bearingFromNorth}
               />
             )}
-
           </div>
         )
       }}

@@ -2,8 +2,21 @@
 'use client'
 
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
-import { Button, Icon, StepContent, useStepper } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H2,
+  Icon,
+  Label,
+  P,
+  StepContent,
+  useStepper,
+} from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
+import { cn } from '@ezstart/ui/lib'
 import { useEffect, useRef, useState } from 'react'
 
 const CardinalPointsStep = () => {
@@ -25,7 +38,7 @@ const CardinalPointsStep = () => {
   // Centre + rayon dynamiques (même base pour pastilles & lignes)
   const cx = box.w / 2
   const cy = box.h / 2
-  const radius = Math.max(Math.min(box.w, box.h) / 2 - (isMobile ? 35 : 80), 0) // marge visuelle
+  const radius = Math.max(Math.min(box.w, box.h) / 2 - (isMobile ? 20 : 40), 0) // marge visuelle
 
   // 💡 Petit fix hooks: déclare tes hooks AVANT tout "return" conditionnel dans StepContent.
   // Ex.: const [rotationAngle, setRotationAngle] = useState(...); puis if (!uploadData.file) return ...
@@ -75,107 +88,104 @@ const CardinalPointsStep = () => {
         return (
           <div className="max-w-4xl mx-auto">
             {/* Header */}
-            <div className="mb-8 text-center">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center space-x-3 text-blue-700 mb-4">
-                  <Icon name="lucide:Compass" className="w-6 h-6" />
-                  <span className="text-xl font-bold">Étape 2 : Points Cardinaux</span>
-                </div>
-                <p className="text-gray-600">
+            <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto')}>
+              <CardHeader className="flex items-center gap-2">
+                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
+                  <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
+                </Div>
+                <H2 size={'h5'} className="text-left">
+                  Étape 2 : Points Cardinaux
+                </H2>
+              </CardHeader>
+              <CardContent className="">
+                <P variant={'description'}>
                   Alignez le Nord de la boussole avec le Nord de votre plan. Utilisez les contrôles
                   pour faire tourner l&apos;orientation.
-                </p>
-              </div>
-            </div>
-
+                </P>
+              </CardContent>
+            </Card>
             {/* Contrôles */}
-            <div className="mb-8 text-center">
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center space-x-3 text-blue-700 mb-4">
-                  <Icon name="lucide:RotateCw" className="w-5 h-5" />
-                  <span className="font-medium">Faites tourner l&apos;orientation</span>
-                  <Button
-                    onClick={resetRotation}
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
-                  >
-                    <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                    <span>Reset</span>
-                  </Button>
-                </div>
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <Div layout={'center'}>
+                <Label htmlFor="-rotate-45">45°</Label>
+                <Button
+                  id="-rotate-45"
+                  onClick={() => handleRotate(rotationAngle - 45)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg"
+                  title="−45°"
+                >
+                  <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                </Button>
+              </Div>
+              <Div layout={'center'}>
+                <Label htmlFor="-rotate-10">10°</Label>
+                <Button
+                  id="-rotate-10"
+                  onClick={() => handleRotate(rotationAngle - 10)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg"
+                  title="−10°"
+                >
+                  <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                </Button>
+              </Div>
+              <Div layout={'center'}>
+                <Label htmlFor="-rotate-1">1°</Label>
+                <Button
+                  id="-rotate-1"
+                  onClick={() => handleRotate(rotationAngle - 1)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg"
+                  title="−1°"
+                >
+                  <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                </Button>
+              </Div>
 
-                <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-gray-800">
-                    {Math.round(rotationAngle)}°
-                  </div>
-                  <div className="text-sm text-gray-600">Angle (repère écran, 0° = Est)</div>
-                </div>
+              <div className="w-px h-8 bg-gray-300 mx-2" />
 
-                <div className="flex items-center justify-center space-x-2 mb-4">
-                  <Button
-                    onClick={() => handleRotate(rotationAngle - 45)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg"
-                    title="−45°"
-                  >
-                    <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleRotate(rotationAngle - 10)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg"
-                    title="−10°"
-                  >
-                    <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleRotate(rotationAngle - 1)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg"
-                    title="−1°"
-                  >
-                    <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                  </Button>
-
-                  <div className="w-px h-8 bg-gray-300 mx-2" />
-
-                  <Button
-                    onClick={() => handleRotate(rotationAngle + 1)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg"
-                    title="+1°"
-                  >
-                    <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleRotate(rotationAngle + 10)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg"
-                    title="+10°"
-                  >
-                    <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleRotate(rotationAngle + 45)}
-                    size="sm"
-                    className="w-10 h-10 grid place-items-center bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-lg"
-                    title="+45°"
-                  >
-                    <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <p className="text-gray-600 text-sm text-center">
-                  Votre plan reste fixe au centre. Alignez <strong>N</strong> avec le Nord de votre
-                  plan.
-                </p>
-              </div>
+              <Div layout={'center'}>
+                <Label htmlFor="+rotate-1">1°</Label>
+                <Button
+                  id="+rotate-1"
+                  onClick={() => handleRotate(rotationAngle + 1)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg"
+                  title="+1°"
+                >
+                  <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                </Button>
+              </Div>
+              <Div layout={'center'}>
+                <Label htmlFor="+rotate-10">10°</Label>
+                <Button
+                  id="+rotate-10"
+                  onClick={() => handleRotate(rotationAngle + 10)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg"
+                  title="+10°"
+                >
+                  <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                </Button>
+              </Div>
+              <Div layout={'center'}>
+                <Label htmlFor="+rotate-45">45°</Label>
+                <Button
+                  id="+rotate-45"
+                  onClick={() => handleRotate(rotationAngle + 45)}
+                  size="sm"
+                  className="w-10 h-10 grid place-items-center bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-lg"
+                  title="+45°"
+                >
+                  <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                </Button>
+              </Div>
             </div>
 
             {/* Roue */}
             <div className="relative flex justify-center items-center ">
-              <div ref={wrapperRef} className="relative w-full h-96 md:h-[700px]">
+              <div ref={wrapperRef} className="relative w-full h-72 md:h-[700px]">
                 {/* Plan centré */}
                 <div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                   <img
