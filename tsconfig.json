@@ -3,31 +3,31 @@
   "extends": "@ezstart/typescript-config/base.json",
   "compilerOptions": {
     "composite": true,
-    "declaration": false,
+    "declaration": true,
     "noEmit": true
   },
   "files": [],
   "references": [
     // Core packages (ordre de dépendance)
     { "path": "./packages/types" },
-    
+
     // Infrastructure packages
     { "path": "./packages/express-core" },
     { "path": "./packages/ui" },
     { "path": "./packages/auth-sdk" },
     { "path": "./packages/next-theme" },
-    
+
     // App-specific types/utils
     { "path": "./apps/ez-billing/types" },
     { "path": "./apps/tower-defense/types" },
     { "path": "./apps/tower-defense/config" },
     { "path": "./apps/tower-defense/utils" },
-    
+
     // APIs
     { "path": "./apps/ezauth/api" },
     { "path": "./apps/ez-billing/api" },
     { "path": "./apps/tower-defense/api" },
-    
+
     // Web apps
     { "path": "./apps/ezstart/web" },
     { "path": "./apps/ezauth/web" },

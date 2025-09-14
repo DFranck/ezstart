@@ -160,18 +160,18 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
           <input {...getInputProps()} aria-label="Select file" />
           <div className="flex flex-col items-center gap-3">
             <div className="flex gap-2">
-              <Icon name="lucide:FileImage" className="w-8 h-8 text-gray-400" />
-              <Icon name="lucide:FileText" className="w-8 h-8 text-gray-400" />
+              <Icon name="lucide:FileImage" className="w-8 h-8 " />
+              <Icon name="lucide:FileText" className="w-8 h-8 " />
             </div>
-            <p className="text-gray-700 font-medium">
+            <p className=" font-medium">
               {isDragActive ? 'Drop your plan here' : 'Drag & drop your plan'}
             </p>
-            <p className="text-sm text-gray-500">…or click to select a file</p>
-            <p className="text-xs text-gray-400">Accepted: JPG, PNG, GIF, PDF</p>
+            <p className="text-sm ">…or click to select a file</p>
+            <p className="text-xs ">Accepted: JPG, PNG, GIF, PDF</p>
           </div>
         </div>
       ) : (
-        <div className="border rounded-lg p-4 bg-white">
+        <div>
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
@@ -181,8 +181,8 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                 <Icon name="lucide:FileText" className="w-5 h-5 text-red-500" />
               )}
               <div>
-                <div className="font-medium text-gray-800">{uploadedFile?.name}</div>
-                <div className="text-xs text-gray-500">
+                <div className="font-medium">{uploadedFile?.name}</div>
+                <div className="text-xs ">
                   {(uploadedFile?.size ? uploadedFile.size / 1024 / 1024 : 0).toFixed(2)} MB
                 </div>
               </div>
@@ -228,7 +228,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Zoom */}
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-gray-700 w-24">Zoom</label>
+                  <label className="text-sm  w-24">Zoom</label>
                   <input
                     type="range"
                     min={1}
@@ -243,7 +243,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
 
                 {/* Rotation */}
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-gray-700 w-24">Rotation</label>
+                  <label className="text-sm  w-24">Rotation</label>
                   <input
                     type="range"
                     min={-180}
@@ -258,8 +258,8 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
 
                 {/* Width (slider + number) */}
                 <div className="flex items-center gap-3">
-                  <label htmlFor="crop-width" className="text-sm text-gray-700 w-24">
-                    Width
+                  <label htmlFor="crop-width" className="text-sm  w-24">
+                    Largeur
                   </label>
                   <input
                     type="range"
@@ -293,8 +293,8 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
 
                 {/* Height (slider + number) */}
                 <div className="flex items-center gap-3">
-                  <label htmlFor="crop-height" className="text-sm text-gray-700 w-24">
-                    Height
+                  <label htmlFor="crop-height" className="text-sm  w-24">
+                    Hauteur
                   </label>
                   <input
                     type="range"
@@ -345,8 +345,8 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
           {uploadedFile?.type === 'application/pdf' && (
             <div className="flex items-center justify-center h-56 bg-gray-50 rounded border">
               <div className="text-center">
-                <Icon name="lucide:FileText" className="w-14 h-14 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-700">PDF loaded</p>
+                <Icon name="lucide:FileText" className="w-14 h-14  mx-auto mb-2" />
+                <p className="">PDF loaded</p>
                 <p className="text-xs text-gray-500">{uploadedFile?.name}</p>
               </div>
             </div>

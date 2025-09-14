@@ -3,9 +3,33 @@
 
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Button, Icon, StepContent, useStepper } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useDevice } from '@ezstart/ui/hooks'
+import { useEffect, useRef, useState } from 'react'
 
 const CardinalPointsStep = () => {
+  const { isMobile } = useDevice()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const [box, setBox] = useState({ w: 0, h: 0 })
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry?.contentRect ?? { width: 0, height: 0 }
+      setBox({ w: width, h: height })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // Centre + rayon dynamiques (même base pour pastilles & lignes)
+  const cx = box.w / 2
+  const cy = box.h / 2
+  const radius = Math.max(Math.min(box.w, box.h) / 2 - (isMobile ? 35 : 80), 0) // marge visuelle
+
+  // 💡 Petit fix hooks: déclare tes hooks AVANT tout "return" conditionnel dans StepContent.
+  // Ex.: const [rotationAngle, setRotationAngle] = useState(...); puis if (!uploadData.file) return ...
+
   return (
     <StepContent stepId="cardinal-points">
       {(data: CardinalStepData, updateData) => {
@@ -150,10 +174,10 @@ const CardinalPointsStep = () => {
             </div>
 
             {/* Roue */}
-            <div className="relative flex justify-center items-center">
-              <div className="relative w-[700px] h-[700px]">
-                {/* Plan central - même taille que le crop */}
-                <div className="absolute w-96 h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <div className="relative flex justify-center items-center ">
+              <div ref={wrapperRef} className="relative w-full h-96 md:h-[700px]">
+                {/* Plan centré */}
+                <div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                   <img
                     src={uploadData.preview}
                     alt="Plan uploadé"
@@ -165,63 +189,64 @@ const CardinalPointsStep = () => {
                   </div>
                 </div>
 
-                {/* Points cardinaux */}
+                {/* Pastilles cardinales (même rayon que les lignes) */}
                 {cardinalPoints.map(({ direction, angle, label }) => {
-                  const totalAngle = (angle + rotationAngle) * (Math.PI / 180)
-                  const radius = 280
-                  const x = Math.cos(totalAngle) * radius
-                  const y = Math.sin(totalAngle) * radius
+                  const a = (angle + rotationAngle) * (Math.PI / 180)
+                  const x = Math.cos(a) * radius
+                  const y = Math.sin(a) * radius
                   return (
                     <div
                       key={direction}
-                      className="absolute w-20 h-20 rounded-full border-4 border-white shadow-xl bg-gradient-to-br from-blue-500 to-blue-600"
+                      className="absolute bg-ezstart w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-white shadow-xl "
                       style={{
-                        left: '50%',
-                        top: '50%',
+                        left: cx,
+                        top: cy,
                         transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                         zIndex: 5,
                       }}
                     >
                       <div className="h-full flex flex-col items-center justify-center text-white p-2 text-center">
-                        <div className="text-xl font-bold">{direction}</div>
-                        <div className="text-sm opacity-90">{label}</div>
+                        <div className="text-lg md:text-xl font-bold">{direction}</div>
+                        <div className="text-xs md:text-sm opacity-90 hidden md:block">{label}</div>
                       </div>
                     </div>
                   )
                 })}
 
-                {/* Lignes */}
+                {/* Lignes → centre dynamique (cx, cy) */}
                 <svg
                   className="absolute inset-0 w-full h-full pointer-events-none"
                   style={{ zIndex: 15 }}
                 >
                   <defs>
                     <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="rgba(59,130,246,0.3)" />
-                      <stop offset="100%" stopColor="rgba(59,130,246,0.1)" />
+                      <stop offset="0%" stopColor="rgba(124, 58, 237,0.4)" />
+                      <stop offset="100%" stopColor="rgba(124, 58, 237,0.2)" />
                     </linearGradient>
                   </defs>
                   {cardinalPoints.map(({ angle }) => {
-                    const totalAngle = (angle + rotationAngle) * (Math.PI / 180)
-                    const radius = 280
-                    const x = Math.cos(totalAngle) * radius
-                    const y = Math.sin(totalAngle) * radius
+                    const a = (angle + rotationAngle) * (Math.PI / 180)
+                    const x = Math.cos(a) * radius
+                    const y = Math.sin(a) * radius
                     return (
                       <line
                         key={angle}
-                        x1={350}
-                        y1={350}
-                        x2={350 + x}
-                        y2={350 + y}
+                        x1={cx}
+                        y1={cy}
+                        x2={cx + x}
+                        y2={cy + y}
                         stroke="url(#lineGradient)"
-                        strokeWidth="2"
+                        strokeWidth={2}
                       />
                     )
                   })}
                 </svg>
 
-                {/* Cercle */}
-                <div className="absolute w-[560px] h-[560px] rounded-full border-2 border-dashed border-gray-300 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                {/* Cercle guide → même centre / rayon */}
+                <div
+                  className="absolute rounded-full border-2 border-dashed border-foreground/40 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{ width: radius * 2, height: radius * 2 }}
+                />
               </div>
             </div>
           </div>

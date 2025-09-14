@@ -3,7 +3,7 @@
 
 import ClientLayout from '@/components/ClientLayout'
 import AnalysisStep from '@/components/steps/AnalysisStep'
-import CardinalPointsStep from '@/components/steps/CardinalPointsStep'
+import CardinalPointsStep from '@/components/steps/CardinalPointsStep-v2'
 import UploadStep from '@/components/steps/UploadStep'
 import { Stepper } from '@ezstart/ui/components'
 
