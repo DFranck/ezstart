@@ -19,10 +19,17 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const baguaRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
 
-  // Détection mobile
+  // Variables de couleurs pour le PDF basées sur le theme
+  const pdfBgColor = isDarkMode ? '#1a1a1a' : '#ffffff'
+  const pdfTextColor = isDarkMode ? '#ffffff' : '#000000'
+  const pdfCardBg = isDarkMode ? '#2a2a2a' : '#ffffff'
+  const pdfBorderColor = isDarkMode ? '#4a4a4a' : '#e5e5e5'
+
+  // Détection mobile et theme
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(
@@ -30,9 +37,21 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       )
     }
+    const checkTheme = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
     checkMobile()
+    checkTheme()
     window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+
+    // Observer pour changements de theme
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+      observer.disconnect()
+    }
   }, [])
 
   const generatePDF = async () => {
@@ -75,7 +94,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         quality: 1,
         width: captureSize,
         height: captureSize,
-        bgcolor: '#ffffff', // Fond blanc propre
+        bgcolor: pdfBgColor, // Fond adapté au theme
         style: {
           transform: `scale(${scaleFactor})`,
           transformOrigin: 'top left',
@@ -131,6 +150,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
       // Add title (sans emoji pour meilleur centrage)
       pdf.setFontSize(20)
+      // Pas de setTextColor pour le titre en dark mode (reste noir car PDF fond blanc par défaut dans jsPDF)
       pdf.text('Analyse Feng Shui Bagua', 105, 30, { align: 'center' })
 
       pdf.setFontSize(12)
@@ -393,12 +413,13 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
               return (
                 <div
                   key={`pdf-card-${dir}`}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 bg-white shadow-lg overflow-hidden"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 shadow-lg overflow-hidden"
                   style={{
                     left: `${xPct}%`,
                     top: `${yPct}%`,
                     width: '120px',
                     borderColor: accent,
+                    backgroundColor: pdfCardBg,
                   }}
                 >
                   {/* Header compact avec couleur de fond */}
@@ -419,13 +440,19 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   {/* Contenu compact */}
                   <div className="p-2 space-y-1">
                     {/* Titre */}
-                    <div className="text-xs font-semibold text-gray-900 flex items-center justify-center gap-2 text-center">
+                    <div
+                      className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
+                      style={{ color: pdfTextColor }}
+                    >
                       {sector.title}
                     </div>
 
                     {/* Premier tip ou enhancer */}
                     {(sector.tips?.[0] || sector.enhancers?.[0]) && (
-                      <div className="text-[9px] text-gray-500 leading-tight flex items-center">
+                      <div
+                        className="text-[9px] leading-tight flex items-center"
+                        style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                      >
                         {sector.shape && (
                           <Icon
                             name={
@@ -450,8 +477,14 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                     )}
                     {/* Etoile volante */}
                     {sector.star && (
-                      <div className="border-t border-gray-200 pt-1">
-                        <div className="text-[9px] text-gray-500 leading-tight flex items-center">
+                      <div
+                        className="border-t pt-1"
+                        style={{ borderColor: pdfBorderColor }}
+                      >
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                        >
                           <Icon
                             name="lucide:Star"
                             className="w-3 h-3 mr-1"
@@ -461,7 +494,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                           />
                           {sector.star.star} - {sector.star.element}
                         </div>
-                        <div className="text-[9px] text-gray-500 leading-tight flex items-center">
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                        >
                           {sector.star.remedies?.length > 0 && (
                             <>
                               <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
