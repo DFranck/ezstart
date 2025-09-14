@@ -264,13 +264,18 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           <span className="font-semibold">Analyse Feng Shui Bagua</span>
         </>
       }
-      description={`Aperçu de votre roue Bagua • ${isGenerating ? 'Génération PDF...' : 'Cliquez "Générer PDF" pour créer le rapport'}`}
+      description={
+        <span className="block">
+          <span className="hidden sm:inline">Aperçu de votre roue Bagua • </span>
+          {isGenerating ? 'Génération PDF...' : 'Cliquez "Générer PDF" pour créer le rapport'}
+        </span>
+      }
       footer={
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2">
           <Button
             onClick={generatePDF}
             disabled={isGenerating}
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            className="bg-blue-600 text-white hover:bg-blue-700 flex-1 sm:flex-initial"
           >
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
             {isGenerating ? 'Génération...' : 'Générer PDF'}
@@ -278,17 +283,17 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           <Button
             onClick={handleDownloadPDF}
             disabled={!pdfUrl || isGenerating}
-            className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
+            className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white flex-1 sm:flex-initial"
           >
             <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
             Télécharger PDF
           </Button>
         </div>
       }
-      className="max-w-[800px] w-[95vw]"
+      className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-hidden"
     >
       {/* Bagua Wheel Preview */}
-      <div className="flex flex-col items-center gap-4 ">
+      <div className="flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-0">
         {/* BaguaWheel MASQUÉ pour capture PDF uniquement */}
         <div
           ref={baguaRef}
@@ -445,12 +450,12 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
         {/* PDF Preview si généré */}
         {pdfUrl && (
-          <div className="w-full mt-4" style={{ aspectRatio: '210/297' }}>
+          <div className="w-full mt-4 overflow-auto" style={{ aspectRatio: '210/297' }}>
             <iframe
               src={pdfUrl}
               className="w-full h-full border border-gray-200 rounded-lg shadow-inner"
               title="Aperçu PDF Bagua"
-              style={{ minHeight: '500px' }}
+              style={{ minHeight: '300px', maxHeight: '70vh' }}
             />
           </div>
         )}

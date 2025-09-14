@@ -17,18 +17,63 @@ import {
   useStepper,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
 import BaguaWheel from './BaguaWheel'
 
-export default function AnalysisStep() {
+export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
+  const { isMobile } = useDevice()
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   useEffect(() => {
     loadBaguaConfig(2025, 'fr-FR').then(setCfg).catch(console.error)
   }, [])
+
+  // Fonction pour télécharger directement le PDF (mobile)
+  const handleDirectPDFDownload = async (uploadData: UploadStepData, bearingFromNorth: number) => {
+    if (!cfg) return
+
+    try {
+      setIsGeneratingPDF(true)
+
+      // Créer temporairement la roue Bagua pour la capture
+      const tempDiv = document.createElement('div')
+      tempDiv.style.position = 'absolute'
+      tempDiv.style.left = '-9999px'
+      tempDiv.style.top = '0'
+      tempDiv.style.width = '400px'
+      tempDiv.style.height = '400px'
+      document.body.appendChild(tempDiv)
+
+      // Import des libs
+      const { default: domtoimage } = await import('dom-to-image')
+      const { default: jsPDF } = await import('jspdf')
+
+      // Render la roue dans le div temporaire (il faudrait créer BaguaWheel ici)
+      // Pour l'instant, on simule juste le téléchargement
+      const pdf = new jsPDF()
+      pdf.text('Analyse Feng Shui', 20, 20)
+      pdf.text(`Bearing: ${bearingFromNorth}°`, 20, 40)
+      pdf.save('analyse-fengshui.pdf')
+
+      document.body.removeChild(tempDiv)
+    } catch (error) {
+      console.error('Erreur génération PDF:', error)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
+
+  // Ouvrir le preview toujours (besoin de la roue pour PDF)
+  useEffect(() => {
+    if (triggerPreview && triggerPreview > 0 && cfg) {
+      setIsPreviewOpen(true)
+    }
+  }, [triggerPreview, cfg])
   return (
     <StepContent stepId="analysis">
       {() => {
@@ -43,7 +88,7 @@ export default function AnalysisStep() {
         const rotationAngle = cardinalData.rotationAngle ?? 0
         const bearingFromNorth = cardinalData.bearingFromNorth ?? (rotationAngle + 90) % 360
 
-        // Fonction pour ouvrir la modale preview
+        // Fonction pour ouvrir preview (toujours modal, responsive)
         const handleOpenPreview = () => {
           setIsPreviewOpen(true)
         }
@@ -75,27 +120,40 @@ export default function AnalysisStep() {
           <div className="mx-auto w-full max-w-7xl">
             {/* Header avec bouton PDF */}
 
-            <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto', {})}>
+            <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto mb-6', {})}>
               <CardHeader className="flex items-center gap-2">
                 <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
-                  <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
+                  <Icon
+                    name="lucide:Sparkles"
+                    size={16}
+                    className=" bg-foreground text-background"
+                  />
                 </Div>
                 <H2 size={'h5'} className="text-left">
-                  Finish
+                  Votre Analyse Feng Shui
                 </H2>
               </CardHeader>
               <CardContent className="">
-                <P variant={'description'}>Consultez cette pas ou téléchargez votre Analyse.</P>
-                <Button onClick={handleOpenPreview} variant={'ezstart'} disabled={!cfg}>
-                  <Icon name="lucide:Eye" className="w-4 h-4" />
-                  <span>Aperçu PDF</span>
-                </Button>
+                <P variant={'description'}>
+                  Découvrez l'harmonisation de votre espace selon les principes du Bagua. Consultez
+                  les recommandations pour chaque secteur ou générez un PDF complet.
+                </P>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={handleOpenPreview}
+                    variant={'ezstart'}
+                    disabled={!cfg || isGeneratingPDF}
+                  >
+                    <Icon name="lucide:FileDown" className="w-4 h-4" />
+                    <span>Aperçu PDF</span>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Colonne gauche : Roue Bagua */}
               <div className="lg:col-span-1">
-                <div className="sticky top-6">
+                <div className="sticky top-36">
                   <div ref={containerRef}>
                     <BaguaWheel
                       src={uploadData.preview!}

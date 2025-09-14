@@ -224,7 +224,6 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
               </div>
 
               {/* Controls: ONLY zoom, rotation, width, height */}
-              {/* Controls: ONLY zoom, rotation, width, height */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Zoom */}
                 <div className="flex items-center gap-3">
@@ -243,17 +242,45 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
 
                 {/* Rotation */}
                 <div className="flex items-center gap-3">
-                  <label className="text-sm  w-24">Rotation</label>
-                  <input
-                    type="range"
-                    min={-180}
-                    max={180}
-                    step={1}
-                    value={rotation}
-                    onChange={e => setRotation(Number(e.target.value))}
-                    className="w-full"
-                  />
-                  <span className="text-xs w-12 text-right">{rotation}°</span>
+                  <label className="text-sm w-24">Rotation</label>
+                  <div className="flex items-center gap-2 flex-1">
+                    <Button
+                      onClick={() => setRotation(prev => prev - 90)}
+                      size="sm"
+                      variant="outline"
+                      className="w-10 h-10 p-0"
+                      title="Rotation -90°"
+                    >
+                      <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={() => setRotation(prev => prev - 15)}
+                      size="sm"
+                      variant="outline"
+                      className="w-8 h-8 p-0 text-xs"
+                      title="Rotation -15°"
+                    >
+                      -15°
+                    </Button>
+                    <Button
+                      onClick={() => setRotation(prev => prev + 15)}
+                      size="sm"
+                      variant="outline"
+                      className="w-8 h-8 p-0 text-xs"
+                      title="Rotation +15°"
+                    >
+                      +15°
+                    </Button>
+                    <Button
+                      onClick={() => setRotation(prev => prev + 90)}
+                      size="sm"
+                      variant="outline"
+                      className="w-10 h-10 p-0"
+                      title="Rotation +90°"
+                    >
+                      <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Width (slider + number) */}

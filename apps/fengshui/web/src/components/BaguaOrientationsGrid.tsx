@@ -3,7 +3,7 @@
 
 import { DIRECTIONS_WITH_CENTER, Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Icon, Button } from '@ezstart/ui/components'
+import { Button, Card, CardContent, CardFooter, CardHeader, Icon, P } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 type Props = {
@@ -45,21 +45,21 @@ export default function BaguaOrientationsGrid({ config }: Props) {
   return (
     <div className="space-y-4">
       {/* Contrôles */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900">Orientations Bagua</h2>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Orientations Bagua</h2>
+        <div className="flex gap-2 text-sm">
           <Button
             onClick={expandAll}
             variant="link"
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors p-0 h-auto"
+            className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
           >
             Tout ouvrir
           </Button>
-          <span className="text-gray-300">•</span>
+          <span className="text-muted-foreground">•</span>
           <Button
             onClick={collapseAll}
             variant="link"
-            className="text-sm text-blue-600 hover:text-blue-800 transition-colors p-0 h-auto"
+            className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
           >
             Tout fermer
           </Button>
@@ -67,7 +67,7 @@ export default function BaguaOrientationsGrid({ config }: Props) {
       </div>
 
       {/* Grille des secteurs */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {DIRECTIONS_WITH_CENTER.map(dir => {
           const sector = config.orientations[dir]
           if (!sector) return null
@@ -112,153 +112,182 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
 
   return (
     <div
-      className="bg-white/90 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all"
+      className="bg-card backdrop-blur rounded-xl sm:rounded-2xl border border-border shadow-sm hover:shadow-md transition-all"
       style={{ borderTopColor: accent, borderTopWidth: '3px' }}
     >
       {/* Header cliquable */}
       <Button
         onClick={onToggle}
         variant="ghost"
-        className="w-full p-4 text-left hover:bg-gray-50/50 transition-colors rounded-t-2xl h-auto justify-start"
+        className="w-full p-3 sm:p-4 text-left hover:bg-muted/50 transition-colors rounded-t-xl sm:rounded-t-2xl h-auto justify-start"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {sector.icon && (
+        <div className="flex items-start sm:items-center justify-between gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            {/* {sector.icon && (
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${accent}15` }}
               >
-                <Icon name={sector.icon} className="w-5 h-5" style={{ color: accent }} />
+                <Icon
+                  name={sector.icon as KnownIconName}
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  style={{ color: accent }}
+                />
               </div>
-            )}
+            )} */}
 
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-gray-900">{sector.title}</h3>
-                <span
-                  className="px-2 py-1 text-xs font-semibold rounded-full"
-                  style={{
-                    color: accent,
-                    backgroundColor: `${accent}15`,
-                    border: `1px solid ${accent}30`,
-                  }}
-                >
-                  {sector.element}
-                </span>
-                <span className="text-xs text-gray-500 font-medium">{direction}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
+                  {sector.title}
+                </h3>
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                  {sector.shape && (
+                    <Icon
+                      name={
+                        sector.shape === 'circle'
+                          ? 'lucide:Circle'
+                          : sector.shape === 'square'
+                            ? 'lucide:Square'
+                            : sector.shape === 'triangle'
+                              ? 'lucide:Triangle'
+                              : sector.shape === 'rectangle'
+                                ? 'lucide:RectangleHorizontal'
+                                : 'lucide:Waves'
+                      }
+                      className="w-3 h-3 mr-1"
+                      style={{ color: accent }}
+                    />
+                  )}
+                  <span
+                    className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs font-semibold rounded-full flex-shrink-0"
+                    style={{
+                      color: accent,
+                      backgroundColor: `${accent}15`,
+                      border: `1px solid ${accent}30`,
+                    }}
+                  >
+                    {sector.element}
+                  </span>
+                  <span className="text-xs text-muted-foreground font-medium flex-shrink-0">
+                    {direction}
+                  </span>
+                </div>
               </div>
-              {sector.summary && <p className="text-sm text-gray-600 mt-1">{sector.summary}</p>}
+              {sector.summary && (
+                <P className="text-xs sm:text-sm text-muted-foreground mt-1 whitespace-normal line-clamp-2">
+                  {sector.summary}
+                </P>
+              )}
             </div>
           </div>
 
           <Icon
             name={isExpanded ? 'lucide:ChevronUp' : 'lucide:ChevronDown'}
-            className="w-5 h-5 text-gray-400 transition-transform"
+            className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground transition-transform flex-shrink-0"
           />
         </div>
       </Button>
 
       {/* Contenu développable */}
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-4 border-t border-gray-100">
+        <Card variant={'ghost'}>
           {/* Bagua de Base - Informations permanentes */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Activateurs de base */}
-              <div>
-                <h5 className="font-semibold text-blue-800 mb-2 flex items-center gap-1">
-                  <Icon name="lucide:Sparkles" className="w-4 h-4" />
-                  Activateurs naturels
-                </h5>
-                <ul className="space-y-1">
-                  {sector.enhancers.map((enhancer: string, idx: number) => (
-                    <li key={idx} className="text-sm text-blue-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                      {enhancer}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Matières favorables */}
-              <div>
-                <h5 className="font-semibold text-blue-800 mb-2 flex items-center gap-1">
-                  <Icon name="lucide:Package" className="w-4 h-4" />
-                  Matières favorables
-                </h5>
-                <p className="text-sm text-blue-700">{sector.matiere}</p>
-              </div>
+          <CardHeader size="xs" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Activateurs de base */}
+            <div>
+              <h5 className="font-semibold  mb-2 flex items-center gap-1">
+                <Icon name="lucide:Sparkles" className="w-4 h-4" />
+                Activateurs naturels
+              </h5>
+              <ul className="space-y-1">
+                {sector.enhancers.map((enhancer: string, idx: number) => (
+                  <li key={idx} className="text-sm flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    {enhancer}
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Cycles des éléments */}
-            <div className="mt-4">
-              <h5 className="font-semibold text-blue-800 mb-2">Cycles des 5 éléments</h5>
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="text-center p-2 bg-green-100 rounded border border-green-300">
-                  <p className="font-medium text-green-800">Nourri par</p>
-                  <p className="text-green-700">{sector.nourisher}</p>
-                </div>
-                <div className="text-center p-2 bg-red-100 rounded border border-red-300">
-                  <p className="font-medium text-red-800">Contrôlé par</p>
-                  <p className="text-red-700">{sector.controller}</p>
-                </div>
-                <div className="text-center p-2 bg-orange-100 rounded border border-orange-300">
-                  <p className="font-medium text-orange-800">Affaibli par</p>
-                  <p className="text-orange-700">{sector.weakenedBy}</p>
-                </div>
+            {/* Matières favorables */}
+            <div>
+              <h5 className="font-semibold  mb-2 flex items-center gap-1">
+                <Icon name="lucide:Package" className="w-4 h-4" />
+                Matières favorables
+              </h5>
+              <p className="text-sm ">{sector.matiere}</p>
+            </div>
+          </CardHeader>
+          {/* Cycles des éléments */}
+          <CardContent size="xs">
+            <h5 className="font-semibold mb-2">Cycles des 5 éléments</h5>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="text-center p-2 bg-green-100 rounded border border-green-300">
+                <p className="font-medium text-green-800">Nourri par</p>
+                <p className="text-green-700">{sector.nourisher}</p>
+              </div>
+              <div className="text-center p-2 bg-red-100 rounded border border-red-300">
+                <p className="font-medium text-red-800">Contrôlé par</p>
+                <p className="text-red-700">{sector.controller}</p>
+              </div>
+              <div className="text-center p-2 bg-orange-100 rounded border border-orange-300">
+                <p className="font-medium text-orange-800">Affaibli par</p>
+                <p className="text-orange-700">{sector.weakenedBy}</p>
               </div>
             </div>
-          </div>
-
+          </CardContent>
           {/* Étoiles Volantes - Informations temporaires */}
           {sector.star && (
-            <div
-              className="p-4 rounded-lg border-2"
-              style={{
-                borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
-                backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
-              }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Icon
-                  name={sector.star.status === 'bonne' ? 'lucide:Star' : 'lucide:AlertTriangle'}
-                  className="w-5 h-5"
-                  style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
-                />
-                <h4
-                  className="font-bold"
-                  style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
-                >
-                  Étoile Volante 2025 ({sector.star.status})
-                </h4>
-              </div>
+            <CardFooter size="xs">
+              <div
+                className="p-4 rounded-lg border-2 w-full"
+                style={{
+                  borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
+                  backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
+                }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <Icon
+                    name={sector.star.status === 'bonne' ? 'lucide:Star' : 'lucide:AlertTriangle'}
+                    className="w-5 h-5"
+                    style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
+                  />
+                  <h4
+                    className="font-bold"
+                    style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
+                  >
+                    Étoile Volante 2025 ({sector.star.status})
+                  </h4>
+                </div>
 
-              <div className="mb-3">
-                <h5 className="font-semibold text-gray-800 mb-1">⭐ {sector.star.star}</h5>
-                {sector.star.element && (
-                  <p className="text-sm text-gray-600">Élément : {sector.star.element}</p>
+                <div className="mb-3">
+                  <h5 className="font-semibold text-gray-800 mb-1">⭐ {sector.star.star}</h5>
+                  {sector.star.element && (
+                    <p className="text-sm text-gray-600">Élément : {sector.star.element}</p>
+                  )}
+                </div>
+
+                {sector.star.remedies.length > 0 && (
+                  <div>
+                    <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+                      <Icon name="lucide:Shield" className="w-4 h-4" />
+                      Remèdes spécifiques 2025
+                    </h5>
+                    <ul className="space-y-1">
+                      {sector.star.remedies.map((remedy: string, idx: number) => (
+                        <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mt-2 flex-shrink-0" />
+                          {remedy}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
-
-              {sector.star.remedies.length > 0 && (
-                <div>
-                  <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-                    <Icon name="lucide:Shield" className="w-4 h-4" />
-                    Remèdes spécifiques 2025
-                  </h5>
-                  <ul className="space-y-1">
-                    {sector.star.remedies.map((remedy: string, idx: number) => (
-                      <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mt-2 flex-shrink-0" />
-                        {remedy}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+            </CardFooter>
           )}
-        </div>
+        </Card>
       )}
     </div>
   )

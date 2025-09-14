@@ -38,7 +38,7 @@ const CardinalPointsStep = () => {
   // Centre + rayon dynamiques (même base pour pastilles & lignes)
   const cx = box.w / 2
   const cy = box.h / 2
-  const radius = Math.max(Math.min(box.w, box.h) / 2 - (isMobile ? 20 : 40), 0) // marge visuelle
+  const radius = Math.max(Math.min(box.w, box.h) / 2 - (isMobile ? 20 : 10), 0) // marge visuelle
 
   // 💡 Petit fix hooks: déclare tes hooks AVANT tout "return" conditionnel dans StepContent.
   // Ex.: const [rotationAngle, setRotationAngle] = useState(...); puis if (!uploadData.file) return ...

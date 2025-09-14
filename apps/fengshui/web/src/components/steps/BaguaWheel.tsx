@@ -4,7 +4,6 @@
 import { Direction, DIRECTIONS } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { useId, useMemo, useRef, useState } from 'react'
-import BaguaSectorCard from '../BaguaSectorCard'
 
 type CardsMode = 'hover' | 'all'
 
@@ -129,7 +128,7 @@ export default function BaguaWheel({
 
   return (
     <div
-      className="mx-auto bg-white/70 backdrop-blur rounded-2xl shadow-xl border border-white/20 p-6"
+      className="mx-auto  backdrop-blur rounded-2xl shadow-xl border  p-6"
       style={{ width: size }}
     >
       <div
@@ -166,9 +165,10 @@ export default function BaguaWheel({
                   key={i}
                   d={sectorPath(start, end, r, cx, cy)}
                   fill="none"
-                  stroke="rgba(0,0,0,0.18)"
+                  stroke="currentColor"
                   strokeWidth={0.4}
                   strokeDasharray="2 3"
+                  className="text-foreground opacity-30"
                 />
               )
             })}
@@ -204,46 +204,7 @@ export default function BaguaWheel({
             })}
           </g>
         </svg>
-
-        {/* ====== CARTES ====== */}
-        {config && (
-          <>
-            {cardsMode === 'hover'
-              ? activeDir && (
-                  <BaguaSectorCard
-                    key={`card-${activeDir}`}
-                    dir={activeDir}
-                    cfg={config}
-                    xPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)]?.xPct || 0}
-                    yPct={cardPosGlobal[DIRECTIONS.indexOf(activeDir)]?.yPct || 0}
-                    offset={{ x: 0, y: 0 }}
-                    onMouseEnter={() => {
-                      /* ... */
-                    }}
-                    onMouseLeave={clearHoverSoon}
-                  />
-                )
-              : cardPosGlobal.map(({ dir, xPct, yPct }) => (
-                  <BaguaSectorCard
-                    key={`card-${dir}`}
-                    dir={dir}
-                    cfg={config}
-                    xPct={xPct}
-                    yPct={yPct}
-                    offset={{ x: 0, y: 0 }}
-                    onMouseEnter={() => {
-                      /* ... */
-                    }}
-                    onMouseLeave={clearHoverSoon}
-                  />
-                ))}
-          </>
-        )}
       </div>
-
-      <p className="mt-3 text-center text-sm text-gray-600">
-        Orientation : <strong>{Math.round(rot)}°</strong> depuis le Nord.
-      </p>
     </div>
   )
 }

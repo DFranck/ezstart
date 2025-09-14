@@ -6,8 +6,11 @@ import AnalysisStep from '@/components/steps/AnalysisStep'
 import CardinalPointsStep from '@/components/steps/CardinalPointsStep-v2'
 import UploadStep from '@/components/steps/UploadStep'
 import { Stepper } from '@ezstart/ui/components'
+import { useState } from 'react'
 
 export default function AnalyzePage() {
+  const [triggerPreview, setTriggerPreview] = useState(0)
+
   const steps = [
     {
       id: 'upload',
@@ -25,10 +28,11 @@ export default function AnalyzePage() {
     },
     {
       id: 'analysis',
-      title: 'Analyse',
-      icon: 'lucide:Map',
-      description: 'Exploration des secteurs',
-      component: <AnalysisStep />,
+      title: 'Résultats',
+      icon: 'lucide:Sparkles',
+      description: 'Votre analyse Feng Shui',
+      component: <AnalysisStep triggerPreview={triggerPreview} />,
+      isFinalStep: true, // Marque cette étape comme finale
     },
   ] as const
 
@@ -37,7 +41,9 @@ export default function AnalyzePage() {
   }
 
   const handleComplete = (allData: Record<string, unknown>) => {
-    console.log('Toutes les données:', allData)
+    console.log('✅ Analyse terminée! Données collectées:', allData)
+    // Déclencher l'ouverture du preview PDF avec un compteur pour forcer le re-trigger
+    setTriggerPreview(prev => prev + 1)
   }
 
   return (

@@ -85,7 +85,8 @@ export function Stepper({
       setCompletedSteps(prev => new Set([...prev, currentStep]))
       goToStep(currentStep + 1)
     } else {
-      // Dernière étape, appeler onComplete
+      // Dernière étape, marquer comme complétée et appeler onComplete
+      setCompletedSteps(prev => new Set([...prev, currentStep]))
       onComplete?.(stepData)
     }
   }
@@ -197,6 +198,7 @@ function StepperHeader({
       >
         {steps.map((step, index) => {
           const isActive = index === currentStep
+          const isLastStep = index === steps.length - 1
           const isCompleted = isStepCompleted(index)
           const isAccessible = isStepAccessible(index)
 
