@@ -17,8 +17,20 @@ type Props = {
 export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingFromNorth }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const baguaRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const generatePDF = async () => {
     try {
@@ -201,6 +213,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
       // Add the captured image - TAILLE MAXIMALE sur la page PDF avec qualité optimale
       const imgData = combinedCanvas.toDataURL('image/png', 1.0) // Qualité PNG maximale
+
+      // Sauvegarder l'image pour le preview desktop (évite double scrollbar iframe)
+      setPreviewImageUrl(imgData)
+
       // Utiliser quasiment toute la largeur A4 avec marges
       const maxWidth = 190 // 210mm - 40mm de marges (20mm de chaque côté)
       const imgWidth = maxWidth
@@ -263,6 +279,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
     if (!isOpen && pdfUrl) {
       URL.revokeObjectURL(pdfUrl)
       setPdfUrl(null)
+      setPreviewImageUrl(null) // Nettoyer aussi l'image de preview
     }
   }, [isOpen, pdfUrl])
 
@@ -460,17 +477,72 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
             })}
         </div>
 
-        {/* PDF Preview si généré */}
-        {pdfUrl && (
-          <div className="w-full mt-4 overflow-auto" style={{ aspectRatio: '210/297' }}>
-            <iframe
-              src={pdfUrl}
-              className="w-full h-full border border-gray-200 rounded-lg shadow-inner"
-              title="Aperçu PDF Bagua"
-              style={{ minHeight: '300px', maxHeight: '70vh' }}
-            />
-          </div>
-        )}
+        {/* PDF Preview ou Loader */}
+        <div className="w-full mt-4">
+          {isGenerating ? (
+            // Loader pendant génération (tous devices)
+            <div className="border border-gray-200 rounded-lg p-8 bg-gradient-to-br from-blue-50 to-indigo-50 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <Icon name="lucide:FileText" className="w-16 h-16 text-blue-600 animate-pulse" />
+                  <div className="absolute -top-1 -right-1">
+                    <Icon name="lucide:Loader2" className="w-6 h-6 text-blue-500 animate-spin" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Capture haute résolution de votre analyse Feng Shui
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : pdfUrl ? (
+            // PDF généré
+            <>
+              {isMobile ? (
+                // Mobile: Message informatif car les iframes PDF ne marchent pas
+                <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 text-center">
+                  <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
+                  <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    L'aperçu n'est pas disponible sur mobile, mais votre PDF est prêt à être téléchargé.
+                  </p>
+                  <div className="text-xs text-gray-500">
+                    Taille : ~{(pdfUrl.length * 0.75 / 1024 / 1024).toFixed(1)} MB
+                  </div>
+                </div>
+              ) : (
+                // Desktop: Preview image propre (sans double scrollbar)
+                <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
+                    Aperçu de votre analyse Feng Shui
+                  </h4>
+                  {previewImageUrl ? (
+                    <div className="flex justify-center">
+                      <img
+                        src={previewImageUrl}
+                        alt="Aperçu PDF Bagua"
+                        className="max-w-full h-auto rounded-lg shadow-lg"
+                        style={{ maxHeight: '60vh' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-64 text-gray-500">
+                      <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
+                      <span>Preview en cours de chargement...</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          ) : null}
+        </div>
       </div>
     </Modal>
   )
