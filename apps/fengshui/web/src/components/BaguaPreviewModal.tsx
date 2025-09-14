@@ -25,7 +25,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
   // Détection mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+      setIsMobile(
+        window.innerWidth <= 768 ||
+          /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
@@ -73,7 +76,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         width: captureSize,
         height: captureSize,
         bgcolor: '#ffffff', // Fond blanc propre
-        pixelRatio: 2, // Force haute résolution
         style: {
           transform: `scale(${scaleFactor})`,
           transformOrigin: 'top left',
@@ -155,7 +157,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const cardsDataUrl = await domtoimage.toPng(cardsRef.current, {
         quality: 1,
         bgcolor: 'transparent',
-        pixelRatio: 2, // Haute résolution pour les cartes aussi
         width: 800 * 2, // Taille du conteneur * 2
         height: 800 * 2,
         style: {
@@ -326,7 +327,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         {/* BaguaWheel MASQUÉ pour capture PDF uniquement */}
         <div
           ref={baguaRef}
-          className="bg-white rounded-2xl  shadow-lg"
           style={{
             width: 'fit-content',
             minWidth: '600px',
@@ -496,8 +496,14 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   </p>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.1s' }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -511,10 +517,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
                   <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    L'aperçu n'est pas disponible sur mobile, mais votre PDF est prêt à être téléchargé.
+                    L'aperçu n'est pas disponible sur mobile, mais votre PDF est prêt à être
+                    téléchargé.
                   </p>
                   <div className="text-xs text-gray-500">
-                    Taille : ~{(pdfUrl.length * 0.75 / 1024 / 1024).toFixed(1)} MB
+                    Taille : ~{((pdfUrl.length * 0.75) / 1024 / 1024).toFixed(1)} MB
                   </div>
                 </div>
               ) : (
