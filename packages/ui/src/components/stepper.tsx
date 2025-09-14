@@ -145,7 +145,7 @@ export function Stepper({
         />
         <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
           {/* Contenu de l'étape actuelle */}
-          <div className="py-6">{children || steps[currentStep]?.component}</div>
+          <div className="py-6 px-2 md:px-6">{children || steps[currentStep]?.component}</div>
 
           {/* Navigation */}
           <StepperNavigation

@@ -5,10 +5,10 @@ import { getCroppedImg } from '@/utils/image'
 import { Button, Icon, Input } from '@ezstart/ui/components'
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import Cropper from 'react-easy-crop'
+import Cropper, { Area } from 'react-easy-crop'
 
 /* ------------------------------------------------------------------------------------------
- * Types
+ * Types (kept scale/position for backward-compat with parent onPlanUpload signature)
  * ----------------------------------------------------------------------------------------*/
 type Transformations = {
   rotation: number
@@ -23,35 +23,32 @@ interface PlanUploaderProps {
   onEditingChange?: (isEditing: boolean) => void
   className?: string
 }
+const MIN_W = 50
+const MAX_W = 800
+const MIN_H = 50
+const MAX_H = 400
 
 type CropPixels = { width: number; height: number; x: number; y: number }
 
 /* ------------------------------------------------------------------------------------------
- * Component
+ * Component (MINIMAL)
  * ----------------------------------------------------------------------------------------*/
 export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: PlanUploaderProps) {
-  // Fichier & preview
+  // File & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
 
-  // États simplifiés pour l'édition
+  // Minimal editing state
   const [isEditing, setIsEditing] = useState(false)
-  const [rotation, setRotation] = useState(0)
-  const [zoom, setZoom] = useState(1)
+  const [rotation, setRotation] = useState<number>(0)
+  const [zoom, setZoom] = useState<number>(1)
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropPixels | null>(null)
 
-  // Contrôle de la taille du crop
-  const [cropWidth, setCropWidth] = useState(300)
-  const [cropHeight, setCropHeight] = useState(200)
+  // Only width/height controls for the crop area
+  const [cropWidth, setCropWidth] = useState<number>(300)
+  const [cropHeight, setCropHeight] = useState<number>(200)
 
-  // Fonction pour ajuster automatiquement le crop aux bords
-  const fitToBounds = () => {
-    setZoom(1)
-    setCrop({ x: 0, y: 0 })
-  }
-
-  // DnD
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
@@ -73,16 +70,17 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
         }
         reader.readAsDataURL(file)
       } else {
-        // PDF: pas d'édition image; on passe direct au parent
-        setPreview('/api/pdf-preview')
-        onPlanUpload(file, '/api/pdf-preview', {
+        // PDFs: no image editing; pass straight to parent
+        const pdfPreview = '/api/pdf-preview'
+        setPreview(pdfPreview)
+        onPlanUpload(file, pdfPreview, {
           rotation: 0,
           scale: 1,
           position: { x: 0, y: 0 },
         })
       }
     },
-    [onPlanUpload]
+    [onPlanUpload, onEditingChange]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -105,8 +103,9 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
     setCroppedAreaPixels(null)
   }
 
-  const onCropComplete = useCallback((_area: unknown, areaPx: CropPixels) => {
-    setCroppedAreaPixels(areaPx)
+  const onCropComplete = useCallback((_area: Area, areaPx: Area) => {
+    // react-easy-crop's Area = { x,y,width,height }
+    setCroppedAreaPixels(areaPx as CropPixels)
   }, [])
 
   const handleApply = useCallback(async () => {
@@ -117,13 +116,15 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
     setUploadedFile(outFile)
     setPreview(dataUrl)
     setIsEditing(false)
+    onEditingChange?.(false)
 
+    // reset transient edit state
     setRotation(0)
     setZoom(1)
     setCrop({ x: 0, y: 0 })
 
     onPlanUpload(outFile, dataUrl, {
-      rotation: 0,
+      rotation,
       scale: 1,
       position: { x: 0, y: 0 },
       crop: {
@@ -134,7 +135,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
       },
       zoom,
     })
-  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload])
+  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange])
 
   const handleCancel = () => {
     setRotation(0)
@@ -147,226 +148,209 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
   const isImage = Boolean(uploadedFile && uploadedFile.type.startsWith('image/'))
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={className}>
       {!uploadedFile ? (
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
             isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
           }`}
-          aria-label="Zone de dépôt de fichier"
+          aria-label="Dropzone"
         >
-          <input {...getInputProps()} aria-label="Sélection de fichier" />
-          <div className="flex flex-col items-center space-y-4">
-            <div className="flex space-x-2">
+          <input {...getInputProps()} aria-label="Select file" />
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex gap-2">
               <Icon name="lucide:FileImage" className="w-8 h-8 text-gray-400" />
               <Icon name="lucide:FileText" className="w-8 h-8 text-gray-400" />
             </div>
-            <div>
-              <p className="text-lg font-medium text-gray-700">
-                {isDragActive ? 'Déposez votre plan ici' : 'Glissez-déposez votre plan'}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">ou cliquez pour sélectionner un fichier</p>
-            </div>
-            <div className="text-xs text-gray-400">Formats acceptés : JPG, PNG, GIF, PDF</div>
+            <p className="text-gray-700 font-medium">
+              {isDragActive ? 'Drop your plan here' : 'Drag & drop your plan'}
+            </p>
+            <p className="text-sm text-gray-500">…or click to select a file</p>
+            <p className="text-xs text-gray-400">Accepted: JPG, PNG, GIF, PDF</p>
           </div>
         </div>
       ) : (
-        <div className="relative">
-          <div className="border rounded-lg p-4 bg-gray-50">
-            {/* En-tête fichier */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                {isImage ? (
-                  <Icon name="lucide:FileImage" className="w-6 h-6 text-blue-500" />
-                ) : (
-                  <Icon name="lucide:FileText" className="w-6 h-6 text-red-500" />
-                )}
-                <div>
-                  <p className="font-medium text-gray-700">{uploadedFile?.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {uploadedFile ? (uploadedFile.size / 1024 / 1024).toFixed(2) : '0.00'} MB
-                  </p>
+        <div className="border rounded-lg p-4 bg-white">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              {isImage ? (
+                <Icon name="lucide:FileImage" className="w-5 h-5 text-blue-500" />
+              ) : (
+                <Icon name="lucide:FileText" className="w-5 h-5 text-red-500" />
+              )}
+              <div>
+                <div className="font-medium text-gray-800">{uploadedFile?.name}</div>
+                <div className="text-xs text-gray-500">
+                  {(uploadedFile?.size ? uploadedFile.size / 1024 / 1024 : 0).toFixed(2)} MB
                 </div>
               </div>
-              <Button
-                onClick={removeFile}
-                variant="ghost"
-                size="sm"
-                className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                aria-label="Retirer le fichier"
-                type="button"
-              >
-                <Icon name="lucide:X" className="w-5 h-5 text-gray-500" />
-              </Button>
             </div>
-
-            {/* ÉDITEUR IMAGE SIMPLIFIÉ */}
-            {preview && isImage && (
-              <div className="space-y-4">
-                {/* Viewer */}
-                <div
-                  className="relative w-full overflow-hidden rounded border bg-white"
-                  style={{ height: 420 }}
-                >
-                  <Cropper
-                    image={preview}
-                    crop={crop}
-                    zoom={zoom}
-                    rotation={rotation}
-                    aspect={undefined}
-                    cropSize={{ width: cropWidth, height: cropHeight }}
-                    restrictPosition={false}
-                    onCropChange={setCrop}
-                    onZoomChange={setZoom}
-                    onRotationChange={setRotation}
-                    onCropComplete={onCropComplete}
-                    objectFit="contain"
-                    showGrid
-                  />
-                  <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                    Ajustez votre plan
-                  </div>
-                </div>
-
-                {/* Contrôles simplifiés */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Zoom */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Icon name="lucide:ZoomIn" className="w-4 h-4" />
-                        Zoom
-                      </h3>
-                      <input
-                        type="range"
-                        min={1}
-                        max={3}
-                        step={0.1}
-                        value={zoom}
-                        onChange={e => setZoom(Number(e.target.value))}
-                        className="w-full"
-                      />
-                      <div className="text-center text-sm text-gray-600 mt-2">
-                        {zoom.toFixed(1)}x
-                      </div>
-                    </div>
-
-                    {/* Rotation */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                        Rotation
-                      </h3>
-                      <div className="flex items-center justify-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setRotation(r => r - 90)}
-                          type="button"
-                        >
-                          <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                        </Button>
-                        <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">
-                          {rotation}°
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setRotation(r => r + 90)}
-                          type="button"
-                        >
-                          <Icon name="lucide:RotateCw" className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contrôles de taille du rectangle */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Largeur du rectangle */}
-                    <div className="bg-yellow-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Icon name="lucide:ArrowLeftRight" className="w-4 h-4" />
-                        Largeur du rectangle
-                      </h3>
-                      <input
-                        type="range"
-                        min={50}
-                        max={800}
-                        step={10}
-                        value={cropWidth}
-                        onChange={e => setCropWidth(Number(e.target.value))}
-                        className="w-full mb-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          className="w-20 text-sm"
-                          value={cropWidth}
-                          onChange={e => setCropWidth(Number(e.target.value) || 50)}
-                          min={50}
-                          max={800}
-                        />
-                        <span className="text-xs text-gray-600">px</span>
-                      </div>
-                    </div>
-
-                    {/* Hauteur du rectangle */}
-                    <div className="bg-yellow-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <Icon name="lucide:ArrowUpDown" className="w-4 h-4" />
-                        Hauteur du rectangle
-                      </h3>
-                      <input
-                        type="range"
-                        min={50}
-                        max={400}
-                        step={10}
-                        value={cropHeight}
-                        onChange={e => setCropHeight(Number(e.target.value))}
-                        className="w-full mb-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          className="w-20 text-sm"
-                          value={cropHeight}
-                          onChange={e => setCropHeight(Number(e.target.value) || 50)}
-                          min={50}
-                          max={400}
-                        />
-                        <span className="text-xs text-gray-600">px</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <Button onClick={handleApply} className="flex-1" type="button">
-                    <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
-                    Valider le crop
-                  </Button>
-                  <Button variant="outline" onClick={handleCancel} type="button">
-                    <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-                    Annuler
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* PDF */}
-            {uploadedFile?.type === 'application/pdf' && (
-              <div className="flex items-center justify-center h-64 bg-gray-100 rounded border">
-                <div className="text-center">
-                  <Icon name="lucide:FileText" className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">PDF chargé</p>
-                  <p className="text-sm text-gray-500">{uploadedFile?.name}</p>
-                </div>
-              </div>
-            )}
+            <Button
+              onClick={removeFile}
+              variant="ghost"
+              size="sm"
+              className="p-1"
+              aria-label="Remove file"
+              type="button"
+            >
+              <Icon name="lucide:X" className="w-5 h-5 text-gray-500" />
+            </Button>
           </div>
+
+          {/* Image editor (minimal) */}
+          {preview && isImage && (
+            <div className="space-y-4">
+              <div
+                className="relative w-full overflow-hidden rounded border"
+                style={{ height: 420 }}
+              >
+                <Cropper
+                  image={preview}
+                  crop={crop}
+                  zoom={zoom}
+                  rotation={rotation}
+                  aspect={undefined}
+                  cropSize={{ width: cropWidth, height: cropHeight }}
+                  restrictPosition={false}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onRotationChange={setRotation}
+                  onCropComplete={onCropComplete}
+                  objectFit="contain"
+                  showGrid={false}
+                />
+              </div>
+
+              {/* Controls: ONLY zoom, rotation, width, height */}
+              {/* Controls: ONLY zoom, rotation, width, height */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Zoom */}
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-gray-700 w-24">Zoom</label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    value={zoom}
+                    onChange={e => setZoom(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</span>
+                </div>
+
+                {/* Rotation */}
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-gray-700 w-24">Rotation</label>
+                  <input
+                    type="range"
+                    min={-180}
+                    max={180}
+                    step={1}
+                    value={rotation}
+                    onChange={e => setRotation(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <span className="text-xs w-12 text-right">{rotation}°</span>
+                </div>
+
+                {/* Width (slider + number) */}
+                <div className="flex items-center gap-3">
+                  <label htmlFor="crop-width" className="text-sm text-gray-700 w-24">
+                    Width
+                  </label>
+                  <input
+                    type="range"
+                    min={MIN_W}
+                    max={MAX_W}
+                    step={10}
+                    value={cropWidth}
+                    onChange={e =>
+                      setCropWidth(
+                        Math.max(MIN_W, Math.min(MAX_W, Number(e.target.value) || MIN_W))
+                      )
+                    }
+                    className="flex-1"
+                    aria-label="Crop width"
+                  />
+                  <Input
+                    id="crop-width"
+                    type="number"
+                    className="w-24 text-sm"
+                    value={cropWidth}
+                    onChange={e =>
+                      setCropWidth(
+                        Math.max(MIN_W, Math.min(MAX_W, Number(e.target.value) || MIN_W))
+                      )
+                    }
+                    min={MIN_W}
+                    max={MAX_W}
+                  />
+                  <span className="text-xs text-gray-600">px</span>
+                </div>
+
+                {/* Height (slider + number) */}
+                <div className="flex items-center gap-3">
+                  <label htmlFor="crop-height" className="text-sm text-gray-700 w-24">
+                    Height
+                  </label>
+                  <input
+                    type="range"
+                    min={MIN_H}
+                    max={MAX_H}
+                    step={10}
+                    value={cropHeight}
+                    onChange={e =>
+                      setCropHeight(
+                        Math.max(MIN_H, Math.min(MAX_H, Number(e.target.value) || MIN_H))
+                      )
+                    }
+                    className="flex-1"
+                    aria-label="Crop height"
+                  />
+                  <Input
+                    id="crop-height"
+                    type="number"
+                    className="w-24 text-sm"
+                    value={cropHeight}
+                    onChange={e =>
+                      setCropHeight(
+                        Math.max(MIN_H, Math.min(MAX_H, Number(e.target.value) || MIN_H))
+                      )
+                    }
+                    min={MIN_H}
+                    max={MAX_H}
+                  />
+                  <span className="text-xs text-gray-600">px</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <Button onClick={handleApply} className="flex-1" type="button">
+                  <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
+                  Apply
+                </Button>
+                <Button variant="outline" onClick={handleCancel} type="button">
+                  <Icon name="lucide:X" className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* PDF preview (minimal) */}
+          {uploadedFile?.type === 'application/pdf' && (
+            <div className="flex items-center justify-center h-56 bg-gray-50 rounded border">
+              <div className="text-center">
+                <Icon name="lucide:FileText" className="w-14 h-14 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-700">PDF loaded</p>
+                <p className="text-xs text-gray-500">{uploadedFile?.name}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

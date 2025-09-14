@@ -38,10 +38,14 @@ const UploadStep = () => {
         const [isEditing, setIsEditing] = useState(false)
 
         const hasUploadedContent = !!(data?.file || data?.preview) || isEditing
+        const isReturningToStep = !!(data?.file || data?.preview) && !isEditing
 
         return (
           <div className="mx-auto w-full max-w-2xl ">
-            <div className={cn('mb-6 sm:mb-8', { hidden: hasUploadedContent })}>
+            {/* Header initial - masqué pendant l'upload/crop */}
+            <div
+              className={cn('mb-6 sm:mb-8', { hidden: hasUploadedContent && !isReturningToStep })}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary grid place-items-center shadow-sm">
                   <Icon
