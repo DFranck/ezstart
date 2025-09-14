@@ -110,11 +110,21 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
     notes: !!sector.notes,
   }
 
+  // Utiliser le gradient si colorHexes existe, sinon couleur simple
+  const hasGradient = sector.colorHexes && sector.colorHexes.length > 1
+
   return (
-    <div
-      className="bg-card backdrop-blur rounded-xl sm:rounded-2xl border border-border shadow-sm hover:shadow-md transition-all"
-      style={{ borderTopColor: accent, borderTopWidth: '3px' }}
-    >
+    <div className="relative bg-card backdrop-blur rounded-xl sm:rounded-2xl border border-border shadow-sm hover:shadow-md transition-all overflow-hidden">
+      {/* Barre de gradient en haut */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[5px]"
+        style={{
+          background: hasGradient
+            ? `linear-gradient(90deg, ${sector.colorHexes.join(', ')})`
+            : accent,
+        }}
+      />
+      <div className="pt-[5px]">
       {/* Header cliquable */}
       <Button
         onClick={onToggle}
@@ -203,7 +213,7 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
               <ul className="space-y-1">
                 {sector.enhancers.map((enhancer: string, idx: number) => (
                   <li key={idx} className="text-sm flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted mt-2 flex-shrink-0" />
                     {enhancer}
                   </li>
                 ))}
@@ -289,6 +299,7 @@ function SectorCard({ direction, sector, accent, isExpanded, onToggle }: SectorC
           )}
         </Card>
       )}
+      </div>
     </div>
   )
 }
