@@ -68,9 +68,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
           </div>
         }
       />
-      <Main withHeaderOffset={position === 'fixed' || position === 'sticky' ? true : false}>
-        {children}
-      </Main>
+      <Main>{children}</Main>
     </>
   )
 }

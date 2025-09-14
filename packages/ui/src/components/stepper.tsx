@@ -117,7 +117,7 @@ export function Stepper({
     // Permettre la navigation vers les étapes précédentes ou complétées
     return stepIndex <= currentStep || isStepCompleted(stepIndex)
   }
-
+  const isTop = useOnScroll() === 0
   const contextValue: StepperContextType = {
     currentStep,
     steps,
@@ -146,7 +146,9 @@ export function Stepper({
         />
         <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
           {/* Contenu de l'étape actuelle */}
-          <div className="py-6 px-2">{children || steps[currentStep]?.component}</div>
+          <div className={cn(`py-6 px-2 ${withHeaderOffset && 'pt-24'}`)}>
+            {children || steps[currentStep]?.component}
+          </div>
 
           {/* Navigation */}
           <StepperNavigation
