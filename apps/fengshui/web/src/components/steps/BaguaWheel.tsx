@@ -70,7 +70,12 @@ export default function BaguaWheel({
   const r = radiusPct
 
   const rot = useMemo(
-    () => (((bearingFromNorth % 360) + 360) % 360) + (config?.rotationOffsetDeg ?? 0),
+    () => {
+      // Si bearingFromNorth = 45° (Nord à 45° sur l'écran),
+      // on doit tourner l'overlay de -45° pour remettre le Nord à sa place dans la wheel
+      const rotation = (-bearingFromNorth + 90) + (config?.rotationOffsetDeg ?? 0)  // +90 pour ajustement de base
+      return ((rotation % 360) + 360) % 360
+    },
     [bearingFromNorth, config?.rotationOffsetDeg]
   )
 

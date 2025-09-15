@@ -22,12 +22,14 @@ import { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
 import BaguaWheel from './BaguaWheel'
+import BaguaGrid from './BaguaGrid'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
   const { isMobile } = useDevice()
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [visualizationMode, setVisualizationMode] = useState<'wheel' | 'grid'>('wheel')
 
   useEffect(() => {
     loadBaguaConfig(2025, 'fr-FR').then(setCfg).catch(console.error)
@@ -148,22 +150,55 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     <span>Aperçu PDF</span>
                   </Button>
                 </div>
+
+                {/* Toggle visualisation */}
+                <div className="flex gap-1 mt-3 p-1 bg-muted rounded-lg">
+                  <Button
+                    onClick={() => setVisualizationMode('wheel')}
+                    variant={visualizationMode === 'wheel' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Icon name="lucide:CircleDot" className="w-4 h-4" />
+                    Roue
+                  </Button>
+                  <Button
+                    onClick={() => setVisualizationMode('grid')}
+                    variant={visualizationMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Icon name="lucide:Grid3X3" className="w-4 h-4" />
+                    Grille
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Colonne gauche : Roue Bagua */}
+              {/* Colonne gauche : Visualization Bagua */}
               <div className="lg:col-span-1">
                 <div className="sticky top-36">
                   <div ref={containerRef}>
-                    <BaguaWheel
-                      src={uploadData.preview!}
-                      bearingFromNorth={bearingFromNorth}
-                      size={Math.min(wheelSize, 400)}
-                      config={cfg || undefined}
-                      labelOffset={8}
-                      cardsMode="hover"
-                      cardsRadiusPct={50}
-                    />
+                    {visualizationMode === 'wheel' ? (
+                      <BaguaWheel
+                        src={uploadData.preview!}
+                        bearingFromNorth={bearingFromNorth}
+                        size={Math.min(wheelSize, 400)}
+                        config={cfg || undefined}
+                        labelOffset={8}
+                        cardsMode="hover"
+                        cardsRadiusPct={50}
+                      />
+                    ) : (
+                      <BaguaGrid
+                        src={uploadData.preview!}
+                        bearingFromNorth={bearingFromNorth}
+                        size={Math.min(wheelSize, 400)}
+                        config={cfg || undefined}
+                        cardsMode="hover"
+                        transformations={uploadData.transformations}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

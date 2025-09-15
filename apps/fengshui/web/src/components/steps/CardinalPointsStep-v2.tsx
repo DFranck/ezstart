@@ -63,26 +63,28 @@ const CardinalPointsStep = () => {
           )
         }
 
-        // rotationAngle = angle "écran" (0° = Est)
+        // rotationAngle = angle "écran" (0° par défaut, car cardinalPoints.N = -90°)
         const [rotationAngle, setRotationAngle] = useState<number>(data.rotationAngle ?? 0)
 
         const handleRotate = (newAngle: number) => {
           const norm = ((newAngle % 360) + 360) % 360
           setRotationAngle(norm)
-          const bearingFromNorth = (norm + 90) % 360 // conversion Est→Nord
-          updateData({ rotationAngle: norm, bearingFromNorth })
+          // LOGIQUE SIMPLE: l'angle écran = bearing depuis le Nord
+          // Si Nord à 45° sur écran → bearing = 45° depuis le Nord
+          // Pas de conversion compliquée
+          updateData({ rotationAngle: norm, bearingFromNorth: norm })
         }
 
         const resetRotation = () => {
-          setRotationAngle(0)
-          updateData({ rotationAngle: 0, bearingFromNorth: 90 }) // 0° Est → 90° depuis le Nord
+          setRotationAngle(0) // Position par défaut : Nord en haut
+          updateData({ rotationAngle: 0, bearingFromNorth: 0 }) // bearing = 0 pour Nord en haut
         }
 
         const cardinalPoints = [
-          { direction: 'N', angle: 0, label: 'Nord' },
-          { direction: 'E', angle: 90, label: 'Est' },
-          { direction: 'S', angle: 180, label: 'Sud' },
-          { direction: 'O', angle: 270, label: 'Ouest' },
+          { direction: 'N', angle: -90, label: 'Nord' },    // Nord en haut (270° ou -90°)
+          { direction: 'E', angle: 0, label: 'Est' },       // Est à droite (0°)
+          { direction: 'S', angle: 90, label: 'Sud' },      // Sud en bas (90°)
+          { direction: 'O', angle: 180, label: 'Ouest' },   // Ouest à gauche (180°)
         ] as const
 
         return (
