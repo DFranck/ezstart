@@ -126,16 +126,10 @@ export default function BaguaGrid({
               return (
                 <div
                   key={direction}
-                  className="relative cursor-pointer transition-all duration-200 border"
+                  className="relative cursor-pointer transition-all duration-200 border border-white/30 bg-black/10 hover:bg-white/20 hover:border-white/50"
                   style={{
                     gridRow: position.row + 1,
                     gridColumn: position.col + 1,
-                    backgroundColor: isActive ? `${sector.color}30` : 'rgba(0,0,0,0.1)',
-                    borderColor: isActive
-                      ? sector.color
-                      : isHovered
-                        ? sector.color
-                        : 'rgba(255,255,255,0.3)',
                   }}
                   onMouseEnter={() => setHoverSector(direction)}
                   onMouseLeave={() => {
