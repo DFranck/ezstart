@@ -192,6 +192,18 @@ export default function BaguaWheel({
               )
             })}
 
+            {/* Zone cliquable pour le centre */}
+            {onSectorClick && (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r * 0.3} // Rayon du centre (30% du rayon total)
+                fill="transparent"
+                className="cursor-pointer hover:fill-primary/10 transition-colors"
+                onClick={() => onSectorClick('C')}
+              />
+            )}
+
             {/* Labels interactifs */}
             {DIRECTIONS.map((dir: Direction, i) => {
               const { a, tx, ty } = labelPos(i)
