@@ -17,6 +17,8 @@ type BaguaGridProps = {
   cardsMode?: CardsMode
   /** Transformations du crop pour adapter la forme */
   transformations?: Transformations
+  /** Callback appelé quand on clique sur un secteur */
+  onSectorClick?: (direction: Direction) => void
 }
 
 // Mapping des directions vers les positions de la grille 3x3 (position de base, avant rotation)
@@ -56,7 +58,6 @@ function getGridPositionForDirection(direction: Direction, rotation: number) {
   const rotatedIndex = (baseIndex + rotationSteps) % 8
   const rotatedDirection = DIRECTIONS[rotatedIndex]
 
-
   return GRID_POSITIONS_BASE[rotatedDirection as Direction]
 }
 
@@ -80,6 +81,7 @@ export default function BaguaGrid({
   config,
   cardsMode = 'hover',
   transformations,
+  onSectorClick,
 }: BaguaGridProps) {
   const [hoverSector, setHoverSector] = useState<Direction | null>(null)
   const [pinnedSector, setPinnedSector] = useState<Direction | null>(null)
@@ -101,20 +103,15 @@ export default function BaguaGrid({
       <div className="relative">
         {/* Plan en taille maximale avec ratio conservé */}
         <div className="w-full relative overflow-hidden">
-          <img
-            src={src}
-            alt="Plan Bagua"
-            className="w-full h-auto object-contain"
-          />
+          <img src={src} alt="Plan Bagua" className="w-full h-auto object-contain" />
 
           {/* Grille 3x3 overlay absolute */}
           <div
-            className="absolute inset-0 grid grid-cols-3 gap-1"
+            className="absolute inset-0 grid grid-cols-3"
             onMouseLeave={() => {
               if (!pinnedSector) setHoverSector(null)
             }}
           >
-
             {/* Secteurs interactifs avec positions rotées */}
             {DIRECTIONS_WITH_CENTER.map(direction => {
               const position = getGridPositionForDirection(direction, rotation)
@@ -126,22 +123,32 @@ export default function BaguaGrid({
               const isActive = activeSector === direction
               const isHovered = hoverSector === direction
 
-
               return (
                 <div
                   key={direction}
-                  className="relative cursor-pointer transition-all duration-200 border-2 bg-black/10"
+                  className="relative cursor-pointer transition-all duration-200 border"
                   style={{
                     gridRow: position.row + 1,
                     gridColumn: position.col + 1,
                     backgroundColor: isActive ? `${sector.color}30` : 'rgba(0,0,0,0.1)',
-                    borderColor: isActive ? sector.color : isHovered ? sector.color : 'rgba(255,255,255,0.3)',
+                    borderColor: isActive
+                      ? sector.color
+                      : isHovered
+                        ? sector.color
+                        : 'rgba(255,255,255,0.3)',
                   }}
                   onMouseEnter={() => setHoverSector(direction)}
                   onMouseLeave={() => {
                     if (!pinnedSector) setHoverSector(null)
                   }}
-                  onClick={() => setPinnedSector(curr => (curr === direction ? null : direction))}
+                  onClick={() => {
+                    // Si on a un callback externe, l'utiliser au lieu du comportement par défaut
+                    if (onSectorClick) {
+                      onSectorClick(direction)
+                    } else {
+                      setPinnedSector(curr => (curr === direction ? null : direction))
+                    }
+                  }}
                 >
                   {/* Label direction top-left */}
                   <div

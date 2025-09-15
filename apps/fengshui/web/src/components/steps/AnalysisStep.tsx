@@ -3,6 +3,7 @@
 
 import { loadBaguaConfig } from '@/config/loadBaguaConfig'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
+import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import {
   Button,
@@ -16,13 +17,13 @@ import {
   StepContent,
   useStepper,
 } from '@ezstart/ui/components'
-import { cn } from '@ezstart/ui/lib'
 import { useDevice } from '@ezstart/ui/hooks'
-import { useEffect, useRef, useState } from 'react'
+import { cn } from '@ezstart/ui/lib'
+import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
-import BaguaWheel from './BaguaWheel'
 import BaguaGrid from './BaguaGrid'
+import BaguaWheel from './BaguaWheel'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
   const { isMobile } = useDevice()
@@ -30,6 +31,19 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [visualizationMode, setVisualizationMode] = useState<'wheel' | 'grid'>('wheel')
+  const [expandedSectors, setExpandedSectors] = useState<Set<Direction>>(new Set())
+
+  // Refs pour scroll vers les secteurs
+  const sectorRefs = useRef<Record<Direction, React.RefObject<HTMLDivElement>>>({} as any)
+
+  // Initialiser les refs pour chaque secteur
+  useEffect(() => {
+    const refs: Record<Direction, React.RefObject<HTMLDivElement>> = {} as any
+    DIRECTIONS_WITH_CENTER.forEach(dir => {
+      refs[dir] = React.createRef()
+    })
+    sectorRefs.current = refs
+  }, [])
 
   useEffect(() => {
     loadBaguaConfig(2025, 'fr-FR').then(setCfg).catch(console.error)
@@ -70,6 +84,26 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
     }
   }
 
+  // Fonction pour gérer le clic sur un secteur dans la grid
+  const handleSectorClick = (direction: Direction) => {
+    // Fermer tous les autres et ouvrir seulement celui-ci
+    setExpandedSectors(new Set([direction]))
+
+    // Toujours scroller vers le secteur
+    setTimeout(() => {
+      const ref = sectorRefs.current[direction]
+      if (ref?.current) {
+        // Scroll avec offset pour voir le bouton et le début du contenu
+        const rect = ref.current.getBoundingClientRect()
+        const offset = 150 // Espace au-dessus du bouton
+        window.scrollTo({
+          top: window.scrollY + rect.top - offset,
+          behavior: 'smooth',
+        })
+      }
+    }, 100) // Petit délai pour l'animation d'ouverture
+  }
+
   // Ouvrir le preview toujours (besoin de la roue pour PDF)
   useEffect(() => {
     if (triggerPreview && triggerPreview > 0 && cfg) {
@@ -89,7 +123,6 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
         // On consomme UNIQUEMENT le bearing calculé en step 2
         const rotationAngle = cardinalData.rotationAngle ?? 0
         const bearingFromNorth = cardinalData.bearingFromNorth ?? (rotationAngle + 90) % 360
-
 
         // Fonction pour ouvrir preview (toujours modal, responsive)
         const handleOpenPreview = () => {
@@ -198,6 +231,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                         config={cfg || undefined}
                         cardsMode="hover"
                         transformations={uploadData.transformations}
+                        onSectorClick={handleSectorClick}
                       />
                     )}
                   </div>
@@ -206,7 +240,12 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
 
               {/* Colonne droite : Orientations détaillées */}
               <div className="lg:col-span-2">
-                <BaguaOrientationsGrid config={cfg || undefined} />
+                <BaguaOrientationsGrid
+                  config={cfg || undefined}
+                  expandedSectors={expandedSectors}
+                  onToggleSector={handleSectorClick}
+                  sectorRefs={sectorRefs.current}
+                />
               </div>
             </div>
 
