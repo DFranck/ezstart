@@ -10,7 +10,7 @@ type Props = {
   config?: YearBaguaConfig
   expandedSectors?: Set<Direction>
   onToggleSector?: (dir: Direction) => void
-  sectorRefs?: Record<Direction, RefObject<HTMLDivElement>>
+  sectorRefs?: Record<Direction, RefObject<HTMLDivElement | null>>
 }
 
 export default function BaguaOrientationsGrid({

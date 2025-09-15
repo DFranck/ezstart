@@ -34,13 +34,13 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   const [expandedSectors, setExpandedSectors] = useState<Set<Direction>>(new Set())
 
   // Refs pour scroll vers les secteurs
-  const sectorRefs = useRef<Record<Direction, React.RefObject<HTMLDivElement>>>({} as any)
+  const sectorRefs = useRef<Record<Direction, React.RefObject<HTMLDivElement | null>>>({} as any)
 
   // Initialiser les refs pour chaque secteur
   useEffect(() => {
-    const refs: Record<Direction, React.RefObject<HTMLDivElement>> = {} as any
+    const refs: Record<Direction, React.RefObject<HTMLDivElement | null>> = {} as any
     DIRECTIONS_WITH_CENTER.forEach(dir => {
-      refs[dir] = React.createRef()
+      refs[dir] = React.createRef<HTMLDivElement>()
     })
     sectorRefs.current = refs
   }, [])
