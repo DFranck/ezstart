@@ -90,6 +90,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
         const rotationAngle = cardinalData.rotationAngle ?? 0
         const bearingFromNorth = cardinalData.bearingFromNorth ?? (rotationAngle + 90) % 360
 
+
         // Fonction pour ouvrir preview (toujours modal, responsive)
         const handleOpenPreview = () => {
           setIsPreviewOpen(true)

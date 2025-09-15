@@ -63,20 +63,15 @@ const CardinalPointsStep = () => {
           )
         }
 
-        // rotationAngle = angle "écran" (0° par défaut, car cardinalPoints.N = -90°)
-        const [rotationAngle, setRotationAngle] = useState<number>(data.rotationAngle ?? 0)
+        // Utiliser directement data.rotationAngle au lieu d'un état local pour éviter la désynchronisation
+        const currentRotation = data.rotationAngle ?? 0
 
         const handleRotate = (newAngle: number) => {
           const norm = ((newAngle % 360) + 360) % 360
-          setRotationAngle(norm)
-          // LOGIQUE SIMPLE: l'angle écran = bearing depuis le Nord
-          // Si Nord à 45° sur écran → bearing = 45° depuis le Nord
-          // Pas de conversion compliquée
           updateData({ rotationAngle: norm, bearingFromNorth: norm })
         }
 
         const resetRotation = () => {
-          setRotationAngle(0) // Position par défaut : Nord en haut
           updateData({ rotationAngle: 0, bearingFromNorth: 0 }) // bearing = 0 pour Nord en haut
         }
 
@@ -112,7 +107,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="-rotate-45">45°</Label>
                 <Button
                   id="-rotate-45"
-                  onClick={() => handleRotate(rotationAngle - 45)}
+                  onClick={() => handleRotate(currentRotation - 45)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg"
                   title="−45°"
@@ -124,7 +119,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="-rotate-10">10°</Label>
                 <Button
                   id="-rotate-10"
-                  onClick={() => handleRotate(rotationAngle - 10)}
+                  onClick={() => handleRotate(currentRotation - 10)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg"
                   title="−10°"
@@ -136,7 +131,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="-rotate-1">1°</Label>
                 <Button
                   id="-rotate-1"
-                  onClick={() => handleRotate(rotationAngle - 1)}
+                  onClick={() => handleRotate(currentRotation - 1)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg"
                   title="−1°"
@@ -151,7 +146,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="+rotate-1">1°</Label>
                 <Button
                   id="+rotate-1"
-                  onClick={() => handleRotate(rotationAngle + 1)}
+                  onClick={() => handleRotate(currentRotation + 1)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg"
                   title="+1°"
@@ -163,7 +158,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="+rotate-10">10°</Label>
                 <Button
                   id="+rotate-10"
-                  onClick={() => handleRotate(rotationAngle + 10)}
+                  onClick={() => handleRotate(currentRotation + 10)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg"
                   title="+10°"
@@ -175,7 +170,7 @@ const CardinalPointsStep = () => {
                 <Label htmlFor="+rotate-45">45°</Label>
                 <Button
                   id="+rotate-45"
-                  onClick={() => handleRotate(rotationAngle + 45)}
+                  onClick={() => handleRotate(currentRotation + 45)}
                   size="sm"
                   className="w-10 h-10 grid place-items-center bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-lg"
                   title="+45°"
@@ -203,7 +198,7 @@ const CardinalPointsStep = () => {
 
                 {/* Pastilles cardinales (même rayon que les lignes) */}
                 {cardinalPoints.map(({ direction, angle, label }) => {
-                  const a = (angle + rotationAngle) * (Math.PI / 180)
+                  const a = (angle + currentRotation) * (Math.PI / 180)
                   const x = Math.cos(a) * radius
                   const y = Math.sin(a) * radius
                   return (
@@ -237,7 +232,7 @@ const CardinalPointsStep = () => {
                     </linearGradient>
                   </defs>
                   {cardinalPoints.map(({ angle }) => {
-                    const a = (angle + rotationAngle) * (Math.PI / 180)
+                    const a = (angle + currentRotation) * (Math.PI / 180)
                     const x = Math.cos(a) * radius
                     const y = Math.sin(a) * radius
                     return (

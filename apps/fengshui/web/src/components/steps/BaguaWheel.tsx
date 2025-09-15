@@ -3,6 +3,7 @@
 
 import { Direction, DIRECTIONS } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
+import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { useId, useMemo, useRef, useState } from 'react'
 
 type CardsMode = 'hover' | 'all'
@@ -69,15 +70,10 @@ export default function BaguaWheel({
   const cy = 50
   const r = radiusPct
 
-  const rot = useMemo(
-    () => {
-      // Si bearingFromNorth = 45° (Nord à 45° sur l'écran),
-      // on doit tourner l'overlay de -45° pour remettre le Nord à sa place dans la wheel
-      const rotation = (-bearingFromNorth + 90) + (config?.rotationOffsetDeg ?? 0)  // +90 pour ajustement de base
-      return ((rotation % 360) + 360) % 360
-    },
-    [bearingFromNorth, config?.rotationOffsetDeg]
-  )
+  const rot = useMemo(() => {
+    const result = calculateBaguaRotation(bearingFromNorth, config)
+    return result
+  }, [bearingFromNorth, config])
 
   // image centrée/insérée dans le cercle
   const s = Math.min(r * Math.SQRT2 * insetRatio, 100)
