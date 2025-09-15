@@ -222,6 +222,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                         labelOffset={8}
                         cardsMode="hover"
                         cardsRadiusPct={50}
+                        onSectorClick={handleSectorClick}
                       />
                     ) : (
                       <BaguaGrid

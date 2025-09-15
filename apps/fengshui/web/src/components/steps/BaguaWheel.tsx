@@ -20,6 +20,8 @@ type BaguaWheelProps = {
   /** 'hover' (par défaut) = 1 seule card; 'all' = toutes les cards */
   cardsMode?: CardsMode
   cardsRadiusPct?: number
+  /** Callback appelé quand on clique sur un secteur */
+  onSectorClick?: (direction: Direction) => void
 }
 
 function degToRad(d: number) {
@@ -64,6 +66,7 @@ export default function BaguaWheel({
   labelOffset = 6,
   cardsMode = 'hover',
   cardsRadiusPct,
+  onSectorClick,
 }: BaguaWheelProps) {
   const clipId = useId()
   const cx = 50
@@ -170,6 +173,21 @@ export default function BaguaWheel({
                   strokeWidth={0.4}
                   strokeDasharray="2 3"
                   className="text-foreground opacity-30"
+                />
+              )
+            })}
+
+            {/* Zones cliquables invisibles pour les secteurs */}
+            {onSectorClick && DIRECTIONS.map((dir: Direction, i) => {
+              const start = i * 45 - 22.5
+              const end = (i + 1) * 45 - 22.5
+              return (
+                <path
+                  key={`clickable-${dir}`}
+                  d={sectorPath(start, end, r, cx, cy)}
+                  fill="transparent"
+                  className="cursor-pointer hover:fill-primary/10 transition-colors"
+                  onClick={() => onSectorClick(dir)}
                 />
               )
             })}
