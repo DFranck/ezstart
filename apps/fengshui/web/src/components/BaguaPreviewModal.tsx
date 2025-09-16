@@ -1,12 +1,12 @@
 'use client'
 
+import { Transformations } from '@/types/bagua'
 import { DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
-import BaguaWheel from './steps/BaguaWheel'
 import BaguaGrid from './steps/BaguaGrid'
-import { Transformations } from '@/types/bagua'
+import BaguaWheel from './steps/BaguaWheel'
 
 type Props = {
   isOpen: boolean
@@ -18,7 +18,15 @@ type Props = {
   transformations?: Transformations
 }
 
-export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingFromNorth, visualizationMode = 'wheel', transformations }: Props) {
+export function BaguaPreviewModal({
+  isOpen,
+  onClose,
+  config,
+  planImage,
+  bearingFromNorth,
+  visualizationMode = 'wheel',
+  transformations,
+}: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -102,7 +110,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         position: wheelRef.current.style.position || 'absolute',
         top: wheelRef.current.style.top || '-9999px',
         left: wheelRef.current.style.left || '-9999px',
-        display: wheelRef.current.style.display || 'block'
+        display: wheelRef.current.style.display || 'block',
       }
 
       wheelRef.current.style.position = 'static'
@@ -174,7 +182,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         format: 'a4',
       })
 
-
       // Function to create cards grid page (3x3 layout)
       const createCardsGridPage = async (pageNumber: number) => {
         if (pageNumber > 1) pdf.addPage()
@@ -184,12 +191,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
 
         pdf.setFontSize(14)
-        pdf.text(
-          `Page ${pageNumber}/3 - Secteurs Détaillés`,
-          105,
-          35,
-          { align: 'center' }
-        )
+        pdf.text(`Page ${pageNumber}/3 - Secteurs Détaillés`, 105, 35, { align: 'center' })
 
         pdf.setFontSize(12)
         pdf.text(
@@ -205,7 +207,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         const cardHeight = 80
         const spacingX = 70
         const spacingY = 90
-        const startX = (210 - (spacingX * 2)) / 2 // Center horizontally
+        const startX = (210 - spacingX * 2) / 2 // Center horizontally
 
         // Get all 9 directions (8 directions + center)
         const allDirections = DIRECTIONS_WITH_CENTER
@@ -216,8 +218,8 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
           const row = Math.floor(index / 3)
           const col = index % 3
-          const x = startX + (col * spacingX)
-          const y = startY + (row * spacingY)
+          const x = startX + col * spacingX
+          const y = startY + row * spacingY
 
           const accent = sector.colorHex
           const accents = sector.colorHexes
@@ -225,11 +227,13 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           // Convert hex colors to RGB for jsPDF
           const hexToRgb = (hex: string) => {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-            return result ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16)
-            } : { r: 0, g: 0, b: 0 }
+            return result
+              ? {
+                  r: parseInt(result[1], 16),
+                  g: parseInt(result[2], 16),
+                  b: parseInt(result[3], 16),
+                }
+              : { r: 0, g: 0, b: 0 }
           }
 
           const accentRgb = hexToRgb(accent)
@@ -250,12 +254,17 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           // Direction and number in header
           pdf.setTextColor(255, 255, 255)
           pdf.setFontSize(8)
-          pdf.text(`${dir} • ${sector.element} • ${sector.number}`, x + cardWidth/2, y + 8, { align: 'center' })
+          pdf.text(`${dir} • ${sector.element} • ${sector.number}`, x + cardWidth / 2, y + 8, {
+            align: 'center',
+          })
 
           // Title
           pdf.setTextColor(isDarkMode ? 255 : 0, isDarkMode ? 255 : 0, isDarkMode ? 255 : 0)
           pdf.setFontSize(9)
-          pdf.text(sector.title, x + cardWidth/2, y + 20, { align: 'center', maxWidth: cardWidth - 4 })
+          pdf.text(sector.title, x + cardWidth / 2, y + 20, {
+            align: 'center',
+            maxWidth: cardWidth - 4,
+          })
 
           // First tip or enhancer
           if (sector.tips?.[0] || sector.enhancers?.[0]) {
@@ -268,7 +277,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           // Star info if available
           if (sector.star) {
             pdf.setFontSize(6)
-            pdf.setTextColor(sector.star.status === 'bonne' ? 34 : 239, sector.star.status === 'bonne' ? 197 : 68, sector.star.status === 'bonne' ? 94 : 68)
+            pdf.setTextColor(
+              sector.star.status === 'bonne' ? 34 : 239,
+              sector.star.status === 'bonne' ? 197 : 68,
+              sector.star.status === 'bonne' ? 94 : 68
+            )
             pdf.text(`★ ${sector.star.star} - ${sector.star.element}`, x + 2, y + 50)
 
             if (sector.star.remedies?.length > 0) {
@@ -281,7 +294,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       }
 
       // Function to create a page for a specific visualization mode
-      const createPageForMode = async (mode: 'wheel' | 'grid', pageNumber: number, imageData: string) => {
+      const createPageForMode = async (
+        mode: 'wheel' | 'grid',
+        pageNumber: number,
+        imageData: string
+      ) => {
         if (pageNumber > 1) pdf.addPage()
 
         // Add page title
@@ -397,7 +414,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         position: gridRef.current.style.position || 'absolute',
         top: gridRef.current.style.top || '-9999px',
         left: gridRef.current.style.left || '-9999px',
-        display: gridRef.current.style.display || 'block'
+        display: gridRef.current.style.display || 'block',
       }
 
       gridRef.current.style.position = 'static'
@@ -479,12 +496,12 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         page3Ctx!.fillStyle = '#ffffff'
         page3Ctx!.font = 'bold 12px Arial'
         page3Ctx!.textAlign = 'center'
-        page3Ctx!.fillText(`${dir} • ${sector.element} • ${sector.number}`, x + cardW/2, y + 20)
+        page3Ctx!.fillText(`${dir} • ${sector.element} • ${sector.number}`, x + cardW / 2, y + 20)
 
         // Title
         page3Ctx!.fillStyle = isDarkMode ? '#ffffff' : '#000000'
         page3Ctx!.font = 'bold 14px Arial'
-        page3Ctx!.fillText(sector.title, x + cardW/2, y + 50)
+        page3Ctx!.fillText(sector.title, x + cardW / 2, y + 50)
 
         // Tip
         if (sector.tips?.[0] || sector.enhancers?.[0]) {
@@ -499,14 +516,14 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
             const testLine = line + word + ' '
             const metrics = page3Ctx!.measureText(testLine)
             if (metrics.width > cardW - 20 && line !== '') {
-              page3Ctx!.fillText(line, x + cardW/2, lineY)
+              page3Ctx!.fillText(line, x + cardW / 2, lineY)
               line = word + ' '
               lineY += 15
             } else {
               line = testLine
             }
           }
-          page3Ctx!.fillText(line, x + cardW/2, lineY)
+          page3Ctx!.fillText(line, x + cardW / 2, lineY)
         }
       })
 
@@ -516,7 +533,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       setPreviewImageUrls({
         page1: wheelImageData,
         page2: gridImageData,
-        page3: page3ImageData
+        page3: page3ImageData,
       })
 
       // Generate Page 1 (Wheel with cards)
@@ -615,7 +632,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
     >
       {/* LOADER EN HAUT - Toujours visible pendant génération */}
       <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
-
         {isGenerating && (
           <div className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center">
             <div className="flex flex-col items-center gap-4">
@@ -630,9 +646,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                 <p className="text-sm text-gray-600 mb-1">
                   Capture haute résolution de votre analyse Feng Shui
                 </p>
-                <p className="text-xs text-gray-500">
-                  3 pages: Roue + Grille + Secteurs détaillés
-                </p>
+                <p className="text-xs text-gray-500">3 pages: Roue + Grille + Secteurs détaillés</p>
               </div>
             </div>
           </div>
@@ -657,42 +671,48 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   Aperçu de votre analyse Feng Shui (3 pages)
                 </h4>
                 {Object.keys(previewImageUrls).length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="space-y-6 max-h-[60vh] overflow-y-auto">
                     {/* Page 1 - Wheel */}
                     {previewImageUrls.page1 && (
                       <div className="text-center">
-                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 1 - Vue Roue</h5>
+                        <h5 className="text-sm font-medium text-gray-600 mb-3">
+                          Page 1 - Vue Roue
+                        </h5>
                         <img
                           src={previewImageUrls.page1}
                           alt="Page 1 - Roue Bagua"
-                          className="w-full h-auto rounded-lg shadow-md border"
-                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                          style={{ maxWidth: '400px' }}
                         />
                       </div>
                     )}
 
                     {/* Page 2 - Grid */}
                     {previewImageUrls.page2 && (
-                      <div className="text-center">
-                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 2 - Vue Grille</h5>
+                      <div className="text-center border-t pt-6">
+                        <h5 className="text-sm font-medium text-gray-600 mb-3">
+                          Page 2 - Vue Grille
+                        </h5>
                         <img
                           src={previewImageUrls.page2}
                           alt="Page 2 - Grille Bagua"
-                          className="w-full h-auto rounded-lg shadow-md border"
-                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                          style={{ maxWidth: '400px' }}
                         />
                       </div>
                     )}
 
                     {/* Page 3 - Cards Grid */}
                     {previewImageUrls.page3 && (
-                      <div className="text-center">
-                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 3 - Secteurs</h5>
+                      <div className="text-center border-t pt-6">
+                        <h5 className="text-sm font-medium text-gray-600 mb-3">
+                          Page 3 - Secteurs Détaillés
+                        </h5>
                         <img
                           src={previewImageUrls.page3}
                           alt="Page 3 - Secteurs Détaillés"
-                          className="w-full h-auto rounded-lg shadow-md border"
-                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                          style={{ maxWidth: '400px' }}
                         />
                       </div>
                     )}
@@ -749,7 +769,15 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           data-bagua="grid-container"
         >
           {planImage && config && (
-            <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              style={{
+                width: '600px',
+                height: '600px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
                 <BaguaGrid
                   src={planImage}
@@ -776,152 +804,150 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         >
           {planImage &&
             config &&
-            (visualizationMode === 'wheel' ? DIRECTIONS : DIRECTIONS_WITH_CENTER).map((dir, index) => {
-              let xPct, yPct
+            (visualizationMode === 'wheel' ? DIRECTIONS : DIRECTIONS_WITH_CENTER).map(
+              (dir, index) => {
+                let xPct, yPct
 
-              if (visualizationMode === 'wheel') {
-                // Position en cercle pour la wheel
-                const angle = index * 45
-                const totalRotation = bearingFromNorth + (config?.rotationOffsetDeg ?? 0)
-                const adjustedAngle = angle + totalRotation
-                const radian = ((adjustedAngle - 90) * Math.PI) / 180
+                if (visualizationMode === 'wheel') {
+                  // Position en cercle pour la wheel
+                  const angle = index * 45
+                  const totalRotation = bearingFromNorth + (config?.rotationOffsetDeg ?? 0)
+                  const adjustedAngle = angle + totalRotation
+                  const radian = ((adjustedAngle - 90) * Math.PI) / 180
 
-                const cardRadius = 320 // Distance du centre pour que les cartes encadrent bien le plan
-                const centerX = 400
-                const centerY = 400
-                const cardX = centerX + cardRadius * Math.cos(radian)
-                const cardY = centerY + cardRadius * Math.sin(radian)
+                  const cardRadius = 320 // Distance du centre pour que les cartes encadrent bien le plan
+                  const centerX = 400
+                  const centerY = 400
+                  const cardX = centerX + cardRadius * Math.cos(radian)
+                  const cardY = centerY + cardRadius * Math.sin(radian)
 
-                xPct = (cardX / 800) * 100
-                yPct = (cardY / 800) * 100
-              } else {
-                // Position en grille EXTERNE pour la grid (en dehors du plan)
-                const gridPositions = {
-                  'NO': { x: 5, y: 5 },     // Coin Haut-Gauche EXTERNE
-                  'N': { x: 50, y: 2 },     // Haut-Centre EXTERNE
-                  'NE': { x: 95, y: 5 },    // Coin Haut-Droite EXTERNE
-                  'O': { x: 2, y: 50 },     // Centre-Gauche EXTERNE
-                  'C': { x: 50, y: 50 },    // Centre (reste au milieu)
-                  'E': { x: 98, y: 50 },    // Centre-Droite EXTERNE
-                  'SO': { x: 5, y: 95 },    // Coin Bas-Gauche EXTERNE
-                  'S': { x: 50, y: 98 },    // Bas-Centre EXTERNE
-                  'SE': { x: 95, y: 95 },   // Coin Bas-Droite EXTERNE
+                  xPct = (cardX / 800) * 100
+                  yPct = (cardY / 800) * 100
+                } else {
+                  // Position en grille EXTERNE pour la grid (en dehors du plan)
+                  const gridPositions = {
+                    NO: { x: 5, y: 5 }, // Coin Haut-Gauche EXTERNE
+                    N: { x: 50, y: 2 }, // Haut-Centre EXTERNE
+                    NE: { x: 95, y: 5 }, // Coin Haut-Droite EXTERNE
+                    O: { x: 2, y: 50 }, // Centre-Gauche EXTERNE
+                    C: { x: 50, y: 50 }, // Centre (reste au milieu)
+                    E: { x: 98, y: 50 }, // Centre-Droite EXTERNE
+                    SO: { x: 5, y: 95 }, // Coin Bas-Gauche EXTERNE
+                    S: { x: 50, y: 98 }, // Bas-Centre EXTERNE
+                    SE: { x: 95, y: 95 }, // Coin Bas-Droite EXTERNE
+                  }
+
+                  const position = gridPositions[dir as keyof typeof gridPositions]
+                  xPct = position ? position.x : 50
+                  yPct = position ? position.y : 50
                 }
 
-                const position = gridPositions[dir as keyof typeof gridPositions]
-                xPct = position ? position.x : 50
-                yPct = position ? position.y : 50
-              }
+                // Version ultra-compacte pour PDF
+                const sector = config.orientations?.[dir]
+                if (!sector) return null
 
-              // Version ultra-compacte pour PDF
-              const sector = config.orientations?.[dir]
-              if (!sector) return null
-
-              const accent = sector.colorHex
-              const accents = sector.colorHexes
-              return (
-                <div
-                  key={`pdf-card-${dir}`}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 shadow-lg overflow-hidden"
-                  style={{
-                    left: `${xPct}%`,
-                    top: `${yPct}%`,
-                    width: '120px',
-                    borderColor: accent,
-                    backgroundColor: pdfCardBg,
-                  }}
-                >
-                  {/* Header compact avec couleur de fond */}
+                const accent = sector.colorHex
+                const accents = sector.colorHexes
+                return (
                   <div
-                    className="h-6 flex items-center justify-center text-xs font-bold"
+                    key={`pdf-card-${dir}`}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 shadow-lg overflow-hidden"
                     style={{
-                      background:
-                        accents && accents.length > 1
-                          ? `linear-gradient(90deg, ${accents.join(', ')})`
-                          : accent,
-                      color: '#ffffff',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                      left: `${xPct}%`,
+                      top: `${yPct}%`,
+                      width: '120px',
+                      borderColor: accent,
+                      backgroundColor: pdfCardBg,
                     }}
                   >
-                    {dir} • {sector.element} •{sector.number}
-                  </div>
-
-                  {/* Contenu compact */}
-                  <div className="p-2 space-y-1">
-                    {/* Titre */}
+                    {/* Header compact avec couleur de fond */}
                     <div
-                      className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
-                      style={{ color: pdfTextColor }}
+                      className="h-6 flex items-center justify-center text-xs font-bold"
+                      style={{
+                        background:
+                          accents && accents.length > 1
+                            ? `linear-gradient(90deg, ${accents.join(', ')})`
+                            : accent,
+                        color: '#ffffff',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                      }}
                     >
-                      {sector.title}
+                      {dir} • {sector.element} •{sector.number}
                     </div>
 
-                    {/* Premier tip ou enhancer */}
-                    {(sector.tips?.[0] || sector.enhancers?.[0]) && (
+                    {/* Contenu compact */}
+                    <div className="p-2 space-y-1">
+                      {/* Titre */}
                       <div
-                        className="text-[9px] leading-tight flex items-center"
-                        style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                        className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
+                        style={{ color: pdfTextColor }}
                       >
-                        {sector.shape && (
-                          <Icon
-                            name={
-                              sector.shape === 'circle'
-                                ? 'lucide:Circle'
-                                : sector.shape === 'square'
-                                  ? 'lucide:Square'
-                                  : sector.shape === 'triangle'
-                                    ? 'lucide:Triangle'
-                                    : sector.shape === 'rectangle'
-                                      ? 'lucide:RectangleHorizontal'
-                                      : 'lucide:Waves'
-                            }
-                            className="w-3 h-3 mr-1"
-                            style={{ color: accent }}
-                          />
-                        )}
-                        {((sector.tips?.[0] || sector.enhancers?.[0])?.length || 0) > 35
-                          ? (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 32) + '...'
-                          : sector.tips?.[0] || sector.enhancers?.[0]}
+                        {sector.title}
                       </div>
-                    )}
-                    {/* Etoile volante */}
-                    {sector.star && (
-                      <div
-                        className="border-t pt-1"
-                        style={{ borderColor: pdfBorderColor }}
-                      >
-                        <div
-                          className="text-[9px] leading-tight flex items-center"
-                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
-                        >
-                          <Icon
-                            name="lucide:Star"
-                            className="w-3 h-3 mr-1"
-                            style={{
-                              color: sector.star.status === 'bonne' ? '#22c55e' : '#ef4444',
-                            }}
-                          />
-                          {sector.star.star} - {sector.star.element}
-                        </div>
-                        <div
-                          className="text-[9px] leading-tight flex items-center"
-                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
-                        >
-                          {sector.star.remedies?.length > 0 && (
-                            <>
-                              <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
-                              {sector.star.remedies?.join(', ')}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-        </div>
 
+                      {/* Premier tip ou enhancer */}
+                      {(sector.tips?.[0] || sector.enhancers?.[0]) && (
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                        >
+                          {sector.shape && (
+                            <Icon
+                              name={
+                                sector.shape === 'circle'
+                                  ? 'lucide:Circle'
+                                  : sector.shape === 'square'
+                                    ? 'lucide:Square'
+                                    : sector.shape === 'triangle'
+                                      ? 'lucide:Triangle'
+                                      : sector.shape === 'rectangle'
+                                        ? 'lucide:RectangleHorizontal'
+                                        : 'lucide:Waves'
+                              }
+                              className="w-3 h-3 mr-1"
+                              style={{ color: accent }}
+                            />
+                          )}
+                          {((sector.tips?.[0] || sector.enhancers?.[0])?.length || 0) > 35
+                            ? (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 32) + '...'
+                            : sector.tips?.[0] || sector.enhancers?.[0]}
+                        </div>
+                      )}
+                      {/* Etoile volante */}
+                      {sector.star && (
+                        <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
+                          <div
+                            className="text-[9px] leading-tight flex items-center"
+                            style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          >
+                            <Icon
+                              name="lucide:Star"
+                              className="w-3 h-3 mr-1"
+                              style={{
+                                color: sector.star.status === 'bonne' ? '#22c55e' : '#ef4444',
+                              }}
+                            />
+                            {sector.star.star} - {sector.star.element}
+                          </div>
+                          <div
+                            className="text-[9px] leading-tight flex items-center"
+                            style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          >
+                            {sector.star.remedies?.length > 0 && (
+                              <>
+                                <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
+                                {sector.star.remedies?.join(', ')}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              }
+            )}
+        </div>
       </div>
     </Modal>
   )
