@@ -670,13 +670,16 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           </div>
         )}
 
-        {/* COMPOSANTS DE CAPTURE - Visibles en dessous (pour debug et capture) */}
-        <div className="w-full space-y-8 border-t pt-6 mt-6">
+        {/* COMPOSANTS DE CAPTURE - Titre caché pendant génération, composants toujours montés */}
+        <div className={`w-full space-y-8 border-t pt-6 mt-6 ${isGenerating ? 'hidden' : ''}`}>
           <h4 className="text-center text-sm text-gray-500">Composants utilisés pour la génération PDF</h4>
+        </div>
 
+        {/* Composants TOUJOURS MONTÉS pour capture (mais peut être cachés visuellement) */}
+        <div className={isGenerating ? 'sr-only' : 'w-full space-y-8'}>
           {/* Wheel pour capture PDF */}
           <div className="space-y-2">
-            <h5 className="text-center text-xs font-medium text-gray-600">Composant Wheel (Page 1)</h5>
+            {!isGenerating && <h5 className="text-center text-xs font-medium text-gray-600">Composant Wheel (Page 1)</h5>}
             <div
               ref={wheelRef}
               className="flex justify-center"
@@ -702,7 +705,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
           {/* Grid pour capture PDF */}
           <div className="space-y-2">
-            <h5 className="text-center text-xs font-medium text-gray-600">Composant Grid (Page 2)</h5>
+            {!isGenerating && <h5 className="text-center text-xs font-medium text-gray-600">Composant Grid (Page 2)</h5>}
             <div
               ref={gridRef}
               className="flex justify-center"
@@ -727,7 +730,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         </div>
 
 
-        {/* Conteneur des BaguaSectorCard pour capture PDF */}
+        {/* Conteneur des BaguaSectorCard pour capture PDF - Toujours monté */}
         <div
           ref={cardsRef}
           className="relative"
