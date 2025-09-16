@@ -171,6 +171,111 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       })
 
 
+      // Function to create cards grid page (3x3 layout)
+      const createCardsGridPage = async (pageNumber: number) => {
+        if (pageNumber > 1) pdf.addPage()
+
+        // Add page title
+        pdf.setFontSize(20)
+        pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
+
+        pdf.setFontSize(14)
+        pdf.text(
+          `Page ${pageNumber}/3 - Secteurs Détaillés`,
+          105,
+          35,
+          { align: 'center' }
+        )
+
+        pdf.setFontSize(12)
+        pdf.text(
+          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
+          105,
+          45,
+          { align: 'center' }
+        )
+
+        // Grid layout: 3x3 cards
+        const startY = 60
+        const cardWidth = 60
+        const cardHeight = 80
+        const spacingX = 70
+        const spacingY = 90
+        const startX = (210 - (spacingX * 2)) / 2 // Center horizontally
+
+        // Get all 9 directions (8 directions + center)
+        const allDirections = DIRECTIONS_WITH_CENTER
+
+        allDirections.forEach((dir, index) => {
+          const sector = config.orientations?.[dir]
+          if (!sector) return
+
+          const row = Math.floor(index / 3)
+          const col = index % 3
+          const x = startX + (col * spacingX)
+          const y = startY + (row * spacingY)
+
+          const accent = sector.colorHex
+          const accents = sector.colorHexes
+
+          // Convert hex colors to RGB for jsPDF
+          const hexToRgb = (hex: string) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+            return result ? {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 }
+          }
+
+          const accentRgb = hexToRgb(accent)
+
+          // Card background
+          pdf.setFillColor(isDarkMode ? 42 : 255, isDarkMode ? 42 : 255, isDarkMode ? 42 : 255)
+          pdf.rect(x, y, cardWidth, cardHeight, 'F')
+
+          // Card border
+          pdf.setDrawColor(accentRgb.r, accentRgb.g, accentRgb.b)
+          pdf.setLineWidth(0.5)
+          pdf.rect(x, y, cardWidth, cardHeight, 'S')
+
+          // Header with gradient effect (simulate with colored rectangle)
+          pdf.setFillColor(accentRgb.r, accentRgb.g, accentRgb.b)
+          pdf.rect(x, y, cardWidth, 12, 'F')
+
+          // Direction and number in header
+          pdf.setTextColor(255, 255, 255)
+          pdf.setFontSize(8)
+          pdf.text(`${dir} • ${sector.element} • ${sector.number}`, x + cardWidth/2, y + 8, { align: 'center' })
+
+          // Title
+          pdf.setTextColor(isDarkMode ? 255 : 0, isDarkMode ? 255 : 0, isDarkMode ? 255 : 0)
+          pdf.setFontSize(9)
+          pdf.text(sector.title, x + cardWidth/2, y + 20, { align: 'center', maxWidth: cardWidth - 4 })
+
+          // First tip or enhancer
+          if (sector.tips?.[0] || sector.enhancers?.[0]) {
+            pdf.setFontSize(7)
+            pdf.setTextColor(100, 100, 100)
+            const tip = (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 60) + '...'
+            pdf.text(tip, x + 2, y + 32, { maxWidth: cardWidth - 4 })
+          }
+
+          // Star info if available
+          if (sector.star) {
+            pdf.setFontSize(6)
+            pdf.setTextColor(sector.star.status === 'bonne' ? 34 : 239, sector.star.status === 'bonne' ? 197 : 68, sector.star.status === 'bonne' ? 94 : 68)
+            pdf.text(`★ ${sector.star.star} - ${sector.star.element}`, x + 2, y + 50)
+
+            if (sector.star.remedies?.length > 0) {
+              pdf.setTextColor(100, 100, 100)
+              const remedies = sector.star.remedies.join(', ').substring(0, 40) + '...'
+              pdf.text(`🛡️ ${remedies}`, x + 2, y + 58)
+            }
+          }
+        })
+      }
+
       // Function to create a page for a specific visualization mode
       const createPageForMode = async (mode: 'wheel' | 'grid', pageNumber: number, imageData: string) => {
         if (pageNumber > 1) pdf.addPage()
@@ -330,10 +435,13 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Generate Page 2 (Grid without cards)
       await createPageForMode('grid', 2, gridImageData)
 
+      // Generate Page 3 (Cards in 3x3 grid)
+      await createCardsGridPage(3)
+
       // Generate blob and URL
       const blob = pdf.output('blob')
       const url = URL.createObjectURL(blob)
-      console.log('PDF generated successfully with 2 pages: Wheel + Grid views')
+      console.log('PDF generated successfully with 3 pages: Wheel + Grid + Cards Grid views')
       setPdfUrl(url)
     } catch (error) {
       console.error('Erreur génération PDF détaillée:', error)
