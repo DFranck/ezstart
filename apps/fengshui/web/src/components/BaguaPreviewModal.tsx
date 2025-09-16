@@ -22,7 +22,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
+  const [previewImageUrls, setPreviewImageUrls] = useState<{
+    page1?: string
+    page2?: string
+    page3?: string
+  }>({})
   const [isDarkMode, setIsDarkMode] = useState(false)
   const wheelRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
@@ -426,8 +430,94 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // For grid, use the captured grid image (no cards)
       const gridImageData = gridDataUrl
 
-      // Save preview image for desktop (using wheel with cards)
-      setPreviewImageUrl(wheelImageData)
+      // Create preview for page 3 (cards grid)
+      const page3Canvas = document.createElement('canvas')
+      const page3Ctx = page3Canvas.getContext('2d')
+      page3Canvas.width = 600
+      page3Canvas.height = 800
+
+      // White background
+      page3Ctx!.fillStyle = isDarkMode ? '#1a1a1a' : '#ffffff'
+      page3Ctx!.fillRect(0, 0, 600, 800)
+
+      // Title
+      page3Ctx!.fillStyle = isDarkMode ? '#ffffff' : '#000000'
+      page3Ctx!.font = 'bold 20px Arial'
+      page3Ctx!.textAlign = 'center'
+      page3Ctx!.fillText('Secteurs Détaillés', 300, 40)
+
+      // Draw cards grid preview
+      const cardW = 180
+      const cardH = 220
+      const spacing = 20
+      const startX = (600 - (cardW * 3 + spacing * 2)) / 2
+      const startY = 80
+
+      DIRECTIONS_WITH_CENTER.forEach((dir, index) => {
+        const sector = config.orientations?.[dir]
+        if (!sector) return
+
+        const row = Math.floor(index / 3)
+        const col = index % 3
+        const x = startX + col * (cardW + spacing)
+        const y = startY + row * (cardH + spacing)
+
+        // Card background
+        page3Ctx!.fillStyle = isDarkMode ? '#2a2a2a' : '#ffffff'
+        page3Ctx!.fillRect(x, y, cardW, cardH)
+
+        // Card border
+        page3Ctx!.strokeStyle = sector.colorHex
+        page3Ctx!.lineWidth = 2
+        page3Ctx!.strokeRect(x, y, cardW, cardH)
+
+        // Header
+        page3Ctx!.fillStyle = sector.colorHex
+        page3Ctx!.fillRect(x, y, cardW, 30)
+
+        // Header text
+        page3Ctx!.fillStyle = '#ffffff'
+        page3Ctx!.font = 'bold 12px Arial'
+        page3Ctx!.textAlign = 'center'
+        page3Ctx!.fillText(`${dir} • ${sector.element} • ${sector.number}`, x + cardW/2, y + 20)
+
+        // Title
+        page3Ctx!.fillStyle = isDarkMode ? '#ffffff' : '#000000'
+        page3Ctx!.font = 'bold 14px Arial'
+        page3Ctx!.fillText(sector.title, x + cardW/2, y + 50)
+
+        // Tip
+        if (sector.tips?.[0] || sector.enhancers?.[0]) {
+          page3Ctx!.fillStyle = '#666666'
+          page3Ctx!.font = '10px Arial'
+          const tip = (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 80) + '...'
+          // Split text into multiple lines
+          const words = tip.split(' ')
+          let line = ''
+          let lineY = y + 75
+          for (const word of words) {
+            const testLine = line + word + ' '
+            const metrics = page3Ctx!.measureText(testLine)
+            if (metrics.width > cardW - 20 && line !== '') {
+              page3Ctx!.fillText(line, x + cardW/2, lineY)
+              line = word + ' '
+              lineY += 15
+            } else {
+              line = testLine
+            }
+          }
+          page3Ctx!.fillText(line, x + cardW/2, lineY)
+        }
+      })
+
+      const page3ImageData = page3Canvas.toDataURL('image/png', 1.0)
+
+      // Save preview images for all pages
+      setPreviewImageUrls({
+        page1: wheelImageData,
+        page2: gridImageData,
+        page3: page3ImageData
+      })
 
       // Generate Page 1 (Wheel with cards)
       await createPageForMode('wheel', 1, wheelImageData)
@@ -481,7 +571,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
     if (!isOpen && pdfUrl) {
       URL.revokeObjectURL(pdfUrl)
       setPdfUrl(null)
-      setPreviewImageUrl(null) // Nettoyer aussi l'image de preview
+      setPreviewImageUrls({}) // Nettoyer aussi les images de preview
     }
   }, [isOpen, pdfUrl])
 
@@ -837,19 +927,51 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   </div>
                 </div>
               ) : (
-                // Desktop: Preview image propre (sans double scrollbar)
+                // Desktop: Preview des 3 pages
                 <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
-                    Aperçu de votre analyse Feng Shui
+                    Aperçu de votre analyse Feng Shui (3 pages)
                   </h4>
-                  {previewImageUrl ? (
-                    <div className="flex justify-center">
-                      <img
-                        src={previewImageUrl}
-                        alt="Aperçu PDF Bagua"
-                        className="max-w-full h-auto rounded-lg shadow-lg"
-                        style={{ maxHeight: '60vh' }}
-                      />
+                  {Object.keys(previewImageUrls).length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                      {/* Page 1 - Wheel */}
+                      {previewImageUrls.page1 && (
+                        <div className="text-center">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 1 - Vue Roue</h5>
+                          <img
+                            src={previewImageUrls.page1}
+                            alt="Page 1 - Roue Bagua"
+                            className="w-full h-auto rounded-lg shadow-md border"
+                            style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Page 2 - Grid */}
+                      {previewImageUrls.page2 && (
+                        <div className="text-center">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 2 - Vue Grille</h5>
+                          <img
+                            src={previewImageUrls.page2}
+                            alt="Page 2 - Grille Bagua"
+                            className="w-full h-auto rounded-lg shadow-md border"
+                            style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Page 3 - Cards Grid */}
+                      {previewImageUrls.page3 && (
+                        <div className="text-center">
+                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 3 - Secteurs</h5>
+                          <img
+                            src={previewImageUrls.page3}
+                            alt="Page 3 - Secteurs Détaillés"
+                            className="w-full h-auto rounded-lg shadow-md border"
+                            style={{ maxHeight: '200px', objectFit: 'contain' }}
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-64 text-gray-500">
