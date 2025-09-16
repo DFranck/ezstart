@@ -93,9 +93,22 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const captureSize = 1200 // Capture à 2x la résolution
       const scaleFactor = captureSize / containerSize
 
-      // Capture the wheel component (now visible in DOM)
+      // First capture the wheel component
       console.log('Capturing wheel component...')
       if (!wheelRef.current) throw new Error('Wheel container not found')
+
+      // Temporarily make the wheel container visible for capture
+      const originalWheelStyle = {
+        position: wheelRef.current.style.position,
+        top: wheelRef.current.style.top,
+        left: wheelRef.current.style.left,
+        display: wheelRef.current.style.display
+      }
+
+      wheelRef.current.style.position = 'static'
+      wheelRef.current.style.top = 'auto'
+      wheelRef.current.style.left = 'auto'
+      wheelRef.current.style.display = 'block'
 
       // Wait for render
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -126,6 +139,12 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           return true
         },
       })
+
+      // Restore original styling
+      wheelRef.current.style.position = originalWheelStyle.position
+      wheelRef.current.style.top = originalWheelStyle.top
+      wheelRef.current.style.left = originalWheelStyle.left
+      wheelRef.current.style.display = originalWheelStyle.display
 
       console.log('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
 
@@ -369,9 +388,22 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Create wheel image (with cards)
       const wheelImageData = await createWheelImage()
 
-      // Capture Grid separately (now visible in DOM)
+      // Capture Grid separately
       console.log('Capturing grid for page 2...')
       if (!gridRef.current) throw new Error('Grid container not found')
+
+      // Temporarily make the grid container visible for capture
+      const originalGridStyle = {
+        position: gridRef.current.style.position,
+        top: gridRef.current.style.top,
+        left: gridRef.current.style.left,
+        display: gridRef.current.style.display
+      }
+
+      gridRef.current.style.position = 'static'
+      gridRef.current.style.top = 'auto'
+      gridRef.current.style.left = 'auto'
+      gridRef.current.style.display = 'block'
 
       // Wait for render
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -388,6 +420,12 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           height: `${containerSize}px`,
         },
       })
+
+      // Restore original styling
+      gridRef.current.style.position = originalGridStyle.position
+      gridRef.current.style.top = originalGridStyle.top
+      gridRef.current.style.left = originalGridStyle.left
+      gridRef.current.style.display = originalGridStyle.display
 
       // For grid, use the captured grid image (no cards)
       const gridImageData = gridDataUrl
@@ -670,67 +708,63 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           </div>
         )}
 
-        {/* COMPOSANTS DE CAPTURE - Titre caché pendant génération, composants toujours montés */}
-        <div className={`w-full space-y-8 border-t pt-6 mt-6 ${isGenerating ? 'hidden' : ''}`}>
-          <h4 className="text-center text-sm text-gray-500">Composants utilisés pour la génération PDF</h4>
+        {/* Containers CACHÉS pour capture PDF */}
+        {/* Wheel MASQUÉE pour capture PDF */}
+        <div
+          ref={wheelRef}
+          style={{
+            width: '600px',
+            height: '600px',
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+          }}
+          data-bagua="wheel-container"
+        >
+          {planImage && config && (
+            <BaguaWheel
+              src={planImage}
+              bearingFromNorth={bearingFromNorth}
+              size={600}
+              config={config}
+              radiusPct={46}
+              insetRatio={1.0}
+              labelOffset={12}
+              cardsMode="none"
+              cardsRadiusPct={60}
+            />
+          )}
         </div>
 
-        {/* Composants TOUJOURS MONTÉS pour capture (mais peut être cachés visuellement) */}
-        <div className={isGenerating ? 'sr-only' : 'w-full space-y-8'}>
-          {/* Wheel pour capture PDF */}
-          <div className="space-y-2">
-            {!isGenerating && <h5 className="text-center text-xs font-medium text-gray-600">Composant Wheel (Page 1)</h5>}
-            <div
-              ref={wheelRef}
-              className="flex justify-center"
-              style={{ width: '100%', overflow: 'hidden' }}
-            >
-              {planImage && config && (
-                <div style={{ width: '600px', height: '600px' }}>
-                  <BaguaWheel
-                    src={planImage}
-                    bearingFromNorth={bearingFromNorth}
-                    size={600}
-                    config={config}
-                    radiusPct={46}
-                    insetRatio={1.0}
-                    labelOffset={12}
-                    cardsMode="none"
-                    cardsRadiusPct={60}
-                  />
-                </div>
-              )}
+        {/* Grid MASQUÉE pour capture PDF */}
+        <div
+          ref={gridRef}
+          style={{
+            width: '600px',
+            height: '600px',
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+          }}
+          data-bagua="grid-container"
+        >
+          {planImage && config && (
+            <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
+                <BaguaGrid
+                  src={planImage}
+                  bearingFromNorth={bearingFromNorth}
+                  size={600}
+                  config={config}
+                  cardsMode="none"
+                  transformations={transformations}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Grid pour capture PDF */}
-          <div className="space-y-2">
-            {!isGenerating && <h5 className="text-center text-xs font-medium text-gray-600">Composant Grid (Page 2)</h5>}
-            <div
-              ref={gridRef}
-              className="flex justify-center"
-              style={{ width: '100%', overflow: 'hidden' }}
-            >
-              {planImage && config && (
-                <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
-                    <BaguaGrid
-                      src={planImage}
-                      bearingFromNorth={bearingFromNorth}
-                      size={600}
-                      config={config}
-                      cardsMode="none"
-                      transformations={transformations}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
-
-        {/* Conteneur des BaguaSectorCard pour capture PDF - Toujours monté */}
+        {/* Conteneur des BaguaSectorCard pour capture PDF */}
         <div
           ref={cardsRef}
           className="relative"
