@@ -452,7 +452,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
               radiusPct={46}
               insetRatio={1.0}
               labelOffset={12}
-              cardsMode="hover"
+              cardsMode="none"
               cardsRadiusPct={60}
             />
           )}
@@ -478,7 +478,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   bearingFromNorth={bearingFromNorth}
                   size={600}
                   config={config}
-                  cardsMode="hover"
+                  cardsMode="none"
                   transformations={transformations}
                 />
               </div>
