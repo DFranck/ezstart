@@ -99,10 +99,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
       // Temporarily make the wheel container visible for capture
       const originalWheelStyle = {
-        position: wheelRef.current.style.position,
-        top: wheelRef.current.style.top,
-        left: wheelRef.current.style.left,
-        display: wheelRef.current.style.display
+        position: wheelRef.current.style.position || 'absolute',
+        top: wheelRef.current.style.top || '-9999px',
+        left: wheelRef.current.style.left || '-9999px',
+        display: wheelRef.current.style.display || 'block'
       }
 
       wheelRef.current.style.position = 'static'
@@ -394,10 +394,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
 
       // Temporarily make the grid container visible for capture
       const originalGridStyle = {
-        position: gridRef.current.style.position,
-        top: gridRef.current.style.top,
-        left: gridRef.current.style.left,
-        display: gridRef.current.style.display
+        position: gridRef.current.style.position || 'absolute',
+        top: gridRef.current.style.top || '-9999px',
+        left: gridRef.current.style.left || '-9999px',
+        display: gridRef.current.style.display || 'block'
       }
 
       gridRef.current.style.position = 'static'
@@ -467,12 +467,12 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         page3Ctx!.fillRect(x, y, cardW, cardH)
 
         // Card border
-        page3Ctx!.strokeStyle = sector.colorHex
+        page3Ctx!.strokeStyle = sector.colorHex || '#000000'
         page3Ctx!.lineWidth = 2
         page3Ctx!.strokeRect(x, y, cardW, cardH)
 
         // Header
-        page3Ctx!.fillStyle = sector.colorHex
+        page3Ctx!.fillStyle = sector.colorHex || '#000000'
         page3Ctx!.fillRect(x, y, cardW, 30)
 
         // Header text
@@ -730,7 +730,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
               radiusPct={46}
               insetRatio={1.0}
               labelOffset={12}
-              cardsMode="none"
+              cardsMode={undefined}
               cardsRadiusPct={60}
             />
           )}
@@ -756,7 +756,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   bearingFromNorth={bearingFromNorth}
                   size={600}
                   config={config}
-                  cardsMode="none"
+                  cardsMode={undefined}
                   transformations={transformations}
                 />
               </div>
