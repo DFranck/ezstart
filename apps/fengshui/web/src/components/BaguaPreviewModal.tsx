@@ -1,10 +1,12 @@
 'use client'
 
-import { DIRECTIONS } from '@/types/directions'
+import { DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
 import BaguaWheel from './steps/BaguaWheel'
+import BaguaGrid from './steps/BaguaGrid'
+import { Transformations } from '@/types/bagua'
 
 type Props = {
   isOpen: boolean
@@ -12,15 +14,19 @@ type Props = {
   config: YearBaguaConfig
   planImage?: string
   bearingFromNorth: number
+  visualizationMode?: 'wheel' | 'grid'
+  transformations?: Transformations
 }
 
-export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingFromNorth }: Props) {
+export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingFromNorth, visualizationMode = 'wheel', transformations }: Props) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const baguaRef = useRef<HTMLDivElement>(null)
+  const wheelRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
 
   // Variables de couleurs pour le PDF basées sur le theme
@@ -90,7 +96,14 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const captureSize = 1200 // Capture à 2x la résolution
       const scaleFactor = captureSize / containerSize
 
-      const dataUrl = await domtoimage.toPng(baguaRef.current, {
+      // First capture the wheel component
+      console.log('Capturing wheel component...')
+      if (!wheelRef.current) throw new Error('Wheel container not found')
+
+      const originalWheelDisplay = wheelRef.current.style.display
+      wheelRef.current.style.display = 'block'
+
+      const wheelDataUrl = await domtoimage.toPng(wheelRef.current, {
         quality: 1,
         width: captureSize,
         height: captureSize,
@@ -117,9 +130,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         },
       })
 
-      console.log('dom-to-image capture successful, data URL length:', dataUrl.length)
+      wheelRef.current.style.display = originalWheelDisplay
 
-      // Créer un canvas à partir du dataURL pour jsPDF
+      console.log('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
+
+      // Créer un canvas à partir du wheelDataURL pour jsPDF
       const img = new Image()
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
@@ -133,36 +148,96 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           ctx?.drawImage(img, 0, 0, captureSize, captureSize)
           resolve(undefined)
         }
-        img.src = dataUrl
+        img.src = wheelDataUrl
       })
 
       console.log('Canvas created successfully:', canvas.width, 'x', canvas.height)
 
-      // Remettre l'élément masqué après capture
-      baguaRef.current.style.display = originalDisplay
-
-      // Create PDF
+      // Create PDF with 2 pages
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       })
 
-      // Add title (sans emoji pour meilleur centrage)
-      pdf.setFontSize(20)
-      // Pas de setTextColor pour le titre en dark mode (reste noir car PDF fond blanc par défaut dans jsPDF)
-      pdf.text('Analyse Feng Shui Bagua', 105, 30, { align: 'center' })
+      // Function to capture a specific visualization mode
+      const captureVisualizationMode = async (mode: 'wheel' | 'grid') => {
+        console.log(`Capturing ${mode} mode...`)
 
-      pdf.setFontSize(12)
-      pdf.text(
-        `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
-        105,
-        45,
-        { align: 'center' }
-      )
+        // Temporarily update the bagua container to show the desired mode
+        if (!baguaRef.current) throw new Error('Bagua container not found')
 
-      // Capturer les BaguaSectorCard rendues en React
-      console.log('Capturing BaguaSectorCard components...')
+        // Force display the bagua container temporarily
+        const originalDisplay = baguaRef.current.style.display
+        baguaRef.current.style.display = 'block'
+
+        // The container already renders the mode based on visualizationMode prop
+        // We need to capture both modes separately
+        const captureSize = 1200
+        const dataUrl = await domtoimage.toPng(baguaRef.current, {
+          quality: 1,
+          width: captureSize,
+          height: captureSize,
+          bgcolor: pdfBgColor,
+          style: {
+            transform: `scale(2)`,
+            transformOrigin: 'top left',
+          },
+        })
+
+        // Hide it again
+        baguaRef.current.style.display = originalDisplay
+
+        return dataUrl
+      }
+
+      // Function to create a page for a specific visualization mode
+      const createPageForMode = async (mode: 'wheel' | 'grid', pageNumber: number, imageData: string) => {
+        if (pageNumber > 1) pdf.addPage()
+
+        // Add page title
+        pdf.setFontSize(20)
+        pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
+
+        pdf.setFontSize(14)
+        pdf.text(
+          `Page ${pageNumber}/2 - Vue ${mode === 'wheel' ? 'Roue' : 'Grille'} Bagua`,
+          105,
+          35,
+          { align: 'center' }
+        )
+
+        pdf.setFontSize(12)
+        pdf.text(
+          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
+          105,
+          45,
+          { align: 'center' }
+        )
+
+        const maxWidth = mode === 'wheel' ? 190 : 160
+        const imgWidth = maxWidth
+        const imgHeight = maxWidth
+        const x = (210 - imgWidth) / 2
+        const y = mode === 'wheel' ? 55 : 70
+
+        // Add the image
+        pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
+
+        // Add orientation info
+        pdf.setFontSize(12)
+        pdf.text(
+          `Orientation : ${Math.round(bearingFromNorth)}° depuis le Nord`,
+          105,
+          y + imgHeight + 15,
+          { align: 'center' }
+        )
+
+        return { x, y, imgWidth, imgHeight }
+      }
+
+      // Capture cards for wheel mode
+      console.log('Capturing cards for wheel mode...')
 
       if (!cardsRef.current) {
         console.error('Cards container not found')
@@ -177,10 +252,10 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const cardsDataUrl = await domtoimage.toPng(cardsRef.current, {
         quality: 1,
         bgcolor: 'transparent',
-        width: 800 * 2, // Taille du conteneur * 2
+        width: 800 * 2,
         height: 800 * 2,
         style: {
-          transform: 'scale(2)', // Scale 2x pour haute résolution
+          transform: 'scale(2)',
           transformOrigin: 'top left',
           width: '800px',
           height: '800px',
@@ -190,77 +265,78 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Remettre masqué
       cardsRef.current.style.display = originalCardsDisplay
 
-      // Créer une image des cartes pour le PDF
-      const cardsImg = new Image()
-      await new Promise(resolve => {
-        cardsImg.onload = resolve
-        cardsImg.src = cardsDataUrl
+      // Create combined image with cards (for wheel)
+      const createWheelImage = async () => {
+        const combinedCanvas = document.createElement('canvas')
+        const combinedCtx = combinedCanvas.getContext('2d')
+        combinedCanvas.width = captureSize
+        combinedCanvas.height = captureSize
+
+        const baguaImg = new Image()
+        const cardsImg = new Image()
+
+        await new Promise(resolve => {
+          let loaded = 0
+          const onLoad = () => {
+            loaded++
+            if (loaded === 2) resolve(undefined)
+          }
+
+          baguaImg.onload = onLoad
+          cardsImg.onload = onLoad
+          baguaImg.src = wheelDataUrl
+          cardsImg.src = cardsDataUrl
+        })
+
+        // Draw bagua background
+        combinedCtx?.drawImage(baguaImg, 0, 0, captureSize, captureSize)
+        // Draw cards overlay (only for wheel)
+        combinedCtx?.drawImage(cardsImg, 0, 0, captureSize, captureSize)
+
+        return combinedCanvas.toDataURL('image/png', 1.0)
+      }
+
+      // Create wheel image (with cards)
+      const wheelImageData = await createWheelImage()
+
+      // Capture Grid separately
+      console.log('Capturing grid for page 2...')
+      if (!gridRef.current) throw new Error('Grid container not found')
+
+      const originalGridDisplay = gridRef.current.style.display
+      gridRef.current.style.display = 'block'
+
+      const gridDataUrl = await domtoimage.toPng(gridRef.current, {
+        quality: 1,
+        width: captureSize,
+        height: captureSize,
+        bgcolor: pdfBgColor,
+        style: {
+          transform: `scale(${scaleFactor})`,
+          transformOrigin: 'top left',
+          width: `${containerSize}px`,
+          height: `${containerSize}px`,
+        },
       })
 
-      // Dessiner les cartes sur le PDF en superposition avec l'image Bagua
-      const cardsCanvas = document.createElement('canvas')
-      const cardsCtx = cardsCanvas.getContext('2d')
-      cardsCanvas.width = canvas.width // Utilise la taille haute résolution
-      cardsCanvas.height = canvas.height
+      gridRef.current.style.display = originalGridDisplay
 
-      // Dessiner l'image Bagua de base (haute résolution)
-      cardsCtx?.drawImage(canvas, 0, 0)
+      // For grid, use the captured grid image (no cards)
+      const gridImageData = gridDataUrl
 
-      // Superposer les cartes - aligner sur l'image Bagua haute résolution
-      // L'image Bagua fait maintenant 1200px dans un canvas de même taille
-      // Le conteneur des cartes fait 1600px (800*2) avec les cartes proportionnelles
-      const baguaImageSize = captureSize // 1200px
-      const cardsContainerSize = 800 * 2 // 1600px (haute résolution)
+      // Save preview image for desktop (using wheel with cards)
+      setPreviewImageUrl(wheelImageData)
 
-      // Échelle pour que les cartes soient proportionnelles à l'image Bagua haute résolution
-      const scale = canvas.width / cardsContainerSize // Échelle adaptée à la haute résolution
-      const cardsWidth = cardsImg.width * scale
-      const cardsHeight = cardsImg.height * scale
+      // Generate Page 1 (Wheel with cards)
+      await createPageForMode('wheel', 1, wheelImageData)
 
-      // Centrer parfaitement sur l'image Bagua haute résolution
-      const cardsX = (canvas.width - cardsWidth) / 2
-      const cardsY = (canvas.height - cardsHeight) / 2
-
-      cardsCtx?.drawImage(cardsImg, cardsX, cardsY, cardsWidth, cardsHeight)
-
-      // Utiliser le canvas combiné pour le PDF
-      const combinedCanvas = cardsCanvas
-      console.log(
-        'Combined canvas created successfully:',
-        combinedCanvas.width,
-        'x',
-        combinedCanvas.height
-      )
-
-      // Add the captured image - TAILLE MAXIMALE sur la page PDF avec qualité optimale
-      const imgData = combinedCanvas.toDataURL('image/png', 1.0) // Qualité PNG maximale
-
-      // Sauvegarder l'image pour le preview desktop (évite double scrollbar iframe)
-      setPreviewImageUrl(imgData)
-
-      // Utiliser quasiment toute la largeur A4 avec marges
-      const maxWidth = 190 // 210mm - 40mm de marges (20mm de chaque côté)
-      const imgWidth = maxWidth
-      const imgHeight = maxWidth // Image carrée
-      const x = (210 - imgWidth) / 2 // Center on A4 width
-      const y = 55
-
-      // Ajouter l'image avec compression optimale pour PDF
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
-
-      // Add orientation info
-      pdf.setFontSize(12)
-      pdf.text(
-        `Orientation : ${Math.round(bearingFromNorth)}° depuis le Nord`,
-        105,
-        y + imgHeight + 15,
-        { align: 'center' }
-      )
+      // Generate Page 2 (Grid without cards)
+      await createPageForMode('grid', 2, gridImageData)
 
       // Generate blob and URL
       const blob = pdf.output('blob')
       const url = URL.createObjectURL(blob)
-      console.log('PDF generated successfully with direction cards')
+      console.log('PDF generated successfully with 2 pages: Wheel + Grid views')
       setPdfUrl(url)
     } catch (error) {
       console.error('Erreur génération PDF détaillée:', error)
@@ -344,18 +420,19 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
     >
       {/* Bagua Wheel Preview */}
       <div className="flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-0">
-        {/* BaguaWheel MASQUÉ pour capture PDF uniquement */}
+        {/* Wheel MASQUÉE pour capture PDF */}
         <div
-          ref={baguaRef}
+          ref={wheelRef}
           style={{
-            width: 'fit-content',
-            minWidth: '600px',
-            minHeight: '600px',
-            display: 'none',
+            width: '600px',
+            height: '600px',
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
           }}
-          data-bagua="container"
+          data-bagua="wheel-container"
         >
-          {planImage && config ? (
+          {planImage && config && (
             <BaguaWheel
               src={planImage}
               bearingFromNorth={bearingFromNorth}
@@ -367,11 +444,79 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
               cardsMode="hover"
               cardsRadiusPct={60}
             />
-          ) : (
-            <div className="flex items-center justify-center w-[600px] h-[600px]">
-              <p className="text-gray-500">Chargement de la roue Bagua...</p>
+          )}
+        </div>
+
+        {/* Grid MASQUÉE pour capture PDF */}
+        <div
+          ref={gridRef}
+          style={{
+            width: '600px',
+            height: '600px',
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+          }}
+          data-bagua="grid-container"
+        >
+          {planImage && config && (
+            <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
+                <BaguaGrid
+                  src={planImage}
+                  bearingFromNorth={bearingFromNorth}
+                  size={600}
+                  config={config}
+                  cardsMode="hover"
+                  transformations={transformations}
+                />
+              </div>
             </div>
           )}
+        </div>
+
+        {/* Preview visible : TOUJOURS les 2 versions */}
+        <div className="space-y-6 max-w-full overflow-x-auto">
+          {/* Wheel Version */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-center">Vue Roue Bagua</h3>
+            <div className="flex justify-center">
+              {planImage && config && (
+                <BaguaWheel
+                  src={planImage}
+                  bearingFromNorth={bearingFromNorth}
+                  size={isMobile ? 300 : 400}
+                  config={config}
+                  radiusPct={46}
+                  insetRatio={1.0}
+                  labelOffset={12}
+                  cardsMode="hover"
+                  cardsRadiusPct={60}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Grid Version */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-center">Vue Grille Bagua</h3>
+            <div className="flex justify-center">
+              {planImage && config && (
+                <div style={{ width: isMobile ? '300px' : '400px', height: isMobile ? '300px' : '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ maxWidth: isMobile ? '300px' : '400px', maxHeight: isMobile ? '300px' : '400px' }}>
+                    <BaguaGrid
+                      src={planImage}
+                      bearingFromNorth={bearingFromNorth}
+                      size={isMobile ? 300 : 400}
+                      config={config}
+                      cardsMode="hover"
+                      transformations={transformations}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Conteneur des BaguaSectorCard pour capture PDF */}
@@ -386,23 +531,42 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         >
           {planImage &&
             config &&
-            DIRECTIONS.map((dir, index) => {
-              const angle = index * 45
-              const totalRotation = bearingFromNorth + (config?.rotationOffsetDeg ?? 0)
-              const adjustedAngle = angle + totalRotation
-              const radian = ((adjustedAngle - 90) * Math.PI) / 180
+            (visualizationMode === 'wheel' ? DIRECTIONS : DIRECTIONS_WITH_CENTER).map((dir, index) => {
+              let xPct, yPct
 
-              // Position en cercle (en pixels dans le conteneur 800x800)
-              // Le plan Bagua fait ~600px, on veut les cartes autour à une distance raisonnable
-              const cardRadius = 320 // Distance du centre pour que les cartes encadrent bien le plan
-              const centerX = 400
-              const centerY = 400
-              const cardX = centerX + cardRadius * Math.cos(radian)
-              const cardY = centerY + cardRadius * Math.sin(radian)
+              if (visualizationMode === 'wheel') {
+                // Position en cercle pour la wheel
+                const angle = index * 45
+                const totalRotation = bearingFromNorth + (config?.rotationOffsetDeg ?? 0)
+                const adjustedAngle = angle + totalRotation
+                const radian = ((adjustedAngle - 90) * Math.PI) / 180
 
-              // Conversion en pourcentages pour BaguaSectorCard
-              const xPct = (cardX / 800) * 100
-              const yPct = (cardY / 800) * 100
+                const cardRadius = 320 // Distance du centre pour que les cartes encadrent bien le plan
+                const centerX = 400
+                const centerY = 400
+                const cardX = centerX + cardRadius * Math.cos(radian)
+                const cardY = centerY + cardRadius * Math.sin(radian)
+
+                xPct = (cardX / 800) * 100
+                yPct = (cardY / 800) * 100
+              } else {
+                // Position en grille EXTERNE pour la grid (en dehors du plan)
+                const gridPositions = {
+                  'NO': { x: 5, y: 5 },     // Coin Haut-Gauche EXTERNE
+                  'N': { x: 50, y: 2 },     // Haut-Centre EXTERNE
+                  'NE': { x: 95, y: 5 },    // Coin Haut-Droite EXTERNE
+                  'O': { x: 2, y: 50 },     // Centre-Gauche EXTERNE
+                  'C': { x: 50, y: 50 },    // Centre (reste au milieu)
+                  'E': { x: 98, y: 50 },    // Centre-Droite EXTERNE
+                  'SO': { x: 5, y: 95 },    // Coin Bas-Gauche EXTERNE
+                  'S': { x: 50, y: 98 },    // Bas-Centre EXTERNE
+                  'SE': { x: 95, y: 95 },   // Coin Bas-Droite EXTERNE
+                }
+
+                const position = gridPositions[dir as keyof typeof gridPositions]
+                xPct = position ? position.x : 50
+                yPct = position ? position.y : 50
+              }
 
               // Version ultra-compacte pour PDF
               const sector = config.orientations?.[dir]
@@ -529,6 +693,9 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
                   <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
                   <p className="text-sm text-gray-600 mb-1">
                     Capture haute résolution de votre analyse Feng Shui
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Format A4 (210×297mm) - Image {visualizationMode === 'wheel' ? 'circulaire' : 'rectangulaire'} avec cards
                   </p>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
