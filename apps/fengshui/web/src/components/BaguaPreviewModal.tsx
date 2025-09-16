@@ -221,7 +221,7 @@ export function BaguaPreviewModal({
           const x = startX + col * spacingX
           const y = startY + row * spacingY
 
-          const accent = sector.colorHex
+          const accent = sector.colorHex || '#000000'
           const accents = sector.colorHexes
 
           // Convert hex colors to RGB for jsPDF
