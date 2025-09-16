@@ -381,8 +381,54 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       }
       className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-hidden"
     >
-      {/* Bagua Wheel Preview */}
+      {/* Bagua Preview - Les 2 versions VISIBLES EN PREMIER */}
       <div className="flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-0">
+
+        {/* Preview visible : TOUJOURS les 2 versions - EN PREMIER */}
+        <div className="space-y-4 max-w-full overflow-x-auto w-full">
+          {/* Wheel Version */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-center">Vue Roue Bagua</h3>
+            <div className="flex justify-center">
+              {planImage && config && (
+                <BaguaWheel
+                  src={planImage}
+                  bearingFromNorth={bearingFromNorth}
+                  size={isMobile ? 300 : 400}
+                  config={config}
+                  radiusPct={46}
+                  insetRatio={1.0}
+                  labelOffset={12}
+                  cardsMode="hover"
+                  cardsRadiusPct={60}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Grid Version */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-center">Vue Grille Bagua</h3>
+            <div className="flex justify-center">
+              {planImage && config && (
+                <div style={{ width: isMobile ? '300px' : '400px', height: isMobile ? '300px' : '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ maxWidth: isMobile ? '300px' : '400px', maxHeight: isMobile ? '300px' : '400px' }}>
+                    <BaguaGrid
+                      src={planImage}
+                      bearingFromNorth={bearingFromNorth}
+                      size={isMobile ? 300 : 400}
+                      config={config}
+                      cardsMode="hover"
+                      transformations={transformations}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Containers CACHÉS pour capture PDF */}
         {/* Wheel MASQUÉE pour capture PDF */}
         <div
           ref={wheelRef}
@@ -436,50 +482,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
               </div>
             </div>
           )}
-        </div>
-
-        {/* Preview visible : TOUJOURS les 2 versions */}
-        <div className="space-y-6 max-w-full overflow-x-auto">
-          {/* Wheel Version */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-center">Vue Roue Bagua</h3>
-            <div className="flex justify-center">
-              {planImage && config && (
-                <BaguaWheel
-                  src={planImage}
-                  bearingFromNorth={bearingFromNorth}
-                  size={isMobile ? 300 : 400}
-                  config={config}
-                  radiusPct={46}
-                  insetRatio={1.0}
-                  labelOffset={12}
-                  cardsMode="hover"
-                  cardsRadiusPct={60}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Grid Version */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-center">Vue Grille Bagua</h3>
-            <div className="flex justify-center">
-              {planImage && config && (
-                <div style={{ width: isMobile ? '300px' : '400px', height: isMobile ? '300px' : '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ maxWidth: isMobile ? '300px' : '400px', maxHeight: isMobile ? '300px' : '400px' }}>
-                    <BaguaGrid
-                      src={planImage}
-                      bearingFromNorth={bearingFromNorth}
-                      size={isMobile ? 300 : 400}
-                      config={config}
-                      cardsMode="hover"
-                      transformations={transformations}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Conteneur des BaguaSectorCard pour capture PDF */}
