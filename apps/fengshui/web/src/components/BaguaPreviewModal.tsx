@@ -93,22 +93,9 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       const captureSize = 1200 // Capture à 2x la résolution
       const scaleFactor = captureSize / containerSize
 
-      // First capture the wheel component
+      // Capture the wheel component (now visible in DOM)
       console.log('Capturing wheel component...')
       if (!wheelRef.current) throw new Error('Wheel container not found')
-
-      // Temporarily make the wheel container visible for capture
-      const originalWheelStyle = {
-        position: wheelRef.current.style.position,
-        top: wheelRef.current.style.top,
-        left: wheelRef.current.style.left,
-        display: wheelRef.current.style.display
-      }
-
-      wheelRef.current.style.position = 'static'
-      wheelRef.current.style.top = 'auto'
-      wheelRef.current.style.left = 'auto'
-      wheelRef.current.style.display = 'block'
 
       // Wait for render
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -139,12 +126,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           return true
         },
       })
-
-      // Restore original styling
-      wheelRef.current.style.position = originalWheelStyle.position
-      wheelRef.current.style.top = originalWheelStyle.top
-      wheelRef.current.style.left = originalWheelStyle.left
-      wheelRef.current.style.display = originalWheelStyle.display
 
       console.log('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
 
@@ -388,22 +369,9 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       // Create wheel image (with cards)
       const wheelImageData = await createWheelImage()
 
-      // Capture Grid separately
+      // Capture Grid separately (now visible in DOM)
       console.log('Capturing grid for page 2...')
       if (!gridRef.current) throw new Error('Grid container not found')
-
-      // Temporarily make the grid container visible for capture
-      const originalGridStyle = {
-        position: gridRef.current.style.position,
-        top: gridRef.current.style.top,
-        left: gridRef.current.style.left,
-        display: gridRef.current.style.display
-      }
-
-      gridRef.current.style.position = 'static'
-      gridRef.current.style.top = 'auto'
-      gridRef.current.style.left = 'auto'
-      gridRef.current.style.display = 'block'
 
       // Wait for render
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -420,12 +388,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
           height: `${containerSize}px`,
         },
       })
-
-      // Restore original styling
-      gridRef.current.style.position = originalGridStyle.position
-      gridRef.current.style.top = originalGridStyle.top
-      gridRef.current.style.left = originalGridStyle.left
-      gridRef.current.style.display = originalGridStyle.display
 
       // For grid, use the captured grid image (no cards)
       const gridImageData = gridDataUrl
@@ -613,45 +575,148 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       }
       className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-hidden"
     >
-      {/* Bagua Preview - Les 2 versions VISIBLES EN PREMIER */}
-      <div className="flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-0">
+      {/* LOADER EN HAUT - Toujours visible pendant génération */}
+      <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
 
-        {/* Preview visible : les 2 versions AVANT génération PDF, cachées APRÈS */}
-        {!pdfUrl && (
-          <div className="space-y-4 max-w-full overflow-x-auto w-full">
-          {/* Wheel Version */}
+        {isGenerating && (
+          <div className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <Icon name="lucide:FileText" className="w-12 h-12 text-blue-600 animate-pulse" />
+                <div className="absolute -top-1 -right-1">
+                  <Icon name="lucide:Loader2" className="w-6 h-6 text-blue-500 animate-spin" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
+                <p className="text-sm text-gray-600 mb-1">
+                  Capture haute résolution de votre analyse Feng Shui
+                </p>
+                <p className="text-xs text-gray-500">
+                  3 pages: Roue + Grille + Secteurs détaillés
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* APERÇU PDF - Affiché quand terminé */}
+        {pdfUrl && !isGenerating && (
+          <div className="w-full">
+            {isMobile ? (
+              // Mobile: Message informatif
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 text-center">
+                <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
+                <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  L'aperçu n'est pas disponible sur mobile, mais votre PDF 3 pages est prêt.
+                </p>
+              </div>
+            ) : (
+              // Desktop: Preview des 3 pages
+              <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
+                  Aperçu de votre analyse Feng Shui (3 pages)
+                </h4>
+                {Object.keys(previewImageUrls).length > 0 ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Page 1 - Wheel */}
+                    {previewImageUrls.page1 && (
+                      <div className="text-center">
+                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 1 - Vue Roue</h5>
+                        <img
+                          src={previewImageUrls.page1}
+                          alt="Page 1 - Roue Bagua"
+                          className="w-full h-auto rounded-lg shadow-md border"
+                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Page 2 - Grid */}
+                    {previewImageUrls.page2 && (
+                      <div className="text-center">
+                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 2 - Vue Grille</h5>
+                        <img
+                          src={previewImageUrls.page2}
+                          alt="Page 2 - Grille Bagua"
+                          className="w-full h-auto rounded-lg shadow-md border"
+                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Page 3 - Cards Grid */}
+                    {previewImageUrls.page3 && (
+                      <div className="text-center">
+                        <h5 className="text-xs font-medium text-gray-600 mb-2">Page 3 - Secteurs</h5>
+                        <img
+                          src={previewImageUrls.page3}
+                          alt="Page 3 - Secteurs Détaillés"
+                          className="w-full h-auto rounded-lg shadow-md border"
+                          style={{ maxHeight: '200px', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-64 text-gray-500">
+                    <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
+                    <span>Preview en cours de chargement...</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* COMPOSANTS DE CAPTURE - Visibles en dessous (pour debug et capture) */}
+        <div className="w-full space-y-8 border-t pt-6 mt-6">
+          <h4 className="text-center text-sm text-gray-500">Composants utilisés pour la génération PDF</h4>
+
+          {/* Wheel pour capture PDF */}
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-center">Vue Roue Bagua</h3>
-            <div className="flex justify-center">
+            <h5 className="text-center text-xs font-medium text-gray-600">Composant Wheel (Page 1)</h5>
+            <div
+              ref={wheelRef}
+              className="flex justify-center"
+              style={{ width: '100%', overflow: 'hidden' }}
+            >
               {planImage && config && (
-                <BaguaWheel
-                  src={planImage}
-                  bearingFromNorth={bearingFromNorth}
-                  size={isMobile ? 300 : 400}
-                  config={config}
-                  radiusPct={46}
-                  insetRatio={1.0}
-                  labelOffset={12}
-                  cardsMode="hover"
-                  cardsRadiusPct={60}
-                />
+                <div style={{ width: '600px', height: '600px' }}>
+                  <BaguaWheel
+                    src={planImage}
+                    bearingFromNorth={bearingFromNorth}
+                    size={600}
+                    config={config}
+                    radiusPct={46}
+                    insetRatio={1.0}
+                    labelOffset={12}
+                    cardsMode="none"
+                    cardsRadiusPct={60}
+                  />
+                </div>
               )}
             </div>
           </div>
 
-          {/* Grid Version */}
+          {/* Grid pour capture PDF */}
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-center">Vue Grille Bagua</h3>
-            <div className="flex justify-center">
+            <h5 className="text-center text-xs font-medium text-gray-600">Composant Grid (Page 2)</h5>
+            <div
+              ref={gridRef}
+              className="flex justify-center"
+              style={{ width: '100%', overflow: 'hidden' }}
+            >
               {planImage && config && (
-                <div style={{ width: isMobile ? '300px' : '400px', height: isMobile ? '300px' : '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ maxWidth: isMobile ? '300px' : '400px', maxHeight: isMobile ? '300px' : '400px' }}>
+                <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
                     <BaguaGrid
                       src={planImage}
                       bearingFromNorth={bearingFromNorth}
-                      size={isMobile ? 300 : 400}
+                      size={600}
                       config={config}
-                      cardsMode="hover"
+                      cardsMode="none"
                       transformations={transformations}
                     />
                   </div>
@@ -660,63 +725,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
             </div>
           </div>
         </div>
-        )}
 
-        {/* Containers CACHÉS pour capture PDF */}
-        {/* Wheel MASQUÉE pour capture PDF */}
-        <div
-          ref={wheelRef}
-          style={{
-            width: '600px',
-            height: '600px',
-            position: 'absolute',
-            top: '-9999px',
-            left: '-9999px',
-          }}
-          data-bagua="wheel-container"
-        >
-          {planImage && config && (
-            <BaguaWheel
-              src={planImage}
-              bearingFromNorth={bearingFromNorth}
-              size={600}
-              config={config}
-              radiusPct={46}
-              insetRatio={1.0}
-              labelOffset={12}
-              cardsMode="none"
-              cardsRadiusPct={60}
-            />
-          )}
-        </div>
-
-        {/* Grid MASQUÉE pour capture PDF */}
-        <div
-          ref={gridRef}
-          style={{
-            width: '600px',
-            height: '600px',
-            position: 'absolute',
-            top: '-9999px',
-            left: '-9999px',
-          }}
-          data-bagua="grid-container"
-        >
-          {planImage && config && (
-            <div style={{ width: '600px', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
-                <BaguaGrid
-                  src={planImage}
-                  bearingFromNorth={bearingFromNorth}
-                  size={600}
-                  config={config}
-                  cardsMode="none"
-                  transformations={transformations}
-                />
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Conteneur des BaguaSectorCard pour capture PDF */}
         <div
@@ -876,114 +885,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
             })}
         </div>
 
-        {/* PDF Preview ou Loader */}
-        <div className="w-full mt-4">
-          {isGenerating ? (
-            // Loader pendant génération (tous devices)
-            <div className="border border-gray-200 rounded-lg p-8 bg-gradient-to-br from-blue-50 to-indigo-50 text-center">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <Icon name="lucide:FileText" className="w-16 h-16 text-blue-600 animate-pulse" />
-                  <div className="absolute -top-1 -right-1">
-                    <Icon name="lucide:Loader2" className="w-6 h-6 text-blue-500 animate-spin" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    Capture haute résolution de votre analyse Feng Shui
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Format A4 (210×297mm) - Image {visualizationMode === 'wheel' ? 'circulaire' : 'rectangulaire'} avec cards
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : pdfUrl ? (
-            // PDF généré
-            <>
-              {isMobile ? (
-                // Mobile: Message informatif car les iframes PDF ne marchent pas
-                <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 text-center">
-                  <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
-                  <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    L'aperçu n'est pas disponible sur mobile, mais votre PDF est prêt à être
-                    téléchargé.
-                  </p>
-                  <div className="text-xs text-gray-500">
-                    Taille : ~{((pdfUrl.length * 0.75) / 1024 / 1024).toFixed(1)} MB
-                  </div>
-                </div>
-              ) : (
-                // Desktop: Preview des 3 pages
-                <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
-                    Aperçu de votre analyse Feng Shui (3 pages)
-                  </h4>
-                  {Object.keys(previewImageUrls).length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                      {/* Page 1 - Wheel */}
-                      {previewImageUrls.page1 && (
-                        <div className="text-center">
-                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 1 - Vue Roue</h5>
-                          <img
-                            src={previewImageUrls.page1}
-                            alt="Page 1 - Roue Bagua"
-                            className="w-full h-auto rounded-lg shadow-md border"
-                            style={{ maxHeight: '200px', objectFit: 'contain' }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Page 2 - Grid */}
-                      {previewImageUrls.page2 && (
-                        <div className="text-center">
-                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 2 - Vue Grille</h5>
-                          <img
-                            src={previewImageUrls.page2}
-                            alt="Page 2 - Grille Bagua"
-                            className="w-full h-auto rounded-lg shadow-md border"
-                            style={{ maxHeight: '200px', objectFit: 'contain' }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Page 3 - Cards Grid */}
-                      {previewImageUrls.page3 && (
-                        <div className="text-center">
-                          <h5 className="text-xs font-medium text-gray-600 mb-2">Page 3 - Secteurs</h5>
-                          <img
-                            src={previewImageUrls.page3}
-                            alt="Page 3 - Secteurs Détaillés"
-                            className="w-full h-auto rounded-lg shadow-md border"
-                            style={{ maxHeight: '200px', objectFit: 'contain' }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-64 text-gray-500">
-                      <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
-                      <span>Preview en cours de chargement...</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          ) : null}
-        </div>
       </div>
     </Modal>
   )
