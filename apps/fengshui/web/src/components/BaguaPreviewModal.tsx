@@ -93,8 +93,21 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       console.log('Capturing wheel component...')
       if (!wheelRef.current) throw new Error('Wheel container not found')
 
-      const originalWheelDisplay = wheelRef.current.style.display
+      // Temporarily make the wheel container visible for capture
+      const originalWheelStyle = {
+        position: wheelRef.current.style.position,
+        top: wheelRef.current.style.top,
+        left: wheelRef.current.style.left,
+        display: wheelRef.current.style.display
+      }
+
+      wheelRef.current.style.position = 'static'
+      wheelRef.current.style.top = 'auto'
+      wheelRef.current.style.left = 'auto'
       wheelRef.current.style.display = 'block'
+
+      // Wait for render
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       const wheelDataUrl = await domtoimage.toPng(wheelRef.current, {
         quality: 1,
@@ -123,7 +136,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         },
       })
 
-      wheelRef.current.style.display = originalWheelDisplay
+      // Restore original styling
+      wheelRef.current.style.position = originalWheelStyle.position
+      wheelRef.current.style.top = originalWheelStyle.top
+      wheelRef.current.style.left = originalWheelStyle.left
+      wheelRef.current.style.display = originalWheelStyle.display
 
       console.log('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
 
@@ -266,8 +283,21 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       console.log('Capturing grid for page 2...')
       if (!gridRef.current) throw new Error('Grid container not found')
 
-      const originalGridDisplay = gridRef.current.style.display
+      // Temporarily make the grid container visible for capture
+      const originalGridStyle = {
+        position: gridRef.current.style.position,
+        top: gridRef.current.style.top,
+        left: gridRef.current.style.left,
+        display: gridRef.current.style.display
+      }
+
+      gridRef.current.style.position = 'static'
+      gridRef.current.style.top = 'auto'
+      gridRef.current.style.left = 'auto'
       gridRef.current.style.display = 'block'
+
+      // Wait for render
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       const gridDataUrl = await domtoimage.toPng(gridRef.current, {
         quality: 1,
@@ -282,7 +312,11 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         },
       })
 
-      gridRef.current.style.display = originalGridDisplay
+      // Restore original styling
+      gridRef.current.style.position = originalGridStyle.position
+      gridRef.current.style.top = originalGridStyle.top
+      gridRef.current.style.left = originalGridStyle.left
+      gridRef.current.style.display = originalGridStyle.display
 
       // For grid, use the captured grid image (no cards)
       const gridImageData = gridDataUrl
