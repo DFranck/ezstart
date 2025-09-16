@@ -44,7 +44,6 @@ const UploadStep = () => {
   return (
     <StepContent stepId="upload">
       {(data: UploadStepData, updateData) => {
-        const { nextStep } = useStepper()
         const [isEditing, setIsEditing] = useState(false)
 
         const hasUploadedContent = !!(data?.file || data?.preview) || isEditing
@@ -84,8 +83,6 @@ const UploadStep = () => {
                     position: { x: 0, y: 0 },
                   },
                 })
-                // Passer automatiquement à l'étape suivante
-                setTimeout(() => nextStep(), 100)
               }}
               onEditingChange={setIsEditing}
               // Optional minimal-crop intent (ignored if PlanUploader doesn't support it)

@@ -6,6 +6,30 @@ import { cn } from '../lib/utils'
 import { Button } from './button'
 import { Icon, KnownIconName } from './icon'
 import { Div, Span } from './tag'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+
+// Composant wrapper pour les boutons avec tooltip
+interface TooltipButtonProps {
+  button: StepButton
+  children: ReactNode
+}
+
+function TooltipButton({ button, children }: TooltipButtonProps) {
+  if (!button.tooltip) {
+    return <>{children}</>
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {children}
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{button.tooltip}</p>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 // Types
 export interface Step {
@@ -40,6 +64,24 @@ export const useStepper = () => {
   return context
 }
 
+// Types pour les boutons conditionnels
+export interface StepButton {
+  label: string
+  icon?: string
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'ezstart'
+  disabled?: boolean
+  hidden?: boolean
+  onClick?: () => void
+  className?: string
+  tooltip?: string
+}
+
+export interface StepperButtons {
+  previous?: StepButton | false
+  next?: StepButton | false
+  custom?: StepButton[]
+}
+
 // Props pour le composant principal
 interface StepperProps {
   steps: Step[]
@@ -51,6 +93,7 @@ interface StepperProps {
   showStepNumbers?: boolean
   allowStepNavigation?: boolean
   children?: ReactNode
+  renderButtons?: (context: StepperContextType) => StepperButtons
 }
 
 // Composant principal Stepper
@@ -64,6 +107,7 @@ export function Stepper({
   showStepNumbers = true,
   allowStepNavigation = true,
   children,
+  renderButtons,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [stepData, setStepData] = useState<Record<string, any>>({})
@@ -132,8 +176,9 @@ export function Stepper({
   }
 
   return (
-    <StepperContext.Provider value={contextValue}>
-      <Div className="flex-1 flex flex-col w-full mb-18">
+    <TooltipProvider>
+      <StepperContext.Provider value={contextValue}>
+        <Div className="flex-1 flex flex-col w-full mb-18">
         {/* Header avec les étapes */}
         <StepperHeader
           steps={steps}
@@ -157,10 +202,13 @@ export function Stepper({
             onNext={nextStep}
             onPrevious={previousStep}
             isLastStep={currentStep === steps.length - 1}
+            renderButtons={renderButtons}
+            context={contextValue}
           />
         </Div>
-      </Div>
-    </StepperContext.Provider>
+        </Div>
+      </StepperContext.Provider>
+    </TooltipProvider>
   )
 }
 
@@ -261,6 +309,8 @@ interface StepperNavigationProps {
   onNext: () => void
   onPrevious: () => void
   isLastStep: boolean
+  renderButtons?: (context: StepperContextType) => StepperButtons
+  context: StepperContextType
 }
 
 function StepperNavigation({
@@ -269,28 +319,85 @@ function StepperNavigation({
   onNext,
   onPrevious,
   isLastStep,
+  renderButtons,
+  context,
 }: StepperNavigationProps) {
+  // Boutons par défaut si renderButtons n'est pas fourni
+  const defaultButtons: StepperButtons = {
+    previous: {
+      label: 'Previous',
+      icon: 'lucide:ArrowLeft',
+      variant: 'outline',
+      disabled: currentStep === 0,
+      onClick: onPrevious,
+      className: cn(currentStep === 0 && 'text-muted-foreground cursor-not-allowed'),
+    },
+    next: {
+      label: isLastStep ? 'Finish' : 'Next',
+      icon: isLastStep ? 'lucide:Check' : 'lucide:ArrowRight',
+      variant: 'ezstart',
+      onClick: onNext,
+    },
+  }
+
+  const buttons = renderButtons ? renderButtons(context) : defaultButtons
+
   return (
     <>
       <div className="fixed z-20 bottom-0 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card">
-        <Button
-          onClick={onPrevious}
-          disabled={currentStep === 0}
-          variant={'outline'}
-          className={cn(currentStep === 0 && 'text-muted-foreground cursor-not-allowed')}
-        >
-          <Icon name="lucide:ArrowLeft" className="w-4 h-4" />
-          <span className="hidden sm:inline">Previous</span>
-        </Button>
+        {/* Bouton Previous */}
+        {buttons.previous && !buttons.previous.hidden && (
+          <TooltipButton button={buttons.previous}>
+            <Button
+              onClick={buttons.previous.onClick}
+              disabled={buttons.previous.disabled}
+              variant={buttons.previous.variant || 'outline'}
+              className={buttons.previous.className}
+            >
+              {buttons.previous.icon && <Icon name={buttons.previous.icon as KnownIconName} className="w-4 h-4" />}
+              <span className="hidden sm:inline">{buttons.previous.label}</span>
+            </Button>
+          </TooltipButton>
+        )}
 
-        <div className="text-sm text-muted-foreground">
-          Step {currentStep + 1} of {totalSteps}
+        {/* Espace ou boutons custom au centre */}
+        <div className="flex items-center gap-2">
+          {buttons.custom?.map((btn, index) => (
+            !btn.hidden && (
+              <TooltipButton key={index} button={btn}>
+                <Button
+                  onClick={btn.onClick}
+                  disabled={btn.disabled}
+                  variant={btn.variant || 'outline'}
+                  className={btn.className}
+                >
+                  {btn.icon && <Icon name={btn.icon as KnownIconName} className="w-4 h-4" />}
+                  <span className="hidden sm:inline">{btn.label}</span>
+                </Button>
+              </TooltipButton>
+            )
+          ))}
+          {!buttons.custom && (
+            <div className="text-sm text-muted-foreground">
+              Step {currentStep + 1} of {totalSteps}
+            </div>
+          )}
         </div>
 
-        <Button onClick={onNext} variant={'ezstart'}>
-          <span className="hidden sm:inline">{isLastStep ? 'Finish' : 'Next'}</span>
-          <Icon name={isLastStep ? 'lucide:Check' : 'lucide:ArrowRight'} className="w-4 h-4" />
-        </Button>
+        {/* Bouton Next */}
+        {buttons.next && !buttons.next.hidden && (
+          <TooltipButton button={buttons.next}>
+            <Button
+              onClick={buttons.next.onClick}
+              disabled={buttons.next.disabled}
+              variant={buttons.next.variant || 'ezstart'}
+              className={buttons.next.className}
+            >
+              <span className="hidden sm:inline">{buttons.next.label}</span>
+              {buttons.next.icon && <Icon name={buttons.next.icon as KnownIconName} className="w-4 h-4" />}
+            </Button>
+          </TooltipButton>
+        )}
       </div>
     </>
   )

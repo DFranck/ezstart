@@ -62,6 +62,51 @@ export default function AnalyzePage() {
         onStepChange={handleStepChange}
         onComplete={handleComplete}
         allowStepNavigation
+        renderButtons={(context) => {
+          const uploadData = context.getStepData('upload')
+          const isUploadStep = context.currentStep === 0
+          const hasFile = uploadData?.file
+          const hasCroppedImage = uploadData?.transformations?.crop
+
+          // Pour Step 1: bloquer si pas de fichier OU si image sans crop validé
+          const canProceedFromStep1 = hasFile && (
+            // Si c'est un PDF, pas besoin de crop
+            !uploadData.file?.type?.startsWith('image/') ||
+            // Si c'est une image, crop doit être validé
+            hasCroppedImage
+          )
+
+          return {
+            previous: context.currentStep === 0 ? false : {
+              label: 'Précédent',
+              icon: 'lucide:ArrowLeft',
+              variant: 'outline',
+              onClick: context.previousStep,
+              tooltip: 'Retourner à l\'étape précédente',
+            },
+            next: {
+              label: context.currentStep === context.steps.length - 1 ? 'Terminer' : 'Suivant',
+              icon: context.currentStep === context.steps.length - 1 ? 'lucide:Check' : 'lucide:ArrowRight',
+              variant: 'ezstart',
+              disabled: isUploadStep && !canProceedFromStep1,
+              onClick: context.nextStep,
+              tooltip: isUploadStep && !canProceedFromStep1
+                ? (hasFile ? 'Validez d\'abord le crop avec le bouton ✓' : 'Uploadez d\'abord un plan')
+                : context.currentStep === context.steps.length - 1
+                  ? 'Terminer l\'analyse Feng Shui'
+                  : 'Passer à l\'étape suivante',
+            },
+            custom: isUploadStep && !canProceedFromStep1 ? [{
+              label: hasFile ? 'Validez le crop avec le bouton ✓' : 'Uploadez d\'abord un plan',
+              icon: 'lucide:AlertCircle',
+              variant: 'outline',
+              disabled: true,
+              tooltip: hasFile
+                ? 'Utilisez les contrôles de crop puis cliquez sur ✓ pour valider'
+                : 'Glissez-déposez votre plan ou cliquez pour parcourir',
+            }] : undefined,
+          }
+        }}
       />
     </ClientLayout>
   )
