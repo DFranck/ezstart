@@ -3,7 +3,7 @@
 
 import { getCroppedImg } from '@/utils/image'
 import { Button, Icon, Input } from '@ezstart/ui/components'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Cropper, { Area } from 'react-easy-crop'
 
@@ -41,13 +41,36 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
   // Minimal editing state
   const [isEditing, setIsEditing] = useState(false)
   const [rotation, setRotation] = useState<number>(0)
-  const [zoom, setZoom] = useState<number>(1)
+  const [zoom, setZoom] = useState<number>(0.5) // Commencer plus petit pour mobile
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropPixels | null>(null)
 
-  // Only width/height controls for the crop area
-  const [cropWidth, setCropWidth] = useState<number>(300)
-  const [cropHeight, setCropHeight] = useState<number>(200)
+  // Only width/height controls for the crop area - responsive defaults
+  const [cropWidth, setCropWidth] = useState<number>(280) // Plus petit pour mobile
+  const [cropHeight, setCropHeight] = useState<number>(180) // Plus petit pour mobile
+
+  // Ajuster les dimensions du crop selon la taille d'écran
+  useEffect(() => {
+    const updateCropSize = () => {
+      const isMobile = window.innerWidth < 640 // sm breakpoint
+      const isTablet = window.innerWidth < 768 // md breakpoint
+
+      if (isMobile) {
+        setCropWidth(200) // Plus petit pour laisser plus d'espace
+        setCropHeight(120)
+      } else if (isTablet) {
+        setCropWidth(250)
+        setCropHeight(150)
+      } else {
+        setCropWidth(300)
+        setCropHeight(200)
+      }
+    }
+
+    updateCropSize()
+    window.addEventListener('resize', updateCropSize)
+    return () => window.removeEventListener('resize', updateCropSize)
+  }, [])
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -203,8 +226,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
           {preview && isImage && (
             <div className="space-y-4">
               <div
-                className="relative w-full overflow-hidden rounded border"
-                style={{ height: 420 }}
+                className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]"
               >
                 <Cropper
                   image={preview}
@@ -220,6 +242,8 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                   onCropComplete={onCropComplete}
                   objectFit="contain"
                   showGrid={false}
+                  minZoom={0.1}
+                  maxZoom={3}
                 />
               </div>
 
@@ -230,7 +254,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                   <label className="text-sm  w-24">Zoom</label>
                   <input
                     type="range"
-                    min={1}
+                    min={0.1}
                     max={3}
                     step={0.1}
                     value={zoom}
@@ -243,41 +267,23 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                 {/* Rotation */}
                 <div className="flex items-center gap-3">
                   <label className="text-sm w-24">Rotation</label>
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2 w-full">
                     <Button
                       onClick={() => setRotation(prev => prev - 90)}
                       size="sm"
                       variant="outline"
-                      className="w-10 h-10 p-0"
-                      title="Rotation -90°"
+                      className="flex-1"
                     >
+                      - 90°
                       <Icon name="lucide:RotateCcw" className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => setRotation(prev => prev - 15)}
-                      size="sm"
-                      variant="outline"
-                      className="w-8 h-8 p-0 text-xs"
-                      title="Rotation -15°"
-                    >
-                      -15°
-                    </Button>
-                    <Button
-                      onClick={() => setRotation(prev => prev + 15)}
-                      size="sm"
-                      variant="outline"
-                      className="w-8 h-8 p-0 text-xs"
-                      title="Rotation +15°"
-                    >
-                      +15°
                     </Button>
                     <Button
                       onClick={() => setRotation(prev => prev + 90)}
                       size="sm"
                       variant="outline"
-                      className="w-10 h-10 p-0"
-                      title="Rotation +90°"
+                      className="flex-1"
                     >
+                      + 90°
                       <Icon name="lucide:RotateCw" className="w-4 h-4" />
                     </Button>
                   </div>
