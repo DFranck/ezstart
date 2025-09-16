@@ -20,12 +20,13 @@ export default function SettingsPage() {
   const loadDeletedItems = async () => {
     try {
       setLoading(true)
+      const userId = getUserId()
       const [clients, companies, quotes, invoices, receipts] = await Promise.all([
-        callApi('/clients?deletedOnly=true'),
-        callApi('/companies?deletedOnly=true'),
-        callApi('/quotes?deletedOnly=true'),
-        callApi('/invoices?deletedOnly=true'),
-        callApi('/receipts?deletedOnly=true'),
+        callApi('/clients?deletedOnly=true', { userId }),
+        callApi('/companies?deletedOnly=true', { userId }),
+        callApi('/quotes?deletedOnly=true', { userId }),
+        callApi('/invoices?deletedOnly=true', { userId }),
+        callApi('/receipts?deletedOnly=true', { userId }),
       ])
 
       setDeletedItems({

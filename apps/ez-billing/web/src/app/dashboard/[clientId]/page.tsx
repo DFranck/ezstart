@@ -121,7 +121,7 @@ const ClientDashboardPage = () => {
       const { getUserId } = await import('../../../utils/get-user-id')
 
       const response = await callApi(`/invoices/${invoice._id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         userId: getUserId(),
         body: {
           status: 'sent',
