@@ -634,12 +634,10 @@ export function BaguaPreviewModal({
       <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
         {isGenerating && (
           <div className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center flex items-center justify-center" style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}>
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <Icon name="lucide:FileText" className="w-12 h-12 text-blue-600 animate-pulse" />
-                <div className="absolute -top-1 -right-1">
-                  <Icon name="lucide:Loader2" className="w-6 h-6 text-blue-500 animate-spin" />
-                </div>
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex items-center gap-4">
+                <Icon name="lucide:FileText" className="w-12 h-12 text-blue-600" />
+                <Icon name="lucide:Loader2" className="w-10 h-10 text-blue-500 animate-spin" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
