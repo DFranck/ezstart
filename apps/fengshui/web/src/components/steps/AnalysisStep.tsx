@@ -258,6 +258,8 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                 config={cfg}
                 planImage={uploadData.preview}
                 bearingFromNorth={bearingFromNorth}
+                visualizationMode={visualizationMode}
+                transformations={uploadData.transformations}
               />
             )}
           </div>
