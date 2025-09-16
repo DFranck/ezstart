@@ -24,7 +24,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
   const [isMobile, setIsMobile] = useState(false)
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const baguaRef = useRef<HTMLDivElement>(null)
   const wheelRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
@@ -65,21 +64,15 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       setIsGenerating(true)
       console.log('Starting PDF generation with iframe-safe approach...')
 
-      // Attendre que l'élément soit rendu
+      // Attendre que les éléments soient rendus
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      if (!baguaRef.current) {
-        console.error('Bagua element still not found after delay')
-        throw new Error('Bagua element not found - make sure the modal is open')
+      if (!wheelRef.current || !gridRef.current) {
+        console.error('Wheel or Grid element not found after delay')
+        throw new Error('Wheel or Grid element not found - make sure the modal is open')
       }
 
-      console.log('Bagua element found:', baguaRef.current)
-
-      // Rendre l'élément temporairement visible pour la capture
-      const originalDisplay = baguaRef.current.style.display
-
-      // Rendre visible pour capture (display: block au lieu de none)
-      baguaRef.current.style.display = 'block'
+      console.log('Wheel and Grid elements found:', wheelRef.current, gridRef.current)
 
       // Import libraries dynamically
       const domtoimage = (await import('dom-to-image')).default
@@ -160,36 +153,6 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
         format: 'a4',
       })
 
-      // Function to capture a specific visualization mode
-      const captureVisualizationMode = async (mode: 'wheel' | 'grid') => {
-        console.log(`Capturing ${mode} mode...`)
-
-        // Temporarily update the bagua container to show the desired mode
-        if (!baguaRef.current) throw new Error('Bagua container not found')
-
-        // Force display the bagua container temporarily
-        const originalDisplay = baguaRef.current.style.display
-        baguaRef.current.style.display = 'block'
-
-        // The container already renders the mode based on visualizationMode prop
-        // We need to capture both modes separately
-        const captureSize = 1200
-        const dataUrl = await domtoimage.toPng(baguaRef.current, {
-          quality: 1,
-          width: captureSize,
-          height: captureSize,
-          bgcolor: pdfBgColor,
-          style: {
-            transform: `scale(2)`,
-            transformOrigin: 'top left',
-          },
-        })
-
-        // Hide it again
-        baguaRef.current.style.display = originalDisplay
-
-        return dataUrl
-      }
 
       // Function to create a page for a specific visualization mode
       const createPageForMode = async (mode: 'wheel' | 'grid', pageNumber: number, imageData: string) => {
