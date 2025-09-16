@@ -384,8 +384,9 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
       {/* Bagua Preview - Les 2 versions VISIBLES EN PREMIER */}
       <div className="flex flex-col items-center gap-2 sm:gap-4 px-2 sm:px-0">
 
-        {/* Preview visible : TOUJOURS les 2 versions - EN PREMIER */}
-        <div className="space-y-4 max-w-full overflow-x-auto w-full">
+        {/* Preview visible : les 2 versions AVANT génération PDF, cachées APRÈS */}
+        {!pdfUrl && (
+          <div className="space-y-4 max-w-full overflow-x-auto w-full">
           {/* Wheel Version */}
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-center">Vue Roue Bagua</h3>
@@ -427,6 +428,7 @@ export function BaguaPreviewModal({ isOpen, onClose, config, planImage, bearingF
             </div>
           </div>
         </div>
+        )}
 
         {/* Containers CACHÉS pour capture PDF */}
         {/* Wheel MASQUÉE pour capture PDF */}
