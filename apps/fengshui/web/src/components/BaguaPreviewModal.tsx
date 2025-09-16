@@ -628,7 +628,7 @@ export function BaguaPreviewModal({
           </Button>
         </div>
       }
-      className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-hidden"
+      className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-y-auto"
     >
       {/* LOADER EN HAUT - Toujours visible pendant génération */}
       <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
@@ -671,7 +671,7 @@ export function BaguaPreviewModal({
                   Aperçu de votre analyse Feng Shui (3 pages)
                 </h4>
                 {Object.keys(previewImageUrls).length > 0 ? (
-                  <div className="space-y-6 max-h-[60vh] overflow-y-auto">
+                  <div className="space-y-6">
                     {/* Page 1 - Wheel */}
                     {previewImageUrls.page1 && (
                       <div className="text-center">
