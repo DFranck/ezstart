@@ -131,10 +131,7 @@ export default function BaguaWheel({
   }, [rot]) // labelR, cx, cy et r ne bougent pas pendant le rendu
 
   return (
-    <div
-      className="mx-auto  backdrop-blur rounded-2xl shadow-xl border  p-6"
-      style={{ width: size }}
-    >
+    <div className="mx-auto" style={{ width: size }}>
       <div
         className="relative"
         onMouseLeave={() => {
@@ -178,19 +175,20 @@ export default function BaguaWheel({
             })}
 
             {/* Zones cliquables invisibles pour les secteurs */}
-            {onSectorClick && DIRECTIONS.map((dir: Direction, i) => {
-              const start = i * 45 - 22.5
-              const end = (i + 1) * 45 - 22.5
-              return (
-                <path
-                  key={`clickable-${dir}`}
-                  d={sectorPath(start, end, r, cx, cy)}
-                  fill="transparent"
-                  className="cursor-pointer hover:fill-primary/10 transition-colors"
-                  onClick={() => onSectorClick(dir)}
-                />
-              )
-            })}
+            {onSectorClick &&
+              DIRECTIONS.map((dir: Direction, i) => {
+                const start = i * 45 - 22.5
+                const end = (i + 1) * 45 - 22.5
+                return (
+                  <path
+                    key={`clickable-${dir}`}
+                    d={sectorPath(start, end, r, cx, cy)}
+                    fill="transparent"
+                    className="cursor-pointer hover:fill-primary/10 transition-colors"
+                    onClick={() => onSectorClick(dir)}
+                  />
+                )
+              })}
 
             {/* Zone cliquable pour le centre */}
             {onSectorClick && (

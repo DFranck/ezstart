@@ -93,13 +93,8 @@ export default function BaguaGrid({
     return result
   }, [bearingFromNorth, config])
 
-  // Calcul de l'aspect ratio basé sur le crop
-  const aspectRatio = transformations?.crop
-    ? transformations.crop.width / transformations.crop.height
-    : 1 // Par défaut carré si pas de crop
-
   return (
-    <div className="mx-auto backdrop-blur shadow-xl border p-2 rounded">
+    <div className="mx-auto">
       <div className="relative">
         {/* Plan en taille maximale avec ratio conservé */}
         <div className="w-full relative overflow-hidden">
@@ -158,34 +153,6 @@ export default function BaguaGrid({
             })}
           </div>
         </div>
-
-        {/* Informations du secteur actif */}
-        {activeSector && (
-          <div className="mt-4 p-4 bg-background/90 backdrop-blur rounded-lg border">
-            {(() => {
-              const sectorId = DIRECTION_TO_SECTOR_ID[activeSector]
-              const sector = BAGUA_SECTORS.find(s => s.id === sectorId)
-              if (!sector) return null
-
-              return (
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-4 h-4 rounded-full border"
-                    style={{ backgroundColor: sector.color }}
-                  />
-                  <div>
-                    <h3 className="font-semibold text-foreground">
-                      {sector.name} ({activeSector})
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Élément: {sector.element} • Direction: {sector.direction}
-                    </p>
-                  </div>
-                </div>
-              )
-            })()}
-          </div>
-        )}
       </div>
     </div>
   )

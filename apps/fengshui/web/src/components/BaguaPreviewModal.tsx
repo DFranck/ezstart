@@ -253,117 +253,6 @@ export function BaguaPreviewModal({
         format: 'a4',
       })
 
-      // Function to create cards grid page (3x3 layout)
-      const createCardsGridPage = async (pageNumber: number) => {
-        if (pageNumber > 1) pdf.addPage()
-
-        // Add page title
-        pdf.setFontSize(20)
-        pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
-
-        pdf.setFontSize(14)
-        pdf.text(`Page ${pageNumber}/3 - Secteurs Détaillés`, 105, 35, { align: 'center' })
-
-        pdf.setFontSize(12)
-        pdf.text(
-          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
-          105,
-          45,
-          { align: 'center' }
-        )
-
-        // Grid layout: 3x3 cards
-        const startY = 60
-        const cardWidth = 60
-        const cardHeight = 80
-        const spacingX = 70
-        const spacingY = 90
-        const startX = (210 - spacingX * 2) / 2 // Center horizontally
-
-        // Get all 9 directions (8 directions + center)
-        const allDirections = DIRECTIONS_WITH_CENTER
-
-        allDirections.forEach((dir, index) => {
-          const sector = config.orientations?.[dir]
-          if (!sector) return
-
-          const row = Math.floor(index / 3)
-          const col = index % 3
-          const x = startX + col * spacingX
-          const y = startY + row * spacingY
-
-          const accent = sector.colorHex || '#000000'
-          const accents = sector.colorHexes || []
-
-          // Convert hex colors to RGB for jsPDF
-          const hexToRgb = (hex: string) => {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-            return result
-              ? {
-                  r: parseInt(result[1] || '00', 16),
-                  g: parseInt(result[2] || '00', 16),
-                  b: parseInt(result[3] || '00', 16),
-                }
-              : { r: 0, g: 0, b: 0 }
-          }
-
-          const accentRgb = hexToRgb(accent || '#000000')
-
-          // Card background - toujours blanc
-          pdf.setFillColor(255, 255, 255)
-          pdf.rect(x, y, cardWidth, cardHeight, 'F')
-
-          // Card border
-          pdf.setDrawColor(accentRgb.r, accentRgb.g, accentRgb.b)
-          pdf.setLineWidth(0.5)
-          pdf.rect(x, y, cardWidth, cardHeight, 'S')
-
-          // Header with gradient effect (simulate with colored rectangle)
-          pdf.setFillColor(accentRgb.r, accentRgb.g, accentRgb.b)
-          pdf.rect(x, y, cardWidth, 12, 'F')
-
-          // Direction and number in header
-          pdf.setTextColor(255, 255, 255)
-          pdf.setFontSize(8)
-          pdf.text(`${dir} • ${sector.element} • ${sector.number}`, x + cardWidth / 2, y + 8, {
-            align: 'center',
-          })
-
-          // Title - toujours noir
-          pdf.setTextColor(0, 0, 0)
-          pdf.setFontSize(9)
-          pdf.text(sector.title, x + cardWidth / 2, y + 20, {
-            align: 'center',
-            maxWidth: cardWidth - 4,
-          })
-
-          // First tip or enhancer
-          if (sector.tips?.[0] || sector.enhancers?.[0]) {
-            pdf.setFontSize(7)
-            pdf.setTextColor(100, 100, 100)
-            const tip = (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 60) + '...'
-            pdf.text(tip, x + 2, y + 32, { maxWidth: cardWidth - 4 })
-          }
-
-          // Star info if available
-          if (sector.star) {
-            pdf.setFontSize(6)
-            pdf.setTextColor(
-              sector.star.status === 'bonne' ? 34 : 239,
-              sector.star.status === 'bonne' ? 197 : 68,
-              sector.star.status === 'bonne' ? 94 : 68
-            )
-            pdf.text(`★ ${sector.star.star} - ${sector.star.element}`, x + 2, y + 50)
-
-            if (sector.star.remedies?.length > 0) {
-              pdf.setTextColor(100, 100, 100)
-              const remedies = sector.star.remedies.join(', ').substring(0, 40) + '...'
-              pdf.text(`🛡️ ${remedies}`, x + 2, y + 58)
-            }
-          }
-        })
-      }
-
       // Function to create a PDF page with title and image
       const createPdfPage = async (
         pageNumber: number,
@@ -374,26 +263,20 @@ export function BaguaPreviewModal({
       ) => {
         if (pageNumber > 1) pdf.addPage()
 
-        // Add page title
-        pdf.setFontSize(20)
-        pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
+        // Titre compact en haut
+        pdf.setFontSize(16)
+        pdf.text('Analyse Feng Shui Bagua', 105, 15, { align: 'center' })
 
-        pdf.setFontSize(14)
-        pdf.text(pageTitle, 105, 35, { align: 'center' })
-
-        pdf.setFontSize(12)
-        pdf.text(
-          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
-          105,
-          45,
-          { align: 'center' }
-        )
-
+        // Image commence plus haut pour gagner de l'espace
         const x = (210 - imgWidth) / 2
-        const y = 55
+        const y = 25
 
         // Add the image
         pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
+
+        // Numéro de page en petit en bas
+        pdf.setFontSize(8)
+        pdf.text(`${pageNumber}/2`, 105, 290, { align: 'center' })
 
         return { x, y, imgWidth, imgHeight }
       }
@@ -525,11 +408,11 @@ export function BaguaPreviewModal({
 
       const page3DataUrl = await domtoimage.toPng(cardsGridRef.current, {
         quality: 1,
-        width: 800,
-        height: 1000,
-        bgcolor: isDarkMode ? '#1a1a1a' : '#ffffff',
+        width: 1600, // Double résolution pour meilleure qualité
+        height: 2000, // Double résolution
+        bgcolor: '#ffffff', // Toujours blanc pour PDF
         style: {
-          transform: 'scale(1)',
+          transform: 'scale(2)', // Scale 2x pour haute résolution
           transformOrigin: 'top left',
         },
       })
@@ -543,19 +426,19 @@ export function BaguaPreviewModal({
       const page3ImageData = page3DataUrl
 
       // Calculate PDF dimensions FIRST (needed for both PDF and preview)
-      const previewGridMaxWidth = 300 // From preview CSS
-      const previewCardsMaxWidth = 400 // From preview CSS
-      const availableHeight = 232
-      const gridSpacing = 15
-      const baseWidth = 140
-      const gridImgWidth = baseWidth * (previewGridMaxWidth / previewCardsMaxWidth) // 105
-      const gridImgHeight = gridImgWidth
-      const remainingHeight = availableHeight - gridImgHeight - gridSpacing
-      const cardsImgWidth = baseWidth // 140mm
-      const cardsNaturalHeight = cardsImgWidth * (1000 / 800) // 175mm
-      const cardsImgHeight = Math.min(cardsNaturalHeight, remainingHeight)
+      // Page 2 a plus d'espace car pas de texte sous les images
+      const gridY = 25 // Position de départ pour la grille (même que page 1)
+      const pageBottom = 280 // Limite basse de la page (laisse une marge)
+      const availableHeight = pageBottom - gridY // 230mm total
+      const gridSpacing = 0 // Espacement entre Grid et Cards
+
+      // Optimiser pour la lisibilité des cartes
+      const gridImgWidth = 90 // Grille plus petite pour maximiser l'espace des cartes
+      const gridImgHeight = gridImgWidth // 90x90
+      const cardsImgWidth = 170 // Cartes plus larges pour plus de lisibilité
+      const cardsImgHeight = 180 // Hauteur fixe généreuse pour les cartes (priorité lisibilité)
+
       const gridX = (210 - gridImgWidth) / 2
-      const gridY = 55
       const cardsX = (210 - cardsImgWidth) / 2
       const cardsY = gridY + gridImgHeight + gridSpacing
 
@@ -574,27 +457,11 @@ export function BaguaPreviewModal({
         ctx.fillStyle = '#ffffff'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-        // Page title - SAME size as PDF
+        // Titre compact en haut (même que PDF)
         ctx.fillStyle = '#000000'
-        ctx.font = `20px Arial` // Font size in pixels, not scaled
+        ctx.font = `16px Arial`
         ctx.textAlign = 'center'
-        ctx.fillText('Analyse Feng Shui Bagua', canvas.width / 2, 20 * mmToPx)
-
-        // Page subtitle - SAME size as PDF
-        ctx.font = `14px Arial`
-        const subtitle =
-          pageNumber === 1
-            ? 'Page 1/2 - Vue Roue Bagua'
-            : 'Page 2/2 - Vue Grille et Secteurs Détaillés'
-        ctx.fillText(subtitle, canvas.width / 2, 35 * mmToPx)
-
-        // Configuration info - SAME size as PDF
-        ctx.font = `12px Arial`
-        ctx.fillText(
-          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
-          canvas.width / 2,
-          45 * mmToPx
-        )
+        ctx.fillText('Analyse Feng Shui Bagua', canvas.width / 2, 15 * mmToPx)
 
         // Add content image directly without nested page
         if (pageNumber === 1) {
@@ -604,7 +471,7 @@ export function BaguaPreviewModal({
             img.onload = () => {
               const imgSize = 190 * mmToPx // Convert mm to pixels
               const x = (canvas.width - imgSize) / 2
-              const y = 55 * mmToPx
+              const y = 25 * mmToPx // Commence plus haut comme dans le PDF
               ctx.drawImage(img, x, y, imgSize, imgSize)
               resolve(undefined)
             }
@@ -641,6 +508,12 @@ export function BaguaPreviewModal({
           ctx.drawImage(cardsImg, cardsXPx, cardsYPx, cardsW, cardsH)
         }
 
+        // Numéro de page en bas (ajouté APRÈS le contenu pour pas être masqué)
+        ctx.fillStyle = '#000000'
+        ctx.font = `8px Arial`
+        ctx.textAlign = 'center'
+        ctx.fillText(`${pageNumber}/2`, canvas.width / 2, 290 * mmToPx)
+
         return canvas.toDataURL('image/png', 1.0)
       }
 
@@ -660,20 +533,9 @@ export function BaguaPreviewModal({
       // Generate Page 2 - Combined Grid + Secteurs détaillés
       pdf.addPage()
 
-      // Add page title for combined page
-      pdf.setFontSize(20)
-      pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
-
-      pdf.setFontSize(14)
-      pdf.text('Page 2/2 - Vue Grille et Secteurs Détaillés', 105, 35, { align: 'center' })
-
-      pdf.setFontSize(12)
-      pdf.text(
-        `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
-        105,
-        45,
-        { align: 'center' }
-      )
+      // Titre compact en haut (même style que page 1)
+      pdf.setFontSize(16)
+      pdf.text('Analyse Feng Shui Bagua', 105, 15, { align: 'center' })
 
       // Use the SAME calculated dimensions as preview
       pdf.addImage(
@@ -696,6 +558,10 @@ export function BaguaPreviewModal({
         undefined,
         'FAST'
       )
+
+      // Numéro de page en bas (même style que page 1)
+      pdf.setFontSize(8)
+      pdf.text('2/2', 105, 290, { align: 'center' })
 
       // Generate blob and URL
       const blob = pdf.output('blob')
@@ -882,7 +748,7 @@ export function BaguaPreviewModal({
               insetRatio={1.0}
               labelOffset={12}
               cardsMode={undefined}
-              cardsRadiusPct={60}
+              cardsRadiusPct={35} // Synchronisé avec cardRadius=280 dans capture PDF
             />
           )}
         </div>
