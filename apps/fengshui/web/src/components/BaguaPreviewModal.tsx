@@ -1,12 +1,53 @@
 'use client'
 
 import { Transformations } from '@/types/bagua'
-import { DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/directions'
+import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
+import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useEffect, useRef, useState } from 'react'
 import BaguaGrid from './steps/BaguaGrid'
 import BaguaWheel from './steps/BaguaWheel'
+
+// Mapping des directions vers les positions de la grille 3x3 (position de base, avant rotation)
+// Organisation standard Feng Shui : N en haut, S en bas, E à droite, O à gauche
+const GRID_POSITIONS_BASE: Record<Direction, { row: number; col: number }> = {
+  NO: { row: 0, col: 0 }, // Haut-Gauche
+  N: { row: 0, col: 1 }, // Haut-Centre
+  NE: { row: 0, col: 2 }, // Haut-Droite
+  O: { row: 1, col: 0 }, // Centre-Gauche
+  C: { row: 1, col: 1 }, // Centre
+  E: { row: 1, col: 2 }, // Centre-Droite
+  SO: { row: 2, col: 0 }, // Bas-Gauche
+  S: { row: 2, col: 1 }, // Bas-Centre
+  SE: { row: 2, col: 2 }, // Bas-Droite
+}
+
+// Fonction pour obtenir la position dans la grille d'une direction selon le bearing
+function getGridPositionForDirection(direction: Direction, rotation: number) {
+  if (direction === 'C') {
+    return GRID_POSITIONS_BASE['C'] // Le centre ne bouge jamais
+  }
+
+  // Si pas de rotation significative, retourner la position de base
+  if (Math.abs(rotation) < 1) {
+    return GRID_POSITIONS_BASE[direction]
+  }
+
+  // LOGIQUE SIMPLIFIEE comme BaguaWheel
+  // rotation = bearing direct, on applique la même logique
+  const rotationSteps = Math.round(rotation / 45) % 8
+
+  // Index de base de la direction (N=0, NE=1, E=2, etc.)
+  const baseIndex = DIRECTIONS.indexOf(direction as any)
+  if (baseIndex === -1) return GRID_POSITIONS_BASE[direction]
+
+  // MÊME LOGIQUE QUE WHEEL: rotation directe dans le même sens
+  const rotatedIndex = (baseIndex + rotationSteps) % 8
+  const rotatedDirection = DIRECTIONS[rotatedIndex]
+
+  return GRID_POSITIONS_BASE[rotatedDirection as Direction]
+}
 
 type Props = {
   isOpen: boolean
@@ -40,6 +81,9 @@ export function BaguaPreviewModal({
   const gridRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
   const cardsGridRef = useRef<HTMLDivElement>(null)
+
+  // Calcul de la rotation avec la même fonction que BaguaWheel et BaguaGrid
+  const rotation = calculateBaguaRotation(bearingFromNorth, config)
 
   // Variables de couleurs pour le PDF basées sur le theme
   const pdfBgColor = isDarkMode ? '#1a1a1a' : '#ffffff'
@@ -934,11 +978,12 @@ export function BaguaPreviewModal({
             Secteurs Détaillés
           </h2>
 
-          {/* Grid layout for cards */}
+          {/* Grid layout for cards - Positioned like BaguaGrid */}
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows: 'repeat(3, 1fr)',
               gap: '20px',
               maxWidth: '720px',
               margin: '0 auto',
@@ -947,10 +992,11 @@ export function BaguaPreviewModal({
           >
             {planImage &&
               config &&
-              DIRECTIONS_WITH_CENTER.map((dir, index) => {
-                // Les MÊMES cartes que dans cardsRef mais sans positionnement absolu
+              DIRECTIONS_WITH_CENTER.map((dir) => {
+                // Calculer la position dans la grille avec la rotation
+                const position = getGridPositionForDirection(dir, rotation)
                 const sector = config.orientations?.[dir]
-                if (!sector) return null
+                if (!sector || !position) return null
 
                 const accent = sector.colorHex || '#000000'
                 const accents = sector.colorHexes || []
@@ -964,6 +1010,8 @@ export function BaguaPreviewModal({
                       borderColor: accent,
                       backgroundColor: pdfCardBg,
                       margin: '0 auto',
+                      gridRow: position.row + 1,
+                      gridColumn: position.col + 1,
                     }}
                   >
                     {/* Header compact avec couleur de fond - IDENTIQUE */}
