@@ -992,7 +992,7 @@ export function BaguaPreviewModal({
           >
             {planImage &&
               config &&
-              DIRECTIONS_WITH_CENTER.map((dir) => {
+              DIRECTIONS_WITH_CENTER.map(dir => {
                 // Calculer la position dans la grille avec la rotation
                 const position = getGridPositionForDirection(dir, rotation)
                 const sector = config.orientations?.[dir]

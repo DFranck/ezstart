@@ -37,6 +37,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
   // File & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [originalPreview, setOriginalPreview] = useState<string | null>(null) // Garder l'image originale
 
   // Minimal editing state
   const [isEditing, setIsEditing] = useState(false)
@@ -84,6 +85,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
         reader.onload = e => {
           const result = e.target?.result as string
           setPreview(result)
+          setOriginalPreview(result) // Sauvegarder l'image originale
           setIsEditing(true)
           onEditingChange?.(true)
           setRotation(0)
@@ -118,6 +120,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
   const removeFile = () => {
     setUploadedFile(null)
     setPreview(null)
+    setOriginalPreview(null)
     setIsEditing(false)
     onEditingChange?.(false)
     setRotation(0)
@@ -210,20 +213,58 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                 </div>
               </div>
             </div>
-            <Button
-              onClick={removeFile}
-              variant="ghost"
-              size="sm"
-              className="p-1"
-              aria-label="Remove file"
-              type="button"
-            >
-              <Icon name="lucide:X" className="w-5 h-5 text-gray-500" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Edit button for re-cropping */}
+              {isImage && !isEditing && (
+                <Button
+                  onClick={() => {
+                    // Revenir à l'image originale pour un nouveau crop
+                    if (originalPreview) {
+                      setPreview(originalPreview)
+                    }
+                    setIsEditing(true)
+                    onEditingChange?.(true)
+                    // Reset crop state for new editing session
+                    setRotation(0)
+                    setZoom(1)
+                    setCrop({ x: 0, y: 0 })
+                    setCroppedAreaPixels(null)
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Edit/Crop image"
+                  type="button"
+                >
+                  <Icon name="lucide:Edit3" className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Edit</span>
+                </Button>
+              )}
+              <Button
+                onClick={removeFile}
+                variant="ghost"
+                size="sm"
+                className="p-1"
+                aria-label="Remove file"
+                type="button"
+              >
+                <Icon name="lucide:X" className="w-5 h-5 text-gray-500" />
+              </Button>
+            </div>
           </div>
 
+          {/* Image preview when not editing */}
+          {preview && isImage && !isEditing && (
+            <div className="mb-4">
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full h-auto max-h-64 object-contain rounded border"
+              />
+            </div>
+          )}
+
           {/* Image editor (minimal) */}
-          {preview && isImage && (
+          {preview && isImage && isEditing && (
             <div className="space-y-4">
               <div
                 className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]"
