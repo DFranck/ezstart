@@ -74,7 +74,6 @@ export function BaguaPreviewModal({
   const [previewImageUrls, setPreviewImageUrls] = useState<{
     page1?: string
     page2?: string
-    page3?: string
   }>({})
   const [isDarkMode, setIsDarkMode] = useState(false)
   const wheelRef = useRef<HTMLDivElement>(null)
@@ -85,11 +84,11 @@ export function BaguaPreviewModal({
   // Calcul de la rotation avec la même fonction que BaguaWheel et BaguaGrid
   const rotation = calculateBaguaRotation(bearingFromNorth, config)
 
-  // Variables de couleurs pour le PDF basées sur le theme
-  const pdfBgColor = isDarkMode ? '#1a1a1a' : '#ffffff'
-  const pdfTextColor = isDarkMode ? '#ffffff' : '#000000'
-  const pdfCardBg = isDarkMode ? '#2a2a2a' : '#ffffff'
-  const pdfBorderColor = isDarkMode ? '#4a4a4a' : '#e5e5e5'
+  // Variables de couleurs pour le PDF - TOUJOURS en mode clair
+  const pdfBgColor = '#ffffff'
+  const pdfTextColor = '#000000'
+  const pdfCardBg = '#ffffff'
+  const pdfBorderColor = '#e5e5e5'
 
   // Détection mobile et theme
   useEffect(() => {
@@ -310,8 +309,8 @@ export function BaguaPreviewModal({
 
           const accentRgb = hexToRgb(accent || '#000000')
 
-          // Card background
-          pdf.setFillColor(isDarkMode ? 42 : 255, isDarkMode ? 42 : 255, isDarkMode ? 42 : 255)
+          // Card background - toujours blanc
+          pdf.setFillColor(255, 255, 255)
           pdf.rect(x, y, cardWidth, cardHeight, 'F')
 
           // Card border
@@ -330,8 +329,8 @@ export function BaguaPreviewModal({
             align: 'center',
           })
 
-          // Title
-          pdf.setTextColor(isDarkMode ? 255 : 0, isDarkMode ? 255 : 0, isDarkMode ? 255 : 0)
+          // Title - toujours noir
+          pdf.setTextColor(0, 0, 0)
           pdf.setFontSize(9)
           pdf.text(sector.title, x + cardWidth / 2, y + 20, {
             align: 'center',
@@ -365,11 +364,13 @@ export function BaguaPreviewModal({
         })
       }
 
-      // Function to create a page for a specific visualization mode
-      const createPageForMode = async (
-        mode: 'wheel' | 'grid',
+      // Function to create a PDF page with title and image
+      const createPdfPage = async (
         pageNumber: number,
-        imageData: string
+        pageTitle: string,
+        imageData: string,
+        imgWidth: number = 190,
+        imgHeight: number = 190
       ) => {
         if (pageNumber > 1) pdf.addPage()
 
@@ -378,12 +379,7 @@ export function BaguaPreviewModal({
         pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
 
         pdf.setFontSize(14)
-        pdf.text(
-          `Page ${pageNumber}/3 - Vue ${mode === 'wheel' ? 'Roue' : 'Grille'} Bagua`,
-          105,
-          35,
-          { align: 'center' }
-        )
+        pdf.text(pageTitle, 105, 35, { align: 'center' })
 
         pdf.setFontSize(12)
         pdf.text(
@@ -393,23 +389,11 @@ export function BaguaPreviewModal({
           { align: 'center' }
         )
 
-        const maxWidth = mode === 'wheel' ? 190 : 160
-        const imgWidth = maxWidth
-        const imgHeight = maxWidth
         const x = (210 - imgWidth) / 2
-        const y = mode === 'wheel' ? 55 : 70
+        const y = 55
 
         // Add the image
         pdf.addImage(imageData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
-
-        // Add orientation info
-        pdf.setFontSize(12)
-        pdf.text(
-          `Orientation : ${Math.round(bearingFromNorth)}° depuis le Nord`,
-          105,
-          y + imgHeight + 15,
-          { align: 'center' }
-        )
 
         return { x, y, imgWidth, imgHeight }
       }
@@ -558,17 +542,122 @@ export function BaguaPreviewModal({
 
       const page3ImageData = page3DataUrl
 
+      // Calculate PDF dimensions FIRST (needed for both PDF and preview)
+      const previewGridMaxWidth = 300 // From preview CSS
+      const previewCardsMaxWidth = 400 // From preview CSS
+      const availableHeight = 232
+      const gridSpacing = 15
+      const baseWidth = 140
+      const gridImgWidth = baseWidth * (previewGridMaxWidth / previewCardsMaxWidth) // 105
+      const gridImgHeight = gridImgWidth
+      const remainingHeight = availableHeight - gridImgHeight - gridSpacing
+      const cardsImgWidth = baseWidth // 140mm
+      const cardsNaturalHeight = cardsImgWidth * (1000 / 800) // 175mm
+      const cardsImgHeight = Math.min(cardsNaturalHeight, remainingHeight)
+      const gridX = (210 - gridImgWidth) / 2
+      const gridY = 55
+      const cardsX = (210 - cardsImgWidth) / 2
+      const cardsY = gridY + gridImgHeight + gridSpacing
+
+      // Create actual PDF page previews with titles and layout
+      const createPdfPagePreview = async (pageNumber: number) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        // Conversion mm to pixels: 1mm = ~3.78 pixels at 96 DPI
+        const mmToPx = 3.78
+        canvas.width = 210 * mmToPx // A4 width in pixels
+        canvas.height = 297 * mmToPx // A4 height in pixels
+
+        if (!ctx) throw new Error('Canvas context not available')
+
+        // White background - toujours clair pour PDF
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        // Page title - SAME size as PDF
+        ctx.fillStyle = '#000000'
+        ctx.font = `20px Arial` // Font size in pixels, not scaled
+        ctx.textAlign = 'center'
+        ctx.fillText('Analyse Feng Shui Bagua', canvas.width / 2, 20 * mmToPx)
+
+        // Page subtitle - SAME size as PDF
+        ctx.font = `14px Arial`
+        const subtitle =
+          pageNumber === 1
+            ? 'Page 1/2 - Vue Roue Bagua'
+            : 'Page 2/2 - Vue Grille et Secteurs Détaillés'
+        ctx.fillText(subtitle, canvas.width / 2, 35 * mmToPx)
+
+        // Configuration info - SAME size as PDF
+        ctx.font = `12px Arial`
+        ctx.fillText(
+          `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
+          canvas.width / 2,
+          45 * mmToPx
+        )
+
+        // Add content image directly without nested page
+        if (pageNumber === 1) {
+          // Page 1: Wheel only - SAME dimensions as PDF
+          const img = new Image()
+          await new Promise(resolve => {
+            img.onload = () => {
+              const imgSize = 190 * mmToPx // Convert mm to pixels
+              const x = (canvas.width - imgSize) / 2
+              const y = 55 * mmToPx
+              ctx.drawImage(img, x, y, imgSize, imgSize)
+              resolve(undefined)
+            }
+            img.src = wheelImageData // Use wheelImageData directly
+          })
+        } else {
+          // Page 2: Grid + Cards with EXACT PDF layout
+          const gridImg = new Image()
+          const cardsImg = new Image()
+
+          await Promise.all([
+            new Promise(resolve => {
+              gridImg.onload = resolve
+              gridImg.src = gridImageData
+            }),
+            new Promise(resolve => {
+              cardsImg.onload = resolve
+              cardsImg.src = page3ImageData
+            }),
+          ])
+
+          // Draw grid (top) - EXACT same position/size as PDF
+          const gridW = gridImgWidth * mmToPx
+          const gridH = gridImgHeight * mmToPx
+          const gridXPx = gridX * mmToPx
+          const gridYPx = gridY * mmToPx
+          ctx.drawImage(gridImg, gridXPx, gridYPx, gridW, gridH)
+
+          // Draw cards (bottom) - EXACT same position/size as PDF
+          const cardsW = cardsImgWidth * mmToPx
+          const cardsH = cardsImgHeight * mmToPx
+          const cardsXPx = cardsX * mmToPx
+          const cardsYPx = cardsY * mmToPx
+          ctx.drawImage(cardsImg, cardsXPx, cardsYPx, cardsW, cardsH)
+        }
+
+        return canvas.toDataURL('image/png', 1.0)
+      }
+
+      // Generate actual PDF page previews with EXACT same dimensions as PDF
+      const page1Preview = await createPdfPagePreview(1)
+      const page2Preview = await createPdfPagePreview(2)
+
       // Save preview images for all pages
       setPreviewImageUrls({
-        page1: wheelImageData,
-        page2: gridImageData,
-        page3: page3ImageData,
+        page1: page1Preview,
+        page2: page2Preview,
       })
 
-      // Generate Page 1 (Wheel with cards)
-      await createPageForMode('wheel', 1, wheelImageData)
+      // Generate Page 1 - Wheel with cards
+      await createPdfPage(1, 'Page 1/2 - Vue Roue Bagua', wheelImageData)
 
-      // Generate Page 2 (Grid without cards) and Page 3 (Cards Grid) combined
+      // Generate Page 2 - Combined Grid + Secteurs détaillés
       pdf.addPage()
 
       // Add page title for combined page
@@ -586,21 +675,27 @@ export function BaguaPreviewModal({
         { align: 'center' }
       )
 
-      // Add Grid image (top half)
-      const gridImgWidth = 90
-      const gridImgHeight = 90
-      const gridX = (210 - gridImgWidth) / 2
-      const gridY = 55
-
-      pdf.addImage(gridImageData, 'PNG', gridX, gridY, gridImgWidth, gridImgHeight, undefined, 'FAST')
-
-      // Add Cards Grid image (bottom half) - Use the SAME capture as preview
-      const cardsImgWidth = 160
-      const cardsImgHeight = 120
-      const cardsX = (210 - cardsImgWidth) / 2
-      const cardsY = gridY + gridImgHeight + 15
-
-      pdf.addImage(page3ImageData, 'PNG', cardsX, cardsY, cardsImgWidth, cardsImgHeight, undefined, 'FAST')
+      // Use the SAME calculated dimensions as preview
+      pdf.addImage(
+        gridImageData,
+        'PNG',
+        gridX,
+        gridY,
+        gridImgWidth,
+        gridImgHeight,
+        undefined,
+        'FAST'
+      )
+      pdf.addImage(
+        page3ImageData,
+        'PNG',
+        cardsX,
+        cardsY,
+        cardsImgWidth,
+        cardsImgHeight,
+        undefined,
+        'FAST'
+      )
 
       // Generate blob and URL
       const blob = pdf.output('blob')
@@ -731,57 +826,26 @@ export function BaguaPreviewModal({
             ) : (
               // Desktop: Preview des 2 pages
               <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
-                  Aperçu de votre analyse Feng Shui (2 pages)
-                </h4>
                 {Object.keys(previewImageUrls).length > 0 ? (
                   <div className="space-y-6">
                     {/* Page 1 - Wheel */}
                     {previewImageUrls.page1 && (
-                      <div className="text-center">
-                        <h5 className="text-sm font-medium text-gray-600 mb-3">
-                          Page 1 - Vue Roue
-                        </h5>
-                        <img
-                          src={previewImageUrls.page1}
-                          alt="Page 1 - Roue Bagua"
-                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                          style={{ maxWidth: '400px' }}
-                        />
-                      </div>
+                      <img
+                        src={previewImageUrls.page1}
+                        alt="Page 1 - Roue Bagua"
+                        className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                        style={{ maxWidth: '400px' }}
+                      />
                     )}
 
                     {/* Page 2 - Combined Grid + Cards */}
-                    {(previewImageUrls.page2 || previewImageUrls.page3) && (
-                      <div className="text-center border-t pt-6">
-                        <h5 className="text-sm font-medium text-gray-600 mb-3">
-                          Page 2 - Vue Grille et Secteurs Détaillés
-                        </h5>
-                        <div className="space-y-4">
-                          {previewImageUrls.page2 && (
-                            <div>
-                              <h6 className="text-xs text-gray-500 mb-2">Grille Bagua</h6>
-                              <img
-                                src={previewImageUrls.page2}
-                                alt="Grille Bagua"
-                                className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                                style={{ maxWidth: '300px' }}
-                              />
-                            </div>
-                          )}
-                          {previewImageUrls.page3 && (
-                            <div>
-                              <h6 className="text-xs text-gray-500 mb-2">Secteurs Détaillés</h6>
-                              <img
-                                src={previewImageUrls.page3}
-                                alt="Secteurs Détaillés"
-                                className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                                style={{ maxWidth: '400px' }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    {previewImageUrls.page2 && (
+                      <img
+                        src={previewImageUrls.page2}
+                        alt="Page 2 - Vue Grille et Secteurs Détaillés"
+                        className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                        style={{ maxWidth: '400px' }}
+                      />
                     )}
                   </div>
                 ) : (
@@ -956,7 +1020,7 @@ export function BaguaPreviewModal({
                       {(sector.tips?.[0] || sector.enhancers?.[0]) && (
                         <div
                           className="text-[9px] leading-tight flex items-center"
-                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          style={{ color: '#6b7280' }} // Toujours gris pour PDF
                         >
                           {sector.shape && (
                             <Icon
@@ -1023,7 +1087,7 @@ export function BaguaPreviewModal({
             width: '800px',
             minHeight: '1000px',
             padding: '40px',
-            backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+            backgroundColor: '#ffffff', // Toujours blanc pour PDF
             position: 'absolute',
             top: '-9999px',
             left: '-9999px',
@@ -1035,7 +1099,7 @@ export function BaguaPreviewModal({
               textAlign: 'center',
               fontSize: '24px',
               fontWeight: 'bold',
-              color: isDarkMode ? '#ffffff' : '#000000',
+              color: '#000000', // Toujours noir pour PDF
               marginBottom: '30px',
             }}
           >
@@ -1107,7 +1171,7 @@ export function BaguaPreviewModal({
                       {(sector.tips?.[0] || sector.enhancers?.[0]) && (
                         <div
                           className="text-[9px] leading-tight flex items-center"
-                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          style={{ color: '#6b7280' }} // Toujours gris pour PDF
                         >
                           {sector.shape && (
                             <Icon
