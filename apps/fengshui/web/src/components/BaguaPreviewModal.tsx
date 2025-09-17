@@ -119,6 +119,33 @@ export function BaguaPreviewModal({
   const generatePDF = async () => {
     try {
       setIsGenerating(true)
+
+      // Injecter CSS global pour masquer TOUTES les scrollbars pendant la génération
+      const hideScrollbarStyle = document.createElement('style')
+      hideScrollbarStyle.id = 'hide-scrollbars-during-pdf'
+      hideScrollbarStyle.textContent = `
+        /* Hide all scrollbars during PDF generation */
+        * {
+          scrollbar-width: none !important; /* Firefox */
+          -ms-overflow-style: none !important; /* IE and Edge */
+        }
+        *::-webkit-scrollbar {
+          display: none !important; /* Chrome, Safari, Opera */
+          width: 0 !important;
+          height: 0 !important;
+        }
+        *::-webkit-scrollbar-track {
+          display: none !important;
+        }
+        *::-webkit-scrollbar-thumb {
+          display: none !important;
+        }
+        body, html {
+          overflow: hidden !important;
+        }
+      `
+      document.head.appendChild(hideScrollbarStyle)
+
       console.log('Starting PDF generation with iframe-safe approach...')
 
       // Attendre que les éléments soient rendus
@@ -541,22 +568,56 @@ export function BaguaPreviewModal({
       // Generate Page 1 (Wheel with cards)
       await createPageForMode('wheel', 1, wheelImageData)
 
-      // Generate Page 2 (Grid without cards)
-      await createPageForMode('grid', 2, gridImageData)
+      // Generate Page 2 (Grid without cards) and Page 3 (Cards Grid) combined
+      pdf.addPage()
 
-      // Generate Page 3 (Cards in 3x3 grid)
-      await createCardsGridPage(3)
+      // Add page title for combined page
+      pdf.setFontSize(20)
+      pdf.text('Analyse Feng Shui Bagua', 105, 20, { align: 'center' })
+
+      pdf.setFontSize(14)
+      pdf.text('Page 2/2 - Vue Grille et Secteurs Détaillés', 105, 35, { align: 'center' })
+
+      pdf.setFontSize(12)
+      pdf.text(
+        `Configuration ${config.year || '2025'} - Orientation ${Math.round(bearingFromNorth)}°`,
+        105,
+        45,
+        { align: 'center' }
+      )
+
+      // Add Grid image (top half)
+      const gridImgWidth = 90
+      const gridImgHeight = 90
+      const gridX = (210 - gridImgWidth) / 2
+      const gridY = 55
+
+      pdf.addImage(gridImageData, 'PNG', gridX, gridY, gridImgWidth, gridImgHeight, undefined, 'FAST')
+
+      // Add Cards Grid image (bottom half) - Use the SAME capture as preview
+      const cardsImgWidth = 160
+      const cardsImgHeight = 120
+      const cardsX = (210 - cardsImgWidth) / 2
+      const cardsY = gridY + gridImgHeight + 15
+
+      pdf.addImage(page3ImageData, 'PNG', cardsX, cardsY, cardsImgWidth, cardsImgHeight, undefined, 'FAST')
 
       // Generate blob and URL
       const blob = pdf.output('blob')
       const url = URL.createObjectURL(blob)
-      console.log('PDF generated successfully with 3 pages: Wheel + Grid + Cards Grid views')
+      console.log('PDF generated successfully with 2 pages: Wheel + Combined Grid/Cards views')
       setPdfUrl(url)
     } catch (error) {
       console.error('Erreur génération PDF détaillée:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
       alert(`Erreur lors de la génération du PDF: ${errorMessage}`)
     } finally {
+      // Nettoyer les styles injectés et restaurer l'état normal
+      const injectedStyle = document.getElementById('hide-scrollbars-during-pdf')
+      if (injectedStyle) {
+        document.head.removeChild(injectedStyle)
+      }
+      document.body.style.overflow = ''
       setIsGenerating(false)
     }
   }
@@ -599,10 +660,10 @@ export function BaguaPreviewModal({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <>
+        <span className="font-semibold flex items-center">
           <Icon name="lucide:Compass" className="w-5 h-5 mr-2 text-foreground/60" />
-          <span className="font-semibold">Analyse Feng Shui Bagua</span>
-        </>
+          Analyse Feng Shui Bagua
+        </span>
       }
       description={
         <span className="block">
@@ -649,7 +710,7 @@ export function BaguaPreviewModal({
                 <p className="text-sm text-gray-600 mb-1">
                   Capture haute résolution de votre analyse Feng Shui
                 </p>
-                <p className="text-xs text-gray-500">3 pages: Roue + Grille + Secteurs détaillés</p>
+                <p className="text-xs text-gray-500">2 pages: Roue + Grille & Secteurs détaillés</p>
               </div>
             </div>
           </div>
@@ -664,14 +725,14 @@ export function BaguaPreviewModal({
                 <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-green-600" />
                 <h3 className="font-semibold text-gray-900 mb-2">PDF généré avec succès !</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  L'aperçu n'est pas disponible sur mobile, mais votre PDF 3 pages est prêt.
+                  L'aperçu n'est pas disponible sur mobile, mais votre PDF 2 pages est prêt.
                 </p>
               </div>
             ) : (
-              // Desktop: Preview des 3 pages
+              // Desktop: Preview des 2 pages
               <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-inner">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3 text-center">
-                  Aperçu de votre analyse Feng Shui (3 pages)
+                  Aperçu de votre analyse Feng Shui (2 pages)
                 </h4>
                 {Object.keys(previewImageUrls).length > 0 ? (
                   <div className="space-y-6">
@@ -690,33 +751,36 @@ export function BaguaPreviewModal({
                       </div>
                     )}
 
-                    {/* Page 2 - Grid */}
-                    {previewImageUrls.page2 && (
+                    {/* Page 2 - Combined Grid + Cards */}
+                    {(previewImageUrls.page2 || previewImageUrls.page3) && (
                       <div className="text-center border-t pt-6">
                         <h5 className="text-sm font-medium text-gray-600 mb-3">
-                          Page 2 - Vue Grille
+                          Page 2 - Vue Grille et Secteurs Détaillés
                         </h5>
-                        <img
-                          src={previewImageUrls.page2}
-                          alt="Page 2 - Grille Bagua"
-                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                          style={{ maxWidth: '400px' }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Page 3 - Cards Grid */}
-                    {previewImageUrls.page3 && (
-                      <div className="text-center border-t pt-6">
-                        <h5 className="text-sm font-medium text-gray-600 mb-3">
-                          Page 3 - Secteurs Détaillés
-                        </h5>
-                        <img
-                          src={previewImageUrls.page3}
-                          alt="Page 3 - Secteurs Détaillés"
-                          className="w-full h-auto rounded-lg shadow-lg border mx-auto"
-                          style={{ maxWidth: '400px' }}
-                        />
+                        <div className="space-y-4">
+                          {previewImageUrls.page2 && (
+                            <div>
+                              <h6 className="text-xs text-gray-500 mb-2">Grille Bagua</h6>
+                              <img
+                                src={previewImageUrls.page2}
+                                alt="Grille Bagua"
+                                className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                                style={{ maxWidth: '300px' }}
+                              />
+                            </div>
+                          )}
+                          {previewImageUrls.page3 && (
+                            <div>
+                              <h6 className="text-xs text-gray-500 mb-2">Secteurs Détaillés</h6>
+                              <img
+                                src={previewImageUrls.page3}
+                                alt="Secteurs Détaillés"
+                                className="w-full h-auto rounded-lg shadow-lg border mx-auto"
+                                style={{ maxWidth: '400px' }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
