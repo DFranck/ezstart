@@ -1039,7 +1039,7 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name={sector.icon || 'lucide:Info'} className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          <Icon name={(sector.icon as any) || 'lucide:Info'} className="w-3 h-3 mr-1" style={{ color: accent }} />
                           {sector.summary.length > 35 ? sector.summary.substring(0, 32) + '...' : sector.summary}
                         </div>
                       )}
