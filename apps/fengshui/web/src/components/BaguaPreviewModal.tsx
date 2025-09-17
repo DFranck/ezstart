@@ -1023,7 +1023,7 @@ export function BaguaPreviewModal({
                       {dir} • {sector.element} • {sector.number}
                     </div>
 
-                    {/* Contenu compact - IDENTIQUE */}
+                    {/* Contenu compact - PAGE 2 ENRICHIE */}
                     <div className="p-2 space-y-1">
                       {/* Titre */}
                       <div
@@ -1032,6 +1032,41 @@ export function BaguaPreviewModal({
                       >
                         {sector.title}
                       </div>
+
+                      {/* Summary avec icône du secteur - NOUVEAU pour page 2 */}
+                      {sector.summary && (
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: '#6b7280' }}
+                        >
+                          <Icon name={sector.icon || 'lucide:Info'} className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          {sector.summary.length > 35 ? sector.summary.substring(0, 32) + '...' : sector.summary}
+                        </div>
+                      )}
+
+                      {/* Relations éléments - NOUVEAU pour page 2 */}
+                      {(sector.nourisher || sector.controller) && (
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: '#6b7280' }}
+                        >
+                          <Icon name="lucide:ArrowRightLeft" className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          {sector.nourisher && `Nourri par: ${sector.nourisher}`}
+                          {sector.nourisher && sector.controller && ' • '}
+                          {sector.controller && `Contrôlé par: ${sector.controller}`}
+                        </div>
+                      )}
+
+                      {/* Matières recommandées - NOUVEAU pour page 2 */}
+                      {sector.matiere && (
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: '#6b7280' }}
+                        >
+                          <Icon name="lucide:Layers" className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          {sector.matiere.length > 32 ? sector.matiere.substring(0, 29) + '...' : sector.matiere}
+                        </div>
+                      )}
 
                       {/* Premier tip ou enhancer */}
                       {(sector.tips?.[0] || sector.enhancers?.[0]) && (
