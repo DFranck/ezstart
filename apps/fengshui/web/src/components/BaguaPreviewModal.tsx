@@ -39,6 +39,7 @@ export function BaguaPreviewModal({
   const wheelRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
+  const cardsGridRef = useRef<HTMLDivElement>(null)
 
   // Variables de couleurs pour le PDF basées sur le theme
   const pdfBgColor = isDarkMode ? '#1a1a1a' : '#ffffff'
@@ -222,21 +223,21 @@ export function BaguaPreviewModal({
           const y = startY + row * spacingY
 
           const accent = sector.colorHex || '#000000'
-          const accents = sector.colorHexes
+          const accents = sector.colorHexes || []
 
           // Convert hex colors to RGB for jsPDF
           const hexToRgb = (hex: string) => {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
             return result
               ? {
-                  r: parseInt(result[1], 16),
-                  g: parseInt(result[2], 16),
-                  b: parseInt(result[3], 16),
+                  r: parseInt(result[1] || '00', 16),
+                  g: parseInt(result[2] || '00', 16),
+                  b: parseInt(result[3] || '00', 16),
                 }
               : { r: 0, g: 0, b: 0 }
           }
 
-          const accentRgb = hexToRgb(accent)
+          const accentRgb = hexToRgb(accent || '#000000')
 
           // Card background
           pdf.setFillColor(isDarkMode ? 42 : 255, isDarkMode ? 42 : 255, isDarkMode ? 42 : 255)
@@ -307,7 +308,7 @@ export function BaguaPreviewModal({
 
         pdf.setFontSize(14)
         pdf.text(
-          `Page ${pageNumber}/2 - Vue ${mode === 'wheel' ? 'Roue' : 'Grille'} Bagua`,
+          `Page ${pageNumber}/3 - Vue ${mode === 'wheel' ? 'Roue' : 'Grille'} Bagua`,
           105,
           35,
           { align: 'center' }
@@ -447,87 +448,44 @@ export function BaguaPreviewModal({
       // For grid, use the captured grid image (no cards)
       const gridImageData = gridDataUrl
 
-      // Create preview for page 3 (cards grid)
-      const page3Canvas = document.createElement('canvas')
-      const page3Ctx = page3Canvas.getContext('2d')
-      page3Canvas.width = 600
-      page3Canvas.height = 800
+      // Capture page 3 from the REAL React cards in cardsGridRef
+      console.log('Capturing page 3 from real React cards grid...')
+      if (!cardsGridRef.current) throw new Error('Cards grid container not found')
 
-      // White background
-      page3Ctx!.fillStyle = isDarkMode ? '#1a1a1a' : '#ffffff'
-      page3Ctx!.fillRect(0, 0, 600, 800)
+      // Temporarily make the cards grid container visible for capture
+      const originalCardsGridStyle = {
+        position: cardsGridRef.current.style.position || 'absolute',
+        top: cardsGridRef.current.style.top || '-9999px',
+        left: cardsGridRef.current.style.left || '-9999px',
+        display: cardsGridRef.current.style.display || 'block',
+      }
 
-      // Title
-      page3Ctx!.fillStyle = isDarkMode ? '#ffffff' : '#000000'
-      page3Ctx!.font = 'bold 20px Arial'
-      page3Ctx!.textAlign = 'center'
-      page3Ctx!.fillText('Secteurs Détaillés', 300, 40)
+      cardsGridRef.current.style.position = 'static'
+      cardsGridRef.current.style.top = 'auto'
+      cardsGridRef.current.style.left = 'auto'
+      cardsGridRef.current.style.display = 'block'
 
-      // Draw cards grid preview
-      const cardW = 180
-      const cardH = 220
-      const spacing = 20
-      const startX = (600 - (cardW * 3 + spacing * 2)) / 2
-      const startY = 80
+      // Wait for render
+      await new Promise(resolve => setTimeout(resolve, 100))
 
-      DIRECTIONS_WITH_CENTER.forEach((dir, index) => {
-        const sector = config.orientations?.[dir]
-        if (!sector) return
-
-        const row = Math.floor(index / 3)
-        const col = index % 3
-        const x = startX + col * (cardW + spacing)
-        const y = startY + row * (cardH + spacing)
-
-        // Card background
-        page3Ctx!.fillStyle = isDarkMode ? '#2a2a2a' : '#ffffff'
-        page3Ctx!.fillRect(x, y, cardW, cardH)
-
-        // Card border
-        page3Ctx!.strokeStyle = sector.colorHex || '#000000'
-        page3Ctx!.lineWidth = 2
-        page3Ctx!.strokeRect(x, y, cardW, cardH)
-
-        // Header
-        page3Ctx!.fillStyle = sector.colorHex || '#000000'
-        page3Ctx!.fillRect(x, y, cardW, 30)
-
-        // Header text
-        page3Ctx!.fillStyle = '#ffffff'
-        page3Ctx!.font = 'bold 12px Arial'
-        page3Ctx!.textAlign = 'center'
-        page3Ctx!.fillText(`${dir} • ${sector.element} • ${sector.number}`, x + cardW / 2, y + 20)
-
-        // Title
-        page3Ctx!.fillStyle = isDarkMode ? '#ffffff' : '#000000'
-        page3Ctx!.font = 'bold 14px Arial'
-        page3Ctx!.fillText(sector.title, x + cardW / 2, y + 50)
-
-        // Tip
-        if (sector.tips?.[0] || sector.enhancers?.[0]) {
-          page3Ctx!.fillStyle = '#666666'
-          page3Ctx!.font = '10px Arial'
-          const tip = (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 80) + '...'
-          // Split text into multiple lines
-          const words = tip.split(' ')
-          let line = ''
-          let lineY = y + 75
-          for (const word of words) {
-            const testLine = line + word + ' '
-            const metrics = page3Ctx!.measureText(testLine)
-            if (metrics.width > cardW - 20 && line !== '') {
-              page3Ctx!.fillText(line, x + cardW / 2, lineY)
-              line = word + ' '
-              lineY += 15
-            } else {
-              line = testLine
-            }
-          }
-          page3Ctx!.fillText(line, x + cardW / 2, lineY)
-        }
+      const page3DataUrl = await domtoimage.toPng(cardsGridRef.current, {
+        quality: 1,
+        width: 800,
+        height: 1000,
+        bgcolor: isDarkMode ? '#1a1a1a' : '#ffffff',
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+        },
       })
 
-      const page3ImageData = page3Canvas.toDataURL('image/png', 1.0)
+      // Restore original styling
+      cardsGridRef.current.style.position = originalCardsGridStyle.position
+      cardsGridRef.current.style.top = originalCardsGridStyle.top
+      cardsGridRef.current.style.left = originalCardsGridStyle.left
+      cardsGridRef.current.style.display = originalCardsGridStyle.display
+
+      const page3ImageData = page3DataUrl
 
       // Save preview images for all pages
       setPreviewImageUrls({
@@ -633,7 +591,10 @@ export function BaguaPreviewModal({
       {/* LOADER EN HAUT - Toujours visible pendant génération */}
       <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
         {isGenerating && (
-          <div className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center flex items-center justify-center" style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}>
+          <div
+            className="w-full border border-gray-200 rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50 text-center flex items-center justify-center"
+            style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}
+          >
             <div className="flex flex-col items-center gap-6">
               <div className="flex items-center gap-4">
                 <Icon name="lucide:FileText" className="w-12 h-12 text-blue-600" />
@@ -844,8 +805,8 @@ export function BaguaPreviewModal({
                 const sector = config.orientations?.[dir]
                 if (!sector) return null
 
-                const accent = sector.colorHex
-                const accents = sector.colorHexes
+                const accent = sector.colorHex || '#000000'
+                const accents = sector.colorHexes || []
                 return (
                   <div
                     key={`pdf-card-${dir}`}
@@ -945,6 +906,154 @@ export function BaguaPreviewModal({
                 )
               }
             )}
+        </div>
+
+        {/* Conteneur des VRAIES cartes React pour page 3 en GRILLE */}
+        <div
+          ref={cardsGridRef}
+          style={{
+            width: '800px',
+            minHeight: '1000px',
+            padding: '40px',
+            backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+          }}
+        >
+          {/* Title */}
+          <h2
+            style={{
+              textAlign: 'center',
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: isDarkMode ? '#ffffff' : '#000000',
+              marginBottom: '30px',
+            }}
+          >
+            Secteurs Détaillés
+          </h2>
+
+          {/* Grid layout for cards */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '20px',
+              maxWidth: '720px',
+              margin: '0 auto',
+              position: 'relative',
+            }}
+          >
+            {planImage &&
+              config &&
+              DIRECTIONS_WITH_CENTER.map((dir, index) => {
+                // Les MÊMES cartes que dans cardsRef mais sans positionnement absolu
+                const sector = config.orientations?.[dir]
+                if (!sector) return null
+
+                const accent = sector.colorHex || '#000000'
+                const accents = sector.colorHexes || []
+                return (
+                  <div
+                    key={`grid-card-${dir}`}
+                    className="rounded-lg border-2 shadow-lg overflow-hidden"
+                    style={{
+                      width: '200px',
+                      minHeight: '240px',
+                      borderColor: accent,
+                      backgroundColor: pdfCardBg,
+                      margin: '0 auto',
+                    }}
+                  >
+                    {/* Header compact avec couleur de fond - IDENTIQUE */}
+                    <div
+                      className="h-6 flex items-center justify-center text-xs font-bold"
+                      style={{
+                        background:
+                          accents && accents.length > 1
+                            ? `linear-gradient(90deg, ${accents.join(', ')})`
+                            : accent,
+                        color: '#ffffff',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                      }}
+                    >
+                      {dir} • {sector.element} • {sector.number}
+                    </div>
+
+                    {/* Contenu compact - IDENTIQUE */}
+                    <div className="p-2 space-y-1">
+                      {/* Titre */}
+                      <div
+                        className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
+                        style={{ color: pdfTextColor }}
+                      >
+                        {sector.title}
+                      </div>
+
+                      {/* Premier tip ou enhancer */}
+                      {(sector.tips?.[0] || sector.enhancers?.[0]) && (
+                        <div
+                          className="text-[9px] leading-tight flex items-center"
+                          style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                        >
+                          {sector.shape && (
+                            <Icon
+                              name={
+                                sector.shape === 'circle'
+                                  ? 'lucide:Circle'
+                                  : sector.shape === 'square'
+                                    ? 'lucide:Square'
+                                    : sector.shape === 'triangle'
+                                      ? 'lucide:Triangle'
+                                      : sector.shape === 'rectangle'
+                                        ? 'lucide:RectangleHorizontal'
+                                        : 'lucide:Waves'
+                              }
+                              className="w-3 h-3 mr-1"
+                              style={{ color: accent }}
+                            />
+                          )}
+                          {((sector.tips?.[0] || sector.enhancers?.[0])?.length || 0) > 35
+                            ? (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 32) + '...'
+                            : sector.tips?.[0] || sector.enhancers?.[0]}
+                        </div>
+                      )}
+
+                      {/* Etoile volante */}
+                      {sector.star && (
+                        <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
+                          <div
+                            className="text-[9px] leading-tight flex items-center"
+                            style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          >
+                            <Icon
+                              name="lucide:Star"
+                              className="w-3 h-3 mr-1"
+                              style={{
+                                color: sector.star.status === 'bonne' ? '#22c55e' : '#ef4444',
+                              }}
+                            />
+                            {sector.star.star} - {sector.star.element}
+                          </div>
+                          <div
+                            className="text-[9px] leading-tight flex items-center"
+                            style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
+                          >
+                            {sector.star.remedies?.length > 0 && (
+                              <>
+                                <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
+                                {sector.star.remedies?.join(', ')}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
         </div>
       </div>
     </Modal>
