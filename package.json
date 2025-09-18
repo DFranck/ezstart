@@ -8,16 +8,17 @@
     "dev": "turbo dev --concurrency 50",
     "dev:types": "tsc -b --watch",
     "dev:optimized": "concurrently \"pnpm dev:types\" \"turbo dev --concurrency 50\"",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "typecheck:watch": "tsc -b --watch",
+    "kill:ports": "powershell -ExecutionPolicy Bypass -File .\\scripts\\kill-ports.ps1",
+    "dev:status": "powershell -ExecutionPolicy Bypass -File .\\scripts\\dev-status.ps1",
     "dev:billing": "turbo run dev --filter=web-ez-billing... --filter=api-ez-billing... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
     "dev:td": "turbo run dev --filter=web-tower-defense... --filter=api-tower-defense... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
     "dev:ez": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui...",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "typecheck:watch": "tsc -b --watch",
-    "kill:ports": "powershell -ExecutionPolicy Bypass -File .\\scripts\\kill-ports.ps1",
-    "dev:status": "powershell -ExecutionPolicy Bypass -File .\\scripts\\dev-status.ps1"
+    "dev:gp": "turbo run dev --filter=web-green-pulse..."
   },
   "jest": {
     "projects": [

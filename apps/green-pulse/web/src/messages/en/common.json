@@ -1,0 +1,8 @@
+{
+  "common": {
+    "appName": "Green-pulse",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try again"
+  }
+}
