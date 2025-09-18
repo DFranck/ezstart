@@ -24,24 +24,11 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       // Header right content (ThemeSwitcher, etc.)
       headerRightContent={<ThemeSwitcher />}
       // Bottom mobile navigation
-      bottomNavigation={[
-        { href: '/', icon: 'lucide:Home', label: 'Home' },
-        { href: '/dashboard', icon: 'lucide:BarChart3', label: 'Dashboard' },
-        { href: '/analytics', icon: 'lucide:TrendingUp', label: 'Analytics' },
-        { href: '/settings', icon: 'lucide:Settings', label: 'Settings' },
-      ]}
+      bottomNavigation={[]}
       // Social links
-      socialLinks={[
-        { href: 'https://github.com', icon: 'lucide:Github', label: 'GitHub' },
-        { href: 'https://twitter.com', icon: 'lucide:Twitter', label: 'Twitter' },
-        { href: 'https://linkedin.com', icon: 'lucide:Linkedin', label: 'LinkedIn' },
-      ]}
+      socialLinks={[]}
       // Footer links
-      footerLinks={[
-        { href: '/privacy', label: 'Privacy Policy' },
-        { href: '/terms', label: 'Terms of Service' },
-        { href: '/legal', label: 'Legal Notices' },
-      ]}
+      footerLinks={[]}
       // Use Next.js Link component
       LinkComponent={Link}
     >

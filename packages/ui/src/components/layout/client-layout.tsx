@@ -15,7 +15,7 @@ export interface NavigationItem {
   icon?: KnownIconName
 }
 
-import { MobileNavbar, type BottomNavItem } from './mobile-navbar'
+import { type BottomNavItem } from './mobile-navbar'
 
 export interface ClientLayoutProps {
   children: React.ReactNode
@@ -146,7 +146,7 @@ export function ClientLayout({
       />
 
       {/* Mobile bottom navigation */}
-      {isMobile && (
+      {/* {isMobile && (
         <div className="fixed bottom-0 inset-x-0 z-40">
           <MobileNavbar
             navigationItems={bottomNavigation}
@@ -159,7 +159,7 @@ export function ClientLayout({
             className={mobileNavbarClassName}
           />
         </div>
-      )}
+      )} */}
     </Div>
   )
 }
