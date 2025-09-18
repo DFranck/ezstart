@@ -90,7 +90,7 @@ export function ClientLayout({
     <Div className={cn('min-h-screen flex flex-col', className)}>
       {/* Header */}
       <Header
-        position="sticky"
+        position="fixed"
         leftContent={
           <div className="flex items-center space-x-4">
             {logoIcon && (
