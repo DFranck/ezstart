@@ -1,6 +1,6 @@
-import { cva } from 'class-variance-authority';
-import { intentContainer, variantContainer } from '../../tokens/tokens';
-import { createAlias } from '../../utils/create-alias';
+import { cva } from 'class-variance-authority'
+import { intentContainer, variantContainer } from '../../tokens/tokens'
+import { createAlias } from '../../utils/create-alias'
 
 // Footer variant config, typée
 export const footerVariantConfig = {
@@ -14,8 +14,7 @@ export const footerVariantConfig = {
   },
   intent: intentContainer,
   layout: {
-    default:
-      'flex flex-col md:flex-row md:items-center md:justify-between gap-4',
+    default: 'flex flex-col md:flex-row md:items-center md:justify-between gap-4',
     centered: 'flex flex-col items-center justify-center gap-4',
     spaced: 'flex flex-row justify-between items-center gap-4',
   },
@@ -23,24 +22,21 @@ export const footerVariantConfig = {
     true: 'pb-16',
     false: '',
   },
-} as const;
+} as const
 
-export const footerVariants = cva(
-  'container mx-auto w-full border-t border-border pt-4 pb-4 bg-background',
-  {
-    variants: footerVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      size: 'full',
-      intent: 'default',
-      layout: 'default',
-      withFixedMobilebar: false,
-    },
-  }
-);
+export const footerVariants = cva('container mx-auto w-full border-t border-border pt-4 pb-4', {
+  variants: footerVariantConfig,
+  defaultVariants: {
+    variant: 'default',
+    size: 'full',
+    intent: 'default',
+    layout: 'default',
+    withFixedMobilebar: false,
+  },
+})
 
 // Footer alias (optionnel si besoin)
-export const FooterTag = createAlias('footer');
+export const FooterTag = createAlias('footer')
 
 // Footer meta pour Playground/Docs/devtools
 export const footerVariantsMeta = Object.fromEntries(
@@ -49,9 +45,9 @@ export const footerVariantsMeta = Object.fromEntries(
     Object.keys(variantValues),
   ])
 ) as {
-  variant: string[];
-  size: string[];
-  intent: string[];
-  layout: string[];
-  withFixedMobilebar: string[];
-};
+  variant: string[]
+  size: string[]
+  intent: string[]
+  layout: string[]
+  withFixedMobilebar: string[]
+}
