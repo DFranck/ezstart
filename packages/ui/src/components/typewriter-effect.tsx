@@ -151,64 +151,97 @@ export const TypewriterEffectSmooth = ({
 
   const renderWords = () => {
     let charCount = 0
+    let cursorPlaced = false
 
     return (
-      <div className="inline">
+      <>
         {words.map((word, wordIdx) => {
           return (
             <span key={`word-${wordIdx}`} className="inline">
               {word.text.split('').map((char, charIdx) => {
                 charCount++
                 const shouldShow = charCount <= displayedChars
+                const isLastVisibleChar = charCount === displayedChars
+
                 return (
-                  <span
-                    key={`char-${charIdx}`}
-                    className={cn(
-                      `transition-opacity duration-100`,
-                      shouldShow ? 'opacity-100' : 'opacity-0',
-                      word.className
+                  <span key={`char-${charIdx}`} className="inline">
+                    <span
+                      className={cn(
+                        `transition-opacity duration-100`,
+                        shouldShow ? 'opacity-100' : 'opacity-0',
+                        word.className
+                      )}
+                    >
+                      {char}
+                    </span>
+                    {isLastVisibleChar && !isComplete && !cursorPlaced && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: 'reverse',
+                        }}
+                        className={cn(
+                          'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+                          cursorClassName
+                        )}
+                        onAnimationStart={() => { cursorPlaced = true }}
+                      />
                     )}
-                  >
-                    {char}
                   </span>
                 )
               })}
               {wordIdx < words.length - 1 && (
-                <span className={charCount + 1 <= displayedChars ? 'opacity-100' : 'opacity-0'}>
-                  &nbsp;
-                </span>
+                <>
+                  <span className={charCount + 1 <= displayedChars ? 'opacity-100' : 'opacity-0'}>
+                    &nbsp;
+                  </span>
+                  {charCount + 1 === displayedChars && !isComplete && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{
+                        duration: 0.8,
+                        repeat: Infinity,
+                        repeatType: 'reverse',
+                      }}
+                      className={cn(
+                        'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+                        cursorClassName
+                      )}
+                    />
+                  )}
+                </>
               )}
             </span>
           )
         })}
-      </div>
+        {isComplete && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity,
+              repeatType: 'reverse',
+            }}
+            className={cn(
+              'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+              cursorClassName
+            )}
+          />
+        )}
+      </>
     )
   }
 
   return (
-    <div ref={ref} className={cn('inline-flex items-baseline gap-1 my-6', className)}>
-      <div className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold">
+    <div ref={ref} className={cn('my-6', className)}>
+      <div className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold inline">
         {renderWords()}
       </div>
-      {!isComplete && (
-        <motion.span
-          initial={{
-            opacity: 0,
-          }}
-          animate={{
-            opacity: 1,
-          }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-          className={cn(
-            'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
-            cursorClassName
-          )}
-        ></motion.span>
-      )}
     </div>
   )
 }
