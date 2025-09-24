@@ -35,19 +35,19 @@ export default function HomePage() {
         size={'full'}
         className="dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900 bg-gradient-to-br from-green-50 to-blue-50"
       >
-        <div className="container mx-auto text-center">
+        <div className="container mx-auto text-center px-4">
           <div className="max-w-4xl mx-auto">
-            <H1 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <H1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               {t('hero.title')}
             </H1>
             <div className="mb-4">
-              <H2 className="text-2xl lg:text-3xl font-semibold mb-2">{t('hero.subtitle')}</H2>
-              <div className="flex justify-center items-center min-h-[60px]">
+              <H2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2">{t('hero.subtitle')}</H2>
+              <div className="flex justify-center items-center min-h-[50px] sm:min-h-[60px] px-2">
                 <TypewriterEffectSmooth
                   words={[
                     {
                       text: t('hero.typewriterText'),
-                      className: "text-lg lg:text-xl font-medium text-center bg-gradient-to-r from-green-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent"
+                      className: "text-base sm:text-lg lg:text-xl font-medium text-center bg-gradient-to-r from-green-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent"
                     }
                   ]}
                   className="flex justify-center"
@@ -57,13 +57,13 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            <P className="text-lg lg:text-xl mb-8 max-w-3xl mx-auto text-muted-foreground">
+            <P className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto text-muted-foreground px-4">
               {t('hero.description')}
             </P>
 
-            <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
-              <P className="text-lg font-medium mb-4">{t('hero.cta')}</P>
-              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-4">
+            <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-2xl mx-auto">
+              <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
+              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Input
                   type="email"
                   placeholder={t('hero.emailPlaceholder')}
@@ -74,7 +74,7 @@ export default function HomePage() {
                 />
                 <Button
                   type="submit"
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-primary-foreground font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
                 >
                   {t('hero.notifyMe')}
                 </Button>
