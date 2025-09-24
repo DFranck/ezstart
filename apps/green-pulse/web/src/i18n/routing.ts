@@ -1,7 +1,8 @@
+// apps/green-pulse/web/i18n/routing.ts
 import { defineRouting } from 'next-intl/routing'
 
 export const routing = defineRouting({
-  locales: ['en', 'fr'],
+  locales: ['fr', 'en'],
   defaultLocale: 'en',
   localeDetection: true,
 })
