@@ -13,10 +13,9 @@ import {
   Section,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
-import { runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 export default function HomePage() {
   const [email, setEmail] = useState('')
