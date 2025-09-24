@@ -54,10 +54,10 @@ const addEmailController = async (req: any, res: any) => {
     const exists = waitlist.emails.some(e => e === emailLower)
 
     if (exists) {
-      return res.json({
-        success: true,
-        message: 'Email already registered',
-        alreadyExists: true,
+      return res.status(409).json({
+        success: false,
+        error: 'Email already registered',
+        code: 'EMAIL_EXISTS',
         count: waitlist.emails.length
       })
     }
@@ -144,6 +144,7 @@ docRouter.post('/:appName/add', addEmailController, {
   status: 201,
   extraResponses: {
     400: { description: 'Invalid email', schema: errorSchema },
+    409: { description: 'Email already exists', schema: errorSchema },
     500: { description: 'Server error', schema: errorSchema }
   }
 })

@@ -18,7 +18,7 @@
     "dev:ez": "turbo run dev --filter=web-ezstart...",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui...",
-    "dev:gp": "turbo run dev --filter=web-green-pulse..."
+    "dev:gp": "turbo run dev --filter=web-green-pulse... --filter=api-ezauth..."
   },
   "jest": {
     "projects": [

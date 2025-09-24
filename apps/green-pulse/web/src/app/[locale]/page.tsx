@@ -17,19 +17,6 @@ import { runWithFeedback } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-// Helper function for Auth API calls
-const callAuthApi = async (endpoint: string, options: RequestInit = {}) => {
-  const baseURL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:5010/api'
-  const url = `${baseURL}${endpoint}`
-
-  const response = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  })
-
-  return response.json()
-}
-
 export default function HomePage() {
   const [email, setEmail] = useState('')
   const t = useTranslations('home')
@@ -39,16 +26,21 @@ export default function HomePage() {
 
     await runWithFeedback({
       action: async () => {
-        const data = await callAuthApi('/waitlist/green-pulse/add', {
+        const baseURL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:5010/api'
+        const response = await fetch(`${baseURL}/waitlist/green-pulse/add`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         })
 
-        if (data.alreadyExists) {
-          throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
-        }
+        const data = await response.json()
 
-        if (!data.success) {
+        if (!response.ok) {
+          // Status 409 = email already exists, use specific message
+          if (response.status === 409 && data.code === 'EMAIL_EXISTS') {
+            throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
+          }
+          // Other errors
           throw new Error(data.error || 'Failed to save email')
         }
 
