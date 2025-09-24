@@ -24,8 +24,8 @@ export default function HomePage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await runWithFeedback(
-      async () => {
+    await runWithFeedback({
+      action: async () => {
         const response = await fetch('/api/waitlist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -45,12 +45,10 @@ export default function HomePage() {
         setEmail('')
         return data
       },
-      {
-        loadingMessage: t('cta.loading') || 'Adding to waitlist...',
-        successMessage: t('cta.thankYou') || "Thank you! You've been added to the waitlist.",
-        errorMessage: t('cta.error') || 'Something went wrong. Please try again.',
-      }
-    )
+      toastLoading: { message: t('cta.loading') || 'Adding to waitlist...' },
+      toastSuccess: { message: t('cta.thankYou') || "Thank you! You've been added to the waitlist." },
+      toastError: { message: t('cta.error') || 'Something went wrong. Please try again.' },
+    })
   }
 
   return (
