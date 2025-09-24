@@ -64,7 +64,10 @@
       "title": "GreenPulse.AI sera bientôt lancé",
       "description": "Inscrivez-vous pour recevoir des mises à jour exclusives et un accès GRATUIT anticipé.",
       "joinWaitlist": "Rejoignez la liste d'attente",
-      "thankYou": "Merci ! Vous serez notifié dès le lancement de GreenPulse.AI"
+      "thankYou": "Merci ! Vous serez notifié dès le lancement de GreenPulse.AI",
+      "loading": "Ajout à la liste d'attente...",
+      "alreadyRegistered": "Cet email est déjà enregistré !",
+      "error": "Une erreur est survenue. Veuillez réessayer."
     }
   }
 }
