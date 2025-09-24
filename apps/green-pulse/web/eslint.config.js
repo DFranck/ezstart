@@ -1,3 +1,4 @@
-import eslintConfig from '@ezstart/eslint-config/next-js'
+import { nextJsConfig } from '@ezstart/eslint-config/next-js'
 
-export default [...eslintConfig]
+/** @type {import("eslint").Linter.Config} */
+export default nextJsConfig
