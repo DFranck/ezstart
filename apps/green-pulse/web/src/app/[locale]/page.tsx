@@ -13,14 +13,21 @@ import {
   Section,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
-import { runWithFeedback, callApi } from '@ezstart/ui/utils'
+import { runWithFeedback } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 // Helper function for Auth API calls
-const callAuthApi = (endpoint: string, options?: RequestInit) => {
+const callAuthApi = async (endpoint: string, options: RequestInit = {}) => {
   const baseURL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:5010/api'
-  return callApi(endpoint, { ...options, baseURL })
+  const url = `${baseURL}${endpoint}`
+
+  const response = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  })
+
+  return response.json()
 }
 
 export default function HomePage() {
