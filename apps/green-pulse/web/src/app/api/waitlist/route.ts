@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
+import os from 'os'
 
-const WAITLIST_FILE = path.join(process.cwd(), 'waitlist.json')
+// Use /tmp in production (Vercel), local file in development
+const WAITLIST_FILE = process.env.NODE_ENV === 'production'
+  ? path.join(os.tmpdir(), 'waitlist.json')
+  : path.join(process.cwd(), 'waitlist.json')
 
 interface WaitlistData {
   waitlist: string[]

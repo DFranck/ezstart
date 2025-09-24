@@ -46,7 +46,9 @@ export default function HomePage() {
         return data
       },
       toastLoading: { message: t('cta.loading') || 'Adding to waitlist...' },
-      toastSuccess: { message: t('cta.thankYou') || "Thank you! You've been added to the waitlist." },
+      toastSuccess: {
+        message: t('cta.thankYou') || "Thank you! You've been added to the waitlist.",
+      },
       toastError: { message: t('cta.error') || 'Something went wrong. Please try again.' },
     })
   }
