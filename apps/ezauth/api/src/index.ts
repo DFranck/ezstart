@@ -1,5 +1,6 @@
 import { createApp, connectToMongo, startServer, getApiPort } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
+import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
 
 const PORT = getApiPort()
 
@@ -8,6 +9,7 @@ const app = createApp()
 
 // API routes
 app.use('/api/auth', authRoutes)
+app.use('/api/waitlist', waitlistRoutes)
 app.get('/api/health', (_: any, res: any) => res.status(200).json({ status: 'ok' }))
 
 // Start server with database connection
@@ -15,7 +17,7 @@ connectToMongo('ezauth')
   .then(() =>
     startServer(app, {
       routes: authRoutes,
-      registries: [authRegistry],
+      registries: [authRegistry, waitlistRegistry],
       serviceName: 'EZAuth',
       port: Number(PORT),
     })

@@ -13,9 +13,15 @@ import {
   Section,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
-import { runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback, callApi } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+
+// Helper function for Auth API calls
+const callAuthApi = (endpoint: string, options?: RequestInit) => {
+  const baseURL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:5010/api'
+  return callApi(endpoint, { ...options, baseURL })
+}
 
 export default function HomePage() {
   const [email, setEmail] = useState('')
@@ -26,19 +32,16 @@ export default function HomePage() {
 
     await runWithFeedback({
       action: async () => {
-        const response = await fetch('/api/waitlist', {
+        const data = await callAuthApi('/waitlist/green-pulse/add', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         })
-
-        const data = await response.json()
 
         if (data.alreadyExists) {
           throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
         }
 
-        if (!response.ok) {
+        if (!data.success) {
           throw new Error(data.error || 'Failed to save email')
         }
 
