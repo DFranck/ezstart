@@ -90,7 +90,7 @@ export const TypewriterEffect = ({
           repeatType: 'reverse',
         }}
         className={cn(
-          'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+          'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-[1em] bg-blue-500',
           cursorClassName
         )}
       ></motion.span>
@@ -184,7 +184,7 @@ export const TypewriterEffectSmooth = ({
                           repeatType: 'reverse',
                         }}
                         className={cn(
-                          'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+                          'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-[1em] bg-blue-500',
                           cursorClassName
                         )}
                         onAnimationStart={() => { cursorPlaced = true }}
@@ -208,7 +208,7 @@ export const TypewriterEffectSmooth = ({
                         repeatType: 'reverse',
                       }}
                       className={cn(
-                        'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
+                        'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-[1em] bg-blue-500',
                         cursorClassName
                       )}
                     />
@@ -218,21 +218,6 @@ export const TypewriterEffectSmooth = ({
             </span>
           )
         })}
-        {isComplete && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              repeatType: 'reverse',
-            }}
-            className={cn(
-              'inline-block rounded-sm w-[2px] sm:w-[3px] md:w-[4px] h-3 sm:h-4 md:h-5 lg:h-6 xl:h-8 bg-blue-500',
-              cursorClassName
-            )}
-          />
-        )}
       </>
     )
   }
