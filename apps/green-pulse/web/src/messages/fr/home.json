@@ -1,0 +1,70 @@
+{
+  "home": {
+    "hero": {
+      "title": "GreenPulse.AI",
+      "subtitle": "Votre Assistant ESG pour la Croissance Verte des Entreprises",
+      "typewriterText": "Réduire les Coûts • Développer le Marketing Vert • Accéder aux Financements • Croître Durablement",
+      "description": "Un accompagnement basé sur l'IA pour aider les PME à réduire leurs coûts, développer un marketing vert solide et accéder à la finance verte.",
+      "cta": "Soyez le premier informé de notre lancement et bénéficiez d'une version d'essai gratuite",
+      "emailPlaceholder": "Votre adresse e-mail",
+      "notifyMe": "Prévenez-moi"
+    },
+    "value": {
+      "intro": "Avec GreenPulse.AI, pas besoin d'être un expert environnemental ou d'en embaucher un. Grâce à une simple conversation avec votre assistant personnalisé, vous recevrez des conseils étape par étape pour :",
+      "points": {
+        "chat": "Discuter de votre situation actuelle et trouver des solutions simples",
+        "measure": "Mesurer votre empreinte carbone",
+        "improve": "Améliorer l'efficacité et économiser de l'argent",
+        "roadmap": "Élaborer des feuilles de route de durabilité avec des KPI",
+        "qualify": "Vous qualifier pour des prêts verts et des opportunités d'exportation"
+      }
+    },
+    "example": {
+      "title": "Exemple d'interaction",
+      "user": "Utilisateur :",
+      "userMessage": "Je gère 4 cliniques esthétiques à HCMC avec 15 employés et 10 machines. Je souhaite réduire mes factures d'électricité et attirer des clients exigeants en produits de qualité et amoureux de la nature. Pouvez-vous m'aider ?",
+      "ai": "GreenPulse.AI :",
+      "aiMessage": "Bonjour Mme Hang, oui je peux certainement vous aider dans vos objectifs de croissance durable. Passons en revue vos dépenses actuelles et vos inventaires de matériel. Pouvez-vous préciser si vous souhaitez faire du marketing avec vos actions ou simplement rester discret ? Envisagez-vous également une levée de fonds via la finance verte dans un futur proche ?"
+    },
+    "packages": {
+      "title": "Nos Offres",
+      "free": {
+        "title": "Version Gratuite",
+        "subtitle": "Pour les explorateurs de l'ESG",
+        "description": "Je veux discuter d'économies d'énergie, d'actions ESG simples, je découvre/explore ce que je peux faire et améliorer dans mon entreprise d'un point de vue durable.",
+        "features": {
+          "chat": "Plateforme de chat IA"
+        }
+      },
+      "premium": {
+        "title": "Package Premium",
+        "subtitle": "Pour une croissance stimulée par l'ESG",
+        "badge": "Populaire",
+        "description": "Je veux utiliser des actions durables et vertes pour stimuler mon activité grâce à un marketing vert sur mesure, éviter le greenwashing et avoir des KPI solides pour mes clients.",
+        "features": {
+          "chat": "Plateforme de chat IA",
+          "tools": "Accès aux outils ESG avec tableau de bord",
+          "import": "Importation de données (docs, voix, images)",
+          "analysis": "Analyse de données et diagrammes",
+          "plans": "Plans d'action sur mesure"
+        }
+      },
+      "golden": {
+        "title": "Package Golden",
+        "subtitle": "Pour une certification ESG officielle",
+        "description": "J'ai besoin d'un rapport/dossier/audit ESG solide et officiel pour la certification ISO / l'exportation internationale / l'accès à la finance verte.",
+        "features": {
+          "all": "Toutes les fonctionnalités Premium",
+          "support": "Support sur mesure pour normes officielles/internationales",
+          "replace": "Remplace ou soutient le responsable ESG"
+        }
+      }
+    },
+    "cta": {
+      "title": "GreenPulse.AI sera bientôt lancé",
+      "description": "Inscrivez-vous pour recevoir des mises à jour exclusives et un accès GRATUIT anticipé.",
+      "joinWaitlist": "Rejoignez la liste d'attente",
+      "thankYou": "Merci ! Vous serez notifié dès le lancement de GreenPulse.AI"
+    }
+  }
+}

@@ -1,7 +1,70 @@
 {
   "home": {
-    "title": "Welcome to Green-pulse",
-    "description": "This app is pre-configured with all the essentials",
-    "getStarted": "Get Started"
+    "hero": {
+      "title": "GreenPulse.AI",
+      "subtitle": "Your ESG Assistant for Green Business Growth",
+      "typewriterText": "Reduce Costs • Develop Green Marketing • Access Finance • Grow Sustainably",
+      "description": "AI-powered support to help SMEs reduce costs, develop solid green marketing, and access green finance.",
+      "cta": "Be the first to know about our launch and get a free trial",
+      "emailPlaceholder": "Your email address",
+      "notifyMe": "Notify me"
+    },
+    "value": {
+      "intro": "With GreenPulse.AI, no need to be an environmental expert or hire one. Through a simple conversation with your personalized assistant, you'll receive step-by-step advice to:",
+      "points": {
+        "chat": "Discuss your current situation and find simple solutions",
+        "measure": "Measure your carbon footprint",
+        "improve": "Improve efficiency and save money",
+        "roadmap": "Develop sustainability roadmaps with KPIs",
+        "qualify": "Qualify for green loans and export opportunities"
+      }
+    },
+    "example": {
+      "title": "Interaction Example",
+      "user": "User:",
+      "userMessage": "I manage 4 aesthetic clinics in HCMC with 15 employees and 10 machines. I want to reduce my electricity bills and attract demanding customers who love quality products and nature. Can you help me?",
+      "ai": "GreenPulse.AI:",
+      "aiMessage": "Hello Ms. Hang, yes I can definitely help you with your sustainable growth goals. Let's review your current expenses and equipment inventories. Can you specify if you want to market your actions or just stay discreet? Are you also considering fundraising through green finance in the near future?"
+    },
+    "packages": {
+      "title": "Our Offers",
+      "free": {
+        "title": "Free Use",
+        "subtitle": "For ESG Explorers",
+        "description": "I want to discuss energy savings, simple ESG actions, discover/explore what I can do and improve in my business from a sustainable perspective.",
+        "features": {
+          "chat": "AI chat platform"
+        }
+      },
+      "premium": {
+        "title": "Premium Package",
+        "subtitle": "For ESG-driven Growth",
+        "badge": "Popular",
+        "description": "I want to use sustainable and green actions to boost my business through tailored green marketing, avoid greenwashing and have solid KPIs for my customers.",
+        "features": {
+          "chat": "AI chat platform",
+          "tools": "Access to ESG tools with dashboard",
+          "import": "Data import (docs, voice, images)",
+          "analysis": "Data analysis and charts",
+          "plans": "Tailored action plans"
+        }
+      },
+      "golden": {
+        "title": "Golden Package",
+        "subtitle": "For Official ESG Certification",
+        "description": "I need a solid and official ESG report/file/audit for ISO certification / international export / green finance access.",
+        "features": {
+          "all": "All Premium features",
+          "support": "Tailored support for official/international standards",
+          "replace": "Replaces or supports ESG manager"
+        }
+      }
+    },
+    "cta": {
+      "title": "GreenPulse.AI launching soon",
+      "description": "Sign up to receive exclusive updates and FREE early access.",
+      "joinWaitlist": "Join the waitlist",
+      "thankYou": "Thank you! You will be notified as soon as GreenPulse.AI launches"
+    }
   }
 }

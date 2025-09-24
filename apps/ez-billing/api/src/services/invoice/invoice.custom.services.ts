@@ -58,6 +58,8 @@ export async function markInvoiceAsPaidService(
 
   // Automatically generate a receipt
   try {
+    console.log(`🔄 Creating receipt for invoice ${updatedInvoice._id} for user ${updatedInvoice.userId}`);
+
     const { ReceiptModel } = await import('../../models/billing/receipt');
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
@@ -79,15 +81,31 @@ export async function markInvoiceAsPaidService(
       total: updatedInvoice.total,
     };
 
+    console.log(`📄 Receipt data:`, {
+      documentNumber: receiptData.documentNumber,
+      userId: receiptData.userId,
+      clientId: receiptData.clientId,
+      invoiceId: receiptData.invoiceId,
+      total: receiptData.total
+    });
+
     const receiptDoc = new ReceiptModel(receiptData);
     const savedReceipt = await receiptDoc.save();
+
+    console.log(`✅ Receipt created successfully: ${savedReceipt._id} (${savedReceipt.documentNumber})`);
 
     return {
       invoice: toApiObject<Invoice>(updatedInvoice),
       receipt: toApiObject<Receipt>(savedReceipt),
     };
   } catch (error) {
-    console.error('Failed to create receipt for invoice:', error);
+    console.error('❌ Failed to create receipt for invoice:', error);
+    console.error('📋 Invoice data:', {
+      id: updatedInvoice._id,
+      userId: updatedInvoice.userId,
+      clientId: updatedInvoice.clientId,
+      documentNumber: updatedInvoice.documentNumber
+    });
     // Return the invoice even if receipt creation fails
     return { invoice: toApiObject<Invoice>(updatedInvoice) };
   }

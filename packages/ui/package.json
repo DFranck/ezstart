@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.475.0",
+    "motion": "^12.23.19",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.54.3",
@@ -47,6 +48,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.0.8",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -55,8 +58,6 @@
     "@types/node": "^20",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "@ezstart/eslint-config": "workspace:*",
-    "@ezstart/typescript-config": "workspace:*",
     "tailwindcss": "^4.0.8",
     "typescript": "^5.7.3"
   },

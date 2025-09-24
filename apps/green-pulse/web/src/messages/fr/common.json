@@ -1,0 +1,8 @@
+{
+  "common": {
+    "appName": "GreenPulse.AI",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer"
+  }
+}

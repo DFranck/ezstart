@@ -9,6 +9,7 @@
 @import './gradient-animation.css';
 @import './slide-in-animation.css';
 @import './text-gradient-animation.css';
+@import './typewriter-animations.css';
 @custom-variant dark (&:is(.dark *));
 
 :root {
