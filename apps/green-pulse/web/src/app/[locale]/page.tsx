@@ -33,54 +33,47 @@ export default function HomePage() {
       {/* Hero Section */}
       <Section
         size={'full'}
-        className="dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900 bg-gradient-to-br from-green-50 to-blue-50"
+        className="text-center dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900 bg-gradient-to-br from-green-50 to-blue-50 "
       >
-        <div className="container mx-auto text-center px-4">
-          <div className="max-w-4xl mx-auto">
-            <H1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              {t('hero.title')}
-            </H1>
-            <div className="mb-4">
-              <H2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2">{t('hero.subtitle')}</H2>
-              <div className="flex justify-center items-center min-h-[50px] sm:min-h-[60px] px-2">
-                <TypewriterEffectSmooth
-                  words={[
-                    {
-                      text: t('hero.typewriterText'),
-                      className: "text-base sm:text-lg lg:text-xl font-medium text-center bg-gradient-to-r from-green-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent"
-                    }
-                  ]}
-                  className="flex justify-center"
-                  cursorClassName="bg-gradient-to-r from-green-500 to-blue-500"
-                  duration={3}
-                  delay={0.5}
-                />
-              </div>
-            </div>
-            <P className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto text-muted-foreground px-4">
-              {t('hero.description')}
-            </P>
+        <H1 className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+          {t('hero.title')}
+        </H1>
+        <div>
+          <H2 size={'h3'}>{t('hero.subtitle')}</H2>
+          <TypewriterEffectSmooth
+            words={[
+              {
+                text: t('hero.typewriterText'),
+                className:
+                  'text-base sm:text-lg lg:text-xl font-medium text-center bg-gradient-to-r from-green-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent',
+              },
+            ]}
+            className="flex justify-center "
+            cursorClassName="bg-gradient-to-r from-green-500 to-blue-500"
+            duration={3}
+            delay={0.5}
+          />
+          <P>{t('hero.description')}</P>
+        </div>
 
-            <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-2xl mx-auto">
-              <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
-              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Input
-                  type="email"
-                  placeholder={t('hero.emailPlaceholder')}
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  className="flex-1"
-                />
-                <Button
-                  type="submit"
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-                >
-                  {t('hero.notifyMe')}
-                </Button>
-              </form>
-            </div>
-          </div>
+        <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-2xl mx-auto">
+          <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
+          <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Input
+              type="email"
+              placeholder={t('hero.emailPlaceholder')}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="flex-1"
+            />
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+            >
+              {t('hero.notifyMe')}
+            </Button>
+          </form>
         </div>
       </Section>
 
@@ -127,32 +120,28 @@ export default function HomePage() {
         size={'xl'}
         className="max-w-full bg-gradient-to-br from-green-50 to-blue-50 dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900"
       >
-        <div className="container mx-auto">
-          <div className="max-w-4xl mx-auto">
-            <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
-            <Card className="p-8 space-y-6">
-              <div className="bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
-                <div className="flex items-start space-x-3">
-                  <Icon name="lucide:User" className="w-6 h-6 text-primary mt-1" />
-                  <div>
-                    <P className="font-semibold text-primary mb-2">{t('example.user')}</P>
-                    <P className="">{t('example.userMessage')}</P>
-                  </div>
-                </div>
+        <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
+        <Card variant={'ghost'} className="p-0 space-y-6">
+          <div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
+            <div className="flex items-start space-x-3 ">
+              <Icon name="lucide:User" className="w-6 h-6 text-primary mt-1" />
+              <div>
+                <P className="font-semibold text-primary mb-2">{t('example.user')}</P>
+                <P className="">{t('example.userMessage')}</P>
               </div>
-
-              <div className="bg-accent/50 p-6 rounded-xl border-l-4 border-accent-foreground">
-                <div className="flex items-start space-x-3">
-                  <Icon name="lucide:Bot" className="w-6 h-6 text-accent-foreground mt-1" />
-                  <div>
-                    <P className="font-semibold text-accent-foreground mb-2">{t('example.ai')}</P>
-                    <P className="">{t('example.aiMessage')}</P>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            </div>
           </div>
-        </div>
+
+          <div className="bg-accent/50 p-6 rounded-xl border-l-4 border-accent-foreground">
+            <div className="flex items-start space-x-3">
+              <Icon name="lucide:Bot" className="w-6 h-6 text-accent-foreground mt-1" />
+              <div>
+                <P className="font-semibold text-accent-foreground mb-2">{t('example.ai')}</P>
+                <P className="">{t('example.aiMessage')}</P>
+              </div>
+            </div>
+          </div>
+        </Card>
       </Section>
 
       {/* Packages Section */}
