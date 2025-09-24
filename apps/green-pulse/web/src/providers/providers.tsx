@@ -2,6 +2,7 @@
 
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
+import { Toaster } from '@ezstart/ui/components'
 import { NextIntlClientProvider } from 'next-intl'
 import { ReactNode } from 'react'
 
@@ -15,16 +16,10 @@ interface ProvidersProps {
 export function Providers({ children, locale, messages, timeZone }: ProvidersProps) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <AuthProvider appName="green-pulse">
-          {children}
-        </AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <AuthProvider appName="green-pulse">{children}</AuthProvider>
       </ThemeProvider>
+      <Toaster />
     </NextIntlClientProvider>
   )
 }

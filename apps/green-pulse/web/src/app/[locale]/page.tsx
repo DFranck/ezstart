@@ -13,6 +13,7 @@ import {
   Section,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
+import { runWithFeedback } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -20,12 +21,36 @@ export default function HomePage() {
   const [email, setEmail] = useState('')
   const t = useTranslations('home')
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Handle email submission
-    console.log('Email submitted:', email)
-    alert(t('cta.thankYou'))
-    setEmail('')
+
+    await runWithFeedback(
+      async () => {
+        const response = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+
+        const data = await response.json()
+
+        if (data.alreadyExists) {
+          throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to save email')
+        }
+
+        setEmail('')
+        return data
+      },
+      {
+        loadingMessage: t('cta.loading') || 'Adding to waitlist...',
+        successMessage: t('cta.thankYou') || "Thank you! You've been added to the waitlist.",
+        errorMessage: t('cta.error') || 'Something went wrong. Please try again.',
+      }
+    )
   }
 
   return (
