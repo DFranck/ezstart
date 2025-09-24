@@ -16,6 +16,7 @@ import {
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function HomePage() {
   const [email, setEmail] = useState('')
@@ -39,9 +40,11 @@ export default function HomePage() {
           // Status 409 = email already exists, use specific message
           if (response.status === 409 && data.code === 'EMAIL_EXISTS') {
             throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
+          } else {
+            throw new Error(
+              data.error || t('cta.error') || 'Something went wrong. Please try again.'
+            )
           }
-          // Other errors
-          throw new Error(data.error || 'Failed to save email')
         }
 
         setEmail('')
@@ -51,7 +54,14 @@ export default function HomePage() {
       toastSuccess: {
         message: t('cta.thankYou') || "Thank you! You've been added to the waitlist.",
       },
-      toastError: { message: t('cta.error') || 'Something went wrong. Please try again.' },
+      toastError: false,
+      onError: error => {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : t('cta.error') || 'Something went wrong. Please try again.'
+        toast.error(errorMessage)
+      },
     })
   }
 
