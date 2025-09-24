@@ -159,6 +159,7 @@ interface InvoiceCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
   onEdit: (e: React.MouseEvent) => void
   onSend: (e: React.MouseEvent) => void
   onDownload: (e: React.MouseEvent) => void
+  onDownloadReceipt?: (e: React.MouseEvent) => void
   onMarkPaid: (e: React.MouseEvent) => void
 }
 
@@ -173,6 +174,7 @@ export function InvoiceCard({
   onEdit,
   onSend,
   onDownload,
+  onDownloadReceipt,
   onMarkPaid,
   className,
 }: InvoiceCardProps) {
@@ -218,6 +220,12 @@ export function InvoiceCard({
             <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
             <span className="hidden xs:inline sm:hidden md:inline">Download</span>
           </Button>
+          {status === 'paid' && onDownloadReceipt && (
+            <Button size="sm" variant="outline" onClick={onDownloadReceipt}>
+              <Icon name="lucide:Receipt" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Receipt</span>
+            </Button>
+          )}
           {permissions.canMarkAsPaid && (
             <Button
               size="sm"

@@ -9,21 +9,27 @@ const docRouter = createRouterWithDoc(waitlistRegistry, router)
 
 // Schemas for validation and documentation
 const addEmailSchema = z.object({
-  email: z.string().email('Invalid email format')
+  email: z.string().email('Invalid email format').describe('Email address to add to the waitlist')
 })
 
 const waitlistResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(),
-  alreadyExists: z.boolean().optional(),
-  count: z.number(),
-  appName: z.string().optional(),
-  emails: z.array(z.string()).optional()
+  success: z.boolean().describe('Indicates if the operation was successful'),
+  message: z.string().optional().describe('Optional success message'),
+  alreadyExists: z.boolean().optional().describe('Indicates if the email was already in the waitlist'),
+  count: z.number().describe('Total number of emails in the waitlist'),
+  appName: z.string().optional().describe('Name of the application'),
+  emails: z.array(z.string()).optional().describe('List of emails in the waitlist (admin only)')
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string()
+  success: z.literal(false).describe('Always false for error responses'),
+  error: z.string().describe('Error message explaining what went wrong')
+})
+
+const getAllWaitlistsResponseSchema = z.object({
+  success: z.boolean().describe('Indicates if the operation was successful'),
+  waitlists: z.record(z.array(z.string())).describe('Object mapping app names to arrays of email addresses'),
+  totalCount: z.number().describe('Total number of emails across all waitlists')
 })
 
 // Add email to waitlist for an app
@@ -161,11 +167,7 @@ docRouter.get('/:appName', getWaitlistController, {
 docRouter.get('/', getAllWaitlistsController, {
   summary: 'Get all waitlists (admin)',
   tags: ['Waitlist'],
-  responseSchema: z.object({
-    success: z.boolean(),
-    waitlists: z.record(z.array(z.string())),
-    totalCount: z.number()
-  }),
+  responseSchema: getAllWaitlistsResponseSchema,
   extraResponses: {
     500: { description: 'Server error', schema: errorSchema }
   }

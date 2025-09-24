@@ -11,6 +11,7 @@ import { QuoteModal } from '@/components/quote-modal'
 import StatsCard from '@/components/StatsCard'
 import { useBillingContext } from '@/contexts/billing-context'
 import { getBillingPermissions } from '@/utils/billing-permissions'
+import { downloadReceiptByInvoiceId } from '@/utils/receipt-utils'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ez-billing/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Card, CardContent, CardHeader, H1, Icon, Modal, P } from '@ezstart/ui/components'
@@ -227,6 +228,26 @@ const ClientDashboardPage = () => {
       console.error('Client data:', client)
       console.error('Company data:', company)
       alert(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  const handleDownloadReceiptByInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      // Find the receipt for this invoice
+      const receipt = receipts.find(r => r.invoiceId === invoice._id)
+
+      if (!receipt) {
+        alert('No receipt found for this invoice')
+        return
+      }
+
+      // Use the existing receipt download function
+      await handleDownloadReceipt(receipt, e)
+    } catch (error) {
+      console.error('Error downloading receipt for invoice:', error)
+      alert('Error downloading receipt')
     }
   }
 
@@ -448,6 +469,7 @@ const ClientDashboardPage = () => {
                     onEdit={e => handleEditInvoice(invoice, e)}
                     onSend={e => handleSendInvoice(invoice, e)}
                     onDownload={e => handleDownloadInvoice(invoice, e)}
+                    onDownloadReceipt={e => handleDownloadReceiptByInvoice(invoice, e)}
                     onMarkPaid={e => handleMarkPaid(invoice, e)}
                   />
                 )
