@@ -133,7 +133,7 @@ export function ClientLayout({
       />
 
       {/* Main content */}
-      <Main className={cn()}>{children}</Main>
+      <Main className={cn('')}>{children}</Main>
 
       {/* Footer */}
       <Footer
