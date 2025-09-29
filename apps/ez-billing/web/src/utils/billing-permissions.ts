@@ -6,6 +6,7 @@ export interface BillingPermissions {
   canSend?: boolean
   canAccept?: boolean
   canReject?: boolean
+  canDecline?: boolean  // alias for canReject
   canConvertToInvoice?: boolean
   canMarkAsPaid?: boolean
   canRefund?: boolean
@@ -29,6 +30,7 @@ export function getQuotePermissions(quote: Quote): BillingPermissions {
         canDelete: false,
         canAccept: true,
         canReject: true,
+        canDecline: true,  // alias for canReject
         reason: 'Quote has been sent to client. Awaiting response.'
       }
     

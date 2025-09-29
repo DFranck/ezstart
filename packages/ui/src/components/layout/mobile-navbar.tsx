@@ -6,7 +6,7 @@ import { cn } from '../../lib'
 import { useEffect, useRef, useState } from 'react'
 import { MobileNavMenu } from './mobile-nav-menu'
 import type { KnownIconName } from '../icon/src/types'
-import type { NavigationItem } from './client-layout'
+import { NavigationItem } from './types'
 
 export interface BottomNavItem {
   href: string

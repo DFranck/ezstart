@@ -14,8 +14,10 @@ import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
+  console.log('🔍 createQuoteService input data:', JSON.stringify(data, null, 2));
+
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
-  
+
   // Provide a default exchange rate if none exists
   if (!exchangeRate) {
     exchangeRate = {
@@ -26,15 +28,25 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
       fetchedAt: new Date(),
     };
   }
-  
+
+  console.log('🔍 About to calculate totals with items:', JSON.stringify(data.items, null, 2));
+  console.log('🔍 Tax rate:', data.taxRate);
+
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
+  console.log('🔍 Calculated totals:', totals);
+
   const documentNumber = await generateNextNumber('quote', data.userId);
-  const doc = new QuoteModel({
+
+  const quoteData = {
     ...data,
     documentNumber,
     ...totals,
     exchangeRate,
-  });
+  };
+
+  console.log('🔍 Final quote data to create:', JSON.stringify(quoteData, null, 2));
+
+  const doc = new QuoteModel(quoteData);
   return toApiObject(await doc.save());
 }
 
@@ -87,7 +99,19 @@ export async function updateQuoteService(
   id: string,
   data: UpdateQuote
 ): Promise<Quote | null> {
-  const totals = calculateTotals(data.items ?? [], data.taxRate ?? 0);
+  // If items or taxRate are not provided, get existing values
+  let itemsToCalculate = data.items;
+  let taxRateToUse = data.taxRate;
+
+  if (!itemsToCalculate || taxRateToUse === undefined) {
+    const existingDoc = await QuoteModel.findById(id);
+    if (!existingDoc) return null;
+
+    itemsToCalculate = data.items ?? existingDoc.items;
+    taxRateToUse = data.taxRate ?? existingDoc.taxRate ?? 0;
+  }
+
+  const totals = calculateTotals(itemsToCalculate, taxRateToUse);
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     { ...data, ...totals },

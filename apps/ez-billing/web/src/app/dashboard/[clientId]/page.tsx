@@ -268,6 +268,111 @@ const ClientDashboardPage = () => {
     setIsInvoiceModalOpen(true)
   }
 
+  const handleSendQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      const { callApi } = await import('@ezstart/ui/utils')
+      const { getUserId } = await import('../../../utils/get-user-id')
+
+      const response = await callApi(`/quotes/${quote._id}`, {
+        method: 'PUT',
+        userId: getUserId(),
+        body: {
+          status: 'sent',
+        },
+      })
+
+      if (response.ok) {
+        // Refresh data
+        await refetchAll()
+      } else {
+        alert('Failed to send quote')
+      }
+    } catch (error) {
+      console.error('Error sending quote:', error)
+      alert('Error sending quote')
+    }
+  }
+
+  const handleAcceptQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      const { callApi } = await import('@ezstart/ui/utils')
+      const { getUserId } = await import('../../../utils/get-user-id')
+
+      const response = await callApi(`/quotes/${quote._id}`, {
+        method: 'PUT',
+        userId: getUserId(),
+        body: {
+          status: 'accepted',
+        },
+      })
+
+      if (response.ok) {
+        // Refresh data
+        await refetchAll()
+      } else {
+        alert('Failed to accept quote')
+      }
+    } catch (error) {
+      console.error('Error accepting quote:', error)
+      alert('Error accepting quote')
+    }
+  }
+
+  const handleDeclineQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      const { callApi } = await import('@ezstart/ui/utils')
+      const { getUserId } = await import('../../../utils/get-user-id')
+
+      const response = await callApi(`/quotes/${quote._id}`, {
+        method: 'PUT',
+        userId: getUserId(),
+        body: {
+          status: 'rejected',
+        },
+      })
+
+      if (response.ok) {
+        // Refresh data
+        await refetchAll()
+      } else {
+        alert('Failed to decline quote')
+      }
+    } catch (error) {
+      console.error('Error declining quote:', error)
+      alert('Error declining quote')
+    }
+  }
+
+  const handleDownloadQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation() // ⬅️ prevent opening preview
+
+    try {
+      const client = clients.find(c => c._id === quote.clientId)
+      const company = quote.companyId
+        ? companies.find(c => c._id === quote.companyId)
+        : undefined
+
+      if (!client) {
+        alert('Client not found')
+        return
+      }
+
+      // Use existing quote PDF generation logic (similar to invoice)
+      const fileName = quote.documentNumber || quote._id
+      // TODO: Implement quote PDF generation if not exists
+      alert('Quote PDF download not implemented yet')
+    } catch (error) {
+      console.error('Error downloading quote:', error)
+      alert('Error downloading quote')
+    }
+  }
+
   // ⬇️ NEW: open preview helpers
   const openPreview = (kind: PreviewKind, doc: PreviewDoc) => {
     setPreview({ isOpen: true, kind, doc })
@@ -513,6 +618,10 @@ const ClientDashboardPage = () => {
                     permissions={permissions}
                     onClick={() => openPreview('quote', quote)}
                     onEdit={e => handleEditQuote(quote, e)}
+                    onSend={e => handleSendQuote(quote, e)}
+                    onAccept={e => handleAcceptQuote(quote, e)}
+                    onDecline={e => handleDeclineQuote(quote, e)}
+                    onDownload={e => handleDownloadQuote(quote, e)}
                     onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
                   />
                 )

@@ -248,10 +248,17 @@ interface QuoteCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
   validUntil?: string
   permissions: {
     canEdit?: boolean
+    canSend?: boolean
+    canAccept?: boolean
+    canDecline?: boolean
     canConvertToInvoice?: boolean
     reason?: string
   }
   onEdit: (e: React.MouseEvent) => void
+  onSend?: (e: React.MouseEvent) => void
+  onAccept?: (e: React.MouseEvent) => void
+  onDecline?: (e: React.MouseEvent) => void
+  onDownload?: (e: React.MouseEvent) => void
   onConvertToInvoice: (e: React.MouseEvent) => void
 }
 
@@ -265,6 +272,10 @@ export function QuoteCard({
   permissions,
   onClick,
   onEdit,
+  onSend,
+  onAccept,
+  onDecline,
+  onDownload,
   onConvertToInvoice,
   className,
 }: QuoteCardProps) {
@@ -305,17 +316,42 @@ export function QuoteCard({
             onClick={onEdit}
             disabled={!permissions.canEdit}
             title={!permissions.canEdit ? permissions.reason : undefined}
+            className={cn({ hidden: !permissions.canEdit })}
           >
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
+          {permissions.canSend && onSend && (
+            <Button size="sm" onClick={onSend} className="bg-blue-500 hover:bg-blue-600 text-white">
+              <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Send</span>
+            </Button>
+          )}
+          {permissions.canAccept && onAccept && (
+            <Button size="sm" onClick={onAccept} className="bg-green-500 hover:bg-green-600 text-white">
+              <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
+            </Button>
+          )}
+          {permissions.canDecline && onDecline && (
+            <Button size="sm" onClick={onDecline} className="bg-red-500 hover:bg-red-600 text-white">
+              <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
+            </Button>
+          )}
+          {onDownload && (
+            <Button size="sm" variant="outline" onClick={onDownload}>
+              <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+            </Button>
+          )}
           {permissions.canConvertToInvoice && (
             <Button
               size="sm"
               onClick={onConvertToInvoice}
               className="bg-blue-500 hover:bg-blue-600 text-white"
             >
-              <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-1" />
-              Invoice
+              <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
+              <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
             </Button>
           )}
         </>

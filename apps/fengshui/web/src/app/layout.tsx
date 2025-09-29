@@ -4,7 +4,7 @@ import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './fengshui-colors.css'
+import ClientLayout from './client-layout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,7 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr">
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
         <ThemeProvider>
-          <AuthProvider appName="fengshui">{children}</AuthProvider>
+          <AuthProvider appName="fengshui">
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

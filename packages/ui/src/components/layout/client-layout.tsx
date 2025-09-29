@@ -1,21 +1,14 @@
 'use client'
 
 import React from 'react'
+import { MobileNavbar } from '.'
 import { useDevice } from '../../hooks'
 import { cn } from '../../lib'
-import { Button } from '../button'
 import { Header } from '../header'
-import { Icon, type KnownIconName } from '../icon'
 import { Div, Main } from '../tag'
-import { Footer, type FooterLink, type SocialLink } from './footer'
-
-export interface NavigationItem {
-  href: string
-  label: string
-  icon?: KnownIconName
-}
-
-import { type BottomNavItem } from './mobile-navbar'
+import { headerVariantConfig } from '../tag/src/variants/tags/header'
+import { Footer } from './footer'
+import { NavigationItem } from './types'
 
 export interface ClientLayoutProps {
   children: React.ReactNode
@@ -24,23 +17,27 @@ export interface ClientLayoutProps {
   appName: string
   currentPath?: string
 
-  // Header props
-  logoIcon?: KnownIconName
-  logoHref?: string
-  headerNavigation?: NavigationItem[]
-  ctaText?: string
-  ctaVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  ctaSize?: 'default' | 'sm' | 'lg' | 'icon'
-  onCtaClick?: () => void
+  // Header props (matching Header component props)
+  headerPosition?: keyof typeof headerVariantConfig.position
+  headerLeftContent?: React.ReactNode
+  headerCenterContent?: React.ReactNode
   headerRightContent?: React.ReactNode
 
   // Mobile bottom navigation
-  bottomNavigation?: BottomNavItem[]
+  bottomNavigation?: NavigationItem[]
 
-  // Footer props
-  socialLinks?: SocialLink[]
-  footerLinks?: FooterLink[]
-  showCopyright?: boolean
+  // Footer props (standard content + flexible zones)
+  footerAppName?: string  // Uses appName if not provided
+  creator?: React.ReactNode  // String or JSX with links
+  footerShowCopyright?: boolean
+  footerCopyrightYear?: number
+  footerTopContent?: React.ReactNode
+  footerLeftContent?: React.ReactNode
+  footerCenterContent?: React.ReactNode
+  footerRightContent?: React.ReactNode
+  footerBottomContent?: React.ReactNode
+  footerLayout?: 'simple' | 'columns' | 'stacked'
+  footerStackOnMobile?: boolean
 
   // Link component (Next.js Link, React Router Link, etc.)
   LinkComponent?: React.ComponentType<any> | string
@@ -58,22 +55,26 @@ export function ClientLayout({
   currentPath = '/',
 
   // Header
-  logoIcon,
-  logoHref,
-  headerNavigation = [],
-  ctaText,
-  ctaVariant,
-  ctaSize,
-  onCtaClick,
+  headerPosition = 'fixed',
+  headerLeftContent,
+  headerCenterContent,
   headerRightContent,
 
   // Mobile nav
   bottomNavigation = [],
 
   // Footer
-  socialLinks = [],
-  footerLinks = [],
-  showCopyright = true,
+  footerAppName,
+  creator,
+  footerShowCopyright = true,
+  footerCopyrightYear,
+  footerTopContent,
+  footerLeftContent,
+  footerCenterContent,
+  footerRightContent,
+  footerBottomContent,
+  footerLayout = 'simple',
+  footerStackOnMobile = true,
 
   // Components
   LinkComponent = 'a',
@@ -90,45 +91,10 @@ export function ClientLayout({
     <Div className={cn('min-h-screen flex flex-col', className)}>
       {/* Header */}
       <Header
-        position="fixed"
-        leftContent={
-          <div className="flex items-center space-x-4">
-            {logoIcon && (
-              <LinkComponent href={logoHref || '/'} className="flex items-center space-x-2">
-                <Icon name={logoIcon} className="h-8 w-8" />
-                <span className="text-xl font-bold">{appName}</span>
-              </LinkComponent>
-            )}
-          </div>
-        }
-        centerContent={
-          <nav className="hidden lg:flex space-x-6">
-            {headerNavigation?.map(item => (
-              <LinkComponent
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                {item.label}
-              </LinkComponent>
-            ))}
-          </nav>
-        }
-        rightContent={
-          <div className="flex items-center space-x-2">
-            {ctaText && (
-              <Button
-                variant={ctaVariant}
-                size={ctaSize}
-                onClick={onCtaClick}
-                className="hidden lg:inline-flex"
-              >
-                {ctaText}
-              </Button>
-            )}
-            {headerRightContent}
-          </div>
-        }
+        position={headerPosition}
+        leftContent={headerLeftContent}
+        centerContent={headerCenterContent}
+        rightContent={headerRightContent}
         className={headerClassName}
       />
 
@@ -137,32 +103,35 @@ export function ClientLayout({
 
       {/* Footer */}
       <Footer
-        appName={appName}
-        socialLinks={socialLinks}
-        footerLinks={footerLinks}
-        showCopyright={showCopyright}
-        LinkComponent={LinkComponent}
+        appName={footerAppName || appName}
+        creator={creator}
+        showCopyright={footerShowCopyright}
+        copyrightYear={footerCopyrightYear}
+        topContent={footerTopContent}
+        leftContent={footerLeftContent}
+        centerContent={footerCenterContent}
+        rightContent={footerRightContent}
+        bottomContent={footerBottomContent}
+        layout={footerLayout}
+        stackOnMobile={footerStackOnMobile}
         className={footerClassName}
       />
 
       {/* Mobile bottom navigation */}
-      {/* {isMobile && (
+      {isMobile && bottomNavigation.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 z-40">
           <MobileNavbar
-            navigationItems={bottomNavigation}
-            headerNavigation={headerNavigation}
+            headerNavigation={bottomNavigation}
+            // headerNavigation={bottomNavigation}
             currentPath={currentPath}
             LinkComponent={LinkComponent}
-            logoIcon={logoIcon}
-            logoHref={logoHref}
+            // logoIcon={logoIcon}
+            // logoHref={logoHref}
             appName={appName}
             className={mobileNavbarClassName}
           />
         </div>
-      )} */}
+      )}
     </Div>
   )
 }
-
-// Re-export types for convenience
-export type { BottomNavItem, FooterLink, SocialLink }

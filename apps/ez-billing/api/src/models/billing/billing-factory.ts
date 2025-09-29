@@ -7,7 +7,7 @@ export function createBillingDocSchema(
   statusEnum: string[],
   statusDefault: string
 ) {
-  return new Schema(
+  const schema = new Schema(
     {
       userId: { type: String, required: true },
       clientId: { type: String, required: true },
@@ -34,7 +34,7 @@ export function createBillingDocSchema(
       },
       taxRate: { type: Number, min: 0, max: 100 },
       deletedAt: { type: String, default: null },
-      documentNumber: { type: String, required: true, unique: true },
+      documentNumber: { type: String, required: true },
       subtotal: { type: Number, required: false },
       taxAmount: { type: Number, required: false },
       total: { type: Number, required: false },
@@ -42,4 +42,9 @@ export function createBillingDocSchema(
     },
     { timestamps: true }
   );
+
+  // Create compound index: documentNumber + userId must be unique
+  schema.index({ documentNumber: 1, userId: 1 }, { unique: true });
+
+  return schema;
 }

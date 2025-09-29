@@ -1,5 +1,5 @@
+export { ClientLayout, type ClientLayoutProps } from './client-layout'
 export { Footer } from './footer'
-export { MobileNavbar } from './mobile-navbar'
 export { MobileNavMenu } from './mobile-nav-menu'
-export { ClientLayout, type ClientLayoutProps, type BottomNavItem, type SocialLink, type FooterLink } from './client-layout'
-export type { NavigationItem } from './client-layout'
+export { MobileNavbar } from './mobile-navbar'
+export type { FooterLink, NavigationItem, SocialLink } from './types'

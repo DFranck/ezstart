@@ -1,59 +1,49 @@
 /* path: /app/page.tsx */
 'use client'
 
-import ClientLayout from '@/components/ClientLayout'
 import {
   Button,
   Card,
   CardContent,
+  Div,
   H1,
   H2,
   Icon,
   KnownIconName,
   P,
   Section,
+  Span,
 } from '@ezstart/ui/components'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export default function HomePage() {
   const [currentYear] = useState(new Date().getFullYear())
-  const [isDarkMode, setIsDarkMode] = useState(false)
-
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'))
-    }
-    checkTheme()
-    const observer = new MutationObserver(checkTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
 
   const features = [
     {
       icon: 'lucide:Upload',
       title: '1. Téléchargez votre plan',
       description: 'Importez une image ou PDF de votre espace (JPG, PNG, PDF)',
-      gradient: 'from-blue-500 to-cyan-500',
+      gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Compass',
       title: '2. Orientez précisément',
       description: 'Alignez votre plan avec le Nord magnétique pour une analyse exacte',
-      gradient: 'from-red-500 to-orange-500',
+      gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Sparkles',
       title: '3. Découvrez votre Bagua',
       description: `Analyse complète ${currentYear} avec étoiles volantes et remèdes`,
-      gradient: 'from-purple-500 to-pink-500',
+      gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Download',
       title: '4. Générez votre PDF',
       description: 'Rapport détaillé haute résolution adapté à votre theme',
-      gradient: 'from-green-500 to-emerald-500',
+      gradient: 'from-red-500 to-yellow-500',
     },
   ]
 
@@ -134,69 +124,67 @@ export default function HomePage() {
   ]
 
   return (
-    <ClientLayout>
+    <>
       {/* Hero Section avec animation */}
-      <Section size={'full'} className="relative overflow-hidden">
-        <div className="absolute inset-0">
+      <Section size={'full'} className="pt-22 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
           {/* Gradient animé */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-blue-500/10 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-transparent to-yellow-500/20 animate-pulse" />
           <div
-            className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-yellow-500/10 animate-pulse"
+            className="absolute inset-0 bg-gradient-to-tr from-yellow-500/20 via-transparent to-yellow-500/20 animate-pulse"
             style={{ animationDelay: '1s' }}
           />
         </div>
-        <div className="relative container mx-auto px-4 py-20">
-          <div className="text-center max-w-5xl mx-auto">
-            {/* Badge année */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 mb-6">
-              <Icon name="lucide:Calendar" className="w-4 h-4 text-red-500" />
-              <span className="text-sm font-semibold text-foreground">
-                Configuration {currentYear}
-              </span>
-            </div>
-
-            <H1 className="text-5xl md:text-7xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent">
-                Feng Shui
-              </span>
-              <span className="text-foreground"> Bagua</span>
-            </H1>
-
-            <p className="text-xl md:text-2xl text-foreground/80 mb-8 font-medium">
-              Harmonisez votre espace selon les 5 éléments et les 8 trigrammes
-            </p>
-
-            <p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              Analyse complète avec{' '}
-              <span className="text-foreground font-semibold">étoiles volantes {currentYear}</span>,
-              remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque
-              secteur de votre habitat pour améliorer santé, prospérité et relations.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/analyze">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
-                >
-                  <Icon name="lucide:Compass" className="mr-2 w-5 h-5" />
-                  Analyser Mon Espace
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2"
-                onClick={() =>
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-                }
-              >
-                <Icon name="lucide:Info" className="mr-2 w-5 h-5" />
-                Comment ça marche
-              </Button>
-            </div>
+        {/* <div className="relative container mx-auto px-4 py-20"> */}
+        <Div layout={'center'}>
+          {/* Badge année */}
+          <div className="inline-flex items-center gap-2">
+            <Icon name="lucide:Calendar" className="w-4 h-4 text-red-500" />
+            <span className="text-sm font-semibold text-foreground">
+              Configuration {currentYear}
+            </span>
           </div>
-        </div>
+
+          <H1 className="text-5xl md:text-7xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-red-500  to-yellow-500 bg-clip-text text-transparent">
+              Feng Shui
+            </span>
+            <span className="text-foreground"> Bagua</span>
+          </H1>
+
+          <P>Harmonisez votre espace selon les 5 éléments et les 8 trigrammes</P>
+
+          <P size={'sm'}>
+            Analyse complète avec{' '}
+            <span className="text-foreground font-semibold">étoiles volantes {currentYear}</span>,
+            remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque
+            secteur de votre habitat pour améliorer santé, prospérité et relations.
+          </P>
+
+          <Div layout={'grid'} size={'lg'}>
+            <Link href="/analyze">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+              >
+                <Icon name="lucide:Compass" className="mr-2 w-5 h-5" />
+                Analyser Mon Espace
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-2"
+              onClick={() =>
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+              }
+            >
+              <Icon name="lucide:Info" className="mr-2 w-5 h-5" />
+              Comment ça marche
+            </Button>
+          </Div>
+        </Div>
+        {/* </div> */}
       </Section>
 
       {/* Features Section avec steps */}
@@ -234,7 +222,7 @@ export default function HomePage() {
       </div>
 
       {/* Sectors Grid avec vraies couleurs */}
-      <div className="bg-muted/30 py-20">
+      <Section size={'full'} className="bg-gradient-to-tr from-red-500/10 to-yellow-500/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <H2 className="text-4xl font-bold mb-4 text-foreground">Les 9 Secteurs du Bagua</H2>
@@ -298,7 +286,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </div>
+      </Section>
 
       {/* CTA Section avec features */}
       <div className="container mx-auto px-4 py-20">
@@ -314,12 +302,12 @@ export default function HomePage() {
                 <span className="text-sm font-semibold text-foreground">100% Gratuit</span>
               </div>
 
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+              <H2 size={'giant'} className="flex flex-col items-center mb-4">
+                <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-yellow-500 bg-clip-text text-transparent">
                   Transformez
                 </span>
-                <span className="text-foreground"> votre espace de vie</span>
-              </h2>
+                <Span size={'h3'}> votre espace de vie</Span>
+              </H2>
 
               <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
                 <div className="flex flex-col items-center">
@@ -345,26 +333,17 @@ export default function HomePage() {
               <Link href="/analyze">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+                  className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
                 >
-                  <Icon name="lucide:Sparkles" className="mr-2 w-5 h-5" />
-                  Commencer l'Analyse Maintenant
+                  <Icon name="lucide:Sparkles" />
+                  <Span className="hidden md:inline">Commencer l'Analyse Maintenant</Span>
+                  <Span className="md:hidden">Analyser</Span>
                 </Button>
               </Link>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Footer */}
-      <div className="border-t border-border bg-card/50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p className="mb-2">🏮 Feng Shui Bagua - Harmonisez votre espace de vie</p>
-            <p className="text-sm">Basé sur les principes traditionnels du Feng Shui chinois</p>
-          </div>
-        </div>
-      </div>
-    </ClientLayout>
+    </>
   )
 }

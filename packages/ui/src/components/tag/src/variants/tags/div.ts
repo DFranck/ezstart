@@ -1,10 +1,10 @@
-import { cva } from 'class-variance-authority';
-import { isDebug } from '../../../../../lib';
-import { intentContainer, variantContainer } from '../../tokens/tokens';
-import { createAlias } from '../../utils/create-alias';
+import { cva } from 'class-variance-authority'
+import { isDebug } from '../../../../../lib'
+import { intentContainer, variantContainer } from '../../tokens/tokens'
+import { createAlias } from '../../utils/create-alias'
 
 // --- Variants
-export const divVariant = variantContainer;
+export const divVariant = variantContainer
 
 export const divSize = {
   default: '',
@@ -14,18 +14,18 @@ export const divSize = {
   lg: 'px-4 py-4 md:px-8 md:py-8',
   xl: 'px-6 py-6 md:px-12 md:py-12',
   full: 'h-full w-full',
-} as const;
+} as const
 
-export const divIntent = intentContainer;
+export const divIntent = intentContainer
 
 export const divLayout = {
   default: '',
   col: 'flex flex-col gap-2 ',
   row: 'flex flex-row gap-2  items-center justify-between',
   grid: 'grid gap-2  grid-cols-1 lg:grid-cols-2 ',
-  center: 'flex flex-col items-center justify-center gap-2 ',
+  center: 'flex flex-col items-center justify-center gap-2 text-center',
   aside: 'flex flex-row',
-} as const;
+} as const
 
 // --- Config
 export const divVariantConfig = {
@@ -37,7 +37,7 @@ export const divVariantConfig = {
     true: 'mt-[71px]',
     false: '',
   },
-} as const;
+} as const
 
 // --- Default variants
 export const DEFAULT_DIV_VARIANTS = {
@@ -46,16 +46,16 @@ export const DEFAULT_DIV_VARIANTS = {
   size: 'default',
   layout: 'default',
   withHeaderOffset: false,
-} as const;
+} as const
 
 // --- cva
 export const divVariants = cva(`${isDebug() ? 'bg-red-500/50' : ''}`, {
   variants: divVariantConfig,
   defaultVariants: DEFAULT_DIV_VARIANTS,
-});
+})
 
 // --- Alias
-export const Div = createAlias('div');
+export const Div = createAlias('div')
 
 // --- Meta for playground/devtools
 export const divVariantsMeta = Object.fromEntries(
@@ -64,9 +64,9 @@ export const divVariantsMeta = Object.fromEntries(
     Object.keys(variantValues),
   ])
 ) as {
-  variant: string[];
-  intent: string[];
-  size: string[];
-  layout: string[];
-  withHeaderOffset: string[];
-};
+  variant: string[]
+  intent: string[]
+  size: string[]
+  layout: string[]
+  withHeaderOffset: string[]
+}

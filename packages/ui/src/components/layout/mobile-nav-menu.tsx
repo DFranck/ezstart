@@ -1,9 +1,9 @@
 'use client'
 
-import { Icon, Tag } from '../'
-import { cn } from '../../lib'
 import { forwardRef } from 'react'
-import type { NavigationItem } from './client-layout'
+import { Icon } from '../'
+import { cn } from '../../lib'
+import { NavigationItem } from './types'
 
 interface MobileNavMenuProps {
   isOpen: boolean
@@ -25,7 +25,7 @@ export const MobileNavMenu = forwardRef<HTMLDivElement, MobileNavMenuProps>(
         )}
       >
         <nav className="px-6 flex flex-col gap-2">
-          {navigationItems.map((item) => (
+          {navigationItems.map(item => (
             <LinkComponent
               key={item.href}
               href={item.href}

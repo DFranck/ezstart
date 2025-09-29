@@ -30,7 +30,11 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
   try {
     const userId = getAuthenticatedUserId(req)
 
+    console.log('🔍 Controller received request body:', JSON.stringify(req.body, null, 2))
+
     const quoteData: CreateQuote = req.body
+
+    console.log('🔍 Controller quoteData:', JSON.stringify(quoteData, null, 2))
 
     // Ensure userId in body matches authenticated user
     if (quoteData.userId && quoteData.userId !== userId) {
@@ -42,6 +46,8 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
 
     // Force userId to match authenticated user
     const secureQuoteData = { ...quoteData, userId }
+
+    console.log('🔍 Controller secureQuoteData:', JSON.stringify(secureQuoteData, null, 2))
 
     const quote = await createQuoteService(secureQuoteData)
 
