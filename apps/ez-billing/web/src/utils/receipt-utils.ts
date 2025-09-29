@@ -46,11 +46,9 @@ export async function downloadReceiptByInvoiceId(invoiceId: string): Promise<voi
 
     const response = await callApi(downloadUrl, {
       userId,
-      options: {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf'
-        }
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf'
       }
     })
 
