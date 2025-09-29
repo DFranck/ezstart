@@ -166,7 +166,7 @@ export default function BaguaWheel({
                   key={i}
                   d={sectorPath(start, end, r, cx, cy)}
                   fill="none"
-                  stroke="currentColor"
+                  stroke="red"
                   strokeWidth={0.4}
                   strokeDasharray="2 3"
                   className="text-foreground opacity-30"
@@ -184,7 +184,7 @@ export default function BaguaWheel({
                     key={`clickable-${dir}`}
                     d={sectorPath(start, end, r, cx, cy)}
                     fill="transparent"
-                    className="cursor-pointer hover:fill-primary/10 transition-colors"
+                    className="cursor-pointer hover:fill-yellow-500/10 transition-colors"
                     onClick={() => onSectorClick(dir)}
                   />
                 )
@@ -197,7 +197,7 @@ export default function BaguaWheel({
                 cy={cy}
                 r={r * 0.3} // Rayon du centre (30% du rayon total)
                 fill="transparent"
-                className="cursor-pointer hover:fill-primary/10 transition-colors"
+                className="cursor-pointer hover:fill-yellow-500/10 transition-colors"
                 onClick={() => onSectorClick('C')}
               />
             )}

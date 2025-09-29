@@ -121,7 +121,7 @@ export default function BaguaGrid({
               return (
                 <div
                   key={direction}
-                  className="relative cursor-pointer transition-all duration-200 border border-white/30 bg-black/10 hover:bg-white/20 hover:border-white/50"
+                  className="relative cursor-pointer transition-all duration-200 border border-red-500/30  hover:bg-yellow-500/10 hover:border-white/50"
                   style={{
                     gridRow: position.row + 1,
                     gridColumn: position.col + 1,

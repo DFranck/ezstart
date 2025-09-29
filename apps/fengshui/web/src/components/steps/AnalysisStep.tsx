@@ -177,7 +177,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                 <div className="flex gap-2 mt-4">
                   <Button
                     onClick={handleOpenPreview}
-                    variant={'ezstart'}
+                    className="text-white bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600"
                     disabled={!cfg || isGeneratingPDF}
                   >
                     <Icon name="lucide:FileDown" className="w-4 h-4" />

@@ -258,7 +258,11 @@ function StepperHeader({
     <div
       className={cn(
         'sticky z-10 backdrop-blur-sm transition-all duration-200 ease-out',
-        withHeaderOffset ? (isTop ? 'top-[70px]' : 'top-[54px]') : 'top-0',
+        withHeaderOffset
+          ? isTop
+            ? 'top-[64px] md:top-[70px]'
+            : 'top-[48px] md:top-[54px]'
+          : 'top-0',
         isTop ? 'bg-background/0' : 'bg-background/80'
       )}
     >
