@@ -3,6 +3,7 @@
 
 import { getCroppedImg } from '@/utils/image'
 import { Button, Icon, Input } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Cropper, { Area } from 'react-easy-crop'
@@ -34,6 +35,8 @@ type CropPixels = { width: number; height: number; x: number; y: number }
  * Component (MINIMAL)
  * ----------------------------------------------------------------------------------------*/
 export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: PlanUploaderProps) {
+  const t = useTranslations()
+
   // File & preview
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -190,10 +193,10 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
               <Icon name="lucide:FileText" className="w-8 h-8 " />
             </div>
             <p className=" font-medium">
-              {isDragActive ? 'Drop your plan here' : 'Drag & drop your plan'}
+              {isDragActive ? t('uploader.dropHere') : t('uploader.dragDrop')}
             </p>
-            <p className="text-sm ">…or click to select a file</p>
-            <p className="text-xs ">Accepted: JPG, PNG, GIF, PDF</p>
+            <p className="text-sm ">{t('uploader.clickToSelect')}</p>
+            <p className="text-xs ">{t('uploader.acceptedFormats')}</p>
           </div>
         </div>
       ) : (
@@ -236,7 +239,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                   type="button"
                 >
                   <Icon name="lucide:Edit3" className="w-4 h-4 mr-1" />
-                  <span className="hidden sm:inline">Edit</span>
+                  <span className="hidden sm:inline">{t('uploader.edit')}</span>
                 </Button>
               )}
               <Button
@@ -292,7 +295,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Zoom */}
                 <div className="flex items-center gap-3">
-                  <label className="text-sm  w-24">Zoom</label>
+                  <label className="text-sm  w-24">{t('uploader.zoom')}</label>
                   <input
                     type="range"
                     min={0.1}
@@ -307,7 +310,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
 
                 {/* Rotation */}
                 <div className="flex items-center gap-3">
-                  <label className="text-sm w-24">Rotation</label>
+                  <label className="text-sm w-24">{t('uploader.rotation')}</label>
                   <div className="flex items-center gap-2 w-full">
                     <Button
                       onClick={() => setRotation(prev => prev - 90)}
@@ -333,7 +336,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                 {/* Width (slider + number) */}
                 <div className="flex items-center gap-3">
                   <label htmlFor="crop-width" className="text-sm  w-24">
-                    Largeur
+                    {t('uploader.width')}
                   </label>
                   <input
                     type="range"
@@ -368,7 +371,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                 {/* Height (slider + number) */}
                 <div className="flex items-center gap-3">
                   <label htmlFor="crop-height" className="text-sm  w-24">
-                    Hauteur
+                    {t('uploader.height')}
                   </label>
                   <input
                     type="range"
@@ -405,11 +408,11 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
               <div className="flex gap-3">
                 <Button onClick={handleApply} className="flex-1" type="button">
                   <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
-                  Apply
+                  {t('uploader.apply')}
                 </Button>
                 <Button variant="outline" onClick={handleCancel} type="button">
                   <Icon name="lucide:X" className="w-4 h-4 mr-2" />
-                  Cancel
+                  {t('uploader.cancel')}
                 </Button>
               </div>
             </div>
@@ -420,7 +423,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
             <div className="flex items-center justify-center h-56 bg-gray-50 rounded border">
               <div className="text-center">
                 <Icon name="lucide:FileText" className="w-14 h-14  mx-auto mb-2" />
-                <p className="">PDF loaded</p>
+                <p className="">{t('uploader.pdfLoaded')}</p>
                 <p className="text-xs text-gray-500">{uploadedFile?.name}</p>
               </div>
             </div>

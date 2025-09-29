@@ -1,14 +1,16 @@
-/* path: /app/analyze/page.tsx */
+/* path: /app/[locale]/analyze/page.tsx */
 'use client'
 
 import AnalysisStep from '@/components/steps/AnalysisStep'
 import CardinalPointsStep from '@/components/steps/CardinalPointsStep-v2'
 import UploadStep from '@/components/steps/UploadStep'
 import { Stepper, type StepperTheme } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 export default function AnalyzePage() {
   const [triggerPreview, setTriggerPreview] = useState(0)
+  const t = useTranslations()
 
   // Theme FengShui avec dégradé rouge-jaune
   const fengShuiTheme: StepperTheme = {
@@ -19,23 +21,23 @@ export default function AnalyzePage() {
   const steps = [
     {
       id: 'upload',
-      title: 'Upload',
+      title: t('steps.upload.title'),
       icon: 'lucide:Upload',
-      description: 'Import du plan',
+      description: t('steps.upload.description'),
       component: <UploadStep />,
     },
     {
       id: 'cardinal-points',
-      title: 'Points Cardinaux',
+      title: t('steps.orientation.title'),
       icon: 'lucide:Compass',
-      description: 'Alignement du Bagua',
+      description: t('steps.orientation.description'),
       component: <CardinalPointsStep />,
     },
     {
       id: 'analysis',
-      title: 'Résultats',
+      title: t('steps.analysis.title'),
       icon: 'lucide:Sparkles',
-      description: 'Votre analyse Feng Shui',
+      description: t('steps.analysis.description'),
       component: <AnalysisStep triggerPreview={triggerPreview} />,
       isFinalStep: true, // Marque cette étape comme finale
     },
@@ -87,14 +89,14 @@ export default function AnalyzePage() {
               context.currentStep === 0
                 ? false
                 : {
-                    label: 'Précédent',
+                    label: t('common.previous'),
                     icon: 'lucide:ArrowLeft',
                     variant: 'outline',
                     onClick: context.previousStep,
-                    tooltip: "Retourner à l'étape précédente",
+                    tooltip: t('tooltips.previousStep'),
                   },
             next: {
-              label: context.currentStep === context.steps.length - 1 ? 'Terminer' : 'Suivant',
+              label: context.currentStep === context.steps.length - 1 ? t('common.finish') : t('common.next'),
               icon:
                 context.currentStep === context.steps.length - 1
                   ? 'lucide:Check'
@@ -105,25 +107,25 @@ export default function AnalyzePage() {
               tooltip:
                 isUploadStep && !canProceedFromStep1
                   ? hasFile
-                    ? "Validez d'abord le crop avec le bouton ✓"
-                    : "Uploadez d'abord un plan"
+                    ? t('steps.upload.cropRequired')
+                    : t('steps.upload.fileRequired')
                   : context.currentStep === context.steps.length - 1
-                    ? "Terminer l'analyse Feng Shui"
-                    : "Passer à l'étape suivante",
+                    ? t('tooltips.finishAnalysis')
+                    : t('tooltips.nextStep'),
             },
             custom:
               isUploadStep && !canProceedFromStep1
                 ? [
                     {
                       label: hasFile
-                        ? 'Validez le crop avec le bouton ✓'
-                        : "Uploadez d'abord un plan",
+                        ? t('steps.upload.cropRequired')
+                        : t('steps.upload.fileRequired'),
                       icon: 'lucide:AlertCircle',
                       variant: 'outline',
                       disabled: true,
                       tooltip: hasFile
-                        ? 'Utilisez les contrôles de crop puis cliquez sur ✓ pour valider'
-                        : 'Glissez-déposez votre plan ou cliquez pour parcourir',
+                        ? t('tooltips.validateCrop')
+                        : t('steps.upload.instructions'),
                     },
                   ]
                 : undefined,

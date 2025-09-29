@@ -4,6 +4,8 @@ import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
 import ClientLayout from './client-layout'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -30,15 +32,26 @@ export const viewport = {
   themeColor: '#10b981',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+  params
+}: {
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const messages = await getMessages()
+
   return (
-    <html lang="fr">
+    <html lang={locale}>
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
-        <ThemeProvider>
-          <AuthProvider appName="fengshui">
-            <ClientLayout>{children}</ClientLayout>
-          </AuthProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>
+            <AuthProvider appName="fengshui">
+              <ClientLayout>{children}</ClientLayout>
+            </AuthProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

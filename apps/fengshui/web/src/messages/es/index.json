@@ -1,0 +1,213 @@
+{
+  "common": {
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "finish": "Finalizar",
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "analyze": "Analizar",
+    "configuration": "Configuración",
+    "freeLabel": "100% Gratis",
+    "darkLightMode": "Soporte Modo Oscuro/Claro",
+    "highResPdf": "PDF Alta Resolución"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "analyze": "Analizar",
+    "about": "Acerca de"
+  },
+  "hero": {
+    "title": "Feng Shui Bagua",
+    "subtitle": "Armoniza tu espacio según los 5 elementos y 8 trigramas",
+    "description": "Análisis completo con estrellas voladoras {year}, remedios personalizados y PDF de alta resolución. Descubre cómo optimizar cada sector de tu hábitat para mejorar salud, prosperidad y relaciones.",
+    "cta": "Analizar Mi Espacio",
+    "learnMore": "Cómo funciona"
+  },
+  "features": {
+    "title": "Proceso Simple en 4 Pasos",
+    "subtitle": "De tu plano a tu análisis Feng Shui completo en solo minutos",
+    "step1": {
+      "title": "1. Sube tu plano",
+      "description": "Importa una imagen o PDF de tu espacio (JPG, PNG, PDF)"
+    },
+    "step2": {
+      "title": "2. Orienta con precisión",
+      "description": "Alinea tu plano con el Norte magnético para un análisis exacto"
+    },
+    "step3": {
+      "title": "3. Descubre tu Bagua",
+      "description": "Análisis completo {year} con estrellas voladoras y remedios"
+    },
+    "step4": {
+      "title": "4. Genera tu PDF",
+      "description": "Informe detallado de alta resolución adaptado a tu tema"
+    }
+  },
+  "sectors": {
+    "title": "Los 9 Sectores del Bagua",
+    "subtitle": "Cada sector corresponde a una dirección, un elemento y un aspecto de tu vida. El análisis {year} incluye estrellas voladoras para recomendaciones precisas.",
+    "career": {
+      "name": "Carrera y Misión de Vida",
+      "description": "Tu camino profesional y espiritual"
+    },
+    "knowledge": {
+      "name": "Sabiduría y Conocimiento",
+      "description": "Aprendizaje, meditación y crecimiento personal"
+    },
+    "family": {
+      "name": "Familia y Ancestros",
+      "description": "Relaciones familiares y herencia"
+    },
+    "wealth": {
+      "name": "Prosperidad y Abundancia",
+      "description": "Riqueza material y espiritual"
+    },
+    "fame": {
+      "name": "Reputación y Reconocimiento",
+      "description": "Imagen pública y logros"
+    },
+    "relationships": {
+      "name": "Relaciones y Amor",
+      "description": "Asociaciones y relaciones amorosas"
+    },
+    "creativity": {
+      "name": "Creatividad e Hijos",
+      "description": "Proyectos creativos y descendientes"
+    },
+    "mentors": {
+      "name": "Ayuda y Mentores",
+      "description": "Apoyo espiritual y viajes"
+    },
+    "health": {
+      "name": "Salud y Equilibrio",
+      "description": "Centro vital y armonía global"
+    }
+  },
+  "elements": {
+    "water": "Agua",
+    "earth": "Tierra",
+    "wood": "Madera",
+    "fire": "Fuego",
+    "metal": "Metal"
+  },
+  "directions": {
+    "N": "N",
+    "NE": "NE",
+    "E": "E",
+    "SE": "SE",
+    "S": "S",
+    "SO": "SO",
+    "O": "O",
+    "NO": "NO",
+    "Center": "Centro"
+  },
+  "cta": {
+    "title": "Transforma tu espacio vital",
+    "subtitle": "Comenzar Análisis Ahora",
+    "shortLabel": "Analizar",
+    "flyingStars": "Estrellas Voladoras {year}"
+  },
+  "steps": {
+    "upload": {
+      "title": "Subir",
+      "description": "Importar plano",
+      "instructions": "Arrastra y suelta tu plano o haz clic para navegar",
+      "fileRequired": "Sube primero un plano",
+      "cropRequired": "Valida primero el recorte con el botón ✓"
+    },
+    "orientation": {
+      "title": "Puntos Cardinales",
+      "description": "Alineación del Bagua"
+    },
+    "analysis": {
+      "title": "Resultados",
+      "description": "Tu análisis Feng Shui"
+    }
+  },
+  "tooltips": {
+    "previousStep": "Volver al paso anterior",
+    "nextStep": "Ir al siguiente paso",
+    "finishAnalysis": "Finalizar análisis Feng Shui",
+    "validateCrop": "Usa los controles de recorte y luego haz clic en ✓ para validar"
+  },
+  "uploader": {
+    "dragDrop": "Arrastra y suelta tu plano",
+    "dropHere": "Suelta tu plano aquí",
+    "clickToSelect": "…o haz clic para seleccionar un archivo",
+    "acceptedFormats": "Aceptado: JPG, PNG, GIF, PDF",
+    "edit": "Editar",
+    "apply": "Aplicar",
+    "cancel": "Cancelar",
+    "zoom": "Zoom",
+    "rotation": "Rotación",
+    "width": "Ancho",
+    "height": "Alto",
+    "pdfLoaded": "PDF cargado"
+  },
+  "cardinal": {
+    "title": "Paso 2: Puntos Cardinales",
+    "description": "Alinea el Norte de la brújula con el Norte de tu plano. Usa los controles para rotar la orientación.",
+    "error": "Error",
+    "noFile": "No se ha subido ningún plano. Por favor regresa al paso 1 para subir un plano.",
+    "yourPlan": "Tu Plano",
+    "fixedCenter": "Centro fijo",
+    "north": "Norte",
+    "east": "Este",
+    "south": "Sur",
+    "west": "Oeste",
+    "reset": "Reiniciar",
+    "info": "Info",
+    "compassHelp": "Consejo: Usa una brújula para conocer la orientación real de tu espacio."
+  },
+  "analysis": {
+    "title": "Tu Análisis Feng Shui",
+    "description": "Descubre la armonización de tu espacio según los principios del Bagua. Consulta las recomendaciones para cada sector o genera un PDF completo.",
+    "pdfPreview": "Vista previa PDF",
+    "wheel": "Rueda",
+    "grid": "Cuadrícula",
+    "expandSector": "Expandir sector",
+    "collapseSector": "Contraer sector",
+    "downloadPdf": "Descargar PDF",
+    "generating": "Generando...",
+    "pdfGenerated": "¡PDF generado exitosamente!",
+    "errorPdf": "Error al generar PDF"
+  },
+  "pdfModal": {
+    "title": "Análisis Feng Shui Bagua",
+    "previewTitle": "Vista previa de tu rueda Bagua",
+    "generatingPdf": "Generación PDF...",
+    "clickToGenerate": "Haz clic en \"Generar PDF\" para crear el informe",
+    "generatePdf": "Generar PDF",
+    "generating": "Generando...",
+    "generatingInProgress": "Generación PDF en progreso...",
+    "capturingAnalysis": "Captura de alta resolución de tu análisis Feng Shui",
+    "twoPages": "2 páginas: Rueda + Cuadrícula y Sectores detallados",
+    "downloadPdf": "Descargar PDF",
+    "planBagua": "Plan Bagua",
+    "detailedSectors": "Sectores Detallados"
+  },
+  "bagua": {
+    "orientations": "Orientaciones Bagua",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "loading": "Cargando configuración Bagua...",
+    "naturalActivators": "Activadores naturales",
+    "favorableMaterials": "Materiales favorables",
+    "fiveElementsCycles": "Ciclos de los 5 elementos",
+    "nourishedBy": "Nutrido por",
+    "controlledBy": "Controlado por",
+    "weakenedBy": "Debilitado por",
+    "flyingStar2025": "Estrella Voladora 2025",
+    "specificRemedies2025": "Remedios específicos 2025",
+    "good": "buena",
+    "bad": "mala",
+    "buena": "buena",
+    "mala": "mala",
+    "bonne": "buena",
+    "mauvaise": "mala"
+  }
+}

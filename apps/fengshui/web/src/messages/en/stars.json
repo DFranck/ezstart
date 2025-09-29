@@ -1,0 +1,69 @@
+{
+  "year": 2025,
+  "locale": "en-US",
+  "stars": {
+    "N": {
+      "star": "Violence",
+      "element": "Metal",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Wood Element", "Water Element"]
+    },
+    "NE": {
+      "star": "Misfortune",
+      "element": "Earth",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Salt cure", "Metal coins"]
+    },
+    "E": {
+      "star": "Multiplicative",
+      "element": "Fire",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Candles"]
+    },
+    "SE": {
+      "star": "Success, fame, prosperity",
+      "element": "Water",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Pair of fish"]
+    },
+    "S": {
+      "star": "6 Celestial (wealth, power, success)",
+      "element": "Metal",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Metal chimes", "Frog", "Quartz"]
+    },
+    "SO": {
+      "star": "Future prosperity",
+      "element": "Earth",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": []
+    },
+    "O": {
+      "star": "Education & harmony",
+      "element": "",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Moving water"]
+    },
+    "NO": {
+      "star": "Quarrels",
+      "element": "Wood",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Fire", "Metal", "Earth", "Precious stones"]
+    },
+    "C": {
+      "star": "Illness",
+      "element": "",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Buddha", "Knotted Chinese coins"]
+    }
+  }
+}

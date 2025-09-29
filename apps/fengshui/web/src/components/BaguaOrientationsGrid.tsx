@@ -4,12 +4,15 @@
 import { DIRECTIONS_WITH_CENTER, Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { Button, Card, CardContent, CardFooter, CardHeader, Icon, P } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { RefObject, forwardRef, useState } from 'react'
 
 type Props = {
   config?: YearBaguaConfig
   expandedSectors?: Set<Direction>
   onToggleSector?: (dir: Direction) => void
+  onExpandAll?: () => void
+  onCollapseAll?: () => void
   sectorRefs?: Record<Direction, RefObject<HTMLDivElement | null>>
 }
 
@@ -17,8 +20,11 @@ export default function BaguaOrientationsGrid({
   config,
   expandedSectors: externalExpandedSectors,
   onToggleSector,
+  onExpandAll,
+  onCollapseAll,
   sectorRefs,
 }: Props) {
+  const t = useTranslations()
   const [internalExpandedSectors, setInternalExpandedSectors] = useState<Set<Direction>>(new Set())
 
   // Utiliser les contrôles externes si fournis, sinon utiliser l'état interne
@@ -38,26 +44,30 @@ export default function BaguaOrientationsGrid({
     })
 
   const expandAll = () => {
-    if (externalExpandedSectors) {
-      // Mode externe : on ne peut pas modifier directement, ignorer pour l'instant
-      return
+    if (externalExpandedSectors && onExpandAll) {
+      // Mode externe : déléguer au parent
+      onExpandAll()
+    } else {
+      // Mode interne : gérer localement
+      setInternalExpandedSectors(new Set(DIRECTIONS_WITH_CENTER))
     }
-    setInternalExpandedSectors(new Set(DIRECTIONS_WITH_CENTER))
   }
 
   const collapseAll = () => {
-    if (externalExpandedSectors) {
-      // Mode externe : on ne peut pas modifier directement, ignorer pour l'instant
-      return
+    if (externalExpandedSectors && onCollapseAll) {
+      // Mode externe : déléguer au parent
+      onCollapseAll()
+    } else {
+      // Mode interne : gérer localement
+      setInternalExpandedSectors(new Set())
     }
-    setInternalExpandedSectors(new Set())
   }
 
   if (!config) {
     return (
       <div className="text-center text-gray-500 py-12">
         <Icon name="lucide:Loader2" className="w-8 h-8 mx-auto mb-4 animate-spin" />
-        <p>Chargement de la configuration Bagua...</p>
+        <p>{t('bagua.loading')}</p>
       </div>
     )
   }
@@ -66,14 +76,14 @@ export default function BaguaOrientationsGrid({
     <div className="space-y-4">
       {/* Contrôles */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h2 className="text-lg sm:text-xl font-bold text-foreground">Orientations Bagua</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">{t('bagua.orientations')}</h2>
         <div className="flex gap-2 text-sm">
           <Button
             onClick={expandAll}
             variant="link"
             className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
           >
-            Tout ouvrir
+            {t('bagua.expandAll')}
           </Button>
           <span className="text-muted-foreground">•</span>
           <Button
@@ -81,7 +91,7 @@ export default function BaguaOrientationsGrid({
             variant="link"
             className="text-sm text-primary hover:text-primary/80 transition-colors p-0 h-auto"
           >
-            Tout fermer
+            {t('bagua.collapseAll')}
           </Button>
         </div>
       </div>
@@ -124,6 +134,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
   { direction, sector, accent, isExpanded, onToggle },
   ref
 ) {
+  const t = useTranslations()
   const has = {
     keywords: !!sector.keywords?.length,
     tips: !!sector.tips?.length,
@@ -236,7 +247,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
               <div>
                 <h5 className="font-semibold  mb-2 flex items-center gap-1">
                   <Icon name="lucide:Sparkles" className="w-4 h-4" />
-                  Activateurs naturels
+                  {t('bagua.naturalActivators')}
                 </h5>
                 <ul className="space-y-1">
                   {sector.enhancers.map((enhancer: string, idx: number) => (
@@ -252,25 +263,25 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
               <div>
                 <h5 className="font-semibold  mb-2 flex items-center gap-1">
                   <Icon name="lucide:Package" className="w-4 h-4" />
-                  Matières favorables
+                  {t('bagua.favorableMaterials')}
                 </h5>
                 <p className="text-sm ">{sector.matiere}</p>
               </div>
             </CardHeader>
             {/* Cycles des éléments */}
             <CardContent size="xs">
-              <h5 className="font-semibold mb-2">Cycles des 5 éléments</h5>
+              <h5 className="font-semibold mb-2">{t('bagua.fiveElementsCycles')}</h5>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2 bg-green-100 rounded border border-green-300">
-                  <p className="font-medium text-green-800">Nourri par</p>
+                  <p className="font-medium text-green-800">{t('bagua.nourishedBy')}</p>
                   <p className="text-green-700">{sector.nourisher}</p>
                 </div>
                 <div className="text-center p-2 bg-red-100 rounded border border-red-300">
-                  <p className="font-medium text-red-800">Contrôlé par</p>
+                  <p className="font-medium text-red-800">{t('bagua.controlledBy')}</p>
                   <p className="text-red-700">{sector.controller}</p>
                 </div>
                 <div className="text-center p-2 bg-orange-100 rounded border border-orange-300">
-                  <p className="font-medium text-orange-800">Affaibli par</p>
+                  <p className="font-medium text-orange-800">{t('bagua.weakenedBy')}</p>
                   <p className="text-orange-700">{sector.weakenedBy}</p>
                 </div>
               </div>
@@ -295,7 +306,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                       className="font-bold"
                       style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
                     >
-                      Étoile Volante 2025 ({sector.star.status})
+                      {t('bagua.flyingStar2025')} ({t(`bagua.${sector.star.status}`)})
                     </h4>
                   </div>
 
@@ -310,7 +321,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                     <div>
                       <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
                         <Icon name="lucide:Shield" className="w-4 h-4" />
-                        Remèdes spécifiques 2025
+                        {t('bagua.specificRemedies2025')}
                       </h5>
                       <ul className="space-y-1">
                         {sector.star.remedies.map((remedy: string, idx: number) => (

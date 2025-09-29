@@ -1,0 +1,69 @@
+{
+  "year": 2025,
+  "locale": "es-ES",
+  "stars": {
+    "N": {
+      "star": "Violencia",
+      "element": "Metal",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["Elemento Madera", "Elemento Agua"]
+    },
+    "NE": {
+      "star": "Mala suerte",
+      "element": "Tierra",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["Cura de sal", "Monedas de metal"]
+    },
+    "E": {
+      "star": "Multiplicativa",
+      "element": "Fuego",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Velas"]
+    },
+    "SE": {
+      "star": "Éxito, fama, prosperidad",
+      "element": "Agua",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Par de peces"]
+    },
+    "S": {
+      "star": "6 Celestial (riqueza, poder, éxito)",
+      "element": "Metal",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Campanillas de metal", "Rana", "Cuarzo"]
+    },
+    "SO": {
+      "star": "Prosperidad futura",
+      "element": "Tierra",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": []
+    },
+    "O": {
+      "star": "Educación y armonía",
+      "element": "",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Agua en movimiento"]
+    },
+    "NO": {
+      "star": "Disputas",
+      "element": "Madera",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["Fuego", "Metal", "Tierra", "Piedras preciosas"]
+    },
+    "C": {
+      "star": "Enfermedad",
+      "element": "",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["Buda", "Monedas chinas anudadas"]
+    }
+  }
+}

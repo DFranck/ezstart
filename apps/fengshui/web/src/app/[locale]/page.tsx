@@ -1,4 +1,4 @@
-/* path: /app/page.tsx */
+/* path: /app/[locale]/page.tsx */
 'use client'
 
 import {
@@ -14,35 +14,37 @@ import {
   Section,
   Span,
 } from '@ezstart/ui/components'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 export default function HomePage() {
   const [currentYear] = useState(new Date().getFullYear())
+  const t = useTranslations()
 
   const features = [
     {
       icon: 'lucide:Upload',
-      title: '1. Téléchargez votre plan',
-      description: 'Importez une image ou PDF de votre espace (JPG, PNG, PDF)',
+      title: t('features.step1.title'),
+      description: t('features.step1.description'),
       gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Compass',
-      title: '2. Orientez précisément',
-      description: 'Alignez votre plan avec le Nord magnétique pour une analyse exacte',
+      title: t('features.step2.title'),
+      description: t('features.step2.description'),
       gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Sparkles',
-      title: '3. Découvrez votre Bagua',
-      description: `Analyse complète ${currentYear} avec étoiles volantes et remèdes`,
+      title: t('features.step3.title'),
+      description: t('features.step3.description', { year: currentYear }),
       gradient: 'from-red-500 to-yellow-500',
     },
     {
       icon: 'lucide:Download',
-      title: '4. Générez votre PDF',
-      description: 'Rapport détaillé haute résolution adapté à votre theme',
+      title: t('features.step4.title'),
+      description: t('features.step4.description'),
       gradient: 'from-red-500 to-yellow-500',
     },
   ]
@@ -50,76 +52,76 @@ export default function HomePage() {
   // Vraies données des 9 secteurs avec leurs couleurs réelles
   const sectors = [
     {
-      direction: 'N',
-      name: 'Carrière et Mission de Vie',
-      element: 'Eau',
+      direction: t('directions.N'),
+      name: t('sectors.career.name'),
+      element: t('elements.water'),
       colors: ['#0D47A1', '#1565C0', '#2196F3', '#000000'],
       shape: 'lucide:Waves',
-      description: 'Votre chemin professionnel et spirituel',
+      description: t('sectors.career.description'),
     },
     {
-      direction: 'NE',
-      name: 'Sagesse et Connaissance',
-      element: 'Terre',
+      direction: t('directions.NE'),
+      name: t('sectors.knowledge.name'),
+      element: t('elements.earth'),
       colors: ['#BCA16A', '#F57C00', '#FFB300'],
       shape: 'lucide:Square',
-      description: 'Apprentissage, méditation et croissance personnelle',
+      description: t('sectors.knowledge.description'),
     },
     {
-      direction: 'E',
-      name: 'Famille et Ancêtres',
-      element: 'Bois',
+      direction: t('directions.E'),
+      name: t('sectors.family.name'),
+      element: t('elements.wood'),
       colors: ['#2E7D32', '#388E3C', '#4CAF50', '#40E0D0'],
       shape: 'lucide:RectangleHorizontal',
-      description: 'Relations familiales et héritage',
+      description: t('sectors.family.description'),
     },
     {
-      direction: 'SE',
-      name: 'Prospérité et Abondance',
-      element: 'Bois',
+      direction: t('directions.SE'),
+      name: t('sectors.wealth.name'),
+      element: t('elements.wood'),
       colors: ['#2E7D32', '#43A047', '#40E0D0'],
       shape: 'lucide:RectangleHorizontal',
-      description: 'Richesse matérielle et spirituelle',
+      description: t('sectors.wealth.description'),
     },
     {
-      direction: 'S',
-      name: 'Réputation et Reconnaissance',
-      element: 'Feu',
+      direction: t('directions.S'),
+      name: t('sectors.fame.name'),
+      element: t('elements.fire'),
       colors: ['#D32F2F', '#F44336', '#FF5722'],
       shape: 'lucide:Triangle',
-      description: 'Image publique et accomplissements',
+      description: t('sectors.fame.description'),
     },
     {
-      direction: 'SO',
-      name: 'Relations et Amour',
-      element: 'Terre',
+      direction: t('directions.SO'),
+      name: t('sectors.relationships.name'),
+      element: t('elements.earth'),
       colors: ['#BCA16A', '#FFA726', '#FFCC80', '#A1887F'],
       shape: 'lucide:Square',
-      description: 'Partenariats et relations amoureuses',
+      description: t('sectors.relationships.description'),
     },
     {
-      direction: 'O',
-      name: 'Créativité et Enfants',
-      element: 'Métal',
+      direction: t('directions.O'),
+      name: t('sectors.creativity.name'),
+      element: t('elements.metal'),
       colors: ['#B0BEC5', '#CFD8DC', '#ECEFF1', '#FFD700'],
       shape: 'lucide:Circle',
-      description: 'Projets créatifs et descendants',
+      description: t('sectors.creativity.description'),
     },
     {
-      direction: 'NO',
-      name: 'Aide et Mentors',
-      element: 'Métal',
+      direction: t('directions.NO'),
+      name: t('sectors.mentors.name'),
+      element: t('elements.metal'),
       colors: ['#B0BEC5', '#CFD8DC', '#ECEFF1', '#FFD700'],
       shape: 'lucide:Circle',
-      description: 'Soutien spirituel et voyages',
+      description: t('sectors.mentors.description'),
     },
     {
-      direction: 'Centre',
-      name: 'Santé et Équilibre',
-      element: 'Terre',
+      direction: t('directions.Center'),
+      name: t('sectors.health.name'),
+      element: t('elements.earth'),
       colors: ['#FBC02D', '#FFEB3B', '#FFA000'],
       shape: 'lucide:Square',
-      description: 'Centre vital et harmonie globale',
+      description: t('sectors.health.description'),
     },
   ]
 
@@ -141,24 +143,20 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2">
             <Icon name="lucide:Calendar" className="w-4 h-4 text-red-500" />
             <span className="text-sm font-semibold text-foreground">
-              Configuration {currentYear}
+              {t('common.configuration')} {currentYear}
             </span>
           </div>
 
           <H1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-red-500  to-yellow-500 bg-clip-text text-transparent">
-              Feng Shui
+              {t('hero.title')}
             </span>
-            <span className="text-foreground"> Bagua</span>
           </H1>
 
-          <P>Harmonisez votre espace selon les 5 éléments et les 8 trigrammes</P>
+          <P>{t('hero.subtitle')}</P>
 
           <P size={'sm'}>
-            Analyse complète avec{' '}
-            <span className="text-foreground font-semibold">étoiles volantes {currentYear}</span>,
-            remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque
-            secteur de votre habitat pour améliorer santé, prospérité et relations.
+            {t('hero.description', { year: currentYear })}
           </P>
 
           <Div layout={'grid'} size={'lg'}>
@@ -168,7 +166,7 @@ export default function HomePage() {
                 className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
               >
                 <Icon name="lucide:Compass" className="mr-2 w-5 h-5" />
-                Analyser Mon Espace
+                {t('hero.cta')}
               </Button>
             </Link>
             <Button
@@ -180,7 +178,7 @@ export default function HomePage() {
               }
             >
               <Icon name="lucide:Info" className="mr-2 w-5 h-5" />
-              Comment ça marche
+              {t('hero.learnMore')}
             </Button>
           </Div>
         </Div>
@@ -190,9 +188,9 @@ export default function HomePage() {
       {/* Features Section avec steps */}
       <div id="features" className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <H2 className="text-4xl font-bold mb-4 text-foreground">Processus Simple en 4 Étapes</H2>
+          <H2 className="text-4xl font-bold mb-4 text-foreground">{t('features.title')}</H2>
           <P className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            De votre plan à votre analyse Feng Shui complète en quelques minutes
+            {t('features.subtitle')}
           </P>
         </div>
 
@@ -225,10 +223,9 @@ export default function HomePage() {
       <Section size={'full'} className="bg-gradient-to-tr from-red-500/10 to-yellow-500/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <H2 className="text-4xl font-bold mb-4 text-foreground">Les 9 Secteurs du Bagua</H2>
+            <H2 className="text-4xl font-bold mb-4 text-foreground">{t('sectors.title')}</H2>
             <P className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Chaque secteur correspond à une direction, un élément et un aspect de votre vie.
-              L'analyse {currentYear} inclut les étoiles volantes pour des recommandations précises.
+              {t('sectors.subtitle', { year: currentYear })}
             </P>
           </div>
 
@@ -299,33 +296,32 @@ export default function HomePage() {
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/20 border border-success/30 mb-6">
                 <Icon name="lucide:Zap" className="w-4 h-4 text-success" />
-                <span className="text-sm font-semibold text-foreground">100% Gratuit</span>
+                <span className="text-sm font-semibold text-foreground">{t('common.freeLabel')}</span>
               </div>
 
               <H2 size={'giant'} className="flex flex-col items-center mb-4">
                 <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-yellow-500 bg-clip-text text-transparent">
-                  Transformez
+                  {t('cta.title')}
                 </span>
-                <Span size={'h3'}> votre espace de vie</Span>
               </H2>
 
               <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
                 <div className="flex flex-col items-center">
                   <Icon name="lucide:Star" className="w-8 h-8 text-yellow-500 mb-2" />
                   <span className="text-sm font-semibold text-foreground">
-                    Étoiles Volantes {currentYear}
+                    {t('cta.flyingStars', { year: currentYear })}
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="lucide:Palette" className="w-8 h-8 text-blue-500 mb-2" />
                   <span className="text-sm font-semibold text-foreground">
-                    Support Dark/Light Mode
+                    {t('common.darkLightMode')}
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Icon name="lucide:FileCheck" className="w-8 h-8 text-green-500 mb-2" />
                   <span className="text-sm font-semibold text-foreground">
-                    PDF Haute Résolution
+                    {t('common.highResPdf')}
                   </span>
                 </div>
               </div>
@@ -336,8 +332,8 @@ export default function HomePage() {
                   className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
                 >
                   <Icon name="lucide:Sparkles" />
-                  <Span className="hidden md:inline">Commencer l'Analyse Maintenant</Span>
-                  <Span className="md:hidden">Analyser</Span>
+                  <Span className="hidden md:inline">{t('cta.subtitle')}</Span>
+                  <Span className="md:hidden">{t('cta.shortLabel')}</Span>
                 </Button>
               </Link>
             </div>

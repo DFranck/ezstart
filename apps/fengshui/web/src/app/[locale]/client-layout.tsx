@@ -1,12 +1,18 @@
 'use client'
 
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { ClientLayout as BaseClientLayout, Button, H1, Icon } from '@ezstart/ui/components'
+import {
+  ClientLayout as BaseClientLayout,
+  Button,
+  H1,
+  Icon,
+  LocaleSwitcher,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
+import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
 type ClientLayoutProps = {
@@ -16,8 +22,17 @@ type ClientLayoutProps = {
 const ClientLayout = ({ children }: ClientLayoutProps) => {
   const { isAuthenticated, login, logout } = useAuth()
   const { theme } = useTheme()
+  const t = useTranslations()
   const pathname = usePathname()
+  const router = useRouter()
+  const locale = useLocale()
   const isAnalyzePage = pathname === '/analyze'
+
+  const locales = ['fr', 'en', 'es']
+
+  const handleLocaleChange = (newLocale: string) => {
+    router.replace(pathname, { locale: newLocale })
+  }
 
   return (
     <BaseClientLayout
@@ -46,7 +61,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
               >
                 Feng Shui Bagua
               </H1>
-              <p className="text-xs text-muted-foreground -mt-1">Harmonisez votre espace</p>
+              <p className="text-xs text-muted-foreground -mt-1">{t('hero.subtitle')}</p>
             </div>
           </Link>
         </div>
@@ -57,21 +72,16 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             <Link href="/analyze">
               <Button variant="outline" size="sm">
                 <Icon name="lucide:Sparkles" className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Analyser</span>
+                <span className="hidden sm:inline">{t('common.analyze')}</span>
               </Button>
             </Link>
           )}
-          {/* {isAuthenticated ? (
-            <Button onClick={logout} variant="outline" size="sm">
-              <Icon name="lucide:LogOut" className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Déconnexion</span>
-            </Button>
-          ) : (
-            <Button onClick={() => login({ theme: theme || 'system' })} size="sm">
-              <Icon name="lucide:LogIn" className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Connexion</span>
-            </Button>
-          )} */}
+          {/* <LoginButton>{isAuthenticated ? t('common.logout') : t('common.login')}</LoginButton> */}
+          <LocaleSwitcher
+            locales={locales}
+            currentLocale={locale}
+            onLocaleChange={handleLocaleChange}
+          />
           <ThemeSwitcher />
         </div>
       }

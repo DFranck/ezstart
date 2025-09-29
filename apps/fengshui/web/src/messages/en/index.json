@@ -1,0 +1,209 @@
+{
+  "common": {
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "save": "Save",
+    "close": "Close",
+    "upload": "Upload",
+    "download": "Download",
+    "analyze": "Analyze",
+    "configuration": "Configuration",
+    "freeLabel": "100% Free",
+    "darkLightMode": "Dark/Light Mode Support",
+    "highResPdf": "High Resolution PDF"
+  },
+  "navigation": {
+    "home": "Home",
+    "analyze": "Analyze",
+    "about": "About"
+  },
+  "hero": {
+    "title": "Feng Shui Bagua",
+    "subtitle": "Harmonize your space according to the 5 elements and 8 trigrams",
+    "description": "Complete analysis with {year} flying stars, personalized remedies and high resolution PDF. Discover how to optimize each sector of your habitat to improve health, prosperity and relationships.",
+    "cta": "Analyze My Space",
+    "learnMore": "How it works"
+  },
+  "features": {
+    "title": "Simple 4-Step Process",
+    "subtitle": "From your floor plan to your complete Feng Shui analysis in just minutes",
+    "step1": {
+      "title": "1. Upload your plan",
+      "description": "Import an image or PDF of your space (JPG, PNG, PDF)"
+    },
+    "step2": {
+      "title": "2. Orient precisely",
+      "description": "Align your plan with magnetic North for exact analysis"
+    },
+    "step3": {
+      "title": "3. Discover your Bagua",
+      "description": "Complete {year} analysis with flying stars and remedies"
+    },
+    "step4": {
+      "title": "4. Generate your PDF",
+      "description": "Detailed high resolution report adapted to your theme"
+    }
+  },
+  "sectors": {
+    "title": "The 9 Bagua Sectors",
+    "subtitle": "Each sector corresponds to a direction, an element and an aspect of your life. The {year} analysis includes flying stars for precise recommendations.",
+    "career": {
+      "name": "Career and Life Mission",
+      "description": "Your professional and spiritual path"
+    },
+    "knowledge": {
+      "name": "Wisdom and Knowledge",
+      "description": "Learning, meditation and personal growth"
+    },
+    "family": {
+      "name": "Family and Ancestors",
+      "description": "Family relationships and heritage"
+    },
+    "wealth": {
+      "name": "Prosperity and Abundance",
+      "description": "Material and spiritual wealth"
+    },
+    "fame": {
+      "name": "Reputation and Recognition",
+      "description": "Public image and achievements"
+    },
+    "relationships": {
+      "name": "Relationships and Love",
+      "description": "Partnerships and romantic relationships"
+    },
+    "creativity": {
+      "name": "Creativity and Children",
+      "description": "Creative projects and descendants"
+    },
+    "mentors": {
+      "name": "Helpful People and Mentors",
+      "description": "Spiritual support and travel"
+    },
+    "health": {
+      "name": "Health and Balance",
+      "description": "Vital center and global harmony"
+    }
+  },
+  "elements": {
+    "water": "Water",
+    "earth": "Earth",
+    "wood": "Wood",
+    "fire": "Fire",
+    "metal": "Metal"
+  },
+  "directions": {
+    "N": "N",
+    "NE": "NE",
+    "E": "E",
+    "SE": "SE",
+    "S": "S",
+    "SO": "SW",
+    "O": "W",
+    "NO": "NW",
+    "Center": "Center"
+  },
+  "cta": {
+    "title": "Transform your living space",
+    "subtitle": "Start Analysis Now",
+    "shortLabel": "Analyze",
+    "flyingStars": "Flying Stars {year}"
+  },
+  "steps": {
+    "upload": {
+      "title": "Upload",
+      "description": "Plan import",
+      "instructions": "Drag and drop your plan or click to browse",
+      "fileRequired": "Upload a plan first",
+      "cropRequired": "Validate the crop first with the ✓ button"
+    },
+    "orientation": {
+      "title": "Cardinal Points",
+      "description": "Bagua alignment"
+    },
+    "analysis": {
+      "title": "Results",
+      "description": "Your Feng Shui analysis"
+    }
+  },
+  "tooltips": {
+    "previousStep": "Return to previous step",
+    "nextStep": "Go to next step",
+    "finishAnalysis": "Finish Feng Shui analysis",
+    "validateCrop": "Use crop controls then click ✓ to validate"
+  },
+  "uploader": {
+    "dragDrop": "Drag & drop your plan",
+    "dropHere": "Drop your plan here",
+    "clickToSelect": "…or click to select a file",
+    "acceptedFormats": "Accepted: JPG, PNG, GIF, PDF",
+    "edit": "Edit",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "zoom": "Zoom",
+    "rotation": "Rotation",
+    "width": "Width",
+    "height": "Height",
+    "pdfLoaded": "PDF loaded"
+  },
+  "cardinal": {
+    "title": "Step 2: Cardinal Points",
+    "description": "Align the compass North with the North of your plan. Use the controls to rotate the orientation.",
+    "error": "Error",
+    "noFile": "No plan has been uploaded. Please return to step 1 to upload a plan.",
+    "yourPlan": "Your Plan",
+    "fixedCenter": "Fixed center",
+    "north": "North",
+    "east": "East",
+    "south": "South",
+    "west": "West",
+    "reset": "Reset",
+    "info": "Info",
+    "compassHelp": "Tip: Use a compass to know the real orientation of your space."
+  },
+  "analysis": {
+    "title": "Your Feng Shui Analysis",
+    "description": "Discover the harmonization of your space according to Bagua principles. Consult recommendations for each sector or generate a complete PDF.",
+    "pdfPreview": "PDF Preview",
+    "wheel": "Wheel",
+    "grid": "Grid",
+    "expandSector": "Expand sector",
+    "collapseSector": "Collapse sector",
+    "downloadPdf": "Download PDF",
+    "generating": "Generating...",
+    "pdfGenerated": "PDF generated successfully!",
+    "errorPdf": "Error generating PDF"
+  },
+  "pdfModal": {
+    "title": "Feng Shui Bagua Analysis",
+    "previewTitle": "Preview of your Bagua wheel",
+    "generatingPdf": "PDF Generation...",
+    "clickToGenerate": "Click \"Generate PDF\" to create the report",
+    "generatePdf": "Generate PDF",
+    "generating": "Generating...",
+    "generatingInProgress": "PDF generation in progress...",
+    "capturingAnalysis": "High resolution capture of your Feng Shui analysis",
+    "twoPages": "2 pages: Wheel + Grid & Detailed Sectors",
+    "downloadPdf": "Download PDF",
+    "planBagua": "Bagua Plan",
+    "detailedSectors": "Detailed Sectors"
+  },
+  "bagua": {
+    "orientations": "Bagua Orientations",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "loading": "Loading Bagua configuration...",
+    "naturalActivators": "Natural activators",
+    "favorableMaterials": "Favorable materials",
+    "fiveElementsCycles": "5 Elements cycles",
+    "nourishedBy": "Nourished by",
+    "controlledBy": "Controlled by",
+    "weakenedBy": "Weakened by",
+    "flyingStar2025": "Flying Star 2025",
+    "specificRemedies2025": "Specific remedies 2025",
+    "good": "good",
+    "bad": "bad"
+  }
+}

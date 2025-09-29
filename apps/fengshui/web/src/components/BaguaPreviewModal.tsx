@@ -5,6 +5,7 @@ import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/direction
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import BaguaGrid from './steps/BaguaGrid'
 import BaguaWheel from './steps/BaguaWheel'
@@ -68,6 +69,7 @@ export function BaguaPreviewModal({
   visualizationMode = 'wheel',
   transformations,
 }: Props) {
+  const t = useTranslations()
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -265,7 +267,7 @@ export function BaguaPreviewModal({
 
         // Titre compact en haut
         pdf.setFontSize(16)
-        pdf.text('Analyse Feng Shui Bagua', 105, 15, { align: 'center' })
+        pdf.text(t('pdfModal.title'), 105, 15, { align: 'center' })
 
         // Image commence plus haut pour gagner de l'espace
         const x = (210 - imgWidth) / 2
@@ -461,7 +463,7 @@ export function BaguaPreviewModal({
         ctx.fillStyle = '#000000'
         ctx.font = `16px Arial`
         ctx.textAlign = 'center'
-        ctx.fillText('Analyse Feng Shui Bagua', canvas.width / 2, 15 * mmToPx)
+        ctx.fillText(t('pdfModal.title'), canvas.width / 2, 15 * mmToPx)
 
         // Add content image directly without nested page
         if (pageNumber === 1) {
@@ -535,7 +537,7 @@ export function BaguaPreviewModal({
 
       // Titre compact en haut (même style que page 1)
       pdf.setFontSize(16)
-      pdf.text('Analyse Feng Shui Bagua', 105, 15, { align: 'center' })
+      pdf.text(t('pdfModal.title'), 105, 15, { align: 'center' })
 
       // Use the SAME calculated dimensions as preview
       pdf.addImage(
@@ -628,8 +630,8 @@ export function BaguaPreviewModal({
       }
       description={
         <span className="block">
-          <span className="hidden sm:inline">Aperçu de votre roue Bagua • </span>
-          {isGenerating ? 'Génération PDF...' : 'Cliquez "Générer PDF" pour créer le rapport'}
+          <span className="hidden sm:inline">{t('pdfModal.previewTitle')} • </span>
+          {isGenerating ? t('pdfModal.generatingPdf') : t('pdfModal.clickToGenerate')}
         </span>
       }
       footer={
@@ -640,7 +642,7 @@ export function BaguaPreviewModal({
             className="bg-blue-600 text-white hover:bg-blue-700 flex-1 sm:flex-initial"
           >
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-            {isGenerating ? 'Génération...' : 'Générer PDF'}
+            {isGenerating ? t('pdfModal.generating') : t('pdfModal.generatePdf')}
           </Button>
           <Button
             onClick={handleDownloadPDF}
@@ -648,7 +650,7 @@ export function BaguaPreviewModal({
             className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white flex-1 sm:flex-initial"
           >
             <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
-            Télécharger PDF
+            {t('pdfModal.downloadPdf')}
           </Button>
         </div>
       }
@@ -667,11 +669,11 @@ export function BaguaPreviewModal({
                 <Icon name="lucide:Loader2" className="w-10 h-10 text-blue-500 animate-spin" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Génération PDF en cours...</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('pdfModal.generatingInProgress')}</h3>
                 <p className="text-sm text-gray-600 mb-1">
-                  Capture haute résolution de votre analyse Feng Shui
+                  {t('pdfModal.capturingAnalysis')}
                 </p>
-                <p className="text-xs text-gray-500">2 pages: Roue + Grille & Secteurs détaillés</p>
+                <p className="text-xs text-gray-500">{t('pdfModal.twoPages')}</p>
               </div>
             </div>
           </div>
@@ -708,7 +710,7 @@ export function BaguaPreviewModal({
                     {previewImageUrls.page2 && (
                       <img
                         src={previewImageUrls.page2}
-                        alt="Page 2 - Vue Grille et Secteurs Détaillés"
+                        alt={`Page 2 - ${t('pdfModal.detailedSectors')}`}
                         className="w-full h-auto rounded-lg shadow-lg border mx-auto"
                         style={{ maxWidth: '400px' }}
                       />
@@ -969,7 +971,7 @@ export function BaguaPreviewModal({
               marginBottom: '30px',
             }}
           >
-            Secteurs Détaillés
+            {t('pdfModal.detailedSectors')}
           </h2>
 
           {/* Grid layout for cards - Positioned like BaguaGrid */}
@@ -1051,9 +1053,9 @@ export function BaguaPreviewModal({
                           style={{ color: '#6b7280' }}
                         >
                           <Icon name="lucide:ArrowRightLeft" className="w-3 h-3 mr-1" style={{ color: accent }} />
-                          {sector.nourisher && `Nourri par: ${sector.nourisher}`}
+                          {sector.nourisher && `${t('bagua.nourishedBy')}: ${sector.nourisher}`}
                           {sector.nourisher && sector.controller && ' • '}
-                          {sector.controller && `Contrôlé par: ${sector.controller}`}
+                          {sector.controller && `${t('bagua.controlledBy')}: ${sector.controller}`}
                         </div>
                       )}
 

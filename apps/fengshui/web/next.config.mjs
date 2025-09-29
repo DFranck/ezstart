@@ -1,3 +1,5 @@
+import createNextIntlPlugin from 'next-intl/plugin'
+
 /** @type {import('next').NextConfig} */
 const baseConfig = {
   transpilePackages: ['@ezstart/ui', '@ezstart/types'],
@@ -11,6 +13,6 @@ const baseConfig = {
   },
 }
 
-// PWA retiré pour fengshui - on a validé que l'architecture fonctionne
-// Chaque app peut ajouter PWA individuellement si nécessaire
-export default baseConfig
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
+
+export default withNextIntl(baseConfig)

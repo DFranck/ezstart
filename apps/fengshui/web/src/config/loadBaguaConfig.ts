@@ -3,34 +3,50 @@
 import { Direction } from '@/types/directions'
 import { YearBaguaConfig, BaguaBaseConfig, BaguaStarsConfig, CombinedOrientation } from '@/types/yearBaguaConfig'
 
-export async function loadBaguaConfig(
-  year: number,
-  locale: string = 'fr-FR'
-): Promise<YearBaguaConfig> {
-  // Charger la configuration de base
-  const baseConfig = await loadBaseConfig(locale)
-  
-  // Charger les étoiles volantes pour l'année
-  const starsConfig = await loadStarsConfig(year, locale)
-  
+// Version client : utilise les données des messages next-intl
+export function loadBaguaConfigFromMessages(messages: any): YearBaguaConfig {
+  if (!messages.bagua) {
+    throw new Error(`No Bagua config found in messages`)
+  }
+
+  const baseConfig = validateBaseConfig(messages.bagua)
+  const starsConfig = validateStarsConfig(messages.bagua.stars)
+
   // Combiner les deux configurations
   return combineConfigs(baseConfig, starsConfig)
 }
 
-async function loadBaseConfig(locale: string): Promise<BaguaBaseConfig> {
-  if (locale.startsWith('fr')) {
-    const cfg = await import('./bagua.fr.base.json')
-    return validateBaseConfig(cfg.default ?? cfg)
-  }
-  throw new Error(`No base Bagua config for locale=${locale}`)
-}
+// Version serveur : import direct pour fallback
+export async function loadBaguaConfig(
+  year: number,
+  locale: string = 'fr-FR'
+): Promise<YearBaguaConfig> {
+  try {
+    let localeCode = 'fr' // Default
+    if (locale.startsWith('en')) {
+      localeCode = 'en'
+    } else if (locale.startsWith('es')) {
+      localeCode = 'es'
+    }
 
-async function loadStarsConfig(year: number, locale: string): Promise<BaguaStarsConfig> {
-  if (year === 2025 && locale.startsWith('fr')) {
-    const cfg = await import('./bagua.2025.fr.stars.json')
-    return validateStarsConfig(cfg.default ?? cfg)
+    const baseConfig = await import(`../messages/${localeCode}/base.json`)
+    const starsConfig = await import(`../messages/${localeCode}/stars.json`)
+
+    return combineConfigs(
+      validateBaseConfig(baseConfig.default ?? baseConfig),
+      validateStarsConfig(starsConfig.default ?? starsConfig)
+    )
+  } catch (error) {
+    console.error(`Failed to load Bagua config for locale ${locale}:`, error)
+    // Fallback to French
+    const baseConfig = await import('../messages/fr/base.json')
+    const starsConfig = await import('../messages/fr/stars.json')
+
+    return combineConfigs(
+      validateBaseConfig(baseConfig.default ?? baseConfig),
+      validateStarsConfig(starsConfig.default ?? starsConfig)
+    )
   }
-  throw new Error(`No stars config for year=${year} locale=${locale}`)
 }
 
 function combineConfigs(base: BaguaBaseConfig, stars: BaguaStarsConfig): YearBaguaConfig {

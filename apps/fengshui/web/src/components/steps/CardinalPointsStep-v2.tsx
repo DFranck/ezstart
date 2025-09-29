@@ -17,10 +17,12 @@ import {
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 const CardinalPointsStep = () => {
   const { isMobile } = useDevice()
+  const t = useTranslations()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: 0, h: 0 })
 
@@ -53,10 +55,9 @@ const CardinalPointsStep = () => {
           return (
             <div className="max-w-4xl mx-auto text-center">
               <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-                <h3 className="text-lg font-semibold text-red-800 mb-2">Erreur</h3>
+                <h3 className="text-lg font-semibold text-red-800 mb-2">{t('cardinal.error')}</h3>
                 <p className="text-red-700">
-                  Aucun plan n&apos;a été uploadé. Veuillez retourner à l&apos;étape 1 pour uploader
-                  un plan.
+                  {t('cardinal.noFile')}
                 </p>
               </div>
             </div>
@@ -76,10 +77,10 @@ const CardinalPointsStep = () => {
         }
 
         const cardinalPoints = [
-          { direction: 'N', angle: -90, label: 'Nord' }, // Nord en haut (270° ou -90°)
-          { direction: 'E', angle: 0, label: 'Est' }, // Est à droite (0°)
-          { direction: 'S', angle: 90, label: 'Sud' }, // Sud en bas (90°)
-          { direction: 'O', angle: 180, label: 'Ouest' }, // Ouest à gauche (180°)
+          { direction: 'N', angle: -90, label: t('cardinal.north') }, // Nord en haut (270° ou -90°)
+          { direction: 'E', angle: 0, label: t('cardinal.east') }, // Est à droite (0°)
+          { direction: 'S', angle: 90, label: t('cardinal.south') }, // Sud en bas (90°)
+          { direction: 'O', angle: 180, label: t('cardinal.west') }, // Ouest à gauche (180°)
         ] as const
 
         return (
@@ -91,13 +92,12 @@ const CardinalPointsStep = () => {
                   <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
                 </Div>
                 <H2 size={'h5'} className="text-left">
-                  Étape 2 : Points Cardinaux
+                  {t('cardinal.title')}
                 </H2>
               </CardHeader>
               <CardContent className="">
                 <P variant={'description'}>
-                  Alignez le Nord de la boussole avec le Nord de votre plan. Utilisez les contrôles
-                  pour faire tourner l&apos;orientation.
+                  {t('cardinal.description')}
                 </P>
               </CardContent>
             </Card>
@@ -171,8 +171,8 @@ const CardinalPointsStep = () => {
                     className="w-full h-full object-contain bg-white"
                   />
                   <div className="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-white p-4 text-center pointer-events-none">
-                    <div className="text-2xl font-bold mb-1 drop-shadow-lg">Votre Plan</div>
-                    <div className="text-sm opacity-90 drop-shadow-lg">Centre fixe</div>
+                    <div className="text-2xl font-bold mb-1 drop-shadow-lg">{t('cardinal.yourPlan')}</div>
+                    <div className="text-sm opacity-90 drop-shadow-lg">{t('cardinal.fixedCenter')}</div>
                   </div>
                 </div>
 

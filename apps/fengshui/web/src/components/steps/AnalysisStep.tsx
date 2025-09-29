@@ -1,7 +1,7 @@
 /* path: /components/steps/AnalysisStep.tsx */
 'use client'
 
-import { loadBaguaConfig } from '@/config/loadBaguaConfig'
+import { loadBaguaConfigFromMessages } from '@/config/loadBaguaConfig'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
@@ -19,6 +19,7 @@ import {
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
+import { useTranslations, useLocale, useMessages } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
@@ -27,6 +28,9 @@ import BaguaWheel from './BaguaWheel'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
   const { isMobile } = useDevice()
+  const t = useTranslations()
+  const locale = useLocale()
+  const messages = useMessages()
   const [cfg, setCfg] = useState<YearBaguaConfig | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
@@ -46,8 +50,13 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   }, [])
 
   useEffect(() => {
-    loadBaguaConfig(2025, 'fr-FR').then(setCfg).catch(console.error)
-  }, [])
+    try {
+      const config = loadBaguaConfigFromMessages(messages)
+      setCfg(config)
+    } catch (error) {
+      console.error('Failed to load Bagua config from messages:', error)
+    }
+  }, [messages])
 
   // Fonction pour télécharger directement le PDF (mobile)
   const handleDirectPDFDownload = async (uploadData: UploadStepData, bearingFromNorth: number) => {
@@ -102,6 +111,16 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
         })
       }
     }, 100) // Petit délai pour l'animation d'ouverture
+  }
+
+  // Fonction pour ouvrir tous les secteurs
+  const handleExpandAll = () => {
+    setExpandedSectors(new Set(DIRECTIONS_WITH_CENTER))
+  }
+
+  // Fonction pour fermer tous les secteurs
+  const handleCollapseAll = () => {
+    setExpandedSectors(new Set())
   }
 
   // Ouvrir le preview toujours (besoin de la roue pour PDF)
@@ -166,13 +185,12 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                   />
                 </Div>
                 <H2 size={'h5'} className="text-left">
-                  Votre Analyse Feng Shui
+                  {t('analysis.title')}
                 </H2>
               </CardHeader>
               <CardContent className="">
                 <P variant={'description'}>
-                  Découvrez l'harmonisation de votre espace selon les principes du Bagua. Consultez
-                  les recommandations pour chaque secteur ou générez un PDF complet.
+                  {t('analysis.description')}
                 </P>
                 <div className="flex gap-2 mt-4">
                   <Button
@@ -181,7 +199,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     disabled={!cfg || isGeneratingPDF}
                   >
                     <Icon name="lucide:FileDown" className="w-4 h-4" />
-                    <span>Aperçu PDF</span>
+                    <span>{t('analysis.pdfPreview')}</span>
                   </Button>
                 </div>
 
@@ -194,7 +212,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     className="flex-1"
                   >
                     <Icon name="lucide:CircleDot" className="w-4 h-4" />
-                    Roue
+                    {t('analysis.wheel')}
                   </Button>
                   <Button
                     onClick={() => setVisualizationMode('grid')}
@@ -203,7 +221,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     className="flex-1"
                   >
                     <Icon name="lucide:Grid3X3" className="w-4 h-4" />
-                    Grille
+                    {t('analysis.grid')}
                   </Button>
                 </div>
               </CardContent>
@@ -245,6 +263,8 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                   config={cfg || undefined}
                   expandedSectors={expandedSectors}
                   onToggleSector={handleSectorClick}
+                  onExpandAll={handleExpandAll}
+                  onCollapseAll={handleCollapseAll}
                   sectorRefs={sectorRefs.current}
                 />
               </div>
