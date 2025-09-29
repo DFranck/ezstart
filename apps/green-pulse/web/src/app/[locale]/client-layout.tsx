@@ -1,8 +1,9 @@
 'use client'
 import { routing } from '@/i18n/routing'
+import { LoginButton } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { ClientLayout, LocaleSwitcher } from '@ezstart/ui/components'
-import { useLocale } from 'next-intl'
+import { Button, ClientLayout, Div, H1, Icon, LocaleSwitcher } from '@ezstart/ui/components'
+import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React from 'react'
@@ -11,6 +12,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const router = useRouter()
   const currentLocale = useLocale()
+  const t = useTranslations()
 
   const handleLocaleChange = (locale: string) => {
     if (!pathname) return
@@ -24,15 +26,28 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
+      headerLeftContent={
+        <Button asChild variant={'ghost'}>
+          <Link href="/">
+            <Icon name="lucide:Leaf" size={16} fontSize={16} />
+            <H1 size={'sm'}>Green Pulse</H1>
+          </Link>
+        </Button>
+      }
       headerRightContent={
-        <>
+        <Div>
+          <LoginButton
+            loginText={t('auth.login')}
+            logoutText={t('auth.logout')}
+            loadingText={t('auth.loading')}
+          />
           <LocaleSwitcher
             locales={[...routing.locales]}
             currentLocale={currentLocale}
             onLocaleChange={handleLocaleChange}
           />
           <ThemeSwitcher />
-        </>
+        </Div>
       }
       bottomNavigation={[]}
       LinkComponent={Link}

@@ -7,6 +7,8 @@ import { useAuth } from './provider.js'
 export interface LoginButtonProps {
   children?: React.ReactNode
   className?: string
+  loginText?: string
+  logoutText?: string
   loadingText?: string
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   size?: 'default' | 'sm' | 'lg' | 'icon'
@@ -18,8 +20,10 @@ export interface LoginButtonProps {
 }
 
 export function LoginButton({
-  children = 'Login with EZAuth',
+  children,
   className,
+  loginText = 'Login with EZAuth',
+  logoutText = 'Logout',
   loadingText = 'Redirecting...',
   variant = 'default',
   size = 'default',
@@ -29,16 +33,15 @@ export function LoginButton({
   onClick,
   loading: externalLoading,
 }: LoginButtonProps) {
-  const { login, isAuthenticated } = useAuth()
+  const { login, logout, isAuthenticated } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [hasStartedLogin, setHasStartedLogin] = useState(false)
 
   const loading = externalLoading ?? isLoading ?? hasStartedLogin
 
-  // Don't show login button if already authenticated
-  if (isAuthenticated) {
-    return null
-  }
+  // Set default children based on auth state and translation props
+  const defaultChildren = isAuthenticated ? logoutText : loginText
+  const buttonText = children ?? defaultChildren
 
   const handleClick = async () => {
     if (loading || disabled) return
@@ -50,13 +53,18 @@ export function LoginButton({
     setHasStartedLogin(true)
 
     try {
-      await login()
+      if (isAuthenticated) {
+        logout() // logout is synchronous, just resets store
+        setIsLoading(false)
+        setHasStartedLogin(false)
+      } else {
+        await login() // login redirects, so no need to reset loading
+      }
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error(isAuthenticated ? 'Logout failed:' : 'Login failed:', error)
       setIsLoading(false)
       setHasStartedLogin(false)
     }
-    // Note: We never reset hasStartedLogin on success since we're redirecting
   }
 
   return (
@@ -67,14 +75,14 @@ export function LoginButton({
       variant={variant}
       size={size}
       className={className}
-      aria-label={loading ? loadingText : `${children}`}
+      aria-label={loading ? loadingText : `${buttonText}`}
     >
       {loading ? (
         <Icon name="fa:FaSpinner" spin className="mr-2" />
       ) : (
-        showIcon && <Icon name={icon ? icon : 'fa:FaUser'} className="mr-2" />
+        showIcon && <Icon name={icon ? icon : (isAuthenticated ? 'fa:FaSignOutAlt' : 'fa:FaUser')} className="mr-2" />
       )}
-      {loading ? loadingText : children}
+      {loading ? loadingText : buttonText}
     </Button>
   )
 }

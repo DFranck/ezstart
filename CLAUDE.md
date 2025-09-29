@@ -52,7 +52,8 @@ pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 | EZStart | Web | 5045 | http://localhost:5045 | ✅ Running |
 | ASC-TCD | Web | 5055 | http://localhost:5055 | ✅ Running |
 | FengShui | Web | 5065 | http://localhost:5065 | ✅ Running |
-| Green-Pulse | Web | 5075 | http://localhost:5075 | ✅ Running |
+| GreenPulse | API | 5070 | http://localhost:5070 | ✅ Running |
+| GreenPulse | Web | 5075 | http://localhost:5075 | ✅ Running |
 
 ### Architecture .env Actuelle
 

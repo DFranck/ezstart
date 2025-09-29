@@ -4,5 +4,10 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "retry": "Try again"
+  },
+  "auth": {
+    "login": "Login with EZAuth",
+    "logout": "Logout",
+    "loading": "Redirecting..."
   }
 }

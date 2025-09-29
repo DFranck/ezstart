@@ -22,11 +22,13 @@
     { "path": "./apps/tower-defense/types" },
     { "path": "./apps/tower-defense/config" },
     { "path": "./apps/tower-defense/utils" },
+    { "path": "./apps/green-pulse/types" },
 
     // APIs
     { "path": "./apps/ezauth/api" },
     { "path": "./apps/ez-billing/api" },
     { "path": "./apps/tower-defense/api" },
+    { "path": "./apps/green-pulse/api" },
 
     // Web apps
     { "path": "./apps/ezstart/web" },
@@ -34,6 +36,7 @@
     { "path": "./apps/ez-billing/web" },
     { "path": "./apps/tower-defense/web" },
     { "path": "./apps/asc-tcd/web" },
-    { "path": "./apps/fengshui/web" }
+    { "path": "./apps/fengshui/web" },
+    { "path": "./apps/green-pulse/web" }
   ]
 }

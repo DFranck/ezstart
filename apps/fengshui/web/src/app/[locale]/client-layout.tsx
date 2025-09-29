@@ -9,6 +9,7 @@ import {
   H1,
   Icon,
   LocaleSwitcher,
+  P,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useLocale, useTranslations } from 'next-intl'
@@ -61,13 +62,15 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
               >
                 Feng Shui Bagua
               </H1>
-              <p className="text-xs text-muted-foreground -mt-1">{t('hero.subtitle')}</p>
+              <P className="text-xs text-muted-foreground -mt-1 line-clamp-1">
+                {t('hero.subtitle')}
+              </P>
             </div>
           </Link>
         </div>
       }
       headerRightContent={
-        <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center gap-2">
           {!isAnalyzePage && (
             <Link href="/analyze">
               <Button variant="outline" size="sm">

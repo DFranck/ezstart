@@ -104,6 +104,10 @@ interface StepperProps {
   children?: ReactNode
   renderButtons?: (context: StepperContextType) => StepperButtons
 
+  // Custom header offsets
+  headerOffsetTop?: string
+  headerOffsetCollapsed?: string
+
   // Theming
   theme?: StepperTheme
 }
@@ -120,6 +124,8 @@ export function Stepper({
   allowStepNavigation = true,
   children,
   renderButtons,
+  headerOffsetTop = 'top-[68px] md:top-[70px]',
+  headerOffsetCollapsed = 'top-[48px] md:top-[54px]',
   theme,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
@@ -203,6 +209,8 @@ export function Stepper({
             withHeaderOffset={withHeaderOffset}
             onStepClick={allowStepNavigation ? goToStep : undefined}
             theme={theme}
+            headerOffsetTop={headerOffsetTop}
+            headerOffsetCollapsed={headerOffsetCollapsed}
           />
           <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
             {/* Contenu de l'étape actuelle */}
@@ -238,6 +246,8 @@ interface StepperHeaderProps {
   withHeaderOffset?: boolean
   onStepClick?: (stepIndex: number) => void
   theme?: StepperTheme
+  headerOffsetTop?: string
+  headerOffsetCollapsed?: string
 }
 
 function StepperHeader({
@@ -249,6 +259,8 @@ function StepperHeader({
   showStepNumbers,
   onStepClick,
   theme,
+  headerOffsetTop,
+  headerOffsetCollapsed,
 }: StepperHeaderProps) {
   // progress ratio for mobile bar
   const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0
@@ -258,11 +270,7 @@ function StepperHeader({
     <div
       className={cn(
         'sticky z-10 backdrop-blur-sm transition-all duration-200 ease-out',
-        withHeaderOffset
-          ? isTop
-            ? 'top-[64px] md:top-[70px]'
-            : 'top-[48px] md:top-[54px]'
-          : 'top-0',
+        withHeaderOffset ? (isTop ? headerOffsetTop : headerOffsetCollapsed) : 'top-0',
         isTop ? 'bg-background/0' : 'bg-background/80'
       )}
     >

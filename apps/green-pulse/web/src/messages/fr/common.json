@@ -4,5 +4,10 @@
     "loading": "Chargement...",
     "error": "Une erreur s'est produite",
     "retry": "Réessayer"
+  },
+  "auth": {
+    "login": "Se connecter avec EZAuth",
+    "logout": "Se déconnecter",
+    "loading": "Redirection..."
   }
 }
