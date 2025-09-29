@@ -76,10 +76,10 @@ const CardinalPointsStep = () => {
         }
 
         const cardinalPoints = [
-          { direction: 'N', angle: -90, label: 'Nord' },    // Nord en haut (270° ou -90°)
-          { direction: 'E', angle: 0, label: 'Est' },       // Est à droite (0°)
-          { direction: 'S', angle: 90, label: 'Sud' },      // Sud en bas (90°)
-          { direction: 'O', angle: 180, label: 'Ouest' },   // Ouest à gauche (180°)
+          { direction: 'N', angle: -90, label: 'Nord' }, // Nord en haut (270° ou -90°)
+          { direction: 'E', angle: 0, label: 'Est' }, // Est à droite (0°)
+          { direction: 'S', angle: 90, label: 'Sud' }, // Sud en bas (90°)
+          { direction: 'O', angle: 180, label: 'Ouest' }, // Ouest à gauche (180°)
         ] as const
 
         return (
@@ -109,8 +109,6 @@ const CardinalPointsStep = () => {
                   id="-rotate-45"
                   onClick={() => handleRotate(currentRotation - 45)}
                   size="sm"
-                  className="w-10 h-10 grid place-items-center bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg"
-                  title="−45°"
                 >
                   <Icon name="lucide:RotateCcw" className="w-4 h-4" />
                 </Button>
@@ -121,21 +119,13 @@ const CardinalPointsStep = () => {
                   id="-rotate-10"
                   onClick={() => handleRotate(currentRotation - 10)}
                   size="sm"
-                  className="w-10 h-10 grid place-items-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg"
-                  title="−10°"
                 >
                   <Icon name="lucide:RotateCcw" className="w-4 h-4" />
                 </Button>
               </Div>
               <Div layout={'center'}>
                 <Label htmlFor="-rotate-1">1°</Label>
-                <Button
-                  id="-rotate-1"
-                  onClick={() => handleRotate(currentRotation - 1)}
-                  size="sm"
-                  className="w-10 h-10 grid place-items-center bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg"
-                  title="−1°"
-                >
+                <Button id="-rotate-1" onClick={() => handleRotate(currentRotation - 1)} size="sm">
                   <Icon name="lucide:RotateCcw" className="w-4 h-4" />
                 </Button>
               </Div>
@@ -144,13 +134,7 @@ const CardinalPointsStep = () => {
 
               <Div layout={'center'}>
                 <Label htmlFor="+rotate-1">1°</Label>
-                <Button
-                  id="+rotate-1"
-                  onClick={() => handleRotate(currentRotation + 1)}
-                  size="sm"
-                  className="w-10 h-10 grid place-items-center bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg"
-                  title="+1°"
-                >
+                <Button id="+rotate-1" onClick={() => handleRotate(currentRotation + 1)} size="sm">
                   <Icon name="lucide:RotateCw" className="w-4 h-4" />
                 </Button>
               </Div>
@@ -160,8 +144,6 @@ const CardinalPointsStep = () => {
                   id="+rotate-10"
                   onClick={() => handleRotate(currentRotation + 10)}
                   size="sm"
-                  className="w-10 h-10 grid place-items-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg"
-                  title="+10°"
                 >
                   <Icon name="lucide:RotateCw" className="w-4 h-4" />
                 </Button>
@@ -172,8 +154,6 @@ const CardinalPointsStep = () => {
                   id="+rotate-45"
                   onClick={() => handleRotate(currentRotation + 45)}
                   size="sm"
-                  className="w-10 h-10 grid place-items-center bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-lg"
-                  title="+45°"
                 >
                   <Icon name="lucide:RotateCw" className="w-4 h-4" />
                 </Button>
@@ -204,7 +184,7 @@ const CardinalPointsStep = () => {
                   return (
                     <div
                       key={direction}
-                      className="absolute bg-ezstart w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-white shadow-xl "
+                      className="absolute bg-gradient-to-r from-red-500  to-yellow-500 w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl z-50"
                       style={{
                         left: cx,
                         top: cy,
@@ -223,18 +203,19 @@ const CardinalPointsStep = () => {
                 {/* Lignes → centre dynamique (cx, cy) */}
                 <svg
                   className="absolute inset-0 w-full h-full pointer-events-none"
-                  style={{ zIndex: 15 }}
+                  style={{ zIndex: 5 }}
                 >
                   <defs>
                     <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="rgba(124, 58, 237,0.4)" />
-                      <stop offset="100%" stopColor="rgba(124, 58, 237,0.2)" />
+                      <stop offset="0%" stopColor="rgba(239, 68, 68, 0.4)" />
+                      <stop offset="100%" stopColor="rgba(239, 68, 68, 0.2)" />
                     </linearGradient>
                   </defs>
                   {cardinalPoints.map(({ angle }) => {
                     const a = (angle + currentRotation) * (Math.PI / 180)
-                    const x = Math.cos(a) * radius
-                    const y = Math.sin(a) * radius
+                    const adjustedRadius = isMobile ? radius - 20 : radius - 40
+                    const x = Math.cos(a) * adjustedRadius
+                    const y = Math.sin(a) * adjustedRadius
                     return (
                       <line
                         key={angle}

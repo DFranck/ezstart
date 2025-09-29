@@ -3,6 +3,7 @@
 import { useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { ClientLayout as BaseClientLayout, Button, H1, Icon } from '@ezstart/ui/components'
+import { cn } from '@ezstart/ui/lib'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -20,6 +21,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   return (
     <BaseClientLayout
+      className={cn(isAnalyzePage && 'mb-18')}
       appName="Feng Shui Bagua"
       creator={
         <div className="flex items-center gap-2">

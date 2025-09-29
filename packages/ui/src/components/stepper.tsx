@@ -21,9 +21,7 @@ function TooltipButton({ button, children }: TooltipButtonProps) {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        {children}
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent>
         <p>{button.tooltip}</p>
       </TooltipContent>
@@ -51,6 +49,7 @@ interface StepperContextType {
   getStepData: (stepId: string) => any
   isStepCompleted: (stepIndex: number) => boolean
   isStepAccessible: (stepIndex: number) => boolean
+  theme?: StepperTheme
 }
 
 const StepperContext = createContext<StepperContextType | null>(null)
@@ -82,6 +81,16 @@ export interface StepperButtons {
   custom?: StepButton[]
 }
 
+// Props pour le theming du stepper
+export interface StepperTheme {
+  primaryColor?: string // Couleur principale (étapes actives/complétées)
+  secondaryColor?: string // Couleur secondaire (fond, bordures)
+  textColor?: string // Couleur du texte
+  mutedColor?: string // Couleur pour les éléments inactifs
+  backgroundColor?: string // Couleur de fond des composants
+  gradientDirection?: 'to right' | 'to left' | 'to bottom' | 'to top' // Direction du dégradé
+}
+
 // Props pour le composant principal
 interface StepperProps {
   steps: Step[]
@@ -94,6 +103,9 @@ interface StepperProps {
   allowStepNavigation?: boolean
   children?: ReactNode
   renderButtons?: (context: StepperContextType) => StepperButtons
+
+  // Theming
+  theme?: StepperTheme
 }
 
 // Composant principal Stepper
@@ -108,6 +120,7 @@ export function Stepper({
   allowStepNavigation = true,
   children,
   renderButtons,
+  theme,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
   const [stepData, setStepData] = useState<Record<string, any>>({})
@@ -173,39 +186,42 @@ export function Stepper({
     getStepData,
     isStepCompleted,
     isStepAccessible,
+    theme,
   }
 
   return (
     <TooltipProvider>
       <StepperContext.Provider value={contextValue}>
         <Div className="flex-1 flex flex-col w-full mb-18">
-        {/* Header avec les étapes */}
-        <StepperHeader
-          steps={steps}
-          currentStep={currentStep}
-          isStepCompleted={isStepCompleted}
-          isStepAccessible={isStepAccessible}
-          showStepNumbers={showStepNumbers}
-          withHeaderOffset={withHeaderOffset}
-          onStepClick={allowStepNavigation ? goToStep : undefined}
-        />
-        <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
-          {/* Contenu de l'étape actuelle */}
-          <div className={cn(`py-6 px-2 ${withHeaderOffset && 'pt-24'}`)}>
-            {children || steps[currentStep]?.component}
-          </div>
-
-          {/* Navigation */}
-          <StepperNavigation
+          {/* Header avec les étapes */}
+          <StepperHeader
+            steps={steps}
             currentStep={currentStep}
-            totalSteps={steps.length}
-            onNext={nextStep}
-            onPrevious={previousStep}
-            isLastStep={currentStep === steps.length - 1}
-            renderButtons={renderButtons}
-            context={contextValue}
+            isStepCompleted={isStepCompleted}
+            isStepAccessible={isStepAccessible}
+            showStepNumbers={showStepNumbers}
+            withHeaderOffset={withHeaderOffset}
+            onStepClick={allowStepNavigation ? goToStep : undefined}
+            theme={theme}
           />
-        </Div>
+          <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
+            {/* Contenu de l'étape actuelle */}
+            <div className={cn(`py-6 px-2 ${withHeaderOffset && 'pt-24'}`)}>
+              {children || steps[currentStep]?.component}
+            </div>
+
+            {/* Navigation */}
+            <StepperNavigation
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              onNext={nextStep}
+              onPrevious={previousStep}
+              isLastStep={currentStep === steps.length - 1}
+              renderButtons={renderButtons}
+              context={contextValue}
+              theme={theme}
+            />
+          </Div>
         </Div>
       </StepperContext.Provider>
     </TooltipProvider>
@@ -221,6 +237,7 @@ interface StepperHeaderProps {
   showStepNumbers: boolean
   withHeaderOffset?: boolean
   onStepClick?: (stepIndex: number) => void
+  theme?: StepperTheme
 }
 
 function StepperHeader({
@@ -231,6 +248,7 @@ function StepperHeader({
   isStepAccessible,
   showStepNumbers,
   onStepClick,
+  theme,
 }: StepperHeaderProps) {
   // progress ratio for mobile bar
   const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0
@@ -238,12 +256,16 @@ function StepperHeader({
   const isTop = scrollY === 0
   return (
     <div
-      className={`sticky z-10 bg-background/95 backdrop-blur-sm shadow-sm' ${withHeaderOffset ? (isTop ? 'top-18' : 'top-14') : 'top-0'}`}
+      className={cn(
+        'sticky z-10 backdrop-blur-sm transition-all duration-200 ease-out',
+        withHeaderOffset ? (isTop ? 'top-[70px]' : 'top-[54px]') : 'top-0',
+        isTop ? 'bg-background/0' : 'bg-background/80'
+      )}
     >
       <div
         role="tablist"
         aria-label="Steps"
-        className="flex gap-3 px-2 py-3 overflow-x-auto snap-x snap-mandatory scroll-p-4 [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-p-4 [-ms-overflow-style:none] [scrollbar-width:none]"
         style={{ scrollbarWidth: 'none' }}
       >
         {steps.map((step, index) => {
@@ -252,15 +274,36 @@ function StepperHeader({
           const isCompleted = isStepCompleted(index)
           const isAccessible = isStepAccessible(index)
 
+          // Styles personnalisés pour les boutons avec theme
+          const buttonStyle = (() => {
+            if (isCompleted && !isActive && theme?.primaryColor && theme?.secondaryColor) {
+              return {
+                background: `linear-gradient(${theme.gradientDirection || 'to right'}, ${theme.primaryColor}, ${theme.secondaryColor})`,
+                color: 'white',
+              }
+            }
+            if (isCompleted && !isActive && theme?.primaryColor) {
+              return {
+                backgroundColor: theme.primaryColor,
+                color: 'white',
+              }
+            }
+            return undefined
+          })()
+
           return (
             <Button
               key={step.id}
               role="tab"
+              className="rounded-none"
               aria-selected={isActive}
               aria-current={isActive ? 'step' : undefined}
               aria-disabled={!isAccessible}
               onClick={() => isAccessible && onStepClick?.(index)}
-              variant={isActive ? 'default' : isCompleted ? 'ezstart' : 'ghost'}
+              variant={
+                isActive ? 'default' : isCompleted && !theme?.primaryColor ? 'ezstart' : 'ghost'
+              }
+              style={buttonStyle}
             >
               <Span className="relative flex items-center justify-center mr-2">
                 <Icon
@@ -293,8 +336,17 @@ function StepperHeader({
       {/* Thin progress bar */}
       <div className="h-1 w-full bg-muted">
         <div
-          className="h-1 bg-ezstart transition-[width] duration-300"
-          style={{ width: `${progress}%` }}
+          className={cn(
+            'h-1 transition-[width] duration-300',
+            !theme?.primaryColor && 'bg-ezstart'
+          )}
+          style={{
+            width: `${progress}%`,
+            background:
+              theme?.primaryColor && theme?.secondaryColor
+                ? `linear-gradient(${theme.gradientDirection || 'to right'}, ${theme.primaryColor}, ${theme.secondaryColor})`
+                : theme?.primaryColor || undefined,
+          }}
           aria-hidden="true"
         />
       </div>
@@ -311,6 +363,7 @@ interface StepperNavigationProps {
   isLastStep: boolean
   renderButtons?: (context: StepperContextType) => StepperButtons
   context: StepperContextType
+  theme?: StepperTheme
 }
 
 function StepperNavigation({
@@ -321,7 +374,27 @@ function StepperNavigation({
   isLastStep,
   renderButtons,
   context,
+  theme,
 }: StepperNavigationProps) {
+  // Styles personnalisés pour le bouton Next avec theme
+  const nextButtonStyle = (() => {
+    if (theme?.primaryColor && theme?.secondaryColor) {
+      return {
+        background: `linear-gradient(${theme.gradientDirection || 'to right'}, ${theme.primaryColor}, ${theme.secondaryColor})`,
+        color: 'white',
+        border: 'none',
+      }
+    }
+    if (theme?.primaryColor) {
+      return {
+        backgroundColor: theme.primaryColor,
+        color: 'white',
+        border: 'none',
+      }
+    }
+    return undefined
+  })()
+
   // Boutons par défaut si renderButtons n'est pas fourni
   const defaultButtons: StepperButtons = {
     previous: {
@@ -335,7 +408,7 @@ function StepperNavigation({
     next: {
       label: isLastStep ? 'Finish' : 'Next',
       icon: isLastStep ? 'lucide:Check' : 'lucide:ArrowRight',
-      variant: 'ezstart',
+      variant: theme?.primaryColor ? 'ghost' : 'ezstart', // ghost pour pouvoir styler avec style
       onClick: onNext,
     },
   }
@@ -354,7 +427,9 @@ function StepperNavigation({
               variant={buttons.previous.variant || 'outline'}
               className={buttons.previous.className}
             >
-              {buttons.previous.icon && <Icon name={buttons.previous.icon as KnownIconName} className="w-4 h-4" />}
+              {buttons.previous.icon && (
+                <Icon name={buttons.previous.icon as KnownIconName} className="w-4 h-4" />
+              )}
               <span className="hidden sm:inline">{buttons.previous.label}</span>
             </Button>
           </TooltipButton>
@@ -362,21 +437,22 @@ function StepperNavigation({
 
         {/* Espace ou boutons custom au centre */}
         <div className="flex items-center gap-2">
-          {buttons.custom?.map((btn, index) => (
-            !btn.hidden && (
-              <TooltipButton key={index} button={btn}>
-                <Button
-                  onClick={btn.onClick}
-                  disabled={btn.disabled}
-                  variant={btn.variant || 'outline'}
-                  className={btn.className}
-                >
-                  {btn.icon && <Icon name={btn.icon as KnownIconName} className="w-4 h-4" />}
-                  <span className="hidden sm:inline">{btn.label}</span>
-                </Button>
-              </TooltipButton>
-            )
-          ))}
+          {buttons.custom?.map(
+            (btn, index) =>
+              !btn.hidden && (
+                <TooltipButton key={index} button={btn}>
+                  <Button
+                    onClick={btn.onClick}
+                    disabled={btn.disabled}
+                    variant={btn.variant || 'outline'}
+                    className={btn.className}
+                  >
+                    {btn.icon && <Icon name={btn.icon as KnownIconName} className="w-4 h-4" />}
+                    <span className="hidden sm:inline">{btn.label}</span>
+                  </Button>
+                </TooltipButton>
+              )
+          )}
           {!buttons.custom && (
             <div className="text-sm text-muted-foreground">
               Step {currentStep + 1} of {totalSteps}
@@ -392,9 +468,12 @@ function StepperNavigation({
               disabled={buttons.next.disabled}
               variant={buttons.next.variant || 'ezstart'}
               className={buttons.next.className}
+              style={theme?.primaryColor ? nextButtonStyle : undefined}
             >
               <span className="hidden sm:inline">{buttons.next.label}</span>
-              {buttons.next.icon && <Icon name={buttons.next.icon as KnownIconName} className="w-4 h-4" />}
+              {buttons.next.icon && (
+                <Icon name={buttons.next.icon as KnownIconName} className="w-4 h-4" />
+              )}
             </Button>
           </TooltipButton>
         )}
