@@ -145,6 +145,8 @@ export async function syncTickerWithDatabase(gameId: string) {
   )
 
   ticker.mutate(gameId, currentState => {
+    console.log('[syncTickerWithDatabase] mutate called with currentState:', currentState ? { _id: currentState._id, tick: currentState.tick, phase: currentState.phase } : 'null/undefined')
+
     // Si on a déjà un état valide, préserver l'état existant (tick, mobs) et juste mettre à jour les données DB
     if (currentState && currentState._id && currentState.tick > 0) {
       console.log(
@@ -173,6 +175,7 @@ export async function syncTickerWithDatabase(gameId: string) {
     }
 
     // Sinon, créer un nouvel état complet
+    console.log('[syncTickerWithDatabase] Creating new complete state from DB with phase:', gameData.phase, 'players:', inGamePlayers.length)
     return {
       _id: gameData._id.toString(),
       players: inGamePlayers.map(igp => ({
