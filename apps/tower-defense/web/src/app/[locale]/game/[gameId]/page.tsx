@@ -1,5 +1,6 @@
 'use client'
 
+import { useGameState } from '@/stores/useGameState'
 import { callApi } from '@ezstart/ui/utils'
 import { notFound, useParams } from 'next/navigation'
 
@@ -19,6 +20,7 @@ export default function GamePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [activeShop, setActiveShop] = useState<'tower' | 'mob' | 'stats' | null>(null)
+  const draggedTower = useGameState(s => s.draggedTower)
 
   useEffect(() => {
     callApi(`/games/${gameId}`)
@@ -39,6 +41,13 @@ export default function GamePage() {
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [gameId])
+
+  // Auto-close drawer when dragging a tower (mobile)
+  useEffect(() => {
+    if (draggedTower && activeShop) {
+      setActiveShop(null)
+    }
+  }, [draggedTower, activeShop])
 
   if (loading) {
     return (
