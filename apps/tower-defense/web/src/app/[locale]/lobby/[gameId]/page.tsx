@@ -18,7 +18,7 @@ export default function LobbyPage({ params }: { params: Promise<{ gameId: string
     params.then(({ gameId }) => {
       setGameId(gameId)
       
-      callApi(`/api/games/${gameId}`)
+      callApi(`/games/${gameId}`)
         .then(res => {
           if (res.ok) {
             setGame(res.data)
