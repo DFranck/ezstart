@@ -6,12 +6,22 @@ import { ticker } from '../tickers/tickerEngine.js'
 
 export async function checkEndGame(gameId: string) {
   const state = ticker.getState(gameId)
-  if (!state) return
+  if (!state) {
+    console.log(`[checkEndGame] No ticker state for game ${gameId}`)
+    return
+  }
 
   const active = state.players.filter((p: InGamePlayer) => p.status === 'active')
 
+  console.log(`[checkEndGame] Game ${gameId}:`, {
+    totalPlayers: state.players.length,
+    activePlayers: active.length,
+    playerStatuses: state.players.map(p => ({ id: p.player._id || p.player, status: p.status })),
+    phase: state.phase
+  })
+
   if (active.length <= 1 && state.phase !== 'finished') {
-    console.log(`[game:end] Game ${gameId} finished.`)
+    console.log(`[game:end] Game ${gameId} finished. Winner:`, active[0]?.player)
 
     const gameDoc = await GameModel.findById(gameId)
     if (gameDoc) {

@@ -34,14 +34,18 @@ export async function leaveGameService({ gameId, playerId }: { gameId: string; p
   } else {
     // En jeu : marquer comme 'left' au lieu de supprimer
     await updatePlayerStatusService({ gameId, playerId, status: 'left' })
-    checkEndGame(gameId)
-    getIO().to(gameId).emit('gameState', game)
   }
 
   await game.save()
 
   // Synchroniser le ticker avec les données mises à jour
   await syncTickerWithDatabase(gameId)
+
+  // Check end game AFTER ticker sync to ensure accurate player counts
+  if (!isLobby) {
+    checkEndGame(gameId)
+    getIO().to(gameId).emit('gameState', game)
+  }
 
   logger.debug(
     `[leaveGameService] Player ${playerId} left game ${gameId}. Remaining players: ${game.players.length}`
