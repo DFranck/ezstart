@@ -18,18 +18,19 @@ export async function handleGameAction(gameId: string, action: GameAction) {
       console.log('[placeTower] Validation result:', isValid)
 
       if (!isValid) {
+        const state = ticker.getState(gameId)
         console.warn('[placeTower] REJECTED - Invalid placement:', {
           playerId,
           x,
           y,
           towerType,
-          gameState: {
-            phase: ticker.getState().phase,
-            playerExists: !!ticker.getState().players.find(p =>
+          gameState: state ? {
+            phase: state.phase,
+            playerExists: !!state.players.find(p =>
               (typeof p.player === 'string' ? p.player : p.player?._id) === playerId
             ),
-            mapSize: ticker.getState().map.length
-          }
+            mapSize: state.map.length
+          } : 'No ticker state'
         })
         return { success: false, reason: 'Invalid tower placement' }
       }
