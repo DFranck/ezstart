@@ -1,5 +1,6 @@
-import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Providers } from '@/providers/providers'
+import { getTimeZoneFromLocale } from '@/i18n/routing'
+import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import type { Metadata } from 'next'
 import { getMessages } from 'next-intl/server'
@@ -23,9 +24,10 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
-        <Providers locale={locale} messages={messages} timeZone={timeZone}>
+        <Providers messages={messages} locale={locale} timeZone={timeZone}>
           <ClientLayout>{children}</ClientLayout>
         </Providers>
+        <Toaster />
       </body>
     </html>
   )

@@ -34,6 +34,22 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           </Link>
         </Button>
       }
+      headerCenterContent={
+        <Div className="hidden md:flex gap-2">
+          <Button asChild variant={'ghost'} size={'sm'}>
+            <Link href="/">
+              <Icon name="lucide:Home" size={16} />
+              Home
+            </Link>
+          </Button>
+          <Button asChild variant={'ghost'} size={'sm'}>
+            <Link href="/lia">
+              <Icon name="lucide:Bot" size={16} />
+              LIA
+            </Link>
+          </Button>
+        </Div>
+      }
       headerRightContent={
         <Div>
           <LoginButton
@@ -49,7 +65,10 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           <ThemeSwitcher />
         </Div>
       }
-      bottomNavigation={[]}
+      bottomNavigation={[
+        { href: '/', label: 'Home', icon: 'lucide:Home' },
+        { href: '/lia', label: 'LIA', icon: 'lucide:Bot' },
+      ]}
       LinkComponent={Link}
     >
       {children}

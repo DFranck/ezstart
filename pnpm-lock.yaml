@@ -688,6 +688,9 @@ importers:
       next-pwa:
         specifier: ^5.6.0
         version: 5.6.0(@babel/core@7.28.0)(@types/babel__core@7.20.5)(next@15.5.2(@babel/core@7.28.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(webpack@5.101.3)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -13701,6 +13704,11 @@ snapshots:
       - supports-color
       - uglify-js
       - webpack
+
+  next-themes@0.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   next-themes@0.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
     dependencies:

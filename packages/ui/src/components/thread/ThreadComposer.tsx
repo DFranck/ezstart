@@ -1,0 +1,166 @@
+'use client';
+
+import { Send } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '../button';
+import { TextArea } from '../textarea';
+import { cn } from '../../lib/utils';
+
+type ThreadComposerProps = {
+  onSubmit: (message: string, files?: File[]) => Promise<void> | void;
+  loading?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  welcomeMessage?: React.ReactNode;
+  showFileUpload?: boolean;
+  className?: string;
+  isNewThread?: boolean;
+  files?: File[];
+  onFilesChange?: (files: File[]) => void;
+  removeFileText?: string;
+  sendLabel?: string;
+};
+
+export function ThreadComposer({
+  onSubmit,
+  loading = false,
+  disabled = false,
+  placeholder = 'Type your message...',
+  welcomeMessage,
+  showFileUpload = false,
+  className,
+  isNewThread = false,
+  files = [],
+  onFilesChange,
+  removeFileText = 'Remove',
+  sendLabel = 'Send message',
+}: ThreadComposerProps) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [message, setMessage] = useState('');
+
+  const resizeTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    const MAX = 110;
+    el.style.height = 'auto';
+    const h = Math.min(el.scrollHeight, MAX);
+    el.style.height = `${h}px`;
+    el.style.overflowY = el.scrollHeight > MAX ? 'auto' : 'hidden';
+  };
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [message]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || loading || disabled) return;
+
+    await onSubmit(message, files);
+    setMessage('');
+    setTimeout(resizeTextarea, 0);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!loading && !disabled && message.trim()) {
+        handleSubmit(e);
+      }
+    }
+  };
+
+  const removeFile = (index: number) => {
+    if (onFilesChange) {
+      onFilesChange(files.filter((_, i) => i !== index));
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        'w-full z-10',
+        'md:fixed md:bottom-0',
+        'md:right-0 md:w-auto',
+        'sticky bottom-0',
+        isNewThread ? 'md:-translate-y-[30vh]' : 'translate-y-0',
+        'transition-transform duration-300 ease-in-out',
+        className
+      )}
+    >
+      {welcomeMessage}
+      <div className='px-4'>
+        <form
+          onSubmit={handleSubmit}
+          className={cn(
+            'relative flex flex-col items-center backdrop-blur',
+            'rounded-lg border bg-background shadow-lg border-black',
+            'max-w-3xl mx-auto w-full'
+          )}
+        >
+          <div className='flex flex-col w-full items-end'>
+            {files.length > 0 && (
+              <div className='w-full px-3 pt-2 pb-1 space-y-1'>
+                {files.map((file, i) => (
+                  <div
+                    key={`${file.name}-${file.size}-${i}`}
+                    className='flex items-center justify-between text-xs text-muted-foreground bg-muted px-3 py-1 rounded shadow'
+                  >
+                    <span className='truncate max-w-[80%]'>📎 {file.name}</span>
+                    <Button
+                      type='button'
+                      onClick={() => removeFile(i)}
+                      size='sm'
+                      variant='outline'
+                    >
+                      {removeFileText}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <TextArea
+              ref={textareaRef}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              className={cn(
+                'w-full resize-none text-sm placeholder:text-muted-foreground',
+                'max-h-[110px] min-h-[36px] px-3 py-2',
+                'border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none',
+                'focus:scroll-mb-40 md:scroll-mb-0',
+                'overflow-y-auto'
+              )}
+            />
+
+            <div className='flex justify-between w-full px-2 pb-2'>
+              <div className='flex items-center gap-1'>
+                {showFileUpload && (
+                  <div>{/* Add file upload component here if needed */}</div>
+                )}
+              </div>
+
+              <div className='flex items-center gap-1'>
+                <Button
+                  type='submit'
+                  size='icon'
+                  aria-label={sendLabel}
+                  disabled={loading || !message.trim() || disabled}
+                  variant={message.trim() && !disabled ? 'default' : 'ghost'}
+                  className='transition-color duration-200 ease-in-out'
+                >
+                  <Send size={16} />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

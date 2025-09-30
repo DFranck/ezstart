@@ -1,25 +1,34 @@
 'use client'
 
 import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
-import { Toaster } from '@ezstart/ui/components'
-import { NextIntlClientProvider } from 'next-intl'
-import { ReactNode } from 'react'
+import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import * as React from 'react'
 
-interface ProvidersProps {
-  children: ReactNode
-  locale: string
-  messages: any
-  timeZone?: string
-}
-
-export function Providers({ children, locale, messages, timeZone }: ProvidersProps) {
+export function Providers({
+  children,
+  messages,
+  locale,
+  timeZone,
+}: {
+  children: React.ReactNode
+  messages: AbstractIntlMessages
+  locale: Locale
+  timeZone: string
+}) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <AuthProvider appName="green-pulse">{children}</AuthProvider>
-      </ThemeProvider>
-      <Toaster />
-    </NextIntlClientProvider>
+    <AuthProvider appName="green-pulse">
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        enableColorScheme
+      >
+        <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
+          {children}
+        </NextIntlClientProvider>
+      </NextThemesProvider>
+    </AuthProvider>
   )
 }
