@@ -27,6 +27,7 @@ export interface ClientLayoutProps {
   bottomNavigation?: NavigationItem[]
 
   // Footer props (standard content + flexible zones)
+  showFooter?: boolean // Show/hide footer (default: true)
   footerAppName?: string  // Uses appName if not provided
   creator?: React.ReactNode  // String or JSX with links
   footerShowCopyright?: boolean
@@ -64,6 +65,7 @@ export function ClientLayout({
   bottomNavigation = [],
 
   // Footer
+  showFooter = true,
   footerAppName,
   creator,
   footerShowCopyright = true,
@@ -102,20 +104,22 @@ export function ClientLayout({
       <Main className={cn('')}>{children}</Main>
 
       {/* Footer */}
-      <Footer
-        appName={footerAppName || appName}
-        creator={creator}
-        showCopyright={footerShowCopyright}
-        copyrightYear={footerCopyrightYear}
-        topContent={footerTopContent}
-        leftContent={footerLeftContent}
-        centerContent={footerCenterContent}
-        rightContent={footerRightContent}
-        bottomContent={footerBottomContent}
-        layout={footerLayout}
-        stackOnMobile={footerStackOnMobile}
-        className={footerClassName}
-      />
+      {showFooter && (
+        <Footer
+          appName={footerAppName || appName}
+          creator={creator}
+          showCopyright={footerShowCopyright}
+          copyrightYear={footerCopyrightYear}
+          topContent={footerTopContent}
+          leftContent={footerLeftContent}
+          centerContent={footerCenterContent}
+          rightContent={footerRightContent}
+          bottomContent={footerBottomContent}
+          layout={footerLayout}
+          stackOnMobile={footerStackOnMobile}
+          className={footerClassName}
+        />
+      )}
 
       {/* Mobile bottom navigation */}
       {isMobile && bottomNavigation.length > 0 && (

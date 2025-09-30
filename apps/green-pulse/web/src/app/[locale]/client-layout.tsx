@@ -22,10 +22,14 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
     router.push(newPath)
   }
 
+  // Hide footer on full-page layouts like chat
+  const isLiaPage = pathname?.includes('/lia')
+
   return (
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
+      showFooter={!isLiaPage}
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">

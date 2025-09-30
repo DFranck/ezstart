@@ -29,13 +29,13 @@ export function Thread({
   return (
     <div
       className={cn(
-        'flex flex-col flex-1 mx-auto w-full md:pb-32 lg:pb-28',
+        'flex flex-col flex-1 overflow-y-auto mx-auto w-full max-w-3xl',
         className
       )}
     >
-      <div className='flex flex-col flex-1 overflow-y-auto py-4'>
+      <div className='flex flex-col flex-1 min-h-full py-4'>
         <div aria-hidden className='pointer-events-none h-px w-px' />
-        <div className='flex flex-col text-sm gap-4 pl-[18px] pr-4 md:pr-2 flex-1 w-full h-full justify-end'>
+        <div className='flex flex-col text-sm gap-4 pl-[18px] pr-4 md:pr-2 flex-1 w-full justify-end'>
           {children}
         </div>
         <div
