@@ -13,8 +13,23 @@ interface MultiPlayerCanvasProps {
   onTowerPlace?: (x: number, y: number) => void
 }
 
+interface InterpolatedMob extends ActiveMob {
+  prevPosition: Position
+  targetPosition: Position
+  lastUpdateTime: number
+}
+
+interface Projectile {
+  id: string
+  from: Position
+  to: Position
+  damage: number
+  targetMobId: string
+  startTime: number
+}
+
 export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlayerCanvasProps) {
-  const { game, sendAction } = useGame()
+  const { game, sendAction, socket } = useGame()
   const draggedTower = useGameState(s => s.draggedTower)
   const setDraggedTower = useGameState(s => s.setDraggedTower)
   const placeTowerAt = useGameState(s => s.placeTowerAt)
@@ -22,6 +37,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const hoveredCellRef = useRef<Position | null>(null)
   const [grassPattern, setGrassPattern] = useState<CanvasPattern | null>(null)
+  const interpolatedMobsRef = useRef<Map<string, InterpolatedMob>>(new Map())
+  const [projectiles, setProjectiles] = useState<Projectile[]>([])
 
   // Récupérer les données locales pour le joueur actuel
   const localTowers = useGameState(s => s.towers)
@@ -47,9 +64,48 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   // Récupérer les mobs actifs qui ciblent ce joueur
   const targetPlayerId = isCurrentPlayer ? currentPlayer?._id : selectedPlayerId
-  const activeMobs: ActiveMob[] = game?.activeMobs?.filter(mob => 
+  const activeMobs: ActiveMob[] = game?.activeMobs?.filter(mob =>
     mob.targetPlayerId === targetPlayerId
   ) || []
+
+  // Mettre à jour les positions interpolées quand on reçoit de nouvelles données
+  useEffect(() => {
+    const now = Date.now()
+    const existingMobs = interpolatedMobsRef.current
+
+    activeMobs.forEach(mob => {
+      const existing = existingMobs.get(mob.id)
+
+      if (!existing) {
+        // Nouveau mob - initialiser sans interpolation
+        existingMobs.set(mob.id, {
+          ...mob,
+          prevPosition: mob.position,
+          targetPosition: mob.position,
+          lastUpdateTime: now,
+        })
+      } else if (
+        existing.position.x !== mob.position.x ||
+        existing.position.y !== mob.position.y
+      ) {
+        // Position a changé - commencer l'interpolation
+        existingMobs.set(mob.id, {
+          ...mob,
+          prevPosition: existing.targetPosition,
+          targetPosition: mob.position,
+          lastUpdateTime: now,
+        })
+      }
+    })
+
+    // Supprimer les mobs qui n'existent plus
+    const activeMobIds = new Set(activeMobs.map(m => m.id))
+    for (const [id] of existingMobs) {
+      if (!activeMobIds.has(id)) {
+        existingMobs.delete(id)
+      }
+    }
+  }, [activeMobs])
 
   // S'assurer qu'on a un path pour le joueur actuel
   useEffect(() => {
@@ -57,6 +113,36 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       initPath()
     }
   }, [isCurrentPlayer, localPath.length, initPath])
+
+  // Écouter les projectiles émis par le serveur
+  useEffect(() => {
+    if (!socket) return
+
+    const handleProjectiles = (incomingProjectiles: any[]) => {
+      const now = Date.now()
+      const newProjectiles = incomingProjectiles.map(p => ({
+        ...p,
+        startTime: now,
+      }))
+      setProjectiles(prev => [...prev, ...newProjectiles])
+    }
+
+    socket.on('projectiles', handleProjectiles)
+    return () => {
+      socket.off('projectiles', handleProjectiles)
+    }
+  }, [socket])
+
+  // Nettoyer les projectiles terminés
+  useEffect(() => {
+    const PROJECTILE_DURATION = 200
+    const interval = setInterval(() => {
+      const now = Date.now()
+      setProjectiles(prev => prev.filter(p => now - p.startTime < PROJECTILE_DURATION))
+    }, 50) // Vérifier toutes les 50ms
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Charger le pattern d'herbe
   useEffect(() => {
@@ -149,11 +235,21 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         }
       }
 
-      // Mobs actifs
+      // Mobs actifs avec interpolation fluide
+      const now = Date.now()
+      const TICK_INTERVAL = 500 // Intervalle entre les ticks (500ms)
+
       ctx.fillStyle = '#dc2626' // Rouge pour les mobs
-      activeMobs.forEach(mob => {
-        const centerX = mob.position.x * TILE_SIZE + TILE_SIZE / 2
-        const centerY = mob.position.y * TILE_SIZE + TILE_SIZE / 2
+      interpolatedMobsRef.current.forEach(mob => {
+        // Calculer la position interpolée
+        const elapsed = now - mob.lastUpdateTime
+        const t = Math.min(elapsed / TICK_INTERVAL, 1) // Ratio d'avancement (0 à 1)
+
+        const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
+        const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
+
+        const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
+        const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
         const radius = TILE_SIZE * 0.3
 
         ctx.beginPath()
@@ -165,8 +261,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           const hpRatio = mob.currentHp / mob.mob.hp
           const barWidth = TILE_SIZE * 0.8
           const barHeight = 4
-          const barX = mob.position.x * TILE_SIZE + (TILE_SIZE - barWidth) / 2
-          const barY = mob.position.y * TILE_SIZE - 8
+          const barX = interpolatedX * TILE_SIZE + (TILE_SIZE - barWidth) / 2
+          const barY = interpolatedY * TILE_SIZE - 8
 
           // Fond de la barre de vie
           ctx.fillStyle = '#4b5563'
@@ -175,7 +271,25 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           // Barre de vie actuelle
           ctx.fillStyle = hpRatio > 0.5 ? '#16a34a' : hpRatio > 0.25 ? '#eab308' : '#dc2626'
           ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight)
+
+          // Restaurer la couleur du mob
+          ctx.fillStyle = '#dc2626'
         }
+      })
+
+      // Projectiles
+      const PROJECTILE_DURATION = 200 // ms
+      ctx.fillStyle = '#fbbf24' // Jaune/Orange pour les projectiles
+      projectiles.forEach(proj => {
+        const elapsed = now - proj.startTime
+        const t = Math.min(elapsed / PROJECTILE_DURATION, 1)
+
+        const x = proj.from.x + (proj.to.x - proj.from.x) * t
+        const y = proj.from.y + (proj.to.y - proj.from.y) * t
+
+        ctx.beginPath()
+        ctx.arc(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 4, 0, 2 * Math.PI)
+        ctx.fill()
       })
 
       // Bordure pour indiquer quel joueur on regarde

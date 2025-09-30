@@ -7,9 +7,9 @@ export const mobSchema = z.object({
   _id: mongoIdSchema,
   name: z.string().describe('Name of the mob'),
   elementalType: z.enum(ELEMENTAL_TYPES).describe('Type of mob'),
-  hp: z.number().describe('Health points of the mob'),
-  speed: z.number().describe('Speed of movement'),
-  damage: z.number().min(1).max(100).default(10).describe('Damage dealt to player when reaching end'),
+  hp: z.number().min(10).max(100).default(30).describe('Health points of the mob'),
+  speed: z.number().min(1).max(10).default(5).describe('Speed of movement'),
+  damage: z.number().min(1).max(3).default(1).describe('Damage dealt to player when reaching end'),
   effects: z.array(z.enum(EFFECTS)).optional(),
 })
 

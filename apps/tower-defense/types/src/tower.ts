@@ -18,10 +18,10 @@ export const towerSchema = z.object({
         .refine(([a, b]) => a !== b, { message: 'Dual type must contain two different types' }),
     ])
     .describe('Elemental type of the tower'),
-  damage: z.number().min(1).max(500).describe('Damage dealt by the tower'),
+  damage: z.number().min(1).max(5).default(2).describe('Damage dealt by the tower'),
   damageType: damageTypeSchema.describe('Damage type of the tower'),
-  speed: z.number().min(0.1).max(3).describe('Attack speed of the tower (attacks/sec)'),
-  range: z.number().min(1).max(10).describe('Attack range of the tower'),
+  speed: z.number().min(1).max(5).default(1).describe('Attack speed of the tower (attacks per tick)'),
+  range: z.number().min(3).max(10).default(5).describe('Attack range of the tower'),
   shape: z
     .array(z.array(z.boolean()))
     .refine(

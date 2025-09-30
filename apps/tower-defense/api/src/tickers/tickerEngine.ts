@@ -2,8 +2,83 @@ import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
 import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'
-import { updatePlayerStatsService } from '../services/updatePlayerStatsService.js'
+import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
 import { getIO } from '../socketInstance.js'
+
+// Fonction pour faire tirer les tours sur les mobs
+function processTowerAttacks(
+  gameId: string,
+  activeMobs: ActiveMob[],
+  players: InGamePlayer[]
+): { updatedMobs: ActiveMob[]; projectiles: any[] } {
+  let updatedMobs = [...activeMobs]
+  const projectiles: any[] = []
+
+  // Pour chaque joueur
+  for (const player of players) {
+    const playerId = player.player?._id?.toString()
+    if (!playerId) continue
+
+    // Pour chaque tour du joueur
+    for (const tower of player.placedTowers || []) {
+      const towerRange = tower.range || 5
+      const towerDamage = tower.damage || 10
+      const towerSpeed = tower.speed || 1 // Tirs par tick
+
+      // Chaque cellule couverte par la tour peut tirer
+      for (const cell of tower.coveredCells || []) {
+        // Trouver les mobs à portée de cette cellule
+        const mobsInRange = updatedMobs.filter(mob => {
+          if (mob.targetPlayerId !== playerId) return false
+
+          const dx = mob.position.x - cell.x
+          const dy = mob.position.y - cell.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+
+          return distance <= towerRange
+        })
+
+        if (mobsInRange.length === 0) continue
+
+        // Tirer sur les mobs selon la stratégie de ciblage
+        const targetCount = towerSpeed // Nombre de tirs par tick
+        const targets = mobsInRange.slice(0, targetCount) // Pour l'instant, on prend les premiers
+
+        // Appliquer les dégâts
+        updatedMobs = updatedMobs.map(mob => {
+          if (!targets.find(t => t.id === mob.id)) return mob
+
+          const newHp = mob.currentHp - towerDamage
+
+          // Créer un projectile visuel
+          projectiles.push({
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            from: { x: cell.x, y: cell.y },
+            to: { x: mob.position.x, y: mob.position.y },
+            damage: towerDamage,
+            targetMobId: mob.id,
+          })
+
+          if (newHp <= 0) {
+            console.log(`[Tower] 💀 Mob ${mob.id} (${mob.mob.name}) killed by tower at (${cell.x},${cell.y})!`)
+            return null as any // Marquer pour suppression
+          }
+
+          console.log(
+            `[Tower] 🎯 Tower cell (${cell.x},${cell.y}) hit mob ${mob.id} for ${towerDamage} damage! HP: ${mob.currentHp} → ${newHp}`
+          )
+
+          return {
+            ...mob,
+            currentHp: newHp,
+          }
+        }).filter(Boolean) // Supprimer les mobs morts (null)
+      }
+    }
+  }
+
+  return { updatedMobs, projectiles }
+}
 
 // Fonction pour déplacer les mobs sur leur path
 function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[] {
@@ -50,7 +125,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       const distance = Math.sqrt(dx * dx + dy * dy)
 
       // Si très proche de la cible, passer à la prochaine case
-      if (distance < 0.1) {
+      if (distance < 1.5) {
         return {
           ...mob,
           pathIndex: mob.pathIndex + 1,
@@ -61,7 +136,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       // Sinon, se déplacer vers la cible selon la vitesse
       // Limiter la vitesse à max 10 pour éviter les téléportations
       const rawSpeed = Math.min(mob.mob.speed, 10)
-      const speed = rawSpeed * 0.01 // Ajuster selon la fréquence du ticker (500ms)
+      const speed = rawSpeed * 0.1 // Ajuster selon la fréquence du ticker (500ms)
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
 
@@ -96,10 +171,22 @@ export const ticker = createTickerEngine<any>({
     // Vérifier les éliminations à chaque tick
     await checkPlayerEliminationService(gameId)
 
-    // Déplacer les mobs
-    const updatedMobs = moveMobs(state.activeMobs, state.players)
+    // 1. Faire tirer les tours sur les mobs
+    const { updatedMobs: mobsAfterAttacks, projectiles } = processTowerAttacks(
+      gameId,
+      state.activeMobs,
+      state.players
+    )
 
-    // Traiter les dégâts des mobs qui ont atteint la fin
+    // Émettre les projectiles pour l'affichage visuel
+    if (projectiles.length > 0) {
+      getIO().to(gameId).emit('projectiles', projectiles)
+    }
+
+    // 2. Déplacer les mobs survivants
+    const updatedMobs = moveMobs(mobsAfterAttacks, state.players)
+
+    // 3. Traiter les dégâts des mobs qui ont atteint la fin
     const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
@@ -114,10 +201,10 @@ export const ticker = createTickerEngine<any>({
         console.log(`[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`)
 
         // Sauvegarder en DB (async, sans attendre)
-        updatePlayerStatsService({
+        updatePlayerHpService({
           gameId,
           playerId: p.player?._id?.toString(),
-          updates: { hp: newHp }
+          hp: newHp
         }).catch(err => console.error('[Ticker] Failed to update player HP:', err))
 
         // Émettre événement de dégât
@@ -207,6 +294,7 @@ export async function syncTickerWithDatabase(gameId: string) {
       )
       return {
         ...currentState,
+        phase: gameData.phase || 'waiting', // Sync phase from DB
         players: inGamePlayers.map(igp => ({
           player: igp.player
             ? {
