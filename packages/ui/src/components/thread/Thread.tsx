@@ -29,7 +29,7 @@ export function Thread({
   return (
     <div
       className={cn(
-        'flex flex-col flex-1 overflow-y-auto mx-auto w-full max-w-3xl',
+        'flex flex-col flex-1 overflow-y-auto w-full',
         className
       )}
     >

@@ -3,7 +3,6 @@
 import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../button';
-import { TextArea } from '../textarea';
 import { cn } from '../../lib/utils';
 
 type ThreadComposerProps = {
@@ -81,10 +80,6 @@ export function ThreadComposer({
     <div
       className={cn(
         'w-full z-10',
-        'md:fixed md:bottom-0',
-        'md:right-0 md:w-auto',
-        'sticky bottom-0',
-        isNewThread ? 'md:-translate-y-[30vh]' : 'translate-y-0',
         'transition-transform duration-300 ease-in-out',
         className
       )}
@@ -96,7 +91,7 @@ export function ThreadComposer({
           className={cn(
             'relative flex flex-col items-center backdrop-blur',
             'rounded-lg border bg-background shadow-lg',
-            'max-w-3xl mx-auto w-full'
+            'w-full'
           )}
         >
           <div className='flex flex-col w-full items-end'>
@@ -121,7 +116,7 @@ export function ThreadComposer({
               </div>
             )}
 
-            <TextArea
+            <textarea
               ref={textareaRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -134,7 +129,7 @@ export function ThreadComposer({
                 'max-h-[110px] min-h-[36px] px-3 py-2',
                 'border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none',
                 'focus:scroll-mb-40 md:scroll-mb-0',
-                'overflow-y-auto'
+                'overflow-y-auto outline-none'
               )}
             />
 

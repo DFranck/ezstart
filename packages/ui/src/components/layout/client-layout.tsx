@@ -101,7 +101,7 @@ export function ClientLayout({
       />
 
       {/* Main content */}
-      <Main className={cn('')}>{children}</Main>
+      <Main className={cn('flex-1 flex flex-col')}>{children}</Main>
 
       {/* Footer */}
       {showFooter && (
