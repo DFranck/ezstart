@@ -64,9 +64,14 @@ export function TowerShop({ game }: TowerShopProps) {
 
   useEffect(() => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
+      // Empêcher le scroll sur mobile lors du drag
+      if ('touches' in e) {
+        e.preventDefault()
+      }
+
       const clientX = 'touches' in e ? e.touches[0]?.clientX || 0 : e.clientX
       const clientY = 'touches' in e ? e.touches[0]?.clientY || 0 : e.clientY
-      if (ghostRef.current) {
+      if (ghostRef.current && ghostRef.current.style.display !== 'none') {
         ghostRef.current.style.left = `${clientX + 4}px`
         ghostRef.current.style.top = `${clientY + 4}px`
       }

@@ -309,13 +309,17 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     return () => cancelAnimationFrame(frameId)
   }, [towers, path, draggedTower, grassPattern, isCurrentPlayer, selectedPlayer, activeMobs])
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isCurrentPlayer) return // Pas d'interaction sur les canvas des adversaires
-
+  const updateHoveredCell = (clientX: number, clientY: number) => {
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return
-    const x = Math.floor((e.clientX - rect.left) / TILE_SIZE)
-    const y = Math.floor((e.clientY - rect.top) / TILE_SIZE)
+
+    // Calculer la taille réelle du canvas avec le responsive
+    const scaleX = rect.width / (ZONE_WIDTH * TILE_SIZE)
+    const scaleY = rect.height / (ZONE_HEIGHT * TILE_SIZE)
+
+    const x = Math.floor((clientX - rect.left) / (TILE_SIZE * scaleX))
+    const y = Math.floor((clientY - rect.top) / (TILE_SIZE * scaleY))
+
     if (
       !hoveredCellRef.current ||
       hoveredCellRef.current.x !== x ||
@@ -325,7 +329,20 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     }
   }
 
-  const handleMouseUp = () => {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isCurrentPlayer) return
+    updateHoveredCell(e.clientX, e.clientY)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isCurrentPlayer) return
+    const touch = e.touches[0]
+    if (touch) {
+      updateHoveredCell(touch.clientX, touch.clientY)
+    }
+  }
+
+  const handlePlacement = () => {
     if (!isCurrentPlayer || !draggedTower || !hoveredCellRef.current || !currentPlayer) return
 
     const cells = computeCoveredCells(
@@ -401,8 +418,13 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         height={ZONE_HEIGHT * TILE_SIZE}
         className={`block border-2 w-full max-w-[600px] h-auto ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
         onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        style={{ cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default' }}
+        onMouseUp={handlePlacement}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handlePlacement}
+        style={{
+          cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default',
+          touchAction: 'none' // Empêche le scroll/zoom pendant le drag
+        }}
       />
     </div>
   )
