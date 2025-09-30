@@ -21,7 +21,7 @@ export function ThreadWelcome({
     <div
       className={cn(
         `${show ? '-translate-y-30 md:-translate-y-20' : 'opacity-0'}`,
-        'flex flex-col items-center justify-center text-center text-white transition-all duration-300 ease-in-out',
+        'flex flex-col items-center justify-center text-center text-foreground transition-all duration-300 ease-in-out',
         className
       )}
     >

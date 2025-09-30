@@ -13,6 +13,8 @@ type ThreadMessagesProps<TMessage extends ThreadMessageType = ThreadMessageType>
   onRetry?: () => void;
   onCopy?: (content: string) => void;
   formatResponseTime?: (time: number) => string;
+  userBubbleClassName?: string;
+  aiBubbleClassName?: string;
 };
 
 export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessageType>({
@@ -25,6 +27,8 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
   onRetry,
   onCopy,
   formatResponseTime,
+  userBubbleClassName,
+  aiBubbleClassName,
 }: ThreadMessagesProps<TMessage>) {
   const shouldShowLoading =
     (loading || streamingText) &&
@@ -56,6 +60,8 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
             onRetry={isLast && msg.role === 'user' ? onRetry : undefined}
             onCopy={onCopy}
             formatResponseTime={formatResponseTime}
+            userBubbleClassName={userBubbleClassName}
+            aiBubbleClassName={aiBubbleClassName}
           >
             {msg.content}
           </ThreadMessage>
@@ -63,7 +69,7 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
       })}
 
       {shouldShowLoading && (
-        <ThreadMessage role='ai'>
+        <ThreadMessage role='ai' aiBubbleClassName={aiBubbleClassName}>
           {streamingText ? (
             <span>
               {streamingText}

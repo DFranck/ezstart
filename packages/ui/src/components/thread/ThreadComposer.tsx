@@ -95,7 +95,7 @@ export function ThreadComposer({
           onSubmit={handleSubmit}
           className={cn(
             'relative flex flex-col items-center backdrop-blur',
-            'rounded-lg border bg-background shadow-lg border-black',
+            'rounded-lg border bg-background shadow-lg',
             'max-w-3xl mx-auto w-full'
           )}
         >

@@ -14,6 +14,8 @@ type ThreadMessageProps = {
   retryText?: string;
   showCopyButton?: boolean;
   formatResponseTime?: (time: number) => string;
+  userBubbleClassName?: string;
+  aiBubbleClassName?: string;
 };
 
 export function ThreadMessage({
@@ -26,6 +28,8 @@ export function ThreadMessage({
   retryText = 'Retry',
   showCopyButton = true,
   formatResponseTime,
+  userBubbleClassName,
+  aiBubbleClassName,
 }: ThreadMessageProps) {
   const isUser = role === 'user';
   const [isHover, setIsHover] = useState(false);
@@ -47,7 +51,7 @@ export function ThreadMessage({
       onMouseLeave={() => setIsHover(false)}
       className={clsx(
         "animate-in data-[turn='user']:animate-in-from-right data-[turn='ai']:animate-in-from-left",
-        'w-full focus:outline-none text-token-text-primary',
+        'w-full focus:outline-none text-foreground',
         'relative-group',
         isUser
           ? 'scroll-mt-[--header-height]'
@@ -64,8 +68,8 @@ export function ThreadMessage({
                 'rounded-lg px-4 py-2 whitespace-pre-wrap break-words max-w-[80%] shadow-sm',
                 'overflow-hidden leading-tight select-text',
                 isUser
-                  ? 'bg-primary/40 text-primary-foreground'
-                  : 'bg-background text-muted-foreground'
+                  ? userBubbleClassName || 'bg-primary text-primary-foreground'
+                  : aiBubbleClassName || 'bg-muted text-foreground'
               )}
               data-message-author-role={role}
             >
