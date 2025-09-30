@@ -141,8 +141,10 @@ export function useGames(options: UseGamesOptions = {}) {
       return runWithFeedback({
         action: async () => {
           const games = await fetchGamesSilent(playerId)
+          // If null, it means fetch is already in progress or failed silently
+          // Don't throw, just return empty array to avoid error state
           if (!games) {
-            throw new Error('Failed to fetch games')
+            return []
           }
           return games
         },
