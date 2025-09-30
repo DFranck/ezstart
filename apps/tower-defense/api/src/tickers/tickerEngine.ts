@@ -54,7 +54,9 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       }
 
       // Sinon, se déplacer vers la cible selon la vitesse
-      const speed = mob.mob.speed * 0.1 // Ajuster selon la fréquence du ticker
+      // Limiter la vitesse à max 10 pour éviter les téléportations
+      const rawSpeed = Math.min(mob.mob.speed, 10)
+      const speed = rawSpeed * 0.01 // Ajuster selon la fréquence du ticker (500ms)
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
 
