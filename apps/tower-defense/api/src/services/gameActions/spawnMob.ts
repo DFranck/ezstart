@@ -38,6 +38,10 @@ export function spawnMob(
 
     // Position de spawn = première case du path
     const spawnPosition = path[0]
+    if (!spawnPosition) {
+      console.warn(`[spawnMob] Path has no spawn position for player ${targetPlayerId}`)
+      return state
+    }
 
     // Créer un nouveau mob actif
     const newMob: ActiveMob = {

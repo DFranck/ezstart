@@ -16,7 +16,7 @@ export async function checkEndGame(gameId: string) {
   console.log(`[checkEndGame] Game ${gameId}:`, {
     totalPlayers: state.players.length,
     activePlayers: active.length,
-    playerStatuses: state.players.map(p => ({ id: p.player._id || p.player, status: p.status })),
+    playerStatuses: state.players.map((p: InGamePlayer) => ({ id: p.player._id || p.player, status: p.status })),
     phase: state.phase
   })
 
