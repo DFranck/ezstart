@@ -28,6 +28,7 @@ export function useGames(options: UseGamesOptions = {}) {
   // Références pour éviter les re-renders inutiles
   const isInitialLoad = useRef(true)
   const lastFetchTime = useRef(0)
+  const isFetching = useRef(false)
   const currentWaitingGames = useRef<Game[]>([])
   const currentAllGames = useRef<Game[]>([])
 
@@ -48,6 +49,13 @@ export function useGames(options: UseGamesOptions = {}) {
   // Fonction de fetch silencieuse pour le polling
   const fetchGamesSilent = useCallback(
     async (playerId?: string) => {
+      // Éviter les appels simultanés
+      if (isFetching.current) {
+        logger.debug('Fetch already in progress, skipping')
+        return null
+      }
+
+      isFetching.current = true
       try {
         if (isDebug()) {
           const games = mockGames
@@ -79,7 +87,7 @@ export function useGames(options: UseGamesOptions = {}) {
           return games
         }
 
-        const res = await callApi('/api/games?phase=waiting&phase=playing')
+        const res = await callApi('/games?phase=waiting&phase=playing')
         if (!res.ok) {
           throw new Error('Failed to fetch games')
         }
@@ -120,6 +128,8 @@ export function useGames(options: UseGamesOptions = {}) {
         logger.error('Silent fetch failed:', error)
         // Ne pas déclencher d'erreur visible pour le polling silencieux
         return null
+      } finally {
+        isFetching.current = false
       }
     },
     [autoRedirect, router, gamesAreEqual]

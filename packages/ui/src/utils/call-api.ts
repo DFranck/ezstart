@@ -23,10 +23,14 @@ export async function callApi<T = any>(
 ): Promise<ApiResponse<T>> {
   const { method = 'GET', query, body, headers = {}, signal, userId } = options
 
-  let url = `${getApiUrl({
+  const baseUrl = getApiUrl({
     serverUrl: process.env.API_URL,
-    clientUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-  })}${endpoint}`
+    clientUrl: process.env.NEXT_PUBLIC_API_URL,
+  })
+
+  // Ensure /api prefix: add if missing, don't duplicate if already present
+  const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint.slice(4) : endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  let url = `${baseUrl}/api${normalizedEndpoint}`
   if (query && Object.keys(query).length > 0) {
     const q = new URLSearchParams(query).toString()
     url += url.includes('?') ? `&${q}` : `?${q}`

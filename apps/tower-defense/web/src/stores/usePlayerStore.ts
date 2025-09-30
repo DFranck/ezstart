@@ -16,7 +16,7 @@ export const usePlayerStore = create<PlayerStore>()(
       player: null,
 
       register: async (name: string, userId: string) => {
-        const res = await callApi<PlayerResponse>('/api/players', {
+        const res = await callApi<PlayerResponse>('/players', {
           method: 'POST',
           body: { name, userId },
         })

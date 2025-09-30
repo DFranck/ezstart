@@ -24,7 +24,7 @@ export function useCreateGame() {
 
     return runWithFeedback({
       action: async () => {
-        const response = await callApi<CreateGameResponse>('/api/games', {
+        const response = await callApi<CreateGameResponse>('/games', {
           method: 'POST',
           body: payload,
         })
