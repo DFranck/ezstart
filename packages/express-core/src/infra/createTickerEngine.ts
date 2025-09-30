@@ -32,18 +32,16 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
   }
 
   function startTickLoop(gameId: string, initialState: State): NodeJS.Timeout {
-    let state = initialState
-    let tick = 0
     console.log(`[⏱️ ticker] Started ticking for game ${gameId} every ${tickIntervalMs}ms`)
 
     return setInterval(() => {
-      tick++
-      state = onTick(gameId, state, tick)
       const room = rooms.get(gameId)
-      if (room) {
-        room.state = state
-        room.tick = tick
-      }
+      if (!room) return
+
+      room.tick++
+      // IMPORTANT: Always read from room.state to respect mutations
+      const newState = onTick(gameId, room.state, room.tick)
+      room.state = newState
     }, tickIntervalMs)
   }
   function mutate(gameId: string, fn: (state: State) => State) {
