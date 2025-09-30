@@ -342,22 +342,23 @@ export function registerSocketHandlers(socket: Socket) {
 
       // Si le jeu est en cours, envoyer l'état actuel du ticker
       if (game.phase === 'playing') {
-        // S'assurer que la room existe
-        ticker.ensureRoom(gameId)
-        
+        // Vérifier si le ticker existe ET a un state valide
         const gameTicker = getGameTicker(gameId)
         const gameState = gameTicker?.getState()
-        
-        if (gameState && gameState._id) {
-          // État ticker valide - envoyer directement
+
+        if (gameState && gameState._id && gameState.phase === 'playing') {
+          // État ticker valide avec vraies données - envoyer directement
           socket.emit('gameState', { ...gameState, _reason: 'game:join' })
         } else {
-          // Ticker vide (serveur redémarré?) - sync depuis DB puis envoyer
+          // Ticker inexistant OU vide (serveur redémarré?) - sync depuis DB
           console.warn(`[game:join] Ticker empty for active game ${gameId} - syncing from DB`)
           await syncTickerWithDatabase(gameId)
-          
+
+          // Après sync, s'assurer que la room existe et tourne
+          ticker.ensureRoom(gameId)
+
           const refreshedState = getGameTicker(gameId)?.getState()
-          if (refreshedState) {
+          if (refreshedState && refreshedState._id) {
             socket.emit('gameState', { ...refreshedState, _reason: 'game:join' })
           } else {
             logger.error(`[game:join] Failed to restore game state for ${gameId}`)
