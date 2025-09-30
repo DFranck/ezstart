@@ -1,9 +1,35 @@
+import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
 
 export interface GameResult {
   playerId: string
   rank: number
   status: 'active' | 'left' | 'eliminated'
+}
+
+export async function updatePlayerHpService({
+  gameId,
+  playerId,
+  hp,
+}: {
+  gameId: string
+  playerId?: string
+  hp: number
+}) {
+  if (!playerId) {
+    console.warn('[updatePlayerHpService] No playerId provided')
+    return
+  }
+
+  // Mettre à jour le HP dans la collection InGamePlayer
+  const result = await InGamePlayerModel.updateOne(
+    { gameId, player: playerId },
+    { $set: { hp } }
+  )
+
+  if (result.matchedCount === 0) {
+    console.warn('[updatePlayerHpService] InGamePlayer not found:', { gameId, playerId })
+  }
 }
 
 export async function updatePlayerStatsService(gameResults: GameResult[]) {

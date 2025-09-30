@@ -64,12 +64,39 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
         updatedAt: state.updatedAt,
       })
 
-      // Mettre à jour l'état
+      // Mettre à jour l'état en préservant les tours locales du joueur actuel
       setGame(prevGame => {
         if (prevGame?.updatedAt === state.updatedAt) {
           return prevGame
         }
-        return { ...state }
+
+        // Merger les tours locales avec le state serveur
+        const mergedState = { ...state }
+        if (currentPlayer && prevGame && prevGame.players) {
+          // Trouver le joueur actuel dans les deux states
+          const prevPlayerIndex = prevGame.players.findIndex(
+            p => p.player?._id === currentPlayer._id
+          )
+          const newPlayerIndex = state.players.findIndex(
+            p => p.player?._id === currentPlayer._id
+          )
+
+          if (prevPlayerIndex !== -1 && newPlayerIndex !== -1) {
+            const prevPlayer = prevGame.players[prevPlayerIndex]
+            const newPlayer = state.players[newPlayerIndex]
+
+            // Si le joueur actuel a plus de tours en local qu'au serveur, les préserver
+            if (prevPlayer.placedTowers.length > newPlayer.placedTowers.length) {
+              mergedState.players = [...state.players]
+              mergedState.players[newPlayerIndex] = {
+                ...newPlayer,
+                placedTowers: prevPlayer.placedTowers
+              }
+            }
+          }
+        }
+
+        return mergedState
       })
     }
 
