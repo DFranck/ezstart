@@ -148,7 +148,7 @@ export function useGames(options: UseGamesOptions = {}) {
           }
           return games
         },
-        toastLoading: { message: 'Loading games...' },
+        toastLoading: false, // Silent loading, no toast needed
         toastSuccess: false,
         toastError: { message: 'Failed to load games' },
         onLoadingChange: setIsLoading,
