@@ -4,7 +4,7 @@ import { usePlayerStore } from '@/stores/usePlayerStore'
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { Icon, Input, Section, Span } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LoadingButton } from './LoadingButton'
 
 export function LoginSection() {
@@ -13,6 +13,7 @@ export function LoginSection() {
   const [name, setName] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [isCreatingPlayer, setIsCreatingPlayer] = useState(false)
+  const isCreatingRef = useRef(false)
 
   const validateName = (name: string) => {
     if (!name.trim()) {
@@ -32,7 +33,8 @@ export function LoginSection() {
 
   // Auto-create player when authenticated and no player exists
   useEffect(() => {
-    if (isAuthenticated && user && !player && !isCreatingPlayer) {
+    if (isAuthenticated && user && !player && !isCreatingPlayer && !isCreatingRef.current) {
+      isCreatingRef.current = true
       setIsCreatingPlayer(true)
       register(user.username, user._id)
         .then(() => {
@@ -40,6 +42,7 @@ export function LoginSection() {
         })
         .catch(err => {
           console.error('Failed to auto-create player:', err)
+          isCreatingRef.current = false // Reset on error to allow retry
         })
         .finally(() => {
           setIsCreatingPlayer(false)

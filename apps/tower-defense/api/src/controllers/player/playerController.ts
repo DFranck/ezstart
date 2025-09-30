@@ -18,7 +18,12 @@ export async function createOrFindPlayerController(req: Request, res: Response) 
     const result = await findOrCreatePlayer({ name, userId })
     return res.status(result.isNew ? 201 : 200).json(result)
   } catch (error) {
-    console.error('[createOrFindPlayerController]', error)
-    return res.status(500).json({ error: 'Server error' })
+    console.error('[createOrFindPlayerController] Error:', error)
+    console.error('[createOrFindPlayerController] Stack:', error instanceof Error ? error.stack : 'No stack')
+    console.error('[createOrFindPlayerController] Body:', { name, userId })
+    return res.status(500).json({
+      error: 'Server error',
+      details: error instanceof Error ? error.message : String(error)
+    })
   }
 }
