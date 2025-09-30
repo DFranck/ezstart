@@ -18,6 +18,7 @@ export const gameSchema = z.object({
   shopUnits: z.array(unitShopItemSchema).describe('Fixed list of units'),
   activeMobs: z.array(activeMobSchema).describe('Mobs currently moving on the map').default([]),
   phase: z.enum(GAME_PHASES).describe('Game phase'),
+  isSoloMode: z.boolean().default(false).describe('Solo mode - mobs spawn on host player'),
   startedAt: z.string().optional().describe('ISO timestamp when game started'),
   createdAt: z.string().describe('ISO timestamp'),
   updatedAt: z.string().describe('ISO timestamp'),

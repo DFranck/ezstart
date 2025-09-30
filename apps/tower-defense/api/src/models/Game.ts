@@ -26,6 +26,7 @@ const gameSchema = new Schema(
       enum: GAME_PHASES,
       default: DEFAULT_PHASE,
     },
+    isSoloMode: { type: Boolean, default: false },
     startedAt: { type: Date, required: false },
   },
   { timestamps: true }

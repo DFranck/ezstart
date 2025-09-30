@@ -39,7 +39,16 @@ export async function handleGameAction(gameId: string, action: GameAction) {
 
     case 'spawnMob': {
       const { mobType, targetPlayerId, fromPlayerId } = action.payload
-      spawnMob(gameId, mobType, targetPlayerId, fromPlayerId)
+
+      // En mode solo, rediriger vers le host
+      const state = ticker.getState()
+      if (state?.isSoloMode && state.host) {
+        const hostId = typeof state.host === 'string' ? state.host : state.host.toString()
+        spawnMob(gameId, mobType, hostId, fromPlayerId)
+      } else {
+        spawnMob(gameId, mobType, targetPlayerId, fromPlayerId)
+      }
+
       return { success: true }
     }
 

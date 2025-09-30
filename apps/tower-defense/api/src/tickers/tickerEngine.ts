@@ -295,6 +295,8 @@ export async function syncTickerWithDatabase(gameId: string) {
       return {
         ...currentState,
         phase: gameData.phase || 'waiting', // Sync phase from DB
+        isSoloMode: gameData.isSoloMode || false, // Sync solo mode from DB
+        host: gameData.host?.toString(),
         players: inGamePlayers.map(igp => ({
           player: igp.player
             ? {
@@ -341,6 +343,7 @@ export async function syncTickerWithDatabase(gameId: string) {
       tick: Math.max(realTick, currentState?.tick || 0), // Utiliser le vrai tick du ticker !
       host: gameData.host?.toString(),
       phase: gameData.phase || 'waiting',
+      isSoloMode: gameData.isSoloMode || false,
       startedAt: gameData.startedAt?.toISOString(),
       createdAt: gameData.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: gameData.updatedAt?.toISOString() || new Date().toISOString(),

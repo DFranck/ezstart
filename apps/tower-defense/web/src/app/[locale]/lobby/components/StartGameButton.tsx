@@ -301,6 +301,7 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
 
   const minPlayers = 2 // Minimum de joueurs requis
   const canStart = activePlayerCount >= minPlayers
+  const isSolo = activePlayerCount === 1
   const allReady = readyPlayers.size === activePlayerCount && canStart
 
   return (
@@ -371,25 +372,44 @@ export function StartGameButton({ gameId, isHost, playerCount, currentUserId }: 
         </div>
       ) : (
         <div className="space-y-2">
-          <Button
-            onClick={initiateReadyCheck}
-            disabled={!canStart}
-            className="w-full bg-blue-500 hover:bg-blue-600"
-          >
-            Ready Check ({activePlayerCount}/{minPlayers} players)
-          </Button>
-          <Button
-            onClick={initiateCountdown}
-            disabled={!canStart}
-            variant="outline"
-            className="w-full"
-          >
-            Quick Start (Skip ready check)
-          </Button>
+          {isSolo ? (
+            // Mode solo - bouton unique pour démarrer seul
+            <div className="space-y-2">
+              <Button
+                onClick={startGame}
+                disabled={isStarting}
+                className="w-full bg-purple-500 hover:bg-purple-600"
+              >
+                {isStarting ? 'Starting Solo Mode...' : '🎮 Start Solo Mode'}
+              </Button>
+              <p className="text-xs text-purple-600 text-center">
+                Play alone - mobs will spawn on your board
+              </p>
+            </div>
+          ) : (
+            // Mode multi - boutons ready check et quick start
+            <>
+              <Button
+                onClick={initiateReadyCheck}
+                disabled={!canStart}
+                className="w-full bg-blue-500 hover:bg-blue-600"
+              >
+                Ready Check ({activePlayerCount}/{minPlayers} players)
+              </Button>
+              <Button
+                onClick={initiateCountdown}
+                disabled={!canStart}
+                variant="outline"
+                className="w-full"
+              >
+                Quick Start (Skip ready check)
+              </Button>
+            </>
+          )}
         </div>
       )}
 
-      {!canStart && (
+      {!canStart && !isSolo && (
         <p className="text-sm text-orange-500 text-center">
           Need at least {minPlayers} players to start ({activePlayerCount} active)
         </p>

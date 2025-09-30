@@ -399,7 +399,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ref={canvasRef}
         width={ZONE_WIDTH * TILE_SIZE}
         height={ZONE_HEIGHT * TILE_SIZE}
-        className={`block border-2 ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
+        className={`block border-2 w-full max-w-[600px] h-auto ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         style={{ cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default' }}

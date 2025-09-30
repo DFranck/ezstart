@@ -24,16 +24,40 @@ export function MobShop({ game }: Props) {
   }, [])
 
   const handleBuyMob = (mob: any) => {
-    if (!currentPlayer || !currentGame) return
-    
-    // Trouver tous les joueurs adversaires (pas soi-même)
-    const opponents = currentGame.players?.filter(p => 
+    console.log('[MobShop] Buy mob clicked:', mob)
+    console.log('[MobShop] Current player:', currentPlayer)
+    console.log('[MobShop] Current game:', currentGame)
+    console.log('[MobShop] Is solo mode:', currentGame?.isSoloMode)
+
+    if (!currentPlayer || !currentGame) {
+      console.warn('[MobShop] Missing currentPlayer or currentGame')
+      return
+    }
+
+    // En mode solo, envoyer les mobs sur soi-même
+    if (currentGame.isSoloMode) {
+      console.log('[MobShop] Solo mode - spawning mob on self')
+      sendAction({
+        type: 'spawnMob',
+        payload: {
+          mobType: mob,
+          targetPlayerId: currentPlayer._id, // Spawn sur soi en solo
+          fromPlayerId: currentPlayer._id,
+        },
+      })
+      return
+    }
+
+    // Mode multi : envoyer aux adversaires
+    const opponents = currentGame.players?.filter(p =>
       p.player?._id && p.player._id !== currentPlayer._id
     ) || []
-    
-    // Envoyer un mob à chaque adversaire
+
+    console.log('[MobShop] Multi mode - found opponents:', opponents.length)
+
     opponents.forEach(opponent => {
       if (opponent.player?._id) {
+        console.log('[MobShop] Sending mob to opponent:', opponent.player._id)
         sendAction({
           type: 'spawnMob',
           payload: {
