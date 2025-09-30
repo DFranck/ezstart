@@ -350,12 +350,14 @@ export function registerSocketHandlers(socket: Socket) {
           // État ticker valide avec vraies données - envoyer directement
           socket.emit('gameState', { ...gameState, _reason: 'game:join' })
         } else {
-          // Ticker inexistant OU vide (serveur redémarré?) - sync depuis DB
+          // Ticker inexistant OU vide (serveur redémarré?) - restaurer depuis DB
           console.warn(`[game:join] Ticker empty for active game ${gameId} - syncing from DB`)
-          await syncTickerWithDatabase(gameId)
 
-          // Après sync, s'assurer que la room existe et tourne
+          // IMPORTANT: Créer la room AVANT sync pour que mutate() fonctionne
           ticker.ensureRoom(gameId)
+
+          // Maintenant sync les données DB dans la room
+          await syncTickerWithDatabase(gameId)
 
           const refreshedState = getGameTicker(gameId)?.getState()
           if (refreshedState && refreshedState._id) {
