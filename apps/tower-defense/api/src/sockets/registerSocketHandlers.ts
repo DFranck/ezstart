@@ -381,9 +381,18 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game action handlers
   socket.on('gameAction', async ({ gameId, action }) => {
-    // S'assurer que la room existe
+    // Vérifier si le ticker existe et a un état valide
+    let tickerState = ticker.getState(gameId)
+
+    if (!tickerState || !tickerState._id || tickerState.phase === 'waiting') {
+      // Ticker inexistant ou vide (serveur redémarré?) - restaurer depuis DB
+      console.warn(`[gameAction] Restoring ticker state from DB for game ${gameId}`)
+      await syncTickerWithDatabase(gameId)
+    }
+
+    // S'assurer que la room existe et tourne
     ticker.ensureRoom(gameId)
-    
+
     // Pas de sync DB pendant le gameplay - tout reste en mémoire
 
     console.log(`[Action] ${action.type} game ${gameId.slice(-6)}`)
