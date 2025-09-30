@@ -2,6 +2,7 @@ import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
 import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'
+import { getIO } from '../socketInstance.js'
 
 // Fonction pour déplacer les mobs sur leur path
 function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[] {
@@ -114,6 +115,10 @@ export const ticker = createTickerEngine<any>({
     if (newState.activeMobs && newState.activeMobs.length > 0) {
       console.log(`[Ticker] Returning state with ${newState.activeMobs.length} active mobs`)
     }
+
+    // Émettre le state mis à jour à tous les clients de la game
+    getIO().to(gameId).emit('gameState', { ...newState, _reason: 'tick' })
+
     return newState
   },
 })
