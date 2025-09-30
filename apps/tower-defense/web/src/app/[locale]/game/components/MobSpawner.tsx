@@ -36,6 +36,7 @@ export function MobSpawner({ targetPlayerId }: MobSpawnerProps) {
       elementalType: 'ground',
       hp: 100,
       speed: 2,
+      damage: 1,
       effects: []
     }
 
