@@ -19,7 +19,7 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
   const connect = () => {
     if (socket?.connected) return
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888', {
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888', {
       transports: ['websocket', 'polling'],
       autoConnect: true,
     })
@@ -40,7 +40,7 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
         console.debug('[GamesSocket] Empty error received (ignored)')
         return
       }
-      
+
       // Log seulement les vraies erreurs avec du contenu
       console.error('[GamesSocket] Error:', error)
     })

@@ -60,7 +60,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
       const apiUrl =
         process.env.NODE_ENV === 'production'
           ? 'https://ezauth-oblm.onrender.com/api/auth/register'
-          : 'http://localhost:8081/api/auth/register'
+          : 'http://localhost:5010/api/auth/register'
 
       const response = await fetch(apiUrl, {
         method: 'POST',
