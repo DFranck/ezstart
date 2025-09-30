@@ -12,13 +12,30 @@ export async function handleGameAction(gameId: string, action: GameAction) {
   switch (action.type) {
     case 'placeTower': {
       const { x, y, towerType, playerId } = action.payload
+      console.log('[placeTower] Attempt:', { playerId, x, y, towerType })
 
       const isValid = ticker.canPlaceTowerAt(playerId, x, y, towerType)
+      console.log('[placeTower] Validation result:', isValid)
+
       if (!isValid) {
+        console.warn('[placeTower] REJECTED - Invalid placement:', {
+          playerId,
+          x,
+          y,
+          towerType,
+          gameState: {
+            phase: ticker.getState().phase,
+            playerExists: !!ticker.getState().players.find(p =>
+              (typeof p.player === 'string' ? p.player : p.player?._id) === playerId
+            ),
+            mapSize: ticker.getState().map.length
+          }
+        })
         return { success: false, reason: 'Invalid tower placement' }
       }
 
       await ticker.placeTower(playerId, x, y, towerType)
+      console.log('[placeTower] SUCCESS - Tower placed at', { x, y, towerType })
       return { success: true }
     }
 

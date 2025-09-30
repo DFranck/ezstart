@@ -230,15 +230,17 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     placeTowerAt(hoveredCellRef.current.x, hoveredCellRef.current.y, draggedTower)
 
     // 2. Envoyer l'action au serveur pour propagation aux autres joueurs
-    sendAction({
-      type: 'placeTower',
+    const action = {
+      type: 'placeTower' as const,
       payload: {
         playerId: currentPlayer?._id,
         x: hoveredCellRef.current.x,
         y: hoveredCellRef.current.y,
         towerType: draggedTower,
       },
-    })
+    }
+    console.log('[MultiPlayerCanvas] Sending placeTower action:', action)
+    sendAction(action)
 
     // 3. Callback pour le parent
     onTowerPlace?.(hoveredCellRef.current.x, hoveredCellRef.current.y)
