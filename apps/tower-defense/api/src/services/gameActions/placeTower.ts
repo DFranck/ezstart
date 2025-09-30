@@ -11,8 +11,8 @@ export function canPlaceTowerAt(
 ): boolean {
   const game = ticker.getState(gameId)
   if (!game || !game.players || !Array.isArray(game.players)) return false
-  
-  const player = game.players.find((p: any) => 
+
+  const player = game.players.find((p: any) =>
     p.player?._id?.toString() === playerId || p.playerId === playerId
   )
   if (!player) return false
@@ -20,7 +20,28 @@ export function canPlaceTowerAt(
   const towers = player.placedTowers
   const cells = computeCoveredCells(x, y, tower)
 
-  return !isColliding(cells, towers)
+  // Vérifier collision avec les tours
+  if (isColliding(cells, towers)) return false
+
+  // Vérifier si un mob est présent sur une des cellules
+  const activeMobs = game.activeMobs || []
+  const mobsOnPlayer = activeMobs.filter((mob: any) => mob.targetPlayerId === playerId)
+
+  for (const mob of mobsOnPlayer) {
+    const mobCell = {
+      x: Math.floor(mob.position.x),
+      y: Math.floor(mob.position.y)
+    }
+
+    // Vérifier si le mob est sur une des cellules de la tour
+    for (const cell of cells) {
+      if (cell.x === mobCell.x && cell.y === mobCell.y) {
+        return false // Un mob est présent sur cette cellule
+      }
+    }
+  }
+
+  return true
 }
 
 export async function placeTower(

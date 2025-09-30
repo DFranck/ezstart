@@ -10,10 +10,16 @@ export function findPath(blocked: Position[]): Position[] {
   const inBounds = (x: number, y: number) => x >= 0 && y >= 0 && x < ZONE_WIDTH && y < ZONE_HEIGHT
 
   const directions = [
+    // Cardinales (coût 1)
     { dx: 1, dy: 0 },
     { dx: -1, dy: 0 },
     { dx: 0, dy: 1 },
     { dx: 0, dy: -1 },
+    // Diagonales (coût ~1.41)
+    { dx: 1, dy: 1 },
+    { dx: 1, dy: -1 },
+    { dx: -1, dy: 1 },
+    { dx: -1, dy: -1 },
   ]
 
   const queue: Position[] = [start]
@@ -32,6 +38,16 @@ export function findPath(blocked: Position[]): Position[] {
       if (!inBounds(nx, ny)) continue
       if (blockedSet.has(key)) continue
       if (cameFrom.has(key)) continue
+
+      // Pour les diagonales, vérifier que les deux cases adjacentes sont libres
+      // Sinon on peut "traverser" un coin bloqué
+      if (dx !== 0 && dy !== 0) {
+        const adjacent1 = `${current.x + dx},${current.y}`
+        const adjacent2 = `${current.x},${current.y + dy}`
+        if (blockedSet.has(adjacent1) || blockedSet.has(adjacent2)) {
+          continue // Diagonal bloquée par un coin
+        }
+      }
 
       cameFrom.set(key, current)
       queue.push({ x: nx, y: ny })
