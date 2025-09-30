@@ -6,6 +6,7 @@ import { Burger, Button, Dropdown, Icon } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 interface GameMenuProps {
   gameId: string
@@ -40,9 +41,35 @@ export function GameMenu({ gameId }: GameMenuProps) {
   useEffect(() => {
     if (!socket) return
 
-    const handleGameFinished = () => {
-      console.log('Game finished, redirecting to home...')
-      router.push('/')
+    const handleGameFinished = (data: any) => {
+      console.log('[GameMenu] 🎮 Game finished event received:', data)
+      console.log('[GameMenu] Winner data:', data.winner)
+      console.log('[GameMenu] Current player ID:', player?._id)
+
+      // Check if current player is the winner
+      const winnerId = data.winner?.player?._id || data.winner?.player
+
+      const isWinner = winnerId === player?._id || winnerId?.toString() === player?._id
+
+      console.log('[GameMenu] Is winner?', isWinner, { winnerId, playerId: player?._id })
+
+      if (isWinner) {
+        toast.success('🎉 Victory! You won the game!', {
+          description: 'Congratulations! You are the last player standing.',
+          duration: 5000,
+        })
+      } else {
+        toast.info('🏁 Game Over', {
+          description: 'The game has ended.',
+          duration: 3000,
+        })
+      }
+
+      // Redirect after showing toast
+      setTimeout(() => {
+        console.log('[GameMenu] Redirecting to home...')
+        router.push('/')
+      }, 2000)
     }
 
     const handlePlayerLeft = (data: any) => {

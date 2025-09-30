@@ -1,6 +1,7 @@
 import { logger } from '@ezstart/ui/lib'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { getIO } from '../socketInstance.js'
+import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 import { checkEndGame } from '../utils/checkEndGame.js'
 import { updatePlayerStatsService } from './updatePlayerStatsService.js'
 
@@ -48,7 +49,10 @@ export async function checkPlayerEliminationService(gameId: string) {
         })
       }
 
-      // Vérifier si la game doit se terminer
+      // Synchroniser le ticker avec les nouvelles données DB avant checkEndGame
+      await syncTickerWithDatabase(gameId)
+
+      // Vérifier si la game doit se terminer APRÈS sync
       await checkEndGame(gameId)
     }
 
