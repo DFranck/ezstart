@@ -2,6 +2,7 @@ import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
 import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'
+import { updatePlayerStatsService } from '../services/updatePlayerStatsService.js'
 import { getIO } from '../socketInstance.js'
 
 // Fonction pour déplacer les mobs sur leur path
@@ -28,9 +29,12 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       )
 
       if (path.length === 0 || mob.pathIndex >= path.length) {
-        // Mob a atteint la fin - il faut gérer les dégâts au joueur ici
-        console.log(`[moveMobs] Mob ${mob.id} reached end of path`)
-        return null
+        // Mob a atteint la fin - infliger des dégâts au joueur
+        const damage = mob.mob.damage || 10
+        console.log(`[moveMobs] 💥 Mob ${mob.id} (${mob.mob.name}) reached end! Dealing ${damage} damage to player ${mob.targetPlayerId}`)
+
+        // Marquer ce mob pour infliger des dégâts (sera géré dans onTick)
+        return { ...mob, _reachedEnd: true, _damage: damage } as any
       }
 
       // Position cible (prochaine case du path)
@@ -95,6 +99,41 @@ export const ticker = createTickerEngine<any>({
     // Déplacer les mobs
     const updatedMobs = moveMobs(state.activeMobs, state.players)
 
+    // Traiter les dégâts des mobs qui ont atteint la fin
+    const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
+    const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
+
+    // Appliquer les dégâts aux joueurs
+    const updatedPlayers = state.players.map((p: InGamePlayer) => {
+      const damageToTake = mobsReachedEnd
+        .filter((m: any) => m.targetPlayerId === p.player?._id?.toString())
+        .reduce((total: number, m: any) => total + (m._damage || 10), 0)
+
+      if (damageToTake > 0) {
+        const newHp = Math.max(0, p.hp - damageToTake)
+        console.log(`[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`)
+
+        // Sauvegarder en DB (async, sans attendre)
+        updatePlayerStatsService({
+          gameId,
+          playerId: p.player?._id?.toString(),
+          updates: { hp: newHp }
+        }).catch(err => console.error('[Ticker] Failed to update player HP:', err))
+
+        // Émettre événement de dégât
+        getIO().to(gameId).emit('playerDamaged', {
+          playerId: p.player?._id?.toString(),
+          playerName: p.player?.name,
+          damage: damageToTake,
+          newHp,
+          mobCount: mobsReachedEnd.filter((m: any) => m.targetPlayerId === p.player?._id?.toString()).length
+        })
+
+        return { ...p, hp: newHp }
+      }
+      return p
+    })
+
     // Log seulement si on a des mobs ou tous les 10 ticks
     if (state.activeMobs && state.activeMobs.length > 0) {
       console.log(
@@ -106,8 +145,9 @@ export const ticker = createTickerEngine<any>({
 
     const newState = {
       ...state,
+      players: updatedPlayers,
       tick,
-      activeMobs: updatedMobs,
+      activeMobs: finalMobs,
       updatedAt: new Date().toISOString(),
     }
 
