@@ -7,14 +7,18 @@ import { contrastText, paintFromElement } from '@tower-defense/utils'
 
 type TowerProps = {
   tower: TowerType
+  onClick?: () => void
+  ref?: React.Ref<HTMLDivElement>
   className?: string
 }
 
-export function Tower({ tower, className }: TowerProps) {
+export function Tower({ tower, onClick, ref, className }: TowerProps) {
   const paint = paintFromElement(tower.elementalType as any)
 
   return (
     <div
+      onClick={onClick}
+      ref={ref ? ref : undefined}
       className={className}
       style={{
         display: 'grid',
@@ -60,9 +64,7 @@ export function Tower({ tower, className }: TowerProps) {
           ),
           textAlign: 'center',
         }}
-      >
-        {tower.name}
-      </div>
+      ></div>
     </div>
   )
 }

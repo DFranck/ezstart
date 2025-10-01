@@ -121,9 +121,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     const handleProjectiles = (incomingProjectiles: any[]) => {
       const now = Date.now()
       // Filtrer les projectiles pour ce joueur uniquement
-      const filteredProjectiles = incomingProjectiles.filter(
-        p => p.playerId === selectedPlayerId
-      )
+      const filteredProjectiles = incomingProjectiles.filter(p => p.playerId === selectedPlayerId)
       const newProjectiles = filteredProjectiles.map(p => ({
         ...p,
         startTime: now,
@@ -475,7 +473,16 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     onTowerPlace?.(hoveredCellRef.current.x, hoveredCellRef.current.y)
 
     setDraggedTower(null)
-  }, [isCurrentPlayer, draggedTower, currentPlayer, towers, placeTowerAt, sendAction, onTowerPlace, setDraggedTower])
+  }, [
+    isCurrentPlayer,
+    draggedTower,
+    currentPlayer,
+    towers,
+    placeTowerAt,
+    sendAction,
+    onTowerPlace,
+    setDraggedTower,
+  ])
 
   // Écouter les touchmove et touchend au niveau window pour capturer TOUS les événements
   useEffect(() => {
@@ -533,14 +540,14 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ref={canvasRef}
         width={ZONE_WIDTH * TILE_SIZE}
         height={ZONE_HEIGHT * TILE_SIZE}
-        className={`block border-2 w-full max-w-[600px] h-auto ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
+        className={`block border-2 w-full  h-auto ${isCurrentPlayer ? 'border-blue-400' : 'border-red-400'}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handlePlacement}
         onTouchMove={handleTouchMove}
         onTouchEnd={handlePlacement}
         style={{
           cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default',
-          touchAction: draggedTower ? 'none' : 'auto' // Empêche le scroll SEULEMENT pendant le drag
+          touchAction: draggedTower ? 'none' : 'auto', // Empêche le scroll SEULEMENT pendant le drag
         }}
       />
     </div>

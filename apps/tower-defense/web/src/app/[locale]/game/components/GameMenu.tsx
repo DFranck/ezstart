@@ -109,17 +109,17 @@ export function GameMenu({ gameId }: GameMenuProps) {
   return (
     <>
       {/* Mobile: Burger Menu */}
-      <div className="md:hidden z-50">
+      <div className="md:hidden relative z-50">
         <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
 
         {isBurgerOpen && (
-          <div className="absolute top-full left-0 right-0 bg-background border-b shadow-lg z-50">
-            <div className="flex flex-col p-4 gap-2">
+          <div className="absolute top-full left-0 mt-2 min-w-[200px] bg-background border rounded-lg shadow-lg z-[60]">
+            <div className="flex flex-col p-2 gap-1">
               {menuItems.map(item => (
                 <Button
                   key={item.value}
                   variant="ghost"
-                  className="justify-start"
+                  className="justify-start w-full"
                   onClick={() => {
                     item.onSelect()
                     setIsBurgerOpen(false)

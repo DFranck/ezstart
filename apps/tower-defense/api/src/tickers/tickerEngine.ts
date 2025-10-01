@@ -398,6 +398,7 @@ export const ticker = createTickerEngine<any>({
       players: updatedPlayers,
       tick,
       activeMobs: finalMobs,
+      startedAt: state.startedAt, // Préserver startedAt du state
       updatedAt: new Date().toISOString(),
     }
 
@@ -456,6 +457,7 @@ export async function syncTickerWithDatabase(gameId: string) {
         phase: gameData.phase || 'waiting', // Sync phase from DB
         isSoloMode: gameData.isSoloMode || false, // Sync solo mode from DB
         host: gameData.host?.toString(),
+        startedAt: gameData.startedAt?.toISOString() || currentState.startedAt, // Sync startedAt from DB
         players: inGamePlayers.map(igp => {
           // Trouver le joueur correspondant dans l'état actuel
           const existingPlayer = currentState.players.find(

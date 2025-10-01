@@ -1,7 +1,7 @@
 'use client'
 
 import { useGameState } from '@/stores/useGameState'
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Icon } from '@ezstart/ui/components'
 import { Game, mockTowers } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
 import { Tower } from './Tower'
@@ -110,7 +110,7 @@ export function TowerShop({ game }: TowerShopProps) {
   // Afficher un placeholder pendant l'hydratation
   if (!isClient) {
     return (
-      <div className="relative">
+      <div className="relative z-50">
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }, (_, i) => (
             <div
@@ -124,48 +124,23 @@ export function TowerShop({ game }: TowerShopProps) {
   }
 
   return (
-    <div className="relative">
-      {/* Desktop: Grid 2 cols */}
-      <div className="hidden md:grid md:grid-cols-2 gap-2">
+    <div className="relative z-50">
+      <div className="flex justify-between bg-pink-500/50 gap-2 overflow-x-auto pb-2 scrollbar-thin">
         {towers.map((tower, index) => (
           <div
             key={tower._id}
-            className="active:cursor-grabbing cursor-grab touch-none flex justify-center items-center"
+            ref={el => {
+              towerRefs.current[index] = el
+            }}
+            className="flex-shrink-0 active:scale-95 touch-none transition-transform"
             onMouseDown={handleMouseDown(index)}
-            onTouchStart={handleTouchStart(index)}
           >
-            <Div className="inline-grid mt-1">
-              <Tower tower={tower} />
-            </Div>
+            <Tower tower={tower} />
           </div>
         ))}
-        <Button onClick={() => setTowers(mockTowers(5))}>Refresh</Button>
-      </div>
-
-      {/* Mobile: Horizontal scroll */}
-      <div className="md:hidden" ref={shopContainerRef}>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {towers.map((tower, index) => (
-            <div
-              key={tower._id}
-              ref={el => {
-                towerRefs.current[index] = el
-              }}
-              className="flex-shrink-0 active:scale-95 touch-none transition-transform"
-              onMouseDown={handleMouseDown(index)}
-            >
-              <Div className="inline-grid bg-muted/50 p-2 rounded-lg border-2 border-transparent active:border-primary">
-                <Tower tower={tower} />
-              </Div>
-            </div>
-          ))}
-          <button
-            onClick={() => setTowers(mockTowers(5))}
-            className="flex-shrink-0 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm"
-          >
-            🔄
-          </button>
-        </div>
+        <Button size={'icon'} onClick={() => setTowers(mockTowers(5))}>
+          <Icon name="lucide:RefreshCw" />
+        </Button>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Button, Div, H6 } from '@ezstart/ui/components'
+import { Button, Div, H6, Icon } from '@ezstart/ui/components'
 import { Game, mockMobs } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 
@@ -20,7 +20,7 @@ export function MobShop({ game }: Props) {
 
   useEffect(() => {
     setIsClient(true)
-    setMobs(mockMobs)
+    setMobs(mockMobs(5))
   }, [])
 
   const handleBuyMob = (mob: any) => {
@@ -49,9 +49,8 @@ export function MobShop({ game }: Props) {
     }
 
     // Mode multi : envoyer aux adversaires
-    const opponents = currentGame.players?.filter(p =>
-      p.player?._id && p.player._id !== currentPlayer._id
-    ) || []
+    const opponents =
+      currentGame.players?.filter(p => p.player?._id && p.player._id !== currentPlayer._id) || []
 
     console.log('[MobShop] Multi mode - found opponents:', opponents.length)
 
@@ -72,7 +71,7 @@ export function MobShop({ game }: Props) {
 
   if (!isClient) {
     return (
-      <Div layout="col" className="gap-4 p-4 bg-muted rounded-xl">
+      <Div layout="col" className="z-50 gap-4 p-4 bg-muted rounded-xl">
         <H6>Mobs à acheter</H6>
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }, (_, i) => (
@@ -84,28 +83,25 @@ export function MobShop({ game }: Props) {
   }
 
   return (
-    <Div layout="col" className="gap-4 p-4 bg-muted rounded-xl">
-      <H6>Mobs à acheter</H6>
-      <Div layout="row" className="gap-2 flex-wrap">
+    <Div className="z-50">
+      <Div layout="row" className="gap-2 flex-wrap bg-yellow-500/20">
         {mobs.map(mob => (
-          <Div key={mob._id} variant="card" layout="col" className="p-2 w-32">
-            {/* <img src={mob.imageUrl} alt={mob.name} className="w-12 h-12 mx-auto" /> */}
-            <span className="text-sm text-center">{mob.name}</span>
-            {/* <span className="text-xs text-center">💰 {mob.reward}</span> */}
-            <Button
-              size="sm"
-              onClick={() => handleBuyMob(mob)}
-              onTouchEnd={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                handleBuyMob(mob)
-              }}
-              className="mt-1"
-            >
-              Buy
-            </Button>
-          </Div>
+          <Button
+            size="icon"
+            key={mob._id}
+            onClick={() => handleBuyMob(mob)}
+            onTouchEnd={e => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleBuyMob(mob)
+            }}
+          >
+            <Icon name="lucide:ShoppingCart" />
+          </Button>
         ))}
+        <Button size={'icon'} onClick={() => setMobs(mockMobs(5))}>
+          <Icon name="lucide:RefreshCw" />
+        </Button>
       </Div>
 
       {toSendMobs.length > 0 && (

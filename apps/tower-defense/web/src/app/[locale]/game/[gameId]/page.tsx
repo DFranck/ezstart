@@ -10,7 +10,6 @@ import { GameCanvasCanvas } from '../components/GameCanvasCanvas'
 import { GameInitializer } from '../components/GameInitializer'
 import { Hud } from '../components/Hud'
 import { MobShop } from '../components/MobShop'
-import { PlayerStatsPanel } from '../components/PlayerStatsPanel'
 import { TowerShop } from '../components/TowerShop'
 
 export default function GamePage() {
@@ -69,7 +68,7 @@ export default function GamePage() {
       <GameInitializer />
       <div className="flex flex-col h-screen w-full overflow-hidden">
         {/* HUD - Compact on mobile */}
-        <Hud game={game} />
+        <Hud />
 
         {/* Main Game Area */}
         <div className="flex flex-1 overflow-hidden">
@@ -82,7 +81,6 @@ export default function GamePage() {
           <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto">
             <TowerShop game={game} />
             <MobShop game={game} />
-            <PlayerStatsPanel game={game} />
           </div>
         </div>
 
@@ -92,33 +90,7 @@ export default function GamePage() {
             draggedTower ? 'pointer-events-none opacity-50' : ''
           }`}
         >
-          <div className="p-2">
-            <TowerShop game={game} />
-          </div>
-
-          {/* Secondary Actions */}
-          <div className="flex justify-center items-center gap-2 px-4 pb-2">
-            <button
-              onClick={() => setActiveShop(activeShop === 'mob' ? null : 'mob')}
-              className={`flex-1 max-w-[140px] px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                activeShop === 'mob'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80'
-              }`}
-            >
-              👾 Buy Mobs
-            </button>
-            <button
-              onClick={() => setActiveShop(activeShop === 'stats' ? null : 'stats')}
-              className={`flex-1 max-w-[140px] px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                activeShop === 'stats'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80'
-              }`}
-            >
-              📊 Stats
-            </button>
-          </div>
+          <div className="p-2"></div>
         </div>
 
         {/* Mobile Drawer - Slide up from bottom (Mobs/Stats only) */}
@@ -136,10 +108,7 @@ export default function GamePage() {
               <div className="sticky top-0 bg-background pt-3 pb-2 px-4 border-b z-10">
                 <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-3" />
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">
-                    {activeShop === 'mob' && '👾 Mob Shop'}
-                    {activeShop === 'stats' && '📊 Player Stats'}
-                  </h3>
+                  <h3 className="text-lg font-bold">{activeShop === 'mob' && '👾 Mob Shop'}</h3>
                   <button
                     onClick={() => setActiveShop(null)}
                     className="p-2 hover:bg-muted rounded-full transition-colors"
@@ -150,10 +119,6 @@ export default function GamePage() {
               </div>
 
               {/* Content */}
-              <div className="p-4">
-                {activeShop === 'mob' && <MobShop game={game} />}
-                {activeShop === 'stats' && <PlayerStatsPanel game={game} />}
-              </div>
             </div>
           </>
         )}

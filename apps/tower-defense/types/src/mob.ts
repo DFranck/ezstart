@@ -19,4 +19,5 @@ export const mobSchema = z.object({
 
 export type Mob = z.infer<typeof mobSchema>
 export const mockMob = generateMock(mobSchema)
-export const mockMobs = generateMock(z.array(mobSchema))
+export const mockMobs = (count: number = 5) =>
+  Array.from({ length: count }, () => generateMock(mobSchema))

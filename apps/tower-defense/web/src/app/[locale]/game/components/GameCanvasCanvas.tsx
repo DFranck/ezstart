@@ -11,20 +11,18 @@ export function GameCanvasCanvas() {
 
   // Toujours afficher le canvas du joueur actuel par défaut
   const displayedPlayerId = selectedPlayerId || currentPlayer?._id || null
-  
+
   // Canvas rendering for player display
 
   return (
-    <div className="relative">
-      <PlayersViewMenu 
+    <div className="relative max-w-[600px] z-10">
+      <PlayersViewMenu
         selectedPlayerId={selectedPlayerId}
         onPlayerSelect={setSelectedPlayerId}
         currentPlayerId={currentPlayer?._id || null}
       />
-      
-      <MultiPlayerCanvas
-        selectedPlayerId={displayedPlayerId}
-      />
+
+      <MultiPlayerCanvas selectedPlayerId={displayedPlayerId} />
     </div>
   )
 }
