@@ -6,6 +6,53 @@ import { updatePlayerStatusService } from '../services/updatePlayerStatusService
 import { checkEndGame } from '../utils/checkEndGame.js'
 import { getIO } from '../socketInstance.js'
 
+// Fonction pour détecter collision entre 2 mobs
+function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
+  const dx = mob1.position.x - mob2.position.x
+  const dy = mob1.position.y - mob2.position.y
+  const distance = Math.sqrt(dx * dx + dy * dy)
+
+  const radius1 = mob1.mob.collisionRadius ?? 0.3
+  const radius2 = mob2.mob.collisionRadius ?? 0.3
+  const minDistance = radius1 + radius2
+
+  return distance < minDistance
+}
+
+// Fonction pour appliquer séparation entre mobs qui se chevauchent
+function applySeparation(mob: ActiveMob, nearbyMobs: ActiveMob[]): { x: number; y: number } {
+  let separationX = 0
+  let separationY = 0
+  let count = 0
+
+  for (const other of nearbyMobs) {
+    if (other.id === mob.id) continue
+
+    // Ignorer si l'un des deux peut voler
+    if (mob.mob.canFly || other.mob.canFly) continue
+
+    if (checkCollision(mob, other)) {
+      // Pousser dans la direction opposée
+      const dx = mob.position.x - other.position.x
+      const dy = mob.position.y - other.position.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      if (distance > 0.01) {
+        separationX += dx / distance
+        separationY += dy / distance
+        count++
+      }
+    }
+  }
+
+  if (count > 0) {
+    separationX /= count
+    separationY /= count
+  }
+
+  return { x: separationX, y: separationY }
+}
+
 // Fonction pour faire tirer les tours sur les mobs
 function processTowerAttacks(
   gameId: string,
@@ -76,13 +123,14 @@ function processTowerAttacks(
   return { updatedMobs, projectiles }
 }
 
-// Fonction pour déplacer les mobs sur leur path
+// Fonction pour déplacer les mobs sur leur path avec collision RTS-style
 function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[] {
   if (!activeMobs || !Array.isArray(activeMobs)) {
     return []
   }
 
-  return activeMobs
+  // Phase 1: Calculer les mouvements souhaités
+  const mobsWithMovement = activeMobs
     .map(mob => {
       // Trouver le joueur cible
       const targetPlayer = players.find(p => p.player?._id?.toString() === mob.targetPlayerId)
@@ -97,9 +145,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       if (path.length === 0 || mob.pathIndex >= path.length) {
         // Mob a atteint la fin - infliger des dégâts au joueur
         const damage = mob.mob.damage || 10
-
-        // Marquer ce mob pour infliger des dégâts (sera géré dans onTick)
-        return { ...mob, _reachedEnd: true, _damage: damage } as any
+        return { mob, movement: null, reachedEnd: true, damage }
       }
 
       // Position cible (prochaine case du path)
@@ -109,36 +155,76 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
         return null
       }
 
-      // Calculer le mouvement vers la position cible
-      const dx = targetCell.x - mob.position.x
-      const dy = targetCell.y - mob.position.y
+      // Appliquer l'offset persistant au waypoint cible
+      const offsetX = mob.pathOffset?.x ?? 0
+      const offsetY = mob.pathOffset?.y ?? 0
+      const targetX = targetCell.x + offsetX
+      const targetY = targetCell.y + offsetY
+
+      // Calculer le mouvement vers la position cible (avec offset)
+      const dx = targetX - mob.position.x
+      const dy = targetY - mob.position.y
       const distance = Math.sqrt(dx * dx + dy * dy)
 
-      // Si très proche de la cible, passer à la prochaine case
+      // Si très proche de la cible (avec offset), passer à la prochaine case
       if (distance < 1.5) {
         return {
-          ...mob,
-          pathIndex: mob.pathIndex + 1,
-          position: { x: targetCell.x, y: targetCell.y },
+          mob,
+          movement: { x: 0, y: 0 },
+          advanceWaypoint: true,
+          targetCell: { x: targetX, y: targetY }, // Position avec offset
+          reachedEnd: false
         }
       }
 
-      // Sinon, se déplacer vers la cible selon la vitesse
-      // Limiter la vitesse à max 10 pour éviter les téléportations
+      // Calculer le mouvement désiré
       const rawSpeed = Math.min(mob.mob.speed, 10)
-      const speed = rawSpeed * 0.05 // Ajuster selon la fréquence du ticker (250ms = 0.05, 500ms = 0.1)
+      const speed = rawSpeed * 0.05
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
 
       return {
-        ...mob,
-        position: {
-          x: mob.position.x + moveX,
-          y: mob.position.y + moveY,
-        },
+        mob,
+        movement: { x: moveX, y: moveY },
+        advanceWaypoint: false,
+        reachedEnd: false
       }
     })
-    .filter(Boolean) as ActiveMob[] // Supprimer les mobs null
+    .filter(Boolean) as any[]
+
+  // Phase 2: Appliquer collision/séparation
+  return mobsWithMovement.map(({ mob, movement, advanceWaypoint, targetCell, reachedEnd, damage }) => {
+    if (reachedEnd) {
+      return { ...mob, _reachedEnd: true, _damage: damage } as any
+    }
+
+    if (advanceWaypoint) {
+      return {
+        ...mob,
+        pathIndex: mob.pathIndex + 1,
+        position: { x: targetCell.x, y: targetCell.y },
+      }
+    }
+
+    // Appliquer séparation si collision activée
+    let finalX = mob.position.x + movement.x
+    let finalY = mob.position.y + movement.y
+
+    if (!mob.mob.canFly) {
+      const separation = applySeparation(mob, activeMobs)
+      // Appliquer séparation avec force plus importante pour séparer visuellement
+      finalX += separation.x * 0.08
+      finalY += separation.y * 0.08
+    }
+
+    return {
+      ...mob,
+      position: {
+        x: finalX,
+        y: finalY,
+      },
+    }
+  }).filter(Boolean) as ActiveMob[]
 }
 
 export const ticker = createTickerEngine<any>({

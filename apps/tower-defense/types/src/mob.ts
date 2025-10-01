@@ -11,6 +11,10 @@ export const mobSchema = z.object({
   speed: z.number().min(1).max(10).default(5).describe('Speed of movement'),
   damage: z.number().min(1).max(3).default(1).describe('Damage dealt to player when reaching end'),
   effects: z.array(z.enum(EFFECTS)).optional(),
+  // RTS-style collision system
+  canFly: z.boolean().default(false).describe('If true, ignores collisions with other mobs'),
+  attackRange: z.number().min(0).max(10).default(0).describe('Attack range (0 = melee, >0 = ranged)'),
+  collisionRadius: z.number().min(0.1).max(1).default(0.3).describe('Collision radius in tiles'),
 })
 
 export type Mob = z.infer<typeof mobSchema>

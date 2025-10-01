@@ -34,20 +34,23 @@ export function spawnMob(
       return state
     }
 
-    // Créer un nouveau mob actif avec offset pour éviter superposition parfaite
-    const offsetX = (Math.random() - 0.5) * 0.4 // ±0.2 cases
-    const offsetY = (Math.random() - 0.5) * 0.4 // ±0.2 cases
+    // Créer un offset persistant pour ce mob (conservé tout au long du trajet)
+    const pathOffset = {
+      x: (Math.random() - 0.5) * 0.6, // ±0.3 cases
+      y: (Math.random() - 0.5) * 0.6  // ±0.3 cases
+    }
 
     const newMob: ActiveMob = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       mob: mobType,
       currentHp: mobType.hp,
       position: {
-        x: spawnPosition.x + offsetX,
-        y: spawnPosition.y + offsetY
+        x: spawnPosition.x + pathOffset.x,
+        y: spawnPosition.y + pathOffset.y
       },
       pathIndex: 0,
       targetPlayerId: targetPlayerId,
+      pathOffset: pathOffset, // Stocker l'offset pour l'appliquer à chaque waypoint
     }
 
     const newActiveMobs = [...(state.activeMobs || []), newMob]

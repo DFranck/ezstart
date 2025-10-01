@@ -14,6 +14,11 @@ export const activeMobSchema = z.object({
   }).describe('Current position on the map'),
   pathIndex: z.number().describe('Current index in the path array'),
   targetPlayerId: mongoIdSchema.describe('Player this mob is targeting'),
+  // RTS-style persistent offset for visual separation
+  pathOffset: z.object({
+    x: z.number().describe('Persistent X offset from path waypoints'),
+    y: z.number().describe('Persistent Y offset from path waypoints')
+  }).optional().describe('Offset applied to all waypoints for visual variety'),
 })
 
 export type ActiveMob = z.infer<typeof activeMobSchema>
