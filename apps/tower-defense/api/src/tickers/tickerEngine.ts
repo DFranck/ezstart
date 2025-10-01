@@ -19,11 +19,62 @@ function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
   return distance < minDistance
 }
 
+// Spatial grid pour optimiser les collisions O(n²) → O(n)
+class SpatialGrid {
+  private cellSize: number
+  private grid: Map<string, ActiveMob[]>
+
+  constructor(cellSize: number = 2) {
+    this.cellSize = cellSize
+    this.grid = new Map()
+  }
+
+  private getKey(x: number, y: number): string {
+    const cellX = Math.floor(x / this.cellSize)
+    const cellY = Math.floor(y / this.cellSize)
+    return `${cellX},${cellY}`
+  }
+
+  clear() {
+    this.grid.clear()
+  }
+
+  insert(mob: ActiveMob) {
+    const key = this.getKey(mob.position.x, mob.position.y)
+    if (!this.grid.has(key)) {
+      this.grid.set(key, [])
+    }
+    this.grid.get(key)!.push(mob)
+  }
+
+  getNearby(mob: ActiveMob): ActiveMob[] {
+    const nearby: ActiveMob[] = []
+    const centerX = Math.floor(mob.position.x / this.cellSize)
+    const centerY = Math.floor(mob.position.y / this.cellSize)
+
+    // Chercher dans la cellule actuelle et les 8 voisines
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const key = `${centerX + dx},${centerY + dy}`
+        const mobs = this.grid.get(key)
+        if (mobs) {
+          nearby.push(...mobs)
+        }
+      }
+    }
+
+    return nearby
+  }
+}
+
 // Fonction pour appliquer séparation entre mobs qui se chevauchent
-function applySeparation(mob: ActiveMob, nearbyMobs: ActiveMob[]): { x: number; y: number } {
+function applySeparation(mob: ActiveMob, spatialGrid: SpatialGrid): { x: number; y: number } {
   let separationX = 0
   let separationY = 0
   let count = 0
+
+  // Récupérer seulement les mobs proches (au lieu de TOUS les mobs)
+  const nearbyMobs = spatialGrid.getNearby(mob)
 
   for (const other of nearbyMobs) {
     if (other.id === mob.id) continue
@@ -192,7 +243,15 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
     })
     .filter(Boolean) as any[]
 
-  // Phase 2: Appliquer collision/séparation
+  // Phase 2: Construire spatial grid pour optimiser collisions
+  const spatialGrid = new SpatialGrid(2) // Cellules de 2×2 tiles
+  for (const item of mobsWithMovement) {
+    if (!item.reachedEnd && !item.advanceWaypoint) {
+      spatialGrid.insert(item.mob)
+    }
+  }
+
+  // Phase 3: Appliquer collision/séparation avec spatial grid
   return mobsWithMovement.map(({ mob, movement, advanceWaypoint, targetCell, reachedEnd, damage }) => {
     if (reachedEnd) {
       return { ...mob, _reachedEnd: true, _damage: damage } as any
@@ -206,12 +265,12 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       }
     }
 
-    // Appliquer séparation si collision activée
+    // Appliquer séparation si collision activée (avec spatial grid optimisé)
     let finalX = mob.position.x + movement.x
     let finalY = mob.position.y + movement.y
 
     if (!mob.mob.canFly) {
-      const separation = applySeparation(mob, activeMobs)
+      const separation = applySeparation(mob, spatialGrid)
       // Appliquer séparation avec force plus importante pour séparer visuellement
       finalX += separation.x * 0.08
       finalY += separation.y * 0.08
