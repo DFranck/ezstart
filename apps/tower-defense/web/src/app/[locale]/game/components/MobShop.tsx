@@ -92,7 +92,16 @@ export function MobShop({ game }: Props) {
             {/* <img src={mob.imageUrl} alt={mob.name} className="w-12 h-12 mx-auto" /> */}
             <span className="text-sm text-center">{mob.name}</span>
             {/* <span className="text-xs text-center">💰 {mob.reward}</span> */}
-            <Button size="sm" onClick={() => handleBuyMob(mob)} className="mt-1">
+            <Button
+              size="sm"
+              onClick={() => handleBuyMob(mob)}
+              onTouchEnd={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleBuyMob(mob)
+              }}
+              className="mt-1"
+            >
               Buy
             </Button>
           </Div>

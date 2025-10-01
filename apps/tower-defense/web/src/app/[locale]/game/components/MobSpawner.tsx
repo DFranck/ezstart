@@ -37,7 +37,10 @@ export function MobSpawner({ targetPlayerId }: MobSpawnerProps) {
       hp: 100,
       speed: 2,
       damage: 1,
-      effects: []
+      effects: [],
+      canFly: false,
+      attackRange: 0,
+      collisionRadius: 0.3
     }
 
     sendAction({
