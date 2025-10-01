@@ -86,7 +86,8 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
             const newPlayer = state.players[newPlayerIndex]
 
             // Si le joueur actuel a plus de tours en local qu'au serveur, les préserver
-            if (prevPlayer.placedTowers.length > newPlayer.placedTowers.length) {
+            if (prevPlayer?.placedTowers && newPlayer?.placedTowers &&
+                prevPlayer.placedTowers.length > newPlayer.placedTowers.length) {
               mergedState.players = [...state.players]
               mergedState.players[newPlayerIndex] = {
                 ...newPlayer,
@@ -206,6 +207,7 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
     <GameContext.Provider
       value={{
         game,
+        socket,
         sendAction: (action: GameAction) => {
           if (socket) {
             socket.emit('gameAction', { gameId, action })

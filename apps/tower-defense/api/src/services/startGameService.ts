@@ -30,7 +30,7 @@ export async function startGameService({ gameId }: { gameId: string }) {
     const activePlayers = inGamePlayers.filter(p => p.status === 'active')
 
     // Mode solo : 1 joueur suffit si c'est le host
-    const isSoloMode = activePlayers.length === 1 && activePlayers[0].player._id?.toString() === game.host?.toString()
+    const isSoloMode = activePlayers.length === 1 && activePlayers[0]?.player._id?.toString() === game.host?.toString()
 
     if (activePlayers.length < 2 && !isSoloMode) {
       throw new Error('Need at least 2 active players to start (or solo mode as host)')

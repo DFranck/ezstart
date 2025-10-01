@@ -292,26 +292,35 @@ export async function syncTickerWithDatabase(gameId: string) {
       console.log(
         `[syncTickerWithDatabase] Preserving existing state with ${currentState.activeMobs.length} mobs, tick: ${currentState.tick}`
       )
+      // Pendant le jeu, préserver les placedTowers du ticker (en mémoire) pour éviter de corrompre l'état des mobs
       return {
         ...currentState,
         phase: gameData.phase || 'waiting', // Sync phase from DB
         isSoloMode: gameData.isSoloMode || false, // Sync solo mode from DB
         host: gameData.host?.toString(),
-        players: inGamePlayers.map(igp => ({
-          player: igp.player
-            ? {
-                _id: igp.player._id?.toString(),
-                name: (igp.player as any).name,
-              }
-            : null,
-          status: igp.status,
-          gold: igp.gold,
-          income: igp.income,
-          hp: igp.hp,
-          hand: igp.hand || [],
-          placedTowers: igp.placedTowers || [],
-          incomingUnits: igp.incomingUnits || [],
-        })),
+        players: inGamePlayers.map(igp => {
+          // Trouver le joueur correspondant dans l'état actuel
+          const existingPlayer = currentState.players.find(
+            (p: any) => p.player?._id === igp.player?._id?.toString()
+          )
+
+          return {
+            player: igp.player
+              ? {
+                  _id: igp.player._id?.toString(),
+                  name: (igp.player as any).name,
+                }
+              : null,
+            status: igp.status,
+            gold: igp.gold,
+            income: igp.income,
+            hp: igp.hp,
+            hand: igp.hand || [],
+            // IMPORTANT: Préserver les tours en mémoire pendant le jeu pour éviter corruption des mobs
+            placedTowers: existingPlayer?.placedTowers || igp.placedTowers || [],
+            incomingUnits: igp.incomingUnits || [],
+          }
+        }),
         tick: Math.max(realTick, currentState.tick), // Utiliser le vrai tick !
         updatedAt: new Date().toISOString(),
       }

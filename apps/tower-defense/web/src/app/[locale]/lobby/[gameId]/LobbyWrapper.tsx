@@ -20,9 +20,9 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
-  const hostId = typeof game.host === 'string' ? game.host : game.host?._id
+  const hostId = game.host
 
-  const getPlayerId = (p: InGamePlayer) => (typeof p.player === 'string' ? p.player : p.player?._id)
+  const getPlayerId = (p: InGamePlayer) => p.player._id
 
   const currentPlayer = game.players.find(p => getPlayerId(p) === player?._id)
   if (!currentPlayer) {
