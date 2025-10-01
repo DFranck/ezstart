@@ -1,8 +1,9 @@
 import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
-import { checkPlayerEliminationService } from '../services/checkPlayerEliminationService.js'
 import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
+import { updatePlayerStatusService } from '../services/updatePlayerStatusService.js'
+import { checkEndGame } from '../utils/checkEndGame.js'
 import { getIO } from '../socketInstance.js'
 
 // Fonction pour faire tirer les tours sur les mobs
@@ -179,17 +180,7 @@ export const ticker = createTickerEngine<any>({
       state._lastTickTime = tickStartTime
     }
 
-    // Vérifier les éliminations seulement si des mobs ont pu faire des dégâts
-    // (optimisation : évite les requêtes DB inutiles à chaque tick)
-    const shouldCheckElimination = state.activeMobs && state.activeMobs.length > 0
-    if (shouldCheckElimination) {
-      const checkStart = Date.now()
-      await checkPlayerEliminationService(gameId)
-      const checkDuration = Date.now() - checkStart
-      if (checkDuration > 50) {
-        console.warn(`[Ticker] ⚠️  checkPlayerElimination took ${checkDuration}ms`)
-      }
-    }
+    // Plus de requête DB ici - l'élimination est gérée en mémoire après les dégâts
 
     // 1. Faire tirer les tours sur les mobs
     const { updatedMobs: mobsAfterAttacks, projectiles } = processTowerAttacks(
@@ -210,15 +201,13 @@ export const ticker = createTickerEngine<any>({
     const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
-    // Appliquer les dégâts aux joueurs
-    let anyPlayerDamaged = false
+    // Appliquer les dégâts aux joueurs et détecter les éliminations en mémoire
     const updatedPlayers = state.players.map((p: InGamePlayer) => {
       const damageToTake = mobsReachedEnd
         .filter((m: any) => m.targetPlayerId === p.player?._id?.toString())
         .reduce((total: number, m: any) => total + (m._damage || 10), 0)
 
       if (damageToTake > 0) {
-        anyPlayerDamaged = true
         const newHp = Math.max(0, p.hp - damageToTake)
         console.log(`[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`)
 
@@ -238,19 +227,39 @@ export const ticker = createTickerEngine<any>({
           mobCount: mobsReachedEnd.filter((m: any) => m.targetPlayerId === p.player?._id?.toString()).length
         })
 
+        // Vérifier élimination en mémoire (pas de DB!)
+        if (newHp <= 0 && p.status === 'active') {
+          console.log(`[Ticker] 💀 Player ${p.player?.name} eliminated (HP: 0)`)
+
+          // Mettre à jour le status en DB (async)
+          updatePlayerStatusService({
+            gameId,
+            playerId: p.player?._id?.toString(),
+            status: 'eliminated'
+          }).catch(err => console.error('[Ticker] Failed to update player status:', err))
+
+          // Émettre événement d'élimination
+          getIO().to(gameId).emit('playerEliminated', {
+            gameId,
+            playerId: p.player?._id?.toString(),
+            playerName: p.player?.name,
+            reason: 'HP reached zero',
+            hp: newHp
+          })
+
+          return { ...p, hp: newHp, status: 'eliminated' as const }
+        }
+
         return { ...p, hp: newHp }
       }
       return p
     })
 
-    // Vérifier les éliminations si un joueur a pris des dégâts
-    if (anyPlayerDamaged) {
-      const checkStart = Date.now()
-      await checkPlayerEliminationService(gameId)
-      const checkDuration = Date.now() - checkStart
-      if (checkDuration > 50) {
-        console.warn(`[Ticker] ⚠️  checkPlayerElimination (post-damage) took ${checkDuration}ms`)
-      }
+    // Vérifier si le jeu doit se terminer après éliminations
+    const hasEliminations = updatedPlayers.some((p: InGamePlayer) => p.status === 'eliminated')
+    if (hasEliminations) {
+      // Vérifier la fin du jeu (async, sans bloquer)
+      checkEndGame(gameId).catch(err => console.error('[Ticker] Failed to check end game:', err))
     }
 
     // Log seulement si on a des mobs ou tous les 10 ticks
