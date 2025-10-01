@@ -180,7 +180,12 @@ export const ticker = createTickerEngine<any>({
     }
 
     // Vérifier les éliminations à chaque tick
+    const checkStart = Date.now()
     await checkPlayerEliminationService(gameId)
+    const checkDuration = Date.now() - checkStart
+    if (checkDuration > 100) {
+      console.warn(`[Ticker] ⚠️  checkPlayerElimination took ${checkDuration}ms (blocking tick!)`)
+    }
 
     // 1. Faire tirer les tours sur les mobs
     const { updatedMobs: mobsAfterAttacks, projectiles } = processTowerAttacks(

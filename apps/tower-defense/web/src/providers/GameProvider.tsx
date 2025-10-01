@@ -56,21 +56,25 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
 
         // Optimisation : réutiliser la référence activeMobs si identique (pour éviter re-renders)
         if (prevGame?.activeMobs && state.activeMobs) {
-          const mobsIdentical =
-            prevGame.activeMobs.length === state.activeMobs.length &&
-            prevGame.activeMobs.every((prevMob, idx) => {
-              const newMob = state.activeMobs?.[idx]
-              return (
-                newMob &&
-                prevMob.id === newMob.id &&
+          // Comparer par ID, pas par index (ordre peut changer)
+          const prevMobsMap = new Map(prevGame.activeMobs.map(m => [m.id, m]))
+          const newMobsMap = new Map(state.activeMobs.map(m => [m.id, m]))
+
+          const sameIds = prevMobsMap.size === newMobsMap.size &&
+            Array.from(prevMobsMap.keys()).every(id => newMobsMap.has(id))
+
+          if (sameIds) {
+            const allIdentical = state.activeMobs.every(newMob => {
+              const prevMob = prevMobsMap.get(newMob.id)
+              return prevMob &&
                 prevMob.position.x === newMob.position.x &&
                 prevMob.position.y === newMob.position.y &&
                 prevMob.currentHp === newMob.currentHp
-              )
             })
 
-          if (mobsIdentical) {
-            mergedState.activeMobs = prevGame.activeMobs
+            if (allIdentical) {
+              mergedState.activeMobs = prevGame.activeMobs
+            }
           }
         }
 
