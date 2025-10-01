@@ -179,12 +179,16 @@ export const ticker = createTickerEngine<any>({
       state._lastTickTime = tickStartTime
     }
 
-    // Vérifier les éliminations à chaque tick
-    const checkStart = Date.now()
-    await checkPlayerEliminationService(gameId)
-    const checkDuration = Date.now() - checkStart
-    if (checkDuration > 100) {
-      console.warn(`[Ticker] ⚠️  checkPlayerElimination took ${checkDuration}ms (blocking tick!)`)
+    // Vérifier les éliminations seulement si des mobs ont pu faire des dégâts
+    // (optimisation : évite les requêtes DB inutiles à chaque tick)
+    const shouldCheckElimination = state.activeMobs && state.activeMobs.length > 0
+    if (shouldCheckElimination) {
+      const checkStart = Date.now()
+      await checkPlayerEliminationService(gameId)
+      const checkDuration = Date.now() - checkStart
+      if (checkDuration > 50) {
+        console.warn(`[Ticker] ⚠️  checkPlayerElimination took ${checkDuration}ms`)
+      }
     }
 
     // 1. Faire tirer les tours sur les mobs
@@ -207,12 +211,14 @@ export const ticker = createTickerEngine<any>({
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
     // Appliquer les dégâts aux joueurs
+    let anyPlayerDamaged = false
     const updatedPlayers = state.players.map((p: InGamePlayer) => {
       const damageToTake = mobsReachedEnd
         .filter((m: any) => m.targetPlayerId === p.player?._id?.toString())
         .reduce((total: number, m: any) => total + (m._damage || 10), 0)
 
       if (damageToTake > 0) {
+        anyPlayerDamaged = true
         const newHp = Math.max(0, p.hp - damageToTake)
         console.log(`[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`)
 
@@ -236,6 +242,16 @@ export const ticker = createTickerEngine<any>({
       }
       return p
     })
+
+    // Vérifier les éliminations si un joueur a pris des dégâts
+    if (anyPlayerDamaged) {
+      const checkStart = Date.now()
+      await checkPlayerEliminationService(gameId)
+      const checkDuration = Date.now() - checkStart
+      if (checkDuration > 50) {
+        console.warn(`[Ticker] ⚠️  checkPlayerElimination (post-damage) took ${checkDuration}ms`)
+      }
+    }
 
     // Log seulement si on a des mobs ou tous les 10 ticks
     if (state.activeMobs && state.activeMobs.length > 0) {
