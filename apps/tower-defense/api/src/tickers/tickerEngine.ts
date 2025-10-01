@@ -168,6 +168,17 @@ export const ticker = createTickerEngine<any>({
     updatedAt: new Date().toISOString(),
   }),
   onTick: async (gameId, state, tick) => {
+    const tickStartTime = Date.now()
+    if (!state._lastTickTime) {
+      state._lastTickTime = tickStartTime
+    } else {
+      const timeSinceLastTick = tickStartTime - state._lastTickTime
+      if (state.activeMobs?.length > 0 || tick % 10 === 0) {
+        console.log(`[Ticker] ⏱️  Tick ${tick} - ${timeSinceLastTick}ms since last tick (target: 500ms)`)
+      }
+      state._lastTickTime = tickStartTime
+    }
+
     // Vérifier les éliminations à chaque tick
     await checkPlayerEliminationService(gameId)
 

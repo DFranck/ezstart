@@ -84,11 +84,16 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           targetPosition: mob.position,
           lastUpdateTime: now,
         })
+        console.log(`[Interpolation] New mob ${mob.id.slice(-6)} at (${mob.position.x.toFixed(1)}, ${mob.position.y.toFixed(1)})`)
       } else if (
-        existing.position.x !== mob.position.x ||
-        existing.position.y !== mob.position.y
+        existing.targetPosition.x !== mob.position.x ||
+        existing.targetPosition.y !== mob.position.y
       ) {
         // Position a changé - commencer l'interpolation
+        const timeSinceLastUpdate = now - existing.lastUpdateTime
+        console.log(
+          `[Interpolation] Mob ${mob.id.slice(-6)}: (${existing.targetPosition.x.toFixed(1)}, ${existing.targetPosition.y.toFixed(1)}) → (${mob.position.x.toFixed(1)}, ${mob.position.y.toFixed(1)}) [${timeSinceLastUpdate}ms]`
+        )
         existingMobs.set(mob.id, {
           ...mob,
           prevPosition: existing.targetPosition,
@@ -103,6 +108,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     for (const [id] of existingMobs) {
       if (!activeMobIds.has(id)) {
         existingMobs.delete(id)
+        console.log(`[Interpolation] Removed mob ${id.slice(-6)}`)
       }
     }
   }, [activeMobs])

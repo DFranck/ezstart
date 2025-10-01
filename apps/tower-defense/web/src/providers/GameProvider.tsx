@@ -38,31 +38,12 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
         return
       }
 
-      // Log complet du gameState pour debug
-      logger.debug(`[GameProvider] 🎮 GameState received ${state._reason ? `(${state._reason})` : ''}:`, {
-        gameId: state._id,
-        tick: state.tick,
-        phase: state.phase,
-        playersCount: state.players?.length,
-        players: state.players?.map(p => ({
-          playerId: p.player?._id,
-          name: p.player?.name,
-          status: p.status,
-          hp: p.hp,
-          gold: p.gold,
-          towersCount: p.placedTowers?.length || 0,
-        })),
-        activeMobsCount: state.activeMobs?.length,
-        activeMobs:
-          state.activeMobs?.map(m => ({
-            id: m.id,
-            name: m.mob.name,
-            targetPlayer: m.targetPlayerId,
-            position: m.position,
-            hp: `${m.currentHp}/${m.mob.hp}`,
-          })) || [],
-        updatedAt: state.updatedAt,
-      })
+      // Log seulement si mobs actifs ou événement non-tick
+      if (state._reason !== 'tick' || (state.activeMobs && state.activeMobs.length > 0)) {
+        logger.debug(
+          `[GameProvider] 🎮 T${state.tick} ${state._reason || 'tick'}: ${state.activeMobs?.length || 0} mobs`
+        )
+      }
 
       // Mettre à jour l'état en préservant les tours locales du joueur actuel
       setGame(prevGame => {
