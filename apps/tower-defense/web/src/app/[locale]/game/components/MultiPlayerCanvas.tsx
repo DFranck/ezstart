@@ -84,16 +84,11 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           targetPosition: mob.position,
           lastUpdateTime: now,
         })
-        console.log(`[Interpolation] New mob ${mob.id.slice(-6)} at (${mob.position.x.toFixed(1)}, ${mob.position.y.toFixed(1)})`)
       } else if (
         existing.targetPosition.x !== mob.position.x ||
         existing.targetPosition.y !== mob.position.y
       ) {
         // Position a changé - commencer l'interpolation
-        const timeSinceLastUpdate = now - existing.lastUpdateTime
-        console.log(
-          `[Interpolation] Mob ${mob.id.slice(-6)}: (${existing.targetPosition.x.toFixed(1)}, ${existing.targetPosition.y.toFixed(1)}) → (${mob.position.x.toFixed(1)}, ${mob.position.y.toFixed(1)}) [${timeSinceLastUpdate}ms]`
-        )
         existingMobs.set(mob.id, {
           ...mob,
           prevPosition: existing.targetPosition,
@@ -108,7 +103,6 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     for (const [id] of existingMobs) {
       if (!activeMobIds.has(id)) {
         existingMobs.delete(id)
-        console.log(`[Interpolation] Removed mob ${id.slice(-6)}`)
       }
     }
   }, [activeMobs])
@@ -247,9 +241,9 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
       ctx.fillStyle = '#dc2626' // Rouge pour les mobs
       interpolatedMobsRef.current.forEach(mob => {
-        // Calculer la position interpolée
+        // Calculer la position interpolée linéaire (vitesse constante)
         const elapsed = now - mob.lastUpdateTime
-        const t = Math.min(elapsed / TICK_INTERVAL, 1) // Ratio d'avancement (0 à 1)
+        const t = Math.min(elapsed / TICK_INTERVAL, 1) // Ratio d'avancement linéaire (0 à 1)
 
         const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
         const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
