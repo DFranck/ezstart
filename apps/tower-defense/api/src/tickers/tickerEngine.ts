@@ -152,6 +152,7 @@ function processTowerAttacks(
           // Créer un projectile visuel
           projectiles.push({
             id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            playerId, // Ajouter le playerId pour filtrer côté client
             from: { x: cell.x, y: cell.y },
             to: { x: mob.position.x, y: mob.position.y },
             damage: towerDamage,

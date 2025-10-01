@@ -120,7 +120,11 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
     const handleProjectiles = (incomingProjectiles: any[]) => {
       const now = Date.now()
-      const newProjectiles = incomingProjectiles.map(p => ({
+      // Filtrer les projectiles pour ce joueur uniquement
+      const filteredProjectiles = incomingProjectiles.filter(
+        p => p.playerId === selectedPlayerId
+      )
+      const newProjectiles = filteredProjectiles.map(p => ({
         ...p,
         startTime: now,
       }))
@@ -131,7 +135,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     return () => {
       socket.off('projectiles', handleProjectiles)
     }
-  }, [socket])
+  }, [socket, selectedPlayerId])
 
   // Nettoyer les projectiles terminés
   useEffect(() => {
@@ -536,7 +540,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         onTouchEnd={handlePlacement}
         style={{
           cursor: isCurrentPlayer && draggedTower ? 'crosshair' : 'default',
-          touchAction: 'none' // Empêche le scroll/zoom pendant le drag
+          touchAction: draggedTower ? 'none' : 'auto' // Empêche le scroll SEULEMENT pendant le drag
         }}
       />
     </div>

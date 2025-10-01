@@ -79,7 +79,7 @@ export function GameMenu({ gameId }: GameMenuProps) {
 
     const handlePlayerEliminated = (data: any) => {
       console.log('Player eliminated:', data)
-      
+
       // Si c'est notre joueur qui est éliminé, le rediriger
       if (data.playerId === player?._id) {
         console.log('You have been eliminated! Redirecting to home...')
@@ -109,7 +109,7 @@ export function GameMenu({ gameId }: GameMenuProps) {
   return (
     <>
       {/* Mobile: Burger Menu */}
-      <div className="md:hidden">
+      <div className="md:hidden z-50">
         <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
 
         {isBurgerOpen && (
@@ -135,7 +135,7 @@ export function GameMenu({ gameId }: GameMenuProps) {
       </div>
 
       {/* Tablet/Desktop: Dropdown Menu */}
-      <div className="hidden md:block">
+      <div className="hidden md:block z-50">
         <Dropdown
           label={
             <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 'use client'
 
+import { Div } from '@ezstart/ui/components'
 import { Game } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 
@@ -22,7 +23,9 @@ export function GameTimer({ game }: GameTimerProps) {
       const minutes = Math.floor(elapsed / 60)
       const seconds = elapsed % 60
 
-      setElapsedTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+      setElapsedTime(
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      )
     }
 
     updateTimer()
@@ -36,8 +39,8 @@ export function GameTimer({ game }: GameTimerProps) {
   }
 
   return (
-    <div className="bg-gray-800 text-white px-3 py-1 rounded-md font-mono text-sm">
-      <span className="text-gray-400">Temps:</span> {elapsedTime}
-    </div>
+    <Div size={'xs'} className="z-50 bg-background rounded-md font-mono text-sm w-fit">
+      {elapsedTime}
+    </Div>
   )
 }
