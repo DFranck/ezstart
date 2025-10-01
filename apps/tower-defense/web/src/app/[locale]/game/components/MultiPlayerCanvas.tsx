@@ -471,12 +471,6 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     onTowerPlace?.(hoveredCellRef.current.x, hoveredCellRef.current.y)
 
     setDraggedTower(null)
-
-    const ghost = document.querySelector<HTMLDivElement>('[data-ghost]')
-    if (ghost) {
-      ghost.innerHTML = ''
-      ghost.style.display = 'none'
-    }
   }, [isCurrentPlayer, draggedTower, currentPlayer, towers, placeTowerAt, sendAction, onTowerPlace, setDraggedTower])
 
   // Écouter les touchmove et touchend au niveau window pour capturer TOUS les événements

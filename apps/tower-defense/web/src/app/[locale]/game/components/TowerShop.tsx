@@ -2,7 +2,6 @@
 
 import { useGameState } from '@/stores/useGameState'
 import { Button, Div } from '@ezstart/ui/components'
-import { TILE_SIZE } from '@tower-defense/config'
 import { Game, mockTowers } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
 import { Tower } from './Tower'
@@ -15,7 +14,6 @@ export function TowerShop({ game }: TowerShopProps) {
   const setDraggedTower = useGameState(s => s.setDraggedTower)
   const [towers, setTowers] = useState<any[]>([])
   const [isClient, setIsClient] = useState(false)
-  const ghostRef = useRef<HTMLDivElement>(null)
   const towerRefs = useRef<(HTMLDivElement | null)[]>([])
   const shopContainerRef = useRef<HTMLDivElement>(null)
 
@@ -24,45 +22,22 @@ export function TowerShop({ game }: TowerShopProps) {
     setIsClient(true)
     setTowers(mockTowers(5))
   }, [])
-  const renderGhost = (shape: boolean[][]) => {
-    if (!ghostRef.current) return
-    ghostRef.current.innerHTML = ''
-    ghostRef.current.style.display = 'grid'
-    ghostRef.current.style.gridTemplateColumns = `repeat(${shape[0]?.length || 0}, ${TILE_SIZE}px)`
-    shape.forEach(row =>
-      row.forEach(cell => {
-        const div = document.createElement('div')
-        div.style.width = `${TILE_SIZE}px`
-        div.style.height = `${TILE_SIZE}px`
-        div.className = `rounded-sm ${cell ? 'bg-green-500' : 'bg-gray-400'}`
-        ghostRef.current?.appendChild(div)
-      })
-    )
-  }
 
-  const startDraggingTower = (towerIndex: number, clientX: number, clientY: number) => {
+  const startDraggingTower = (towerIndex: number) => {
     const tower = towers[towerIndex]
     setDraggedTower(tower)
-    renderGhost(tower.shape)
-
-    if (ghostRef.current) {
-      // Center ghost on cursor/finger
-      const ghostWidth = (tower.shape[0]?.length || 1) * TILE_SIZE
-      const ghostHeight = tower.shape.length * TILE_SIZE
-      ghostRef.current.style.left = `${clientX - ghostWidth / 2}px`
-      ghostRef.current.style.top = `${clientY - ghostHeight / 2}px`
-    }
+    // Ghost tower preview removed - only grid cells preview needed
   }
 
   const handleMouseDown = (towerIndex: number) => (e: React.MouseEvent) => {
     e.preventDefault()
-    startDraggingTower(towerIndex, e.clientX, e.clientY)
+    startDraggingTower(towerIndex)
   }
 
   const handleTouchStart = (towerIndex: number) => (e: React.TouchEvent) => {
     const touch = e.touches[0]
     if (touch) {
-      startDraggingTower(towerIndex, touch.clientX, touch.clientY)
+      startDraggingTower(towerIndex)
     }
   }
 
@@ -83,7 +58,7 @@ export function TowerShop({ game }: TowerShopProps) {
         const touch = e.touches[0]
         if (touch) {
           console.log('[TowerShop] Starting drag - pos:', touch.clientX, touch.clientY)
-          startDraggingTower(index, touch.clientX, touch.clientY)
+          startDraggingTower(index)
         }
       }
 
@@ -99,26 +74,6 @@ export function TowerShop({ game }: TowerShopProps) {
   }, [towers])
 
   useEffect(() => {
-    let currentTowerShape: boolean[][] | null = null
-
-    const handleMove = (e: MouseEvent | TouchEvent) => {
-      // Empêcher le scroll sur mobile lors du drag
-      if ('touches' in e) {
-        e.preventDefault()
-      }
-
-      const clientX = 'touches' in e ? e.touches[0]?.clientX || 0 : e.clientX
-      const clientY = 'touches' in e ? e.touches[0]?.clientY || 0 : e.clientY
-
-      if (ghostRef.current && ghostRef.current.style.display !== 'none') {
-        // Center ghost on cursor/finger during move
-        const ghostWidth = ghostRef.current.offsetWidth
-        const ghostHeight = ghostRef.current.offsetHeight
-        ghostRef.current.style.left = `${clientX - ghostWidth / 2}px`
-        ghostRef.current.style.top = `${clientY - ghostHeight / 2}px`
-      }
-    }
-
     const handleEnd = (e: MouseEvent | TouchEvent) => {
       // Restaurer le container shop
       if (shopContainerRef.current) {
@@ -132,41 +87,22 @@ export function TowerShop({ game }: TowerShopProps) {
       const clientY =
         'changedTouches' in e ? e.changedTouches[0]?.clientY || 0 : (e as MouseEvent).clientY
 
-      console.log('[TowerShop] handleEnd - finger position:', clientX, clientY)
-
       // Vérifier si on a laché sur le canvas
       const elementAtPoint = document.elementFromPoint(clientX, clientY)
       const isCanvas = elementAtPoint?.closest('canvas')
 
-      console.log(
-        '[TowerShop] handleEnd - element:',
-        elementAtPoint?.tagName,
-        elementAtPoint?.className
-      )
-      console.log('[TowerShop] handleEnd - isCanvas:', !!isCanvas)
-
       if (!isCanvas) {
-        console.log('[TowerShop] handleEnd - NOT CANVAS, cancelling drag')
+        // Annuler le drag si pas sur le canvas
         setDraggedTower(null)
-        if (ghostRef.current) {
-          ghostRef.current.innerHTML = ''
-          ghostRef.current.style.display = 'none'
-        }
-      } else {
-        console.log('[TowerShop] handleEnd - IS CANVAS, letting canvas handle it')
-        // Ne rien faire - le canvas va gérer le placement via son propre touchend
       }
+      // Sinon le canvas gérera le placement via son propre touchend
     }
 
-    window.addEventListener('mousemove', handleMove)
     window.addEventListener('mouseup', handleEnd)
-    window.addEventListener('touchmove', handleMove, { passive: false })
     window.addEventListener('touchend', handleEnd)
 
     return () => {
-      window.removeEventListener('mousemove', handleMove)
       window.removeEventListener('mouseup', handleEnd)
-      window.removeEventListener('touchmove', handleMove)
       window.removeEventListener('touchend', handleEnd)
     }
   }, [setDraggedTower])
@@ -189,8 +125,6 @@ export function TowerShop({ game }: TowerShopProps) {
 
   return (
     <div className="relative">
-      <div ref={ghostRef} data-ghost className="pointer-events-none fixed z-50 opacity-90" />
-
       {/* Desktop: Grid 2 cols */}
       <div className="hidden md:grid md:grid-cols-2 gap-2">
         {towers.map((tower, index) => (
@@ -214,7 +148,9 @@ export function TowerShop({ game }: TowerShopProps) {
           {towers.map((tower, index) => (
             <div
               key={tower._id}
-              ref={el => (towerRefs.current[index] = el)}
+              ref={el => {
+                towerRefs.current[index] = el
+              }}
               className="flex-shrink-0 active:scale-95 touch-none transition-transform"
               onMouseDown={handleMouseDown(index)}
             >
