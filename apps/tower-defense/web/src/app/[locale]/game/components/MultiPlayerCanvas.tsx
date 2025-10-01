@@ -135,7 +135,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   // Nettoyer les projectiles terminés
   useEffect(() => {
-    const PROJECTILE_DURATION = 200
+    const PROJECTILE_DURATION = 400 // Durée plus longue pour correspondre au tick (500ms)
     const interval = setInterval(() => {
       const now = Date.now()
       setProjectiles(prev => prev.filter(p => now - p.startTime < PROJECTILE_DURATION))
@@ -278,7 +278,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       })
 
       // Projectiles
-      const PROJECTILE_DURATION = 200 // ms
+      const PROJECTILE_DURATION = 400 // Durée synchronisée avec le tick serveur
       ctx.fillStyle = '#fbbf24' // Jaune/Orange pour les projectiles
       projectiles.forEach(proj => {
         const elapsed = now - proj.startTime
