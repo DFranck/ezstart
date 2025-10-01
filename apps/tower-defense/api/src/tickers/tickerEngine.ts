@@ -126,7 +126,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       // Sinon, se déplacer vers la cible selon la vitesse
       // Limiter la vitesse à max 10 pour éviter les téléportations
       const rawSpeed = Math.min(mob.mob.speed, 10)
-      const speed = rawSpeed * 0.1 // Ajuster selon la fréquence du ticker (500ms)
+      const speed = rawSpeed * 0.05 // Ajuster selon la fréquence du ticker (250ms = 0.05, 500ms = 0.1)
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
 
@@ -142,7 +142,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
 }
 
 export const ticker = createTickerEngine<any>({
-  tickIntervalMs: 500, // 500ms = 2 ticks/sec pour le dev (au lieu de 100ms = 10 ticks/sec)
+  tickIntervalMs: 250, // 250ms = 4 ticks/sec (balance gameplay/performance)
   createInitialState: gameId => ({
     _id: gameId,
     players: [],

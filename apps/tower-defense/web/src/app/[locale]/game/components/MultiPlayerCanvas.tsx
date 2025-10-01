@@ -135,7 +135,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   // Nettoyer les projectiles terminés
   useEffect(() => {
-    const PROJECTILE_DURATION = 400 // Durée plus longue pour correspondre au tick (500ms)
+    const PROJECTILE_DURATION = 200 // Durée synchronisée avec le tick (250ms)
     const interval = setInterval(() => {
       const now = Date.now()
       setProjectiles(prev => prev.filter(p => now - p.startTime < PROJECTILE_DURATION))
@@ -237,7 +237,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
       // Mobs actifs avec interpolation fluide
       const now = Date.now()
-      const TICK_INTERVAL = 500 // Intervalle entre les ticks (500ms)
+      const TICK_INTERVAL = 250 // Intervalle entre les ticks (250ms)
 
       // Grouper les mobs par position pour afficher le compte
       const mobsByPosition = new Map<string, InterpolatedMob[]>()
@@ -318,7 +318,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       })
 
       // Projectiles avec compteur pour les superposés
-      const PROJECTILE_DURATION = 400 // Durée synchronisée avec le tick serveur
+      const PROJECTILE_DURATION = 200 // Durée synchronisée avec le tick serveur (250ms)
 
       // Grouper les projectiles par position
       const projectilesByPosition = new Map<string, typeof projectiles>()
