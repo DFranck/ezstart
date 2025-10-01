@@ -61,13 +61,8 @@ function processTowerAttacks(
           })
 
           if (newHp <= 0) {
-            console.log(`[Tower] 💀 Mob ${mob.id} (${mob.mob.name}) killed by tower at (${cell.x},${cell.y})!`)
             return null as any // Marquer pour suppression
           }
-
-          console.log(
-            `[Tower] 🎯 Tower cell (${cell.x},${cell.y}) hit mob ${mob.id} for ${towerDamage} damage! HP: ${mob.currentHp} → ${newHp}`
-          )
 
           return {
             ...mob,
@@ -92,7 +87,6 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       // Trouver le joueur cible
       const targetPlayer = players.find(p => p.player?._id?.toString() === mob.targetPlayerId)
       if (!targetPlayer) {
-        console.log(`[moveMobs] No target player found for mob ${mob.id}`)
         return null
       }
 
@@ -100,14 +94,9 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       const blockedCells = targetPlayer.placedTowers.flatMap((t: any) => t.coveredCells)
       const path = findPath(blockedCells)
 
-      console.log(
-        `[moveMobs] Mob ${mob.id}: pathIndex=${mob.pathIndex}, pathLength=${path.length}, position=(${mob.position.x}, ${mob.position.y})`
-      )
-
       if (path.length === 0 || mob.pathIndex >= path.length) {
         // Mob a atteint la fin - infliger des dégâts au joueur
         const damage = mob.mob.damage || 10
-        console.log(`[moveMobs] 💥 Mob ${mob.id} (${mob.mob.name}) reached end! Dealing ${damage} damage to player ${mob.targetPlayerId}`)
 
         // Marquer ce mob pour infliger des dégâts (sera géré dans onTick)
         return { ...mob, _reachedEnd: true, _damage: damage } as any
@@ -173,10 +162,6 @@ export const ticker = createTickerEngine<any>({
     if (!state._lastTickTime) {
       state._lastTickTime = tickStartTime
     } else {
-      const timeSinceLastTick = tickStartTime - state._lastTickTime
-      if (state.activeMobs?.length > 0 || tick % 10 === 0) {
-        console.log(`[Ticker] ⏱️  Tick ${tick} - ${timeSinceLastTick}ms since last tick (target: 500ms)`)
-      }
       state._lastTickTime = tickStartTime
     }
 
@@ -262,26 +247,12 @@ export const ticker = createTickerEngine<any>({
       checkEndGame(gameId).catch(err => console.error('[Ticker] Failed to check end game:', err))
     }
 
-    // Log seulement si on a des mobs ou tous les 10 ticks
-    if (state.activeMobs && state.activeMobs.length > 0) {
-      console.log(
-        `[Ticker] Tick ${tick} game ${gameId.slice(-6)} - Moving ${state.activeMobs.length} mobs`
-      )
-    } else if (tick % 10 === 0) {
-      console.log(`[Ticker] Tick ${tick} game ${gameId.slice(-6)}`)
-    }
-
     const newState = {
       ...state,
       players: updatedPlayers,
       tick,
       activeMobs: finalMobs,
       updatedAt: new Date().toISOString(),
-    }
-
-    // Log seulement si on a des mobs actifs
-    if (newState.activeMobs && newState.activeMobs.length > 0) {
-      console.log(`[Ticker] Returning state with ${newState.activeMobs.length} active mobs`)
     }
 
     // Émettre le state mis à jour à tous les clients de la game

@@ -8,15 +8,7 @@ export function spawnMob(
   targetPlayerId: string,
   fromPlayerId: string
 ): void {
-  console.log(`[spawnMob] Spawning mob for target player ${targetPlayerId}`)
-
   ticker.mutate(gameId, state => {
-    console.log(`[spawnMob] Current state:`, {
-      hasId: !!state._id,
-      playersCount: state.players?.length || 0,
-      mobsCount: state.activeMobs?.length || 0
-    })
-
     // Trouver le joueur ciblé et calculer son path
     const targetPlayer = state.players?.find((p: any) =>
       p.player?._id?.toString() === targetPlayerId
@@ -32,20 +24,19 @@ export function spawnMob(
     const path = findPath(blockedCells)
 
     if (!path || path.length === 0) {
-      console.warn(`[spawnMob] No valid path found for player ${targetPlayerId}`)
+      console.warn(`[spawnMob] No valid path for player ${targetPlayerId}`)
       return state
     }
 
-    // Position de spawn = première case du path
     const spawnPosition = path[0]
     if (!spawnPosition) {
-      console.warn(`[spawnMob] Path has no spawn position for player ${targetPlayerId}`)
+      console.warn(`[spawnMob] No spawn position for player ${targetPlayerId}`)
       return state
     }
 
     // Créer un nouveau mob actif
     const newMob: ActiveMob = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ID unique simple
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       mob: mobType,
       currentHp: mobType.hp,
       position: { x: spawnPosition.x, y: spawnPosition.y },
@@ -53,22 +44,13 @@ export function spawnMob(
       targetPlayerId: targetPlayerId,
     }
 
-    console.log(`[spawnMob] Created mob:`, newMob)
-
     const newActiveMobs = [...(state.activeMobs || []), newMob]
-    console.log(`[spawnMob] New activeMobs count: ${newActiveMobs.length}`)
+    console.log(`[spawnMob] ✅ Spawned ${mobType.name} → total: ${newActiveMobs.length} mobs`)
 
-    const newState = {
+    return {
       ...state,
       activeMobs: newActiveMobs,
       updatedAt: new Date().toISOString(),
     }
-    
-    console.log(`[spawnMob] Returning state with ${newState.activeMobs?.length} mobs`)
-    return newState
   })
-  
-  // Vérifier l'état après mutation
-  const afterState = ticker.getState(gameId)
-  console.log(`[spawnMob] State after mutation: ${afterState?.activeMobs?.length || 0} mobs`)
 }

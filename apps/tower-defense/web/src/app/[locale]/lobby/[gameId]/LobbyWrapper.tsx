@@ -20,7 +20,10 @@ export function LobbyWrapper({ game, gameId }: Props) {
     )
   }
 
-  const hostId = game.host
+  // Extraire l'ID du host (peut être un objet ou un string)
+  const hostId = typeof game.host === 'object' && game.host !== null
+    ? (game.host as any)._id
+    : game.host
 
   const getPlayerId = (p: InGamePlayer) => p.player._id
 

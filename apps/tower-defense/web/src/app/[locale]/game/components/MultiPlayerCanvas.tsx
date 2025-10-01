@@ -239,6 +239,21 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       const now = Date.now()
       const TICK_INTERVAL = 500 // Intervalle entre les ticks (500ms)
 
+      // Grouper les mobs par position pour afficher le compte
+      const mobsByPosition = new Map<string, InterpolatedMob[]>()
+      interpolatedMobsRef.current.forEach(mob => {
+        const elapsed = now - mob.lastUpdateTime
+        const t = Math.min(elapsed / TICK_INTERVAL, 1)
+        const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
+        const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
+
+        const key = `${Math.round(interpolatedX * 10)},${Math.round(interpolatedY * 10)}`
+        if (!mobsByPosition.has(key)) {
+          mobsByPosition.set(key, [])
+        }
+        mobsByPosition.get(key)!.push(mob)
+      })
+
       ctx.fillStyle = '#dc2626' // Rouge pour les mobs
       interpolatedMobsRef.current.forEach(mob => {
         // Calculer la position interpolée linéaire (vitesse constante)
@@ -277,8 +292,49 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         }
       })
 
-      // Projectiles
+      // Afficher le nombre de mobs par position
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 3
+      ctx.font = 'bold 14px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+
+      mobsByPosition.forEach((mobs, key) => {
+        if (mobs.length > 1 && mobs[0]) {
+          const mob = mobs[0]
+          const elapsed = now - mob.lastUpdateTime
+          const t = Math.min(elapsed / TICK_INTERVAL, 1)
+          const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
+          const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
+
+          const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
+          const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
+
+          const text = `x${mobs.length}`
+          ctx.strokeText(text, centerX, centerY)
+          ctx.fillText(text, centerX, centerY)
+        }
+      })
+
+      // Projectiles avec compteur pour les superposés
       const PROJECTILE_DURATION = 400 // Durée synchronisée avec le tick serveur
+
+      // Grouper les projectiles par position
+      const projectilesByPosition = new Map<string, typeof projectiles>()
+      projectiles.forEach(proj => {
+        const elapsed = now - proj.startTime
+        const t = Math.min(elapsed / PROJECTILE_DURATION, 1)
+        const x = proj.from.x + (proj.to.x - proj.from.x) * t
+        const y = proj.from.y + (proj.to.y - proj.from.y) * t
+
+        const key = `${Math.round(x * 10)},${Math.round(y * 10)}`
+        if (!projectilesByPosition.has(key)) {
+          projectilesByPosition.set(key, [])
+        }
+        projectilesByPosition.get(key)!.push(proj)
+      })
+
       ctx.fillStyle = '#fbbf24' // Jaune/Orange pour les projectiles
       projectiles.forEach(proj => {
         const elapsed = now - proj.startTime
@@ -290,6 +346,31 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ctx.beginPath()
         ctx.arc(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, 4, 0, 2 * Math.PI)
         ctx.fill()
+      })
+
+      // Afficher le nombre de projectiles par position
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 2
+      ctx.font = 'bold 10px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+
+      projectilesByPosition.forEach((projs, key) => {
+        if (projs.length > 1 && projs[0]) {
+          const proj = projs[0]
+          const elapsed = now - proj.startTime
+          const t = Math.min(elapsed / PROJECTILE_DURATION, 1)
+          const x = proj.from.x + (proj.to.x - proj.from.x) * t
+          const y = proj.from.y + (proj.to.y - proj.from.y) * t
+
+          const centerX = x * TILE_SIZE + TILE_SIZE / 2
+          const centerY = y * TILE_SIZE + TILE_SIZE / 2 - 8 // Décalé vers le haut
+
+          const text = `x${projs.length}`
+          ctx.strokeText(text, centerX, centerY)
+          ctx.fillText(text, centerX, centerY)
+        }
       })
 
       // Bordure pour indiquer quel joueur on regarde
