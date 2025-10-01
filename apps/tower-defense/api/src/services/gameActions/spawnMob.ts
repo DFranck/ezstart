@@ -34,12 +34,18 @@ export function spawnMob(
       return state
     }
 
-    // Créer un nouveau mob actif
+    // Créer un nouveau mob actif avec offset pour éviter superposition parfaite
+    const offsetX = (Math.random() - 0.5) * 0.4 // ±0.2 cases
+    const offsetY = (Math.random() - 0.5) * 0.4 // ±0.2 cases
+
     const newMob: ActiveMob = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       mob: mobType,
       currentHp: mobType.hp,
-      position: { x: spawnPosition.x, y: spawnPosition.y },
+      position: {
+        x: spawnPosition.x + offsetX,
+        y: spawnPosition.y + offsetY
+      },
       pathIndex: 0,
       targetPlayerId: targetPlayerId,
     }
