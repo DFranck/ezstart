@@ -6,7 +6,7 @@ import { usePlayerStore } from '@/stores/usePlayerStore'
 import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
 import { computeCoveredCells, findPath, isColliding } from '@tower-defense/utils'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface MultiPlayerCanvasProps {
   selectedPlayerId: string | null
@@ -62,11 +62,11 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       ? findPath(selectedPlayer.placedTowers.flatMap((t: any) => t.coveredCells))
       : []
 
-  // Récupérer les mobs actifs qui ciblent ce joueur
+  // Récupérer les mobs actifs qui ciblent ce joueur (mémorisé pour éviter re-renders inutiles)
   const targetPlayerId = isCurrentPlayer ? currentPlayer?._id : selectedPlayerId
-  const activeMobs: ActiveMob[] = game?.activeMobs?.filter(mob =>
-    mob.targetPlayerId === targetPlayerId
-  ) || []
+  const activeMobs = useMemo(() => {
+    return game?.activeMobs?.filter(mob => mob.targetPlayerId === targetPlayerId) || []
+  }, [game?.activeMobs, targetPlayerId])
 
   // Mettre à jour les positions interpolées quand on reçoit de nouvelles données
   useEffect(() => {

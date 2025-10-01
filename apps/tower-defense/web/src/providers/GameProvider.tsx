@@ -52,7 +52,28 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
         }
 
         // Merger les tours locales avec le state serveur
-        const mergedState = { ...state }
+        let mergedState = { ...state }
+
+        // Optimisation : réutiliser la référence activeMobs si identique (pour éviter re-renders)
+        if (prevGame?.activeMobs && state.activeMobs) {
+          const mobsIdentical =
+            prevGame.activeMobs.length === state.activeMobs.length &&
+            prevGame.activeMobs.every((prevMob, idx) => {
+              const newMob = state.activeMobs?.[idx]
+              return (
+                newMob &&
+                prevMob.id === newMob.id &&
+                prevMob.position.x === newMob.position.x &&
+                prevMob.position.y === newMob.position.y &&
+                prevMob.currentHp === newMob.currentHp
+              )
+            })
+
+          if (mobsIdentical) {
+            mergedState.activeMobs = prevGame.activeMobs
+          }
+        }
+
         if (currentPlayer && prevGame && prevGame.players) {
           // Trouver le joueur actuel dans les deux states
           const prevPlayerIndex = prevGame.players.findIndex(
