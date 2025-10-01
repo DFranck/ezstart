@@ -16,6 +16,8 @@ export function TowerShop({ game }: TowerShopProps) {
   const [towers, setTowers] = useState<any[]>([])
   const [isClient, setIsClient] = useState(false)
   const ghostRef = useRef<HTMLDivElement>(null)
+  const towerRefs = useRef<(HTMLDivElement | null)[]>([])
+  const shopContainerRef = useRef<HTMLDivElement>(null)
 
   // Initialiser les towers côté client seulement pour éviter l'hydratation mismatch
   useEffect(() => {
@@ -44,8 +46,11 @@ export function TowerShop({ game }: TowerShopProps) {
     renderGhost(tower.shape)
 
     if (ghostRef.current) {
-      ghostRef.current.style.left = `${clientX + 4}px`
-      ghostRef.current.style.top = `${clientY + 4}px`
+      // Center ghost on cursor/finger
+      const ghostWidth = (tower.shape[0]?.length || 1) * TILE_SIZE
+      const ghostHeight = tower.shape.length * TILE_SIZE
+      ghostRef.current.style.left = `${clientX - ghostWidth / 2}px`
+      ghostRef.current.style.top = `${clientY - ghostHeight / 2}px`
     }
   }
 
@@ -55,14 +60,47 @@ export function TowerShop({ game }: TowerShopProps) {
   }
 
   const handleTouchStart = (towerIndex: number) => (e: React.TouchEvent) => {
-    e.preventDefault()
     const touch = e.touches[0]
     if (touch) {
       startDraggingTower(towerIndex, touch.clientX, touch.clientY)
     }
   }
 
+  // Attach touch listeners manually with { passive: false } to allow preventDefault
   useEffect(() => {
+    const listeners: Array<{ ref: HTMLDivElement; handler: (e: TouchEvent) => void }> = []
+
+    towerRefs.current.forEach((ref, index) => {
+      if (!ref) return
+
+      const handleTouchStartNative = (e: TouchEvent) => {
+        console.log('[TowerShop] NATIVE touchstart - index:', index)
+        // Rendre le container transparent IMMÉDIATEMENT (sans attendre React)
+        if (shopContainerRef.current) {
+          shopContainerRef.current.style.pointerEvents = 'none'
+          shopContainerRef.current.style.opacity = '0.5'
+        }
+        const touch = e.touches[0]
+        if (touch) {
+          console.log('[TowerShop] Starting drag - pos:', touch.clientX, touch.clientY)
+          startDraggingTower(index, touch.clientX, touch.clientY)
+        }
+      }
+
+      ref.addEventListener('touchstart', handleTouchStartNative, { passive: false })
+      listeners.push({ ref, handler: handleTouchStartNative })
+    })
+
+    return () => {
+      listeners.forEach(({ ref, handler }) => {
+        ref.removeEventListener('touchstart', handler)
+      })
+    }
+  }, [towers])
+
+  useEffect(() => {
+    let currentTowerShape: boolean[][] | null = null
+
     const handleMove = (e: MouseEvent | TouchEvent) => {
       // Empêcher le scroll sur mobile lors du drag
       if ('touches' in e) {
@@ -71,22 +109,52 @@ export function TowerShop({ game }: TowerShopProps) {
 
       const clientX = 'touches' in e ? e.touches[0]?.clientX || 0 : e.clientX
       const clientY = 'touches' in e ? e.touches[0]?.clientY || 0 : e.clientY
+
       if (ghostRef.current && ghostRef.current.style.display !== 'none') {
-        ghostRef.current.style.left = `${clientX + 4}px`
-        ghostRef.current.style.top = `${clientY + 4}px`
+        // Center ghost on cursor/finger during move
+        const ghostWidth = ghostRef.current.offsetWidth
+        const ghostHeight = ghostRef.current.offsetHeight
+        ghostRef.current.style.left = `${clientX - ghostWidth / 2}px`
+        ghostRef.current.style.top = `${clientY - ghostHeight / 2}px`
       }
     }
 
     const handleEnd = (e: MouseEvent | TouchEvent) => {
-      const target = (e.target as HTMLElement) ?? null
-      const isCanvas = target?.closest('canvas')
+      // Restaurer le container shop
+      if (shopContainerRef.current) {
+        shopContainerRef.current.style.pointerEvents = ''
+        shopContainerRef.current.style.opacity = ''
+      }
+
+      // Pour touchend, utiliser changedTouches au lieu de touches
+      const clientX =
+        'changedTouches' in e ? e.changedTouches[0]?.clientX || 0 : (e as MouseEvent).clientX
+      const clientY =
+        'changedTouches' in e ? e.changedTouches[0]?.clientY || 0 : (e as MouseEvent).clientY
+
+      console.log('[TowerShop] handleEnd - finger position:', clientX, clientY)
+
+      // Vérifier si on a laché sur le canvas
+      const elementAtPoint = document.elementFromPoint(clientX, clientY)
+      const isCanvas = elementAtPoint?.closest('canvas')
+
+      console.log(
+        '[TowerShop] handleEnd - element:',
+        elementAtPoint?.tagName,
+        elementAtPoint?.className
+      )
+      console.log('[TowerShop] handleEnd - isCanvas:', !!isCanvas)
 
       if (!isCanvas) {
+        console.log('[TowerShop] handleEnd - NOT CANVAS, cancelling drag')
         setDraggedTower(null)
         if (ghostRef.current) {
           ghostRef.current.innerHTML = ''
           ghostRef.current.style.display = 'none'
         }
+      } else {
+        console.log('[TowerShop] handleEnd - IS CANVAS, letting canvas handle it')
+        // Ne rien faire - le canvas va gérer le placement via son propre touchend
       }
     }
 
@@ -123,7 +191,8 @@ export function TowerShop({ game }: TowerShopProps) {
     <div className="relative">
       <div ref={ghostRef} data-ghost className="pointer-events-none fixed z-50 opacity-90" />
 
-      <div className="grid grid-cols-2 gap-2">
+      {/* Desktop: Grid 2 cols */}
+      <div className="hidden md:grid md:grid-cols-2 gap-2">
         {towers.map((tower, index) => (
           <div
             key={tower._id}
@@ -137,6 +206,30 @@ export function TowerShop({ game }: TowerShopProps) {
           </div>
         ))}
         <Button onClick={() => setTowers(mockTowers(5))}>Refresh</Button>
+      </div>
+
+      {/* Mobile: Horizontal scroll */}
+      <div className="md:hidden" ref={shopContainerRef}>
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          {towers.map((tower, index) => (
+            <div
+              key={tower._id}
+              ref={el => (towerRefs.current[index] = el)}
+              className="flex-shrink-0 active:scale-95 touch-none transition-transform"
+              onMouseDown={handleMouseDown(index)}
+            >
+              <Div className="inline-grid bg-muted/50 p-2 rounded-lg border-2 border-transparent active:border-primary">
+                <Tower tower={tower} />
+              </Div>
+            </div>
+          ))}
+          <button
+            onClick={() => setTowers(mockTowers(5))}
+            className="flex-shrink-0 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm"
+          >
+            🔄
+          </button>
+        </div>
       </div>
     </div>
   )

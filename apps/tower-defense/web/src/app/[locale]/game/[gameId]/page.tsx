@@ -42,10 +42,10 @@ export default function GamePage() {
       .finally(() => setLoading(false))
   }, [gameId])
 
-  // Auto-close drawer when dragging a tower (mobile)
+  // Auto-close drawer when dragging a tower (mobile) - ONLY for mob/stats shops
   useEffect(() => {
-    if (draggedTower && activeShop) {
-      setActiveShop(null)
+    if (draggedTower && activeShop && activeShop !== 'tower') {
+      // Don't close, just let user place tower
     }
   }, [draggedTower, activeShop])
 
@@ -86,46 +86,47 @@ export default function GamePage() {
           </div>
         </div>
 
-        {/* Mobile Floating Action Buttons */}
-        <div className="md:hidden fixed bottom-4 left-0 right-0 flex justify-center items-center gap-3 px-4 z-40">
-          <button
-            onClick={() => setActiveShop(activeShop === 'tower' ? null : 'tower')}
-            className={`flex-1 max-w-[120px] px-4 py-3 rounded-xl font-semibold shadow-lg transition-all ${
-              activeShop === 'tower'
-                ? 'bg-primary text-primary-foreground scale-105'
-                : 'bg-background/95 backdrop-blur border-2 hover:scale-105'
-            }`}
-          >
-            🏰 Towers
-          </button>
-          <button
-            onClick={() => setActiveShop(activeShop === 'mob' ? null : 'mob')}
-            className={`flex-1 max-w-[120px] px-4 py-3 rounded-xl font-semibold shadow-lg transition-all ${
-              activeShop === 'mob'
-                ? 'bg-primary text-primary-foreground scale-105'
-                : 'bg-background/95 backdrop-blur border-2 hover:scale-105'
-            }`}
-          >
-            👾 Mobs
-          </button>
-          <button
-            onClick={() => setActiveShop(activeShop === 'stats' ? null : 'stats')}
-            className={`flex-1 max-w-[120px] px-4 py-3 rounded-xl font-semibold shadow-lg transition-all ${
-              activeShop === 'stats'
-                ? 'bg-primary text-primary-foreground scale-105'
-                : 'bg-background/95 backdrop-blur border-2 hover:scale-105'
-            }`}
-          >
-            📊 Stats
-          </button>
+        {/* Mobile Tower Bar - Always visible at bottom */}
+        <div
+          className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t shadow-lg transition-opacity ${
+            draggedTower ? 'pointer-events-none opacity-50' : ''
+          }`}
+        >
+          <div className="p-2">
+            <TowerShop game={game} />
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="flex justify-center items-center gap-2 px-4 pb-2">
+            <button
+              onClick={() => setActiveShop(activeShop === 'mob' ? null : 'mob')}
+              className={`flex-1 max-w-[140px] px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeShop === 'mob'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              👾 Buy Mobs
+            </button>
+            <button
+              onClick={() => setActiveShop(activeShop === 'stats' ? null : 'stats')}
+              className={`flex-1 max-w-[140px] px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeShop === 'stats'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              📊 Stats
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Drawer - Slide up from bottom */}
-        {activeShop && (
+        {/* Mobile Drawer - Slide up from bottom (Mobs/Stats only) */}
+        {activeShop && activeShop !== 'tower' && (
           <>
             {/* Backdrop */}
             <div
-              className="md:hidden fixed inset-0 bg-black/50 z-40 animate-in fade-in"
+              className="md:hidden fixed inset-0 bg-black/50 z-50 animate-in fade-in"
               onClick={() => setActiveShop(null)}
             />
 
@@ -136,7 +137,6 @@ export default function GamePage() {
                 <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-3" />
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold">
-                    {activeShop === 'tower' && '🏰 Tower Shop'}
                     {activeShop === 'mob' && '👾 Mob Shop'}
                     {activeShop === 'stats' && '📊 Player Stats'}
                   </h3>
@@ -151,7 +151,6 @@ export default function GamePage() {
 
               {/* Content */}
               <div className="p-4">
-                {activeShop === 'tower' && <TowerShop game={game} />}
                 {activeShop === 'mob' && <MobShop game={game} />}
                 {activeShop === 'stats' && <PlayerStatsPanel game={game} />}
               </div>

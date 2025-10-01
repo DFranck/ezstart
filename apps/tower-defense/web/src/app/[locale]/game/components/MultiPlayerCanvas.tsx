@@ -6,7 +6,7 @@ import { usePlayerStore } from '@/stores/usePlayerStore'
 import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
 import { computeCoveredCells, findPath, isColliding } from '@tower-defense/utils'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 interface MultiPlayerCanvasProps {
   selectedPlayerId: string | null
@@ -419,12 +419,22 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     if (!isCurrentPlayer) return
     const touch = e.touches[0]
     if (touch) {
+      console.log('[MultiPlayerCanvas] touchMove (React) - pos:', touch.clientX, touch.clientY)
       updateHoveredCell(touch.clientX, touch.clientY)
     }
   }
 
-  const handlePlacement = () => {
-    if (!isCurrentPlayer || !draggedTower || !hoveredCellRef.current || !currentPlayer) return
+  const handlePlacement = useCallback(() => {
+    console.log('[MultiPlayerCanvas] handlePlacement called')
+    console.log('[MultiPlayerCanvas] - isCurrentPlayer:', isCurrentPlayer)
+    console.log('[MultiPlayerCanvas] - draggedTower:', draggedTower)
+    console.log('[MultiPlayerCanvas] - hoveredCell:', hoveredCellRef.current)
+    console.log('[MultiPlayerCanvas] - currentPlayer:', !!currentPlayer)
+
+    if (!isCurrentPlayer || !draggedTower || !hoveredCellRef.current || !currentPlayer) {
+      console.log('[MultiPlayerCanvas] handlePlacement ABORTED - missing condition')
+      return
+    }
 
     const cells = computeCoveredCells(
       hoveredCellRef.current.x,
@@ -432,9 +442,12 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       draggedTower
     )
 
+    console.log('[MultiPlayerCanvas] - cells:', cells)
     const isInvalid = isColliding(cells, towers)
+    console.log('[MultiPlayerCanvas] - isInvalid:', isInvalid)
 
     if (isInvalid) {
+      console.log('[MultiPlayerCanvas] handlePlacement ABORTED - collision detected')
       return
     }
 
@@ -464,7 +477,32 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       ghost.innerHTML = ''
       ghost.style.display = 'none'
     }
-  }
+  }, [isCurrentPlayer, draggedTower, currentPlayer, towers, placeTowerAt, sendAction, onTowerPlace, setDraggedTower])
+
+  // Écouter les touchmove et touchend au niveau window pour capturer TOUS les événements
+  useEffect(() => {
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (!isCurrentPlayer) return
+      const touch = e.touches[0]
+      if (touch && canvasRef.current) {
+        console.log('[MultiPlayerCanvas] touchMove (global) - pos:', touch.clientX, touch.clientY)
+        updateHoveredCell(touch.clientX, touch.clientY)
+      }
+    }
+
+    const handleGlobalTouchEnd = (e: TouchEvent) => {
+      if (!isCurrentPlayer || !draggedTower) return
+      console.log('[MultiPlayerCanvas] touchEnd (global) - calling handlePlacement')
+      handlePlacement()
+    }
+
+    window.addEventListener('touchmove', handleGlobalTouchMove, { passive: true })
+    window.addEventListener('touchend', handleGlobalTouchEnd, { passive: true })
+    return () => {
+      window.removeEventListener('touchmove', handleGlobalTouchMove)
+      window.removeEventListener('touchend', handleGlobalTouchEnd)
+    }
+  }, [isCurrentPlayer, draggedTower, handlePlacement])
 
   // Si aucun joueur sélectionné ET pas le joueur actuel, afficher le message
   if (!selectedPlayer && !isCurrentPlayer) {
