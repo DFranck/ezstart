@@ -25,14 +25,26 @@ export const towerSchema = z.object({
   shape: z
     .array(z.array(z.boolean()))
     .refine(
-      (shape: BoolGrid) =>
-        SHAPE_VALUES.some(
-          (allowed: readonly (readonly boolean[])[]) =>
-            JSON.stringify(allowed) === JSON.stringify(shape)
-        ),
-      { message: 'Shape must match predefined Tetris shapes' }
+      (shape: BoolGrid) => {
+        // Max 3×3, connected cells, at least 1 cell
+        const rows = shape.length
+        if (rows === 0 || rows > 3) return false
+        const cols = shape[0]?.length ?? 0
+        if (cols === 0 || cols > 3) return false
+
+        // Check rectangular
+        for (const row of shape) {
+          if (row.length !== cols) return false
+        }
+
+        // Must have at least one true
+        if (!shape.some(row => row.some(cell => cell))) return false
+
+        return true
+      },
+      { message: 'Shape must be max 3×3 with connected cells' }
     )
-    .describe('2D shape of the tower (must match Tetris shape)'),
+    .describe('2D shape of the tower (max 3×3, connected cells)'),
   splashRadius: z.number().min(0).max(5).optional().describe('Splash radius of the tower'),
   effect: z.enum(EFFECTS).optional().describe('Tower effect'),
   targetingStrategy: z.enum(TARGETING_STRATEGIES).optional().describe('Tower targeting strategy'),
@@ -43,7 +55,8 @@ export type Tower = z.infer<typeof towerSchema>
 
 function getRandomShape(): boolean[][] {
   const shape = SHAPE_VALUES[Math.floor(Math.random() * SHAPE_VALUES.length)]
-  return JSON.parse(JSON.stringify(shape)) as boolean[][]
+  // Deep clone to avoid readonly issues
+  return shape.map(row => [...row])
 }
 
 export function mockTowers(count: number): Tower[] {

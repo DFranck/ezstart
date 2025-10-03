@@ -4,6 +4,7 @@ import { useGameState } from '@/stores/useGameState'
 import { callApi } from '@ezstart/ui/utils'
 import { notFound, useParams } from 'next/navigation'
 
+import { Div } from '@ezstart/ui/components'
 import { Game } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 import { GameCanvasCanvas } from '../components/GameCanvasCanvas'
@@ -73,24 +74,27 @@ export default function GamePage() {
         {/* Main Game Area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Canvas - Full width on mobile, flexible on desktop */}
-          <div className="flex-1 relative overflow-auto">
+          <div className="flex-1 relative overflow-auto flex justify-center mb-96">
             <GameCanvasCanvas />
-          </div>
 
-          {/* Desktop Sidebar - Hidden on mobile */}
-          <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto">
-            <TowerShop game={game} />
-            <MobShop game={game} />
+            {/* Desktop Sidebar - Hidden on mobile */}
+            <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto right-0 top-1/2 bg-red-500 absolute">
+              <TowerShop game={game} />
+              <MobShop game={game} />
+            </div>
           </div>
         </div>
 
         {/* Mobile Tower Bar - Always visible at bottom */}
         <div
-          className={`md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t shadow-lg transition-opacity ${
+          className={`md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-40 bg-background/95 backdrop-blur border-t shadow-lg transition-opacity w-full max-w-[600px] ${
             draggedTower ? 'pointer-events-none opacity-50' : ''
           }`}
         >
-          <div className="p-2"></div>
+          <Div layout="col" className="bg-blue-500/50 z-50 w-full fixed bottom-0">
+            <MobShop game={game} />
+            <TowerShop game={game} />
+          </Div>
         </div>
 
         {/* Mobile Drawer - Slide up from bottom (Mobs/Stats only) */}
