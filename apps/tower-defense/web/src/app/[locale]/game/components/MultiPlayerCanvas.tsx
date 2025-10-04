@@ -3,9 +3,9 @@
 import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
+import { ELEMENTAL_COLORS, TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
-import { computeCoveredCells, findPath, isColliding } from '@tower-defense/utils'
+import { computeCoveredCells, findPath, isColliding, paintFromElement } from '@tower-defense/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 interface MultiPlayerCanvasProps {
@@ -206,18 +206,44 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
       })
 
-      // Tours du joueur
-      if (isCurrentPlayer) {
-        // Tours du joueur actuel - couleur normale
-        ctx.fillStyle = '#facc99'
-      } else {
-        // Tours des adversaires - couleur différente
-        ctx.fillStyle = '#ff9999'
-      }
-
+      // Tours du joueur avec couleurs élémentaires
       towers.forEach(tower => {
+        // Vérifier que la tower a un elementalType
+        if (!tower.elementalType) {
+          // Fallback si pas de type défini
+          ctx.fillStyle = isCurrentPlayer ? '#facc99' : '#ff9999'
+          tower.coveredCells.forEach(({ x, y }) => {
+            ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+          })
+          return
+        }
+
+        const paint = paintFromElement(tower.elementalType)
+
         tower.coveredCells.forEach(({ x, y }) => {
+          // Si c'est un gradient (dual type)
+          if (paint.kind === 'dual') {
+            const gradient = ctx.createLinearGradient(
+              x * TILE_SIZE,
+              y * TILE_SIZE,
+              (x + 1) * TILE_SIZE,
+              (y + 1) * TILE_SIZE
+            )
+            gradient.addColorStop(0, paint.color)
+            gradient.addColorStop(1, paint.colorB!)
+            ctx.fillStyle = gradient
+          } else {
+            ctx.fillStyle = paint.color
+          }
+
           ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+
+          // Bordure pour distinguer les towers adversaires
+          if (!isCurrentPlayer) {
+            ctx.strokeStyle = '#000000'
+            ctx.lineWidth = 1
+            ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+          }
         })
       })
 
@@ -256,7 +282,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         mobsByPosition.get(key)!.push(mob)
       })
 
-      ctx.fillStyle = '#dc2626' // Rouge pour les mobs
+      // Mobs avec couleurs élémentaires
       interpolatedMobsRef.current.forEach(mob => {
         // Calculer la position interpolée linéaire (vitesse constante)
         const elapsed = now - mob.lastUpdateTime
@@ -268,6 +294,10 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
         const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
         const radius = TILE_SIZE * 0.3
+
+        // Couleur du mob selon son type élémentaire
+        const mobColor = ELEMENTAL_COLORS[mob.mob.elementalType] || '#dc2626'
+        ctx.fillStyle = mobColor
 
         ctx.beginPath()
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
@@ -288,9 +318,6 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           // Barre de vie actuelle
           ctx.fillStyle = hpRatio > 0.5 ? '#16a34a' : hpRatio > 0.25 ? '#eab308' : '#dc2626'
           ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight)
-
-          // Restaurer la couleur du mob
-          ctx.fillStyle = '#dc2626'
         }
       })
 

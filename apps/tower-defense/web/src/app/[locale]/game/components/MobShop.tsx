@@ -4,6 +4,7 @@ import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Div, H6, Icon } from '@ezstart/ui/components'
+import { ELEMENTAL_COLORS, type ElementalType } from '@tower-defense/config'
 import { Game, mockMobs } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 
@@ -84,21 +85,29 @@ export function MobShop({ game }: Props) {
 
   return (
     <Div className="z-50">
-      <Div layout="row" className="gap-2 flex-wrap bg-yellow-500/20">
-        {mobs.map(mob => (
-          <Button
-            size="icon"
-            key={mob._id}
-            onClick={() => handleBuyMob(mob)}
-            onTouchEnd={e => {
-              e.preventDefault()
-              e.stopPropagation()
-              handleBuyMob(mob)
-            }}
-          >
-            <Icon name="lucide:ShoppingCart" />
-          </Button>
-        ))}
+      <Div layout="row" className="gap-2 flex-wrap">
+        {mobs.map(mob => {
+          const mobColor = ELEMENTAL_COLORS[mob.elementalType as ElementalType] || '#888'
+          return (
+            <Button
+              size="icon"
+              key={mob._id}
+              onClick={() => handleBuyMob(mob)}
+              onTouchEnd={e => {
+                e.preventDefault()
+                e.stopPropagation()
+                handleBuyMob(mob)
+              }}
+              style={{ backgroundColor: mobColor }}
+              className="relative group"
+            >
+              <Icon name="lucide:Ghost" className="text-white" />
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                {mob.name}
+              </span>
+            </Button>
+          )
+        })}
         <Button size={'icon'} onClick={() => setMobs(mockMobs(5))}>
           <Icon name="lucide:RefreshCw" />
         </Button>

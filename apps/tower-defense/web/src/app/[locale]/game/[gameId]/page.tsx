@@ -74,11 +74,14 @@ export default function GamePage() {
         {/* Main Game Area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Canvas - Full width on mobile, flexible on desktop */}
-          <div className="flex-1 relative overflow-auto flex justify-center mb-96">
+          <div className="flex-1 relative overflow-auto flex justify-center mb-32 lg:mb-0">
             <GameCanvasCanvas />
-
+            <Div layout="col" className="lg:hidden fixed bottom-0">
+              <MobShop game={game} />
+              <TowerShop game={game} />
+            </Div>
             {/* Desktop Sidebar - Hidden on mobile */}
-            <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto right-0 top-1/2 bg-red-500 absolute">
+            <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto bg-red-500">
               <TowerShop game={game} />
               <MobShop game={game} />
             </div>
@@ -90,12 +93,7 @@ export default function GamePage() {
           className={`md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-40 bg-background/95 backdrop-blur border-t shadow-lg transition-opacity w-full max-w-[600px] ${
             draggedTower ? 'pointer-events-none opacity-50' : ''
           }`}
-        >
-          <Div layout="col" className="bg-blue-500/50 z-50 w-full fixed bottom-0">
-            <MobShop game={game} />
-            <TowerShop game={game} />
-          </Div>
-        </div>
+        ></div>
 
         {/* Mobile Drawer - Slide up from bottom (Mobs/Stats only) */}
         {activeShop && activeShop !== 'tower' && (

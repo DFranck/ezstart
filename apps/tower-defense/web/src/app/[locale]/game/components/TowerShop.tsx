@@ -125,7 +125,7 @@ export function TowerShop({ game }: TowerShopProps) {
 
   return (
     <div className="relative z-50">
-      <div className="flex justify-between bg-pink-500/50 gap-2 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex lg:flex-col justify-between bg-pink-500/50 gap-2 overflow-x-auto pb-2 scrollbar-thin">
         {towers.map((tower, index) => (
           <div
             key={tower._id}

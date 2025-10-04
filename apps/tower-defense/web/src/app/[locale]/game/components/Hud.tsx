@@ -5,8 +5,6 @@ import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Div, Icon, LI, Section, UL } from '@ezstart/ui/components'
 import { GameMenu } from './GameMenu'
 import { GameTimer } from './GameTimer'
-import { MobShop } from './MobShop'
-import { TowerShop } from './TowerShop'
 
 export function Hud() {
   const { game } = useGame()
@@ -20,7 +18,7 @@ export function Hud() {
     <Section
       id="hud"
       size={'xs'}
-      className="h-full justify-between items-start max-h-screen max-w-screen bg-red-500/50 absolute"
+      className="h-full justify-between items-start max-h-screen max-w-screen absolute"
     >
       <Div layout={'row'} className="w-fit">
         <GameMenu gameId={game._id} />
@@ -36,10 +34,6 @@ export function Hud() {
             <Icon name="lucide:Coins" /> {playerInGame?.income ?? 0}
           </LI>
         </UL>
-      </Div>
-      <Div layout="col" className="bg-blue-500/50 z-50 w-full">
-        <MobShop game={game} />
-        <TowerShop game={game} />
       </Div>
     </Section>
   )
