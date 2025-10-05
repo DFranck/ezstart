@@ -110,6 +110,14 @@ export const TOWER_SHAPES_3x3: readonly NonEmptyGrid[] = [
 /** Flat list of all valid shapes (used by validation) */
 export const SHAPE_VALUES: readonly Grid[] = TOWER_SHAPES_3x3 as readonly Grid[]
 
+/** Get shapes by max cell count */
+export function getShapesByMaxSize(maxCells: number): readonly Grid[] {
+  return SHAPE_VALUES.filter(shape => {
+    const cellCount = shape.reduce((count, row) => count + row.filter(cell => cell).length, 0)
+    return cellCount <= maxCells
+  })
+}
+
 /** Validate shape: max 3×3, connected cells, at least 1 cell */
 export function isValidTowerShape(grid: readonly (readonly boolean[])[]): boolean {
   const rows = grid.length

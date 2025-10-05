@@ -16,11 +16,18 @@ export async function checkEndGame(gameId: string) {
   console.log(`[checkEndGame] Game ${gameId}:`, {
     totalPlayers: state.players.length,
     activePlayers: active.length,
-    playerStatuses: state.players.map((p: InGamePlayer) => ({ id: p.player._id || p.player, status: p.status })),
+    isSoloMode: state.isSoloMode,
+    playerStatuses: state.players.map((p: InGamePlayer) => ({ id: p.player._id || p.player, status: p.status, hp: p.hp })),
     phase: state.phase
   })
 
-  if (active.length <= 1 && state.phase !== 'finished') {
+  // Solo mode: end game if player is eliminated
+  // Multi mode: end game if 1 or 0 players remain active
+  const shouldEndGame = state.isSoloMode
+    ? active.length === 0
+    : active.length <= 1
+
+  if (shouldEndGame && state.phase !== 'finished') {
     console.log(`[game:end] Game ${gameId} finished. Winner:`, active[0]?.player)
 
     const gameDoc = await GameModel.findById(gameId)

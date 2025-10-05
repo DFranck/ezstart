@@ -4,8 +4,8 @@ import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Div, H6, Icon } from '@ezstart/ui/components'
-import { ELEMENTAL_COLORS, type ElementalType } from '@tower-defense/config'
-import { Game, mockMobs } from '@tower-defense/types'
+import { calculateUnitPrice, ELEMENTAL_COLORS, type ElementalType } from '@tower-defense/config'
+import { Game, mockMobs, ShopItem } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 
 type Props = {
@@ -16,24 +16,38 @@ export function MobShop({ game }: Props) {
   const { game: currentGame, sendAction } = useGame()
   const currentPlayer = usePlayerStore(s => s.player)
   const { toSendMobs } = useGameState()
-  const [mobs, setMobs] = useState<any[]>([])
+  const gold = useGameState(s => s.gold)
+  const spendGold = useGameState(s => s.spendGold)
+  const [shopItems, setShopItems] = useState<ShopItem[]>([])
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-    setMobs(mockMobs(5))
+    const mobs = mockMobs(5)
+    const items: ShopItem[] = mobs.map(mob => ({
+      type: 'unit' as const,
+      basePrice: calculateUnitPrice(mob),
+      unit: mob,
+    }))
+    setShopItems(items)
   }, [])
 
-  const handleBuyMob = (mob: any) => {
-    console.log('[MobShop] Buy mob clicked:', mob)
-    console.log('[MobShop] Current player:', currentPlayer)
-    console.log('[MobShop] Current game:', currentGame)
-    console.log('[MobShop] Is solo mode:', currentGame?.isSoloMode)
+  const handleBuyMob = (item: ShopItem) => {
+    if (item.type !== 'unit') return
+
+    // Check if player has enough gold
+    if (gold < item.basePrice) {
+      console.log('[MobShop] Not enough gold:', gold, '<', item.basePrice)
+      return
+    }
 
     if (!currentPlayer || !currentGame) {
       console.warn('[MobShop] Missing currentPlayer or currentGame')
       return
     }
+
+    // Backend will deduct gold and sync back via gameState
+    // No local deduction to avoid double spending
 
     // En mode solo, envoyer les mobs sur soi-même
     if (currentGame.isSoloMode) {
@@ -41,8 +55,8 @@ export function MobShop({ game }: Props) {
       sendAction({
         type: 'spawnMob',
         payload: {
-          mobType: mob,
-          targetPlayerId: currentPlayer._id, // Spawn sur soi en solo
+          mobType: item.unit,
+          targetPlayerId: currentPlayer._id,
           fromPlayerId: currentPlayer._id,
         },
       })
@@ -61,7 +75,7 @@ export function MobShop({ game }: Props) {
         sendAction({
           type: 'spawnMob',
           payload: {
-            mobType: mob,
+            mobType: item.unit,
             targetPlayerId: opponent.player._id,
             fromPlayerId: currentPlayer._id,
           },
@@ -86,29 +100,84 @@ export function MobShop({ game }: Props) {
   return (
     <Div className="z-50">
       <Div layout="row" className="gap-2 flex-wrap">
-        {mobs.map(mob => {
-          const mobColor = ELEMENTAL_COLORS[mob.elementalType as ElementalType] || '#888'
+        {shopItems.map(item => {
+          if (item.type !== 'unit') return null
+          const mobColor = ELEMENTAL_COLORS[item.unit.elementalType as ElementalType] || '#888'
+          const canAfford = gold >= item.basePrice
           return (
-            <Button
-              size="icon"
-              key={mob._id}
-              onClick={() => handleBuyMob(mob)}
-              onTouchEnd={e => {
-                e.preventDefault()
-                e.stopPropagation()
-                handleBuyMob(mob)
-              }}
-              style={{ backgroundColor: mobColor }}
-              className="relative group"
-            >
-              <Icon name="lucide:Ghost" className="text-white" />
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {mob.name}
-              </span>
-            </Button>
+            <div key={item.unit._id} className="relative">
+              <Button
+                size="icon"
+                onClick={() => handleBuyMob(item)}
+                onTouchEnd={e => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleBuyMob(item)
+                }}
+                style={{ backgroundColor: mobColor }}
+                className="relative group h-14 w-14"
+                disabled={!canAfford}
+              >
+                <Icon name="lucide:Ghost" className="text-white" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  {item.unit.name}
+                </span>
+              </Button>
+
+              {/* Price badge (top-right) */}
+              <div
+                className={`absolute -top-1 -right-1 px-1 py-0.5 rounded-sm text-[10px] font-bold leading-none ${
+                  canAfford ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'
+                }`}
+              >
+                {item.basePrice}
+              </div>
+
+              {/* HP badge (top-left) - only number */}
+              <div className="absolute -top-1 -left-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-red-500/90 text-white leading-none">
+                {item.unit.hp}
+              </div>
+
+              {/* Damage badge (bottom-left) - only number */}
+              <div className="absolute -bottom-1 -left-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-orange-500/90 text-white leading-none">
+                {item.unit.damage}
+              </div>
+
+              {/* Speed badge (bottom-right) - only number */}
+              <div className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-blue-500/90 text-white leading-none">
+                {item.unit.speed}
+              </div>
+
+              {/* Special icons - smaller */}
+              {item.unit.canFly && (
+                <div className="absolute top-0 left-0">
+                  <Icon name="lucide:Wind" className="w-2.5 h-2.5 text-cyan-400" />
+                </div>
+              )}
+              {item.unit.isRanged && (
+                <div className="absolute bottom-0 right-0">
+                  <Icon name="lucide:Target" className="w-2.5 h-2.5 text-purple-400" />
+                </div>
+              )}
+
+              {!canAfford && (
+                <div className="absolute inset-0 bg-black/50 rounded pointer-events-none" />
+              )}
+            </div>
           )
         })}
-        <Button size={'icon'} onClick={() => setMobs(mockMobs(5))}>
+        <Button
+          size={'icon'}
+          onClick={() => {
+            const mobs = mockMobs(5)
+            const items: ShopItem[] = mobs.map(mob => ({
+              type: 'unit' as const,
+              basePrice: calculateUnitPrice(mob),
+              unit: mob,
+            }))
+            setShopItems(items)
+          }}
+        >
           <Icon name="lucide:RefreshCw" />
         </Button>
       </Div>

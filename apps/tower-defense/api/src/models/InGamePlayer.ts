@@ -17,6 +17,8 @@ const inGamePlayerSchema = new Schema(
     gold: { type: Number, required: true },
     income: { type: Number, required: true },
     hp: { type: Number, required: true },
+    tier: { type: Number, required: true, default: 1, min: 1 },
+    goldSpent: { type: Number, required: true, default: 0, min: 0 },
     hand: { type: [towerSchema], required: true, default: [] },
     placedTowers: { type: [placedTowerSchema], required: true, default: [] },
     incomingUnits: { type: [mobSchema], required: true, default: [] },

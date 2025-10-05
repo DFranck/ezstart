@@ -81,7 +81,7 @@ export default function GamePage() {
               <TowerShop game={game} />
             </Div>
             {/* Desktop Sidebar - Hidden on mobile */}
-            <div className="hidden md:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto bg-red-500">
+            <div className="hidden lg:flex md:w-[320px] flex-col gap-4 p-4 bg-background/95 backdrop-blur border-l overflow-y-auto">
               <TowerShop game={game} />
               <MobShop game={game} />
             </div>

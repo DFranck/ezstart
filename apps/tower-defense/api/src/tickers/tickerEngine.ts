@@ -1,5 +1,12 @@
 import { createTickerEngine } from '@ezstart/express-core'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
+import {
+  calculateKillReward,
+  getIncomeTickInterval,
+  calculateTotalIncome,
+  INCOME_INTERVAL_SECONDS,
+  TOWER_STATS,
+} from '@tower-defense/config'
 import { findPath } from '@tower-defense/utils'
 import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
 import { updatePlayerStatusService } from '../services/updatePlayerStatusService.js'
@@ -109,9 +116,10 @@ function processTowerAttacks(
   gameId: string,
   activeMobs: ActiveMob[],
   players: InGamePlayer[]
-): { updatedMobs: ActiveMob[]; projectiles: any[] } {
+): { updatedMobs: ActiveMob[]; projectiles: any[]; goldRewards: Map<string, number> } {
   let updatedMobs = [...activeMobs]
   const projectiles: any[] = []
+  const goldRewards = new Map<string, number>() // playerId -> gold earned
 
   // Pour chaque joueur
   for (const player of players) {
@@ -160,6 +168,10 @@ function processTowerAttacks(
           })
 
           if (newHp <= 0) {
+            // Mob killed - award gold to defender
+            const reward = calculateKillReward(mob.mob)
+            goldRewards.set(playerId, (goldRewards.get(playerId) || 0) + reward)
+            console.log(`[Ticker] ${player.player?.name} killed ${mob.mob.name} → +${reward} gold`)
             return null as any // Marquer pour suppression
           }
 
@@ -172,7 +184,7 @@ function processTowerAttacks(
     }
   }
 
-  return { updatedMobs, projectiles }
+  return { updatedMobs, projectiles, goldRewards }
 }
 
 // Fonction pour déplacer les mobs sur leur path avec collision RTS-style
@@ -314,7 +326,7 @@ export const ticker = createTickerEngine<any>({
     // Plus de requête DB ici - l'élimination est gérée en mémoire après les dégâts
 
     // 1. Faire tirer les tours sur les mobs
-    const { updatedMobs: mobsAfterAttacks, projectiles } = processTowerAttacks(
+    const { updatedMobs: mobsAfterAttacks, projectiles, goldRewards } = processTowerAttacks(
       gameId,
       state.activeMobs,
       state.players
@@ -332,8 +344,25 @@ export const ticker = createTickerEngine<any>({
     const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
-    // Appliquer les dégâts aux joueurs et détecter les éliminations en mémoire
+    // 4. Apply gold rewards for kills and passive income
+    const incomeTickInterval = getIncomeTickInterval(250) // Dynamic based on balance.ts
+    const shouldApplyIncome = tick % incomeTickInterval === 0
+
+    // Appliquer les dégâts aux joueurs, gold rewards, et income
     const updatedPlayers = state.players.map((p: InGamePlayer) => {
+      const playerId = p.player?._id?.toString()
+      if (!playerId) return p
+
+      // Gold from kills
+      const killGold = goldRewards.get(playerId) || 0
+
+      // Passive income (applied based on INCOME_INTERVAL_SECONDS from balance.ts)
+      // Calculate total income including tier bonuses
+      const totalIncome = calculateTotalIncome(p.income || 0, p.tier || 1)
+      const incomeGold = shouldApplyIncome ? totalIncome : 0
+
+      const totalGoldGained = killGold + incomeGold
+      const newGold = totalGoldGained > 0 ? (p.gold || 0) + totalGoldGained : p.gold
       const damageToTake = mobsReachedEnd
         .filter((m: any) => m.targetPlayerId === p.player?._id?.toString())
         .reduce((total: number, m: any) => total + (m._damage || 10), 0)
@@ -378,11 +407,17 @@ export const ticker = createTickerEngine<any>({
             hp: newHp
           })
 
-          return { ...p, hp: newHp, status: 'eliminated' as const }
+          return { ...p, hp: newHp, gold: newGold, status: 'eliminated' as const }
         }
 
-        return { ...p, hp: newHp }
+        return { ...p, hp: newHp, gold: newGold }
       }
+
+      // No damage but gold gained
+      if (totalGoldGained > 0) {
+        return { ...p, gold: newGold }
+      }
+
       return p
     })
 

@@ -1,7 +1,7 @@
 // path: @tower-defense/types/src/tower.ts
 import { generateMock } from '@anatine/zod-mock'
 import { z, type infer } from 'zod'
-import { EFFECTS, SHAPE_VALUES, TARGETING_STRATEGIES } from '@tower-defense/config'
+import { EFFECTS, SHAPE_VALUES, getShapesByMaxSize, TARGETING_STRATEGIES } from '@tower-defense/config'
 import { damageTypeSchema } from './damage.js'
 import { elementalTypeSchema } from './elements.js'
 
@@ -53,17 +53,37 @@ export const towerSchema = z.object({
 
 export type Tower = z.infer<typeof towerSchema>
 
-function getRandomShape(): boolean[][] {
-  const shape = SHAPE_VALUES[Math.floor(Math.random() * SHAPE_VALUES.length)]
+function getRandomShape(maxCells?: number): boolean[][] {
+  const availableShapes = maxCells ? getShapesByMaxSize(maxCells) : SHAPE_VALUES
+  const shape = availableShapes[Math.floor(Math.random() * availableShapes.length)]
+  if (!shape) {
+    // Fallback to single cell if no shape found
+    return [[true]]
+  }
   // Deep clone to avoid readonly issues
   return shape.map(row => [...row])
 }
 
-export function mockTowers(count: number): Tower[] {
-  return Array.from({ length: count }, () => ({
-    ...generateMock(towerSchema),
-    shape: getRandomShape(),
-  }))
+export function mockTowers(count: number, filterFn?: (tower: Tower) => boolean, maxCells?: number): Tower[] {
+  const maxAttempts = count * 10 // Prevent infinite loop
+  const towers: Tower[] = []
+  let attempts = 0
+
+  while (towers.length < count && attempts < maxAttempts) {
+    const tower: Tower = {
+      ...generateMock(towerSchema),
+      shape: getRandomShape(maxCells),
+    }
+
+    // If no filter or filter passes, add the tower
+    if (!filterFn || filterFn(tower)) {
+      towers.push(tower)
+    }
+
+    attempts++
+  }
+
+  return towers
 }
 
 export const mockTower: Tower = {

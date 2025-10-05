@@ -1,5 +1,6 @@
 import type { InGamePlayer, Tower } from '@tower-defense/types'
 import { computeCoveredCells, isColliding } from '@tower-defense/utils'
+import { calculateTowerPrice, getTierFromGoldSpent } from '@tower-defense/config'
 import { ticker } from '../../tickers/tickerEngine.js'
 
 export function canPlaceTowerAt(
@@ -16,6 +17,13 @@ export function canPlaceTowerAt(
     p.player?._id?.toString() === playerId || p.playerId === playerId
   )
   if (!player) return false
+
+  // Check if player has enough gold
+  const towerPrice = calculateTowerPrice(tower)
+  if ((player.gold ?? 0) < towerPrice) {
+    console.log(`[canPlaceTowerAt] Not enough gold: ${player.gold} < ${towerPrice}`)
+    return false
+  }
 
   const towers = player.placedTowers
   const cells = computeCoveredCells(x, y, tower)
@@ -52,6 +60,7 @@ export async function placeTower(
   tower: Tower
 ): Promise<void> {
   const coveredCells = computeCoveredCells(x, y, tower)
+  const towerPrice = calculateTowerPrice(tower)
 
   // 1. Mettre à jour le ticker (état en mémoire)
   ticker.mutate(gameId, state => {
@@ -59,7 +68,7 @@ export async function placeTower(
       console.warn(`[placeTower] Invalid players array for game ${gameId}`)
       return state
     }
-    
+
     const players = state.players.map((p: any) => {
       if ((p.player?._id?.toString() || p.playerId) !== playerId) return p
 
@@ -69,9 +78,28 @@ export async function placeTower(
         coveredCells,
       }
 
+      // Deduct gold and update goldSpent
+      const newGold = Math.max(0, (p.gold ?? 0) - towerPrice)
+      const newGoldSpent = (p.goldSpent ?? 0) + towerPrice
+
+      // Check for tier unlock
+      const newTier = getTierFromGoldSpent(newGoldSpent)
+      const tierChanged = newTier !== (p.tier ?? 1)
+
+      if (tierChanged) {
+        console.log(`[placeTower] 🎉 Tier unlocked! ${p.tier ?? 1} → ${newTier}`)
+      }
+
+      console.log(
+        `[placeTower] Deducting ${towerPrice} gold (${p.gold} → ${newGold}), spent: ${newGoldSpent}, tier: ${newTier}`
+      )
+
       return {
         ...p,
         placedTowers: [...p.placedTowers, placedTower],
+        gold: newGold,
+        goldSpent: newGoldSpent,
+        tier: newTier,
       }
     })
 

@@ -45,6 +45,20 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
         )
       }
 
+      // Sync gold from backend to frontend store
+      if (currentPlayer) {
+        const playerInGame = state.players.find(p => p.player?._id === currentPlayer._id)
+        if (playerInGame && playerInGame.gold !== undefined) {
+          // Import dynamically to avoid circular dependency
+          import('@/stores/useGameState').then(({ useGameState }) => {
+            const currentGold = useGameState.getState().gold
+            if (currentGold !== playerInGame.gold) {
+              useGameState.getState().setGold(playerInGame.gold)
+            }
+          })
+        }
+      }
+
       // Mettre à jour l'état en préservant les tours locales du joueur actuel
       setGame(prevGame => {
         if (prevGame?.updatedAt === state.updatedAt) {

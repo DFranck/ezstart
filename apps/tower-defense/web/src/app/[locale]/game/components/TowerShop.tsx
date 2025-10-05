@@ -2,7 +2,8 @@
 
 import { useGameState } from '@/stores/useGameState'
 import { Button, Icon } from '@ezstart/ui/components'
-import { Game, mockTowers } from '@tower-defense/types'
+import { calculateTowerPrice, isTowerAllowedAtTier } from '@tower-defense/config'
+import { Game, mockTowers, ShopItem } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
 import { Tower } from './Tower'
 
@@ -12,32 +13,118 @@ type TowerShopProps = {
 
 export function TowerShop({ game }: TowerShopProps) {
   const setDraggedTower = useGameState(s => s.setDraggedTower)
-  const [towers, setTowers] = useState<any[]>([])
+  const gold = useGameState(s => s.gold)
+  const spendGold = useGameState(s => s.spendGold)
+  const [shopItems, setShopItems] = useState<ShopItem[]>([])
   const [isClient, setIsClient] = useState(false)
+  const [currentTier, setCurrentTier] = useState(1)
   const towerRefs = useRef<(HTMLDivElement | null)[]>([])
   const shopContainerRef = useRef<HTMLDivElement>(null)
 
-  // Initialiser les towers côté client seulement pour éviter l'hydratation mismatch
+  // Get current player's tier from game state
+  useEffect(() => {
+    const currentPlayerId = game.players[0]?.player?._id // TODO: Get actual current player
+    const currentPlayer = game.players.find(p => p.player?._id === currentPlayerId)
+    if (currentPlayer?.tier && currentPlayer.tier !== currentTier) {
+      console.log('[TowerShop] Tier changed:', currentTier, '→', currentPlayer.tier)
+      setCurrentTier(currentPlayer.tier)
+    }
+  }, [game.players, currentTier])
+
+  // Generate a single tower with tier filtering
+  const generateOneTower = (tier: number): ShopItem => {
+    // Get max cells for tier
+    const maxCells = tier === 1 ? 1 : tier === 2 ? 2 : 9
+    console.log('[TowerShop] Generating tower for tier:', tier, 'maxCells:', maxCells)
+
+    // Generate tower with maxCells constraint
+    const towers = mockTowers(
+      1,
+      t => {
+        const price = calculateTowerPrice(t)
+        const allowed = isTowerAllowedAtTier(t, tier, price)
+        if (!allowed) {
+          const shapeSize = t.shape.reduce(
+            (count, row) => count + row.filter(cell => cell).length,
+            0
+          )
+          console.log(
+            '[TowerShop] Tower rejected - size:',
+            shapeSize,
+            'price:',
+            price,
+            'tier:',
+            tier
+          )
+        }
+        return allowed
+      },
+      maxCells
+    )
+
+    const tower = towers[0] ?? mockTowers(1, undefined, 1)[0]! // Fallback to 1-cell
+    const shapeSize = tower.shape.reduce((count, row) => count + row.filter(cell => cell).length, 0)
+    console.log(
+      '[TowerShop] Generated tower - size:',
+      shapeSize,
+      'price:',
+      calculateTowerPrice(tower)
+    )
+
+    return {
+      type: 'tower' as const,
+      basePrice: calculateTowerPrice(tower),
+      tower,
+    }
+  }
+
+  // Generate towers with tier filtering
+  const generateTowers = () => {
+    console.log('[TowerShop] Generating towers for tier:', currentTier)
+    const items: ShopItem[] = Array.from({ length: 5 }, () => generateOneTower(currentTier))
+    setShopItems(items)
+  }
+
+  // Replace a tower at specific index
+  const replaceTowerAt = (index: number) => {
+    setShopItems(prev => {
+      const newItems = [...prev]
+      newItems[index] = generateOneTower(currentTier)
+      return newItems
+    })
+  }
+
+  // Initialiser les shop items côté client
   useEffect(() => {
     setIsClient(true)
-    setTowers(mockTowers(5))
-  }, [])
+    generateTowers()
+  }, [currentTier])
 
-  const startDraggingTower = (towerIndex: number) => {
-    const tower = towers[towerIndex]
-    setDraggedTower(tower)
-    // Ghost tower preview removed - only grid cells preview needed
+  const startDraggingTower = (itemIndex: number) => {
+    const item = shopItems[itemIndex]
+    if (!item || item.type !== 'tower') return
+
+    // Check if player has enough gold
+    if (gold < item.basePrice) {
+      console.log('[TowerShop] Not enough gold:', gold, '<', item.basePrice)
+      return
+    }
+
+    setDraggedTower(item.tower, item.basePrice)
+
+    // Replace the tower in the shop immediately
+    replaceTowerAt(itemIndex)
   }
 
-  const handleMouseDown = (towerIndex: number) => (e: React.MouseEvent) => {
+  const handleMouseDown = (itemIndex: number) => (e: React.MouseEvent) => {
     e.preventDefault()
-    startDraggingTower(towerIndex)
+    startDraggingTower(itemIndex)
   }
 
-  const handleTouchStart = (towerIndex: number) => (e: React.TouchEvent) => {
+  const handleTouchStart = (itemIndex: number) => (e: React.TouchEvent) => {
     const touch = e.touches[0]
     if (touch) {
-      startDraggingTower(towerIndex)
+      startDraggingTower(itemIndex)
     }
   }
 
@@ -71,7 +158,7 @@ export function TowerShop({ game }: TowerShopProps) {
         ref.removeEventListener('touchstart', handler)
       })
     }
-  }, [towers])
+  }, [shopItems])
 
   useEffect(() => {
     const handleEnd = (e: MouseEvent | TouchEvent) => {
@@ -87,7 +174,7 @@ export function TowerShop({ game }: TowerShopProps) {
       const clientY =
         'changedTouches' in e ? e.changedTouches[0]?.clientY || 0 : (e as MouseEvent).clientY
 
-      // Vérifier si on a laché sur le canvas
+      // Vérifier si on a lâché sur le canvas
       const elementAtPoint = document.elementFromPoint(clientX, clientY)
       const isCanvas = elementAtPoint?.closest('canvas')
 
@@ -125,20 +212,35 @@ export function TowerShop({ game }: TowerShopProps) {
 
   return (
     <div className="relative z-50">
-      <div className="flex lg:flex-col justify-between bg-pink-500/50 gap-2 overflow-x-auto pb-2 scrollbar-thin">
-        {towers.map((tower, index) => (
-          <div
-            key={tower._id}
-            ref={el => {
-              towerRefs.current[index] = el
-            }}
-            className="flex-shrink-0 active:scale-95 touch-none transition-transform"
-            onMouseDown={handleMouseDown(index)}
-          >
-            <Tower tower={tower} />
-          </div>
-        ))}
-        <Button size={'icon'} onClick={() => setTowers(mockTowers(5))}>
+      <div className="flex lg:flex-col justify-between gap-2">
+        {shopItems.map((item, index) => {
+          if (item.type !== 'tower') return null
+          const canAfford = gold >= item.basePrice
+          return (
+            <div
+              key={item.tower._id}
+              ref={el => {
+                towerRefs.current[index] = el
+              }}
+              className="flex-shrink-0 active:scale-95 touch-none transition-transform relative w-fit"
+              onMouseDown={handleMouseDown(index)}
+            >
+              <Tower tower={item.tower} showStats={true} />
+              {/* Price badge moved outside tower stats to avoid conflict */}
+              <div
+                className={`absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  canAfford ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'
+                } z-10 leading-none`}
+              >
+                {item.basePrice}
+              </div>
+              {!canAfford && (
+                <div className="absolute inset-0 bg-black/50 rounded pointer-events-none" />
+              )}
+            </div>
+          )
+        })}
+        <Button size={'icon'} onClick={generateTowers}>
           <Icon name="lucide:RefreshCw" />
         </Button>
       </div>

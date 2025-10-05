@@ -1,6 +1,7 @@
 'use client'
 
 import { useGame } from '@/contexts/GameContext'
+import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Div, Icon, LI, Section, UL } from '@ezstart/ui/components'
 import { GameMenu } from './GameMenu'
@@ -9,6 +10,7 @@ import { GameTimer } from './GameTimer'
 export function Hud() {
   const { game } = useGame()
   const currentPlayer = usePlayerStore(s => s.player)
+  const gold = useGameState(s => s.gold)
 
   if (!game || !currentPlayer) return null
 
@@ -27,11 +29,11 @@ export function Hud() {
           <LI>
             <Icon name="lucide:Heart" /> {playerInGame?.hp ?? 0}
           </LI>
-          <LI>
-            <Icon name="lucide:Coins" /> {playerInGame?.gold ?? 0}
+          <LI className="font-bold text-yellow-600">
+            <Icon name="lucide:Coins" className="text-yellow-500" /> {gold}
           </LI>
           <LI>
-            <Icon name="lucide:Coins" /> {playerInGame?.income ?? 0}
+            <Icon name="lucide:TrendingUp" /> {playerInGame?.income ?? 0}/s
           </LI>
         </UL>
       </Div>

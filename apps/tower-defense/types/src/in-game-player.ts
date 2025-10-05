@@ -15,6 +15,8 @@ export const inGamePlayerSchema = z.object({
   gold: z.number().describe('Current gold'),
   income: z.number().describe('Passive income'),
   hp: z.number().describe('Remaining HP'),
+  tier: z.number().min(1).default(1).describe('Current tier (for progression)'),
+  goldSpent: z.number().default(0).describe('Total gold spent (for tier unlock)'),
   hand: z.array(towerSchema).describe('Cards in hand'),
   placedTowers: z.array(placedTowerSchema).describe('Towers placed'),
   incomingUnits: z.array(mobSchema).describe('Units sent to this player'),
