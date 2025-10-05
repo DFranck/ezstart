@@ -13,8 +13,8 @@ const PayContext = createContext<PayContextValue | null>(null)
 
 interface PayProviderProps {
   children: ReactNode
-  appName?: string
-  config?: Partial<PayClientConfig>
+  appName: string
+  config?: Partial<Omit<PayClientConfig, 'appName'>>
 }
 
 export function PayProvider({ children, appName, config }: PayProviderProps) {
