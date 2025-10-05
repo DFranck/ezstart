@@ -172,6 +172,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/eslint-config':
         specifier: workspace:*
@@ -331,6 +334,9 @@ importers:
       mongoose:
         specifier: ^8.0.0
         version: 8.17.0(socks@2.8.6)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -441,6 +447,9 @@ importers:
       stripe:
         specifier: ^14.0.0
         version: 14.25.0
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -880,6 +889,9 @@ importers:
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/eslint-config':
         specifier: workspace:*
