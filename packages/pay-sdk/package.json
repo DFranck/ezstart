@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@ezstart/ui": "workspace:*",
-    "zod": "^4.1.11",
+    "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

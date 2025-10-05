@@ -14,9 +14,6 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.3.0
         version: 4.3.0(react@19.1.1)
-      zod:
-        specifier: ^3.25.28
-        version: 3.25.76
     devDependencies:
       '@ezstart/eslint-config':
         specifier: workspace:*
@@ -227,6 +224,9 @@ importers:
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -937,17 +937,20 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@4.1.11)
+        version: 7.3.4(zod@3.25.76)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types
       '@tower-defense/config':
         specifier: workspace:*
         version: link:../config
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@anatine/zod-mock':
         specifier: ^3.14.0
-        version: 3.14.0(@faker-js/faker@9.9.0)(zod@4.1.11)
+        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)
 
   apps/tower-defense/utils:
     dependencies:
@@ -1136,7 +1139,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@4.1.11)
+        version: 7.3.4(zod@3.25.76)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../types
@@ -1164,6 +1167,9 @@ importers:
       yamljs:
         specifier: ^0.3.0
         version: 0.3.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@types/cors':
         specifier: ^2.8.18
@@ -1227,8 +1233,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       zod:
-        specifier: ^4.1.11
-        version: 4.1.11
+        specifier: ^3.23.8
+        version: 3.25.76
       zustand:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@19.1.12)(react@19.1.1)
@@ -8035,9 +8041,6 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.1.11:
-    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
-
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
     engines: {node: '>=12.7.0'}
@@ -8082,11 +8085,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
 
-  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@4.1.11)':
+  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)':
     dependencies:
       '@faker-js/faker': 9.9.0
       randexp: 0.5.3
-      zod: 4.1.11
+      zod: 3.25.76
 
   '@apideck/better-ajv-errors@0.3.6(ajv@8.17.1)':
     dependencies:
@@ -8099,11 +8102,6 @@ snapshots:
     dependencies:
       openapi3-ts: 4.5.0
       zod: 3.25.76
-
-  '@asteasolutions/zod-to-openapi@7.3.4(zod@4.1.11)':
-    dependencies:
-      openapi3-ts: 4.5.0
-      zod: 4.1.11
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -16011,8 +16009,6 @@ snapshots:
   yoga-layout@3.2.1: {}
 
   zod@3.25.76: {}
-
-  zod@4.1.11: {}
 
   zustand@4.5.7(@types/react@19.1.12)(react@19.1.1):
     dependencies:
