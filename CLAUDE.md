@@ -49,7 +49,9 @@ pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 | EZ-Billing | Web | 5025 | http://localhost:5025 | ✅ Running |
 | Tower Defense | API | 5030 | http://localhost:5030 | ✅ Running |
 | Tower Defense | Web | 5035 | http://localhost:5035 | ✅ Running |
-| EZStart | Web | 5045 | http://localhost:5045 | ✅ Running |
+| **EZPay** | **API** | **5040** | **http://localhost:5040** | **✅ Running** |
+| **EZPay** | **Web** | **5045** | **http://localhost:5045** | **✅ Running** |
+| EZStart | Web | 5050 | http://localhost:5050 | ✅ Running |
 | ASC-TCD | Web | 5055 | http://localhost:5055 | ✅ Running |
 | FengShui | Web | 5065 | http://localhost:5065 | ✅ Running |
 | GreenPulse | API | 5070 | http://localhost:5070 | ✅ Running |
@@ -245,25 +247,43 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/we
 
 #### Providers et Infrastructure :
 
-- **Web Core** : `"@ezstart/next-core": "workspace:*"`
+- **Theme Provider** : `"@ezstart/next-theme": "workspace:*"`
+- **Auth Provider** : `"@ezstart/auth-sdk": "workspace:*"`
 - **UI Components** : `"@ezstart/ui": "workspace:*"`
-- **WebProviders** : Pour apps avec i18n (ezstart)
-  ```tsx
-  import { WebProviders } from '@ezstart/next-core/providers'
-  <WebProviders messages={messages} locale={locale} timeZone={timeZone} appName="ezstart">
-  ```
-- **SimpleWebProviders** : Pour apps sans i18n (ezauth, ez-billing, fengshui, tower-defense)
-  ```tsx
-  import { SimpleWebProviders } from '@ezstart/next-core/providers'
-  <SimpleWebProviders appName="fengshui">
-  ```
 
-#### Avantages de @ezstart/next-core :
+**Setup standard (apps sans i18n) :**
+```tsx
+import { ThemeProvider } from '@ezstart/next-theme'
+import { AuthProvider } from '@ezstart/auth-sdk'
 
-- 🔐 **Auth centralisée** avec @ezstart/auth-sdk
-- 🎨 **Theme management** avec next-themes
-- 🌍 **i18n support** avec next-intl (si nécessaire)
-- ⚡ **SSR/SSG optimized** avec client/server boundaries
+<ThemeProvider>
+  <AuthProvider appName="fengshui">
+    {children}
+  </AuthProvider>
+</ThemeProvider>
+```
+
+**Setup avec i18n (ezstart uniquement) :**
+```tsx
+import { ThemeProvider } from '@ezstart/next-theme'
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { NextIntlClientProvider } from 'next-intl'
+
+<NextIntlClientProvider messages={messages} locale={locale}>
+  <ThemeProvider>
+    <AuthProvider appName="ezstart">
+      {children}
+    </AuthProvider>
+  </ThemeProvider>
+</NextIntlClientProvider>
+```
+
+#### Avantages de l'Architecture :
+
+- 🔐 **Auth centralisée** avec @ezstart/auth-sdk (SSO)
+- 🎨 **Theme management** avec @ezstart/next-theme (dark/light mode)
+- 🌍 **i18n support** avec next-intl (optionnel)
+- ⚡ **SSR/SSG optimized** avec client/server boundaries Next.js
 - 🏗️ **Architecture unifiée** pour toutes les apps web
 
 ### APIs - Configuration 100% Centralisée
@@ -332,7 +352,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - `types.json` - Configuration types
 - `@ezstart/next-config` - Configs Next.js partagées
 - `@ezstart/ui` - Composants, styles et configs CSS/PostCSS
-- `@ezstart/next-core` - Infrastructure web partagée (providers, auth, themes)
+- `@ezstart/next-theme` - Theme provider (dark/light mode)
 - `@ezstart/express-core` - Infrastructure API partagée
 - `@ezstart/auth-sdk` - SDK d'authentification centralisé
 
@@ -590,6 +610,218 @@ const { user, isAuthenticated, login, logout } = useAuth()
 1. **Remplacer** AuthProvider actuel par EZAuth
 2. **Créer** page `/auth/callback` dans chaque app
 3. **Single Sign-On** automatique entre toutes les apps
+
+## EZPay - Système de Paiement Universel ⭐ NOUVEAU
+
+### Architecture
+
+- **Service API** : `apps/ezpay/api` - Service standalone sur port 5040
+- **Service Web** : `apps/ezpay/web` - Dashboard et documentation sur port 5045
+- **Client SDK** : `packages/pay-sdk` - Package réutilisable avec React hooks et composants
+- **Base de données** : MongoDB partagée avec collection `payments`
+
+### Cas d'Usage
+
+EZPay gère **TOUS** les types de paiements du monorepo :
+
+| Type | Description | Exemple |
+|------|-------------|---------|
+| **Donations** | Dons avec testimonials publics | Support Tower Defense |
+| **Purchases** | Achats in-app | Gems, powerups, items |
+| **Subscriptions** | Abonnements récurrents | Premium Tower Defense |
+| **Invoices** | Facturation clients | Intégration EZ-Billing |
+
+### Avantages Architecture Centralisée
+
+✅ **Une seule config Stripe** pour tout le monorepo
+✅ **Webhooks centralisés** (pas 5 endpoints différents)
+✅ **Dashboard unifié** (tous les paiements visibles)
+✅ **Composants réutilisables** (donations, achats, abonnements)
+✅ **Link EZAuth** (historique paiements par user)
+✅ **Stats globales** (revenus, trending projects)
+
+### Intégration dans les Apps
+
+```typescript
+// 1. Ajouter dépendance
+"@ezstart/pay-sdk": "workspace:*"
+
+// 2. Setup client
+import { createPayClient, PayProvider } from '@ezstart/pay-sdk'
+
+const payClient = createPayClient({
+  appName: 'tower-defense'
+})
+
+// 3. Provider
+<PayProvider client={payClient}>
+  <App />
+</PayProvider>
+
+// 4. Utiliser composants
+import { DonateModal, DonationWall, BuyButton } from '@ezstart/pay-sdk'
+
+// Donations avec testimonials
+<DonateModal projectId="tower-defense" projectName="Tower Defense" />
+<DonationWall projectId="tower-defense" limit={9} />
+
+// Achats in-app
+<BuyButton
+  projectId="tower-defense"
+  productId="gems-100"
+  productName="100 Gems"
+  amount={4.99}
+  onSuccess={(payment) => addGems(100)}
+/>
+```
+
+### Endpoints API
+
+```
+POST   /api/donate              - Créer une donation
+GET    /api/donations           - Liste donations (testimonials)
+GET    /api/donations/stats     - Statistiques donations
+
+POST   /api/purchase            - Créer un achat
+GET    /api/purchases           - Liste achats utilisateur
+
+POST   /api/subscribe           - Créer abonnement
+GET    /api/subscriptions       - Liste abonnements utilisateur
+POST   /api/subscriptions/:id/cancel - Annuler abonnement
+
+POST   /api/webhooks/stripe     - Webhooks Stripe (confirmations)
+POST   /api/webhooks/paypal     - Webhooks PayPal (optionnel)
+
+GET    /api/payments/:id        - Détails paiement
+GET    /api/health              - Health check
+```
+
+### Base de Données - Model Payment
+
+```typescript
+{
+  // Project
+  projectId: 'tower-defense',
+  projectName: 'Tower Defense',
+
+  // Type & Amount
+  type: 'donation' | 'purchase' | 'subscription' | 'invoice',
+  amount: 9.99,
+  currency: 'USD',
+
+  // Customer (link EZAuth)
+  userId?: string,              // EZAuth user ID
+  customerName?: string,
+  customerEmail?: string,
+  isAnonymous: false,
+
+  // Payment Provider
+  provider: 'stripe' | 'paypal',
+  paymentId: 'cs_test_...',
+  paymentMethod: 'card',
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled',
+
+  // Metadata (flexible par type)
+  metadata: {
+    // Donations
+    message?: 'Great game!',
+    isPublic?: true,
+
+    // Purchases
+    productId?: 'gems-100',
+    productName?: '100 Gems',
+    quantity?: 1,
+
+    // Subscriptions
+    subscriptionId?: 'sub_...',
+    planId?: 'premium-monthly',
+    interval?: 'month' | 'year',
+
+    // Invoices
+    invoiceId?: 'INV-001',
+  },
+
+  createdAt: Date,
+  completedAt?: Date
+}
+```
+
+### Composants Disponibles
+
+**Donations :**
+- `<DonateButton />` - Bouton simple
+- `<DonateModal />` - Modal complet avec montants prédéfinis
+- `<DonationWall />` - Mur de testimonials publics
+
+**Purchases :**
+- `<BuyButton />` - Bouton d'achat avec callback
+- `<ProductCard />` - Carte produit réutilisable
+- `<CheckoutFlow />` - Flow complet de checkout
+
+**Subscriptions :**
+- `<SubscribeButton />` - Bouton d'abonnement
+- `<PricingTable />` - Table de pricing avec plans
+- `<SubscriptionManager />` - Gestion abonnements utilisateur
+
+**Partagés :**
+- `<PaymentHistory />` - Historique paiements utilisateur
+- `<PaymentStatus />` - Statut d'un paiement
+
+### Hooks Disponibles
+
+```typescript
+// Hook principal
+const { createDonation, createPurchase, createSubscription } = usePay()
+
+// Hook spécialisé donations
+const { donations, isLoading, reload } = useDonations({
+  projectId: 'tower-defense',
+  limit: 10
+})
+```
+
+### Configuration Stripe
+
+**Variables d'environnement API :**
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+WEB_URL=http://localhost:5045
+```
+
+**Variables d'environnement Web :**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5040/api
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+```
+
+### Webhooks Stripe
+
+EZPay gère automatiquement les webhooks Stripe pour :
+- ✅ `checkout.session.completed` → Status `completed`
+- ✅ `checkout.session.expired` → Status `cancelled`
+- ✅ `charge.refunded` → Status `refunded`
+- ✅ `customer.subscription.*` → Gestion abonnements
+
+**Endpoint webhook :** `https://ezpay-api.onrender.com/api/webhooks/stripe`
+
+### Utilisation Externe (Hors Monorepo)
+
+**Option 1: Package NPM** (futur)
+```bash
+npm install @ezstart/pay-sdk
+```
+
+**Option 2: Widget Embeddable**
+```html
+<script src="https://ezpay.vercel.app/widget.js"></script>
+<div id="ezpay-widget" data-project="my-project"></div>
+```
+
+**Option 3: Lien Direct**
+```
+https://ezpay.vercel.app/donate?project=tower-defense&amount=10
+```
 
 ## APIs - Standardisation Express-Core ✅
 

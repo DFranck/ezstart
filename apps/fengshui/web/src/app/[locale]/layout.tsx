@@ -1,11 +1,13 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
+import { PayProvider } from '@ezstart/pay-sdk'
 import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { payClient } from '@/lib/pay-client'
 import ClientLayout from './client-layout'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -48,7 +50,9 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <AuthProvider appName="fengshui">
-              <ClientLayout>{children}</ClientLayout>
+              <PayProvider client={payClient}>
+                <ClientLayout>{children}</ClientLayout>
+              </PayProvider>
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

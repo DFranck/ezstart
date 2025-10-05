@@ -25,7 +25,8 @@ This package is automatically included in all @ezstart APIs via workspace depend
 ```typescript
 import { createApp, connectToMongo, startServer, getApiPort, Router } from '@ezstart/express-core'
 
-const PORT = getApiPort('EZAUTH') // or 'EZ_BILLING', 'TOWER_DEFENSE'
+// Port configuration with fallback
+const PORT = getApiPort(5040) // Defaults to 5040, or uses process.env.PORT
 
 // Create app with standard configuration (includes cors, json parsing, etc.)
 const app = createApp()
@@ -148,14 +149,14 @@ startServer(app, {
 #### Port Configuration
 
 ```typescript
-import { getApiPort, API_PORTS } from '@ezstart/express-core'
+import { getApiPort } from '@ezstart/express-core'
 
-// Get standardized port for service
-const PORT = getApiPort('EZAUTH') // 8081
-const PORT = getApiPort('EZ_BILLING') // 4101
-const PORT = getApiPort('TOWER_DEFENSE') // 4201
+// Get standardized port for service (with fallback)
+const PORT = getApiPort(5010) // Defaults to 5010, or process.env.PORT if defined
 
-// Falls back to process.env.PORT if defined
+// Pattern 50xx:
+// APIs: 50x0 (EZAuth 5010, EZ-Billing 5020, Tower Defense 5030, EZPay 5040, etc.)
+// Web:  50x5 (EZAuth 5015, EZ-Billing 5025, Tower Defense 5035, EZPay 5045, etc.)
 ```
 
 #### Express Router (Centralized)
@@ -342,9 +343,11 @@ app.post('/users', (req: TypedRequest<CreateUserBody>, res) => {
 
 All @ezstart APIs use this shared infrastructure:
 
-- ✅ **ezauth/api** - Authentication service (port 8081)
-- ✅ **ez-billing/api** - Billing management API (port 4101)
-- ✅ **tower-defense/api** - Tower Defense game API (port 4201)
+- ✅ **ezauth/api** - Authentication service (port 5010)
+- ✅ **ezpay/api** - Universal payment system (port 5040)
+- ✅ **ez-billing/api** - Billing management API (port 5020)
+- ✅ **tower-defense/api** - Tower Defense game API (port 5030)
+- ✅ **green-pulse/api** - Green Pulse API (port 5070)
 
 ### Standardized Features Across All APIs:
 

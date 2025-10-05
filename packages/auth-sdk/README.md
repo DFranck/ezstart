@@ -193,29 +193,33 @@ const authClient = new AuthClient({
 })
 ```
 
-## Integration with @ezstart/next-core
+## Standard Integration with Theme Provider
 
-When using `@ezstart/next-core`, authentication is automatically configured:
+Typically used with `@ezstart/next-theme` for complete setup:
 
 ```tsx
-import { SimpleWebProviders } from '@ezstart/next-core/providers'
+import { ThemeProvider } from '@ezstart/next-theme'
+import { AuthProvider } from '@ezstart/auth-sdk'
 
-// Auth is automatically enabled
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SimpleWebProviders appName="my-app">
-      {children}
-    </SimpleWebProviders>
+    <ThemeProvider>
+      <AuthProvider appName="my-app">
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 ```
 
 ## Applications Using This SDK
 
+- ✅ **ezstart/web** - Main application (with i18n)
+- ✅ **ezauth/web** - Auth service UI
 - ✅ **ez-billing/web** - Billing management
-- ✅ **tower-defense/web** - Tower Defense game  
+- ✅ **tower-defense/web** - Tower Defense game
 - ✅ **fengshui/web** - Feng Shui application
-- ✅ All apps via `@ezstart/next-core`
+- ✅ **asc-tcd/web** - ASC-TCD application
 
 ## Development
 
@@ -232,7 +236,7 @@ pnpm typecheck
 
 ## Related Packages
 
-- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
+- [`@ezstart/next-theme`](../next-theme/README.md) - Theme provider for dark/light mode
 - [`@ezstart/ui`](../ui/README.md) - UI components library
 - [EZAuth API](../../apps/ezauth/api/README.md) - Authentication service
 - [EZAuth Web](../../apps/ezauth/web/README.md) - Authentication interface

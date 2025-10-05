@@ -608,7 +608,7 @@ pnpm dev
 
 ## Related Packages
 
-- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure using these components
+- [`@ezstart/next-theme`](../next-theme/README.md) - Theme management (dark/light mode) for web applications
 - [`@ezstart/tailwind-config`](../tailwind-config/README.md) - Tailwind configuration optimized for these components
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - ESLint rules for component development
 - [`@ezstart/typescript-config`](../typescript-config/README.md) - TypeScript configuration

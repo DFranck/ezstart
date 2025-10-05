@@ -1,0 +1,46 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { usePayContext } from '../provider.js'
+import type { Payment } from '../types.js'
+
+interface UseDonationsParams {
+  projectId?: string
+  limit?: number
+  autoLoad?: boolean
+}
+
+export function useDonations(params: UseDonationsParams = {}) {
+  const { client } = usePayContext()
+  const [donations, setDonations] = useState<Payment[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const { projectId, limit = 10, autoLoad = true } = params
+
+  const loadDonations = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await client.getDonations({ projectId, limit })
+      setDonations(result.payments)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load donations')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (autoLoad) {
+      loadDonations()
+    }
+  }, [projectId, limit, autoLoad])
+
+  return {
+    donations,
+    isLoading,
+    error,
+    reload: loadDonations,
+  }
+}

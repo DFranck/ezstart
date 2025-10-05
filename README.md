@@ -53,14 +53,16 @@ This monorepo uses **pnpm workspaces** with a centralized architecture to maximi
 
 All Next.js web applications use the **exact same** standardized configuration:
 
-| Configuration         | Package/Source                                                            | Description                                                  |
-| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **React Providers**   | [`@ezstart/next-core`](./packages/next-core/README.md)                    | SimpleWebProviders + WebProviders with EZAuth, Theming, i18n |
-| **UI Components**     | [`@ezstart/ui`](./packages/ui/README.md)                                  | UI components, global styles, PostCSS config                 |
-| **Tailwind Config**   | [`@ezstart/tailwind-config`](./packages/tailwind-config/)                 | Centralized Tailwind configuration                           |
-| **ESLint Config**     | [`@ezstart/eslint-config/next-js`](./packages/eslint-config/)             | ESLint rules for Next.js                                     |
-| **Next.js Config**    | [`@ezstart/next-config`](./packages/next-config/)                         | Next.js configuration with optimizations                     |
-| **TypeScript Config** | [`@ezstart/typescript-config/nextjs.json`](./packages/typescript-config/) | Shared TypeScript configurations                             |
+| Configuration         | Package/Source                                                            | Description                                     |
+| --------------------- | ------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Theme Provider**    | [`@ezstart/next-theme`](./packages/next-theme/)                           | Theme management (dark/light mode)              |
+| **Auth Provider**     | [`@ezstart/auth-sdk`](./packages/auth-sdk/)                               | Centralized authentication with EZAuth SSO      |
+| **Payment Provider**  | [`@ezstart/pay-sdk`](./packages/pay-sdk/)                                 | Universal payment system (donations, purchases) |
+| **UI Components**     | [`@ezstart/ui`](./packages/ui/README.md)                                  | UI components, global styles, PostCSS config    |
+| **Tailwind Config**   | [`@ezstart/tailwind-config`](./packages/tailwind-config/)                 | Centralized Tailwind configuration              |
+| **ESLint Config**     | [`@ezstart/eslint-config/next-js`](./packages/eslint-config/)             | ESLint rules for Next.js                        |
+| **Next.js Config**    | [`@ezstart/next-config`](./packages/next-config/)                         | Next.js configuration with optimizations        |
+| **TypeScript Config** | [`@ezstart/typescript-config/nextjs.json`](./packages/typescript-config/) | Shared TypeScript configurations                |
 
 #### Standardized Applications (100% Centralized)
 
@@ -93,7 +95,9 @@ All Node.js APIs use the **exact same** shared infrastructure:
 
 #### Web Infrastructure
 
-- [`@ezstart/next-core`](./packages/next-core/) - Standardized providers, React infrastructure
+- [`@ezstart/next-theme`](./packages/next-theme/) - Theme provider (dark/light mode)
+- [`@ezstart/auth-sdk`](./packages/auth-sdk/) - Authentication SDK with EZAuth SSO
+- [`@ezstart/pay-sdk`](./packages/pay-sdk/) - Payment SDK (donations, purchases, subscriptions)
 - [`@ezstart/ui`](./packages/ui/) - UI components, global styles, CSS configurations
 
 #### API Infrastructure
@@ -169,7 +173,7 @@ pnpm lint
 
 ### 📚 Documentation
 
-- [Web-Core Configuration](./packages/next-core/README.md) - Web application standardization
+- [Next Theme](./packages/next-theme/README.md) - Theme management (dark/light mode)
 - [UI Components](./packages/ui/README.md) - Design system and components
 - [EZAuth SDK](./packages/auth-sdk/README.md) - Authentication integration
 - [Claude Instructions](./CLAUDE.md) - Development guide and best practices

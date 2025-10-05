@@ -39,7 +39,7 @@ export default nextJsConfig
 
 ### ⚛️ Internal React Packages (`react-internal`)
 
-For packages that contain React components (like `@ezstart/ui`, `@ezstart/next-core`):
+For packages that contain React components (like `@ezstart/ui`, `@ezstart/next-theme`):
 
 ```js
 // eslint.config.js
@@ -156,7 +156,8 @@ export default [...config, {
 
 ### ✅ React Packages (React Internal Config)
 - **@ezstart/ui** - UI components library
-- **@ezstart/next-core** - Web infrastructure
+- **@ezstart/next-theme** - Theme management (dark/light mode)
+- **@ezstart/auth-sdk** - Authentication SDK with React hooks
 
 ## Configuration Architecture
 
@@ -390,6 +391,6 @@ When modifying rules:
 ## Related Packages
 
 - [`@ezstart/typescript-config`](../typescript-config/README.md) - TypeScript configuration
-- [`@ezstart/next-config`](../next-config/README.md) - Next.js configuration  
-- [`@ezstart/next-core`](../next-core/README.md) - Web application infrastructure
+- [`@ezstart/next-config`](../next-config/README.md) - Next.js configuration
+- [`@ezstart/next-theme`](../next-theme/README.md) - Theme management (dark/light mode)
 - [`@ezstart/ui`](../ui/README.md) - UI components that use this config

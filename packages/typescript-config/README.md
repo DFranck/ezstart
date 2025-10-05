@@ -230,7 +230,8 @@ All API services use the API configuration:
 React component packages use the React library configuration:
 
 - **@ezstart/ui** → `react-library.json`
-- **@ezstart/next-core** → `base.json` (with JSX support)
+- **@ezstart/next-theme** → `react-library.json`
+- **@ezstart/auth-sdk** → `base.json` (with JSX support)
 
 ### ✅ Utility Packages (Library/Base Config)
 Utility and infrastructure packages:
@@ -624,4 +625,4 @@ This works well with the path mappings in our configurations.
 - [`@ezstart/eslint-config`](../eslint-config/README.md) - ESLint configuration for TypeScript
 - [`@ezstart/types`](../types/README.md) - Shared TypeScript types
 - [`@ezstart/express-core`](../express-core/README.md) - Uses API configuration
-- [`@ezstart/next-core`](../next-core/README.md) - Uses base configuration
+- [`@ezstart/next-theme`](../next-theme/README.md) - Uses React library configuration

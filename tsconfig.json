@@ -15,6 +15,7 @@
     { "path": "./packages/express-core" },
     { "path": "./packages/ui" },
     { "path": "./packages/auth-sdk" },
+    { "path": "./packages/pay-sdk" },
     { "path": "./packages/next-theme" },
 
     // App-specific types/utils
@@ -26,6 +27,7 @@
 
     // APIs
     { "path": "./apps/ezauth/api" },
+    { "path": "./apps/ezpay/api" },
     { "path": "./apps/ez-billing/api" },
     { "path": "./apps/tower-defense/api" },
     { "path": "./apps/green-pulse/api" },
@@ -33,6 +35,7 @@
     // Web apps
     { "path": "./apps/ezstart/web" },
     { "path": "./apps/ezauth/web" },
+    { "path": "./apps/ezpay/web" },
     { "path": "./apps/ez-billing/web" },
     { "path": "./apps/tower-defense/web" },
     { "path": "./apps/asc-tcd/web" },

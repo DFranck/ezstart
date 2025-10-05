@@ -412,6 +412,104 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
 
+  apps/ezpay/api:
+    dependencies:
+      '@ezstart/express-core':
+        specifier: workspace:*
+        version: link:../../../packages/express-core
+      '@ezstart/pay-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/pay-sdk
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
+      express:
+        specifier: ^4.18.2
+        version: 4.21.2
+      helmet:
+        specifier: ^7.1.0
+        version: 7.2.0
+      mongoose:
+        specifier: ^8.0.0
+        version: 8.17.0(socks@2.8.6)
+      stripe:
+        specifier: ^14.0.0
+        version: 14.25.0
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../../../packages/typescript-config
+      '@types/cors':
+        specifier: ^2.8.14
+        version: 2.8.19
+      '@types/express':
+        specifier: ^4.17.17
+        version: 4.17.23
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.9
+      tsx:
+        specifier: ^4.0.0
+        version: 4.20.3
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  apps/ezpay/web:
+    dependencies:
+      '@ezstart/next-theme':
+        specifier: workspace:*
+        version: link:../../../packages/next-theme
+      '@ezstart/pay-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/pay-sdk
+      '@ezstart/ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+      autoprefixer:
+        specifier: ^10.4.19
+        version: 10.4.21(postcss@8.5.6)
+      next:
+        specifier: 15.5.2
+        version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      postcss:
+        specifier: ^8.4.38
+        version: 8.5.6
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+    devDependencies:
+      '@ezstart/eslint-config':
+        specifier: workspace:*
+        version: link:../../../packages/eslint-config
+      '@ezstart/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@ezstart/tailwind-config':
+        specifier: workspace:*
+        version: link:../../../packages/tailwind-config
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../../../packages/typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.9
+      '@types/react':
+        specifier: ^19.1.12
+        version: 19.1.12
+      '@types/react-dom':
+        specifier: ^19.1.9
+        version: 19.1.9(@types/react@19.1.12)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
   apps/ezstart/web:
     dependencies:
       '@ezstart/auth-sdk':
@@ -502,6 +600,9 @@ importers:
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
+      '@ezstart/pay-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/pay-sdk
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -836,7 +937,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@4.1.11)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types
@@ -846,7 +947,7 @@ importers:
     devDependencies:
       '@anatine/zod-mock':
         specifier: ^3.14.0
-        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)
+        version: 3.14.0(@faker-js/faker@9.9.0)(zod@4.1.11)
 
   apps/tower-defense/utils:
     dependencies:
@@ -1035,7 +1136,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@4.1.11)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../types
@@ -1116,6 +1217,34 @@ importers:
       '@types/react':
         specifier: ^19.1.12
         version: 19.1.12
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  packages/pay-sdk:
+    dependencies:
+      '@ezstart/ui':
+        specifier: workspace:*
+        version: link:../ui
+      zod:
+        specifier: ^4.1.11
+        version: 4.1.11
+      zustand:
+        specifier: ^4.5.5
+        version: 4.5.7(@types/react@19.1.12)(react@19.1.1)
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: ^19.1.12
+        version: 19.1.12
+      next:
+        specifier: ^15.5.2
+        version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -7158,6 +7287,10 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
+  stripe@14.25.0:
+    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
+    engines: {node: '>=12.*'}
+
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
     engines: {node: '>= 12.0.0'}
@@ -7902,6 +8035,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.1.11:
+    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
+
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
     engines: {node: '>=12.7.0'}
@@ -7946,11 +8082,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
 
-  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)':
+  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@4.1.11)':
     dependencies:
       '@faker-js/faker': 9.9.0
       randexp: 0.5.3
-      zod: 3.25.76
+      zod: 4.1.11
 
   '@apideck/better-ajv-errors@0.3.6(ajv@8.17.1)':
     dependencies:
@@ -7963,6 +8099,11 @@ snapshots:
     dependencies:
       openapi3-ts: 4.5.0
       zod: 3.25.76
+
+  '@asteasolutions/zod-to-openapi@7.3.4(zod@4.1.11)':
+    dependencies:
+      openapi3-ts: 4.5.0
+      zod: 4.1.11
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -14916,6 +15057,11 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
+  stripe@14.25.0:
+    dependencies:
+      '@types/node': 20.19.9
+      qs: 6.14.0
+
   styled-jsx@5.1.6(@babel/core@7.28.0)(react@18.3.1):
     dependencies:
       client-only: 0.0.1
@@ -15865,6 +16011,8 @@ snapshots:
   yoga-layout@3.2.1: {}
 
   zod@3.25.76: {}
+
+  zod@4.1.11: {}
 
   zustand@4.5.7(@types/react@19.1.12)(react@19.1.1):
     dependencies:
