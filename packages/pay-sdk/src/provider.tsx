@@ -1,22 +1,27 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, type ReactNode } from 'react'
-import { PayClient } from './client.js'
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createPayClient } from './client.js'
 import { usePayStore } from './store.js'
 import type { PayClientConfig } from './types.js'
 
 interface PayContextValue {
-  client: PayClient
+  client: ReturnType<typeof createPayClient>
 }
 
 const PayContext = createContext<PayContextValue | null>(null)
 
 interface PayProviderProps {
   children: ReactNode
-  client: PayClient
+  appName?: string
+  config?: Partial<PayClientConfig>
 }
 
-export function PayProvider({ children, client }: PayProviderProps) {
+export function PayProvider({ children, appName, config }: PayProviderProps) {
+  const client = useMemo(() => {
+    return createPayClient({ appName, ...config })
+  }, [appName, config])
+
   return <PayContext.Provider value={{ client }}>{children}</PayContext.Provider>
 }
 
