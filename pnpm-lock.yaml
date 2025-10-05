@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  zod: 3.23.8
+
 importers:
 
   .:
@@ -225,8 +228,8 @@ importers:
         specifier: workspace:*
         version: link:../../../packages/types
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -687,7 +690,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.0.0
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@3.23.8)
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -717,10 +720,10 @@ importers:
         version: 3.3.2
       openai:
         specifier: ^4.78.1
-        version: 4.104.0(ws@8.18.3)(zod@3.25.76)
+        version: 4.104.0(ws@8.18.3)(zod@3.23.8)
       zod:
-        specifier: ^3.24.1
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/eslint-config':
         specifier: workspace:*
@@ -754,10 +757,10 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.0.0
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@3.23.8)
       zod:
-        specifier: ^3.24.1
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -937,7 +940,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@3.23.8)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../../../packages/types
@@ -945,12 +948,12 @@ importers:
         specifier: workspace:*
         version: link:../config
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@anatine/zod-mock':
         specifier: ^3.14.0
-        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)
+        version: 3.14.0(@faker-js/faker@9.9.0)(zod@3.23.8)
 
   apps/tower-defense/utils:
     dependencies:
@@ -1077,8 +1080,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
       zustand:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@19.1.12)(react@19.1.1)
@@ -1142,7 +1145,7 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@3.23.8)
       '@ezstart/types':
         specifier: workspace:*
         version: link:../types
@@ -1171,8 +1174,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@types/cors':
         specifier: ^2.8.18
@@ -1236,8 +1239,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
       zustand:
         specifier: ^4.5.5
         version: 4.5.7(@types/react@19.1.12)(react@19.1.1)
@@ -1274,10 +1277,10 @@ importers:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
-        version: 7.3.4(zod@3.25.76)
+        version: 7.3.4(zod@3.23.8)
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       typescript:
         specifier: ^5.7.3
@@ -1357,8 +1360,8 @@ importers:
         specifier: ^1.2.4
         version: 1.3.6
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@ezstart/eslint-config':
         specifier: workspace:*
@@ -1414,7 +1417,7 @@ packages:
     resolution: {integrity: sha512-pTYyn9dlszUl5gMGWtE7DBRvx1EcqpBJ1iJ73rlJYCZr9lgIEdZ6PCZQqoXIdlC8DYIwuT1M3/N8arkJa7A10Q==}
     peerDependencies:
       '@faker-js/faker': ^7.0.0 || ^8.0.0 || ^9.0.0
-      zod: ^3.21.4
+      zod: 3.23.8
 
   '@apideck/better-ajv-errors@0.3.6':
     resolution: {integrity: sha512-P+ZygBLZtkp0qqOAJJVX4oX/sFo5JR3eBWwwuqHHhK0GIgQOKWrAfiAaWX0aArHkRWHMuggFEgAZNxVPwPZYaA==}
@@ -1425,7 +1428,7 @@ packages:
   '@asteasolutions/zod-to-openapi@7.3.4':
     resolution: {integrity: sha512-/2rThQ5zPi9OzVwes6U7lK1+Yvug0iXu25olp7S0XsYmOqnyMfxH7gdSQjn/+DSOHRg7wnotwGJSyL+fBKdnEA==}
     peerDependencies:
-      zod: ^3.20.2
+      zod: 3.23.8
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -6427,7 +6430,7 @@ packages:
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: ^3.23.8
+      zod: 3.23.8
     peerDependenciesMeta:
       ws:
         optional: true
@@ -8041,8 +8044,8 @@ packages:
   yoga-layout@3.2.1:
     resolution: {integrity: sha512-0LPOt3AxKqMdFBZA3HBAt/t/8vIKq7VaQYbuA8WxCgung+p9TVyKRYdpvCb80HcdTN2NkbIKbhNwKUfm3tQywQ==}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -8088,11 +8091,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
 
-  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@3.25.76)':
+  '@anatine/zod-mock@3.14.0(@faker-js/faker@9.9.0)(zod@3.23.8)':
     dependencies:
       '@faker-js/faker': 9.9.0
       randexp: 0.5.3
-      zod: 3.25.76
+      zod: 3.23.8
 
   '@apideck/better-ajv-errors@0.3.6(ajv@8.17.1)':
     dependencies:
@@ -8101,10 +8104,10 @@ snapshots:
       jsonpointer: 5.0.1
       leven: 3.1.0
 
-  '@asteasolutions/zod-to-openapi@7.3.4(zod@3.25.76)':
+  '@asteasolutions/zod-to-openapi@7.3.4(zod@3.23.8)':
     dependencies:
       openapi3-ts: 4.5.0
-      zod: 3.25.76
+      zod: 3.23.8
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -11412,7 +11415,7 @@ snapshots:
     dependencies:
       devtools-protocol: 0.0.1464554
       mitt: 3.0.1
-      zod: 3.25.76
+      zod: 3.23.8
 
   ci-info@3.9.0: {}
 
@@ -14003,7 +14006,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@4.104.0(ws@8.18.3)(zod@3.25.76):
+  openai@4.104.0(ws@8.18.3)(zod@3.23.8):
     dependencies:
       '@types/node': 18.19.127
       '@types/node-fetch': 2.6.13
@@ -14014,7 +14017,7 @@ snapshots:
       node-fetch: 2.7.0
     optionalDependencies:
       ws: 8.18.3
-      zod: 3.25.76
+      zod: 3.23.8
     transitivePeerDependencies:
       - encoding
 
@@ -16011,7 +16014,7 @@ snapshots:
 
   yoga-layout@3.2.1: {}
 
-  zod@3.25.76: {}
+  zod@3.23.8: {}
 
   zustand@4.5.7(@types/react@19.1.12)(react@19.1.1):
     dependencies:
