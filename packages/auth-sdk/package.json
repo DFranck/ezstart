@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "zustand": "^4.5.5",
-    "@ezstart/ui": "workspace:*"
+    "@ezstart/ui": "workspace:*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",
