@@ -1,17 +1,11 @@
 import { createTickerEngine } from '@ezstart/express-core'
+import { calculateKillReward } from '@tower-defense/config'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
-import {
-  calculateKillReward,
-  getIncomeTickInterval,
-  calculateTotalIncome,
-  INCOME_INTERVAL_SECONDS,
-  TOWER_STATS,
-} from '@tower-defense/config'
 import { findPath } from '@tower-defense/utils'
 import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
 import { updatePlayerStatusService } from '../services/updatePlayerStatusService.js'
-import { checkEndGame } from '../utils/checkEndGame.js'
 import { getIO } from '../socketInstance.js'
+import { checkEndGame } from '../utils/checkEndGame.js'
 
 // Fonction pour détecter collision entre 2 mobs
 function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
@@ -152,34 +146,38 @@ function processTowerAttacks(
         const targets = mobsInRange.slice(0, targetCount) // Pour l'instant, on prend les premiers
 
         // Appliquer les dégâts
-        updatedMobs = updatedMobs.map(mob => {
-          if (!targets.find(t => t.id === mob.id)) return mob
+        updatedMobs = updatedMobs
+          .map(mob => {
+            if (!targets.find(t => t.id === mob.id)) return mob
 
-          const newHp = mob.currentHp - towerDamage
+            const newHp = mob.currentHp - towerDamage
 
-          // Créer un projectile visuel
-          projectiles.push({
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            playerId, // Ajouter le playerId pour filtrer côté client
-            from: { x: cell.x, y: cell.y },
-            to: { x: mob.position.x, y: mob.position.y },
-            damage: towerDamage,
-            targetMobId: mob.id,
+            // Créer un projectile visuel
+            projectiles.push({
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              playerId, // Ajouter le playerId pour filtrer côté client
+              from: { x: cell.x, y: cell.y },
+              to: { x: mob.position.x, y: mob.position.y },
+              damage: towerDamage,
+              targetMobId: mob.id,
+            })
+
+            if (newHp <= 0) {
+              // Mob killed - award gold to defender
+              const reward = calculateKillReward(mob.mob)
+              goldRewards.set(playerId, (goldRewards.get(playerId) || 0) + reward)
+              console.log(
+                `[Ticker] ${player.player?.name} killed ${mob.mob.name} → +${reward} gold`
+              )
+              return null as any // Marquer pour suppression
+            }
+
+            return {
+              ...mob,
+              currentHp: newHp,
+            }
           })
-
-          if (newHp <= 0) {
-            // Mob killed - award gold to defender
-            const reward = calculateKillReward(mob.mob)
-            goldRewards.set(playerId, (goldRewards.get(playerId) || 0) + reward)
-            console.log(`[Ticker] ${player.player?.name} killed ${mob.mob.name} → +${reward} gold`)
-            return null as any // Marquer pour suppression
-          }
-
-          return {
-            ...mob,
-            currentHp: newHp,
-          }
-        }).filter(Boolean) // Supprimer les mobs morts (null)
+          .filter(Boolean) // Supprimer les mobs morts (null)
       }
     }
   }
@@ -237,7 +235,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
           movement: { x: 0, y: 0 },
           advanceWaypoint: true,
           targetCell: { x: targetX, y: targetY }, // Position avec offset
-          reachedEnd: false
+          reachedEnd: false,
         }
       }
 
@@ -251,7 +249,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
         mob,
         movement: { x: moveX, y: moveY },
         advanceWaypoint: false,
-        reachedEnd: false
+        reachedEnd: false,
       }
     })
     .filter(Boolean) as any[]
@@ -265,38 +263,40 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
   }
 
   // Phase 3: Appliquer collision/séparation avec spatial grid
-  return mobsWithMovement.map(({ mob, movement, advanceWaypoint, targetCell, reachedEnd, damage }) => {
-    if (reachedEnd) {
-      return { ...mob, _reachedEnd: true, _damage: damage } as any
-    }
+  return mobsWithMovement
+    .map(({ mob, movement, advanceWaypoint, targetCell, reachedEnd, damage }) => {
+      if (reachedEnd) {
+        return { ...mob, _reachedEnd: true, _damage: damage } as any
+      }
 
-    if (advanceWaypoint) {
+      if (advanceWaypoint) {
+        return {
+          ...mob,
+          pathIndex: mob.pathIndex + 1,
+          position: { x: targetCell.x, y: targetCell.y },
+        }
+      }
+
+      // Appliquer séparation si collision activée (avec spatial grid optimisé)
+      let finalX = mob.position.x + movement.x
+      let finalY = mob.position.y + movement.y
+
+      if (!mob.mob.canFly) {
+        const separation = applySeparation(mob, spatialGrid)
+        // Appliquer séparation avec force plus importante pour séparer visuellement
+        finalX += separation.x * 0.08
+        finalY += separation.y * 0.08
+      }
+
       return {
         ...mob,
-        pathIndex: mob.pathIndex + 1,
-        position: { x: targetCell.x, y: targetCell.y },
+        position: {
+          x: finalX,
+          y: finalY,
+        },
       }
-    }
-
-    // Appliquer séparation si collision activée (avec spatial grid optimisé)
-    let finalX = mob.position.x + movement.x
-    let finalY = mob.position.y + movement.y
-
-    if (!mob.mob.canFly) {
-      const separation = applySeparation(mob, spatialGrid)
-      // Appliquer séparation avec force plus importante pour séparer visuellement
-      finalX += separation.x * 0.08
-      finalY += separation.y * 0.08
-    }
-
-    return {
-      ...mob,
-      position: {
-        x: finalX,
-        y: finalY,
-      },
-    }
-  }).filter(Boolean) as ActiveMob[]
+    })
+    .filter(Boolean) as ActiveMob[]
 }
 
 export const ticker = createTickerEngine<any>({
@@ -326,11 +326,11 @@ export const ticker = createTickerEngine<any>({
     // Plus de requête DB ici - l'élimination est gérée en mémoire après les dégâts
 
     // 1. Faire tirer les tours sur les mobs
-    const { updatedMobs: mobsAfterAttacks, projectiles, goldRewards } = processTowerAttacks(
-      gameId,
-      state.activeMobs,
-      state.players
-    )
+    const {
+      updatedMobs: mobsAfterAttacks,
+      projectiles,
+      goldRewards,
+    } = processTowerAttacks(gameId, state.activeMobs, state.players)
 
     // Émettre les projectiles pour l'affichage visuel
     if (projectiles.length > 0) {
@@ -344,9 +344,8 @@ export const ticker = createTickerEngine<any>({
     const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
-    // 4. Apply gold rewards for kills and passive income
-    const incomeTickInterval = getIncomeTickInterval(250) // Dynamic based on balance.ts
-    const shouldApplyIncome = tick % incomeTickInterval === 0
+    // 4. Apply gold rewards for kills and passive income (every 12 ticks = 3 seconds at 250ms tick)
+    const shouldApplyIncome = tick % 12 === 0
 
     // Appliquer les dégâts aux joueurs, gold rewards, et income
     const updatedPlayers = state.players.map((p: InGamePlayer) => {
@@ -356,10 +355,8 @@ export const ticker = createTickerEngine<any>({
       // Gold from kills
       const killGold = goldRewards.get(playerId) || 0
 
-      // Passive income (applied based on INCOME_INTERVAL_SECONDS from balance.ts)
-      // Calculate total income including tier bonuses
-      const totalIncome = calculateTotalIncome(p.income || 0, p.tier || 1)
-      const incomeGold = shouldApplyIncome ? totalIncome : 0
+      // Passive income (applied every 3 seconds = every 12 ticks)
+      const incomeGold = shouldApplyIncome ? (p.income || 0) * 3 : 0
 
       const totalGoldGained = killGold + incomeGold
       const newGold = totalGoldGained > 0 ? (p.gold || 0) + totalGoldGained : p.gold
@@ -369,23 +366,29 @@ export const ticker = createTickerEngine<any>({
 
       if (damageToTake > 0) {
         const newHp = Math.max(0, p.hp - damageToTake)
-        console.log(`[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`)
+        console.log(
+          `[Ticker] Player ${p.player?.name} took ${damageToTake} damage! HP: ${p.hp} → ${newHp}`
+        )
 
         // Sauvegarder en DB (async, sans attendre)
         updatePlayerHpService({
           gameId,
           playerId: p.player?._id?.toString(),
-          hp: newHp
+          hp: newHp,
         }).catch(err => console.error('[Ticker] Failed to update player HP:', err))
 
         // Émettre événement de dégât
-        getIO().to(gameId).emit('playerDamaged', {
-          playerId: p.player?._id?.toString(),
-          playerName: p.player?.name,
-          damage: damageToTake,
-          newHp,
-          mobCount: mobsReachedEnd.filter((m: any) => m.targetPlayerId === p.player?._id?.toString()).length
-        })
+        getIO()
+          .to(gameId)
+          .emit('playerDamaged', {
+            playerId: p.player?._id?.toString(),
+            playerName: p.player?.name,
+            damage: damageToTake,
+            newHp,
+            mobCount: mobsReachedEnd.filter(
+              (m: any) => m.targetPlayerId === p.player?._id?.toString()
+            ).length,
+          })
 
         // Vérifier élimination en mémoire (pas de DB!)
         if (newHp <= 0 && p.status === 'active') {
@@ -395,7 +398,7 @@ export const ticker = createTickerEngine<any>({
           updatePlayerStatusService({
             gameId,
             playerId: p.player?._id?.toString(),
-            status: 'eliminated'
+            status: 'eliminated',
           }).catch(err => console.error('[Ticker] Failed to update player status:', err))
 
           // Émettre événement d'élimination
@@ -404,7 +407,7 @@ export const ticker = createTickerEngine<any>({
             playerId: p.player?._id?.toString(),
             playerName: p.player?.name,
             reason: 'HP reached zero',
-            hp: newHp
+            hp: newHp,
           })
 
           return { ...p, hp: newHp, gold: newGold, status: 'eliminated' as const }
@@ -438,7 +441,9 @@ export const ticker = createTickerEngine<any>({
     }
 
     // Émettre le state mis à jour à tous les clients de la game
-    getIO().to(gameId).emit('gameState', { ...newState, _reason: 'tick' })
+    getIO()
+      .to(gameId)
+      .emit('gameState', { ...newState, _reason: 'tick' })
 
     return newState
   },
@@ -473,14 +478,22 @@ export async function syncTickerWithDatabase(gameId: string) {
   )
 
   ticker.mutate(gameId, currentState => {
-    console.log('[syncTickerWithDatabase] mutate called with currentState:', currentState ? { _id: currentState._id, tick: currentState.tick, phase: currentState.phase } : 'null/undefined')
+    console.log(
+      '[syncTickerWithDatabase] mutate called with currentState:',
+      currentState
+        ? { _id: currentState._id, tick: currentState.tick, phase: currentState.phase }
+        : 'null/undefined'
+    )
 
     // Si on a déjà un état valide avec vraies données de jeu, préserver l'état existant et juste mettre à jour les joueurs depuis DB
     // Conditions: a un _id ET (tick > 0 OU phase='playing' avec des joueurs)
-    const hasValidGameData = currentState && currentState._id && (
-      currentState.tick > 0 ||
-      (currentState.phase === 'playing' && currentState.players && currentState.players.length > 0)
-    )
+    const hasValidGameData =
+      currentState &&
+      currentState._id &&
+      (currentState.tick > 0 ||
+        (currentState.phase === 'playing' &&
+          currentState.players &&
+          currentState.players.length > 0))
 
     if (hasValidGameData) {
       console.log(
@@ -522,7 +535,12 @@ export async function syncTickerWithDatabase(gameId: string) {
     }
 
     // Sinon, créer un nouvel état complet
-    console.log('[syncTickerWithDatabase] Creating new complete state from DB with phase:', gameData.phase, 'players:', inGamePlayers.length)
+    console.log(
+      '[syncTickerWithDatabase] Creating new complete state from DB with phase:',
+      gameData.phase,
+      'players:',
+      inGamePlayers.length
+    )
     return {
       _id: gameData._id.toString(),
       players: inGamePlayers.map(igp => ({

@@ -96,8 +96,8 @@ export const TOWER_STATS = {
   DAMAGE_MULTIPLIER: 0.5, // Multiplicateur global des dégâts (0.5 = -50% damage)
   RANGE_MIN: 3,
   RANGE_MAX: 10,
-  SPEED_MIN: 1, // Attaques par tick (250ms)
-  SPEED_MAX: 5,
+  SPEED_MIN: 0.25, // Attaques par tick (250ms) - 0.25 = 1 attaque/sec, 1 = 4 attaques/sec
+  SPEED_MAX: 2, // Max 2 = 8 attaques/sec (au lieu de 20)
   SPLASH_RADIUS_MAX: 5,
 }
 

@@ -73,9 +73,9 @@ export function Tower({ tower, onClick, ref, className, showStats = false }: Tow
       {showStats && (
         <>
           {/* Damage badge (top-left) - only number */}
-          {/* <div className="absolute -top-1 -left-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-orange-500/90 text-white leading-none">
+          <div className="absolute -top-1 -left-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-orange-500/90 text-white leading-none">
             {tower.damage}
-          </div> */}
+          </div>
 
           {/* Range badge (top-right) - only number */}
           {/* <div className="absolute -top-1 -right-1 px-1 py-0.5 rounded-sm text-[10px] font-bold bg-blue-500/90 text-white leading-none">

@@ -68,27 +68,12 @@ export function GameProvider({ gameId, children }: { gameId: string; children: R
         // Merger les tours locales avec le state serveur
         let mergedState = { ...state }
 
-        // Optimisation : réutiliser la référence activeMobs si identique (pour éviter re-renders)
+        // Optimisation simplifiée : comparer seulement la longueur et updatedAt
+        // Plus de comparaison deep des mobs pour éviter le lag
         if (prevGame?.activeMobs && state.activeMobs) {
-          // Comparer par ID, pas par index (ordre peut changer)
-          const prevMobsMap = new Map(prevGame.activeMobs.map(m => [m.id, m]))
-          const newMobsMap = new Map(state.activeMobs.map(m => [m.id, m]))
-
-          const sameIds = prevMobsMap.size === newMobsMap.size &&
-            Array.from(prevMobsMap.keys()).every(id => newMobsMap.has(id))
-
-          if (sameIds) {
-            const allIdentical = state.activeMobs.every(newMob => {
-              const prevMob = prevMobsMap.get(newMob.id)
-              return prevMob &&
-                prevMob.position.x === newMob.position.x &&
-                prevMob.position.y === newMob.position.y &&
-                prevMob.currentHp === newMob.currentHp
-            })
-
-            if (allIdentical) {
-              mergedState.activeMobs = prevGame.activeMobs
-            }
+          if (prevGame.activeMobs.length === state.activeMobs.length &&
+              prevGame.updatedAt === state.updatedAt) {
+            mergedState.activeMobs = prevGame.activeMobs
           }
         }
 

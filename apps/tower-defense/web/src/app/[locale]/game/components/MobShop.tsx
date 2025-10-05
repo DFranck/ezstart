@@ -7,6 +7,7 @@ import { Button, Div, H6, Icon } from '@ezstart/ui/components'
 import { calculateUnitPrice, ELEMENTAL_COLORS, type ElementalType } from '@tower-defense/config'
 import { Game, mockMobs, ShopItem } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
+import { RtsButton } from './RtsButton'
 
 type Props = {
   game: Game
@@ -46,12 +47,11 @@ export function MobShop({ game }: Props) {
       return
     }
 
-    // Backend will deduct gold and sync back via gameState
-    // No local deduction to avoid double spending
+    // Optimistic UI: déduire le gold localement immédiatement pour éviter le lag visuel
+    spendGold(item.basePrice)
 
     // En mode solo, envoyer les mobs sur soi-même
     if (currentGame.isSoloMode) {
-      console.log('[MobShop] Solo mode - spawning mob on self')
       sendAction({
         type: 'spawnMob',
         payload: {
@@ -67,11 +67,8 @@ export function MobShop({ game }: Props) {
     const opponents =
       currentGame.players?.filter(p => p.player?._id && p.player._id !== currentPlayer._id) || []
 
-    console.log('[MobShop] Multi mode - found opponents:', opponents.length)
-
     opponents.forEach(opponent => {
       if (opponent.player?._id) {
-        console.log('[MobShop] Sending mob to opponent:', opponent.player._id)
         sendAction({
           type: 'spawnMob',
           payload: {
@@ -105,24 +102,18 @@ export function MobShop({ game }: Props) {
           const mobColor = ELEMENTAL_COLORS[item.unit.elementalType as ElementalType] || '#888'
           const canAfford = gold >= item.basePrice
           return (
-            <div key={item.unit._id} className="relative">
-              <Button
-                size="icon"
+            <div key={item.unit._id} className="relative group">
+              <RtsButton
                 onClick={() => handleBuyMob(item)}
-                onTouchEnd={e => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleBuyMob(item)
-                }}
-                style={{ backgroundColor: mobColor }}
-                className="relative group h-14 w-14"
                 disabled={!canAfford}
-              >
-                <Icon name="lucide:Ghost" className="text-white" />
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  {item.unit.name}
-                </span>
-              </Button>
+                cooldown={500}
+                icon="lucide:Ghost"
+                style={{ backgroundColor: mobColor }}
+                className="h-14 w-14"
+              />
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                {item.unit.name}
+              </span>
 
               {/* Price badge (top-right) */}
               <div
@@ -154,7 +145,7 @@ export function MobShop({ game }: Props) {
                   <Icon name="lucide:Wind" className="w-2.5 h-2.5 text-cyan-400" />
                 </div>
               )}
-              {item.unit.isRanged && (
+              {item.unit.attackRange > 0 && (
                 <div className="absolute bottom-0 right-0">
                   <Icon name="lucide:Target" className="w-2.5 h-2.5 text-purple-400" />
                 </div>
