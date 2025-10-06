@@ -14,7 +14,9 @@
     "configuration": "Configuración",
     "freeLabel": "100% Gratis",
     "darkLightMode": "Soporte Modo Oscuro/Claro",
-    "highResPdf": "PDF Alta Resolución"
+    "highResPdf": "PDF Alta Resolución",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
   },
   "donate": {
     "pageTitle": "Apóyanos",

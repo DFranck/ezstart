@@ -2,7 +2,7 @@
 
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { GRADIENT_TEXT } from '@/lib/theme-colors'
-import { useAuth } from '@ezstart/auth-sdk'
+import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { ClientLayout as BaseClientLayout, H1, LocaleSwitcher, P } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
@@ -31,7 +31,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   return (
     <BaseClientLayout
-      className={cn(isAnalyzePage && 'mb-24 sm:mb-10')}
+      className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
       appName="Feng Shui Bagua"
       creator={
         <div className="flex items-center gap-2">
@@ -67,7 +67,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       ]}
       headerRightContent={
         <div className="flex items-center gap-2">
-          {/* <LoginButton>{isAuthenticated ? t('common.logout') : t('common.login')}</LoginButton> */}
+          <LoginButton>{isAuthenticated ? t('common.logout') : t('common.login')}</LoginButton>
           <LocaleSwitcher
             locales={locales}
             currentLocale={locale}

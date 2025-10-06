@@ -14,7 +14,9 @@
     "configuration": "Configuration",
     "freeLabel": "100% Gratuit",
     "darkLightMode": "Support Dark/Light Mode",
-    "highResPdf": "PDF Haute Résolution"
+    "highResPdf": "PDF Haute Résolution",
+    "login": "Connexion",
+    "logout": "Déconnexion"
   },
   "donate": {
     "pageTitle": "Soutenez-nous",
