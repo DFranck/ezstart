@@ -32,7 +32,7 @@ export default function DonateSuccessPage() {
 
   return (
     <Section size={'full'} className="relative pt-24 md:pt-32">
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Gradient animé */}
         <div className="absolute inset-0 animate-pulse" style={getGradientWithOpacity(20, 'br')} />
         <div
@@ -60,13 +60,15 @@ export default function DonateSuccessPage() {
         </H1>
 
         {/* Message */}
-        <P className="text-xl text-muted-foreground mb-12">
-          {t('successMessage')}
-        </P>
+        <P className="text-xl text-muted-foreground mb-12">{t('successMessage')}</P>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <Button asChild size="lg" className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600">
+          <Button
+            asChild
+            size="lg"
+            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+          >
             <Link href="/">
               <Icon name="lucide:Home" className="w-5 h-5 mr-2" />
               {t('backHome')}

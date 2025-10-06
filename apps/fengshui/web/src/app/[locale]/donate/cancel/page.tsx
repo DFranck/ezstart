@@ -10,7 +10,7 @@ export default function DonateCancelPage() {
 
   return (
     <Section size={'full'} className="relative pt-24 md:pt-32">
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Gradient animé */}
         <div className="absolute inset-0 animate-pulse" style={getGradientWithOpacity(20, 'br')} />
         <div

@@ -11,8 +11,8 @@ export default function DonatePage() {
   const t = useTranslations('donate')
 
   return (
-    <Section size={'full'}>
-      <div className="absolute inset-0 -z-10">
+    <Section size={'full'} className="relative">
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Gradient animé */}
         <div className="absolute inset-0 animate-pulse" style={getGradientWithOpacity(20, 'br')} />
         <div
@@ -20,7 +20,7 @@ export default function DonatePage() {
           style={{ ...getGradientWithOpacity(20, 'tr'), animationDelay: '1s' }}
         />
       </div>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto pt-16">
         {/* Header */}
         <div className="text-center mb-12">
           <H1 className="text-5xl md:text-7xl font-bold mb-6">

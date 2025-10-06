@@ -18,7 +18,9 @@ function getEZPayUrls() {
     const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
 
     return {
-      apiBaseURL: isProduction ? 'https://ezpay-api.up.railway.app/api' : 'http://localhost:5040/api',
+      apiBaseURL: isProduction
+        ? 'https://ezpay-api.up.railway.app/api'
+        : 'http://localhost:5040/api',
       webBaseURL: isProduction ? 'https://ezpay.vercel.app' : 'http://localhost:5045',
     }
   } else {
