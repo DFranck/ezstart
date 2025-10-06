@@ -1,8 +1,8 @@
 /**
  * Centralized theme colors for FengShui app
  *
- * Pour changer le thème : modifie uniquement les valeurs oklch() dans src/styles/theme.css
- * Ce fichier lit dynamiquement les CSS variables définies dans theme.css
+ * Pour changer le thème : modifie les CSS variables --fengshui-* dans @ezstart/ui/globals.css
+ * Ce fichier lit dynamiquement les CSS variables définies dans globals.css
  */
 
 /**
