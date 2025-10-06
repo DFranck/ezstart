@@ -4,6 +4,7 @@
 import AnalysisStep from '@/components/steps/AnalysisStep'
 import CardinalPointsStep from '@/components/steps/CardinalPointsStep-v2'
 import UploadStep from '@/components/steps/UploadStep'
+import { THEME_COLORS } from '@/lib/theme-colors'
 import { Stepper, type StepperTheme } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -12,10 +13,10 @@ export default function AnalyzePage() {
   const [triggerPreview, setTriggerPreview] = useState(0)
   const t = useTranslations()
 
-  // Theme FengShui avec dégradé rouge-jaune
+  // Theme FengShui dynamique (centralisé dans theme-colors.ts)
   const fengShuiTheme: StepperTheme = {
-    primaryColor: '#ef4444', // Rouge pour la barre de progression
-    secondaryColor: '#eab308', // Jaune pour les accents
+    primaryColor: THEME_COLORS.hex.primary,
+    secondaryColor: THEME_COLORS.hex.secondary,
   }
 
   const steps = [

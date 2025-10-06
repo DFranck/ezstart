@@ -2,7 +2,7 @@
 'use client'
 
 import { Link } from '@/i18n/navigation'
-import { GRADIENT_BG, GRADIENT_TEXT, THEME_COLORS } from '@/lib/theme-colors'
+import { GRADIENT_BG, GRADIENT_TEXT, THEME_COLORS, getGradientWithOpacity } from '@/lib/theme-colors'
 import {
   Button,
   Card,
@@ -132,9 +132,9 @@ export default function HomePage() {
       <Section size={'full'} className="pt-22 relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
           {/* Gradient animé */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-green-500/20 animate-pulse" />
+          <div className={`absolute inset-0 bg-gradient-to-br ${getGradientWithOpacity(20)} via-transparent animate-pulse`} />
           <div
-            className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 via-transparent to-green-500/20 animate-pulse"
+            className={`absolute inset-0 bg-gradient-to-tr ${getGradientWithOpacity(20)} via-transparent animate-pulse`}
             style={{ animationDelay: '1s' }}
           />
         </div>
@@ -291,9 +291,9 @@ export default function HomePage() {
           <CardContent className="p-12 text-center relative">
             {/* Decorative elements */}
             <div
-              className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${THEME_COLORS.gradient.from}/10 to-transparent rounded-full blur-3xl`}
+              className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${getGradientWithOpacity(10)} to-transparent rounded-full blur-3xl`}
             />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl" />
+            <div className={`absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr ${getGradientWithOpacity(10)} to-transparent rounded-full blur-3xl`} />
 
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/20 border border-success/30 mb-6">
