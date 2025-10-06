@@ -28,10 +28,14 @@ export function createApp(options?: CreateAppOptions): Express {
     ? {
         origin: options.corsOrigins,
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
       }
     : {
         origin: '*', // Allow all origins if not specified
         credentials: false,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
       };
 
   app.use(cors(corsOptions));
