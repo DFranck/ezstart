@@ -6,6 +6,12 @@ const PORT = getApiPort(5040)
 // Create app with raw body routes for webhook signature verification
 const app = createApp({
   rawBodyRoutes: ['/api/webhooks/stripe'],
+  corsOrigins: [
+    'http://localhost:5065', // FengShui local
+    'http://localhost:5045', // EZPay web local
+    'https://ez-fengshui.vercel.app', // FengShui prod
+    'https://ezpay.vercel.app', // EZPay web prod (if needed)
+  ],
 })
 
 // Health check (for Render)

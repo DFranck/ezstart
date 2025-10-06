@@ -12,11 +12,29 @@ export interface CreateAppOptions {
    * Example: ['/api/webhooks/stripe', '/api/webhooks/paypal']
    */
   rawBodyRoutes?: string[];
+  /**
+   * CORS origins to allow
+   * Example: ['https://myapp.vercel.app', 'http://localhost:3000']
+   * If not provided, allows all origins (*)
+   */
+  corsOrigins?: string[];
 }
 
 export function createApp(options?: CreateAppOptions): Express {
   const app = express();
-  app.use(cors());
+
+  // Configure CORS
+  const corsOptions = options?.corsOrigins
+    ? {
+        origin: options.corsOrigins,
+        credentials: true,
+      }
+    : {
+        origin: '*', // Allow all origins if not specified
+        credentials: false,
+      };
+
+  app.use(cors(corsOptions));
 
   // Apply raw body parser for specific routes BEFORE JSON parser
   if (options?.rawBodyRoutes) {
