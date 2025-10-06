@@ -7,6 +7,10 @@ const PORT = getApiPort()
 // Create app with standard configuration
 const app = createApp()
 
+// Health check (for Render)
+app.get('/', (_: any, res: any) => res.status(200).json({ status: 'ok', service: 'EZAuth' }))
+app.get('/health', (_: any, res: any) => res.status(200).json({ status: 'ok', service: 'EZAuth' }))
+
 // API routes
 app.use('/api/auth', authRoutes)
 app.use('/api/waitlist', waitlistRoutes)

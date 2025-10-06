@@ -4,6 +4,10 @@ import routes, { globalRegistry } from './routes/index.js'
 export const app = createApp()
 const PORT = getApiPort()
 
+// Health check (for Render)
+app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'EZ-Billing' }))
+app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'EZ-Billing' }))
+
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
