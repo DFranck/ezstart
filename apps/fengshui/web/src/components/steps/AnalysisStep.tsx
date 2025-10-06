@@ -25,6 +25,7 @@ import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
 import BaguaGrid from './BaguaGrid'
 import BaguaWheel from './BaguaWheel'
+import { GRADIENT_BG } from '@/lib/theme-colors'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
   const { isMobile } = useDevice()
@@ -195,7 +196,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                 <div className="flex gap-2 mt-4">
                   <Button
                     onClick={handleOpenPreview}
-                    className="text-white bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600"
+                    className={`text-white ${GRADIENT_BG}`}
                     disabled={!cfg || isGeneratingPDF}
                   >
                     <Icon name="lucide:FileDown" className="w-4 h-4" />

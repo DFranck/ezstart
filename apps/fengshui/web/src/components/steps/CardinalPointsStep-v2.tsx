@@ -18,6 +18,7 @@ import {
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
+import { THEME_COLORS } from '@/lib/theme-colors'
 import { useEffect, useRef, useState } from 'react'
 
 const CardinalPointsStep = () => {
@@ -184,7 +185,7 @@ const CardinalPointsStep = () => {
                   return (
                     <div
                       key={direction}
-                      className="absolute bg-gradient-to-r from-red-500  to-yellow-500 w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl z-50"
+                      className={`absolute bg-gradient-to-r ${THEME_COLORS.gradientClasses} w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl z-50`}
                       style={{
                         left: cx,
                         top: cy,

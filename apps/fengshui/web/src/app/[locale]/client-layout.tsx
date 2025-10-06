@@ -15,6 +15,7 @@ import { cn } from '@ezstart/ui/lib'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
+import { GRADIENT_TEXT } from '@/lib/theme-colors'
 
 type ClientLayoutProps = {
   children: ReactNode
@@ -58,7 +59,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
             <div>
               <H1
                 size={'h5'}
-                className="text-start w-fit font-bold bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent"
+                className={`text-start w-fit font-bold ${GRADIENT_TEXT}`}
               >
                 Feng Shui Bagua
               </H1>

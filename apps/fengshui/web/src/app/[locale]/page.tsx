@@ -1,6 +1,8 @@
 /* path: /app/[locale]/page.tsx */
 'use client'
 
+import { Link } from '@/i18n/navigation'
+import { GRADIENT_BG, GRADIENT_TEXT, THEME_COLORS } from '@/lib/theme-colors'
 import {
   Button,
   Card,
@@ -14,7 +16,6 @@ import {
   Section,
   Span,
 } from '@ezstart/ui/components'
-import { Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -27,25 +28,25 @@ export default function HomePage() {
       icon: 'lucide:Upload',
       title: t('features.step1.title'),
       description: t('features.step1.description'),
-      gradient: 'from-red-500 to-yellow-500',
+      gradient: THEME_COLORS.gradientClasses,
     },
     {
       icon: 'lucide:Compass',
       title: t('features.step2.title'),
       description: t('features.step2.description'),
-      gradient: 'from-red-500 to-yellow-500',
+      gradient: THEME_COLORS.gradientClasses,
     },
     {
       icon: 'lucide:Sparkles',
       title: t('features.step3.title'),
       description: t('features.step3.description', { year: currentYear }),
-      gradient: 'from-red-500 to-yellow-500',
+      gradient: THEME_COLORS.gradientClasses,
     },
     {
       icon: 'lucide:Download',
       title: t('features.step4.title'),
       description: t('features.step4.description'),
-      gradient: 'from-red-500 to-yellow-500',
+      gradient: THEME_COLORS.gradientClasses,
     },
   ]
 
@@ -131,9 +132,9 @@ export default function HomePage() {
       <Section size={'full'} className="pt-22 relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
           {/* Gradient animé */}
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-transparent to-yellow-500/20 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-green-500/20 animate-pulse" />
           <div
-            className="absolute inset-0 bg-gradient-to-tr from-yellow-500/20 via-transparent to-yellow-500/20 animate-pulse"
+            className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 via-transparent to-green-500/20 animate-pulse"
             style={{ animationDelay: '1s' }}
           />
         </div>
@@ -148,22 +149,18 @@ export default function HomePage() {
           </div>
 
           <H1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-red-500  to-yellow-500 bg-clip-text text-transparent">
-              {t('hero.title')}
-            </span>
+            <span className={`bg-gradient-to-r ${GRADIENT_TEXT}`}>{t('hero.title')}</span>
           </H1>
 
           <P>{t('hero.subtitle')}</P>
 
-          <P size={'sm'}>
-            {t('hero.description', { year: currentYear })}
-          </P>
+          <P size={'sm'}>{t('hero.description', { year: currentYear })}</P>
 
           <Div layout={'grid'} size={'lg'}>
             <Link href="/analyze">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+                className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
               >
                 <Icon name="lucide:Compass" className="mr-2 w-5 h-5" />
                 {t('hero.cta')}
@@ -220,7 +217,10 @@ export default function HomePage() {
       </div>
 
       {/* Sectors Grid avec vraies couleurs */}
-      <Section size={'full'} className="bg-gradient-to-tr from-red-500/10 to-yellow-500/10">
+      <Section
+        size={'full'}
+        className={`bg-gradient-to-tr ${THEME_COLORS.gradient.from}/10 ${THEME_COLORS.gradient.to}/10`}
+      >
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <H2 className="text-4xl font-bold mb-4 text-foreground">{t('sectors.title')}</H2>
@@ -290,19 +290,21 @@ export default function HomePage() {
         <Card className="bg-gradient-to-br from-card via-card to-muted/20 shadow-2xl overflow-hidden">
           <CardContent className="p-12 text-center relative">
             {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-red-500/10 to-transparent rounded-full blur-3xl" />
+            <div
+              className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${THEME_COLORS.gradient.from}/10 to-transparent rounded-full blur-3xl`}
+            />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl" />
 
             <div className="relative">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/20 border border-success/30 mb-6">
                 <Icon name="lucide:Zap" className="w-4 h-4 text-success" />
-                <span className="text-sm font-semibold text-foreground">{t('common.freeLabel')}</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {t('common.freeLabel')}
+                </span>
               </div>
 
               <H2 size={'giant'} className="flex flex-col items-center mb-4">
-                <span className="bg-gradient-to-r from-red-500 via-yellow-500 to-yellow-500 bg-clip-text text-transparent">
-                  {t('cta.title')}
-                </span>
+                <span className={GRADIENT_TEXT}>{t('cta.title')}</span>
               </H2>
 
               <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
@@ -329,7 +331,7 @@ export default function HomePage() {
               <Link href="/analyze">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+                  className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
                 >
                   <Icon name="lucide:Sparkles" />
                   <Span className="hidden md:inline">{t('cta.subtitle')}</Span>
