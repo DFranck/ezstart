@@ -1,12 +1,12 @@
 import type {
-  PayClientConfig,
   CreateDonationRequest,
   CreatePurchaseRequest,
   CreateSubscriptionRequest,
+  PayClientConfig,
+  Payment,
   PaymentResponse,
   PaymentsListResponse,
   StatsResponse,
-  Payment,
 } from './types.js'
 
 // Helper to get the correct URLs based on environment
@@ -18,15 +18,13 @@ function getEZPayUrls() {
     const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
 
     return {
-      apiBaseURL: isProduction
-        ? 'https://ezpay-api.onrender.com/api'
-        : 'http://localhost:5040/api',
+      apiBaseURL: isProduction ? 'https://ezpay-api.up.railway.app/api' : 'http://localhost:5040/api',
       webBaseURL: isProduction ? 'https://ezpay.vercel.app' : 'http://localhost:5045',
     }
   } else {
     // On server, use a safe default (production URLs)
     return {
-      apiBaseURL: 'https://ezpay-api.onrender.com/api',
+      apiBaseURL: 'https://ezpay-api.up.railway.app/api',
       webBaseURL: 'https://ezpay.vercel.app',
     }
   }
