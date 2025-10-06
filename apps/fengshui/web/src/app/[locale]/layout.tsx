@@ -4,9 +4,9 @@ import { PayProvider } from '@ezstart/pay-sdk'
 import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { Inter } from 'next/font/google'
 import ClientLayout from './client-layout'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -35,7 +35,7 @@ export const viewport = {
 
 export default async function RootLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode
   params: Promise<{ locale: string }>
