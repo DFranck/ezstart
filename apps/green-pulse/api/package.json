@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "prebuild": "pnpm --filter @ezstart/types build && pnpm --filter @green-pulse/types build",
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "tsc && ls -la dist",
+    "start": "ls -la && ls -la dist && node dist/index.js",
     "start:prod": "pnpm build && node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
