@@ -31,7 +31,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
 
   return (
     <BaseClientLayout
-      className={cn(isAnalyzePage && 'mb-24 sm:mb-0')}
+      className={cn(isAnalyzePage && 'mb-24 sm:mb-10')}
       appName="Feng Shui Bagua"
       creator={
         <div className="flex items-center gap-2">

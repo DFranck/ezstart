@@ -81,8 +81,25 @@ export function DonationWall({
   }
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
-      {donations.map((donation, index) => (
+    <>
+      {/* Add keyframes for animation */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `
+      }} />
+
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
+        {donations.map((donation, index) => (
         <Card
           key={donation.id}
           className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
@@ -154,23 +171,8 @@ export function DonationWall({
             )}
           </CardContent>
         </Card>
-      ))}
-
-      {/* Add keyframes for animation */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `
-      }} />
-    </div>
+        ))}
+      </div>
+    </>
   )
 }
