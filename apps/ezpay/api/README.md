@@ -40,7 +40,7 @@ PORT=5040
 NODE_ENV=development
 
 # MongoDB
-MONGODB_URI=mongodb://localhost:27017/ezpay
+MONGO_URL=mongodb://localhost:27017/ezpay
 
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...
@@ -49,7 +49,6 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 # URLs
 WEB_URL=http://localhost:5045
-API_URL=http://localhost:5040
 
 # PayPal (optional)
 PAYPAL_CLIENT_ID=
@@ -243,7 +242,7 @@ cd apps/ezpay/api && node dist/index.js
 ```env
 NODE_ENV=production
 PORT=10000
-MONGODB_URI=mongodb+srv://...
+MONGO_URL=mongodb+srv://...
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 WEB_URL=https://ezpay.vercel.app

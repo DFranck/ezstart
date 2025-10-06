@@ -74,7 +74,7 @@ pnpm --filter web-ezpay dev
 **API (.env.local):**
 ```env
 PORT=5040
-MONGODB_URI=mongodb://localhost:27017/ezpay
+MONGO_URL=mongodb://localhost:27017/ezpay
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 WEB_URL=http://localhost:5045

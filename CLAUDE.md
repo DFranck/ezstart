@@ -308,10 +308,18 @@ Toutes les APIs du monorepo DOIVENT utiliser le préfixe `/api` pour :
 
 **Structure API standardisée :**
 ```typescript
-// Dans server.ts de chaque API
+// Dans index.ts de chaque API (convention standard Node.js)
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 ```
+
+**✅ CONVENTION OBLIGATOIRE : Point d'entrée `index.ts`**
+
+Toutes les APIs utilisent **`src/index.ts`** comme point d'entrée :
+- **Convention Node.js standard** : fichier par défaut
+- **package.json** : `"main": "dist/index.js"`
+- **Scripts** : `"dev": "tsx watch src/index.ts"`, `"start": "node dist/index.js"`
+- **Cohérence** : toutes les APIs (EZAuth, EZ-Billing, Tower Defense, EZPay) utilisent cette convention
 
 **URLs finales :**
 - EZAuth : `http://localhost:5010/api/auth/*`, `/api/health`

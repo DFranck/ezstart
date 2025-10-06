@@ -1,14 +1,14 @@
 {
   "name": "api-tower-defense",
   "version": "0.0.1",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch src/index.ts",
     "prebuild": "cd ../../.. && pnpm --filter @ezstart/types build && pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/ui build && pnpm --filter @tower-defense/config build && pnpm --filter @tower-defense/types build && pnpm --filter @tower-defense/utils build",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "start:prod": "pnpm build && node dist/server.js",
+    "start": "node dist/index.js",
+    "start:prod": "pnpm build && node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --fix"
