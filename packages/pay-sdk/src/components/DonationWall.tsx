@@ -100,15 +100,15 @@ export function DonationWall({
 
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className || ''}`}>
         {donations.map((donation, index) => (
-        <Card
-          key={donation.id}
-          className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
-          style={{
-            animationDelay: `${index * 100}ms`,
-            animation: 'fadeInUp 0.6s ease-out forwards',
-            opacity: 0
-          }}
-        >
+          <Card
+            key={donation.id}
+            className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
+            style={{
+              animationDelay: `${index * 100}ms`,
+              animation: 'fadeInUp 0.6s ease-out forwards',
+              opacity: 0
+            }}
+          >
           {/* Gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-pink-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
 
@@ -170,7 +170,7 @@ export function DonationWall({
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
         ))}
       </div>
     </>

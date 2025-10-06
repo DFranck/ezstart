@@ -78,11 +78,16 @@ export function LoginButton({
       aria-label={loading ? loadingText : `${buttonText}`}
     >
       {loading ? (
-        <Icon name="fa:FaSpinner" spin className="mr-2" />
+        <Icon name="fa:FaSpinner" spin className="md:mr-2" />
       ) : (
-        showIcon && <Icon name={icon ? icon : (isAuthenticated ? 'fa:FaSignOutAlt' : 'fa:FaUser')} className="mr-2" />
+        showIcon && (
+          <Icon
+            name={icon ? icon : isAuthenticated ? 'fa:FaSignOutAlt' : 'fa:FaUser'}
+            className="md:mr-2"
+          />
+        )
       )}
-      {loading ? loadingText : buttonText}
+      <span className="hidden md:inline">{loading ? loadingText : buttonText}</span>
     </Button>
   )
 }
