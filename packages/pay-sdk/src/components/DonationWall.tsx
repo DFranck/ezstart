@@ -3,19 +3,43 @@
 import { Card, CardContent } from '@ezstart/ui/components'
 import { useDonations } from '../hooks/useDonations.js'
 
+export interface DonationWallTexts {
+  loadingText?: string
+  errorText?: string
+  noDonationsText?: string
+  anonymousLabel?: string
+}
+
 interface DonationWallProps {
   projectId?: string
   limit?: number
   className?: string
+  texts?: DonationWallTexts
+  // Legacy props for backward compatibility
+  noDonationsText?: string
 }
 
-export function DonationWall({ projectId, limit = 10, className }: DonationWallProps) {
+export function DonationWall({
+  projectId,
+  limit = 10,
+  className,
+  texts,
+  noDonationsText: legacyNoDonationsText
+}: DonationWallProps) {
   const { donations, isLoading, error } = useDonations({ projectId, limit })
+
+  // Merge texts with defaults
+  const t = {
+    loadingText: texts?.loadingText || 'Loading donations...',
+    errorText: texts?.errorText || 'Error',
+    noDonationsText: texts?.noDonationsText || legacyNoDonationsText || 'No donations yet. Be the first to support!',
+    anonymousLabel: texts?.anonymousLabel || 'Anonymous',
+  }
 
   if (isLoading) {
     return (
       <div className={className}>
-        <p className="text-muted-foreground">Loading donations...</p>
+        <p className="text-muted-foreground">{t.loadingText}</p>
       </div>
     )
   }
@@ -23,7 +47,7 @@ export function DonationWall({ projectId, limit = 10, className }: DonationWallP
   if (error) {
     return (
       <div className={className}>
-        <p className="text-destructive">Error: {error}</p>
+        <p className="text-destructive">{t.errorText}: {error}</p>
       </div>
     )
   }
@@ -31,7 +55,7 @@ export function DonationWall({ projectId, limit = 10, className }: DonationWallP
   if (!donations.length) {
     return (
       <div className={className}>
-        <p className="text-muted-foreground">No donations yet. Be the first to support!</p>
+        <p className="text-muted-foreground">{t.noDonationsText}</p>
       </div>
     )
   }
@@ -46,7 +70,7 @@ export function DonationWall({ projectId, limit = 10, className }: DonationWallP
                 {donation.customerName?.[0] || '?'}
               </div>
               <div className="flex-1">
-                <p className="font-semibold">{donation.customerName || 'Anonymous'}</p>
+                <p className="font-semibold">{donation.customerName || t.anonymousLabel}</p>
                 <p className="text-sm text-muted-foreground">
                   ${donation.amount} •{' '}
                   {new Date(donation.createdAt).toLocaleDateString(undefined, {

@@ -47,12 +47,18 @@ export class PayClient {
   // ===== DONATIONS =====
 
   async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
+    // Auto-detect return URL from current window location
+    const returnUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : undefined
+
     const response = await fetch(`${this.config.baseURL}/donate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, returnUrl }),
     })
 
     const result = await response.json()

@@ -15,6 +15,7 @@ export { useDonations } from './hooks/useDonations.js'
 // Components - Donations
 export { DonateButton } from './components/DonateButton.js'
 export { DonateModal } from './components/DonateModal.js'
+export type { DonateModalTexts, DonateModalProps } from './components/DonateModal.js'
 export { DonationWall } from './components/DonationWall.js'
 
 // Re-export types

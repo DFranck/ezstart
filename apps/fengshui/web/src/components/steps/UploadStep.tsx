@@ -12,9 +12,9 @@ import {
   Icon,
   P,
   StepContent,
-  useStepper,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 /**
@@ -24,6 +24,8 @@ import { useState } from 'react'
  * - Minimal crop intent via optional uploaderOptions (no extra toolbars)
  */
 const UploadStep = () => {
+  const t = useTranslations()
+
   // Optional: only if PlanUploader exposes such knobs.
   const uploaderOptions = {
     // keep UX minimal: just crop/confirm
@@ -50,7 +52,7 @@ const UploadStep = () => {
         const isReturningToStep = !!(data?.file || data?.preview) && !isEditing
 
         return (
-          <div className="mx-auto w-full max-w-2xl ">
+          <>
             {/* Header initial - masqué pendant l'upload/crop */}
             <Card
               variant={'ghost'}
@@ -63,11 +65,11 @@ const UploadStep = () => {
                   <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
                 </Div>
                 <H2 size={'h5'} className="text-left">
-                  Étape 1 · Import de votre plan
+                  {t('steps.upload.title')}
                 </H2>
               </CardHeader>
               <CardContent className="">
-                <P variant={'description'}>Ajoutez le plan de votre appartement ou maison.</P>
+                <P variant={'description'}>{t('steps.upload.description')}</P>
               </CardContent>
             </Card>
 
@@ -88,7 +90,7 @@ const UploadStep = () => {
               // Optional minimal-crop intent (ignored if PlanUploader doesn't support it)
               {...uploaderOptions}
             />
-          </div>
+          </>
         )
       }}
     </StepContent>

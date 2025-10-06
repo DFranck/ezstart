@@ -28,8 +28,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
 
+        console.log(`🔍 Looking for payment with ID: ${session.id}`)
+
         // Update payment status to completed
-        await Payment.updateOne(
+        const result = await Payment.updateOne(
           { paymentId: session.id },
           {
             status: 'completed',
@@ -38,7 +40,11 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           }
         )
 
-        console.log(`✅ Payment completed: ${session.id}`)
+        if (result.matchedCount === 0) {
+          console.error(`❌ Payment not found in DB: ${session.id}`)
+        } else {
+          console.log(`✅ Payment completed: ${session.id}`)
+        }
         break
       }
 

@@ -171,6 +171,30 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-lg;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.556 0 0 / 0.2) transparent;
+  }
+  .dark * {
+    scrollbar-color: oklch(0.708 0 0 / 0.2) transparent;
+  }
 }
 
 @theme inline {

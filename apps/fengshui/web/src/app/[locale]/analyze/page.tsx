@@ -67,6 +67,7 @@ export default function AnalyzePage() {
           }>
         }
         withHeaderOffset
+        bottomOffset="bottom-10 sm:bottom-0"
         onStepChange={handleStepChange}
         onComplete={handleComplete}
         allowStepNavigation
@@ -97,7 +98,10 @@ export default function AnalyzePage() {
                     tooltip: t('tooltips.previousStep'),
                   },
             next: {
-              label: context.currentStep === context.steps.length - 1 ? t('common.finish') : t('common.next'),
+              label:
+                context.currentStep === context.steps.length - 1
+                  ? t('common.finish')
+                  : t('common.next'),
               icon:
                 context.currentStep === context.steps.length - 1
                   ? 'lucide:Check'

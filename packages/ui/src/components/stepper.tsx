@@ -5,7 +5,7 @@ import { useOnScroll } from '../hooks'
 import { cn } from '../lib/utils'
 import { Button } from './button'
 import { Icon, KnownIconName } from './icon'
-import { Div, Span } from './tag'
+import { Div, Section, Span } from './tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 
 // Composant wrapper pour les boutons avec tooltip
@@ -108,6 +108,9 @@ interface StepperProps {
   headerOffsetTop?: string
   headerOffsetCollapsed?: string
 
+  // Bottom navigation offset (for mobile bottom nav bars)
+  bottomOffset?: string // e.g., 'bottom-16' for 64px mobile nav height
+
   // Theming
   theme?: StepperTheme
 }
@@ -126,6 +129,7 @@ export function Stepper({
   renderButtons,
   headerOffsetTop = 'top-[68px] md:top-[70px]',
   headerOffsetCollapsed = 'top-[48px] md:top-[54px]',
+  bottomOffset = 'bottom-0',
   theme,
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState(initialStep)
@@ -198,7 +202,7 @@ export function Stepper({
   return (
     <TooltipProvider>
       <StepperContext.Provider value={contextValue}>
-        <Div className="flex-1 flex flex-col w-full mb-18">
+        <Div className="flex-1 flex flex-col w-full">
           {/* Header avec les étapes */}
           <StepperHeader
             steps={steps}
@@ -214,9 +218,7 @@ export function Stepper({
           />
           <Div className={cn('flex-1 flex flex-col items-center justify-center w-full', className)}>
             {/* Contenu de l'étape actuelle */}
-            <div className={cn(`py-6 px-2 ${withHeaderOffset && 'pt-24'}`)}>
-              {children || steps[currentStep]?.component}
-            </div>
+            <Section size={'full'}>{children || steps[currentStep]?.component}</Section>
 
             {/* Navigation */}
             <StepperNavigation
@@ -228,6 +230,7 @@ export function Stepper({
               renderButtons={renderButtons}
               context={contextValue}
               theme={theme}
+              bottomOffset={bottomOffset}
             />
           </Div>
         </Div>
@@ -376,6 +379,7 @@ interface StepperNavigationProps {
   renderButtons?: (context: StepperContextType) => StepperButtons
   context: StepperContextType
   theme?: StepperTheme
+  bottomOffset?: string
 }
 
 function StepperNavigation({
@@ -387,6 +391,7 @@ function StepperNavigation({
   renderButtons,
   context,
   theme,
+  bottomOffset = 'bottom-0',
 }: StepperNavigationProps) {
   // Styles personnalisés pour le bouton Next avec theme
   const nextButtonStyle = (() => {
@@ -429,7 +434,7 @@ function StepperNavigation({
 
   return (
     <>
-      <div className="fixed z-20 bottom-0 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card">
+      <div className={cn('fixed z-20 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card', bottomOffset)}>
         {/* Bouton Previous */}
         {buttons.previous && !buttons.previous.hidden && (
           <TooltipButton button={buttons.previous}>

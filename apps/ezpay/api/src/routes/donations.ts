@@ -19,6 +19,7 @@ router.post('/donate', async (req: Request, res: Response) => {
       userId,
       donorName,
       donorEmail,
+      returnUrl, // Custom return URL from calling app
     } = req.body
 
     // Validation
@@ -28,6 +29,9 @@ router.post('/donate', async (req: Request, res: Response) => {
         error: 'projectId and positive amount are required',
       })
     }
+
+    // Use custom returnUrl or fallback to WEB_URL (EZPay web)
+    const baseUrl = returnUrl || process.env.WEB_URL
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({
@@ -43,8 +47,8 @@ router.post('/donate', async (req: Request, res: Response) => {
         isPublic: isPublic.toString(),
         isAnonymous: isAnonymous.toString(),
       },
-      successUrl: `${process.env.WEB_URL}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${process.env.WEB_URL}/donate/cancel`,
+      successUrl: `${baseUrl}/donate/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/donate/cancel`,
     })
 
     // Create payment record in DB
@@ -66,6 +70,9 @@ router.post('/donate', async (req: Request, res: Response) => {
         isPublic,
       },
     })
+
+    console.log(`💳 Donation created - Session ID: ${session.id}`)
+    console.log(`🔗 Checkout URL: ${session.url}`)
 
     res.json({
       success: true,
@@ -157,6 +164,70 @@ router.get('/donations/stats', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch donation stats',
+    })
+  }
+})
+
+// Verify and update payment status (called from success page)
+router.post('/verify-payment/:sessionId', async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required',
+      })
+    }
+
+    // Find payment in DB
+    const payment = await Payment.findOne({ paymentId: sessionId })
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        error: 'Payment not found',
+      })
+    }
+
+    // If already completed, return success
+    if (payment.status === 'completed') {
+      return res.json({
+        success: true,
+        payment,
+      })
+    }
+
+    // Verify with Stripe API to prevent fraud
+    const { stripe } = await import('../services/stripe.js')
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    // Only mark as completed if Stripe confirms payment
+    if (session.payment_status === 'paid' && session.status === 'complete') {
+      payment.status = 'completed'
+      payment.completedAt = new Date()
+      payment.paymentMethod = session.payment_method_types?.[0]
+      await payment.save()
+
+      console.log(`✅ Payment verified with Stripe and completed: ${sessionId}`)
+
+      res.json({
+        success: true,
+        payment,
+      })
+    } else {
+      // Payment not confirmed by Stripe
+      console.warn(`⚠️ Payment not confirmed by Stripe: ${sessionId} (status: ${session.status})`)
+      res.status(400).json({
+        success: false,
+        error: 'Payment not confirmed',
+      })
+    }
+  } catch (error) {
+    console.error('Verify payment error:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Failed to verify payment',
     })
   }
 })

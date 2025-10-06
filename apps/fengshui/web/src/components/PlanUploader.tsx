@@ -269,9 +269,7 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
           {/* Image editor (minimal) */}
           {preview && isImage && isEditing && (
             <div className="space-y-4">
-              <div
-                className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]"
-              >
+              <div className="relative w-full overflow-hidden rounded border h-80 sm:h-96 md:h-[420px]">
                 <Cropper
                   image={preview}
                   crop={crop}
@@ -303,7 +301,15 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                     step={0.1}
                     value={zoom}
                     onChange={e => setZoom(Number(e.target.value))}
-                    className="w-full"
+                    className="w-full appearance-none bg-transparent cursor-pointer
+                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
+                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
+                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
+                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
+                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
                   />
                   <span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</span>
                 </div>
@@ -349,7 +355,15 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                         Math.max(MIN_W, Math.min(MAX_W, Number(e.target.value) || MIN_W))
                       )
                     }
-                    className="flex-1"
+                    className="flex-1 appearance-none bg-transparent cursor-pointer
+                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
+                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
+                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
+                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
+                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
                     aria-label="Crop width"
                   />
                   <Input
@@ -384,7 +398,15 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
                         Math.max(MIN_H, Math.min(MAX_H, Number(e.target.value) || MIN_H))
                       )
                     }
-                    className="flex-1"
+                    className="flex-1 appearance-none bg-transparent cursor-pointer
+                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
+                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
+                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
+                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
+                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
                     aria-label="Crop height"
                   />
                   <Input

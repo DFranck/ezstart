@@ -2,7 +2,11 @@ import { createApp, connectToMongo, startServer, getApiPort } from '@ezstart/exp
 import routes from './routes/index.js'
 
 const PORT = getApiPort(5040)
-const app = createApp()
+
+// Create app with raw body routes for webhook signature verification
+const app = createApp({
+  rawBodyRoutes: ['/api/webhooks/stripe'],
+})
 
 // Mount API routes
 app.use('/api', routes)
