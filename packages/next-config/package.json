@@ -8,11 +8,15 @@
     ".": "./src/base.js",
     "./base": "./src/base.js",
     "./base.js": "./src/base.js",
-    "./pwa": "./src/pwa.js"
+    "./pwa": "./src/pwa.js",
+    "./withI18n": "./src/withI18n.js",
+    "./withPWA": "./src/withPWA.js"
   },
   "files": [
     "src/base.js",
-    "src/pwa.js"
+    "src/pwa.js",
+    "src/withI18n.js",
+    "src/withPWA.js"
   ],
   "peerDependencies": {
     "next": "^15.0.0"
