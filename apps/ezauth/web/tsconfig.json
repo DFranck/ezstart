@@ -1,6 +1,7 @@
 {
   "extends": "@ezstart/typescript-config/nextjs.json",
   "compilerOptions": {
+    "composite": true,
     "plugins": [
       {
         "name": "next"
