@@ -63,7 +63,7 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       navLinks={[
         { href: '/', label: t('navigation.home'), icon: 'lucide:Home' },
         { href: '/analyze', label: t('navigation.analyze'), icon: 'lucide:Sparkles' },
-        { href: '/donate', label: t('common.donate'), icon: 'lucide:Heart' },
+        { href: '/donate', label: t('common.donate'), icon: 'lucide:Leaf' },
       ]}
       headerRightContent={
         <div className="flex items-center gap-2">
