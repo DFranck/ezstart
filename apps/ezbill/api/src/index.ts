@@ -17,11 +17,11 @@ connectToMongo('ezbill')
       routes,
       registries: globalRegistry,
       basePath: '/api',
-      serviceName: 'EzBilling',
+      serviceName: 'EZBill',
       port: Number(PORT),
     })
   )
   .catch(err => {
-    console.error('❌ Failed to start EzBilling API', err)
+    console.error('❌ Failed to start EZBill API', err)
     process.exit(1)
   })
