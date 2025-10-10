@@ -145,7 +145,8 @@
     "title": "Transformez votre espace de vie",
     "subtitle": "Commencer l'Analyse Maintenant",
     "shortLabel": "Analyser",
-    "flyingStars": "Étoiles Volantes {year}"
+    "flyingStars": "Étoiles Volantes {year}",
+    "supportTool": "Soutenir l'outil Feng Shui"
   },
   "steps": {
     "upload": {

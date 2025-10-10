@@ -145,7 +145,8 @@
     "title": "Transform your living space",
     "subtitle": "Start Analysis Now",
     "shortLabel": "Analyze",
-    "flyingStars": "Flying Stars {year}"
+    "flyingStars": "Flying Stars {year}",
+    "supportTool": "Support Feng Shui Tool"
   },
   "steps": {
     "upload": {

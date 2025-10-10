@@ -340,16 +340,28 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <Link href="/analyze">
-                <Button
-                  size="lg"
-                  className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
-                >
-                  <Icon name="lucide:Sparkles" />
-                  <Span className="hidden md:inline">{t('cta.subtitle')}</Span>
-                  <Span className="md:hidden">{t('cta.shortLabel')}</Span>
-                </Button>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link href="/analyze">
+                  <Button
+                    size="lg"
+                    className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
+                  >
+                    <Icon name="lucide:Sparkles" />
+                    <Span className="hidden md:inline">{t('cta.subtitle')}</Span>
+                    <Span className="md:hidden">{t('cta.shortLabel')}</Span>
+                  </Button>
+                </Link>
+                <Link href="/donate">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 hover:bg-accent/50 transition-all transform hover:scale-105"
+                  >
+                    <Icon name="lucide:Leaf" className="text-green-600" />
+                    <Span>{t('cta.supportTool')}</Span>
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
