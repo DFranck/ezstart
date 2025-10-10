@@ -410,6 +410,30 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - Impact/results
   ```
 
+### Renaming Projects - Migration Scripts
+
+**Historique des migrations :**
+- **10/10/2025** : `ez-billing` → `ezbill` (commit 55bb447)
+
+**Script de migration disponible :**
+- `scripts/rename-ez-billing-to-ezbill.sh` - Script complet de migration
+
+**Process de renaming d'un projet :**
+1. Créer un script bash dans `scripts/` avec les étapes suivantes :
+   - Utiliser `git mv` pour préserver l'historique git
+   - Mettre à jour tous les `package.json` (name, dependencies)
+   - Mettre à jour les imports TypeScript avec `sed` + `find`
+   - Mettre à jour la documentation (CLAUDE.md, DEPLOY.md, README)
+   - Mettre à jour les messages i18n si nécessaire
+   - Nettoyer le cache (node_modules/.cache, .turbo)
+   - Réinstaller les dépendances avec `pnpm install`
+2. Tester la compilation avec `pnpm turbo build --filter=[new-name]`
+3. Actions manuelles post-migration :
+   - Renommer le projet sur Vercel/Railway
+   - Mettre à jour Root Directory dans Vercel
+   - Tester le déploiement
+   - Commit avec message descriptif
+
 ## 🚀 DÉPLOIEMENT - Configuration Railway & Vercel ✅
 
 **📄 Documentation complète : Voir [DEPLOY.md](./DEPLOY.md) à la racine du monorepo**
