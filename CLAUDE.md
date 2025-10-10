@@ -410,105 +410,133 @@ Tous les packages utilisent les configurations centralisées selon leur type :
   - Impact/results
   ```
 
-## 🚀 DÉPLOIEMENT - Configuration Vercel & Render ✅
+## 🚀 DÉPLOIEMENT - Configuration Railway & Vercel ✅
 
-### Configuration Vercel (Apps Web) - 100% Opérationnel
+**📄 Documentation complète : Voir [DEPLOY.md](./DEPLOY.md) à la racine du monorepo**
+
+### Architecture de Déploiement
+
+**Railway (Free Plan $1/mois) - APIs Critiques :**
+- ✅ **EZAuth API** : https://ezauth.up.railway.app (private: ezauth.railway.internal)
+- ✅ **EZPay API** : https://ezpay-api.up.railway.app (private: ezstart.railway.internal)
+
+**Vercel (Free Tier) - Apps Web :**
+- ✅ **EZStart** : https://ezstart-web.vercel.app
+- ✅ **EZAuth** : https://ezauth-web.vercel.app
+- ✅ **EZ-Billing** : https://ez-billing-web.vercel.app
+- ✅ **EZPay** : https://ezpay-web.vercel.app
+- ✅ **Tower Defense** : https://tower-defense-web.vercel.app
+- ✅ **FengShui** : https://fengshui-web.vercel.app
+- ✅ **ASC-TCD** : https://asc-tcd-web.vercel.app
+
+### Pourquoi Railway pour EZAuth et EZPay ?
+
+- ⚡ **0ms cold start** (critique pour SSO et paiements)
+- 💰 **Usage ponctuel** (~$0.20-0.40/mois pour les deux)
+- 🔒 **Toujours actif** (pas de sleep mode)
+- 🎯 **Consommation faible** (authentification et paiements = pics courts)
+
+### Configuration Railway - Build Optimisé
+
+**EZAuth API :**
+```bash
+# Build Command (OPTIMISÉ)
+pnpm install --frozen-lockfile --shamefully-hoist && \
+pnpm --filter @ezstart/express-core build && \
+pnpm turbo build --filter=api-ezauth
+
+# Start Command
+cd apps/ezauth/api && node dist/index.js
+
+# Healthcheck
+/api/health
+```
+
+**EZPay API :**
+```bash
+# Build Command (OPTIMISÉ)
+pnpm install --frozen-lockfile --shamefully-hoist && \
+pnpm --filter @ezstart/express-core build && \
+pnpm turbo build --filter=api-ezpay
+
+# Start Command
+cd apps/ezpay/api && node dist/index.js
+
+# Healthcheck
+/api/health
+```
+
+**⚠️ Notes importantes :**
+- Seul `@ezstart/express-core` est nécessaire pour builder les APIs
+- Les SDKs (`auth-sdk`, `pay-sdk`, `ui`) ne sont utilisés que côté web
+- Ne pas inclure `@ezstart/ui` dans le build des APIs
+
+### Configuration Vercel (Apps Web)
 
 **Stratégie de déploiement :**
-- ✅ **Root Directory** : `apps/[app]/web` (cible le sous-dossier du monorepo)
-- ✅ **Include files outside root directory** : COCHÉ (obligatoire pour monorepo)
-- ✅ **Build Command** : `pnpm build` (utilise le package.json local)
+- ✅ **Root Directory** : `apps/[app]/web`
+- ✅ **Include files outside root directory** : COCHÉ (obligatoire)
+- ✅ **Build Command** : `pnpm build`
 
 **Build Commands optimisés dans package.json :**
 ```json
-// Toutes les apps web ont cette structure optimisée
 "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build"
 ```
 
-**Apps Web déployées sur Vercel :**
-- **EZStart** : https://ezstart-web.vercel.app
-- **EZAuth** : https://ezauth-web.vercel.app
-- **EZ-Billing** : https://ez-billing-web.vercel.app
-- **Tower Defense** : https://tower-defense-web.vercel.app
-- **FengShui** : https://fengshui-web.vercel.app
-- **ASC-TCD** : https://asc-tcd-web.vercel.app
+### Monitoring Railway
 
-### Configuration Render (APIs) - 100% Opérationnel
-
-**Stratégie de déploiement :**
-- ✅ **Repository** : https://github.com/DFranck/ezstart (racine du monorepo)
-- ✅ **Build Command** : `pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-[name]`
-- ✅ **Start Command** : `cd apps/[app]/api && node dist/[file].js`
-
-**Build Commands par API :**
-```bash
-# EZAuth API
-Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-ezauth
-Start: cd apps/ezauth/api && node dist/index.js
-
-# EZ-Billing API
-Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-ez-billing
-Start: cd apps/ez-billing/api && node dist/server.js
-
-# Tower Defense API
-Build: pnpm install --frozen-lockfile --shamefully-hoist && pnpm turbo build --filter=api-tower-defense
-Start: cd apps/tower-defense/api && node dist/server.js
+**Vérifier la consommation :**
+```
+Dashboard Railway → Settings → Usage
+- CPU Usage
+- Memory Usage
+- Network (entrant/sortant)
 ```
 
-**Variables d'environnement Render :**
-- `NODE_ENV=production`
-- `PORT=10000`
-- Health Check: `/api/health`
-
-### Build Filters Render (Optimisation) ✅
-
-**Pour éviter les rebuilds inutiles, configurer :**
-
-**EZAuth API - Included Paths :**
+**Estimation consommation :**
 ```
-apps/ezauth/api/**
-packages/express-core/**
-packages/types/**
-packages/ui/**
-```
-
-**EZ-Billing API - Included Paths :**
-```
-apps/ez-billing/api/**
-packages/express-core/**
-packages/types/**
-```
-
-**Tower Defense API - Included Paths :**
-```
-apps/tower-defense/api/**
-packages/express-core/**
-packages/types/**
-```
-
-**Ignored Paths (pour toutes les APIs) :**
-```
-apps/ezstart/**
-apps/fengshui/**
-apps/asc-tcd/**
-packages/ui/** (sauf EZAuth)
-packages/auth-sdk/** (sauf si utilisé)
+EZAuth API : ~$0.10-0.20/mois (auth ponctuelle)
+EZPay API : ~$0.10-0.20/mois (paiements rares)
+TOTAL : ~$0.20-0.40/mois
+RESTE : $0.60-0.80 de marge ✅
 ```
 
 ### Bonnes Pratiques Déploiement
 
-1. **Vercel** : Toujours cocher "Include files outside root directory"
-2. **Render** : Utiliser les Build Filters pour optimiser les déploiements
+1. **Railway** : Seul `express-core` nécessaire pour builder les APIs
+2. **Vercel** : Toujours cocher "Include files outside root directory"
 3. **Monorepo** : Build les dépendances avant les apps (ordre important)
 4. **Health Checks** : Tous les endpoints `/api/health` configurés
-5. **Variables d'env** : Production settings appliquées
+5. **Secrets** : Utiliser `.env.local` en dev, Railway/Vercel Variables en prod
+6. **Monitoring** : Surveiller usage Railway pour rester sous $1/mois
 
-### Notes Techniques
+### Variables d'Environnement Production
 
-- Monorepo utilise pnpm workspaces
-- TypeScript avec configurations partagées
-- Architecture microservices avec packages partagés
-- Déploiements Vercel et Render 100% opérationnels
+**EZAuth API (Railway) :**
+```env
+NODE_ENV=production
+PORT=5010
+MONGO_URL=mongodb+srv://...
+JWT_SECRET=production-secret
+ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ez-billing-web.vercel.app,...
+```
+
+**EZPay API (Railway) :**
+```env
+NODE_ENV=production
+PORT=5040
+MONGO_URL=mongodb+srv://...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+WEB_URL=https://ezpay-web.vercel.app
+```
+
+**Apps Web (Vercel) :**
+```env
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=https://ezauth.railway.internal/api
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+```
 
 ### Gestion des Processus Background
 
@@ -534,35 +562,54 @@ packages/auth-sdk/** (sauf si utilisé)
 - **Web Apps (50x5)** : EZAuth 5015, EZ-Billing 5025, Tower Defense 5035
 - **Web Standalone** : EZStart 5045, ASC-TCD 5055, FengShui 5065
 
-### Architecture .env Standardisée
+### Architecture .env Standardisée ✅ (Mise à jour 10/10/2025)
 
-**Structure par projet :**
+**Structure 3 fichiers par projet :**
 ```
-📁 Chaque projet :
-├── .env.example    ← Template committé avec placeholders
-├── .env.local      ← Valeurs réelles (ignoré par git)
-└── ❌ PAS de .env  ← Supprimé pour éviter confusion
+📁 Chaque API (ezauth, ezpay) :
+├── .env.example       ← Template (COMMITTÉ) - Placeholders + documentation
+├── .env.local         ← Dev local (GITIGNORED) - Secrets réels développement
+└── .env.production    ← Production (GITIGNORED) - Secrets réels Railway
 ```
 
-**Changements effectués :**
-1. ✅ Suppression des ports hardcodés dans `express-core`
-2. ✅ Migration de tous les `.env` vers `.env.local`
-3. ✅ Création de `.env.example` pour tous les projets
-4. ✅ Mise à jour `.gitignore` pour permettre `.env.example`
-5. ✅ Suppression des variables `NEXT_PUBLIC_EZAUTH_*` (auto-config dans auth-sdk)
-6. ✅ Mise à jour `auth-sdk/client.ts` avec nouveaux ports (5010/5015)
-7. ✅ Correction `express-core/index.ts` : suppression export `API_PORTS`
+**Workflow Environnements :**
 
-**État actuel (après kill node.exe) :**
-- Monorepo prêt avec nouveaux ports
-- Lancer avec `pnpm dev` utilisera les ports 50xx
-- Tous les fichiers .env.local doivent avoir les bons ports
-- Script `dev-status.ps1` mis à jour avec nouveaux ports
+**1. Développement Local :**
+```bash
+cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
+# Remplir avec valeurs dev (MongoDB local, test Stripe, etc.)
+# express-core charge .env.local en priorité
+```
 
-**À faire au prochain démarrage :**
-1. Vérifier que tous les .env.local ont les bons ports (50xx)
-2. Lancer `pnpm dev` pour démarrer avec nouveaux ports
-3. Tester avec `pnpm dev:status` pour confirmer
+**2. Production Railway :**
+```bash
+# NE PAS commiter .env.production
+# Copier chaque variable dans Railway Dashboard → Settings → Variables
+# Référence: .env.production contient toutes les variables nécessaires
+```
+
+**3. Template (.env.example) :**
+```bash
+# TOUJOURS à jour avec toutes les variables
+# OBLIGATOIRE de mettre à jour après ajout de nouvelles variables
+# Committé pour documenter la config nécessaire
+```
+
+**Règles Importantes :**
+1. ✅ `.env.example` → Template SANS secrets (committé)
+2. ✅ `.env.local` → Dev avec secrets réels (gitignored)
+3. ✅ `.env.production` → Production avec secrets réels (gitignored)
+4. ❌ `.env` → NE PLUS UTILISER (supprimé pour éviter confusion)
+5. ✅ express-core charge `.env.local` en priorité, puis `.env` en fallback
+
+**Configuration .gitignore :**
+```
+.env
+.env.local
+.env.*.local
+.env.production
+!.env.example
+```
 
 ## EZAuth - Système d'Authentification Centralisé
 
