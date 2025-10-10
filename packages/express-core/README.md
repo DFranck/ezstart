@@ -345,7 +345,7 @@ All @ezstart APIs use this shared infrastructure:
 
 - ✅ **ezauth/api** - Authentication service (port 5010)
 - ✅ **ezpay/api** - Universal payment system (port 5040)
-- ✅ **ez-billing/api** - Billing management API (port 5020)
+- ✅ **ezbill/api** - Billing management API (port 5020)
 - ✅ **tower-defense/api** - Tower Defense game API (port 5030)
 - ✅ **green-pulse/api** - Green Pulse API (port 5070)
 

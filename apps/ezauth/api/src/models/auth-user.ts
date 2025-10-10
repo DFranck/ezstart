@@ -56,7 +56,7 @@ const authUserSchema = new Schema<AuthUserDocument>({
   },
   apps: [{
     type: String,
-    enum: ['ez-billing', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'], // Add more apps as needed
+    enum: ['ezbill', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'], // Add more apps as needed
   }],
 }, {
   timestamps: true,

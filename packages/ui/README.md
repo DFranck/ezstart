@@ -468,7 +468,7 @@ interface MyButtonProps extends ButtonProps {
 All @ezstart applications use this comprehensive UI library:
 
 - ✅ **ezauth/web** - Authentication interface
-- ✅ **ez-billing/web** - Billing management interface
+- ✅ **ezbill/web** - Billing management interface
 - ✅ **ezstart/web** - Main application interface
 - ✅ **fengshui/web** - Feng Shui application interface
 - ✅ **tower-defense/web** - Game interface
@@ -602,7 +602,7 @@ pnpm lint
 pnpm storybook
 
 # Or test in consuming applications
-cd ../../apps/ez-billing/web
+cd ../../apps/ezbill/web
 pnpm dev
 ```
 

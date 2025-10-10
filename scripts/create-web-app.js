@@ -21,11 +21,11 @@ const projectPath = path.join(rootDir, 'apps', projectName, 'web')
 const EXISTING_PORTS = {
   // APIs (50x0)
   'ezauth-api': 5010,
-  'ez-billing-api': 5020,
+  'ezbill-api': 5020,
   'tower-defense-api': 5030,
   // Web Apps (50x5)
   'ezauth-web': 5015,
-  'ez-billing-web': 5025,
+  'ezbill-web': 5025,
   'tower-defense-web': 5035,
   // Standalone Web Apps
   'ezstart-web': 5045,

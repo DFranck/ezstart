@@ -67,7 +67,7 @@ All Next.js web applications use the **exact same** standardized configuration:
 #### Standardized Applications (100% Centralized)
 
 - ✅ [`ezauth/web`](./apps/ezauth/web/) - Authentication service (port 8080)
-- ✅ [`ez-billing/web`](./apps/ez-billing/web/) - Billing management (port 4100)
+- ✅ [`ezbill/web`](./apps/ezbill/web/) - Billing management (port 4100)
 - ✅ [`ezstart/web`](./apps/ezstart/web/) - Main application (port 4000)
 - ✅ [`fengshui/web`](./apps/fengshui/web/) - Feng Shui application (port 4400)
 - ✅ [`tower-defense/web`](./apps/tower-defense/web/) - Tower Defense game (port 4200)
@@ -87,7 +87,7 @@ All Node.js APIs use the **exact same** shared infrastructure:
 #### Available APIs
 
 - [`ezauth/api`](./apps/ezauth/api/) - Centralized authentication service (port 8001)
-- [`ez-billing/api`](./apps/ez-billing/api/) - Billing API (port 4101)
+- [`ezbill/api`](./apps/ezbill/api/) - Billing API (port 4101)
 - [`ezstart/api`](./apps/ezstart/api/) - Main API service (port 8888)
 - [`tower-defense/api`](./apps/tower-defense/api/) - Tower Defense API (port 4201)
 
@@ -147,7 +147,7 @@ pnpm install
 pnpm dev
 
 # Start a specific app
-pnpm --filter ez-billing-web dev
+pnpm --filter ezbill-web dev
 pnpm --filter ezauth-api dev
 ```
 
@@ -158,7 +158,7 @@ pnpm --filter ezauth-api dev
 pnpm build
 
 # Build a specific app
-pnpm --filter ez-billing-web build
+pnpm --filter ezbill-web build
 
 # Global TypeCheck (18/18 packages)
 pnpm typecheck

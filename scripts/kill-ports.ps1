@@ -26,8 +26,8 @@ if ($choice -eq "2") {
 } else {
     Write-Host ""
     Write-Host "Checking @ezstart ports (50xx range)..." -ForegroundColor Cyan
-    Write-Host "APIs: 5010 (ezauth), 5020 (ez-billing), 5030 (tower-defense)" -ForegroundColor Gray
-    Write-Host "Web apps: 5015 (ezauth), 5025 (ez-billing), 5035 (tower-defense)" -ForegroundColor Gray
+    Write-Host "APIs: 5010 (ezauth), 5020 (ezbill), 5030 (tower-defense)" -ForegroundColor Gray
+    Write-Host "Web apps: 5015 (ezauth), 5025 (ezbill), 5035 (tower-defense)" -ForegroundColor Gray
     Write-Host "Web apps: 5045 (ezstart), 5055 (asc-tcd), 5065 (fengshui)" -ForegroundColor Gray
     
     # Show current status

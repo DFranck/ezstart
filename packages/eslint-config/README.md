@@ -112,7 +112,7 @@ All remaining issues are converted to warnings rather than errors, allowing buil
 All @ezstart web applications use the Next.js configuration:
 
 ```js
-// apps/ez-billing/web/eslint.config.js
+// apps/ezbill/web/eslint.config.js
 import { nextJsConfig } from "@ezstart/eslint-config/next-js"
 export default nextJsConfig
 ```
@@ -143,7 +143,7 @@ export default [...config, {
 
 ### ✅ Web Applications (Next.js Config)
 - **ezauth/web** - Authentication service
-- **ez-billing/web** - Billing management
+- **ezbill/web** - Billing management
 - **ezstart/web** - Main application  
 - **fengshui/web** - Feng Shui application
 - **tower-defense/web** - Tower Defense game
@@ -151,7 +151,7 @@ export default [...config, {
 
 ### ✅ API Services (Base Config)
 - **ezauth/api** - Authentication API
-- **ez-billing/api** - Billing API
+- **ezbill/api** - Billing API
 - **tower-defense/api** - Tower Defense API
 
 ### ✅ React Packages (React Internal Config)

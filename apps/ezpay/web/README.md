@@ -247,7 +247,7 @@ Response:
   },
   byProject: {
     'tower-defense': { count: 234, total: 5678.90 },
-    'ez-billing': { count: 189, total: 4567.89 },
+    'ezbill': { count: 189, total: 4567.89 },
     ...
   }
 }

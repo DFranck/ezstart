@@ -163,14 +163,14 @@ Complete query schema for paginated list endpoints.
 
 **APIs:**
 - ✅ **api-ezauth** - Authentication service
-- ✅ **api-ez-billing** - Invoicing API
+- ✅ **api-ezbill** - Invoicing API
 - ✅ **api-ezpay** - Payment API
 - ✅ **api-tower-defense** - Game backend
 - ✅ **api-green-pulse** - Eco-tracking API
 
 **Shared Packages:**
 - ✅ **@ezstart/express-core** - API infrastructure
-- ✅ **@ez-billing/types** - Extends with billing-specific types
+- ✅ **@ezbill/types** - Extends with billing-specific types
 - ✅ **@tower-defense/types** - Extends with game-specific types
 - ✅ **@green-pulse/types** - Extends with eco-specific types
 
@@ -193,7 +193,7 @@ export const paginationSchema = z.object({ ... })
 ### ❌ DON'T: Add app-specific types
 
 ```typescript
-// Belongs in @ez-billing/types
+// Belongs in @ezbill/types
 export const invoiceSchema = z.object({ ... })
 
 // Belongs in @tower-defense/types

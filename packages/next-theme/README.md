@@ -125,7 +125,7 @@ Ready-to-use theme toggle button component.
 
 - ✅ **web-ezstart** - Main landing page
 - ✅ **web-ezauth** - Authentication portal
-- ✅ **web-ez-billing** - Invoicing app
+- ✅ **web-ezbill** - Invoicing app
 - ✅ **web-ezpay** - Payment dashboard
 - ✅ **web-tower-defense** - Game interface
 - ✅ **web-fengshui** - Wellness app

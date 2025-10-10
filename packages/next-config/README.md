@@ -142,7 +142,7 @@ For Progressive Web App features:
 All @ezstart web applications use this centralized configuration:
 
 - ✅ **ezauth/web** - Authentication service (port 8080)
-- ✅ **ez-billing/web** - Billing management (port 4100)  
+- ✅ **ezbill/web** - Billing management (port 4100)  
 - ✅ **ezstart/web** - Main application (port 4000)
 - ✅ **fengshui/web** - Feng Shui application (port 4400)
 - ✅ **tower-defense/web** - Tower Defense game (port 4200)

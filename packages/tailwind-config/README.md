@@ -174,7 +174,7 @@ This ensures that all UI component styles are included in the final CSS bundle.
 All @ezstart web applications use this centralized configuration:
 
 - ✅ **ezauth/web** - Authentication service
-- ✅ **ez-billing/web** - Billing management  
+- ✅ **ezbill/web** - Billing management  
 - ✅ **ezstart/web** - Main application
 - ✅ **fengshui/web** - Feng Shui application
 - ✅ **tower-defense/web** - Tower Defense game

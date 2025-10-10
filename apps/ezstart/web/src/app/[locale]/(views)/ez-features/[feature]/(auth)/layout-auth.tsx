@@ -21,7 +21,7 @@ const AuthLayoutWithData = ({ children }: { children: React.ReactNode }) => {
         className={cn('h-14 bg-muted border-y sticky top-0')}
         leftContent={
           <H1 size={'h5'} asChild className='text-start w-fit'>
-            <Link href='/ez-features/ez-billing'>EzBilling</Link>
+            <Link href='/ez-features/ezbill'>EzBilling</Link>
           </H1>
         }
         centerContent={

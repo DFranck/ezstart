@@ -21,7 +21,7 @@ import { AuthClient, AuthProvider } from '@ezstart/auth-sdk'
 
 const authClient = new AuthClient({
   baseURL: 'http://localhost:8001/api/auth',
-  appName: 'ez-billing', // your app name
+  appName: 'ezbill', // your app name
   redirectUri: 'http://localhost:3000/auth/callback'
 })
 
@@ -178,7 +178,7 @@ interface User {
 ```tsx
 const authClient = new AuthClient({
   baseURL: 'http://localhost:8001/api/auth',
-  appName: 'ez-billing',
+  appName: 'ezbill',
   redirectUri: 'http://localhost:3000/auth/callback'
 })
 ```
@@ -188,7 +188,7 @@ const authClient = new AuthClient({
 ```tsx
 const authClient = new AuthClient({
   baseURL: 'https://auth.ezstart.com/api/auth',
-  appName: 'ez-billing',
+  appName: 'ezbill',
   redirectUri: 'https://billing.ezstart.com/auth/callback'
 })
 ```
@@ -216,7 +216,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 - ✅ **ezstart/web** - Main application (with i18n)
 - ✅ **ezauth/web** - Auth service UI
-- ✅ **ez-billing/web** - Billing management
+- ✅ **ezbill/web** - Billing management
 - ✅ **tower-defense/web** - Tower Defense game
 - ✅ **fengshui/web** - Feng Shui application
 - ✅ **asc-tcd/web** - ASC-TCD application
