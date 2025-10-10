@@ -1,7 +1,7 @@
 {
   "name": "@ezbill/types",
   "version": "0.1.0",
-  "description": "Types for ez-billing application",
+  "description": "Types for ezbill application",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",

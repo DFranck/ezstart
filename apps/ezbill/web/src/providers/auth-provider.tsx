@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 
 export const EZAuthProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <AuthProvider appName="ez-billing">
+    <AuthProvider appName="ezbill">
       {children}
     </AuthProvider>
   )

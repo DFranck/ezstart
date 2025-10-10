@@ -5,13 +5,13 @@ export const app = createApp()
 const PORT = getApiPort()
 
 // Health check (for Render)
-app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'EZ-Billing' }))
-app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'EZ-Billing' }))
+app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'EZBill' }))
+app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'EZBill' }))
 
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
-connectToMongo('ez-billing')
+connectToMongo('ezbill')
   .then(() =>
     startServer(app, {
       routes,

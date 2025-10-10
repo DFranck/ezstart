@@ -1,4 +1,4 @@
-# Project structure for apps\ez-billing\api
+# Project structure for apps\ezbill\api
 
 - .env
 - controllers/

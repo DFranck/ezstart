@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
         <ThemeProvider>
-          <AuthProvider appName="ez-billing">
+          <AuthProvider appName="ezbill">
             {children}
           </AuthProvider>
         </ThemeProvider>

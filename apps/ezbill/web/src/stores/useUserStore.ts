@@ -53,7 +53,7 @@ export const useUserStore = create<UserStore>()(
       reset: () => set({ user: null }),
     }),
     {
-      name: 'ez-billing-user',
+      name: 'ezbill-user',
       partialize: state => ({ user: state.user }),
     }
   )
