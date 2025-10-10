@@ -155,8 +155,8 @@ import { getApiPort } from '@ezstart/express-core'
 const PORT = getApiPort(5010) // Defaults to 5010, or process.env.PORT if defined
 
 // Pattern 50xx:
-// APIs: 50x0 (EZAuth 5010, EZ-Billing 5020, Tower Defense 5030, EZPay 5040, etc.)
-// Web:  50x5 (EZAuth 5015, EZ-Billing 5025, Tower Defense 5035, EZPay 5045, etc.)
+// APIs: 50x0 (EZAuth 5010, EZBill 5020, Tower Defense 5030, EZPay 5040, etc.)
+// Web:  50x5 (EZAuth 5015, EZBill 5025, Tower Defense 5035, EZPay 5045, etc.)
 ```
 
 #### Express Router (Centralized)

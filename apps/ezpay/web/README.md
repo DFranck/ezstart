@@ -461,7 +461,7 @@ pnpm --filter web-ezpay start
 ### Applications Utilisant EZPay
 
 - **Tower Defense** - Donations, purchases, subscriptions
-- **EZ-Billing** - Invoice payments (futur)
+- **EZBill** - Invoice payments (futur)
 - **GreenPulse** - Donations et subscriptions (futur)
 
 ### Related Packages

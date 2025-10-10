@@ -9,7 +9,7 @@ EZPay est le système de paiement centralisé pour tous les projets du monorepo 
 | **Donations** | Dons avec testimonials publics | Support Tower Defense |
 | **Purchases** | Achats in-app | Gems, powerups, items |
 | **Subscriptions** | Abonnements récurrents | Premium Tower Defense |
-| **Invoices** | Facturation clients | Intégration EZ-Billing |
+| **Invoices** | Facturation clients | Intégration EZBill |
 
 ## 📦 Architecture
 

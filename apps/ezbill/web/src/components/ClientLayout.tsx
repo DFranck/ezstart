@@ -39,7 +39,7 @@ const ClientLayout = ({
                   size={'h5'}
                   className="text-start w-fit font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent"
                 >
-                  EZ-Billing
+                  EZBill
                 </H1>
                 <p className="text-xs text-gray-500 -mt-1">Professional Billing</p>
               </div>

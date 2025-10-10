@@ -272,7 +272,7 @@ const client = createPayClient({
 - ✅ **Feng Shui** - Page donations avec modal et wall
 - ⏳ **Tower Defense** - Donations + achats in-app (à venir)
 - ⏳ **EZStart** - Donations (à venir)
-- ⏳ **EZ-Billing** - Integration factures (à venir)
+- ⏳ **EZBill** - Integration factures (à venir)
 
 ## 📚 Related Packages
 

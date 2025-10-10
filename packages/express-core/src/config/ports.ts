@@ -5,7 +5,7 @@
  *
  * Development ports (defined in .env files):
  * EZAuth API: 5010, EZAuth Web: 5015
- * EZ-Billing API: 5020, EZ-Billing Web: 5025
+ * EZBill API: 5020, EZBill Web: 5025
  * Tower Defense API: 5030, Tower Defense Web: 5035
  * EZPay API: 5040, EZPay Web: 5045
  * EZStart Web: 5050, ASC-TCD Web: 5055, FengShui Web: 5065

@@ -34,7 +34,7 @@ export default function HomePage() {
                 <Icon name="lucide:Receipt" className="w-6 h-6 text-white" />
               </div>
               <H1 className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent w-fit">
-                EZ-Billing
+                EZBill
               </H1>
             </CardHeader>
             <CardContent>
