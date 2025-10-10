@@ -1,0 +1,50 @@
+import { currencyEnum } from '@ezbill/types';
+import { Schema } from 'mongoose';
+import { baseLineItemSchema } from './billing-base.js';
+
+export function createBillingDocSchema(
+  extra: Record<string, any>,
+  statusEnum: string[],
+  statusDefault: string
+) {
+  const schema = new Schema(
+    {
+      userId: { type: String, required: true },
+      clientId: { type: String, required: true },
+      companyId: { type: String, required: false }, // Optional: facturer au nom d'une company
+      items: { type: [baseLineItemSchema], required: true },
+      currency: { type: String, enum: currencyEnum.options, default: 'USD' },
+      exchangeRate: {
+        type: {
+          from: { type: String, enum: currencyEnum.options, required: true },
+          to: { type: String, enum: currencyEnum.options, required: true },
+          rate: { type: Number, required: true },
+          source: { type: String, required: true },
+          fetchedAt: { type: Date, required: true },
+        },
+        required: true,
+      },
+      dueDate: { type: String },
+      notes: { type: String },
+      terms: { type: String },
+      status: {
+        type: String,
+        enum: statusEnum,
+        default: statusDefault,
+      },
+      taxRate: { type: Number, min: 0, max: 100 },
+      deletedAt: { type: String, default: null },
+      documentNumber: { type: String, required: true },
+      subtotal: { type: Number, required: false },
+      taxAmount: { type: Number, required: false },
+      total: { type: Number, required: false },
+      ...extra,
+    },
+    { timestamps: true }
+  );
+
+  // Create compound index: documentNumber + userId must be unique
+  schema.index({ documentNumber: 1, userId: 1 }, { unique: true });
+
+  return schema;
+}

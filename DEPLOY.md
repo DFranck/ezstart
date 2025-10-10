@@ -21,7 +21,7 @@
 |---------|----------|---------------|--------|
 | **EZStart** | Vercel | https://ezstart-web.vercel.app | ✅ Active |
 | **EZAuth** | Vercel | https://ezauth-web.vercel.app | ✅ Active |
-| **EZ-Billing** | Vercel | https://ez-billing-web.vercel.app | ✅ Active |
+| **EZBill** | Vercel | https://ezbill-web.vercel.app | ✅ Active |
 | **EZPay** | Vercel | https://ezpay-web.vercel.app | ✅ Active |
 | **Tower Defense** | Vercel | https://tower-defense-web.vercel.app | ✅ Active |
 | **FengShui** | Vercel | https://fengshui-web.vercel.app | ✅ Active |
@@ -63,7 +63,7 @@ NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezauth?retryWrites=true&w=majority
 JWT_SECRET=production-secure-jwt-secret-change-me
-ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ez-billing-web.vercel.app,https://tower-defense-web.vercel.app,https://ezpay-web.vercel.app
+ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ezbill-web.vercel.app,https://tower-defense-web.vercel.app,https://ezpay-web.vercel.app
 ```
 
 **Networking:**
@@ -124,7 +124,7 @@ WEB_URL=https://ezpay-web.vercel.app
 
 ### Apps Web - Configuration Standardisée
 
-**Pour toutes les apps web (ezstart, ezauth, ez-billing, ezpay, etc.) :**
+**Pour toutes les apps web (ezstart, ezauth, ezbill, ezpay, etc.) :**
 
 ```bash
 # Root Directory
@@ -248,7 +248,7 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 **Avant (OOM) :**
 ```
 • Running build in 28 packages (TOUS compilés)
-• APIs (ezauth, ezpay, tower-defense, ez-billing, green-pulse)
+• APIs (ezauth, ezpay, tower-defense, ezbill, green-pulse)
 • Packages (ui, auth-sdk, pay-sdk, types, express-core, etc.)
 • Out of Memory après 25 minutes
 ```

@@ -29,7 +29,7 @@ pnpm dev  # Lance tout (moins optimisé, plus de processus)
 
 #### Option 3: Développement Ciblé
 ```bash
-pnpm dev:billing  # EZ-Billing + EZAuth
+pnpm dev:billing  # EZBill + EZAuth
 pnpm dev:td       # Tower Defense + EZAuth
 pnpm dev:ez       # EZStart seul
 ```
@@ -45,8 +45,8 @@ pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 |---------|------|------|-----|--------|
 | EZAuth | API | 5010 | http://localhost:5010 | ✅ Running |
 | EZAuth | Web | 5015 | http://localhost:5015 | ✅ Running |
-| EZ-Billing | API | 5020 | http://localhost:5020 | ✅ Running |
-| EZ-Billing | Web | 5025 | http://localhost:5025 | ✅ Running |
+| EZBill | API | 5020 | http://localhost:5020 | ✅ Running |
+| EZBill | Web | 5025 | http://localhost:5025 | ✅ Running |
 | Tower Defense | API | 5030 | http://localhost:5030 | ✅ Running |
 | Tower Defense | Web | 5035 | http://localhost:5035 | ✅ Running |
 | **EZPay** | **API** | **5040** | **http://localhost:5040** | **✅ Running** |
@@ -110,7 +110,7 @@ Si tu reprends une session avec des processus déjà en cours :
 │   ├── config/        # Configurations communes
 │   └── ...
 ├── apps/
-│   ├── ez-billing/
+│   ├── ezbill/
 │   │   ├── web/       # Frontend Next.js
 │   │   ├── api/       # Backend API
 │   │   ├── types/     # Types spécifiques au projet (mais partagés web/api)
@@ -146,7 +146,7 @@ Si tu reprends une session avec des processus déjà en cours :
 - Types d'entités → `packages/types` ou `apps/[project]/types`
 - Utilitaires de validation → `packages/utils`
 - Configs API communes → `packages/config`
-- Types spécifiques EZ-Billing → `apps/ez-billing/types`
+- Types spécifiques EZBill → `apps/ezbill/types`
 - Composants UI réutilisables → `packages/ui` (si existe)
 
 ## 🚀 MONOREPO ULTRA-OPTIMISÉ - Architecture et Principes
@@ -234,7 +234,7 @@ Si tu reprends une session avec des processus déjà en cours :
 
 ### Apps Web - Configuration 100% Centralisée
 
-Toutes les apps web (`ezstart/web`, `ezauth/web`, `ez-billing/web`, `fengshui/web`, `tower-defense/web`, `asc-tcd/web`) utilisent **exactement** la même configuration :
+Toutes les apps web (`ezstart/web`, `ezauth/web`, `ezbill/web`, `fengshui/web`, `tower-defense/web`, `asc-tcd/web`) utilisent **exactement** la même configuration :
 
 #### Configuration de Base :
 
@@ -288,7 +288,7 @@ import { NextIntlClientProvider } from 'next-intl'
 
 ### APIs - Configuration 100% Centralisée
 
-Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même configuration :
+Toutes les APIs (`ezauth/api`, `ezbill/api`, `tower-defense/api`) utilisent **exactement** la même configuration :
 
 - **ESLint Config** : `eslint.config.js` → `@ezstart/eslint-config/base`
 - **TypeScript Config** : `tsconfig.json` → `@ezstart/typescript-config/api.json`
@@ -319,11 +319,11 @@ Toutes les APIs utilisent **`src/index.ts`** comme point d'entrée :
 - **Convention Node.js standard** : fichier par défaut
 - **package.json** : `"main": "dist/index.js"`
 - **Scripts** : `"dev": "tsx watch src/index.ts"`, `"start": "node dist/index.js"`
-- **Cohérence** : toutes les APIs (EZAuth, EZ-Billing, Tower Defense, EZPay) utilisent cette convention
+- **Cohérence** : toutes les APIs (EZAuth, EZBill, Tower Defense, EZPay) utilisent cette convention
 
 **URLs finales :**
 - EZAuth : `http://localhost:5010/api/auth/*`, `/api/health`
-- EZ-Billing : `http://localhost:5020/api/clients`, `/api/invoices`, `/api/health`
+- EZBill : `http://localhost:5020/api/clients`, `/api/invoices`, `/api/health`
 - Tower Defense : `http://localhost:5030/api/*`, `/api/health`
 
 **✅ RESPECT DU PATTERN :**
@@ -423,7 +423,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 **Vercel (Free Tier) - Apps Web :**
 - ✅ **EZStart** : https://ezstart-web.vercel.app
 - ✅ **EZAuth** : https://ezauth-web.vercel.app
-- ✅ **EZ-Billing** : https://ez-billing-web.vercel.app
+- ✅ **EZBill** : https://ezbill-web.vercel.app
 - ✅ **EZPay** : https://ezpay-web.vercel.app
 - ✅ **Tower Defense** : https://tower-defense-web.vercel.app
 - ✅ **FengShui** : https://fengshui-web.vercel.app
@@ -518,7 +518,7 @@ NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://...
 JWT_SECRET=production-secret
-ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ez-billing-web.vercel.app,...
+ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ezbill-web.vercel.app,...
 ```
 
 **EZPay API (Railway) :**
@@ -558,8 +558,8 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ### Système de Ports Standardisé (Implémenté le 12/09/2025)
 
 **Pattern 50xx :**
-- **APIs (50x0)** : EZAuth 5010, EZ-Billing 5020, Tower Defense 5030
-- **Web Apps (50x5)** : EZAuth 5015, EZ-Billing 5025, Tower Defense 5035
+- **APIs (50x0)** : EZAuth 5010, EZBill 5020, Tower Defense 5030
+- **Web Apps (50x5)** : EZAuth 5015, EZBill 5025, Tower Defense 5035
 - **Web Standalone** : EZStart 5045, ASC-TCD 5055, FengShui 5065
 
 ### Architecture .env Standardisée ✅ (Mise à jour 10/10/2025)
@@ -621,7 +621,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 
 ### Flow OAuth2
 
-1. **Redirect** → EZAuth service (`/login?app=ez-billing&redirect_uri=...`)
+1. **Redirect** → EZAuth service (`/login?app=ezbill&redirect_uri=...`)
 2. **Auth** → Utilisateur se connecte/enregistre
 3. **Callback** → Retour avec code d'autorisation (`/auth/callback?code=...`)
 4. **Exchange** → Code → JWT token (7 jours)
@@ -637,7 +637,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 import { AuthProvider, AuthClient } from '@ezstart/auth-sdk'
 const authClient = new AuthClient({
   baseURL: 'http://localhost:8001/api/auth',
-  appName: 'ez-billing', // ou 'tower-defense'
+  appName: 'ezbill', // ou 'tower-defense'
   redirectUri: 'http://localhost:3000/auth/callback'
 })
 
@@ -684,7 +684,7 @@ EZPay gère **TOUS** les types de paiements du monorepo :
 | **Donations** | Dons avec testimonials publics | Support Tower Defense |
 | **Purchases** | Achats in-app | Gems, powerups, items |
 | **Subscriptions** | Abonnements récurrents | Premium Tower Defense |
-| **Invoices** | Facturation clients | Intégration EZ-Billing |
+| **Invoices** | Facturation clients | Intégration EZBill |
 
 ### Avantages Architecture Centralisée
 
@@ -882,7 +882,7 @@ https://ezpay.vercel.app/donate?project=tower-defense&amount=10
 
 ### Configuration 100% Centralisée avec @ezstart/express-core
 
-Toutes les APIs (`ezauth/api`, `ez-billing/api`, `tower-defense/api`) utilisent **exactement** la même infrastructure standardisée :
+Toutes les APIs (`ezauth/api`, `ezbill/api`, `tower-defense/api`) utilisent **exactement** la même infrastructure standardisée :
 
 #### Infrastructure Unifiée :
 
@@ -936,7 +936,7 @@ connectToMongo('ezauth')
 #### Ports Standardisés :
 
 - **ezauth** : Port 8081 (`getApiPort('EZAUTH')`)
-- **ez-billing** : Port 4101 (`getApiPort('EZ_BILLING')`)
+- **ezbill** : Port 4101 (`getApiPort('EZ_BILLING')`)
 - **tower-defense** : Port 4201 (`getApiPort('TOWER_DEFENSE')`)
 
 #### Bonnes Pratiques APIs :
