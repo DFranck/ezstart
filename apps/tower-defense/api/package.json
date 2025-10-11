@@ -17,7 +17,8 @@
     "test:load:16": "NUM_PLAYERS=16 tsx src/tests/load-test.ts",
     "test:load:20": "NUM_PLAYERS=20 TEST_DURATION_MS=120000 tsx src/tests/load-test.ts",
     "test:stress": "tsx src/tests/stress-test.ts",
-    "test:density": "tsx src/tests/density-test.ts"
+    "test:density": "tsx src/tests/density-test.ts",
+    "test:frontend": "tsx src/tests/frontend-perf-test.ts"
   },
   "dependencies": {
     "@ezstart/express-core": "workspace:*",
