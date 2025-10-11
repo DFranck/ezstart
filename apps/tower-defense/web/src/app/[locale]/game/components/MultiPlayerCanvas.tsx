@@ -5,6 +5,7 @@ import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import {
   ELEMENTAL_COLORS,
+  ELEMENTAL_TYPES,
   PROJECTILE_CLEANUP_INTERVAL_MS,
   PROJECTILE_DURATION_RATIO,
   TICK_INTERVAL_MS,
@@ -47,6 +48,12 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
   const [grassPattern, setGrassPattern] = useState<CanvasPattern | null>(null)
   const interpolatedMobsRef = useRef<Map<string, InterpolatedMob>>(new Map())
   const [projectiles, setProjectiles] = useState<Projectile[]>([])
+
+  // 🚀 OPTIMIZATION 1: Offscreen canvas for static terrain
+  const terrainCanvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  // 🚀 OPTIMIZATION 3: Gradient cache
+  const gradientCacheRef = useRef<Map<string, CanvasGradient>>(new Map())
 
   // Récupérer les données locales pour le joueur actuel
   const localTowers = useGameState(s => s.towers)
@@ -177,13 +184,47 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     }
   }, [])
 
+  // 🚀 OPTIMIZATION 1: Create offscreen canvas for static terrain
+  useEffect(() => {
+    if (!grassPattern || path.length === 0) return
+
+    // Create offscreen canvas
+    const offscreenCanvas = document.createElement('canvas')
+    offscreenCanvas.width = ZONE_WIDTH * TILE_SIZE
+    offscreenCanvas.height = ZONE_HEIGHT * TILE_SIZE
+    const offscreenCtx = offscreenCanvas.getContext('2d')
+    if (!offscreenCtx) return
+
+    const pathSet = new Set(path.map(p => `${p.x},${p.y}`))
+
+    // Draw grass (non-path areas) - ONCE
+    for (let y = 0; y < ZONE_HEIGHT; y++) {
+      for (let x = 0; x < ZONE_WIDTH; x++) {
+        const key = `${x},${y}`
+        if (!pathSet.has(key)) {
+          offscreenCtx.save()
+          offscreenCtx.translate(x * TILE_SIZE, y * TILE_SIZE)
+          offscreenCtx.fillStyle = grassPattern
+          offscreenCtx.fillRect(0, 0, TILE_SIZE, TILE_SIZE)
+          offscreenCtx.restore()
+        }
+      }
+    }
+
+    // Draw path - ONCE
+    offscreenCtx.fillStyle = '#6b7280'
+    path.forEach(({ x, y }) => {
+      offscreenCtx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+    })
+
+    terrainCanvasRef.current = offscreenCanvas
+  }, [path, grassPattern]) // Only rebuild when path or pattern changes
+
   // Rendu du canvas
   useEffect(() => {
     let frameId: number
     const ctx = canvasRef.current?.getContext('2d')
     if (!ctx) return
-
-    const pathSet = new Set(path.map(p => `${p.x},${p.y}`))
 
     // Performance monitoring
     let frameCount = 0
@@ -194,36 +235,46 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       const frameStart = Date.now()
       ctx.clearRect(0, 0, ZONE_WIDTH * TILE_SIZE, ZONE_HEIGHT * TILE_SIZE)
 
-      // Fond herbe (hors path)
-      for (let y = 0; y < ZONE_HEIGHT; y++) {
-        for (let x = 0; x < ZONE_WIDTH; x++) {
-          const key = `${x},${y}`
-          if (!pathSet.has(key)) {
-            ctx.save()
-            ctx.translate(x * TILE_SIZE, y * TILE_SIZE)
-
-            if (grassPattern) {
-              ctx.fillStyle = grassPattern
-            } else {
-              // Fallback si la texture n'est pas chargée
-              ctx.fillStyle = '#90EE90' // Vert clair
-            }
-
-            ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE)
-            ctx.restore()
-          }
-        }
+      // 🚀 OPTIMIZATION 1: Draw static terrain from offscreen canvas (1 drawImage instead of 400 fillRect)
+      if (terrainCanvasRef.current) {
+        ctx.drawImage(terrainCanvasRef.current, 0, 0)
+      } else {
+        // Fallback: terrain non prêt
+        ctx.fillStyle = '#90EE90'
+        ctx.fillRect(0, 0, ZONE_WIDTH * TILE_SIZE, ZONE_HEIGHT * TILE_SIZE)
       }
 
-      // Path
-      ctx.fillStyle = '#6b7280'
-      path.forEach(({ x, y }) => {
-        ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-      })
+      // 🚀 OPTIMIZATION 3: Cached gradients for towers
+      type ElementalUnion =
+        | (typeof ELEMENTAL_TYPES)[number]
+        | readonly [(typeof ELEMENTAL_TYPES)[number], (typeof ELEMENTAL_TYPES)[number]]
+
+      const getOrCreateGradient = (elementalType: ElementalUnion, x: number, y: number): CanvasGradient | string => {
+        const cacheKey = `${JSON.stringify(elementalType)}-${x}-${y}`
+        let gradient = gradientCacheRef.current.get(cacheKey)
+
+        if (!gradient) {
+          const paint = paintFromElement(elementalType)
+          if (paint.kind === 'dual') {
+            gradient = ctx.createLinearGradient(
+              x * TILE_SIZE,
+              y * TILE_SIZE,
+              (x + 1) * TILE_SIZE,
+              (y + 1) * TILE_SIZE
+            )
+            gradient.addColorStop(0, paint.color)
+            gradient.addColorStop(1, paint.colorB!)
+            gradientCacheRef.current.set(cacheKey, gradient)
+          } else {
+            return paint.color // Return color directly for non-gradients
+          }
+        }
+
+        return gradient
+      }
 
       // Tours du joueur avec couleurs élémentaires
       towers.forEach(tower => {
-        // Vérifier que la tower a un elementalType
         if (!tower.elementalType) {
           // Fallback si pas de type défini
           ctx.fillStyle = isCurrentPlayer ? '#facc99' : '#ff9999'
@@ -233,24 +284,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           return
         }
 
-        const paint = paintFromElement(tower.elementalType)
-
         tower.coveredCells.forEach(({ x, y }) => {
-          // Si c'est un gradient (dual type)
-          if (paint.kind === 'dual') {
-            const gradient = ctx.createLinearGradient(
-              x * TILE_SIZE,
-              y * TILE_SIZE,
-              (x + 1) * TILE_SIZE,
-              (y + 1) * TILE_SIZE
-            )
-            gradient.addColorStop(0, paint.color)
-            gradient.addColorStop(1, paint.colorB!)
-            ctx.fillStyle = gradient
-          } else {
-            ctx.fillStyle = paint.color
-          }
-
+          ctx.fillStyle = getOrCreateGradient(tower.elementalType!, x, y)
           ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
           // Bordure pour distinguer les towers adversaires
@@ -281,32 +316,47 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       // Mobs actifs avec interpolation fluide
       const nowMobs = Date.now()
 
-      // Grouper les mobs par position pour afficher le compte
-      const mobsByPosition = new Map<string, InterpolatedMob[]>()
+      // OPTIMISATION: Calculer toutes les positions interpolées UNE SEULE FOIS
+      const interpolatedPositions = new Map<
+        string,
+        {
+          x: number
+          y: number
+          centerX: number
+          centerY: number
+          mob: InterpolatedMob
+        }
+      >()
+
       interpolatedMobsRef.current.forEach(mob => {
         const elapsed = nowMobs - mob.lastUpdateTime
         const t = Math.min(elapsed / TICK_INTERVAL_MS, 1)
         const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
         const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
+        const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
+        const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
 
-        const key = `${Math.round(interpolatedX * 10)},${Math.round(interpolatedY * 10)}`
+        interpolatedPositions.set(mob.id, {
+          x: interpolatedX,
+          y: interpolatedY,
+          centerX,
+          centerY,
+          mob,
+        })
+      })
+
+      // Grouper les mobs par position pour afficher le compte
+      const mobsByPosition = new Map<string, Array<{ x: number; y: number; centerX: number; centerY: number; mob: InterpolatedMob }>>()
+      interpolatedPositions.forEach(pos => {
+        const key = `${Math.round(pos.x * 10)},${Math.round(pos.y * 10)}`
         if (!mobsByPosition.has(key)) {
           mobsByPosition.set(key, [])
         }
-        mobsByPosition.get(key)!.push(mob)
+        mobsByPosition.get(key)!.push(pos)
       })
 
       // Mobs avec couleurs élémentaires
-      interpolatedMobsRef.current.forEach(mob => {
-        // Calculer la position interpolée linéaire (vitesse constante)
-        const elapsed = nowMobs - mob.lastUpdateTime
-        const t = Math.min(elapsed / TICK_INTERVAL_MS, 1) // Ratio d'avancement linéaire (0 à 1)
-
-        const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
-        const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
-
-        const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
-        const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
+      interpolatedPositions.forEach(({ x: interpolatedX, y: interpolatedY, centerX, centerY, mob }) => {
         const radius = TILE_SIZE * 0.3
 
         // Couleur du mob selon son type élémentaire
@@ -343,17 +393,9 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
 
-      mobsByPosition.forEach((mobs, key) => {
+      mobsByPosition.forEach(mobs => {
         if (mobs.length > 1 && mobs[0]) {
-          const mob = mobs[0]
-          const elapsed = nowMobs - mob.lastUpdateTime
-          const t = Math.min(elapsed / TICK_INTERVAL_MS, 1)
-          const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
-          const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
-
-          const centerX = interpolatedX * TILE_SIZE + TILE_SIZE / 2
-          const centerY = interpolatedY * TILE_SIZE + TILE_SIZE / 2
-
+          const { centerX, centerY } = mobs[0]
           const text = `x${mobs.length}`
           ctx.strokeText(text, centerX, centerY)
           ctx.fillText(text, centerX, centerY)
