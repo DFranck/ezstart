@@ -13,7 +13,7 @@
     {
       "menuLabel": "Applications",
       "menu": [
-        { "label": "EzBilling", "href": "https://ezstart-ezbill.vercel.app/" },
+        { "label": "EzBill", "href": "https://ezstart-ez-billing.vercel.app/" },
         { "label": "Tower-Defense", "href": "https://tower-defense-two.vercel.app/" },
         { "label": "EzFengShui", "href": "https://ez-fengshui.vercel.app/" }
       ]

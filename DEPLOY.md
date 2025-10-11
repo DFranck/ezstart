@@ -4,12 +4,13 @@
 
 ### APIs Railway (Usage Ponctuel - Free Plan $1/mois)
 
-| Service | Platform | URL Production | Private URL | Status |
-|---------|----------|---------------|-------------|--------|
-| **EZAuth API** | Railway | https://ezauth.up.railway.app | ezauth.railway.internal | ✅ Active |
-| **EZPay API** | Railway | https://ezpay-api.up.railway.app | ezstart.railway.internal | ✅ Active |
+| Service        | Platform | URL Production                   | Private URL              | Status    |
+| -------------- | -------- | -------------------------------- | ------------------------ | --------- |
+| **EZAuth API** | Railway  | https://ezauth.up.railway.app    | ezauth.railway.internal  | ✅ Active |
+| **EZPay API**  | Railway  | https://ezpay-api.up.railway.app | ezstart.railway.internal | ✅ Active |
 
 **Pourquoi Railway pour ces APIs ?**
+
 - ✅ **0ms cold start** - Critique pour SSO (EZAuth) et paiements (EZPay)
 - ✅ **Usage ponctuel** - Authentification et paiements = pics courts, consommation faible
 - ✅ **Gratuit** - $1/mois suffit pour usage intermittent
@@ -17,15 +18,15 @@
 
 ### Apps Web Vercel (Free Tier)
 
-| Service | Platform | URL Production | Status |
-|---------|----------|---------------|--------|
-| **EZStart** | Vercel | https://ezstart-web.vercel.app | ✅ Active |
-| **EZAuth** | Vercel | https://ezauth-web.vercel.app | ✅ Active |
-| **EZBill** | Vercel | https://ezbill-web.vercel.app | ✅ Active |
-| **EZPay** | Vercel | https://ezpay-web.vercel.app | ✅ Active |
-| **Tower Defense** | Vercel | https://tower-defense-web.vercel.app | ✅ Active |
-| **FengShui** | Vercel | https://fengshui-web.vercel.app | ✅ Active |
-| **ASC-TCD** | Vercel | https://asc-tcd-web.vercel.app | ✅ Active |
+| Service           | Platform | URL Production                       | Status    |
+| ----------------- | -------- | ------------------------------------ | --------- |
+| **EZStart**       | Vercel   | https://ezstart-web.vercel.app       | ✅ Active |
+| **EZAuth**        | Vercel   | https://ezauth.vercel.app            | ✅ Active |
+| **EZBill**        | Vercel   | https://ezbill-web.vercel.app        | ✅ Active |
+| **EZPay**         | Vercel   | https://ezpay-web.vercel.app         | ✅ Active |
+| **Tower Defense** | Vercel   | https://tower-defense-web.vercel.app | ✅ Active |
+| **FengShui**      | Vercel   | https://fengshui-web.vercel.app      | ✅ Active |
+| **ASC-TCD**       | Vercel   | https://asc-tcd-web.vercel.app       | ✅ Active |
 
 ---
 
@@ -34,6 +35,7 @@
 ### 1. EZAuth API
 
 **Source Repository:**
+
 ```
 Repository: DFranck/ezstart
 Branch: master
@@ -41,6 +43,7 @@ Root Directory: (none - racine du monorepo)
 ```
 
 **Build Configuration:**
+
 ```bash
 # Build Command (OPTIMISÉ - seulement express-core nécessaire)
 pnpm install --frozen-lockfile --shamefully-hoist && \
@@ -58,15 +61,17 @@ cd apps/ezauth/api && node dist/index.js
 ```
 
 **Variables d'Environnement:**
+
 ```env
 NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezauth?retryWrites=true&w=majority
 JWT_SECRET=production-secure-jwt-secret-change-me
-ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ezbill-web.vercel.app,https://tower-defense-web.vercel.app,https://ezpay-web.vercel.app
+ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezbill-web.vercel.app,https://tower-defense-web.vercel.app,https://ezpay-web.vercel.app
 ```
 
 **Networking:**
+
 - Public: `ezauth.up.railway.app` (Port 5010)
 - Private: `ezauth.railway.internal` (IPv6)
 - Healthcheck: `/api/health`
@@ -78,6 +83,7 @@ ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ezbill-web.vercel.app,http
 ### 2. EZPay API
 
 **Source Repository:**
+
 ```
 Repository: DFranck/ezstart
 Branch: master
@@ -85,6 +91,7 @@ Root Directory: (none - racine du monorepo)
 ```
 
 **Build Configuration:**
+
 ```bash
 # Build Command (OPTIMISÉ - seulement express-core nécessaire)
 pnpm install --frozen-lockfile --shamefully-hoist && \
@@ -101,6 +108,7 @@ cd apps/ezpay/api && node dist/index.js
 ```
 
 **Variables d'Environnement:**
+
 ```env
 NODE_ENV=production
 PORT=5040
@@ -112,6 +120,7 @@ WEB_URL=https://ezpay-web.vercel.app
 ```
 
 **Networking:**
+
 - Public: `ezpay-api.up.railway.app` (Port 5040)
 - Private: `ezstart.railway.internal` (IPv6)
 - Healthcheck: `/api/health`
@@ -159,6 +168,7 @@ apps/ezpay/web/
 ### Variables d'Environnement Vercel
 
 **EZAuth Web :**
+
 ```env
 # Development (.env.local)
 PORT=5015
@@ -169,6 +179,7 @@ NEXT_PUBLIC_EZAUTH_API_URL=https://ezauth.up.railway.app/api/auth
 ```
 
 **EZPay Web :**
+
 ```env
 # Development (.env.local)
 NEXT_PUBLIC_API_URL=http://localhost:5040/api
@@ -182,6 +193,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
 **Configuration dans Vercel Dashboard :**
+
 ```
 Project Settings → Environment Variables
 
@@ -213,19 +225,21 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 ### Solution : Turbo outputMode + Build Script Optimisé
 
 **1. turbo.json optimisé :**
+
 ```json
 {
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "**/dist/**"],
-      "outputMode": "errors-only"  // ← Réduit les logs et la mémoire
+      "outputMode": "errors-only" // ← Réduit les logs et la mémoire
     }
   }
 }
 ```
 
 **2. Build scripts apps web déjà optimisés :**
+
 ```json
 // apps/ezpay/web/package.json
 "build": "pnpm --filter @ezstart/ui --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build"
@@ -246,6 +260,7 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 ### Résultat
 
 **Avant (OOM) :**
+
 ```
 • Running build in 28 packages (TOUS compilés)
 • APIs (ezauth, ezpay, tower-defense, ezbill, green-pulse)
@@ -254,6 +269,7 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 ```
 
 **Après (✅ Success) :**
+
 ```
 • Running build in 3 packages (seulement les nécessaires)
 • @ezstart/ui
@@ -280,10 +296,12 @@ pnpm turbo build --filter=api-ezauth
 ```
 
 **Ordre de build obligatoire :**
+
 1. `@ezstart/express-core` - Infrastructure API commune (OBLIGATOIRE)
 2. `api-ezauth` ou `api-ezpay` - API finale
 
 **⚠️ SDKs NON nécessaires pour le build API :**
+
 - `@ezstart/auth-sdk` - Utilisé uniquement côté web
 - `@ezstart/pay-sdk` - Utilisé uniquement côté web
 - `@ezstart/ui` - Utilisé uniquement côté web
@@ -295,6 +313,7 @@ pnpm turbo build --filter=api-ezauth
 ### Vérifier la Consommation
 
 **Dashboard Railway :**
+
 ```
 Settings → Usage
 - CPU Usage
@@ -303,6 +322,7 @@ Settings → Usage
 ```
 
 **Estimation Consommation :**
+
 ```
 EZAuth API (SSO ponctuel) : ~$0.10-0.20/mois
 EZPay API (paiements rares) : ~$0.10-0.20/mois
@@ -310,6 +330,7 @@ TOTAL : ~$0.20-0.40/mois (reste $0.60-0.80 de marge)
 ```
 
 **Optimisations pour réduire la consommation :**
+
 - ✅ Healthcheck timeout à 300s (évite vérifications trop fréquentes)
 - ✅ Restart policy: On Failure (10 retries max)
 - ✅ Pas de cron jobs (évite réveils inutiles)
@@ -322,12 +343,14 @@ TOTAL : ~$0.20-0.40/mois (reste $0.60-0.80 de marge)
 ### Build Failures Railway
 
 **Erreur: Module not found @ezstart/xxx**
+
 ```bash
 # Solution: Builder les dépendances workspace avant
 pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/auth-sdk build
 ```
 
 **Erreur: TypeScript compilation failed**
+
 ```bash
 # Vérifier que tsconfig.json a composite: true
 # Vérifier que tous les packages ont été buildés
@@ -336,6 +359,7 @@ pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/auth-sdk bui
 ### Runtime Failures
 
 **API ne démarre pas**
+
 ```bash
 # Vérifier les variables d'environnement (MONGO_URL, JWT_SECRET, etc.)
 # Vérifier le healthcheck path (/api/health)
@@ -343,6 +367,7 @@ pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/auth-sdk bui
 ```
 
 **CORS Errors**
+
 ```bash
 # Ajouter les URLs Vercel dans ALLOWED_ORIGINS
 # Format: https://app.vercel.app,https://app2.vercel.app
@@ -371,6 +396,7 @@ apps/ezpay/api/
 ### Workflow Environnements
 
 **1. Développement Local :**
+
 ```bash
 # Copier .env.example vers .env.local
 cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
@@ -380,6 +406,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 ```
 
 **2. Production Railway :**
+
 ```bash
 # Référence: .env.production contient toutes les variables nécessaires
 # NE PAS commiter .env.production (déjà dans .gitignore)
@@ -393,6 +420,7 @@ Railway → Settings → Variables → Add Variable
 ```
 
 **3. Template (.env.example) :**
+
 ```bash
 # Toujours à jour avec toutes les variables nécessaires
 # Contient placeholders et documentation complète
@@ -402,12 +430,14 @@ Railway → Settings → Variables → Add Variable
 ### Secrets à NE JAMAIS Commiter
 
 **Railway Variables (Production) :**
+
 - ❌ `MONGO_URL` avec credentials
 - ❌ `JWT_SECRET` production (différent de dev)
-- ❌ `STRIPE_SECRET_KEY` live keys (sk_live_*)
+- ❌ `STRIPE_SECRET_KEY` live keys (sk*live*\*)
 - ❌ `STRIPE_WEBHOOK_SECRET`
 
 **Fichiers git-ignorés :**
+
 - ✅ `.env.local` - Dev avec secrets réels
 - ✅ `.env.production` - Template production avec secrets réels
 - ❌ `.env.example` - Template SANS secrets (committé)
@@ -415,6 +445,7 @@ Railway → Settings → Variables → Add Variable
 ### Railway Variables Configuration
 
 **Dans Railway Dashboard :**
+
 ```
 Service → Settings → Variables → Add Variable
 

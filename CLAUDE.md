@@ -5,6 +5,7 @@
 ### État Actuel (12/09/2025 - 18h30)
 
 **Monorepo 100% opérationnel avec :**
+
 - ✅ Tous les services sur ports 50xx (voir tableau ci-dessous)
 - ✅ Architecture .env standardisée (.env.example + .env.local)
 - ✅ TypeScript centralisé avec un seul `tsc -b --watch`
@@ -13,6 +14,7 @@
 ### Comment Démarrer une Session de Développement
 
 #### Option 1: Mode Optimisé (RECOMMANDÉ)
+
 ```bash
 # Terminal 1: Watcher TypeScript centralisé
 pnpm dev:types  # Lance tsc -b --watch pour TOUT le monorepo
@@ -20,14 +22,17 @@ pnpm dev:types  # Lance tsc -b --watch pour TOUT le monorepo
 # Terminal 2: Tous les serveurs
 pnpm dev  # Lance tous les services sans tsc --watch individuel
 ```
+
 **Résultat:** ~10-15 processus Node.js au lieu de 50+
 
 #### Option 2: Mode Simple
+
 ```bash
 pnpm dev  # Lance tout (moins optimisé, plus de processus)
 ```
 
 #### Option 3: Développement Ciblé
+
 ```bash
 pnpm dev:billing  # EZBill + EZAuth
 pnpm dev:td       # Tower Defense + EZAuth
@@ -35,27 +40,28 @@ pnpm dev:ez       # EZStart seul
 ```
 
 ### Vérifier l'État des Services
+
 ```bash
 pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 ```
 
 ### Ports et URLs des Services
 
-| Service | Type | Port | URL | Status |
-|---------|------|------|-----|--------|
-| EZAuth | API | 5010 | http://localhost:5010 | ✅ Running |
-| EZAuth | Web | 5015 | http://localhost:5015 | ✅ Running |
-| EZBill | API | 5020 | http://localhost:5020 | ✅ Running |
-| EZBill | Web | 5025 | http://localhost:5025 | ✅ Running |
-| Tower Defense | API | 5030 | http://localhost:5030 | ✅ Running |
-| Tower Defense | Web | 5035 | http://localhost:5035 | ✅ Running |
-| **EZPay** | **API** | **5040** | **http://localhost:5040** | **✅ Running** |
-| **EZPay** | **Web** | **5045** | **http://localhost:5045** | **✅ Running** |
-| EZStart | Web | 5050 | http://localhost:5050 | ✅ Running |
-| ASC-TCD | Web | 5055 | http://localhost:5055 | ✅ Running |
-| FengShui | Web | 5065 | http://localhost:5065 | ✅ Running |
-| GreenPulse | API | 5070 | http://localhost:5070 | ✅ Running |
-| GreenPulse | Web | 5075 | http://localhost:5075 | ✅ Running |
+| Service       | Type    | Port     | URL                       | Status         |
+| ------------- | ------- | -------- | ------------------------- | -------------- |
+| EZAuth        | API     | 5010     | http://localhost:5010     | ✅ Running     |
+| EZAuth        | Web     | 5015     | http://localhost:5015     | ✅ Running     |
+| EZBill        | API     | 5020     | http://localhost:5020     | ✅ Running     |
+| EZBill        | Web     | 5025     | http://localhost:5025     | ✅ Running     |
+| Tower Defense | API     | 5030     | http://localhost:5030     | ✅ Running     |
+| Tower Defense | Web     | 5035     | http://localhost:5035     | ✅ Running     |
+| **EZPay**     | **API** | **5040** | **http://localhost:5040** | **✅ Running** |
+| **EZPay**     | **Web** | **5045** | **http://localhost:5045** | **✅ Running** |
+| EZStart       | Web     | 5050     | http://localhost:5050     | ✅ Running     |
+| ASC-TCD       | Web     | 5055     | http://localhost:5055     | ✅ Running     |
+| FengShui      | Web     | 5065     | http://localhost:5065     | ✅ Running     |
+| GreenPulse    | API     | 5070     | http://localhost:5070     | ✅ Running     |
+| GreenPulse    | Web     | 5075     | http://localhost:5075     | ✅ Running     |
 
 ### Architecture .env Actuelle
 
@@ -71,6 +77,7 @@ pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 ### Processus Background Actuels
 
 Si tu reprends une session avec des processus déjà en cours :
+
 1. Vérifie avec `pnpm dev:status`
 2. Si besoin, tue tous les Node.js et relance
 3. Les IDs de processus background peuvent être vus avec BashOutput
@@ -160,12 +167,14 @@ Si tu reprends une session avec des processus déjà en cours :
 #### 1. Compilation Centralisée avec `tsc -b`
 
 **Configuration obligatoire :**
+
 - ✅ **UN SEUL** `tsc -b --watch` à la racine pour TOUT le monorepo
 - ✅ **tsconfig.json root** avec `references` vers tous les packages/apps
 - ✅ **`composite: true`** dans TOUS les tsconfig des packages
 - ❌ **JAMAIS** de `tsc --watch` dans les scripts dev des packages
 
 **Scripts optimisés :**
+
 ```json
 // package.json root
 "dev:types": "tsc -b --watch",        // UN SEUL processus TypeScript
@@ -174,6 +183,7 @@ Si tu reprends une session avec des processus déjà en cours :
 ```
 
 **Avantages :**
+
 - 1 processus TypeScript au lieu de 22+
 - Compilation intelligente des dépendances
 - Recompilation automatique en cascade
@@ -181,13 +191,15 @@ Si tu reprends une session avec des processus déjà en cours :
 #### 2. Hiérarchie des Configurations
 
 **Toujours vérifier et utiliser dans cet ordre :**
+
 1. Config centralisée dans `@ezstart/typescript-config`
-2. Config centralisée dans `@ezstart/eslint-config` 
+2. Config centralisée dans `@ezstart/eslint-config`
 3. Config centralisée dans `@ezstart/tailwind-config`
 4. Créer une nouvelle config partagée si nécessaire
 5. En dernier recours seulement : config locale
 
 **Packages de configuration :**
+
 - `typescript-config` : 6 variantes (base, api, nextjs, library, react-library, types)
 - `eslint-config` : 3 variantes (base, next-js, react-internal)
 - `tailwind-config` : Config Tailwind partagée
@@ -196,6 +208,7 @@ Si tu reprends une session avec des processus déjà en cours :
 #### 3. Règles de Development
 
 **À vérifier systématiquement :**
+
 - ✅ Tous les packages utilisent une config TypeScript centralisée
 - ✅ `composite: true` présent dans tous les tsconfig
 - ✅ Target uniforme : ES2022 pour tout le monorepo
@@ -203,11 +216,12 @@ Si tu reprends une session avec des processus déjà en cours :
 - ✅ Scripts dev sans `tsc --watch` (géré au root)
 
 **Structure tsconfig.json pour packages :**
+
 ```json
 {
   "extends": "@ezstart/typescript-config/[variante].json",
   "compilerOptions": {
-    "composite": true,  // OBLIGATOIRE pour tsc -b
+    "composite": true, // OBLIGATOIRE pour tsc -b
     "outDir": "./dist",
     "rootDir": "./src"
   }
@@ -252,28 +266,26 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ezbill/web`, `fengshui/web`, 
 - **UI Components** : `"@ezstart/ui": "workspace:*"`
 
 **Setup standard (apps sans i18n) :**
+
 ```tsx
 import { ThemeProvider } from '@ezstart/next-theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
 
-<ThemeProvider>
-  <AuthProvider appName="fengshui">
-    {children}
-  </AuthProvider>
+;<ThemeProvider>
+  <AuthProvider appName="fengshui">{children}</AuthProvider>
 </ThemeProvider>
 ```
 
 **Setup avec i18n (ezstart uniquement) :**
+
 ```tsx
 import { ThemeProvider } from '@ezstart/next-theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { NextIntlClientProvider } from 'next-intl'
 
-<NextIntlClientProvider messages={messages} locale={locale}>
+;<NextIntlClientProvider messages={messages} locale={locale}>
   <ThemeProvider>
-    <AuthProvider appName="ezstart">
-      {children}
-    </AuthProvider>
+    <AuthProvider appName="ezstart">{children}</AuthProvider>
   </ThemeProvider>
 </NextIntlClientProvider>
 ```
@@ -301,12 +313,14 @@ Toutes les APIs (`ezauth/api`, `ezbill/api`, `tower-defense/api`) utilisent **ex
 **✅ OBLIGATOIRE : Utiliser le préfixe `/api`**
 
 Toutes les APIs du monorepo DOIVENT utiliser le préfixe `/api` pour :
+
 - **Séparation claire** : distinction routes API vs assets/web
 - **Proxying** : facilite la configuration nginx/reverse proxy
 - **Standards** : convention universelle (Next.js, Express, etc.)
 - **Sécurité** : règles CORS/auth plus simples à appliquer
 
 **Structure API standardisée :**
+
 ```typescript
 // Dans index.ts de chaque API (convention standard Node.js)
 app.use('/api', routes)
@@ -316,17 +330,20 @@ app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 **✅ CONVENTION OBLIGATOIRE : Point d'entrée `index.ts`**
 
 Toutes les APIs utilisent **`src/index.ts`** comme point d'entrée :
+
 - **Convention Node.js standard** : fichier par défaut
 - **package.json** : `"main": "dist/index.js"`
 - **Scripts** : `"dev": "tsx watch src/index.ts"`, `"start": "node dist/index.js"`
 - **Cohérence** : toutes les APIs (EZAuth, EZBill, Tower Defense, EZPay) utilisent cette convention
 
 **URLs finales :**
+
 - EZAuth : `http://localhost:5010/api/auth/*`, `/api/health`
 - EZBill : `http://localhost:5020/api/clients`, `/api/invoices`, `/api/health`
 - Tower Defense : `http://localhost:5030/api/*`, `/api/health`
 
 **✅ RESPECT DU PATTERN :**
+
 - `NEXT_PUBLIC_API_URL=http://localhost:50XX/api` dans les `.env.local`
 - Endpoints expose via `callApi('/clients')` → `GET /api/clients`
 
@@ -413,12 +430,15 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 ### Renaming Projects - Migration Scripts
 
 **Historique des migrations :**
+
 - **10/10/2025** : `ez-billing` → `ezbill` (commit 55bb447)
 
 **Script de migration disponible :**
+
 - `scripts/rename-ez-billing-to-ezbill.sh` - Script complet de migration
 
 **Process de renaming d'un projet :**
+
 1. Créer un script bash dans `scripts/` avec les étapes suivantes :
    - Utiliser `git mv` pour préserver l'historique git
    - Mettre à jour tous les `package.json` (name, dependencies)
@@ -441,12 +461,14 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 ### Architecture de Déploiement
 
 **Railway (Free Plan $1/mois) - APIs Critiques :**
+
 - ✅ **EZAuth API** : https://ezauth.up.railway.app (private: ezauth.railway.internal)
 - ✅ **EZPay API** : https://ezpay-api.up.railway.app (private: ezstart.railway.internal)
 
 **Vercel (Free Tier) - Apps Web :**
+
 - ✅ **EZStart** : https://ezstart-web.vercel.app
-- ✅ **EZAuth** : https://ezauth-web.vercel.app
+- ✅ **EZAuth** : https://ezauth.vercel.app
 - ✅ **EZBill** : https://ezbill-web.vercel.app
 - ✅ **EZPay** : https://ezpay-web.vercel.app
 - ✅ **Tower Defense** : https://tower-defense-web.vercel.app
@@ -463,6 +485,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 ### Configuration Railway - Build Optimisé
 
 **EZAuth API :**
+
 ```bash
 # Build Command (OPTIMISÉ)
 pnpm install --frozen-lockfile --shamefully-hoist && \
@@ -477,6 +500,7 @@ cd apps/ezauth/api && node dist/index.js
 ```
 
 **EZPay API :**
+
 ```bash
 # Build Command (OPTIMISÉ)
 pnpm install --frozen-lockfile --shamefully-hoist && \
@@ -491,6 +515,7 @@ cd apps/ezpay/api && node dist/index.js
 ```
 
 **⚠️ Notes importantes :**
+
 - Seul `@ezstart/express-core` est nécessaire pour builder les APIs
 - Les SDKs (`auth-sdk`, `pay-sdk`, `ui`) ne sont utilisés que côté web
 - Ne pas inclure `@ezstart/ui` dans le build des APIs
@@ -498,11 +523,13 @@ cd apps/ezpay/api && node dist/index.js
 ### Configuration Vercel (Apps Web)
 
 **Stratégie de déploiement :**
+
 - ✅ **Root Directory** : `apps/[app]/web`
 - ✅ **Include files outside root directory** : COCHÉ (obligatoire)
 - ✅ **Build Command** : `pnpm build`
 
 **Build Commands optimisés dans package.json :**
+
 ```json
 "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build"
 ```
@@ -510,6 +537,7 @@ cd apps/ezpay/api && node dist/index.js
 ### Monitoring Railway
 
 **Vérifier la consommation :**
+
 ```
 Dashboard Railway → Settings → Usage
 - CPU Usage
@@ -518,6 +546,7 @@ Dashboard Railway → Settings → Usage
 ```
 
 **Estimation consommation :**
+
 ```
 EZAuth API : ~$0.10-0.20/mois (auth ponctuelle)
 EZPay API : ~$0.10-0.20/mois (paiements rares)
@@ -537,15 +566,17 @@ RESTE : $0.60-0.80 de marge ✅
 ### Variables d'Environnement Production
 
 **EZAuth API (Railway) :**
+
 ```env
 NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://...
 JWT_SECRET=production-secret
-ALLOWED_ORIGINS=https://ezauth-web.vercel.app,https://ezbill-web.vercel.app,...
+ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezbill-web.vercel.app,...
 ```
 
 **EZPay API (Railway) :**
+
 ```env
 NODE_ENV=production
 PORT=5040
@@ -556,6 +587,7 @@ WEB_URL=https://ezpay-web.vercel.app
 ```
 
 **Apps Web (Vercel) :**
+
 ```env
 NODE_ENV=production
 NEXT_PUBLIC_API_URL=https://ezauth.railway.internal/api
@@ -582,6 +614,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ### Système de Ports Standardisé (Implémenté le 12/09/2025)
 
 **Pattern 50xx :**
+
 - **APIs (50x0)** : EZAuth 5010, EZBill 5020, Tower Defense 5030
 - **Web Apps (50x5)** : EZAuth 5015, EZBill 5025, Tower Defense 5035
 - **Web Standalone** : EZStart 5045, ASC-TCD 5055, FengShui 5065
@@ -589,6 +622,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ### Architecture .env Standardisée ✅ (Mise à jour 10/10/2025)
 
 **Structure 3 fichiers par projet :**
+
 ```
 📁 Chaque API (ezauth, ezpay) :
 ├── .env.example       ← Template (COMMITTÉ) - Placeholders + documentation
@@ -599,6 +633,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 **Workflow Environnements :**
 
 **1. Développement Local :**
+
 ```bash
 cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 # Remplir avec valeurs dev (MongoDB local, test Stripe, etc.)
@@ -606,6 +641,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 ```
 
 **2. Production Railway :**
+
 ```bash
 # NE PAS commiter .env.production
 # Copier chaque variable dans Railway Dashboard → Settings → Variables
@@ -613,6 +649,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 ```
 
 **3. Template (.env.example) :**
+
 ```bash
 # TOUJOURS à jour avec toutes les variables
 # OBLIGATOIRE de mettre à jour après ajout de nouvelles variables
@@ -620,6 +657,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 ```
 
 **Règles Importantes :**
+
 1. ✅ `.env.example` → Template SANS secrets (committé)
 2. ✅ `.env.local` → Dev avec secrets réels (gitignored)
 3. ✅ `.env.production` → Production avec secrets réels (gitignored)
@@ -627,6 +665,7 @@ cp apps/ezauth/api/.env.example apps/ezauth/api/.env.local
 5. ✅ express-core charge `.env.local` en priorité, puis `.env` en fallback
 
 **Configuration .gitignore :**
+
 ```
 .env
 .env.local
@@ -703,12 +742,12 @@ const { user, isAuthenticated, login, logout } = useAuth()
 
 EZPay gère **TOUS** les types de paiements du monorepo :
 
-| Type | Description | Exemple |
-|------|-------------|---------|
-| **Donations** | Dons avec testimonials publics | Support Tower Defense |
-| **Purchases** | Achats in-app | Gems, powerups, items |
-| **Subscriptions** | Abonnements récurrents | Premium Tower Defense |
-| **Invoices** | Facturation clients | Intégration EZBill |
+| Type              | Description                    | Exemple               |
+| ----------------- | ------------------------------ | --------------------- |
+| **Donations**     | Dons avec testimonials publics | Support Tower Defense |
+| **Purchases**     | Achats in-app                  | Gems, powerups, items |
+| **Subscriptions** | Abonnements récurrents         | Premium Tower Defense |
+| **Invoices**      | Facturation clients            | Intégration EZBill    |
 
 ### Avantages Architecture Centralisée
 
@@ -828,21 +867,25 @@ GET    /api/health              - Health check
 ### Composants Disponibles
 
 **Donations :**
+
 - `<DonateButton />` - Bouton simple
 - `<DonateModal />` - Modal complet avec montants prédéfinis
 - `<DonationWall />` - Mur de testimonials publics
 
 **Purchases :**
+
 - `<BuyButton />` - Bouton d'achat avec callback
 - `<ProductCard />` - Carte produit réutilisable
 - `<CheckoutFlow />` - Flow complet de checkout
 
 **Subscriptions :**
+
 - `<SubscribeButton />` - Bouton d'abonnement
 - `<PricingTable />` - Table de pricing avec plans
 - `<SubscriptionManager />` - Gestion abonnements utilisateur
 
 **Partagés :**
+
 - `<PaymentHistory />` - Historique paiements utilisateur
 - `<PaymentStatus />` - Statut d'un paiement
 
@@ -855,13 +898,14 @@ const { createDonation, createPurchase, createSubscription } = usePay()
 // Hook spécialisé donations
 const { donations, isLoading, reload } = useDonations({
   projectId: 'tower-defense',
-  limit: 10
+  limit: 10,
 })
 ```
 
 ### Configuration Stripe
 
 **Variables d'environnement API :**
+
 ```env
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -869,6 +913,7 @@ WEB_URL=http://localhost:5045
 ```
 
 **Variables d'environnement Web :**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5040/api
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -877,6 +922,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ### Webhooks Stripe
 
 EZPay gère automatiquement les webhooks Stripe pour :
+
 - ✅ `checkout.session.completed` → Status `completed`
 - ✅ `checkout.session.expired` → Status `cancelled`
 - ✅ `charge.refunded` → Status `refunded`
@@ -887,17 +933,20 @@ EZPay gère automatiquement les webhooks Stripe pour :
 ### Utilisation Externe (Hors Monorepo)
 
 **Option 1: Package NPM** (futur)
+
 ```bash
 npm install @ezstart/pay-sdk
 ```
 
 **Option 2: Widget Embeddable**
+
 ```html
 <script src="https://ezpay.vercel.app/widget.js"></script>
 <div id="ezpay-widget" data-project="my-project"></div>
 ```
 
 **Option 3: Lien Direct**
+
 ```
 https://ezpay.vercel.app/donate?project=tower-defense&amount=10
 ```
