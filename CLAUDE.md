@@ -2,7 +2,7 @@
 
 ## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
 
-### État Actuel (12/09/2025 - 18h30)
+### État Actuel (12/10/2025 - 00h20)
 
 **Monorepo 100% opérationnel avec :**
 
@@ -10,6 +10,7 @@
 - ✅ Architecture .env standardisée (.env.example + .env.local)
 - ✅ TypeScript centralisé avec un seul `tsc -b --watch`
 - ✅ Configuration 100% partagée et optimisée
+- ✅ **Tower Defense optimisé** : Architecture partagée avec 15 mobs + 15 towers (voir [Tower Defense Architecture](#tower-defense---architecture-optimisée))
 
 ### Comment Démarrer une Session de Développement
 
@@ -1235,3 +1236,243 @@ const t = Math.min(elapsed / TICK_INTERVAL_MS, 1)
 - 0 erreur TypeScript
 - Production-ready
 
+## Tower Defense - Architecture Optimisée
+
+### 🎮 Vue d'Ensemble (Mise à jour 12/10/2025)
+
+**Architecture 100% Partagée avec Single Source of Truth**
+
+Tower Defense utilise maintenant une architecture avancée où **frontend et backend partagent exactement les mêmes définitions** d'entités via le monorepo.
+
+###Architecture des Packages
+
+```
+apps/tower-defense/
+├── types/                    # Types TypeScript + Définitions Entités
+│   └── src/
+│       ├── entityTypes.ts    # ⭐ 15 Mobs + 15 Towers (SINGLE SOURCE OF TRUTH)
+│       ├── mobType.ts        # Zod schema MobType
+│       ├── towerType.ts      # Zod schema TowerType
+│       └── ...
+├── config/                   # Configuration gameplay
+│   └── src/
+│       ├── balance.ts        # Constantes d'équilibrage
+│       ├── effects.ts        # Effets disponibles
+│       ├── targeting.ts      # Stratégies de ciblage
+│       └── ...
+├── api/                      # Backend Express + Socket.IO
+│   └── src/
+│       ├── managers/         # GameManager, EntityManager
+│       ├── systems/          # ECS (MovementSystem, TowerSystem)
+│       └── services/
+│           └── entityRegistry.ts  # Seed depuis @tower-defense/types
+├── web/                      # Frontend Next.js
+│   └── src/
+│       └── components/
+│           ├── TowerShop.tsx      # Import depuis @tower-defense/types
+│           └── MobShop.tsx        # Import depuis @tower-defense/types
+└── utils/                    # Utilitaires partagés
+```
+
+### 🏗️ Architecture Partagée (Nouveau 12/10/2025)
+
+#### Problème Résolu : Dépendance Cyclique
+
+**Avant :**
+```
+@tower-defense/types ← @tower-defense/config ← @tower-defense/types ❌
+```
+
+**Après :**
+```
+@tower-defense/types → @tower-defense/config ✅
+```
+
+**Solution :** Les définitions d'entités (`entityTypes.ts`) sont dans `types` au lieu de `config`.
+
+#### Single Source of Truth
+
+```typescript
+// apps/tower-defense/types/src/entityTypes.ts
+export const ENTITY_MOB_TYPES: MobType[] = [
+  {
+    _id: 'mob-basic-slime',
+    name: 'Basic Slime',
+    elementalType: 'normal',
+    hp: 30,
+    speed: 5,
+    damage: 1,
+    // ...
+  },
+  // ... 14 autres mobs
+]
+
+export const ENTITY_TOWER_TYPES: TowerType[] = [
+  {
+    _id: 'tower-basic-archer',
+    name: 'Archer Tower',
+    elementalType: 'normal',
+    damage: 2,
+    range: 5,
+    // ...
+  },
+  // ... 14 autres towers
+]
+```
+
+#### Backend : EntityRegistry
+
+```typescript
+// apps/tower-defense/api/src/services/entityRegistry.ts
+import { ENTITY_MOB_TYPES, ENTITY_TOWER_TYPES } from '@tower-defense/types'
+
+export async function seedEntityTypes(): Promise<void> {
+  ENTITY_MOB_TYPES.forEach(mobType => {
+    entityRegistry.registerMobType(mobType)
+  })
+  
+  ENTITY_TOWER_TYPES.forEach(towerType => {
+    entityRegistry.registerTowerType(towerType)
+  })
+  
+  // ✅ Seeded 15 mob types and 15 tower types
+}
+```
+
+#### Frontend : TowerShop & MobShop
+
+```typescript
+// apps/tower-defense/web/src/app/[locale]/game/components/TowerShop.tsx
+import { ENTITY_TOWER_TYPES } from '@tower-defense/types'
+
+const getAvailableTowersForTier = (tier: number): TowerType[] => {
+  return ENTITY_TOWER_TYPES.filter(tower => {
+    const price = calculateTowerPrice(tower)
+    return isTowerAllowedAtTier(tower, tier, price)
+  })
+}
+```
+
+### ✅ Avantages de l'Architecture
+
+1. **Type Safety** : Frontend et backend utilisent exactement les mêmes types TypeScript
+2. **Pas d'API Call** : Pas besoin de `GET /api/entity-types` au runtime
+3. **Build-time Validation** : Si tu changes un type, erreur TypeScript immédiate partout
+4. **Monorepo Power** : Les workspace dependencies permettent ce partage transparent
+5. **Pas de Duplication** : Une seule définition pour tout
+
+### 📦 Entités Disponibles
+
+#### 15 Mob Types :
+- **Normal** : Basic Slime, Armored Knight, Flying Bat
+- **Fire** : Fire Imp, Lava Golem, Phoenix
+- **Water** : Water Sprite, Ice Giant, Frost Dragon
+- **Grass** : Vine Walker, Treant, Poison Bee
+- **Electric** : Spark Wisp, Thunder Titan, Lightning Hawk
+
+#### 15 Tower Types :
+- **Normal** : Archer Tower (single), Sniper Tower (long range), Cannon Tower (splash)
+- **Fire** : Flame Thrower (burn), Inferno Tower (AoE burn), Phoenix Nest (dual-type)
+- **Water** : Ice Shard (slow), Blizzard Tower (AoE slow), Tidal Wave (hybrid)
+- **Grass** : Vine Snare (fast), Nature Guardian (2x2), Overgrowth (hybrid)
+- **Electric** : Tesla Coil (stun), Lightning Storm (chain), Thunderforge (powerful)
+
+### 🚀 Optimisations Backend
+
+#### GameManager (In-Memory)
+```typescript
+class GameManager {
+  private games = new Map<string, GameInstance>()  // O(1) lookup
+  
+  createGame(hostId: string, gameId?: string): GameInstance {
+    const game: GameInstance = {
+      id: gameId || new Types.ObjectId().toString(),
+      players: new Map(),
+      mobs: new SpatialGrid<ActiveMob>(5),
+      towers: new SpatialGrid<TowerWithPosition>(5),
+      tick: 0,
+      phase: 'waiting',
+    }
+    this.games.set(game.id, game)
+    return game
+  }
+}
+```
+
+#### EntityManager (Type Lookup)
+```typescript
+class EntityManager {
+  createMob(typeId: string, playerId: string, position: Position): ActiveMob {
+    const mobType = entityRegistry.getMobType(typeId)
+    if (!mobType) throw new Error(`MobType ${typeId} not found`)
+    
+    return {
+      id: new Types.ObjectId().toString(),
+      typeId: mobType._id,
+      hp: mobType.hp,
+      playerId,
+      position,
+      // ...
+    }
+  }
+  
+  createTower(typeId: string, playerId: string, position: Position): TowerWithPosition {
+    const towerType = entityRegistry.getTowerType(typeId)
+    if (!towerType) throw new Error(`TowerType ${typeId} not found`)
+    
+    return {
+      id: new Types.ObjectId().toString(),
+      typeId: towerType._id,
+      playerId,
+      position,
+      // ...
+    }
+  }
+}
+```
+
+### 🎯 Comment Tester
+
+```bash
+# 1. Redémarrer VS Code (pour tuer anciens processus Node.js)
+# 2. Lancer Tower Defense
+pnpm dev:td
+
+# 3. Ouvrir le jeu
+open http://localhost:5035
+
+# 4. Créer une nouvelle game
+# 5. Vérifier les shops : tu verras "Archer Tower", "Sniper Tower", "Fire Imp", etc.
+#    au lieu de noms aléatoires générés par mockTowers/mockMobs
+```
+
+### 📝 Fichiers Importants
+
+- [apps/tower-defense/types/src/entityTypes.ts](apps/tower-defense/types/src/entityTypes.ts) - **Source unique** des 30 entités
+- [apps/tower-defense/api/src/services/entityRegistry.ts](apps/tower-defense/api/src/services/entityRegistry.ts:9) - Backend seed
+- [apps/tower-defense/api/src/managers/GameManager.ts](apps/tower-defense/api/src/managers/GameManager.ts) - Gestion in-memory
+- [apps/tower-defense/api/src/managers/EntityManager.ts](apps/tower-defense/api/src/managers/EntityManager.ts) - Factory entities
+- [apps/tower-defense/web/src/app/[locale]/game/components/TowerShop.tsx](apps/tower-defense/web/src/app/[locale]/game/components/TowerShop.tsx:7) - Frontend towers
+- [apps/tower-defense/web/src/app/[locale]/game/components/MobShop.tsx](apps/tower-defense/web/src/app/[locale]/game/components/MobShop.tsx:9) - Frontend mobs
+
+### 🐛 Troubleshooting
+
+**ERR_CONNECTION_REFUSED sur localhost:5035**
+- Problème : Anciens processus Node.js persistent en arrière-plan
+- Solution : Redémarrer VS Code ou tuer manuellement tous les processus `node.exe` dans Task Manager
+
+**API seed seulement 3 types au lieu de 15**
+- Problème : Ancienne version du code qui tourne
+- Solution : Redémarrer tous les serveurs pour charger la nouvelle version
+
+**Dépendance cyclique Turbo**
+- Problème : `types` ← `config` ← `types`
+- Solution : Déjà résolue ! `entityTypes.ts` est dans `types`, pas `config`
+
+### 🔄 Prochaines Étapes
+
+1. **Ajouter sprites/images** pour chaque tower/mob
+2. **Balancing** : Ajuster HP/damage/prix selon tests
+3. **Tests de charge** : Voir limite de towers/mobs
+4. **Wave System** : Vagues automatiques de mobs
+5. **Multiplayer complet** : Combat P2P avec vrais mobs
