@@ -5,7 +5,8 @@
  * Types are loaded once at server startup and cached in memory.
  */
 
-import { MobType, TowerType } from '@tower-defense/types'
+import type { MobType, TowerType } from '@tower-defense/types'
+import { ENTITY_MOB_TYPES, ENTITY_TOWER_TYPES } from '@tower-defense/types'
 
 class EntityRegistry {
   private mobTypes = new Map<string, MobType>()
@@ -64,91 +65,20 @@ class EntityRegistry {
 export const entityRegistry = new EntityRegistry()
 
 /**
- * Seed entity types from existing mob/tower configurations
+ * Seed entity types from shared @tower-defense/config
  * Called at server startup
+ *
+ * This ensures API and Web use the EXACT same entity definitions (type safety!)
  */
 export async function seedEntityTypes(): Promise<void> {
-  console.log('🌱 Seeding entity types...')
+  console.log('🌱 Seeding entity types from @tower-defense/config...')
 
-  // For now, we'll convert existing Mob and Tower objects to types
-  // In the future, these could come from a database or config files
-
-  // Example: Create some basic mob types
-  const basicMobTypes: MobType[] = [
-    {
-      _id: 'mob-basic-normal',
-      name: 'Basic Slime',
-      elementalType: 'normal',
-      hp: 30,
-      speed: 5,
-      damage: 1,
-      canFly: false,
-      attackRange: 0,
-      collisionRadius: 0.3,
-    },
-    {
-      _id: 'mob-fire',
-      name: 'Fire Elemental',
-      elementalType: 'fire',
-      hp: 25,
-      speed: 6,
-      damage: 2,
-      canFly: false,
-      attackRange: 0,
-      collisionRadius: 0.3,
-    },
-    {
-      _id: 'mob-water',
-      name: 'Water Spirit',
-      elementalType: 'water',
-      hp: 35,
-      speed: 4,
-      damage: 1,
-      canFly: false,
-      attackRange: 0,
-      collisionRadius: 0.3,
-    },
-  ]
-
-  basicMobTypes.forEach(mobType => {
+  // Import shared entity definitions from config package
+  ENTITY_MOB_TYPES.forEach(mobType => {
     entityRegistry.registerMobType(mobType)
   })
 
-  // Example: Create some basic tower types
-  const basicTowerTypes: TowerType[] = [
-    {
-      _id: 'tower-basic-normal',
-      name: 'Basic Tower',
-      elementalType: 'normal',
-      damage: 2,
-      damageType: 'single',
-      speed: 1,
-      range: 5,
-      shape: [[true]],
-    },
-    {
-      _id: 'tower-fire',
-      name: 'Fire Tower',
-      elementalType: 'fire',
-      damage: 3,
-      damageType: 'splash',
-      speed: 1,
-      range: 6,
-      shape: [[true]],
-    },
-    {
-      _id: 'tower-water',
-      name: 'Water Tower',
-      elementalType: 'water',
-      damage: 2,
-      damageType: 'single',
-      speed: 2,
-      range: 5,
-      shape: [[true]],
-    },
-  ]
-
-  basicTowerTypes.forEach(towerType => {
+  ENTITY_TOWER_TYPES.forEach(towerType => {
     entityRegistry.registerTowerType(towerType)
   })
 

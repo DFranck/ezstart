@@ -3,7 +3,8 @@
 import { useGameState } from '@/stores/useGameState'
 import { Button, Icon } from '@ezstart/ui/components'
 import { calculateTowerPrice, isTowerAllowedAtTier } from '@tower-defense/config'
-import { Game, mockTowers, ShopItem } from '@tower-defense/types'
+import type { Game, ShopItem, TowerType } from '@tower-defense/types'
+import { ENTITY_TOWER_TYPES } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'
 import { Tower } from './Tower'
 
@@ -31,49 +32,39 @@ export function TowerShop({ game }: TowerShopProps) {
     }
   }, [game.players, currentTier])
 
+  // Get available towers for current tier (from shared config)
+  const getAvailableTowersForTier = (tier: number): TowerType[] => {
+    return ENTITY_TOWER_TYPES.filter(tower => {
+      const price = calculateTowerPrice(tower)
+      return isTowerAllowedAtTier(tower, tier, price)
+    })
+  }
+
   // Generate a single tower with tier filtering
   const generateOneTower = (tier: number): ShopItem => {
-    // Get max cells for tier
-    const maxCells = tier === 1 ? 1 : tier === 2 ? 2 : 9
-    console.log('[TowerShop] Generating tower for tier:', tier, 'maxCells:', maxCells)
+    const availableTowers = getAvailableTowersForTier(tier)
 
-    // Generate tower with maxCells constraint
-    const towers = mockTowers(
-      1,
-      t => {
-        const price = calculateTowerPrice(t)
-        const allowed = isTowerAllowedAtTier(t, tier, price)
-        if (!allowed) {
-          const shapeSize = t.shape.reduce(
-            (count, row) => count + row.filter(cell => cell).length,
-            0
-          )
-          console.log(
-            '[TowerShop] Tower rejected - size:',
-            shapeSize,
-            'price:',
-            price,
-            'tier:',
-            tier
-          )
-        }
-        return allowed
-      },
-      maxCells
-    )
+    if (availableTowers.length === 0) {
+      console.warn('[TowerShop] No towers available for tier:', tier)
+      // Fallback to basic tower
+      const basicTower = ENTITY_TOWER_TYPES[0]!
+      return {
+        type: 'tower' as const,
+        basePrice: calculateTowerPrice(basicTower),
+        tower: basicTower,
+      }
+    }
 
-    const tower = towers[0] ?? mockTowers(1, undefined, 1)[0]! // Fallback to 1-cell
-    const shapeSize = tower.shape.reduce((count, row) => count + row.filter(cell => cell).length, 0)
-    console.log(
-      '[TowerShop] Generated tower - size:',
-      shapeSize,
-      'price:',
-      calculateTowerPrice(tower)
-    )
+    // Pick random tower from available ones
+    const randomIndex = Math.floor(Math.random() * availableTowers.length)
+    const tower = availableTowers[randomIndex]!
+
+    const price = calculateTowerPrice(tower)
+    console.log('[TowerShop] Generated tower:', tower.name, 'price:', price, 'tier:', tier)
 
     return {
       type: 'tower' as const,
-      basePrice: calculateTowerPrice(tower),
+      basePrice: price,
       tower,
     }
   }

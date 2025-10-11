@@ -26,12 +26,12 @@ export async function createGameService(input: CreateGamePayload): Promise<Creat
     ...createDefaultGamePlayer({ playerId: player._id, name: player.name }),
   })
 
-  // NEW: Create game in GameManager (in-memory)
+  // NEW: Create game in GameManager (in-memory) with SAME ID as DB
   const gameId = newGame._id.toString()
-  const gameInstance = gameManager.createGame(player._id.toString())
+  gameManager.createGame(player._id.toString(), gameId) // Pass DB gameId!
 
   // Add host as first player
-  gameManager.addPlayer(gameInstance.id, {
+  gameManager.addPlayer(gameId, {
     id: player._id.toString(),
     name: player.name,
     hp: DEFAULT_HP,
@@ -42,7 +42,7 @@ export async function createGameService(input: CreateGamePayload): Promise<Creat
     isAlive: true,
   })
 
-  console.log(`[createGameService] Created game ${gameId} in both DB and GameManager`)
+  console.log(`[createGameService] ✅ Created game ${gameId} in both DB and GameManager`)
 
   // Émettre l'événement de création de game
   const populatedGame = await GameModel.findById(newGame._id).populate('players host')

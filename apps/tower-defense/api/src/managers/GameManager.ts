@@ -46,9 +46,9 @@ class GameManager {
    * Create a new game instance
    * Time: O(1)
    */
-  createGame(hostId: string): GameInstance {
+  createGame(hostId: string, gameId?: string): GameInstance {
     const game: GameInstance = {
-      id: new Types.ObjectId().toString(),
+      id: gameId || new Types.ObjectId().toString(),
       hostId,
       players: new Map(),
       mobs: new SpatialGrid<ActiveMob>(5), // 5-tile cells

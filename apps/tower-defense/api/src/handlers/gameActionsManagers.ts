@@ -18,23 +18,16 @@ export async function handleGameActionWithManagers(gameId: string, action: GameA
     case 'placeTower': {
       const { x, y, towerType, playerId } = action.payload
 
-      // TODO: Add validation logic (canPlaceTowerAt)
-      // For now, simple placement
-
       try {
-        // Create tower using EntityManager
-        const tower = entityManager.createTower(
-          towerType._id,
-          { x, y },
-          [{ x, y }] // Simple 1x1 tower for now
-        )
+        // Create tower using EntityManager (uses EntityRegistry for type lookup)
+        const tower = entityManager.createTower(towerType._id, playerId, { x, y })
 
-        // Place in GameManager
+        // Place tower in GameManager
         gameManager.placeTower(gameId, tower)
 
-        // Deduct gold from player (TODO: implement properly)
-        // gameManager.updatePlayer(gameId, playerId, { gold: player.gold - cost })
-
+        console.log(
+          `[placeTower] ✅ Placed tower ${tower.typeId} at (${x}, ${y}) for player ${playerId}`
+        )
         return { success: true }
       } catch (error) {
         console.error('[placeTower] Error:', error)

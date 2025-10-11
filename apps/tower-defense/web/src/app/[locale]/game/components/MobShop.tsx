@@ -5,7 +5,8 @@ import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, Div, H6, Icon } from '@ezstart/ui/components'
 import { calculateUnitPrice, ELEMENTAL_COLORS, type ElementalType } from '@tower-defense/config'
-import { Game, mockMobs, ShopItem } from '@tower-defense/types'
+import type { Game, ShopItem, MobType } from '@tower-defense/types'
+import { ENTITY_MOB_TYPES } from '@tower-defense/types'
 import { useEffect, useState } from 'react'
 import { RtsButton } from './RtsButton'
 
@@ -22,15 +23,24 @@ export function MobShop({ game }: Props) {
   const [shopItems, setShopItems] = useState<ShopItem[]>([])
   const [isClient, setIsClient] = useState(false)
 
+  // Generate random mobs from shared config
+  const generateMobs = () => {
+    const items: ShopItem[] = []
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * ENTITY_MOB_TYPES.length)
+      const mob = ENTITY_MOB_TYPES[randomIndex]!
+      items.push({
+        type: 'unit' as const,
+        basePrice: calculateUnitPrice(mob),
+        unit: mob,
+      })
+    }
+    setShopItems(items)
+  }
+
   useEffect(() => {
     setIsClient(true)
-    const mobs = mockMobs(5)
-    const items: ShopItem[] = mobs.map(mob => ({
-      type: 'unit' as const,
-      basePrice: calculateUnitPrice(mob),
-      unit: mob,
-    }))
-    setShopItems(items)
+    generateMobs()
   }, [])
 
   const handleBuyMob = (item: ShopItem) => {
@@ -157,18 +167,7 @@ export function MobShop({ game }: Props) {
             </div>
           )
         })}
-        <Button
-          size={'icon'}
-          onClick={() => {
-            const mobs = mockMobs(5)
-            const items: ShopItem[] = mobs.map(mob => ({
-              type: 'unit' as const,
-              basePrice: calculateUnitPrice(mob),
-              unit: mob,
-            }))
-            setShopItems(items)
-          }}
-        >
+        <Button size={'icon'} onClick={generateMobs}>
           <Icon name="lucide:RefreshCw" />
         </Button>
       </Div>
