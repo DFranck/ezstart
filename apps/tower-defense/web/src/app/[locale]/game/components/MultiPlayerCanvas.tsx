@@ -3,7 +3,15 @@
 import { useGame } from '@/contexts/GameContext'
 import { useGameState } from '@/stores/useGameState'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { ELEMENTAL_COLORS, TILE_SIZE, ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
+import {
+  ELEMENTAL_COLORS,
+  PROJECTILE_CLEANUP_INTERVAL_MS,
+  PROJECTILE_DURATION_RATIO,
+  TICK_INTERVAL_MS,
+  TILE_SIZE,
+  ZONE_HEIGHT,
+  ZONE_WIDTH,
+} from '@tower-defense/config'
 import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
 import { computeCoveredCells, findPath, isColliding, paintFromElement } from '@tower-defense/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -137,11 +145,12 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   // Nettoyer les projectiles terminés
   useEffect(() => {
-    const PROJECTILE_DURATION = 200 // Durée synchronisée avec le tick (250ms)
+    // Durée synchronisée avec le tick (ratio * TICK_INTERVAL_MS)
+    const PROJECTILE_DURATION = TICK_INTERVAL_MS * PROJECTILE_DURATION_RATIO
     const interval = setInterval(() => {
       const now = Date.now()
       setProjectiles(prev => prev.filter(p => now - p.startTime < PROJECTILE_DURATION))
-    }, 50) // Vérifier toutes les 50ms
+    }, PROJECTILE_CLEANUP_INTERVAL_MS)
 
     return () => clearInterval(interval)
   }, [])
@@ -176,7 +185,13 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
     const pathSet = new Set(path.map(p => `${p.x},${p.y}`))
 
+    // Performance monitoring
+    let frameCount = 0
+    let lastFpsTime = Date.now()
+    let fps = 60
+
     const draw = () => {
+      const frameStart = Date.now()
       ctx.clearRect(0, 0, ZONE_WIDTH * TILE_SIZE, ZONE_HEIGHT * TILE_SIZE)
 
       // Fond herbe (hors path)
@@ -264,14 +279,13 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       }
 
       // Mobs actifs avec interpolation fluide
-      const now = Date.now()
-      const TICK_INTERVAL = 250 // Intervalle entre les ticks (250ms)
+      const nowMobs = Date.now()
 
       // Grouper les mobs par position pour afficher le compte
       const mobsByPosition = new Map<string, InterpolatedMob[]>()
       interpolatedMobsRef.current.forEach(mob => {
-        const elapsed = now - mob.lastUpdateTime
-        const t = Math.min(elapsed / TICK_INTERVAL, 1)
+        const elapsed = nowMobs - mob.lastUpdateTime
+        const t = Math.min(elapsed / TICK_INTERVAL_MS, 1)
         const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
         const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
 
@@ -285,8 +299,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       // Mobs avec couleurs élémentaires
       interpolatedMobsRef.current.forEach(mob => {
         // Calculer la position interpolée linéaire (vitesse constante)
-        const elapsed = now - mob.lastUpdateTime
-        const t = Math.min(elapsed / TICK_INTERVAL, 1) // Ratio d'avancement linéaire (0 à 1)
+        const elapsed = nowMobs - mob.lastUpdateTime
+        const t = Math.min(elapsed / TICK_INTERVAL_MS, 1) // Ratio d'avancement linéaire (0 à 1)
 
         const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
         const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
@@ -332,8 +346,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       mobsByPosition.forEach((mobs, key) => {
         if (mobs.length > 1 && mobs[0]) {
           const mob = mobs[0]
-          const elapsed = now - mob.lastUpdateTime
-          const t = Math.min(elapsed / TICK_INTERVAL, 1)
+          const elapsed = nowMobs - mob.lastUpdateTime
+          const t = Math.min(elapsed / TICK_INTERVAL_MS, 1)
           const interpolatedX = mob.prevPosition.x + (mob.targetPosition.x - mob.prevPosition.x) * t
           const interpolatedY = mob.prevPosition.y + (mob.targetPosition.y - mob.prevPosition.y) * t
 
@@ -407,6 +421,28 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ctx.strokeStyle = '#ff6b6b'
         ctx.lineWidth = 3
         ctx.strokeRect(0, 0, ZONE_WIDTH * TILE_SIZE, ZONE_HEIGHT * TILE_SIZE)
+      }
+
+      // Performance monitoring - FPS counter
+      frameCount++
+      const now = Date.now()
+      if (now - lastFpsTime >= 1000) {
+        fps = frameCount
+        frameCount = 0
+        lastFpsTime = now
+
+        // Warn if FPS drops significantly
+        if (fps < 30) {
+          console.warn(
+            `⚠️ [Canvas] Low FPS: ${fps} (${interpolatedMobsRef.current.size} mobs, ${towers.length} towers)`
+          )
+        }
+      }
+
+      // Log frame time if slow (> 16ms for 60 FPS)
+      const frameTime = Date.now() - frameStart
+      if (frameTime > 16) {
+        console.warn(`⚠️ [Canvas] Slow frame: ${frameTime}ms`)
       }
     }
 

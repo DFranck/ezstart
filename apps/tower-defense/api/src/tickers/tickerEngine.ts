@@ -1,5 +1,17 @@
 import { createTickerEngine } from '@ezstart/express-core'
-import { calculateKillReward } from '@tower-defense/config'
+import {
+  calculateKillReward,
+  DEFAULT_COLLISION_RADIUS,
+  INCOME_TICK_INTERVAL,
+  MAX_MOB_SPEED,
+  MIN_SEPARATION_DISTANCE,
+  MOB_SPEED_MULTIPLIER,
+  SEPARATION_FORCE,
+  SLOW_TICK_THRESHOLD_MS,
+  SPATIAL_GRID_CELL_SIZE,
+  TICK_INTERVAL_MS,
+  WAYPOINT_THRESHOLD,
+} from '@tower-defense/config'
 import type { ActiveMob, InGamePlayer } from '@tower-defense/types'
 import { findPath } from '@tower-defense/utils'
 import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
@@ -13,8 +25,8 @@ function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
   const dy = mob1.position.y - mob2.position.y
   const distance = Math.sqrt(dx * dx + dy * dy)
 
-  const radius1 = mob1.mob.collisionRadius ?? 0.3
-  const radius2 = mob2.mob.collisionRadius ?? 0.3
+  const radius1 = mob1.mob.collisionRadius ?? DEFAULT_COLLISION_RADIUS
+  const radius2 = mob2.mob.collisionRadius ?? DEFAULT_COLLISION_RADIUS
   const minDistance = radius1 + radius2
 
   return distance < minDistance
@@ -25,7 +37,7 @@ class SpatialGrid {
   private cellSize: number
   private grid: Map<string, ActiveMob[]>
 
-  constructor(cellSize: number = 2) {
+  constructor(cellSize: number = SPATIAL_GRID_CELL_SIZE) {
     this.cellSize = cellSize
     this.grid = new Map()
   }
@@ -89,7 +101,7 @@ function applySeparation(mob: ActiveMob, spatialGrid: SpatialGrid): { x: number;
       const dy = mob.position.y - other.position.y
       const distance = Math.sqrt(dx * dx + dy * dy)
 
-      if (distance > 0.01) {
+      if (distance > MIN_SEPARATION_DISTANCE) {
         separationX += dx / distance
         separationY += dy / distance
         count++
@@ -229,7 +241,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       const distance = Math.sqrt(dx * dx + dy * dy)
 
       // Si très proche de la cible (avec offset), passer à la prochaine case
-      if (distance < 1.5) {
+      if (distance < WAYPOINT_THRESHOLD) {
         return {
           mob,
           movement: { x: 0, y: 0 },
@@ -240,8 +252,8 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       }
 
       // Calculer le mouvement désiré
-      const rawSpeed = Math.min(mob.mob.speed, 10)
-      const speed = rawSpeed * 0.05
+      const rawSpeed = Math.min(mob.mob.speed, MAX_MOB_SPEED)
+      const speed = rawSpeed * MOB_SPEED_MULTIPLIER
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
 
@@ -255,7 +267,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
     .filter(Boolean) as any[]
 
   // Phase 2: Construire spatial grid pour optimiser collisions
-  const spatialGrid = new SpatialGrid(2) // Cellules de 2×2 tiles
+  const spatialGrid = new SpatialGrid() // Utilise SPATIAL_GRID_CELL_SIZE par défaut
   for (const item of mobsWithMovement) {
     if (!item.reachedEnd && !item.advanceWaypoint) {
       spatialGrid.insert(item.mob)
@@ -283,9 +295,9 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
 
       if (!mob.mob.canFly) {
         const separation = applySeparation(mob, spatialGrid)
-        // Appliquer séparation avec force plus importante pour séparer visuellement
-        finalX += separation.x * 0.08
-        finalY += separation.y * 0.08
+        // Appliquer séparation avec force pour séparer visuellement
+        finalX += separation.x * SEPARATION_FORCE
+        finalY += separation.y * SEPARATION_FORCE
       }
 
       return {
@@ -300,7 +312,7 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
 }
 
 export const ticker = createTickerEngine<any>({
-  tickIntervalMs: 250, // 250ms = 4 ticks/sec (balance gameplay/performance)
+  tickIntervalMs: TICK_INTERVAL_MS, // From config: 250ms = 4 ticks/sec
   createInitialState: gameId => ({
     _id: gameId,
     players: [],
@@ -323,6 +335,9 @@ export const ticker = createTickerEngine<any>({
       state._lastTickTime = tickStartTime
     }
 
+    // Performance monitoring init
+    const perfStart = Date.now()
+
     // Plus de requête DB ici - l'élimination est gérée en mémoire après les dégâts
 
     // 1. Faire tirer les tours sur les mobs
@@ -344,8 +359,8 @@ export const ticker = createTickerEngine<any>({
     const mobsReachedEnd = updatedMobs.filter((m: any) => m._reachedEnd)
     const finalMobs = updatedMobs.filter((m: any) => !m._reachedEnd)
 
-    // 4. Apply gold rewards for kills and passive income (every 12 ticks = 3 seconds at 250ms tick)
-    const shouldApplyIncome = tick % 12 === 0
+    // 4. Apply gold rewards for kills and passive income (from config)
+    const shouldApplyIncome = tick % INCOME_TICK_INTERVAL === 0
 
     // Appliquer les dégâts aux joueurs, gold rewards, et income
     const updatedPlayers = state.players.map((p: InGamePlayer) => {
@@ -444,6 +459,23 @@ export const ticker = createTickerEngine<any>({
     getIO()
       .to(gameId)
       .emit('gameState', { ...newState, _reason: 'tick' })
+
+    // Performance monitoring end
+    const tickDuration = Date.now() - perfStart
+
+    // Warn if tick processing is slow
+    if (tickDuration > SLOW_TICK_THRESHOLD_MS) {
+      console.warn(
+        `⚠️ [Ticker] Slow tick #${tick} for game ${gameId.slice(-6)}: ${tickDuration}ms (${state.players.length}p, ${finalMobs.length}m)`
+      )
+    }
+
+    // Periodic performance stats (every 10 seconds)
+    if (tick % 40 === 0 && tick > 0) {
+      console.log(
+        `📊 [Ticker] Game ${gameId.slice(-6)} stats: Tick #${tick}, ${state.players.length} players, ${finalMobs.length} mobs, last tick: ${tickDuration}ms`
+      )
+    }
 
     return newState
   },
