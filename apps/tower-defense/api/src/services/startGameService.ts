@@ -7,6 +7,8 @@ import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
 import { getGameTicker } from '../tickers/getGameTicker.js'
 import { getIO } from '../socketInstance.js'
+import { gameManager } from '../managers/GameManager.js'
+import { gameEngine } from '../engine/GameEngine.js'
 
 // Map pour tracker les jeux en cours de démarrage (anti-race condition)
 const startingGames = new Set<string>()
@@ -65,6 +67,11 @@ export async function startGameService({ gameId }: { gameId: string }) {
     // Démarrer le ticker pour ce jeu
     const { ticker } = await import('../tickers/tickerEngine.js')
     ticker.ensureRoom(gameId)
+
+    // NEW: Start game in GameManager + GameEngine
+    gameManager.startGame(gameId)
+    gameEngine.startGame(gameId)
+    logger.debug(`[startGameService] 🚀 GameEngine started for game ${gameId}`)
 
     // Obtenir l'état initial du jeu depuis le ticker
     const gameTicker = getGameTicker(gameId)

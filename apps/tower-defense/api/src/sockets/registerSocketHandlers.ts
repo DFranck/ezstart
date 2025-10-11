@@ -1,6 +1,7 @@
 import { logger } from '@ezstart/ui/lib'
 import type { Socket } from 'socket.io'
 import { handleGameAction } from '../handlers/gameActions.js'
+import { handleGameActionWithManagers } from '../handlers/gameActionsManagers.js'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
@@ -334,48 +335,38 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game handlers
   socket.on('game:join', async ({ gameId }) => {
-    // Joining game silently
-
     try {
-      const game = await GameModel.findById(gameId)
-      if (!game) {
-        socket.emit('error', { message: 'Game not found' })
-        return
-      }
+      // NEW: Use GameManager instead of DB
+      const gameInstance = gameManager.getGame(gameId)
 
-      // Rejoindre la room du jeu
-      socket.join(gameId)
-
-      // Si le jeu est en cours, envoyer l'état actuel du ticker
-      if (game.phase === 'playing') {
-        // Vérifier si le ticker existe ET a un state valide
-        const gameTicker = getGameTicker(gameId)
-        const gameState = gameTicker?.getState()
-
-        if (gameState && gameState._id && gameState.phase === 'playing') {
-          // État ticker valide avec vraies données - envoyer directement
-          socket.emit('gameState', { ...gameState, _reason: 'game:join' })
-        } else {
-          // Ticker inexistant OU vide (serveur redémarré?) - restaurer depuis DB
-          console.warn(`[game:join] Ticker empty for active game ${gameId} - syncing from DB`)
-
-          // IMPORTANT: Créer la room AVANT sync pour que mutate() fonctionne
-          ticker.ensureRoom(gameId)
-
-          // Maintenant sync les données DB dans la room
-          await syncTickerWithDatabase(gameId)
-
-          const refreshedState = getGameTicker(gameId)?.getState()
-          if (refreshedState && refreshedState._id) {
-            socket.emit('gameState', { ...refreshedState, _reason: 'game:join' })
-          } else {
-            logger.error(`[game:join] Failed to restore game state for ${gameId}`)
-            socket.emit('error', { message: 'Game state unavailable' })
-          }
+      if (!gameInstance) {
+        // Fallback: Try to load from DB if not in memory
+        const game = await GameModel.findById(gameId)
+        if (!game) {
+          socket.emit('error', { message: 'Game not found' })
+          return
         }
       }
 
-      // Successfully joined game
+      // Join socket room
+      socket.join(gameId)
+      socket.join(`game-${gameId}`) // New manager room format
+
+      // If game is playing, send current state from GameManager
+      if (gameInstance && gameInstance.phase === 'playing') {
+        const state = {
+          _id: gameInstance.id,
+          tick: gameInstance.tick,
+          phase: gameInstance.phase,
+          players: Array.from(gameInstance.players.values()),
+          activeMobs: gameInstance.mobs.getAll(),
+          placedTowers: gameInstance.towers.getAll(),
+          _reason: 'game:join',
+        }
+        socket.emit('gameState', state)
+      }
+
+      logger.debug(`[game:join] Player joined game ${gameId}`)
     } catch (error) {
       logger.error('[game:join] Error:', error)
       socket.emit('error', { message: 'Failed to join game' })
@@ -389,22 +380,19 @@ export function registerSocketHandlers(socket: Socket) {
 
   // Game action handlers
   socket.on('gameAction', async ({ gameId, action }) => {
-    // S'assurer que la room existe (crée si nécessaire avec état initial)
-    ticker.ensureRoom(gameId)
+    console.log(`[Action] ${action.type} game ${gameId.slice(-6)}`)
 
-    // Vérifier si le ticker a un état valide avec vraies données
-    let tickerState = ticker.getState(gameId)
+    // NEW: Use GameManager instead of ticker
+    const game = gameManager.getGame(gameId)
 
-    if (!tickerState || !tickerState._id || tickerState.phase === 'waiting') {
-      // Ticker vide (serveur redémarré?) - restaurer depuis DB
-      console.warn(`[gameAction] Restoring ticker state from DB for game ${gameId}`)
-      await syncTickerWithDatabase(gameId)
+    if (!game) {
+      console.log(`[Action] ❌ Game ${gameId} not found in GameManager`)
+      socket.emit('actionRejected', { reason: 'Game not found' })
+      return
     }
 
-    // Pas de sync DB pendant le gameplay - tout reste en mémoire
-
-    console.log(`[Action] ${action.type} game ${gameId.slice(-6)}`)
-    const result = await handleGameAction(gameId, action)
+    // Handle action with new managers
+    const result = await handleGameActionWithManagers(gameId, action)
 
     if (!result.success) {
       const reason = 'reason' in result ? result.reason : 'Unknown error'
@@ -413,13 +401,25 @@ export function registerSocketHandlers(socket: Socket) {
       return
     }
 
-    const newState = getGameTicker(gameId)?.getState()
-    if (!newState) {
+    // Get updated state from GameManager
+    const updatedGame = gameManager.getGame(gameId)
+    if (!updatedGame) {
       return
     }
 
+    const newState = {
+      _id: updatedGame.id,
+      tick: updatedGame.tick,
+      phase: updatedGame.phase,
+      players: Array.from(updatedGame.players.values()),
+      activeMobs: updatedGame.mobs.getAll(),
+      placedTowers: updatedGame.towers.getAll(),
+      _reason: `gameAction:${action.type}`,
+    }
+
     console.log(`[Action] ✅ ${action.type} success - tick ${newState.tick}, ${newState.activeMobs?.length || 0} mobs`)
-    getIO().to(gameId).emit('gameState', { ...newState, _reason: `gameAction:${action.type}` })
+    getIO().to(gameId).emit('gameState', newState)
+    getIO().to(`game-${gameId}`).emit('gameState', newState) // Also emit to new room format
   })
 
   // Gestion des déconnexions

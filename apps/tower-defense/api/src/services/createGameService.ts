@@ -1,10 +1,11 @@
-import { DEFAULT_PHASE } from '@tower-defense/config'
+import { DEFAULT_PHASE, DEFAULT_HP, DEFAULT_GOLD, DEFAULT_INCOME } from '@tower-defense/config'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
 import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
 import { getIO } from '../socketInstance.js'
+import { gameManager } from '../managers/GameManager.js'
 
 export async function createGameService(input: CreateGamePayload): Promise<CreateGameResponse> {
   const player = await PlayerModel.findById(input.playerId)
@@ -24,6 +25,24 @@ export async function createGameService(input: CreateGamePayload): Promise<Creat
     player: player._id,
     ...createDefaultGamePlayer({ playerId: player._id, name: player.name }),
   })
+
+  // NEW: Create game in GameManager (in-memory)
+  const gameId = newGame._id.toString()
+  const gameInstance = gameManager.createGame(player._id.toString())
+
+  // Add host as first player
+  gameManager.addPlayer(gameInstance.id, {
+    id: player._id.toString(),
+    name: player.name,
+    hp: DEFAULT_HP,
+    gold: DEFAULT_GOLD,
+    income: DEFAULT_INCOME,
+    tier: 1,
+    goldSpent: 0,
+    isAlive: true,
+  })
+
+  console.log(`[createGameService] Created game ${gameId} in both DB and GameManager`)
 
   // Émettre l'événement de création de game
   const populatedGame = await GameModel.findById(newGame._id).populate('players host')
