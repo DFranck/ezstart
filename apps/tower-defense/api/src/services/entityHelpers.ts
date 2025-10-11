@@ -7,7 +7,7 @@
 
 import { ActiveMob, ActiveMobLegacy, PlacedTower, PlacedTowerLegacy, MobType, TowerType, Mob, Tower } from '@tower-defense/types'
 import { entityRegistry } from './entityRegistry.js'
-import { ObjectId } from 'mongodb'
+import { Types } from 'mongoose'
 
 /**
  * Get MobType from ActiveMob (supports both old and new format)
@@ -46,7 +46,7 @@ export function getTowerTypeFromPlaced(placedTower: PlacedTower | PlacedTowerLeg
   // Legacy format: embedded properties (PlacedTower extends Tower)
   // Extract Tower properties
   const towerType: TowerType = {
-    _id: (placedTower as any)._id || new ObjectId().toString(),
+    _id: (placedTower as any)._id || new Types.ObjectId().toString(),
     name: (placedTower as any).name || 'Unknown',
     elementalType: (placedTower as any).elementalType,
     damage: (placedTower as any).damage || 2,
@@ -140,7 +140,7 @@ export function createActiveMob(
   const mobType = entityRegistry.getMobType(mobTypeId)!
 
   return {
-    id: new ObjectId().toString(),
+    id: new Types.ObjectId().toString(),
     mobTypeId,
     currentHp: mobType.hp,
     position,
@@ -169,7 +169,7 @@ export function createPlacedTower(
   }
 
   return {
-    id: new ObjectId().toString(),
+    id: new Types.ObjectId().toString(),
     towerTypeId,
     origin,
     coveredCells,

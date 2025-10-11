@@ -7,7 +7,7 @@
 
 import { ActiveMob, PlacedTower, Position } from '@tower-defense/types'
 import { entityRegistry } from '../services/entityRegistry.js'
-import { ObjectId } from 'mongodb'
+import { Types } from 'mongoose'
 
 class EntityManager {
   /**
@@ -26,7 +26,7 @@ class EntityManager {
     }
 
     const mob: ActiveMob = {
-      id: new ObjectId().toString(),
+      id: new Types.ObjectId().toString(),
       mobTypeId,
       currentHp: mobType.hp,
       position,
@@ -52,7 +52,7 @@ class EntityManager {
     }
 
     const tower: PlacedTower = {
-      id: new ObjectId().toString(),
+      id: new Types.ObjectId().toString(),
       towerTypeId,
       origin,
       coveredCells,

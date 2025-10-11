@@ -9,6 +9,12 @@ import { getIO } from '../socketInstance.js'
 import { getGameTicker } from '../tickers/getGameTicker.js'
 import { syncTickerWithDatabase, ticker } from '../tickers/tickerEngine.js'
 
+// NEW: Import optimized managers
+import { gameManager } from '../managers/GameManager.js'
+import { entityManager } from '../managers/EntityManager.js'
+import { playerManager } from '../managers/PlayerManager.js'
+import { gameEngine } from '../engine/GameEngine.js'
+
 // Map pour tracker les connexions actives
 const activeConnections = new Map<string, { socketId: string; gameId: string; playerId: string }>()
 
@@ -426,6 +432,9 @@ export function registerSocketHandlers(socket: Socket) {
         // Marquer le joueur comme déconnecté (pas supprimer)
         await updatePlayerStatusService({ gameId, playerId, status: 'disconnected' })
 
+        // NEW: Disconnect from PlayerManager
+        playerManager.disconnectSession(socket.id)
+
         // Nettoyer le ready check si actif
         const readyPlayers = activeReadyChecks.get(gameId)
         if (readyPlayers) {
@@ -458,4 +467,110 @@ export function registerSocketHandlers(socket: Socket) {
       activeConnections.delete(socket.id)
     }
   })
+
+  // ============================================================================
+  // NEW: OPTIMIZED HANDLERS USING MANAGERS (Examples for migration)
+  // ============================================================================
+  // These handlers demonstrate how to use the new in-memory managers instead of DB queries
+  // TODO: Progressively migrate existing handlers to use these patterns
+
+  /* Example handlers to implement:
+
+  socket.on('createGame', (data, callback) => {
+    try {
+      const playerId = data.playerId
+      const game = gameManager.createGame(playerId)
+
+      // Add creator as player
+      gameManager.addPlayer(game.id, {
+        id: playerId,
+        name: data.playerName,
+        hp: 20,
+        gold: 50,
+        income: 5,
+        tier: 1,
+        goldSpent: 0,
+        isAlive: true,
+        socketId: socket.id,
+      })
+
+      // Register session
+      playerManager.registerSession(playerId, socket.id, data.playerName)
+
+      // Join room
+      socket.join(`game-${game.id}`)
+
+      callback({ success: true, gameId: game.id })
+    } catch (error) {
+      callback({ success: false, error: error.message })
+    }
+  })
+
+  socket.on('joinGame', (data, callback) => {
+    try {
+      const game = gameManager.getGame(data.gameId)
+      if (!game) throw new Error('Game not found')
+
+      gameManager.addPlayer(game.id, {
+        id: data.playerId,
+        name: data.playerName,
+        hp: 20,
+        gold: 50,
+        income: 5,
+        tier: 1,
+        goldSpent: 0,
+        isAlive: true,
+        socketId: socket.id,
+      })
+
+      playerManager.registerSession(data.playerId, socket.id, data.playerName)
+      playerManager.setCurrentGame(socket.id, game.id)
+
+      socket.join(`game-${game.id}`)
+
+      callback({ success: true })
+    } catch (error) {
+      callback({ success: false, error: error.message })
+    }
+  })
+
+  socket.on('startGame', (data, callback) => {
+    try {
+      gameEngine.startGame(data.gameId)
+      callback({ success: true })
+    } catch (error) {
+      callback({ success: false, error: error.message })
+    }
+  })
+
+  socket.on('placeTower', (data) => {
+    try {
+      const tower = entityManager.createTower(
+        data.towerTypeId,
+        data.origin,
+        data.coveredCells
+      )
+
+      gameManager.placeTower(data.gameId, tower)
+    } catch (error) {
+      console.error('Place tower error:', error)
+    }
+  })
+
+  socket.on('spawnMob', (data) => {
+    try {
+      const mob = entityManager.createMob(
+        data.mobTypeId,
+        data.targetPlayerId,
+        data.position,
+        0
+      )
+
+      gameManager.spawnMob(data.gameId, mob)
+    } catch (error) {
+      console.error('Spawn mob error:', error)
+    }
+  })
+
+  */
 }

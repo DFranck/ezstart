@@ -7,7 +7,7 @@
 
 import { SpatialGrid } from '../engine/SpatialGrid.js'
 import { ActiveMob, PlacedTower, Position } from '@tower-defense/types'
-import { ObjectId } from 'mongodb'
+import { Types } from 'mongoose'
 
 export interface PlayerInstance {
   id: string
@@ -21,12 +21,17 @@ export interface PlayerInstance {
   socketId?: string
 }
 
+// Wrapper for PlacedTower to work with SpatialGrid (uses origin as position)
+export interface TowerWithPosition extends PlacedTower {
+  position: Position // Alias for origin
+}
+
 export interface GameInstance {
   id: string
   hostId: string
   players: Map<string, PlayerInstance>
   mobs: SpatialGrid<ActiveMob>
-  towers: SpatialGrid<PlacedTower>
+  towers: SpatialGrid<TowerWithPosition>
   tick: number
   phase: 'waiting' | 'playing' | 'finished'
   createdAt: number
@@ -43,11 +48,11 @@ class GameManager {
    */
   createGame(hostId: string): GameInstance {
     const game: GameInstance = {
-      id: new ObjectId().toString(),
+      id: new Types.ObjectId().toString(),
       hostId,
       players: new Map(),
       mobs: new SpatialGrid<ActiveMob>(5), // 5-tile cells
-      towers: new SpatialGrid<PlacedTower>(5),
+      towers: new SpatialGrid<TowerWithPosition>(5),
       tick: 0,
       phase: 'waiting',
       createdAt: Date.now(),
@@ -183,7 +188,13 @@ class GameManager {
     const game = this.games.get(gameId)
     if (!game) throw new Error(`Game ${gameId} not found`)
 
-    game.towers.insert(tower)
+    // Wrap tower to add position field (alias for origin)
+    const towerWithPos: TowerWithPosition = {
+      ...tower,
+      position: tower.origin,
+    }
+
+    game.towers.insert(towerWithPos)
   }
 
   /**
