@@ -2,7 +2,7 @@
 'use client'
 
 import { loadBaguaConfigFromMessages } from '@/config/loadBaguaConfig'
-import { GRADIENT_BG, THEME_COLORS } from '@/lib/theme-colors'
+import { THEME_COLORS } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
@@ -11,7 +11,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Div,
   H2,
   Icon,
   P,
@@ -176,12 +175,10 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
           <div className="mx-auto w-full max-w-7xl">
             {/* Header avec bouton PDF */}
 
-            <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto mb-6', {})}>
-              <CardHeader className="flex items-center gap-2">
-                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center">
-                  <Icon name="lucide:Sparkles" size={16} />
-                </Div>
-                <H2 size={'h5'} className="text-left">
+            <Card variant={'ghost'} className={cn('gap-2 mx-auto mb-6', {})}>
+              <CardHeader className="flex items-center justify-center gap-2">
+                <Icon name="lucide:Sparkles" size={16} />
+                <H2 size={'h5'} className="w-fit">
                   {t('analysis.title')}
                 </H2>
               </CardHeader>
@@ -223,6 +220,32 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     <Icon name="lucide:Grid3X3" className="w-4 h-4" />
                     {t('analysis.grid')}
                   </Button>
+                </div>
+                <div className="hidden w-full py-4 md:flex items-center justify-center">
+                  <div className="w-full  max-w-[600px]">
+                    {visualizationMode === 'wheel' ? (
+                      <BaguaWheel
+                        src={uploadData.preview!}
+                        bearingFromNorth={bearingFromNorth}
+                        config={cfg || undefined}
+                        labelOffset={8}
+                        size={500}
+                        cardsMode="hover"
+                        cardsRadiusPct={50}
+                        onSectorClick={handleSectorClick}
+                      />
+                    ) : (
+                      <BaguaGrid
+                        src={uploadData.preview!}
+                        bearingFromNorth={bearingFromNorth}
+                        size={280}
+                        config={cfg || undefined}
+                        cardsMode="hover"
+                        transformations={uploadData.transformations}
+                        onSectorClick={handleSectorClick}
+                      />
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
