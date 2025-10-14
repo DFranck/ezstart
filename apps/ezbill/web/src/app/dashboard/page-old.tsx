@@ -264,15 +264,21 @@ const DashboardPageOld = () => {
                     <stop offset="95%" stopColor="hsl(var(--ezbill-payment))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                  opacity={0.3}
+                />
                 <XAxis
                   dataKey="month"
-                  className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fill: 'hsl(var(--foreground))' }}
+                  tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
                 />
                 <YAxis
-                  className="text-xs"
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fill: 'hsl(var(--foreground))' }}
+                  tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
                   tickFormatter={(value) => `$${value}`}
                 />
                 <ChartTooltip
