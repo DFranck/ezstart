@@ -291,6 +291,14 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+        <Button
+          size="lg"
+          className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
+        >
+          <Icon name="lucide:Sparkles" />
+          <Span className="hidden md:inline">{t('cta.subtitle')}</Span>
+          <Span className="md:hidden">{t('cta.shortLabel')}</Span>
+        </Button>
       </Section>
 
       {/* CTA Section avec features */}

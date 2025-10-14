@@ -151,7 +151,7 @@
   "steps": {
     "upload": {
       "title": "Étape 1 · Import de votre plan",
-      "description": "Ajoutez le plan de votre appartement ou maison.",
+      "description": "Ajoutez le plan de votre habitation ou bureau.",
       "instructions": "Glissez-déposez votre plan ou cliquez pour parcourir",
       "fileRequired": "Uploadez d'abord un plan",
       "cropRequired": "Validez d'abord le crop avec le bouton ✓"

@@ -14,9 +14,10 @@ export default function AnalyzePage() {
   const t = useTranslations()
 
   // Theme FengShui dynamique (centralisé dans theme-colors.ts)
+  // Utilise CSS variables pour éviter les problèmes d'hydratation SSR
   const fengShuiTheme: StepperTheme = {
-    primaryColor: THEME_COLORS.hex.primary,
-    secondaryColor: THEME_COLORS.hex.secondary,
+    primaryColor: THEME_COLORS.cssVars.primary,
+    secondaryColor: THEME_COLORS.cssVars.secondary,
   }
 
   const steps = [

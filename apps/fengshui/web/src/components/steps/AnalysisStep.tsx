@@ -2,6 +2,7 @@
 'use client'
 
 import { loadBaguaConfigFromMessages } from '@/config/loadBaguaConfig'
+import { GRADIENT_BG } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
@@ -19,13 +20,12 @@ import {
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
-import { useTranslations, useLocale, useMessages } from 'next-intl'
+import { useLocale, useMessages, useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
 import BaguaGrid from './BaguaGrid'
 import BaguaWheel from './BaguaWheel'
-import { GRADIENT_BG } from '@/lib/theme-colors'
 
 export default function AnalysisStep({ triggerPreview }: { triggerPreview?: number }) {
   const { isMobile } = useDevice()
@@ -178,26 +178,25 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
 
             <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto mb-6', {})}>
               <CardHeader className="flex items-center gap-2">
-                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
-                  <Icon
-                    name="lucide:Sparkles"
-                    size={16}
-                    className=" bg-foreground text-background"
-                  />
+                <Div className="min-w-8 h-8 rounded-full flex items-center justify-center">
+                  <Icon name="lucide:Sparkles" size={16} />
                 </Div>
                 <H2 size={'h5'} className="text-left">
                   {t('analysis.title')}
                 </H2>
               </CardHeader>
               <CardContent className="">
-                <P variant={'description'}>
-                  {t('analysis.description')}
-                </P>
+                <P variant={'description'}>{t('analysis.description')}</P>
                 <div className="flex gap-2 mt-4">
                   <Button
                     onClick={handleOpenPreview}
-                    className={`text-white ${GRADIENT_BG}`}
+                    variant="ghost"
                     disabled={!cfg || isGeneratingPDF}
+                    style={{
+                      background: `linear-gradient(to right, ${THEME_COLORS.cssVars.primary}, ${THEME_COLORS.cssVars.secondary})`,
+                      color: 'white',
+                      border: 'none',
+                    }}
                   >
                     <Icon name="lucide:FileDown" className="w-4 h-4" />
                     <span>{t('analysis.pdfPreview')}</span>

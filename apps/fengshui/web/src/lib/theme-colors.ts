@@ -5,26 +5,13 @@
  * Ce fichier lit dynamiquement les CSS variables définies dans globals.css
  */
 
-/**
- * Récupère une couleur CSS variable et la convertit en hex
- * Fallback vers une valeur par défaut si pas disponible (SSR)
- */
-function getCSSColor(varName: string, fallback: string): string {
-  if (typeof window === 'undefined') return fallback // SSR
-  const root = getComputedStyle(document.documentElement)
-  const value = root.getPropertyValue(varName).trim()
-  return value || fallback
-}
-
 export const THEME_COLORS = {
-  // Hex colors dynamiques (lus depuis CSS variables)
-  get hex() {
-    return {
-      primary: getCSSColor('--fengshui-primary', '#3b82f6'),
-      secondary: getCSSColor('--fengshui-secondary', '#22c55e'),
-      primaryDark: getCSSColor('--fengshui-primary-dark', '#2563eb'),
-      secondaryDark: getCSSColor('--fengshui-secondary-dark', '#16a34a'),
-    }
+  // CSS Variables (pour usage dans style objects - compatible SSR)
+  cssVars: {
+    primary: 'var(--fengshui-primary)',
+    secondary: 'var(--fengshui-secondary)',
+    primaryDark: 'var(--fengshui-primary-dark)',
+    secondaryDark: 'var(--fengshui-secondary-dark)',
   },
   // Classes Tailwind utilisant les CSS variables
   gradient: {

@@ -151,7 +151,7 @@
   "steps": {
     "upload": {
       "title": "Step 1 · Import your plan",
-      "description": "Add your apartment or house floor plan.",
+      "description": "Add your home or office floor plan.",
       "instructions": "Drag and drop your plan or click to browse",
       "fileRequired": "Upload a plan first",
       "cropRequired": "Validate the crop first with the ✓ button"

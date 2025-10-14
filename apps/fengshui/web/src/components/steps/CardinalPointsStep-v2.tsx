@@ -140,8 +140,8 @@ const CardinalWheel = ({
       {/* Header */}
       <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto')}>
         <CardHeader className="flex items-center gap-2">
-          <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
-            <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
+          <Div className="min-w-8 h-8 rounded-full flex items-center justify-center ">
+            <Icon name="lucide:Upload" size={16} />
           </Div>
           <H2 size={'h5'} className="text-left flex items-center gap-2">
             {t('cardinal.title')}
