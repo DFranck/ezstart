@@ -107,12 +107,12 @@ export function MobShop({ game }: Props) {
   return (
     <Div className="z-50">
       <Div layout="row" className="gap-2 flex-wrap">
-        {shopItems.map(item => {
+        {shopItems.map((item, index) => {
           if (item.type !== 'unit') return null
           const mobColor = ELEMENTAL_COLORS[item.unit.elementalType as ElementalType] || '#888'
           const canAfford = gold >= item.basePrice
           return (
-            <div key={item.unit._id} className="relative group">
+            <div key={`mob-shop-${index}`} className="relative group">
               <RtsButton
                 onClick={() => handleBuyMob(item)}
                 disabled={!canAfford}

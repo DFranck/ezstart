@@ -1,16 +1,27 @@
-import { Mob, PlacedTower, Position, Tower } from '@tower-defense/types'
+import { Mob, Position, Tower, TowerType } from '@tower-defense/types'
 import { computeCoveredCells, findPath } from '@tower-defense/utils'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// Frontend PlacedTower with full tower data for rendering (flattened TowerType)
+// Compatible with utils functions that expect { coveredCells: Position[] }
+export type PlacedTowerFrontend = TowerType & {
+  origin: Position
+  coveredCells: Position[]
+  // Optional fields from backend PlacedTower for compatibility
+  id?: string
+  towerTypeId?: string
+  playerId?: string
+}
+
 interface GameState {
   //towers
-  towers: PlacedTower[]
+  towers: PlacedTowerFrontend[]
   draggedTower: Tower | null
   draggedTowerPrice: number | null
   setDraggedTower: (tower: Tower | null, price?: number) => void
   placeTowerAt: (x: number, y: number, tower: Tower) => void
-  addTower: (tower: PlacedTower) => void
+  addTower: (tower: PlacedTowerFrontend) => void
 
   toSendMobs: Mob[]
   addMobToSend: (mob: Mob) => void
@@ -75,7 +86,7 @@ export const useGameState = create<GameState>()(
         }),
       placeTowerAt: (x, y, tower) => {
         const coveredCells = computeCoveredCells(x, y, tower)
-        const placed: PlacedTower = {
+        const placed: PlacedTowerFrontend = {
           ...tower,
           origin: { x, y },
           coveredCells,

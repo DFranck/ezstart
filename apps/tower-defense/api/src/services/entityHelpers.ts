@@ -154,6 +154,7 @@ export function createActiveMob(
  */
 export function createPlacedTower(
   towerOrId: Tower | string,
+  playerId: string,
   origin: { x: number; y: number },
   coveredCells: Array<{ x: number; y: number }>
 ): PlacedTower {
@@ -171,6 +172,7 @@ export function createPlacedTower(
   return {
     id: new Types.ObjectId().toString(),
     towerTypeId,
+    playerId,
     origin,
     coveredCells,
   }

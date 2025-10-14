@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Frontend Performance Test
  *
@@ -5,6 +6,7 @@
  * Measures FPS, frame times, and rendering performance under various loads.
  *
  * Usage: pnpm test:frontend
+ * NOTE: Uses browser APIs via Puppeteer - TypeScript errors ignored
  */
 
 import puppeteer, { Browser, Page } from 'puppeteer'

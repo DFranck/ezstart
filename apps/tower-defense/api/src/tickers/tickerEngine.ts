@@ -18,6 +18,7 @@ import { updatePlayerHpService } from '../services/updatePlayerStatsService.js'
 import { updatePlayerStatusService } from '../services/updatePlayerStatusService.js'
 import { getIO } from '../socketInstance.js'
 import { checkEndGame } from '../utils/checkEndGame.js'
+import { entityRegistry } from '../services/entityRegistry.js'
 
 // Fonction pour détecter collision entre 2 mobs
 function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
@@ -25,8 +26,10 @@ function checkCollision(mob1: ActiveMob, mob2: ActiveMob): boolean {
   const dy = mob1.position.y - mob2.position.y
   const distance = Math.sqrt(dx * dx + dy * dy)
 
-  const radius1 = mob1.mob.collisionRadius ?? DEFAULT_COLLISION_RADIUS
-  const radius2 = mob2.mob.collisionRadius ?? DEFAULT_COLLISION_RADIUS
+  const mobType1 = entityRegistry.getMobType(mob1.mobTypeId)
+  const mobType2 = entityRegistry.getMobType(mob2.mobTypeId)
+  const radius1 = mobType1?.collisionRadius ?? DEFAULT_COLLISION_RADIUS
+  const radius2 = mobType2?.collisionRadius ?? DEFAULT_COLLISION_RADIUS
   const minDistance = radius1 + radius2
 
   return distance < minDistance
@@ -93,7 +96,9 @@ function applySeparation(mob: ActiveMob, spatialGrid: SpatialGrid): { x: number;
     if (other.id === mob.id) continue
 
     // Ignorer si l'un des deux peut voler
-    if (mob.mob.canFly || other.mob.canFly) continue
+    const mobType1 = entityRegistry.getMobType(mob.mobTypeId)
+    const mobType2 = entityRegistry.getMobType(other.mobTypeId)
+    if (mobType1?.canFly || mobType2?.canFly) continue
 
     if (checkCollision(mob, other)) {
       // Pousser dans la direction opposée
@@ -134,9 +139,12 @@ function processTowerAttacks(
 
     // Pour chaque tour du joueur
     for (const tower of player.placedTowers || []) {
-      const towerRange = tower.range || 5
-      const towerDamage = tower.damage || 10
-      const towerSpeed = tower.speed || 1 // Tirs par tick
+      const towerType = entityRegistry.getTowerType(tower.towerTypeId)
+      if (!towerType) continue
+
+      const towerRange = towerType.range || 5
+      const towerDamage = towerType.damage || 10
+      const towerSpeed = towerType.speed || 1 // Tirs par tick
 
       // Chaque cellule couverte par la tour peut tirer
       for (const cell of tower.coveredCells || []) {
@@ -176,10 +184,11 @@ function processTowerAttacks(
 
             if (newHp <= 0) {
               // Mob killed - award gold to defender
-              const reward = calculateKillReward(mob.mob)
+              const mobType = entityRegistry.getMobType(mob.mobTypeId)
+              const reward = mobType ? calculateKillReward(mobType) : 10
               goldRewards.set(playerId, (goldRewards.get(playerId) || 0) + reward)
               console.log(
-                `[Ticker] ${player.player?.name} killed ${mob.mob.name} → +${reward} gold`
+                `[Ticker] ${player.player?.name} killed ${mobType?.name || 'unknown'} → +${reward} gold`
               )
               return null as any // Marquer pour suppression
             }
@@ -218,7 +227,8 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
 
       if (path.length === 0 || mob.pathIndex >= path.length) {
         // Mob a atteint la fin - infliger des dégâts au joueur
-        const damage = mob.mob.damage || 10
+        const mobType = entityRegistry.getMobType(mob.mobTypeId)
+        const damage = mobType?.damage || 10
         return { mob, movement: null, reachedEnd: true, damage }
       }
 
@@ -252,7 +262,8 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       }
 
       // Calculer le mouvement désiré
-      const rawSpeed = Math.min(mob.mob.speed, MAX_MOB_SPEED)
+      const mobType = entityRegistry.getMobType(mob.mobTypeId)
+      const rawSpeed = Math.min(mobType?.speed || 5, MAX_MOB_SPEED)
       const speed = rawSpeed * MOB_SPEED_MULTIPLIER
       const moveX = (dx / distance) * speed
       const moveY = (dy / distance) * speed
@@ -293,7 +304,8 @@ function moveMobs(activeMobs: ActiveMob[], players: InGamePlayer[]): ActiveMob[]
       let finalX = mob.position.x + movement.x
       let finalY = mob.position.y + movement.y
 
-      if (!mob.mob.canFly) {
+      const mobType = entityRegistry.getMobType(mob.mobTypeId)
+      if (!mobType?.canFly) {
         const separation = applySeparation(mob, spatialGrid)
         // Appliquer séparation avec force pour séparer visuellement
         finalX += separation.x * SEPARATION_FORCE
@@ -574,7 +586,7 @@ export async function syncTickerWithDatabase(gameId: string) {
       inGamePlayers.length
     )
     return {
-      _id: gameData._id.toString(),
+      _id: gameId, // Use gameId directly (string) instead of gameData._id (ObjectId)
       players: inGamePlayers.map(igp => ({
         player: igp.player
           ? {

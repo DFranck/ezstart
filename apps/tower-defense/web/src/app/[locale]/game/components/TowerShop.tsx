@@ -209,7 +209,7 @@ export function TowerShop({ game }: TowerShopProps) {
           const canAfford = gold >= item.basePrice
           return (
             <div
-              key={item.tower._id}
+              key={`tower-shop-${index}`}
               ref={el => {
                 towerRefs.current[index] = el
               }}

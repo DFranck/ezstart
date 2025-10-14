@@ -12,10 +12,11 @@ export function Hud() {
   const currentPlayer = usePlayerStore(s => s.player)
   const gold = useGameState(s => s.gold)
 
-  if (!game || !currentPlayer) return null
+  // FIXME: Temporary fix to show HUD even without currentPlayer (allow emergency exit)
+  if (!game) return null
 
   // Trouver les stats du joueur actuel dans le jeu
-  const playerInGame = game.players.find(p => p.player?._id === currentPlayer._id)
+  const playerInGame = currentPlayer ? game.players.find(p => p.player?._id === currentPlayer._id) : null
   return (
     <Section
       id="hud"

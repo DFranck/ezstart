@@ -43,6 +43,7 @@ class EntityManager {
    */
   createTower(
     towerTypeId: string,
+    playerId: string,
     origin: Position,
     coveredCells: Position[]
   ): PlacedTower {
@@ -54,6 +55,7 @@ class EntityManager {
     const tower: PlacedTower = {
       id: new Types.ObjectId().toString(),
       towerTypeId,
+      playerId,
       origin,
       coveredCells,
     }

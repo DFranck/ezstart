@@ -9,6 +9,7 @@ import { updatePlayerStatusService } from '../services/updatePlayerStatusService
 import { getIO } from '../socketInstance.js'
 import { getGameTicker } from '../tickers/getGameTicker.js'
 import { syncTickerWithDatabase, ticker } from '../tickers/tickerEngine.js'
+import { DEFAULT_HP, DEFAULT_GOLD, DEFAULT_INCOME } from '@tower-defense/config'
 
 // NEW: Import optimized managers
 import { gameManager } from '../managers/GameManager.js'
@@ -337,15 +338,54 @@ export function registerSocketHandlers(socket: Socket) {
   socket.on('game:join', async ({ gameId }) => {
     try {
       // NEW: Use GameManager instead of DB
-      const gameInstance = gameManager.getGame(gameId)
+      let gameInstance = gameManager.getGame(gameId)
 
       if (!gameInstance) {
         // Fallback: Try to load from DB if not in memory
-        const game = await GameModel.findById(gameId)
+        const game = await GameModel.findById(gameId).populate('host')
         if (!game) {
           socket.emit('error', { message: 'Game not found' })
           return
         }
+
+        // Recreate game in GameManager from DB
+        logger.debug(`[game:join] ⚠️  Game ${gameId} not in memory, recreating from DB`)
+
+        const hostId = typeof game.host === 'string' ? game.host : game.host?._id?.toString()
+        if (!hostId) {
+          socket.emit('error', { message: 'Invalid game host' })
+          return
+        }
+        gameManager.createGame(hostId, gameId)
+
+        // Load all InGamePlayers and add to GameManager
+        const inGamePlayers = await InGamePlayerModel.find({ gameId })
+        for (const igp of inGamePlayers) {
+          const playerId = igp.player.toString()
+          // Get player name from Player model
+          const player = await PlayerModel.findById(playerId)
+          gameManager.addPlayer(gameId, {
+            id: playerId,
+            name: player?.name || 'Unknown',
+            hp: igp.hp || DEFAULT_HP,
+            gold: igp.gold || DEFAULT_GOLD,
+            income: igp.income || DEFAULT_INCOME,
+            tier: igp.tier || 1,
+            goldSpent: igp.goldSpent || 0,
+            isAlive: igp.hp > 0, // isAlive is determined by hp
+          })
+        }
+
+        // Update phase if needed
+        const recreatedGame = gameManager.getGame(gameId)
+        if (recreatedGame && game.phase) {
+          recreatedGame.phase = game.phase as 'waiting' | 'playing' | 'finished'
+        }
+
+        logger.debug(`[game:join] ✅ Recreated game ${gameId} with ${inGamePlayers.length} players, phase: ${game.phase}`)
+
+        // Get the recreated instance
+        gameInstance = gameManager.getGame(gameId)
       }
 
       // Join socket room

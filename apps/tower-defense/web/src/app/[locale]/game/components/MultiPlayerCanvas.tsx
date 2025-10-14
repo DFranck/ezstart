@@ -13,7 +13,8 @@ import {
   ZONE_HEIGHT,
   ZONE_WIDTH,
 } from '@tower-defense/config'
-import { ActiveMob, InGamePlayer, PlacedTower, Position } from '@tower-defense/types'
+import { ActiveMob, InGamePlayer, Position, ENTITY_MOB_TYPES, ENTITY_TOWER_TYPES, ElementalType } from '@tower-defense/types'
+import { PlacedTowerFrontend } from '@/stores/useGameState'
 import { computeCoveredCells, findPath, isColliding, paintFromElement } from '@tower-defense/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -22,7 +23,12 @@ interface MultiPlayerCanvasProps {
   onTowerPlace?: (x: number, y: number) => void
 }
 
-interface InterpolatedMob extends ActiveMob {
+// Frontend ActiveMob with elementalType resolved for rendering
+interface ActiveMobFrontend extends ActiveMob {
+  elementalType: ElementalType
+}
+
+interface InterpolatedMob extends ActiveMobFrontend {
   prevPosition: Position
   targetPosition: Position
   lastUpdateTime: number
@@ -67,14 +73,30 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
 
   const isCurrentPlayer = selectedPlayerId === currentPlayer?._id
 
+  // Convert server towers to frontend format
+  const serverTowers: PlacedTowerFrontend[] = useMemo(() => {
+    if (!selectedPlayer?.placedTowers) return []
+    return selectedPlayer.placedTowers.map(st => {
+      const towerType = ENTITY_TOWER_TYPES.find(tt => tt._id === st.towerTypeId) || ENTITY_TOWER_TYPES[0]
+      if (!towerType) {
+        console.warn(`Unknown towerTypeId: ${st.towerTypeId} and no fallback available`)
+      }
+      return {
+        ...towerType,
+        origin: st.origin,
+        coveredCells: st.coveredCells,
+      } as PlacedTowerFrontend
+    })
+  }, [selectedPlayer?.placedTowers])
+
   // Utiliser les données locales pour le joueur actuel, sinon les données serveur
-  const towers: PlacedTower[] = isCurrentPlayer ? localTowers : selectedPlayer?.placedTowers || []
+  const towers: PlacedTowerFrontend[] = isCurrentPlayer ? localTowers : serverTowers
 
   // Calculer le path pour le joueur sélectionné
   const path: Position[] = isCurrentPlayer
     ? localPath
     : selectedPlayer
-      ? findPath(selectedPlayer.placedTowers.flatMap((t: any) => t.coveredCells))
+      ? findPath(selectedPlayer.placedTowers.flatMap(t => t.coveredCells))
       : []
 
   // Récupérer les mobs actifs qui ciblent ce joueur (mémorisé pour éviter re-renders inutiles)
@@ -89,12 +111,24 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     const existingMobs = interpolatedMobsRef.current
 
     activeMobs.forEach(mob => {
+      // Convert backend ActiveMob (with mobTypeId) to frontend ActiveMobFrontend (with elementalType)
+      const mobType = ENTITY_MOB_TYPES.find(mt => mt._id === mob.mobTypeId)
+      if (!mobType) {
+        console.warn(`Unknown mobTypeId: ${mob.mobTypeId}`)
+        return
+      }
+
+      const mobWithType: ActiveMobFrontend = {
+        ...mob,
+        elementalType: mobType.elementalType,
+      }
+
       const existing = existingMobs.get(mob.id)
 
       if (!existing) {
         // Nouveau mob - initialiser sans interpolation
         existingMobs.set(mob.id, {
-          ...mob,
+          ...mobWithType,
           prevPosition: mob.position,
           targetPosition: mob.position,
           lastUpdateTime: now,
@@ -105,7 +139,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       ) {
         // Position a changé - commencer l'interpolation
         existingMobs.set(mob.id, {
-          ...mob,
+          ...mobWithType,
           prevPosition: existing.targetPosition,
           targetPosition: mob.position,
           lastUpdateTime: now,
@@ -304,7 +338,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
           hoveredCellRef.current.y,
           draggedTower
         )
-        const isInvalid = isColliding(cells, towers)
+        const isInvalid = isColliding(cells, towers as any)
 
         ctx.fillStyle = isInvalid ? 'rgba(239, 68, 68, 0.6)' : 'rgba(74, 222, 128, 0.6)'
 
@@ -359,8 +393,12 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
       interpolatedPositions.forEach(({ x: interpolatedX, y: interpolatedY, centerX, centerY, mob }) => {
         const radius = TILE_SIZE * 0.3
 
+        // Get mob type for HP and other stats
+        const mobType = ENTITY_MOB_TYPES.find(mt => mt._id === mob.mobTypeId)
+        const maxHp = mobType?.hp || 100
+
         // Couleur du mob selon son type élémentaire
-        const mobColor = ELEMENTAL_COLORS[mob.mob.elementalType] || '#dc2626'
+        const mobColor = ELEMENTAL_COLORS[mob.elementalType] || '#dc2626'
         ctx.fillStyle = mobColor
 
         ctx.beginPath()
@@ -368,8 +406,8 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
         ctx.fill()
 
         // Barre de vie si le mob a pris des dégâts
-        if (mob.currentHp < mob.mob.hp) {
-          const hpRatio = mob.currentHp / mob.mob.hp
+        if (mob.currentHp < maxHp) {
+          const hpRatio = mob.currentHp / maxHp
           const barWidth = TILE_SIZE * 0.8
           const barHeight = 4
           const barX = interpolatedX * TILE_SIZE + (TILE_SIZE - barWidth) / 2
@@ -550,7 +588,7 @@ export function MultiPlayerCanvas({ selectedPlayerId, onTowerPlace }: MultiPlaye
     )
 
     console.log('[MultiPlayerCanvas] - cells:', cells)
-    const isInvalid = isColliding(cells, towers)
+    const isInvalid = isColliding(cells, towers as any)
     console.log('[MultiPlayerCanvas] - isInvalid:', isInvalid)
 
     if (isInvalid) {

@@ -12,6 +12,7 @@ import { towerSchema } from './tower.js'
 export const placedTowerSchema = z.object({
   id: mongoIdSchema.describe('Unique ID for this placed tower instance'),
   towerTypeId: mongoIdSchema.describe('Reference to TowerType definition'),
+  playerId: mongoIdSchema.describe('Player who owns this tower'),
   origin: positionSchema.describe('Origin position of the tower'),
   coveredCells: z.array(positionSchema).describe('Cells covered by tower shape'),
 })

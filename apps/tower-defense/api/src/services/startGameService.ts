@@ -61,12 +61,12 @@ export async function startGameService({ gameId }: { gameId: string }) {
 
     await game.save()
 
-    // Synchroniser le ticker avec les données mises à jour
-    await syncTickerWithDatabase(gameId)
-
-    // Démarrer le ticker pour ce jeu
+    // Démarrer le ticker pour ce jeu AVANT de sync (ensureRoom doit être appelé en premier)
     const { ticker } = await import('../tickers/tickerEngine.js')
     ticker.ensureRoom(gameId)
+
+    // Synchroniser le ticker avec les données mises à jour (après ensureRoom pour mettre à jour l'état)
+    await syncTickerWithDatabase(gameId)
 
     // NEW: Start game in GameManager + GameEngine
     gameManager.startGame(gameId)
@@ -79,6 +79,7 @@ export async function startGameService({ gameId }: { gameId: string }) {
 
     if (initialGameState) {
       logger.debug(`[startGameService] Broadcasting initial game state to room: ${gameId}`)
+      logger.debug(`[startGameService] Initial state has ${initialGameState.players?.length || 0} players`)
       // Broadcaster l'état initial à tous les joueurs qui rejoignent le jeu
       getIO().to(gameId).emit('gameState', initialGameState)
       

@@ -59,7 +59,7 @@ export function spawnMob(
 
     const newMob: ActiveMob = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      mob: mobType,
+      mobTypeId: mobType._id,
       currentHp: mobType.hp,
       position: {
         x: spawnPosition.x + pathOffset.x,
