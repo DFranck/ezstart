@@ -21,7 +21,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
       >
         <CardHeader className="flex items-center justify-between">
           {/* Company Icon */}
-          <div className="min-w-8 h-8 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center">
+          <div className="min-w-8 h-8 bg-gradient-to-r from-ezbill-indigo-400 to-ezbill-purple-400 rounded-xl flex items-center justify-center">
             <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
           </div>
           <H3 size={'h6'} className="text-right">

@@ -110,7 +110,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             loading={isLoading}
             type="submit"
             disabled={!formData.companyName}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             form="company-form"
           >
             <Icon name={company ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />

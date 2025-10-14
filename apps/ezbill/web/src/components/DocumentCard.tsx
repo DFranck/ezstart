@@ -179,8 +179,9 @@ export function InvoiceCard({
   className,
 }: InvoiceCardProps) {
   const statusConfig = {
-    paid: { bg: 'bg-green-100 dark:bg-green-900/20', text: 'text-green-800 dark:text-green-300' },
-    sent: { bg: 'bg-blue-100 dark:bg-blue-900/20', text: 'text-blue-800 dark:text-blue-300' },
+    paid: { bg: 'bg-ezbill-paid/10', text: 'text-ezbill-paid' },
+    sent: { bg: 'bg-ezbill-sent/10', text: 'text-ezbill-sent' },
+    draft: { bg: 'bg-ezbill-draft/10', text: 'text-ezbill-draft' },
     default: { bg: 'bg-muted', text: 'text-muted-foreground' },
   }
 
@@ -193,8 +194,8 @@ export function InvoiceCard({
       total={total}
       currency={currency}
       icon="lucide:FileEdit"
-      iconGradient="bg-gradient-to-r from-blue-400 to-indigo-400"
-      focusRingColor="focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
+      iconGradient="bg-gradient-to-r from-ezbill-invoice to-ezbill-invoice/80"
+      focusRingColor="focus:ring-2 focus:ring-ezbill-invoice/30"
       statusConfig={statusConfig}
       onClick={onClick}
       className={className}
@@ -211,7 +212,7 @@ export function InvoiceCard({
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
           {permissions.canSend && (
-            <Button size="sm" onClick={onSend} className="bg-primary hover:bg-primary/90 text-white">
+            <Button size="sm" onClick={onSend} className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground">
               <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Send</span>
             </Button>
@@ -230,7 +231,7 @@ export function InvoiceCard({
             <Button
               size="sm"
               onClick={onMarkPaid}
-              className="bg-success hover:bg-success/90 text-white"
+              className="bg-ezbill-paid hover:bg-ezbill-paid/90 text-ezbill-paid-foreground"
             >
               <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
@@ -280,12 +281,10 @@ export function QuoteCard({
   className,
 }: QuoteCardProps) {
   const statusConfig = {
-    accepted: {
-      bg: 'bg-green-100 dark:bg-green-900/20',
-      text: 'text-green-800 dark:text-green-300',
-    },
-    rejected: { bg: 'bg-red-100 dark:bg-red-900/20', text: 'text-red-800 dark:text-red-300' },
-    sent: { bg: 'bg-blue-100 dark:bg-blue-900/20', text: 'text-blue-800 dark:text-blue-300' },
+    accepted: { bg: 'bg-ezbill-accepted/10', text: 'text-ezbill-accepted' },
+    rejected: { bg: 'bg-ezbill-rejected/10', text: 'text-ezbill-rejected' },
+    sent: { bg: 'bg-ezbill-sent/10', text: 'text-ezbill-sent' },
+    draft: { bg: 'bg-ezbill-draft/10', text: 'text-ezbill-draft' },
     default: { bg: 'bg-muted', text: 'text-muted-foreground' },
   }
 
@@ -298,8 +297,8 @@ export function QuoteCard({
       total={total}
       currency={currency}
       icon="lucide:FileText"
-      iconGradient="bg-gradient-to-r from-green-400 to-emerald-400"
-      focusRingColor="focus:ring-2 focus:ring-emerald-300 dark:focus:ring-emerald-600"
+      iconGradient="bg-gradient-to-r from-ezbill-quote to-ezbill-quote/80"
+      focusRingColor="focus:ring-2 focus:ring-ezbill-quote/30"
       statusConfig={statusConfig}
       onClick={onClick}
       className={className}
@@ -321,19 +320,19 @@ export function QuoteCard({
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
           {permissions.canSend && onSend && (
-            <Button size="sm" onClick={onSend} className="bg-primary hover:bg-primary/90 text-white">
+            <Button size="sm" onClick={onSend} className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground">
               <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Send</span>
             </Button>
           )}
           {permissions.canAccept && onAccept && (
-            <Button size="sm" onClick={onAccept} className="bg-success hover:bg-success/90 text-white">
+            <Button size="sm" onClick={onAccept} className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground">
               <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
             </Button>
           )}
           {permissions.canDecline && onDecline && (
-            <Button size="sm" onClick={onDecline} className="bg-destructive hover:bg-red-600 text-white">
+            <Button size="sm" onClick={onDecline} className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground">
               <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
             </Button>
@@ -348,7 +347,7 @@ export function QuoteCard({
             <Button
               size="sm"
               onClick={onConvertToInvoice}
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
             >
               <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
@@ -378,11 +377,8 @@ export function ReceiptCard({
   className,
 }: ReceiptCardProps) {
   const statusConfig = {
-    refunded: { bg: 'bg-red-100 dark:bg-red-900/20', text: 'text-red-800 dark:text-red-300' },
-    default: {
-      bg: 'bg-green-100 dark:bg-green-900/20',
-      text: 'text-green-800 dark:text-green-300',
-    },
+    refunded: { bg: 'bg-ezbill-rejected/10', text: 'text-ezbill-rejected' },
+    default: { bg: 'bg-ezbill-paid/10', text: 'text-ezbill-paid' },
   }
 
   return (
@@ -394,8 +390,8 @@ export function ReceiptCard({
       total={total}
       currency={currency}
       icon="lucide:Receipt"
-      iconGradient="bg-gradient-to-r from-purple-400 to-pink-400"
-      focusRingColor="focus:ring-2 focus:ring-fuchsia-300 dark:focus:ring-fuchsia-600"
+      iconGradient="bg-gradient-to-r from-ezbill-receipt to-ezbill-receipt/80"
+      focusRingColor="focus:ring-2 focus:ring-ezbill-receipt/30"
       statusConfig={statusConfig}
       onClick={onClick}
       className={className}

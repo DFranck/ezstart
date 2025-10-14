@@ -129,7 +129,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             loading={isLoading}
             type="submit"
             disabled={!formData.clientName}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-to-r from-ezbill-cyan-500 to-ezbill-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             form="client-form"
           >
             <>

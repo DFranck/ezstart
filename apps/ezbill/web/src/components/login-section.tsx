@@ -82,7 +82,7 @@ export function LoginSection() {
             loading={isLoggingIn}
             disabled={!username.trim()}
             loadingText="Signing in..."
-            className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="w-full bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <Icon name="lucide:ArrowRight" className="w-4 h-4 mr-2" />
             Continue
@@ -91,7 +91,7 @@ export function LoginSection() {
       ) : (
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500 rounded-lg flex items-center justify-center">
               <Icon name="lucide:Check" className="w-4 h-4 text-white" />
             </div>
             <Span className="text-lg font-semibold text-success">

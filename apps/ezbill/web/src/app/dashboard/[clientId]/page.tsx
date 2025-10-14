@@ -108,8 +108,8 @@ const ClientDashboardPage = () => {
       <div className="min-h-screen  flex items-center justify-center w-full">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-full opacity-20 animate-pulse"></div>
+            <div className="w-12 h-12 border-4 border-ezbill-indigo-400/30 border-t-ezbill-indigo-600 rounded-full animate-spin"></div>
+            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-ezbill-indigo-600 to-ezbill-cyan-600 rounded-full opacity-20 animate-pulse"></div>
           </div>
           <P className="text-foreground/60 font-medium">Loading client dashboard...</P>
         </div>
@@ -143,15 +143,15 @@ const ClientDashboardPage = () => {
           title="Invoices"
           description={`${clientInvoices.length} total invoices`}
           icon="lucide:FileEdit"
-          iconGradient="bg-gradient-to-r from-blue-500 to-indigo-500"
+          iconGradient="bg-gradient-to-r from-ezbill-blue-500 to-ezbill-indigo-500"
           onAdd={handleCreateInvoice}
           addButtonText="Create Invoice"
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+          addButtonGradient="bg-gradient-to-r from-ezbill-blue-500 to-ezbill-indigo-500 hover:from-ezbill-blue-600 hover:to-ezbill-indigo-600"
           isEmpty={clientInvoices.length === 0}
           emptyState={{
             icon: 'lucide:FileEdit',
-            iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-primary',
+            iconBg: 'bg-gradient-to-r from-ezbill-blue-400/20 to-ezbill-indigo-400/20 text-ezbill-invoice',
             title: 'No invoices yet',
             description: 'Create your first invoice to get started',
             buttonText: 'Create First Invoice',
@@ -188,15 +188,15 @@ const ClientDashboardPage = () => {
           title="Quotes"
           description={`${clientQuotes.length} total quotes`}
           icon="lucide:FileText"
-          iconGradient="bg-gradient-to-r from-green-500 to-emerald-500"
+          iconGradient="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500"
           onAdd={handleCreateQuote}
           addButtonText="Create Quote"
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+          addButtonGradient="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500 hover:from-ezbill-green-600 hover:to-ezbill-emerald-600"
           isEmpty={clientQuotes.length === 0}
           emptyState={{
             icon: 'lucide:FileText',
-            iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-success',
+            iconBg: 'bg-gradient-to-r from-ezbill-green-400/20 to-ezbill-emerald-400/20 text-ezbill-quote',
             title: 'No quotes yet',
             description: 'Create your first quote to get started',
             buttonText: 'Create First Quote',
@@ -235,15 +235,15 @@ const ClientDashboardPage = () => {
           title="Receipts"
           description={`${clientReceipts.length} total receipts`}
           icon="lucide:Receipt"
-          iconGradient="bg-gradient-to-r from-purple-500 to-pink-500"
+          iconGradient="bg-gradient-to-r from-ezbill-purple-500 to-ezbill-pink-500"
           onAdd={() => {}}
           addButtonText=""
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hidden"
+          addButtonGradient="bg-gradient-to-r from-ezbill-purple-500 to-ezbill-pink-500 hover:from-ezbill-purple-600 hover:to-ezbill-pink-600 hidden"
           isEmpty={clientReceipts.length === 0}
           emptyState={{
             icon: 'lucide:Receipt',
-            iconBg: 'bg-gradient-to-r from-purple-100 to-pink-100 text-accent',
+            iconBg: 'bg-gradient-to-r from-ezbill-purple-400/20 to-ezbill-pink-400/20 text-ezbill-receipt',
             title: 'No receipts yet',
             description: 'Receipts are generated automatically when invoices are paid',
             buttonText: '',

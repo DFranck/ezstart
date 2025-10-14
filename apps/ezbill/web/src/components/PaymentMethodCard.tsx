@@ -14,14 +14,14 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
     <div key={paymentMethod._id} className="group relative">
       <Card
         className={cn(
-          'hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-green-200 group-hover:-translate-y-1',
+          'hover:shadow-xl cursor-pointer transition-all duration-300 border-ezbill-payment/20 hover:border-ezbill-payment/40 group-hover:-translate-y-1',
           className
         )}
         onClick={() => onEdit(paymentMethod)}
       >
         <CardContent className="p-4 sm:p-6">
         {/* Payment Method Icon */}
-        <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center mb-4">
+        <div className="w-12 h-12 bg-gradient-to-r from-ezbill-payment to-ezbill-payment/80 rounded-xl flex items-center justify-center mb-4">
           <Icon
             name={
               paymentMethod.type === 'crypto_wallet'
@@ -30,7 +30,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
                   ? 'lucide:Building'
                   : 'lucide:CreditCard'
             }
-            className="w-6 h-6 text-white"
+            className="w-6 h-6 text-ezbill-payment-foreground"
           />
         </div>
 
@@ -39,7 +39,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
             {paymentMethod.name}
           </h3>
           {paymentMethod.isDefault && (
-            <span className="bg-green-100 text-success text-xs px-2 py-1 rounded-full font-medium">
+            <span className="bg-ezbill-payment/10 text-ezbill-payment border border-ezbill-payment/30 text-xs px-2 py-1 rounded-full font-medium">
               Default
             </span>
           )}

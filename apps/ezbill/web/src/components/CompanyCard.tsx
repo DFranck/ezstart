@@ -21,7 +21,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
       >
         <CardContent className="p-4 sm:p-6">
           {/* Company Icon */}
-          <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center mb-4">
+          <div className="w-12 h-12 bg-gradient-to-r from-ezbill-indigo-400 to-ezbill-purple-400 rounded-xl flex items-center justify-center mb-4">
             <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
           </div>
 
