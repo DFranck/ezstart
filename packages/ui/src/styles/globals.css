@@ -56,10 +56,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   --ezstart: oklch(0.5413 0.2466 293.01);
-  --fengshui-primary: oklch(0.637 0.237 264.052); /* blue-500 #3b82f6 */
-  --fengshui-secondary: oklch(0.788 0.204 142.495); /* green-500 #22c55e */
+  --fengshui-primary: oklch(0.637 0.237 264.052); /* blue-500 #3b82f2 */
+  --fengshui-secondary: oklch(0.637 0.237 264.052); /* blue-500 #3b82f2 */
   --fengshui-primary-dark: oklch(0.571 0.242 265.754); /* blue-600 #2563eb */
-  --fengshui-secondary-dark: oklch(0.71 0.211 145.533); /* green-600 #16a34a */
+  --fengshui-secondary-dark: oklch(0.571 0.242 265.754); /* blue-600 #2563eb */
 }
 
 .dark {
@@ -106,9 +106,9 @@
 
   --ezstart: oklch(0.5413 0.2466 293.01);
   --fengshui-primary: oklch(0.637 0.237 264.052);
-  --fengshui-secondary: oklch(0.788 0.204 142.495);
+  --fengshui-secondary: oklch(0.637 0.237 264.052);
   --fengshui-primary-dark: oklch(0.571 0.242 265.754);
-  --fengshui-secondary-dark: oklch(0.71 0.211 145.533);
+  --fengshui-secondary-dark: oklch(0.571 0.242 265.754);
 }
 
 @theme inline {

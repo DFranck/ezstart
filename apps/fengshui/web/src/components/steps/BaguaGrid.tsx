@@ -99,8 +99,8 @@ export default function BaguaGrid({
   }, [bearingFromNorth, config])
 
   return (
-    <div className="mx-auto">
-      <div className="relative">
+    <div className="mx-auto ">
+      <div className="relative ">
         {/* Plan en taille maximale avec ratio conservé */}
         <div className="w-full relative overflow-hidden">
           <img src={src} alt="Plan Bagua" className="w-full h-auto object-contain" />

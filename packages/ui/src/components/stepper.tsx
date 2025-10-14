@@ -438,7 +438,12 @@ function StepperNavigation({
 
   return (
     <>
-      <div className={cn('fixed z-20 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card', bottomOffset)}>
+      <div
+        className={cn(
+          'fixed z-20 left-0 right-0 flex justify-between items-center px-2 py-4 border-t border-border bg-card/60 backdrop-blur',
+          bottomOffset
+        )}
+      >
         {/* Bouton Previous */}
         {buttons.previous && !buttons.previous.hidden && (
           <TooltipButton button={buttons.previous}>
