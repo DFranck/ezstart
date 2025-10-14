@@ -148,14 +148,12 @@ const CardinalWheel = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors">
-                    <Icon name="lucide:Info" size={14} className="text-primary" />
+                  <button className="">
+                    <Icon name="lucide:Info" size={14} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <P variant={'description'} className="text-xs">
-                    {t('cardinal.tooltipHelp')}
-                  </P>
+                  <P className="text-xs">{t('cardinal.tooltipHelp')}</P>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
