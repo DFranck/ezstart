@@ -149,8 +149,8 @@ export function BaguaPreviewModal({
 
       console.log('Starting PDF generation with iframe-safe approach...')
 
-      // Attendre que les éléments soient rendus
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Attendre que les éléments soient rendus - délai augmenté pour SVG
+      await new Promise(resolve => setTimeout(resolve, 3000))
 
       if (!wheelRef.current || !gridRef.current) {
         console.error('Wheel or Grid element not found after delay')
@@ -191,8 +191,8 @@ export function BaguaPreviewModal({
       wheelRef.current.style.left = 'auto'
       wheelRef.current.style.display = 'block'
 
-      // Wait for render
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for render - délai augmenté pour que le SVG se rende complètement
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       const wheelDataUrl = await domtoimage.toPng(wheelRef.current, {
         quality: 1,
@@ -363,8 +363,8 @@ export function BaguaPreviewModal({
       gridRef.current.style.left = 'auto'
       gridRef.current.style.display = 'block'
 
-      // Wait for render
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for render - délai augmenté pour que le SVG/images se rendent complètement
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       const gridDataUrl = await domtoimage.toPng(gridRef.current, {
         quality: 1,
@@ -751,6 +751,7 @@ export function BaguaPreviewModal({
               labelOffset={12}
               cardsMode={undefined}
               cardsRadiusPct={35} // Synchronisé avec cardRadius=280 dans capture PDF
+              onSectorClick={() => {}} // Forcer le rendu des zones colorées cliquables
             />
           )}
         </div>
