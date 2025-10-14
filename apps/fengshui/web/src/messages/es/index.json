@@ -188,6 +188,7 @@
   "cardinal": {
     "title": "Paso 2: Puntos Cardinales",
     "description": "Alinea el Norte de la brújula con el Norte de tu plano. Usa los controles para rotar la orientación.",
+    "dragHint": "Arrastra cualquier punto cardinal para rotar",
     "error": "Error",
     "noFile": "No se ha subido ningún plano. Por favor regresa al paso 1 para subir un plano.",
     "yourPlan": "Tu Plano",

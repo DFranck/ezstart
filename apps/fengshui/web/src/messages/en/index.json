@@ -188,6 +188,7 @@
   "cardinal": {
     "title": "Step 2: Cardinal Points",
     "description": "Align the compass North with the North of your plan. Use the controls to rotate the orientation.",
+    "dragHint": "Drag any cardinal point to rotate",
     "error": "Error",
     "noFile": "No plan has been uploaded. Please return to step 1 to upload a plan.",
     "yourPlan": "Your Plan",
