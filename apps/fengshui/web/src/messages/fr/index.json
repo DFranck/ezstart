@@ -203,11 +203,11 @@
     "compassHelp": "Astuce : Utilisez une boussole pour connaître l'orientation réelle de votre espace."
   },
   "analysis": {
-    "title": "Votre Analyse Feng Shui",
-    "description": "Découvrez l'harmonisation de votre espace selon les principes du Bagua. Consultez les recommandations pour chaque secteur ou générez un PDF complet.",
-    "pdfPreview": "Aperçu PDF",
-    "wheel": "Roue",
-    "grid": "Grille",
+    "title": "Analyse de votre plan Feng Shui",
+    "description": "L'école de la boussole est utilisée ici pour créer une carte énergétique du lieu et connaître le diagramme des étoiles volantes pour harmoniser les énergies selon les lieux. Ainsi, l'expertise en la matière à des préconisations pièce par pièce, qui orienteront le choix des couleurs, des formes, des matières mais aussi des meubles (yin ou yang) ou des objets déco (symbolique).",
+    "pdfPreview": "Télécharger le PDF",
+    "wheel": "Boussole",
+    "grid": "Bagua",
     "expandSector": "Développer le secteur",
     "collapseSector": "Réduire le secteur",
     "downloadPdf": "Télécharger PDF",

@@ -203,11 +203,11 @@
     "compassHelp": "Tip: Use a compass to know the real orientation of your space."
   },
   "analysis": {
-    "title": "Your Feng Shui Analysis",
-    "description": "Discover the harmonization of your space according to Bagua principles. Consult recommendations for each sector or generate a complete PDF.",
-    "pdfPreview": "PDF Preview",
-    "wheel": "Wheel",
-    "grid": "Grid",
+    "title": "Analysis of your Feng Shui plan",
+    "description": "The compass school is used here to create an energetic map of the place and know the flying stars diagram to harmonize energies according to locations. Thus, the expertise in this matter provides room-by-room recommendations, which will guide the choice of colors, shapes, materials but also furniture (yin or yang) or decorative objects (symbolic).",
+    "pdfPreview": "Download PDF",
+    "wheel": "Compass",
+    "grid": "Bagua",
     "expandSector": "Expand sector",
     "collapseSector": "Collapse sector",
     "downloadPdf": "Download PDF",

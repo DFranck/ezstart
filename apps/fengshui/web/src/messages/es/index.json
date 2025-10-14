@@ -203,11 +203,11 @@
     "compassHelp": "Consejo: Usa una brújula para conocer la orientación real de tu espacio."
   },
   "analysis": {
-    "title": "Tu Análisis Feng Shui",
-    "description": "Descubre la armonización de tu espacio según los principios del Bagua. Consulta las recomendaciones para cada sector o genera un PDF completo.",
-    "pdfPreview": "Vista previa PDF",
-    "wheel": "Rueda",
-    "grid": "Cuadrícula",
+    "title": "Análisis de tu plano Feng Shui",
+    "description": "La escuela de la brújula se utiliza aquí para crear un mapa energético del lugar y conocer el diagrama de las estrellas voladoras para armonizar las energías según los lugares. Así, la experiencia en la materia tiene recomendaciones habitación por habitación, que orientarán la elección de colores, formas, materiales pero también muebles (yin o yang) u objetos decorativos (simbólicos).",
+    "pdfPreview": "Descargar PDF",
+    "wheel": "Brújula",
+    "grid": "Bagua",
     "expandSector": "Expandir sector",
     "collapseSector": "Contraer sector",
     "downloadPdf": "Descargar PDF",
