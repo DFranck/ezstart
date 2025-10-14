@@ -29,7 +29,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Client</span>
-                  <div className="bg-gradient-to-r from-ezbill-client to-ezbill-client/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-client rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:User" className="text-ezbill-client-foreground" />
                   </div>
                 </div>
@@ -52,7 +52,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Company</span>
-                  <div className="bg-gradient-to-r from-ezbill-company to-ezbill-company/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-company rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:Building" className="text-ezbill-company-foreground" />
                   </div>
                 </div>
@@ -75,7 +75,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Payment</span>
-                  <div className="bg-gradient-to-r from-ezbill-payment to-ezbill-payment/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-payment rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:CreditCard" className="text-ezbill-payment-foreground" />
                   </div>
                 </div>
@@ -104,7 +104,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Invoice</span>
-                  <div className="bg-gradient-to-r from-ezbill-invoice to-ezbill-invoice/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-invoice rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:FileEdit" className="text-ezbill-invoice-foreground" />
                   </div>
                 </div>
@@ -127,7 +127,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Quote</span>
-                  <div className="bg-gradient-to-r from-ezbill-quote to-ezbill-quote/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-quote rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:FileText" className="text-ezbill-quote-foreground" />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function ColorsShowcasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Receipt</span>
-                  <div className="bg-gradient-to-r from-ezbill-receipt to-ezbill-receipt/80 rounded-xl w-12 h-12 flex items-center justify-center">
+                  <div className="bg-gradient-receipt rounded-xl w-12 h-12 flex items-center justify-center">
                     <Icon name="lucide:Receipt" className="text-ezbill-receipt-foreground" />
                   </div>
                 </div>
@@ -277,11 +277,11 @@ export default function ColorsShowcasePage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-gradient-to-r from-ezbill-client to-ezbill-client/80 rounded-xl p-6 text-ezbill-client-foreground">
+                  <div className="bg-gradient-client rounded-xl p-6 text-ezbill-client-foreground">
                     <Icon name="lucide:User" className="w-8 h-8 mb-2" />
                     <P>Client Gradient</P>
                   </div>
-                  <div className="bg-gradient-to-r from-ezbill-invoice to-ezbill-invoice/80 rounded-xl p-6 text-ezbill-invoice-foreground">
+                  <div className="bg-gradient-invoice rounded-xl p-6 text-ezbill-invoice-foreground">
                     <Icon name="lucide:FileEdit" className="w-8 h-8 mb-2" />
                     <P>Invoice Gradient</P>
                   </div>

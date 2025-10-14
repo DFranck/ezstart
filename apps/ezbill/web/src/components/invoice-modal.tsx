@@ -196,7 +196,7 @@ export function InvoiceModal({
             type="submit"
             disabled={!formData.clientId || formData.items.some(item => !item.label)}
             form="invoice-form"
-            className="bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-company hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={invoice ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {invoice ? 'Update Invoice' : 'Create Invoice'}
@@ -566,7 +566,7 @@ export function InvoiceModal({
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-purple-500 text-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center bg-gradient-company text-white rounded-lg p-4 shadow-lg">
                 <span className="flex items-center font-bold text-lg">
                   <Icon name="lucide:DollarSign" className="w-5 h-5 mr-2" />
                   Total:

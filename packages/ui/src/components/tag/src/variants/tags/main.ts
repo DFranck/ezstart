@@ -22,7 +22,7 @@ export const DEFAULT_MAIN_VARIANTS = {
 } as const
 
 // --- cva
-export const mainVariants = cva('w-full flex-1 flex flex-col items-center', {
+export const mainVariants = cva('w-full flex-1 flex flex-col items-center py-10', {
   variants: mainVariantConfig,
   defaultVariants: DEFAULT_MAIN_VARIANTS,
 })

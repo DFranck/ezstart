@@ -21,7 +21,7 @@ export function ClientStats({
         title="Total Revenue"
         value={`$${totalRevenue.toFixed(2)}`}
         icon="lucide:DollarSign"
-        iconGradient="bg-gradient-to-r from-ezbill-green-400 to-ezbill-emerald-400"
+        iconGradient="bg-gradient-payment"
       />
       <StatsCard
         title="Pending"
@@ -33,13 +33,13 @@ export function ClientStats({
         title="Invoices"
         value={invoicesCount.toString()}
         icon="lucide:FileEdit"
-        iconGradient="bg-gradient-to-r from-ezbill-blue-400 to-ezbill-indigo-400"
+        iconGradient="bg-gradient-invoice"
       />
       <StatsCard
         title="Quotes"
         value={quotesCount.toString()}
         icon="lucide:FileText"
-        iconGradient="bg-gradient-to-r from-ezbill-purple-400 to-ezbill-pink-400"
+        iconGradient="bg-gradient-receipt"
       />
     </div>
   )

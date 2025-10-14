@@ -22,7 +22,7 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
       >
         <CardContent className="p-4 sm:p-6">
           {/* Client Avatar */}
-          <div className="w-12 h-12 bg-gradient-to-r from-ezbill-cyan-400 to-ezbill-blue-400 rounded-xl flex items-center justify-center mb-4">
+          <div className="w-12 h-12 bg-gradient-client rounded-xl flex items-center justify-center mb-4">
             <Icon
               name={client.isCompany ? 'lucide:Building' : 'lucide:User'}
               className="w-6 h-6 text-white"

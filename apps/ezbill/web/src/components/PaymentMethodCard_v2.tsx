@@ -28,7 +28,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
         onClick={() => onEdit(paymentMethod)}
       >
         <CardHeader className="flex items-center justify-between">
-          <div className="w-8 h-8 bg-gradient-to-r from-ezbill-green-400 to-ezbill-emerald-400 rounded-xl flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-payment rounded-xl flex items-center justify-center">
             <Icon
               name={
                 paymentMethod.type === 'crypto_wallet'

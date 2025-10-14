@@ -190,7 +190,7 @@ const DashboardPage = () => {
             title="Total Revenue"
             value={`$${totalRevenue.toFixed(2)}`}
             icon="lucide:DollarSign"
-            iconGradient="bg-gradient-to-r from-ezbill-green-400 to-ezbill-emerald-400"
+            iconGradient="bg-gradient-payment"
           />
           <StatsCard
             title="Pending"
@@ -202,13 +202,13 @@ const DashboardPage = () => {
             title="Invoices"
             value={allInvoices.length.toString()}
             icon="lucide:FileEdit"
-            iconGradient="bg-gradient-to-r from-ezbill-blue-400 to-ezbill-indigo-400"
+            iconGradient="bg-gradient-invoice"
           />
           <StatsCard
             title="Quotes"
             value={allQuotes.length.toString()}
             icon="lucide:FileText"
-            iconGradient="bg-gradient-to-r from-ezbill-purple-400 to-ezbill-pink-400"
+            iconGradient="bg-gradient-receipt"
           />
         </div>
         {/* Quick Actions - Only show when missing data */}
@@ -219,7 +219,7 @@ const DashboardPage = () => {
                 title="Create Company"
                 description="Set up your business profile and billing information"
                 setter={setIsCompanyModalOpen}
-                className="bg-gradient-to-r from-ezbill-indigo-500 to-ezbill-purple-600 text-white"
+                className="bg-gradient-company text-white"
                 descriptionClassName="text-primary-foreground/80"
               />
             )}
@@ -229,7 +229,7 @@ const DashboardPage = () => {
                 title="Create Client"
                 description="Add clients to start creating invoices and quotes"
                 setter={setIsClientModalOpen}
-                className="bg-gradient-to-r from-ezbill-cyan-500 to-ezbill-blue-600 text-white"
+                className="bg-gradient-client text-white"
                 descriptionClassName="text-primary-foreground/80"
               />
             )}
@@ -238,8 +238,8 @@ const DashboardPage = () => {
                 title="Add Payment Method"
                 description="Configure how you receive payments from clients"
                 setter={setIsPaymentMethodModalOpen}
-                className="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-600 text-white"
-                descriptionClassName="text-emerald-100"
+                className="bg-gradient-payment text-white"
+                descriptionClassName="text-primary-foreground/80"
               />
             )}
           </div>
@@ -249,15 +249,15 @@ const DashboardPage = () => {
           title="Clients"
           description="Click on a client to manage their billing"
           icon="lucide:Users"
-          iconGradient="bg-gradient-to-r from-ezbill-cyan-500 to-ezbill-blue-500"
+          iconGradient="bg-gradient-client"
           onAdd={() => setIsClientModalOpen(true)}
           addButtonText="Add Client"
           addButtonIcon="lucide:UserPlus"
-          addButtonGradient="bg-gradient-to-r from-ezbill-cyan-500 to-ezbill-blue-500 hover:from-ezbill-cyan-600 hover:to-ezbill-blue-600"
+          addButtonGradient="bg-gradient-client hover:bg-gradient-client-hover"
           isEmpty={!hasClients}
           emptyState={{
             icon: 'lucide:Users',
-            iconBg: 'bg-gradient-to-r from-ezbill-cyan-400/20 to-ezbill-blue-400/20 text-ezbill-client',
+            iconBg: 'bg-gradient-client-light text-ezbill-client',
             title: 'No clients yet',
             description: 'Add your first client to start creating invoices and quotes',
             buttonText: 'Add First Client',

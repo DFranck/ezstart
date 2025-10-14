@@ -109,7 +109,7 @@ const ClientDashboardPage = () => {
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-ezbill-indigo-400/30 border-t-ezbill-indigo-600 rounded-full animate-spin"></div>
-            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-ezbill-indigo-600 to-ezbill-cyan-600 rounded-full opacity-20 animate-pulse"></div>
+            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-company rounded-full opacity-20 animate-pulse"></div>
           </div>
           <P className="text-foreground/60 font-medium">Loading client dashboard...</P>
         </div>
@@ -143,15 +143,15 @@ const ClientDashboardPage = () => {
           title="Invoices"
           description={`${clientInvoices.length} total invoices`}
           icon="lucide:FileEdit"
-          iconGradient="bg-gradient-to-r from-ezbill-blue-500 to-ezbill-indigo-500"
+          iconGradient="bg-gradient-invoice"
           onAdd={handleCreateInvoice}
           addButtonText="Create Invoice"
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-ezbill-blue-500 to-ezbill-indigo-500 hover:from-ezbill-blue-600 hover:to-ezbill-indigo-600"
+          addButtonGradient="bg-gradient-invoice hover:bg-gradient-invoice-hover"
           isEmpty={clientInvoices.length === 0}
           emptyState={{
             icon: 'lucide:FileEdit',
-            iconBg: 'bg-gradient-to-r from-ezbill-blue-400/20 to-ezbill-indigo-400/20 text-ezbill-invoice',
+            iconBg: 'bg-gradient-invoice-light text-ezbill-invoice',
             title: 'No invoices yet',
             description: 'Create your first invoice to get started',
             buttonText: 'Create First Invoice',
@@ -188,15 +188,15 @@ const ClientDashboardPage = () => {
           title="Quotes"
           description={`${clientQuotes.length} total quotes`}
           icon="lucide:FileText"
-          iconGradient="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500"
+          iconGradient="bg-gradient-payment"
           onAdd={handleCreateQuote}
           addButtonText="Create Quote"
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500 hover:from-ezbill-green-600 hover:to-ezbill-emerald-600"
+          addButtonGradient="bg-gradient-payment hover:bg-gradient-payment-hover"
           isEmpty={clientQuotes.length === 0}
           emptyState={{
             icon: 'lucide:FileText',
-            iconBg: 'bg-gradient-to-r from-ezbill-green-400/20 to-ezbill-emerald-400/20 text-ezbill-quote',
+            iconBg: 'bg-gradient-payment-light text-ezbill-quote',
             title: 'No quotes yet',
             description: 'Create your first quote to get started',
             buttonText: 'Create First Quote',
@@ -235,15 +235,15 @@ const ClientDashboardPage = () => {
           title="Receipts"
           description={`${clientReceipts.length} total receipts`}
           icon="lucide:Receipt"
-          iconGradient="bg-gradient-to-r from-ezbill-purple-500 to-ezbill-pink-500"
+          iconGradient="bg-gradient-receipt"
           onAdd={() => {}}
           addButtonText=""
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-to-r from-ezbill-purple-500 to-ezbill-pink-500 hover:from-ezbill-purple-600 hover:to-ezbill-pink-600 hidden"
+          addButtonGradient="bg-gradient-receipt hover:bg-gradient-receipt-hover hidden"
           isEmpty={clientReceipts.length === 0}
           emptyState={{
             icon: 'lucide:Receipt',
-            iconBg: 'bg-gradient-to-r from-ezbill-purple-400/20 to-ezbill-pink-400/20 text-ezbill-receipt',
+            iconBg: 'bg-gradient-receipt-light text-ezbill-receipt',
             title: 'No receipts yet',
             description: 'Receipts are generated automatically when invoices are paid',
             buttonText: '',

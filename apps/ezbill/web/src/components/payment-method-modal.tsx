@@ -306,7 +306,7 @@ export function PaymentMethodModal({
             type="submit"
             disabled={formData.type === 'crypto_wallet' && !formData.walletAddress}
             form="payment-method-form"
-            className="bg-gradient-to-r from-ezbill-green-500 to-ezbill-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-payment hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={paymentMethod ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {paymentMethod ? 'Update' : 'Add'} Payment Method

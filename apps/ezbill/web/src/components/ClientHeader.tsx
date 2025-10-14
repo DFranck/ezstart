@@ -31,8 +31,8 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
             <div
               className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
                 client.isCompany
-                  ? 'bg-gradient-to-r from-ezbill-company to-ezbill-company/80'
-                  : 'bg-gradient-to-r from-ezbill-client to-ezbill-client/80'
+                  ? 'bg-gradient-company'
+                  : 'bg-gradient-client'
               }`}
             >
               <Icon
@@ -103,14 +103,14 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
         <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <Button
             onClick={onCreateQuote}
-            className="bg-gradient-to-r from-ezbill-quote to-ezbill-quote/80 hover:from-ezbill-quote/90 hover:to-ezbill-quote/70 text-ezbill-quote-foreground font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            className="bg-gradient-quote hover:opacity-90 text-ezbill-quote-foreground font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
           >
             <Icon name="lucide:FileText" className="w-4 h-4 sm:mr-2" />
             <span className="ml-2 sm:ml-0">New Quote</span>
           </Button>
           <Button
             onClick={onCreateInvoice}
-            className="bg-gradient-to-r from-ezbill-invoice to-ezbill-invoice/80 hover:from-ezbill-invoice/90 hover:to-ezbill-invoice/70 text-ezbill-invoice-foreground font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            className="bg-gradient-invoice hover:opacity-90 text-ezbill-invoice-foreground font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
           >
             <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
             <span className="ml-2 sm:ml-0">New Invoice</span>

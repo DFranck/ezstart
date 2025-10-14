@@ -21,7 +21,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
       >
         <CardContent className="p-4 sm:p-6">
         {/* Payment Method Icon */}
-        <div className="w-12 h-12 bg-gradient-to-r from-ezbill-payment to-ezbill-payment/80 rounded-xl flex items-center justify-center mb-4">
+        <div className="w-12 h-12 bg-gradient-payment rounded-xl flex items-center justify-center mb-4">
           <Icon
             name={
               paymentMethod.type === 'crypto_wallet'

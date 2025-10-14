@@ -48,7 +48,7 @@ const ClientLayout = ({
             <div>
               <H1
                 size={'h5'}
-                className="text-start w-fit font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+                className="text-start w-fit font-bold bg-gradient-to-r from-ezbill-client to-ezbill-invoice bg-clip-text text-transparent"
               >
                 EZBill
               </H1>
@@ -94,7 +94,22 @@ const ClientLayout = ({
         </div>
       }
       LinkComponent={Link}
-      showFooter={false}
+      showFooter={true}
+      footerShowCopyright={true}
+      creator={
+        <>
+          Made by
+          <a
+            href="https://ezstart-web.vercel.app/fr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline ml-2"
+          >
+            DFranck
+          </a>
+        </>
+      }
+      footerLayout="simple"
     >
       {children}
     </BaseClientLayout>

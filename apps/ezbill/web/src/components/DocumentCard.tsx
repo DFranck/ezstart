@@ -194,7 +194,7 @@ export function InvoiceCard({
       total={total}
       currency={currency}
       icon="lucide:FileEdit"
-      iconGradient="bg-gradient-to-r from-ezbill-invoice to-ezbill-invoice/80"
+      iconGradient="bg-gradient-invoice"
       focusRingColor="focus:ring-2 focus:ring-ezbill-invoice/30"
       statusConfig={statusConfig}
       onClick={onClick}
@@ -297,7 +297,7 @@ export function QuoteCard({
       total={total}
       currency={currency}
       icon="lucide:FileText"
-      iconGradient="bg-gradient-to-r from-ezbill-quote to-ezbill-quote/80"
+      iconGradient="bg-gradient-quote"
       focusRingColor="focus:ring-2 focus:ring-ezbill-quote/30"
       statusConfig={statusConfig}
       onClick={onClick}
@@ -390,7 +390,7 @@ export function ReceiptCard({
       total={total}
       currency={currency}
       icon="lucide:Receipt"
-      iconGradient="bg-gradient-to-r from-ezbill-receipt to-ezbill-receipt/80"
+      iconGradient="bg-gradient-receipt"
       focusRingColor="focus:ring-2 focus:ring-ezbill-receipt/30"
       statusConfig={statusConfig}
       onClick={onClick}
