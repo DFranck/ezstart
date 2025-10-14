@@ -78,6 +78,14 @@ export default function BaguaWheel({
     return result
   }, [bearingFromNorth, config])
 
+  // Helper pour obtenir la couleur d'une direction depuis la config
+  const getSectorColor = (dir: Direction): string => {
+    if (!config?.orientations?.[dir]) return '#ef4444'
+    const colorHex = config.orientations[dir].colorHex
+    const colorHexes = config.orientations[dir].colorHexes
+    return colorHex || colorHexes?.[0] || '#ef4444'
+  }
+
   // image centrée/insérée dans le cercle
   const s = Math.min(r * Math.SQRT2 * insetRatio, 100)
   const imgX = cx - s / 2
@@ -179,12 +187,13 @@ export default function BaguaWheel({
               DIRECTIONS.map((dir: Direction, i) => {
                 const start = i * 45 - 22.5
                 const end = (i + 1) * 45 - 22.5
+                const sectorColor = getSectorColor(dir)
                 return (
                   <path
                     key={`clickable-${dir}`}
                     d={sectorPath(start, end, r, cx, cy)}
-                    fill="transparent"
-                    className="cursor-pointer hover:fill-yellow-500/10 transition-colors"
+                    fill={sectorColor}
+                    className="cursor-pointer transition-opacity opacity-30 hover:opacity-60"
                     onClick={() => onSectorClick(dir)}
                   />
                 )
@@ -196,8 +205,8 @@ export default function BaguaWheel({
                 cx={cx}
                 cy={cy}
                 r={r * 0.3} // Rayon du centre (30% du rayon total)
-                fill="transparent"
-                className="cursor-pointer hover:fill-yellow-500/10 transition-colors"
+                fill={getSectorColor('C')}
+                className="cursor-pointer transition-opacity opacity-30 hover:opacity-60"
                 onClick={() => onSectorClick('C')}
               />
             )}

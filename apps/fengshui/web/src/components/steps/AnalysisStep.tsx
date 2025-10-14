@@ -2,7 +2,7 @@
 'use client'
 
 import { loadBaguaConfigFromMessages } from '@/config/loadBaguaConfig'
-import { GRADIENT_BG } from '@/lib/theme-colors'
+import { GRADIENT_BG, THEME_COLORS } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'

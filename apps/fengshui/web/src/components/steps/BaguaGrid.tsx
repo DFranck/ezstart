@@ -73,7 +73,6 @@ const DIRECTION_TO_SECTOR_ID: Record<Direction, string> = {
   NO: 'NO',
   C: 'CENTER',
 }
-
 export default function BaguaGrid({
   src,
   bearingFromNorth,
@@ -86,7 +85,13 @@ export default function BaguaGrid({
   const [hoverSector, setHoverSector] = useState<Direction | null>(null)
   const [pinnedSector, setPinnedSector] = useState<Direction | null>(null)
   const activeSector = pinnedSector ?? hoverSector
-
+  // Helper pour obtenir la couleur d'une direction depuis la config
+  const getSectorColor = (dir: Direction): string => {
+    if (!config?.orientations?.[dir]) return '#ef4444'
+    const colorHex = config.orientations[dir].colorHex
+    const colorHexes = config.orientations[dir].colorHexes
+    return colorHex || colorHexes?.[0] || '#ef4444'
+  }
   // Calcul de la rotation avec la même fonction que BaguaWheel
   const rotation = useMemo(() => {
     const result = calculateBaguaRotation(bearingFromNorth, config)
@@ -117,14 +122,21 @@ export default function BaguaGrid({
 
               const isActive = activeSector === direction
               const isHovered = hoverSector === direction
+              const sectorColor = getSectorColor(direction)
+
+              const bgColor = sectorColor + (isHovered ? '9D' : '6D')
 
               return (
                 <div
                   key={direction}
-                  className="relative cursor-pointer transition-all duration-200 border border-red-500/30  hover:bg-yellow-500/10 hover:border-white/50"
+                  className="relative cursor-pointer transition-all duration-200"
                   style={{
                     gridRow: position.row + 1,
                     gridColumn: position.col + 1,
+                    backgroundColor: bgColor,
+                    borderWidth: '0.5px',
+                    borderStyle: 'dashed',
+                    borderColor: '#ef444460',
                   }}
                   onMouseEnter={() => setHoverSector(direction)}
                   onMouseLeave={() => {
