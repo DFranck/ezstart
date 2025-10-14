@@ -7,10 +7,10 @@ type Props = {
   description: string
   icon: KnownIconName
   iconGradient: string
-  onAdd: () => void
-  addButtonText: string
-  addButtonIcon: KnownIconName
-  addButtonGradient: string
+  onAdd?: () => void
+  addButtonText?: string
+  addButtonIcon?: KnownIconName
+  addButtonGradient?: string
   children: ReactNode
   emptyState?: {
     icon: KnownIconName
@@ -21,6 +21,7 @@ type Props = {
   }
   isEmpty?: boolean
   className?: string
+  hideAddButton?: boolean
 }
 
 const DashboardSection = ({
@@ -36,6 +37,7 @@ const DashboardSection = ({
   emptyState,
   isEmpty = false,
   className,
+  hideAddButton = false,
 }: Props) => {
   return (
     <Card variant="floating" className={cn('', className)}>
@@ -59,16 +61,18 @@ const DashboardSection = ({
                 </P>
               </div>
             </div>
-            <Button
-              onClick={onAdd}
-              className={cn(
-                'text-white font-medium px-3 py-2 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
-                addButtonGradient
-              )}
-            >
-              <Icon name={addButtonIcon} className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">{addButtonText}</span>
-            </Button>
+            {!hideAddButton && onAdd && addButtonText && addButtonIcon && addButtonGradient && (
+              <Button
+                onClick={onAdd}
+                className={cn(
+                  'text-white font-medium px-3 py-2 sm:px-6 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5',
+                  addButtonGradient
+                )}
+              >
+                <Icon name={addButtonIcon} className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{addButtonText}</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -85,13 +89,15 @@ const DashboardSection = ({
               </div>
               <h3 className="text-lg font-semibold mb-2">{emptyState.title}</h3>
               <p className="text-foreground/60 mb-6">{emptyState.description}</p>
-              <Button
-                onClick={onAdd}
-                className={cn('text-white font-medium px-6 py-3 rounded-xl', addButtonGradient)}
-              >
-                <Icon name={addButtonIcon} className="w-4 h-4 mr-2" />
-                {emptyState.buttonText}
-              </Button>
+              {onAdd && addButtonIcon && addButtonGradient && (
+                <Button
+                  onClick={onAdd}
+                  className={cn('text-white font-medium px-6 py-3 rounded-xl', addButtonGradient)}
+                >
+                  <Icon name={addButtonIcon} className="w-4 h-4 mr-2" />
+                  {emptyState.buttonText}
+                </Button>
+              )}
             </div>
           ) : (
             children

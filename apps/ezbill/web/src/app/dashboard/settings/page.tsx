@@ -2,24 +2,12 @@
 
 import { CompanyModal } from '@/components/company-modal'
 import CompanyCard from '@/components/CompanyCard_v2'
+import DashboardSection from '@/components/DashboardSection'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import { useBillingContext } from '@/contexts/billing-context'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  H2,
-  H3,
-  Icon,
-  P,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@ezstart/ui/components'
+import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { callApi } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
@@ -179,110 +167,82 @@ export default function SettingsPage() {
           </TabsList>
 
           <TabsContent value="business">
-            <Card variant={isMobile ? 'ghost' : 'floating'}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Icon name="lucide:Building2" />
-                    <div>
-                      <H2 size="h3">Your Business</H2>
-                      <P>Configure your business information for invoices and quotes</P>
-                    </div>
-                  </div>
-                  <Button onClick={() => setIsCompanyModalOpen(true)}>
-                    <Icon name="lucide:Plus" />
-                    Add Company
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                {companies.length === 0 ? (
-                  <div className="flex flex-col items-center gap-4">
-                    <Icon name="lucide:Building2" />
-                    <H3 size="h4">No companies yet</H3>
-                    <P>Add your business information to appear on invoices and quotes</P>
-                    <Button onClick={() => setIsCompanyModalOpen(true)}>
-                      <Icon name="lucide:Plus" />
-                      Add Your Business
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {companies.map(company => (
-                      <CompanyCard
-                        key={company._id}
-                        company={company}
-                        onEdit={handleEditCompany}
-                        onDelete={handleDeleteCompany}
-                      />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DashboardSection
+              title="Your Business"
+              description="Configure your business information for invoices and quotes"
+              icon="lucide:Building2"
+              iconGradient="bg-gradient-company"
+              onAdd={() => setIsCompanyModalOpen(true)}
+              addButtonText="Add Company"
+              addButtonIcon="lucide:Plus"
+              addButtonGradient="bg-gradient-company"
+              isEmpty={companies.length === 0}
+              emptyState={{
+                icon: 'lucide:Building2',
+                iconBg: 'bg-gradient-company/10',
+                title: 'No companies yet',
+                description: 'Add your business information to appear on invoices and quotes',
+                buttonText: 'Add Your Business',
+              }}
+              className={isMobile ? 'border-0 shadow-none' : ''}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {companies.map(company => (
+                  <CompanyCard
+                    key={company._id}
+                    company={company}
+                    onEdit={handleEditCompany}
+                    onDelete={handleDeleteCompany}
+                  />
+                ))}
+              </div>
+            </DashboardSection>
           </TabsContent>
 
           <TabsContent value="payment-methods">
-            <Card variant={isMobile ? 'ghost' : 'floating'}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Icon name="lucide:CreditCard" />
-                    <div>
-                      <H2 size="h3">Payment Methods</H2>
-                      <P>Configure how you receive payments from clients</P>
-                    </div>
-                  </div>
-                  <Button onClick={() => setIsPaymentMethodModalOpen(true)}>
-                    <Icon name="lucide:Plus" />
-                    Add Payment Method
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                {paymentMethods.length === 0 ? (
-                  <div className="flex flex-col items-center gap-4">
-                    <Icon name="lucide:CreditCard" />
-                    <H3 size="h4">No payment methods yet</H3>
-                    <P>Add your first payment method to start receiving payments from clients</P>
-                    <Button onClick={() => setIsPaymentMethodModalOpen(true)}>
-                      <Icon name="lucide:Plus" />
-                      Add First Payment Method
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paymentMethods.map(paymentMethod => (
-                      <PaymentMethodCard
-                        key={paymentMethod._id}
-                        paymentMethod={paymentMethod}
-                        onEdit={handleEditPaymentMethod}
-                        onDelete={handleDeletePaymentMethod}
-                      />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DashboardSection
+              title="Payment Methods"
+              description="Configure how you receive payments from clients"
+              icon="lucide:CreditCard"
+              iconGradient="bg-gradient-payment"
+              onAdd={() => setIsPaymentMethodModalOpen(true)}
+              addButtonText="Add Payment Method"
+              addButtonIcon="lucide:Plus"
+              addButtonGradient="bg-gradient-payment"
+              isEmpty={paymentMethods.length === 0}
+              emptyState={{
+                icon: 'lucide:CreditCard',
+                iconBg: 'bg-gradient-payment/10',
+                title: 'No payment methods yet',
+                description:
+                  'Add your first payment method to start receiving payments from clients',
+                buttonText: 'Add First Payment Method',
+              }}
+              className={isMobile ? 'border-0 shadow-none' : ''}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paymentMethods.map(paymentMethod => (
+                  <PaymentMethodCard
+                    key={paymentMethod._id}
+                    paymentMethod={paymentMethod}
+                    onEdit={handleEditPaymentMethod}
+                    onDelete={handleDeletePaymentMethod}
+                  />
+                ))}
+              </div>
+            </DashboardSection>
           </TabsContent>
 
           <TabsContent value="deleted-items">
-            <Card variant={isMobile ? 'ghost' : 'floating'}>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Icon name="lucide:RefreshCw" />
-                  <div>
-                    <H2 size="h3">Recover Deleted Items</H2>
-                    <P>
-                      Items shown here have been deleted but can be restored or permanently removed
-                    </P>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
+            <DashboardSection
+              title="Recover Deleted Items"
+              description="Items shown here have been deleted but can be restored or permanently removed"
+              icon="lucide:RefreshCw"
+              iconGradient="bg-gradient-receipt"
+              hideAddButton
+              className={isMobile ? 'border-0 shadow-none' : ''}
+            >
+              <div className="space-y-4">
                 <DeletedItemsManager
                   title="Clients"
                   items={deletedItems.clients}
@@ -332,8 +292,8 @@ export default function SettingsPage() {
                   onRestore={id => handleRestore('receipts', id)}
                   onHardDelete={id => handleHardDelete('receipts', id)}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </DashboardSection>
           </TabsContent>
         </Tabs>
       </div>

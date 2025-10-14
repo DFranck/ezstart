@@ -1,1 +1,36 @@
 @import '@ezstart/ui/styles';
+
+/* Custom Tabs Colors for Settings Page */
+.tab-trigger-company[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.675 0.151 273), oklch(0.715 0.206 298));
+  color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.tab-trigger-payment[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.805 0.175 145), oklch(0.782 0.147 166));
+  color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.tab-trigger-receipt[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.715 0.206 298), oklch(0.703 0.195 340));
+  color: white;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark mode support */
+.dark .tab-trigger-company[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.675 0.151 273), oklch(0.715 0.206 298));
+  color: white;
+}
+
+.dark .tab-trigger-payment[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.805 0.175 145), oklch(0.782 0.147 166));
+  color: white;
+}
+
+.dark .tab-trigger-receipt[data-state='active'] {
+  background: linear-gradient(to right, oklch(0.715 0.206 298), oklch(0.703 0.195 340));
+  color: white;
+}
