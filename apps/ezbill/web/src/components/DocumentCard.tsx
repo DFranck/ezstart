@@ -45,6 +45,12 @@ export function DocumentCard({
   const statusStyles = statusConfig[status] ||
     statusConfig.default || { bg: 'bg-muted', text: 'text-muted-foreground' }
 
+  const borderClasses = {
+    invoice: 'border-ezbill-invoice/20 hover:border-ezbill-invoice/40',
+    quote: 'border-ezbill-quote/20 hover:border-ezbill-quote/40',
+    receipt: 'border-ezbill-receipt/20 hover:border-ezbill-receipt/40',
+  }
+
   return (
     <div className="group relative">
       <Card
@@ -54,6 +60,7 @@ export function DocumentCard({
         onKeyDown={onKeyDown || (e => (e.key === 'Enter' || e.key === ' ') && onClick())}
         className={cn(
           'hover:shadow-xl hover:shadow-foreground/10 transition-all duration-300 outline-none cursor-pointer group-hover:-translate-y-1',
+          borderClasses[type],
           focusRingColor,
           className
         )}
