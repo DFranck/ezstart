@@ -56,10 +56,38 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   --ezstart: oklch(0.5413 0.2466 293.01);
-  --fengshui-primary: oklch(0.637 0.237 264.052); /* blue-500 #3b82f2 */
-  --fengshui-secondary: oklch(0.637 0.237 264.052); /* blue-500 #3b82f2 */
-  --fengshui-primary-dark: oklch(0.571 0.242 265.754); /* blue-600 #2563eb */
-  --fengshui-secondary-dark: oklch(0.571 0.242 265.754); /* blue-600 #2563eb */
+  --fengshui-primary: oklch(0.637 0.237 264.052);
+  --fengshui-secondary: oklch(51.714% 0.19553 262.827);
+
+  /* EZBill - Entity Colors */
+  --ezbill-client: oklch(0.7 0.15 210); /* Cyan-Blue - Friendly, professional */
+  --ezbill-client-foreground: oklch(0.25 0.08 210);
+  --ezbill-company: oklch(0.68 0.18 290); /* Purple - Corporate, premium */
+  --ezbill-company-foreground: oklch(0.22 0.09 290);
+  --ezbill-payment: oklch(0.75 0.16 150); /* Green-Emerald - Money, success */
+  --ezbill-payment-foreground: oklch(0.2 0.07 150);
+
+  /* EZBill - Document Status Colors */
+  --ezbill-invoice: oklch(0.65 0.17 240); /* Blue-Indigo - Official, trust */
+  --ezbill-invoice-foreground: oklch(0.22 0.08 240);
+  --ezbill-quote: oklch(0.7 0.17 135); /* Green - Growth, opportunity */
+  --ezbill-quote-foreground: oklch(0.2 0.08 135);
+  --ezbill-receipt: oklch(0.68 0.2 310); /* Purple-Pink - Confirmation, complete */
+  --ezbill-receipt-foreground: oklch(0.22 0.1 310);
+
+  /* EZBill - Status States */
+  --ezbill-draft: oklch(0.68 0.05 250); /* Gray-Blue - Work in progress */
+  --ezbill-draft-foreground: oklch(0.4 0.02 250);
+  --ezbill-sent: oklch(0.7 0.18 240); /* Blue - In transit */
+  --ezbill-sent-foreground: oklch(0.22 0.09 240);
+  --ezbill-paid: oklch(0.75 0.17 145); /* Green - Success, money received */
+  --ezbill-paid-foreground: oklch(0.2 0.08 145);
+  --ezbill-accepted: oklch(0.73 0.16 135); /* Green - Approved */
+  --ezbill-accepted-foreground: oklch(0.2 0.07 135);
+  --ezbill-rejected: oklch(0.65 0.22 25); /* Red - Declined */
+  --ezbill-rejected-foreground: oklch(0.22 0.11 25);
+  --ezbill-pending: oklch(0.75 0.18 80); /* Orange-Amber - Awaiting action */
+  --ezbill-pending-foreground: oklch(0.25 0.09 80);
 }
 
 .dark {
@@ -106,9 +134,37 @@
 
   --ezstart: oklch(0.5413 0.2466 293.01);
   --fengshui-primary: oklch(0.637 0.237 264.052);
-  --fengshui-secondary: oklch(0.637 0.237 264.052);
-  --fengshui-primary-dark: oklch(0.571 0.242 265.754);
-  --fengshui-secondary-dark: oklch(0.571 0.242 265.754);
+  --fengshui-secondary: oklch(52.223% 0.1119 246.835);
+
+  /* EZBill - Entity Colors (Dark Mode) */
+  --ezbill-client: oklch(0.55 0.14 210);
+  --ezbill-client-foreground: oklch(0.9 0.08 210);
+  --ezbill-company: oklch(0.58 0.16 290);
+  --ezbill-company-foreground: oklch(0.92 0.08 290);
+  --ezbill-payment: oklch(0.6 0.15 150);
+  --ezbill-payment-foreground: oklch(0.93 0.07 150);
+
+  /* EZBill - Document Status Colors (Dark Mode) */
+  --ezbill-invoice: oklch(0.55 0.15 240);
+  --ezbill-invoice-foreground: oklch(0.9 0.08 240);
+  --ezbill-quote: oklch(0.58 0.15 135);
+  --ezbill-quote-foreground: oklch(0.92 0.07 135);
+  --ezbill-receipt: oklch(0.56 0.17 310);
+  --ezbill-receipt-foreground: oklch(0.91 0.08 310);
+
+  /* EZBill - Status States (Dark Mode) */
+  --ezbill-draft: oklch(0.5 0.04 250);
+  --ezbill-draft-foreground: oklch(0.85 0.02 250);
+  --ezbill-sent: oklch(0.56 0.16 240);
+  --ezbill-sent-foreground: oklch(0.92 0.08 240);
+  --ezbill-paid: oklch(0.6 0.15 145);
+  --ezbill-paid-foreground: oklch(0.93 0.07 145);
+  --ezbill-accepted: oklch(0.58 0.14 135);
+  --ezbill-accepted-foreground: oklch(0.92 0.06 135);
+  --ezbill-rejected: oklch(0.52 0.19 25);
+  --ezbill-rejected-foreground: oklch(0.88 0.09 25);
+  --ezbill-pending: oklch(0.6 0.16 80);
+  --ezbill-pending-foreground: oklch(0.94 0.08 80);
 }
 
 @theme inline {
@@ -160,8 +216,32 @@
   --color-ezstart: var(--ezstart);
   --color-fengshui-primary: var(--fengshui-primary);
   --color-fengshui-secondary: var(--fengshui-secondary);
-  --color-fengshui-primary-dark: var(--fengshui-primary-dark);
-  --color-fengshui-secondary-dark: var(--fengshui-secondary-dark);
+
+  /* EZBill Color Tokens */
+  --color-ezbill-client: var(--ezbill-client);
+  --color-ezbill-client-foreground: var(--ezbill-client-foreground);
+  --color-ezbill-company: var(--ezbill-company);
+  --color-ezbill-company-foreground: var(--ezbill-company-foreground);
+  --color-ezbill-payment: var(--ezbill-payment);
+  --color-ezbill-payment-foreground: var(--ezbill-payment-foreground);
+  --color-ezbill-invoice: var(--ezbill-invoice);
+  --color-ezbill-invoice-foreground: var(--ezbill-invoice-foreground);
+  --color-ezbill-quote: var(--ezbill-quote);
+  --color-ezbill-quote-foreground: var(--ezbill-quote-foreground);
+  --color-ezbill-receipt: var(--ezbill-receipt);
+  --color-ezbill-receipt-foreground: var(--ezbill-receipt-foreground);
+  --color-ezbill-draft: var(--ezbill-draft);
+  --color-ezbill-draft-foreground: var(--ezbill-draft-foreground);
+  --color-ezbill-sent: var(--ezbill-sent);
+  --color-ezbill-sent-foreground: var(--ezbill-sent-foreground);
+  --color-ezbill-paid: var(--ezbill-paid);
+  --color-ezbill-paid-foreground: var(--ezbill-paid-foreground);
+  --color-ezbill-accepted: var(--ezbill-accepted);
+  --color-ezbill-accepted-foreground: var(--ezbill-accepted-foreground);
+  --color-ezbill-rejected: var(--ezbill-rejected);
+  --color-ezbill-rejected-foreground: var(--ezbill-rejected-foreground);
+  --color-ezbill-pending: var(--ezbill-pending);
+  --color-ezbill-pending-foreground: var(--ezbill-pending-foreground);
 }
 
 @layer base {
