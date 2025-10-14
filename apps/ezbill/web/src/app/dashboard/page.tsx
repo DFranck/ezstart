@@ -3,12 +3,10 @@
 import { ClientModal } from '@/components/client-modal'
 import ClientCard from '@/components/ClientCard_v2'
 import { CompanyModal } from '@/components/company-modal'
-import CompanyCard from '@/components/CompanyCard_v2'
 import DashboardSection from '@/components/DashboardSection'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import FirstActionCard from '@/components/FirstActionCard'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
-import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import StatsCard from '@/components/StatsCard'
 import { useBillingContext } from '@/contexts/billing-context'
 import { getUserId } from '@/utils/get-user-id'
@@ -23,8 +21,16 @@ import { toast } from 'sonner'
 const DashboardPage = () => {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
-  const { clients, companies, paymentMethods, invoices, quotes, refetchAll, loading } =
-    useBillingContext()
+  const {
+    clients,
+    companies,
+    paymentMethods,
+    invoices,
+    quotes,
+    receipts,
+    refetchAll,
+    loading,
+  } = useBillingContext()
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
@@ -50,6 +56,7 @@ const DashboardPage = () => {
   // Calculate global stats
   const allInvoices = invoices || []
   const allQuotes = quotes || []
+  const allReceipts = receipts || []
 
   const totalRevenue = allInvoices
     .filter(invoice => invoice.status === 'paid')
@@ -58,6 +65,26 @@ const DashboardPage = () => {
   const pendingAmount = allInvoices
     .filter(invoice => invoice.status === 'sent' || invoice.status === 'draft')
     .reduce((sum, invoice) => sum + (invoice.total || 0), 0)
+
+  // Sort clients by latest activity
+  const getClientLatestActivity = (clientId: string): Date => {
+    const clientInvoices = allInvoices.filter(inv => inv.clientId === clientId)
+    const clientQuotes = allQuotes.filter(q => q.clientId === clientId)
+    const clientReceipts = allReceipts.filter(r => r.clientId === clientId)
+
+    const dates = [
+      ...clientInvoices.map(inv => new Date(inv.updatedAt || inv.createdAt)),
+      ...clientQuotes.map(q => new Date(q.updatedAt || q.createdAt)),
+      ...clientReceipts.map(r => new Date(r.updatedAt || r.createdAt)),
+    ]
+
+    // Return most recent date or epoch if no activity
+    return dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date(0)
+  }
+
+  const sortedClients = [...(clients || [])].sort((a, b) => {
+    return getClientLatestActivity(b._id).getTime() - getClientLatestActivity(a._id).getTime()
+  })
 
   const handleEditCompany = (company: Company) => {
     setEditingCompany(company)
@@ -237,7 +264,7 @@ const DashboardPage = () => {
           }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {clients?.map(client => (
+            {sortedClients.map(client => (
               <ClientCard
                 key={client._id}
                 client={client}
@@ -248,69 +275,6 @@ const DashboardPage = () => {
             ))}
           </div>
         </DashboardSection>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {/* Companies Section */}
-          <DashboardSection
-            title="Companies"
-            description="Add your business info"
-            icon="lucide:Building2"
-            iconGradient="bg-gradient-to-r from-indigo-500 to-purple-500"
-            onAdd={() => setIsCompanyModalOpen(true)}
-            addButtonText="Add Company"
-            addButtonIcon="lucide:Plus"
-            addButtonGradient="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-            isEmpty={!hasCompanies}
-            emptyState={{
-              icon: 'lucide:Building2',
-              iconBg: 'bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-500',
-              title: 'No companies yet',
-              description: 'Create your first company to start professional billing',
-              buttonText: 'Create First Company',
-            }}
-          >
-            <div className="grid grid-cols-1  gap-4 sm:gap-6">
-              {companies.map(company => (
-                <CompanyCard
-                  key={company._id}
-                  company={company}
-                  onEdit={handleEditCompany}
-                  onDelete={handleDeleteCompany}
-                />
-              ))}
-            </div>
-          </DashboardSection>
-
-          {/* Payment Methods Section */}
-          <DashboardSection
-            title="Payment Methods"
-            description="Configure how you receive payments"
-            icon="lucide:CreditCard"
-            iconGradient="bg-gradient-to-r from-green-500 to-emerald-500"
-            onAdd={() => setIsPaymentMethodModalOpen(true)}
-            addButtonText="Add Payment Method"
-            addButtonIcon="lucide:Plus"
-            addButtonGradient="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-            isEmpty={paymentMethods.length === 0}
-            emptyState={{
-              icon: 'lucide:CreditCard',
-              iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-500',
-              title: 'No payment methods yet',
-              description: 'Add your first payment method to start receiving payments from clients',
-              buttonText: 'Add First Payment Method',
-            }}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2  gap-4 sm:gap-6">
-              {paymentMethods.map(paymentMethod => (
-                <PaymentMethodCard
-                  key={paymentMethod._id}
-                  paymentMethod={paymentMethod}
-                  onEdit={handleEditPaymentMethod}
-                  onDelete={handleDeletePaymentMethod}
-                />
-              ))}
-            </div>
-          </DashboardSection>
-        </div>
       </div>
 
       {/* Modals */}
