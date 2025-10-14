@@ -222,6 +222,9 @@ import { Carousel, CarouselContent, CarouselItem } from '@ezstart/ui/components'
 ```
 
 #### Icon System
+
+**⚡ Performance Optimized** - Global cache prevents icon re-imports for instant loading
+
 ```tsx
 import { Icon } from '@ezstart/ui/components'
 
@@ -235,6 +238,13 @@ import { Icon } from '@ezstart/ui/components'
 {/* Custom icons */}
 <Icon name="custom:ezstart" size={32} />
 ```
+
+**Features:**
+- ⚡ **Global Cache** - Icons loaded once, cached forever during the session
+- 🔄 **Smart Loading** - Prevents duplicate imports with promise deduplication
+- 🎨 **Multiple Libraries** - Support for Lucide, FontAwesome, and custom icons
+- 📦 **Tree Shaking** - Only loads icons you actually use
+- 💾 **Zero Re-renders** - Cached icons load instantly when switching tabs/routes
 
 **19+ Custom Icons Available:**
 `ezstart`, `ezauth`, `email`, `password`, `google`, `facebook`, `linkedin`, `github`, `discord`, `youtube`, `twitter`, `instagram`, `monitor`, `laptop`, `tablet`, `mobile`, `check-circle`, `x-circle`, `info-circle`

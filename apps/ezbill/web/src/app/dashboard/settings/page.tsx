@@ -1,13 +1,40 @@
 'use client'
 
-import { Client, Company, Invoice, Quote, Receipt } from '@ezbill/types'
-import { Icon, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
+import { CompanyModal } from '@/components/company-modal'
+import CompanyCard from '@/components/CompanyCard_v2'
+import { PaymentMethodModal } from '@/components/payment-method-modal'
+import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
+import { useBillingContext } from '@/contexts/billing-context'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  H2,
+  H3,
+  Icon,
+  P,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@ezstart/ui/components'
+import { useDevice } from '@ezstart/ui/hooks'
 import { callApi } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { getUserId } from '../../../utils/get-user-id'
 import { DeletedItemsManager } from './components/deleted-items-manager'
 
 export default function SettingsPage() {
+  const { companies, paymentMethods, refetchAll } = useBillingContext()
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
+  const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
+  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
+  const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(
+    undefined
+  )
   const [deletedItems, setDeletedItems] = useState({
     clients: [] as Client[],
     companies: [] as Company[],
@@ -16,7 +43,7 @@ export default function SettingsPage() {
     receipts: [] as Receipt[],
   })
   const [loading, setLoading] = useState(true)
-
+  const { isMobile } = useDevice()
   const loadDeletedItems = async () => {
     try {
       setLoading(true)
@@ -71,15 +98,60 @@ export default function SettingsPage() {
     }
   }
 
+  const handleEditCompany = (company: Company) => {
+    setEditingCompany(company)
+    setIsCompanyModalOpen(true)
+  }
+
+  const handleCompanyModalClose = () => {
+    setIsCompanyModalOpen(false)
+    setEditingCompany(undefined)
+  }
+
+  const handleDeleteCompany = async (company: Company) => {
+    try {
+      await callApi(`/companies/${company._id}`, {
+        method: 'DELETE',
+        userId: getUserId(),
+      })
+      toast.success(`${company.companyName} deleted successfully`)
+      refetchAll()
+    } catch (error) {
+      console.error('Error deleting company:', error)
+      toast.error(`Failed to delete ${company.companyName}. Please try again.`)
+    }
+  }
+
+  const handleEditPaymentMethod = (paymentMethod: PaymentMethod) => {
+    setEditingPaymentMethod(paymentMethod)
+    setIsPaymentMethodModalOpen(true)
+  }
+
+  const handlePaymentMethodModalClose = () => {
+    setIsPaymentMethodModalOpen(false)
+    setEditingPaymentMethod(undefined)
+  }
+
+  const handleDeletePaymentMethod = async (paymentMethod: PaymentMethod) => {
+    try {
+      await callApi(`/payment-methods/${paymentMethod._id}`, {
+        method: 'DELETE',
+        userId: getUserId(),
+      })
+      toast.success(`${paymentMethod.name} deleted successfully`)
+      refetchAll()
+    } catch (error) {
+      console.error('Error deleting payment method:', error)
+      toast.error(`Failed to delete ${paymentMethod.name}. Please try again.`)
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center w-full">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-full opacity-20 animate-pulse"></div>
-          </div>
-          <p className="text-gray-600 font-medium">Loading settings...</p>
+      <div className="flex flex-1 items-center justify-center py-12">
+        <div className="flex flex-col items-center gap-4">
+          <Icon name="lucide:Loader2" className="animate-spin" />
+          <P>Loading settings...</P>
         </div>
       </div>
     )
@@ -88,79 +160,129 @@ export default function SettingsPage() {
   const totalDeleted = Object.values(deletedItems).reduce((sum, items) => sum + items.length, 0)
 
   return (
-    <div className="min-h-screen  w-full">
-      {/* Header with glass effect */}
-      <div className="backdrop-blur-sm bg-white/70 border-b border-white/20 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
-                Settings
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Manage your account settings and recover deleted items
-              </p>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="hidden lg:flex items-center space-x-6">
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <Icon name="lucide:Trash2" className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{totalDeleted}</p>
-                    <p className="text-sm text-gray-500">Deleted Items</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="deleted-items" className="space-y-8">
-          <TabsList className="bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg">
-            <TabsTrigger
-              value="deleted-items"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
-            >
-              <Icon name="lucide:Trash2" className="w-4 h-4 mr-2" />
-              Deleted Items{' '}
-              {totalDeleted > 0 && (
-                <span className="ml-2 px-2 py-1 bg-red-500/20 text-red-700 rounded-full text-xs font-medium">
-                  ({totalDeleted})
-                </span>
-              )}
+    <div className="max-w-7xl w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      <div>
+        <Tabs defaultValue="business" className="space-y-8">
+          <TabsList>
+            <TabsTrigger value="business">
+              <Icon name="lucide:Building2" />
+              Your Business
             </TabsTrigger>
-            <TabsTrigger
-              value="account"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
-            >
-              <Icon name="lucide:User" className="w-4 h-4 mr-2" />
-              Account
+            <TabsTrigger value="payment-methods">
+              <Icon name="lucide:CreditCard" />
+              Payment Methods
+            </TabsTrigger>
+            <TabsTrigger value="deleted-items">
+              <Icon name="lucide:Trash2" />
+              Deleted Items {totalDeleted > 0 && <span className="ml-2">({totalDeleted})</span>}
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="deleted-items" className="space-y-8">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <Icon name="lucide:RefreshCw" className="w-5 h-5 text-white" />
+          <TabsContent value="business">
+            <Card variant={isMobile ? 'ghost' : 'floating'}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Icon name="lucide:Building2" />
+                    <div>
+                      <H2 size="h3">Your Business</H2>
+                      <P>Configure your business information for invoices and quotes</P>
+                    </div>
                   </div>
+                  <Button onClick={() => setIsCompanyModalOpen(true)}>
+                    <Icon name="lucide:Plus" />
+                    Add Company
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                {companies.length === 0 ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <Icon name="lucide:Building2" />
+                    <H3 size="h4">No companies yet</H3>
+                    <P>Add your business information to appear on invoices and quotes</P>
+                    <Button onClick={() => setIsCompanyModalOpen(true)}>
+                      <Icon name="lucide:Plus" />
+                      Add Your Business
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {companies.map(company => (
+                      <CompanyCard
+                        key={company._id}
+                        company={company}
+                        onEdit={handleEditCompany}
+                        onDelete={handleDeleteCompany}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="payment-methods">
+            <Card variant={isMobile ? 'ghost' : 'floating'}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Icon name="lucide:CreditCard" />
+                    <div>
+                      <H2 size="h3">Payment Methods</H2>
+                      <P>Configure how you receive payments from clients</P>
+                    </div>
+                  </div>
+                  <Button onClick={() => setIsPaymentMethodModalOpen(true)}>
+                    <Icon name="lucide:Plus" />
+                    Add Payment Method
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                {paymentMethods.length === 0 ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <Icon name="lucide:CreditCard" />
+                    <H3 size="h4">No payment methods yet</H3>
+                    <P>Add your first payment method to start receiving payments from clients</P>
+                    <Button onClick={() => setIsPaymentMethodModalOpen(true)}>
+                      <Icon name="lucide:Plus" />
+                      Add First Payment Method
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {paymentMethods.map(paymentMethod => (
+                      <PaymentMethodCard
+                        key={paymentMethod._id}
+                        paymentMethod={paymentMethod}
+                        onEdit={handleEditPaymentMethod}
+                        onDelete={handleDeletePaymentMethod}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="deleted-items">
+            <Card variant={isMobile ? 'ghost' : 'floating'}>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Icon name="lucide:RefreshCw" />
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Recover Deleted Items</h2>
-                    <p className="text-sm text-gray-500">
+                    <H2 size="h3">Recover Deleted Items</H2>
+                    <P>
                       Items shown here have been deleted but can be restored or permanently removed
-                    </p>
+                    </P>
                   </div>
                 </div>
-              </div>
+              </CardHeader>
 
-              <div className="p-6 space-y-6">
+              <CardContent className="space-y-4">
                 <DeletedItemsManager
                   title="Clients"
                   items={deletedItems.clients}
@@ -210,41 +332,26 @@ export default function SettingsPage() {
                   onRestore={id => handleRestore('receipts', id)}
                   onHardDelete={id => handleHardDelete('receipts', id)}
                 />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="account" className="space-y-8">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                    <Icon name="lucide:User" className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
-                    <p className="text-sm text-gray-500">
-                      Manage your account preferences and security
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <Icon name="lucide:Settings" className="w-10 h-10 text-indigo-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Coming Soon</h3>
-                  <p className="text-gray-500 mb-6">
-                    Account management features are being developed and will be available soon
-                  </p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modals */}
+      <CompanyModal
+        isOpen={isCompanyModalOpen}
+        onClose={handleCompanyModalClose}
+        company={editingCompany}
+        onSave={refetchAll}
+      />
+
+      <PaymentMethodModal
+        isOpen={isPaymentMethodModalOpen}
+        onClose={handlePaymentMethodModalClose}
+        paymentMethod={editingPaymentMethod}
+        onSave={refetchAll}
+      />
     </div>
   )
 }

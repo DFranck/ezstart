@@ -18,6 +18,7 @@ import { Main } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 const DashboardPage = () => {
   const router = useRouter()
@@ -107,6 +108,13 @@ const DashboardPage = () => {
   const confirmDelete = async () => {
     if (!deleteDialog.item) return
 
+    const itemName =
+      deleteDialog.type === 'company'
+        ? (deleteDialog.item as Company).companyName
+        : deleteDialog.type === 'client'
+          ? (deleteDialog.item as Client).clientName
+          : (deleteDialog.item as PaymentMethod).name
+
     try {
       if (deleteDialog.type === 'company') {
         await callApi(`/companies/${deleteDialog.item._id}`, {
@@ -124,9 +132,11 @@ const DashboardPage = () => {
           userId: getUserId(),
         })
       }
+      toast.success(`${itemName} deleted successfully`)
       refetchAll()
     } catch (error) {
       console.error(`Error deleting ${deleteDialog.type}:`, error)
+      toast.error(`Failed to delete ${itemName}. Please try again.`)
     }
   }
 
@@ -135,10 +145,10 @@ const DashboardPage = () => {
       <Main>
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-full opacity-20 animate-pulse"></div>
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-full opacity-20 animate-pulse"></div>
           </div>
-          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
+          <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
         </div>
       </Main>
     )
@@ -166,25 +176,23 @@ const DashboardPage = () => {
             value={allInvoices.length.toString()}
             icon="lucide:FileEdit"
             iconGradient="bg-gradient-to-r from-blue-400 to-indigo-400"
-            className="hidden"
           />
           <StatsCard
             title="Quotes"
             value={allQuotes.length.toString()}
             icon="lucide:FileText"
             iconGradient="bg-gradient-to-r from-purple-400 to-pink-400"
-            className="hidden"
           />
         </div>
-        {/* Quick Actions - Only show when no data exists */}
-        {hasCompanies || hasClients || paymentMethods.length > 0 ? null : (
-          <div className="flex gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Quick Actions - Only show when missing data */}
+        {(!hasCompanies || !hasClients || paymentMethods.length === 0) && (
+          <div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
             {!hasCompanies && (
               <FirstActionCard
                 title="Create Company"
-                description=" Set up your business profile and billing information"
+                description="Set up your business profile and billing information"
                 setter={setIsCompanyModalOpen}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white "
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
                 descriptionClassName="text-indigo-100"
               />
             )}
@@ -194,7 +202,7 @@ const DashboardPage = () => {
                 title="Create Client"
                 description="Add clients to start creating invoices and quotes"
                 setter={setIsClientModalOpen}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white "
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                 descriptionClassName="text-cyan-100"
               />
             )}
@@ -202,8 +210,8 @@ const DashboardPage = () => {
               <FirstActionCard
                 title="Add Payment Method"
                 description="Configure how you receive payments from clients"
-                setter={setIsClientModalOpen}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white "
+                setter={setIsPaymentMethodModalOpen}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
                 descriptionClassName="text-emerald-100"
               />
             )}
@@ -211,7 +219,7 @@ const DashboardPage = () => {
         )}
         {/* Clients Section */}
         <DashboardSection
-          title="Your Clients"
+          title="Clients"
           description="Click on a client to manage their billing"
           icon="lucide:Users"
           iconGradient="bg-gradient-to-r from-cyan-500 to-blue-500"
@@ -243,8 +251,8 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Companies Section */}
           <DashboardSection
-            title="Your Companies"
-            description="Manage your business entities"
+            title="Companies"
+            description="Add your business info"
             icon="lucide:Building2"
             iconGradient="bg-gradient-to-r from-indigo-500 to-purple-500"
             onAdd={() => setIsCompanyModalOpen(true)}
@@ -274,7 +282,7 @@ const DashboardPage = () => {
 
           {/* Payment Methods Section */}
           <DashboardSection
-            title="Your Payment Methods"
+            title="Payment Methods"
             description="Configure how you receive payments"
             icon="lucide:CreditCard"
             iconGradient="bg-gradient-to-r from-green-500 to-emerald-500"

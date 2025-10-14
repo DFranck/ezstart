@@ -102,11 +102,84 @@ Si tu reprends une session avec des processus déjà en cours :
 
 ### Bonnes Pratiques UI/UX
 
-- **JAMAIS** utiliser des balises HTML natives (`<input>`, `<button>`, `<label>`)
-- **TOUJOURS** utiliser les composants du package `@ezstart/ui/components` (Input, Button, Label, Card, etc.)
-- **JAMAIS** utiliser des couleurs hardcodées (`bg-red-50`, `text-gray-600`)
-- **TOUJOURS** utiliser des classes sémantiques (`bg-destructive/15`, `text-muted-foreground`, `text-primary`)
-- **TOUJOURS** laisser les composants gérer leurs propres styles et couleurs
+#### Composants UI (PRIORITÉ ABSOLUE)
+
+- **JAMAIS** utiliser des balises HTML natives (`<div>`, `<button>`, `<input>`, `<label>`, `<h1>`, `<p>`)
+- **TOUJOURS** utiliser les composants du package `@ezstart/ui/components` en premier
+
+**Exemples de composants à utiliser :**
+
+```tsx
+// ❌ JAMAIS faire ça
+<div className="bg-white rounded-lg shadow p-6">
+  <h2>Title</h2>
+  <p>Description</p>
+  <button onClick={...}>Click</button>
+</div>
+
+// ✅ TOUJOURS faire ça
+<Card variant="floating">
+  <CardHeader>
+    <H2 size="h3">Title</H2>
+    <P>Description</P>
+  </CardHeader>
+  <CardContent>
+    <Button onClick={...}>Click</Button>
+  </CardContent>
+</Card>
+```
+
+**Liste des composants disponibles :**
+- **Layout** : `Card`, `CardHeader`, `CardContent`, `CardFooter`, `Main`, `Header`, `Footer`
+- **Typography** : `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Label`
+- **Form** : `Button`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`
+- **Navigation** : `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
+- **Feedback** : `Alert`, `Badge`, `Toast` (via sonner)
+- **Utility** : `Icon`, `Separator`, `Skeleton`
+
+#### Couleurs Sémantiques (OBLIGATOIRE)
+
+- **JAMAIS** utiliser des couleurs hardcodées (`bg-red-50`, `text-gray-600`, `border-blue-500`)
+- **TOUJOURS** utiliser des classes sémantiques qui s'adaptent au dark mode
+
+**Classes sémantiques :**
+```tsx
+// ❌ Couleurs hardcodées
+className="bg-gray-100 text-gray-900 border-gray-200"
+
+// ✅ Classes sémantiques
+className="bg-card text-foreground border"
+
+// ❌ Couleurs de marque hardcodées
+className="bg-indigo-500 text-white"
+
+// ✅ Classes de marque sémantiques
+className="bg-primary text-primary-foreground"
+```
+
+**Palette sémantique complète :**
+- **Background** : `bg-background`, `bg-card`, `bg-muted`, `bg-popover`
+- **Text** : `text-foreground`, `text-muted-foreground`, `text-card-foreground`
+- **Primary** : `bg-primary`, `text-primary`, `text-primary-foreground`
+- **Destructive** : `bg-destructive`, `text-destructive`, `text-destructive-foreground`
+- **Border** : `border` (utilise la couleur border par défaut)
+- **Accent** : `bg-accent`, `text-accent-foreground`
+
+#### Props des Composants
+
+- **TOUJOURS** utiliser les props `variant` et `size` quand disponibles
+- **TOUJOURS** laisser les composants gérer leurs propres styles
+
+```tsx
+// ✅ Utiliser les variants
+<Card variant="floating" />     // ou "default", "ghost", "elevated", "premium"
+<Button variant="destructive" /> // ou "default", "outline", "ghost", "link"
+<H2 size="h3" />                // Rendu h2 avec style h3
+
+// ✅ Utiliser les sizes
+<Button size="sm" />            // ou "default", "lg", "icon"
+<Icon className="w-4 h-4" />   // Tailles cohérentes
+```
 
 ### Structure Monorepo
 
