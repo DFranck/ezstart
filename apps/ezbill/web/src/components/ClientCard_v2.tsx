@@ -25,7 +25,11 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
       <Card
         onClick={() => onClick(client)}
         className={cn(
-          'hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-cyan-200 group-hover:-translate-y-1',
+          `hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 group-hover:-translate-y-1 ${
+            client.isCompany
+              ? 'border-ezbill-company/20 hover:border-ezbill-company/40'
+              : 'border-ezbill-client/20 hover:border-ezbill-client/40'
+          }`,
           className
         )}
       >

@@ -14,7 +14,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
     <div key={paymentMethod._id} className="group relative">
       <Card
         className={cn(
-          'hover:shadow-xl cursor-pointer transition-all duration-300 border-ezbill-payment/20 hover:border-ezbill-payment/40 group-hover:-translate-y-1',
+          'hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 border-ezbill-payment/20 hover:border-ezbill-payment/40 group-hover:-translate-y-1',
           className
         )}
         onClick={() => onEdit(paymentMethod)}

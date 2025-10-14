@@ -14,7 +14,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
     <div key={company._id} className="group relative">
       <Card
         className={cn(
-          'hover:shadow-xl cursor-pointer transition-all duration-300 hover:border-indigo-200 group-hover:-translate-y-1',
+          'hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 border-ezbill-company/20 hover:border-ezbill-company/40 group-hover:-translate-y-1',
           className
         )}
         onClick={() => onEdit(company)}
