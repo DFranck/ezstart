@@ -143,6 +143,8 @@ export function Stepper({
       if (step && onStepChange) {
         onStepChange(stepIndex, step.id)
       }
+      // Scroll to top smoothly when navigating between steps
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -155,6 +157,8 @@ export function Stepper({
       // Dernière étape, marquer comme complétée et appeler onComplete
       setCompletedSteps(prev => new Set([...prev, currentStep]))
       onComplete?.(stepData)
+      // Scroll to top on completion
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
