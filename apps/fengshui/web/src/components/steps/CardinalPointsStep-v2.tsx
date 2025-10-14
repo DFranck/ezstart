@@ -4,16 +4,18 @@
 import { THEME_COLORS } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import {
-  Button,
   Card,
   CardContent,
   CardHeader,
   Div,
   H2,
   Icon,
-  Label,
   P,
   StepContent,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
   useStepper,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
@@ -83,15 +85,15 @@ const CardinalWheel = ({
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault()
     setIsDragging(true)
-    const clientX = 'touches' in e ? e.touches[0]?.clientX ?? 0 : e.clientX
-    const clientY = 'touches' in e ? e.touches[0]?.clientY ?? 0 : e.clientY
+    const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? 0) : e.clientX
+    const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? 0) : e.clientY
     dragStartAngleRef.current = calculateAngle(clientX, clientY) - currentRotation
   }
 
   const handleDragMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return
-    const clientX = 'touches' in e ? e.touches[0]?.clientX ?? 0 : e.clientX
-    const clientY = 'touches' in e ? e.touches[0]?.clientY ?? 0 : e.clientY
+    const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? 0) : e.clientX
+    const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? 0) : e.clientY
     const currentAngle = calculateAngle(clientX, clientY)
     const newRotation = currentAngle - dragStartAngleRef.current
     handleRotate(newRotation)
@@ -141,8 +143,22 @@ const CardinalWheel = ({
           <Div className="min-w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
             <Icon name="lucide:Upload" size={16} className=" bg-foreground text-background" />
           </Div>
-          <H2 size={'h5'} className="text-left">
+          <H2 size={'h5'} className="text-left flex items-center gap-2">
             {t('cardinal.title')}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors">
+                    <Icon name="lucide:Info" size={14} className="text-primary" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <P variant={'description'} className="text-xs">
+                    {t('cardinal.tooltipHelp')}
+                  </P>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </H2>
         </CardHeader>
         <CardContent className="">
@@ -153,7 +169,7 @@ const CardinalWheel = ({
         </CardContent>
       </Card>
       {/* Contrôles */}
-      <div className="flex items-center justify-center space-x-2 mb-4">
+      {/* <div className="flex items-center justify-center space-x-2 mb-4">
         <Div layout={'center'}>
           <Label htmlFor="-rotate-45">45°</Label>
           <Button id="-rotate-45" onClick={() => handleRotate(currentRotation - 45)} size="sm">
@@ -193,11 +209,11 @@ const CardinalWheel = ({
             <Icon name="lucide:RotateCw" className="w-4 h-4" />
           </Button>
         </Div>
-      </div>
+      </div> */}
 
       {/* Roue */}
       <div className="relative flex justify-center items-center ">
-        <div ref={wrapperRef} className="relative w-full h-72 md:h-[700px]">
+        <div ref={wrapperRef} className="relative w-full h-72 md:h-[550px]">
           {/* Plan centré */}
           <div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <img

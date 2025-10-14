@@ -189,6 +189,7 @@
     "title": "Étape 2 : Points Cardinaux",
     "description": "Alignez le Nord de la boussole avec le Nord de votre plan. Utilisez les contrôles pour faire tourner l'orientation.",
     "dragHint": "Faites glisser n'importe quel point cardinal pour pivoter",
+    "tooltipHelp": "Utilisez votre boussole pour identifier le Nord de votre logement. Vous pouvez aussi utiliser Google Maps si vous n'êtes pas sur place. L'orientation du Nord est déterminante dans le positionnement et l'analyse des secteurs.",
     "error": "Erreur",
     "noFile": "Aucun plan n'a été uploadé. Veuillez retourner à l'étape 1 pour uploader un plan.",
     "yourPlan": "Votre Plan",
