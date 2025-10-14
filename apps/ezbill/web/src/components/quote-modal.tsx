@@ -144,7 +144,7 @@ export function QuoteModal({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="bg-white/60 backdrop-blur-sm border-white/30  hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+              className="bg-card border  hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Icon name="lucide:X" className="w-4 h-4 mr-2" />
               Cancel
@@ -177,12 +177,12 @@ export function QuoteModal({
                   onValueChange={value => setFormData({ ...formData, clientId: value })}
                   required
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {clients.map(client => (
-                      <SelectItem key={client._id} value={client._id} className="hover:bg-amber-50">
+                      <SelectItem key={client._id} value={client._id} className="hover:bg-warning/5">
                         <div className="flex items-center">
                           <Icon name="lucide:User" className="w-4 h-4 mr-2 text-amber-500" />
                           {client.clientName}
@@ -205,18 +205,18 @@ export function QuoteModal({
                   setFormData({ ...formData, companyId: value === 'personal' ? '' : value })
                 }
               >
-                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                   <SelectValue placeholder="Select billing entity" />
                 </SelectTrigger>
-                <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
-                  <SelectItem value="personal" className="hover:bg-amber-50">
+                <SelectContent className="bg-popover border shadow-xl rounded-xl">
+                  <SelectItem value="personal" className="hover:bg-warning/5">
                     <div className="flex items-center">
                       <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
                       Personal (your name)
                     </div>
                   </SelectItem>
                   {companies?.map(company => (
-                    <SelectItem key={company._id} value={company._id} className="hover:bg-amber-50">
+                    <SelectItem key={company._id} value={company._id} className="hover:bg-warning/5">
                       <div className="flex items-center">
                         <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-accent" />
                         {company.companyName}
@@ -236,12 +236,12 @@ export function QuoteModal({
                 value={formData.currency}
                 onValueChange={(value: Currency) => setFormData({ ...formData, currency: value })}
               >
-                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                <SelectContent className="bg-popover border shadow-xl rounded-xl">
                   {currencies.map(({ value, label }) => (
-                    <SelectItem key={value} value={value} className="hover:bg-amber-50">
+                    <SelectItem key={value} value={value} className="hover:bg-warning/5">
                       <div className="flex items-center">
                         <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                         {label}
@@ -265,7 +265,7 @@ export function QuoteModal({
                   type="date"
                   value={formData.validUntil}
                   onChange={e => setFormData({ ...formData, validUntil: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                 />
               </div>
             </div>
@@ -284,7 +284,7 @@ export function QuoteModal({
                         setFormData({ ...formData, taxRate: 0 })
                       }
                     }}
-                    className="border-amber-300 text-amber-600 focus:ring-amber-500"
+                    className="border-warning/50 text-amber-600 focus:ring-amber-500"
                   />
                   <Label
                     htmlFor="showTaxes"
@@ -309,7 +309,7 @@ export function QuoteModal({
                       onChange={e =>
                         setFormData({ ...formData, taxRate: parseFloat(e.target.value) || 0 })
                       }
-                      className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                     />
                   </div>
                 )}
@@ -322,10 +322,10 @@ export function QuoteModal({
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-warning" />
               <H3 className="text-xl font-bold ">Line Items</H3>
             </div>
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/30 overflow-hidden">
+            <div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+                  <TableRow className="bg-gradient-to-r from-warning/10 to-warning/5">
                     <TableHead className="font-semibold ">
                       <div className="flex items-center">
                         <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
@@ -349,14 +349,14 @@ export function QuoteModal({
                 </TableHeader>
                 <TableBody>
                   {formData.items.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-amber-50/50">
+                    <TableRow key={index} className="hover:bg-warning/5">
                       <TableCell className="p-3">
                         <Input
                           placeholder="Description"
                           value={item.label}
                           onChange={e => updateLineItem(index, 'label', e.target.value)}
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -369,7 +369,7 @@ export function QuoteModal({
                             updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)
                           }
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -383,7 +383,7 @@ export function QuoteModal({
                             updateLineItem(index, 'price', parseFloat(e.target.value) || 0)
                           }
                           required
-                          className="bg-white/80 backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -391,7 +391,7 @@ export function QuoteModal({
                           type="button"
                           variant="outline"
                           onClick={() => removeLineItem(index)}
-                          className="w-8 h-8 p-0 bg-white/60 border-red-200 text-destructive hover:bg-red-50 hover:border-red-300 rounded-lg transition-all"
+                          className="w-8 h-8 p-0 bg-card border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 rounded-lg transition-all"
                           disabled={formData.items.length === 1}
                         >
                           <Icon name="lucide:X" className="w-4 h-4" />
@@ -406,7 +406,7 @@ export function QuoteModal({
               type="button"
               variant="outline"
               onClick={addLineItem}
-              className="mt-4 bg-white/60 backdrop-blur-sm border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 px-4 py-2 rounded-xl transition-all duration-200"
+              className="mt-4 bg-card border-warning/30 text-amber-600 hover:bg-warning/5 hover:border-warning/50 px-4 py-2 rounded-xl transition-all duration-200"
             >
               <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
               Add Line Item
@@ -450,7 +450,7 @@ export function QuoteModal({
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
               placeholder="Additional notes for this quote..."
             />
           </div>
@@ -464,7 +464,7 @@ export function QuoteModal({
               value={formData.terms}
               onChange={e => setFormData({ ...formData, terms: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
               placeholder="Quote terms and conditions..."
             />
           </div>

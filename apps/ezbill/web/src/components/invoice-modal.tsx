@@ -186,7 +186,7 @@ export function InvoiceModal({
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="bg-white/60 backdrop-blur-sm border-white/30  hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+            className="bg-card border  hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
             Cancel
@@ -218,10 +218,10 @@ export function InvoiceModal({
                   onValueChange={value => setFormData({ ...formData, clientId: value })}
                   required
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {clients.map(client => (
                       <SelectItem
                         key={client._id}
@@ -250,10 +250,10 @@ export function InvoiceModal({
                   setFormData({ ...formData, companyId: value === 'personal' ? '' : value })
                 }
               >
-                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
                   <SelectValue placeholder="Select billing entity" />
                 </SelectTrigger>
-                <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                <SelectContent className="bg-popover border shadow-xl rounded-xl">
                   <SelectItem value="personal" className="hover:bg-primary/5">
                     <div className="flex items-center">
                       <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
@@ -286,10 +286,10 @@ export function InvoiceModal({
                   value={formData.paymentMethodId || ''}
                   onValueChange={value => setFormData({ ...formData, paymentMethodId: value })}
                 >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
                     <SelectValue placeholder="Select payment method" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {paymentMethods.map(method => (
                       <SelectItem
                         key={method._id}
@@ -350,10 +350,10 @@ export function InvoiceModal({
                 value={formData.currency}
                 onValueChange={(value: Currency) => setFormData({ ...formData, currency: value })}
               >
-                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
+                <SelectContent className="bg-popover border shadow-xl rounded-xl">
                   {currencies.map(({ value, label }) => (
                     <SelectItem key={value} value={value} className="hover:bg-primary/5">
                       <div className="flex items-center">
@@ -379,7 +379,7 @@ export function InvoiceModal({
                   type="date"
                   value={formData.dueDate}
                   onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 />
               </div>
             </div>
@@ -426,7 +426,7 @@ export function InvoiceModal({
                           taxRate: parseFloat(e.target.value.replace(',', '.')) || 0,
                         })
                       }
-                      className="w-full  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="w-full  focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                     />
                   </div>
                 )}
@@ -473,7 +473,7 @@ export function InvoiceModal({
                           value={item.label}
                           onChange={e => updateLineItem(index, 'label', e.target.value)}
                           required
-                          className="focus:ring-2 focus:ring-primary focus:border-indigo-500"
+                          className="bg-background text-foreground border focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -491,7 +491,7 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className=" border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-indigo-500"
+                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -509,7 +509,7 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className=" backdrop-blur-sm border-white/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-indigo-500"
+                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
                       <TableCell className="p-3">
@@ -517,7 +517,7 @@ export function InvoiceModal({
                           type="button"
                           variant="outline"
                           onClick={() => removeLineItem(index)}
-                          className="w-8 h-8 p-0 bg-white/60 border-red-200 text-destructive hover:bg-red-50 hover:border-red-300 rounded-lg transition-all"
+                          className="w-8 h-8 p-0 bg-card border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 rounded-lg transition-all"
                           disabled={formData.items.length === 1}
                         >
                           <Icon name="lucide:X" className="w-4 h-4" />
@@ -587,7 +587,7 @@ export function InvoiceModal({
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
               placeholder="Additional notes for this invoice..."
             />
           </div>
@@ -601,7 +601,7 @@ export function InvoiceModal({
               value={formData.terms}
               onChange={e => setFormData({ ...formData, terms: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-indigo-500 transition-all duration-200 shadow-sm hover:shadow-md resize-none"
+              className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
               placeholder="Payment due upon receipt. Late payment penalties may apply..."
             />
           </div>

@@ -101,7 +101,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="backdrop-blur-sm hover:bg-white/80 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+            className="hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Icon name="lucide:X" className="w-4 h-4 mr-2" />
             Cancel
