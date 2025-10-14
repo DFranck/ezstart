@@ -12,10 +12,11 @@ import { useBillingContext } from '@/contexts/billing-context'
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Main } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, ChartContainer, ChartTooltip, ChartTooltipContent, H3, Main } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/ui/utils'
 import { redirect, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { toast } from 'sonner'
 
 const DashboardPageOld = () => {
@@ -85,6 +86,42 @@ const DashboardPageOld = () => {
   const sortedClients = [...(clients || [])].sort((a, b) => {
     return getClientLatestActivity(b._id).getTime() - getClientLatestActivity(a._id).getTime()
   })
+
+  // Prepare chart data - Revenue over last 6 months
+  const revenueChartData = useMemo(() => {
+    const monthsData = new Map<string, number>()
+    const now = new Date()
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      monthsData.set(monthKey, 0)
+    }
+
+    // Aggregate paid invoices by month
+    allInvoices
+      .filter(invoice => invoice.status === 'paid')
+      .forEach(invoice => {
+        const date = new Date(invoice.createdAt)
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        if (monthsData.has(monthKey)) {
+          monthsData.set(monthKey, (monthsData.get(monthKey) || 0) + (invoice.total || 0))
+        }
+      })
+
+    return Array.from(monthsData.entries()).map(([month, revenue]) => ({
+      month,
+      revenue: Math.round(revenue * 100) / 100, // Round to 2 decimals
+    }))
+  }, [allInvoices])
+
+  const chartConfig = {
+    revenue: {
+      label: 'Revenue',
+      color: 'hsl(var(--ezbill-payment))',
+    },
+  }
 
   const handleEditCompany = (company: Company) => {
     setEditingCompany(company)
@@ -211,6 +248,49 @@ const DashboardPageOld = () => {
             iconGradient="bg-gradient-receipt"
           />
         </div>
+
+        {/* Revenue Chart */}
+        <Card variant="floating">
+          <CardHeader>
+            <H3 size="h4">Revenue Over Time</H3>
+            <p className="text-sm text-muted-foreground">Last 6 months revenue from paid invoices</p>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <AreaChart data={revenueChartData}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--ezbill-payment))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--ezbill-payment))" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="month"
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  formatter={(value: any) => [`$${value.toFixed(2)}`, 'Revenue']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="hsl(var(--ezbill-payment))"
+                  strokeWidth={2}
+                  fill="url(#colorRevenue)"
+                />
+              </AreaChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions - Only show when missing data */}
         {(!hasCompanies || !hasClients || paymentMethods.length === 0) && (
           <div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
