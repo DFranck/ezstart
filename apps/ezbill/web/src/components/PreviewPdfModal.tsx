@@ -1,0 +1,315 @@
+'use client'
+
+import { useBillingContext } from '@/contexts/billing-context'
+import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
+import { Invoice, Quote, Receipt } from '@ezbill/types'
+import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { useInvoicePDF } from '@ezstart/ui/hooks'
+import {
+  InvoicePDF,
+  ReceiptPDF,
+  type PDFInvoiceData,
+  type PDFReceiptData,
+} from '@ezstart/ui/templates'
+import React, { useState } from 'react'
+
+/** Discriminated union for preview */
+export type PreviewKind = 'invoice' | 'quote' | 'receipt'
+export type PreviewDoc = (Invoice | Quote | Receipt) & { _id: string }
+export type PreviewState = { isOpen: boolean; kind?: PreviewKind; doc?: PreviewDoc }
+
+const getDocTitle = (kind: PreviewKind, doc: PreviewDoc) =>
+  `${kind.charAt(0).toUpperCase() + kind.slice(1)} #${(doc as any).documentNumber ?? doc._id}`
+
+const getPdfUrl = (kind: PreviewKind, doc: PreviewDoc) => {
+  // Prefer explicit url if your doc already carries one
+  const explicit = (doc as any).pdfUrl as string | undefined
+  if (explicit) return explicit
+
+  // Fallback: REST endpoint convention
+  const base = kind === 'invoice' ? 'invoices' : kind === 'quote' ? 'quotes' : 'receipts'
+  return `/api/billing/${base}/${doc._id}/pdf`
+}
+
+interface PreviewPdfModalProps {
+  isOpen: boolean
+  onClose: () => void
+  kind?: PreviewKind
+  doc?: PreviewDoc
+}
+
+/** Lightweight, reusable PDF preview modal */
+export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalProps) {
+  const { downloadInvoicePDF, isGenerating } = useInvoicePDF()
+  const { clients, companies, paymentMethods } = useBillingContext()
+  const [pdfBlob, setPdfBlob] = useState<string | null>(null)
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+
+  // ALL HOOKS MUST BE BEFORE ANY CONDITIONAL RETURNS
+  // Générer le preview automatiquement à l'ouverture
+  React.useEffect(() => {
+    if (
+      isOpen &&
+      (kind === 'invoice' || kind === 'receipt') &&
+      !pdfBlob &&
+      !isGeneratingPreview &&
+      doc
+    ) {
+      const generatePreview = async () => {
+        if (kind !== 'invoice' && kind !== 'receipt') {
+          return
+        }
+
+        const document = doc as Invoice | Receipt
+        const client = clients.find(c => c._id === document.clientId)
+        const company = document.companyId
+          ? companies.find(c => c._id === document.companyId)
+          : undefined
+
+        if (!client) return
+
+        setIsGeneratingPreview(true)
+        try {
+          const { pdf } = await import('@react-pdf/renderer')
+          let blob: Blob
+
+          if (kind === 'invoice') {
+            const pdfData = convertToInvoicePDFData(
+              document as Invoice,
+              client,
+              company,
+              paymentMethods
+            )
+            blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+          } else {
+            const pdfData = convertToReceiptPDFData(document as Receipt, client, company)
+            blob = await pdf(<ReceiptPDF data={pdfData} />).toBlob()
+          }
+
+          const url = URL.createObjectURL(blob)
+          setPdfBlob(url)
+        } catch (error) {
+          console.error('Erreur génération preview PDF:', error)
+        } finally {
+          setIsGeneratingPreview(false)
+        }
+      }
+      generatePreview()
+    }
+  }, [isOpen, kind, pdfBlob, isGeneratingPreview, doc, clients, companies, paymentMethods])
+
+  if (!isOpen || !kind || !doc) return null
+
+  const title = getDocTitle(kind, doc)
+  const pdfUrl = getPdfUrl(kind, doc)
+
+  const generatePDFData = () => {
+    if (kind !== 'invoice' && kind !== 'receipt') return null
+
+    const document = doc as Invoice | Receipt
+    const client = clients.find(c => c._id === document.clientId)
+    const company = document.companyId
+      ? companies.find(c => c._id === document.companyId)
+      : undefined
+
+    if (!client) return null
+
+    if (kind === 'invoice') {
+      return convertToInvoicePDFData(document as Invoice, client, company, paymentMethods)
+    } else {
+      return convertToReceiptPDFData(document as Receipt, client, company)
+    }
+  }
+
+  const handleGeneratePreview = async () => {
+    if (kind !== 'invoice' && kind !== 'receipt') {
+      alert("La génération PDF n'est disponible que pour les factures et reçus")
+      return
+    }
+
+    const pdfData = generatePDFData()
+    if (!pdfData) {
+      alert('Client non trouvé')
+      return
+    }
+
+    setIsGeneratingPreview(true)
+    try {
+      const { pdf } = await import('@react-pdf/renderer')
+      let blob: Blob
+
+      if (kind === 'invoice') {
+        blob = await pdf(<InvoicePDF data={pdfData as PDFInvoiceData} />).toBlob()
+      } else {
+        blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+      }
+
+      const url = URL.createObjectURL(blob)
+      setPdfBlob(url)
+    } catch (error) {
+      console.error('Erreur génération preview PDF:', error)
+      alert('Erreur lors de la génération du preview PDF')
+    } finally {
+      setIsGeneratingPreview(false)
+    }
+  }
+
+  const handleDownloadPDF = async () => {
+    const pdfData = generatePDFData()
+    if (!pdfData) {
+      alert('Client non trouvé')
+      return
+    }
+
+    try {
+      const document = doc as Invoice | Receipt
+      const fileName = document.documentNumber || document._id
+
+      if (kind === 'invoice') {
+        await downloadInvoicePDF(<InvoicePDF data={pdfData as PDFInvoiceData} />, fileName)
+      } else {
+        // For receipts, use the same download mechanism but with receipt template
+        const { pdf } = await import('@react-pdf/renderer')
+        const blob = await pdf(<ReceiptPDF data={pdfData as PDFReceiptData} />).toBlob()
+
+        // Create download link
+        const url = URL.createObjectURL(blob)
+        const link = window.document.createElement('a')
+        link.href = url
+        link.download = `receipt-${fileName}.pdf`
+        window.document.body.appendChild(link)
+        link.click()
+        window.document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }
+    } catch (error) {
+      console.error('Erreur téléchargement PDF:', error)
+      alert('Erreur lors du téléchargement du PDF')
+    }
+  }
+
+  // Nettoyer l'URL quand le modal se ferme
+  const handleClose = () => {
+    if (pdfBlob) {
+      URL.revokeObjectURL(pdfBlob)
+      setPdfBlob(null)
+    }
+    onClose()
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={
+        <>
+          <Icon
+            name={
+              kind === 'invoice'
+                ? 'lucide:FileEdit'
+                : kind === 'quote'
+                  ? 'lucide:FileText'
+                  : 'lucide:Receipt'
+            }
+            className="w-5 h-5 mr-2 text-foreground/60"
+          />
+          <span className="font-semibold">{title}</span>
+        </>
+      }
+      description={
+        <>
+          Click outside or press <kbd className="px-1 py-0.5 border rounded">Esc</kbd> to close
+        </>
+      }
+      footer={
+        <div className="flex items-center justify-between w-full">
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleGeneratePreview}
+              disabled={isGeneratingPreview}
+              className="hover:bg-gray-50"
+            >
+              <Icon
+                name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:Eye'}
+                className={`w-4 h-4 mr-2 ${isGeneratingPreview ? 'animate-spin' : ''}`}
+              />
+              {isGeneratingPreview ? 'Génération...' : 'Refresh Preview'}
+            </Button>
+            <Button
+              onClick={handleDownloadPDF}
+              disabled={isGenerating || !pdfBlob}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Icon
+                name={isGenerating ? 'lucide:Loader2' : 'lucide:Download'}
+                className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : ''}`}
+              />
+              {isGenerating ? 'Téléchargement...' : 'Download PDF'}
+            </Button>
+          </div>
+        </div>
+      }
+      className="max-w-[1100px] w-[98vw]"
+    >
+      {/* PDF container */}
+      <div className="">
+        {pdfBlob ? (
+          <>
+            {/* Desktop PDF Preview */}
+            <iframe
+              src={`${pdfBlob}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+              className="hidden sm:block w-full h-[50vh]"
+              title={`${title} – PDF preview`}
+            />
+            {/* Mobile PDF Download */}
+            <div className="sm:hidden flex flex-col items-center justify-center p-8 text-center h-[50vh] bg-muted/20 rounded-lg">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4">
+                <Icon name="lucide:FileDown" className="w-8 h-8 text-blue-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Ready</h3>
+              <p className="text-foreground/60 mb-4 text-sm">
+                PDF preview is not supported on mobile. Download to view.
+              </p>
+              <Button
+                onClick={() => {
+                  const link = document.createElement('a')
+                  link.href = pdfBlob
+                  link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                }}
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6">
+              <Icon
+                name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:FileText'}
+                className={`w-10 h-10 text-blue-500 ${isGeneratingPreview ? 'animate-spin' : ''}`}
+              />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {isGeneratingPreview ? 'Generating PDF Preview...' : 'Instant PDF Generation'}
+            </h3>
+            <p className="text-foreground/60 mb-6 max-w-md">
+              {isGeneratingPreview
+                ? 'Please wait while we generate your PDF preview...'
+                : `Click "Refresh Preview" to generate and preview your ${kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt'} PDF.`}
+            </p>
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <Icon name="lucide:Zap" className="w-4 h-4 text-yellow-500" />
+              <span>Client-side generation • No server required</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
