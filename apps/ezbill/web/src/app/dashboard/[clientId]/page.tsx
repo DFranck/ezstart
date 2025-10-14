@@ -5,6 +5,7 @@
 
 import { ClientHeader } from '@/components/ClientHeader'
 import { ClientStats } from '@/components/ClientStats'
+import CollapsibleGroup from '@/components/CollapsibleGroup'
 import DashboardSection from '@/components/DashboardSection'
 import { InvoiceCard, QuoteCard, ReceiptCard } from '@/components/DocumentCard'
 import { InvoiceModal } from '@/components/invoice-modal'
@@ -14,11 +15,12 @@ import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useClientDashboardHandlers } from '@/hooks/useClientDashboardHandlers'
 import { getBillingPermissions } from '@/utils/billing-permissions'
+import { groupInvoicesByMonth, groupInvoicesByStatus, groupInvoicesByWeek } from '@/utils/group-invoices'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { P } from '@ezstart/ui/components'
+import { Button, Icon, P } from '@ezstart/ui/components'
 import { redirect, useParams } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 const ClientDashboardPage = () => {
   const params = useParams()
@@ -35,6 +37,7 @@ const ClientDashboardPage = () => {
   const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined)
   const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
+  const [invoiceGroupBy, setInvoiceGroupBy] = useState<'month' | 'week' | 'status'>('month')
 
   // Use the custom hook for all document handlers
   const handlers = useClientDashboardHandlers()
@@ -103,6 +106,13 @@ const ClientDashboardPage = () => {
 
   const closePreview = () => setPreview({ isOpen: false })
 
+  // Group invoices based on selected grouping
+  const invoiceGroups = useMemo(() => {
+    if (invoiceGroupBy === 'month') return groupInvoicesByMonth(clientInvoices, 'fr')
+    if (invoiceGroupBy === 'week') return groupInvoicesByWeek(clientInvoices, 'fr')
+    return groupInvoicesByStatus(clientInvoices)
+  }, [clientInvoices, invoiceGroupBy])
+
   if (loading) {
     return (
       <div className="min-h-screen  flex items-center justify-center w-full">
@@ -138,7 +148,7 @@ const ClientDashboardPage = () => {
           quotesCount={clientQuotes.length}
         />
 
-        {/* Invoices */}
+        {/* Invoices with Grouping */}
         <DashboardSection
           title="Invoices"
           description={`${clientInvoices.length} total invoices`}
@@ -159,26 +169,86 @@ const ClientDashboardPage = () => {
         >
           {clientInvoices.length > 0 && (
             <div className="space-y-4">
-              {clientInvoices.map(invoice => {
-                const permissions = getBillingPermissions(invoice, 'invoice')
-                return (
-                  <InvoiceCard
-                    key={invoice._id}
-                    documentNumber={invoice.documentNumber}
-                    status={invoice.status}
-                    createdAt={invoice.createdAt}
-                    total={invoice.total}
-                    currency={invoice.currency}
-                    permissions={permissions}
-                    onClick={() => openPreview('invoice', invoice)}
-                    onEdit={e => handleEditInvoice(invoice, e)}
-                    onSend={e => handlers.handleSendInvoice(invoice, e)}
-                    onDownload={e => handlers.handleDownloadInvoice(invoice, e)}
-                    onDownloadReceipt={e => handlers.handleDownloadReceiptByInvoice(invoice, e)}
-                    onMarkPaid={e => handleMarkPaid(invoice, e)}
-                  />
-                )
-              })}
+              {/* Group By Selector - Only show if 5+ invoices */}
+              {clientInvoices.length >= 5 && (
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    variant={invoiceGroupBy === 'month' ? 'default' : 'outline'}
+                    onClick={() => setInvoiceGroupBy('month')}
+                  >
+                    <Icon name="lucide:Calendar" className="w-4 h-4 mr-2" />
+                    By Month
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={invoiceGroupBy === 'week' ? 'default' : 'outline'}
+                    onClick={() => setInvoiceGroupBy('week')}
+                  >
+                    <Icon name="lucide:CalendarDays" className="w-4 h-4 mr-2" />
+                    By Week
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={invoiceGroupBy === 'status' ? 'default' : 'outline'}
+                    onClick={() => setInvoiceGroupBy('status')}
+                  >
+                    <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
+                    By Status
+                  </Button>
+                </div>
+              )}
+
+              {/* Collapsible Groups - Only if 5+ invoices, otherwise flat list */}
+              {clientInvoices.length >= 5 ? (
+                <CollapsibleGroup
+                  groups={invoiceGroups}
+                  renderItem={(invoice) => {
+                    const permissions = getBillingPermissions(invoice, 'invoice')
+                    return (
+                      <InvoiceCard
+                        key={invoice._id}
+                        documentNumber={invoice.documentNumber}
+                        status={invoice.status}
+                        createdAt={invoice.createdAt}
+                        total={invoice.total}
+                        currency={invoice.currency}
+                        permissions={permissions}
+                        onClick={() => openPreview('invoice', invoice)}
+                        onEdit={e => handleEditInvoice(invoice, e)}
+                        onSend={e => handlers.handleSendInvoice(invoice, e)}
+                        onDownload={e => handlers.handleDownloadInvoice(invoice, e)}
+                        onDownloadReceipt={e => handlers.handleDownloadReceiptByInvoice(invoice, e)}
+                        onMarkPaid={e => handleMarkPaid(invoice, e)}
+                      />
+                    )
+                  }}
+                  defaultOpenAll={clientInvoices.length < 20}
+                  showToggleAll={invoiceGroups.length > 2}
+                />
+              ) : (
+                // Flat list for < 5 invoices
+                clientInvoices.map(invoice => {
+                  const permissions = getBillingPermissions(invoice, 'invoice')
+                  return (
+                    <InvoiceCard
+                      key={invoice._id}
+                      documentNumber={invoice.documentNumber}
+                      status={invoice.status}
+                      createdAt={invoice.createdAt}
+                      total={invoice.total}
+                      currency={invoice.currency}
+                      permissions={permissions}
+                      onClick={() => openPreview('invoice', invoice)}
+                      onEdit={e => handleEditInvoice(invoice, e)}
+                      onSend={e => handlers.handleSendInvoice(invoice, e)}
+                      onDownload={e => handlers.handleDownloadInvoice(invoice, e)}
+                      onDownloadReceipt={e => handlers.handleDownloadReceiptByInvoice(invoice, e)}
+                      onMarkPaid={e => handleMarkPaid(invoice, e)}
+                    />
+                  )
+                })
+              )}
             </div>
           )}
         </DashboardSection>
