@@ -151,7 +151,7 @@ const ClientDashboardPage = () => {
           isEmpty={clientInvoices.length === 0}
           emptyState={{
             icon: 'lucide:FileEdit',
-            iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-500',
+            iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-primary',
             title: 'No invoices yet',
             description: 'Create your first invoice to get started',
             buttonText: 'Create First Invoice',
@@ -196,7 +196,7 @@ const ClientDashboardPage = () => {
           isEmpty={clientQuotes.length === 0}
           emptyState={{
             icon: 'lucide:FileText',
-            iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-500',
+            iconBg: 'bg-gradient-to-r from-green-100 to-emerald-100 text-success',
             title: 'No quotes yet',
             description: 'Create your first quote to get started',
             buttonText: 'Create First Quote',
@@ -243,7 +243,7 @@ const ClientDashboardPage = () => {
           isEmpty={clientReceipts.length === 0}
           emptyState={{
             icon: 'lucide:Receipt',
-            iconBg: 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-500',
+            iconBg: 'bg-gradient-to-r from-purple-100 to-pink-100 text-accent',
             title: 'No receipts yet',
             description: 'Receipts are generated automatically when invoices are paid',
             buttonText: '',

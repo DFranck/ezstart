@@ -228,7 +228,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               variant="outline"
               onClick={handleGeneratePreview}
               disabled={isGeneratingPreview}
-              className="hover:bg-gray-50"
+              className="hover:bg-muted/50"
             >
               <Icon
                 name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:Eye'}
@@ -239,7 +239,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
             <Button
               onClick={handleDownloadPDF}
               disabled={isGenerating || !pdfBlob}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Icon
                 name={isGenerating ? 'lucide:Loader2' : 'lucide:Download'}
@@ -264,10 +264,10 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
             />
             {/* Mobile PDF Download */}
             <div className="sm:hidden flex flex-col items-center justify-center p-8 text-center h-[50vh] bg-muted/20 rounded-lg">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4">
-                <Icon name="lucide:FileDown" className="w-8 h-8 text-blue-500" />
+              <div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-4">
+                <Icon name="lucide:FileDown" className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Ready</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">PDF Ready</h3>
               <p className="text-foreground/60 mb-4 text-sm">
                 PDF preview is not supported on mobile. Download to view.
               </p>
@@ -280,7 +280,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                   link.click()
                   document.body.removeChild(link)
                 }}
-                className="bg-blue-500 hover:bg-blue-600"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
                 Download PDF
@@ -289,13 +289,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
           </>
         ) : (
           <div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-6">
               <Icon
                 name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:FileText'}
-                className={`w-10 h-10 text-blue-500 ${isGeneratingPreview ? 'animate-spin' : ''}`}
+                className={`w-10 h-10 text-primary ${isGeneratingPreview ? 'animate-spin' : ''}`}
               />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {isGeneratingPreview ? 'Generating PDF Preview...' : 'Instant PDF Generation'}
             </h3>
             <p className="text-foreground/60 mb-6 max-w-md">
@@ -303,8 +303,8 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                 ? 'Please wait while we generate your PDF preview...'
                 : `Click "Refresh Preview" to generate and preview your ${kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt'} PDF.`}
             </p>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <Icon name="lucide:Zap" className="w-4 h-4 text-yellow-500" />
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Icon name="lucide:Zap" className="w-4 h-4 text-warning" />
               <span>Client-side generation • No server required</span>
             </div>
           </div>

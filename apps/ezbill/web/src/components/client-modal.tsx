@@ -147,7 +147,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:User" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
             Client Name *
           </Label>
           <div className="relative">
@@ -158,7 +158,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               value={formData.clientName}
               onChange={e => setFormData({ ...formData, clientName: e.target.value })}
               required
-              className="w-full focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="Enter client name"
             />
           </div>
@@ -166,26 +166,26 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-primary" />
             Client Type
           </Label>
           <Select
             value={formData.isCompany ? 'company' : 'individual'}
             onValueChange={value => setFormData({ ...formData, isCompany: value === 'company' })}
           >
-            <SelectTrigger className="w-full focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md">
+            <SelectTrigger className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="individual" className="hover:bg-cyan-50">
+              <SelectItem value="individual" className="hover:bg-primary/5">
                 <div className="flex items-center">
-                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-green-500" />
+                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
                   Individual
                 </div>
               </SelectItem>
-              <SelectItem value="company" className="hover:bg-cyan-50">
+              <SelectItem value="company" className="hover:bg-primary/5">
                 <div className="flex items-center">
-                  <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-purple-500" />
+                  <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-accent" />
                   Company
                 </div>
               </SelectItem>
@@ -195,7 +195,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-primary" />
             Email
           </Label>
           <div className="relative">
@@ -206,7 +206,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="client@example.com"
             />
           </div>
@@ -214,7 +214,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-primary" />
             Phone
           </Label>
           <div className="relative">
@@ -224,7 +224,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             <Input
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -232,7 +232,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-primary" />
             Website
           </Label>
           <div className="relative">
@@ -243,7 +243,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               type="url"
               value={formData.website}
               onChange={e => setFormData({ ...formData, website: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="https://example.com"
             />
           </div>
@@ -251,7 +251,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-primary" />
             Address
           </Label>
           <div className="relative">
@@ -261,7 +261,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             <Input
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="123 Main Street"
             />
           </div>
@@ -274,13 +274,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 id="showFullAddress"
                 checked={showFullAddress}
                 onCheckedChange={(checked: boolean) => setShowFullAddress(checked)}
-                className="border-cyan-300 text-cyan-600 focus:ring-cyan-500"
+                className="border-primary/30 text-primary focus:ring-cyan-500"
               />
               <Label
                 htmlFor="showFullAddress"
                 className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-primary" />
                 Add detailed address (city, postal code, country)
               </Label>
             </div>
@@ -291,39 +291,39 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
           <>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-primary" />
                 City
               </Label>
               <Input
                 value={formData.city}
                 onChange={e => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="New York"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3  flex items-center">
-                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-primary" />
                 Postal Code
               </Label>
               <Input
                 value={formData.postalCode}
                 onChange={e => setFormData({ ...formData, postalCode: e.target.value })}
-                className="w-full focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="10001"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-primary" />
                 Country
               </Label>
               <Input
                 value={formData.country}
                 onChange={e => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="United States"
               />
             </div>
@@ -332,16 +332,16 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         {formData.isCompany && (
           <>
-            <div className="lg:col-span-2 border-t border-cyan-200/50 pt-6 mt-2">
+            <div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
               <div className="flex items-center mb-4">
-                <Icon name="lucide:Building2" className="w-5 h-5 mr-2 text-purple-500" />
-                <h4 className="text-lg font-semibold text-gray-900">Company Information</h4>
+                <Icon name="lucide:Building2" className="w-5 h-5 mr-2 text-accent" />
+                <h4 className="text-lg font-semibold text-foreground">Company Information</h4>
               </div>
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-accent" />
                 Registration Number
               </Label>
               <Input
@@ -356,7 +356,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-accent" />
                 Tax Number
               </Label>
               <Input
@@ -371,63 +371,63 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         {formData.isCompany && (
           <>
-            <div className="lg:col-span-2 border-t border-cyan-200/50 pt-6 mt-2">
+            <div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
               <div className="flex items-center mb-4">
-                <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-cyan-500" />
-                <h4 className="text-lg font-semibold text-gray-900">Contact Person</h4>
-                <span className="ml-2 text-sm text-gray-500">(Optional)</span>
+                <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-primary" />
+                <h4 className="text-lg font-semibold text-foreground">Contact Person</h4>
+                <span className="ml-2 text-sm text-muted-foreground">(Optional)</span>
               </div>
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:User" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
                 Contact Name
               </Label>
               <Input
                 value={formData.contactPersonName}
                 onChange={e => setFormData({ ...formData, contactPersonName: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="Jean-Baptiste"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-primary" />
                 Job Title
               </Label>
               <Input
                 value={formData.contactPersonTitle}
                 onChange={e => setFormData({ ...formData, contactPersonTitle: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="Project Manager"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-primary" />
                 Contact Email
               </Label>
               <Input
                 type="email"
                 value={formData.contactPersonEmail}
                 onChange={e => setFormData({ ...formData, contactPersonEmail: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="jean-baptiste@company.com"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-cyan-500" />
+                <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-primary" />
                 Contact Phone
               </Label>
               <Input
                 value={formData.contactPersonPhone}
                 onChange={e => setFormData({ ...formData, contactPersonPhone: e.target.value })}
-                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="+33 6 12 34 56 78"
               />
             </div>
@@ -436,13 +436,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-cyan-500" />
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
             Notes
           </Label>
           <TextArea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
+            className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
             placeholder="Additional notes about this client..."
             rows={4}
           />

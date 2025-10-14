@@ -39,7 +39,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
             {paymentMethod.name}
           </h3>
           {paymentMethod.isDefault && (
-            <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+            <span className="bg-green-100 text-success text-xs px-2 py-1 rounded-full font-medium">
               Default
             </span>
           )}

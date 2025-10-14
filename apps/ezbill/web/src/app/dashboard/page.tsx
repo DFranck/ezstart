@@ -220,7 +220,7 @@ const DashboardPage = () => {
                 description="Set up your business profile and billing information"
                 setter={setIsCompanyModalOpen}
                 className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
-                descriptionClassName="text-indigo-100"
+                descriptionClassName="text-primary-foreground/80"
               />
             )}
 
@@ -230,7 +230,7 @@ const DashboardPage = () => {
                 description="Add clients to start creating invoices and quotes"
                 setter={setIsClientModalOpen}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                descriptionClassName="text-cyan-100"
+                descriptionClassName="text-primary-foreground/80"
               />
             )}
             {paymentMethods.length === 0 && (
@@ -257,7 +257,7 @@ const DashboardPage = () => {
           isEmpty={!hasClients}
           emptyState={{
             icon: 'lucide:Users',
-            iconBg: 'bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-500',
+            iconBg: 'bg-gradient-to-r from-cyan-100 to-blue-100 text-primary',
             title: 'No clients yet',
             description: 'Add your first client to start creating invoices and quotes',
             buttonText: 'Add First Client',

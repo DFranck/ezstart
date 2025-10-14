@@ -150,50 +150,50 @@ export function PaymentMethodModal({
           <>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-success" />
                 Bank Name
               </Label>
               <Input
                 value={formData.bankName || ''}
                 onChange={e => setFormData({ ...formData, bankName: e.target.value })}
                 placeholder="JPMorgan Chase, BNP Paribas..."
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-success" />
                 Account Number
               </Label>
               <Input
                 value={formData.accountNumber || ''}
                 onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
                 placeholder="1234567890"
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-success" />
                 IBAN
               </Label>
               <Input
                 value={formData.iban || ''}
                 onChange={e => setFormData({ ...formData, iban: e.target.value })}
                 placeholder="FR14 2004 1010 0505 0001 3M02 606"
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
               />
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-success" />
                 SWIFT/BIC Code
               </Label>
               <Input
                 value={formData.swift || ''}
                 onChange={e => setFormData({ ...formData, swift: e.target.value })}
                 placeholder="BNPAFRPP"
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
           </>
@@ -204,38 +204,38 @@ export function PaymentMethodModal({
           <>
             <div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-success" />
                 Wallet Address *
               </Label>
               <Input
                 value={formData.walletAddress || ''}
                 onChange={e => setFormData({ ...formData, walletAddress: e.target.value })}
                 placeholder="cosmos1abc123def456ghi789jkl012mno345pqr678stu"
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
               />
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-success" />
                 Network
               </Label>
               <Input
                 value={formData.network || ''}
                 onChange={e => setFormData({ ...formData, network: e.target.value })}
                 placeholder="Cosmos Hub, Ethereum, Bitcoin..."
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-success" />
                 Currency/Token
               </Label>
               <Input
                 value={formData.currency || ''}
                 onChange={e => setFormData({ ...formData, currency: e.target.value })}
                 placeholder="USDC, ETH, BTC, ATOM..."
-                className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
           </>
@@ -247,7 +247,7 @@ export function PaymentMethodModal({
         return (
           <div className="lg:col-span-2">
             <Label className="text-sm font-medium mb-3 block flex items-center">
-              <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-green-500" />
+              <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-success" />
               Email Address
             </Label>
             <div className="relative">
@@ -259,7 +259,7 @@ export function PaymentMethodModal({
                 value={formData.email || ''}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
                 placeholder="your.email@example.com"
-                className="w-full pl-12 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full pl-12 focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
           </div>
@@ -269,7 +269,7 @@ export function PaymentMethodModal({
         return (
           <div className="lg:col-span-2">
             <Label className="text-sm font-medium mb-3 block flex items-center">
-              <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-green-500" />
+              <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-success" />
               Account Details
             </Label>
             <TextArea
@@ -277,7 +277,7 @@ export function PaymentMethodModal({
               onChange={e => setFormData({ ...formData, instructions: e.target.value })}
               placeholder="Enter account details, instructions, or any relevant information..."
               rows={3}
-              className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
+              className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
             />
           </div>
         )
@@ -321,21 +321,21 @@ export function PaymentMethodModal({
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-success" />
             Payment Type *
           </Label>
           <Select
             value={formData.type}
             onValueChange={(value: PaymentMethodType) => setFormData({ ...formData, type: value })}
           >
-            <SelectTrigger className="w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md">
+            <SelectTrigger className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {paymentMethodTypes.map(type => (
                 <SelectItem key={type.value} value={type.value}>
                   <div className="flex items-center">
-                    <Icon name={type.icon} className="w-4 h-4 mr-2 text-green-500" />
+                    <Icon name={type.icon} className="w-4 h-4 mr-2 text-success" />
                     {type.label}
                   </div>
                 </SelectItem>
@@ -348,7 +348,7 @@ export function PaymentMethodModal({
           <div className="flex items-center mb-4">
             <Icon
               name={selectedType?.icon || 'lucide:Settings'}
-              className="w-5 h-5 mr-2 text-green-500"
+              className="w-5 h-5 mr-2 text-success"
             />
             <h4 className="text-lg font-semibold ">{selectedType?.label} Details</h4>
           </div>
@@ -357,7 +357,7 @@ export function PaymentMethodModal({
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-green-500" />
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-success" />
             Additional Instructions
           </Label>
           <TextArea
@@ -365,7 +365,7 @@ export function PaymentMethodModal({
             onChange={e => setFormData({ ...formData, instructions: e.target.value })}
             placeholder="Any special instructions for payments..."
             rows={2}
-            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm hover:shadow-md min-h-[80px] resize-none"
+            className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md min-h-[80px] resize-none"
           />
         </div>
 
@@ -378,13 +378,13 @@ export function PaymentMethodModal({
                 onCheckedChange={(checked: boolean) =>
                   setFormData({ ...formData, isDefault: checked })
                 }
-                className="border-green-300 text-green-600 focus:ring-green-500"
+                className="border-green-300 text-success focus:ring-success"
               />
               <Label
                 htmlFor="isDefault"
                 className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-green-500" />
+                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-success" />
                 Make this my default payment method
               </Label>
             </div>

@@ -72,7 +72,7 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
                 variant="outline"
                 size="sm"
                 onClick={() => onRestore(item._id)}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                className="text-success hover:text-success/90 hover:bg-success/5"
               >
                 Restore
               </Button>
@@ -80,7 +80,7 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteDialog({ isOpen: true, item })}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
               >
                 Delete Forever
               </Button>

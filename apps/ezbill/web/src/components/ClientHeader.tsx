@@ -15,7 +15,7 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
     <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 w-full">
       <Link
         href="/dashboard"
-        className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4 group"
+        className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors mb-4 group"
       >
         <Icon
           name="lucide:ArrowLeft"
@@ -31,8 +31,8 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
             <div
               className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center ${
                 client.isCompany
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                  ? 'bg-gradient-to-r from-accent to-accent/80'
+                  : 'bg-gradient-to-r from-primary to-primary/80'
               }`}
             >
               <Icon
@@ -46,8 +46,8 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
                 <span
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     client.isCompany
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-cyan-100 text-cyan-700'
+                      ? 'bg-accent/10 text-accent'
+                      : 'bg-primary/10 text-primary'
                   }`}
                 >
                   <Icon
@@ -67,7 +67,7 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
                 <Icon name="lucide:Mail" className="w-4 h-4 mr-2 " />
                 <a
                   href={`mailto:${client.email}`}
-                  className="hover:text-indigo-600 transition-colors"
+                  className="hover:text-primary transition-colors"
                 >
                   {client.email}
                 </a>
@@ -77,7 +77,7 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
             {client.phone && (
               <div className="flex items-center text-sm text-foreground/60  backdrop-blur-sm ">
                 <Icon name="lucide:Phone" className="w-4 h-4 mr-2 " />
-                <a href={`tel:${client.phone}`} className="hover:text-indigo-600 transition-colors">
+                <a href={`tel:${client.phone}`} className="hover:text-primary transition-colors">
                   {client.phone}
                 </a>
               </div>
@@ -103,14 +103,14 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
         <CardContent className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <Button
             onClick={onCreateQuote}
-            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            className="bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
           >
             <Icon name="lucide:FileText" className="w-4 h-4 sm:mr-2" />
             <span className="ml-2 sm:ml-0">New Quote</span>
           </Button>
           <Button
             onClick={onCreateInvoice}
-            className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-medium px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
           >
             <Icon name="lucide:FileEdit" className="w-4 h-4 sm:mr-2" />
             <span className="ml-2 sm:ml-0">New Invoice</span>

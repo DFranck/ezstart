@@ -94,7 +94,7 @@ export function LoginSection() {
             <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
               <Icon name="lucide:Check" className="w-4 h-4 text-white" />
             </div>
-            <Span className="text-lg font-semibold text-green-700">
+            <Span className="text-lg font-semibold text-success">
               Connected as {user.username}
             </Span>
           </div>

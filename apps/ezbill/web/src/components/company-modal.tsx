@@ -126,7 +126,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-purple-500" />
+            <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-accent" />
             Company Name *
           </Label>
           <div className="relative">
@@ -137,7 +137,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
               value={formData.companyName}
               onChange={e => setFormData({ ...formData, companyName: e.target.value })}
               required
-              className="w-full pl-12 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12 focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="Enter company name"
             />
           </div>
@@ -145,7 +145,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div>
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-purple-500" />
+            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-accent" />
             Email
           </Label>
           <div className="relative">
@@ -156,7 +156,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-12 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12 focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="company@example.com"
             />
           </div>
@@ -164,7 +164,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div>
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-purple-500" />
+            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-accent" />
             Phone
           </Label>
           <div className="relative">
@@ -174,7 +174,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             <Input
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-12 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12 focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -182,7 +182,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div>
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-purple-500" />
+            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-accent" />
             Website
           </Label>
           <div className="relative">
@@ -193,7 +193,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
               type="url"
               value={formData.website}
               onChange={e => setFormData({ ...formData, website: e.target.value })}
-              className="w-full pl-12 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12 focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="https://company.com"
             />
           </div>
@@ -201,7 +201,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-purple-500" />
+            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-accent" />
             Address
           </Label>
           <div className="relative">
@@ -211,7 +211,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             <Input
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
-              className="w-full pl-12 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full pl-12 focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="123 Business Street"
             />
           </div>
@@ -224,13 +224,13 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
                 id="showFullAddress"
                 checked={showFullAddress}
                 onCheckedChange={(checked: boolean) => setShowFullAddress(checked)}
-                className="border-purple-300 text-purple-600 focus:ring-purple-500"
+                className="border-accent/30 text-accent focus:ring-accent"
               />
               <Label
                 htmlFor="showFullAddress"
                 className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-accent" />
                 Add detailed address (city, postal code, country)
               </Label>
             </div>
@@ -241,39 +241,39 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
           <>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-accent" />
                 City
               </Label>
               <Input
                 value={formData.city}
                 onChange={e => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="New York"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 flex items-center">
-                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-accent" />
                 Postal Code
               </Label>
               <Input
                 value={formData.postalCode}
                 onChange={e => setFormData({ ...formData, postalCode: e.target.value })}
-                className="w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="10001"
               />
             </div>
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-purple-500" />
+                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-accent" />
                 Country
               </Label>
               <Input
                 value={formData.country}
                 onChange={e => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="United States"
               />
             </div>
@@ -282,14 +282,14 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div className="lg:col-span-2 border-t border-purple-200/50 pt-6 mt-2">
           <div className="flex items-center mb-4">
-            <Icon name="lucide:Scale" className="w-5 h-5 mr-2 text-orange-500" />
+            <Icon name="lucide:Scale" className="w-5 h-5 mr-2 text-warning" />
             <h4 className="text-lg font-semibold ">Legal Information</h4>
           </div>
         </div>
 
         <div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-orange-500" />
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-warning" />
             Registration Number
           </Label>
           <Input
@@ -302,7 +302,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
         <div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-orange-500" />
+            <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-warning" />
             Tax Number
           </Label>
           <Input

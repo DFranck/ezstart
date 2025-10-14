@@ -211,14 +211,14 @@ export function QuoteModal({
                 <SelectContent className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-xl">
                   <SelectItem value="personal" className="hover:bg-amber-50">
                     <div className="flex items-center">
-                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-green-500" />
+                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
                       Personal (your name)
                     </div>
                   </SelectItem>
                   {companies?.map(company => (
                     <SelectItem key={company._id} value={company._id} className="hover:bg-amber-50">
                       <div className="flex items-center">
-                        <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-purple-500" />
+                        <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-accent" />
                         {company.companyName}
                       </div>
                     </SelectItem>
@@ -243,7 +243,7 @@ export function QuoteModal({
                   {currencies.map(({ value, label }) => (
                     <SelectItem key={value} value={value} className="hover:bg-amber-50">
                       <div className="flex items-center">
-                        <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-yellow-500" />
+                        <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                         {label}
                       </div>
                     </SelectItem>
@@ -259,7 +259,7 @@ export function QuoteModal({
               </Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Icon name="lucide:Calendar" className="w-5 h-5 text-gray-400" />
+                  <Icon name="lucide:Calendar" className="w-5 h-5 text-muted-foreground/60" />
                 </div>
                 <Input
                   type="date"
@@ -290,14 +290,14 @@ export function QuoteModal({
                     htmlFor="showTaxes"
                     className="text-sm font-medium  flex items-center cursor-pointer"
                   >
-                    <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-orange-500" />
+                    <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-warning" />
                     Add Taxes
                   </Label>
                 </div>
                 {showTaxes && (
                   <div>
                     <Label className="text-sm font-medium  mb-3 block flex items-center">
-                      <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-orange-500" />
+                      <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-warning" />
                       Tax Rate (%)
                     </Label>
                     <Input
@@ -319,7 +319,7 @@ export function QuoteModal({
 
           <div>
             <div className="flex items-center mb-6">
-              <Icon name="lucide:List" className="w-5 h-5 mr-2 text-orange-500" />
+              <Icon name="lucide:List" className="w-5 h-5 mr-2 text-warning" />
               <H3 className="text-xl font-bold ">Line Items</H3>
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/30 overflow-hidden">
@@ -391,7 +391,7 @@ export function QuoteModal({
                           type="button"
                           variant="outline"
                           onClick={() => removeLineItem(index)}
-                          className="w-8 h-8 p-0 bg-white/60 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all"
+                          className="w-8 h-8 p-0 bg-white/60 border-red-200 text-destructive hover:bg-red-50 hover:border-red-300 rounded-lg transition-all"
                           disabled={formData.items.length === 1}
                         >
                           <Icon name="lucide:X" className="w-4 h-4" />

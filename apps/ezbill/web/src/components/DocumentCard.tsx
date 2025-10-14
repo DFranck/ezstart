@@ -211,7 +211,7 @@ export function InvoiceCard({
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
           {permissions.canSend && (
-            <Button size="sm" onClick={onSend} className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Button size="sm" onClick={onSend} className="bg-primary hover:bg-primary/90 text-white">
               <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Send</span>
             </Button>
@@ -230,7 +230,7 @@ export function InvoiceCard({
             <Button
               size="sm"
               onClick={onMarkPaid}
-              className="bg-green-500 hover:bg-green-600 text-white"
+              className="bg-success hover:bg-success/90 text-white"
             >
               <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
@@ -321,19 +321,19 @@ export function QuoteCard({
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
           {permissions.canSend && onSend && (
-            <Button size="sm" onClick={onSend} className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Button size="sm" onClick={onSend} className="bg-primary hover:bg-primary/90 text-white">
               <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Send</span>
             </Button>
           )}
           {permissions.canAccept && onAccept && (
-            <Button size="sm" onClick={onAccept} className="bg-green-500 hover:bg-green-600 text-white">
+            <Button size="sm" onClick={onAccept} className="bg-success hover:bg-success/90 text-white">
               <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
             </Button>
           )}
           {permissions.canDecline && onDecline && (
-            <Button size="sm" onClick={onDecline} className="bg-red-500 hover:bg-red-600 text-white">
+            <Button size="sm" onClick={onDecline} className="bg-destructive hover:bg-red-600 text-white">
               <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
             </Button>
@@ -348,7 +348,7 @@ export function QuoteCard({
             <Button
               size="sm"
               onClick={onConvertToInvoice}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+              className="bg-primary hover:bg-primary/90 text-white"
             >
               <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>

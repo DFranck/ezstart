@@ -8,8 +8,8 @@ export function EZAuthLoginSection() {
   if (isAuthenticated && user) {
     return (
       <div className="text-center">
-        <p className="text-green-600 mb-2">Welcome back, {user.username}!</p>
-        <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
+        <p className="text-success mb-2">Welcome back, {user.username}!</p>
+        <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
       </div>
     )
   }
@@ -24,7 +24,7 @@ export function EZAuthLoginSection() {
       </Button>
 
       <div className="text-center">
-        <p className="text-xs text-gray-500">Secure authentication powered by EZAuth</p>
+        <p className="text-xs text-muted-foreground">Secure authentication powered by EZAuth</p>
       </div>
     </div>
   )
