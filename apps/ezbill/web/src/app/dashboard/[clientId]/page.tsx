@@ -14,9 +14,9 @@ import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useClientDashboardHandlers } from '@/hooks/useClientDashboardHandlers'
 import { getBillingPermissions } from '@/utils/billing-permissions'
-import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
+import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Icon, P } from '@ezstart/ui/components'
+import { P } from '@ezstart/ui/components'
 import { redirect, useParams } from 'next/navigation'
 import React, { useState } from 'react'
 
@@ -129,7 +129,7 @@ const ClientDashboardPage = () => {
       />
 
       {/* Body */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6">
         {/* Stats */}
         <ClientStats
           totalRevenue={totalRevenue}

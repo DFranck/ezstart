@@ -3,17 +3,17 @@ import * as React from 'react'
 
 import { cn } from '../lib/utils'
 
-const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border shadow-sm', {
+const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border', {
   variants: {
     variant: {
-      default: 'bg-card',
+      default: 'bg-card shadow-sm shadow-foreground/5',
       ghost: 'bg-transparent border-transparent shadow-none',
       floating:
         'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg shadow-foreground/10',
-      dark: 'bg-foreground border-foreground shadow-2xl text-background',
+      dark: 'bg-foreground border-foreground shadow-2xl shadow-foreground/20 text-background',
       premium:
-        'bg-gradient-to-r from-indigo-50 via-white to-cyan-50 border-indigo-200/30 shadow-xl',
-      elevated: 'bg-card shadow-2xl border-border/50',
+        'bg-gradient-to-r from-indigo-50 via-white to-cyan-50 border-indigo-200/30 shadow-xl shadow-foreground/10',
+      elevated: 'bg-card shadow-2xl shadow-foreground/10 border-border/50',
     },
     size: {
       xs: 'gap-2 py-2',
