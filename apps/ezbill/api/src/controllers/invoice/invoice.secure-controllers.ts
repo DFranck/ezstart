@@ -210,7 +210,7 @@ export async function softDeleteSecureInvoiceController(req: AuthRequest, res: R
       });
     }
 
-    res.status(204).send(); // No content
+    res.json(invoice); // Return deleted invoice with deletedAt timestamp
   } catch (error) {
     console.error('Error in softDeleteSecureInvoiceController:', error);
     res.status(500).json({

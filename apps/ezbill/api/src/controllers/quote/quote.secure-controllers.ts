@@ -222,7 +222,7 @@ export async function softDeleteSecureQuoteController(req: AuthRequest, res: Res
       })
     }
 
-    res.status(204).send() // No content
+    res.json(quote) // Return deleted quote with deletedAt timestamp
   } catch (error) {
     console.error('Error in softDeleteSecureQuoteController:', error)
     res.status(500).json({

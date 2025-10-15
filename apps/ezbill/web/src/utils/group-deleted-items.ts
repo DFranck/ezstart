@@ -1,4 +1,4 @@
-import { Client, Company, Invoice, Quote, Receipt } from '@ezbill/types'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { GroupItem } from '@/components/CollapsibleGroup'
 
 type DeletedItemsMap = {
@@ -7,9 +7,10 @@ type DeletedItemsMap = {
   quotes: Quote[]
   invoices: Invoice[]
   receipts: Receipt[]
+  paymentMethods: PaymentMethod[]
 }
 
-type AllDeletedItemTypes = Client | Company | Quote | Invoice | Receipt
+type AllDeletedItemTypes = Client | Company | Quote | Invoice | Receipt | PaymentMethod
 
 export type DeletedItemGroup = GroupItem<{
   type: keyof DeletedItemsMap
@@ -71,6 +72,16 @@ export function groupDeletedItems(deletedItems: DeletedItemsMap): DeletedItemGro
       label: 'Receipts',
       count: deletedItems.receipts.length,
       items: deletedItems.receipts.map(item => ({ type: 'receipts' as const, item })),
+    })
+  }
+
+  // Payment Methods
+  if (deletedItems.paymentMethods.length > 0) {
+    groups.push({
+      id: 'paymentMethods',
+      label: 'Payment Methods',
+      count: deletedItems.paymentMethods.length,
+      items: deletedItems.paymentMethods.map(item => ({ type: 'paymentMethods' as const, item })),
     })
   }
 

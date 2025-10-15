@@ -33,6 +33,7 @@ export default function SettingsPage() {
     quotes: [] as Quote[],
     invoices: [] as Invoice[],
     receipts: [] as Receipt[],
+    paymentMethods: [] as PaymentMethod[],
   })
   const [loading, setLoading] = useState(true)
   const { isMobile } = useDevice()
@@ -40,12 +41,13 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       const userId = getUserId()
-      const [clients, companies, quotes, invoices, receipts] = await Promise.all([
+      const [clients, companies, quotes, invoices, receipts, paymentMethods] = await Promise.all([
         callApi('/clients?deletedOnly=true', { userId }),
         callApi('/companies?deletedOnly=true', { userId }),
         callApi('/quotes?deletedOnly=true', { userId }),
         callApi('/invoices?deletedOnly=true', { userId }),
         callApi('/receipts?deletedOnly=true', { userId }),
+        callApi('/payment-methods?deletedOnly=true', { userId }),
       ])
 
       setDeletedItems({
@@ -54,6 +56,7 @@ export default function SettingsPage() {
         quotes: quotes.ok && Array.isArray(quotes.data) ? quotes.data : [],
         invoices: invoices.ok && Array.isArray(invoices.data) ? invoices.data : [],
         receipts: receipts.ok && Array.isArray(receipts.data) ? receipts.data : [],
+        paymentMethods: paymentMethods.ok && Array.isArray(paymentMethods.data) ? paymentMethods.data : [],
       })
     } catch (error) {
       console.error('Error loading deleted items:', error)
@@ -66,27 +69,40 @@ export default function SettingsPage() {
     loadDeletedItems()
   }, [])
 
+  // Map type to API endpoint
+  const getApiEndpoint = (type: string): string => {
+    if (type === 'paymentMethods') return 'payment-methods'
+    return type
+  }
+
   const handleRestore = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}/restore`, {
+      const endpoint = getApiEndpoint(type)
+      await callApi(`/${endpoint}/${id}/restore`, {
         method: 'POST',
         userId: getUserId(),
       })
+      toast.success('Item restored successfully')
+      refetchAll()
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error restoring ${type}:`, error)
+      toast.error('Failed to restore item')
     }
   }
 
   const handleHardDelete = async (type: string, id: string) => {
     try {
-      await callApi(`/${type}/${id}/hard-delete`, {
+      const endpoint = getApiEndpoint(type)
+      await callApi(`/${endpoint}/${id}?permanent=true`, {
         method: 'DELETE',
         userId: getUserId(),
       })
+      toast.success('Item permanently deleted')
       await loadDeletedItems() // Refresh the list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)
+      toast.error('Failed to permanently delete item')
     }
   }
 

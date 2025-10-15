@@ -1,15 +1,15 @@
 'use client'
 
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
-import { Client, Company, Invoice, Quote, Receipt } from '@ezbill/types'
+import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { Button } from '@ezstart/ui/components'
 import { useState } from 'react'
 
-type DeletedItem = Client | Company | Invoice | Quote | Receipt
+type DeletedItem = Client | Company | Invoice | Quote | Receipt | PaymentMethod
 
 interface DeletedItemCardProps {
   item: DeletedItem
-  type: 'clients' | 'companies' | 'quotes' | 'invoices' | 'receipts'
+  type: 'clients' | 'companies' | 'quotes' | 'invoices' | 'receipts' | 'paymentMethods'
   onRestore: (id: string) => Promise<void>
   onHardDelete: (id: string) => Promise<void>
 }
@@ -19,6 +19,7 @@ const getDisplayName = (item: DeletedItem, type: string): string => {
   if (type === 'companies') return (item as Company).companyName
   if (type === 'quotes' || type === 'invoices' || type === 'receipts')
     return (item as Invoice | Quote | Receipt).documentNumber
+  if (type === 'paymentMethods') return (item as PaymentMethod).name
   return 'Unknown'
 }
 
@@ -30,6 +31,10 @@ const getDescription = (item: DeletedItem, type: string): string => {
   if (type === 'quotes' || type === 'invoices' || type === 'receipts') {
     const doc = item as Invoice | Quote | Receipt
     return `${doc.total.toFixed(2)} ${doc.currency}`
+  }
+  if (type === 'paymentMethods') {
+    const pm = item as PaymentMethod
+    return `${pm.type} • ${pm.bankName || pm.cardBrand || 'N/A'}`
   }
   return ''
 }

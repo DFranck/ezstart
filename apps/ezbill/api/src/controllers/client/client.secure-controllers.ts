@@ -197,7 +197,7 @@ export async function softDeleteSecureClientController(req: Request, res: Respon
         });
       }
 
-      res.status(204).send(); // No content
+      res.json(client); // Return deleted client with deletedAt timestamp
     }
   } catch (error) {
     console.error('Error in softDeleteSecureClientController:', error);

@@ -182,7 +182,7 @@ export async function softDeleteSecureReceiptController(req: AuthRequest, res: R
       });
     }
 
-    res.status(204).send(); // No content
+    res.json(receipt); // Return deleted receipt with deletedAt timestamp
   } catch (error) {
     console.error('Error in softDeleteSecureReceiptController:', error);
     res.status(500).json({
