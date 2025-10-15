@@ -100,7 +100,8 @@ export default function SettingsPage() {
         userId: getUserId(),
       })
       toast.success('Item permanently deleted')
-      await loadDeletedItems() // Refresh the list
+      refetchAll() // Invalidate React Query cache
+      await loadDeletedItems() // Refresh the deleted items list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)
       toast.error('Failed to permanently delete item')
