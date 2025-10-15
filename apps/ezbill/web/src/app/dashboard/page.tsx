@@ -12,8 +12,8 @@ import { RevenueChart } from '@/components/RevenueChart'
 import StatsCard from '@/components/StatsCard'
 import { TopClientsChart } from '@/components/TopClientsChart'
 import { useBillingContext } from '@/contexts/billing-context'
-import { groupClientsByActivity } from '@/utils/group-clients'
 import { getUserId } from '@/utils/get-user-id'
+import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Div } from '@ezstart/ui/components'
@@ -148,7 +148,7 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col items-center space-y-4">
+      <div className="flex flex-1 flex-col items-center justify-center space-y-4">
         <div className="relative">
           <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
           <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-full opacity-20 animate-pulse"></div>
