@@ -24,7 +24,8 @@ export function useClients() {
       const userId = getUserId()
       const response = await callApi<Client[]>('/clients', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch clients')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
@@ -36,7 +37,8 @@ export function useInvoices() {
       const userId = getUserId()
       const response = await callApi<Invoice[]>('/invoices', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch invoices')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
@@ -48,7 +50,8 @@ export function useQuotes() {
       const userId = getUserId()
       const response = await callApi<Quote[]>('/quotes', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch quotes')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
@@ -60,7 +63,8 @@ export function useReceipts() {
       const userId = getUserId()
       const response = await callApi<Receipt[]>('/receipts', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch receipts')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
@@ -72,7 +76,8 @@ export function useCompanies() {
       const userId = getUserId()
       const response = await callApi<Company[]>('/companies', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch companies')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
@@ -84,7 +89,8 @@ export function usePaymentMethods() {
       const userId = getUserId()
       const response = await callApi<PaymentMethod[]>('/payment-methods', { userId })
       if (!response.ok || !response.data) throw new Error('Failed to fetch payment methods')
-      return response.data
+      // Filter out soft-deleted items
+      return response.data.filter((item) => !item.deletedAt)
     },
   })
 }
