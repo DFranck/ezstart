@@ -7,6 +7,7 @@ import DashboardSection from '@/components/DashboardSection'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import { useBillingContext } from '@/contexts/billing-context'
+import { useInvalidateBilling } from '@/hooks/useBillingQueries'
 import { groupCompaniesAsOne } from '@/utils/group-companies'
 import { groupDeletedItems } from '@/utils/group-deleted-items'
 import { groupPaymentMethodsByType } from '@/utils/group-payment-methods'
@@ -21,6 +22,14 @@ import { DeletedItemCard } from './components/deleted-item-card'
 
 export default function SettingsPage() {
   const { companies, paymentMethods, refetchAll } = useBillingContext()
+  const {
+    invalidateClients,
+    invalidateCompanies,
+    invalidateQuotes,
+    invalidateInvoices,
+    invalidateReceipts,
+    invalidatePaymentMethods,
+  } = useInvalidateBilling()
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [editingCompany, setEditingCompany] = useState<Company | undefined>(undefined)
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
@@ -84,11 +93,35 @@ export default function SettingsPage() {
         userId: getUserId(),
       })
       toast.success('Item restored successfully')
-      refetchAll()
-      await loadDeletedItems() // Refresh the list
+      invalidateResourceType(type) // Invalidate only the specific resource
+      await loadDeletedItems() // Refresh the deleted items list
     } catch (error) {
       console.error(`Error restoring ${type}:`, error)
       toast.error('Failed to restore item')
+    }
+  }
+
+  // Helper to invalidate only the specific resource type
+  const invalidateResourceType = (type: string) => {
+    switch (type) {
+      case 'clients':
+        invalidateClients()
+        break
+      case 'companies':
+        invalidateCompanies()
+        break
+      case 'quotes':
+        invalidateQuotes()
+        break
+      case 'invoices':
+        invalidateInvoices()
+        break
+      case 'receipts':
+        invalidateReceipts()
+        break
+      case 'paymentMethods':
+        invalidatePaymentMethods()
+        break
     }
   }
 
@@ -100,7 +133,7 @@ export default function SettingsPage() {
         userId: getUserId(),
       })
       toast.success('Item permanently deleted')
-      refetchAll() // Invalidate React Query cache
+      invalidateResourceType(type) // Invalidate only the specific resource
       await loadDeletedItems() // Refresh the deleted items list
     } catch (error) {
       console.error(`Error permanently deleting ${type}:`, error)
