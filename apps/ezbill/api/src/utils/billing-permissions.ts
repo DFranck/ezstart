@@ -26,7 +26,7 @@ export function getQuotePermissions(quote: Quote): BillingPermissions {
     case 'sent':
       return {
         canEdit: false,
-        canDelete: false,
+        canDelete: true, // Can delete if client doesn't respond
         canAccept: true,
         canReject: true,
         reason: 'Quote has been sent to client. Awaiting response.'
