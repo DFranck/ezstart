@@ -1,6 +1,7 @@
 import { Button, Card, CardContent, Icon, KnownIconName } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
+import { DeleteConfirmationDialog } from './delete-confirmation-dialog'
 
 interface BaseDocumentCardProps {
   documentNumber: string
@@ -294,6 +295,8 @@ export function QuoteCard({
   onConvertToInvoice,
   className,
 }: QuoteCardProps) {
+  const [deleteDialog, setDeleteDialog] = useState(false)
+
   const statusConfig = {
     accepted: { bg: 'bg-ezbill-accepted/10', text: 'text-ezbill-accepted' },
     rejected: { bg: 'bg-ezbill-rejected/10', text: 'text-ezbill-rejected' },
@@ -303,6 +306,7 @@ export function QuoteCard({
   }
 
   return (
+    <>
     <DocumentCard
       type="quote"
       documentNumber={documentNumber}
@@ -337,7 +341,10 @@ export function QuoteCard({
             <Button
               size="sm"
               variant="outline"
-              onClick={onDelete}
+              onClick={(e) => {
+                e.stopPropagation()
+                setDeleteDialog(true)
+              }}
               className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
             >
               <Icon name="lucide:Trash2" className="w-4 h-4" />
@@ -392,6 +399,21 @@ export function QuoteCard({
         </>
       }
     />
+
+    <DeleteConfirmationDialog
+      isOpen={deleteDialog}
+      onClose={() => setDeleteDialog(false)}
+      onConfirm={(e) => {
+        if (onDelete) {
+          onDelete(e as any)
+        }
+        setDeleteDialog(false)
+      }}
+      title="Delete Quote"
+      description={`Are you sure you want to delete quote #${documentNumber}? This will move it to trash.`}
+      confirmText="Delete Quote"
+    />
+    </>
   )
 }
 
