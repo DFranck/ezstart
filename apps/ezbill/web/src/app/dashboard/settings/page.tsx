@@ -8,6 +8,7 @@ import { PaymentMethodModal } from '@/components/payment-method-modal'
 import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import { useBillingContext } from '@/contexts/billing-context'
 import { groupCompaniesAsOne } from '@/utils/group-companies'
+import { groupDeletedItems } from '@/utils/group-deleted-items'
 import { groupPaymentMethodsByType } from '@/utils/group-payment-methods'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
@@ -16,7 +17,7 @@ import { callApi } from '@ezstart/ui/utils'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getUserId } from '../../../utils/get-user-id'
-import { DeletedItemsManager } from './components/deleted-items-manager'
+import { DeletedItemCard } from './components/deleted-item-card'
 
 export default function SettingsPage() {
   const { companies, paymentMethods, refetchAll } = useBillingContext()
@@ -153,6 +154,7 @@ export default function SettingsPage() {
   // Group data
   const companyGroups = groupCompaniesAsOne(companies)
   const paymentMethodGroups = groupPaymentMethodsByType(paymentMethods)
+  const deletedItemGroups = groupDeletedItems(deletedItems)
 
   return (
     <div className="max-w-7xl w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
@@ -257,57 +259,26 @@ export default function SettingsPage() {
               hideAddButton
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
-              <div className="space-y-4">
-                <DeletedItemsManager
-                  title="Clients"
-                  items={deletedItems.clients}
-                  type="clients"
-                  getDisplayName={(item: Client) => item.clientName}
-                  getDescription={(item: Client) => item.email || 'No email'}
-                  onRestore={id => handleRestore('clients', id)}
-                  onHardDelete={id => handleHardDelete('clients', id)}
+              {deletedItemGroups.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No deleted items found.
+                </div>
+              ) : (
+                <CollapsibleGroup
+                  groups={deletedItemGroups}
+                  renderItem={({ type, item }) => (
+                    <DeletedItemCard
+                      item={item}
+                      type={type}
+                      onRestore={id => handleRestore(type, id)}
+                      onHardDelete={id => handleHardDelete(type, id)}
+                    />
+                  )}
+                  getItemKey={({ item }) => item._id}
+                  defaultOpenAll={false}
+                  showToggleAll={true}
                 />
-
-                <DeletedItemsManager
-                  title="Companies"
-                  items={deletedItems.companies}
-                  type="companies"
-                  getDisplayName={(item: Company) => item.companyName}
-                  getDescription={(item: Company) => item.email || 'No email'}
-                  onRestore={id => handleRestore('companies', id)}
-                  onHardDelete={id => handleHardDelete('companies', id)}
-                />
-
-                <DeletedItemsManager
-                  title="Quotes"
-                  items={deletedItems.quotes}
-                  type="quotes"
-                  getDisplayName={(item: Quote) => item.documentNumber}
-                  getDescription={(item: Quote) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={id => handleRestore('quotes', id)}
-                  onHardDelete={id => handleHardDelete('quotes', id)}
-                />
-
-                <DeletedItemsManager
-                  title="Invoices"
-                  items={deletedItems.invoices}
-                  type="invoices"
-                  getDisplayName={(item: Invoice) => item.documentNumber}
-                  getDescription={(item: Invoice) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={id => handleRestore('invoices', id)}
-                  onHardDelete={id => handleHardDelete('invoices', id)}
-                />
-
-                <DeletedItemsManager
-                  title="Receipts"
-                  items={deletedItems.receipts}
-                  type="receipts"
-                  getDisplayName={(item: Receipt) => item.documentNumber}
-                  getDescription={(item: Receipt) => `${item.total.toFixed(2)} ${item.currency}`}
-                  onRestore={id => handleRestore('receipts', id)}
-                  onHardDelete={id => handleHardDelete('receipts', id)}
-                />
-              </div>
+              )}
             </DashboardSection>
           </TabsContent>
         </Tabs>
