@@ -108,6 +108,7 @@ export default function SettingsPage() {
       })
       toast.success(`${company.companyName} deleted successfully`)
       refetchAll()
+      loadDeletedItems() // Refresh deleted items list
     } catch (error) {
       console.error('Error deleting company:', error)
       toast.error(`Failed to delete ${company.companyName}. Please try again.`)
@@ -132,6 +133,7 @@ export default function SettingsPage() {
       })
       toast.success(`${paymentMethod.name} deleted successfully`)
       refetchAll()
+      loadDeletedItems() // Refresh deleted items list
     } catch (error) {
       console.error('Error deleting payment method:', error)
       toast.error(`Failed to delete ${paymentMethod.name}. Please try again.`)
