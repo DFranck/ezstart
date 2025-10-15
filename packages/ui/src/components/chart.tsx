@@ -132,12 +132,12 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background text-foreground px-2.5 py-1.5 text-xs shadow-xl shadow-foreground/10',
+          'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
           className
         )}
       >
         {!hideLabel && (
-          <div className={cn('font-medium text-foreground', labelClassName)}>
+          <div className={cn('font-medium', labelClassName)}>
             {labelFormatter ? labelFormatter(label, payload) : label}
           </div>
         )}
@@ -165,13 +165,9 @@ const ChartTooltipContent = React.forwardRef<
                       }}
                     />
                   )}
-                  <span className="text-muted-foreground">
-                    {itemConfig?.label || item.name}
-                  </span>
+                  <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
                 </div>
-                <span className="font-mono font-medium tabular-nums text-foreground">
-                  {value}
-                </span>
+                <span className="font-mono font-medium tabular-nums text-foreground">{value}</span>
               </div>
             )
           })}
@@ -215,7 +211,9 @@ const ChartLegendContent = React.forwardRef<
         return (
           <div
             key={item.value}
-            className={cn('flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground')}
+            className={cn(
+              'flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
+            )}
           >
             {!hideIcon && (
               <div
@@ -236,9 +234,9 @@ ChartLegendContent.displayName = 'ChartLegendContent'
 
 export {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  ChartTooltip,
+  ChartTooltipContent,
 }

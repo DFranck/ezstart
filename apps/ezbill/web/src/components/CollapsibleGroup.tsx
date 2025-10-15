@@ -1,4 +1,12 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Button, Icon } from '@ezstart/ui/components'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Badge,
+  Button,
+  Icon,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { ReactNode, useState } from 'react'
 
@@ -41,10 +49,10 @@ function CollapsibleGroup<T>({
   defaultOpenAll = true,
   showToggleAll = false,
   emptyMessage,
-  className
+  className,
 }: Props<T>) {
   const [openGroups, setOpenGroups] = useState<string[]>(
-    defaultOpenAll ? groups.map(g => g.id) : []
+    defaultOpenAll ? groups.map(g => g.id) : groups.length > 0 && groups[0] ? [groups[0].id] : []
   )
 
   const toggleAll = () => {
@@ -56,11 +64,7 @@ function CollapsibleGroup<T>({
   }
 
   if (groups.length === 0 && emptyMessage) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        {emptyMessage}
-      </div>
-    )
+    return <div className="text-center py-8 text-muted-foreground">{emptyMessage}</div>
   }
 
   const allOpen = openGroups.length === groups.length
@@ -76,7 +80,10 @@ function CollapsibleGroup<T>({
             onClick={toggleAll}
             className="text-muted-foreground hover:text-foreground"
           >
-            <Icon name={allOpen ? 'lucide:ChevronsDown' : 'lucide:ChevronsRight'} className="w-4 h-4 mr-2" />
+            <Icon
+              name={allOpen ? 'lucide:ChevronsDown' : 'lucide:ChevronsRight'}
+              className="w-4 h-4 mr-2"
+            />
             {allOpen ? 'Collapse All' : 'Expand All'}
           </Button>
         </div>
@@ -93,7 +100,7 @@ function CollapsibleGroup<T>({
           <AccordionItem
             key={group.id}
             value={group.id}
-            className="border rounded-xl bg-card"
+            className="border rounded-xl bg-card !border-b"
           >
             <AccordionTrigger className="hover:no-underline px-4 py-3">
               <div className="flex items-center justify-between w-full pr-2">

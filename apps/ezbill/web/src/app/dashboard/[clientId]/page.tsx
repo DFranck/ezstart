@@ -16,6 +16,8 @@ import { useBillingContext } from '@/contexts/billing-context'
 import { useClientDashboardHandlers } from '@/hooks/useClientDashboardHandlers'
 import { getBillingPermissions } from '@/utils/billing-permissions'
 import { groupInvoicesByMonth, groupInvoicesByStatus, groupInvoicesByWeek } from '@/utils/group-invoices'
+import { groupQuotesByMonth, groupQuotesByStatus } from '@/utils/group-quotes'
+import { groupReceiptsByMonth } from '@/utils/group-receipts'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Icon, P } from '@ezstart/ui/components'
@@ -38,6 +40,7 @@ const ClientDashboardPage = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined)
   const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
   const [invoiceGroupBy, setInvoiceGroupBy] = useState<'month' | 'week' | 'status'>('month')
+  const [quoteGroupBy, setQuoteGroupBy] = useState<'month' | 'status'>('month')
 
   // Use the custom hook for all document handlers
   const handlers = useClientDashboardHandlers()
@@ -113,6 +116,17 @@ const ClientDashboardPage = () => {
     return groupInvoicesByStatus(clientInvoices)
   }, [clientInvoices, invoiceGroupBy])
 
+  // Group quotes based on selected grouping
+  const quoteGroups = useMemo(() => {
+    if (quoteGroupBy === 'month') return groupQuotesByMonth(clientQuotes, 'fr')
+    return groupQuotesByStatus(clientQuotes)
+  }, [clientQuotes, quoteGroupBy])
+
+  // Group receipts by month
+  const receiptGroups = useMemo(() => {
+    return groupReceiptsByMonth(clientReceipts, 'fr')
+  }, [clientReceipts])
+
   if (loading) {
     return (
       <div className="min-h-screen  flex items-center justify-center w-full">
@@ -169,8 +183,8 @@ const ClientDashboardPage = () => {
         >
           {clientInvoices.length > 0 && (
             <div className="space-y-4">
-              {/* Group By Selector - Only show if 5+ invoices */}
-              {clientInvoices.length >= 5 && (
+              {/* Group By Selector - Only show if 3+ invoices */}
+              {clientInvoices.length >= 3 && (
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
@@ -199,8 +213,8 @@ const ClientDashboardPage = () => {
                 </div>
               )}
 
-              {/* Collapsible Groups - Only if 5+ invoices, otherwise flat list */}
-              {clientInvoices.length >= 5 ? (
+              {/* Collapsible Groups - Only if 3+ invoices, otherwise flat list */}
+              {clientInvoices.length >= 3 ? (
                 <CollapsibleGroup
                   groups={invoiceGroups}
                   renderItem={(invoice) => {
@@ -223,11 +237,11 @@ const ClientDashboardPage = () => {
                       />
                     )
                   }}
-                  defaultOpenAll={clientInvoices.length < 20}
+                  defaultOpenAll={false}
                   showToggleAll={invoiceGroups.length > 2}
                 />
               ) : (
-                // Flat list for < 5 invoices
+                // Flat list for < 3 invoices
                 clientInvoices.map(invoice => {
                   const permissions = getBillingPermissions(invoice, 'invoice')
                   return (
@@ -253,7 +267,7 @@ const ClientDashboardPage = () => {
           )}
         </DashboardSection>
 
-        {/* Quotes */}
+        {/* Quotes with Grouping */}
         <DashboardSection
           title="Quotes"
           description={`${clientQuotes.length} total quotes`}
@@ -274,33 +288,87 @@ const ClientDashboardPage = () => {
         >
           {clientQuotes.length > 0 && (
             <div className="space-y-4">
-              {clientQuotes.map(quote => {
-                const permissions = getBillingPermissions(quote, 'quote')
-                return (
-                  <QuoteCard
-                    key={quote._id}
-                    documentNumber={quote.documentNumber}
-                    status={quote.status}
-                    createdAt={quote.createdAt}
-                    total={quote.total}
-                    currency={quote.currency}
-                    validUntil={quote.validUntil}
-                    permissions={permissions}
-                    onClick={() => openPreview('quote', quote)}
-                    onEdit={e => handleEditQuote(quote, e)}
-                    onSend={e => handlers.handleSendQuote(quote, e)}
-                    onAccept={e => handlers.handleAcceptQuote(quote, e)}
-                    onDecline={e => handlers.handleDeclineQuote(quote, e)}
-                    onDownload={e => handlers.handleDownloadQuote(quote, e)}
-                    onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
-                  />
-                )
-              })}
+              {/* Group By Selector - Only show if 3+ quotes */}
+              {clientQuotes.length >= 3 && (
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    size="sm"
+                    variant={quoteGroupBy === 'month' ? 'default' : 'outline'}
+                    onClick={() => setQuoteGroupBy('month')}
+                  >
+                    <Icon name="lucide:Calendar" className="w-4 h-4 mr-2" />
+                    By Month
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={quoteGroupBy === 'status' ? 'default' : 'outline'}
+                    onClick={() => setQuoteGroupBy('status')}
+                  >
+                    <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
+                    By Status
+                  </Button>
+                </div>
+              )}
+
+              {/* Collapsible Groups - Only if 3+ quotes, otherwise flat list */}
+              {clientQuotes.length >= 3 ? (
+                <CollapsibleGroup
+                  groups={quoteGroups}
+                  renderItem={(quote) => {
+                    const permissions = getBillingPermissions(quote, 'quote')
+                    return (
+                      <QuoteCard
+                        key={quote._id}
+                        documentNumber={quote.documentNumber}
+                        status={quote.status}
+                        createdAt={quote.createdAt}
+                        total={quote.total}
+                        currency={quote.currency}
+                        validUntil={quote.validUntil}
+                        permissions={permissions}
+                        onClick={() => openPreview('quote', quote)}
+                        onEdit={e => handleEditQuote(quote, e)}
+                        onSend={e => handlers.handleSendQuote(quote, e)}
+                        onAccept={e => handlers.handleAcceptQuote(quote, e)}
+                        onDecline={e => handlers.handleDeclineQuote(quote, e)}
+                        onDownload={e => handlers.handleDownloadQuote(quote, e)}
+                        onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
+                      />
+                    )
+                  }}
+                  defaultOpenAll={false}
+                  showToggleAll={quoteGroups.length > 2}
+                />
+              ) : (
+                // Flat list for < 3 quotes
+                clientQuotes.map(quote => {
+                  const permissions = getBillingPermissions(quote, 'quote')
+                  return (
+                    <QuoteCard
+                      key={quote._id}
+                      documentNumber={quote.documentNumber}
+                      status={quote.status}
+                      createdAt={quote.createdAt}
+                      total={quote.total}
+                      currency={quote.currency}
+                      validUntil={quote.validUntil}
+                      permissions={permissions}
+                      onClick={() => openPreview('quote', quote)}
+                      onEdit={e => handleEditQuote(quote, e)}
+                      onSend={e => handlers.handleSendQuote(quote, e)}
+                      onAccept={e => handlers.handleAcceptQuote(quote, e)}
+                      onDecline={e => handlers.handleDeclineQuote(quote, e)}
+                      onDownload={e => handlers.handleDownloadQuote(quote, e)}
+                      onConvertToInvoice={e => handleConvertToInvoice(quote, e)}
+                    />
+                  )
+                })
+              )}
             </div>
           )}
         </DashboardSection>
 
-        {/* Receipts */}
+        {/* Receipts with Grouping */}
         <DashboardSection
           title="Receipts"
           description={`${clientReceipts.length} total receipts`}
@@ -322,19 +390,42 @@ const ClientDashboardPage = () => {
         >
           {clientReceipts.length > 0 && (
             <div className="space-y-4">
-              {clientReceipts.map(receipt => (
-                <ReceiptCard
-                  key={receipt._id}
-                  documentNumber={receipt.documentNumber}
-                  status={receipt.status}
-                  createdAt={receipt.createdAt}
-                  total={receipt.total}
-                  currency={receipt.currency}
-                  paymentDate={receipt.paymentDate}
-                  onClick={() => openPreview('receipt', receipt)}
-                  onDownload={e => handlers.handleDownloadReceipt(receipt, e)}
+              {/* Collapsible Groups - Only if 3+ receipts, otherwise flat list */}
+              {clientReceipts.length >= 3 ? (
+                <CollapsibleGroup
+                  groups={receiptGroups}
+                  renderItem={(receipt) => (
+                    <ReceiptCard
+                      key={receipt._id}
+                      documentNumber={receipt.documentNumber}
+                      status={receipt.status}
+                      createdAt={receipt.createdAt}
+                      total={receipt.total}
+                      currency={receipt.currency}
+                      paymentDate={receipt.paymentDate}
+                      onClick={() => openPreview('receipt', receipt)}
+                      onDownload={e => handlers.handleDownloadReceipt(receipt, e)}
+                    />
+                  )}
+                  defaultOpenAll={false}
+                  showToggleAll={receiptGroups.length > 2}
                 />
-              ))}
+              ) : (
+                // Flat list for < 3 receipts
+                clientReceipts.map(receipt => (
+                  <ReceiptCard
+                    key={receipt._id}
+                    documentNumber={receipt.documentNumber}
+                    status={receipt.status}
+                    createdAt={receipt.createdAt}
+                    total={receipt.total}
+                    currency={receipt.currency}
+                    paymentDate={receipt.paymentDate}
+                    onClick={() => openPreview('receipt', receipt)}
+                    onDownload={e => handlers.handleDownloadReceipt(receipt, e)}
+                  />
+                ))
+              )}
             </div>
           )}
         </DashboardSection>
