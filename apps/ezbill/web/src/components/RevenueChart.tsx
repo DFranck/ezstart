@@ -25,7 +25,7 @@ type RevenueChartProps = {
 type PeriodType = '6m' | '12m' | 'year'
 
 export function RevenueChart({ invoices, className }: RevenueChartProps) {
-  const [period, setPeriod] = useState<PeriodType>('12m')
+  const [period, setPeriod] = useState<PeriodType>('6m')
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
 
   // Get all available years from invoices
@@ -128,6 +128,7 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
             <Button
               variant={period === '12m' ? 'default' : 'outline'}
               size="sm"
+              className="hidden md:flex"
               onClick={() => setPeriod('12m')}
             >
               12 Months
@@ -135,6 +136,7 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
             <Button
               variant={period === 'year' ? 'default' : 'outline'}
               size="sm"
+              className="hidden md:flex"
               onClick={() => setPeriod('year')}
             >
               Year
@@ -143,7 +145,7 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
               <select
                 value={selectedYear}
                 onChange={e => setSelectedYear(Number(e.target.value))}
-                className="px-3 py-1.5 text-sm border border-border rounded-md bg-background text-foreground"
+                className="hidden md:inline-block px-3 py-1.5 text-sm border border-border rounded-md bg-background text-foreground"
               >
                 {availableYears.map(year => (
                   <option key={year} value={year}>
