@@ -20,6 +20,7 @@ export type GroupItem<T = unknown> = {
 type Props<T> = {
   groups: GroupItem<T>[]
   renderItem: (item: T, index: number) => ReactNode
+  getItemKey?: (item: T, index: number) => string
   defaultOpenAll?: boolean
   showToggleAll?: boolean
   emptyMessage?: string
@@ -46,6 +47,7 @@ type Props<T> = {
 function CollapsibleGroup<T>({
   groups,
   renderItem,
+  getItemKey,
   defaultOpenAll = true,
   showToggleAll = false,
   emptyMessage,
@@ -114,7 +116,10 @@ function CollapsibleGroup<T>({
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 pt-2">
               <div className="space-y-3">
-                {group.items.map((item, idx) => renderItem(item, idx))}
+                {group.items.map((item, idx) => {
+                  const key = getItemKey ? getItemKey(item, idx) : `${group.id}-item-${idx}`
+                  return <div key={key}>{renderItem(item, idx)}</div>
+                })}
               </div>
             </AccordionContent>
           </AccordionItem>

@@ -2,6 +2,7 @@
 
 import { ClientModal } from '@/components/client-modal'
 import ClientCard from '@/components/ClientCard_v2'
+import CollapsibleGroup from '@/components/CollapsibleGroup'
 import { CompanyModal } from '@/components/company-modal'
 import DashboardSection from '@/components/DashboardSection'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
@@ -11,6 +12,7 @@ import { RevenueChart } from '@/components/RevenueChart'
 import StatsCard from '@/components/StatsCard'
 import { TopClientsChart } from '@/components/TopClientsChart'
 import { useBillingContext } from '@/contexts/billing-context'
+import { groupClientsByActivity } from '@/utils/group-clients'
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
@@ -60,25 +62,8 @@ const DashboardPage = () => {
     .filter(invoice => invoice.status === 'sent' || invoice.status === 'draft')
     .reduce((sum, invoice) => sum + (invoice.total || 0), 0)
 
-  // Sort clients by latest activity
-  const getClientLatestActivity = (clientId: string): Date => {
-    const clientInvoices = allInvoices.filter(inv => inv.clientId === clientId)
-    const clientQuotes = allQuotes.filter(q => q.clientId === clientId)
-    const clientReceipts = allReceipts.filter(r => r.clientId === clientId)
-
-    const dates = [
-      ...clientInvoices.map(inv => new Date(inv.updatedAt || inv.createdAt)),
-      ...clientQuotes.map(q => new Date(q.updatedAt || q.createdAt)),
-      ...clientReceipts.map(r => new Date(r.updatedAt || r.createdAt)),
-    ]
-
-    // Return most recent date or epoch if no activity
-    return dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date(0)
-  }
-
-  const sortedClients = [...(clients || [])].sort((a, b) => {
-    return getClientLatestActivity(b._id).getTime() - getClientLatestActivity(a._id).getTime()
-  })
+  // Group clients by activity
+  const clientGroups = groupClientsByActivity(clients || [], allInvoices, allQuotes, allReceipts)
 
   const handleEditCompany = (company: Company) => {
     setEditingCompany(company)
@@ -267,17 +252,21 @@ const DashboardPage = () => {
                 buttonText: 'Add First Client',
               }}
             >
-              <div className="grid grid-cols-1  gap-4 sm:gap-6">
-                {sortedClients.map(client => (
+              <CollapsibleGroup
+                groups={clientGroups}
+                renderItem={client => (
                   <ClientCard
-                    key={client._id}
                     client={client}
                     onClick={handleClientClick}
                     onEdit={handleEditClient}
                     onDelete={handleDeleteClient}
                   />
-                ))}
-              </div>
+                )}
+                getItemKey={client => client._id}
+                defaultOpenAll={false}
+                showToggleAll={true}
+                className="grid grid-cols-1 gap-4 sm:gap-6"
+              />
             </DashboardSection>{' '}
           </div>
         )}
