@@ -56,7 +56,8 @@ export default function SettingsPage() {
         quotes: quotes.ok && Array.isArray(quotes.data) ? quotes.data : [],
         invoices: invoices.ok && Array.isArray(invoices.data) ? invoices.data : [],
         receipts: receipts.ok && Array.isArray(receipts.data) ? receipts.data : [],
-        paymentMethods: paymentMethods.ok && Array.isArray(paymentMethods.data) ? paymentMethods.data : [],
+        paymentMethods:
+          paymentMethods.ok && Array.isArray(paymentMethods.data) ? paymentMethods.data : [],
       })
     } catch (error) {
       console.error('Error loading deleted items:', error)
@@ -263,7 +264,7 @@ export default function SettingsPage() {
                 getItemKey={paymentMethod => paymentMethod._id}
                 defaultOpenAll={true}
                 showToggleAll={paymentMethodGroups.length > 1}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                // className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               />
             </DashboardSection>
           </TabsContent>
