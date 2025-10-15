@@ -60,6 +60,10 @@ export const paymentMethodSchema = paymentMethodBaseSchema.extend({
 
   createdAt: z.string().describe('ISO timestamp when the payment method was created'),
   updatedAt: z.string().describe('ISO timestamp when the payment method was last updated'),
+  deletedAt: z
+    .string()
+    .optional()
+    .describe('ISO timestamp when the payment method was soft-deleted'),
 });
 
 export type PaymentMethodType = ZodInfer<typeof paymentMethodTypeEnum>;

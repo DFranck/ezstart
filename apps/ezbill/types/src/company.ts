@@ -42,6 +42,10 @@ export const companySchema = companyBaseSchema.extend({
 
   createdAt: z.string().describe('ISO timestamp when the company was created'),
   updatedAt: z.string().describe('ISO timestamp when the company was last updated'),
+  deletedAt: z
+    .string()
+    .optional()
+    .describe('ISO timestamp when the company was soft-deleted'),
 })
 
 export type CreateCompany = ZodInfer<typeof createCompanySchema>
