@@ -260,6 +260,7 @@ interface QuoteCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
   validUntil?: string
   permissions: {
     canEdit?: boolean
+    canDelete?: boolean
     canSend?: boolean
     canAccept?: boolean
     canDecline?: boolean
@@ -267,6 +268,7 @@ interface QuoteCardProps extends Omit<BaseDocumentCardProps, 'onKeyDown'> {
     reason?: string
   }
   onEdit: (e: React.MouseEvent) => void
+  onDelete?: (e: React.MouseEvent) => void
   onSend?: (e: React.MouseEvent) => void
   onAccept?: (e: React.MouseEvent) => void
   onDecline?: (e: React.MouseEvent) => void
@@ -284,6 +286,7 @@ export function QuoteCard({
   permissions,
   onClick,
   onEdit,
+  onDelete,
   onSend,
   onAccept,
   onDecline,
@@ -330,6 +333,16 @@ export function QuoteCard({
           >
             <Icon name="lucide:Edit" className="w-4 h-4" />
           </Button>
+          {permissions.canDelete && onDelete && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onDelete}
+              className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
+            >
+              <Icon name="lucide:Trash2" className="w-4 h-4" />
+            </Button>
+          )}
           {permissions.canSend && onSend && (
             <Button
               size="sm"

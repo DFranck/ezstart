@@ -328,6 +328,7 @@ const ClientDashboardPage = () => {
                         permissions={permissions}
                         onClick={() => openPreview('quote', quote)}
                         onEdit={e => handleEditQuote(quote, e)}
+                        onDelete={e => handlers.handleDeleteQuote(quote, e)}
                         onSend={e => handlers.handleSendQuote(quote, e)}
                         onAccept={e => handlers.handleAcceptQuote(quote, e)}
                         onDecline={e => handlers.handleDeclineQuote(quote, e)}
@@ -355,6 +356,7 @@ const ClientDashboardPage = () => {
                       permissions={permissions}
                       onClick={() => openPreview('quote', quote)}
                       onEdit={e => handleEditQuote(quote, e)}
+                      onDelete={e => handlers.handleDeleteQuote(quote, e)}
                       onSend={e => handlers.handleSendQuote(quote, e)}
                       onAccept={e => handlers.handleAcceptQuote(quote, e)}
                       onDecline={e => handlers.handleDeclineQuote(quote, e)}

@@ -245,6 +245,32 @@ export function useClientDashboardHandlers() {
     }
   }
 
+  const handleDeleteQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+
+    const confirmed = confirm(
+      `Are you sure you want to delete quote ${quote.documentNumber}? This will move it to trash.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const response = await callApi(`/quotes/${quote._id}`, {
+        method: 'DELETE',
+        userId: getUserId(),
+      })
+
+      if (response.ok) {
+        await refetchAll()
+      } else {
+        alert('Failed to delete quote')
+      }
+    } catch (error) {
+      console.error('Error deleting quote:', error)
+      alert('Error deleting quote')
+    }
+  }
+
   return {
     handleSendInvoice,
     handleDownloadInvoice,
@@ -255,5 +281,6 @@ export function useClientDashboardHandlers() {
     handleAcceptQuote,
     handleDeclineQuote,
     handleDownloadQuote,
+    handleDeleteQuote,
   }
 }
