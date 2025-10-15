@@ -1,11 +1,14 @@
 'use client'
 
+import CollapsibleGroup from '@/components/CollapsibleGroup'
 import { CompanyModal } from '@/components/company-modal'
 import CompanyCard from '@/components/CompanyCard_v2'
 import DashboardSection from '@/components/DashboardSection'
 import { PaymentMethodModal } from '@/components/payment-method-modal'
 import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import { useBillingContext } from '@/contexts/billing-context'
+import { groupCompaniesAsOne } from '@/utils/group-companies'
+import { groupPaymentMethodsByType } from '@/utils/group-payment-methods'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
@@ -147,6 +150,10 @@ export default function SettingsPage() {
 
   const totalDeleted = Object.values(deletedItems).reduce((sum, items) => sum + items.length, 0)
 
+  // Group data
+  const companyGroups = groupCompaniesAsOne(companies)
+  const paymentMethodGroups = groupPaymentMethodsByType(paymentMethods)
+
   return (
     <div className="max-w-7xl w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       <div>
@@ -186,16 +193,20 @@ export default function SettingsPage() {
               }}
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {companies.map(company => (
+              <CollapsibleGroup
+                groups={companyGroups}
+                renderItem={company => (
                   <CompanyCard
-                    key={company._id}
                     company={company}
                     onEdit={handleEditCompany}
                     onDelete={handleDeleteCompany}
                   />
-                ))}
-              </div>
+                )}
+                getItemKey={company => company._id}
+                defaultOpenAll={true}
+                showToggleAll={false}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              />
             </DashboardSection>
           </TabsContent>
 
@@ -220,16 +231,20 @@ export default function SettingsPage() {
               }}
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paymentMethods.map(paymentMethod => (
+              <CollapsibleGroup
+                groups={paymentMethodGroups}
+                renderItem={paymentMethod => (
                   <PaymentMethodCard
-                    key={paymentMethod._id}
                     paymentMethod={paymentMethod}
                     onEdit={handleEditPaymentMethod}
                     onDelete={handleDeletePaymentMethod}
                   />
-                ))}
-              </div>
+                )}
+                getItemKey={paymentMethod => paymentMethod._id}
+                defaultOpenAll={true}
+                showToggleAll={paymentMethodGroups.length > 1}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              />
             </DashboardSection>
           </TabsContent>
 
