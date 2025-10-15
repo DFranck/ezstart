@@ -95,7 +95,7 @@ export default function SettingsPage() {
   const handleHardDelete = async (type: string, id: string) => {
     try {
       const endpoint = getApiEndpoint(type)
-      await callApi(`/${endpoint}/${id}?permanent=true`, {
+      await callApi(`/${endpoint}/${id}/hard-delete`, {
         method: 'DELETE',
         userId: getUserId(),
       })
