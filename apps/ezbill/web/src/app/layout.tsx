@@ -1,4 +1,6 @@
 import '@ezstart/ui/globals.css'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import type { Metadata } from 'next'
@@ -22,11 +24,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        <ThemeProvider>
-          <AuthProvider appName="ezbill">
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <QueryProvider>
+            <ThemeProvider>
+              <AuthProvider appName="ezbill">{children}</AuthProvider>
+            </ThemeProvider>
+          </QueryProvider>
+        </ErrorBoundary>
         <Toaster />
       </body>
     </html>

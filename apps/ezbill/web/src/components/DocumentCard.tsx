@@ -403,9 +403,9 @@ export function QuoteCard({
     <DeleteConfirmationDialog
       isOpen={deleteDialog}
       onClose={() => setDeleteDialog(false)}
-      onConfirm={(e) => {
+      onConfirm={() => {
         if (onDelete) {
-          onDelete(e as any)
+          onDelete({} as React.MouseEvent)
         }
         setDeleteDialog(false)
       }}
