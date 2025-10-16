@@ -2,7 +2,7 @@
 
 import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@/utils/api'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'

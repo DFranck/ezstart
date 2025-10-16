@@ -1,7 +1,7 @@
 'use client'
 
 import { Receipt } from '@ezbill/types'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { getUserId } from './get-user-id'
 
 /**

@@ -1,4 +1,4 @@
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

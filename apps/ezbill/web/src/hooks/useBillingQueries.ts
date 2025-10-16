@@ -3,7 +3,7 @@
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 
 // Query keys
 export const billingKeys = {

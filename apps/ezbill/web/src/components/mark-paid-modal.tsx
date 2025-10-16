@@ -3,7 +3,7 @@
 import { Company, CreateReceipt, Invoice } from '@ezbill/types';
 import { Button, H3, Input, Label, Modal, Section, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { getUserId } from '../utils/get-user-id';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';

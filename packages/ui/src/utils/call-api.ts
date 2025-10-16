@@ -1,4 +1,5 @@
-import { getApiUrl } from './get-api-url'
+import { getApiUrl as getApiUrlDeprecated } from './get-api-url'
+import type { AppName } from '@ezstart/config/urls'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
@@ -15,18 +16,28 @@ export type CallApiOptions = {
   headers?: Record<string, string>
   signal?: AbortSignal
   userId?: string
+  /** App name to automatically resolve API URL from @ezstart/config */
+  appName?: AppName
 }
 
 export async function callApi<T = any>(
   endpoint: string,
   options: CallApiOptions = {}
 ): Promise<ApiResponse<T>> {
-  const { method = 'GET', query, body, headers = {}, signal, userId } = options
+  const { method = 'GET', query, body, headers = {}, signal, userId, appName } = options
 
-  const baseUrl = getApiUrl({
-    serverUrl: process.env.API_URL,
-    clientUrl: process.env.NEXT_PUBLIC_API_URL,
-  })
+  // Use new @ezstart/config if appName is provided
+  let baseUrl: string
+  if (appName) {
+    const { getApiUrl } = await import('@ezstart/config/urls')
+    baseUrl = getApiUrl(appName)
+  } else {
+    // Fallback to deprecated getApiUrl for backward compatibility
+    baseUrl = getApiUrlDeprecated({
+      serverUrl: process.env.API_URL,
+      clientUrl: process.env.NEXT_PUBLIC_API_URL,
+    })
+  }
 
   // Ensure /api prefix: add if missing, don't duplicate if already present
   const normalizedEndpoint = endpoint.startsWith('/api/') ? endpoint.slice(4) : endpoint.startsWith('/') ? endpoint : `/${endpoint}`

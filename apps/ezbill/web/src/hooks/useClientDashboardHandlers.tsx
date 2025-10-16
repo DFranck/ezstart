@@ -5,7 +5,7 @@ import { getUserId } from '@/utils/get-user-id'
 import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { InvoicePDF, ReceiptPDF } from '@ezstart/ui/templates'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import React from 'react'
 
 export function useClientDashboardHandlers() {
