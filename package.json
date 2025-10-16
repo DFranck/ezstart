@@ -5,6 +5,11 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "build:ezauth-api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build && turbo build --filter=api-ezauth",
+    "build:ezpay-api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build && turbo build --filter=api-ezpay",
+    "build:ezbill-api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build && turbo build --filter=api-ezbill",
+    "build:tower-defense-api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build && turbo build --filter=api-tower-defense",
+    "build:green-pulse-api": "pnpm --filter @ezstart/config --filter @ezstart/express-core build && turbo build --filter=api-green-pulse",
     "dev": "turbo dev --concurrency 50",
     "dev:types": "tsc -b --watch",
     "dev:optimized": "concurrently \"pnpm dev:types\" \"turbo dev --concurrency 50\"",
