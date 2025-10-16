@@ -10,5 +10,18 @@
     "src/app/**/*": {
       "maxDuration": 30
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://ezbill.ezstart.xyz/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "ezbill-web.vercel.app"
+        }
+      ]
+    }
+  ]
 }

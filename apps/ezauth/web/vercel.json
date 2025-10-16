@@ -10,5 +10,18 @@
     "src/app/**/*": {
       "maxDuration": 30
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://ezauth.ezstart.xyz/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "ezstart-ezauth.vercel.app"
+        }
+      ]
+    }
+  ]
 }
