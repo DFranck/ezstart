@@ -2,13 +2,26 @@
   "name": "@ezstart/config",
   "version": "0.0.1",
   "description": "Centralized configuration for all environments, URLs, and CORS",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./urls": "./src/urls.ts",
-    "./cors": "./src/cors.ts",
-    "./env": "./src/env.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./urls": {
+      "import": "./dist/urls.js",
+      "types": "./dist/urls.d.ts"
+    },
+    "./cors": {
+      "import": "./dist/cors.js",
+      "types": "./dist/cors.d.ts"
+    },
+    "./env": {
+      "import": "./dist/env.js",
+      "types": "./dist/env.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc -b",
