@@ -601,6 +601,28 @@ cd apps/ezpay/api && node dist/index.js
 - ✅ **Root Directory** : `apps/[app]/web`
 - ✅ **Include files outside root directory** : COCHÉ (obligatoire)
 - ✅ **Build Command** : `pnpm build`
+- ✅ **vercel.json** : Configuration obligatoire dans chaque app web
+
+**Configuration vercel.json standardisée :**
+
+```json
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "src/app/**/*": {
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+**⚠️ OBLIGATOIRE :** Toutes les apps web DOIVENT avoir un `vercel.json` avec `outputDirectory: ".next"` pour éviter l'erreur "No Output Directory named 'public' found".
 
 **Build Commands optimisés dans package.json :**
 
