@@ -18,13 +18,13 @@ function getEZAuthUrls() {
       apiBaseURL: isProduction
         ? 'https://ezauth.up.railway.app/api/auth'
         : 'http://localhost:5010/api/auth',
-      webBaseURL: isProduction ? 'https://ezauth.vercel.app' : 'http://localhost:5015',
+      webBaseURL: isProduction ? 'https://ezstart-ezauth.vercel.app' : 'http://localhost:5015',
     }
   } else {
     // On server, use a safe default (production URLs)
     return {
       apiBaseURL: 'https://ezauth.up.railway.app/api/auth',
-      webBaseURL: 'https://ezauth.vercel.app',
+      webBaseURL: 'https://ezstart-ezauth.vercel.app',
     }
   }
 }

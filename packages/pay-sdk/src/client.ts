@@ -21,13 +21,13 @@ function getEZPayUrls() {
       apiBaseURL: isProduction
         ? 'https://ezpay-api.up.railway.app/api'
         : 'http://localhost:5040/api',
-      webBaseURL: isProduction ? 'https://ezpay-web.vercel.app' : 'http://localhost:5045',
+      webBaseURL: isProduction ? 'https://ezstart-ezpay.vercel.app' : 'http://localhost:5045',
     }
   } else {
     // On server, use a safe default (production URLs)
     return {
       apiBaseURL: 'https://ezpay-api.up.railway.app/api',
-      webBaseURL: 'https://ezpay-web.vercel.app',
+      webBaseURL: 'https://ezstart-ezpay.vercel.app',
     }
   }
 }
