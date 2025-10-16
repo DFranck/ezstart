@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 5065",
-    "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

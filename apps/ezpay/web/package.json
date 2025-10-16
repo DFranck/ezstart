@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @ezstart/ui --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build",
     "dev": "next dev --turbopack -p 5045",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

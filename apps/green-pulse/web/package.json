@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node src/scripts/dev-with-port.js",
     "dev:port": "next dev -p $PORT",
-    "build": "pnpm --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"

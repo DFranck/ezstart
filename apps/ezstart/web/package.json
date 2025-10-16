@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node src/scripts/dev-with-port.js",
     "dev:port": "next dev --turbopack -p $PORT",
-    "build": "pnpm --filter @ezstart/ui --filter @ezstart/next-theme --filter @ezstart/auth-sdk build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/next-theme --filter @ezstart/auth-sdk build && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
