@@ -3,7 +3,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
-import type { Metadata } from 'next'
+import { createMetadata } from '@ezstart/seo-config/metadata'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
 
@@ -12,10 +12,13 @@ const fontSans = Geist({
   variable: '--font-sans',
 })
 
-export const metadata: Metadata = {
-  title: 'EZ Billing',
-  description: 'Simple billing management',
-}
+export const metadata = createMetadata({
+  appName: 'EZ Billing',
+  description: 'Simple and efficient billing management for businesses',
+  domain: 'https://ezbill-web.vercel.app',
+  keywords: ['billing', 'invoices', 'clients', 'payments', 'business'],
+  themeColor: '#3B82F6',
+})
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

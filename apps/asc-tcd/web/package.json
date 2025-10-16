@@ -36,6 +36,7 @@
     "@types/react-dom": "^19.1.9",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/next-config": "workspace:*",
+    "@ezstart/seo-config": "workspace:*",
     "@ezstart/tailwind-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "typescript": "^5.7.3"

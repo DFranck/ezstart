@@ -36,6 +36,7 @@
   "devDependencies": {
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/next-config": "workspace:*",
+    "@ezstart/seo-config": "workspace:*",
     "@ezstart/tailwind-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
     "@types/dom-to-image": "^2.6.7",

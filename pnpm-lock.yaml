@@ -112,6 +112,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -237,6 +240,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -417,6 +423,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -521,6 +530,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -597,6 +609,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -691,6 +706,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -1076,6 +1094,9 @@ importers:
       '@ezstart/next-config':
         specifier: workspace:*
         version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
@@ -1306,6 +1327,18 @@ importers:
       react:
         specifier: ^19.1.1
         version: 19.1.1
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  packages/seo-config:
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      next:
+        specifier: ^15.5.2
+        version: 15.5.2(@babel/core@7.28.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
