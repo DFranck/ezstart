@@ -16,6 +16,7 @@
   "dependencies": {
     "@ezstart/express-core": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "express": "^4.18.2",
     "mongoose": "^8.0.0",
     "jsonwebtoken": "^9.0.2",

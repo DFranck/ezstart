@@ -1,3 +1,4 @@
+import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
 import type { AuthToken, AuthUser } from './types.js'
 
 export interface AuthClientConfig {
@@ -8,24 +9,12 @@ export interface AuthClientConfig {
 
 // Helper to get the correct URLs based on environment
 function getEZAuthUrls() {
-  // Check if we're in browser or server
-  if (typeof window !== 'undefined') {
-    // In browser, check the current hostname
-    const hostname = window.location.hostname
-    const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
+  // Detect environment (local, development, production)
+  const env = getCurrentEnvironment()
 
-    return {
-      apiBaseURL: isProduction
-        ? 'https://ezauth.up.railway.app/api/auth'
-        : 'http://localhost:5010/api/auth',
-      webBaseURL: isProduction ? 'https://ezstart-ezauth.vercel.app' : 'http://localhost:5015',
-    }
-  } else {
-    // On server, use a safe default (production URLs)
-    return {
-      apiBaseURL: 'https://ezauth.up.railway.app/api/auth',
-      webBaseURL: 'https://ezstart-ezauth.vercel.app',
-    }
+  return {
+    apiBaseURL: `${getApiUrl('ezauth', env)}/api/auth`,
+    webBaseURL: getWebUrl('ezauth', env),
   }
 }
 

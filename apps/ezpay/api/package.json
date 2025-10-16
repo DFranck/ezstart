@@ -16,6 +16,7 @@
   "dependencies": {
     "@ezstart/express-core": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "express": "^4.19.2",
     "mongoose": "^8.15.1",
     "stripe": "^14.0.0",

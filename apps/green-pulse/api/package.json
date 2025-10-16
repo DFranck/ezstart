@@ -16,6 +16,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.0.0",
     "@ezstart/express-core": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "@green-pulse/types": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

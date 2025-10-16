@@ -39,42 +39,42 @@ export interface AppUrls {
  * Complete URL mapping for all apps
  */
 export const URLS: Record<AppName, AppUrls> = {
-  'ezstart': {
+  ezstart: {
     web: {
       local: 'http://localhost:5050',
-      development: 'https://ezstart.vercel.app',
+      development: 'https://ezstart-web.vercel.app',
       production: 'https://www.ezstart.xyz',
     },
   },
 
-  'ezauth': {
+  ezauth: {
     web: {
       local: 'http://localhost:5015',
-      development: 'https://ezauth.vercel.app',
+      development: 'https://ezstart-ezauth.vercel.app',
       production: 'https://ezauth.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:5010',
-      production: 'https://ezauth-api.up.railway.app',
+      production: 'https://ezauth.up.railway.app',
     },
   },
 
-  'ezbill': {
+  ezbill: {
     web: {
       local: 'http://localhost:5025',
-      development: 'https://ezbill.vercel.app',
+      development: 'https://ezstart-ezbill.vercel.app',
       production: 'https://ezbill.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:5020',
-      production: 'https://ezbill-api.up.railway.app',
+      production: 'https://ez-billing.onrender.com',
     },
   },
 
-  'ezpay': {
+  ezpay: {
     web: {
       local: 'http://localhost:5045',
-      development: 'https://ezpay.vercel.app',
+      development: 'https://ezstart-ezpay.vercel.app',
       production: 'https://ezpay.ezstart.xyz',
     },
     api: {
@@ -83,7 +83,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
   },
 
-  'fengshui': {
+  fengshui: {
     web: {
       local: 'http://localhost:5065',
       development: 'https://fengshui.vercel.app',
@@ -183,9 +183,5 @@ export function getAllApiUrls(app: AppName): string[] {
   const apiUrls = URLS[app].api
   if (!apiUrls) return []
 
-  return [
-    apiUrls.local,
-    apiUrls.development,
-    apiUrls.production,
-  ].filter(Boolean) as string[]
+  return [apiUrls.local, apiUrls.development, apiUrls.production].filter(Boolean) as string[]
 }

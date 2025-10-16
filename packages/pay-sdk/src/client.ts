@@ -1,3 +1,4 @@
+import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
 import type {
   CreateDonationRequest,
   CreatePurchaseRequest,
@@ -11,24 +12,12 @@ import type {
 
 // Helper to get the correct URLs based on environment
 function getEZPayUrls() {
-  // Check if we're in browser or server
-  if (typeof window !== 'undefined') {
-    // In browser, check the current hostname
-    const hostname = window.location.hostname
-    const isProduction = !hostname.includes('localhost') && !hostname.includes('127.0.0.1')
+  // Detect environment (local, development, production)
+  const env = getCurrentEnvironment()
 
-    return {
-      apiBaseURL: isProduction
-        ? 'https://ezpay-api.up.railway.app/api'
-        : 'http://localhost:5040/api',
-      webBaseURL: isProduction ? 'https://ezstart-ezpay.vercel.app' : 'http://localhost:5045',
-    }
-  } else {
-    // On server, use a safe default (production URLs)
-    return {
-      apiBaseURL: 'https://ezpay-api.up.railway.app/api',
-      webBaseURL: 'https://ezstart-ezpay.vercel.app',
-    }
+  return {
+    apiBaseURL: `${getApiUrl('ezpay', env)}/api`,
+    webBaseURL: getWebUrl('ezpay', env),
   }
 }
 

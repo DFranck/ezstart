@@ -454,6 +454,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 
 ### Packages Centralisés de Configuration
 
+- `@ezstart/config` - **URLs, domaines et configuration CORS centralisés** ⭐ NOUVEAU
 - `@ezstart/tailwind-config` - Configs Tailwind partagées
 - `@ezstart/eslint-config` - Règles ESLint partagées avec 3 variantes :
   - `base.js` - Configuration de base (APIs, packages simples)
@@ -471,6 +472,7 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 - `@ezstart/next-theme` - Theme provider (dark/light mode)
 - `@ezstart/express-core` - Infrastructure API partagée
 - `@ezstart/auth-sdk` - SDK d'authentification centralisé
+- `@ezstart/pay-sdk` - SDK de paiement centralisé
 
 ### Propagation Automatique des Changements
 
@@ -1693,16 +1695,33 @@ const domain = getWebUrl('ezpay', 'production')
 - **Tower Defense API** → Appelé uniquement par Tower Defense web
 - **GreenPulse API** → Appelé uniquement par GreenPulse web
 
-### Migration des Apps
+### Migration des Apps ✅ COMPLÉTÉE (16/10/2025)
+
+**Status :** Toutes les apps et APIs du monorepo utilisent maintenant `@ezstart/config` !
+
+**Apps migrées :**
+- ✅ **EZAuth API** - CORS auto-configuré
+- ✅ **EZPay API** - CORS auto-configuré
+- ✅ **EZBill API** - CORS auto-configuré
+- ✅ **Tower Defense API** - CORS auto-configuré + Socket.IO
+- ✅ **GreenPulse API** - CORS auto-configuré
+- ✅ **Tower Defense Web** - getApiUrl('tower-defense') pour Socket.IO
+- ✅ **SDKs** - auth-sdk et pay-sdk utilisent déjà @ezstart/config
+- ✅ **@ezstart/ui** - get-api-url.ts marqué deprecated avec warning
 
 **Guide complet :** [docs/MIGRATION-CONFIG.md](./docs/MIGRATION-CONFIG.md)
 
-**Étapes rapides :**
-1. Ajouter `"@ezstart/config": "workspace:*"` à package.json
-2. Remplacer `process.env.NEXT_PUBLIC_API_URL` par `getApiUrl(app)`
-3. Remplacer logique CORS custom par `createCorsConfig(app)`
-4. Supprimer URLs des .env.local (garder les secrets !)
-5. Tester localement puis en prod
+**Changements appliqués :**
+1. ✅ Ajouté `"@ezstart/config": "workspace:*"` à tous les package.json
+2. ✅ Remplacé hardcoded CORS origins par `createCorsConfig(appName)`
+3. ✅ Remplacé `process.env.NEXT_PUBLIC_API_URL` par `getApiUrl(appName)`
+4. ✅ Mis à jour tous les `.env.example` avec notes de migration
+5. ✅ Installé les dépendances avec `pnpm install`
+
+**Notes importantes :**
+- Les URLs peuvent maintenant rester dans `.env.local` pour override en dev
+- CORS origins ne sont plus nécessaires dans `.env` des APIs
+- Un seul changement dans `packages/config/src/urls.ts` → Tous les projets updated
 
 ### Mettre à Jour un Domaine
 

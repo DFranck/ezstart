@@ -1,4 +1,5 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
+import { createCorsConfig } from '@ezstart/config/cors'
 import routes from './routes/index.js'
 
 const PORT = getApiPort(5040)
@@ -6,17 +7,7 @@ const PORT = getApiPort(5040)
 // Create app with raw body routes for webhook signature verification
 const app = createApp({
   rawBodyRoutes: ['/api/webhooks/stripe'],
-  corsOrigins: [
-    // Local development
-    'http://localhost:5045', // EZPay web local
-    'http://localhost:5065', // FengShui local
-    // Vercel domains (legacy)
-    'https://ezstart-ezpay.vercel.app',
-    'https://ezfengshui.vercel.app',
-    // Custom domains (ezstart.xyz)
-    'https://ezpay.ezstart.xyz',
-    'https://ezfengshui.ezstart.xyz',
-  ],
+  ...createCorsConfig('ezpay'),
 })
 
 // Health check (for Render)

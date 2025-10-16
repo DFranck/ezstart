@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { getApiUrl } from '@ezstart/config/urls'
 
 interface GamesSocketContextType {
   socket: Socket | null
@@ -19,7 +20,8 @@ export function GamesSocketProvider({ children }: { children: React.ReactNode })
   const connect = () => {
     if (socket?.connected) return
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888', {
+    const apiUrl = getApiUrl('tower-defense')
+    const newSocket = io(apiUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
     })

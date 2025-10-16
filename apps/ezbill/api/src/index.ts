@@ -1,16 +1,8 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
+import { createCorsConfig } from '@ezstart/config/cors'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({
-  corsOrigins: [
-    // Local development
-    'http://localhost:5025', // EZBill web local
-    // Vercel domains (legacy)
-    'https://ezstart-ezbill.vercel.app',
-    // Custom domains (ezstart.xyz)
-    'https://ezbill.ezstart.xyz',
-  ],
-})
+export const app = createApp(createCorsConfig('ezbill'))
 const PORT = getApiPort()
 
 // Health check (for Render)

@@ -148,6 +148,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -267,6 +270,9 @@ importers:
       '@ezbill/types':
         specifier: workspace:*
         version: link:../types
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -447,6 +453,9 @@ importers:
 
   apps/ezpay/api:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -739,6 +748,9 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.0.0
         version: 7.3.4(zod@3.23.8)
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -892,6 +904,9 @@ importers:
 
   apps/tower-defense/api:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
@@ -1033,6 +1048,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -1139,6 +1157,9 @@ importers:
 
   packages/auth-sdk:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1170,6 +1191,9 @@ importers:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^20
+        version: 20.19.9
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -1218,6 +1242,9 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
         version: 7.3.4(zod@3.23.8)
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
       '@ezstart/types':
         specifier: workspace:*
         version: link:../types
@@ -1320,6 +1347,9 @@ importers:
 
   packages/pay-sdk:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1387,6 +1417,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

@@ -16,6 +16,7 @@
   "dependencies": {
     "@ezbill/types": "workspace:*",
     "@ezstart/express-core": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.19.2",

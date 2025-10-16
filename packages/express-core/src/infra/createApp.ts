@@ -1,6 +1,8 @@
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express, { Express } from 'express';
+import type { AppName } from '@ezstart/config/urls';
+import { createCorsConfig } from '@ezstart/config/cors';
 
 // Load .env.local first (priority), then .env as fallback
 dotenv.config({ path: '.env.local' });
@@ -14,9 +16,20 @@ export interface CreateAppOptions {
   rawBodyRoutes?: string[];
   /**
    * CORS origins to allow
-   * Example: ['https://myapp.vercel.app', 'http://localhost:3000']
-   * If not provided, allows all origins (*)
+   *
+   * Option 1 (RECOMMENDED): Auto-detect using @ezstart/config
+   * ```typescript
+   * createApp({ apiApp: 'ezauth' }) // Auto CORS for all apps calling EZAuth
+   * ```
+   *
+   * Option 2 (MANUAL): Provide custom origins
+   * ```typescript
+   * createApp({ corsOrigins: ['https://myapp.vercel.app'] })
+   * ```
+   *
+   * Option 3 (LEGACY): Not provided = allows all origins (*)
    */
+  apiApp?: AppName;
   corsOrigins?: string[];
 }
 
@@ -24,19 +37,31 @@ export function createApp(options?: CreateAppOptions): Express {
   const app = express();
 
   // Configure CORS
-  const corsOptions = options?.corsOrigins
-    ? {
-        origin: options.corsOrigins,
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
-      }
-    : {
-        origin: '*', // Allow all origins if not specified
-        credentials: false,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
-      };
+  let corsOptions: any;
+
+  if (options?.apiApp) {
+    // Option 1: Auto-detect CORS using @ezstart/config (RECOMMENDED)
+    corsOptions = createCorsConfig(options.apiApp);
+    console.log(`✅ [CORS] Auto-configured for API: ${options.apiApp}`);
+  } else if (options?.corsOrigins) {
+    // Option 2: Manual CORS origins
+    corsOptions = {
+      origin: options.corsOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
+    };
+    console.log(`✅ [CORS] Manual origins: ${options.corsOrigins.join(', ')}`);
+  } else {
+    // Option 3: Allow all (LEGACY)
+    corsOptions = {
+      origin: '*',
+      credentials: false,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
+    };
+    console.warn(`⚠️ [CORS] Allowing ALL origins (*) - Consider using apiApp option`);
+  }
 
   app.use(cors(corsOptions));
 

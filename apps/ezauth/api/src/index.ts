@@ -1,26 +1,12 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
+import { createCorsConfig } from '@ezstart/config/cors'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
 
 const PORT = getApiPort()
 
-// Create app with CORS configuration
-const app = createApp({
-  corsOrigins: [
-    // Local development
-    'http://localhost:5015', // EZAuth web local
-    'http://localhost:5025', // EZBill web local
-    'http://localhost:5050', // EZStart web local
-    // Vercel domains (legacy)
-    'https://ezstart-ezauth.vercel.app',
-    'https://ezstart-ezbill.vercel.app',
-    'https://ezstart-web.vercel.app',
-    // Custom domains (ezstart.xyz)
-    'https://ezauth.ezstart.xyz',
-    'https://ezbill.ezstart.xyz',
-    'https://ezstart.xyz',
-  ],
-})
+// Create app with CORS configuration from @ezstart/config
+const app = createApp(createCorsConfig('ezauth'))
 
 // Health check (for Render)
 app.get('/', (_: any, res: any) => res.status(200).json({ status: 'ok', service: 'EZAuth' }))
