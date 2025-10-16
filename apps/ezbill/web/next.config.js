@@ -1,1 +1,10 @@
-export { baseConfig as default } from '@ezstart/next-config/base.js'
+import { createNextConfig } from '@ezstart/next-config/compose'
+
+export default createNextConfig({
+  pwa: true,
+  extend: {
+    eslint: {
+      ignoreDuringBuilds: true
+    }
+  }
+})

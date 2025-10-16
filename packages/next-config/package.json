@@ -10,20 +10,27 @@
     "./base.js": "./src/base.js",
     "./pwa": "./src/pwa.js",
     "./withI18n": "./src/withI18n.js",
-    "./withPWA": "./src/withPWA.js"
+    "./withPWA": "./src/withPWA.js",
+    "./compose": "./src/compose.js"
   },
   "files": [
     "src/base.js",
     "src/pwa.js",
     "src/withI18n.js",
-    "src/withPWA.js"
+    "src/withPWA.js",
+    "src/compose.js"
   ],
   "peerDependencies": {
     "next": "^15.0.0"
   },
   "devDependencies": {
-    "next": "^15.5.2",
     "@ezstart/typescript-config": "workspace:*",
+    "next": "^15.5.2",
     "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "deepmerge": "^4.3.1",
+    "next-intl": "^4.3.12",
+    "next-pwa": "^5.6.0"
   }
 }

@@ -1,10 +1,12 @@
 # @ezstart/next-config
 
-Centralized Next.js configuration for all @ezstart web applications.
+**Centralized Next.js configuration with PWA and i18n support for all @ezstart web applications.**
+
+> ✅ **Updated:** 16/10/2025 - Now with `createNextConfig()` composer
 
 ## Overview
 
-`@ezstart/next-config` provides standardized Next.js configurations that ensure consistency and optimal performance across all web applications in the @ezstart monorepo.
+`@ezstart/next-config` provides a unified, composable Next.js configuration system with built-in PWA and i18n support. All 8 web apps in the monorepo use this package for 100% consistent configuration.
 
 ## Installation
 
