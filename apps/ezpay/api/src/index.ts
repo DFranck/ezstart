@@ -7,10 +7,15 @@ const PORT = getApiPort(5040)
 const app = createApp({
   rawBodyRoutes: ['/api/webhooks/stripe'],
   corsOrigins: [
-    'http://localhost:5065', // FengShui local
+    // Local development
     'http://localhost:5045', // EZPay web local
-    'https://ez-fengshui.vercel.app', // FengShui prod
-    'https://ezpay.vercel.app', // EZPay web prod (if needed)
+    'http://localhost:5065', // FengShui local
+    // Vercel domains (legacy)
+    'https://ezpay-web.vercel.app',
+    'https://fengshui-web.vercel.app',
+    // Custom domains (ezstart.xyz)
+    'https://ezpay.ezstart.xyz',
+    'https://ezfengshui.ezstart.xyz',
   ],
 })
 
