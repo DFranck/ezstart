@@ -12,6 +12,7 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
+import { getApiUrl } from '@ezstart/config/urls'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -50,10 +51,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         redirect_uri: redirect_uri || undefined,
       }
 
-      const apiUrl =
-        process.env.NODE_ENV === 'production'
-          ? 'https://ezauth-oblm.onrender.com/api/auth/login'
-          : 'http://localhost:5010/api/auth/login'
+      const apiUrl = `${getApiUrl('ezauth')}/api/auth/login`
 
       const response = await fetch(apiUrl, {
         method: 'POST',
