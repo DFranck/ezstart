@@ -14,6 +14,7 @@ import {
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
+import { getApiUrl } from '@ezstart/config/urls'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -26,8 +27,8 @@ export default function HomePage() {
 
     await runWithFeedback({
       action: async () => {
-        const baseURL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:5010/api'
-        const response = await fetch(`${baseURL}/waitlist/green-pulse/add`, {
+        const apiUrl = getApiUrl('ezauth')
+        const response = await fetch(`${apiUrl}/api/auth/waitlist/green-pulse/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),

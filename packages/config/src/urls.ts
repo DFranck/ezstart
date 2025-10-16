@@ -67,7 +67,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5020',
-      production: 'https://ez-billing.onrender.com',
+      production: 'https://ezbill.onrender.com',
     },
   },
 
