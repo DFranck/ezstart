@@ -1,5 +1,21 @@
 # 🚀 Configuration Claude - @ezstart Monorepo
 
+## 📚 Documentation Centralisée
+
+**Voir [docs/README.md](./docs/README.md) pour la documentation complète et les audits.**
+
+**Audits disponibles :**
+- 🔒 [Security Audit](./docs/audits/SECURITY-AUDIT.md) - Authentication, secrets, CORS, vulnerabilities
+- ⚡ [Performance Audit](./docs/audits/PERFORMANCE-AUDIT.md) - Bundle sizes, API times, optimization
+- 🏗️ [Architecture Audit](./docs/audits/ARCHITECTURE-AUDIT.md) - Dependencies, structure, best practices
+- ✨ [Code Quality Audit](./docs/audits/CODE-QUALITY-AUDIT.md) - TypeScript, ESLint, tests, documentation
+- 📦 [Dependencies Audit](./docs/audits/DEPENDENCIES-AUDIT.md) - Outdated packages, vulnerabilities, licenses
+- ♿ [Accessibility Audit](./docs/audits/ACCESSIBILITY-AUDIT.md) - WCAG compliance, keyboard nav, screen readers
+- 🚀 [Infrastructure Audit](./docs/audits/INFRASTRUCTURE-AUDIT.md) - Railway/Vercel, monitoring, backups
+- 🔌 [API Audit](./docs/audits/API-AUDIT.md) - OpenAPI, error handling, authentication
+- 🔍 [SEO Audit](./docs/audits/SEO-AUDIT.md) - Meta tags, sitemaps, structured data
+- 🌐 [Web Apps Audit](./docs/audits/WEB-APPS-AUDIT.md) - App configs, PWA, deployment
+
 ## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
 
 ### État Actuel (12/10/2025 - 00h20)
@@ -130,6 +146,7 @@ Si tu reprends une session avec des processus déjà en cours :
 ```
 
 **Liste des composants disponibles :**
+
 - **Layout** : `Card`, `CardHeader`, `CardContent`, `CardFooter`, `Main`, `Header`, `Footer`
 - **Typography** : `H1`, `H2`, `H3`, `H4`, `H5`, `H6`, `P`, `Label`
 - **Form** : `Button`, `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`
@@ -143,21 +160,23 @@ Si tu reprends une session avec des processus déjà en cours :
 - **TOUJOURS** utiliser des classes sémantiques qui s'adaptent au dark mode
 
 **Classes sémantiques :**
+
 ```tsx
 // ❌ Couleurs hardcodées
-className="bg-gray-100 text-gray-900 border-gray-200"
+className = 'bg-gray-100 text-gray-900 border-gray-200'
 
 // ✅ Classes sémantiques
-className="bg-card text-foreground border"
+className = 'bg-card text-foreground border'
 
 // ❌ Couleurs de marque hardcodées
-className="bg-indigo-500 text-white"
+className = 'bg-indigo-500 text-white'
 
 // ✅ Classes de marque sémantiques
-className="bg-primary text-primary-foreground"
+className = 'bg-primary text-primary-foreground'
 ```
 
 **Palette sémantique complète :**
+
 - **Background** : `bg-background`, `bg-card`, `bg-muted`, `bg-popover`
 - **Text** : `text-foreground`, `text-muted-foreground`, `text-card-foreground`
 - **Primary** : `bg-primary`, `text-primary`, `text-primary-foreground`
@@ -344,7 +363,6 @@ Toutes les apps web (`ezstart/web`, `ezauth/web`, `ezbill/web`, `fengshui/web`, 
 ```tsx
 import { ThemeProvider } from '@ezstart/next-theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
-
 ;<ThemeProvider>
   <AuthProvider appName="fengshui">{children}</AuthProvider>
 </ThemeProvider>
@@ -356,7 +374,6 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { NextIntlClientProvider } from 'next-intl'
-
 ;<NextIntlClientProvider messages={messages} locale={locale}>
   <ThemeProvider>
     <AuthProvider appName="ezstart">{children}</AuthProvider>
@@ -543,10 +560,10 @@ Tous les packages utilisent les configurations centralisées selon leur type :
 
 - ✅ **EZStart** : https://ezstart-web.vercel.app
 - ✅ **EZAuth** : https://ezauth.vercel.app
-- ✅ **EZBill** : https://ezbill-web.vercel.app
-- ✅ **EZPay** : https://ezpay-web.vercel.app
+- ✅ **EZBill** : https://ezstart-ezbill.vercel.app
+- ✅ **EZPay** : https://ezstart-ezpay.vercel.app
 - ✅ **Tower Defense** : https://tower-defense-web.vercel.app
-- ✅ **FengShui** : https://fengshui-web.vercel.app
+- ✅ **FengShui** : https://ezfengshui.vercel.app
 - ✅ **ASC-TCD** : https://asc-tcd-web.vercel.app
 
 ### Pourquoi Railway pour EZAuth et EZPay ?
@@ -668,7 +685,7 @@ NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://...
 JWT_SECRET=production-secret
-ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezbill-web.vercel.app,...
+ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezstart-ezbill.vercel.app,...
 ```
 
 **EZPay API (Railway) :**
@@ -679,7 +696,7 @@ PORT=5040
 MONGO_URL=mongodb+srv://...
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-WEB_URL=https://ezpay-web.vercel.app
+WEB_URL=https://ezstart-ezpay.vercel.app
 ```
 
 **Apps Web (Vercel) :**
@@ -1156,6 +1173,7 @@ export const SLOW_TICK_THRESHOLD_MS = 200
 ```
 
 **Avantages :**
+
 - ✅ Single source of truth pour toutes les valeurs de gameplay
 - ✅ Modification globale en changeant une seule constante
 - ✅ Documentation inline de chaque valeur
@@ -1181,6 +1199,7 @@ if (tick % 40 === 0) {
 ```
 
 **Métriques surveillées :**
+
 - Durée de traitement de chaque tick
 - Nombre de joueurs/mobs par partie
 - Warnings automatiques si dégradation
@@ -1196,12 +1215,14 @@ if (fps < 30) {
 }
 
 // Frame time monitoring
-if (frameTime > 16) { // 60 FPS = 16ms/frame
+if (frameTime > 16) {
+  // 60 FPS = 16ms/frame
   console.warn(`⚠️ [Canvas] Slow frame: ${frameTime}ms`)
 }
 ```
 
 **Métriques surveillées :**
+
 - FPS en temps réel
 - Durée de rendu de chaque frame
 - Nombre de mobs/towers affichés
@@ -1214,6 +1235,7 @@ if (frameTime > 16) { // 60 FPS = 16ms/frame
 Script complet de test de charge pour valider les performances avec 8+ joueurs simultanés.
 
 **Usage :**
+
 ```bash
 # Test standard (8 joueurs, 60s)
 cd apps/tower-defense/api
@@ -1230,6 +1252,7 @@ NUM_PLAYERS=12 TEST_DURATION_MS=90000 pnpm test:load
 ```
 
 **Métriques mesurées :**
+
 - Total Actions (towers placed, mobs spawned)
 - Average Latency
 - Error Rate
@@ -1243,12 +1266,14 @@ NUM_PLAYERS=12 TEST_DURATION_MS=90000 pnpm test:load
 #### Désynchronisation Projectiles (CRITIQUE)
 
 **Problème :**
+
 ```typescript
 // ❌ AVANT : Hardcodé, désynchronisé du ticker
 const PROJECTILE_DURATION = 200 // Ticker = 250ms !
 ```
 
 **Solution :**
+
 ```typescript
 // ✅ APRÈS : Synchronisé avec le ticker
 const PROJECTILE_DURATION = TICK_INTERVAL_MS * PROJECTILE_DURATION_RATIO
@@ -1260,18 +1285,21 @@ const PROJECTILE_DURATION = TICK_INTERVAL_MS * PROJECTILE_DURATION_RATIO
 ### 📈 Résultats des Optimisations
 
 **Performance Backend :**
+
 - ✅ Tick processing : ~5-15ms (objectif < 200ms)
 - ✅ CPU usage : ~5-10% pour 4 joueurs
 - ✅ Support : 100+ mobs simultanés sans lag
 - ✅ Spatial Grid : Collision O(n²) → O(n)
 
 **Performance Frontend :**
+
 - ✅ FPS constant : 60 FPS
 - ✅ Interpolation fluide : 250ms ticker → 16ms frames
 - ✅ Pas de memory leaks détectés
 - ✅ Canvas rendering optimisé avec RAF
 
 **Load Test Results (8 joueurs) :**
+
 - ✅ Duration : ~61s
 - ✅ Total Actions : ~150-200
 - ✅ Avg Latency : ~50-100ms
@@ -1281,6 +1309,7 @@ const PROJECTILE_DURATION = TICK_INTERVAL_MS * PROJECTILE_DURATION_RATIO
 ### 🎯 Bonnes Pratiques Établies
 
 #### 1. Constantes Centralisées
+
 ```typescript
 // ✅ TOUJOURS importer depuis @tower-defense/config
 import { TICK_INTERVAL_MS, MOB_SPEED_MULTIPLIER } from '@tower-defense/config'
@@ -1290,6 +1319,7 @@ const speed = rawSpeed * 0.05 // NON !
 ```
 
 #### 2. Monitoring Automatique
+
 ```typescript
 // ✅ TOUJOURS monitorer les performances critiques
 if (tickDuration > SLOW_TICK_THRESHOLD_MS) {
@@ -1298,6 +1328,7 @@ if (tickDuration > SLOW_TICK_THRESHOLD_MS) {
 ```
 
 #### 3. Load Testing Régulier
+
 ```bash
 # ✅ TOUJOURS tester avant un déploiement majeur
 pnpm test:load:stress
@@ -1305,6 +1336,7 @@ pnpm test:load:stress
 ```
 
 #### 4. Synchronisation Ticker/Frontend
+
 ```typescript
 // ✅ TOUJOURS utiliser les mêmes constantes partout
 // Backend
@@ -1374,11 +1406,13 @@ apps/tower-defense/
 #### Problème Résolu : Dépendance Cyclique
 
 **Avant :**
+
 ```
 @tower-defense/types ← @tower-defense/config ← @tower-defense/types ❌
 ```
 
 **Après :**
+
 ```
 @tower-defense/types → @tower-defense/config ✅
 ```
@@ -1425,11 +1459,11 @@ export async function seedEntityTypes(): Promise<void> {
   ENTITY_MOB_TYPES.forEach(mobType => {
     entityRegistry.registerMobType(mobType)
   })
-  
+
   ENTITY_TOWER_TYPES.forEach(towerType => {
     entityRegistry.registerTowerType(towerType)
   })
-  
+
   // ✅ Seeded 15 mob types and 15 tower types
 }
 ```
@@ -1459,6 +1493,7 @@ const getAvailableTowersForTier = (tier: number): TowerType[] => {
 ### 📦 Entités Disponibles
 
 #### 15 Mob Types :
+
 - **Normal** : Basic Slime, Armored Knight, Flying Bat
 - **Fire** : Fire Imp, Lava Golem, Phoenix
 - **Water** : Water Sprite, Ice Giant, Frost Dragon
@@ -1466,6 +1501,7 @@ const getAvailableTowersForTier = (tier: number): TowerType[] => {
 - **Electric** : Spark Wisp, Thunder Titan, Lightning Hawk
 
 #### 15 Tower Types :
+
 - **Normal** : Archer Tower (single), Sniper Tower (long range), Cannon Tower (splash)
 - **Fire** : Flame Thrower (burn), Inferno Tower (AoE burn), Phoenix Nest (dual-type)
 - **Water** : Ice Shard (slow), Blizzard Tower (AoE slow), Tidal Wave (hybrid)
@@ -1475,10 +1511,11 @@ const getAvailableTowersForTier = (tier: number): TowerType[] => {
 ### 🚀 Optimisations Backend
 
 #### GameManager (In-Memory)
+
 ```typescript
 class GameManager {
-  private games = new Map<string, GameInstance>()  // O(1) lookup
-  
+  private games = new Map<string, GameInstance>() // O(1) lookup
+
   createGame(hostId: string, gameId?: string): GameInstance {
     const game: GameInstance = {
       id: gameId || new Types.ObjectId().toString(),
@@ -1495,12 +1532,13 @@ class GameManager {
 ```
 
 #### EntityManager (Type Lookup)
+
 ```typescript
 class EntityManager {
   createMob(typeId: string, playerId: string, position: Position): ActiveMob {
     const mobType = entityRegistry.getMobType(typeId)
     if (!mobType) throw new Error(`MobType ${typeId} not found`)
-    
+
     return {
       id: new Types.ObjectId().toString(),
       typeId: mobType._id,
@@ -1510,11 +1548,11 @@ class EntityManager {
       // ...
     }
   }
-  
+
   createTower(typeId: string, playerId: string, position: Position): TowerWithPosition {
     const towerType = entityRegistry.getTowerType(typeId)
     if (!towerType) throw new Error(`TowerType ${typeId} not found`)
-    
+
     return {
       id: new Types.ObjectId().toString(),
       typeId: towerType._id,
@@ -1553,14 +1591,17 @@ open http://localhost:5035
 ### 🐛 Troubleshooting
 
 **ERR_CONNECTION_REFUSED sur localhost:5035**
+
 - Problème : Anciens processus Node.js persistent en arrière-plan
 - Solution : Redémarrer VS Code ou tuer manuellement tous les processus `node.exe` dans Task Manager
 
 **API seed seulement 3 types au lieu de 15**
+
 - Problème : Ancienne version du code qui tourne
 - Solution : Redémarrer tous les serveurs pour charger la nouvelle version
 
 **Dépendance cyclique Turbo**
+
 - Problème : `types` ← `config` ← `types`
 - Solution : Déjà résolue ! `entityTypes.ts` est dans `types`, pas `config`
 
