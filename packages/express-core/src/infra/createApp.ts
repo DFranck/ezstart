@@ -42,7 +42,16 @@ export function createApp(options?: CreateAppOptions): Express {
   if (options?.apiApp) {
     // Option 1: Auto-detect CORS using @ezstart/config (RECOMMENDED)
     corsOptions = createCorsConfig(options.apiApp);
+
+    // Get allowed origins for logging
+    const { getAllowedOrigins } = require('@ezstart/config/cors');
+    const allowedOrigins = getAllowedOrigins(options.apiApp);
+
     console.log(`✅ [CORS] Auto-configured for API: ${options.apiApp}`);
+    console.log(`📍 [CORS] Allowed origins (${allowedOrigins.length}):`);
+    allowedOrigins.forEach((origin: string, i: number) => {
+      console.log(`   ${i + 1}. ${origin}`);
+    });
   } else if (options?.corsOrigins) {
     // Option 2: Manual CORS origins
     corsOptions = {
