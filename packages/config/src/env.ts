@@ -1,4 +1,4 @@
-import { AppName, getWebUrl, getApiUrl, getCurrentEnvironment } from './urls'
+import { AppName, getWebUrl, getApiUrl, getCurrentEnvironment } from './urls.js'
 
 /**
  * Get environment-aware URLs for an app
@@ -46,4 +46,4 @@ export function isDevelopment(): boolean {
 export { getCurrentEnvironment }
 
 // Import URLS for use in this file
-import { URLS } from './urls'
+import { URLS } from './urls.js'

@@ -1,4 +1,4 @@
-import { URLS, AppName, getAllWebUrls } from './urls'
+import { URLS, AppName, getAllWebUrls } from './urls.js'
 
 /**
  * Get all allowed CORS origins for a given API
