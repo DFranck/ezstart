@@ -1,8 +1,7 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
-import { createCorsConfig } from '@ezstart/config/cors'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp(createCorsConfig('ezbill'))
+export const app = createApp({ apiApp: 'ezbill' })
 const PORT = getApiPort()
 
 // Health check (for Render)

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "autoprefixer": "^10.4.19",

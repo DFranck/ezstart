@@ -1,8 +1,7 @@
 import { connectToMongo, createApp, startServer, Router, getApiPort } from '@ezstart/express-core'
-import { createCorsConfig } from '@ezstart/config/cors'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp(createCorsConfig('green-pulse'))
+export const app = createApp({ apiApp: 'green-pulse' })
 const PORT = getApiPort(5070)
 
 app.use('/api', routes)

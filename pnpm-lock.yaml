@@ -69,6 +69,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -209,6 +212,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -377,6 +383,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -508,6 +517,9 @@ importers:
 
   apps/ezpay/web:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -569,6 +581,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -654,6 +669,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -834,6 +852,9 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme

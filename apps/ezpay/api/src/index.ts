@@ -1,5 +1,4 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
-import { createCorsConfig } from '@ezstart/config/cors'
 import routes from './routes/index.js'
 
 const PORT = getApiPort(5040)
@@ -7,7 +6,7 @@ const PORT = getApiPort(5040)
 // Create app with raw body routes for webhook signature verification
 const app = createApp({
   rawBodyRoutes: ['/api/webhooks/stripe'],
-  ...createCorsConfig('ezpay'),
+  apiApp: 'ezpay',
 })
 
 // Health check (for Render)

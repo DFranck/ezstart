@@ -19,7 +19,11 @@
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui... --filter=web-ezauth... --filter=api-ezauth... --filter=web-ezpay... --filter=api-ezpay... --concurrency=15",
     "dev:gp": "turbo run dev --filter=web-green-pulse... --filter=api-green-pulse... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
-    "dev:pay": "turbo run dev --filter=web-ezpay... --filter=api-ezpay... --concurrency=15"
+    "dev:pay": "turbo run dev --filter=web-ezpay... --filter=api-ezpay... --concurrency=15",
+    "audit:health": "node scripts/audit-health-check.js",
+    "audit:quick": "node scripts/quick-health-check.js",
+    "audit:security": "pnpm audit --audit-level moderate",
+    "audit:deps": "pnpm outdated --recursive"
   },
   "jest": {
     "projects": [

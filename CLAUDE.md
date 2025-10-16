@@ -607,11 +607,26 @@ cd apps/ezpay/api && node dist/index.js
 /api/health
 ```
 
-**⚠️ Notes importantes :**
+**⚠️ Notes importantes (Mis à jour 16/10/2025) :**
 
-- Seul `@ezstart/express-core` est nécessaire pour builder les APIs
+- **OBLIGATOIRE** : Ajouter `--filter @ezstart/config build` AVANT le build des APIs
+- `@ezstart/express-core` dépend de `@ezstart/config` pour CORS auto-configuration
 - Les SDKs (`auth-sdk`, `pay-sdk`, `ui`) ne sont utilisés que côté web
 - Ne pas inclure `@ezstart/ui` dans le build des APIs
+
+**Build Command Railway CORRIGÉ :**
+
+```bash
+# EZAuth API (avec config + express-core)
+pnpm install --frozen-lockfile --shamefully-hoist && \
+pnpm --filter @ezstart/config --filter @ezstart/express-core build && \
+pnpm turbo build --filter=api-ezauth
+
+# EZPay API (avec config + express-core)
+pnpm install --frozen-lockfile --shamefully-hoist && \
+pnpm --filter @ezstart/config --filter @ezstart/express-core build && \
+pnpm turbo build --filter=api-ezpay
+```
 
 ### Configuration Vercel (Apps Web)
 
@@ -1722,6 +1737,68 @@ const domain = getWebUrl('ezpay', 'production')
 - Les URLs peuvent maintenant rester dans `.env.local` pour override en dev
 - CORS origins ne sont plus nécessaires dans `.env` des APIs
 - Un seul changement dans `packages/config/src/urls.ts` → Tous les projets updated
+
+### 🔧 Fix Critique - createApp() Pattern (16/10/2025)
+
+**Problème découvert :** Erreur TypeScript sur Railway lors du build des APIs.
+
+**Erreur :**
+```
+error TS2559: Type '{ origin: ..., credentials: ... }' has no properties
+in common with type 'CreateAppOptions'.
+```
+
+**Cause :** Utilisation incorrecte de `createApp(createCorsConfig('ezauth'))` au lieu de passer l'option `apiApp`.
+
+**Solution :**
+
+```typescript
+// ❌ INCORRECT (causait l'erreur Railway)
+import { createCorsConfig } from '@ezstart/config/cors'
+const app = createApp(createCorsConfig('ezauth'))
+
+// ❌ INCORRECT (spread ne fonctionne pas)
+const app = createApp({
+  rawBodyRoutes: ['/api/webhooks/stripe'],
+  ...createCorsConfig('ezpay'),
+})
+
+// ✅ CORRECT - Option 1: Auto-CORS (RECOMMANDÉ)
+const app = createApp({ apiApp: 'ezauth' })
+
+// ✅ CORRECT - Option 2: Avec rawBodyRoutes
+const app = createApp({
+  rawBodyRoutes: ['/api/webhooks/stripe'],
+  apiApp: 'ezpay',
+})
+
+// ✅ CORRECT - Option 3: CORS manuel
+const app = createApp({
+  corsOrigins: ['https://custom-domain.com'],
+})
+```
+
+**Interface CreateAppOptions :**
+
+```typescript
+export interface CreateAppOptions {
+  rawBodyRoutes?: string[];
+  apiApp?: AppName;        // Auto-detect CORS from @ezstart/config
+  corsOrigins?: string[];  // Manual CORS origins
+}
+```
+
+**Fichiers corrigés :**
+- ✅ apps/ezauth/api/src/index.ts
+- ✅ apps/ezpay/api/src/index.ts (avec rawBodyRoutes)
+- ✅ apps/ezbill/api/src/index.ts
+- ✅ apps/tower-defense/api/src/index.ts
+- ✅ apps/green-pulse/api/src/index.ts
+
+**Dépendances ajoutées :**
+- ✅ `@ezstart/config` dans tous les package.json (8 web apps + 5 APIs)
+- ✅ `pnpm install` exécuté pour installer les dépendances
+- ✅ TypeCheck validé sur toutes les APIs
 
 ### Mettre à Jour un Domaine
 

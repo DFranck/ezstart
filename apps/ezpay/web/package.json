@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/config": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",

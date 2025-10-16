@@ -40,6 +40,10 @@ npm-debug.log*
 *.pem
 note.md
 
+# Audit reports (generated files)
+health-check-report.json
+audit-report.json
+
 # TypeScript build info
 *.tsbuildinfo
 next-env.d.ts

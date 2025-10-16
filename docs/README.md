@@ -19,7 +19,11 @@ docs/
     ├── INFRASTRUCTURE-AUDIT.md
     ├── API-AUDIT.md
     ├── SEO-AUDIT.md
-    └── WEB-APPS-AUDIT.md
+    ├── WEB-APPS-AUDIT.md
+    ├── TESTING-AUDIT.md
+    ├── UX-AUDIT.md
+    ├── I18N-AUDIT.md
+    └── MONITORING-AUDIT.md
 ```
 
 ---
@@ -156,6 +160,58 @@ Comprehensive audit of all web applications in the monorepo.
 
 ---
 
+### 🧪 [Testing Audit](./audits/TESTING-AUDIT.md)
+Unit tests, integration tests, E2E tests, test coverage, and test quality.
+
+**Key Areas:**
+- Test coverage (unit/integration/E2E)
+- Testing infrastructure (Jest/Vitest/Playwright)
+- Mock strategy
+- Test quality & best practices
+- Bug reproduction tests
+- CI/CD integration
+
+---
+
+### 🎨 [UX Audit](./audits/UX-AUDIT.md)
+User experience covering design consistency, user flows, onboarding, and usability.
+
+**Key Areas:**
+- Design consistency (@ezstart/ui usage)
+- User flows (auth, payment, invoice, game)
+- Onboarding experience
+- Feedback mechanisms (loading, success, errors)
+- Responsive design
+- Interactions & micro-animations
+
+---
+
+### 🌐 [Internationalization (i18n) Audit](./audits/I18N-AUDIT.md)
+Translation coverage, locale support, date/number formatting, and RTL support.
+
+**Key Areas:**
+- Locale support (en, fr, es, etc.)
+- Translation coverage & quality
+- Date/time formatting (locale-aware)
+- Number/currency formatting
+- RTL support (Arabic, Hebrew)
+- Localized URLs & routing
+
+---
+
+### 📊 [Monitoring Audit](./audits/MONITORING-AUDIT.md)
+Logging, error tracking, analytics, performance monitoring, and alerting.
+
+**Key Areas:**
+- Logging infrastructure (structured logs)
+- Error tracking (Sentry)
+- Analytics (GA, Plausible, Umami)
+- APM & performance monitoring
+- Alerting & notifications
+- Uptime monitoring
+
+---
+
 ## 📊 Audit Status Dashboard
 
 | Audit | Status | Last Updated | Score |
@@ -170,6 +226,10 @@ Comprehensive audit of all web applications in the monorepo.
 | 🔌 API | 🔴 Not Audited | - | -/100 |
 | 🔍 SEO | 🟡 Partial | 2025-10-16 | -/100 |
 | 🌐 Web Apps | 🟡 Partial | 2025-10-16 | -/100 |
+| 🧪 Testing | 🔴 Not Audited | - | -/100 |
+| 🎨 UX | 🔴 Not Audited | - | -/100 |
+| 🌐 i18n | 🔴 Not Audited | - | -/100 |
+| 📊 Monitoring | 🔴 Not Audited | - | -/100 |
 
 **Legend:**
 - 🟢 Complete & Up-to-date
@@ -179,6 +239,8 @@ Comprehensive audit of all web applications in the monorepo.
 ---
 
 ## 🎯 How to Use Audits
+
+**📖 [Read the Complete Audit Guide](./AUDIT-GUIDE.md) - Step-by-step instructions**
 
 ### 1. **Before Major Changes**
 Run relevant audits to establish baseline metrics.
@@ -192,6 +254,9 @@ Run Security, Performance, and Infrastructure audits.
 ### 4. **Compliance**
 Use Accessibility and Security audits for compliance checks.
 
+### 5. **Quick Start**
+Follow the [Audit Guide](./AUDIT-GUIDE.md) for your first complete audit (1 week).
+
 ---
 
 ## 🔄 Audit Schedule
@@ -204,11 +269,15 @@ Use Accessibility and Security audits for compliance checks.
 | Dependencies | Weekly | Security vulnerabilities |
 | Performance | Monthly | Detect regressions |
 | Code Quality | Monthly | Maintain standards |
+| Testing | Monthly | Maintain test quality |
+| Monitoring | Monthly | Detect issues early |
 | Accessibility | Quarterly | WCAG compliance |
 | Architecture | Quarterly | Prevent tech debt |
 | Infrastructure | Monthly | Cost & uptime |
 | API | Quarterly | Documentation sync |
 | SEO | Quarterly | Search rankings |
+| UX | Quarterly | User experience |
+| i18n | Quarterly | Translation quality |
 | Web Apps | As needed | Feature changes |
 
 ---
@@ -227,6 +296,10 @@ When updating an audit:
 ---
 
 ## 📚 Additional Documentation
+
+### Audit Documentation
+- **[AUDIT-GUIDE.md](./AUDIT-GUIDE.md)** - Complete guide to auditing your monorepo ⭐
+- [audits/](./audits/) - Individual audit templates
 
 ### Root Level Docs
 - [CLAUDE.md](../CLAUDE.md) - Guide for Claude AI development

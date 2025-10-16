@@ -1,11 +1,10 @@
 import { connectToMongo, createApp, createSocketServer, startServer, getApiPort } from '@ezstart/express-core'
-import { createCorsConfig } from '@ezstart/config/cors'
 import routes, { globalRegistry } from './routes/index.js'
 import { setIO } from './socketInstance.js'
 import { registerSocketHandlers } from './sockets/registerSocketHandlers.js'
 import { seedEntityTypes } from './services/entityRegistry.js'
 
-const app = createApp(createCorsConfig('tower-defense'))
+const app = createApp({ apiApp: 'tower-defense' })
 const PORT = getApiPort()
 
 // Health check (for Render)
