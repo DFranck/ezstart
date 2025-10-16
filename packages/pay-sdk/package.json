@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^20",
     "@types/react": "^19.1.12",
     "next": "^15.5.2",
     "react": "^19.1.1",
