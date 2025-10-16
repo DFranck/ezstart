@@ -1,3 +1,6 @@
+⚠️ **MIGRATION NOTE:** This README contains outdated environment variable examples.
+URLs are now auto-configured via `@ezstart/config`. See [packages/config/README.md](../../packages/config/README.md) for current usage.
+
 # Tower Defense Game
 
 ## Overview

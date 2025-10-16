@@ -1,3 +1,6 @@
+⚠️ **MIGRATION NOTE:** This README contains outdated environment variable examples.
+URLs are now auto-configured via `@ezstart/config`. See [packages/config/README.md](../../packages/config/README.md) for current usage.
+
 # EZPay Web - Universal Payment Dashboard
 
 Dashboard et documentation pour le système de paiement centralisé du monorepo @ezstart.
