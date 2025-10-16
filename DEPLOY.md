@@ -22,10 +22,10 @@
 | ----------------- | -------- | ------------------------------------ | --------- |
 | **EZStart**       | Vercel   | https://ezstart-web.vercel.app       | ✅ Active |
 | **EZAuth**        | Vercel   | https://ezauth.vercel.app            | ✅ Active |
-| **EZBill**        | Vercel   | https://ezbill-web.vercel.app        | ✅ Active |
-| **EZPay**         | Vercel   | https://ezpay-web.vercel.app         | ✅ Active |
+| **EZBill**        | Vercel   | https://ezstart-ezbill.vercel.app    | ✅ Active |
+| **EZPay**         | Vercel   | https://ezstart-ezpay.vercel.app     | ✅ Active |
 | **Tower Defense** | Vercel   | https://tower-defense-web.vercel.app | ✅ Active |
-| **FengShui**      | Vercel   | https://fengshui-web.vercel.app      | ✅ Active |
+| **FengShui**      | Vercel   | https://ezfengshui.vercel.app        | ✅ Active |
 | **ASC-TCD**       | Vercel   | https://asc-tcd-web.vercel.app       | ✅ Active |
 
 ---
@@ -67,7 +67,7 @@ NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezauth?retryWrites=true&w=majority
 JWT_SECRET=production-secure-jwt-secret-change-me
-ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezbill-web.vercel.app,https://tower-defense-web.vercel.app,https://ezpay-web.vercel.app
+ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezstart-ezbill.vercel.app,https://tower-defense-web.vercel.app,https://ezstart-ezpay.vercel.app
 ```
 
 **Networking:**
@@ -116,7 +116,7 @@ MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezpay?retryWrites=true
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
-WEB_URL=https://ezpay-web.vercel.app
+WEB_URL=https://ezstart-ezpay.vercel.app
 ```
 
 **Networking:**
@@ -188,7 +188,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 # Production (.env.production - Configurer dans Vercel)
 NEXT_PUBLIC_API_URL=https://ezpay-api.up.railway.app/api
-NEXT_PUBLIC_WEB_URL=https://ezpay-web.vercel.app
+NEXT_PUBLIC_WEB_URL=https://ezstart-ezpay.vercel.app
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
@@ -202,7 +202,7 @@ Pour EZAuth Web:
 
 Pour EZPay Web:
 1. NEXT_PUBLIC_API_URL = https://ezpay-api.up.railway.app/api
-2. NEXT_PUBLIC_WEB_URL = https://ezpay-web.vercel.app
+2. NEXT_PUBLIC_WEB_URL = https://ezstart-ezpay.vercel.app
 3. NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = pk_live_...
 
 Environment: Production
