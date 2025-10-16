@@ -12,9 +12,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/next-theme": "workspace:*",
     "@ezstart/pay-sdk": "workspace:*",
     "@ezstart/ui": "workspace:*",
-    "@ezstart/next-theme": "workspace:*",
     "autoprefixer": "^10.4.19",
     "next": "15.5.2",
     "postcss": "^8.4.38",
@@ -22,13 +22,14 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/next-config": "workspace:*",
     "@ezstart/tailwind-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "deepmerge": "^4.3.1",
     "typescript": "^5.7.3"
   }
 }

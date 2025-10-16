@@ -536,6 +536,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.9
         version: 19.1.9(@types/react@19.1.12)
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
