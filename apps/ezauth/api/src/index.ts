@@ -1,4 +1,4 @@
-import { createApp, connectToMongo, startServer, getApiPort } from '@ezstart/express-core'
+import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
 
@@ -13,7 +13,7 @@ const app = createApp({
     'http://localhost:5050', // EZStart web local
     // Vercel domains (legacy)
     'https://ezstart-ezauth.vercel.app',
-    'https://ezbill-web.vercel.app',
+    'https://ezstart-ezbill.vercel.app',
     'https://ezstart-web.vercel.app',
     // Custom domains (ezstart.xyz)
     'https://ezauth.ezstart.xyz',

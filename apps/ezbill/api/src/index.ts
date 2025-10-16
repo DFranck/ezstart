@@ -1,4 +1,4 @@
-import { connectToMongo, createApp, startServer, getApiPort } from '@ezstart/express-core'
+import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp({
@@ -6,7 +6,7 @@ export const app = createApp({
     // Local development
     'http://localhost:5025', // EZBill web local
     // Vercel domains (legacy)
-    'https://ezbill-web.vercel.app',
+    'https://ezstart-ezbill.vercel.app',
     // Custom domains (ezstart.xyz)
     'https://ezbill.ezstart.xyz',
   ],
