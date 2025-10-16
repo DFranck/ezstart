@@ -1612,3 +1612,116 @@ open http://localhost:5035
 3. **Tests de charge** : Voir limite de towers/mobs
 4. **Wave System** : Vagues automatiques de mobs
 5. **Multiplayer complet** : Combat P2P avec vrais mobs
+
+## @ezstart/config - Configuration Centralisée des URLs et CORS ✅
+
+**Créé le 16/10/2025 - Single source of truth pour tous les URLs et environnements**
+
+### Problème Résolu
+
+**Avant :**
+- URLs dispersées dans 50+ fichiers (.env.local, code hardcodé)
+- CORS origins dupliqués partout
+- Désynchronisation entre environnements
+- Confusion entre domaines Vercel/Railway/custom
+
+**Après :**
+- Toutes les URLs dans `packages/config/src/urls.ts`
+- Détection automatique d'environnement (local/dev/prod)
+- Configuration CORS générée automatiquement
+- Pattern cohérent pour tous les domaines
+
+### Usage
+
+#### Web App - Obtenir URL de l'API
+```typescript
+import { getApiUrl } from '@ezstart/config'
+
+const API_URL = getApiUrl('ezpay')
+// Local: http://localhost:5040
+// Prod: https://ezpay-api.up.railway.app
+```
+
+#### API - Configuration CORS
+```typescript
+import { createCorsConfig } from '@ezstart/config/cors'
+import cors from 'cors'
+
+// ✅ Inclut automatiquement toutes les apps qui appellent cette API
+app.use(cors(createCorsConfig('ezauth')))
+```
+
+#### SEO - Domaine de production
+```typescript
+import { getWebUrl } from '@ezstart/config'
+
+const domain = getWebUrl('ezpay', 'production')
+// https://ezpay.ezstart.xyz
+```
+
+### Mapping Complet des URLs
+
+| App | Web Local | API Local | Web Prod | API Prod |
+|-----|-----------|-----------|----------|----------|
+| EZStart | :5050 | - | www.ezstart.xyz | - |
+| EZAuth | :5015 | :5010 | ezauth.ezstart.xyz | ezauth-api.up.railway.app |
+| EZBill | :5025 | :5020 | ezbill.ezstart.xyz | ezbill-api.up.railway.app |
+| EZPay | :5045 | :5040 | ezpay.ezstart.xyz | ezpay-api.up.railway.app |
+| FengShui | :5065 | - | ezfengshui.ezstart.xyz | - |
+| Tower Defense | :5035 | :5030 | tower-defense.ezstart.xyz | tower-defense-api.up.railway.app |
+| ASC-TCD | :5055 | - | www.asc-tcd.com | - |
+| GreenPulse | :5075 | :5070 | www.ai-greenpulse.com | green-pulse-api.up.railway.app |
+
+### Pattern des Domaines
+
+**Vercel (Web):**
+- Dev: `[app].vercel.app` (auto Vercel)
+- Prod: `[app].ezstart.xyz` OU domaine custom
+
+**Railway (API):**
+- Prod: `[app]-api.up.railway.app`
+
+**Local:**
+- Web: `localhost:50X5` (apps avec 5)
+- API: `localhost:50X0` (APIs avec 0)
+
+### Règles CORS Automatiques
+
+- **EZAuth API** → Appelé par TOUTES les apps (SSO)
+- **EZPay API** → Appelé par apps avec paiements (EZPay, Tower Defense, EZBill)
+- **EZBill API** → Appelé uniquement par EZBill web
+- **Tower Defense API** → Appelé uniquement par Tower Defense web
+- **GreenPulse API** → Appelé uniquement par GreenPulse web
+
+### Migration des Apps
+
+**Guide complet :** [docs/MIGRATION-CONFIG.md](./docs/MIGRATION-CONFIG.md)
+
+**Étapes rapides :**
+1. Ajouter `"@ezstart/config": "workspace:*"` à package.json
+2. Remplacer `process.env.NEXT_PUBLIC_API_URL` par `getApiUrl(app)`
+3. Remplacer logique CORS custom par `createCorsConfig(app)`
+4. Supprimer URLs des .env.local (garder les secrets !)
+5. Tester localement puis en prod
+
+### Mettre à Jour un Domaine
+
+```typescript
+// packages/config/src/urls.ts
+export const URLS = {
+  'ezpay': {
+    web: {
+      production: 'https://nouveau-domaine.com'
+    }
+  }
+}
+```
+
+Rebuild le package → Toutes les apps se mettent à jour automatiquement ! ✅
+
+### Documentation
+
+- **README complet :** [packages/config/README.md](./packages/config/README.md)
+- **Guide migration :** [docs/MIGRATION-CONFIG.md](./docs/MIGRATION-CONFIG.md)
+- **API Reference :** Types TypeScript avec JSDoc
+
