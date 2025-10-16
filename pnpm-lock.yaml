@@ -853,6 +853,12 @@ importers:
       '@ezstart/eslint-config':
         specifier: workspace:*
         version: link:../../../packages/eslint-config
+      '@ezstart/next-config':
+        specifier: workspace:*
+        version: link:../../../packages/next-config
+      '@ezstart/seo-config':
+        specifier: workspace:*
+        version: link:../../../packages/seo-config
       '@ezstart/tailwind-config':
         specifier: workspace:*
         version: link:../../../packages/tailwind-config
