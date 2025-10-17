@@ -37,6 +37,26 @@ export interface AppUrls {
 }
 
 /**
+ * Project metadata for monitoring and documentation
+ */
+export interface ProjectMetadata {
+  /** Display name */
+  name: string
+  /** Brief description */
+  description: string
+  /** Emoji icon (fallback if no logo) */
+  emoji: string
+  /** Optional logo path (relative to public folder) */
+  logo?: string
+  /** GitHub repository path (relative to monorepo) */
+  githubPath: string
+  /** Deployment platform for web app */
+  webPlatform?: 'vercel' | 'railway' | 'render' | 'custom'
+  /** Deployment platform for API */
+  apiPlatform?: 'vercel' | 'railway' | 'render' | 'custom'
+}
+
+/**
  * Complete URL mapping for all apps
  */
 export const URLS: Record<AppName, AppUrls> = {
@@ -138,6 +158,92 @@ export const URLS: Record<AppName, AppUrls> = {
 }
 
 /**
+ * Project metadata for all apps
+ */
+export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
+  ezstart: {
+    name: 'EZStart',
+    description: 'Monorepo hub and documentation platform',
+    emoji: '🚀',
+    logo: '/icons/icon-192x192.png',
+    githubPath: 'apps/ezstart',
+    webPlatform: 'vercel',
+  },
+
+  ezauth: {
+    name: 'EZAuth',
+    description: 'Centralized authentication and SSO service',
+    emoji: '🔐',
+    githubPath: 'apps/ezauth',
+    webPlatform: 'vercel',
+    apiPlatform: 'railway',
+  },
+
+  ezbill: {
+    name: 'EZBill',
+    description: 'Invoicing and billing management',
+    emoji: '💼',
+    githubPath: 'apps/ezbill',
+    webPlatform: 'vercel',
+    apiPlatform: 'render',
+  },
+
+  ezpay: {
+    name: 'EZPay',
+    description: 'Universal payment processing service',
+    emoji: '💳',
+    githubPath: 'apps/ezpay',
+    webPlatform: 'vercel',
+    apiPlatform: 'railway',
+  },
+
+  fengshui: {
+    name: 'FengShui',
+    description: 'Feng Shui consultation and analysis',
+    emoji: '🎋',
+    githubPath: 'apps/fengshui',
+    webPlatform: 'vercel',
+  },
+
+  'tower-defense': {
+    name: 'Tower Defense',
+    description: 'Multiplayer tower defense game',
+    emoji: '🗼',
+    logo: '/icons/icon-192x192.png',
+    githubPath: 'apps/tower-defense',
+    webPlatform: 'vercel',
+    apiPlatform: 'railway',
+  },
+
+  'asc-tcd': {
+    name: 'ASC-TCD',
+    description: 'Agence Sécurité Conseil TCD',
+    emoji: '🛡️',
+    logo: 'https://www.asc-tcd.com/images/logo.png',
+    githubPath: 'apps/asc-tcd',
+    webPlatform: 'custom',
+  },
+
+  'green-pulse': {
+    name: 'GreenPulse',
+    description: 'AI-powered sustainability and carbon tracking',
+    emoji: '🌱',
+    githubPath: 'apps/green-pulse',
+    webPlatform: 'custom',
+    apiPlatform: 'railway',
+  },
+
+  monitoring: {
+    name: 'Monitoring',
+    description: 'Monorepo health and performance monitoring',
+    emoji: '📊',
+    githubPath: 'apps/monitoring',
+    webPlatform: 'vercel',
+    apiPlatform: 'railway',
+  },
+}
+
+/**
  * Get the current environment based on NODE_ENV or VERCEL_ENV
  */
 export function getCurrentEnvironment(): Environment {
@@ -221,4 +327,52 @@ export function getPort(app: AppName, type: 'web' | 'api' = 'web'): number {
 
   const port = new URL(url).port
   return parseInt(port, 10)
+}
+
+/**
+ * Get project metadata for an app
+ */
+export function getProjectMetadata(app: AppName): ProjectMetadata {
+  return PROJECT_METADATA[app]
+}
+
+/**
+ * Get all app names
+ */
+export function getAllApps(): AppName[] {
+  return Object.keys(URLS) as AppName[]
+}
+
+/**
+ * Check if app has an API
+ */
+export function hasApi(app: AppName): boolean {
+  return !!URLS[app].api
+}
+
+/**
+ * Get GitHub URL for a project
+ */
+export function getGitHubUrl(app: AppName): string {
+  const metadata = PROJECT_METADATA[app]
+  return `https://github.com/DFranck/ezstart/tree/master/${metadata.githubPath}`
+}
+
+/**
+ * Get logo URL for production environment
+ * For PWA icons, returns the full production URL
+ * For custom logos, returns as-is (already full URL)
+ */
+export function getLogoUrl(app: AppName): string | undefined {
+  const metadata = PROJECT_METADATA[app]
+  if (!metadata.logo) return undefined
+
+  // If it's a full URL (like ASC-TCD), return as-is
+  if (metadata.logo.startsWith('http')) {
+    return metadata.logo
+  }
+
+  // If it's a relative path (PWA icons), prefix with production web URL
+  const webUrl = URLS[app].web.production
+  return `${webUrl}${metadata.logo}`
 }

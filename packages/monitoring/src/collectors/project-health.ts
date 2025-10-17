@@ -3,9 +3,10 @@
  * Groups health checks by project instead of individual services
  */
 
-import type { ProjectHealth, ProjectId, PROJECT_ENDPOINTS, ProjectEndpoint } from '../types/project'
+import type { ProjectHealth, ProjectId, ProjectEndpoint } from '../types/project'
 import type { HealthStatus } from '../types/health'
 import { HealthChecker } from './health-checker'
+import { PROJECT_ENDPOINTS } from '../utils/project-config'
 
 export class ProjectHealthChecker {
   private healthChecker: HealthChecker
@@ -22,7 +23,6 @@ export class ProjectHealthChecker {
     environment: 'local' | 'production' = 'local',
     options?: { timeout?: number; retries?: number }
   ): Promise<ProjectHealth> {
-    const { PROJECT_ENDPOINTS } = await import('../types/project')
     const config = PROJECT_ENDPOINTS[projectId]
 
     // Check all endpoints for this project
@@ -128,7 +128,6 @@ export class ProjectHealthChecker {
     environment: 'local' | 'production' = 'local',
     options?: { timeout?: number; retries?: number }
   ): Promise<ProjectHealth[]> {
-    const { PROJECT_ENDPOINTS } = await import('../types/project')
     const projectIds = Object.keys(PROJECT_ENDPOINTS) as ProjectId[]
 
     const results = await Promise.all(
