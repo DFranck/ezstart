@@ -5,7 +5,7 @@ import { registerSocketHandlers } from './sockets/registerSocketHandlers.js'
 import { seedEntityTypes } from './services/entityRegistry.js'
 
 const app = createApp({ apiApp: 'tower-defense' })
-const PORT = getApiPort()
+const PORT = getApiPort('tower-defense')
 
 // Health check (for Render)
 app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'Tower Defense' }))

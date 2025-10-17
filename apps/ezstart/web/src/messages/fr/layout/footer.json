@@ -1,6 +1,8 @@
 {
   "footer": {
     "copyright": "© {year} EzStart LLC – Registered in Wyoming, USA. Tous droits réservés.",
-    "legalNotices": "Mentions légales"
+    "legalNotices": "Mentions légales",
+    "createdWith": "Fait avec",
+    "by": "par"
   }
 }

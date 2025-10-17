@@ -1,7 +1,7 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
 import routes from './routes/index.js'
 
-const PORT = getApiPort(5040)
+const PORT = getApiPort('ezpay')
 
 // Create app with raw body routes for webhook signature verification
 const app = createApp({

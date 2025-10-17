@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/pay-sdk --filter @ezstart/next-theme build && next build",
-    "dev": "next dev --turbopack -p 5045",
+    "dev": "node ../../../packages/config/bin/dev-server.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "start": "next start",

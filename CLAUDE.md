@@ -16,6 +16,50 @@
 - 🔍 [SEO Audit](./docs/audits/SEO-AUDIT.md) - Meta tags, sitemaps, structured data
 - 🌐 [Web Apps Audit](./docs/audits/WEB-APPS-AUDIT.md) - App configs, PWA, deployment
 
+## 🎛️ Système de Monitoring Centralisé ⭐ NOUVEAU (17/10/2025)
+
+**Architecture complète de monitoring et d'observabilité pour tout le monorepo.**
+
+### Composants
+
+- **📦 Package `@ezstart/monitoring`** - Types, utilities, health checker
+- **🔌 API Monitoring** - Port 5080 (local) / Railway (prod)
+- **📊 Dashboard** - Intégré dans EZStart web (`/monitoring`)
+
+### Fonctionnalités
+
+✅ **Health Checks automatiques** - Tous les APIs et web apps
+✅ **Audit Tracking** - Scores, dates, status (auto-parsing des .md)
+✅ **Deployment Monitoring** - Railway/Vercel, commits, build info
+✅ **Database Health** - Connection, response time, storage
+✅ **Git Tracking** - Uncommitted changes, unpushed commits, frequency
+✅ **Overall Health Score** - 0-100 avec status (excellent/good/fair/poor)
+✅ **Continuous Improvement** - Track amélioration continue avec métriques
+
+### Quick Start
+
+```bash
+# Démarrer l'API de monitoring
+cd apps/monitoring/api && pnpm dev
+
+# Voir le dashboard
+open http://localhost:5050/monitoring
+
+# API endpoints
+curl http://localhost:5080/api/health-checks  # Tous les services
+curl http://localhost:5080/api/audits         # Tous les audits
+curl http://localhost:5080/api/metrics        # Métriques globales
+```
+
+### Services Monitorés
+
+- **5 APIs** : EZAuth, EZPay, EZBill, Tower Defense, GreenPulse
+- **8 Web Apps** : EZStart, EZAuth, EZBill, EZPay, TD, FengShui, ASC-TCD, GreenPulse
+- **5 Databases** : MongoDB pour chaque app
+- **14 Audits** : Tracking automatique avec parsing des fichiers .md
+
+**Documentation complète :** [AUDIT-GUIDE.md](./docs/AUDIT-GUIDE.md)
+
 ## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
 
 ### État Actuel (12/10/2025 - 00h20)
@@ -51,9 +95,13 @@ pnpm dev  # Lance tout (moins optimisé, plus de processus)
 #### Option 3: Développement Ciblé
 
 ```bash
-pnpm dev:billing  # EZBill + EZAuth
-pnpm dev:td       # Tower Defense + EZAuth
-pnpm dev:ez       # EZStart seul
+pnpm dev:bill  # EZBill + EZAuth
+pnpm dev:td    # Tower Defense + EZAuth
+pnpm dev:ez    # EZStart + Monitoring + ALL APIs (nécessaire pour dashboard monitoring)
+pnpm dev:fs    # FengShui + EZAuth + EZPay
+pnpm dev:gp    # GreenPulse + EZAuth
+pnpm dev:pay   # EZPay seul
+pnpm dev:asc   # ASC-TCD seul
 ```
 
 ### Vérifier l'État des Services
@@ -79,6 +127,7 @@ pnpm dev:status  # Affiche l'état de tous les services avec leurs ports
 | FengShui      | Web     | 5065     | http://localhost:5065     | ✅ Running     |
 | GreenPulse    | API     | 5070     | http://localhost:5070     | ✅ Running     |
 | GreenPulse    | Web     | 5075     | http://localhost:5075     | ✅ Running     |
+| **Monitoring**| **API** | **5080** | **http://localhost:5080** | **⭐ NEW**     |
 
 ### Architecture .env Actuelle
 
@@ -738,6 +787,41 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
   2. BashOutput pour vérifier l'état
   3. KillBash pour terminer proprement
   ```
+
+### Script kill:ports - Intelligent Port Management ✅ (Créé 17/10/2025)
+
+**Script dynamique qui utilise `@ezstart/config` comme source of truth pour les ports.**
+
+**Commande :**
+```bash
+pnpm kill:ports
+```
+
+**Features :**
+- ✅ **Lecture dynamique des ports** depuis `@ezstart/config/urls.ts`
+- ✅ **Évite de tuer des ports externes** au monorepo @ezstart
+- ✅ **2 modes** : Kill ports @ezstart uniquement OU kill tous les Node.js (nuclear)
+- ✅ **Fallback automatique** si erreur de lecture du config (hardcoded ports)
+- ✅ **Affichage détaillé** : Ports trouvés, processus tués, status final
+
+**Architecture :**
+- `scripts/get-ezstart-ports.mjs` - Script Node.js qui lit `@ezstart/config` et retourne un JSON array de ports
+- `scripts/kill-ports.ps1` - Script PowerShell qui appelle le script Node.js et tue les processus sur ces ports
+
+**Avantages :**
+- **Single source of truth** : Ajout d'une nouvelle app → ports détectés automatiquement
+- **Sécurité** : Ne tue jamais un port utilisé par un projet externe
+- **Maintenance** : Plus besoin de mettre à jour manuellement la liste des ports dans le script
+
+**Exemple d'output :**
+```
+Fetching @ezstart ports from config...
+Found 14 @ezstart ports: 5010, 5015, 5020, 5025, 5030, 5035, 5040, 5045, 5050, 5055, 5065, 5070, 5075, 5080
+
+Options:
+1. Kill only @ezstart ports (from config)
+2. Kill ALL Node.js processes (nuclear option)
+```
 
 ## Configuration des Ports et .env - NOUVELLE ARCHITECTURE ✅
 
@@ -1630,6 +1714,171 @@ open http://localhost:5035
 4. **Wave System** : Vagues automatiques de mobs
 5. **Multiplayer complet** : Combat P2P avec vrais mobs
 
+## 📊 Système de Monitoring - Dashboard Centralisé ⭐ NOUVEAU (Créé 17/10/2025)
+
+**Architecture complète de monitoring pour tout le monorepo @ezstart**
+
+### Vue d'Ensemble
+
+Le système de monitoring offre une vue centralisée de la santé et des performances de tous les services, APIs, audits et déploiements du monorepo.
+
+### Architecture
+
+**Monitoring API** - `apps/monitoring/api` (Port 5080)
+- MongoDB: `ezstart-monitoring`
+- Health checks de tous les services (13 services)
+- Tracking des audits (14 types d'audits)
+- Monitoring des déploiements Railway/Vercel
+- Métriques agrégées
+
+**Monitoring Dashboard** - Intégré dans EZStart Web
+- URL: http://localhost:5045/en/monitoring
+- Lien dans navigation EZStart
+- 4 composants réutilisables: ServiceCard, AuditCard, HealthScore, MetricsOverview
+
+**Package @ezstart/monitoring** - Types et utilitaires partagés
+- Types: HealthCheckResult, AuditType, MonitoringMetrics
+- Collectors: HealthChecker avec retry et uptime tracking
+- Utils: calculateOverallHealthScore, getOverallHealthStatus
+
+### Endpoints API
+
+```bash
+GET /api/health-checks              # Tous les services
+GET /api/health-checks/:serviceId   # Service spécifique
+GET /api/audits                     # Tous les audits
+GET /api/audits/:type               # Audit spécifique
+GET /api/deployments                # Tous les déploiements
+GET /api/metrics                    # Métriques agrégées
+GET /api/health                     # Health check API
+GET /docs                           # Swagger documentation
+```
+
+### Services Monitorés
+
+**13 Services (5 APIs + 8 Web Apps):**
+- APIs: EZAuth (5010), EZPay (5040), EZBill (5020), Tower Defense (5030), GreenPulse (5070)
+- Web: EZStart (5045), EZAuth (5015), EZBill (5025), EZPay (5045), Tower Defense (5035), FengShui (5065), ASC-TCD (5055), GreenPulse (5075)
+
+**14 Types d'Audits:**
+- Security, Performance, Architecture, Code Quality
+- Dependencies, Accessibility, Infrastructure, API
+- SEO, Web Apps, Testing, UX, i18n, Monitoring
+
+### Dashboard Features
+
+**Overall Health Score (0-100)**
+- Calcul basé sur: Services (30%), Audits (30%), Deployments (20%), Databases (20%)
+- Status: excellent (90+), good (70+), fair (50+), poor (30+), critical (<30)
+- Barre de progression et comparaison avec target (90)
+
+**Metrics Overview**
+- Services Health: X/Y operational avec pourcentage
+- Audits Complete: X/Y coverage
+- Active Deployments: Railway + Vercel
+- Avg Response Time: Last 24 hours
+
+**Services Tabs**
+- APIs: Carte par service avec status, response time, uptime, avg response
+- Web Apps: Même structure que APIs
+- Badge coloré: green (healthy), red (unhealthy)
+
+**Audits Tabs**
+- Carte par audit avec emoji, nom, description
+- Score /100 avec couleur dynamique (green 90+, yellow 70+, red <70)
+- Status: complete, partial, not-audited
+- Date de dernière mise à jour
+
+### Configuration
+
+**Variables d'environnement (Monitoring API):**
+```env
+NODE_ENV=development
+PORT=5080
+MONGO_URL=mongodb+srv://...
+HEALTH_CHECK_INTERVAL=30000
+HEALTH_CHECK_TIMEOUT=5000
+HEALTH_CHECK_RETRIES=3
+```
+
+**CORS:** Auto-configuré via `@ezstart/config` pour toutes les 8 web apps
+
+### Usage
+
+```bash
+# Démarrer EZStart avec toutes les APIs (nécessaire pour monitoring)
+pnpm dev:ez
+
+# Accéder au dashboard
+open http://localhost:5045/en/monitoring
+
+# API directe
+curl http://localhost:5080/api/health-checks
+curl http://localhost:5080/api/audits
+curl http://localhost:5080/api/metrics
+```
+
+### Fix Dashboard Fetch - Next.js SSR (17/10/2025)
+
+**Problème**: Next.js SSR ne pouvait pas fetch depuis monitoring API malgré que l'API fonctionnait avec curl.
+
+**Cause**: `getApiUrl('monitoring')` retournait le mauvais environnement en mode dev Next.js.
+
+**Solution Appliquée** ([page.tsx:9-11](apps/ezstart/web/src/app/[locale]/monitoring/page.tsx#L9-L11)):
+
+```typescript
+// Force local URL in development
+const MONITORING_API_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:5080'
+  : getApiUrl('monitoring')
+```
+
+**Logging Amélioré** - Debugging des fetch failures:
+
+```typescript
+async function getHealthChecks() {
+  try {
+    console.log('[Monitoring] Fetching health checks from:', MONITORING_API_URL)
+    const res = await fetch(`${MONITORING_API_URL}/api/health-checks`, {
+      cache: 'no-store',
+    })
+    console.log('[Monitoring] Health checks response status:', res.status)
+    if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`)
+    return res.json()
+  } catch (error) {
+    console.error('[Monitoring] Error fetching health checks:', error)
+    if (error instanceof Error) {
+      console.error('[Monitoring] Error details:', error.message, error.cause)
+    }
+    return { services: [] }
+  }
+}
+```
+
+**Améliorations du Logging**:
+- ✅ Logs de l'URL exacte utilisée
+- ✅ Logs du status HTTP de la réponse
+- ✅ Logs détaillés d'erreur avec message et cause
+- ✅ Messages d'erreur enrichis avec status codes
+
+**Résultat**: Dashboard peut maintenant fetch correctement avec logs détaillés pour debugging.
+
+### Prochaines Étapes
+
+1. ✅ Dashboard opérationnel avec fetch fixes
+2. ⏳ Créer les fichiers d'audit markdown avec scores réels
+3. ⏳ Configurer health checks périodiques (cron job)
+4. ⏳ Ajouter alertes (email/Slack) quand service tombe
+5. ⏳ Graphiques de tendance pour métriques historiques
+6. ⏳ Export de rapports (PDF/Excel)
+
+### Fichiers Importants
+
+- `apps/monitoring/api/` - API de monitoring
+- `apps/ezstart/web/src/app/[locale]/monitoring/` - Dashboard
+- `packages/monitoring/` - Types et collectors
+- `apps/monitoring/api/README.md` - Documentation API complète
+
 ## @ezstart/config - Configuration Centralisée des URLs et CORS ✅
 
 **Créé le 16/10/2025 - Single source of truth pour tous les URLs et environnements**
@@ -1820,4 +2069,104 @@ Rebuild le package → Toutes les apps se mettent à jour automatiquement ! ✅
 - **README complet :** [packages/config/README.md](./packages/config/README.md)
 - **Guide migration :** [docs/MIGRATION-CONFIG.md](./docs/MIGRATION-CONFIG.md)
 - **API Reference :** Types TypeScript avec JSDoc
+
+
+## 🎯 Port Management - Single Source of Truth (17/10/2025)
+
+**Migration complète : Tous les ports sont maintenant auto-détectés depuis `@ezstart/config`**
+
+### Problème Résolu
+
+**Avant :**
+- Ports hardcodés dans 50+ endroits (package.json, .env, scripts)
+- Duplication entre CLAUDE.md, monitoring, APIs, web apps
+- Conflits de ports (EZStart vs EZPay sur 5045)
+- `PORT=` obligatoire dans tous les `.env.local`
+
+**Après :**
+- ✅ **Un seul endroit** : `packages/config/src/urls.ts`
+- ✅ **0 duplication** : Toutes les apps lisent depuis config
+- ✅ **0 .env nécessaire** : Ports auto-détectés
+- ✅ **Type-safe** : TypeScript valide les noms d'apps
+
+### Architecture Complète
+
+#### 1. Config Centralisée - getPort()
+
+```typescript
+// packages/config/src/urls.ts
+export function getPort(app: AppName, type: 'web' | 'api' = 'web'): number {
+  const url = type === 'api' ? URLS[app].api?.local : URLS[app].web.local
+  if (!url) throw new Error(`No ${type} URL defined for app: ${app}`)
+  return parseInt(new URL(url).port, 10)
+}
+```
+
+#### 2. APIs - Utilisation de getApiPort()
+
+Toutes les APIs (6/6) utilisent `getApiPort(appName)` :
+- ✅ EZAuth: `getApiPort('ezauth')` → 5010
+- ✅ EZPay: `getApiPort('ezpay')` → 5040  
+- ✅ EZBill: `getApiPort('ezbill')` → 5020
+- ✅ Tower Defense: `getApiPort('tower-defense')` → 5030
+- ✅ GreenPulse: `getApiPort('green-pulse')` → 5070
+- ✅ Monitoring: `getApiPort('monitoring')` → 5080
+
+#### 3. Web Apps - Script Universel
+
+Toutes les web apps (8/8) utilisent `packages/config/bin/dev-server.js` :
+
+```json
+"scripts": {
+  "dev": "node ../../../packages/config/bin/dev-server.js"
+}
+```
+
+Le script auto-détecte le nom de l'app et récupère le port depuis config.
+
+#### 4. Monitoring - Auto-Configuration
+
+```typescript
+// packages/monitoring/src/types/health.ts
+import { URLS } from '@ezstart/config'
+
+export const MONITORED_SERVICES = {
+  'ezauth-api': {
+    localUrl: `${URLS.ezauth.api?.local}/api/health`,
+    port: new URL(URLS.ezauth.api!.local).port,
+  }
+  // ... auto-généré pour tous
+}
+```
+
+### Nettoyage Effectué
+
+**Supprimé :**
+- ❌ `PORT=` dans tous les `.env.example` (6 APIs)
+- ❌ Ports hardcodés dans `package.json` (8 web apps)
+- ❌ Scripts `dev-with-port.js` personnalisés (2 apps)
+
+**Ajouté :**
+- ✅ Commentaire : `# PORT is auto-detected from @ezstart/config`
+- ✅ Script universel : `packages/config/bin/dev-server.js`
+
+### Usage
+
+```bash
+# Aucun .env nécessaire !
+pnpm dev:ez     # Tous les ports auto-détectés
+
+# Ajouter un nouveau service
+# 1. Ajouter dans packages/config/src/urls.ts
+# 2. Utiliser getApiPort('new-app') ou dev-server.js
+# C'est tout ! ✅
+```
+
+### Avantages
+
+1. ✅ **Single Source of Truth** : Un seul fichier
+2. ✅ **Type Safety** : TypeScript valide
+3. ✅ **Auto-Sync** : Monitoring se met à jour automatiquement
+4. ✅ **Moins de Config** : Plus besoin de .env pour ports
+5. ✅ **DX Améliorée** : Juste fonctionne™
 

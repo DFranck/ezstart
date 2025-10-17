@@ -1,1 +1,10 @@
-{ "common": { "learnMore": "En savoir plus", "inProgress": "En cours" } }
+{
+  "common": {
+    "learnMore": "En savoir plus",
+    "inProgress": "En cours"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  }
+}

@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { useMessages } from 'next-intl';
+import { useMessages } from 'next-intl'
 
 export type NavMenu = {
-  menuLabel: string;
-  menu: { label: string; href: string }[];
-};
-export type NavLink = { label: string; href: string };
-export type NavItem = NavLink | NavMenu;
+  menuLabel: string
+  menu: { label: string; href: string }[]
+}
+export type NavLink = { label: string; href: string }
+export type NavItem = NavLink | NavMenu
 
 export const useNavLinks = (): NavItem[] => {
   // SSR-safe messages handling
@@ -19,6 +19,6 @@ export const useNavLinks = (): NavItem[] => {
     // Return empty array as fallback
     return []
   }
-  
-  return Array.isArray(messages.links) ? messages.links : [];
-};
+
+  return Array.isArray(messages.links) ? messages.links : []
+}

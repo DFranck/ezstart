@@ -1,21 +1,31 @@
+import { getPort, type AppName } from '@ezstart/config'
+
 /**
- * Get the port for an API service from environment variables
- * Pattern: 50x0 = APIs | 50x5 = Web Apps
- * Each service should define its PORT in .env file for development
+ * Get the port for an API service
  *
- * Development ports (defined in .env files):
- * EZAuth API: 5010, EZAuth Web: 5015
- * EZBill API: 5020, EZBill Web: 5025
- * Tower Defense API: 5030, Tower Defense Web: 5035
- * EZPay API: 5040, EZPay Web: 5045
- * EZStart Web: 5050, ASC-TCD Web: 5055, FengShui Web: 5065
- * Green Pulse API: 5070, Green Pulse Web: 5075
+ * NEW (v2): Uses @ezstart/config as single source of truth
+ * Falls back to process.env.PORT for override capability
+ *
+ * @param appName - The app name from @ezstart/config (e.g., 'ezauth', 'ezpay')
+ * @returns Port number for the API
+ *
+ * @example
+ * ```typescript
+ * const PORT = getApiPort('ezauth') // 5010 from config
+ * const PORT = getApiPort('ezpay') // 5040 from config
+ * ```
  */
-export function getApiPort(defaultPort = 3000): number {
-  const port = process.env.PORT
-  if (!port) {
-    console.warn(`⚠️ PORT not defined, using fallback: ${defaultPort}`)
-    return defaultPort
+export function getApiPort(appName: AppName): number {
+  // Allow override via env var (useful for testing/deployment)
+  if (process.env.PORT) {
+    return parseInt(process.env.PORT, 10)
   }
-  return parseInt(port, 10)
+
+  // Get from @ezstart/config (single source of truth)
+  try {
+    return getPort(appName, 'api')
+  } catch (error) {
+    console.error(`❌ Failed to get port for ${appName}:`, error instanceof Error ? error.message : 'Unknown error')
+    throw error
+  }
 }

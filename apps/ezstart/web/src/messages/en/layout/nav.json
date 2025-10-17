@@ -1,7 +1,6 @@
 {
   "links": [
     { "label": "Home", "href": "/" },
-
     {
       "menuLabel": "Libraries",
       "menu": [
@@ -13,6 +12,7 @@
     {
       "menuLabel": "Applications",
       "menu": [
+        { "label": "EZMonitor", "href": "/monitoring" },
         { "label": "EZBill", "href": "https://ezstart-ezbill.vercel.app/" },
         { "label": "EZFengShui", "href": "https://ezfengshui.vercel.app/" }
       ]

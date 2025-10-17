@@ -1,0 +1,27 @@
+{
+  "name": "@ezstart/monitoring",
+  "version": "1.0.0",
+  "description": "Centralized monitoring, auditing, and health check system for @ezstart monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "monitoring",
+    "audit",
+    "health-check",
+    "observability"
+  ],
+  "dependencies": {
+    "@ezstart/config": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

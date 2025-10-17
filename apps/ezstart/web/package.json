@@ -5,8 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node src/scripts/dev-with-port.js",
-    "dev:port": "next dev --turbopack -p $PORT",
+    "dev": "node ../../../packages/config/bin/dev-server.js",
     "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/next-theme --filter @ezstart/auth-sdk build && next build",
     "start": "next start",
     "lint": "next lint",
@@ -16,6 +15,7 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/monitoring": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",

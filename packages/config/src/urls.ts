@@ -21,6 +21,7 @@ export type AppName =
   | 'tower-defense'
   | 'asc-tcd'
   | 'green-pulse'
+  | 'monitoring'
 
 export interface AppUrls {
   web: {
@@ -122,6 +123,18 @@ export const URLS: Record<AppName, AppUrls> = {
       production: 'https://green-pulse-api.up.railway.app',
     },
   },
+
+  monitoring: {
+    web: {
+      local: 'http://localhost:5050', // Monitoring dashboard is in ezstart
+      development: 'https://ezstart-web.vercel.app',
+      production: 'https://www.ezstart.xyz',
+    },
+    api: {
+      local: 'http://localhost:5080',
+      production: 'https://monitoring-api.up.railway.app',
+    },
+  },
 }
 
 /**
@@ -184,4 +197,28 @@ export function getAllApiUrls(app: AppName): string[] {
   if (!apiUrls) return []
 
   return [apiUrls.local, apiUrls.development, apiUrls.production].filter(Boolean) as string[]
+}
+
+/**
+ * Get port number for an app (web or API)
+ * Usage: Start dev servers with the correct port from config
+ *
+ * @example
+ * ```typescript
+ * // Web app
+ * const port = getPort('ezstart', 'web') // 5050
+ *
+ * // API
+ * const port = getPort('ezauth', 'api') // 5010
+ * ```
+ */
+export function getPort(app: AppName, type: 'web' | 'api' = 'web'): number {
+  const url = type === 'api' ? URLS[app].api?.local : URLS[app].web.local
+
+  if (!url) {
+    throw new Error(`No ${type} URL defined for app: ${app}`)
+  }
+
+  const port = new URL(url).port
+  return parseInt(port, 10)
 }

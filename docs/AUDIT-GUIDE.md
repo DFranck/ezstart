@@ -17,6 +17,106 @@ Les audits ne sont pas une punition, mais un **système de santé préventive** 
 
 ---
 
+## 🎛️ Architecture du Système de Monitoring ⭐ NOUVEAU
+
+Le monorepo dispose maintenant d'un **système de monitoring centralisé** pour suivre automatiquement l'état de santé de tout l'écosystème.
+
+### Composants du Système
+
+**1. Package `@ezstart/monitoring`**
+- Types TypeScript pour tous les aspects du monitoring
+- Utilitaires de scoring et de formatage
+- Health checker avec historique et uptime
+- Single source of truth pour tous les services
+
+**2. API de Monitoring (`apps/monitoring/api`)**
+- **Port:** 5080 (local) / Railway (prod)
+- **Endpoints:**
+  - `GET /api/health-checks` - État de tous les services
+  - `GET /api/audits` - Status de tous les audits
+  - `GET /api/deployments` - Info déploiements Railway/Vercel
+  - `GET /api/metrics` - Métriques agrégées pour dashboard
+
+**3. Dashboard de Monitoring (EZStart Web)**
+- Visualisation en temps réel de tous les services
+- Suivi automatique des audits avec scores et dates
+- Monitoring des déploiements et commits
+- Alertes pour services down ou audits overdue
+- Tracking d'amélioration continue
+
+### Services Monitorés Automatiquement
+
+**APIs (5 services):**
+- EZAuth API (http://localhost:5010/api/health)
+- EZPay API (http://localhost:5040/api/health)
+- EZBill API (http://localhost:5020/api/health)
+- Tower Defense API (http://localhost:5030/api/health)
+- GreenPulse API (http://localhost:5070/api/health)
+
+**Web Apps (8 services):**
+- EZStart, EZAuth, EZBill, EZPay, Tower Defense, FengShui, ASC-TCD, GreenPulse
+
+**Databases (5 services):**
+- MongoDB pour chaque application
+
+### Utilisation du Système
+
+```bash
+# Démarrer l'API de monitoring
+cd apps/monitoring/api
+pnpm dev
+
+# Accéder au dashboard
+open http://localhost:5050/monitoring
+
+# Checker un service via API
+curl http://localhost:5080/api/health-checks/ezauth-api
+
+# Voir toutes les métriques
+curl http://localhost:5080/api/metrics
+```
+
+### Métriques Disponibles
+
+Le système track automatiquement :
+- ✅ **Services** : healthy/degraded/unhealthy, uptime, response time
+- ✅ **Audits** : score, last updated, next due, overdue count
+- ✅ **Deployments** : status, last commit, build info
+- ✅ **Databases** : connection status, response time, storage
+- ✅ **Git** : uncommitted changes, unpushed commits, commit frequency
+- ✅ **Overall Health** : Score global 0-100, status (excellent/good/fair/poor)
+
+### Amélioration Continue
+
+Le dashboard inclut un système de **continuous improvement tracking** :
+- Identifier les domaines d'amélioration
+- Définir état actuel vs état désiré
+- Action items avec priorités
+- Métriques before/after
+- Suivi des progrès dans le temps
+
+**Exemple :**
+```typescript
+{
+  category: 'performance',
+  title: 'Réduire le temps de build',
+  currentState: '8 minutes',
+  desiredState: '3 minutes',
+  actionItems: [
+    'Activer Turbo cache',
+    'Optimiser tsconfig references',
+    'Paralléliser les builds'
+  ],
+  metrics: {
+    before: 8,
+    after: 3.5,
+    unit: 'minutes'
+  }
+}
+```
+
+---
+
 ## 📅 Calendrier d'Audit
 
 ### Audits Hebdomadaires (🔴 CRITIQUES)

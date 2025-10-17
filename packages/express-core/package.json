@@ -13,8 +13,14 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
+    },
+    "./cors": {
+      "types": "./dist/config/cors.d.ts",
+      "import": "./dist/config/cors.js",
+      "require": "./dist/config/cors.js"
     }
   },
   "dependencies": {

@@ -1,0 +1,106 @@
+'use client'
+
+import { Card, CardContent, H3, P } from '@ezstart/ui/components'
+
+interface MetricCardProps {
+  title: string
+  value: string | number
+  subtitle?: string
+  icon?: string
+  trend?: {
+    value: number
+    direction: 'up' | 'down'
+  }
+}
+
+function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
+  const getTrendColor = () => {
+    if (!trend) return ''
+    return trend.direction === 'up' ? 'text-green-500' : 'text-red-500'
+  }
+
+  const getTrendIcon = () => {
+    if (!trend) return null
+    return trend.direction === 'up' ? '↑' : '↓'
+  }
+
+  return (
+    <Card variant="floating" className="hover:border-primary/50 transition-colors">
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <P className="text-sm text-muted-foreground">{title}</P>
+            <div className="flex items-baseline gap-2">
+              {icon && <span className="text-2xl">{icon}</span>}
+              <H3 size="h2" className="font-bold">
+                {value}
+              </H3>
+            </div>
+            {subtitle && (
+              <P className="text-xs text-muted-foreground">{subtitle}</P>
+            )}
+          </div>
+          {trend && (
+            <div className={`flex items-center gap-1 ${getTrendColor()}`}>
+              <span className="text-2xl">{getTrendIcon()}</span>
+              <P className="text-sm font-semibold">{Math.abs(trend.value)}%</P>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+interface MetricsOverviewProps {
+  metrics: {
+    servicesHealthy: number
+    servicesTotal: number
+    auditsComplete: number
+    auditsTotal: number
+    deploymentsActive: number
+    deploymentsTotal: number
+    avgResponseTime: number
+  }
+}
+
+export function MetricsOverview({ metrics }: MetricsOverviewProps) {
+  const servicesHealthPercentage = Math.round(
+    (metrics.servicesHealthy / metrics.servicesTotal) * 100
+  )
+  const auditsCompletePercentage = Math.round(
+    (metrics.auditsComplete / metrics.auditsTotal) * 100
+  )
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <MetricCard
+        title="Services Health"
+        value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
+        subtitle={`${servicesHealthPercentage}% operational`}
+        icon="🚀"
+      />
+
+      <MetricCard
+        title="Audits Complete"
+        value={`${metrics.auditsComplete}/${metrics.auditsTotal}`}
+        subtitle={`${auditsCompletePercentage}% coverage`}
+        icon="📋"
+      />
+
+      <MetricCard
+        title="Active Deployments"
+        value={`${metrics.deploymentsActive}/${metrics.deploymentsTotal}`}
+        subtitle="Railway + Vercel"
+        icon="☁️"
+      />
+
+      <MetricCard
+        title="Avg Response Time"
+        value={`${metrics.avgResponseTime}ms`}
+        subtitle="Last 24 hours"
+        icon="⚡"
+      />
+    </div>
+  )
+}

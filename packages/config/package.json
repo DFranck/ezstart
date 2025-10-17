@@ -7,20 +7,24 @@
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./urls": {
+      "types": "./dist/urls.d.ts",
       "import": "./dist/urls.js",
-      "types": "./dist/urls.d.ts"
+      "require": "./dist/urls.js"
     },
     "./cors": {
+      "types": "./dist/cors.d.ts",
       "import": "./dist/cors.js",
-      "types": "./dist/cors.d.ts"
+      "require": "./dist/cors.js"
     },
     "./env": {
+      "types": "./dist/env.d.ts",
       "import": "./dist/env.js",
-      "types": "./dist/env.d.ts"
+      "require": "./dist/env.js"
     }
   },
   "scripts": {

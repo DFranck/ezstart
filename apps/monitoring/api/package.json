@@ -1,0 +1,32 @@
+{
+  "name": "api-monitoring",
+  "version": "1.0.0",
+  "description": "Monitoring and observability API for @ezstart monorepo",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ezstart/express-core": "workspace:*",
+    "@ezstart/monitoring": "workspace:*",
+    "@ezstart/config": "workspace:*",
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "mongodb": "^6.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

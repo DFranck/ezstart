@@ -2,7 +2,7 @@ import { connectToMongo, createApp, startServer, Router, getApiPort } from '@ezs
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp({ apiApp: 'green-pulse' })
-const PORT = getApiPort(5070)
+const PORT = getApiPort('green-pulse')
 
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok', service: 'green-pulse-api' }))

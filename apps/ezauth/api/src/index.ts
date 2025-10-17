@@ -2,7 +2,7 @@ import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/exp
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
 
-const PORT = getApiPort()
+const PORT = getApiPort('ezauth')
 
 // Create app with CORS configuration from @ezstart/config
 const app = createApp({ apiApp: 'ezauth' })

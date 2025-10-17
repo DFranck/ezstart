@@ -584,6 +584,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
+      '@ezstart/monitoring':
+        specifier: workspace:*
+        version: link:../../../packages/monitoring
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -921,6 +924,52 @@ importers:
         version: 3.4.17(ts-node@10.9.2(@types/node@22.18.6)(typescript@5.7.3))
       typescript:
         specifier: ^5.7.3
+        version: 5.7.3
+
+  apps/monitoring/api:
+    dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../../../packages/config
+      '@ezstart/express-core':
+        specifier: workspace:*
+        version: link:../../../packages/express-core
+      '@ezstart/monitoring':
+        specifier: workspace:*
+        version: link:../../../packages/monitoring
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+      mongodb:
+        specifier: ^6.12.0
+        version: 6.18.0(socks@2.8.6)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@ezstart/eslint-config':
+        specifier: workspace:*
+        version: link:../../../packages/eslint-config
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../../../packages/typescript-config
+      '@types/cors':
+        specifier: ^2.8.17
+        version: 2.8.19
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.3
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.18.6
+      tsx:
+        specifier: ^4.19.2
+        version: 4.20.3
+      typescript:
+        specifier: ^5.7.2
         version: 5.7.3
 
   apps/tower-defense/api:
@@ -1320,6 +1369,22 @@ importers:
         version: 0.2.34
       typescript:
         specifier: ^5.7.3
+        version: 5.7.3
+
+  packages/monitoring:
+    dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@ezstart/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.7.2
         version: 5.7.3
 
   packages/next-config:
@@ -3763,8 +3828,14 @@ packages:
   '@types/express-serve-static-core@4.19.6':
     resolution: {integrity: sha512-N4LZ2xG7DatVqhCZzOGb1Yi5lMbXSZcmdLDe9EzSndPV2HpWYWzRbaerl2n27irrm94EPpprqa8KpskPT085+A==}
 
+  '@types/express-serve-static-core@5.1.0':
+    resolution: {integrity: sha512-jnHMsrd0Mwa9Cf4IdOzbz543y4XJepXrbia2T4b6+spXC2We3t1y6K44D3mR8XMFSXMCf3/l7rCgddfx7UNVBA==}
+
   '@types/express@4.17.23':
     resolution: {integrity: sha512-Crp6WY9aTYP3qPi2wGDo9iUe/rceX01UMhnF1jmwDcKCFM6cx7YhGP/Mpr3y9AASpfHixIG0E6azCcL5OcDHsQ==}
+
+  '@types/express@5.0.3':
+    resolution: {integrity: sha512-wGA0NX93b19/dZC1J18tKWVIYWyyF2ZjT9vin/NRu0qzzvfVzWjs04iq2rQ3H65vCTQYlRqs3YHfY7zjdV+9Kw==}
 
   '@types/fs-extra@11.0.4':
     resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
@@ -10849,11 +10920,24 @@ snapshots:
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.5
 
+  '@types/express-serve-static-core@5.1.0':
+    dependencies:
+      '@types/node': 20.19.9
+      '@types/qs': 6.14.0
+      '@types/range-parser': 1.2.7
+      '@types/send': 0.17.5
+
   '@types/express@4.17.23':
     dependencies:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 4.19.6
       '@types/qs': 6.14.0
+      '@types/serve-static': 1.15.8
+
+  '@types/express@5.0.3':
+    dependencies:
+      '@types/body-parser': 1.19.6
+      '@types/express-serve-static-core': 5.1.0
       '@types/serve-static': 1.15.8
 
   '@types/fs-extra@11.0.4':

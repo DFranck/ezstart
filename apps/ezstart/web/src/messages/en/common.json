@@ -1,1 +1,10 @@
-{ "common": { "learnMore": "Learn more", "inProgress": "In Progress" } }
+{
+  "common": {
+    "learnMore": "Learn more",
+    "inProgress": "In Progress"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout"
+  }
+}

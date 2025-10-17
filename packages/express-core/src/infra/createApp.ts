@@ -2,7 +2,7 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express, { Express } from 'express';
 import type { AppName } from '@ezstart/config/urls';
-import { createCorsConfig } from '@ezstart/config/cors';
+import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors';
 
 // Load .env.local first (priority), then .env as fallback
 dotenv.config({ path: '.env.local' });
@@ -44,7 +44,6 @@ export function createApp(options?: CreateAppOptions): Express {
     corsOptions = createCorsConfig(options.apiApp);
 
     // Get allowed origins for logging
-    const { getAllowedOrigins } = require('@ezstart/config/cors');
     const allowedOrigins = getAllowedOrigins(options.apiApp);
 
     console.log(`✅ [CORS] Auto-configured for API: ${options.apiApp}`);
