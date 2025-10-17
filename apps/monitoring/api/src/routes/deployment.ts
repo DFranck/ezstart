@@ -1,5 +1,4 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { Router as ExpressRouter } from 'express'
 import { DEPLOYMENT_CONFIGS } from '@ezstart/monitoring'
 import { exec } from 'child_process'
 import { promisify } from 'util'
@@ -7,7 +6,7 @@ import { promisify } from 'util'
 const execAsync = promisify(exec)
 
 export const deploymentRegistry = new OpenAPIRegistry()
-const router: ExpressRouter = Router()
+const router = Router()
 const docRouter = createRouterWithDoc(deploymentRegistry, router)
 export const deploymentRoutes = router
 

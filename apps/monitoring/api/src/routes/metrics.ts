@@ -1,5 +1,4 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { Router as ExpressRouter } from 'express'
 import {
   HealthChecker,
   MONITORED_SERVICES,
@@ -16,7 +15,7 @@ import { promisify } from 'util'
 const execAsync = promisify(exec)
 
 export const metricsRegistry = new OpenAPIRegistry()
-const router: ExpressRouter = Router()
+const router = Router()
 const docRouter = createRouterWithDoc(metricsRegistry, router)
 export const metricsRoutes = router
 

@@ -1,12 +1,11 @@
 import { Router } from '@ezstart/express-core'
-import { Router as ExpressRouter } from 'express'
 import { healthRoutes, healthRegistry } from './health'
 import { auditRoutes, auditRegistry } from './audit'
 import { deploymentRoutes, deploymentRegistry } from './deployment'
 import { metricsRoutes, metricsRegistry } from './metrics'
 import projectsRouter from './projects'
 
-const router: ExpressRouter = Router()
+const router = Router()
 
 // Mount sub-routes
 router.use('/health-checks', healthRoutes)

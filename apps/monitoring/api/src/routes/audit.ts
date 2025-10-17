@@ -1,11 +1,10 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { Router as ExpressRouter } from 'express'
 import { AUDIT_METADATA, type AuditType } from '@ezstart/monitoring'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 
 export const auditRegistry = new OpenAPIRegistry()
-const router: ExpressRouter = Router()
+const router = Router()
 const docRouter = createRouterWithDoc(auditRegistry, router)
 export const auditRoutes = router
 

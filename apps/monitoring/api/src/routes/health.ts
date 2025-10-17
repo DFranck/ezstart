@@ -1,9 +1,8 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { Router as ExpressRouter } from 'express'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 
 export const healthRegistry = new OpenAPIRegistry()
-const router: ExpressRouter = Router()
+const router = Router()
 const docRouter = createRouterWithDoc(healthRegistry, router)
 export const healthRoutes = router
 
