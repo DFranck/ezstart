@@ -39,6 +39,7 @@ export interface ProjectHealth {
   description?: string
   emoji?: string
   logo?: string // Path to logo image (optional, fallback to emoji)
+  githubUrl?: string // GitHub repository URL
   endpoints: ProjectEndpoint[]
   overallStatus: HealthStatus
   healthyCount: number
@@ -57,6 +58,7 @@ export const PROJECT_ENDPOINTS: Record<
     emoji: string
     logo?: string // Optional logo path (fallback to emoji if not provided)
     description: string
+    githubUrl?: string // GitHub repository URL
     endpoints: Array<{
       type: EndpointType
       label: string
@@ -72,6 +74,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'EZAuth',
     emoji: '🔐',
     description: 'Centralized authentication service (SSO)',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/ezauth',
     endpoints: [
       {
         type: 'api',
@@ -94,6 +97,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'EZBill',
     emoji: '💼',
     description: 'Invoicing and billing management',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/ezbill',
     endpoints: [
       {
         type: 'api',
@@ -116,6 +120,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'EZPay',
     emoji: '💳',
     description: 'Universal payment processing',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/ezpay',
     endpoints: [
       {
         type: 'api',
@@ -138,6 +143,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'Tower Defense',
     emoji: '🏰',
     description: 'Multiplayer tower defense game',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/tower-defense',
     endpoints: [
       {
         type: 'api',
@@ -160,6 +166,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'GreenPulse',
     emoji: '🌱',
     description: 'AI-powered environmental impact tracker',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/green-pulse',
     endpoints: [
       {
         type: 'api',
@@ -182,6 +189,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'EZStart',
     emoji: '🚀',
     description: 'Main landing page and dashboard',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/ezstart',
     endpoints: [
       {
         type: 'web',
@@ -196,6 +204,7 @@ export const PROJECT_ENDPOINTS: Record<
     name: 'FengShui',
     emoji: '🎋',
     description: 'Feng Shui consultation platform',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/fengshui',
     endpoints: [
       {
         type: 'web',
@@ -211,6 +220,7 @@ export const PROJECT_ENDPOINTS: Record<
     emoji: '🎓',
     logo: 'https://www.asc-tcd.com/images/logo.png', // Logo from production domain
     description: 'Academic student center',
+    githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/asc-tcd',
     endpoints: [
       {
         type: 'web',

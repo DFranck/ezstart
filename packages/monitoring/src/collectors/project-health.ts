@@ -109,6 +109,7 @@ export class ProjectHealthChecker {
       description: config.description,
       emoji: config.emoji,
       logo: config.logo, // Optional logo, fallback to emoji if not provided
+      githubUrl: config.githubUrl, // GitHub repository URL
       endpoints: endpointResults,
       overallStatus,
       healthyCount,
