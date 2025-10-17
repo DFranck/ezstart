@@ -1,9 +1,9 @@
 import { Router } from '@ezstart/express-core'
-import { healthRoutes, healthRegistry } from './health'
-import { auditRoutes, auditRegistry } from './audit'
-import { deploymentRoutes, deploymentRegistry } from './deployment'
-import { metricsRoutes, metricsRegistry } from './metrics'
-import projectsRouter from './projects'
+import { healthRoutes, healthRegistry } from './health.js'
+import { auditRoutes, auditRegistry } from './audit.js'
+import { deploymentRoutes, deploymentRegistry } from './deployment.js'
+import { metricsRoutes, metricsRegistry } from './metrics.js'
+import projectsRouter from './projects.js'
 
 const router = Router()
 
