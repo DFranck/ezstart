@@ -20,18 +20,18 @@ export function AuditCard({ audit }: AuditCardProps) {
   const getStatusColor = () => {
     switch (audit.status) {
       case 'complete':
-        return 'bg-green-500/10 text-green-500 border-green-500/20'
+        return 'bg-status-healthy/10 text-status-healthy border-status-healthy/20'
       case 'partial':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+        return 'bg-status-degraded/10 text-status-degraded border-status-degraded/20'
       default:
-        return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+        return 'bg-status-unknown/10 text-status-unknown border-status-unknown/20'
     }
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-500'
-    if (score >= 70) return 'text-yellow-500'
-    return 'text-red-500'
+    if (score >= 90) return 'text-status-healthy'
+    if (score >= 70) return 'text-status-degraded'
+    return 'text-status-unhealthy'
   }
 
   return (
@@ -74,8 +74,8 @@ export function AuditCard({ audit }: AuditCardProps) {
           )}
 
           {!audit.exists && (
-            <div className="mt-3 p-2 bg-yellow-500/10 rounded-md">
-              <P className="text-xs text-yellow-600 dark:text-yellow-500">
+            <div className="mt-3 p-2 bg-status-degraded/10 rounded-md">
+              <P className="text-xs text-status-degraded">
                 Audit file not found
               </P>
             </div>

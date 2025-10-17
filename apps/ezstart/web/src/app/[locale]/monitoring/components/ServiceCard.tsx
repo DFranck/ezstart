@@ -14,8 +14,8 @@ interface ServiceCardProps {
 export function ServiceCard({ service }: ServiceCardProps) {
   const isHealthy = service.status === 'healthy'
   const statusColor = isHealthy
-    ? 'bg-green-500/10 text-green-500 border-green-500/20'
-    : 'bg-red-500/10 text-red-500 border-red-500/20'
+    ? 'bg-status-healthy/10 text-status-healthy border-status-healthy/20'
+    : 'bg-status-unhealthy/10 text-status-unhealthy border-status-unhealthy/20'
 
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">

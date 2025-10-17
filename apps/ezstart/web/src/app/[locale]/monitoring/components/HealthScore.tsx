@@ -9,10 +9,10 @@ interface HealthScoreProps {
 
 export function HealthScore({ score, status }: HealthScoreProps) {
   const getScoreColor = () => {
-    if (score >= 90) return 'text-green-500'
-    if (score >= 70) return 'text-yellow-500'
-    if (score >= 50) return 'text-orange-500'
-    return 'text-red-500'
+    if (score >= 90) return 'text-status-healthy'
+    if (score >= 70) return 'text-status-degraded'
+    if (score >= 50) return 'text-status-degraded'
+    return 'text-status-unhealthy'
   }
 
   const getStatusEmoji = () => {
@@ -31,10 +31,10 @@ export function HealthScore({ score, status }: HealthScoreProps) {
   }
 
   const getBackgroundGradient = () => {
-    if (score >= 90) return 'from-green-500/20 to-green-500/5'
-    if (score >= 70) return 'from-yellow-500/20 to-yellow-500/5'
-    if (score >= 50) return 'from-orange-500/20 to-orange-500/5'
-    return 'from-red-500/20 to-red-500/5'
+    if (score >= 90) return 'from-status-healthy/20 to-status-healthy/5'
+    if (score >= 70) return 'from-status-degraded/20 to-status-degraded/5'
+    if (score >= 50) return 'from-status-degraded/20 to-status-degraded/5'
+    return 'from-status-unhealthy/20 to-status-unhealthy/5'
   }
 
   return (
@@ -61,12 +61,12 @@ export function HealthScore({ score, status }: HealthScoreProps) {
               <div
                 className={`h-full ${
                   score >= 90
-                    ? 'bg-green-500'
+                    ? 'bg-status-healthy'
                     : score >= 70
-                      ? 'bg-yellow-500'
+                      ? 'bg-status-degraded'
                       : score >= 50
-                        ? 'bg-orange-500'
-                        : 'bg-red-500'
+                        ? 'bg-status-degraded'
+                        : 'bg-status-unhealthy'
                 } transition-all duration-500`}
                 style={{ width: `${score}%` }}
               />

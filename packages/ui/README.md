@@ -76,6 +76,40 @@ Built-in support for light and dark themes with semantic colors:
 | **EZStart** | Brand identity | `hsl(var(--ezstart))` |
 | **Muted** | Disabled states, placeholders | `hsl(var(--muted))` |
 
+### Monitoring Status Colors
+
+Semantic colors for service health monitoring and status indicators:
+
+| Status | Usage | Tailwind Class | CSS Variable |
+|--------|-------|----------------|-------------|
+| **Healthy** | Service operational | `bg-status-healthy` | `var(--status-healthy)` |
+| **Degraded** | Partial issues | `bg-status-degraded` | `var(--status-degraded)` |
+| **Unhealthy** | Service down | `bg-status-unhealthy` | `var(--status-unhealthy)` |
+| **Unknown** | No data available | `bg-status-unknown` | `var(--status-unknown)` |
+
+### Platform Colors
+
+Brand colors for deployment platforms:
+
+| Platform | Tailwind Class | CSS Variable |
+|----------|----------------|-------------|
+| **Railway** | `bg-platform-railway` | `var(--platform-railway)` |
+| **Render** | `bg-platform-render` | `var(--platform-render)` |
+| **Vercel** | `bg-platform-vercel` | `var(--platform-vercel)` |
+
+**Example usage:**
+```tsx
+// Status badges
+<Badge className="bg-status-healthy/10 text-status-healthy">
+  Healthy
+</Badge>
+
+// Platform badges
+<Badge className="bg-platform-railway/10 text-platform-railway">
+  Railway
+</Badge>
+```
+
 ## 🧩 Components Library (50+ Components)
 
 ### Core Components

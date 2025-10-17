@@ -11,13 +11,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'bg-green-500/10 text-green-500 border-green-500/20'
+        return 'bg-status-healthy/10 text-status-healthy border-status-healthy/20'
       case 'degraded':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+        return 'bg-status-degraded/10 text-status-degraded border-status-degraded/20'
       case 'unhealthy':
-        return 'bg-red-500/10 text-red-500 border-red-500/20'
+        return 'bg-status-unhealthy/10 text-status-unhealthy border-status-unhealthy/20'
       default:
-        return 'bg-muted text-muted-foreground'
+        return 'bg-status-unknown/10 text-status-unknown border-status-unknown/20'
     }
   }
 
@@ -38,9 +38,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
     if (!platform) return null
 
     const colors: Record<string, string> = {
-      railway: 'bg-purple-500/10 text-purple-500',
-      render: 'bg-blue-500/10 text-blue-500',
-      vercel: 'bg-black/10 text-foreground dark:bg-white/10',
+      railway: 'bg-platform-railway/10 text-platform-railway',
+      render: 'bg-platform-render/10 text-platform-render',
+      vercel: 'bg-platform-vercel/10 text-platform-vercel',
     }
 
     return (

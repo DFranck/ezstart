@@ -16,7 +16,7 @@ interface MetricCardProps {
 function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
   const getTrendColor = () => {
     if (!trend) return ''
-    return trend.direction === 'up' ? 'text-green-500' : 'text-red-500'
+    return trend.direction === 'up' ? 'text-status-healthy' : 'text-status-unhealthy'
   }
 
   const getTrendIcon = () => {
