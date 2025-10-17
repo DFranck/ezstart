@@ -94,6 +94,7 @@ export class ProjectHealthChecker {
       name: config.name,
       description: config.description,
       emoji: config.emoji,
+      logo: config.logo, // Optional logo, fallback to emoji if not provided
       endpoints: endpointResults,
       overallStatus,
       healthyCount,

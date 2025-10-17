@@ -33,6 +33,7 @@ export interface ProjectHealth {
   name: string
   description?: string
   emoji?: string
+  logo?: string // Path to logo image (optional, fallback to emoji)
   endpoints: ProjectEndpoint[]
   overallStatus: HealthStatus
   healthyCount: number
@@ -49,6 +50,7 @@ export const PROJECT_ENDPOINTS: Record<
   {
     name: string
     emoji: string
+    logo?: string // Optional logo path (fallback to emoji if not provided)
     description: string
     endpoints: Array<{
       type: EndpointType
@@ -165,7 +167,7 @@ export const PROJECT_ENDPOINTS: Record<
     endpoints: [
       {
         type: 'web',
-        label: 'Web App',
+        label: 'Web',
         getUrl: env => (env === 'local' ? 'http://localhost:5050' : 'https://www.ezstart.xyz'),
         platform: 'vercel',
       },
@@ -179,7 +181,7 @@ export const PROJECT_ENDPOINTS: Record<
     endpoints: [
       {
         type: 'web',
-        label: 'Web App',
+        label: 'Web',
         getUrl: env => (env === 'local' ? 'http://localhost:5065' : 'https://ezfengshui.ezstart.xyz'),
         platform: 'vercel',
       },
@@ -189,11 +191,12 @@ export const PROJECT_ENDPOINTS: Record<
   'asc-tcd': {
     name: 'ASC-TCD',
     emoji: '🎓',
+    logo: 'https://www.asc-tcd.com/images/logo.png', // Logo from production domain
     description: 'Academic student center',
     endpoints: [
       {
         type: 'web',
-        label: 'Web App',
+        label: 'Web',
         getUrl: env => (env === 'local' ? 'http://localhost:5055' : 'https://www.asc-tcd.com'),
         platform: 'vercel',
       },

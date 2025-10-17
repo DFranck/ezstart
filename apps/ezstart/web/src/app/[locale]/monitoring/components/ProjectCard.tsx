@@ -54,8 +54,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{project.emoji}</span>
+          <div className="flex items-center gap-3">
+            {/* Logo or Emoji */}
+            {project.logo ? (
+              <img
+                src={project.logo}
+                alt={`${project.name} logo`}
+                className="w-10 h-10 object-contain rounded-md"
+              />
+            ) : (
+              <span className="text-3xl">{project.emoji}</span>
+            )}
             <div>
               <H3 size="h5" className="mb-1">
                 {project.name}
