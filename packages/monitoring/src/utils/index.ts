@@ -2,6 +2,6 @@
  * @ezstart/monitoring utilities
  */
 
-export * from './scoring'
-export * from './formatters'
-export * from './project-config'
+export * from './scoring.js'
+export * from './formatters.js'
+export * from './project-config.js'

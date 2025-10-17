@@ -2,5 +2,5 @@
  * @ezstart/monitoring collectors
  */
 
-export * from './health-checker'
-export * from './project-health'
+export * from './health-checker.js'
+export * from './project-health.js'

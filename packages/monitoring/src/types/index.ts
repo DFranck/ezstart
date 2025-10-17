@@ -5,22 +5,22 @@
  */
 
 // Audit types
-export * from './audit'
+export * from './audit.js'
 
 // Health check types
-export * from './health'
+export * from './health.js'
 
 // Deployment types
-export * from './deployment'
+export * from './deployment.js'
 
 // Database types
-export * from './database'
+export * from './database.js'
 
 // Git/commit types
-export * from './git'
+export * from './git.js'
 
 // Metrics and dashboard types
-export * from './metrics'
+export * from './metrics.js'
 
 // Project-based monitoring types
-export * from './project'
+export * from './project.js'
