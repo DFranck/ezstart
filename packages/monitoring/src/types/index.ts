@@ -21,3 +21,6 @@ export * from './git'
 
 // Metrics and dashboard types
 export * from './metrics'
+
+// Project-based monitoring types
+export * from './project'

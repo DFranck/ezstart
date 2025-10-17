@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardHeader, CardContent, H2, P } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, H2, P } from '@ezstart/ui/components'
 
 interface HealthScoreProps {
   score: number
@@ -38,7 +38,10 @@ export function HealthScore({ score, status }: HealthScoreProps) {
   }
 
   return (
-    <Card variant="elevated" className={`bg-gradient-to-br ${getBackgroundGradient()}`}>
+    <Card
+      variant="elevated"
+      className={`bg-gradient-to-br ${getBackgroundGradient()} w-full max-w-lg`}
+    >
       <CardHeader>
         <H2 size="h4" className="text-center">
           Overall Health Score
@@ -47,17 +50,11 @@ export function HealthScore({ score, status }: HealthScoreProps) {
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className={`text-8xl font-bold ${getScoreColor()}`}>
-              {score}
-            </div>
-            <div className="absolute -top-2 -right-2 text-4xl">
-              {getStatusEmoji()}
-            </div>
+            <div className={`text-8xl font-bold ${getScoreColor()}`}>{score}</div>
+            <div className="absolute -top-2 -right-2 text-4xl">{getStatusEmoji()}</div>
           </div>
 
-          <P className="text-xl font-semibold capitalize text-center">
-            {status}
-          </P>
+          <P className="text-xl font-semibold capitalize text-center">{status}</P>
 
           <div className="w-full max-w-md">
             <div className="h-3 bg-muted rounded-full overflow-hidden">
