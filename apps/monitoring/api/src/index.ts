@@ -1,6 +1,6 @@
 import { createApp, startServer, connectToMongo, getApiPort } from '@ezstart/express-core'
 import { getAllWebUrls } from '@ezstart/config'
-import { routes, registries } from './routes'
+import { routes, registries } from './routes/index.js'
 
 const PORT = getApiPort('monitoring')
 
