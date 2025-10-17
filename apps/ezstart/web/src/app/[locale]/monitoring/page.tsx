@@ -5,9 +5,12 @@ import { HealthScore } from './components/HealthScore'
 import { MetricsOverview } from './components/MetricsOverview'
 import { ServiceCard } from './components/ServiceCard'
 
-// Force local environment for monitoring API in dev
+// Get monitoring API URL based on environment
+// In Next.js SSR, we need to be explicit about the environment
 const MONITORING_API_URL =
-  process.env.NODE_ENV === 'development' ? 'http://localhost:5080' : getApiUrl('monitoring')
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5080' // Always use local in dev
+    : getApiUrl('monitoring', 'production') // Explicit production in prod
 
 async function getHealthChecks() {
   try {

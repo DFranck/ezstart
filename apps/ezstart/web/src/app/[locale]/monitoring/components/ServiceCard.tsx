@@ -48,7 +48,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
               <P className="font-medium">{service.uptime.toFixed(1)}%</P>
             </div>
           )}
-          {service.avgResponseTime !== undefined && (
+          {service.avgResponseTime !== undefined && service.avgResponseTime !== null && (
             <div className="flex items-center justify-between text-sm">
               <P className="text-muted-foreground">Avg Response</P>
               <P className="font-medium">{service.avgResponseTime.toFixed(0)}ms</P>

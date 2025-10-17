@@ -29,15 +29,22 @@ pnpm start
 
 ### Health Checks
 
+**Environment Behavior:**
+- **Development**: Checks ONLY local URLs (doesn't consume production resources)
+- **Production**: Checks ONLY production URLs
+
 ```bash
 # Get all health checks
 GET /api/health-checks
+# Returns: { services: [...], environment: "development"|"production", summary: {...} }
 
 # Get specific service health
 GET /api/health-checks/:serviceId
+# Returns: { serviceId, serviceName, environment, checks: [...] }
 
 # Get service health history
 GET /api/health-checks/:serviceId/history?limit=50
+# Returns: { id, name, history: [...], uptime: { 24h, 7d, 30d } }
 ```
 
 ### Audits

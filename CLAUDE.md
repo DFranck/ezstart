@@ -29,12 +29,45 @@
 ### Fonctionnalités
 
 ✅ **Health Checks automatiques** - Tous les APIs et web apps
+✅ **Environment-based Checks** - Dev: local+prod, Prod: prod uniquement
 ✅ **Audit Tracking** - Scores, dates, status (auto-parsing des .md)
 ✅ **Deployment Monitoring** - Railway/Vercel, commits, build info
 ✅ **Database Health** - Connection, response time, storage
 ✅ **Git Tracking** - Uncommitted changes, unpushed commits, frequency
 ✅ **Overall Health Score** - 0-100 avec status (excellent/good/fair/poor)
 ✅ **Continuous Improvement** - Track amélioration continue avec métriques
+
+### Comportement des Health Checks par Environnement
+
+**En Développement (NODE_ENV=development):**
+- Vérifie UNIQUEMENT les URLs locales
+- Exemple: EZAuth API → 1 check (localhost:5010 uniquement)
+- Total: 13 services × 1 URL = 13 health checks
+- Avantage: **Ne consomme PAS les ressources des services en production**
+
+**En Production (NODE_ENV=production):**
+- Vérifie UNIQUEMENT les URLs de production
+- Exemple: EZAuth API → 1 check (Railway prod uniquement)
+- Total: 13 services × 1 URL = 13 health checks
+- Avantage: Monitoring prod sans overhead inutile
+
+**Implémentation:**
+```typescript
+// packages/monitoring/src/types/health.ts
+export function getUrlsToCheck(
+  serviceId: MonitoredServiceId,
+  environment: 'development' | 'production' = 'development'
+): Array<{ url: string; label: string }> {
+  const config = MONITORED_SERVICES[serviceId]
+
+  if (environment === 'production') {
+    return [{ url: config.productionUrl, label: 'production' }]
+  }
+
+  // Development: ONLY local URLs (don't consume prod resources)
+  return [{ url: config.localUrl, label: 'local' }]
+}
+```
 
 ### Quick Start
 

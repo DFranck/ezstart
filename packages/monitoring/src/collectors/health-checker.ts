@@ -3,7 +3,13 @@
  * Performs health checks on services and returns results
  */
 
-import type { HealthCheckConfig, HealthCheckResult, HealthStatus } from '../types'
+import type {
+  HealthCheckConfig,
+  HealthCheckResult,
+  HealthStatus,
+  MonitoredServiceId,
+} from '../types'
+import { MONITORED_SERVICES, getUrlsToCheck } from '../types'
 
 export class HealthChecker {
   private results: Map<string, HealthCheckResult[]> = new Map()
@@ -161,5 +167,41 @@ export class HealthChecker {
    */
   clearAllHistory(): void {
     this.results.clear()
+  }
+
+  /**
+   * Check all URLs for a service based on environment
+   * - Development: Check ONLY local URLs
+   * - Production: Check ONLY production URLs
+   */
+  async checkAllEnvironments(
+    serviceId: MonitoredServiceId,
+    environment: 'development' | 'production' = 'development',
+    options?: {
+      timeout?: number
+      retries?: number
+    }
+  ): Promise<HealthCheckResult[]> {
+    const config = MONITORED_SERVICES[serviceId]
+    const urlsToCheck = getUrlsToCheck(serviceId, environment)
+
+    const results = await Promise.all(
+      urlsToCheck.map(async ({ url, label }) => {
+        const checkConfig: HealthCheckConfig = {
+          name: `${config.name} (${label})`,
+          type: config.type,
+          url,
+          timeout: options?.timeout || 5000,
+          interval: 30000,
+          retries: options?.retries || 3,
+        }
+
+        return options?.retries
+          ? await this.checkWithRetries(checkConfig)
+          : await this.check(checkConfig)
+      })
+    )
+
+    return results
   }
 }

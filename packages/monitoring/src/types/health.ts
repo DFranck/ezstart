@@ -143,3 +143,23 @@ export const MONITORED_SERVICES = {
 } as const
 
 export type MonitoredServiceId = keyof typeof MONITORED_SERVICES
+
+/**
+ * Get URLs to check based on environment
+ * - Development: Check ONLY local URLs (don't consume production resources)
+ * - Production: Check ONLY production URLs
+ */
+export function getUrlsToCheck(
+  serviceId: MonitoredServiceId,
+  environment: 'development' | 'production' = 'development'
+): Array<{ url: string; label: string }> {
+  const config = MONITORED_SERVICES[serviceId]
+
+  if (environment === 'production') {
+    // Production: Only check production URLs
+    return [{ url: config.productionUrl, label: 'production' }]
+  }
+
+  // Development: Only check local URLs
+  return [{ url: config.localUrl, label: 'local' }]
+}
