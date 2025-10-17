@@ -33,9 +33,16 @@ export class HealthChecker {
       clearTimeout(timeoutId)
 
       const responseTime = Date.now() - startTime
-      const isHealthy = config.expectedStatus
-        ? response.status === config.expectedStatus
-        : response.ok
+
+      // Determine if the service is healthy
+      let isHealthy: boolean
+      if (config.expectedStatus) {
+        isHealthy = response.status === config.expectedStatus
+      } else {
+        // For web apps, redirects (3xx) are considered healthy (Next.js redirects, etc.)
+        // APIs should return 2xx directly
+        isHealthy = response.ok || (response.status >= 300 && response.status < 400)
+      }
 
       const result: HealthCheckResult = {
         name: config.name,
