@@ -29,10 +29,10 @@
  */
 
 // Types
-export * from './types'
+export * from './types/index.js'
 
 // Utilities
-export * from './utils'
+export * from './utils/index.js'
 
 // Collectors
-export * from './collectors'
+export * from './collectors/index.js'
