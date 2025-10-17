@@ -1,7 +1,7 @@
 import { Router } from '@ezstart/express-core'
 import { ProjectHealthChecker } from '@ezstart/monitoring'
 
-export const projectsRouter = Router()
+const projectsRouter = Router()
 const projectHealthChecker = new ProjectHealthChecker()
 
 /**
@@ -71,3 +71,5 @@ projectsRouter.get('/:projectId', async (req, res) => {
     })
   }
 })
+
+export default projectsRouter

@@ -142,6 +142,7 @@ export const PROJECT_ENDPOINTS: Record<
   'tower-defense': {
     name: 'Tower Defense',
     emoji: '🏰',
+    logo: 'https://tower-defense.ezstart.xyz/icons/icon-192x192.png', // PWA icon from production
     description: 'Multiplayer tower defense game',
     githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/tower-defense',
     endpoints: [
@@ -188,6 +189,7 @@ export const PROJECT_ENDPOINTS: Record<
   ezstart: {
     name: 'EZStart',
     emoji: '🚀',
+    logo: 'https://www.ezstart.xyz/icons/icon-192x192.png', // PWA icon from production
     description: 'Main landing page and dashboard',
     githubUrl: 'https://github.com/DFranck/ezstart/tree/master/apps/ezstart',
     endpoints: [
