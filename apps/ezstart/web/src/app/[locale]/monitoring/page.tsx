@@ -1,5 +1,5 @@
 import { getApiUrl } from '@ezstart/config'
-import { H1, H2, P, Section } from '@ezstart/ui/components'
+import { H1, P, Section, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
 import { AuditCard } from './components/AuditCard'
 import { HealthScore } from './components/HealthScore'
 import { MetricsOverview } from './components/MetricsOverview'
@@ -81,42 +81,64 @@ export default async function MonitoringPage() {
   }
 
   return (
-    <Section className="container mx-auto px-4 py-8">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <H1>System Monitoring Dashboard</H1>
-          <P className="text-muted-foreground">
-            Real-time monitoring of all projects across the @ezstart monorepo
-          </P>
-        </div>
-
-        {/* Overall Health Score */}
-        <HealthScore score={score} status={status} />
-
-        {/* Metrics Overview */}
-        <MetricsOverview metrics={metricsData} />
-
-        {/* Projects */}
-        <div className="space-y-4">
-          <H2 size="h3">Projects ({projects.length})</H2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project: any) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
+    <>
+      <>
+        <Section size={'full'}>
+          {/* Header */}
+          <div className="space-y-2">
+            <H1>System Monitoring Dashboard</H1>
+            <P className="text-muted-foreground">
+              Real-time monitoring of all projects across the @ezstart monorepo
+            </P>
           </div>
-        </div>
 
-        {/* Audits */}
-        <div className="space-y-4">
-          <H2 size="h3">Audits ({audits.length})</H2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {audits.map((audit: any) => (
-              <AuditCard key={audit.auditType} audit={audit} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </Section>
+          {/* Overall Health Score */}
+          <HealthScore score={score} status={status} />
+
+          {/* Metrics Overview */}
+          <MetricsOverview metrics={metricsData} />
+        </Section>
+
+        {/* Tabs for different monitoring sections */}
+        {/* Future tabs: Deployments, Logs, Metrics, Database, Git */}
+        <Tabs defaultValue="projects" className="w-full max-w-7xl">
+          <TabsList className="grid w-full max-w-lg grid-cols-2">
+            <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
+            <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
+            {/* <TabsTrigger value="deployments">Deployments</TabsTrigger> */}
+            {/* <TabsTrigger value="logs">Logs</TabsTrigger> */}
+            {/* <TabsTrigger value="metrics">Metrics</TabsTrigger> */}
+          </TabsList>
+
+          <TabsContent value="projects" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project: any) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+
+            {projects.length === 0 && (
+              <div className="text-center py-12">
+                <P className="text-muted-foreground">No projects found</P>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="audits" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {audits.map((audit: any) => (
+                <AuditCard key={audit.auditType} audit={audit} />
+              ))}
+            </div>
+
+            {audits.length === 0 && (
+              <div className="text-center py-12">
+                <P className="text-muted-foreground">No audits found</P>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </>
+    </>
   )
 }

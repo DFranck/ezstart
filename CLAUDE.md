@@ -92,9 +92,35 @@ cd apps/monitoring/api && pnpm dev
 open http://localhost:5050/monitoring
 
 # API endpoints
-curl http://localhost:5080/api/health-checks  # Tous les services
+curl http://localhost:5080/api/projects       # Projets groupés (API + Web)
+curl http://localhost:5080/api/health-checks  # Services individuels
 curl http://localhost:5080/api/audits         # Tous les audits
 curl http://localhost:5080/api/metrics        # Métriques globales
+```
+
+### Dashboard - Vue Par Projet
+
+**Architecture des Tabs :**
+- ✅ **Projects** - Cartes groupées par projet (API + Web + Platform badges)
+- ✅ **Audits** - Tracking des audits et scores
+- 🔜 **Deployments** - Status Railway/Vercel/Render, derniers déploiements
+- 🔜 **Logs** - Logs centralisés de tous les services
+- 🔜 **Metrics** - Graphiques de performance, tendances
+- 🔜 **Database** - MongoDB health, storage, connexions
+- 🔜 **Git** - Commits récents, branches, PRs
+
+**Exemple de carte projet :**
+```
+┌────────────────────────────────────┐
+│ 💼 EZBill            [degraded]   │
+│ Invoicing and billing management   │
+│                                     │
+│ 🟢 API (Render)           125ms   │
+│ 🔴 Web (Vercel)           Down    │
+│                                     │
+│ Overall: 1/2 healthy                │
+│ Avg Response: 125ms                 │
+└────────────────────────────────────┘
 ```
 
 ### Services Monitorés
