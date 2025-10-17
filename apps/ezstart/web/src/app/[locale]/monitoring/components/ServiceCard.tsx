@@ -42,18 +42,6 @@ export function ServiceCard({ service }: ServiceCardProps) {
               {service.responseTime ? `${service.responseTime}ms` : 'N/A'}
             </P>
           </div>
-          {service.uptime !== undefined && (
-            <div className="flex items-center justify-between text-sm">
-              <P className="text-muted-foreground">Uptime (24h)</P>
-              <P className="font-medium">{service.uptime.toFixed(1)}%</P>
-            </div>
-          )}
-          {service.avgResponseTime !== undefined && service.avgResponseTime !== null && (
-            <div className="flex items-center justify-between text-sm">
-              <P className="text-muted-foreground">Avg Response</P>
-              <P className="font-medium">{service.avgResponseTime.toFixed(0)}ms</P>
-            </div>
-          )}
           {service.error && (
             <div className="mt-3 p-2 bg-destructive/10 rounded-md">
               <P className="text-xs text-destructive">{service.error}</P>
