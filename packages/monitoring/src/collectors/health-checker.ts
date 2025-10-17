@@ -172,7 +172,7 @@ export class HealthChecker {
   /**
    * Check all URLs for a service based on environment
    * - Development: Check ONLY local URLs
-   * - Production: Check ONLY production URLs
+   * - Production: Check ALL production URLs (Railway + Render + Vercel)
    */
   async checkAllEnvironments(
     serviceId: MonitoredServiceId,

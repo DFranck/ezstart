@@ -145,9 +145,36 @@ export const MONITORED_SERVICES = {
 export type MonitoredServiceId = keyof typeof MONITORED_SERVICES
 
 /**
+ * Platform configuration for health checks
+ */
+export const SERVICE_PLATFORMS = {
+  // Railway ($) - Check in prod for monitoring
+  railway: ['ezauth-api', 'ezpay-api'] as MonitoredServiceId[],
+
+  // Render (free) - Check periodically to prevent sleep
+  render: [
+    'ezbill-api',
+    'tower-defense-api',
+    'green-pulse-api',
+  ] as MonitoredServiceId[],
+
+  // Vercel (free) - Web apps, check in prod
+  vercel: [
+    'ezstart-web',
+    'ezauth-web',
+    'ezbill-web',
+    'ezpay-web',
+    'tower-defense-web',
+    'fengshui-web',
+    'asc-tcd-web',
+    'green-pulse-web',
+  ] as MonitoredServiceId[],
+} as const
+
+/**
  * Get URLs to check based on environment
  * - Development: Check ONLY local URLs (don't consume production resources)
- * - Production: Check ONLY production URLs
+ * - Production: Check ALL production URLs (Railway for monitoring, Render to prevent sleep, Vercel for uptime)
  */
 export function getUrlsToCheck(
   serviceId: MonitoredServiceId,
@@ -156,7 +183,7 @@ export function getUrlsToCheck(
   const config = MONITORED_SERVICES[serviceId]
 
   if (environment === 'production') {
-    // Production: Only check production URLs
+    // Production: Check all services (Railway + Render + Vercel)
     return [{ url: config.productionUrl, label: 'production' }]
   }
 

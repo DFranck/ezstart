@@ -1,5 +1,14 @@
 import { getApiUrl } from '@ezstart/config'
-import { H1, H2, Main, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
+import {
+  H1,
+  H2,
+  P,
+  Section,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@ezstart/ui/components'
 import { AuditCard } from './components/AuditCard'
 import { HealthScore } from './components/HealthScore'
 import { MetricsOverview } from './components/MetricsOverview'
@@ -109,8 +118,8 @@ export default async function MonitoringPage() {
   const webServices = services.filter((s: any) => s.type === 'web')
 
   return (
-    <Main className="container mx-auto px-4 py-8">
-      <div className="space-y-8">
+    <>
+      <Section size={'full'}>
         {/* Header */}
         <div className="space-y-2">
           <H1>System Monitoring Dashboard</H1>
@@ -125,57 +134,57 @@ export default async function MonitoringPage() {
 
         {/* Metrics Overview */}
         <MetricsOverview metrics={metricsData} />
+      </Section>
 
-        {/* Services & Audits Tabs */}
-        <Tabs defaultValue="services" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="services">Services ({services.length})</TabsTrigger>
-            <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
-          </TabsList>
+      {/* Services & Audits Tabs */}
+      <Tabs defaultValue="services" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="services">Services ({services.length})</TabsTrigger>
+          <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="services" className="space-y-6 mt-6">
-            {/* APIs */}
-            <div className="space-y-4">
-              <H2 size="h3">APIs ({apiServices.length})</H2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {apiServices.map((service: any) => (
-                  <ServiceCard key={service.id} service={service} />
-                ))}
-              </div>
-            </div>
-
-            {/* Web Apps */}
-            <div className="space-y-4">
-              <H2 size="h3">Web Applications ({webServices.length})</H2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {webServices.map((service: any) => (
-                  <ServiceCard key={service.id} service={service} />
-                ))}
-              </div>
-            </div>
-
-            {services.length === 0 && (
-              <div className="text-center py-12">
-                <P className="text-muted-foreground">No services found</P>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="audits" className="space-y-4 mt-6">
+        <TabsContent value="services" className="space-y-6 mt-6">
+          {/* APIs */}
+          <div className="space-y-4">
+            <H2 size="h3">APIs ({apiServices.length})</H2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {audits.map((audit: any) => (
-                <AuditCard key={audit.auditType} audit={audit} />
+              {apiServices.map((service: any) => (
+                <ServiceCard key={service.id} service={service} />
               ))}
             </div>
+          </div>
 
-            {audits.length === 0 && (
-              <div className="text-center py-12">
-                <P className="text-muted-foreground">No audits found</P>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </Main>
+          {/* Web Apps */}
+          <div className="space-y-4">
+            <H2 size="h3">Web Applications ({webServices.length})</H2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {webServices.map((service: any) => (
+                <ServiceCard key={service.id} service={service} />
+              ))}
+            </div>
+          </div>
+
+          {services.length === 0 && (
+            <div className="text-center py-12">
+              <P className="text-muted-foreground">No services found</P>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="audits" className="space-y-4 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {audits.map((audit: any) => (
+              <AuditCard key={audit.auditType} audit={audit} />
+            ))}
+          </div>
+
+          {audits.length === 0 && (
+            <div className="text-center py-12">
+              <P className="text-muted-foreground">No audits found</P>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </>
   )
 }

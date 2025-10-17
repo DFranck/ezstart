@@ -14,8 +14,11 @@ const healthChecker = new HealthChecker()
  * Get all health check results
  *
  * Environment behavior:
- * - Development: Checks ALL URLs (local + production) for each service
- * - Production: Checks ONLY production URLs
+ * - Development: Checks ONLY local URLs
+ * - Production: Checks ALL production URLs
+ *   - Railway (EZAuth, EZPay): For monitoring
+ *   - Render (EZBill, TD, GreenPulse): To prevent sleep
+ *   - Vercel (Web apps): For uptime monitoring
  */
 router.get('/', async (_, res) => {
   try {

@@ -46,27 +46,40 @@
 - Avantage: **Ne consomme PAS les ressources des services en production**
 
 **En Production (NODE_ENV=production):**
-- Vérifie UNIQUEMENT les URLs de production
-- Exemple: EZAuth API → 1 check (Railway prod uniquement)
-- Total: 13 services × 1 URL = 13 health checks
-- Avantage: Monitoring prod sans overhead inutile
+- Vérifie TOUTES les URLs de production (Railway + Render + Vercel)
+- **Stratégie intelligente par plateforme :**
+  - Railway (EZAuth, EZPay) : Check pour monitoring → Coût ~$0.02/mois ✅
+  - Render (EZBill, TD, GreenPulse) : Check pour **empêcher sleep** → Garde APIs éveillées 24/7
+  - Vercel (Web apps) : Check pour uptime monitoring → Gratuit
+- Total: 13 services × 1 check toutes les 10min = **~1,900 checks/jour**
+- Coûts: Railway ~$0.02/mois, Render 720h/750h utilisées (optimal) ✅
 
-**Implémentation:**
+### Stratégie Multi-Plateforme (Railway + Render + Vercel)
+
+**Objectifs :**
+1. ✅ **Railway ($)** : Minimal checks pour monitoring (économiser $0.64 restant)
+2. ✅ **Render (free)** : Regular checks pour **empêcher le sleep** (garde APIs éveillées)
+3. ✅ **Vercel (free)** : Uptime monitoring des web apps
+
+**Plateformes par service :**
 ```typescript
 // packages/monitoring/src/types/health.ts
-export function getUrlsToCheck(
-  serviceId: MonitoredServiceId,
-  environment: 'development' | 'production' = 'development'
-): Array<{ url: string; label: string }> {
-  const config = MONITORED_SERVICES[serviceId]
-
-  if (environment === 'production') {
-    return [{ url: config.productionUrl, label: 'production' }]
-  }
-
-  // Development: ONLY local URLs (don't consume prod resources)
-  return [{ url: config.localUrl, label: 'local' }]
+export const SERVICE_PLATFORMS = {
+  railway: ['ezauth-api', 'ezpay-api'],           // $0.02/mois
+  render: ['ezbill-api', 'tower-defense-api', 'green-pulse-api'],  // 720h/750h
+  vercel: ['ezstart-web', 'ezauth-web', ...],     // Gratuit
 }
+```
+
+**Configuration optimale (.env) :**
+```env
+# Check toutes les 10 minutes
+HEALTH_CHECK_INTERVAL=600000
+
+# Résultat:
+# - Render APIs restent éveillées (check < 15min sleep threshold)
+# - Railway: 13 checks × 144/jour × 30 jours = ~55,000 checks/mois = $0.02-0.05
+# - Render: 720h/750h utilisées = optimal ✅
 ```
 
 ### Quick Start
