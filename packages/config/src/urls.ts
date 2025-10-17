@@ -120,7 +120,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5030',
-      production: 'https://tower-defense-api.up.railway.app',
+      production: 'https://ezstart-api.onrender.com',
     },
   },
 
@@ -140,19 +140,19 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5070',
-      production: 'https://green-pulse-api.up.railway.app',
+      production: 'https://monitor-5qul.onrender.com',
     },
   },
 
   monitoring: {
     web: {
-      local: 'http://localhost:5050', // Monitoring dashboard is in ezstart
+      local: 'http://localhost:5050',
       development: 'https://ezstart-web.vercel.app',
       production: 'https://www.ezstart.xyz',
     },
     api: {
       local: 'http://localhost:5080',
-      production: 'https://monitoring-api.up.railway.app',
+      production: 'https://ezstart-17v5.onrender.com',
     },
   },
 }
