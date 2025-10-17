@@ -49,6 +49,13 @@ export class ProjectHealthChecker {
             responseTime: result.responseTime,
             error: result.error,
             lastCheck: result.timestamp,
+            // Add API metadata if available
+            metadata: endpoint.endpointsCount || endpoint.getSwaggerUrl
+              ? {
+                  endpointsCount: endpoint.endpointsCount,
+                  swaggerUrl: endpoint.getSwaggerUrl?.(environment),
+                }
+              : undefined,
           }
 
           return projectEndpoint
@@ -62,6 +69,13 @@ export class ProjectHealthChecker {
             responseTime: null,
             error: error instanceof Error ? error.message : 'Unknown error',
             lastCheck: new Date(),
+            // Add API metadata even on error
+            metadata: endpoint.endpointsCount || endpoint.getSwaggerUrl
+              ? {
+                  endpointsCount: endpoint.endpointsCount,
+                  swaggerUrl: endpoint.getSwaggerUrl?.(environment),
+                }
+              : undefined,
           }
 
           return projectEndpoint

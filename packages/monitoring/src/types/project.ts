@@ -26,6 +26,11 @@ export interface ProjectEndpoint {
   responseTime: number | null
   error: string | null
   lastCheck: Date
+  // API-specific metadata
+  metadata?: {
+    endpointsCount?: number // Number of API endpoints
+    swaggerUrl?: string // OpenAPI/Swagger docs URL
+  }
 }
 
 export interface ProjectHealth {
@@ -57,6 +62,9 @@ export const PROJECT_ENDPOINTS: Record<
       label: string
       getUrl: (env: 'local' | 'production') => string
       platform?: 'railway' | 'render' | 'vercel'
+      // API-specific config
+      endpointsCount?: number // Number of API endpoints (for APIs only)
+      getSwaggerUrl?: (env: 'local' | 'production') => string // Swagger docs URL
     }>
   }
 > = {
@@ -70,6 +78,8 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'API',
         getUrl: env => (env === 'local' ? 'http://localhost:5010/api/health' : 'https://ezauth.up.railway.app/api/health'),
         platform: 'railway',
+        endpointsCount: 8,
+        getSwaggerUrl: env => (env === 'local' ? 'http://localhost:5010/docs' : 'https://ezauth.up.railway.app/docs'),
       },
       {
         type: 'web',
@@ -90,6 +100,8 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'API',
         getUrl: env => (env === 'local' ? 'http://localhost:5020/api/health' : 'https://ezbill.onrender.com/api/health'),
         platform: 'render',
+        endpointsCount: 49,
+        getSwaggerUrl: env => (env === 'local' ? 'http://localhost:5020/docs' : 'https://ezbill.onrender.com/docs'),
       },
       {
         type: 'web',
@@ -110,6 +122,8 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'API',
         getUrl: env => (env === 'local' ? 'http://localhost:5040/api/health' : 'https://ezpay-api.up.railway.app/api/health'),
         platform: 'railway',
+        endpointsCount: 6,
+        getSwaggerUrl: env => (env === 'local' ? 'http://localhost:5040/docs' : 'https://ezpay-api.up.railway.app/docs'),
       },
       {
         type: 'web',
@@ -130,6 +144,8 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'API',
         getUrl: env => (env === 'local' ? 'http://localhost:5030/api/health' : 'https://tower-defense-api.up.railway.app/api/health'),
         platform: 'railway',
+        endpointsCount: 7,
+        getSwaggerUrl: env => (env === 'local' ? 'http://localhost:5030/docs' : 'https://tower-defense-api.up.railway.app/docs'),
       },
       {
         type: 'web',
@@ -150,6 +166,8 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'API',
         getUrl: env => (env === 'local' ? 'http://localhost:5070/api/health' : 'https://green-pulse-api.up.railway.app/api/health'),
         platform: 'railway',
+        endpointsCount: 2,
+        getSwaggerUrl: env => (env === 'local' ? 'http://localhost:5070/docs' : 'https://green-pulse-api.up.railway.app/docs'),
       },
       {
         type: 'web',
