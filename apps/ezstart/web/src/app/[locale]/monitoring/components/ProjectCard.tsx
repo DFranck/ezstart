@@ -85,23 +85,34 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {project.endpoints.map((endpoint, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-2 rounded-md bg-muted/50"
+              className="flex items-start justify-between p-3 rounded-md bg-muted/50 hover:bg-muted/70 transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <span>{getStatusEmoji(endpoint.status)}</span>
-                <div>
-                  <P className="text-sm font-medium">{endpoint.label}</P>
-                  {endpoint.platform && (
-                    <div className="mt-1">{getPlatformBadge(endpoint.platform)}</div>
-                  )}
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                <span className="mt-0.5">{getStatusEmoji(endpoint.status)}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <P className="text-sm font-medium">{endpoint.label}</P>
+                    {endpoint.platform && getPlatformBadge(endpoint.platform)}
+                  </div>
+                  <a
+                    href={endpoint.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors block truncate mt-1"
+                    title={endpoint.url}
+                  >
+                    {endpoint.url}
+                  </a>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right ml-2 flex-shrink-0">
                 <P className="text-sm font-medium">
                   {endpoint.responseTime ? `${endpoint.responseTime}ms` : 'N/A'}
                 </P>
                 {endpoint.error && (
-                  <P className="text-xs text-destructive mt-1">{endpoint.error}</P>
+                  <P className="text-xs text-destructive mt-1 max-w-[120px] truncate" title={endpoint.error}>
+                    {endpoint.error}
+                  </P>
                 )}
               </div>
             </div>

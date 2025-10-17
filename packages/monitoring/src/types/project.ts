@@ -14,6 +14,7 @@ export type ProjectId =
   | 'fengshui'
   | 'asc-tcd'
   | 'green-pulse'
+  | 'monitoring'
 
 export type EndpointType = 'api' | 'web'
 
@@ -199,6 +200,20 @@ export const PROJECT_ENDPOINTS: Record<
         label: 'Web',
         getUrl: env => (env === 'local' ? 'http://localhost:5055' : 'https://www.asc-tcd.com'),
         platform: 'vercel',
+      },
+    ],
+  },
+
+  monitoring: {
+    name: 'Monitoring',
+    emoji: '📊',
+    description: 'Central monitoring and observability hub for the monorepo',
+    endpoints: [
+      {
+        type: 'api',
+        label: 'API',
+        getUrl: env => (env === 'local' ? 'http://localhost:5080/api/health' : 'https://monitoring.ezstart.xyz/api/health'),
+        platform: 'railway',
       },
     ],
   },
