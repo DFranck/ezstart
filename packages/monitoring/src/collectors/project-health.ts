@@ -3,10 +3,10 @@
  * Groups health checks by project instead of individual services
  */
 
-import type { ProjectHealth, ProjectId, ProjectEndpoint } from '../types/project'
-import type { HealthStatus } from '../types/health'
-import { HealthChecker } from './health-checker'
-import { PROJECT_ENDPOINTS } from '../utils/project-config'
+import type { ProjectHealth, ProjectId, ProjectEndpoint } from '../types/project.js'
+import type { HealthStatus } from '../types/health.js'
+import { HealthChecker } from './health-checker.js'
+import { PROJECT_ENDPOINTS } from '../utils/project-config.js'
 
 export class ProjectHealthChecker {
   private healthChecker: HealthChecker

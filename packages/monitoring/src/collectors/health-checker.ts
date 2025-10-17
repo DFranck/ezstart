@@ -8,8 +8,8 @@ import type {
   HealthCheckResult,
   HealthStatus,
   MonitoredServiceId,
-} from '../types'
-import { MONITORED_SERVICES, getUrlsToCheck } from '../types'
+} from '../types/index.js'
+import { MONITORED_SERVICES, getUrlsToCheck } from '../types/index.js'
 
 export class HealthChecker {
   private results: Map<string, HealthCheckResult[]> = new Map()

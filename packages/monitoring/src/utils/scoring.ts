@@ -2,7 +2,7 @@
  * Utilities for scoring and calculating health metrics
  */
 
-import type { AuditStatus, HealthStatus } from '../types'
+import type { AuditStatus, HealthStatus } from '../types/index.js'
 
 /**
  * Convert audit score to status

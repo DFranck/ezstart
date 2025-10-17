@@ -13,7 +13,7 @@ import {
   getGitHubUrl,
   getLogoUrl,
 } from '@ezstart/config'
-import type { ProjectId, ProjectConfig } from '../types/project'
+import type { ProjectId, ProjectConfig } from '../types/project.js'
 
 /**
  * Manual endpoint counts for APIs
