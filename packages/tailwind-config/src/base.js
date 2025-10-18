@@ -14,7 +14,10 @@ export default {
   ],
   theme: {
     extend: {
-      // Extensions communes seront ajoutées ici si nécessaire
+      animation: {
+        'spin-slow': 'spin 2s linear infinite',
+        'spin-fast': 'spin 0.5s linear infinite',
+      },
     },
   },
   plugins: [

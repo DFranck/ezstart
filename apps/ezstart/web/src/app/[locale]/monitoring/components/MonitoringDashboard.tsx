@@ -1,7 +1,7 @@
 'use client'
 
 import { getApiUrl } from '@ezstart/config'
-import { Section, Tabs, TabsContent, TabsList, TabsTrigger, P } from '@ezstart/ui/components'
+import { H1, P, Section, Spinner, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
 import { useEffect, useState } from 'react'
 import { AuditCard } from './AuditCard'
 import { HealthScore } from './HealthScore'
@@ -10,7 +10,9 @@ import { ProjectCard } from './ProjectCard'
 
 // Get monitoring API URL based on environment
 const MONITORING_API_URL =
-  process.env.NODE_ENV === 'development' ? 'http://localhost:5080' : getApiUrl('monitoring', 'production')
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:5080'
+    : getApiUrl('monitoring', 'production')
 
 interface ProjectsData {
   projects: any[]
@@ -125,14 +127,11 @@ export function MonitoringDashboard() {
   if (isLoading) {
     return (
       <Section size="full">
-        <div className="flex items-center justify-center py-20">
-          <div className="space-y-4 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <P className="text-muted-foreground">Loading monitoring data...</P>
-            <P className="text-sm text-muted-foreground">
-              (If on Render free tier, this may take 30-60s for cold start)
-            </P>
-          </div>
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <Spinner size="xl" variant="primary" text="Loading monitoring data..." textSize="md" />
+          <P className="text-sm text-muted-foreground">
+            (If on Render free tier, this may take 30-60s for cold start)
+          </P>
         </div>
       </Section>
     )
@@ -162,6 +161,13 @@ export function MonitoringDashboard() {
   return (
     <>
       <Section size="full">
+        {/* Header */}
+        <div className="space-y-2 mb-8">
+          <H1>System Monitoring Dashboard</H1>
+          <P className="text-muted-foreground">
+            Real-time monitoring of all projects across the @ezstart monorepo
+          </P>
+        </div>
         {/* Overall Health Score */}
         <HealthScore score={score} status={status} />
 
