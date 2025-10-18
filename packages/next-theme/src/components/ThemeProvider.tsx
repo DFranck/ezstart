@@ -1,7 +1,6 @@
 'use client'
 
 import { ThemeProvider as NextThemesProvider, type Attribute } from 'next-themes'
-import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 
 export interface ThemeProviderProps {
@@ -13,6 +12,20 @@ export interface ThemeProviderProps {
   attribute?: Attribute
 }
 
+/**
+ * ThemeProvider wrapper for next-themes
+ *
+ * IMPORTANT: next-themes includes a blocking script that runs BEFORE React hydration
+ * to prevent theme flash. This script automatically adds the correct class to <html>
+ * based on localStorage or system preference.
+ *
+ * DO NOT add mounted guards or suppress hydration warnings - this breaks the script!
+ *
+ * Configuration:
+ * - defaultTheme: 'system' (respects OS preference by default)
+ * - enableSystem: true (allows system theme detection)
+ * - disableTransitionOnChange: true (prevents animation flash on theme change)
+ */
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
@@ -22,16 +35,6 @@ export function ThemeProvider({
   attribute = 'class',
   ...props
 }: ThemeProviderProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return <div suppressHydrationWarning>{children}</div>
-  }
-
   return (
     <NextThemesProvider
       attribute={attribute}
