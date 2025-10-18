@@ -5,6 +5,7 @@
 
 import cron from 'node-cron'
 import { HealthChecker, MONITORED_SERVICES, SERVICE_PLATFORMS } from '@ezstart/monitoring'
+import { HealthCheck } from '../models/HealthCheck.js'
 
 export class HealthCheckScheduler {
   private healthChecker: HealthChecker
@@ -78,9 +79,33 @@ export class HealthCheckScheduler {
               retries: 0, // No retries, just ping
             })
 
+            // Save to MongoDB for history/graphs
+            await HealthCheck.create({
+              serviceId,
+              status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
+              responseTime: result.responseTime,
+              timestamp: new Date(),
+              error: result.error,
+              metadata: result.metadata,
+            })
+
             return { serviceId, result }
           } catch (error) {
             console.error(`❌ [Scheduler] Error checking ${serviceId}:`, error)
+
+            // Still save failed check to MongoDB
+            try {
+              await HealthCheck.create({
+                serviceId,
+                status: 'unhealthy',
+                responseTime: null,
+                timestamp: new Date(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
+            } catch (dbError) {
+              console.error(`❌ [Scheduler] Failed to save health check to DB:`, dbError)
+            }
+
             return { serviceId, result: null }
           }
         })

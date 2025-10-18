@@ -4,6 +4,7 @@ import { auditRoutes, auditRegistry } from './audit.js'
 import { deploymentRoutes, deploymentRegistry } from './deployment.js'
 import { metricsRoutes, metricsRegistry } from './metrics.js'
 import projectsRouter from './projects.js'
+import historyRouter from './history.js'
 
 const router = Router()
 
@@ -13,6 +14,7 @@ router.use('/audits', auditRoutes)
 router.use('/deployments', deploymentRoutes)
 router.use('/metrics', metricsRoutes)
 router.use('/projects', projectsRouter)
+router.use('/history', historyRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -26,6 +28,8 @@ router.get('/', (_, res) => {
       audits: '/api/audits',
       deployments: '/api/deployments',
       metrics: '/api/metrics',
+      history: '/api/history/:serviceId',
+      projectHistory: '/api/history/project/:projectId',
       docs: '/api/docs',
     },
   })
