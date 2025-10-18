@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardHeader, CardContent, Badge, H3, P, Icon, Button } from '@ezstart/ui/components'
 import type { AuditType } from '@ezstart/monitoring'
+import { Badge, Button, Card, CardContent, CardHeader, H3, Icon, P } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 interface AuditCardProps {
@@ -36,7 +36,7 @@ export function AuditCard({ audit }: AuditCardProps) {
   }
 
   // Generate GitHub URL for audit file
-  const githubUrl = `https://github.com/polyglot-support/MonopolyAccess/blob/master/docs/audits/${audit.auditType.toUpperCase()}-AUDIT.md`
+  const githubUrl = `https://github.com/DFranck/ezstart/tree/master/docs/audits/${audit.auditType.toUpperCase()}-AUDIT.md`
 
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
@@ -48,9 +48,7 @@ export function AuditCard({ audit }: AuditCardProps) {
             </H3>
             <P className="text-sm text-muted-foreground">{audit.description}</P>
           </div>
-          <Badge className={getStatusColor()}>
-            {audit.status}
-          </Badge>
+          <Badge className={getStatusColor()}>{audit.status}</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -71,9 +69,7 @@ export function AuditCard({ audit }: AuditCardProps) {
           {audit.lastUpdated && (
             <div className="flex items-center justify-between text-sm">
               <P className="text-muted-foreground">Last Updated</P>
-              <P className="font-medium">
-                {new Date(audit.lastUpdated).toLocaleDateString()}
-              </P>
+              <P className="font-medium">{new Date(audit.lastUpdated).toLocaleDateString()}</P>
             </div>
           )}
 

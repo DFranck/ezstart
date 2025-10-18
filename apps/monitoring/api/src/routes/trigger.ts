@@ -41,16 +41,18 @@ triggerRouter.post('/', async (req, res) => {
             retries: 0,
           })
 
-          // Save to MongoDB
-          // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
-          await HealthCheck.create({
-            serviceId,
-            status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
-            responseTime: result.responseTime,
-            timestamp: new Date(),
-            error: result.error,
-            metadata: result.metadata,
-          })
+          // Save to MongoDB (only in production)
+          if (!isDev) {
+            // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
+            await HealthCheck.create({
+              serviceId,
+              status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
+              responseTime: result.responseTime,
+              timestamp: new Date(),
+              error: result.error,
+              metadata: result.metadata,
+            })
+          }
 
           console.log(
             `✅ [Trigger] ${serviceId}: ${result.status} (${result.responseTime || 'N/A'}ms)`
@@ -60,18 +62,20 @@ triggerRouter.post('/', async (req, res) => {
         } catch (error) {
           console.error(`❌ [Trigger] Error checking ${serviceId}:`, error)
 
-          // Save failed check
-          try {
-            // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
-            await HealthCheck.create({
-              serviceId,
-              status: 'unhealthy',
-              responseTime: null,
-              timestamp: new Date(),
-              error: error instanceof Error ? error.message : 'Unknown error',
-            })
-          } catch (dbError) {
-            console.error(`❌ [Trigger] Failed to save health check to DB:`, dbError)
+          // Save failed check (only in production)
+          if (!isDev) {
+            try {
+              // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
+              await HealthCheck.create({
+                serviceId,
+                status: 'unhealthy',
+                responseTime: null,
+                timestamp: new Date(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
+            } catch (dbError) {
+              console.error(`❌ [Trigger] Failed to save health check to DB:`, dbError)
+            }
           }
 
           return { serviceId, result: null }
