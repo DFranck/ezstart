@@ -6,5 +6,13 @@
   "auth": {
     "login": "Connexion",
     "logout": "Déconnexion"
+  },
+  "pwa": {
+    "install": {
+      "title": "Installer EZStart",
+      "description": "Installez l'application pour un accès rapide et une meilleure expérience",
+      "installButton": "Installer",
+      "laterButton": "Plus tard"
+    }
   }
 }

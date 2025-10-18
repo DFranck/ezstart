@@ -48,6 +48,11 @@ export function PWAInstallPrompt({
       setIsInstalled(window.matchMedia('(display-mode: standalone)').matches)
     }
 
+    // In dev mode with showInDev, force show the prompt for testing
+    if (isDev && showInDev) {
+      setShowInstallPrompt(true)
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
@@ -71,7 +76,7 @@ export function PWAInstallPrompt({
         window.removeEventListener('appinstalled', handleAppInstalled)
       }
     }
-  }, [])
+  }, [isDev, showInDev])
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return

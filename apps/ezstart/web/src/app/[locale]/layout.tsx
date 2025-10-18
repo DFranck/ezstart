@@ -1,6 +1,6 @@
 import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
-import { PWAInstallPrompt, Toaster } from '@ezstart/ui/components'
+import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -67,7 +67,6 @@ export default async function LocaleLayout(props: {
           <ClientLayout>{children}</ClientLayout>
         </Providers>
         <Toaster />
-        <PWAInstallPrompt appName="EZStart" />
       </body>
     </html>
   )

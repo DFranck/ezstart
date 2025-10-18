@@ -6,5 +6,13 @@
   "auth": {
     "login": "Login",
     "logout": "Logout"
+  },
+  "pwa": {
+    "install": {
+      "title": "Install EZStart",
+      "description": "Install the app for quick access and a better experience",
+      "installButton": "Install",
+      "laterButton": "Later"
+    }
   }
 }

@@ -8,6 +8,7 @@ import {
   H2,
   Icon,
   LocaleSwitcher,
+  PWAInstallPrompt,
   type NavigationLink,
 } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
@@ -48,7 +49,9 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       appName="EZStart"
       creator={
         <div className="flex items-center gap-2">
-          <span>{t('footer.createdWith')} ❤️ {t('footer.by')} </span>
+          <span>
+            {t('footer.createdWith')} ❤️ {t('footer.by')}{' '}
+          </span>
           <Link
             target="_blank"
             href="https://www.linkedin.com/in/franck-seradni/"
@@ -114,6 +117,13 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
       LinkComponent={Link}
     >
       {children}
+      <PWAInstallPrompt
+        appName={t('pwa.install.title')}
+        description={t('pwa.install.description')}
+        installButtonText={t('pwa.install.installButton')}
+        laterButtonText={t('pwa.install.laterButton')}
+        showInDev
+      />
     </BaseClientLayout>
   )
 }
