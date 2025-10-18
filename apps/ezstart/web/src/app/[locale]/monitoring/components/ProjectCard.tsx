@@ -1,13 +1,53 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import type { ProjectHealth } from '@ezstart/monitoring'
-import { Badge, Card, CardContent, CardHeader, Div, H3, Icon, P } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, CardHeader, Div, H3, Icon, P, UptimeGraph } from '@ezstart/ui/components'
+import type { UptimeDataPoint } from '@ezstart/ui/components'
 
 interface ProjectCardProps {
   project: ProjectHealth
 }
 
+interface ServiceHistory {
+  serviceId: string
+  totalChecks: number
+  healthyChecks: number
+  uptimePercentage: number
+  avgResponseTime: number | null
+  history: UptimeDataPoint[]
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
+  const [servicesHistory, setServicesHistory] = useState<ServiceHistory[]>([])
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true)
+
+  // Fetch health check history for the project
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        setIsLoadingHistory(true)
+        const MONITORING_API_URL =
+          process.env.NODE_ENV === 'development'
+            ? 'http://localhost:5080'
+            : 'https://ezstart-monitoring.up.railway.app'
+
+        const res = await fetch(`${MONITORING_API_URL}/api/history/project/${project.id}?hours=24`)
+        if (!res.ok) throw new Error('Failed to fetch history')
+
+        const data = await res.json()
+        setServicesHistory(data.services || [])
+      } catch (error) {
+        console.error('Failed to fetch project history:', error)
+        setServicesHistory([])
+      } finally {
+        setIsLoadingHistory(false)
+      }
+    }
+
+    fetchHistory()
+  }, [project.id])
+
   const getGithubUrlForEndpoint = (endpointType: string) => {
     if (!project.githubUrl) return null
     // Si le githubUrl pointe déjà vers un sous-dossier (api ou web), le retourner tel quel
@@ -174,20 +214,47 @@ export function ProjectCard({ project }: ProjectCardProps) {
             )
           })}
 
-          {/* Summary */}
-          <div className="pt-2 border-t border-border mt-auto">
-            <div className="flex items-center justify-between text-sm">
+          {/* Uptime Graphs */}
+          <div className="pt-2 border-t border-border mt-auto space-y-3">
+            {isLoadingHistory ? (
+              <P className="text-xs text-muted-foreground text-center py-4">Loading history...</P>
+            ) : servicesHistory.length > 0 ? (
+              servicesHistory.map(service => {
+                // Determine title based on serviceId (e.g., "ezauth-api" → "API", "ezauth-web" → "Web")
+                const title = service.serviceId.includes('-api')
+                  ? 'API'
+                  : service.serviceId.includes('-web')
+                    ? 'Web'
+                    : service.serviceId
+
+                return (
+                  <UptimeGraph
+                    key={service.serviceId}
+                    data={service.history}
+                    title={title}
+                    uptimePercentage={service.uptimePercentage}
+                    height={60}
+                    showPercentage
+                    showTitle
+                  />
+                )
+              })
+            ) : (
+              <div className="text-center py-4">
+                <P className="text-xs text-muted-foreground">No history data available</P>
+                <P className="text-xs text-muted-foreground mt-1">
+                  Health checks will appear here after monitoring starts
+                </P>
+              </div>
+            )}
+
+            {/* Overall Summary */}
+            <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
               <P className="text-muted-foreground">Overall Status</P>
               <P className="font-medium">
                 {project.healthyCount}/{project.totalCount} healthy
               </P>
             </div>
-            {project.avgResponseTime !== null && (
-              <div className="flex items-center justify-between text-sm mt-1">
-                <P className="text-muted-foreground">Avg Response</P>
-                <P className="font-medium">{project.avgResponseTime}ms</P>
-              </div>
-            )}
           </div>
         </Div>
       </CardContent>

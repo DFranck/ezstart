@@ -69,7 +69,7 @@ export function MetricsOverview({ metrics }: MetricsOverviewProps) {
   const auditsCompletePercentage = Math.round((metrics.auditsComplete / metrics.auditsTotal) * 100)
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       <MetricCard
         title="Projects Health"
         value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
