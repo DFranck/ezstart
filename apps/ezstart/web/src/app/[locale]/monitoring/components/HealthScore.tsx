@@ -49,14 +49,16 @@ export function HealthScore({ score, status }: HealthScoreProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
+          <div className="relative flex items-end">
             <div className={`text-8xl font-bold ${getScoreColor()}`}>{score}</div>
+            <span className={`text-3xl font-semibold mb-2 ml-1 ${getScoreColor()}`}>%</span>
             <div className="absolute -top-2 -right-2 text-4xl">{getStatusEmoji()}</div>
           </div>
 
           <P className="text-xl font-semibold capitalize text-center">{status}</P>
 
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-md relative">
+            {/* Progress bar */}
             <div className="h-3 bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full ${
@@ -71,17 +73,13 @@ export function HealthScore({ score, status }: HealthScoreProps) {
                 style={{ width: `${score}%` }}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4 w-full max-w-md text-center">
-            <div className="bg-background/50 rounded-lg p-3">
-              <P className="text-sm text-muted-foreground">Target</P>
-              <P className="text-lg font-bold">90+</P>
-            </div>
-            <div className="bg-background/50 rounded-lg p-3">
-              <P className="text-sm text-muted-foreground">Current</P>
-              <P className={`text-lg font-bold ${getScoreColor()}`}>{score}</P>
-            </div>
+            {/* Target marker at 90% */}
+            <div
+              className="absolute top-0 h-3 w-0.5 bg-foreground/40"
+              style={{ left: '90%' }}
+              title="Target: 90+"
+            />
           </div>
         </div>
       </CardContent>

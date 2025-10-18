@@ -1,13 +1,23 @@
 'use client'
 
 import type { ProjectHealth } from '@ezstart/monitoring'
-import { Badge, Card, CardContent, CardHeader, H3, Icon, P } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, CardHeader, Div, H3, Icon, P } from '@ezstart/ui/components'
 
 interface ProjectCardProps {
   project: ProjectHealth
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const getGithubUrlForEndpoint = (endpointType: string) => {
+    if (!project.githubUrl) return null
+    // Si le githubUrl pointe déjà vers un sous-dossier (api ou web), le retourner tel quel
+    if (project.githubUrl.includes('/api') || project.githubUrl.includes('/web')) {
+      return project.githubUrl
+    }
+    // Sinon, ajouter /api ou /web selon le type
+    return `${project.githubUrl}/${endpointType}`
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy':
@@ -51,7 +61,15 @@ export function ProjectCard({ project }: ProjectCardProps) {
   }
 
   return (
-    <Card variant="floating" className="hover:border-primary/50 transition-colors">
+    <Card
+      variant="floating"
+      onClick={e => {
+        if (project.githubUrl) {
+          window.open(project.githubUrl, '_blank', 'noopener,noreferrer')
+        }
+      }}
+      className="hover:border-primary/50 transition-colors flex flex-col cursor-pointer"
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -70,18 +88,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 <H3 size="h5" className="mb-1">
                   {project.name}
                 </H3>
-                {/* GitHub Link */}
-                {project.githubUrl && (
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    title="View on GitHub"
-                  >
-                    <Icon name="lucide:Github" className="w-4 h-4" />
-                  </a>
-                )}
               </div>
               {project.description && (
                 <P className="text-xs text-muted-foreground">{project.description}</P>
@@ -91,14 +97,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <Badge className={getStatusColor(project.overallStatus)}>{project.overallStatus}</Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
+      <CardContent className="flex-1 flex flex-col">
+        <Div layout={'col'} className="space-y-3 flex-1 flex flex-col">
           {/* Endpoints */}
-          {project.endpoints.map((endpoint, index) => (
-            <div
-              key={index}
-              className="flex items-start justify-between p-3 rounded-md bg-muted/50 transition-colors"
-            >
+          {project.endpoints.map((endpoint, index) => {
+            const githubUrl = getGithubUrlForEndpoint(endpoint.type)
+            return (
+              <div
+                key={index}
+                onClick={() => {
+                  if (githubUrl) {
+                    window.open(githubUrl, '_blank', 'noopener,noreferrer')
+                  }
+                }}
+                className="flex items-start justify-between p-3 rounded-md bg-muted/50 border transition-colors hover:bg-muted/40 hover:border-primary/50 cursor-pointer"
+              >
               <div className="flex items-start gap-2 flex-1 min-w-0">
                 <span className="mt-0.5">{getStatusEmoji(endpoint.status)}</span>
                 <div className="flex-1 min-w-0">
@@ -120,7 +133,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                       href={endpoint.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
+                      onClick={e => e.stopPropagation()}
+                      className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
                       title={endpoint.url}
                     >
                       <Icon name="lucide:ExternalLink" className="w-3 h-3 flex-shrink-0" />
@@ -133,7 +147,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                         href={endpoint.metadata.swaggerUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
+                        onClick={e => e.stopPropagation()}
+                        className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
                         title={endpoint.metadata.swaggerUrl}
                       >
                         📖 {endpoint.metadata.swaggerUrl}
@@ -156,10 +171,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 )}
               </div>
             </div>
-          ))}
+            )
+          })}
 
           {/* Summary */}
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 border-t border-border mt-auto">
             <div className="flex items-center justify-between text-sm">
               <P className="text-muted-foreground">Overall Status</P>
               <P className="font-medium">
@@ -173,7 +189,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </div>
             )}
           </div>
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )

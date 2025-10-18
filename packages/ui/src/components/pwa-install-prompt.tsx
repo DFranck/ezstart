@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Badge } from './badge'
 import { Button } from './button'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -23,12 +24,12 @@ interface PWAInstallPromptProps {
 }
 
 export function PWAInstallPrompt({
-  appName = 'This app',
+  appName = 'Install This app',
   description = 'Install the app for quick access and a better experience',
   installButtonText = 'Install',
   laterButtonText = 'Later',
   className = '',
-  showInDev = false
+  showInDev = false,
 }: PWAInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
@@ -111,15 +112,17 @@ export function PWAInstallPrompt({
   }
 
   return (
-    <div className={`fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}>
+    <div
+      className={`fixed bottom-4 left-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 ${className}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Install {appName}
+            {appName}
             {isDev && showInDev && (
-              <span className="ml-2 text-xs bg-yellow-500 text-black px-2 py-1 rounded">
-                DEV MODE
-              </span>
+              <Badge variant="warning" className="ml-2">
+                DEV
+              </Badge>
             )}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
