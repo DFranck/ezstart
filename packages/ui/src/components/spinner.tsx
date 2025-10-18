@@ -4,7 +4,7 @@ export interface SpinnerProps {
   /** Size of the spinner */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   /** Variant style */
-  variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'destructive' | 'success'
+  variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'destructive' | 'success' | 'fancy'
   /** Animation speed */
   speed?: 'slow' | 'normal' | 'fast'
   /** Optional text to display below spinner */
@@ -36,6 +36,16 @@ const variantStyles = {
   accent: 'border-accent/30 border-t-accent',
   destructive: 'border-destructive/30 border-t-destructive',
   success: 'border-green-500/30 border-t-green-500',
+  fancy: 'border-primary/20 border-t-primary', // Same as primary but with pulse effect
+}
+
+// Inner pulse circle sizes for fancy variant
+const fancyPulseSizes = {
+  xs: 'w-2 h-2 top-0.5 left-0.5',
+  sm: 'w-2.5 h-2.5 top-0.5 left-0.5',
+  md: 'w-4 h-4 top-1 left-1',
+  lg: 'w-5 h-5 top-1.5 left-1.5',
+  xl: 'w-8 h-8 top-2 left-2',
 }
 
 const speedStyles = {
@@ -67,6 +77,10 @@ const textSizeStyles = {
  * <Spinner variant="primary" size="lg" />
  *
  * @example
+ * // Fancy variant with pulse effect (EZBill style)
+ * <Spinner variant="fancy" size="xl" text="Loading your dashboard..." />
+ *
+ * @example
  * // Full screen loading
  * <Spinner fullScreen backdrop text="Please wait..." />
  */
@@ -81,7 +95,32 @@ export function Spinner({
   fullScreen = false,
   backdrop = false,
 }: SpinnerProps) {
-  const spinner = (
+  const isFancy = variant === 'fancy'
+
+  const spinner = isFancy ? (
+    // Fancy variant with pulse effect (EZBill style)
+    <div className="relative">
+      <div
+        className={cn(
+          'rounded-full border-solid',
+          sizeStyles[size],
+          variantStyles[variant],
+          speedStyles[speed],
+          className
+        )}
+        role="status"
+        aria-label={text || 'Loading'}
+      />
+      <div
+        className={cn(
+          'absolute bg-gradient-to-r from-primary to-primary/80 rounded-full opacity-20 animate-pulse',
+          fancyPulseSizes[size]
+        )}
+        aria-hidden="true"
+      />
+    </div>
+  ) : (
+    // Standard spinner
     <div
       className={cn(
         'rounded-full border-solid',
@@ -96,10 +135,14 @@ export function Spinner({
   )
 
   const content = (
-    <div className={cn('flex flex-col items-center justify-center gap-3', fullScreen && 'h-screen')}>
+    <div
+      className={cn('flex flex-col items-center justify-center gap-3', fullScreen && 'h-screen')}
+    >
       {spinner}
       {text && (
-        <p className={cn('text-muted-foreground', textSizeStyles[textSize], textClassName)}>{text}</p>
+        <p className={cn('text-muted-foreground', textSizeStyles[textSize], textClassName)}>
+          {text}
+        </p>
       )}
     </div>
   )

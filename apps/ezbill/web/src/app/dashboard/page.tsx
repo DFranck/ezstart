@@ -16,7 +16,7 @@ import { getUserId } from '@/utils/get-user-id'
 import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Div } from '@ezstart/ui/components'
+import { Div, Spinner } from '@ezstart/ui/components'
 import { callApi } from '@/utils/api'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -148,12 +148,8 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center space-y-4">
-        <div className="relative">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-r from-primary to-primary/80 rounded-full opacity-20 animate-pulse"></div>
-        </div>
-        <p className="text-muted-foreground font-medium">Loading your dashboard...</p>
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <Spinner variant="fancy" size="xl" text="Loading your dashboard..." textSize="md" />
       </div>
     )
   }
