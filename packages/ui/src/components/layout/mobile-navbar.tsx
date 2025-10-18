@@ -1,9 +1,9 @@
 'use client'
 
 import { Icon, Tag } from '../'
-import { useClickOutside, useDevice } from '../../hooks'
+import { useDevice } from '../../hooks'
 import { cn } from '../../lib'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MobileNavMenu } from './mobile-nav-menu'
 import type { KnownIconName } from '../icon/src/types'
 import { NavigationItem, NavigationLink } from './types'
@@ -40,14 +40,8 @@ export function MobileNavbar({
 }: MobileNavbarProps) {
   const { isMobile } = useDevice()
   const [isOpen, setIsOpen] = useState(false)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const burgerRef = useRef<HTMLButtonElement>(null)
 
-  useClickOutside(mobileMenuRef, () => {
-    if (isMobile && isOpen) {
-      setIsOpen(false)
-    }
-  })
+  // Note: useClickOutside disabled - burger/X button handles all toggle logic
 
   useEffect(() => {
     if (!isMobile && isOpen) {
@@ -64,7 +58,6 @@ export function MobileNavbar({
         {/* Burger Menu */}
         {headerNavigation.length > 0 && (
           <div
-            ref={mobileMenuRef}
             className={cn(
               'transition-all duration-500 border-t-2 ease-in-out overflow-hidden px-2',
               isOpen ? 'max-h-[400px] py-2' : 'max-h-0'
@@ -110,7 +103,6 @@ export function MobileNavbar({
             {/* Burger button */}
             {headerNavigation.length > 0 && (
               <button
-                ref={burgerRef}
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex flex-col items-center p-2 text-xs transition-colors text-muted-foreground hover:text-primary"
                 aria-label="Toggle menu"
@@ -134,7 +126,6 @@ export function MobileNavbar({
       {/* Burger Menu */}
       {headerNavigation.length > 0 && (
         <div
-          ref={mobileMenuRef}
           className={cn(
             'transition-all duration-500 border-t-2 ease-in-out overflow-hidden px-2',
             isOpen ? 'max-h-[400px] py-2' : 'max-h-0'
@@ -157,7 +148,6 @@ export function MobileNavbar({
           </LinkComponent>
 
           <button
-            ref={burgerRef}
             onClick={() => setIsOpen(!isOpen)}
             className="w-full flex justify-center py-2 text-muted-foreground hover:text-primary transition-colors"
             aria-label="Toggle menu"
