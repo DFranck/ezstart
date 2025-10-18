@@ -5,6 +5,7 @@ import { deploymentRoutes, deploymentRegistry } from './deployment.js'
 import { metricsRoutes, metricsRegistry } from './metrics.js'
 import projectsRouter from './projects.js'
 import historyRouter from './history.js'
+import triggerRouter from './trigger.js'
 
 const router = Router()
 
@@ -15,6 +16,7 @@ router.use('/deployments', deploymentRoutes)
 router.use('/metrics', metricsRoutes)
 router.use('/projects', projectsRouter)
 router.use('/history', historyRouter)
+router.use('/trigger-checks', triggerRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {

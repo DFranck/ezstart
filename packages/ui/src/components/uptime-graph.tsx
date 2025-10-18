@@ -158,7 +158,7 @@ export function UptimeGraph({
   }
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         {showTitle && title && <h4 className="text-sm font-medium text-foreground">{title}</h4>}
@@ -181,11 +181,11 @@ export function UptimeGraph({
           <BarChart
             data={chartData}
             margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-            barCategoryGap={2}
+            barCategoryGap={1.5}
             barGap={1}
           >
             <XAxis dataKey="index" hide />
-            <YAxis hide domain={[0, 2]} />
+            <YAxis hide />
             <Tooltip content={<CustomTooltip />} cursor={false} />
             <Bar dataKey="value" radius={[3, 3, 3, 3]} maxBarSize={6}>
               {chartData.map((entry, index) => (

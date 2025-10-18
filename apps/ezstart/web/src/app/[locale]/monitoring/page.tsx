@@ -2,7 +2,9 @@
 
 import { getApiUrl } from '@ezstart/config'
 import {
+  Button,
   H1,
+  Icon,
   P,
   Section,
   Spinner,
@@ -60,54 +62,93 @@ export default function MonitoringDashboard() {
   })
   const [auditsData, setAuditsData] = useState<AuditsData>({ audits: [] })
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setIsLoading(true)
-        setError(null)
+  // Fetch monitoring data
+  const fetchData = async (showLoading = true) => {
+    try {
+      if (showLoading) setIsLoading(true)
+      else setIsRefreshing(true)
+      setError(null)
 
-        // Fetch with timeout
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
+      // Fetch with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
 
-        const [projectsRes, auditsRes] = await Promise.all([
-          fetch(`${MONITORING_API_URL}/api/projects`, {
-            cache: 'no-store',
-            signal: controller.signal,
-          }),
-          fetch(`${MONITORING_API_URL}/api/audits`, {
-            cache: 'no-store',
-            signal: controller.signal,
-          }),
-        ])
+      const [projectsRes, auditsRes] = await Promise.all([
+        fetch(`${MONITORING_API_URL}/api/projects`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }),
+        fetch(`${MONITORING_API_URL}/api/audits`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }),
+      ])
 
-        clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
 
-        if (!projectsRes.ok || !auditsRes.ok) {
-          throw new Error('Failed to fetch monitoring data')
-        }
-
-        const [projects, audits] = await Promise.all([projectsRes.json(), auditsRes.json()])
-
-        setProjectsData(projects)
-        setAuditsData(audits)
-      } catch (err) {
-        console.error('[Monitoring] Error fetching data:', err)
-        setError(
-          err instanceof Error
-            ? err.message === 'Failed to fetch'
-              ? 'Monitoring API is offline or sleeping. Please wait 30-60s for Render to wake up, then refresh.'
-              : err.message
-            : 'Unknown error'
-        )
-      } finally {
-        setIsLoading(false)
+      if (!projectsRes.ok || !auditsRes.ok) {
+        throw new Error('Failed to fetch monitoring data')
       }
-    }
 
+      const [projects, audits] = await Promise.all([projectsRes.json(), auditsRes.json()])
+
+      setProjectsData(projects)
+      setAuditsData(audits)
+      setLastRefresh(new Date())
+    } catch (err) {
+      console.error('[Monitoring] Error fetching data:', err)
+      setError(
+        err instanceof Error
+          ? err.message === 'Failed to fetch'
+            ? 'Monitoring API is offline or sleeping. Please wait 30-60s for Render to wake up, then refresh.'
+            : err.message
+          : 'Unknown error'
+      )
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  // Trigger manual health checks on all services
+  const triggerHealthChecks = async () => {
+    try {
+      setIsRefreshing(true)
+
+      // Trigger health checks via monitoring API
+      await fetch(`${MONITORING_API_URL}/api/trigger-checks`, {
+        method: 'POST',
+        cache: 'no-store',
+      })
+
+      // Wait a bit for checks to complete, then refresh data
+      setTimeout(() => {
+        fetchData(false)
+      }, 2000)
+    } catch (err) {
+      console.error('[Monitoring] Error triggering health checks:', err)
+      // Still refresh data even if trigger fails
+      fetchData(false)
+    }
+  }
+
+  // Initial fetch
+  useEffect(() => {
     fetchData()
+  }, [])
+
+  // Auto-refresh every 5 minutes (synced with health check interval)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('[Monitoring] Auto-refreshing data (5min interval)...')
+      fetchData(false)
+    }, 5 * 60 * 1000) // 5 minutes
+
+    return () => clearInterval(interval)
   }, [])
 
   const { projects, summary } = projectsData
@@ -172,10 +213,34 @@ export default function MonitoringDashboard() {
       <Section size="full">
         {/* Header */}
         <div className="space-y-2 mb-8">
-          <H1>System Monitoring Dashboard</H1>
-          <P className="text-muted-foreground">
-            Real-time monitoring of all projects across the @ezstart monorepo
-          </P>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <H1>System Monitoring Dashboard</H1>
+              <P className="text-muted-foreground">
+                Real-time monitoring of all projects across the @ezstart monorepo
+              </P>
+            </div>
+            <div className="flex items-center gap-3">
+              {lastRefresh && (
+                <P className="text-xs text-muted-foreground">
+                  Last refresh: {lastRefresh.toLocaleTimeString()}
+                </P>
+              )}
+              <Button
+                onClick={triggerHealthChecks}
+                disabled={isRefreshing}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Icon
+                  name="lucide:RefreshCw"
+                  className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                />
+                {isRefreshing ? 'Checking...' : 'Refresh Now'}
+              </Button>
+            </div>
+          </div>
         </div>
         {/* Overall Health Score */}
         <HealthScore score={score} status={status} />

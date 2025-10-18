@@ -231,7 +231,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   <UptimeGraph
                     data={serviceHistory.history}
                     uptimePercentage={serviceHistory.uptimePercentage}
-                    height={30}
+                    height={20}
                     showPercentage={false}
                     showTitle={false}
                   />
