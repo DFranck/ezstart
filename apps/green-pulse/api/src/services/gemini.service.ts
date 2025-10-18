@@ -17,7 +17,7 @@ Do not include explanations. Fill missing values with null and list them in _mis
 export async function chatWithExtraction(message: string, extractEsg: boolean = false) {
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: extractEsg ? SYSTEM_PROMPT_EXTRACTION : SYSTEM_PROMPT_GENERAL,
       generationConfig: {
         temperature: extractEsg ? 0.1 : 0.7,
@@ -82,7 +82,7 @@ export async function transcribeAudio(filePath: string): Promise<string> {
 export async function readImage(imageUrlOrPath: string): Promise<any> {
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: 'Extract equipment attributes and meter readings as JSON.',
       generationConfig: {
         temperature: 0.1,
@@ -134,7 +134,7 @@ Return {"ok": true} or {"ok": false, "errors": [...]}`
 
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: 'You are a data validator. Return only JSON.',
       generationConfig: {
         temperature: 0,
