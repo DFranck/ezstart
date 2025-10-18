@@ -18,6 +18,8 @@ interface PWAInstallPromptProps {
   installButtonText?: string
   laterButtonText?: string
   className?: string
+  /** Show prompt in development mode (default: false) */
+  showInDev?: boolean
 }
 
 export function PWAInstallPrompt({
@@ -25,16 +27,19 @@ export function PWAInstallPrompt({
   description = 'Install the app for quick access and a better experience',
   installButtonText = 'Install',
   laterButtonText = 'Later',
-  className = ''
+  className = '',
+  showInDev = false
 }: PWAInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
 
+  const isDev = process.env.NODE_ENV === 'development'
+
   useEffect(() => {
-    // Skip in development to avoid annoying popups during dev
-    if (process.env.NODE_ENV === 'development') {
+    // Skip in development unless showInDev is true
+    if (isDev && !showInDev) {
       return
     }
 
@@ -106,9 +111,16 @@ export function PWAInstallPrompt({
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Install {appName}
+            {isDev && showInDev && (
+              <span className="ml-2 text-xs bg-yellow-500 text-black px-2 py-1 rounded">
+                DEV MODE
+              </span>
+            )}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-            {description}
+            {isDev && showInDev && !showInstallPrompt
+              ? "Dev mode active - Browser hasn't triggered beforeinstallprompt event yet"
+              : description}
           </p>
         </div>
         <div className="flex gap-2 ml-4">
