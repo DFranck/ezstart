@@ -46,10 +46,13 @@ export class HealthCheckScheduler {
 
     this.isRunning = true
 
-    // Run immediately on startup
-    this.performHealthChecks().catch(err => {
-      console.error('❌ [Scheduler] Error during initial health check:', err)
-    })
+    // Wait 5 seconds before first health check to ensure MongoDB is fully ready
+    console.log('⏰ [Scheduler] Waiting 5 seconds before first health check...')
+    setTimeout(() => {
+      this.performHealthChecks().catch(err => {
+        console.error('❌ [Scheduler] Error during initial health check:', err)
+      })
+    }, 5000)
 
     console.log('✅ [Scheduler] Health check scheduler started')
   }
