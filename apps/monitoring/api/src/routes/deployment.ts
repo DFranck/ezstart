@@ -8,7 +8,7 @@ const execAsync = promisify(exec)
 export const deploymentRegistry = new OpenAPIRegistry()
 const router = Router()
 const docRouter = createRouterWithDoc(deploymentRegistry, router)
-export const deploymentRoutes = router
+export const deploymentRoutes = router as ReturnType<typeof Router>
 
 /**
  * GET /api/deployments

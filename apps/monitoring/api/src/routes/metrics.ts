@@ -17,7 +17,7 @@ const execAsync = promisify(exec)
 export const metricsRegistry = new OpenAPIRegistry()
 const router = Router()
 const docRouter = createRouterWithDoc(metricsRegistry, router)
-export const metricsRoutes = router
+export const metricsRoutes = router as ReturnType<typeof Router>
 
 const healthChecker = new HealthChecker()
 

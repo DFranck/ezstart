@@ -72,4 +72,4 @@ projectsRouter.get('/:projectId', async (req, res) => {
   }
 })
 
-export default projectsRouter
+export default projectsRouter as ReturnType<typeof Router>

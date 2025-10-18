@@ -6,7 +6,7 @@ import { join } from 'path'
 export const auditRegistry = new OpenAPIRegistry()
 const router = Router()
 const docRouter = createRouterWithDoc(auditRegistry, router)
-export const auditRoutes = router
+export const auditRoutes = router as ReturnType<typeof Router>
 
 /**
  * GET /api/audits

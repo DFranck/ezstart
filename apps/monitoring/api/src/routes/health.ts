@@ -4,7 +4,7 @@ import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 export const healthRegistry = new OpenAPIRegistry()
 const router = Router()
 const docRouter = createRouterWithDoc(healthRegistry, router)
-export const healthRoutes = router
+export const healthRoutes = router as ReturnType<typeof Router>
 
 const healthChecker = new HealthChecker()
 

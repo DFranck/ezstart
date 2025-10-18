@@ -6,11 +6,12 @@
 import cron from 'node-cron'
 import { HealthChecker, MONITORED_SERVICES, SERVICE_PLATFORMS } from '@ezstart/monitoring'
 import { HealthCheck } from '../models/HealthCheck.js'
+import type { ScheduledTask } from 'node-cron'
 
 export class HealthCheckScheduler {
   private healthChecker: HealthChecker
   private isRunning = false
-  private cronJob: cron.ScheduledTask | null = null
+  private cronJob: ScheduledTask | null = null
 
   constructor() {
     this.healthChecker = new HealthChecker()
@@ -80,6 +81,7 @@ export class HealthCheckScheduler {
             })
 
             // Save to MongoDB for history/graphs
+            // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
             await HealthCheck.create({
               serviceId,
               status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
@@ -95,6 +97,7 @@ export class HealthCheckScheduler {
 
             // Still save failed check to MongoDB
             try {
+              // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
               await HealthCheck.create({
                 serviceId,
                 status: 'unhealthy',

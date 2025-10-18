@@ -37,5 +37,5 @@ router.get('/', (_, res) => {
   })
 })
 
-export const routes = router
+export const routes = router as ReturnType<typeof Router>
 export const registries = [healthRegistry, auditRegistry, deploymentRegistry, metricsRegistry]

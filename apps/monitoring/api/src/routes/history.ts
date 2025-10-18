@@ -1,4 +1,5 @@
-import { Router } from '@ezstart/express-core'
+import { Router, type RequestHandler } from '@ezstart/express-core'
+import type { Router as ExpressRouter } from 'express'
 import { HealthCheck } from '../models/HealthCheck.js'
 import { getMockServiceHistory } from '../utils/mockHistory.js'
 
@@ -14,14 +15,13 @@ const isDev = process.env.NODE_ENV !== 'production'
  */
 historyRouter.get('/:serviceId', async (req, res) => {
   try {
-    const { serviceId } = req.params
+    const { serviceId } = req.params as { serviceId: string }
     const hours = Math.min(Number(req.query.hours) || 24, 168) // Max 7 days
 
     // In dev: use mock data, in prod: use real MongoDB data
     if (isDev) {
       const mockData = getMockServiceHistory(serviceId, hours)
       return res.json({
-        serviceId,
         hours,
         ...mockData,
       })
@@ -29,24 +29,26 @@ historyRouter.get('/:serviceId', async (req, res) => {
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
 
-    const history = await HealthCheck.find({
+    // @ts-expect-error - Mongoose type inference issue with strict TypeScript
+    const history = (await HealthCheck.find({
       serviceId,
       timestamp: { $gte: cutoffTime },
     })
       .sort({ timestamp: 1 }) // Oldest first for chronological graph
       .select('status responseTime timestamp error')
       .lean()
+      .exec()) as any[]
 
     // Calculate uptime percentage
     const totalChecks = history.length
-    const healthyChecks = history.filter(h => h.status === 'healthy').length
+    const healthyChecks = history.filter((h: any) => h.status === 'healthy').length
     const uptimePercentage = totalChecks > 0 ? (healthyChecks / totalChecks) * 100 : 0
 
     // Calculate average response time (only healthy checks)
-    const healthyWithResponse = history.filter(h => h.status === 'healthy' && h.responseTime !== null)
+    const healthyWithResponse = history.filter((h: any) => h.status === 'healthy' && h.responseTime !== null)
     const avgResponseTime =
       healthyWithResponse.length > 0
-        ? healthyWithResponse.reduce((sum, h) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
+        ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
         : null
 
     res.json({
@@ -56,7 +58,7 @@ historyRouter.get('/:serviceId', async (req, res) => {
       healthyChecks,
       uptimePercentage: Number(uptimePercentage.toFixed(2)),
       avgResponseTime: avgResponseTime ? Math.round(avgResponseTime) : null,
-      history: history.map(h => ({
+      history: history.map((h: any) => ({
         status: h.status,
         responseTime: h.responseTime,
         timestamp: h.timestamp,
@@ -81,7 +83,7 @@ historyRouter.get('/:serviceId', async (req, res) => {
  */
 historyRouter.get('/project/:projectId', async (req, res) => {
   try {
-    const { projectId } = req.params
+    const { projectId } = req.params as { projectId: string }
     const hours = Math.min(Number(req.query.hours) || 24, 168)
 
     // Map project to service IDs
@@ -101,24 +103,26 @@ historyRouter.get('/project/:projectId', async (req, res) => {
 
     const histories = await Promise.all(
       serviceIds.map(async serviceId => {
-        const history = await HealthCheck.find({
+        // @ts-expect-error - Mongoose type inference issue with strict TypeScript
+        const history = (await HealthCheck.find({
           serviceId,
           timestamp: { $gte: cutoffTime },
         })
           .sort({ timestamp: 1 })
           .select('status responseTime timestamp error')
           .lean()
+          .exec()) as any[]
 
         if (history.length === 0) return null
 
         const totalChecks = history.length
-        const healthyChecks = history.filter(h => h.status === 'healthy').length
+        const healthyChecks = history.filter((h: any) => h.status === 'healthy').length
         const uptimePercentage = totalChecks > 0 ? (healthyChecks / totalChecks) * 100 : 0
 
-        const healthyWithResponse = history.filter(h => h.status === 'healthy' && h.responseTime !== null)
+        const healthyWithResponse = history.filter((h: any) => h.status === 'healthy' && h.responseTime !== null)
         const avgResponseTime =
           healthyWithResponse.length > 0
-            ? healthyWithResponse.reduce((sum, h) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
+            ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
             : null
 
         return {
@@ -127,7 +131,7 @@ historyRouter.get('/project/:projectId', async (req, res) => {
           healthyChecks,
           uptimePercentage: Number(uptimePercentage.toFixed(2)),
           avgResponseTime: avgResponseTime ? Math.round(avgResponseTime) : null,
-          history: history.map(h => ({
+          history: history.map((h: any) => ({
             status: h.status,
             responseTime: h.responseTime,
             timestamp: h.timestamp,
@@ -152,4 +156,4 @@ historyRouter.get('/project/:projectId', async (req, res) => {
   }
 })
 
-export default historyRouter
+export default historyRouter as ReturnType<typeof Router>
