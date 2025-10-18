@@ -1,0 +1,20 @@
+[phases.setup]
+# Skip system packages (no Puppeteer needed for this API)
+aptPkgs = []
+
+[phases.install]
+cmds = [
+  "corepack enable",
+  "corepack prepare pnpm@latest --activate"
+]
+
+[phases.build]
+cmds = [
+  "cd /app",
+  "pnpm install --frozen-lockfile --shamefully-hoist",
+  "pnpm --filter @ezstart/config --filter @ezstart/express-core build",
+  "pnpm turbo build --filter=api-ezpay"
+]
+
+[start]
+cmd = "cd apps/ezpay/api && node dist/index.js"
