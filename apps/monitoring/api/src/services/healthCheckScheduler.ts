@@ -1,6 +1,6 @@
 /**
  * Background health check scheduler
- * Keeps Render services awake by pinging them every 10 minutes
+ * Keeps Render services awake by pinging them every 5 minutes
  */
 
 import cron from 'node-cron'
@@ -18,7 +18,7 @@ export class HealthCheckScheduler {
   /**
    * Start the scheduler
    * - In development: Do nothing (don't ping production services)
-   * - In production: Ping Render services every 10 minutes to prevent sleep
+   * - In production: Ping Render services every 5 minutes to prevent sleep
    */
   start() {
     if (this.isRunning) {
@@ -33,11 +33,12 @@ export class HealthCheckScheduler {
     }
 
     console.log('⏰ [Scheduler] Starting health check cron job...')
-    console.log('⏰ [Scheduler] Will check Render services every 10 minutes to prevent sleep')
+    console.log('⏰ [Scheduler] Will check Render services every 5 minutes to prevent sleep')
 
-    // Run every 10 minutes: */10 * * * *
+    // Run every 5 minutes: */5 * * * *
     // This keeps Render free tier services awake (sleep after 15min of inactivity)
-    this.cronJob = cron.schedule('*/10 * * * *', async () => {
+    // Synced with UptimeRobot interval (5 minutes)
+    this.cronJob = cron.schedule('*/5 * * * *', async () => {
       await this.performHealthChecks()
     })
 
@@ -73,7 +74,7 @@ export class HealthCheckScheduler {
               type: config.type,
               url: config.productionUrl,
               timeout: 10000, // 10s timeout
-              interval: 600000, // 10min
+              interval: 300000, // 5min
               retries: 0, // No retries, just ping
             })
 
@@ -122,7 +123,7 @@ export class HealthCheckScheduler {
     return {
       isRunning: this.isRunning,
       environment: process.env.NODE_ENV,
-      nextRun: this.cronJob ? 'Every 10 minutes' : 'Not scheduled',
+      nextRun: this.cronJob ? 'Every 5 minutes' : 'Not scheduled',
     }
   }
 }
