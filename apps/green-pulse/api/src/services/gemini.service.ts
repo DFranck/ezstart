@@ -13,8 +13,12 @@ const SYSTEM_PROMPT_EXTRACTION = `You are a structured extractor. From the conve
 output ONLY valid JSON conforming to the ESG schema (company, sites, period, scopes, targets, evidence).
 Do not include explanations. Fill missing values with null and list them in _missing.`
 
-// Chat with extraction
-export async function chatWithExtraction(message: string, extractEsg: boolean = false) {
+// Chat with extraction (with conversation history support)
+export async function chatWithExtraction(
+  message: string,
+  extractEsg: boolean = false,
+  conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
+) {
   try {
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
@@ -25,8 +29,25 @@ export async function chatWithExtraction(message: string, extractEsg: boolean = 
       },
     })
 
-    const result = await model.generateContent(message)
-    const content = result.response.text()
+    let content: string
+
+    // If conversation history exists, use chat mode for context
+    if (conversationHistory && conversationHistory.length > 0) {
+      // Convert conversation history to Gemini format
+      const history = conversationHistory.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }))
+
+      // Start chat with history
+      const chat = model.startChat({ history })
+      const result = await chat.sendMessage(message)
+      content = result.response.text()
+    } else {
+      // No history, use single generateContent
+      const result = await model.generateContent(message)
+      content = result.response.text()
+    }
 
     if (extractEsg) {
       try {

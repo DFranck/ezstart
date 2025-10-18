@@ -49,7 +49,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           <Button asChild variant={'ghost'} size={'sm'}>
             <Link href="/lia">
               <Icon name="lucide:Bot" size={16} />
-              LIA
+              Chat
             </Link>
           </Button>
         </Div>

@@ -19,7 +19,7 @@ type LiaThreadProps = {
 }
 
 export function LiaThread({ activeConversationId, setActiveConversationId }: LiaThreadProps) {
-  const { messages, loading, streamingText, sendMessage, resendLastMessage, isNewThread, clearMessages } =
+  const { messages, loading, streamingText, sendMessage, resendLastMessage, isNewThread, clearMessages, loadMessages } =
     useThreadContext()
 
   const {
@@ -28,6 +28,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     createConversation,
     renameConversation,
     softDeleteConversation,
+    loadConversation,
   } = useConversations()
 
   // Convert to ThreadSidebar format
@@ -53,10 +54,26 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
   }, [createConversation, clearMessages])
 
   // Handle conversation select
-  const handleConversationSelect = useCallback((id: string) => {
-    setActiveConversationId(id)
-    // TODO: Load messages from selected conversation
-  }, [])
+  const handleConversationSelect = useCallback(async (id: string) => {
+    try {
+      setActiveConversationId(id)
+
+      // Load conversation with messages
+      const conversation = await loadConversation(id)
+      if (conversation && conversation.messages) {
+        // Convert API messages to ThreadMessage format
+        const threadMessages = conversation.messages.map((msg: any) => ({
+          id: `${msg.role}-${msg.timestamp.getTime()}`,
+          role: msg.role === 'assistant' ? 'ai' : msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp.toISOString(),
+        }))
+        loadMessages(threadMessages)
+      }
+    } catch (error) {
+      console.error('Failed to load conversation messages:', error)
+    }
+  }, [loadConversation, loadMessages, setActiveConversationId])
 
   // Handle rename
   const handleRename = useCallback(

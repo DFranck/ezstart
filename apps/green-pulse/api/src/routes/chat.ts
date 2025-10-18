@@ -34,8 +34,26 @@ docRouter.post('/', async (req, res) => {
 
     const { message, extract_esg, session_id, conversation_id } = validation.data
 
-    // Chat with optional ESG extraction
-    const result = await chatWithExtraction(message, extract_esg)
+    // Load conversation history if conversation_id provided
+    let conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
+    if (conversation_id) {
+      try {
+        // @ts-expect-error - Mongoose findById type inference issue
+        const conversation = await Conversation.findById(conversation_id).lean().exec()
+        if (conversation && conversation.messages) {
+          conversationHistory = conversation.messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content,
+          }))
+        }
+      } catch (loadError) {
+        console.error('Failed to load conversation history:', loadError)
+        // Continue without history if load fails
+      }
+    }
+
+    // Chat with optional ESG extraction and conversation history
+    const result = await chatWithExtraction(message, extract_esg, conversationHistory)
 
     // If ESG extraction was successful, validate the data
     let validationResult: any = null

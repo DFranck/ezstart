@@ -22,6 +22,7 @@ export type UseThreadAPIReturn = {
   sendMessage: (message: string, files?: File[]) => Promise<void>;
   resendLastMessage: () => Promise<void>;
   clearMessages: () => void;
+  loadMessages: (messages: ThreadMessage[]) => void;
   isNewThread: boolean;
 };
 
@@ -142,6 +143,12 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
     setLastUserMessage('');
   }, []);
 
+  const loadMessages = useCallback((newMessages: ThreadMessage[]) => {
+    setMessages(newMessages);
+    setError(null);
+    setStreamingText('');
+  }, []);
+
   const isNewThread = messages.length === 0;
 
   return {
@@ -152,6 +159,7 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
     sendMessage,
     resendLastMessage,
     clearMessages,
+    loadMessages,
     isNewThread,
   };
 }

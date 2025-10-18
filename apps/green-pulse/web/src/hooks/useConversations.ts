@@ -167,6 +167,34 @@ export function useConversations() {
     }
   }, [loadConversations])
 
+  // Load specific conversation with messages
+  const loadConversation = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/conversations/${id}`)
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+      }
+
+      const data = await res.json()
+      if (data.success && data.data) {
+        return {
+          ...data.data,
+          createdAt: new Date(data.data.createdAt),
+          updatedAt: new Date(data.data.updatedAt),
+          messages: data.data.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        }
+      }
+      return null
+    } catch (err) {
+      console.error('Load conversation error:', err)
+      throw err
+    }
+  }, [])
+
   // Load on mount
   useEffect(() => {
     loadConversations()
@@ -177,6 +205,7 @@ export function useConversations() {
     loading,
     error,
     loadConversations,
+    loadConversation,
     createConversation,
     renameConversation,
     softDeleteConversation,
