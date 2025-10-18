@@ -46,13 +46,14 @@ export class HealthCheckScheduler {
 
     this.isRunning = true
 
-    // Wait 5 seconds before first health check to ensure MongoDB is fully ready
-    console.log('⏰ [Scheduler] Waiting 5 seconds before first health check...')
+    // Wait 30 seconds before first health check to ensure MongoDB is fully operational
+    // Render cold starts + MongoDB Atlas connection can take 15-20 seconds
+    console.log('⏰ [Scheduler] Waiting 30 seconds before first health check...')
     setTimeout(() => {
       this.performHealthChecks().catch(err => {
         console.error('❌ [Scheduler] Error during initial health check:', err)
       })
-    }, 5000)
+    }, 30000)
 
     console.log('✅ [Scheduler] Health check scheduler started')
   }
