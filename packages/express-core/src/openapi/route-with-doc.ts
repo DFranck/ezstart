@@ -21,7 +21,7 @@ type RouteDocOptions = {
 
 export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, basePath = '') {
   function addRouteWithDoc(
-    method: 'get' | 'post' | 'put' | 'delete',
+    method: 'get' | 'post' | 'put' | 'patch' | 'delete',
     path: string,
     middlewares: RequestHandler[],
     options: RouteDocOptions
@@ -128,6 +128,10 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, b
     put: (path: string, ...args: [...RequestHandler[], RouteDocOptions]) => {
       const opts = args.pop() as RouteDocOptions
       addRouteWithDoc('put', path, args as RequestHandler[], opts)
+    },
+    patch: (path: string, ...args: [...RequestHandler[], RouteDocOptions]) => {
+      const opts = args.pop() as RouteDocOptions
+      addRouteWithDoc('patch', path, args as RequestHandler[], opts)
     },
     delete: (path: string, ...args: [...RequestHandler[], RouteDocOptions]) => {
       const opts = args.pop() as RouteDocOptions
