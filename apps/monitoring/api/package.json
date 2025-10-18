@@ -1,6 +1,7 @@
 {
   "name": "api-monitoring",
   "version": "1.0.0",
+  "type": "module",
   "description": "Monitoring and observability API for @ezstart monorepo",
   "main": "dist/index.js",
   "scripts": {

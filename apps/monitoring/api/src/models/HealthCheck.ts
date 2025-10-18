@@ -32,7 +32,7 @@ const healthCheckSchema = new Schema<IHealthCheck>({
   timestamp: {
     type: Date,
     required: true,
-    index: true, // Index for time-based queries
+    // Index created via schema.index() below for TTL and compound index
     default: Date.now,
   },
   error: {

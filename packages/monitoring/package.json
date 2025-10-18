@@ -1,6 +1,7 @@
 {
   "name": "@ezstart/monitoring",
   "version": "1.0.0",
+  "type": "module",
   "description": "Centralized monitoring, auditing, and health check system for @ezstart monorepo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
