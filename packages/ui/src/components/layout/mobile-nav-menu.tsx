@@ -92,7 +92,7 @@ export const MobileNavMenu = forwardRef<HTMLDivElement, MobileNavMenuProps>(
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className="flex items-center justify-center space-x-3 p-2 rounded-md hover:bg-accent transition-colors font-medium w-full max-w-sm"
+                className="flex items-center justify-center space-x-3 p-2 rounded-md hover:bg-accent transition-colors font-medium w-full"
               >
                 {item.icon && <Icon name={item.icon} className="h-5 w-5" />}
                 <span>{item.label}</span>

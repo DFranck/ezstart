@@ -225,7 +225,7 @@ export function ClientLayout({
               if (isNavigationMenu(item)) {
                 const isMenuOpen = openMenus.has(index)
                 return (
-                  <div key={index} className="w-full max-w-sm">
+                  <div key={index} className="w-full">
                     {/* Menu label - clickable to toggle */}
                     <button
                       onClick={() => toggleMenu(index)}
@@ -237,10 +237,7 @@ export function ClientLayout({
                       </div>
                       <Icon
                         name="lucide:ChevronDown"
-                        className={cn(
-                          'w-4 h-4 transition-transform',
-                          isMenuOpen && 'rotate-180'
-                        )}
+                        className={cn('w-4 h-4 transition-transform', isMenuOpen && 'rotate-180')}
                       />
                     </button>
 
@@ -261,7 +258,9 @@ export function ClientLayout({
                             onClick={() => setIsBurgerOpen(false)}
                           >
                             <LinkTag href={subItem.href}>
-                              {subItem.icon && <Icon name={subItem.icon} className="w-4 h-4 mr-2" />}
+                              {subItem.icon && (
+                                <Icon name={subItem.icon} className="w-4 h-4 mr-2" />
+                              )}
                               {subItem.label}
                             </LinkTag>
                           </Button>
@@ -278,7 +277,7 @@ export function ClientLayout({
                   key={item.href}
                   asChild
                   variant="ghost"
-                  className="w-full max-w-sm justify-center"
+                  className="w-full justify-center"
                   onClick={() => setIsBurgerOpen(false)}
                 >
                   <LinkTag href={item.href}>

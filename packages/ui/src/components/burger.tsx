@@ -26,7 +26,6 @@ export const Burger = ({
       variant={'ghost'}
       className={cn(
         'relative cursor-pointer flex flex-col justify-center items-center',
-        { 'pointer-events-none': isOpen },
         className
       )}
       {...props}
