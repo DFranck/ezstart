@@ -1,9 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import type { ProjectHealth } from '@ezstart/monitoring'
-import { Badge, Card, CardContent, CardHeader, Div, H3, Icon, P, UptimeGraph } from '@ezstart/ui/components'
 import type { UptimeDataPoint } from '@ezstart/ui/components'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H3,
+  Icon,
+  P,
+  UptimeGraph,
+} from '@ezstart/ui/components'
+import { useEffect, useState } from 'react'
 
 interface ProjectCardProps {
   project: ProjectHealth
@@ -139,123 +149,96 @@ export function ProjectCard({ project }: ProjectCardProps) {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <Div layout={'col'} className="space-y-3 flex-1 flex flex-col">
-          {/* Endpoints */}
+          {/* Endpoints with Graphs */}
           {project.endpoints.map((endpoint, index) => {
             const githubUrl = getGithubUrlForEndpoint(endpoint.type)
+            // Find matching service history
+            const serviceId = `${project.id}-${endpoint.type}`
+            const serviceHistory = servicesHistory.find(s => s.serviceId === serviceId)
+
             return (
-              <div
-                key={index}
-                onClick={() => {
-                  if (githubUrl) {
-                    window.open(githubUrl, '_blank', 'noopener,noreferrer')
-                  }
-                }}
-                className="flex items-start justify-between p-3 rounded-md bg-muted/50 border transition-colors hover:bg-muted/40 hover:border-primary/50 cursor-pointer"
-              >
-              <div className="flex items-start gap-2 flex-1 min-w-0">
-                <span className="mt-0.5">{getStatusEmoji(endpoint.status)}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <P className="text-sm font-medium">{endpoint.label}</P>
-                    {endpoint.platform && getPlatformBadge(endpoint.platform)}
-                    {/* Show endpoints count for APIs */}
-                    {endpoint.metadata?.endpointsCount && (
-                      <Badge variant="outline" className="text-xs bg-muted/50">
-                        {endpoint.metadata.endpointsCount} routes
-                      </Badge>
-                    )}
+              <div key={index} className="space-y-2">
+                <div
+                  onClick={() => {
+                    if (githubUrl) {
+                      window.open(githubUrl, '_blank', 'noopener,noreferrer')
+                    }
+                  }}
+                  className="flex items-start justify-between p-3 rounded-md bg-muted/50 border transition-colors hover:bg-muted/40 hover:border-primary/50 cursor-pointer"
+                >
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <span className="mt-0.5">{getStatusEmoji(endpoint.status)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <P className="text-sm font-medium">{endpoint.label}</P>
+                        {endpoint.platform && getPlatformBadge(endpoint.platform)}
+                        {/* Show endpoints count for APIs */}
+                        {endpoint.metadata?.endpointsCount && (
+                          <Badge variant="outline" className="text-xs bg-muted/50">
+                            {endpoint.metadata.endpointsCount} routes
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* URLs */}
+                      <div className="flex flex-col gap-1 mt-2">
+                        {/* Main URL */}
+                        <a
+                          href={endpoint.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
+                          title={endpoint.url}
+                        >
+                          <Icon name="lucide:ExternalLink" className="w-3 h-3 flex-shrink-0" />
+                          {endpoint.url}
+                        </a>
+
+                        {/* Swagger Docs URL for APIs */}
+                        {endpoint.metadata?.swaggerUrl && (
+                          <a
+                            href={endpoint.metadata.swaggerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
+                            title={endpoint.metadata.swaggerUrl}
+                          >
+                            📖 {endpoint.metadata.swaggerUrl}
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
-
-                  {/* URLs */}
-                  <div className="flex flex-col gap-1 mt-2">
-                    {/* Main URL */}
-                    <a
-                      href={endpoint.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
-                      title={endpoint.url}
-                    >
-                      <Icon name="lucide:ExternalLink" className="w-3 h-3 flex-shrink-0" />
-                      {endpoint.url}
-                    </a>
-
-                    {/* Swagger Docs URL for APIs */}
-                    {endpoint.metadata?.swaggerUrl && (
-                      <a
-                        href={endpoint.metadata.swaggerUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
-                        title={endpoint.metadata.swaggerUrl}
+                  <div className="text-right ml-2 flex-shrink-0">
+                    <P className="text-sm font-medium">
+                      {endpoint.responseTime ? `${endpoint.responseTime}ms` : 'N/A'}
+                    </P>
+                    {endpoint.error && (
+                      <P
+                        className="text-xs text-destructive mt-1 max-w-[120px] truncate"
+                        title={endpoint.error}
                       >
-                        📖 {endpoint.metadata.swaggerUrl}
-                      </a>
+                        {endpoint.error}
+                      </P>
                     )}
                   </div>
                 </div>
-              </div>
-              <div className="text-right ml-2 flex-shrink-0">
-                <P className="text-sm font-medium">
-                  {endpoint.responseTime ? `${endpoint.responseTime}ms` : 'N/A'}
-                </P>
-                {endpoint.error && (
-                  <P
-                    className="text-xs text-destructive mt-1 max-w-[120px] truncate"
-                    title={endpoint.error}
-                  >
-                    {endpoint.error}
-                  </P>
+
+                {/* Uptime Graph for this endpoint */}
+                {!isLoadingHistory && serviceHistory && (
+                  <UptimeGraph
+                    data={serviceHistory.history}
+                    uptimePercentage={serviceHistory.uptimePercentage}
+                    height={30}
+                    showPercentage={false}
+                    showTitle={false}
+                  />
                 )}
               </div>
-            </div>
             )
           })}
-
-          {/* Uptime Graphs */}
-          <div className="pt-2 border-t border-border mt-auto space-y-3">
-            {isLoadingHistory ? (
-              <P className="text-xs text-muted-foreground text-center py-4">Loading history...</P>
-            ) : servicesHistory.length > 0 ? (
-              servicesHistory.map(service => {
-                // Determine title based on serviceId (e.g., "ezauth-api" → "API", "ezauth-web" → "Web")
-                const title = service.serviceId.includes('-api')
-                  ? 'API'
-                  : service.serviceId.includes('-web')
-                    ? 'Web'
-                    : service.serviceId
-
-                return (
-                  <UptimeGraph
-                    key={service.serviceId}
-                    data={service.history}
-                    title={title}
-                    uptimePercentage={service.uptimePercentage}
-                    height={60}
-                    showPercentage
-                    showTitle
-                  />
-                )
-              })
-            ) : (
-              <div className="text-center py-4">
-                <P className="text-xs text-muted-foreground">No history data available</P>
-                <P className="text-xs text-muted-foreground mt-1">
-                  Health checks will appear here after monitoring starts
-                </P>
-              </div>
-            )}
-
-            {/* Overall Summary */}
-            <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
-              <P className="text-muted-foreground">Overall Status</P>
-              <P className="font-medium">
-                {project.healthyCount}/{project.totalCount} healthy
-              </P>
-            </div>
-          </div>
         </Div>
       </CardContent>
     </Card>

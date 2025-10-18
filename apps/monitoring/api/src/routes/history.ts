@@ -1,7 +1,9 @@
 import { Router } from '@ezstart/express-core'
 import { HealthCheck } from '../models/HealthCheck.js'
+import { getMockServiceHistory } from '../utils/mockHistory.js'
 
 const historyRouter = Router()
+const isDev = process.env.NODE_ENV !== 'production'
 
 /**
  * GET /api/history/:serviceId
@@ -14,6 +16,16 @@ historyRouter.get('/:serviceId', async (req, res) => {
   try {
     const { serviceId } = req.params
     const hours = Math.min(Number(req.query.hours) || 24, 168) // Max 7 days
+
+    // In dev: use mock data, in prod: use real MongoDB data
+    if (isDev) {
+      const mockData = getMockServiceHistory(serviceId, hours)
+      return res.json({
+        serviceId,
+        hours,
+        ...mockData,
+      })
+    }
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
 
@@ -74,6 +86,16 @@ historyRouter.get('/project/:projectId', async (req, res) => {
 
     // Map project to service IDs
     const serviceIds = [`${projectId}-api`, `${projectId}-web`]
+
+    // In dev: use mock data, in prod: use real MongoDB data
+    if (isDev) {
+      const mockServices = serviceIds.map(serviceId => getMockServiceHistory(serviceId, hours))
+      return res.json({
+        projectId,
+        hours,
+        services: mockServices,
+      })
+    }
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
 

@@ -1,7 +1,6 @@
 'use client'
 
-import React from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { cn } from '../lib/utils'
 
 export interface UptimeDataPoint {
@@ -66,21 +65,49 @@ export function UptimeGraph({
   showPercentage = true,
   showTitle = true,
 }: UptimeGraphProps) {
-  // Transform data for Recharts
-  const chartData = data.map((point, index) => ({
-    index,
-    value: point.status === 'healthy' ? 1 : 0,
-    status: point.status,
-    responseTime: point.responseTime,
-    timestamp: point.timestamp,
-  }))
+  // Aggregate data into groups for better readability
+  // Group by 6 checks (30 minutes) to get ~48 bars for 24h instead of 288
+  const aggregateData = (rawData: UptimeDataPoint[], groupSize: number = 6) => {
+    const aggregated: Array<{
+      index: number
+      value: number
+      status: 'healthy' | 'unhealthy'
+      responseTime: number | null
+      timestamp: Date
+      healthyCount: number
+      totalCount: number
+    }> = []
+
+    for (let i = 0; i < rawData.length; i += groupSize) {
+      const group = rawData.slice(i, i + groupSize)
+      const healthyCount = group.filter(p => p.status === 'healthy').length
+      const totalCount = group.length
+      const avgResponseTime =
+        group
+          .filter(p => p.responseTime !== null)
+          .reduce((sum, p) => sum + (p.responseTime || 0), 0) / healthyCount || null
+
+      aggregated.push({
+        index: i / groupSize,
+        value: 1, // Always 1 for uniform bar height
+        status: healthyCount === totalCount ? 'healthy' : 'unhealthy', // Red if ANY failure
+        responseTime: avgResponseTime,
+        timestamp: group[0]?.timestamp || new Date(), // Use first timestamp of group
+        healthyCount,
+        totalCount,
+      })
+    }
+
+    return aggregated
+  }
+
+  // Transform data for Recharts (aggregate to ~48 bars)
+  const chartData = aggregateData(data, 6)
 
   // Calculate uptime if not provided
   const calculatedUptime =
     uptimePercentage ??
-    (data.length > 0
-      ? (data.filter(d => d.status === 'healthy').length / data.length) * 100
-      : 0)
+    (data.length > 0 ? (data.filter(d => d.status === 'healthy').length / data.length) * 100 : 0)
 
   // Determine color based on uptime percentage
   const getUptimeColor = (uptime: number) => {
@@ -110,13 +137,18 @@ export function UptimeGraph({
       day: 'numeric',
     })
 
+    const uptimeInGroup = ((data.healthyCount / data.totalCount) * 100).toFixed(0)
+
     return (
       <div className="rounded-lg border bg-card p-2 shadow-md">
         <p className="text-xs font-medium text-foreground">
-          {data.status === 'healthy' ? '✅ Healthy' : '❌ Unhealthy'}
+          {data.status === 'healthy' ? '✅ Healthy' : '❌ Issues'}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {data.healthyCount}/{data.totalCount} checks ({uptimeInGroup}%)
         </p>
         {data.responseTime && (
-          <p className="text-xs text-muted-foreground">{data.responseTime}ms</p>
+          <p className="text-xs text-muted-foreground">~{Math.round(data.responseTime)}ms avg</p>
         )}
         <p className="text-xs text-muted-foreground">
           {dateStr} {timeStr}
@@ -129,9 +161,7 @@ export function UptimeGraph({
     <div className={cn('space-y-2', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        {showTitle && title && (
-          <h4 className="text-sm font-medium text-foreground">{title}</h4>
-        )}
+        {showTitle && title && <h4 className="text-sm font-medium text-foreground">{title}</h4>}
         {showPercentage && (
           <div
             className={cn(
@@ -148,15 +178,20 @@ export function UptimeGraph({
       {/* Chart */}
       {data.length > 0 ? (
         <ResponsiveContainer width="100%" height={height}>
-          <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            barCategoryGap={2}
+            barGap={1}
+          >
             <XAxis dataKey="index" hide />
-            <YAxis hide domain={[0, 1]} />
+            <YAxis hide domain={[0, 2]} />
             <Tooltip content={<CustomTooltip />} cursor={false} />
-            <Bar dataKey="value" radius={[2, 2, 0, 0]}>
+            <Bar dataKey="value" radius={[3, 3, 3, 3]} maxBarSize={6}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.status === 'healthy' ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'}
+                  fill={entry.status === 'healthy' ? '#22c55e' : '#ef4444'}
                 />
               ))}
             </Bar>
