@@ -49,12 +49,10 @@ export const MobileNavMenu = forwardRef<HTMLDivElement, MobileNavMenuProps>(
                   {/* Menu label - clickable to toggle */}
                   <button
                     onClick={() => toggleMenu(index)}
-                    className="w-full flex items-center justify-between px-2 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-2 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      {item.icon && <Icon name={item.icon} className="h-4 w-4" />}
-                      <span>{item.menuLabel}</span>
-                    </div>
+                    {item.icon && <Icon name={item.icon} className="h-4 w-4" />}
+                    <span>{item.menuLabel}</span>
                     <Icon
                       name="lucide:ChevronDown"
                       className={cn('h-4 w-4 transition-transform', isMenuOpen && 'rotate-180')}
