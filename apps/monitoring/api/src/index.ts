@@ -1,6 +1,7 @@
 import { createApp, startServer, connectToMongo, getApiPort } from '@ezstart/express-core'
 import { getAllWebUrls } from '@ezstart/config'
 import { routes, registries } from './routes/index.js'
+import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
 
 const PORT = getApiPort('monitoring')
 
@@ -18,12 +19,16 @@ const corsOrigins = [
 ]
 const app = createApp({ corsOrigins })
 
+// Initialize health check scheduler
+const healthCheckScheduler = new HealthCheckScheduler()
+
 // Health check endpoint
 app.get('/api/health', (_, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'monitoring-api',
     timestamp: new Date().toISOString(),
+    scheduler: healthCheckScheduler.getStatus(),
   })
 })
 
@@ -41,7 +46,24 @@ connectToMongo('ezstart-monitoring')
       port: PORT,
     })
   })
+  .then(() => {
+    // Start background health check scheduler
+    healthCheckScheduler.start()
+  })
   .catch(err => {
     console.error('❌ Failed to start Monitoring API', err)
     process.exit(1)
   })
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('⏰ [Scheduler] SIGTERM received, stopping scheduler...')
+  healthCheckScheduler.stop()
+  process.exit(0)
+})
+
+process.on('SIGINT', () => {
+  console.log('⏰ [Scheduler] SIGINT received, stopping scheduler...')
+  healthCheckScheduler.stop()
+  process.exit(0)
+})
