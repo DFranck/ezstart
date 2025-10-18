@@ -129,11 +129,12 @@ export function ClientLayout({
   const mobileNavItems = navLinks || bottomNavigation
 
   // Close burger menu on click outside (tablet only)
-  useClickOutside(burgerMenuRef, () => {
-    if (isTablet && isBurgerOpen) {
-      setIsBurgerOpen(false)
-    }
-  })
+  // Note: Disabled because burger toggle handles open/close itself
+  // useClickOutside(burgerMenuRef, () => {
+  //   if (isTablet && isBurgerOpen) {
+  //     setIsBurgerOpen(false)
+  //   }
+  // })
 
   // Close burger menu when switching from tablet to desktop
   useEffect(() => {
