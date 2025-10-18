@@ -106,22 +106,27 @@ export function ClientLayout({
   const scrollY = useOnScroll()
   const isTop = scrollY === 0
   const [isBurgerOpen, setIsBurgerOpen] = useState(false)
+  const [openMenus, setOpenMenus] = useState<Set<number>>(new Set())
   const burgerMenuRef = useRef<HTMLDivElement>(null)
 
   const LinkTag = LinkComponent as any
 
-  // Flatten navLinks for mobile/tablet (no nested menus)
-  const flattenedNavLinks =
-    navLinks?.flatMap(link => {
-      if (isNavigationMenu(link)) {
-        return link.menu
+  const toggleMenu = (index: number) => {
+    setOpenMenus(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) {
+        next.delete(index)
+      } else {
+        next.add(index)
       }
-      return [link]
-    }) || []
+      return next
+    })
+  }
 
+  // Keep navLinks with menus for mobile/tablet (now supports nested menus)
   // Use smart navLinks if provided, otherwise legacy props
-  const navigationItems = navLinks ? flattenedNavLinks : burgerNavigation || bottomNavigation
-  const mobileNavItems = navLinks ? flattenedNavLinks : bottomNavigation
+  const navigationItems = navLinks || burgerNavigation || bottomNavigation
+  const mobileNavItems = navLinks || bottomNavigation
 
   // Close burger menu on click outside (tablet only)
   useClickOutside(burgerMenuRef, () => {
@@ -214,21 +219,75 @@ export function ClientLayout({
             isBurgerOpen ? 'max-h-[400px] py-4 bg-background border-b-2' : 'max-h-0'
           )}
         >
-          <nav className="flex flex-col gap-2 px-6 w-full">
-            {navigationItems.map(item => (
-              <Button
-                key={item.href}
-                asChild
-                variant="ghost"
-                className="justify-start"
-                onClick={() => setIsBurgerOpen(false)}
-              >
-                <LinkTag href={item.href}>
-                  {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" />}
-                  {item.label}
-                </LinkTag>
-              </Button>
-            ))}
+          <nav className="flex flex-col gap-2 px-6 w-full items-center">
+            {navigationItems.map((item, index) => {
+              // Handle menu items (with submenus - collapsible)
+              if (isNavigationMenu(item)) {
+                const isMenuOpen = openMenus.has(index)
+                return (
+                  <div key={index} className="w-full max-w-sm">
+                    {/* Menu label - clickable to toggle */}
+                    <button
+                      onClick={() => toggleMenu(index)}
+                      className="w-full flex items-center justify-between px-2 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        {item.icon && <Icon name={item.icon} className="w-4 h-4" />}
+                        <span>{item.menuLabel}</span>
+                      </div>
+                      <Icon
+                        name="lucide:ChevronDown"
+                        className={cn(
+                          'w-4 h-4 transition-transform',
+                          isMenuOpen && 'rotate-180'
+                        )}
+                      />
+                    </button>
+
+                    {/* Submenu items - collapsible */}
+                    <div
+                      className={cn(
+                        'overflow-hidden transition-all duration-300 ease-in-out',
+                        isMenuOpen ? 'max-h-96 mt-1' : 'max-h-0'
+                      )}
+                    >
+                      <div className="space-y-1 pl-2">
+                        {item.menu.map(subItem => (
+                          <Button
+                            key={subItem.href}
+                            asChild
+                            variant="ghost"
+                            className="w-full justify-center text-sm"
+                            onClick={() => setIsBurgerOpen(false)}
+                          >
+                            <LinkTag href={subItem.href}>
+                              {subItem.icon && <Icon name={subItem.icon} className="w-4 h-4 mr-2" />}
+                              {subItem.label}
+                            </LinkTag>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+              // Handle regular links
+              return (
+                <Button
+                  key={item.href}
+                  asChild
+                  variant="ghost"
+                  className="w-full max-w-sm justify-center"
+                  onClick={() => setIsBurgerOpen(false)}
+                >
+                  <LinkTag href={item.href}>
+                    {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" />}
+                    {item.label}
+                  </LinkTag>
+                </Button>
+              )
+            })}
           </nav>
         </div>
       )}

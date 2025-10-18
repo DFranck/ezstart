@@ -3,6 +3,7 @@
 import { getApiUrl } from '@ezstart/config'
 import {
   Button,
+  Div,
   H1,
   Icon,
   P,
@@ -143,10 +144,13 @@ export default function MonitoringDashboard() {
 
   // Auto-refresh every 5 minutes (synced with health check interval)
   useEffect(() => {
-    const interval = setInterval(() => {
-      console.log('[Monitoring] Auto-refreshing data (5min interval)...')
-      fetchData(false)
-    }, 5 * 60 * 1000) // 5 minutes
+    const interval = setInterval(
+      () => {
+        console.log('[Monitoring] Auto-refreshing data (5min interval)...')
+        fetchData(false)
+      },
+      5 * 60 * 1000
+    ) // 5 minutes
 
     return () => clearInterval(interval)
   }, [])
@@ -212,36 +216,32 @@ export default function MonitoringDashboard() {
     <>
       <Section size="full">
         {/* Header */}
-        <div className="space-y-2 mb-8">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <H1>System Monitoring Dashboard</H1>
-              <P className="text-muted-foreground">
-                Real-time monitoring of all projects across the @ezstart monorepo
+        <Div layout={'center'}>
+          <H1>System Monitoring Dashboard</H1>
+          <P className="text-muted-foreground">
+            Real-time monitoring of all projects across the @ezstart monorepo
+          </P>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={triggerHealthChecks}
+              disabled={isRefreshing}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Icon
+                name="lucide:RefreshCw"
+                className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+              />
+              {isRefreshing ? 'Checking...' : 'Refresh Now'}
+            </Button>
+            {lastRefresh && (
+              <P className="text-xs text-muted-foreground">
+                Last refresh: {lastRefresh.toLocaleTimeString()}
               </P>
-            </div>
-            <div className="flex items-center gap-3">
-              {lastRefresh && (
-                <P className="text-xs text-muted-foreground">
-                  Last refresh: {lastRefresh.toLocaleTimeString()}
-                </P>
-              )}
-              <Button
-                onClick={triggerHealthChecks}
-                disabled={isRefreshing}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <Icon
-                  name="lucide:RefreshCw"
-                  className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                />
-                {isRefreshing ? 'Checking...' : 'Refresh Now'}
-              </Button>
-            </div>
+            )}
           </div>
-        </div>
+        </Div>
         {/* Overall Health Score */}
         <HealthScore score={score} status={status} />
 
@@ -250,7 +250,7 @@ export default function MonitoringDashboard() {
       </Section>
 
       {/* Tabs for different monitoring sections */}
-      <Tabs defaultValue="projects" className="w-full max-w-7xl">
+      <Tabs defaultValue="projects" className="w-full max-w-7xl px-2">
         <TabsList className="grid w-full max-w-lg grid-cols-2">
           <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
           <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
@@ -259,7 +259,10 @@ export default function MonitoringDashboard() {
         <TabsContent value="projects" className="space-y-4 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((project: any) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={`${project.id}-${lastRefresh?.getTime() || 'initial'}`}
+                project={project}
+              />
             ))}
           </div>
 

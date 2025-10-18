@@ -6,7 +6,7 @@ import { cn } from '../../lib'
 import { useEffect, useRef, useState } from 'react'
 import { MobileNavMenu } from './mobile-nav-menu'
 import type { KnownIconName } from '../icon/src/types'
-import { NavigationItem } from './types'
+import { NavigationItem, NavigationLink } from './types'
 
 export interface BottomNavItem {
   href: string
@@ -17,8 +17,8 @@ export interface BottomNavItem {
 interface MobileNavbarProps {
   // Bottom nav items (optional - if empty, shows logo + burger)
   navigationItems?: BottomNavItem[]
-  // Header navigation for burger menu
-  headerNavigation?: NavigationItem[]
+  // Header navigation for burger menu (supports NavigationLink with menus)
+  headerNavigation?: NavigationLink[]
   currentPath?: string
   LinkComponent?: React.ComponentType<any> | string
   className?: string
