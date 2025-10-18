@@ -212,7 +212,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/tower-defense',
     webPlatform: 'vercel',
-    apiPlatform: 'railway',
+    apiPlatform: 'render',
   },
 
   'asc-tcd': {
@@ -221,7 +221,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     emoji: '🛡️',
     logo: 'https://www.asc-tcd.com/images/logo.png',
     githubPath: 'apps/asc-tcd',
-    webPlatform: 'custom',
+    webPlatform: 'vercel',
   },
 
   'green-pulse': {
@@ -229,8 +229,8 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     description: 'AI-powered sustainability and carbon tracking',
     emoji: '🌱',
     githubPath: 'apps/green-pulse',
-    webPlatform: 'custom',
-    apiPlatform: 'railway',
+    webPlatform: 'vercel',
+    apiPlatform: 'render',
   },
 
   monitoring: {
@@ -239,7 +239,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     emoji: '📊',
     githubPath: 'apps/monitoring',
     webPlatform: 'vercel',
-    apiPlatform: 'railway',
+    apiPlatform: 'render',
   },
 }
 

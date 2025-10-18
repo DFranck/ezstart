@@ -13,7 +13,6 @@ import {
   P,
   UptimeGraph,
 } from '@ezstart/ui/components'
-import { getApiUrl } from '@ezstart/config'
 import { useEffect, useState } from 'react'
 
 interface ProjectCardProps {
@@ -38,7 +37,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
     async function fetchHistory() {
       try {
         setIsLoadingHistory(true)
-        const MONITORING_API_URL = getApiUrl('monitoring')
+        const MONITORING_API_URL =
+          process.env.NODE_ENV === 'development'
+            ? 'http://localhost:5080'
+            : 'https://ezstart-17v5.onrender.com'
 
         const res = await fetch(`${MONITORING_API_URL}/api/history/project/${project.id}?hours=24`)
         if (!res.ok) throw new Error('Failed to fetch history')

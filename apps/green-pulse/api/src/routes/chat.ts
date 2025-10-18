@@ -4,6 +4,7 @@ import {
   Router
 } from '@ezstart/express-core'
 import { chatWithExtraction, extractEsgPayload, validateEsgData } from '../services/gemini.service.js'
+import { Conversation } from '../models/Conversation.js'
 import {
   ChatRequestSchema,
   ChatResponseSchema,
@@ -31,7 +32,7 @@ docRouter.post('/', async (req, res) => {
       })
     }
 
-    const { message, extract_esg, session_id } = validation.data
+    const { message, extract_esg, session_id, conversation_id } = validation.data
 
     // Chat with optional ESG extraction
     const result = await chatWithExtraction(message, extract_esg)
@@ -47,6 +48,32 @@ docRouter.post('/', async (req, res) => {
       }
     }
 
+    // Save messages to conversation if conversation_id provided
+    if (conversation_id) {
+      try {
+        await Conversation.findByIdAndUpdate(conversation_id, {
+          $push: {
+            messages: [
+              {
+                role: 'user',
+                content: message,
+                timestamp: new Date(),
+              },
+              {
+                role: 'assistant',
+                content: result.response,
+                timestamp: new Date(),
+                metadata: result.extractedData ? { extractedData: result.extractedData } : undefined,
+              },
+            ],
+          },
+        })
+      } catch (saveError) {
+        console.error('Failed to save messages to conversation:', saveError)
+        // Don't fail the request, just log the error
+      }
+    }
+
     res.json({
       success: true,
       data: {
@@ -54,6 +81,7 @@ docRouter.post('/', async (req, res) => {
         extracted_data: result.extractedData,
         validation: validationResult,
         session_id: session_id || `session_${Date.now()}`,
+        conversation_id,
         suggestions: result.extractedData
           ? ['Review extracted data', 'Submit to ESG system', 'Add more details']
           : ['Tell me about your energy usage', 'Upload a utility bill', 'Take a photo of your meter']

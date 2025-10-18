@@ -9,42 +9,93 @@ import {
   ThreadSidebar,
   ThreadWelcome,
 } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useCallback } from 'react'
 import { useThreadContext } from './ThreadProvider'
+import { useConversations } from '@/hooks/useConversations'
 
-export function LiaThread() {
-  const { messages, loading, streamingText, sendMessage, resendLastMessage, isNewThread } =
+type LiaThreadProps = {
+  activeConversationId: string | null
+  setActiveConversationId: (id: string | null) => void
+}
+
+export function LiaThread({ activeConversationId, setActiveConversationId }: LiaThreadProps) {
+  const { messages, loading, streamingText, sendMessage, resendLastMessage, isNewThread, clearMessages } =
     useThreadContext()
 
-  // Mock conversations - À remplacer par vraies données
-  const [conversations] = useState<Conversation[]>([
-    {
-      id: '1',
-      title: 'ESG Report Analysis',
-      preview: 'Can you help me analyze our ESG data...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-      unread: false,
-    },
-    {
-      id: '2',
-      title: 'Carbon Footprint',
-      preview: 'What are best practices for reducing...',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-      unread: true,
-    },
-  ])
+  const {
+    conversations: apiConversations,
+    loading: conversationsLoading,
+    createConversation,
+    renameConversation,
+    softDeleteConversation,
+  } = useConversations()
 
-  const [activeConversationId, setActiveConversationId] = useState('1')
+  // Convert to ThreadSidebar format
+  const conversations: Conversation[] = apiConversations.map(conv => ({
+    id: conv.id,
+    title: conv.title,
+    preview: conv.preview,
+    timestamp: conv.updatedAt,
+    unread: conv.unread || false,
+  }))
+
+  // Handle new conversation
+  const handleNewConversation = useCallback(async () => {
+    try {
+      const newConv = await createConversation('New Chat')
+      if (newConv) {
+        setActiveConversationId(newConv.id)
+        clearMessages()
+      }
+    } catch (error) {
+      console.error('Failed to create new conversation:', error)
+    }
+  }, [createConversation, clearMessages])
+
+  // Handle conversation select
+  const handleConversationSelect = useCallback((id: string) => {
+    setActiveConversationId(id)
+    // TODO: Load messages from selected conversation
+  }, [])
+
+  // Handle rename
+  const handleRename = useCallback(
+    async (id: string, newTitle: string) => {
+      try {
+        await renameConversation(id, newTitle)
+      } catch (error) {
+        console.error('Failed to rename conversation:', error)
+      }
+    },
+    [renameConversation]
+  )
+
+  // Handle delete
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await softDeleteConversation(id)
+        // If deleted conversation was active, clear it
+        if (id === activeConversationId) {
+          setActiveConversationId(null)
+          clearMessages()
+        }
+      } catch (error) {
+        console.error('Failed to delete conversation:', error)
+      }
+    },
+    [softDeleteConversation, activeConversationId, clearMessages]
+  )
 
   return (
     <ThreadLayout
-      headerOffset="top-16" // Adjust based on your header height
+      headerOffset="top-16"
       sidebar={
         <ThreadSidebar
           conversations={conversations}
-          activeConversationId={activeConversationId}
-          onConversationSelect={setActiveConversationId}
-          onNewConversation={() => console.log('New conversation')}
+          activeConversationId={activeConversationId || undefined}
+          onConversationSelect={handleConversationSelect}
+          onNewConversation={handleNewConversation}
           newConversationLabel="New Chat"
           emptyState="Start a new conversation to get insights from LIA"
         />

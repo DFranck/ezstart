@@ -15,7 +15,7 @@ export const auditRoutes = router as ReturnType<typeof Router>
 router.get('/', (_, res) => {
   try {
     const audits = Object.entries(AUDIT_METADATA).map(([auditType, metadata]) => {
-      const filePath = join(process.cwd(), '../../', metadata.filePath)
+      const filePath = join(process.cwd(), '../../../', metadata.filePath)
       const exists = existsSync(filePath)
 
       let score: number | null = null
@@ -87,7 +87,7 @@ router.get('/:type', (req, res) => {
       return res.status(404).json({ error: 'Audit type not found' })
     }
 
-    const filePath = join(process.cwd(), '../../', metadata.filePath)
+    const filePath = join(process.cwd(), '../../../', metadata.filePath)
     const exists = existsSync(filePath)
 
     if (!exists) {

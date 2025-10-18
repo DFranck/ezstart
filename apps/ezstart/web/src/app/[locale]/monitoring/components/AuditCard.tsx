@@ -1,7 +1,8 @@
 'use client'
 
-import { Card, CardHeader, CardContent, Badge, H3, P } from '@ezstart/ui/components'
+import { Card, CardHeader, CardContent, Badge, H3, P, Icon, Button } from '@ezstart/ui/components'
 import type { AuditType } from '@ezstart/monitoring'
+import Link from 'next/link'
 
 interface AuditCardProps {
   audit: {
@@ -33,6 +34,9 @@ export function AuditCard({ audit }: AuditCardProps) {
     if (score >= 70) return 'text-status-degraded'
     return 'text-status-unhealthy'
   }
+
+  // Generate GitHub URL for audit file
+  const githubUrl = `https://github.com/polyglot-support/MonopolyAccess/blob/master/docs/audits/${audit.auditType.toUpperCase()}-AUDIT.md`
 
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
@@ -75,10 +79,19 @@ export function AuditCard({ audit }: AuditCardProps) {
 
           {!audit.exists && (
             <div className="mt-3 p-2 bg-status-degraded/10 rounded-md">
-              <P className="text-xs text-status-degraded">
-                Audit file not found
-              </P>
+              <P className="text-xs text-status-degraded">Audit file not found</P>
             </div>
+          )}
+
+          {/* GitHub link */}
+          {audit.exists && (
+            <Link href={githubUrl} target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <Icon name="lucide:FileText" className="w-4 h-4" />
+                View Full Audit
+                <Icon name="lucide:ExternalLink" className="w-3 h-3" />
+              </Button>
+            </Link>
           )}
         </div>
       </CardContent>

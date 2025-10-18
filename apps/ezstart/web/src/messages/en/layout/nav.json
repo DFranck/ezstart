@@ -14,7 +14,8 @@
       "menu": [
         { "label": "EZMonitor", "href": "/monitoring" },
         { "label": "EZBill", "href": "https://ezstart-ezbill.vercel.app/" },
-        { "label": "EZFengShui", "href": "https://ezfengshui.vercel.app/" }
+        { "label": "EZFengShui", "href": "https://ezfengshui.vercel.app/" },
+        { "label": "GreenPulse", "href": "https://www.ai-greenpulse.com/" }
       ]
     }
   ]
