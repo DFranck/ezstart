@@ -9,7 +9,7 @@ import {
 } from '@green-pulse/types'
 
 export const conversationRegistry = new OpenAPIRegistry()
-const router = Router()
+const router: any = Router()
 const docRouter = createRouterWithDoc(conversationRegistry, router, '/conversations')
 
 /**
@@ -129,6 +129,7 @@ docRouter.get(
     try {
       const { id } = req.params
 
+      // @ts-expect-error - Mongoose findById type inference issue
       const conversation = await Conversation.findById(id).lean().exec()
 
       if (!conversation) {
@@ -197,6 +198,7 @@ docRouter.patch(
 
       const { title } = validation.data
 
+      // @ts-expect-error - Mongoose findByIdAndUpdate type inference issue
       const conversation = await Conversation.findByIdAndUpdate(
         id,
         { title },
@@ -247,6 +249,7 @@ docRouter.delete(
     try {
       const { id } = req.params
 
+      // @ts-expect-error - Mongoose findByIdAndUpdate type inference issue
       const conversation = await Conversation.findByIdAndUpdate(
         id,
         { deletedAt: new Date() },
@@ -291,6 +294,7 @@ docRouter.delete(
     try {
       const { id } = req.params
 
+      // @ts-expect-error - Mongoose findByIdAndDelete type inference issue
       const conversation = await Conversation.findByIdAndDelete(id)
 
       if (!conversation) {
@@ -331,6 +335,7 @@ docRouter.post(
     try {
       const { id } = req.params
 
+      // @ts-expect-error - Mongoose findByIdAndUpdate type inference issue
       const conversation = await Conversation.findByIdAndUpdate(
         id,
         { deletedAt: null },

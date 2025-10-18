@@ -51,6 +51,7 @@ docRouter.post('/', async (req, res) => {
     // Save messages to conversation if conversation_id provided
     if (conversation_id) {
       try {
+        // @ts-expect-error - Mongoose findByIdAndUpdate type inference issue
         await Conversation.findByIdAndUpdate(conversation_id, {
           $push: {
             messages: [

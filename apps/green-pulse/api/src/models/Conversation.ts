@@ -79,7 +79,9 @@ conversationSchema.index({ userId: 1, deletedAt: 1, updatedAt: -1 })
 conversationSchema.pre('save', function (next) {
   if (this.messages && this.messages.length > 0) {
     const lastMessage = this.messages[this.messages.length - 1]
-    this.preview = lastMessage.content.substring(0, 100)
+    if (lastMessage) {
+      this.preview = lastMessage.content.substring(0, 100)
+    }
   }
   next()
 })
