@@ -321,6 +321,71 @@ className = 'bg-primary text-primary-foreground'
 <Icon className="w-4 h-4" />   // Tailles cohérentes
 ```
 
+#### Theme Management (CRITIQUE) ⭐ NOUVEAU (18/10/2025)
+
+**Toutes les apps utilisent `@ezstart/next-theme` pour gérer dark/light mode.**
+
+**Configuration correcte (éviter le flash de thème) :**
+
+```tsx
+// app/layout.tsx
+import { ThemeProvider } from '@ezstart/next-theme'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning> {/* ⚠️ NO className on html tag! */}
+      <body>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+**❌ ERREURS COURANTES :**
+
+```tsx
+// ❌ MAUVAIS : className="" override le script bloquant
+<html lang="en" suppressHydrationWarning className="">
+
+// ❌ MAUVAIS : Mounted guard casse le script bloquant
+if (!mounted) return <div suppressHydrationWarning>{children}</div>
+
+// ✅ BON : Laisser next-themes gérer tout seul
+<html lang="en" suppressHydrationWarning>
+```
+
+**Règles critiques :**
+
+- ✅ **defaultTheme: 'system'** - Respecte le thème OS par défaut
+- ✅ **enableSystem: true** - Permet la détection du système
+- ✅ **disableTransitionOnChange: true** - Évite l'animation flash
+- ✅ **suppressHydrationWarning** sur `<html>` - Évite les warnings React
+- ❌ **JAMAIS** de `className` sur `<html>` - Casse le script bloquant
+- ❌ **JAMAIS** de mounted guard - next-themes a déjà un script bloquant
+
+**Pourquoi ça fonctionne :**
+
+`next-themes` injecte un **script bloquant** qui s'exécute AVANT l'hydration React pour :
+1. Lire `localStorage` ou détecter le thème système
+2. Ajouter la classe `.dark` sur `<html>` instantanément
+3. Éviter le flash light → dark au chargement
+
+**Utilisation du thème :**
+
+```tsx
+'use client'
+import { useTheme } from '@ezstart/next-theme'
+
+const { theme, setTheme, resolvedTheme } = useTheme()
+// theme: 'light' | 'dark' | 'system'
+// resolvedTheme: 'light' | 'dark' (résolu)
+```
+
+**Documentation :** [packages/next-theme/README.md](./packages/next-theme/README.md)
+
 ### Structure Monorepo
 
 ```

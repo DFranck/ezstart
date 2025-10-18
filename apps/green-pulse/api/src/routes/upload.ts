@@ -2,7 +2,7 @@ import { Router, OpenAPIRegistry } from '@ezstart/express-core'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
-import { transcribeAudio, readImage } from '../services/openai.service.js'
+import { transcribeAudio, readImage } from '../services/gemini.service.js'
 import { UploadTypeSchema } from '@green-pulse/types'
 
 export const uploadRegistry = new OpenAPIRegistry()

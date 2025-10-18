@@ -9,11 +9,11 @@ This package provides a centralized theme management solution for all Next.js ap
 ## Features
 
 - 🌓 **Dark/Light Mode** - Seamless theme switching
-- 🎨 **System Preference Detection** - Auto-detects user's OS theme
-- ⚡ **Hydration Safe** - No flash of unstyled content
+- 🎨 **System Preference Detection** - Auto-detects user's OS theme (default: 'system')
+- ⚡ **Hydration Safe** - No flash of unstyled content (uses blocking script)
 - 🔧 **Theme Toggle Component** - Ready-to-use UI component
 - 🎯 **TypeScript Support** - Full type safety
-- 📦 **Zero Config** - Works out of the box
+- 📦 **Zero Config** - Works out of the box with sane defaults
 
 ## Installation
 
@@ -37,7 +37,7 @@ import { ThemeProvider } from '@ezstart/next-theme'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning> {/* ⚠️ NO className on html tag! */}
       <body>
         <ThemeProvider>
           {children}
@@ -47,6 +47,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   )
 }
 ```
+
+**⚠️ IMPORTANT:**
+- **DO NOT** add `className=""` to the `<html>` tag - this breaks the blocking script!
+- **ALWAYS** add `suppressHydrationWarning` to prevent React warnings
+- The `next-themes` blocking script runs BEFORE hydration to prevent flash
 
 ### 2. Use the theme toggle component
 

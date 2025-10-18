@@ -44,7 +44,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>

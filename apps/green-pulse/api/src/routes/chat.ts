@@ -3,7 +3,7 @@ import {
   OpenAPIRegistry,
   Router
 } from '@ezstart/express-core'
-import { chatWithExtraction, extractEsgPayload, validateEsgData } from '../services/openai.service.js'
+import { chatWithExtraction, extractEsgPayload, validateEsgData } from '../services/gemini.service.js'
 import {
   ChatRequestSchema,
   ChatResponseSchema,

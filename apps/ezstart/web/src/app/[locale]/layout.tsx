@@ -36,7 +36,7 @@ export default async function LocaleLayout(props: {
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning className="">
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="application-name" content="EZStart" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
