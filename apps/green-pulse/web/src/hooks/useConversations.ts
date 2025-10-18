@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { callApi } from '@/utils/api'
 
 export type ConversationListItem = {
   id: string
@@ -22,20 +23,18 @@ export function useConversations() {
     setError(null)
 
     try {
-      const res = await fetch('/api/conversations')
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
+      const response = await callApi<{ conversations: any[] }>('/conversations')
 
-      const data = await res.json()
-      if (data.success && data.data?.conversations) {
+      if (response.ok && response.data?.conversations) {
         setConversations(
-          data.data.conversations.map((conv: any) => ({
+          response.data.conversations.map((conv: any) => ({
             ...conv,
             createdAt: new Date(conv.createdAt),
             updatedAt: new Date(conv.updatedAt),
           }))
         )
+      } else {
+        throw new Error('Failed to load conversations')
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load conversations'
@@ -49,26 +48,21 @@ export function useConversations() {
   // Create new conversation
   const createConversation = useCallback(async (title: string = 'New Chat') => {
     try {
-      const res = await fetch('/api/conversations', {
+      const response = await callApi<any>('/conversations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
+        body: { title },
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success && data.data) {
+      if (response.ok && response.data) {
         const newConv = {
-          ...data.data,
-          createdAt: new Date(data.data.createdAt),
-          updatedAt: new Date(data.data.updatedAt),
+          ...response.data,
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt),
         }
         setConversations(prev => [newConv, ...prev])
         return newConv
       }
+      throw new Error('Failed to create conversation')
     } catch (err) {
       console.error('Create conversation error:', err)
       throw err
@@ -78,23 +72,19 @@ export function useConversations() {
   // Rename conversation
   const renameConversation = useCallback(async (id: string, newTitle: string) => {
     try {
-      const res = await fetch(`/api/conversations/${id}`, {
+      const response = await callApi(`/conversations/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newTitle }),
+        body: { title: newTitle },
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success) {
+      if (response.ok) {
         setConversations(prev =>
           prev.map(conv =>
             conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv
           )
         )
+      } else {
+        throw new Error('Failed to rename conversation')
       }
     } catch (err) {
       console.error('Rename conversation error:', err)
@@ -105,18 +95,14 @@ export function useConversations() {
   // Soft delete conversation
   const softDeleteConversation = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/conversations/${id}`, {
+      const response = await callApi(`/conversations/${id}`, {
         method: 'DELETE',
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success) {
-        // Remove from list (soft delete hides it)
+      if (response.ok) {
         setConversations(prev => prev.filter(conv => conv.id !== id))
+      } else {
+        throw new Error('Failed to delete conversation')
       }
     } catch (err) {
       console.error('Soft delete conversation error:', err)
@@ -127,17 +113,14 @@ export function useConversations() {
   // Hard delete conversation (permanent)
   const hardDeleteConversation = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/conversations/${id}/hard`, {
+      const response = await callApi(`/conversations/${id}/hard`, {
         method: 'DELETE',
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success) {
+      if (response.ok) {
         setConversations(prev => prev.filter(conv => conv.id !== id))
+      } else {
+        throw new Error('Failed to permanently delete conversation')
       }
     } catch (err) {
       console.error('Hard delete conversation error:', err)
@@ -148,18 +131,14 @@ export function useConversations() {
   // Restore soft deleted conversation
   const restoreConversation = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/conversations/${id}/restore`, {
+      const response = await callApi(`/conversations/${id}/restore`, {
         method: 'POST',
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success) {
-        // Reload conversations to show restored one
+      if (response.ok) {
         await loadConversations()
+      } else {
+        throw new Error('Failed to restore conversation')
       }
     } catch (err) {
       console.error('Restore conversation error:', err)
@@ -170,19 +149,14 @@ export function useConversations() {
   // Load specific conversation with messages
   const loadConversation = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/conversations/${id}`)
+      const response = await callApi<any>(`/conversations/${id}`)
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-      }
-
-      const data = await res.json()
-      if (data.success && data.data) {
+      if (response.ok && response.data) {
         return {
-          ...data.data,
-          createdAt: new Date(data.data.createdAt),
-          updatedAt: new Date(data.data.updatedAt),
-          messages: data.data.messages.map((msg: any) => ({
+          ...response.data,
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt),
+          messages: response.data.messages.map((msg: any) => ({
             ...msg,
             timestamp: new Date(msg.timestamp),
           })),
