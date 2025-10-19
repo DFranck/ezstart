@@ -4,6 +4,7 @@ import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../button';
 import { cn } from '../../lib/utils';
+import { useThreadLayout } from './ThreadLayoutContext';
 
 type ThreadComposerProps = {
   onSubmit: (message: string, files?: File[]) => Promise<void> | void;
@@ -34,6 +35,7 @@ export function ThreadComposer({
   removeFileText = 'Remove',
   sendLabel = 'Send message',
 }: ThreadComposerProps) {
+  const layoutContext = useThreadLayout();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [message, setMessage] = useState('');
 
@@ -81,6 +83,7 @@ export function ThreadComposer({
       className={cn(
         'w-full z-10 pb-6',
         'transition-transform duration-300 ease-in-out',
+        layoutContext?.mobileFooterOffset && `md:pb-6 ${layoutContext.mobileFooterOffset}`,
         className
       )}
     >

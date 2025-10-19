@@ -62,12 +62,11 @@ function ThreadLayoutInner({
   }
 
   return (
-    <ThreadLayoutProvider value={{ closeSidebar }}>
+    <ThreadLayoutProvider value={{ closeSidebar, mobileFooterOffset }}>
       <div className={cn(
         'relative flex w-full h-screen',
         theme.background,
         mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
-        mobileFooterOffset && `md:pb-0 ${mobileFooterOffset}`,
         className
       )}>
       {/* Mobile Toggle Button */}

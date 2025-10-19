@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react';
 
 type ThreadLayoutContextValue = {
   closeSidebar: () => void;
+  mobileFooterOffset?: string;
 };
 
 const ThreadLayoutContext = createContext<ThreadLayoutContextValue | undefined>(undefined);
