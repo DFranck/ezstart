@@ -156,12 +156,17 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
       const messageIndex = messages.findIndex((msg) => msg.id === messageId);
       if (messageIndex === -1) return;
 
+      // Get the original message
+      const originalMessage = messages[messageIndex];
+      if (!originalMessage) return; // Safety check
+
       // Remove all messages after the edited message (including its AI response)
       const messagesUpToEdit = messages.slice(0, messageIndex);
 
       // Update the edited message content
       const editedMessage: ThreadMessage = {
-        ...messages[messageIndex],
+        ...originalMessage,
+        role: originalMessage.role, // Explicitly preserve role type
         content: newContent,
       };
 

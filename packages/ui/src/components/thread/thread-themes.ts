@@ -136,9 +136,9 @@ export const threadThemes: Record<string, ThreadTheme> = {
  */
 export function getThreadTheme(colorScheme?: string): ThreadTheme {
   if (!colorScheme || colorScheme === 'custom') {
-    return threadThemes.neutral;
+    return threadThemes.neutral as ThreadTheme;
   }
-  return threadThemes[colorScheme] || threadThemes.neutral;
+  return (threadThemes[colorScheme] as ThreadTheme) || (threadThemes.neutral as ThreadTheme);
 }
 
 /**
