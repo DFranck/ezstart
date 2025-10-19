@@ -1,4 +1,5 @@
-import { Schema, model, Document } from 'mongoose'
+import { connectToMongo } from '@ezstart/express-core'
+import { Schema, Document } from 'mongoose'
 import bcrypt from 'bcryptjs'
 import { AuthUser } from '@ezstart/auth-sdk/server'
 
@@ -61,6 +62,7 @@ const authUserSchema = new Schema<AuthUserDocument>({
 }, {
   timestamps: true,
   collection: 'auth_users', // Separate collection from other apps
+  bufferCommands: false, // Disable buffering for fail-fast
 })
 
 // Hash password before saving
@@ -93,4 +95,18 @@ authUserSchema.methods.toAuthUser = function(): AuthUser {
   }
 }
 
-export const AuthUserModel = model<AuthUserDocument>('AuthUser', authUserSchema)
+// Direct model export (requires mongoose to be initialized first)
+let AuthUserModel: ReturnType<typeof import('mongoose').model<AuthUserDocument>>
+
+/**
+ * Factory function to get AuthUser model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getAuthUserModel() {
+  const mongoose = await connectToMongo('ezauth')
+  AuthUserModel = mongoose.models.AuthUser || mongoose.model<AuthUserDocument>('AuthUser', authUserSchema)
+  return AuthUserModel
+}
+
+// Export model for direct use (will be undefined until getAuthUserModel is called)
+export { AuthUserModel }

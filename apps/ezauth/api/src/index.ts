@@ -1,6 +1,8 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
+import { getAuthUserModel } from './models/auth-user.js'
+import { getAuthCodeModel } from './models/auth-code.js'
 
 const PORT = getApiPort('ezauth')
 
@@ -16,16 +18,21 @@ app.use('/api/auth', authRoutes)
 app.use('/api/waitlist', waitlistRoutes)
 app.get('/api/health', (_: any, res: any) => res.status(200).json({ status: 'ok' }))
 
-// Start server with database connection
+// Connect to MongoDB and start server
 connectToMongo('ezauth')
-  .then(() =>
-    startServer(app, {
+  .then(async () => {
+    // Initialize models
+    await getAuthUserModel()
+    await getAuthCodeModel()
+    console.log('✅ Models initialized (AuthUser, AuthCode)')
+
+    return startServer(app, {
       routes: authRoutes,
       registries: [authRegistry, waitlistRegistry],
       serviceName: 'EZAuth',
       port: Number(PORT),
     })
-  )
+  })
   .catch((err: any) => {
     console.error('❌ Failed to start EZAuth API', err)
     process.exit(1)

@@ -1,12 +1,77 @@
-import { Router } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Payment } from '../models/Payment.js'
 import { createCheckoutSession } from '../services/stripe.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
+import { z } from 'zod'
 
+export const donationsRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(donationsRegistry, router)
 
-// Create donation
-router.post('/donate', async (req: Request, res: Response) => {
+// ========================================
+// Zod Schemas
+// ========================================
+
+const createDonationSchema = z.object({
+  projectId: z.string().describe('Project identifier'),
+  projectName: z.string().optional().describe('Project display name'),
+  amount: z.number().positive().describe('Donation amount in currency units'),
+  currency: z.string().default('USD').describe('Currency code (USD, EUR, etc.)'),
+  message: z.string().optional().describe('Optional message from donor'),
+  isPublic: z.boolean().default(true).describe('Whether donation is shown publicly'),
+  isAnonymous: z.boolean().default(false).describe('Whether donor wants to stay anonymous'),
+  userId: z.string().optional().describe('EZAuth user ID if logged in'),
+  donorName: z.string().optional().describe('Donor name'),
+  donorEmail: z.string().email().optional().describe('Donor email'),
+  returnUrl: z.string().url().optional().describe('Custom return URL after payment'),
+})
+
+const donationsQuerySchema = z.object({
+  projectId: z.string().optional().describe('Filter by project ID'),
+  limit: z.coerce.number().default(10).describe('Number of donations to return'),
+})
+
+const donationStatsQuerySchema = z.object({
+  projectId: z.string().optional().describe('Filter stats by project ID'),
+})
+
+const verifyPaymentParamsSchema = z.object({
+  sessionId: z.string().describe('Stripe checkout session ID'),
+})
+
+const paymentResponseSchema = z.object({
+  success: z.boolean().describe('Whether the operation succeeded'),
+  payment: z.any().optional().describe('Payment object with details'),
+  checkoutUrl: z.string().optional().describe('Stripe checkout URL to redirect user'),
+  error: z.string().optional().describe('Error message if operation failed'),
+})
+
+const donationsListResponseSchema = z.object({
+  success: z.boolean().describe('Whether the operation succeeded'),
+  payments: z.array(z.any()).describe('List of public donations'),
+  total: z.number().describe('Total number of donations matching the query'),
+})
+
+const donationStatsResponseSchema = z.object({
+  success: z.boolean().describe('Whether the operation succeeded'),
+  stats: z.object({
+    total: z.number().describe('Total amount donated'),
+    count: z.number().describe('Total number of donations'),
+    byType: z.object({
+      donation: z.object({
+        total: z.number().describe('Total amount from donations'),
+        count: z.number().describe('Number of donations'),
+      }),
+    }),
+    recent: z.array(z.any()).describe('Recent donations (last 5)'),
+  }).describe('Donation statistics'),
+})
+
+// ========================================
+// Route Handlers
+// ========================================
+
+const createDonationHandler = async (req: Request, res: Response) => {
   try {
     const {
       projectId,
@@ -19,16 +84,8 @@ router.post('/donate', async (req: Request, res: Response) => {
       userId,
       donorName,
       donorEmail,
-      returnUrl, // Custom return URL from calling app
+      returnUrl,
     } = req.body
-
-    // Validation
-    if (!projectId || !amount || amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'projectId and positive amount are required',
-      })
-    }
 
     // Use custom returnUrl or fallback to WEB_URL (EZPay web)
     const baseUrl = returnUrl || process.env.WEB_URL
@@ -86,10 +143,9 @@ router.post('/donate', async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Failed to create donation',
     })
   }
-})
+}
 
-// Get donations (for testimonials wall)
-router.get('/donations', async (req: Request, res: Response) => {
+const getDonationsHandler = async (req: Request, res: Response) => {
   try {
     const { projectId, limit = 10 } = req.query
 
@@ -122,10 +178,9 @@ router.get('/donations', async (req: Request, res: Response) => {
       error: 'Failed to fetch donations',
     })
   }
-})
+}
 
-// Get donation stats
-router.get('/donations/stats', async (req: Request, res: Response) => {
+const getDonationStatsHandler = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.query
 
@@ -166,19 +221,11 @@ router.get('/donations/stats', async (req: Request, res: Response) => {
       error: 'Failed to fetch donation stats',
     })
   }
-})
+}
 
-// Verify and update payment status (called from success page)
-router.post('/verify-payment/:sessionId', async (req: Request, res: Response) => {
+const verifyPaymentHandler = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params
-
-    if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Session ID is required',
-      })
-    }
 
     // Find payment in DB
     const payment = await Payment.findOne({ paymentId: sessionId })
@@ -230,6 +277,39 @@ router.post('/verify-payment/:sessionId', async (req: Request, res: Response) =>
       error: 'Failed to verify payment',
     })
   }
+}
+
+// ========================================
+// Routes with OpenAPI Documentation
+// ========================================
+
+docRouter.post('/donate', createDonationHandler, {
+  summary: 'Create a donation checkout session',
+  tags: ['Donations'],
+  bodySchema: createDonationSchema,
+  responseSchema: paymentResponseSchema,
+  status: 201,
+})
+
+docRouter.get('/donations', getDonationsHandler, {
+  summary: 'Get public donations (testimonials wall)',
+  tags: ['Donations'],
+  querySchema: donationsQuerySchema,
+  responseSchema: donationsListResponseSchema,
+})
+
+docRouter.get('/donations/stats', getDonationStatsHandler, {
+  summary: 'Get donation statistics',
+  tags: ['Donations'],
+  querySchema: donationStatsQuerySchema,
+  responseSchema: donationStatsResponseSchema,
+})
+
+docRouter.post('/verify-payment/:sessionId', verifyPaymentHandler, {
+  summary: 'Verify and complete payment after Stripe checkout',
+  tags: ['Donations'],
+  paramsSchema: verifyPaymentParamsSchema,
+  responseSchema: paymentResponseSchema,
 })
 
 export default router

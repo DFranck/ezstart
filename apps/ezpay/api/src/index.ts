@@ -1,5 +1,5 @@
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
-import routes from './routes/index.js'
+import routes, { registries } from './routes/index.js'
 
 const PORT = getApiPort('ezpay')
 
@@ -21,6 +21,7 @@ connectToMongo('ezpay')
   .then(() =>
     startServer(app, {
       routes,
+      registries,
       serviceName: 'EZPay',
       port: PORT,
     })

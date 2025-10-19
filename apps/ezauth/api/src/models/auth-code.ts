@@ -1,4 +1,5 @@
-import { Schema, model, Document } from 'mongoose'
+import { connectToMongo } from '@ezstart/express-core'
+import { Schema, Document } from 'mongoose'
 
 interface AuthCodeDocument extends Document {
   code: string
@@ -41,9 +42,24 @@ const authCodeSchema = new Schema<AuthCodeDocument>({
 }, {
   timestamps: true,
   collection: 'auth_codes',
+  bufferCommands: false, // Disable buffering for fail-fast
 })
 
 // Auto-expire codes
 authCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
-export const AuthCodeModel = model<AuthCodeDocument>('AuthCode', authCodeSchema)
+// Direct model export (requires mongoose to be initialized first)
+let AuthCodeModel: ReturnType<typeof import('mongoose').model<AuthCodeDocument>>
+
+/**
+ * Factory function to get AuthCode model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getAuthCodeModel() {
+  const mongoose = await connectToMongo('ezauth')
+  AuthCodeModel = mongoose.models.AuthCode || mongoose.model<AuthCodeDocument>('AuthCode', authCodeSchema)
+  return AuthCodeModel
+}
+
+// Export model for direct use (will be undefined until getAuthCodeModel is called)
+export { AuthCodeModel }

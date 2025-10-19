@@ -1,6 +1,6 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
-import { WaitlistModel } from '../models/waitlist.js'
+import { getWaitlistModel } from '../models/waitlist.js'
 import { z } from 'zod'
 
 export const waitlistRegistry = new OpenAPIRegistry()
@@ -35,6 +35,8 @@ const getAllWaitlistsResponseSchema = z.object({
 // Add email to waitlist for an app
 const addEmailController = async (req: any, res: any) => {
   try {
+    const WaitlistModel = await getWaitlistModel()
+
     const { appName } = req.params
     const { email } = req.body
 
@@ -46,6 +48,7 @@ const addEmailController = async (req: any, res: any) => {
     }
 
     // Find or create waitlist for this app
+    // @ts-expect-error - Mongoose type inference issue
     let waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {
@@ -89,8 +92,11 @@ const addEmailController = async (req: any, res: any) => {
 // Get waitlist for an app
 const getWaitlistController = async (req: any, res: any) => {
   try {
+    const WaitlistModel = await getWaitlistModel()
+
     const { appName } = req.params
 
+    // @ts-expect-error - Mongoose type inference issue
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {
@@ -120,6 +126,9 @@ const getWaitlistController = async (req: any, res: any) => {
 // Get all waitlists (admin endpoint)
 const getAllWaitlistsController = async (req: any, res: any) => {
   try {
+    const WaitlistModel = await getWaitlistModel()
+
+    // @ts-expect-error - Mongoose type inference issue
     const waitlists = await WaitlistModel.find({})
 
     const result = waitlists.reduce((acc, waitlist) => {
