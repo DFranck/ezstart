@@ -2,11 +2,55 @@
 
 **Centralized Next.js configuration with PWA and i18n support for all @ezstart web applications.**
 
-> ✅ **Updated:** 16/10/2025 - Now with `createNextConfig()` composer
+> ✅ **Updated:** 19/10/2025 - Now with automatic PWA icon generation!
 
 ## Overview
 
 `@ezstart/next-config` provides a unified, composable Next.js configuration system with built-in PWA and i18n support. All 8 web apps in the monorepo use this package for 100% consistent configuration.
+
+## 🎨 NEW: Automatic PWA Icon Generation
+
+Generate all PWA icons, favicon, and Apple Touch Icon from a single source logo!
+
+### Quick Start
+
+1. Add a logo source to your `public/` folder:
+   - `logo.png` (recommended: 512x512 or higher)
+   - `logo.svg` (vector format, auto-scales perfectly)
+   - `logo-source.png`
+
+2. Run the generator:
+   ```bash
+   cd apps/your-app/web
+   node ../../../packages/next-config/scripts/generate-icons.js
+   ```
+
+3. **Generated files:**
+   - `/icons/icon-{16,32,72,96,128,144,152,192,384,512}x{size}.png` - PWA icons
+   - `/favicon.png` - Browser favicon (32x32)
+   - `/apple-touch-icon.png` - iOS home screen icon (180x180)
+
+### Features
+
+✅ **Auto-detection** - Finds your logo automatically
+✅ **Optimized** - Uses Sharp for maximum compression
+✅ **Transparent backgrounds** - Perfect for PWAs
+✅ **iOS compatible** - Generates apple-touch-icon with opaque background
+✅ **One command** - Generates all 12 files instantly
+
+### Integration with Build
+
+Add to your `package.json`:
+```json
+{
+  "scripts": {
+    "generate-icons": "node ../../../packages/next-config/scripts/generate-icons.js",
+    "build": "pnpm generate-icons && next build"
+  }
+}
+```
+
+Now icons are automatically regenerated on every build! 🚀
 
 ## Installation
 
