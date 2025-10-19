@@ -47,6 +47,13 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
       origins.push(...getAllWebUrls('green-pulse'))
       break
 
+    case 'monitoring':
+      // Monitoring API is called by ALL web apps (dashboard in EZStart)
+      Object.keys(URLS).forEach((app) => {
+        origins.push(...getAllWebUrls(app as AppName))
+      })
+      break
+
     default:
       // By default, only same-app calls
       origins.push(...getAllWebUrls(apiApp))

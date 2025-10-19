@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { MobileNavbar } from '.'
-import { useClickOutside, useDevice, useOnScroll } from '../../hooks'
+import { useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
@@ -21,6 +21,7 @@ export interface ClientLayoutProps {
   currentPath?: string
 
   // Header props (matching Header component props)
+  showHeader?: boolean
   headerPosition?: keyof typeof headerVariantConfig.position
   headerLeftContent?: React.ReactNode
   headerCenterContent?: React.ReactNode
@@ -64,6 +65,7 @@ export function ClientLayout({
   currentPath = '/',
 
   // Header
+  showHeader = true,
   headerPosition = 'fixed',
   headerLeftContent,
   headerCenterContent,
@@ -194,20 +196,22 @@ export function ClientLayout({
   return (
     <Div className={cn('min-h-screen flex flex-col', className)}>
       {/* Header with smart navigation */}
-      <Header
-        position={headerPosition}
-        leftContent={headerLeftContent}
-        centerContent={navLinks ? renderDesktopNav() : headerCenterContent}
-        rightContent={
-          <div className="flex items-center gap-2">
-            {headerRightContent}
-            {isTablet && navigationItems.length > 0 && (
-              <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
-            )}
-          </div>
-        }
-        className={headerClassName}
-      />
+      {showHeader && (
+        <Header
+          position={headerPosition}
+          leftContent={headerLeftContent}
+          centerContent={navLinks ? renderDesktopNav() : headerCenterContent}
+          rightContent={
+            <div className="flex items-center gap-2">
+              {headerRightContent}
+              {isTablet && navigationItems.length > 0 && (
+                <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
+              )}
+            </div>
+          }
+          className={headerClassName}
+        />
+      )}
 
       {/* Burger dropdown menu (tablet only) - outside Header for full width */}
       {isTablet && navigationItems.length > 0 && (
