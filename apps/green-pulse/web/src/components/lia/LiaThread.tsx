@@ -52,10 +52,11 @@ export function LiaThread({
 
   // Register callback to reload conversations when auto-created
   useEffect(() => {
-    if (onRegisterConversationCreatedCallback) {
+    if (onRegisterConversationCreatedCallback && loadConversations) {
       onRegisterConversationCreatedCallback(() => loadConversations)
     }
-  }, [onRegisterConversationCreatedCallback, loadConversations])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onRegisterConversationCreatedCallback]) // Only run when callback changes, not loadConversations
 
   // Load messages from cache when conversationData changes
   useEffect(() => {
