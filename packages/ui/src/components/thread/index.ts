@@ -5,5 +5,6 @@ export { ThreadMessage } from './ThreadMessage';
 export { ThreadMessages } from './ThreadMessages';
 export { ThreadSidebar } from './ThreadSidebar';
 export type { Conversation } from './ThreadSidebar';
+export { ConversationItemActions } from './ConversationItemActions';
 export { ThreadWelcome } from './ThreadWelcome';
 export * from './types';

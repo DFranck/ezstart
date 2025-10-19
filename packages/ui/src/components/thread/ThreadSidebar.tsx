@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Icon } from '../icon';
+import { ConversationItemActions } from './ConversationItemActions';
 
 export type Conversation = {
   id: string;
@@ -18,6 +19,8 @@ type ThreadSidebarProps = {
   activeConversationId?: string;
   onConversationSelect?: (id: string) => void;
   onNewConversation?: () => void;
+  onRename?: (id: string, newTitle: string) => void | Promise<void>;
+  onDelete?: (id: string) => void | Promise<void>;
   newConversationLabel?: string;
   emptyState?: ReactNode;
   header?: ReactNode;
@@ -31,6 +34,8 @@ export function ThreadSidebar({
   activeConversationId,
   onConversationSelect,
   onNewConversation,
+  onRename,
+  onDelete,
   newConversationLabel = 'New conversation',
   emptyState,
   header,
@@ -84,39 +89,54 @@ export function ThreadSidebar({
               }
 
               return (
-                <button
+                <div
                   key={conversation.id}
-                  onClick={() => onConversationSelect?.(conversation.id)}
                   className={cn(
-                    'w-full text-left p-3 rounded-lg transition-colors',
+                    'relative group',
+                    'w-full rounded-lg transition-colors',
                     'hover:bg-accent',
-                    isActive && 'bg-accent',
-                    conversation.unread && 'font-semibold'
+                    isActive && 'bg-accent'
                   )}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-medium truncate">
-                          {conversation.title}
-                        </h3>
-                        {conversation.unread && (
-                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                  <button
+                    onClick={() => onConversationSelect?.(conversation.id)}
+                    className={cn(
+                      'w-full text-left p-3',
+                      conversation.unread && 'font-semibold'
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-medium truncate">
+                            {conversation.title}
+                          </h3>
+                          {conversation.unread && (
+                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                          )}
+                        </div>
+                        {conversation.preview && (
+                          <p className="text-xs text-muted-foreground truncate mt-1">
+                            {conversation.preview}
+                          </p>
                         )}
                       </div>
-                      {conversation.preview && (
-                        <p className="text-xs text-muted-foreground truncate mt-1">
-                          {conversation.preview}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {conversation.timestamp && (
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {formatTimestamp(conversation.timestamp)}
+                          </span>
+                        )}
+                        <ConversationItemActions
+                          conversationId={conversation.id}
+                          conversationTitle={conversation.title}
+                          onRename={onRename}
+                          onDelete={onDelete}
+                        />
+                      </div>
                     </div>
-                    {conversation.timestamp && (
-                      <span className="text-xs text-muted-foreground flex-shrink-0">
-                        {formatTimestamp(conversation.timestamp)}
-                      </span>
-                    )}
-                  </div>
-                </button>
+                  </button>
+                </div>
               );
             })
           )}

@@ -125,6 +125,8 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
           activeConversationId={activeConversationId || undefined}
           onConversationSelect={handleConversationSelect}
           onNewConversation={handleNewConversation}
+          onRename={handleRename}
+          onDelete={handleDelete}
           newConversationLabel="New Chat"
           emptyState="Start a new conversation to get insights from LIA"
         />
