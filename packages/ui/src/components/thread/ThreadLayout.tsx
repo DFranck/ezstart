@@ -14,6 +14,8 @@ type ThreadLayoutProps = {
   showSidebar?: boolean;
   sidebarWidth?: string;
   headerOffset?: string; // Offset for fixed header (e.g., 'top-16', 'top-20')
+  mobileHeaderOffset?: string; // Mobile-only header offset (e.g., 'pt-16', 'mt-16')
+  mobileFooterOffset?: string; // Mobile-only footer offset (e.g., 'pb-16', 'mb-16')
   className?: string;
   onSidebarToggle?: (isOpen: boolean) => void;
   colorScheme?: ColorScheme;
@@ -26,6 +28,8 @@ function ThreadLayoutInner({
   showSidebar = true,
   sidebarWidth = 'w-80',
   headerOffset = 'top-0',
+  mobileHeaderOffset,
+  mobileFooterOffset,
   className,
   onSidebarToggle,
 }: Omit<ThreadLayoutProps, 'colorScheme' | 'customTheme'>) {
@@ -45,7 +49,13 @@ function ThreadLayoutInner({
 
   if (!showSidebar || !sidebar) {
     return (
-      <div className={cn('w-full h-screen flex flex-col', theme.background, className)}>
+      <div className={cn(
+        'w-full h-screen flex flex-col',
+        theme.background,
+        mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
+        mobileFooterOffset && `md:pb-0 ${mobileFooterOffset}`,
+        className
+      )}>
         {children}
       </div>
     );
@@ -53,7 +63,13 @@ function ThreadLayoutInner({
 
   return (
     <ThreadLayoutProvider value={{ closeSidebar }}>
-      <div className={cn('relative flex w-full h-screen', theme.background, className)}>
+      <div className={cn(
+        'relative flex w-full h-screen',
+        theme.background,
+        mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
+        mobileFooterOffset && `md:pb-0 ${mobileFooterOffset}`,
+        className
+      )}>
       {/* Mobile Toggle Button */}
       <Button
         onClick={toggleSidebar}
@@ -62,7 +78,8 @@ function ThreadLayoutInner({
         className={cn(
           'fixed left-4 z-50 md:hidden',
           'shadow-lg backdrop-blur-sm bg-background/80',
-          headerOffset
+          headerOffset,
+          mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
         )}
         aria-label="Toggle conversations"
       >
