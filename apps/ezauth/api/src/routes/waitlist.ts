@@ -60,7 +60,7 @@ const addEmailController = async (req: any, res: any) => {
 
     // Check if email already exists
     const emailLower = email.toLowerCase()
-    const exists = waitlist.emails.some(e => e === emailLower)
+    const exists = waitlist.emails.some((e: string) => e === emailLower)
 
     if (exists) {
       return res.status(409).json({
@@ -131,7 +131,7 @@ const getAllWaitlistsController = async (req: any, res: any) => {
     // @ts-expect-error - Mongoose type inference issue
     const waitlists = await WaitlistModel.find({})
 
-    const result = waitlists.reduce((acc, waitlist) => {
+    const result = waitlists.reduce((acc: Record<string, string[]>, waitlist: any) => {
       acc[waitlist.appName] = waitlist.emails
       return acc
     }, {} as Record<string, string[]>)
@@ -139,7 +139,7 @@ const getAllWaitlistsController = async (req: any, res: any) => {
     res.json({
       success: true,
       waitlists: result,
-      totalCount: Object.values(result).reduce((sum, emails) => sum + emails.length, 0)
+      totalCount: Object.values(result).reduce((sum: number, emails: unknown) => sum + (emails as string[]).length, 0)
     })
   } catch (error) {
     console.error('Error fetching all waitlists:', error)

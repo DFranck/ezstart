@@ -1,5 +1,6 @@
 import Authjs from './authjs'
 import CosmosKit from './cosmoskit'
+import Ezbill from './ezbill'
 import Expressjs from './expressjs'
 import Ezstart from './ezstart'
 import Figma from './figma'
@@ -21,6 +22,7 @@ import Zustand from './zustand'
 export const customIconMap = {
   Authjs,
   CosmosKit,
+  Ezbill,
   Expressjs,
   Ezstart,
   Figma,

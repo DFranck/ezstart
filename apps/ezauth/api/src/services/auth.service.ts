@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import { AuthUserModel, AuthUserDocument } from '../models/auth-user.js'
-import { AuthCodeModel } from '../models/auth-code.js'
-import { 
-  LoginRequest, 
-  RegisterRequest, 
-  TokenRequest, 
+import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
+import { getAuthCodeModel } from '../models/auth-code.js'
+import {
+  LoginRequest,
+  RegisterRequest,
+  TokenRequest,
   AuthToken,
   AuthCode,
   AuthCodeResponse,
@@ -18,11 +18,13 @@ const JWT_EXPIRES_IN = '7d'
 export class AuthService {
   // Register new user
   static async register(data: RegisterRequest): Promise<AuthCodeResponse> {
+    const AuthUserModel = await getAuthUserModel()
+
     // Check if user already exists
     const existingUser = await AuthUserModel.findOne({
       $or: [{ email: data.email }, { username: data.username }]
     })
-    
+
     if (existingUser) {
       throw new Error('User already exists with this email or username')
     }
@@ -46,6 +48,7 @@ export class AuthService {
 
   // Login user
   static async login(data: LoginRequest): Promise<AuthCodeResponse> {
+    const AuthUserModel = await getAuthUserModel()
     // Find user by email OR username
     const user = await AuthUserModel.findOne({
       $or: [
@@ -76,6 +79,8 @@ export class AuthService {
 
   // Exchange code for token
   static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
+    const AuthCodeModel = await getAuthCodeModel()
+    const AuthUserModel = await getAuthUserModel()
     console.log('🔍 Looking for auth code with:', {
       code: data.code,
       app: data.app,
@@ -152,6 +157,7 @@ export class AuthService {
 
   // Get user by ID
   static async getUserById(userId: string) {
+    const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findById(userId)
     if (!user) {
       throw new Error('User not found')
@@ -161,6 +167,7 @@ export class AuthService {
 
   // Private: Generate auth code
   private static async generateAuthCode(userId: string, app: string, redirectUri?: string): Promise<AuthCodeResponse> {
+    const AuthCodeModel = await getAuthCodeModel()
     const code = crypto.randomBytes(32).toString('hex')
     
     const authCode = new AuthCodeModel({
@@ -180,6 +187,7 @@ export class AuthService {
 
   // Check if user has access to app
   static async checkAppAccess(userId: string, app: string): Promise<boolean> {
+    const AuthUserModel = await getAuthUserModel()
     const user = await AuthUserModel.findById(userId)
     return user ? user.apps.includes(app) : false
   }

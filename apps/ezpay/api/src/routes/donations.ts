@@ -247,6 +247,9 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
 
     // Verify with Stripe API to prevent fraud
     const { stripe } = await import('../services/stripe.js')
+    if (!sessionId) {
+      return res.status(400).json({ success: false, error: 'Missing sessionId' })
+    }
     const session = await stripe.checkout.sessions.retrieve(sessionId)
 
     // Only mark as completed if Stripe confirms payment

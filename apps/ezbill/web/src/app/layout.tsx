@@ -3,7 +3,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
-import { createMetadata } from '@ezstart/seo-config/metadata'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
 
@@ -17,7 +17,6 @@ export const metadata = createMetadata({
   description: 'Simple and efficient billing management for businesses',
   domain: 'https://ezbill-web.vercel.app',
   keywords: ['billing', 'invoices', 'clients', 'payments', 'business'],
-  themeColor: '#3B82F6',
   icons: {
     icon: [
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
@@ -28,12 +27,11 @@ export const metadata = createMetadata({
   },
 })
 
+export const viewport = createViewport('#3B82F6')
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
       <body className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
         <ErrorBoundary>
           <QueryProvider>

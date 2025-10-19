@@ -95,13 +95,28 @@ export function createMetadata(config: MetadataConfig): Metadata {
       creator: twitterHandle,
     },
     manifest: '/manifest.json',
-    themeColor,
-    viewport: {
-      width: 'device-width',
-      initialScale: 1,
-      maximumScale: 5,
-    },
     ...(icons && { icons }), // Add icons if provided
+  }
+}
+
+/**
+ * Creates viewport configuration for Next.js (separate from metadata in Next.js 15+)
+ * Should be exported as `export const viewport` in layout.tsx
+ *
+ * @example
+ * ```ts
+ * // apps/myapp/web/src/app/layout.tsx
+ * import { createViewport } from '@ezstart/seo-config/metadata'
+ *
+ * export const viewport = createViewport('#3B82F6')
+ * ```
+ */
+export function createViewport(themeColor = '#000000') {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    themeColor,
   }
 }
 
