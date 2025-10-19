@@ -8,11 +8,14 @@ export { makeRestoreController } from './controller-factory/make-restore-control
 export { makeUpdateController } from './controller-factory/make-update-controller.js'
 
 // Infra
-export { connectToMongo } from './infra/connectToMongo.js'
+export { connectToMongo, getMongo } from './infra/connectToMongo.js'
 export { createApp } from './infra/createApp.js'
 export { createSocketServer } from './infra/createSocketServer.js'
 export { createTickerEngine } from './infra/createTickerEngine.js'
 export { startServer } from './infra/startServer.js'
+
+// MongoDB connection utilities (legacy from mongo.ts)
+export { getConnectionState, disconnectMongo } from './mongo.js'
 
 // Express exports for centralization
 export { Router } from 'express'

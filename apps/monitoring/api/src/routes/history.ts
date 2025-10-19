@@ -1,10 +1,7 @@
-import { Router, type RequestHandler } from '@ezstart/express-core'
-import type { Router as ExpressRouter } from 'express'
-import { HealthCheck } from '../models/HealthCheck.js'
-import { getMockServiceHistory } from '../utils/mockHistory.js'
+import { Router } from '@ezstart/express-core'
+import { getHealthCheckModel } from '../models/HealthCheck.js'
 
 const historyRouter = Router()
-const isDev = process.env.NODE_ENV !== 'production'
 
 /**
  * GET /api/history/project/:projectId
@@ -26,17 +23,8 @@ historyRouter.get('/project/:projectId', async (req, res) => {
     // Map project to service IDs
     const serviceIds = [`${projectId}-api`, `${projectId}-web`]
 
-    // In dev: use mock data, in prod: use real MongoDB data
-    if (isDev) {
-      const mockServices = serviceIds.map(serviceId => getMockServiceHistory(serviceId, hours))
-      return res.json({
-        projectId,
-        hours,
-        services: mockServices,
-      })
-    }
-
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
+    const HealthCheck = await getHealthCheckModel()
 
     const histories = await Promise.all(
       serviceIds.map(async serviceId => {
@@ -109,16 +97,8 @@ historyRouter.get('/:serviceId', async (req, res) => {
     const { serviceId } = req.params as { serviceId: string }
     const hours = Math.min(Number(req.query.hours) || 24, 168) // Max 7 days
 
-    // In dev: use mock data, in prod: use real MongoDB data
-    if (isDev) {
-      const mockData = getMockServiceHistory(serviceId, hours)
-      return res.json({
-        hours,
-        ...mockData,
-      })
-    }
-
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
+    const HealthCheck = await getHealthCheckModel()
 
     // @ts-expect-error - Mongoose type inference issue with strict TypeScript
     const history = (await HealthCheck.find({

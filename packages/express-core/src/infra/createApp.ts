@@ -46,11 +46,7 @@ export function createApp(options?: CreateAppOptions): Express {
     // Get allowed origins for logging
     const allowedOrigins = getAllowedOrigins(options.apiApp);
 
-    console.log(`✅ [CORS] Auto-configured for API: ${options.apiApp}`);
-    console.log(`📍 [CORS] Allowed origins (${allowedOrigins.length}):`);
-    allowedOrigins.forEach((origin: string, i: number) => {
-      console.log(`   ${i + 1}. ${origin}`);
-    });
+    console.log(`✅ [CORS] Auto-configured for ${options.apiApp}: ${allowedOrigins.length} origins allowed`);
   } else if (options?.corsOrigins) {
     // Option 2: Manual CORS origins
     corsOptions = {
@@ -59,7 +55,8 @@ export function createApp(options?: CreateAppOptions): Express {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
     };
-    console.log(`✅ [CORS] Manual origins: ${options.corsOrigins.join(', ')}`);
+
+    console.log(`✅ [CORS] Manually configured: ${options.corsOrigins.length} origins allowed`);
   } else {
     // Option 3: Allow all (LEGACY)
     corsOptions = {

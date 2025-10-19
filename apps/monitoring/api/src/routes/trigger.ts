@@ -1,6 +1,6 @@
 import { Router } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
-import { HealthCheck } from '../models/HealthCheck.js'
+import { getHealthCheckModel } from '../models/HealthCheck.js'
 
 const triggerRouter = Router()
 const healthChecker = new HealthChecker()
@@ -23,6 +23,7 @@ triggerRouter.post('/', async (req, res) => {
 
     // Run checks in background
     const serviceIds = Object.keys(MONITORED_SERVICES)
+    const HealthCheck = await getHealthCheckModel()
 
     Promise.all(
       serviceIds.map(async serviceId => {
@@ -65,6 +66,7 @@ triggerRouter.post('/', async (req, res) => {
           // Save failed check (only in production)
           if (!isDev) {
             try {
+              const HealthCheck = await getHealthCheckModel()
               // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
               await HealthCheck.create({
                 serviceId,

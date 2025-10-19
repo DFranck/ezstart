@@ -1,25 +1,96 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
+import type { Request, Response, Router as ExpressRouter } from 'express'
+import { z } from 'zod'
 
 export const healthRegistry = new OpenAPIRegistry()
-const router = Router()
+const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(healthRegistry, router)
 export const healthRoutes = router as ReturnType<typeof Router>
 
 const healthChecker = new HealthChecker()
 
-/**
- * GET /api/health-checks
- * Get all health check results
- *
- * Environment behavior:
- * - Development: Checks ONLY local URLs
- * - Production: Checks ALL production URLs
- *   - Railway (EZAuth, EZPay): For monitoring
- *   - Render (EZBill, TD, GreenPulse): To prevent sleep
- *   - Vercel (Web apps): For uptime monitoring
- */
-router.get('/', async (_, res) => {
+// ========================================
+// Zod Schemas
+// ========================================
+
+const serviceIdParamSchema = z.object({
+  serviceId: z.string().describe('Unique identifier of the service'),
+})
+
+const historyQuerySchema = z.object({
+  limit: z.coerce.number().default(50).describe('Number of history entries to return'),
+})
+
+const healthCheckResultSchema = z.object({
+  id: z.string(),
+  serviceId: z.string(),
+  name: z.string(),
+  status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']),
+  responseTime: z.number().nullable(),
+  error: z.string().optional(),
+  uptime: z.number(),
+  avgResponseTime: z.number(),
+})
+
+const healthCheckSummarySchema = z.object({
+  total: z.number(),
+  healthy: z.number(),
+  degraded: z.number(),
+  unhealthy: z.number(),
+  unknown: z.number(),
+})
+
+const allHealthChecksResponseSchema = z.object({
+  services: z.array(healthCheckResultSchema).describe('List of health check results for all services'),
+  environment: z.enum(['development', 'production']).describe('Current environment (development or production)'),
+  summary: healthCheckSummarySchema.describe('Summary statistics of health checks'),
+})
+
+const serviceHealthResponseSchema = z.object({
+  serviceId: z.string().describe('Unique identifier of the service'),
+  serviceName: z.string().describe('Human-readable name of the service'),
+  environment: z.enum(['development', 'production']).describe('Current environment'),
+  checks: z.array(
+    healthCheckResultSchema.extend({
+      history: z.array(
+        z.object({
+          timestamp: z.string(),
+          status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']),
+          responseTime: z.number().nullable(),
+        })
+      ),
+    })
+  ).describe('List of health check results with history'),
+})
+
+const historyResponseSchema = z.object({
+  id: z.string().describe('Unique identifier of the service'),
+  name: z.string().describe('Human-readable name of the service'),
+  history: z.array(
+    z.object({
+      timestamp: z.string(),
+      status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']),
+      responseTime: z.number().nullable(),
+    })
+  ).describe('Historical health check results'),
+  uptime: z.object({
+    '24h': z.number(),
+    '7d': z.number(),
+    '30d': z.number(),
+  }).describe('Uptime percentage for different time periods'),
+})
+
+const errorResponseSchema = z.object({
+  error: z.string(),
+  message: z.string(),
+})
+
+// ========================================
+// Route Handlers
+// ========================================
+
+const getAllHealthChecksHandler = async (_: Request, res: Response) => {
   try {
     const environment =
       process.env.NODE_ENV === 'production' ? 'production' : 'development'
@@ -69,17 +140,9 @@ router.get('/', async (_, res) => {
       message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
-})
+}
 
-/**
- * GET /api/health-checks/:serviceId
- * Get health check result for specific service
- *
- * Environment behavior:
- * - Development: Returns checks for ALL URLs (local + production)
- * - Production: Returns check for ONLY production URL
- */
-router.get('/:serviceId', async (req, res) => {
+const getServiceHealthHandler = async (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params
     const config = MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
@@ -121,13 +184,9 @@ router.get('/:serviceId', async (req, res) => {
       message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
-})
+}
 
-/**
- * GET /api/health-checks/:serviceId/history
- * Get health check history for specific service
- */
-router.get('/:serviceId/history', (req, res) => {
+const getServiceHistoryHandler = (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params
     const { limit = '50' } = req.query
@@ -159,4 +218,29 @@ router.get('/:serviceId/history', (req, res) => {
       message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
+}
+
+// ========================================
+// Routes with OpenAPI Documentation
+// ========================================
+
+docRouter.get('/', getAllHealthChecksHandler, {
+  summary: 'Get all health check results for monitored services',
+  tags: ['Health Checks'],
+  responseSchema: allHealthChecksResponseSchema,
+})
+
+docRouter.get('/:serviceId', getServiceHealthHandler, {
+  summary: 'Get health check for specific service',
+  tags: ['Health Checks'],
+  paramsSchema: serviceIdParamSchema,
+  responseSchema: serviceHealthResponseSchema,
+})
+
+docRouter.get('/:serviceId/history', getServiceHistoryHandler, {
+  summary: 'Get health check history with uptime statistics',
+  tags: ['Health Checks'],
+  paramsSchema: serviceIdParamSchema,
+  querySchema: historyQuerySchema,
+  responseSchema: historyResponseSchema,
 })

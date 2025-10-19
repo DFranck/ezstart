@@ -26,9 +26,7 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   app.get('/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
   if (registries.length > 0) {
-    console.log(`📋 Found ${registries.length} registries`)
     const allDefinitions = registries.flatMap(r => r.definitions)
-    console.log(`📋 Total route definitions: ${allDefinitions.length}`)
 
     const generator = new OpenApiGeneratorV3(allDefinitions)
     const openApiDoc = generator.generateDocument({
@@ -41,7 +39,17 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
       servers: [{ url: basePath || '/' }],
     })
 
-    console.log(`📋 Generated OpenAPI doc with ${Object.keys(openApiDoc.paths || {}).length} paths`)
+    const pathsCount = Object.keys(openApiDoc.paths || {}).length
+    const operationsCount = Object.values(openApiDoc.paths || {}).reduce(
+      (total, path: any) => total + Object.keys(path).filter(k => ['get', 'post', 'put', 'patch', 'delete'].includes(k)).length,
+      0
+    )
+
+    console.log(`📋 OpenAPI Documentation:`)
+    console.log(`   ├─ ${registries.length} route modules`)
+    console.log(`   ├─ ${pathsCount} unique paths`)
+    console.log(`   └─ ${operationsCount} total operations (GET, POST, PUT, etc.)`)
+
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc))
   }
 

@@ -14,7 +14,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '@ezstart/ui/components'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { io, Socket } from 'socket.io-client'
 import { AuditCard } from './components/AuditCard'
 import { HealthScore } from './components/HealthScore'
 import { MetricsOverview } from './components/MetricsOverview'
@@ -66,6 +67,7 @@ export default function MonitoringDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const socketRef = useRef<Socket | null>(null)
 
   // Fetch monitoring data
   const fetchData = async (showLoading = true) => {
@@ -142,11 +144,48 @@ export default function MonitoringDashboard() {
     fetchData()
   }, [])
 
-  // Auto-refresh every 5 minutes (synced with health check interval)
+  // Socket.IO real-time updates
+  useEffect(() => {
+    // Connect to Socket.IO server
+    console.log('[Monitoring] Connecting to Socket.IO...')
+    const socket = io(MONITORING_API_URL, {
+      transports: ['websocket', 'polling'],
+    })
+
+    socketRef.current = socket
+
+    socket.on('connect', () => {
+      console.log('[Monitoring] Socket.IO connected:', socket.id)
+    })
+
+    socket.on('health-checks-updated', (data) => {
+      console.log('[Monitoring] Received health-checks-updated event:', data)
+      // Refresh data when health checks complete
+      fetchData(false)
+      // Update lastRefresh to force ProjectCard re-render and history fetch
+      setLastRefresh(new Date())
+    })
+
+    socket.on('disconnect', () => {
+      console.log('[Monitoring] Socket.IO disconnected')
+    })
+
+    socket.on('connect_error', (err) => {
+      console.error('[Monitoring] Socket.IO connection error:', err.message)
+    })
+
+    // Cleanup on unmount
+    return () => {
+      console.log('[Monitoring] Disconnecting Socket.IO...')
+      socket.disconnect()
+    }
+  }, [])
+
+  // Auto-refresh every 5 minutes as fallback (in case Socket.IO fails)
   useEffect(() => {
     const interval = setInterval(
       () => {
-        console.log('[Monitoring] Auto-refreshing data (5min interval)...')
+        console.log('[Monitoring] Auto-refreshing data (5min fallback)...')
         fetchData(false)
       },
       5 * 60 * 1000
@@ -183,9 +222,6 @@ export default function MonitoringDashboard() {
       <Section size="full">
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner size="xl" text="Loading monitoring data..." variant="fancy" />
-          <P className="text-sm text-muted-foreground">
-            (If on Render free tier, this may take 30-60s for cold start)
-          </P>
         </div>
       </Section>
     )

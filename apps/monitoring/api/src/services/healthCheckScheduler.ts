@@ -5,21 +5,31 @@
 
 import cron from 'node-cron'
 import { HealthChecker, MONITORED_SERVICES, SERVICE_PLATFORMS } from '@ezstart/monitoring'
-import { HealthCheck } from '../models/HealthCheck.js'
+import { getHealthCheckModel } from '../models/HealthCheck.js'
 import type { ScheduledTask } from 'node-cron'
+import type { Server as IOServer } from 'socket.io'
 
 export class HealthCheckScheduler {
   private healthChecker: HealthChecker
   private isRunning = false
   private cronJob: ScheduledTask | null = null
+  private io: IOServer | null = null
 
   constructor() {
     this.healthChecker = new HealthChecker()
   }
 
   /**
+   * Set Socket.IO instance for real-time updates
+   */
+  setSocketIO(io: IOServer) {
+    this.io = io
+    console.log('📡 [Scheduler] Socket.IO instance attached for real-time updates')
+  }
+
+  /**
    * Start the scheduler
-   * - In development: Do nothing (don't ping production services)
+   * - In development: Ping production URLs only (for testing monitoring)
    * - In production: Ping Render services every 5 minutes to prevent sleep
    */
   start() {
@@ -28,14 +38,16 @@ export class HealthCheckScheduler {
       return
     }
 
-    // Only run in production
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('⏰ [Scheduler] Skipping in development (not pinging production services)')
-      return
-    }
+    const isDev = process.env.NODE_ENV !== 'production'
+    const envLabel = isDev ? 'development' : 'production'
 
-    console.log('⏰ [Scheduler] Starting health check cron job...')
-    console.log('⏰ [Scheduler] Will check Render services every 5 minutes to prevent sleep')
+    console.log(`⏰ [Scheduler] Starting health check cron job in ${envLabel} mode...`)
+    console.log('⏰ [Scheduler] Will check ALL production URLs every 5 minutes')
+    console.log(`⏰ [Scheduler] Monitoring ${Object.keys(MONITORED_SERVICES).length} services (APIs + Web apps)`)
+
+    if (isDev) {
+      console.log('⚠️ [Scheduler] Running in DEV mode - pinging PRODUCTION URLs only (not localhost)')
+    }
 
     // Run every 5 minutes: */5 * * * *
     // This keeps Render free tier services awake (sleep after 15min of inactivity)
@@ -46,31 +58,38 @@ export class HealthCheckScheduler {
 
     this.isRunning = true
 
-    // Wait 30 seconds before first health check to ensure MongoDB is fully operational
-    // Render cold starts + MongoDB Atlas connection can take 15-20 seconds
-    console.log('⏰ [Scheduler] Waiting 30 seconds before first health check...')
+    // Wait before first health check to ensure MongoDB is fully operational
+    // Production (Render): Wait 30s for cold starts + MongoDB Atlas connection (15-20s)
+    // Development: Wait 5s for MongoDB connection only
+    const initialDelay = isDev ? 5000 : 30000
+    const delayLabel = isDev ? '5 seconds' : '30 seconds'
+
+    console.log(`⏰ [Scheduler] Waiting ${delayLabel} before first health check...`)
     setTimeout(() => {
       this.performHealthChecks().catch(err => {
         console.error('❌ [Scheduler] Error during initial health check:', err)
       })
-    }, 30000)
+    }, initialDelay)
 
-    console.log('✅ [Scheduler] Health check scheduler started')
+    console.log(`✅ [Scheduler] Health check scheduler started (${envLabel} mode)`)
   }
 
   /**
-   * Perform health checks on all Render services
+   * Perform health checks on all production services
    */
   private async performHealthChecks() {
     const startTime = Date.now()
     console.log(`⏰ [Scheduler] Running health checks at ${new Date().toISOString()}`)
 
     try {
-      // Get Render services (the ones that need to be kept awake)
-      const renderServiceIds = SERVICE_PLATFORMS.render
+      // Get shared MongoDB connection
+      const HealthCheck = await getHealthCheckModel()
+
+      // Get ALL services (not just Render)
+      const allServiceIds = Object.keys(MONITORED_SERVICES) as Array<keyof typeof MONITORED_SERVICES>
 
       const results = await Promise.all(
-        renderServiceIds.map(async serviceId => {
+        allServiceIds.map(async serviceId => {
           try {
             const config = MONITORED_SERVICES[serviceId]
 
@@ -120,17 +139,38 @@ export class HealthCheckScheduler {
 
       const duration = Date.now() - startTime
       const healthyCount = results.filter(r => r.result?.status === 'healthy').length
+      const unhealthyCount = results.length - healthyCount
 
-      console.log(
-        `✅ [Scheduler] Health checks completed in ${duration}ms: ${healthyCount}/${results.length} healthy`
-      )
+      // Concise logging: Only show details when there are issues
+      if (unhealthyCount === 0) {
+        console.log(`✅ [Scheduler] All ${results.length} services healthy in ${duration}ms`)
+      } else {
+        console.log(
+          `⚠️ [Scheduler] Health checks completed in ${duration}ms: ${healthyCount}/${results.length} healthy`
+        )
 
-      // Log individual results
-      results.forEach(({ serviceId, result }) => {
-        const emoji = result?.status === 'healthy' ? '✅' : '❌'
-        const responseTime = result?.responseTime ? `${result.responseTime}ms` : 'timeout'
-        console.log(`  ${emoji} ${serviceId}: ${result?.status || 'error'} (${responseTime})`)
-      })
+        // Only log unhealthy services
+        results.forEach(({ serviceId, result }) => {
+          if (result?.status !== 'healthy') {
+            const responseTime = result?.responseTime ? `${result.responseTime}ms` : 'timeout'
+            console.log(`  ❌ ${serviceId}: ${result?.status || 'error'} (${responseTime})`)
+          }
+        })
+      }
+
+      // Emit real-time update to connected clients
+      if (this.io) {
+        this.io.emit('health-checks-updated', {
+          timestamp: new Date().toISOString(),
+          summary: {
+            total: results.length,
+            healthy: healthyCount,
+            unhealthy: results.length - healthyCount,
+          },
+          duration,
+        })
+        console.log(`📡 [Scheduler] Emitted health-checks-updated event to ${this.io.engine.clientsCount} clients`)
+      }
     } catch (error) {
       console.error('❌ [Scheduler] Error during health checks:', error)
     }
