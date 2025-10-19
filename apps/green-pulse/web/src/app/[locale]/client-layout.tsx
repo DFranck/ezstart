@@ -36,10 +36,14 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       mobileLogoSrc="/logo.png"
       mobileLogoAlt="Green Pulse Logo"
       mobileLogoHref="/"
-      bottomNavigation={isLiaPage ? undefined : [
-        { href: '/', label: 'Home', icon: 'lucide:Home' },
-        { href: '/lia', label: 'LIA', icon: 'lucide:Bot' },
-      ]}
+      bottomNavigation={
+        isLiaPage
+          ? undefined
+          : [
+              { href: '/', label: 'Home', icon: 'lucide:Home' },
+              { href: '/chat', label: 'LIA', icon: 'lucide:Bot' },
+            ]
+      }
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">
