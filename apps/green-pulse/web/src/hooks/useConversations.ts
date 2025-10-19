@@ -48,16 +48,17 @@ export function useConversations() {
   // Create new conversation
   const createConversation = useCallback(async (title: string = 'New Chat') => {
     try {
-      const response = await callApi<any>('/conversations', {
+      const response = await callApi<{ success: boolean; data: any }>('/conversations', {
         method: 'POST',
         body: { title },
       })
 
-      if (response.ok && response.data) {
+      if (response.ok && response.data?.data) {
+        const conversation = response.data.data
         const newConv = {
-          ...response.data,
-          createdAt: new Date(response.data.createdAt),
-          updatedAt: new Date(response.data.updatedAt),
+          ...conversation,
+          createdAt: new Date(conversation.createdAt),
+          updatedAt: new Date(conversation.updatedAt),
         }
         setConversations(prev => [newConv, ...prev])
         return newConv
@@ -149,17 +150,18 @@ export function useConversations() {
   // Load specific conversation with messages
   const loadConversation = useCallback(async (id: string) => {
     try {
-      const response = await callApi<any>(`/conversations/${id}`)
+      const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
 
-      if (response.ok && response.data) {
+      if (response.ok && response.data?.data) {
+        const conversation = response.data.data
         return {
-          ...response.data,
-          createdAt: new Date(response.data.createdAt),
-          updatedAt: new Date(response.data.updatedAt),
-          messages: response.data.messages.map((msg: any) => ({
+          ...conversation,
+          createdAt: new Date(conversation.createdAt),
+          updatedAt: new Date(conversation.updatedAt),
+          messages: conversation.messages?.map((msg: any) => ({
             ...msg,
             timestamp: new Date(msg.timestamp),
-          })),
+          })) || [],
         }
       }
       return null
