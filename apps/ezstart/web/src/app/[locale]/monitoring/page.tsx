@@ -67,6 +67,7 @@ export default function MonitoringDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [nextRefreshIn, setNextRefreshIn] = useState<number>(300) // 5 minutes in seconds
   const socketRef = useRef<Socket | null>(null)
 
   // Fetch monitoring data
@@ -164,6 +165,8 @@ export default function MonitoringDashboard() {
       fetchData(false)
       // Update lastRefresh to force ProjectCard re-render and history fetch
       setLastRefresh(new Date())
+      // Reset countdown to 5 minutes
+      setNextRefreshIn(300)
     })
 
     socket.on('disconnect', () => {
@@ -181,12 +184,28 @@ export default function MonitoringDashboard() {
     }
   }, [])
 
+  // Countdown timer (updates every second)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNextRefreshIn(prev => {
+        if (prev <= 1) {
+          // Reset to 5 minutes when countdown reaches 0
+          return 300
+        }
+        return prev - 1
+      })
+    }, 1000) // 1 second
+
+    return () => clearInterval(interval)
+  }, [])
+
   // Auto-refresh every 5 minutes as fallback (in case Socket.IO fails)
   useEffect(() => {
     const interval = setInterval(
       () => {
         console.log('[Monitoring] Auto-refreshing data (5min fallback)...')
         fetchData(false)
+        setNextRefreshIn(300) // Reset countdown
       },
       5 * 60 * 1000
     ) // 5 minutes
@@ -272,9 +291,14 @@ export default function MonitoringDashboard() {
               {isRefreshing ? 'Checking...' : 'Refresh Now'}
             </Button>
             {lastRefresh && (
-              <P className="text-xs text-muted-foreground">
-                Last refresh: {lastRefresh.toLocaleTimeString()}
-              </P>
+              <div className="flex flex-col items-end gap-1">
+                <P className="text-xs text-muted-foreground">
+                  Last refresh: {lastRefresh.toLocaleTimeString()}
+                </P>
+                <P className="text-xs text-muted-foreground">
+                  Next update in: {Math.floor(nextRefreshIn / 60)}:{String(nextRefreshIn % 60).padStart(2, '0')}
+                </P>
+              </div>
             )}
           </div>
         </Div>
