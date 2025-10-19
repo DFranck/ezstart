@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
 import { callApi } from '@/utils/api'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export type ConversationListItem = {
   id: string
@@ -12,42 +12,80 @@ export type ConversationListItem = {
   unread?: boolean
 }
 
+export type ConversationWithMessages = ConversationListItem & {
+  messages: Array<{
+    role: string
+    content: string
+    timestamp: Date
+  }>
+}
+
+/**
+ * React Query hook for conversations management
+ *
+ * Features:
+ * - Automatic caching (5 min stale time)
+ * - No refetch on conversation switch (uses cache)
+ * - Optimistic updates for mutations
+ * - Automatic background revalidation
+ */
 export function useConversations() {
-  const [conversations, setConversations] = useState<ConversationListItem[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  // Load all conversations
-  const loadConversations = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const response = await callApi<{ success: boolean; data: { conversations: any[] } }>('/conversations')
+  // Query: Load all conversations
+  const {
+    data: conversations = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: async () => {
+      const response = await callApi<{ success: boolean; data: { conversations: any[] } }>(
+        '/conversations'
+      )
 
       if (response.ok && response.data?.data?.conversations) {
-        setConversations(
-          response.data.data.conversations.map((conv: any) => ({
-            ...conv,
-            createdAt: new Date(conv.createdAt),
-            updatedAt: new Date(conv.updatedAt),
-          }))
-        )
-      } else {
-        throw new Error('Failed to load conversations')
+        return response.data.data.conversations.map((conv: any) => ({
+          ...conv,
+          createdAt: new Date(conv.createdAt),
+          updatedAt: new Date(conv.updatedAt),
+        }))
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load conversations'
-      setError(errorMessage)
-      console.error('Load conversations error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+      throw new Error('Failed to load conversations')
+    },
+  })
 
-  // Create new conversation
-  const createConversation = useCallback(async (title: string = 'New Chat') => {
-    try {
+  // Query: Load specific conversation with messages (cached!)
+  const useConversation = (id: string | null) => {
+    return useQuery({
+      queryKey: ['conversation', id],
+      queryFn: async () => {
+        if (!id) return null
+
+        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
+
+        if (response.ok && response.data?.data) {
+          const conversation = response.data.data
+          return {
+            ...conversation,
+            createdAt: new Date(conversation.createdAt),
+            updatedAt: new Date(conversation.updatedAt),
+            messages:
+              conversation.messages?.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp),
+              })) || [],
+          } as ConversationWithMessages
+        }
+        return null
+      },
+      enabled: !!id, // Only run query if id exists
+    })
+  }
+
+  // Mutation: Create new conversation
+  const createConversationMutation = useMutation({
+    mutationFn: async (title: string = 'New Chat') => {
       const response = await callApi<{ success: boolean; data: any }>('/conversations', {
         method: 'POST',
         body: { title },
@@ -55,137 +93,122 @@ export function useConversations() {
 
       if (response.ok && response.data?.data) {
         const conversation = response.data.data
-        const newConv = {
+        return {
           ...conversation,
           createdAt: new Date(conversation.createdAt),
           updatedAt: new Date(conversation.updatedAt),
         }
-        setConversations(prev => [newConv, ...prev])
-        return newConv
       }
       throw new Error('Failed to create conversation')
-    } catch (err) {
-      console.error('Create conversation error:', err)
-      throw err
-    }
-  }, [])
+    },
+    onSuccess: newConv => {
+      // Optimistic update: Add to cache immediately
+      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) => [
+        newConv,
+        ...old,
+      ])
+    },
+  })
 
-  // Rename conversation
-  const renameConversation = useCallback(async (id: string, newTitle: string) => {
-    try {
+  // Mutation: Rename conversation
+  const renameConversationMutation = useMutation({
+    mutationFn: async ({ id, newTitle }: { id: string; newTitle: string }) => {
       const response = await callApi(`/conversations/${id}`, {
         method: 'PATCH',
         body: { title: newTitle },
       })
 
-      if (response.ok) {
-        setConversations(prev =>
-          prev.map(conv =>
-            conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv
-          )
-        )
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to rename conversation')
       }
-    } catch (err) {
-      console.error('Rename conversation error:', err)
-      throw err
-    }
-  }, [])
+      return { id, newTitle }
+    },
+    onSuccess: ({ id, newTitle }) => {
+      // Optimistic update
+      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+        old.map(conv => (conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv))
+      )
+    },
+  })
 
-  // Soft delete conversation
-  const softDeleteConversation = useCallback(async (id: string) => {
-    try {
+  // Mutation: Soft delete conversation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}`, {
         method: 'DELETE',
       })
 
-      if (response.ok) {
-        setConversations(prev => prev.filter(conv => conv.id !== id))
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to delete conversation')
       }
-    } catch (err) {
-      console.error('Soft delete conversation error:', err)
-      throw err
-    }
-  }, [])
+      return id
+    },
+    onSuccess: id => {
+      // Optimistic update
+      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+        old.filter(conv => conv.id !== id)
+      )
+      // Invalidate specific conversation cache
+      queryClient.removeQueries({ queryKey: ['conversation', id] })
+    },
+  })
 
-  // Hard delete conversation (permanent)
-  const hardDeleteConversation = useCallback(async (id: string) => {
-    try {
+  // Mutation: Hard delete conversation
+  const hardDeleteConversationMutation = useMutation({
+    mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/hard`, {
         method: 'DELETE',
       })
 
-      if (response.ok) {
-        setConversations(prev => prev.filter(conv => conv.id !== id))
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to permanently delete conversation')
       }
-    } catch (err) {
-      console.error('Hard delete conversation error:', err)
-      throw err
-    }
-  }, [])
+      return id
+    },
+    onSuccess: id => {
+      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+        old.filter(conv => conv.id !== id)
+      )
+      queryClient.removeQueries({ queryKey: ['conversation', id] })
+    },
+  })
 
-  // Restore soft deleted conversation
-  const restoreConversation = useCallback(async (id: string) => {
-    try {
+  // Mutation: Restore conversation
+  const restoreConversationMutation = useMutation({
+    mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/restore`, {
         method: 'POST',
       })
 
-      if (response.ok) {
-        await loadConversations()
-      } else {
+      if (!response.ok) {
         throw new Error('Failed to restore conversation')
       }
-    } catch (err) {
-      console.error('Restore conversation error:', err)
-      throw err
-    }
-  }, [loadConversations])
-
-  // Load specific conversation with messages
-  const loadConversation = useCallback(async (id: string) => {
-    try {
-      const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
-
-      if (response.ok && response.data?.data) {
-        const conversation = response.data.data
-        return {
-          ...conversation,
-          createdAt: new Date(conversation.createdAt),
-          updatedAt: new Date(conversation.updatedAt),
-          messages: conversation.messages?.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          })) || [],
-        }
-      }
-      return null
-    } catch (err) {
-      console.error('Load conversation error:', err)
-      throw err
-    }
-  }, [])
-
-  // Load on mount
-  useEffect(() => {
-    loadConversations()
-  }, [loadConversations])
+      return id
+    },
+    onSuccess: () => {
+      // Refetch all conversations after restore
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+  })
 
   return {
+    // Data
     conversations,
     loading,
-    error,
-    loadConversations,
-    loadConversation,
-    createConversation,
-    renameConversation,
-    softDeleteConversation,
-    hardDeleteConversation,
-    restoreConversation,
+    error: error?.message || null,
+
+    // Query hook for single conversation
+    useConversation,
+
+    // Mutations (unwrap for cleaner API)
+    createConversation: createConversationMutation.mutateAsync,
+    renameConversation: (id: string, newTitle: string) =>
+      renameConversationMutation.mutateAsync({ id, newTitle }),
+    softDeleteConversation: deleteConversationMutation.mutateAsync,
+    hardDeleteConversation: hardDeleteConversationMutation.mutateAsync,
+    restoreConversation: restoreConversationMutation.mutateAsync,
+
+    // Manual refetch (rarely needed with React Query)
+    loadConversations: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
   }
 }

@@ -10,7 +10,7 @@ import {
   ThreadSidebar,
   ThreadWelcome,
 } from '@ezstart/ui/components'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useThreadContext } from './ThreadProvider'
 
 type LiaThreadProps = {
@@ -36,8 +36,24 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     createConversation,
     renameConversation,
     softDeleteConversation,
-    loadConversation,
+    useConversation,
   } = useConversations()
+
+  // Use React Query to fetch conversation (CACHED! ✅)
+  const { data: conversationData } = useConversation(activeConversationId)
+
+  // Load messages from cache when conversationData changes
+  useEffect(() => {
+    if (conversationData && conversationData.messages) {
+      const threadMessages = conversationData.messages.map((msg: any) => ({
+        id: `${msg.role}-${msg.timestamp.getTime()}`,
+        role: msg.role === 'assistant' ? 'ai' : msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp.toISOString(),
+      }))
+      loadMessages(threadMessages)
+    }
+  }, [conversationData, loadMessages])
 
   // Convert to ThreadSidebar format
   const conversations: Conversation[] = apiConversations.map(conv => ({
@@ -59,31 +75,16 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     } catch (error) {
       console.error('Failed to create new conversation:', error)
     }
-  }, [createConversation, clearMessages])
+  }, [createConversation, clearMessages, setActiveConversationId])
 
-  // Handle conversation select
+  // Handle conversation select (NO MORE REFETCH! Uses cache ✅)
   const handleConversationSelect = useCallback(
-    async (id: string) => {
-      try {
-        setActiveConversationId(id)
-
-        // Load conversation with messages
-        const conversation = await loadConversation(id)
-        if (conversation && conversation.messages) {
-          // Convert API messages to ThreadMessage format
-          const threadMessages = conversation.messages.map((msg: any) => ({
-            id: `${msg.role}-${msg.timestamp.getTime()}`,
-            role: msg.role === 'assistant' ? 'ai' : msg.role,
-            content: msg.content,
-            timestamp: msg.timestamp.toISOString(),
-          }))
-          loadMessages(threadMessages)
-        }
-      } catch (error) {
-        console.error('Failed to load conversation messages:', error)
-      }
+    (id: string) => {
+      setActiveConversationId(id)
+      // React Query automatically fetches from cache if available!
+      // useConversation(id) hook will handle the rest
     },
-    [loadConversation, loadMessages, setActiveConversationId]
+    [setActiveConversationId]
   )
 
   // Handle rename

@@ -4,6 +4,7 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { AbstractIntlMessages, Locale, NextIntlClientProvider } from 'next-intl'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import * as React from 'react'
+import { QueryProvider } from '@/components/providers/QueryProvider'
 
 export function Providers({
   children,
@@ -17,18 +18,20 @@ export function Providers({
   timeZone: string
 }) {
   return (
-    <AuthProvider appName="green-pulse">
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-        enableColorScheme
-      >
-        <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
-          {children}
-        </NextIntlClientProvider>
-      </NextThemesProvider>
-    </AuthProvider>
+    <QueryProvider>
+      <AuthProvider appName="green-pulse">
+        <NextThemesProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          enableColorScheme
+        >
+          <NextIntlClientProvider messages={messages} locale={locale} timeZone={timeZone}>
+            {children}
+          </NextIntlClientProvider>
+        </NextThemesProvider>
+      </AuthProvider>
+    </QueryProvider>
   )
 }
