@@ -16,14 +16,27 @@ export default function LiaPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      formatRequest: (message: string) => ({
-        message,
-        extract_esg: false,
-        session_id: sessionId,
-        conversation_id: activeConversationId, // Pass active conversation
-      }),
+      formatRequest: (message: string) => {
+        const payload: any = {
+          message,
+          extract_esg: false,
+          session_id: sessionId,
+        }
+        // Only include conversation_id if it exists (avoid sending null)
+        if (activeConversationId) {
+          payload.conversation_id = activeConversationId
+        }
+        return payload
+      },
       formatResponse: (data: any) => {
         return data.data?.response || data.response || 'No response'
+      },
+      onSuccess: (data: any) => {
+        // Save conversation_id for subsequent messages
+        if (data.data?.conversation_id && !activeConversationId) {
+          console.log('✅ Conversation created:', data.data.conversation_id)
+          setActiveConversationId(data.data.conversation_id)
+        }
       },
       onError: (error: Error) => {
         console.error('LIA Chat Error:', error)
