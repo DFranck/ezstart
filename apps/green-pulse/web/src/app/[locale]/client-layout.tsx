@@ -33,6 +33,9 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       currentPath={pathname}
       showHeader={!isChatPage && !isLiaPage}
       showFooter={!isChatPage && !isLiaPage}
+      mobileLogoSrc="/logo.png"
+      mobileLogoAlt="Green Pulse Logo"
+      mobileLogoHref="/"
       bottomNavigation={isLiaPage ? undefined : [
         { href: '/', label: 'Home', icon: 'lucide:Home' },
         { href: '/lia', label: 'LIA', icon: 'lucide:Bot' },

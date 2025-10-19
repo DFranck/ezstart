@@ -52,6 +52,12 @@ export interface ClientLayoutProps {
   // Link component (Next.js Link, React Router Link, etc.)
   LinkComponent?: React.ComponentType<any> | string
 
+  // Mobile navbar logo (Icon OR Image)
+  mobileLogoIcon?: string // Icon name (e.g., 'custom:Ezbill', 'lucide:Zap')
+  mobileLogoSrc?: string // Image path (e.g., '/logo.png') - takes priority over logoIcon
+  mobileLogoAlt?: string // Alt text for image logo
+  mobileLogoHref?: string // Logo link href (default: '/')
+
   // Styling
   className?: string
   headerClassName?: string
@@ -97,6 +103,12 @@ export function ClientLayout({
 
   // Components
   LinkComponent = 'a',
+
+  // Mobile navbar logo
+  mobileLogoIcon,
+  mobileLogoSrc,
+  mobileLogoAlt,
+  mobileLogoHref,
 
   // Styling
   className,
@@ -323,6 +335,10 @@ export function ClientLayout({
             currentPath={currentPath}
             LinkComponent={LinkComponent}
             appName={appName}
+            logoIcon={mobileLogoIcon as any}
+            logoSrc={mobileLogoSrc}
+            logoAlt={mobileLogoAlt}
+            logoHref={mobileLogoHref}
             className={mobileNavbarClassName}
           />
         </div>

@@ -22,8 +22,10 @@ interface MobileNavbarProps {
   currentPath?: string
   LinkComponent?: React.ComponentType<any> | string
   className?: string
-  // Logo props
-  logoIcon?: KnownIconName
+  // Logo props (Icon OR Image)
+  logoIcon?: KnownIconName // Icon name (e.g., 'custom:Ezbill', 'lucide:Zap')
+  logoSrc?: string // Image path (e.g., '/logo.png') - takes priority over logoIcon
+  logoAlt?: string // Alt text for image logo
   logoHref?: string
   appName?: string
 }
@@ -35,6 +37,8 @@ export function MobileNavbar({
   LinkComponent = 'a',
   className,
   logoIcon = 'lucide:Zap' as KnownIconName,
+  logoSrc,
+  logoAlt,
   logoHref = '/',
   appName = 'App'
 }: MobileNavbarProps) {
@@ -144,7 +148,12 @@ export function MobileNavbar({
       <Tag as="nav" className={cn('border-t', className)}>
         <div className="grid grid-cols-2 items-center w-full">
           <LinkComponent href={logoHref} className="w-full flex justify-center py-2">
-            <Icon name={logoIcon} size={24} />
+            {logoSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoSrc} alt={logoAlt || appName} className="h-6 w-auto" />
+            ) : (
+              <Icon name={logoIcon} size={24} />
+            )}
           </LinkComponent>
 
           <button

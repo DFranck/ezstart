@@ -48,6 +48,8 @@ const ClientLayout = ({ children }: ClientLayoutProps) => {
     <>
       <BaseClientLayout
         appName="EZStart"
+        mobileLogoIcon="custom:Ezstart"
+        mobileLogoHref={`/${currentLocale}/`}
         creator={
           <div className="flex items-center gap-2">
             <span>
