@@ -28,7 +28,6 @@ historyRouter.get('/project/:projectId', async (req, res) => {
 
     const histories = await Promise.all(
       serviceIds.map(async serviceId => {
-        // @ts-expect-error - Mongoose type inference issue with strict TypeScript
         const history = (await HealthCheck.find({
           serviceId,
           timestamp: { $gte: cutoffTime },
@@ -100,7 +99,6 @@ historyRouter.get('/:serviceId', async (req, res) => {
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
     const HealthCheck = await getHealthCheckModel()
 
-    // @ts-expect-error - Mongoose type inference issue with strict TypeScript
     const history = (await HealthCheck.find({
       serviceId,
       timestamp: { $gte: cutoffTime },

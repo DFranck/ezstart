@@ -44,7 +44,6 @@ triggerRouter.post('/', async (req, res) => {
 
           // Save to MongoDB (only in production)
           if (!isDev) {
-            // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
             await HealthCheck.create({
               serviceId,
               status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
@@ -67,7 +66,6 @@ triggerRouter.post('/', async (req, res) => {
           if (!isDev) {
             try {
               const HealthCheck = await getHealthCheckModel()
-              // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
               await HealthCheck.create({
                 serviceId,
                 status: 'unhealthy',

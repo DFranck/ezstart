@@ -104,7 +104,6 @@ export class HealthCheckScheduler {
             })
 
             // Save to MongoDB for history/graphs
-            // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
             await HealthCheck.create({
               serviceId,
               status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
@@ -120,7 +119,6 @@ export class HealthCheckScheduler {
 
             // Still save failed check to MongoDB
             try {
-              // @ts-expect-error - Mongoose create() type inference issue with strict TypeScript
               await HealthCheck.create({
                 serviceId,
                 status: 'unhealthy',
