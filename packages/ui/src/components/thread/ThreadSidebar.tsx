@@ -5,6 +5,7 @@ import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Icon } from '../icon';
 import { ConversationItemActions } from './ConversationItemActions';
+import { useThreadLayout } from './ThreadLayoutContext';
 
 export type Conversation = {
   id: string;
@@ -21,6 +22,7 @@ type ThreadSidebarProps = {
   onNewConversation?: () => void;
   onRename?: (id: string, newTitle: string) => void | Promise<void>;
   onDelete?: (id: string) => void | Promise<void>;
+  onClose?: () => void; // Callback to close sidebar (mobile)
   newConversationLabel?: string;
   emptyState?: ReactNode;
   header?: ReactNode;
@@ -36,6 +38,7 @@ export function ThreadSidebar({
   onNewConversation,
   onRename,
   onDelete,
+  onClose,
   newConversationLabel = 'New conversation',
   emptyState,
   header,
@@ -43,6 +46,7 @@ export function ThreadSidebar({
   className,
   renderConversation,
 }: ThreadSidebarProps) {
+  const layoutContext = useThreadLayout();
   const formatTimestamp = (date?: Date) => {
     if (!date) return '';
     const now = new Date();
@@ -99,7 +103,11 @@ export function ThreadSidebar({
                   )}
                 >
                   <button
-                    onClick={() => onConversationSelect?.(conversation.id)}
+                    onClick={() => {
+                      onConversationSelect?.(conversation.id);
+                      onClose?.(); // Legacy callback (optional)
+                      layoutContext?.closeSidebar(); // Close sidebar on mobile after selection
+                    }}
                     className={cn(
                       'w-full text-left p-3',
                       conversation.unread && 'font-semibold'

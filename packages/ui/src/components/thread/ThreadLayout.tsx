@@ -4,6 +4,9 @@ import { ReactNode, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Icon } from '../icon';
+import { ThreadThemeProvider, useThreadTheme } from './ThreadThemeContext';
+import { ThreadLayoutProvider } from './ThreadLayoutContext';
+import { ColorScheme, ThreadTheme } from './types';
 
 type ThreadLayoutProps = {
   children: ReactNode;
@@ -13,9 +16,11 @@ type ThreadLayoutProps = {
   headerOffset?: string; // Offset for fixed header (e.g., 'top-16', 'top-20')
   className?: string;
   onSidebarToggle?: (isOpen: boolean) => void;
+  colorScheme?: ColorScheme;
+  customTheme?: Partial<ThreadTheme>;
 };
 
-export function ThreadLayout({
+function ThreadLayoutInner({
   children,
   sidebar,
   showSidebar = true,
@@ -23,7 +28,8 @@ export function ThreadLayout({
   headerOffset = 'top-0',
   className,
   onSidebarToggle,
-}: ThreadLayoutProps) {
+}: Omit<ThreadLayoutProps, 'colorScheme' | 'customTheme'>) {
+  const { theme } = useThreadTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -32,16 +38,22 @@ export function ThreadLayout({
     onSidebarToggle?.(newState);
   };
 
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+    onSidebarToggle?.(false);
+  };
+
   if (!showSidebar || !sidebar) {
     return (
-      <div className={cn('w-full h-screen flex flex-col', className)}>
+      <div className={cn('w-full h-screen flex flex-col', theme.background, className)}>
         {children}
       </div>
     );
   }
 
   return (
-    <div className={cn('relative flex w-full h-screen', className)}>
+    <ThreadLayoutProvider value={{ closeSidebar }}>
+      <div className={cn('relative flex w-full h-screen', theme.background, className)}>
       {/* Mobile Toggle Button */}
       <Button
         onClick={toggleSidebar}
@@ -62,7 +74,9 @@ export function ThreadLayout({
         className={cn(
           'fixed md:sticky left-0 z-40',
           'transition-transform duration-300 ease-in-out',
-          'bg-background border-r flex flex-col',
+          theme.sidebar?.background || 'bg-background',
+          theme.sidebar?.border || 'border-r',
+          'flex flex-col',
           sidebarWidth,
           headerOffset,
           // Calculate height based on header offset
@@ -100,5 +114,16 @@ export function ThreadLayout({
         {children}
       </main>
     </div>
+    </ThreadLayoutProvider>
+  );
+}
+
+export function ThreadLayout(props: ThreadLayoutProps) {
+  const { colorScheme = 'neutral', customTheme, ...layoutProps } = props;
+
+  return (
+    <ThreadThemeProvider colorScheme={colorScheme} customTheme={customTheme}>
+      <ThreadLayoutInner {...layoutProps} />
+    </ThreadThemeProvider>
   );
 }

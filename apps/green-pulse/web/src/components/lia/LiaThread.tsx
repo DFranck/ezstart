@@ -120,6 +120,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
   return (
     <ThreadLayout
       // headerOffset="top-16"
+      colorScheme="green"
       sidebar={
         <ThreadSidebar
           conversations={conversations}

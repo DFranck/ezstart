@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import { Icon } from '../icon';
 import { ThreadMessageMeta } from './types';
+import { useThreadTheme } from './ThreadThemeContext';
 
 type ThreadMessageProps = {
   role: 'user' | 'ai';
@@ -38,6 +39,7 @@ export function ThreadMessage({
   userBubbleClassName,
   aiBubbleClassName,
 }: ThreadMessageProps) {
+  const { theme } = useThreadTheme();
   const isUser = role === 'user';
   const [isHover, setIsHover] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +49,18 @@ export function ThreadMessage({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const shouldShowRetry = isUser && isLastUserMessage && onRetry;
   const shouldShowEditCopy = isUser && !isLastUserMessage && hasResponse && onEdit && messageId;
+
+  // Get bubble styles from theme
+  const defaultUserBubble = clsx(
+    theme.message?.user?.background || 'bg-primary',
+    theme.message?.user?.text || 'text-primary-foreground',
+    theme.message?.user?.border
+  );
+  const defaultAiBubble = clsx(
+    theme.message?.ai?.background || 'bg-muted',
+    theme.message?.ai?.text || 'text-foreground',
+    theme.message?.ai?.border
+  );
 
   const handleCopy = () => {
     if (onCopy && typeof children === 'string') {
@@ -124,8 +138,8 @@ export function ThreadMessage({
                 'rounded-lg px-4 py-2 max-w-[80%] shadow-sm',
                 isEditing ? 'p-2' : 'whitespace-pre-wrap break-words overflow-hidden leading-tight select-text',
                 isUser
-                  ? userBubbleClassName || 'bg-primary text-primary-foreground'
-                  : aiBubbleClassName || 'bg-muted text-foreground'
+                  ? userBubbleClassName || defaultUserBubble
+                  : aiBubbleClassName || defaultAiBubble
               )}
               data-message-author-role={role}
             >

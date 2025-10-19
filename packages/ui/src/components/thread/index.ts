@@ -7,4 +7,6 @@ export { ThreadSidebar } from './ThreadSidebar';
 export type { Conversation } from './ThreadSidebar';
 export { ConversationItemActions } from './ConversationItemActions';
 export { ThreadWelcome } from './ThreadWelcome';
+export { threadThemes, getThreadTheme, mergeThreadTheme } from './thread-themes';
+export { ThreadThemeProvider, useThreadTheme } from './ThreadThemeContext';
 export * from './types';
