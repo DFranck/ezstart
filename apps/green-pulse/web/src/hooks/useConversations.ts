@@ -23,11 +23,11 @@ export function useConversations() {
     setError(null)
 
     try {
-      const response = await callApi<{ conversations: any[] }>('/conversations')
+      const response = await callApi<{ success: boolean; data: { conversations: any[] } }>('/conversations')
 
-      if (response.ok && response.data?.conversations) {
+      if (response.ok && response.data?.data?.conversations) {
         setConversations(
-          response.data.conversations.map((conv: any) => ({
+          response.data.data.conversations.map((conv: any) => ({
             ...conv,
             createdAt: new Date(conv.createdAt),
             updatedAt: new Date(conv.updatedAt),
