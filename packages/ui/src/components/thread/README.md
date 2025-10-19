@@ -204,8 +204,7 @@ export default function ChatPage() {
 ```json
 {
   "message": "Hello, how are you?",
-  "session_id": "session_123",
-  "extract_esg": false
+  "session_id": "session_123"
 }
 ```
 
@@ -268,22 +267,30 @@ Tous les composants utilisent Tailwind CSS et peuvent être personnalisés :
 />
 ```
 
-## 📱 Exemple : Green Pulse LIA
+## 📱 Exemples d'Implémentation
 
-Voir l'implémentation complète dans :
+### GreenPulse - AI Sustainability Chat
 - `@ezstart/apps/green-pulse/web/src/components/lia/`
-- `@ezstart/apps/green-pulse/web/src/app/[locale]/lia/page.tsx`
+- Format: OpenAI-style conversation avec session tracking
 
-## 🔄 Pattern de réutilisation
+### WhatsApp Style (exemple)
+- Messages bidirectionnels avec media upload
+- Format: Real-time messaging avec read receipts
+
+### Support Client (exemple)
+- Agent response avec typing indicator
+- Format: Department routing + priority
+
+## 🔄 Pattern de Réutilisation
 
 Pour chaque nouveau projet :
 
-1. **Copier** `ThreadProvider.tsx` et `LiaThread.tsx`
-2. **Renommer** selon votre contexte (ex: `SupportThread`, `AIThread`)
+1. **Copier** `ThreadProvider.tsx` depuis un projet existant
+2. **Renommer** selon votre contexte (ex: `ChatProvider`, `SupportProvider`, `MessagingProvider`)
 3. **Configurer** l'endpoint et les formats dans la page
-4. **Personnaliser** les textes et styles
+4. **Personnaliser** les textes, styles, et features
 
-Exemple pour un support client :
+Exemple générique :
 
 ```tsx
 // src/components/support/SupportProvider.tsx
