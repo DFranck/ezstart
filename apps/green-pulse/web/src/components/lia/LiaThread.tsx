@@ -120,6 +120,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
   return (
     <ThreadLayout
       colorScheme="green"
+      mobileFooterOffset="pb-16" // 64px for mobile bottom nav
       sidebar={
         <ThreadSidebar
           conversations={conversations}

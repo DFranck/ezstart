@@ -23,18 +23,15 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
     router.push(newPath)
   }
 
-  // Hide footer on full-page layouts like chat and lia
+  // Hide header/footer on full-page layouts like chat (but keep mobile nav on /lia)
   const isChatPage = pathname?.includes('/chat')
-  const isLiaPage = pathname?.includes('/lia')
-  const isFullPageLayout = isChatPage || isLiaPage
 
   return (
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
-      showHeader={!isFullPageLayout}
-      showFooter={!isFullPageLayout}
-      hideBottomNavOnMobile={isFullPageLayout}
+      showHeader={!isChatPage}
+      showFooter={!isChatPage}
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">
