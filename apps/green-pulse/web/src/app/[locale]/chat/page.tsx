@@ -11,7 +11,7 @@ export default function LiaPage() {
 
   const config = useMemo(
     () => ({
-      endpoint: `${getApiUrl('green-pulse')}/chat`,
+      endpoint: `${getApiUrl('green-pulse')}/api/chat`,
       method: 'POST' as const,
       headers: {
         'Content-Type': 'application/json',
