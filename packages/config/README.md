@@ -97,6 +97,16 @@ if (isProduction()) {
 const env = getCurrentEnvironment()  // 'local' | 'development' | 'production'
 ```
 
+**Environment Detection Strategy:**
+
+- **Server-side (SSR):** Uses `process.env.VERCEL_ENV` or `process.env.NODE_ENV`
+- **Client-side (CSR):** Detects from `window.location.hostname`
+  - Production domains: `www.ai-greenpulse.com`, `*.ezstart.xyz`, `www.asc-tcd.com`
+  - Development domains: `*.vercel.app`
+  - Local: `localhost`, `127.0.0.1`
+
+This ensures `getApiUrl()` and `getWebUrl()` work correctly in both SSR and CSR contexts.
+
 ### Get App URLs (Convenience)
 
 ```typescript

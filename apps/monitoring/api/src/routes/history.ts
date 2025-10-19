@@ -50,6 +50,7 @@ historyRouter.get('/project/:projectId', async (req, res) => {
           .lean()
           .exec()) as any[]
 
+        // No data = return null (will be filtered out)
         if (history.length === 0) return null
 
         const totalChecks = history.length
@@ -77,15 +78,18 @@ historyRouter.get('/project/:projectId', async (req, res) => {
       })
     )
 
-    // Filter out null results (services that don't exist)
+    // Filter out null results (services with no data)
     const validHistories = histories.filter(h => h !== null)
 
+    // Empty data is OK (200), return empty array
     res.json({
       projectId,
       hours,
       services: validHistories,
     })
   } catch (error) {
+    // Real error (DB connection, query failure, etc) = 500
+    console.error('[History] Error fetching project history:', error)
     res.status(500).json({
       error: 'Failed to fetch project history',
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -138,6 +142,7 @@ historyRouter.get('/:serviceId', async (req, res) => {
         ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
         : null
 
+    // Empty data is OK (200), return empty history
     res.json({
       serviceId,
       hours,
@@ -153,6 +158,8 @@ historyRouter.get('/:serviceId', async (req, res) => {
       })),
     })
   } catch (error) {
+    // Real error (DB connection, query failure, etc) = 500
+    console.error('[History] Error fetching service history:', error)
     res.status(500).json({
       error: 'Failed to fetch history',
       message: error instanceof Error ? error.message : 'Unknown error',

@@ -140,6 +140,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5070',
+      development: 'https://monitor-5qul.onrender.com', // Same as production (Render)
       production: 'https://monitor-5qul.onrender.com',
     },
   },
@@ -245,19 +246,50 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
 
 /**
  * Get the current environment based on NODE_ENV or VERCEL_ENV
+ * Supports both server-side (Node.js) and client-side (browser) detection
  */
 export function getCurrentEnvironment(): Environment {
-  // Vercel specific env var
+  // Server-side: Check Vercel env var first
   if (typeof process !== 'undefined' && process.env.VERCEL_ENV) {
     return process.env.VERCEL_ENV as Environment
   }
 
-  // Standard NODE_ENV
-  const nodeEnv = typeof process !== 'undefined' ? process.env.NODE_ENV : 'development'
+  // Server-side: Standard NODE_ENV
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+    return 'production'
+  }
 
-  if (nodeEnv === 'production') return 'production'
-  if (nodeEnv === 'development') return 'development'
-  return 'local'
+  // Client-side: Detect from window.location.hostname
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+
+    // Production domains
+    if (
+      hostname === 'www.ai-greenpulse.com' ||
+      hostname === 'www.ezstart.xyz' ||
+      hostname === 'ezauth.ezstart.xyz' ||
+      hostname === 'ezbill.ezstart.xyz' ||
+      hostname === 'ezpay.ezstart.xyz' ||
+      hostname === 'ezfengshui.ezstart.xyz' ||
+      hostname === 'tower-defense.ezstart.xyz' ||
+      hostname === 'www.asc-tcd.com'
+    ) {
+      return 'production'
+    }
+
+    // Development domains (Vercel preview)
+    if (hostname.endsWith('.vercel.app')) {
+      return 'development'
+    }
+
+    // Local development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'local'
+    }
+  }
+
+  // Fallback: development (safe default for SSR)
+  return 'development'
 }
 
 /**
