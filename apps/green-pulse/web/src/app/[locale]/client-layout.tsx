@@ -23,15 +23,20 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
     router.push(newPath)
   }
 
-  // Hide header/footer on full-page layouts like chat (but keep mobile nav on /lia)
+  // Hide header/footer/mobile-nav on full-page layouts
   const isChatPage = pathname?.includes('/chat')
+  const isLiaPage = pathname?.includes('/lia')
 
   return (
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
-      showHeader={!isChatPage}
-      showFooter={!isChatPage}
+      showHeader={!isChatPage && !isLiaPage}
+      showFooter={!isChatPage && !isLiaPage}
+      bottomNavigation={isLiaPage ? undefined : [
+        { href: '/', label: 'Home', icon: 'lucide:Home' },
+        { href: '/lia', label: 'LIA', icon: 'lucide:Bot' },
+      ]}
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">
@@ -72,10 +77,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           <ThemeSwitcher />
         </Div>
       }
-      bottomNavigation={[
-        { href: '/', label: 'Home', icon: 'lucide:Home' },
-        { href: '/lia', label: 'LIA', icon: 'lucide:Bot' },
-      ]}
       LinkComponent={Link}
     >
       {children}
