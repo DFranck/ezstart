@@ -18,13 +18,13 @@ import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Div, Spinner } from '@ezstart/ui/components'
-import { redirect, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 
 const DashboardPage = () => {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, login } = useAuth()
   const { clients, companies, paymentMethods, invoices, quotes, receipts, refetchAll, loading } =
     useBillingContext()
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
@@ -41,9 +41,20 @@ const DashboardPage = () => {
     undefined
   )
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      login()
+    }
+  }, [isAuthenticated, loading, login])
+
+  // Show loading while checking auth
   if (!isAuthenticated || !user) {
-    redirect('/')
-    return null
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <Spinner variant="fancy" size="xl" text="Checking authentication..." textSize="md" />
+      </div>
+    )
   }
 
   const hasClients = clients && clients.length > 0

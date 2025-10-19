@@ -29,9 +29,8 @@ export default function HomePage() {
         {/* Logo */}
         <Card className="mt-8 mb-4 md:mb-8" variant="ghost">
           <CardHeader className="flex items-center justify-center gap-2">
-            <div className="w-12 h-12 bg-gradient-client rounded-xl flex items-center justify-center mb-2">
-              <Icon name="lucide:Receipt" className="w-6 h-6 text-white" />
-            </div>
+            <Icon name="custom:Ezbill" size={24} className="md:hidden" />
+            <Icon name="custom:Ezbill" size={32} className="hidden md:flex" />
             <H1 className="bg-gradient-to-r from-ezbill-client to-ezbill-invoice bg-clip-text text-transparent w-fit">
               EZBill
             </H1>
