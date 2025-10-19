@@ -4,6 +4,7 @@ import { LoginButton } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { Button, ClientLayout, Div, H1, Icon, LocaleSwitcher } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React from 'react'
@@ -34,7 +35,8 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">
-            <Icon name="lucide:Leaf" size={16} fontSize={16} />
+            <Image src="/logo.png" alt="Logo" width={32} height={32} className="mr-2" />
+            {/* <Icon name="lucide:Leaf" size={16} fontSize={16} /> */}
             <H1 size={'sm'}>Green Pulse</H1>
           </Link>
         </Button>

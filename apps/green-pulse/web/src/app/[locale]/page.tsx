@@ -1,8 +1,10 @@
 'use client'
 
+import { getApiUrl } from '@ezstart/config/urls'
 import {
   Button,
   Card,
+  Div,
   H1,
   H2,
   H3,
@@ -14,8 +16,8 @@ import {
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
-import { getApiUrl } from '@ezstart/config/urls'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useState } from 'react'
 
 export default function HomePage() {
@@ -72,9 +74,14 @@ export default function HomePage() {
         size={'full'}
         className="text-center dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900 bg-gradient-to-br from-green-50 to-blue-50 "
       >
-        <H1 className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-          {t('hero.title')}
-        </H1>
+        {' '}
+        <Div layout={'row'}>
+          <Image src="/logo.png" alt="Logo" width={60} height={60} className="mr-2" />
+
+          <H1 className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            {t('hero.title')}
+          </H1>
+        </Div>
         <div>
           <H2 size={'h3'}>{t('hero.subtitle')}</H2>
           <TypewriterEffectSmooth
@@ -92,7 +99,6 @@ export default function HomePage() {
           />
           <P>{t('hero.description')}</P>
         </div>
-
         <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-2xl mx-auto">
           <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
           <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -290,11 +296,11 @@ export default function HomePage() {
       <Section size={'xl'} className="max-w-full bg-gradient-to-r from-green-600 to-blue-600 ">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
+            {' '}
             <H3 className="text-3xl lg:text-4xl font-bold text-primary-foreground mb-6">
               {t('cta.title')}
             </H3>
             <P className="text-xl text-primary-foreground/90 mb-8">{t('cta.description')}</P>
-
             <form
               onSubmit={handleEmailSubmit}
               className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"

@@ -9,6 +9,14 @@ import ClientLayout from './client-layout'
 export const metadata: Metadata = {
   title: 'Green-pulse',
   description: 'Green-pulse application',
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 interface RootLayoutProps {
