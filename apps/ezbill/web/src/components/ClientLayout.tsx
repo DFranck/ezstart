@@ -40,11 +40,9 @@ const ClientLayout = ({
         <div className="flex items-center space-x-4">
           <Link
             href={isAuthenticated ? '/dashboard' : '/'}
-            className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary/80 rounded-xl flex items-center justify-center">
-              <Icon name="lucide:Receipt" className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <Icon name="custom:Ezbill" size={30} />
             <div>
               <H1
                 size={'h5'}
