@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react'
 export default function LiaPage() {
   const sessionId = useMemo(() => `lia_${Date.now()}`, [])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
+  const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
 
   const config = useMemo(
     () => ({
@@ -36,13 +37,17 @@ export default function LiaPage() {
         if (data.data?.conversation_id && !activeConversationId) {
           console.log('✅ Conversation created:', data.data.conversation_id)
           setActiveConversationId(data.data.conversation_id)
+          // Trigger conversation list reload
+          if (onConversationCreated) {
+            onConversationCreated()
+          }
         }
       },
       onError: (error: Error) => {
         console.error('LIA Chat Error:', error)
       },
     }),
-    [sessionId, activeConversationId]
+    [sessionId, activeConversationId, onConversationCreated]
   ) // Re-create when activeConversationId changes
 
   return (
@@ -50,6 +55,7 @@ export default function LiaPage() {
       <LiaThread
         activeConversationId={activeConversationId}
         setActiveConversationId={setActiveConversationId}
+        onRegisterConversationCreatedCallback={setOnConversationCreated}
       />
     </ThreadProvider>
   )

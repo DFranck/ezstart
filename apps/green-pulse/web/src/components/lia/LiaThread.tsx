@@ -17,9 +17,14 @@ import { useThreadContext } from './ThreadProvider'
 type LiaThreadProps = {
   activeConversationId: string | null
   setActiveConversationId: (id: string | null) => void
+  onRegisterConversationCreatedCallback?: (callback: () => void) => void
 }
 
-export function LiaThread({ activeConversationId, setActiveConversationId }: LiaThreadProps) {
+export function LiaThread({
+  activeConversationId,
+  setActiveConversationId,
+  onRegisterConversationCreatedCallback
+}: LiaThreadProps) {
   const {
     messages,
     loading,
@@ -39,10 +44,18 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     renameConversation,
     softDeleteConversation,
     useConversation,
+    loadConversations,
   } = useConversations()
 
   // Use React Query to fetch conversation (CACHED! ✅)
   const { data: conversationData } = useConversation(activeConversationId)
+
+  // Register callback to reload conversations when auto-created
+  useEffect(() => {
+    if (onRegisterConversationCreatedCallback) {
+      onRegisterConversationCreatedCallback(() => loadConversations)
+    }
+  }, [onRegisterConversationCreatedCallback, loadConversations])
 
   // Load messages from cache when conversationData changes
   useEffect(() => {
