@@ -9,6 +9,12 @@ export interface MetadataConfig {
   ogImage?: string
   twitterHandle?: string
   locale?: string
+  /** Custom icons (overrides default favicon detection) */
+  icons?: {
+    icon?: string | Array<{ url: string; sizes?: string; type?: string }>
+    apple?: string | Array<{ url: string; sizes?: string; type?: string }>
+    shortcut?: string
+  }
 }
 
 /**
@@ -37,6 +43,7 @@ export function createMetadata(config: MetadataConfig): Metadata {
     ogImage = `${domain}/og-image.png`,
     twitterHandle = '@ezstart',
     locale = 'en_US',
+    icons,
   } = config
 
   return {
@@ -94,6 +101,7 @@ export function createMetadata(config: MetadataConfig): Metadata {
       initialScale: 1,
       maximumScale: 5,
     },
+    ...(icons && { icons }), // Add icons if provided
   }
 }
 

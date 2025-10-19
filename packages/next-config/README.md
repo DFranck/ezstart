@@ -14,29 +14,51 @@ Generate all PWA icons, favicon, and Apple Touch Icon from a single source logo!
 
 ### Quick Start
 
-1. Add a logo source to your `public/` folder:
-   - `logo.png` (recommended: 512x512 or higher)
-   - `logo.svg` (vector format, auto-scales perfectly)
-   - `logo-source.png`
+1. **Add a logo source** to your `public/` folder (or skip for automatic fallback):
+   - `logo.svg` ⭐ **Recommended** - Vector format, perfect scaling (priority #1)
+   - `logo.png` - PNG format, 512x512px minimum (priority #2)
+   - `logo-source.svg` / `logo-source.png` - Alternative source names
 
-2. Run the generator:
+2. **Run the generator:**
    ```bash
    cd apps/your-app/web
    node ../../../packages/next-config/scripts/generate-icons.js
    ```
 
-3. **Generated files:**
-   - `/icons/icon-{16,32,72,96,128,144,152,192,384,512}x{size}.png` - PWA icons
+3. **Generated files:** (12 files total)
+   - `/icons/icon-{16,32,72,96,128,144,152,192,384,512}x{size}.png` - 10 PWA icons
    - `/favicon.png` - Browser favicon (32x32)
-   - `/apple-touch-icon.png` - iOS home screen icon (180x180)
+   - `/apple-touch-icon.png` - iOS home screen icon (180x180, opaque)
 
 ### Features
 
-✅ **Auto-detection** - Finds your logo automatically
-✅ **Optimized** - Uses Sharp for maximum compression
-✅ **Transparent backgrounds** - Perfect for PWAs
-✅ **iOS compatible** - Generates apple-touch-icon with opaque background
+✅ **Auto-detection** - Finds logo from 8 possible filenames (prioritizes SVG)
+✅ **Fallback logo** - Auto-generates gradient logo with app initials if no source found
+✅ **Ultra-optimized** - Sharp compression (5KB for 512px vs ~200KB unoptimized)
+✅ **Transparent backgrounds** - PNG icons with alpha channel for PWAs
+✅ **iOS compatible** - Apple Touch Icon with opaque white background
 ✅ **One command** - Generates all 12 files instantly
+
+### Real-World Examples
+
+**EZBill (SVG logo):**
+```bash
+cd apps/ezbill/web
+node ../../../packages/next-config/scripts/generate-icons.js
+# ✅ Found logo.svg → Generated 12 optimized icons (total ~23KB)
+```
+
+**EZAuth (no logo - fallback):**
+```bash
+cd apps/ezauth/web
+node ../../../packages/next-config/scripts/generate-icons.js
+# ✅ No logo found → Generated fallback with "EA" initials (gradient purple)
+```
+
+**Results:**
+- `icon-512x512.png`: **5.1KB** (SVG source) vs **2.2KB** (fallback)
+- `apple-touch-icon.png`: **2.5KB** (opaque white background)
+- `favicon.png`: **1.1KB** (ultra-compressed)
 
 ### Integration with Build
 
