@@ -23,13 +23,14 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   // Hide footer on full-page layouts like chat
-  const isLiaPage = pathname?.includes('/lia')
+  const isChatPage = pathname?.includes('/chat')
 
   return (
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
-      showFooter={!isLiaPage}
+      showHeader={!isChatPage}
+      showFooter={!isChatPage}
       headerLeftContent={
         <Button asChild variant={'ghost'}>
           <Link href="/">
@@ -47,7 +48,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
             </Link>
           </Button>
           <Button asChild variant={'ghost'} size={'sm'}>
-            <Link href="/lia">
+            <Link href="/chat">
               <Icon name="lucide:Bot" size={16} />
               Chat
             </Link>

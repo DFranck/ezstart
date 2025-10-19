@@ -1,5 +1,6 @@
 'use client'
 
+import { useConversations } from '@/hooks/useConversations'
 import {
   Conversation,
   Thread,
@@ -11,7 +12,6 @@ import {
 } from '@ezstart/ui/components'
 import { useCallback } from 'react'
 import { useThreadContext } from './ThreadProvider'
-import { useConversations } from '@/hooks/useConversations'
 
 type LiaThreadProps = {
   activeConversationId: string | null
@@ -19,8 +19,16 @@ type LiaThreadProps = {
 }
 
 export function LiaThread({ activeConversationId, setActiveConversationId }: LiaThreadProps) {
-  const { messages, loading, streamingText, sendMessage, resendLastMessage, isNewThread, clearMessages, loadMessages } =
-    useThreadContext()
+  const {
+    messages,
+    loading,
+    streamingText,
+    sendMessage,
+    resendLastMessage,
+    isNewThread,
+    clearMessages,
+    loadMessages,
+  } = useThreadContext()
 
   const {
     conversations: apiConversations,
@@ -54,26 +62,29 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
   }, [createConversation, clearMessages])
 
   // Handle conversation select
-  const handleConversationSelect = useCallback(async (id: string) => {
-    try {
-      setActiveConversationId(id)
+  const handleConversationSelect = useCallback(
+    async (id: string) => {
+      try {
+        setActiveConversationId(id)
 
-      // Load conversation with messages
-      const conversation = await loadConversation(id)
-      if (conversation && conversation.messages) {
-        // Convert API messages to ThreadMessage format
-        const threadMessages = conversation.messages.map((msg: any) => ({
-          id: `${msg.role}-${msg.timestamp.getTime()}`,
-          role: msg.role === 'assistant' ? 'ai' : msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp.toISOString(),
-        }))
-        loadMessages(threadMessages)
+        // Load conversation with messages
+        const conversation = await loadConversation(id)
+        if (conversation && conversation.messages) {
+          // Convert API messages to ThreadMessage format
+          const threadMessages = conversation.messages.map((msg: any) => ({
+            id: `${msg.role}-${msg.timestamp.getTime()}`,
+            role: msg.role === 'assistant' ? 'ai' : msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp.toISOString(),
+          }))
+          loadMessages(threadMessages)
+        }
+      } catch (error) {
+        console.error('Failed to load conversation messages:', error)
       }
-    } catch (error) {
-      console.error('Failed to load conversation messages:', error)
-    }
-  }, [loadConversation, loadMessages, setActiveConversationId])
+    },
+    [loadConversation, loadMessages, setActiveConversationId]
+  )
 
   // Handle rename
   const handleRename = useCallback(
@@ -106,7 +117,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
 
   return (
     <ThreadLayout
-      headerOffset="top-16"
+      // headerOffset="top-16"
       sidebar={
         <ThreadSidebar
           conversations={conversations}
