@@ -4,6 +4,8 @@ import { createContext, useContext } from 'react';
 
 type ThreadLayoutContextValue = {
   closeSidebar: () => void;
+  toggleSidebar: () => void;
+  isSidebarOpen: boolean;
   mobileFooterOffset?: string;
 };
 

@@ -8,6 +8,7 @@ import {
   ThreadLayout,
   ThreadMessages,
   ThreadSidebar,
+  ThreadSidebarToggle,
   ThreadWelcome,
 } from '@ezstart/ui/components'
 import { useCallback, useEffect } from 'react'
@@ -121,6 +122,12 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     <ThreadLayout
       colorScheme="green"
       mobileFooterOffset="pb-16" // 64px for mobile bottom nav
+      sidebarToggle={
+        <ThreadSidebarToggle
+          className="fixed left-4 bottom-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
+          variant="default"
+        />
+      }
       sidebar={
         <ThreadSidebar
           conversations={conversations}

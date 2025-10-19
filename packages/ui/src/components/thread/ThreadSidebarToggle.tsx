@@ -1,0 +1,55 @@
+'use client';
+
+import { cn } from '../../lib/utils';
+import { Button } from '../button';
+import { Icon } from '../icon';
+import { useThreadLayout } from './ThreadLayoutContext';
+
+type ThreadSidebarToggleProps = {
+  className?: string;
+  size?: 'sm' | 'default' | 'lg' | 'icon';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
+  iconSize?: number;
+};
+
+/**
+ * Reusable sidebar toggle button for Thread components.
+ * Uses ThreadLayoutContext to control sidebar state.
+ *
+ * @example
+ * // In app header
+ * <ThreadSidebarToggle className="mr-4" />
+ *
+ * // Floating button (default ThreadLayout position)
+ * <ThreadSidebarToggle
+ *   className="fixed left-4 top-4 z-50 md:hidden"
+ *   variant="outline"
+ * />
+ */
+export function ThreadSidebarToggle({
+  className,
+  size = 'icon',
+  variant = 'outline',
+  iconSize = 20,
+}: ThreadSidebarToggleProps) {
+  const layoutContext = useThreadLayout();
+
+  if (!layoutContext) {
+    console.warn('ThreadSidebarToggle must be used within ThreadLayout');
+    return null;
+  }
+
+  const { toggleSidebar, isSidebarOpen } = layoutContext;
+
+  return (
+    <Button
+      onClick={toggleSidebar}
+      size={size}
+      variant={variant}
+      className={cn(className)}
+      aria-label={isSidebarOpen ? 'Close conversations' : 'Open conversations'}
+    >
+      <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={iconSize} />
+    </Button>
+  );
+}

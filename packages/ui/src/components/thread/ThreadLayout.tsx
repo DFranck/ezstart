@@ -11,6 +11,7 @@ import { ColorScheme, ThreadTheme } from './types';
 type ThreadLayoutProps = {
   children: ReactNode;
   sidebar?: ReactNode;
+  sidebarToggle?: ReactNode; // Custom toggle button. If provided, default button is hidden.
   showSidebar?: boolean;
   sidebarWidth?: string;
   headerOffset?: string; // Offset for fixed header (e.g., 'top-16', 'top-20')
@@ -25,6 +26,7 @@ type ThreadLayoutProps = {
 function ThreadLayoutInner({
   children,
   sidebar,
+  sidebarToggle,
   showSidebar = true,
   sidebarWidth = 'w-80',
   headerOffset = 'top-0',
@@ -62,28 +64,32 @@ function ThreadLayoutInner({
   }
 
   return (
-    <ThreadLayoutProvider value={{ closeSidebar, mobileFooterOffset }}>
+    <ThreadLayoutProvider value={{ closeSidebar, toggleSidebar, isSidebarOpen, mobileFooterOffset }}>
       <div className={cn(
         'relative flex w-full h-screen',
         theme.background,
         mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
         className
       )}>
-      {/* Mobile Toggle Button */}
-      <Button
-        onClick={toggleSidebar}
-        size="icon"
-        variant="outline"
-        className={cn(
-          'fixed left-4 z-50 md:hidden',
-          'shadow-lg backdrop-blur-sm bg-background/80',
-          headerOffset,
-          mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
-        )}
-        aria-label="Toggle conversations"
-      >
-        <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={20} />
-      </Button>
+      {/* Mobile Toggle Button - Default or Custom */}
+      {sidebarToggle ? (
+        sidebarToggle
+      ) : (
+        <Button
+          onClick={toggleSidebar}
+          size="icon"
+          variant="outline"
+          className={cn(
+            'fixed left-4 z-50 md:hidden',
+            'shadow-lg backdrop-blur-sm bg-background/80',
+            headerOffset,
+            mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
+          )}
+          aria-label="Toggle conversations"
+        >
+          <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={20} />
+        </Button>
+      )}
 
       {/* Sidebar - Desktop: always visible, Mobile: overlay */}
       <aside
