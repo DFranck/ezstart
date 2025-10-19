@@ -81,12 +81,15 @@ export default function MonitoringDashboard() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000) // 30s timeout
 
+      // Add timestamp to bypass cache
+      const timestamp = Date.now()
+
       const [projectsRes, auditsRes] = await Promise.all([
-        fetch(`${MONITORING_API_URL}/api/projects`, {
+        fetch(`${MONITORING_API_URL}/api/projects?_t=${timestamp}`, {
           cache: 'no-store',
           signal: controller.signal,
         }),
-        fetch(`${MONITORING_API_URL}/api/audits`, {
+        fetch(`${MONITORING_API_URL}/api/audits?_t=${timestamp}`, {
           cache: 'no-store',
           signal: controller.signal,
         }),
