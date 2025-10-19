@@ -79,7 +79,7 @@ export function ThreadComposer({
   return (
     <div
       className={cn(
-        'w-full z-10',
+        'w-full z-10 pb-6',
         'transition-transform duration-300 ease-in-out',
         className
       )}

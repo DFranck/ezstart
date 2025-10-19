@@ -12,6 +12,7 @@ type ThreadMessagesProps<TMessage extends ThreadMessageType = ThreadMessageType>
   loadingText?: string;
   onRetry?: () => void;
   onCopy?: (content: string) => void;
+  onEdit?: (messageId: string, newContent: string) => void;
   formatResponseTime?: (time: number) => string;
   userBubbleClassName?: string;
   aiBubbleClassName?: string;
@@ -26,6 +27,7 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
   loadingText = 'Loading',
   onRetry,
   onCopy,
+  onEdit,
   formatResponseTime,
   userBubbleClassName,
   aiBubbleClassName,
@@ -43,11 +45,14 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
 
         const key = (msg as any).id ?? `${msg.timestamp ?? 't'}-${index}`;
         const isLast = index === messages.length - 1;
+        const hasResponse = index < messages.length - 1;
 
         return (
           <ThreadMessage
             key={key}
             role={msg.role}
+            messageId={(msg as any).id}
+            hasResponse={hasResponse}
             meta={
               msg.role === 'ai'
                 ? {
@@ -59,6 +64,7 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
             isLastUserMessage={isLast && msg.role === 'user'}
             onRetry={isLast && msg.role === 'user' ? onRetry : undefined}
             onCopy={onCopy}
+            onEdit={msg.role === 'user' ? onEdit : undefined}
             formatResponseTime={formatResponseTime}
             userBubbleClassName={userBubbleClassName}
             aiBubbleClassName={aiBubbleClassName}
@@ -95,6 +101,9 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
           )}
         </ThreadMessage>
       )}
+
+      {/* Spacing after last message */}
+      <div className='h-6' />
     </div>
   );
 }

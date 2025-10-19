@@ -88,21 +88,30 @@ export function ConversationItemActions({
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* Menu Trigger Button */}
-      <button
+      {/* Menu Trigger - div instead of button to avoid nested button error */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={(e) => {
           e.stopPropagation();
           setIsMenuOpen(!isMenuOpen);
         }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }
+        }}
         className={cn(
-          'p-1 rounded hover:bg-accent/50 transition-opacity',
+          'p-1 rounded hover:bg-accent/50 transition-opacity cursor-pointer',
           'opacity-0 group-hover:opacity-100',
           isMenuOpen && 'opacity-100'
         )}
         aria-label="More actions"
       >
         <Icon name="lucide:MoreVertical" size={16} />
-      </button>
+      </div>
 
       {/* Dropdown Menu */}
       {isMenuOpen && (

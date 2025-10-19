@@ -25,6 +25,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
     streamingText,
     sendMessage,
     resendLastMessage,
+    editMessage,
     isNewThread,
     clearMessages,
     loadMessages,
@@ -140,6 +141,7 @@ export function LiaThread({ activeConversationId, setActiveConversationId }: Lia
           isNewThread={isNewThread}
           loadingText="LIA is thinking"
           onRetry={resendLastMessage}
+          onEdit={editMessage}
           formatResponseTime={time => `${(time / 1000).toFixed(2)}s`}
         />
       </Thread>

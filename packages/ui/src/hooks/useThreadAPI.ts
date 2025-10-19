@@ -21,6 +21,7 @@ export type UseThreadAPIReturn = {
   error: string | null;
   sendMessage: (message: string, files?: File[]) => Promise<void>;
   resendLastMessage: () => Promise<void>;
+  editMessage: (messageId: string, newContent: string) => Promise<void>;
   clearMessages: () => void;
   loadMessages: (messages: ThreadMessage[]) => void;
   isNewThread: boolean;
@@ -149,6 +150,30 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
     setStreamingText('');
   }, []);
 
+  const editMessage = useCallback(
+    async (messageId: string, newContent: string) => {
+      // Find the message index
+      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+      if (messageIndex === -1) return;
+
+      // Remove all messages after the edited message (including its AI response)
+      const messagesUpToEdit = messages.slice(0, messageIndex);
+
+      // Update the edited message content
+      const editedMessage: ThreadMessage = {
+        ...messages[messageIndex],
+        content: newContent,
+      };
+
+      // Set messages to include only up to the edited message
+      setMessages([...messagesUpToEdit, editedMessage]);
+
+      // Re-send the edited message to get a new AI response
+      await sendMessage(newContent);
+    },
+    [messages, sendMessage]
+  );
+
   const isNewThread = messages.length === 0;
 
   return {
@@ -158,6 +183,7 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
     error,
     sendMessage,
     resendLastMessage,
+    editMessage,
     clearMessages,
     loadMessages,
     isNewThread,
