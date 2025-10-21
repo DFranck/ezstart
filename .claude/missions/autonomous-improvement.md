@@ -206,7 +206,7 @@ type(scope): brief description
 | 1. Sentry | ⏭️ Skipped | 0h | - | Needs external Sentry account |
 | 2. Logging | ✅ Complete | 1.5h | 687a964 | Monitoring 35→70 (+35pts) |
 | 3. robots.txt | ✅ Complete | 0.2h | a1cf6d4 | Already existed, updated audit |
-| 4. Open Graph | ✅ Complete | 1h | - | SEO 65→80 (+15pts), 8 SVG images |
+| 4. Open Graph | ✅ Complete | 1h | 3dea828 | SEO 65→80 (+15pts), 8 SVG images |
 | 5. JSON-LD | ⏳ Pending | 0h | - | Next item |
 | 6. Root README | ⏳ Pending | 0h | - | Waiting |
 | 7. Package READMEs | ⏳ Pending | 0h | - | Waiting |
