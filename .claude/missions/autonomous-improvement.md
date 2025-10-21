@@ -208,7 +208,7 @@ type(scope): brief description
 | 2. Logging | ✅ Complete | 1.5h | 687a964 | Monitoring 35→70 (+35pts) |
 | 3. robots.txt | ✅ Complete | 0.2h | a1cf6d4 | Already existed, updated audit |
 | 4. Open Graph | ✅ Complete | 1h | 3dea828 | SEO 65→80 (+15pts), 8 SVG images |
-| 5. JSON-LD | ✅ Complete | 0.8h | - | SEO 80→85 (+5pts), schema-dts |
+| 5. JSON-LD | ✅ Complete | 0.8h | 363ac48 | SEO 80→85 (+5pts), schema-dts |
 | 6. Root README | ⏳ Pending | 0h | - | Waiting |
 | 7. Package READMEs | ⏳ Pending | 0h | - | Waiting |
 
