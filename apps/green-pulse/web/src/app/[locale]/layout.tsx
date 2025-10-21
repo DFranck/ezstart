@@ -2,13 +2,17 @@ import { Providers } from '@/providers/providers'
 import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
-import type { Metadata } from 'next'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { getMessages } from 'next-intl/server'
 import ClientLayout from './client-layout'
 
-export const metadata: Metadata = {
-  title: 'Green-pulse',
-  description: 'Green-pulse application',
+export const metadata = createMetadata({
+  appName: 'Green Pulse',
+  description: 'AI-powered sustainable development assistant - Track and improve your environmental impact',
+  domain: 'https://green-pulse-web.vercel.app',
+  keywords: ['sustainability', 'environment', 'AI', 'green', 'climate'],
+  themeColor: '#10b981',
+  ogImage: 'https://green-pulse-web.vercel.app/og-image.svg',
   icons: {
     icon: [
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
@@ -17,7 +21,9 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
-}
+})
+
+export const viewport = createViewport('#10b981')
 
 interface RootLayoutProps {
   children: React.ReactNode

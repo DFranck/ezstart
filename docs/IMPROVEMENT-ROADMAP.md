@@ -904,8 +904,8 @@ test('create and send invoice', async ({ page }) => {
 | 1 | Sentry | ⏭️ Skipped | 0h | 35 | - | Needs Sentry account setup |
 | 1 | Logging | ✅ Complete | 1.5h | 35 | 70 | Pino + @ezstart/logger |
 | 1 | robots.txt | ✅ Complete | 0.2h | 54 | 65 | Already exists via @ezstart/seo-config |
-| 1 | Open Graph | ⏳ Pending | 0h | 54 | 80 | |
-| 1 | JSON-LD | ⏳ Pending | 0h | 54 | 85 | |
+| 1 | Open Graph | ✅ Complete | 1h | 65 | 80 | createMetadata + 8 SVG images |
+| 1 | JSON-LD | ⏳ Pending | 0h | 80 | 85 | Next item |
 | 1 | Root README | ⏳ Pending | 0h | 68 | 75 | |
 | 1 | Package READMEs | ⏳ Pending | 0h | 68 | 85 | |
 | 2 | next-intl migration | ⏳ Pending | 0h | 65 | 80 | |

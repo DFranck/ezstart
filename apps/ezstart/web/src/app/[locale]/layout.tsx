@@ -2,11 +2,23 @@ import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import ClientLayout from './client-layout'
+
+export const metadata = createMetadata({
+  appName: 'EZStart',
+  description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
+  domain: 'https://ezstart-web.vercel.app',
+  keywords: ['development', 'platform', 'web apps', 'ezstart', 'tools'],
+  themeColor: '#000000',
+  ogImage: 'https://ezstart-web.vercel.app/og-image.svg',
+})
+
+export const viewport = createViewport('#000000')
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))

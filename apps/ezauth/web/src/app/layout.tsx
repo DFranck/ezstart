@@ -1,27 +1,27 @@
-'use client'
-
-import { AuthProvider } from '@ezstart/auth-sdk'
-import { ThemeProvider } from '@ezstart/next-theme'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { Providers } from '@/components/providers'
 import './globals.css'
 
-// Note: metadata must be exported from a non-client component
-// This will be moved to a separate metadata file if needed
+export const metadata = createMetadata({
+  appName: 'EZAuth',
+  description: 'EZStart centralized authentication service - Secure SSO for all EZStart applications',
+  domain: 'https://ezauth.vercel.app',
+  keywords: ['authentication', 'SSO', 'OAuth2', 'login', 'ezstart'],
+  themeColor: '#000000',
+  ogImage: 'https://ezauth.vercel.app/og-image.svg',
+})
+
+export const viewport = createViewport('#000000')
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>EZAuth - Authentication</title>
-        <meta name="description" content="EZStart centralized authentication service" />
-      </head>
       <body className="min-h-screen">
-        <ThemeProvider>
-          <AuthProvider appName="ezauth">
-            <div className="min-h-screen bg-background text-foreground flex items-center justify-center mx-2">
-              {children}
-            </div>
-          </AuthProvider>
-        </ThemeProvider>
+        <Providers>
+          <div className="min-h-screen bg-background text-foreground flex items-center justify-center mx-2">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   )
