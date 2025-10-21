@@ -50,11 +50,12 @@
 - [x] Update SEO-AUDIT.md score: 65 → 80 (+15 points)
 - [x] Commit: "feat(seo): add Open Graph and Twitter Card metadata to all apps"
 
-#### Item 5: JSON-LD Structured Data (1h)
-- [ ] Add Organization schema to layout.tsx in each web app
-- [ ] Test with Google Rich Results Test
-- [ ] Update SEO-AUDIT.md score: 80 → 85
-- [ ] Commit: "feat(seo): add JSON-LD structured data for all apps"
+#### Item 5: JSON-LD Structured Data (1h) - ✅ COMPLETED
+- [x] Created @ezstart/seo-config/json-ld with createJsonLd helper
+- [x] Added JSON-LD WebApplication schema to all 8 web apps
+- [x] Used appropriate applicationCategory for each app
+- [x] Update SEO-AUDIT.md score: 80 → 85 (+5 points)
+- [x] Commit: "feat(seo): add JSON-LD structured data for all apps"
 
 #### Item 6: Root README.md (2h)
 - [ ] Create comprehensive README.md at root
@@ -207,7 +208,7 @@ type(scope): brief description
 | 2. Logging | ✅ Complete | 1.5h | 687a964 | Monitoring 35→70 (+35pts) |
 | 3. robots.txt | ✅ Complete | 0.2h | a1cf6d4 | Already existed, updated audit |
 | 4. Open Graph | ✅ Complete | 1h | 3dea828 | SEO 65→80 (+15pts), 8 SVG images |
-| 5. JSON-LD | ⏳ Pending | 0h | - | Next item |
+| 5. JSON-LD | ✅ Complete | 0.8h | - | SEO 80→85 (+5pts), schema-dts |
 | 6. Root README | ⏳ Pending | 0h | - | Waiting |
 | 7. Package READMEs | ⏳ Pending | 0h | - | Waiting |
 

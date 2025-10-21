@@ -3,6 +3,7 @@ import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
@@ -19,6 +20,13 @@ export const metadata = createMetadata({
 })
 
 export const viewport = createViewport('#000000')
+
+const jsonLd = createJsonLd({
+  appName: 'EZStart',
+  description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
+  url: 'https://ezstart-web.vercel.app',
+  applicationCategory: 'DeveloperApplication',
+})
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))
@@ -75,6 +83,10 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers messages={messages} locale={locale} timeZone={timeZone}>
           <ClientLayout>{children}</ClientLayout>
         </Providers>

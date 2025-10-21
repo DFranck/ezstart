@@ -4,6 +4,7 @@ import { PayProvider } from '@ezstart/pay-sdk'
 import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
@@ -27,6 +28,13 @@ export const metadata = createMetadata({
 
 export const viewport = createViewport('#10b981')
 
+const jsonLd = createJsonLd({
+  appName: 'Feng Shui Bagua',
+  description: "Application web pour l'analyse Feng Shui avec import de plans et roue d'orientation interactive",
+  url: 'https://ezfengshui.vercel.app',
+  applicationCategory: 'LifestyleApplication',
+})
+
 export default async function RootLayout({
   children,
   params,
@@ -40,6 +48,10 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <AuthProvider appName="fengshui">

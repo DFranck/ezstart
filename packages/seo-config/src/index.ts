@@ -6,3 +6,6 @@ export type { RobotsConfig } from './robots'
 
 export { createSitemap } from './sitemap'
 export type { SitemapConfig } from './sitemap'
+
+export { createJsonLd, createOrganizationJsonLd } from './json-ld'
+export type { JsonLdConfig } from './json-ld'

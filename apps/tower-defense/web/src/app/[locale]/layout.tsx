@@ -2,11 +2,19 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
+import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { Geist, Geist_Mono } from 'next/font/google'
 
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { PWAInstallPrompt } from '@ezstart/ui/components'
+
+const jsonLd = createJsonLd({
+  appName: 'Tower Defense',
+  description: 'Competitive multiplayer Tower Defense game with RNG shop mechanics and PvP battles',
+  url: 'https://tower-defense.vercel.app',
+  applicationCategory: 'GameApplication',
+})
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -66,6 +74,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ErrorBoundary>
           <ThemeProvider>
             <AuthProvider appName="tower-defense">
