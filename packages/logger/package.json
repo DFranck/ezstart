@@ -1,0 +1,31 @@
+{
+  "name": "@ezstart/logger",
+  "version": "0.0.1",
+  "description": "Structured logging with Pino for @ezstart monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": "20.18.x",
+    "pnpm": "10.12.x"
+  }
+}

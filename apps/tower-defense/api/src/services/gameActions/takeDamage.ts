@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import { InGamePlayerModel } from '../../models/InGamePlayer.js'
 
 interface TakeDamagePayload {

@@ -2,7 +2,8 @@
 
 import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { isDebug, logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
+import { isDebug } from '@ezstart/ui/lib'
 import { callApi, runWithFeedback } from '@ezstart/ui/utils'
 import { mockGames, type Game } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'

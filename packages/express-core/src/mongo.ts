@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { logger } from '@ezstart/logger'
 
 /**
  * Flag to track if connection is being established
@@ -54,7 +55,7 @@ export async function getMongo(): Promise<typeof mongoose> {
     mongoose.set('bufferCommands', false)
     mongoose.set('bufferTimeoutMS', 30000) // 30s instead of 10s
 
-    console.log(`🔌 [MongoDB] Connecting to database (${connectionSource})`)
+    logger.info({ source: connectionSource }, '🔌 [MongoDB] Connecting to database')
 
     try {
       await mongoose.connect(mongoUrl, {
@@ -72,13 +73,13 @@ export async function getMongo(): Promise<typeof mongoose> {
       // Test the connection with a ping
       if (mongoose.connection.db) {
         await mongoose.connection.db.admin().ping()
-        console.log(`✅ [MongoDB] Connected to '${mongoose.connection.name}' (read/write ready)`)
+        logger.info({ database: mongoose.connection.name }, '✅ [MongoDB] Connected (read/write ready)')
       } else {
-        console.log(`✅ [MongoDB] Connected to '${mongoose.connection.name}'`)
+        logger.info({ database: mongoose.connection.name }, '✅ [MongoDB] Connected')
       }
     } catch (error) {
       isConnecting = false
-      console.error('[MongoDB] ❌ Connection failed:', error)
+      logger.error({ error }, '[MongoDB] ❌ Connection failed')
       throw error
     }
   }
@@ -109,9 +110,9 @@ export function getConnectionState(): number {
  */
 export async function disconnectMongo(): Promise<void> {
   if (mongoose.connection.readyState !== 0) {
-    console.log('[MongoDB] Disconnecting...')
+    logger.info('[MongoDB] Disconnecting...')
     await mongoose.disconnect()
     isConnecting = false
-    console.log('[MongoDB] ✅ Disconnected')
+    logger.info('[MongoDB] ✅ Disconnected')
   }
 }

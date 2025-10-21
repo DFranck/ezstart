@@ -16,6 +16,8 @@
     "@ezstart/config": "workspace:*",
     "@ezstart/express-core": "workspace:*",
     "@ezstart/monitoring": "workspace:*",
+    "@sentry/node": "^10.20.0",
+    "@sentry/profiling-node": "^10.20.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "mongodb": "^6.12.0",

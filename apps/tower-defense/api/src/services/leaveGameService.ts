@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { getIO } from '../socketInstance.js'

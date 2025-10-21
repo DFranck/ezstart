@@ -3,7 +3,7 @@
 import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { useGameSync } from '@/hooks/useGameSync'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import type { PlayerStatus } from '@tower-defense/config'
 import type { Game, GameAction, InGamePlayer, JoinGameResponse } from '@tower-defense/types'
 import { useEffect, useRef, useState } from 'react'

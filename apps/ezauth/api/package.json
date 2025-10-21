@@ -14,24 +14,26 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/express-core": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "express": "^4.18.2",
-    "mongoose": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
+    "@ezstart/express-core": "workspace:*",
+    "@sentry/node": "^10.20.0",
+    "@sentry/profiling-node": "^10.20.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "helmet": "^7.1.0",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
-    "@types/express": "^4.17.17",
-    "@types/jsonwebtoken": "^9.0.3",
     "@types/bcryptjs": "^2.4.4",
     "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.3",
     "@types/node": "^20.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.7.3"

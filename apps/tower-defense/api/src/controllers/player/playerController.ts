@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import { Request, Response } from 'express'
 import { findOrCreatePlayer } from '../../services/player/playerService.js'
 

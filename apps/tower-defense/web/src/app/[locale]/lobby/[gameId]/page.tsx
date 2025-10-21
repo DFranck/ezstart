@@ -1,6 +1,6 @@
 'use client'
 
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import { callApi } from '@ezstart/ui/utils'
 import { LeaveGameButton } from '../../../../components/LeaveGameButton'
 import { LobbyWrapper } from './LobbyWrapper'

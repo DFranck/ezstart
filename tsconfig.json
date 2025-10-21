@@ -10,6 +10,7 @@
   "references": [
     // Core packages (ordre de dépendance)
     { "path": "./packages/types" },
+    { "path": "./packages/logger" },
 
     // Infrastructure packages
     { "path": "./packages/express-core" },

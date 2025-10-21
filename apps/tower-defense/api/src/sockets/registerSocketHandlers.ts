@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import type { Socket } from 'socket.io'
 import { handleGameAction } from '../handlers/gameActions.js'
 import { handleGameActionWithManagers } from '../handlers/gameActionsManagers.js'
