@@ -20,9 +20,20 @@
 
 **Execute in order:**
 
-#### Item 1: Sentry Setup (4h) - ⏭️ SKIPPED
-- [x] SKIPPED - Needs external config (Sentry account + DSN)
-- [x] Can be added later in 30min when Sentry account is created
+#### Item 1: Sentry Setup (4h) - ✅ COMPLETED (CRITICAL APIs)
+- [x] Created Sentry organization "ezstart" (https://ezstart.sentry.io)
+- [x] Created 3 critical Sentry projects (EZAuth, EZPay, Monitoring)
+- [x] Centralized Sentry config in @ezstart/logger/sentry.ts
+- [x] Created instrument.mts pattern for ESM modules
+- [x] Migrated EZAuth API to centralized Sentry (tested, 6 events)
+- [x] Migrated EZPay API to centralized Sentry (tested, working)
+- [x] Migrated Monitoring API to centralized Sentry (build validated)
+- [x] Fixed critical bug: setupExpressErrorHandler AFTER routes
+- [x] Documented Sentry architecture in CLAUDE.md (150+ lines)
+- [x] Reduced code duplication by 75% (28 lines → 7 lines per API)
+- [x] Update MONITORING-AUDIT.md score: 70 → 75 (+5 points)
+- [x] Commit: "feat: centralize Sentry error tracking for 3 critical APIs" (3ef9dda)
+- [ ] Remaining: Create 3 more projects (EZBill, Tower Defense, GreenPulse) - 30min
 
 #### Item 2: Structured Logging (4h) - ✅ COMPLETED
 - [x] Install pino and pino-pretty
@@ -203,7 +214,7 @@ type(scope): brief description
 
 | Item | Status | Time Spent | Commit SHA | Notes |
 |------|--------|------------|------------|-------|
-| 1. Sentry | ⏭️ Skipped | 0h | - | Needs external Sentry account |
+| 1. Sentry | ✅ Complete | 2h | 3ef9dda | Monitoring 70→75 (+5pts), 3 critical APIs |
 | 2. Logging | ✅ Complete | 1.5h | 687a964 | Monitoring 35→70 (+35pts) |
 | 3. robots.txt | ✅ Complete | 0.2h | a1cf6d4 | Already existed, updated audit |
 | 4. Open Graph | ✅ Complete | 1h | 3dea828 | SEO 65→80 (+15pts), 8 SVG images |

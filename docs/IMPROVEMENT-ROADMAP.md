@@ -72,71 +72,78 @@
 
 **Quick Wins:**
 
-#### 1.1 Sentry Setup (4h)
-```bash
-# Install Sentry (FREE tier)
-pnpm add @sentry/node @sentry/nextjs
+#### 1.1 Sentry Setup (4h) - ✅ COMPLETED (3 CRITICAL APIs)
 
-# Configure in each API
-# apps/[app]/api/src/index.ts
-import * as Sentry from '@sentry/node'
+**What was done:**
+```typescript
+// Created centralized Sentry config in @ezstart/logger
+import { initSentry, Sentry } from '@ezstart/logger'
 
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-  tracesSampleRate: 0.1, // 10% of requests
-})
+// apps/[api]/src/instrument.mts (7 lines instead of 28!)
+const sentry = initSentry('API Name')
+export { Sentry, sentry }
 
-# Configure in each Web app
-# apps/[app]/web/sentry.client.config.js
-import * as Sentry from '@sentry/nextjs'
-
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 0.1,
-})
+// apps/[api]/src/index.ts
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
+// ... routes ...
+Sentry.setupExpressErrorHandler(app) // AFTER routes
 ```
+
+**Completed:**
+- ✅ Created Sentry org "ezstart" (https://ezstart.sentry.io)
+- ✅ Migrated 3 critical APIs: EZAuth, EZPay, Monitoring
+- ✅ Centralized config in @ezstart/logger (75% code reduction)
+- ✅ Tested: 6+ events captured successfully
+- ✅ Fixed critical bug: handler order (AFTER routes)
+- ✅ Documented in CLAUDE.md (150+ lines)
+
+**Remaining:**
+- [ ] Create 3 Sentry projects: EZBill, Tower Defense, GreenPulse (30min)
+- [ ] Migrate remaining 3 APIs using centralized pattern (30min)
+- [ ] Add Sentry to 8 web apps with @sentry/nextjs (2h)
 
 **Gain:**
 - ✅ See ALL production errors in real-time
 - ✅ Stack traces + user context + breadcrumbs
 - ✅ Email alerts for critical errors
 
-**Time:** 4h (30min per API/Web app × 5 services)
+**Time Spent:** 2h (3 critical APIs done)
+**Time Remaining:** 2h (3 APIs + 8 web apps)
 
 ---
 
-#### 1.2 Structured Logging (4h)
-```bash
-# Install Pino (lightweight, fast)
-pnpm add pino pino-pretty
+#### 1.2 Structured Logging (4h) - ✅ COMPLETED
 
-# Create logger utility
-# packages/utils/src/logger.ts
-import pino from 'pino'
+**What was done:**
+```typescript
+// Created dedicated @ezstart/logger package
+import { logger } from '@ezstart/logger'
 
-export const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: process.env.NODE_ENV === 'development'
-    ? { target: 'pino-pretty' }
-    : undefined
-})
-
-# Replace console.log everywhere
-# ❌ console.log('User logged in:', userId)
-# ✅ logger.info({ userId, email }, 'User logged in')
+// Usage everywhere
+logger.info({ userId, email }, 'User logged in')
+logger.error({ error, requestId }, 'Payment failed')
 ```
+
+**Completed:**
+- ✅ Created packages/logger with pino + pino-pretty
+- ✅ Replaced console.log in express-core (mongo.ts, startServer.ts)
+- ✅ Migrated Tower Defense API (7 files) + Web (7 files)
+- ✅ Removed logger from @ezstart/ui (clean architecture)
+- ✅ Created backward compatibility wrapper
+- ✅ Full documentation in packages/logger/README.md
 
 **Gain:**
 - ✅ JSON logs (searchable in Railway/Vercel)
 - ✅ Log levels (error, warn, info, debug)
 - ✅ Structured context (userId, requestId, etc.)
 
-**Time:** 4h (1h setup + 3h replace console.log)
+**Time:** 1.5h (efficient reuse of existing package)
+**Commit:** 687a964
 
 ---
 
-**Phase 1.1 Total:** 8h, +35 points, **Score: 35 → 70**
+**Phase 1.1 Total:** 3.5h (instead of 8h!), +40 points, **Score: 35 → 75**
 
 ---
 
@@ -901,7 +908,7 @@ test('create and send invoice', async ({ page }) => {
 
 | Phase | Item | Status | Time Spent | Score Before | Score After | Notes |
 |-------|------|--------|------------|--------------|-------------|-------|
-| 1 | Sentry | ⏭️ Skipped | 0h | 35 | - | Needs Sentry account setup |
+| 1 | Sentry | ✅ Complete | 2h | 70 | 75 | 3 critical APIs, centralized in @ezstart/logger |
 | 1 | Logging | ✅ Complete | 1.5h | 35 | 70 | Pino + @ezstart/logger |
 | 1 | robots.txt | ✅ Complete | 0.2h | 54 | 65 | Already exists via @ezstart/seo-config |
 | 1 | Open Graph | ✅ Complete | 1h | 65 | 80 | createMetadata + 8 SVG images |
