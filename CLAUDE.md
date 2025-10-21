@@ -2,9 +2,13 @@
 
 ## 📚 Documentation Centralisée
 
-**Voir [docs/README.md](./docs/README.md) pour la documentation complète et les audits.**
+**Documentation principale :**
+- 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ **RÈGLES DE DÉVELOPPEMENT OBLIGATOIRES** (lire en premier)
+- 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complete)
+- 📄 [docs/AUDIT-SUMMARY.md](./docs/AUDIT-SUMMARY.md) - Executive summary pour stakeholders
+- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
 
-**Audits disponibles :**
+**Audits disponibles (score global 72.1/100) :**
 - 🔒 [Security Audit](./docs/audits/SECURITY-AUDIT.md) - Authentication, secrets, CORS, vulnerabilities
 - ⚡ [Performance Audit](./docs/audits/PERFORMANCE-AUDIT.md) - Bundle sizes, API times, optimization
 - 🏗️ [Architecture Audit](./docs/audits/ARCHITECTURE-AUDIT.md) - Dependencies, structure, best practices
@@ -134,7 +138,9 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 
 ## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
 
-### État Actuel (12/10/2025 - 00h20)
+**⚠️ LECTURE OBLIGATOIRE :** [DEV-RULES.md](./DEV-RULES.md) - Toutes les règles de développement à suivre
+
+### État Actuel (21/10/2025)
 
 **Monorepo 100% opérationnel avec :**
 
@@ -142,7 +148,8 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 - ✅ Architecture .env standardisée (.env.example + .env.local)
 - ✅ TypeScript centralisé avec un seul `tsc -b --watch`
 - ✅ Configuration 100% partagée et optimisée
-- ✅ **Tower Defense optimisé** : Architecture partagée avec 15 mobs + 15 towers (voir [Tower Defense Architecture](#tower-defense---architecture-optimisée))
+- ✅ **16/16 Audits complets** - Score global 72.1/100 (voir [docs/README.md](./docs/README.md))
+- ✅ **DEV-RULES.md** - Règles de développement consolidées et obligatoires
 
 ### Comment Démarrer une Session de Développement
 
@@ -222,20 +229,32 @@ Si tu reprends une session avec des processus déjà en cours :
 
 ### Points Critiques à Respecter
 
+**⚠️ VOIR [DEV-RULES.md](./DEV-RULES.md) POUR LA LISTE COMPLÈTE DES RÈGLES**
+
+**Résumé des règles les plus importantes :**
+
 1. **JAMAIS** ajouter `tsc --watch` dans les scripts dev des packages
 2. **TOUJOURS** utiliser `.env.local` pour les secrets (jamais `.env`)
 3. **TOUJOURS** vérifier que `composite: true` est présent dans les tsconfig
 4. **TOUJOURS** utiliser les ports 50xx (pattern: APIs 50x0, Web 50x5)
 5. **TOUJOURS** utiliser les configs centralisées avant de créer du local
+6. **TOUJOURS** vérifier si code existe dans `packages/` avant de créer
+7. **JAMAIS** de balises HTML natives (utiliser composants `@ezstart/ui`)
+8. **JAMAIS** de couleurs hardcodées (utiliser classes sémantiques)
+9. **TOUJOURS** utiliser `getMongo()` pour MongoDB (connexion partagée)
+10. **TOUJOURS** mettre à jour README des packages avant commit
 
 # Configuration Claude - @ezstart Monorepo
 
 ## Architecture et Bonnes Pratiques
 
+**📐 DOCUMENTATION COMPLÈTE :** Voir [DEV-RULES.md](./DEV-RULES.md) pour toutes les règles de développement
+
 ### Principe de Base : Réutilisabilité Maximale
 
 - **TOUJOURS** utiliser/créer des composants agnostiques au maximum
 - **PRIORITÉ** aux packages partagés du monorepo avant toute création spécifique
+- **VÉRIFIER** [DEV-RULES.md](./DEV-RULES.md) avant chaque développement
 
 ### Bonnes Pratiques UI/UX
 
