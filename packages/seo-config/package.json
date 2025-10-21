@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./metadata": "./src/metadata.ts",
     "./robots": "./src/robots.ts",
-    "./sitemap": "./src/sitemap.ts"
+    "./sitemap": "./src/sitemap.ts",
+    "./json-ld": "./src/json-ld.ts"
   },
   "scripts": {
     "build": "tsc -b",
