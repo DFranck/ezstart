@@ -1,3 +1,6 @@
+// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
 import { createApp, startServer, connectToMongo, getApiPort, createSocketServer } from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries } from './routes/index.js'
@@ -31,6 +34,10 @@ app.get('/api/health', (_, res) => {
 
 // Mount API routes
 app.use('/api', routes)
+
+// Sentry error handler (called automatically by expressIntegration)
+// MUST be AFTER all routes/controllers
+Sentry.setupExpressErrorHandler(app)
 
 // Connect to MongoDB and start server
 // Wait for MongoDB to be fully ready before starting scheduler

@@ -68,6 +68,7 @@ export default function MonitoringDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [nextRefreshIn, setNextRefreshIn] = useState<number>(300) // 5 minutes in seconds
+  const [activeTab, setActiveTab] = useState<'projects' | 'audits'>('projects')
   const socketRef = useRef<Socket | null>(null)
 
   // Fetch monitoring data
@@ -218,25 +219,55 @@ export default function MonitoringDashboard() {
 
   const { projects, summary } = projectsData
   const { audits } = auditsData
-  const { score, status } = calculateOverallHealth(summary)
 
-  const metricsData = {
-    servicesHealthy: summary.healthy,
-    servicesTotal: summary.total,
-    auditsComplete: audits.filter((a: any) => a.status === 'complete').length,
-    auditsTotal: audits.length,
-    deploymentsActive: summary.healthy,
-    deploymentsTotal: summary.total,
-    avgResponseTime:
-      projects.length > 0
-        ? Math.round(
-            projects
-              .filter((p: any) => p.avgResponseTime !== null)
-              .reduce((acc: number, p: any) => acc + (p.avgResponseTime || 0), 0) /
-              projects.filter((p: any) => p.avgResponseTime !== null).length
-          )
-        : 0,
-  }
+  // Calculate metrics based on active tab
+  const projectsHealth = calculateOverallHealth(summary)
+
+  // Calculate audits global score
+  const auditsGlobalScore = audits.length > 0
+    ? Math.round(audits.reduce((acc: number, a: any) => acc + (a.score || 0), 0) / audits.length)
+    : 0
+
+  let auditsStatus: 'excellent' | 'good' | 'fair' | 'poor' | 'critical'
+  if (auditsGlobalScore >= 90) auditsStatus = 'excellent'
+  else if (auditsGlobalScore >= 70) auditsStatus = 'good'
+  else if (auditsGlobalScore >= 50) auditsStatus = 'fair'
+  else if (auditsGlobalScore >= 30) auditsStatus = 'poor'
+  else auditsStatus = 'critical'
+
+  // Dynamic score/status based on active tab
+  const { score, status } = activeTab === 'projects'
+    ? projectsHealth
+    : { score: auditsGlobalScore, status: auditsStatus }
+
+  // Dynamic metrics based on active tab
+  const metricsData = activeTab === 'projects'
+    ? {
+        servicesHealthy: summary.healthy,
+        servicesTotal: summary.total,
+        auditsComplete: audits.filter((a: any) => a.status === 'complete').length,
+        auditsTotal: audits.length,
+        deploymentsActive: summary.healthy,
+        deploymentsTotal: summary.total,
+        avgResponseTime:
+          projects.length > 0
+            ? Math.round(
+                projects
+                  .filter((p: any) => p.avgResponseTime !== null)
+                  .reduce((acc: number, p: any) => acc + (p.avgResponseTime || 0), 0) /
+                  projects.filter((p: any) => p.avgResponseTime !== null).length
+              )
+            : 0,
+      }
+    : {
+        servicesHealthy: audits.filter((a: any) => a.score >= 80).length,
+        servicesTotal: audits.length,
+        auditsComplete: audits.filter((a: any) => a.status === 'complete').length,
+        auditsTotal: audits.length,
+        deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
+        deploymentsTotal: audits.length,
+        avgResponseTime: Math.round(auditsGlobalScore),
+      }
 
   // Loading state
   if (isLoading) {
@@ -313,7 +344,7 @@ export default function MonitoringDashboard() {
       </Section>
 
       {/* Tabs for different monitoring sections */}
-      <Tabs defaultValue="projects" className="w-full max-w-7xl px-2">
+      <Tabs defaultValue="projects" className="w-full max-w-7xl px-2" onValueChange={(value) => setActiveTab(value as 'projects' | 'audits')}>
         <TabsList className="grid w-full max-w-lg grid-cols-2">
           <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
           <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>

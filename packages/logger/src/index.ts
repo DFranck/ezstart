@@ -68,3 +68,6 @@ export const logger = {
 }
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug'
+
+// Export Sentry utilities
+export { initSentry, Sentry } from './sentry.js'

@@ -157,12 +157,9 @@ importers:
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
-      '@sentry/node':
-        specifier: ^10.20.0
-        version: 10.20.0
-      '@sentry/profiling-node':
-        specifier: ^10.20.0
-        version: 10.20.0
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -471,15 +468,12 @@ importers:
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/pay-sdk':
         specifier: workspace:*
         version: link:../../../packages/pay-sdk
-      '@sentry/node':
-        specifier: ^10.20.0
-        version: 10.20.0
-      '@sentry/profiling-node':
-        specifier: ^10.20.0
-        version: 10.20.0
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -955,15 +949,12 @@ importers:
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/monitoring':
         specifier: workspace:*
         version: link:../../../packages/monitoring
-      '@sentry/node':
-        specifier: ^10.20.0
-        version: 10.20.0
-      '@sentry/profiling-node':
-        specifier: ^10.20.0
-        version: 10.20.0
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1427,6 +1418,15 @@ importers:
 
   packages/logger:
     dependencies:
+      '@sentry/node':
+        specifier: ^10.20.0
+        version: 10.20.0
+      '@sentry/profiling-node':
+        specifier: ^10.20.0
+        version: 10.20.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       pino:
         specifier: ^9.5.0
         version: 9.14.0

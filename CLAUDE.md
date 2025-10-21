@@ -136,6 +136,177 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 
 **Documentation complète :** [AUDIT-GUIDE.md](./docs/AUDIT-GUIDE.md)
 
+## 🐛 Error Tracking avec Sentry ⭐ NOUVEAU (21/10/2025)
+
+**Architecture centralisée pour le monitoring d'erreurs en production**
+
+### Organisation Sentry
+
+- **Organization** : `ezstart` (https://ezstart.sentry.io)
+- **Projets configurés** :
+  - ✅ EZAuth API (`4510227936247808`)
+  - ✅ EZPay API (`4510227932577792`)
+  - ✅ Monitoring API (`4510227939983360`)
+  - ⏳ EZBill API (à créer)
+  - ⏳ Tower Defense API (à créer)
+  - ⏳ GreenPulse API (à créer)
+
+### Architecture Centralisée
+
+**Package `@ezstart/logger` - Single Source of Truth**
+
+Toute la configuration Sentry est centralisée dans `packages/logger/src/sentry.ts` :
+
+```typescript
+import { initSentry, Sentry } from '@ezstart/logger'
+
+// Une seule fonction réutilisable pour tous les APIs
+export function initSentry(appName: string) {
+  config({ path: '.env.local' })
+
+  if (!process.env.SENTRY_DSN) {
+    console.log(`⚠️  [Sentry] ${appName}: DSN not provided`)
+    return undefined
+  }
+
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    sendDefaultPii: true,
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+    integrations: [nodeProfilingIntegration()],
+  })
+
+  return Sentry
+}
+```
+
+**Réduction de code : 28 lignes → 7 lignes par API (75% moins de duplication !)**
+
+### Setup Standard pour Nouvelle API
+
+**1. Créer `src/instrument.mts`** (AVANT index.ts) :
+
+```typescript
+// apps/[api]/src/instrument.mts
+import { initSentry, Sentry } from '@ezstart/logger'
+
+// Initialize Sentry for [API Name]
+const sentry = initSentry('[API Name]')
+
+export { Sentry, sentry }
+```
+
+**2. Importer dans `src/index.ts`** :
+
+```typescript
+// apps/[api]/src/index.ts
+
+// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
+import { createApp, ... } from '@ezstart/express-core'
+
+const app = createApp({ apiApp: 'api-name' })
+
+// ... définir toutes les routes ...
+
+// ⚠️ CRITIQUE: setupExpressErrorHandler DOIT être APRÈS toutes les routes
+Sentry.setupExpressErrorHandler(app)
+```
+
+**3. Ajouter DSN dans `.env.local`** :
+
+```env
+# Get from https://sentry.io/settings/ezstart/projects/[project-name]/keys/
+SENTRY_DSN=https://...@o4510227903152128.ingest.us.sentry.io/...
+```
+
+**4. Ajouter `@ezstart/logger` au `package.json`** :
+
+```json
+{
+  "dependencies": {
+    "@ezstart/logger": "workspace:*"
+  }
+}
+```
+
+### Piège Critique à Éviter ⚠️
+
+**ERREUR FRÉQUENTE** : Mettre `setupExpressErrorHandler()` AVANT les routes
+
+```typescript
+// ❌ MAUVAIS - Sentry ne capturera PAS les erreurs !
+const app = createApp()
+Sentry.setupExpressErrorHandler(app)
+app.use('/api', routes)
+
+// ✅ BON - Sentry capture toutes les erreurs des routes
+const app = createApp()
+app.use('/api', routes)
+Sentry.setupExpressErrorHandler(app)
+```
+
+**Pourquoi ?** Express exécute les middlewares dans l'ordre. Si le handler Sentry est avant les routes, les erreurs des routes ne seront jamais interceptées.
+
+### Variables d'Environnement
+
+**Development (.env.local)** :
+```env
+SENTRY_DSN=https://...  # Optional - errors logged to console
+NODE_ENV=development
+```
+
+**Production (Railway/Render)** :
+```env
+SENTRY_DSN=https://...  # Required - errors sent to Sentry dashboard
+NODE_ENV=production
+```
+
+### Tester Sentry
+
+```bash
+# 1. Créer endpoint de test (temporary)
+app.get('/debug-sentry', (req, res) => {
+  throw new Error('🧪 Test Sentry Error!')
+})
+
+# 2. Trigger l'erreur
+curl http://localhost:50XX/debug-sentry
+
+# 3. Vérifier sur Sentry
+https://ezstart.sentry.io/issues/?project=[project-id]
+
+# 4. Supprimer l'endpoint après test ✅
+```
+
+### Avantages de l'Architecture
+
+✅ **Code centralisé** - Une seule source de vérité dans `@ezstart/logger`
+✅ **DRY** - 75% moins de code dupliqué
+✅ **Type-safe** - TypeScript valide la config
+✅ **Consistent** - Même setup pour tous les APIs
+✅ **Maintenable** - Changement dans logger → tous les APIs updated
+
+### APIs Migrées
+
+- ✅ **EZAuth API** - Centralisé, testé, fonctionne
+- ✅ **EZPay API** - Centralisé, testé, fonctionne
+- ✅ **Monitoring API** - Centralisé, build validé
+- ⏳ **EZBill API** - À migrer
+- ⏳ **Tower Defense API** - À migrer
+- ⏳ **GreenPulse API** - À migrer
+
+### Prochaines Étapes
+
+1. Créer 3 projets Sentry restants (EZBill, Tower Defense, GreenPulse)
+2. Appliquer le setup standard (instrument.mts + index.ts)
+3. Tester chaque API avec `/debug-sentry`
+4. Supprimer les endpoints de test
+5. Documenter dans MONITORING-AUDIT.md
+
 ## 📋 GUIDE DE DÉMARRAGE POUR NOUVEAU CLAUDE
 
 **⚠️ LECTURE OBLIGATOIRE :** [DEV-RULES.md](./DEV-RULES.md) - Toutes les règles de développement à suivre
