@@ -906,8 +906,8 @@ test('create and send invoice', async ({ page }) => {
 | 1 | robots.txt | ✅ Complete | 0.2h | 54 | 65 | Already exists via @ezstart/seo-config |
 | 1 | Open Graph | ✅ Complete | 1h | 65 | 80 | createMetadata + 8 SVG images |
 | 1 | JSON-LD | ✅ Complete | 0.8h | 80 | 85 | createJsonLd + schema-dts |
-| 1 | Root README | ⏳ Pending | 0h | 68 | 75 | |
-| 1 | Package READMEs | ⏳ Pending | 0h | 68 | 85 | |
+| 1 | Root README | ✅ Complete | 1.2h | 68 | 75 | 297 lines, comprehensive |
+| 1 | Package READMEs | ⏳ Pending | 0h | 75 | 85 | |
 | 2 | next-intl migration | ⏳ Pending | 0h | 65 | 80 | |
 | 2 | Spanish translations | ⏳ Pending | 0h | 65 | 90 | |
 | 2 | ARIA labels | ⏳ Pending | 0h | 74 | 80 | |

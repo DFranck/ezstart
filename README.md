@@ -1,179 +1,296 @@
-<!-- AUTO:TITLE:START -->
+# 🚀 EZStart Monorepo
 
-# 📦 ezstart
+**Modern full-stack monorepo** - Build and launch applications faster with shared infrastructure and best practices.
 
-<!-- AUTO:TITLE:END -->
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
+[![Monorepo](https://img.shields.io/badge/Monorepo-pnpm%20workspaces-orange)](https://pnpm.io/)
+[![Health Score](https://img.shields.io/badge/Health-85%2F100-brightgreen)](#-health--quality-score)
+[![Apps](https://img.shields.io/badge/Apps-8%20web%20%2B%205%20API-blueviolet)](#-applications)
 
-<!-- AUTO:DESC:START -->
+---
 
-Mono repo for ezstart projects
+## 📊 Health & Quality Score
 
-<!-- AUTO:DESC:END -->
+**Overall: 85/100** 🟢 Excellent
 
-<!-- AUTO:GETTING_STARTED:START -->
+| Category | Score | Status |
+|----------|-------|--------|
+| [Architecture](./docs/audits/ARCHITECTURE-AUDIT.md) | 95/100 | 🟢 Exemplary |
+| [Code Quality](./docs/audits/CODE-QUALITY-AUDIT.md) | 92/100 | 🟢 Excellent |
+| [SEO](./docs/audits/SEO-AUDIT.md) | 85/100 | 🟢 Excellent |
+| [Infrastructure](./docs/audits/INFRASTRUCTURE-AUDIT.md) | 82/100 | 🟢 Very Good |
+| [Dependencies](./docs/audits/DEPENDENCIES-AUDIT.md) | 80/100 | 🟢 Very Good |
+| [Monitoring](./docs/audits/MONITORING-AUDIT.md) | 70/100 | 🟡 Fair |
+
+📈 **Full Audit Dashboard**: [docs/README.md](./docs/README.md)
+📋 **Improvement Roadmap**: [docs/IMPROVEMENT-ROADMAP.md](./docs/IMPROVEMENT-ROADMAP.md)
+
+---
+
+## ⚡ Quick Start
 
 ```bash
-# 1️⃣ Clone the public repo and move to this package if it's public
-git clone https://github.com/DFranck/ezstart-public.git
-cd
-
-# 2️⃣ Install dependencies
+# Install dependencies
 pnpm install
 
-# 3️⃣ Run the package
-pnpm dev
-```
-
-<!-- AUTO:GETTING_STARTED:END -->
-
-<!-- AUTO:PROJECT_STRUCTURE:START -->
-
-## 📂 Project Structure
-
-👉 See the full structure here: [structure.md](./structure.md)
-
-<!-- AUTO:PROJECT_STRUCTURE:END -->
-
-## 🏗️ Architecture and Standardization
-
-### ⚡ Quality Control Dashboard
-
-| Metric                  | Status | Coverage               | Description                                       |
-| ----------------------- | ------ | ---------------------- | ------------------------------------------------- |
-| **TypeCheck**           | ✅     | **18/18 packages**     | Complete TypeScript verification                  |
-| **Lint**                | ✅     | **17/17 packages**     | Complete ESLint verification (code packages only) |
-| **Centralization**      | ✅     | **100% apps/packages** | All configurations centralized                    |
-| **Warning Suppression** | ✅     | **Optimized**          | Annoying rules disabled, important ones kept      |
-
-### Monorepo Configuration
-
-This monorepo uses **pnpm workspaces** with a centralized architecture to maximize reusability and maintain consistency across all projects.
-
-### 🌐 Web Applications - 100% Centralized Configuration
-
-All Next.js web applications use the **exact same** standardized configuration:
-
-| Configuration         | Package/Source                                                            | Description                                     |
-| --------------------- | ------------------------------------------------------------------------- | ----------------------------------------------- |
-| **Theme Provider**    | [`@ezstart/next-theme`](./packages/next-theme/)                           | Theme management (dark/light mode)              |
-| **Auth Provider**     | [`@ezstart/auth-sdk`](./packages/auth-sdk/)                               | Centralized authentication with EZAuth SSO      |
-| **Payment Provider**  | [`@ezstart/pay-sdk`](./packages/pay-sdk/)                                 | Universal payment system (donations, purchases) |
-| **UI Components**     | [`@ezstart/ui`](./packages/ui/README.md)                                  | UI components, global styles, PostCSS config    |
-| **Tailwind Config**   | [`@ezstart/tailwind-config`](./packages/tailwind-config/)                 | Centralized Tailwind configuration              |
-| **ESLint Config**     | [`@ezstart/eslint-config/next-js`](./packages/eslint-config/)             | ESLint rules for Next.js                        |
-| **Next.js Config**    | [`@ezstart/next-config`](./packages/next-config/)                         | Next.js configuration with optimizations        |
-| **TypeScript Config** | [`@ezstart/typescript-config/nextjs.json`](./packages/typescript-config/) | Shared TypeScript configurations                |
-
-#### Standardized Applications (100% Centralized)
-
-- ✅ [`ezauth/web`](./apps/ezauth/web/) - Authentication service (port 8080)
-- ✅ [`ezbill/web`](./apps/ezbill/web/) - Billing management (port 4100)
-- ✅ [`ezstart/web`](./apps/ezstart/web/) - Main application (port 4000)
-- ✅ [`fengshui/web`](./apps/fengshui/web/) - Feng Shui application (port 4400)
-- ✅ [`tower-defense/web`](./apps/tower-defense/web/) - Tower Defense game (port 4200)
-- ✅ [`asc-tcd/web`](./apps/asc-tcd/web/) - ASC-TCD website (port 4300)
-
-### 🔧 APIs - 100% Centralized Configuration
-
-All Node.js APIs use the **exact same** shared infrastructure:
-
-| Configuration           | Package/Source                                                         | Description                                           |
-| ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------- |
-| **ESLint Config**       | [`@ezstart/eslint-config/base`](./packages/eslint-config/)             | ESLint rules for APIs                                 |
-| **TypeScript Config**   | [`@ezstart/typescript-config/api.json`](./packages/typescript-config/) | TypeScript configuration for APIs                     |
-| **Base Infrastructure** | [`@ezstart/express-core`](./packages/express-core/)                    | Shared API infrastructure (Express, middleware, etc.) |
-| **Common Types**        | [`@ezstart/types`](./packages/types/)                                  | Shared types between web and API                      |
-
-#### Available APIs
-
-- [`ezauth/api`](./apps/ezauth/api/) - Centralized authentication service (port 8001)
-- [`ezbill/api`](./apps/ezbill/api/) - Billing API (port 4101)
-- [`ezstart/api`](./apps/ezstart/api/) - Main API service (port 8888)
-- [`tower-defense/api`](./apps/tower-defense/api/) - Tower Defense API (port 4201)
-
-### 📦 Centralized Packages
-
-#### Web Infrastructure
-
-- [`@ezstart/next-theme`](./packages/next-theme/) - Theme provider (dark/light mode)
-- [`@ezstart/auth-sdk`](./packages/auth-sdk/) - Authentication SDK with EZAuth SSO
-- [`@ezstart/pay-sdk`](./packages/pay-sdk/) - Payment SDK (donations, purchases, subscriptions)
-- [`@ezstart/ui`](./packages/ui/) - UI components, global styles, CSS configurations
-
-#### API Infrastructure
-
-- [`@ezstart/express-core`](./packages/express-core/) - Express infrastructure, shared middleware
-- [`@ezstart/auth-sdk`](./packages/auth-sdk/) - EZAuth client SDK with React hooks
-
-#### Shared Utilities
-
-- [`@ezstart/types`](./packages/types/) - Common TypeScript types
-
-#### Configuration Packages (100% Centralized)
-
-- [`@ezstart/tailwind-config`](./packages/tailwind-config/) - Tailwind configurations
-- [`@ezstart/eslint-config`](./packages/eslint-config/) - ESLint rules with 3 variants:
-  - `base.js` - Base configuration (APIs, packages)
-  - `next-js.js` - Next.js configuration (web apps)
-  - `react-internal.js` - React configuration (internal packages)
-- [`@ezstart/typescript-config`](./packages/typescript-config/) - TypeScript configs with 6 variants:
-  - `base.json` - Base configuration
-  - `api.json` - API configuration
-  - `nextjs.json` - Next.js configuration
-  - `library.json` - Library configuration
-  - `react-library.json` - React library configuration
-  - `types.json` - Types configuration
-- [`@ezstart/next-config`](./packages/next-config/) - Next.js configuration
-
-### 🔐 Authentication System - EZAuth
-
-Centralized SSO architecture for all applications:
-
-- **API Service** : [`ezauth/api`](./apps/ezauth/api/) (port 8001)
-- **Web Interface** : [`ezauth/web`](./apps/ezauth/web/) (port 8080)
-- **Client SDK** : [`@ezstart/auth-sdk`](./packages/auth-sdk/)
-- **OAuth2 Flow** : Authorization code → JWT (7 days)
-- **Automatic SSO** : Token valid across all apps
-
-### 🚀 Standardized Commands
-
-#### Development
-
-```bash
-# Install all dependencies
-pnpm install
-
-# Start all apps in development mode
+# Start all services (recommended for first time)
 pnpm dev
 
-# Start a specific app
-pnpm --filter ezbill-web dev
-pnpm --filter ezauth-api dev
+# Or start specific apps
+pnpm dev:ez      # EZStart + Monitoring + All APIs
+pnpm dev:bill    # EZBill + EZAuth
+pnpm dev:td      # Tower Defense + EZAuth
+pnpm dev:fs      # FengShui + EZAuth + EZPay
+
+# Check service status
+pnpm dev:status
 ```
 
-#### Production
+### Development URLs
+
+| Service | Web | API |
+|---------|-----|-----|
+| **EZStart** | http://localhost:5050 | - |
+| **EZAuth** | http://localhost:5015 | http://localhost:5010 |
+| **EZBill** | http://localhost:5025 | http://localhost:5020 |
+| **EZPay** | http://localhost:5045 | http://localhost:5040 |
+| **Tower Defense** | http://localhost:5035 | http://localhost:5030 |
+| **FengShui** | http://localhost:5065 | - |
+| **ASC-TCD** | http://localhost:5055 | - |
+| **GreenPulse** | http://localhost:5075 | http://localhost:5070 |
+| **Monitoring** | - | http://localhost:5080 |
+
+---
+
+## 🎯 Applications
+
+### Web Applications (8)
+
+#### 🏠 EZStart
+**Main Hub & Dashboard** - Central platform for accessing all EZStart applications.
+- **Tech**: Next.js 15, i18n (next-intl), PWA
+- **Features**: Multilingual, monitoring dashboard, app launcher
+- **Status**: ✅ Production ready
+
+#### 🔐 EZAuth
+**Centralized Authentication** - SSO authentication service for all apps.
+- **Tech**: OAuth2, JWT, MongoDB
+- **Features**: Single sign-on, user management, secure tokens
+- **Status**: ✅ Production ready
+
+#### 💼 EZBill
+**Invoicing & Billing** - Simple billing management for businesses.
+- **Tech**: Next.js, React Query, MongoDB
+- **Features**: Clients, invoices, payments tracking
+- **Status**: ✅ Production ready
+
+#### 💳 EZPay
+**Universal Payment System** - Centralized payment handling for all apps.
+- **Tech**: Stripe, webhooks, MongoDB
+- **Features**: Donations, purchases, subscriptions
+- **Status**: ✅ Production ready
+
+#### 🎮 Tower Defense
+**Multiplayer Strategy Game** - Competitive tower defense with RNG mechanics.
+- **Tech**: Socket.IO, Canvas rendering, real-time multiplayer
+- **Features**: PvP battles, shop system, leaderboards
+- **Status**: ✅ Production ready
+
+#### 🧭 FengShui Bagua
+**Feng Shui Analysis** - Interactive Feng Shui compass with floor plan import.
+- **Tech**: Next.js, Canvas, i18n
+- **Features**: Bagua wheel, floor plans, orientation analysis
+- **Status**: ✅ Production ready
+
+#### 🏃 ASC-TCD
+**Sports Association Website** - Website for sports and cultural activities.
+- **Tech**: Next.js, i18n
+- **Features**: Event management, member portal
+- **Status**: ✅ Production ready
+
+#### 🌱 Green Pulse
+**AI Sustainability Assistant** - Track and improve environmental impact.
+- **Tech**: Next.js, React Query, AI integration
+- **Features**: Carbon tracking, recommendations, analytics
+- **Status**: ✅ Production ready
+
+### API Services (5)
+
+- **EZAuth API** (5010) - Authentication service
+- **EZBill API** (5020) - Billing backend
+- **EZPay API** (5040) - Payment processing
+- **Tower Defense API** (5030) - Game server with Socket.IO
+- **GreenPulse API** (5070) - AI sustainability backend
+- **Monitoring API** (5080) - Health checks and metrics
+
+---
+
+## 🏗️ Architecture
+
+### Monorepo Structure
+
+```
+@ezstart/
+├── apps/                    # Applications (8 web + 5 API)
+│   ├── ezstart/web         # Main hub (Next.js)
+│   ├── ezauth/             # Authentication (Next.js + API)
+│   ├── ezbill/             # Billing (Next.js + API)
+│   ├── ezpay/              # Payments (Next.js + API)
+│   ├── tower-defense/      # Game (Next.js + Socket.IO API)
+│   ├── fengshui/web        # Feng Shui (Next.js)
+│   ├── asc-tcd/web         # Sports association (Next.js)
+│   ├── green-pulse/        # Sustainability (Next.js + API)
+│   └── monitoring/api      # Monitoring service
+│
+├── packages/               # Shared packages (16)
+│   ├── ui/                # UI components & design system
+│   ├── auth-sdk/          # Authentication client
+│   ├── pay-sdk/           # Payment client
+│   ├── express-core/      # API infrastructure
+│   ├── config/            # URLs & environment config
+│   ├── seo-config/        # SEO utilities (metadata, JSON-LD)
+│   ├── logger/            # Pino structured logging
+│   ├── next-theme/        # Dark/light mode
+│   ├── monitoring/        # Health checks & metrics
+│   └── [11 more...]       # Config, types, utils
+│
+└── docs/                  # Documentation & audits
+    ├── README.md          # Audit dashboard
+    ├── audits/            # 16 complete audits
+    └── IMPROVEMENT-ROADMAP.md
+```
+
+### Key Features
+
+✅ **100% TypeScript** - Full type safety across all apps
+✅ **Centralized Configuration** - Single source of truth
+✅ **Shared Components** - Reusable UI library
+✅ **SSO Authentication** - EZAuth for all apps
+✅ **Universal Payments** - EZPay for all transactions
+✅ **Structured Logging** - Pino with automatic instrumentation
+✅ **SEO Optimized** - Open Graph, JSON-LD, sitemaps
+✅ **Health Monitoring** - Automated checks for all services
+
+---
+
+## 🛠️ Development
+
+### Quality Control
 
 ```bash
+# TypeScript check (18/18 packages)
+pnpm typecheck
+
+# ESLint check (17/17 packages)
+pnpm lint
+
 # Build all apps
 pnpm build
 
-# Build a specific app
+# Build specific app
 pnpm --filter ezbill-web build
-
-# Global TypeCheck (18/18 packages)
-pnpm typecheck
-
-# Global Lint (17/17 packages)
-pnpm lint
 ```
 
-### ⚡ Automatic Propagation
+### Port Management
 
-✨ **Any change** in centralized packages propagates **automatically** to all projects. Single source of truth for the entire monorepo!
+All services use the **50xx** pattern:
+- **APIs**: 5010, 5020, 5030, 5040, 5070, 5080 (ending in 0)
+- **Web Apps**: 5015, 5025, 5035, 5045, 5050, 5055, 5065, 5075 (ending in 5)
 
-### 📚 Documentation
+Auto-detected from `@ezstart/config` - no manual configuration needed!
 
-- [Next Theme](./packages/next-theme/README.md) - Theme management (dark/light mode)
-- [UI Components](./packages/ui/README.md) - Design system and components
-- [EZAuth SDK](./packages/auth-sdk/README.md) - Authentication integration
-- [Claude Instructions](./CLAUDE.md) - Development guide and best practices
+### Environment Variables
+
+Each app has:
+- `.env.example` - Template with placeholders (committed)
+- `.env.local` - Your local secrets (gitignored)
+- `.env.production` - Production secrets (gitignored)
+
+All URLs and ports are auto-configured via `@ezstart/config`.
+
+---
+
+## 📚 Documentation
+
+### Essential Reads
+
+- **[CLAUDE.md](./CLAUDE.md)** - 📐 Complete development guide (architecture, patterns, conventions)
+- **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ **MANDATORY** development rules
+- **[docs/README.md](./docs/README.md)** - 📊 Audit dashboard (16/16 audits)
+- **[DEPLOY.md](./DEPLOY.md)** - 🚀 Deployment guide (Railway + Vercel)
+
+### Audits (16/16 Complete)
+
+All audits available in [docs/audits/](./docs/audits/):
+- Architecture, Code Quality, Dependencies, Security
+- Performance, SEO, Accessibility, Infrastructure
+- API, Web Apps, Testing, UX, i18n, Monitoring
+
+### Package Documentation
+
+Browse [packages/](./packages/) - Each package has a comprehensive README with:
+- Installation & setup
+- API reference
+- Usage examples
+- Migration guides
+
+---
+
+## 🚢 Deployment
+
+### Production URLs
+
+| App | Domain | Platform |
+|-----|--------|----------|
+| EZStart | ezstart-web.vercel.app | Vercel |
+| EZAuth | ezauth.vercel.app | Vercel (Web) |
+| EZAuth API | ezauth.up.railway.app | Railway |
+| EZBill | ezstart-ezbill.vercel.app | Vercel |
+| EZPay | ezstart-ezpay.vercel.app | Vercel |
+| EZPay API | ezpay-api.up.railway.app | Railway |
+| Tower Defense | tower-defense-web.vercel.app | Vercel |
+| FengShui | ezfengshui.vercel.app | Vercel |
+| ASC-TCD | asc-tcd-web.vercel.app | Vercel |
+| GreenPulse | green-pulse-web.vercel.app | Vercel |
+
+**See [DEPLOY.md](./DEPLOY.md) for complete deployment instructions.**
+
+---
+
+## 🤝 Contributing
+
+### Before You Start
+
+1. Read [DEV-RULES.md](./DEV-RULES.md) - **Mandatory rules**
+2. Read [CLAUDE.md](./CLAUDE.md) - Architecture & patterns
+3. Check [docs/IMPROVEMENT-ROADMAP.md](./docs/IMPROVEMENT-ROADMAP.md) - Current priorities
+
+### Development Workflow
+
+1. Always use centralized packages before creating new ones
+2. Follow the monorepo structure (packages/ for shared, apps/ for specific)
+3. Use semantic commits (`feat:`, `fix:`, `docs:`, etc.)
+4. Run `pnpm typecheck` and `pnpm lint` before committing
+5. Update package READMEs when modifying shared packages
+
+---
+
+## 📊 Stats
+
+- **8 Web Applications** (Next.js 15, React 19)
+- **5 API Services** (Express + Socket.IO)
+- **16 Shared Packages** (100% TypeScript)
+- **18/18 TypeCheck Coverage** (100%)
+- **17/17 Lint Coverage** (100%)
+- **16/16 Audits Complete** (100%)
+- **Overall Health: 85/100** (Excellent)
+
+---
+
+## 📄 License
+
+Private monorepo - All rights reserved.
+
+---
+
+**Built with ❤️ using pnpm workspaces, Next.js 15, and TypeScript**
