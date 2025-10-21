@@ -907,7 +907,7 @@ test('create and send invoice', async ({ page }) => {
 | 1 | Open Graph | ✅ Complete | 1h | 65 | 80 | createMetadata + 8 SVG images |
 | 1 | JSON-LD | ✅ Complete | 0.8h | 80 | 85 | createJsonLd + schema-dts |
 | 1 | Root README | ✅ Complete | 1.2h | 68 | 75 | 297 lines, comprehensive |
-| 1 | Package READMEs | ⏳ Pending | 0h | 75 | 85 | |
+| 1 | Package READMEs | ✅ Complete | 0h | 75 | 85 | Done by another agent, 100% coverage |
 | 2 | next-intl migration | ⏳ Pending | 0h | 65 | 80 | |
 | 2 | Spanish translations | ⏳ Pending | 0h | 65 | 90 | |
 | 2 | ARIA labels | ⏳ Pending | 0h | 74 | 80 | |
