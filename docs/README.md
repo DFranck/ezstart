@@ -241,6 +241,9 @@ Logging, error tracking, analytics, performance monitoring, and alerting.
 **Executive Summary:**
 📄 [Read the Audit Summary](./AUDIT-SUMMARY.md) - High-level overview for stakeholders
 
+**Action Plan:**
+🚀 [Read the Improvement Roadmap](./IMPROVEMENT-ROADMAP.md) - ROI-First strategy to reach 85/100
+
 ### Complete Audit List
 
 | Audit | Status | Last Updated | Score | Grade |
