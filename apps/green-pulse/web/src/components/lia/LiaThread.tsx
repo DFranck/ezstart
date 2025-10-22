@@ -140,12 +140,12 @@ export function LiaThread({
     <ThreadLayout
       colorScheme="green"
       headerOffset="top-16"
-      mobileFooterOffset="pb-16" // 64px for mobile bottom nav
+      mobileFooterOffset="pb-16"
       sidebarToggle={
         // Only show sidebar toggle if authenticated
         isAuthenticated ? (
           <ThreadSidebarToggle
-            className="fixed left-4 bottom-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
+            className="fixed right-4 top-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
             variant="default"
           />
         ) : undefined
