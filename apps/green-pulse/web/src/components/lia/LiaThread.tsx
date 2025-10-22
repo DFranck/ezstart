@@ -1,6 +1,7 @@
 'use client'
 
 import { useConversations } from '@/hooks/useConversations'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import {
   Conversation,
   Thread,
@@ -11,7 +12,6 @@ import {
   ThreadSidebarToggle,
   ThreadWelcome,
 } from '@ezstart/ui/components'
-import { useAuthStore } from '@ezstart/auth-sdk'
 import { useCallback, useEffect } from 'react'
 import { useThreadContext } from './ThreadProvider'
 
@@ -24,7 +24,7 @@ type LiaThreadProps = {
 export function LiaThread({
   activeConversationId,
   setActiveConversationId,
-  onRegisterConversationCreatedCallback
+  onRegisterConversationCreatedCallback,
 }: LiaThreadProps) {
   // Check if user is authenticated
   const { isAuthenticated } = useAuthStore()
@@ -139,6 +139,7 @@ export function LiaThread({
   return (
     <ThreadLayout
       colorScheme="green"
+      headerOffset="top-16"
       mobileFooterOffset="pb-16" // 64px for mobile bottom nav
       sidebarToggle={
         // Only show sidebar toggle if authenticated

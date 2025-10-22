@@ -109,7 +109,7 @@ export function ThreadSidebar({
                       layoutContext?.closeSidebar(); // Close sidebar on mobile after selection
                     }}
                     className={cn(
-                      'w-full text-left p-3',
+                      'w-full text-left p-3 pr-10',
                       conversation.unread && 'font-semibold'
                     )}
                   >
@@ -135,15 +135,18 @@ export function ThreadSidebar({
                             {formatTimestamp(conversation.timestamp)}
                           </span>
                         )}
-                        <ConversationItemActions
-                          conversationId={conversation.id}
-                          conversationTitle={conversation.title}
-                          onRename={onRename}
-                          onDelete={onDelete}
-                        />
                       </div>
                     </div>
                   </button>
+                  {/* Actions positioned absolutely outside button to avoid nested button error */}
+                  <div className="absolute right-3 top-3 z-10">
+                    <ConversationItemActions
+                      conversationId={conversation.id}
+                      conversationTitle={conversation.title}
+                      onRename={onRename}
+                      onDelete={onDelete}
+                    />
+                  </div>
                 </div>
               );
             })
