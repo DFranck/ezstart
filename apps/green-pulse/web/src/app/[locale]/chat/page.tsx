@@ -3,10 +3,12 @@
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { getApiUrl } from '@ezstart/config'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { useMemo, useState } from 'react'
 
 export default function LiaPage() {
-  const sessionId = useMemo(() => `lia_${Date.now()}`, [])
+  // Get user from Zustand store (localStorage 'ezauth-storage')
+  const { user, isAuthenticated } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
 
@@ -21,7 +23,8 @@ export default function LiaPage() {
         const payload: any = {
           message,
           extract_esg: false,
-          session_id: sessionId,
+          // Include userId if authenticated
+          ...(isAuthenticated && user?._id && { userId: user._id }),
         }
         // Only include conversation_id if it exists (avoid sending null)
         if (activeConversationId) {
@@ -35,7 +38,8 @@ export default function LiaPage() {
       onSuccess: (data: any) => {
         // Save conversation_id for subsequent messages
         if (data.data?.conversation_id && !activeConversationId) {
-          console.log('✅ Conversation created:', data.data.conversation_id)
+          const userInfo = isAuthenticated && user?._id ? `userId: ${user._id}` : 'anonymous'
+          console.log(`✅ Conversation created: ${data.data.conversation_id} (${userInfo})`)
           setActiveConversationId(data.data.conversation_id)
           // Trigger conversation list reload
           if (onConversationCreated) {
@@ -47,8 +51,8 @@ export default function LiaPage() {
         console.error('LIA Chat Error:', error)
       },
     }),
-    [sessionId, activeConversationId, onConversationCreated]
-  ) // Re-create when activeConversationId changes
+    [isAuthenticated, user, activeConversationId, onConversationCreated]
+  ) // Re-create when auth state or activeConversationId changes
 
   return (
     <ThreadProvider config={config}>

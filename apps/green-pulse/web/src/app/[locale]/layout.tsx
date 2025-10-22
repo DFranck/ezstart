@@ -8,12 +8,12 @@ import { getMessages } from 'next-intl/server'
 import ClientLayout from './client-layout'
 
 export const metadata = createMetadata({
-  appName: 'Green Pulse',
+  appName: 'GreenPulse',
   description: 'AI-powered sustainable development assistant - Track and improve your environmental impact',
-  domain: 'https://green-pulse-web.vercel.app',
+  domain: 'https://www.ai-greenpulse.com',
   keywords: ['sustainability', 'environment', 'AI', 'green', 'climate'],
   themeColor: '#10b981',
-  ogImage: 'https://green-pulse-web.vercel.app/og-image.svg',
+  ogImage: 'https://www.ai-greenpulse.com/og-image.svg',
   icons: {
     icon: [
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
@@ -27,9 +27,9 @@ export const metadata = createMetadata({
 export const viewport = createViewport('#10b981')
 
 const jsonLd = createJsonLd({
-  appName: 'Green Pulse',
+  appName: 'GreenPulse',
   description: 'AI-powered sustainable development assistant - Track and improve your environmental impact',
-  url: 'https://green-pulse-web.vercel.app',
+  url: 'https://www.ai-greenpulse.com',
   applicationCategory: 'UtilitiesApplication',
 })
 

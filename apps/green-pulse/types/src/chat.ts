@@ -23,10 +23,11 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>
 // Chat Request
 export const ChatRequestSchema = z.object({
   message: z.string().min(1).describe('User message or question'),
-  session_id: z.string().optional().describe('Session ID for conversation continuity'),
+  session_id: z.string().optional().describe('Session ID for conversation continuity (deprecated, use userId)'),
   conversation_id: z.string().optional().describe('Conversation ID to save messages to'),
   context: z.array(ChatMessageSchema).optional().describe('Previous conversation context'),
   extract_esg: z.boolean().default(false).describe('Whether to extract ESG data from the message'),
+  userId: z.string().optional().describe('User ID from EZAuth (if authenticated)'),
 }).openapi({ title: 'Chat Request' })
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>

@@ -11,6 +11,7 @@ import {
   ThreadSidebarToggle,
   ThreadWelcome,
 } from '@ezstart/ui/components'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { useCallback, useEffect } from 'react'
 import { useThreadContext } from './ThreadProvider'
 
@@ -25,6 +26,9 @@ export function LiaThread({
   setActiveConversationId,
   onRegisterConversationCreatedCallback
 }: LiaThreadProps) {
+  // Check if user is authenticated
+  const { isAuthenticated } = useAuthStore()
+
   const {
     messages,
     loading,
@@ -137,22 +141,28 @@ export function LiaThread({
       colorScheme="green"
       mobileFooterOffset="pb-16" // 64px for mobile bottom nav
       sidebarToggle={
-        <ThreadSidebarToggle
-          className="fixed left-4 bottom-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
-          variant="default"
-        />
+        // Only show sidebar toggle if authenticated
+        isAuthenticated ? (
+          <ThreadSidebarToggle
+            className="fixed left-4 bottom-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
+            variant="default"
+          />
+        ) : undefined
       }
       sidebar={
-        <ThreadSidebar
-          conversations={conversations}
-          activeConversationId={activeConversationId || undefined}
-          onConversationSelect={handleConversationSelect}
-          onNewConversation={handleNewConversation}
-          onRename={handleRename}
-          onDelete={handleDelete}
-          newConversationLabel="New Chat"
-          emptyState="Start a new conversation to get insights from LIA"
-        />
+        // Only show conversations list if authenticated
+        isAuthenticated ? (
+          <ThreadSidebar
+            conversations={conversations}
+            activeConversationId={activeConversationId || undefined}
+            onConversationSelect={handleConversationSelect}
+            onNewConversation={handleNewConversation}
+            onRename={handleRename}
+            onDelete={handleDelete}
+            newConversationLabel="New Chat"
+            emptyState="Start a new conversation to get insights from LIA"
+          />
+        ) : undefined
       }
     >
       <Thread messages={messages} streamingText={streamingText}>

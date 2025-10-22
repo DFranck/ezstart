@@ -32,7 +32,7 @@ docRouter.post('/', async (req, res) => {
       })
     }
 
-    let { message, extract_esg, session_id, conversation_id } = validation.data
+    let { message, extract_esg, session_id, conversation_id, userId } = validation.data
 
     // Auto-create conversation if not provided
     if (!conversation_id) {
@@ -40,11 +40,13 @@ docRouter.post('/', async (req, res) => {
         const newConversation = new Conversation({
           title: message.slice(0, 50) + (message.length > 50 ? '...' : ''), // First 50 chars as title
           messages: [],
-          userId: session_id,
+          userId: userId || null, // null if anonymous, userID if authenticated
         })
         await newConversation.save()
         conversation_id = newConversation._id.toString()
-        console.log('✅ Auto-created conversation:', conversation_id)
+        console.log(
+          `✅ Auto-created conversation: ${conversation_id} (userId: ${userId || 'anonymous'})`
+        )
       } catch (createError) {
         console.error('Failed to auto-create conversation:', createError)
         // Continue without conversation_id if creation fails
