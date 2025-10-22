@@ -1,6 +1,6 @@
 # Migration Example: EZAuth API
 
-This document shows a complete example of migrating an existing API to use `getMongo()`.
+This document shows a complete example of migrating an existing API to use `connectToMongo()`.
 
 ## Before Migration
 
@@ -73,7 +73,7 @@ connectToMongo('ezauth')
 ### auth-user.ts (Model with Factory)
 
 ```typescript
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema, Document } from 'mongoose'
 
 export interface AuthUserDocument extends Document {
@@ -93,7 +93,7 @@ const authUserSchema = new Schema<AuthUserDocument>({
 
 // ✅ Factory function
 export async function getAuthUserModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo()
   return mongoose.models.AuthUser || mongoose.model<AuthUserDocument>('AuthUser', authUserSchema)
 }
 ```
@@ -124,13 +124,13 @@ export class AuthService {
 }
 ```
 
-### index.ts (API Startup with getMongo)
+### index.ts (API Startup with connectToMongo)
 
 ```typescript
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 
 // ✅ New centralized connection
-getMongo()
+connectToMongo()
   .then(() => {
     console.log('✅ Connected to MongoDB (shared connection)')
     return startServer(app, {...})
@@ -150,7 +150,7 @@ getMongo()
 
 ### 1. Models
 
-- [ ] Import `getMongo` from `@ezstart/express-core`
+- [ ] Import `connectToMongo` from `@ezstart/express-core`
 - [ ] Import `Schema, Document` from `mongoose` (not default import)
 - [ ] Add `bufferCommands: false` to schema options
 - [ ] Convert direct export to factory function
@@ -164,9 +164,9 @@ getMongo()
 
 ### 3. API Startup (index.ts)
 
-- [ ] Replace `connectToMongo('db')` import with `getMongo`
-- [ ] Replace `connectToMongo('db')` call with `getMongo()`
-- [ ] Move scheduler.start() to AFTER getMongo() resolves
+- [ ] Replace `connectToMongo('db')` import with `connectToMongo`
+- [ ] Replace `connectToMongo('db')` call with `connectToMongo()`
+- [ ] Move scheduler.start() to AFTER connectToMongo() resolves
 - [ ] Add logs for debugging: "MongoDB fully operational"
 
 ### 4. Testing
@@ -273,8 +273,8 @@ class LogCleanupScheduler {
 **Cause:** Model is trying to use MongoDB before connection is established.
 
 **Solution:**
-1. Ensure `getMongo()` is called in index.ts before startServer()
-2. Ensure scheduler waits for getMongo() promise to resolve
+1. Ensure `connectToMongo()` is called in index.ts before startServer()
+2. Ensure scheduler waits for connectToMongo() promise to resolve
 3. Add `bufferCommands: false` to schema for immediate errors
 
 ### Error: "MongooseError: Cannot overwrite model"
@@ -284,7 +284,7 @@ class LogCleanupScheduler {
 **Solution:**
 Use factory pattern with check:
 ```typescript
-const mongoose = await getMongo()
+const mongoose = await connectToMongo()
 return mongoose.models.ModelName || mongoose.model('ModelName', schema)
 ```
 
@@ -309,7 +309,7 @@ let cachedModel: any = null
 
 export async function getUserModel() {
   if (cachedModel) return cachedModel
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo()
   cachedModel = mongoose.models.User || mongoose.model('User', userSchema)
   return cachedModel
 }
@@ -320,7 +320,7 @@ export class UserService {
 
   private static async getModel() {
     if (this.modelCache) return this.modelCache
-    const mongoose = await getMongo()
+    const mongoose = await connectToMongo()
     this.modelCache = mongoose.models.User || mongoose.model('User', userSchema)
     return this.modelCache
   }
@@ -332,10 +332,10 @@ export class UserService {
 }
 ```
 
-**Note:** Caching is optional. The factory function is already fast (microseconds) since `getMongo()` returns immediately when connected.
+**Note:** Caching is optional. The factory function is already fast (microseconds) since `connectToMongo()` returns immediately when connected.
 
 ## References
 
 - [MONGODB-ARCHITECTURE.md](./MONGODB-ARCHITECTURE.md) - Full architecture documentation
-- [mongo.ts](./src/mongo.ts) - getMongo() implementation
+- [mongo.ts](./src/mongo.ts) - connectToMongo() implementation
 - [apps/monitoring/api](../../apps/monitoring/api) - Complete working example

@@ -96,19 +96,3 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
     process.exit(1);
   }
 }
-
-/**
- * Legacy alias for backward compatibility
- * @deprecated Use connectToMongo() instead
- */
-export async function getMongo(): Promise<typeof mongoose> {
-  console.warn('⚠️ [Deprecated] getMongo() is deprecated, use connectToMongo("dbname") instead');
-
-  if (!process.env.MONGO_URL) {
-    throw new Error('MONGO_URL environment variable is required when using getMongo()');
-  }
-
-  // Extract DB name from MONGO_URL or use 'default'
-  const dbName = process.env.MONGO_URL.split('/').pop()?.split('?')[0] || 'default';
-  return connectToMongo(dbName);
-}

@@ -1758,13 +1758,13 @@ connectToMongo('ezauth')
 **Dans les APIs (index.ts) :**
 
 ```typescript
-import { getMongo, startServer, createApp, getApiPort } from '@ezstart/express-core'
+import { connectToMongo, startServer, createApp, getApiPort } from '@ezstart/express-core'
 
 const app = createApp({ apiApp: 'monitoring' })
 const PORT = getApiPort('monitoring')
 
-// ✅ Wait for MongoDB to be fully ready before starting scheduler
-getMongo()
+// ✅ Connect to MongoDB before starting server
+connectToMongo('ezstart-monitoring')
   .then(() => {
     console.log('✅ Connected to MongoDB (shared connection)')
     return startServer(app, { routes, registries, serviceName: 'Monitoring API', port: PORT })
@@ -1786,7 +1786,7 @@ getMongo()
 
 ```typescript
 // apps/monitoring/api/src/models/HealthCheck.ts
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
 
 const healthCheckSchema = new Schema({
@@ -1799,10 +1799,10 @@ const healthCheckSchema = new Schema({
 
 /**
  * Factory function to get model attached to shared connection
- * MUST be called after getMongo() has been initialized
+ * MUST be called after connectToMongo() has been initialized
  */
 export async function getHealthCheckModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo('ezstart-monitoring')
   return mongoose.models.HealthCheck || mongoose.model('HealthCheck', healthCheckSchema)
 }
 ```
@@ -1842,9 +1842,9 @@ MONGO_URL=mongodb+srv://user:pass@cluster.mongodb.net/database-name
 
 ### Bonnes Pratiques MongoDB
 
-✅ **TOUJOURS** utiliser `getMongo()` au lieu de `mongoose.connect()`
+✅ **TOUJOURS** utiliser `connectToMongo(dbName)` pour établir la connexion
 ✅ **TOUJOURS** créer des factory functions pour les models (`getModelName()`)
-✅ **TOUJOURS** attendre `getMongo()` avant de démarrer schedulers/cron jobs
+✅ **TOUJOURS** attendre `connectToMongo()` avant de démarrer schedulers/cron jobs
 ✅ **TOUJOURS** utiliser `bufferCommands: false` dans les schemas
 ✅ **JAMAIS** importer `mongoose` directement dans les models (use `Schema` from mongoose)
 ✅ **JAMAIS** exporter directement un model (use factory function)
@@ -1860,29 +1860,15 @@ export const MyModel = mongoose.model('MyModel', schema) // Multiple connections
 **✅ BON :**
 
 ```typescript
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
 
 const schema = new Schema({...}, { bufferCommands: false })
 
 export async function getMyModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo('database-name')
   return mongoose.models.MyModel || mongoose.model('MyModel', schema)
 }
-```
-
-### Debugging Connection State
-
-```typescript
-import { getConnectionState } from '@ezstart/express-core'
-
-const state = getConnectionState()
-// 0 = disconnected
-// 1 = connected
-// 2 = connecting
-// 3 = disconnecting
-
-console.log(`[MongoDB] Connection state: ${state}`)
 ```
 
 ### Node.js LTS for Production
@@ -1945,36 +1931,23 @@ Mongoose et le driver MongoDB sont optimisés et testés sur LTS uniquement.
 **Étapes de migration (ordre recommandé) :**
 
 1. **Models** - Créer factory functions `getModelName()`
-   - Remplacer `import { model } from 'mongoose'` par `import { getMongo } from '@ezstart/express-core'`
+   - Remplacer `import { model } from 'mongoose'` par `import { connectToMongo } from '@ezstart/express-core'`
    - Ajouter `bufferCommands: false` dans schema options
    - Créer `export async function getModelName() { ... }`
 2. **Services/Routes** - Appeler factory au début de chaque fonction
    - Remplacer `import { ModelName }` par `import { getModelName }`
    - Ajouter `const ModelName = await getModelName()` au début de chaque méthode
    - **Important:** Ajouter `// @ts-expect-error - Mongoose type inference issue` avant `.findOne()`, `.find()`, `.findById()`
-3. **Index.ts** - Utiliser getMongo() au lieu de connectToMongo()
-   - Remplacer `connectToMongo('db-name')` par `getMongo()`
+3. **Index.ts** - Utiliser connectToMongo() avec database name
+   - Pattern: `connectToMongo('database-name')` (e.g. 'ezauth', 'ezbill', etc.)
    - Logs: "Connected to MongoDB (shared connection)"
-4. **Scheduler** (si applicable) - Attendre getMongo() avant start
-   - Déplacer `scheduler.start()` dans `.then()` après `getMongo()`
+4. **Scheduler** (si applicable) - Attendre connectToMongo() avant start
+   - Déplacer `scheduler.start()` dans `.then()` après `connectToMongo()`
 5. **Package.json** - Configurer Node.js LTS
    - Ajouter `"engines": { "node": "20.18.x", "pnpm": "10.12.x" }`
 6. **Build & Test** - Valider la migration
    - `pnpm --filter api-NAME build` - Doit réussir sans erreurs
    - `pnpm --filter api-NAME dev` - Tester CRUD operations
-
-**Stratégie recommandée pour finir EZAuth :**
-
-```bash
-# Méthode rapide avec sed (ajoute @ts-expect-error automatiquement)
-cd apps/ezauth/api/src/services
-# Avant chaque appel Mongoose problématique
-sed -i '/(await AuthUserModel\.findOne\|await AuthUserModel\.findById\|await AuthCodeModel\.findOne\|await AuthCodeModel\.find)/i\    // @ts-expect-error - Mongoose type inference issue' auth.service.ts
-
-# Rebuild
-cd ../../../..
-pnpm --filter api-ezauth build
-```
 
 ## 🎮 Tower Defense - Optimisations de Performance (11/10/2025)
 

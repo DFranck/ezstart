@@ -18,7 +18,7 @@ Ce document décrit l'architecture de connexion MongoDB centralisée pour tout l
 
 ### Après (Single Shared Connection)
 
-- ✅ Une seule connexion partagée via `getMongo()`
+- ✅ Une seule connexion partagée via `connectToMongo()`
 - ✅ Fail-fast avec `bufferCommands: false` (erreurs immédiates au lieu de buffering)
 - ✅ Tous les models attachés à la même connexion
 - ✅ Timeouts configurés (15s connection + server selection)
@@ -35,7 +35,7 @@ import mongoose from 'mongoose'
 
 let isConnecting = false
 
-export async function getMongo(): Promise<typeof mongoose> {
+export async function connectToMongo(): Promise<typeof mongoose> {
   // Already connected - return immediately
   if (mongoose.connection.readyState === 1) {
     return mongoose
@@ -90,7 +90,7 @@ export const User = mongoose.model('User', schema) // Multiple connections possi
 **✅ BON (Factory Function) :**
 
 ```typescript
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
 
 const userSchema = new Schema(
@@ -106,10 +106,10 @@ const userSchema = new Schema(
 
 /**
  * Factory function to get User model attached to shared connection
- * MUST be called after getMongo() has been initialized
+ * MUST be called after connectToMongo() has been initialized
  */
 export async function getUserModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo()
   return mongoose.models.User || mongoose.model('User', userSchema)
 }
 ```
@@ -128,16 +128,16 @@ const users = await User.find({ email: /example.com/ })
 
 ### 3. API Startup - Wait for MongoDB Ready
 
-**Pattern obligatoire :** Attendre `getMongo()` avant de démarrer schedulers/background jobs.
+**Pattern obligatoire :** Attendre `connectToMongo()` avant de démarrer schedulers/background jobs.
 
 ```typescript
-import { getMongo, startServer, createApp, getApiPort } from '@ezstart/express-core'
+import { connectToMongo, startServer, createApp, getApiPort } from '@ezstart/express-core'
 
 const app = createApp({ apiApp: 'monitoring' })
 const PORT = getApiPort('monitoring')
 
 // ✅ Wait for MongoDB to be fully ready
-getMongo()
+connectToMongo()
   .then(() => {
     console.log('✅ Connected to MongoDB (shared connection)')
     return startServer(app, { routes, registries, serviceName: 'Monitoring API', port: PORT })
@@ -169,7 +169,7 @@ MONGO_URL=mongodb+srv://user:pass@cluster.mongodb.net/ezstart-monitoring
 
 ### Timeouts
 
-**Configurés automatiquement dans `getMongo()` :**
+**Configurés automatiquement dans `connectToMongo()` :**
 
 - `serverSelectionTimeoutMS: 15000` - Temps d'attente pour trouver un serveur MongoDB (15s)
 - `connectTimeoutMS: 15000` - Temps d'attente pour établir la connexion initiale (15s)
@@ -210,18 +210,18 @@ console.log(`[MongoDB] Connection state: ${mongoose.connection.readyState}`)
 
 ## Migration Guide
 
-### Migrer une API existante vers getMongo()
+### Migrer une API existante vers connectToMongo()
 
 **Étapes :**
 
-1. **Remplacer connectToMongo() par getMongo() dans index.ts**
+1. **Remplacer connectToMongo() par connectToMongo() dans index.ts**
 
 ```diff
 - import { connectToMongo } from '@ezstart/express-core'
-+ import { getMongo } from '@ezstart/express-core'
++ import { connectToMongo } from '@ezstart/express-core'
 
 - connectToMongo('database-name')
-+ getMongo()
++ connectToMongo()
     .then(() => {
       console.log('✅ Connected to MongoDB (shared connection)')
       return startServer(...)
@@ -232,7 +232,7 @@ console.log(`[MongoDB] Connection state: ${mongoose.connection.readyState}`)
 
 ```diff
 - import mongoose from 'mongoose'
-+ import { getMongo } from '@ezstart/express-core'
++ import { connectToMongo } from '@ezstart/express-core'
 + import { Schema } from 'mongoose'
 
 - const schema = new mongoose.Schema({...})
@@ -240,7 +240,7 @@ console.log(`[MongoDB] Connection state: ${mongoose.connection.readyState}`)
 
 - export const MyModel = mongoose.model('MyModel', schema)
 + export async function getMyModel() {
-+   const mongoose = await getMongo()
++   const mongoose = await connectToMongo()
 +   return mongoose.models.MyModel || mongoose.model('MyModel', schema)
 + }
 ```
@@ -261,7 +261,7 @@ async function handler(req, res) {
 4. **Attendre MongoDB avant les schedulers**
 
 ```diff
-getMongo()
+connectToMongo()
   .then(() => startServer(...))
   .then(() => {
 +     console.log('✅ MongoDB fully operational')
@@ -290,7 +290,7 @@ curl http://localhost:5080/api/my-resource
 
 **Fichiers modifiés :**
 
-- `apps/monitoring/api/src/index.ts` - Utilise `getMongo()` au lieu de `connectToMongo()`
+- `apps/monitoring/api/src/index.ts` - Utilise `connectToMongo()` au lieu de `connectToMongo()`
 - `apps/monitoring/api/src/models/HealthCheck.ts` - Factory function `getHealthCheckModel()`
 - `apps/monitoring/api/src/routes/history.ts` - Appelle `getHealthCheckModel()`
 - `apps/monitoring/api/src/routes/trigger.ts` - Appelle `getHealthCheckModel()`
@@ -315,9 +315,9 @@ curl http://localhost:5080/api/my-resource
 
 ### ✅ À FAIRE
 
-1. **TOUJOURS** utiliser `getMongo()` au lieu de `mongoose.connect()`
+1. **TOUJOURS** utiliser `connectToMongo()` au lieu de `mongoose.connect()`
 2. **TOUJOURS** créer des factory functions pour les models (`getModelName()`)
-3. **TOUJOURS** attendre `getMongo()` avant de démarrer schedulers/cron jobs
+3. **TOUJOURS** attendre `connectToMongo()` avant de démarrer schedulers/cron jobs
 4. **TOUJOURS** utiliser `bufferCommands: false` dans les schemas
 5. **TOUJOURS** utiliser Node.js LTS (20.18.x) en production
 6. **TOUJOURS** configurer `MONGO_URL` dans `.env.local` (dev) et Railway/Vercel (prod)
@@ -326,7 +326,7 @@ curl http://localhost:5080/api/my-resource
 
 1. **JAMAIS** importer `mongoose` directement dans les models (use `Schema` from mongoose)
 2. **JAMAIS** exporter directement un model (use factory function)
-3. **JAMAIS** démarrer des background jobs avant `getMongo()` ready
+3. **JAMAIS** démarrer des background jobs avant `connectToMongo()` ready
 4. **JAMAIS** utiliser plusieurs connexions MongoDB dans le même process
 5. **JAMAIS** ignorer les warnings "Unsupported engine" (upgrade to Node LTS)
 

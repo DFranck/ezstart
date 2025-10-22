@@ -427,9 +427,9 @@ const app = createApp({ apiApp: 'ezauth' })
 
 ## 🗄️ MongoDB - Connexion Centralisée
 
-### Single Source of Truth : getMongo()
+### Single Source of Truth : connectToMongo()
 
-**TOUJOURS** utiliser `getMongo()` depuis `@ezstart/express-core` :
+**TOUJOURS** utiliser `connectToMongo(dbName)` depuis `@ezstart/express-core` :
 
 ```typescript
 // ❌ MAUVAIS
@@ -438,12 +438,12 @@ mongoose.connect(process.env.MONGO_URL)
 const MyModel = mongoose.model('MyModel', schema)
 
 // ✅ BON
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
 
 // Factory function pour model
 export async function getMyModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo('database-name')
   return mongoose.models.MyModel || mongoose.model('MyModel', schema)
 }
 
@@ -456,11 +456,11 @@ const doc = await MyModel.findOne({ ... })
 
 1. ✅ **Factory Functions** pour tous les models
    - Exporter `async function getModelName()` au lieu du model directement
-   - Attacher model à la connexion partagée via `getMongo()`
+   - Attacher model à la connexion partagée via `connectToMongo()`
 
 2. ✅ **Wait for Ready** avant schedulers/cron jobs
    ```typescript
-   getMongo()
+   connectToMongo('database-name')
      .then(() => startServer(...))
      .then(() => scheduler.start()) // Après MongoDB ready
    ```
@@ -495,7 +495,7 @@ const user = await AuthUserModel.findOne({ email })
 ```typescript
 import {
   createApp,
-  getMongo,
+  connectToMongo,
   startServer,
   getApiPort,
   Router,
@@ -515,7 +515,7 @@ app.use('/api/auth', router)
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }))
 
 // Démarrage
-getMongo()
+connectToMongo('ezauth')
   .then(() => startServer(app, {
     routes: router,
     registries: [registry],
@@ -933,7 +933,7 @@ Quand tu crées un nouveau package dans `/packages/` :
 Quand tu crées une nouvelle app dans `/apps/` :
 
 - [ ] Vérifier structure : web/, api/, types/, utils/, config/
-- [ ] APIs : Utiliser @ezstart/express-core + getMongo()
+- [ ] APIs : Utiliser @ezstart/express-core + connectToMongo(dbName)
 - [ ] Web : Utiliser configs centralisées (tailwind, eslint, tsconfig)
 - [ ] Ajouter port dans packages/config/src/urls.ts
 - [ ] Setup providers (ThemeProvider, AuthProvider)
@@ -995,12 +995,12 @@ const API_URL = getApiUrl('ezauth') // Pas hardcodé
 
 **Solution :**
 ```typescript
-// Utiliser getMongo() au lieu de mongoose.connect()
-import { getMongo } from '@ezstart/express-core'
+// Utiliser connectToMongo() au lieu de mongoose.connect()
+import { connectToMongo } from '@ezstart/express-core'
 
 // Factory functions pour models
 export async function getMyModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo('database-name')
   return mongoose.models.MyModel || mongoose.model('MyModel', schema)
 }
 ```

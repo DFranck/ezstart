@@ -1,4 +1,4 @@
-import { getMongo } from '@ezstart/express-core'
+import { connectToMongo } from '@ezstart/express-core'
 import { Schema, Document } from 'mongoose'
 
 export interface WaitlistDocument extends Document {
@@ -29,9 +29,9 @@ const waitlistSchema = new Schema<WaitlistDocument>({
 
 /**
  * Factory function to get Waitlist model attached to shared connection
- * MUST be called after getMongo() has been initialized
+ * MUST be called after connectToMongo() has been initialized
  */
 export async function getWaitlistModel() {
-  const mongoose = await getMongo()
+  const mongoose = await connectToMongo('ezauth')
   return mongoose.models.Waitlist || mongoose.model<WaitlistDocument>('Waitlist', waitlistSchema)
 }
