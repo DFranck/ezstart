@@ -14,25 +14,26 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "@ezstart/ui": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
+    "@ezstart/ui": "workspace:*",
     "autoprefixer": "^10.4.19",
     "deepmerge": "^4.3.1",
     "next": "15.5.2",
+    "next-intl": "^4.4.0",
     "postcss": "^8.4.38",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.54.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/next-config": "workspace:*",
     "@ezstart/seo-config": "workspace:*",
     "@ezstart/tailwind-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "typescript": "^5.7.3"
   }
 }
