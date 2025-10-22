@@ -2,6 +2,8 @@
 
 import clsx from 'clsx';
 import { ReactNode, useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Icon } from '../icon';
 import { ThreadMessageMeta } from './types';
 import { useThreadTheme } from './ThreadThemeContext';
@@ -170,7 +172,34 @@ export function ThreadMessage({
                 </div>
               ) : (
                 <>
-                  {children}
+                  {role === 'ai' && typeof children === 'string' ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc ml-4 mb-2" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+                          li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                          code: ({ node, inline, ...props }: any) =>
+                            inline ? (
+                              <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props} />
+                            ) : (
+                              <code className="block bg-muted p-2 rounded text-sm my-2 overflow-x-auto" {...props} />
+                            ),
+                          strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                          em: ({ node, ...props }) => <em className="italic" {...props} />,
+                          a: ({ node, ...props }) => (
+                            <a className="text-primary underline hover:opacity-80" {...props} />
+                          ),
+                        }}
+                      >
+                        {children}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    children
+                  )}
 
                   {shouldShowRetry && (
                     <div className='mt-3 text-xs flex justify-end'>

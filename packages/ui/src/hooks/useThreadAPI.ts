@@ -58,21 +58,24 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
 
   const sendMessage = useCallback(
-    async (message: string, files?: File[]) => {
+    async (message: string, files?: File[], skipAddingUserMessage = false) => {
       if (!message.trim()) return;
 
       setError(null);
       setLastUserMessage(message);
 
-      // Add user message
-      const userMessage: ThreadMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-      };
+      // Add user message (skip if called from editMessage)
+      if (!skipAddingUserMessage) {
+        const userMessage: ThreadMessage = {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString(),
+        };
 
-      setMessages((prev) => [...prev, userMessage]);
+        setMessages((prev) => [...prev, userMessage]);
+      }
+
       setLoading(true);
 
       try {
@@ -174,7 +177,8 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
       setMessages([...messagesUpToEdit, editedMessage]);
 
       // Re-send the edited message to get a new AI response
-      await sendMessage(newContent);
+      // Skip adding user message since we already added the edited one above
+      await sendMessage(newContent, undefined, true);
     },
     [messages, sendMessage]
   );

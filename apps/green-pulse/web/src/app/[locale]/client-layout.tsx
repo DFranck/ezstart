@@ -31,7 +31,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
-      showHeader={!isChatPage && !isLiaPage}
+      // showHeader={!isChatPage && !isLiaPage}
       showFooter={!isChatPage && !isLiaPage}
       mobileLogoSrc="/logo.png"
       mobileLogoAlt="Green Pulse Logo"

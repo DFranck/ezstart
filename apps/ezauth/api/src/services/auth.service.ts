@@ -49,6 +49,8 @@ export class AuthService {
   // Login user
   static async login(data: LoginRequest): Promise<AuthCodeResponse> {
     const AuthUserModel = await getAuthUserModel()
+    console.log('🔍 [DEBUG] Login attempt:', { email: data.email, app: data.app })
+
     // Find user by email OR username
     const user = await AuthUserModel.findOne({
       $or: [
@@ -56,12 +58,17 @@ export class AuthService {
         { username: data.email } // Allow using email field for username too
       ]
     })
+
+    console.log('🔍 [DEBUG] User found:', user ? `Yes (${user.email})` : 'No')
+
     if (!user) {
       throw new Error('Invalid credentials')
     }
 
     // Check password
     const isValidPassword = await user.comparePassword(data.password)
+    console.log('🔍 [DEBUG] Password valid:', isValidPassword)
+
     if (!isValidPassword) {
       throw new Error('Invalid credentials')
     }
