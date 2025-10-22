@@ -3,7 +3,7 @@
 **ROI-First Strategy for Maximum Impact with Minimum Effort**
 
 **Last Updated:** 2025-10-22
-**Current Score:** 77.5/100 (Monitoring 35→80, +2.8 points from Phase 1)
+**Current Score:** 78.8/100 (Monitoring +2.8, i18n +1.3 from Phase 1-2)
 **Target Score:** 85+ (Excellent)
 
 ---
@@ -401,44 +401,49 @@ import { ... } from '@ezstart/[package-name]'
 **Impact:** +61 points (+3.8 global score)
 **ROI:** 1.52 pts/hour ⭐⭐⭐
 
-### 4. i18n: 65/100 → 90/100 (14h, +25 pts)
+### 4. i18n: 65/100 → 85/100 (8h, +20 pts) ✅ COMPLETED (EN/FR only)
 
-**Current Problem:**
-- ❌ Only 1/8 apps support i18n (EZStart)
-- ❌ Only English available (blocks international expansion)
+**Problem (solved):**
+- ❌ Only 5/8 apps support i18n (EZStart, FengShui, Tower Defense, ASC-TCD, GreenPulse)
+- ❌ 3 apps hardcoded English (EZAuth, EZBill, EZPay)
 - ❌ Inconsistent i18n architecture
 
 **Actions:**
 
-#### 4.1 Migrate Apps to next-intl (8h)
-```bash
-# Apps to migrate (7):
-# - apps/ezauth/web
-# - apps/ezbill/web
-# - apps/ezpay/web
-# - apps/tower-defense/web
-# - apps/fengshui/web
-# - apps/asc-tcd/web
-# - apps/green-pulse/web
+#### 4.1 Migrate Apps to next-intl (8h) - ✅ COMPLETED (3 apps)
 
-# Copy structure from apps/ezstart/web
-pnpm add next-intl
+**What was done (2025-10-22):**
+```typescript
+// Migrated EZAuth, EZBill, EZPay to next-intl with EN/FR
+// Used centralized @ezstart/next-config i18n option
 
-# Create i18n structure
-apps/[app]/web/
-├── messages/
-│   ├── en.json
-│   └── es.json
-└── src/
-    ├── i18n.ts
-    └── middleware.ts
+// Before:
+import createNextIntlPlugin from 'next-intl/plugin'
+const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
+export default withNextIntl(createNextConfig({ pwa: true }))
+
+// After (simplified):
+export default createNextConfig({
+  pwa: true,
+  i18n: true,  // Uses @ezstart/next-config withI18n helper
+  i18nRequestPath: './src/i18n.ts',
+})
 ```
 
-**Time:** 8h (1h per app × 7 apps + 1h testing)
+**Completed:**
+- ✅ Migrated EZAuth web to next-intl (EN/FR translations) - commit 5fbf28c
+- ✅ Migrated EZBill web to next-intl (EN/FR translations) - commit 0138564
+- ✅ Migrated EZPay web to next-intl (EN/FR translations) - commit 900740d
+- ✅ Simplified config using centralized helper - commit 0cad39a
+- ✅ Updated I18N-AUDIT.md (65 → 85, +20 pts) - commit 9338d7f
+- ✅ 100% monorepo i18n coverage (8/8 apps with next-intl)
+- ✅ Full English/French bilingual support
+
+**Time:** 6h actual (faster than estimated)
 
 ---
 
-#### 4.2 Add Spanish Translations (6h)
+#### 4.2 Add Spanish Translations (6h) - ⏳ NOT DONE YET
 ```bash
 # Use AI to translate en.json → es.json
 # Review + validate translations
@@ -455,12 +460,14 @@ apps/[app]/web/
 
 ---
 
-**Phase 2.1 Total:** 14h, +25 points, **Score: 65 → 90**
+**Phase 2 Item 4 Total:** 8h (only EN/FR), +20 points, **Score: 65 → 85**
 
 **Gain:**
-- ✅ Access to Spanish market (~500M users)
-- ✅ Consistent i18n architecture across all apps
-- ✅ Easy to add more languages later
+- ✅ 100% monorepo i18n coverage (8/8 apps) ⭐ **ACHIEVED**
+- ✅ Consistent i18n architecture across all apps ⭐ **ACHIEVED**
+- ✅ Full English/French bilingual support ⭐ **ACHIEVED**
+- ⏳ Access to Spanish market (~500M users) - Not done yet (future: 85 → 90)
+- ✅ Easy to add more languages later ⭐ **ACHIEVED**
 
 ---
 
