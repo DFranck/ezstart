@@ -285,6 +285,9 @@ importers:
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -781,6 +784,9 @@ importers:
       '@ezstart/express-core':
         specifier: workspace:*
         version: link:../../../packages/express-core
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1

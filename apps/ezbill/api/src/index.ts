@@ -1,3 +1,6 @@
+// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
 import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
@@ -10,6 +13,9 @@ app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'EZ
 
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
+
+// Sentry error handler MUST be AFTER all routes
+Sentry.setupExpressErrorHandler(app)
 
 connectToMongo('ezbill')
   .then(() =>

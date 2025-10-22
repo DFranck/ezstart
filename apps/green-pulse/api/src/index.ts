@@ -1,3 +1,6 @@
+// Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
 import { connectToMongo, createApp, startServer, Router, getApiPort } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
@@ -6,6 +9,9 @@ const PORT = getApiPort('green-pulse')
 
 app.use('/api', routes)
 app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok', service: 'green-pulse-api' }))
+
+// Sentry error handler MUST be AFTER all routes
+Sentry.setupExpressErrorHandler(app)
 
 // Start server with MongoDB
 connectToMongo('greenpulse')
