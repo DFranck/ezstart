@@ -68,6 +68,11 @@ function ThreadLayoutInner({
       <div className={cn(
         'relative flex w-full h-screen',
         theme.background,
+        // Add padding-top based on headerOffset to prevent overlap
+        headerOffset === 'top-16' ? 'pt-16' :
+        headerOffset === 'top-20' ? 'pt-20' :
+        headerOffset === 'top-0' ? '' :
+        headerOffset.startsWith('top-') ? headerOffset.replace('top-', 'pt-') : '',
         mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
         className
       )}>
