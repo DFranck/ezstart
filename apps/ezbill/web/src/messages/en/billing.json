@@ -1,0 +1,25 @@
+{
+  "invoice": {
+    "create": "Create Invoice",
+    "edit": "Edit Invoice",
+    "delete": "Delete Invoice",
+    "send": "Send Invoice",
+    "number": "Invoice Number",
+    "date": "Invoice Date",
+    "dueDate": "Due Date",
+    "amount": "Amount",
+    "status": "Status",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue"
+  },
+  "client": {
+    "create": "Create Client",
+    "edit": "Edit Client",
+    "delete": "Delete Client",
+    "name": "Client Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address"
+  }
+}

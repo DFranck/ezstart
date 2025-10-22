@@ -1,0 +1,25 @@
+{
+  "invoice": {
+    "create": "Créer une facture",
+    "edit": "Modifier la facture",
+    "delete": "Supprimer la facture",
+    "send": "Envoyer la facture",
+    "number": "Numéro de facture",
+    "date": "Date de facturation",
+    "dueDate": "Date d'échéance",
+    "amount": "Montant",
+    "status": "Statut",
+    "paid": "Payée",
+    "pending": "En attente",
+    "overdue": "En retard"
+  },
+  "client": {
+    "create": "Créer un client",
+    "edit": "Modifier le client",
+    "delete": "Supprimer le client",
+    "name": "Nom du client",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse"
+  }
+}

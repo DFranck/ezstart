@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "invoices": "Invoices",
+    "settings": "Settings"
+  }
+}
