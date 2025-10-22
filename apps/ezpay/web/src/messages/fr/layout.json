@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "donate": "Faire un don",
+    "projects": "Projets",
+    "history": "Historique des paiements",
+    "docs": "Documentation"
+  }
+}

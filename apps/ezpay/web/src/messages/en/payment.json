@@ -1,0 +1,34 @@
+{
+  "donation": {
+    "title": "Support the Project",
+    "amount": "Amount",
+    "message": "Leave a message (optional)",
+    "anonymous": "Donate anonymously",
+    "submit": "Donate",
+    "thankYou": "Thank you for your support!",
+    "recent": "Recent Donations",
+    "noMessage": "No message"
+  },
+  "purchase": {
+    "title": "Purchase",
+    "price": "Price",
+    "quantity": "Quantity",
+    "total": "Total",
+    "buy": "Buy Now",
+    "success": "Purchase successful!"
+  },
+  "subscription": {
+    "title": "Subscribe",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "subscribe": "Subscribe",
+    "cancel": "Cancel Subscription",
+    "manage": "Manage Subscription"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed",
+    "refunded": "Refunded"
+  }
+}

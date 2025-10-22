@@ -1,37 +1,22 @@
-import { createMetadata } from '@ezstart/seo-config/metadata'
-import { createJsonLd } from '@ezstart/seo-config/json-ld'
-import { ThemeProvider } from '@ezstart/next-theme'
 import './globals.css'
+import { routing } from '@/i18n/routing'
+import { ReactNode } from 'react'
 
-export const metadata = createMetadata({
-  appName: 'EZPay',
-  description: 'Universal payment system for donations, purchases, and subscriptions',
-  domain: 'https://ezpay.vercel.app',
-  keywords: ['payment', 'donations', 'subscriptions', 'stripe', 'ezstart'],
-  themeColor: '#10B981',
-})
+type Props = {
+  children: ReactNode
+  params: Promise<{ locale: string }>
+}
 
-const jsonLd = createJsonLd({
-  appName: 'EZPay',
-  description: 'Universal payment system for donations, purchases, and subscriptions',
-  url: 'https://ezpay.vercel.app',
-  applicationCategory: 'FinanceApplication',
-})
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }))
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default async function RootLayout({ children, params }: Props) {
+  const { locale } = await params
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-screen">{children}</body>
     </html>
   )
 }

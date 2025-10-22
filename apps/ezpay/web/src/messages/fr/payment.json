@@ -1,0 +1,34 @@
+{
+  "donation": {
+    "title": "Soutenir le projet",
+    "amount": "Montant",
+    "message": "Laisser un message (optionnel)",
+    "anonymous": "Don anonyme",
+    "submit": "Faire un don",
+    "thankYou": "Merci pour votre soutien !",
+    "recent": "Dons récents",
+    "noMessage": "Aucun message"
+  },
+  "purchase": {
+    "title": "Achat",
+    "price": "Prix",
+    "quantity": "Quantité",
+    "total": "Total",
+    "buy": "Acheter maintenant",
+    "success": "Achat réussi !"
+  },
+  "subscription": {
+    "title": "S'abonner",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "subscribe": "S'abonner",
+    "cancel": "Annuler l'abonnement",
+    "manage": "Gérer l'abonnement"
+  },
+  "status": {
+    "pending": "En attente",
+    "completed": "Terminé",
+    "failed": "Échoué",
+    "refunded": "Remboursé"
+  }
+}
