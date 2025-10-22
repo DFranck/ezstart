@@ -3,6 +3,7 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { Providers } from '@/components/providers'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { routing } from '@/i18n/routing'
 import { ReactNode } from 'react'
 
 export const metadata = createMetadata({
@@ -28,12 +29,16 @@ type Props = {
   params: Promise<{ locale: string }>
 }
 
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }))
+}
+
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider messages={messages} locale={locale}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
