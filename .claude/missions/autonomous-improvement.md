@@ -127,11 +127,24 @@
 #### Item 9: Spanish Translations (6h) - ⏳ NOT DONE YET
 - [ ] ... (deferred to later)
 
-#### Item 10-12: Accessibility (12h)
-- [ ] ... (details in IMPROVEMENT-ROADMAP.md)
+#### Item 10-12: Accessibility (12h) - ⏸️ DEFERRED
+- [x] Foundation completed (focus-visible, @axe-core/react installed)
+- [x] Score improved: 72 → 76 (+4 points, +0.25 global)
+- [ ] Full accessibility audit deferred - Reason: Should fix once in @ezstart/ui, not per app
+- [ ] Manual testing (keyboard nav, screen reader) - To do later when standardizing UI components
+- [ ] ARIA labels fixes - To do in @ezstart/ui package for all apps at once
 
-#### Item 13-15: UX Polish (14h)
-- [ ] ... (details in IMPROVEMENT-ROADMAP.md)
+**Note:** Accessibility improvements should follow "single source of truth" principle.
+Fixing in @ezstart/ui = 8 apps fixed automatically. Deferred until time for proper UI standardization.
+
+#### Item 13-15: UX Polish (14h) - ⏸️ DEFERRED
+- [ ] Loading states (Skeleton screens) - Deferred to @ezstart/ui audit
+- [ ] Error states (Error boundaries) - Deferred to @ezstart/ui audit
+- [ ] Empty states - Deferred to @ezstart/ui audit
+
+**Note:** UX improvements should be done in @ezstart/ui package to benefit all 8 apps at once.
+Creating Skeleton, EmptyState, ErrorBoundary components once = 8 apps improved automatically.
+Combined with Accessibility audit for comprehensive UI component overhaul.
 
 **Phase 2 Completion:**
 - [ ] Update progress table, scores, commit
@@ -256,9 +269,11 @@ type(scope): brief description
 | Item | Status | Time Spent | Commit SHA | Notes |
 |------|--------|------------|------------|-------|
 | 8. i18n Migration | ✅ Complete | 6h | 5fbf28c, 0138564, 900740d, 0cad39a, 9338d7f, e239aaf | i18n 65→85 (+20pts), 8/8 apps EN/FR |
+| 9. Spanish Translations | ⏳ Pending | 0h | - | Deferred to later |
+| 10-12. Accessibility | ⏸️ Deferred | 1h | 200dc09, 44e78a2, f218f4f, 8807bd0 | Foundation only: 72→76 (+0.25 global), full audit deferred to UI standardization |
 
-**Phase 2 Status: 🔄 IN PROGRESS (1/6 items)**
-**Global Score: 77.5 → 78.8 (+1.3 points)**
+**Phase 2 Status: 🔄 IN PROGRESS (1.5/6 items)**
+**Global Score: 77.5 → 77.8 (+0.3 points since i18n)**
 
 **Status:** ⏳ Pending | 🔄 In Progress | ✅ Complete | ❌ Blocked
 
