@@ -157,7 +157,7 @@ All autonomous work follows these rules:
 1. ✅ **UI Components** - Use @ezstart/ui, NEVER HTML natives
 2. ✅ **Semantic Colors** - Use classes like bg-card, NEVER bg-gray-100
 3. ✅ **Package Hierarchy** - Check packages/ first, reuse before creating
-4. ✅ **MongoDB** - Use getMongo(), NEVER mongoose.connect()
+4. ✅ **MongoDB** - Use connectToMongo(dbName) from @ezstart/express-core (singleton pattern)
 5. ✅ **URLs/Ports** - Use @ezstart/config, NEVER hardcode
 6. ✅ **Documentation** - Update README when modifying packages
 7. ✅ **TypeScript** - strict mode, composite: true, no errors

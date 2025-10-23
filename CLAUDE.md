@@ -420,7 +420,7 @@ Si tu reprends une session avec des processus déjà en cours :
 6. **TOUJOURS** vérifier si code existe dans `packages/` avant de créer
 7. **JAMAIS** de balises HTML natives (utiliser composants `@ezstart/ui`)
 8. **JAMAIS** de couleurs hardcodées (utiliser classes sémantiques)
-9. **TOUJOURS** utiliser `getMongo()` pour MongoDB (connexion partagée)
+9. **TOUJOURS** utiliser `connectToMongo(dbName)` pour MongoDB (connexion singleton partagée)
 10. **TOUJOURS** mettre à jour README des packages avant commit
 
 # Configuration Claude - @ezstart Monorepo
@@ -1733,13 +1733,12 @@ connectToMongo('ezauth')
 
 - **config/ports.ts** : Configuration centralisée des ports
 - **infra/createApp.ts** : Bootstrap Express avec CORS automatique
-- **infra/connectToMongo.ts** : Connexion MongoDB standardisée (deprecated, use getMongo())
+- **infra/connectToMongo.ts** : Connexion MongoDB singleton partagée
 - **infra/startServer.ts** : Démarrage serveur + OpenAPI
 - **middlewares/** : Validation params/query partagée
 - **openapi/** : Documentation automatique avec Zod
-- **mongo.ts** : ⭐ **NOUVEAU** - Connexion MongoDB centralisée et partagée
 
-## 🗄️ MongoDB - Connexion Centralisée ⭐ NOUVEAU (19/10/2025)
+## 🗄️ MongoDB - Connexion Centralisée ⭐ (19/10/2025)
 
 ### Single Source of Truth pour MongoDB
 
@@ -1891,35 +1890,30 @@ Mongoose et le driver MongoDB sont optimisés et testés sur LTS uniquement.
 **✅ Root package.json** : Déjà configuré avec `node: "20.18.x"`
 **✅ Monitoring API** : Déjà configuré avec `node: "20.18.x"`
 
-### Migration des APIs Existantes
+### Migration MongoDB - État Actuel
 
-**APIs déjà migrées vers getMongo() :**
-- ✅ **Monitoring API** - Complet (models + routes + index.ts + scheduler) (**Build ✅ - 19/10/2025**)
+**✅ Toutes les APIs utilisent `connectToMongo(dbName)` depuis le commit `a0e3055` (22/10/2025)**
 
-**APIs partiellement migrées :**
-- 🔧 **EZAuth API (90% fait)** - Models ✅, Index.ts ✅, Waitlist routes ✅, Auth service ⚠️
-  - **Fichiers migrés :**
-    - Models: [auth-user.ts](./apps/ezauth/api/src/models/auth-user.ts), [auth-code.ts](./apps/ezauth/api/src/models/auth-code.ts), [waitlist.ts](./apps/ezauth/api/src/models/waitlist.ts) ✅
-    - Index.ts: [index.ts:20](./apps/ezauth/api/src/index.ts#L20) utilise `getMongo()` ✅
-    - Routes: [waitlist.ts](./apps/ezauth/api/src/routes/waitlist.ts) utilise `getWaitlistModel()` ✅
-    - Package.json: Node.js LTS 20.18.x configuré ✅
-  - **Reste à faire :**
-    - [auth.service.ts](./apps/ezauth/api/src/services/auth.service.ts) - Importe factory functions ✅, mais usages causent erreurs TypeScript
-    - Ajouter `// @ts-expect-error - Mongoose type inference issue` avant ~15 appels Mongoose (findOne/find/findById)
-  - **Build status:** ❌ 15 erreurs TypeScript (type inference Mongoose avec factory pattern)
-  - **Temps estimé:** 10min pour ajouter les comments `@ts-expect-error`
+Pattern standard pour tous les APIs :
 
-**APIs à migrer :**
-- ⏳ **EZPay API** (1 model: Payment - Simple, estimé 15min)
-- ⏳ **EZBill API** (10+ models - Complexe, estimé 2h)
-- ⏳ **Tower Defense API** (7 models - Moyen, estimé 1h)
-- ⏳ **GreenPulse API** (1 model: Conversation - Simple, estimé 15min)
+```typescript
+import { connectToMongo, startServer, createApp } from '@ezstart/express-core'
 
-**Statistiques de migration :**
-- ✅ **1/5 APIs** migrées complètement (20%) - Monitoring
-- 🔧 **1/5 APIs** à 90% (18%) - EZAuth (juste errors TypeScript à fix)
-- ⏳ **3/5 APIs** à démarrer (0%) - EZPay, EZBill, Tower Defense, GreenPulse
-- **Progression globale : 38/100** (1 API complète + 0.9 API partielle)
+connectToMongo('database-name')
+  .then(() => startServer(app, { routes, registries, serviceName, port }))
+  .catch(err => {
+    console.error('❌ Failed to start API', err)
+    process.exit(1)
+  })
+```
+
+**Caractéristiques :**
+- ✅ **Singleton pattern** - Une seule connexion partagée par API
+- ✅ **Fail-fast** - `bufferCommands: false` pour détecter les erreurs rapidement
+- ✅ **Timeouts configurés** - 30s connection timeout, 45s socket timeout
+- ✅ **Auto-fallback** - Essaie localhost si Atlas échoue
+- ✅ **Connection pooling** - Min 2, Max 10 connexions
+- ✅ **Ping test** - Vérifie que la connexion est read/write ready
 
 **Guide de migration complet :**
 

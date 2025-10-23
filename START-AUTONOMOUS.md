@@ -210,7 +210,7 @@ cat docs/README.md | grep "Global Score"
 - Use semantic colors (no hardcoded)
 - Check packages/ first before creating
 - Update READMEs for packages
-- Use getMongo() for MongoDB
+- Use connectToMongo(dbName) for MongoDB
 - Use @ezstart/config for URLs
 
 ✅ **Code quality**

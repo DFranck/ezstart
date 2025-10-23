@@ -160,7 +160,7 @@
 2. ✅ ALWAYS use semantic colors (NEVER hardcoded like bg-gray-100)
 3. ✅ ALWAYS check packages/ before creating new code
 4. ✅ ALWAYS update README when modifying packages
-5. ✅ ALWAYS use getMongo() for MongoDB (NEVER mongoose.connect)
+5. ✅ ALWAYS use connectToMongo(dbName) for MongoDB (singleton pattern)
 6. ✅ ALWAYS use @ezstart/config for URLs/ports
 7. ✅ ALWAYS structured commits (conventional commits format)
 8. ✅ ALWAYS typecheck before commit (pnpm typecheck)
