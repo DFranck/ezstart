@@ -2,9 +2,10 @@
 
 **ROI-First Strategy for Maximum Impact with Minimum Effort**
 
-**Last Updated:** 2025-10-22
-**Current Score:** 78.8/100 (Monitoring +2.8, i18n +1.3 from Phase 1-2)
+**Last Updated:** 2025-10-23
+**Current Score:** 78.8/100 (Good+)
 **Target Score:** 85+ (Excellent)
+**Progress:** Phase 1 Complete ✅ | Phase 2 Partial (i18n only, A11y/UX deferred) 🟡
 
 ---
 
@@ -471,14 +472,19 @@ export default createNextConfig({
 
 ---
 
-### 5. Accessibility: 74/100 → 90/100 (12h, +16 pts)
+### 5. Accessibility: 74/100 → 90/100 (12h, +16 pts) - ⏸️ DEFERRED
+
+**⚠️ DEFERRED - DO NOT WORK ON THIS YET**
+
+**Reason:** Should be done in `@ezstart/ui` package (not per app) following "single source of truth" principle.
+Fixing components in @ezstart/ui = 8 apps fixed automatically. Wait for proper UI audit phase.
 
 **Current Problem:**
 - ❌ Missing ARIA labels (screen readers can't understand)
 - ❌ Keyboard navigation incomplete (can't use without mouse)
 - ❌ Not WCAG 2.1 Level AA compliant
 
-**Actions:**
+**Actions (when time comes):**
 
 #### 5.1 Fix ARIA Labels (4h)
 ```tsx
@@ -551,14 +557,19 @@ useEffect(() => {
 
 ---
 
-### 6. UX: 70/100 → 90/100 (14h, +20 pts)
+### 6. UX: 70/100 → 90/100 (14h, +20 pts) - ⏸️ DEFERRED
+
+**⚠️ DEFERRED - DO NOT WORK ON THIS YET**
+
+**Reason:** Should be done in `@ezstart/ui` package (create Skeleton, ErrorBoundary, EmptyState components once).
+Creating reusable components = 8 apps improved automatically. Wait for proper UI component audit.
 
 **Current Problem:**
 - ❌ No loading states (user doesn't know what's happening)
 - ❌ No error states (cryptic error messages)
 - ❌ No empty states (blank pages look broken)
 
-**Actions:**
+**Actions (when time comes):**
 
 #### 6.1 Loading States (6h)
 ```tsx
@@ -653,23 +664,31 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 ---
 
-## 📊 Phase 2 Summary
+## 📊 Phase 2 Summary - PARTIAL COMPLETION
 
-**Total Effort:** 40 hours (2-3 weeks)
-**Total Gain:** +61 points
-**ROI:** 1.52 pts/hour ⭐⭐⭐
+**Status:** 🟡 Partial (1/6 items) - Accessibility & UX **DEFERRED** to UI audit phase
 
-**Score Improvements:**
-- i18n: 65 → 90 (+25)
-- Accessibility: 74 → 90 (+16)
-- UX: 70 → 90 (+20)
+**Completed:**
+- ✅ **i18n Migration** (Item 8): 8/8 apps with next-intl EN/FR
 
-**Global Score:** 77.3 → 81.1 (+3.8 points)
+**Deferred:**
+- ⏸️ **Spanish Translations** (Item 9): Low priority, can add later
+- ⏸️ **Accessibility** (Items 10-12): Should be done in @ezstart/ui, not per app
+- ⏸️ **UX Polish** (Items 13-15): Should be done in @ezstart/ui, not per app
 
-**Impact:**
-- ✅ International-ready (Spanish market accessible)
-- ✅ Legally compliant (WCAG 2.1 Level AA)
-- ✅ Delightful UX (loading, errors, empty states)
+**Actual Effort:** 6 hours (1 item completed)
+**Actual Gain:** +1.3 global points (i18n: 65 → 85)
+**ROI:** 0.22 pts/hour global
+
+**Global Score:** 77.5 → 78.8 (+1.3 points)
+
+**Impact Achieved:**
+- ✅ 100% monorepo i18n coverage (8/8 apps)
+- ✅ Full EN/FR bilingual support
+- ✅ Consistent i18n architecture
+
+**Why Items Deferred:**
+The "single source of truth" principle applies: fixing accessibility/UX in `@ezstart/ui` components = 8 apps improved automatically. More efficient than fixing per app. Combined with proper UI component audit later.
 
 ---
 
@@ -917,26 +936,26 @@ test('create and send invoice', async ({ page }) => {
 
 | Phase | Item | Status | Time Spent | Score Before | Score After | Notes |
 |-------|------|--------|------------|--------------|-------------|-------|
-| 1 | Sentry | ✅ Complete | 2h | 70 | 75 | 3 critical APIs, centralized in @ezstart/logger |
-| 1 | Logging | ✅ Complete | 1.5h | 35 | 70 | Pino + @ezstart/logger |
+| 1 | Sentry | ✅ Complete | 4h | 35 | 80 | ALL 6 APIs, centralized in @ezstart/logger (+45 pts) |
+| 1 | Logging | ✅ Complete | 1.5h | 35 | 70 | Pino + @ezstart/logger (included in Monitoring) |
 | 1 | robots.txt | ✅ Complete | 0.2h | 54 | 65 | Already exists via @ezstart/seo-config |
 | 1 | Open Graph | ✅ Complete | 1h | 65 | 80 | createMetadata + 8 SVG images |
 | 1 | JSON-LD | ✅ Complete | 0.8h | 80 | 85 | createJsonLd + schema-dts |
 | 1 | Root README | ✅ Complete | 1.2h | 68 | 75 | 297 lines, comprehensive |
 | 1 | Package READMEs | ✅ Complete | 0h | 75 | 85 | Done by another agent, 100% coverage |
-| 2 | next-intl migration | ⏳ Pending | 0h | 65 | 80 | |
-| 2 | Spanish translations | ⏳ Pending | 0h | 65 | 90 | |
-| 2 | ARIA labels | ⏳ Pending | 0h | 74 | 80 | |
-| 2 | Keyboard nav | ⏳ Pending | 0h | 74 | 85 | |
-| 2 | Screen readers | ⏳ Pending | 0h | 74 | 90 | |
-| 2 | Loading states | ⏳ Pending | 0h | 70 | 80 | |
-| 2 | Error states | ⏳ Pending | 0h | 70 | 85 | |
-| 2 | Empty states | ⏳ Pending | 0h | 70 | 90 | |
-| 3 | Unit tests | ⏳ Pending | 0h | 15 | 50 | |
-| 3 | Integration tests | ⏳ Pending | 0h | 15 | 65 | |
-| 3 | E2E tests | ⏳ Pending | 0h | 15 | 80 | |
+| 2 | i18n migration | ✅ Complete | 6h | 65 | 85 | 8/8 apps with next-intl EN/FR (+20 pts) |
+| 2 | Spanish translations | ⏸️ Deferred | - | 85 | 90 | Low priority, can add later |
+| 2 | ARIA labels | ⏸️ Deferred | - | 76 | 80 | Should be done in @ezstart/ui |
+| 2 | Keyboard nav | ⏸️ Deferred | - | 76 | 85 | Should be done in @ezstart/ui |
+| 2 | Screen readers | ⏸️ Deferred | - | 76 | 90 | Should be done in @ezstart/ui |
+| 2 | Loading states | ⏸️ Deferred | - | 70 | 80 | Create Skeleton in @ezstart/ui |
+| 2 | Error states | ⏸️ Deferred | - | 70 | 85 | Create ErrorBoundary in @ezstart/ui |
+| 2 | Empty states | ⏸️ Deferred | - | 70 | 90 | Create EmptyState in @ezstart/ui |
+| 3 | Unit tests | ⏳ Pending | 0h | 15 | 50 | Start after Phase 2 complete |
+| 3 | Integration tests | ⏳ Pending | 0h | 15 | 65 | Start after Phase 2 complete |
+| 3 | E2E tests | ⏳ Pending | 0h | 15 | 80 | Start after Phase 2 complete |
 
-**Status:** ⏳ Pending | 🔄 In Progress | ✅ Complete
+**Status:** ⏳ Pending | 🔄 In Progress | ✅ Complete | ⏸️ Deferred
 
 ---
 
