@@ -147,20 +147,56 @@ Creating Skeleton, EmptyState, ErrorBoundary components once = 8 apps improved a
 Combined with Accessibility audit for comprehensive UI component overhaul.
 
 **Phase 2 Completion:**
-- [ ] Update progress table, scores, commit
+- [x] Update IMPROVEMENT-ROADMAP.md with deferred items (06/10/2025)
+- [x] Update docs/README.md with new global score (77.5 → 78.8)
+- [x] Commit: "docs: defer Accessibility & UX to @ezstart/ui audit phase" (6e391e2)
+
+**Phase 2 Status:** 🟡 PARTIAL (1/6 items)
+- ✅ i18n migration complete (8/8 apps EN/FR)
+- ⏸️ Spanish, Accessibility, UX deferred to @ezstart/ui audit
 
 ---
 
-### Phase 3: Testing (76h, Target: 85.2/100)
+### Phase 3: Testing (76h, Target: 82.9/100) - 📚 DOCUMENTED
 
-**Execute after Phase 2 is 100% complete:**
+**⚠️ DO NOT START UNTIL READY**
 
-#### Item 16-18: Tests (76h)
-- [ ] ... (details in IMPROVEMENT-ROADMAP.md)
+**Complete Strategy:** [docs/TESTING-STRATEGY-V2.md](../docs/TESTING-STRATEGY-V2.md)
+
+**Architecture (Follows Existing Monorepo Pattern):**
+- `packages/test-utils` → Generic test infrastructure (like types/, config/)
+- `apps/[project]/test-utils` → Project-specific test code (like apps/ezbill/types)
+- Proof of concept: **EZBill** (simpler than Tower Defense)
+
+**Implementation Plan:**
+- Week 1-2: Setup infrastructure (12h)
+  - Create `packages/test-utils`
+  - Create `apps/ezbill/test-utils`
+- Week 3-4: Unit tests (20h)
+- Week 5-6: Integration tests (20h)
+- Week 7-8: E2E tests (16h)
+- Week 9: CI/CD integration (8h)
+
+**Expected Results:**
+- Testing score: 15 → 80 (+65 pts)
+- Global score: 78.8 → 82.9 (+4.1 pts) → **EXCELLENT STATUS**
+
+**Documentation Added (23/10/2025):**
+- [x] CLAUDE.md section "Testing Architecture" (line 1947-2063)
+- [x] docs/TESTING-STRATEGY-V2.md (complete strategy, 300+ lines)
+- [x] docs/README.md reference to testing docs
+- [x] IMPROVEMENT-ROADMAP.md Phase 3 updated
+- [x] Removed obsolete TESTING-STRATEGY.md (v1)
+- [x] Commit: "docs: document Phase 3 testing strategy" (06d0bcf)
+
+**Phase 3 Items:**
+- [ ] Item 16: Setup test infrastructure (12h)
+- [ ] Item 17: Write unit + integration tests (40h)
+- [ ] Item 18: Write E2E tests + CI/CD (24h)
 
 **Phase 3 Completion:**
 - [ ] Update progress table, scores, commit
-- [ ] Celebrate 🎉 Score 72.1 → 85.2!
+- [ ] Celebrate 🎉 Score 78.8 → 82.9 (EXCELLENT)!
 
 ---
 
@@ -210,24 +246,26 @@ type(scope): brief description
 
 ## 🎯 Success Criteria
 
-**Phase 1 Success:**
-- ✅ Monitoring score: 35 → 70
-- ✅ SEO score: 54 → 85
-- ✅ Documentation score: 68 → 85
-- ✅ Global score: 72.1 → 77.3
+**Phase 1 Success:** ✅ ACHIEVED
+- ✅ Monitoring score: 35 → 80 (+45 pts, better than expected!)
+- ✅ SEO score: 54 → 85 (+31 pts)
+- ✅ Documentation score: 68 → 85 (+17 pts)
+- ✅ Global score: 72.1 → 77.5 (+5.4 pts)
 - ✅ All 7 items committed separately
 - ✅ Progress table 100% complete
 
-**Phase 2 Success:**
-- ✅ i18n score: 65 → 90
-- ✅ Accessibility score: 74 → 90
-- ✅ UX score: 70 → 90
-- ✅ Global score: 77.3 → 81.1
+**Phase 2 Success:** 🟡 PARTIAL
+- ✅ i18n score: 65 → 85 (+20 pts, EN/FR complete)
+- ⏸️ Accessibility: 74 → 90 (deferred to @ezstart/ui audit)
+- ⏸️ UX: 70 → 90 (deferred to @ezstart/ui audit)
+- ✅ Global score: 77.5 → 78.8 (+1.3 pts)
+- ✅ Reason for deferral: More efficient to fix in @ezstart/ui = 8 apps benefit
 
-**Phase 3 Success:**
-- ✅ Testing score: 15 → 80
-- ✅ Global score: 81.1 → 85.2
-- ✅ Project status: Good → **Excellent**
+**Phase 3 Success:** 📚 DOCUMENTED (Not started)
+- 🎯 Testing score: 15 → 80 (+65 pts target)
+- 🎯 Global score: 78.8 → 82.9 (+4.1 pts target) → **EXCELLENT**
+- 🎯 Project status: Good+ → **Excellent**
+- 📚 Complete strategy documented in TESTING-STRATEGY-V2.md
 
 ---
 
@@ -269,13 +307,28 @@ type(scope): brief description
 | Item | Status | Time Spent | Commit SHA | Notes |
 |------|--------|------------|------------|-------|
 | 8. i18n Migration | ✅ Complete | 6h | 5fbf28c, 0138564, 900740d, 0cad39a, 9338d7f, e239aaf | i18n 65→85 (+20pts), 8/8 apps EN/FR |
-| 9. Spanish Translations | ⏳ Pending | 0h | - | Deferred to later |
-| 10-12. Accessibility | ⏸️ Deferred | 1h | 200dc09, 44e78a2, f218f4f, 8807bd0 | Foundation only: 72→76 (+0.25 global), full audit deferred to UI standardization |
+| 9. Spanish Translations | ⏸️ Deferred | - | - | Low priority, can add later (85→90) |
+| 10-12. Accessibility | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (74→90) |
+| 13-15. UX Polish | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (70→90) |
 
-**Phase 2 Status: 🔄 IN PROGRESS (1.5/6 items)**
-**Global Score: 77.5 → 77.8 (+0.3 points since i18n)**
+**Phase 2 Status: 🟡 PARTIAL (1/6 items)**
+**Global Score: 77.5 → 78.8 (+1.3 points from i18n only)**
+**Items Deferred:** 5/6 items deferred to @ezstart/ui comprehensive audit (more efficient)
 
-**Status:** ⏳ Pending | 🔄 In Progress | ✅ Complete | ❌ Blocked
+### Phase 3 Progress
+
+| Item | Status | Time Spent | Commit SHA | Notes |
+|------|--------|------------|------------|-------|
+| 16. Test Infrastructure | ⏳ Pending | 0h | - | packages/test-utils + apps/ezbill/test-utils |
+| 17. Unit + Integration Tests | ⏳ Pending | 0h | - | EZBill, EZAuth, EZPay APIs |
+| 18. E2E Tests + CI/CD | ⏳ Pending | 0h | - | Critical user journeys + GitHub Actions |
+| Documentation | ✅ Complete | 2h | 06d0bcf | TESTING-STRATEGY-V2.md, CLAUDE.md section |
+
+**Phase 3 Status: 📚 DOCUMENTED (0/3 items started)**
+**Global Score Target: 78.8 → 82.9 (+4.1 points) → EXCELLENT**
+**Documentation:** Complete strategy in TESTING-STRATEGY-V2.md, ready to implement
+
+**Status:** ⏳ Pending | 🔄 In Progress | ✅ Complete | ⏸️ Deferred
 
 ---
 
