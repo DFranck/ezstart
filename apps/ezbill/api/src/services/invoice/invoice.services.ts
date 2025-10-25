@@ -4,7 +4,7 @@ import {
   Invoice,
   UpdateInvoice,
 } from '@ezbill/types';
-import { InvoiceModel } from '../../models/billing/invoice.js';
+import { getInvoiceModel } from '../../models/billing/invoice.js';
 import { calculateTotals } from '../../utils/calculate-totals.js';
 import { generateNextNumber } from '../../utils/generate-next-number.js';
 import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
@@ -14,8 +14,9 @@ import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 export async function createInvoiceService(
   data: CreateInvoice
 ): Promise<Invoice> {
+  const InvoiceModel = await getInvoiceModel();
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
-  
+
   // Provide a default exchange rate if none exists
   if (!exchangeRate) {
     exchangeRate = {
@@ -26,7 +27,7 @@ export async function createInvoiceService(
       fetchedAt: new Date(),
     };
   }
-  
+
   const totals = calculateTotals(data.items, data.taxRate ?? 0);
   const documentNumber = await generateNextNumber('invoice', data.userId);
   const doc = new InvoiceModel({
@@ -41,6 +42,7 @@ export async function createInvoiceService(
 export async function getInvoicesService(
   query: GetInvoicesQuery
 ): Promise<Invoice[]> {
+  const InvoiceModel = await getInvoiceModel();
   const docs = await findWithQuery(InvoiceModel, query, {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
@@ -51,6 +53,7 @@ export async function getInvoicesService(
 export async function getInvoiceByIdService(
   id: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findById(id);
   return doc ? toApiObject<Invoice>(doc) : null;
 }
@@ -58,6 +61,7 @@ export async function getInvoiceByIdService(
 export async function softDeleteInvoiceService(
   id: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
     {
@@ -72,6 +76,7 @@ export async function softDeleteInvoiceService(
 export async function hardDeleteInvoiceService(
   id: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findByIdAndDelete(id);
   return doc ? toApiObject<Invoice>(doc) : null;
 }
@@ -80,9 +85,10 @@ export async function updateInvoiceService(
   id: string,
   data: UpdateInvoice
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   // Only recalculate totals if items or taxRate are being updated
   const shouldRecalculateTotals = data.items !== undefined || data.taxRate !== undefined;
-  
+
   let updateData = { ...data };
   if (shouldRecalculateTotals) {
     const existingInvoice = await InvoiceModel.findById(id);
@@ -105,6 +111,7 @@ export async function updateInvoiceService(
 export async function restoreInvoiceService(
   id: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   // First get the existing invoice to retrieve its userId
   const existingDoc = await InvoiceModel.findById(id);
   if (!existingDoc) return null;

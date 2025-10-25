@@ -6,7 +6,7 @@ import {
   Quote,
   UpdateQuote,
 } from '@ezbill/types';
-import { QuoteModel } from '../../models/billing/quote.js';
+import { getQuoteModel } from '../../models/billing/quote.js';
 import { calculateTotals } from '../../utils/calculate-totals.js';
 import { generateNextNumber } from '../../utils/generate-next-number.js';
 import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
@@ -14,6 +14,7 @@ import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
+  const QuoteModel = await getQuoteModel();
   console.log('🔍 createQuoteService input data:', JSON.stringify(data, null, 2));
 
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
@@ -53,6 +54,7 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
 export async function getQuotesService(
   query: GetQuotesQuery & { includeDeleted?: boolean; deletedOnly?: boolean }
 ): Promise<Quote[]> {
+  const QuoteModel = await getQuoteModel();
   let deletedAtFilter = {};
   
   if (query.deletedOnly) {
@@ -70,6 +72,7 @@ export async function getQuotesService(
 }
 
 export async function getQuoteByIdService(id: string): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findById(id);
   return doc ? toApiObject<Quote>(doc) : null;
 }
@@ -77,6 +80,7 @@ export async function getQuoteByIdService(id: string): Promise<Quote | null> {
 export async function softDeleteQuoteService(
   id: string
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     {
@@ -91,6 +95,7 @@ export async function softDeleteQuoteService(
 export async function hardDeleteQuoteService(
   id: string
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findByIdAndDelete(id);
   return doc ? toApiObject<Quote>(doc) : null;
 }
@@ -99,6 +104,7 @@ export async function updateQuoteService(
   id: string,
   data: UpdateQuote
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   // If items or taxRate are not provided, get existing values
   let itemsToCalculate = data.items;
   let taxRateToUse = data.taxRate;
@@ -121,6 +127,7 @@ export async function updateQuoteService(
 }
 
 export async function restoreQuoteService(id: string): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   // First get the existing quote to retrieve its userId
   const existingDoc = await QuoteModel.findById(id);
   if (!existingDoc) return null;
@@ -142,10 +149,13 @@ export async function convertQuoteToInvoiceService(
   quoteId: string,
   conversionData: ConvertQuoteToInvoice
 ): Promise<Invoice | null> {
+  const QuoteModel = await getQuoteModel();
   // Import here to avoid circular dependency
-  const { InvoiceModel } = await import('../../models/billing/invoice');
+  const { getInvoiceModel } = await import('../../models/billing/invoice');
   const { generateNextNumber } = await import('../../utils/generate-next-number');
-  
+
+  const InvoiceModel = await getInvoiceModel();
+
   // Get the quote
   const quote = await QuoteModel.findById(quoteId);
   if (!quote || quote.deletedAt) {

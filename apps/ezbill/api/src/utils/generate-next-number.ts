@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
-import { InvoiceModel } from '../models/billing/invoice.js';
-import { QuoteModel } from '../models/billing/quote.js';
-import { ReceiptModel } from '../models/billing/receipt.js';
+import { getInvoiceModel } from '../models/billing/invoice.js';
+import { getQuoteModel } from '../models/billing/quote.js';
+import { getReceiptModel } from '../models/billing/receipt.js';
 
 export async function generateNextNumber(
   type: 'invoice' | 'quote' | 'receipt',
@@ -14,6 +14,11 @@ export async function generateNextNumber(
   };
 
   const prefix = `${prefixMap[type]}-${new Date().getFullYear()}`;
+
+  // Get models using factory functions
+  const InvoiceModel = await getInvoiceModel();
+  const QuoteModel = await getQuoteModel();
+  const ReceiptModel = await getReceiptModel();
 
   const models: Record<'invoice' | 'quote' | 'receipt', Model<any>> = {
     invoice: InvoiceModel,

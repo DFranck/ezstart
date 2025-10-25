@@ -4,7 +4,7 @@ import {
   Receipt,
   UpdateReceipt,
 } from '@ezbill/types';
-import { ReceiptModel } from '../../models/billing/receipt.js';
+import { getReceiptModel } from '../../models/billing/receipt.js';
 import { calculateTotals } from '../../utils/calculate-totals.js';
 import { generateNextNumber } from '../../utils/generate-next-number.js';
 import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
@@ -14,6 +14,7 @@ import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 export async function createReceiptService(
   data: CreateReceipt
 ): Promise<Receipt> {
+  const ReceiptModel = await getReceiptModel();
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
   
   // Provide a default exchange rate if none exists
@@ -41,6 +42,7 @@ export async function createReceiptService(
 export async function getReceiptsService(
   query: GetReceiptsQuery
 ): Promise<Receipt[]> {
+  const ReceiptModel = await getReceiptModel();
   const docs = await findWithQuery(ReceiptModel, query, {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
@@ -51,6 +53,7 @@ export async function getReceiptsService(
 export async function getReceiptByIdService(
   id: string
 ): Promise<Receipt | null> {
+  const ReceiptModel = await getReceiptModel();
   const doc = await ReceiptModel.findById(id);
   return doc ? toApiObject<Receipt>(doc) : null;
 }
@@ -58,6 +61,7 @@ export async function getReceiptByIdService(
 export async function softDeleteReceiptService(
   id: string
 ): Promise<Receipt | null> {
+  const ReceiptModel = await getReceiptModel();
   const doc = await ReceiptModel.findByIdAndUpdate(
     id,
     {
@@ -72,6 +76,7 @@ export async function softDeleteReceiptService(
 export async function hardDeleteReceiptService(
   id: string
 ): Promise<Receipt | null> {
+  const ReceiptModel = await getReceiptModel();
   const doc = await ReceiptModel.findByIdAndDelete(id);
   return doc ? toApiObject<Receipt>(doc) : null;
 }
@@ -80,6 +85,7 @@ export async function updateReceiptService(
   id: string,
   data: UpdateReceipt
 ): Promise<Receipt | null> {
+  const ReceiptModel = await getReceiptModel();
   const totals = calculateTotals(data.items ?? [], data.taxRate ?? 0);
   const doc = await ReceiptModel.findByIdAndUpdate(
     id,
@@ -92,6 +98,7 @@ export async function updateReceiptService(
 export async function restoreReceiptService(
   id: string
 ): Promise<Receipt | null> {
+  const ReceiptModel = await getReceiptModel();
   // First get the existing receipt to retrieve its userId
   const existingDoc = await ReceiptModel.findById(id);
   if (!existingDoc) return null;

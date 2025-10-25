@@ -1,5 +1,5 @@
 import { AddLineItem, Quote } from '@ezbill/types';
-import { QuoteModel } from '../../models/billing/quote.js';
+import { getQuoteModel } from '../../models/billing/quote.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { calculateTotals } from '../../utils/calculate-totals.js';
 
@@ -7,6 +7,7 @@ export async function assignClientToQuoteService(
   id: string,
   clientId: string
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     { clientId },
@@ -19,6 +20,7 @@ export async function addLineItemToQuoteService(
   id: string,
   item: AddLineItem
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   // First get the current quote to recalculate totals after adding item
   const existingDoc = await QuoteModel.findById(id);
   if (!existingDoc) return null;
@@ -38,6 +40,7 @@ export async function removeLineItemToQuoteService(
   id: string,
   itemId: string
 ): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   // First get the current quote to recalculate totals after removing item
   const existingDoc = await QuoteModel.findById(id);
   if (!existingDoc) return null;
@@ -54,6 +57,7 @@ export async function removeLineItemToQuoteService(
 }
 
 export async function acceptQuoteService(id: string): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     { status: 'accepted' },
@@ -63,6 +67,7 @@ export async function acceptQuoteService(id: string): Promise<Quote | null> {
 }
 
 export async function rejectQuoteService(id: string): Promise<Quote | null> {
+  const QuoteModel = await getQuoteModel();
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     { status: 'rejected' },

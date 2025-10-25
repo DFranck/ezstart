@@ -1,11 +1,12 @@
 import { AddLineItem, Invoice, Receipt } from '@ezbill/types';
-import { InvoiceModel } from '../../models/billing/invoice.js';
+import { getInvoiceModel } from '../../models/billing/invoice.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
 export async function assignClientToInvoiceService(
   id: string,
   clientId: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
     { clientId },
@@ -18,6 +19,7 @@ export async function addLineItemToInvoiceService(
   id: string,
   item: AddLineItem
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
     { $push: { items: item } },
@@ -34,6 +36,7 @@ export async function markInvoiceAsPaidService(
     notes?: string;
   }
 ): Promise<{ invoice: Invoice; receipt?: Receipt } | null> {
+  const InvoiceModel = await getInvoiceModel();
   // Get the invoice first to check current status
   const invoice = await InvoiceModel.findById(id);
   if (!invoice || invoice.deletedAt) {
@@ -60,7 +63,7 @@ export async function markInvoiceAsPaidService(
   try {
     console.log(`🔄 Creating receipt for invoice ${updatedInvoice._id} for user ${updatedInvoice.userId}`);
 
-    const { ReceiptModel } = await import('../../models/billing/receipt');
+    const { getReceiptModel } = await import('../../models/billing/receipt');
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
     const receiptDocumentNumber = await generateNextNumber('receipt', updatedInvoice.userId);
@@ -89,6 +92,7 @@ export async function markInvoiceAsPaidService(
       total: receiptData.total
     });
 
+    const ReceiptModel = await getReceiptModel();
     const receiptDoc = new ReceiptModel(receiptData);
     const savedReceipt = await receiptDoc.save();
 
@@ -115,6 +119,7 @@ export async function removeLineItemToInvoiceService(
   id: string,
   itemId: string
 ): Promise<Invoice | null> {
+  const InvoiceModel = await getInvoiceModel();
   const doc = await InvoiceModel.findByIdAndUpdate(
     id,
     { $pull: { items: { _id: itemId } } },

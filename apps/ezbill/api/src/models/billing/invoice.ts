@@ -1,20 +1,29 @@
 import { Invoice } from '@ezbill/types';
-import { model } from 'mongoose';
+import { connectToMongo } from '@ezstart/express-core';
+import { Model } from 'mongoose';
 import { createBillingDocSchema } from './billing-factory.js';
 
-export const InvoiceModel = model<Invoice>(
-  'Invoice',
-  createBillingDocSchema(
-    {
-      dueDate: {
-        type: String,
-        default: () =>
-          new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      quoteId: { type: String, default: null },
-      paymentMethodId: { type: String, required: false },
+export type InvoiceDocument = Invoice;
+
+const invoiceSchema = createBillingDocSchema(
+  {
+    dueDate: {
+      type: String,
+      default: () =>
+        new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     },
-    ['draft', 'sent', 'paid'],
-    'draft'
-  )
+    quoteId: { type: String, default: null },
+    paymentMethodId: { type: String, required: false },
+  },
+  ['draft', 'sent', 'paid'],
+  'draft'
 );
+
+/**
+ * Factory function to get Invoice model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getInvoiceModel(): Promise<Model<InvoiceDocument>> {
+  const mongoose = await connectToMongo('ezbill');
+  return mongoose.models.Invoice || mongoose.model<InvoiceDocument>('Invoice', invoiceSchema);
+}
