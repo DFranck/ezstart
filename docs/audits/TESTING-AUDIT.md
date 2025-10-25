@@ -1,16 +1,18 @@
 # 🧪 Testing Audit - @ezstart Monorepo
 
-**Total Score:** 35/100 (+20 from initial audit)
-**Last Updated:** 2025-10-25
-**Status:** 🟡 In Progress - Global Packages Tested, Apps Pending
+**Total Score:** 40/100 (+25 from initial audit)
+**Last Updated:** 2025-10-25 (Phase 3.2 - Tower Defense)
+**Status:** 🟡 In Progress - Global Packages + Tower Defense Tested
 
 ---
 
 ## 📋 Overview
 
-**UPDATE (2025-10-25):** Test infrastructure established! 100 tests passing for critical global packages (@ezstart/config, @ezstart/logger, @ezstart/express-core). Test utilities created for MongoDB, factories, and E2E. App-specific tests pending.
+**UPDATE (2025-10-25 - Phase 3.2):** Tower Defense API tested! 50 additional tests added covering GameManager and EntityManager. Total: 150 tests passing (100 global packages + 50 Tower Defense).
 
-**Previous State (2025-10-21):** Jest configured in 2 APIs but zero test files implemented. No unit, integration, or E2E tests across the entire monorepo.
+**Previous Update (2025-10-25 - Phase 3.1):** Test infrastructure established! 100 tests passing for critical global packages (@ezstart/config, @ezstart/logger, @ezstart/express-core). Test utilities created for MongoDB, factories, and E2E.
+
+**Initial State (2025-10-21):** Jest configured in 2 APIs but zero test files implemented. No unit, integration, or E2E tests across the entire monorepo.
 
 ---
 
@@ -34,8 +36,8 @@
 |---------|-------|------------|----------|-----------|------------|--------|
 | api-ezauth | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
 | api-ezbill | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
-| api-ezpay | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
-| api-tower-defense | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
+| api-ezpay | 0% | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
+| api-tower-defense | ~60% | ~60% | ~50% | ~70% | 50 | 🟢 Good |
 | api-green-pulse | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
 | api-monitoring | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
 | web-ezstart | 0% | 0% | 0% | 0% | 0 | ❌ Critical |
@@ -404,19 +406,26 @@ git log --oneline --format="%H" | head -10 | xargs -I {} sh -c 'echo "Commit: {}
 
 ## ✅ Progress Update (2025-10-25)
 
-### Completed
+### Completed - Phase 3.1 (Infrastructure + Global Packages)
 - ✅ #3 Setup mongodb-memory-server for tests (`packages/test-utils`)
 - ✅ #5 Setup Playwright for E2E tests (`packages/playwright-config`)
 - ✅ #9 Document testing best practices (READMEs for all test packages)
 - ✅ Test infrastructure packages created (test-utils, playwright-config, ezbill/test-utils)
 - ✅ 100 tests passing for global packages (config, logger, express-core)
 
+### Completed - Phase 3.2 (App-Specific Testing)
+- ✅ #10 Tower Defense API unit tests (GameManager + EntityManager)
+- ✅ 50 additional tests passing (31 GameManager + 19 EntityManager)
+- ✅ Total: **150 tests passing** across 4 packages
+- ✅ Vitest standardized for all APIs (migration from Jest)
+- ✅ Entity registry seeding pattern established
+
 ### Next Steps
 - ⏳ #1 Add integration tests for EZAuth API (in progress)
 - ⏳ #2 Add E2E tests for payment flow (pending)
 - ⏳ #4 Add unit tests for @ezstart/ui components (pending)
 - ⏳ #6 Add pre-commit hook to run tests (pending)
-- ⏳ #7 Improve test coverage to 70%+ (currently 16% - 3/18 packages tested)
+- ⏳ #7 Improve test coverage to 70%+ (currently 22% - 4/18 packages tested)
 
 ---
 
@@ -425,7 +434,7 @@ git log --oneline --format="%H" | head -10 | xargs -I {} sh -c 'echo "Commit: {}
 ### Priority: 🔴 CRITICAL
 - [ ] #1 Add integration tests for EZAuth API (SSO flow, token validation)
 - [ ] #2 Add E2E tests for payment flow (EZPay donations, purchases)
-- [ ] #10 Add unit tests for Tower Defense API (game logic, ticker engine)
+- [x] ~~#10 Add unit tests for Tower Defense API (game logic, ticker engine)~~ ✅ DONE
 
 ### Priority: 🟡 HIGH
 - [ ] #4 Add unit tests for @ezstart/ui components (Button, Card, Input)
