@@ -2,10 +2,10 @@
 
 **ROI-First Strategy for Maximum Impact with Minimum Effort**
 
-**Last Updated:** 2025-10-25
-**Current Score:** 77.0/100 (Good+)
+**Last Updated:** 2025-10-25 (Phase 3.2 Complete)
+**Current Score:** 77.3/100 (Good+)
 **Target Score:** 85+ (Excellent)
-**Progress:** Phase 1 Complete ✅ | Phase 2 Partial 🟡 | Phase 3 In Progress (35/80) 🟡
+**Progress:** Phase 1 Complete ✅ | Phase 2 Partial 🟡 | Phase 3 In Progress (40/80 - 50%) 🟡
 
 ---
 
@@ -42,10 +42,11 @@
 - 🟢 **Very Good (80-89):** 3 audits (18.75%) - Dependencies, Security, Infrastructure
 - 🟡 **Good (70-79):** 5 audits (31.25%) - Web Apps, API, Performance, Accessibility, UX
 - 🟡 **Fair (50-69):** 3 audits (18.75%) - Documentation, i18n, SEO
-- 🟡 **Poor (35-49):** 2 audits (12.5%) - **Monitoring (35), Testing (35)**
+- 🟡 **Poor (35-49):** 2 audits (12.5%) - **Monitoring (35), Testing (40)**
 
 **Progress:**
-- Testing: 15 → 35 (+20 points) ⬆️
+- Testing: 15 → 40 (+25 points) ⬆️ [Phase 3.2 complete]
+- Global Score: 77.0 → 77.3 (+0.3 points)
 - All others: Stable
 
 ### What to Keep (Already Excellent)
@@ -690,26 +691,35 @@ The "single source of truth" principle applies: fixing accessibility/UX in `@ezs
 
 **📚 Complete Strategy:** [docs/TESTING-STRATEGY-V2.md](./TESTING-STRATEGY-V2.md)
 
-### ✅ Progress Update (2025-10-25)
+### ✅ Progress Update (2025-10-25) - Phase 3.2 COMPLETE
 
-**Completed:**
+**Completed - Phase 3.1 (Infrastructure + Global Packages):**
 - ✅ Test infrastructure created (packages/test-utils, packages/playwright-config)
 - ✅ Project-specific test utils (apps/ezbill/test-utils)
 - ✅ Documentation (~700 lines of READMEs)
 - ✅ 100 tests passing for 3 critical global packages
-- ✅ Score improved: 15/100 → 35/100 (+20 points in 1 day!)
+- ✅ Score improved: 15/100 → 35/100 (+20 points)
 
-**Packages Tested (100/100 tests passing):**
+**Completed - Phase 3.2 (Tower Defense API):**
+- ✅ Tower Defense API fully tested (GameManager + EntityManager)
+- ✅ 50 additional tests passing (31 GameManager + 19 EntityManager)
+- ✅ Vitest standardized for all APIs (migrated from Jest)
+- ✅ Entity registry seeding pattern established
+- ✅ Score improved: 35/100 → 40/100 (+5 points)
+
+**Packages Tested (150/150 tests passing):**
 1. **@ezstart/config** - 40 tests (URLs, CORS, env detection)
 2. **@ezstart/logger** - 29 tests (Pino logger, Sentry integration)
 3. **@ezstart/express-core** - 31 tests (ports, createApp, CORS)
+4. **api-tower-defense** - 50 tests (GameManager, EntityManager) ⭐ NEW
 
-**Current Coverage:** 16% (3/18 packages tested)
+**Current Coverage:** 22% (4/18 packages tested)
+**Current Score:** 40/100 (50% to target 80/100)
 
 **Next Steps:**
-- ⏳ Tower Defense API tests (game logic, ticker engine)
-- ⏳ EZBill API tests (invoice CRUD)
-- ⏳ EZAuth API tests (SSO flow)
+- ⏳ EZBill API tests (invoice CRUD, client management)
+- ⏳ EZAuth API tests (SSO flow, token validation)
+- ⏳ EZPay API tests (donations, purchases, webhooks)
 - ⏳ E2E tests with Playwright
 
 ### 7. Testing: 15/100 → 80/100 (76h, +65 pts)
