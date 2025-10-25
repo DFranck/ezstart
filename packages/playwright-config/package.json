@@ -1,0 +1,17 @@
+{
+  "name": "@ezstart/playwright-config",
+  "version": "1.0.0",
+  "description": "Centralized Playwright configuration for @ezstart monorepo",
+  "type": "module",
+  "main": "./base.config.ts",
+  "exports": {
+    ".": "./base.config.ts"
+  },
+  "keywords": ["playwright", "e2e", "testing", "config"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.2",
+  "devDependencies": {
+    "@playwright/test": "^1.51.1"
+  }
+}

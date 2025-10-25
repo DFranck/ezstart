@@ -1,0 +1,32 @@
+{
+  "name": "@ezstart/test-utils",
+  "version": "1.0.0",
+  "description": "Generic test infrastructure for @ezstart monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./mongodb": "./dist/mongodb.js",
+    "./factories/*": "./dist/factories/*.js",
+    "./helpers/*": "./dist/helpers/*.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["testing", "vitest", "mongodb", "test-utils"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.2",
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^20.18.0",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "mongodb-memory-server": "^10.1.2",
+    "mongoose": "^8.9.3"
+  }
+}

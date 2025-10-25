@@ -1,0 +1,24 @@
+{
+  "name": "@ezbill/test-utils",
+  "version": "1.0.0",
+  "description": "EZBill-specific test utilities",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["testing", "ezbill"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.2",
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@ezstart/test-utils": "workspace:*",
+    "@ezbill/types": "workspace:*"
+  }
+}
