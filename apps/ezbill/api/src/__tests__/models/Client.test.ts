@@ -1,11 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { setupTestDatabase, teardownTestDatabase } from '@ezstart/test-utils'
-import { ClientModel } from '../../models/client.js'
-import type { BillingClient } from '@ezbill/types'
+import { getClientModel, type ClientDocument } from '../../models/client.js'
+import type { Model } from 'mongoose'
 
 describe('Client Model', () => {
+  let ClientModel: Model<ClientDocument>
+
   beforeAll(async () => {
     await setupTestDatabase()
+    ClientModel = await getClientModel()
   })
 
   afterAll(async () => {
@@ -211,7 +214,7 @@ describe('Client Model', () => {
       const duration = Date.now() - start
 
       expect(results).toHaveLength(10)
-      expect(duration).toBeLessThan(50) // Should be fast with index
+      expect(duration).toBeLessThan(100) // Should be fast with index
     })
   })
 

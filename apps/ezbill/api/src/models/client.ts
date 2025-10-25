@@ -1,9 +1,10 @@
 import { BillingClient } from '@ezbill/types';
-import { Document, Schema, model } from 'mongoose';
+import { connectToMongo } from '@ezstart/express-core';
+import { Document, Schema, Model } from 'mongoose';
 
-type ClientDocument = BillingClient & Document;
+export type ClientDocument = BillingClient & Document;
 
-const clientSchema = new Schema(
+const clientSchema = new Schema<ClientDocument>(
   {
     userId: { type: String, required: true, index: true },
     clientName: { type: String, required: true },
@@ -25,7 +26,17 @@ const clientSchema = new Schema(
     notes: { type: String },
     deletedAt: { type: String, default: null },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    bufferCommands: false, // Disable buffering for fail-fast
+  }
 );
 
-export const ClientModel = model<ClientDocument>('Client', clientSchema);
+/**
+ * Factory function to get Client model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getClientModel(): Promise<Model<ClientDocument>> {
+  const mongoose = await connectToMongo('ezbill');
+  return mongoose.models.Client || mongoose.model<ClientDocument>('Client', clientSchema);
+}
