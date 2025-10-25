@@ -699,6 +699,8 @@ The "single source of truth" principle applies: fixing accessibility/UX in `@ezs
 **Impact:** +65 points (+4.1 global score)
 **ROI:** 0.86 pts/hour ⭐⭐
 
+**📚 Complete Strategy:** [docs/TESTING-STRATEGY-V2.md](./TESTING-STRATEGY-V2.md)
+
 ### 7. Testing: 15/100 → 80/100 (76h, +65 pts)
 
 **Why Testing Last?**
@@ -706,6 +708,10 @@ The "single source of truth" principle applies: fixing accessibility/UX in `@ezs
 - ✅ You **know the code better** after 2 months of improvements
 - ✅ Tests are **meaningful** (test real use cases, not artificial coverage)
 - ✅ No wasted tests (avoid testing code that will change)
+
+**Architecture:** Follow existing monorepo pattern (like `types/`, `config/`, `utils/`)
+- `packages/test-utils` → Generic test infrastructure (cross-project)
+- `apps/[project]/test-utils` → Project-specific test code (shared API/Web)
 
 **Actions:**
 

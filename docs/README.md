@@ -336,6 +336,10 @@ When updating an audit:
 - **[AUDIT-GUIDE.md](./AUDIT-GUIDE.md)** - Complete guide to auditing your monorepo ⭐
 - [audits/](./audits/) - Individual audit templates
 
+### Testing Documentation
+- **[TESTING-STRATEGY-V2.md](./TESTING-STRATEGY-V2.md)** - Phase 3 testing strategy ⭐
+- **[IMPROVEMENT-ROADMAP.md](./IMPROVEMENT-ROADMAP.md)** - Roadmap to 85/100 score
+
 ### Root Level Docs
 - [CLAUDE.md](../CLAUDE.md) - Guide for Claude AI development
 - [DEPLOY.md](../DEPLOY.md) - Deployment guide (Railway & Vercel)

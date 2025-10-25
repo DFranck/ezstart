@@ -7,8 +7,9 @@
 - 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complete)
 - 📄 [docs/AUDIT-SUMMARY.md](./docs/AUDIT-SUMMARY.md) - Executive summary pour stakeholders
 - 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
+- 🧪 **[docs/TESTING-STRATEGY-V2.md](./docs/TESTING-STRATEGY-V2.md)** - ⭐ **STRATÉGIE TESTING** (Phase 3 roadmap)
 
-**Audits disponibles (score global 72.1/100) :**
+**Audits disponibles (score global 78.8/100) :**
 - 🔒 [Security Audit](./docs/audits/SECURITY-AUDIT.md) - Authentication, secrets, CORS, vulnerabilities
 - ⚡ [Performance Audit](./docs/audits/PERFORMANCE-AUDIT.md) - Bundle sizes, API times, optimization
 - 🏗️ [Architecture Audit](./docs/audits/ARCHITECTURE-AUDIT.md) - Dependencies, structure, best practices
@@ -1942,6 +1943,124 @@ connectToMongo('database-name')
 6. **Build & Test** - Valider la migration
    - `pnpm --filter api-NAME build` - Doit réussir sans erreurs
    - `pnpm --filter api-NAME dev` - Tester CRUD operations
+
+## 🧪 Testing Architecture - Phase 3 Roadmap ⭐ (23/10/2025)
+
+**Stratégie complète :** [docs/TESTING-STRATEGY-V2.md](./docs/TESTING-STRATEGY-V2.md)
+
+### Principe : Suivre l'Architecture Monorepo Existante
+
+**DON'T:** Créer 3 packages séparés (`test-utils`, `api-test-utils`, `e2e-utils`)
+**DO:** Suivre la hiérarchie existante (comme `types/`, `config/`, `utils/`)
+
+### Architecture Testing (Suit le Pattern Existant)
+
+```
+@ezstart/
+├── packages/
+│   ├── types/          ✅ Existe - Types cross-project
+│   ├── config/         ✅ Existe - Config cross-project
+│   ├── ui/             ✅ Existe - UI cross-project
+│   └── test-utils/     ⭐ NEW    - Test infra cross-project
+│       ├── vitest.config.ts    # Config Vitest centralisée
+│       ├── mongodb.ts          # MongoDB Memory Server setup
+│       ├── factories/
+│       │   └── user.ts         # createTestUser() (commun)
+│       └── helpers/
+│           ├── cleanDb.ts      # Database cleanup
+│           └── seed.ts         # Generic seed helpers
+│
+└── apps/
+    └── ezbill/                 # Exemple avec EZBill
+        ├── types/      ✅ Existe - Types EZBill
+        ├── config/     ✅ Existe - Config EZBill
+        ├── utils/      ✅ Existe - Utils EZBill
+        │
+        ├── test-utils/ ⭐ NEW    - Test utils EZBill-specific
+        │   ├── factories/
+        │   │   ├── invoice.ts  # createTestInvoice()
+        │   │   └── client.ts   # createTestClient()
+        │   └── mocks/
+        │       └── stripe.ts   # Mock Stripe pour EZBill
+        │
+        ├── api/        → consomme types/, config/, test-utils/, packages/*
+        │   └── src/
+        │       └── __tests__/  # Tests API
+        │
+        └── web/        → consomme types/, config/, test-utils/, packages/*
+            └── e2e/            # Tests E2E
+```
+
+### Hiérarchie des Tests (Suit les 3 Niveaux Existants)
+
+**1. `packages/test-utils`** - Generic, cross-project
+- ✅ Setup DB, factories User (commun à tous)
+- ✅ Config Vitest centralisée
+- ✅ Utilisé par : EZAuth, EZBill, EZPay, Tower Defense
+
+**2. `apps/[project]/test-utils`** - Project-specific, shared API/Web
+- ✅ Factories spécifiques (Invoice, Tower, Mob)
+- ✅ Mocks spécifiques au projet
+- ✅ Partagé entre API et Web du projet
+
+**3. `apps/[project]/api|web/__tests__|e2e`** - Layer-specific
+- ✅ Tests spécifiques à une couche seulement
+
+### Exemple d'Usage
+
+```typescript
+// apps/ezbill/api/src/services/__tests__/invoice.service.test.ts
+import { setupTestDatabase, cleanDatabase } from '@ezstart/test-utils'  // Generic
+import { createTestInvoice } from '../../../test-utils/factories/invoice' // EZBill-specific
+import { InvoiceService } from '../invoice.service'
+
+describe('InvoiceService', () => {
+  beforeAll(async () => {
+    await setupTestDatabase() // Shared setup
+  })
+
+  it('calculates total correctly', () => {
+    const invoice = createTestInvoice({
+      items: [
+        { quantity: 2, price: 10 },
+        { quantity: 1, price: 5 },
+      ],
+    })
+    const total = InvoiceService.calculateTotal(invoice)
+    expect(total).toBe(25)
+  })
+})
+```
+
+### Avantages de cette Architecture
+
+✅ **Cohérent** - Suit exactement le pattern types/, config/, utils/
+✅ **Clair** - packages/ = cross-project, apps/*/ = project-specific
+✅ **Partageable** - apps/ezbill/test-utils partagé entre API et Web
+✅ **Type-safe** - Partage les types/ du même projet
+✅ **Maintenable** - Single source of truth
+
+### Plan d'Implémentation (Phase 3)
+
+**Semaines 1-2 :** Setup infrastructure (12h)
+- Créer `packages/test-utils`
+- Créer `apps/ezbill/test-utils` (proof of concept)
+
+**Semaines 3-4 :** Unit tests (20h)
+- EZAuth, EZBill, EZPay business logic
+
+**Semaines 5-6 :** Integration tests (20h)
+- API routes tests
+
+**Semaines 7-8 :** E2E tests (16h)
+- Critical user journeys
+
+**Semaine 9 :** CI/CD (8h)
+- GitHub Actions, coverage
+
+**Total :** 76h → Score 15 → 80 (+65 pts) → Global 78.8 → 82.9 (**EXCELLENT**)
+
+**Documentation complète :** [docs/TESTING-STRATEGY-V2.md](./docs/TESTING-STRATEGY-V2.md)
 
 ## 🎮 Tower Defense - Optimisations de Performance (11/10/2025)
 
