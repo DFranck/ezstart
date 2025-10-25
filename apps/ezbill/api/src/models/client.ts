@@ -1,8 +1,8 @@
-import { BillingClient } from '@ezbill/types';
+import { Client } from '@ezbill/types';
 import { connectToMongo } from '@ezstart/express-core';
 import { Document, Schema, Model } from 'mongoose';
 
-export type ClientDocument = BillingClient & Document;
+export type ClientDocument = Client & Document;
 
 const clientSchema = new Schema<ClientDocument>(
   {

@@ -248,6 +248,7 @@ describe('Client Model', () => {
         { new: true }
       )
 
+      // @ts-expect-error - Mongoose returns Date but Client type has string (ISO timestamp)
       expect(updated?.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime())
     })
   })
