@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { getEnv, isDevelopment, isProduction } from '../env.js'
+import { getCurrentEnvironment, isDevelopment, isProduction } from '../env.js'
 
 describe('@ezstart/config - Environment', () => {
-  describe('getEnv', () => {
+  describe('getCurrentEnvironment', () => {
     it('should return current environment', () => {
-      const env = getEnv()
+      const env = getCurrentEnvironment()
 
-      expect(['development', 'production', 'test']).toContain(env)
+      expect(['local', 'development', 'production']).toContain(env)
     })
 
     it('should default to development if NODE_ENV not set', () => {
       const originalEnv = process.env.NODE_ENV
       delete process.env.NODE_ENV
 
-      const env = getEnv()
+      const env = getCurrentEnvironment()
 
       expect(env).toBe('development')
 
@@ -21,11 +21,11 @@ describe('@ezstart/config - Environment', () => {
       process.env.NODE_ENV = originalEnv
     })
 
-    it('should return test in test environment', () => {
-      const env = getEnv()
+    it('should return development in test environment', () => {
+      const env = getCurrentEnvironment()
 
-      // Vitest sets NODE_ENV=test
-      expect(env).toBe('test')
+      // Vitest sets NODE_ENV=test, which maps to 'development'
+      expect(env).toBe('development')
     })
   })
 
@@ -36,9 +36,9 @@ describe('@ezstart/config - Environment', () => {
       expect(typeof result).toBe('boolean')
     })
 
-    it('should be false in test environment', () => {
-      // We are in test environment (vitest)
-      expect(isDevelopment()).toBe(false)
+    it('should be true in test environment', () => {
+      // Vitest sets NODE_ENV=test, which maps to 'development'
+      expect(isDevelopment()).toBe(true)
     })
   })
 

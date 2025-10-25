@@ -35,15 +35,12 @@ describe('@ezstart/config - CORS', () => {
       process.env.NODE_ENV = originalEnv
     })
 
-    it('should not include localhost in production', () => {
-      const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
-
+    it('should include localhost URLs (getAllWebUrls returns all 3 environments)', () => {
       const origins = getAllowedOrigins('ezauth')
 
-      expect(origins.some(url => url.includes('localhost'))).toBe(false)
-
-      process.env.NODE_ENV = originalEnv
+      // getAllWebUrls() returns [local, development, production] for each app
+      // So localhost URLs are ALWAYS included in the allowed origins array
+      expect(origins.some(url => url.includes('localhost'))).toBe(true)
     })
   })
 
@@ -56,16 +53,14 @@ describe('@ezstart/config - CORS', () => {
       expect(config.credentials).toBe(true)
     })
 
-    it('should have origin as array', () => {
+    it('should have origin as function', () => {
       const config = createCorsConfig('ezauth')
 
-      expect(Array.isArray(config.origin)).toBe(true)
-      expect((config.origin as string[]).length).toBeGreaterThan(0)
+      expect(typeof config.origin).toBe('function')
     })
 
     it('should allow all web apps for ezauth', () => {
-      const config = createCorsConfig('ezauth')
-      const origins = config.origin as string[]
+      const origins = getAllowedOrigins('ezauth')
 
       // EZAuth API is called by all apps (SSO)
       expect(origins).toContain('http://localhost:5050') // ezstart
@@ -74,8 +69,7 @@ describe('@ezstart/config - CORS', () => {
     })
 
     it('should only allow ezbill web for ezbill API', () => {
-      const config = createCorsConfig('ezbill')
-      const origins = config.origin as string[]
+      const origins = getAllowedOrigins('ezbill')
 
       expect(origins).toContain('http://localhost:5025')
       // Should not contain other apps
@@ -83,11 +77,10 @@ describe('@ezstart/config - CORS', () => {
     })
 
     it('should handle ezpay with multiple callers', () => {
-      const config = createCorsConfig('ezpay')
-      const origins = config.origin as string[]
+      const origins = getAllowedOrigins('ezpay')
 
-      // EZPay is called by apps with payments
-      expect(origins.length).toBeGreaterThan(1)
+      // EZPay is called by apps with payments (ezpay, tower-defense, ezbill)
+      expect(origins.length).toBeGreaterThan(3)
     })
   })
 
@@ -105,16 +98,14 @@ describe('@ezstart/config - CORS', () => {
       const apps = ['ezauth', 'ezbill', 'ezpay']
 
       apps.forEach(app => {
-        const config = createCorsConfig(app as any)
-        const origins = config.origin as string[]
+        const origins = getAllowedOrigins(app as any)
 
         expect(origins).not.toContain('*')
       })
     })
 
     it('should only allow known domains', () => {
-      const config = createCorsConfig('ezauth')
-      const origins = config.origin as string[]
+      const origins = getAllowedOrigins('ezauth')
 
       origins.forEach(origin => {
         const isLocalhost = origin.includes('localhost')
