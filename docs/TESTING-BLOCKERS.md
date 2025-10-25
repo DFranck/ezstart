@@ -8,10 +8,15 @@ This document tracks technical blockers encountered during the testing implement
 
 ## 🚧 Active Blockers
 
+_(No active blockers)_
+
+## ✅ Resolved Blockers
+
 ### 1. EZBill API - Mongoose Global Connection Issue
 
-**Status:** 🔴 BLOCKED
+**Status:** ✅ RESOLVED
 **Phase:** 3.3 (App-Specific Testing)
+**Resolved:** 2025-10-25
 **Impact:** Cannot test EZBill models with mongodb-memory-server
 **Discovered:** 2025-10-25
 
@@ -127,35 +132,39 @@ vi.mock('../../models/client.js', () => ({
 **Impact:** Tests pass but not true integration tests
 **Risk:** Mocks may diverge from real behavior
 
-#### Recommended Path Forward
+#### Solution Implemented ✅
 
-**Short-term (This Week):**
-1. Use **Option 2** for immediate testing
-2. Create integration tests with real MongoDB
-3. Document models work correctly
-4. Score: +10 points (40 → 50)
+**Chose Option 1 - Factory Pattern (RECOMMENDED)**
 
-**Long-term (Next Sprint):**
-1. Implement **Option 1** (factory pattern)
-2. Migrate to mongodb-memory-server
-3. Faster tests, better CI/CD
-4. Establish pattern for all future models
+Copied the pattern from EZAuth API which already used this approach:
 
-#### Implementation Plan
+1. ✅ Refactored `ClientModel` to `getClientModel()` factory function
+2. ✅ Factory calls `connectToMongo('ezbill')` to get shared connection
+3. ✅ Returns model attached to correct connection (cached if exists)
+4. ✅ Updated all 7 client service functions to use factory
+5. ✅ Created Client.test.ts with 13 comprehensive tests
+6. ✅ Fixed TypeScript types (ClientDocument = Client & Document)
 
-**Phase 3.3a - Integration Tests (2-3h):**
-- [ ] Setup MongoDB Atlas test cluster
-- [ ] Add TEST_MONGO_URL to .env.example
-- [ ] Update test-utils to support real MongoDB
-- [ ] Write Client model integration tests
-- [ ] Write Invoice model integration tests
+**Results:**
+- ✅ 13/13 tests passing with mongodb-memory-server
+- ✅ pnpm typecheck passes (0 errors)
+- ✅ No buffering timeouts
+- ✅ Tests run fast and isolated (~4.5s for 13 tests)
+- ✅ Pattern established for all future models
 
-**Phase 3.3b - Factory Pattern (6-8h):**
-- [ ] Refactor ClientModel to factory pattern
-- [ ] Refactor InvoiceModel to factory pattern
-- [ ] Update all controllers to use factories
-- [ ] Migrate tests to mongodb-memory-server
-- [ ] Document pattern in DEV-RULES.md
+**Time taken:** 2.5 hours (better than estimated 6-8h because EZAuth pattern existed)
+
+#### Implementation Status
+
+**Phase 3.3 - Factory Pattern:**
+- ✅ Refactor ClientModel to factory pattern (completed)
+- ✅ Write Client model tests - 13/13 passing (completed)
+- ✅ Update all client controllers to use factory (completed)
+- ✅ Fix TypeScript types and typecheck (completed)
+- ⏳ Refactor InvoiceModel to factory pattern (next)
+- ⏳ Write Invoice model tests (next)
+- ⏳ Update invoice controllers to use factory (next)
+- ⏳ Document pattern in DEV-RULES.md (after all models done)
 
 #### Lessons Learned
 
@@ -173,11 +182,29 @@ vi.mock('../../models/client.js', () => ({
    - mongodb-memory-server is second best
    - Real MongoDB should be integration tests only
 
+#### Files Modified
+
+**Models:**
+- [apps/ezbill/api/src/models/client.ts](apps/ezbill/api/src/models/client.ts) - Factory pattern refactor
+
+**Services:**
+- [apps/ezbill/api/src/services/client/client.services.ts](apps/ezbill/api/src/services/client/client.services.ts) - All 7 functions updated
+
+**Tests:**
+- [apps/ezbill/api/src/__tests__/models/Client.test.ts](apps/ezbill/api/src/__tests__/models/Client.test.ts) - 13 comprehensive tests
+
+**Config:**
+- [apps/ezbill/api/tsconfig.json](apps/ezbill/api/tsconfig.json) - Removed jest types
+- [apps/ezbill/api/vitest.config.ts](apps/ezbill/api/vitest.config.ts) - Testing setup
+- [apps/ezbill/api/package.json](apps/ezbill/api/package.json) - Vitest dependencies
+
+**Commits:**
+- fd5f851 - test(ezbill): refactor Client model to factory pattern + 13 passing tests
+- fd7c86b - refactor(ezbill): update controllers to use getClientModel() factory + fix types
+
 ---
 
-## ✅ Resolved Blockers
-
-### 1. Tower Defense - Entity Registry Not Seeded
+### 2. Tower Defense - Entity Registry Not Seeded
 
 **Status:** ✅ RESOLVED
 **Resolved:** 2025-10-25
