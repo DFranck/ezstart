@@ -122,12 +122,9 @@
 - [x] Updated IMPROVEMENT-ROADMAP.md with i18n completion
 - [x] Commit: "docs: mark i18n migration complete in improvement roadmap" (e239aaf)
 
-**Note:** Spanish (ES) translations not done yet (future: 85 → 90)
+**Note:** Spanish (ES) is **NOT** in scope. Only FR/EN are supported languages.
 
-#### Item 9: Spanish Translations (6h) - ⏳ NOT DONE YET
-- [ ] ... (deferred to later)
-
-#### Item 10-12: Accessibility (12h) - ⏸️ DEFERRED
+#### Item 9: Accessibility (12h) - ⏸️ DEFERRED
 - [x] Foundation completed (focus-visible, @axe-core/react installed)
 - [x] Score improved: 72 → 76 (+4 points, +0.25 global)
 - [ ] Full accessibility audit deferred - Reason: Should fix once in @ezstart/ui, not per app
@@ -137,7 +134,7 @@
 **Note:** Accessibility improvements should follow "single source of truth" principle.
 Fixing in @ezstart/ui = 8 apps fixed automatically. Deferred until time for proper UI standardization.
 
-#### Item 13-15: UX Polish (14h) - ⏸️ DEFERRED
+#### Item 10: UX Polish (14h) - ⏸️ DEFERRED
 - [ ] Loading states (Skeleton screens) - Deferred to @ezstart/ui audit
 - [ ] Error states (Error boundaries) - Deferred to @ezstart/ui audit
 - [ ] Empty states - Deferred to @ezstart/ui audit
@@ -151,9 +148,9 @@ Combined with Accessibility audit for comprehensive UI component overhaul.
 - [x] Update docs/README.md with new global score (77.5 → 78.8)
 - [x] Commit: "docs: defer Accessibility & UX to @ezstart/ui audit phase" (6e391e2)
 
-**Phase 2 Status:** 🟡 PARTIAL (1/6 items)
-- ✅ i18n migration complete (8/8 apps EN/FR)
-- ⏸️ Spanish, Accessibility, UX deferred to @ezstart/ui audit
+**Phase 2 Status:** 🟡 PARTIAL (1/3 items)
+- ✅ i18n migration complete (8/8 apps EN/FR only)
+- ⏸️ Accessibility, UX deferred to @ezstart/ui audit
 
 ---
 
@@ -255,7 +252,7 @@ type(scope): brief description
 - ✅ Progress table 100% complete
 
 **Phase 2 Success:** 🟡 PARTIAL
-- ✅ i18n score: 65 → 85 (+20 pts, EN/FR complete)
+- ✅ i18n score: 65 → 85 (+20 pts, EN/FR complete, ES not in scope)
 - ⏸️ Accessibility: 74 → 90 (deferred to @ezstart/ui audit)
 - ⏸️ UX: 70 → 90 (deferred to @ezstart/ui audit)
 - ✅ Global score: 77.5 → 78.8 (+1.3 pts)
@@ -307,13 +304,13 @@ type(scope): brief description
 | Item | Status | Time Spent | Commit SHA | Notes |
 |------|--------|------------|------------|-------|
 | 8. i18n Migration | ✅ Complete | 6h | 5fbf28c, 0138564, 900740d, 0cad39a, 9338d7f, e239aaf | i18n 65→85 (+20pts), 8/8 apps EN/FR |
-| 9. Spanish Translations | ⏸️ Deferred | - | - | Low priority, can add later (85→90) |
-| 10-12. Accessibility | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (74→90) |
-| 13-15. UX Polish | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (70→90) |
+| 9. Accessibility | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (74→90) |
+| 10. UX Polish | ⏸️ Deferred | - | 6e391e2 | Should be done in @ezstart/ui (70→90) |
 
-**Phase 2 Status: 🟡 PARTIAL (1/6 items)**
+**Phase 2 Status: 🟡 PARTIAL (1/3 items)**
 **Global Score: 77.5 → 78.8 (+1.3 points from i18n only)**
-**Items Deferred:** 5/6 items deferred to @ezstart/ui comprehensive audit (more efficient)
+**Items Deferred:** 2/3 items deferred to @ezstart/ui comprehensive audit (more efficient)
+**Note:** Spanish (ES) is NOT in scope - only FR/EN supported
 
 ### Phase 3 Progress
 

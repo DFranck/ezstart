@@ -36,12 +36,11 @@ Good i18n infrastructure with next-intl configured in 6/8 apps (75% coverage). S
 - ✅ **Full EN/FR coverage** - All apps support English + French
 - ⚠️ **Limited locales** - Only en + fr, missing es/zh/ar for broader market
 
-**Target Languages:**
+**Supported Languages:**
 - ✅ English (en) - Primary ✅ Implemented
 - ✅ French (fr) - Quebec market ✅ Implemented
-- ❌ Spanish (es) - US/LATAM market ❌ Missing
-- ❌ Chinese (zh) - Asian market ❌ Missing
-- ❌ Arabic (ar) - RTL testing ❌ Missing
+
+**Note:** Only EN/FR are in scope. Spanish (ES), Chinese (ZH), Arabic (AR) are **NOT** planned.
 
 ---
 
@@ -76,6 +75,7 @@ Good i18n infrastructure with next-intl configured in 6/8 apps (75% coverage). S
 - ✅ **100% coverage in ALL apps** - All user-facing strings use `t()` function ⭐ **IMPROVED**
 - ✅ **Namespaced keys** - Well-organized (common, auth, layout, domain-specific)
 - ✅ **Complete EN/FR translation** - All 8 apps fully bilingual
+- ℹ️ **No Spanish planned** - Only FR/EN are supported languages
 
 ---
 
@@ -87,9 +87,10 @@ Good i18n infrastructure with next-intl configured in 6/8 apps (75% coverage). S
 ```
 apps/[app]/web/messages/
 ├── en.json       # English (default) ✅
-├── fr.json       # French ✅
-└── [es.json]     # Spanish ❌ Missing
+└── fr.json       # French ✅
 ```
+
+**Note:** Spanish (ES) is NOT in scope. Only FR/EN translation files.
 
 **Example Structure (EZStart):**
 ```json
@@ -411,11 +412,11 @@ export const config = {
 
 ### Critical Gaps
 
-**Priority: 🟡 HIGH** (downgraded from CRITICAL)
-1. ⚠️ **Only 2 locales** - Missing Spanish, Chinese, Arabic (global reach limited)
-2. ❌ **Zero RTL support** - Can't support Arabic/Hebrew markets
+**Priority: ℹ️ OUT OF SCOPE** (by design)
+1. ℹ️ **Only 2 locales (EN/FR)** - Spanish, Chinese, Arabic are NOT planned
+2. ℹ️ **Zero RTL support** - Arabic/Hebrew markets are NOT targeted
 
-**Priority: 🟡 HIGH**
+**Priority: 🟡 MEDIUM**
 1. ⚠️ **Inconsistent date/number formatting** - Should centralize in @ezstart/utils
 2. ❌ **No email localization** - French users receive English emails
 3. ❌ **No CI checks** - Missing translations not caught before deploy
@@ -442,12 +443,11 @@ export const config = {
 1. ✅ Added next-intl to EZAuth, EZBill, EZPay (3 apps × 2h = 6h)
 2. ✅ Used centralized i18n config from `@ezstart/next-config`
 
-**Immediate Actions (This Week):**
+**Immediate Actions (Future):**
 1. Create centralized formatters in `@ezstart/utils`:
    - `formatDate(date, locale)` → locale-aware dates
    - `formatCurrency(amount, currency, locale)` → locale-aware money
    - `formatNumber(num, locale)` → locale-aware numbers
-3. Add Spanish (es) locale to all i18n apps
 
 **Short-term (This Month):**
 1. Implement ICU pluralization in all translation files
@@ -456,12 +456,12 @@ export const config = {
 4. Setup CI check for missing translations
 5. Localize transactional emails (React Email with locale prop)
 
-**Long-term (This Quarter):**
-1. Add Chinese (zh) and Arabic (ar) locales
-2. Implement RTL support with Tailwind utilities
-3. Integrate translation platform (Phrase or Lokalise)
-4. Add relative time formatting ("2 days ago")
-5. Professional translation review for French
+**Long-term (Future):**
+1. Integrate translation platform (Phrase or Lokalise)
+2. Add relative time formatting ("2 days ago")
+3. Professional translation review for French
+
+**Note:** Chinese (ZH), Arabic (AR), and Spanish (ES) are NOT planned. Only FR/EN are supported.
 
 ### Technical Debt
 
@@ -539,22 +539,21 @@ const price = formatCurrency(1000, 'USD', locale)
 ### Priority: ✅ COMPLETED
 - [x] #1 Add next-intl to EZAuth, EZBill, EZPay (6h total) ⭐ **DONE 2025-10-22**
 
-### Priority: 🟡 HIGH
+### Priority: 🟡 MEDIUM
 - [ ] #2 Create `@ezstart/utils/i18n` with date/currency formatters (2h)
-- [ ] #3 Add Spanish (es) locale to all apps (4h)
 
-### Priority: 🟡 HIGH
-- [ ] #4 Implement ICU pluralization in all translation files (3h)
-- [ ] #5 Create automated translation extraction script (2h)
-- [ ] #6 Add CI check for missing translations (1h)
-- [ ] #7 Add hreflang tags to layout.tsx (1h)
+### Priority: 🟡 MEDIUM (continued)
+- [ ] #3 Implement ICU pluralization in all translation files (3h)
+- [ ] #4 Create automated translation extraction script (2h)
+- [ ] #5 Add CI check for missing translations (1h)
+- [ ] #6 Add hreflang tags to layout.tsx (1h)
 
-### Priority: 🟢 MEDIUM
-- [ ] #8 Add Chinese (zh) and Arabic (ar) locales (8h)
-- [ ] #9 Implement basic RTL support with Tailwind (6h)
-- [ ] #10 Localize emails with React Email (4h)
-- [ ] #11 Integrate translation platform (Phrase or Lokalise) (8h)
+### Priority: 🟢 LOW
+- [ ] #7 Localize emails with React Email (4h)
+- [ ] #8 Integrate translation platform (Phrase or Lokalise) (8h)
 
 ---
 
-**Total Estimated Effort:** ~45 hours to reach 90/100 score 🚀
+**Note:** Spanish, Chinese, and Arabic locales are **NOT** in scope. Only FR/EN are supported.
+
+**Total Estimated Effort:** ~20 hours for remaining FR/EN improvements (no new languages)

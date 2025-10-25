@@ -444,31 +444,15 @@ export default createNextConfig({
 
 ---
 
-#### 4.2 Add Spanish Translations (6h) - ⏳ NOT DONE YET
-```bash
-# Use AI to translate en.json → es.json
-# Review + validate translations
-# Test with locale switcher
-
-# Focus on:
-# - Navigation
-# - Common UI (buttons, forms, errors)
-# - Landing pages
-# (Don't translate everything, prioritize user-facing content)
-```
-
-**Time:** 6h (automated translation + manual review)
-
----
-
-**Phase 2 Item 4 Total:** 8h (only EN/FR), +20 points, **Score: 65 → 85**
+**Phase 2 Item 4 Total:** 6h (EN/FR only), +20 points, **Score: 65 → 85**
 
 **Gain:**
 - ✅ 100% monorepo i18n coverage (8/8 apps) ⭐ **ACHIEVED**
 - ✅ Consistent i18n architecture across all apps ⭐ **ACHIEVED**
 - ✅ Full English/French bilingual support ⭐ **ACHIEVED**
-- ⏳ Access to Spanish market (~500M users) - Not done yet (future: 85 → 90)
 - ✅ Easy to add more languages later ⭐ **ACHIEVED**
+
+**Note:** Spanish (ES) is **NOT** in scope. Only FR/EN are supported languages for this monorepo.
 
 ---
 
@@ -950,7 +934,6 @@ test('create and send invoice', async ({ page }) => {
 | 1 | Root README | ✅ Complete | 1.2h | 68 | 75 | 297 lines, comprehensive |
 | 1 | Package READMEs | ✅ Complete | 0h | 75 | 85 | Done by another agent, 100% coverage |
 | 2 | i18n migration | ✅ Complete | 6h | 65 | 85 | 8/8 apps with next-intl EN/FR (+20 pts) |
-| 2 | Spanish translations | ⏸️ Deferred | - | 85 | 90 | Low priority, can add later |
 | 2 | ARIA labels | ⏸️ Deferred | - | 76 | 80 | Should be done in @ezstart/ui |
 | 2 | Keyboard nav | ⏸️ Deferred | - | 76 | 85 | Should be done in @ezstart/ui |
 | 2 | Screen readers | ⏸️ Deferred | - | 76 | 90 | Should be done in @ezstart/ui |
