@@ -146,6 +146,13 @@ export function PlanUploader({
           setZoom(1)
           setCrop({ x: 0, y: 0 })
           setCroppedAreaPixels(null)
+
+          // Notify parent immediately with the file (even before crop is applied)
+          onPlanUpload(file, result, {
+            rotation: 0,
+            scale: 1,
+            position: { x: 0, y: 0 },
+          })
         }
         reader.readAsDataURL(file)
       } else {

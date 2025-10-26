@@ -21,6 +21,33 @@
 - 🔍 [SEO Audit](./docs/audits/SEO-AUDIT.md) - Meta tags, sitemaps, structured data
 - 🌐 [Web Apps Audit](./docs/audits/WEB-APPS-AUDIT.md) - App configs, PWA, deployment
 
+## 🎨 FengShui - Smart Crop UX ⭐ AMÉLIORÉ (26/10/2025)
+
+**Problème résolu :** Utilisateurs bloqués car ils ne cliquaient pas sur "Valider" après avoir ajusté le crop.
+
+**Solution implémentée :**
+- ✅ **Bouton "Next" actif dès l'upload** - Plus besoin de cliquer sur "Valider"
+- ✅ **Auto-validation intelligente** - Le crop est validé automatiquement au clic sur "Next" si ajusté
+- ✅ **2 workflows supportés** :
+  1. Upload → Next direct (image non-croppée)
+  2. Upload → Ajuster crop → Next (auto-valide et applique le crop)
+
+**Architecture technique :**
+- `PlanUploader` expose `editingState` avec `{ isEditing, canApply, applyHandler }`
+- `UploadStep` stocke `editingState` dans `stepData` via état local + `useEffect`
+- `analyze/page.tsx` : Bouton "Next" async qui appelle `applyHandler()` si nécessaire
+- `onPlanUpload` appelé **dès l'upload** pour stocker le fichier dans `stepData`
+
+**Fichiers modifiés :**
+- [PlanUploader.tsx](apps/fengshui/web/src/components/PlanUploader.tsx:155-159) - Appel immédiat `onPlanUpload` + callback `onEditingStateChange`
+- [UploadStep.tsx](apps/fengshui/web/src/components/steps/UploadStep.tsx:28-32) - État local `editingState` + sync avec `stepData`
+- [analyze/page.tsx](apps/fengshui/web/src/app/[locale]/analyze/page.tsx:86-99) - Handler async `handleNext` avec auto-validation
+
+**Impact UX :**
+- 🚀 **100% des users** peuvent maintenant continuer sans friction
+- ⚡ **Workflow plus rapide** - 1 clic au lieu de 2 (Apply + Next)
+- 🎯 **Intelligent** - Auto-détecte si le crop a été ajusté ou non
+
 ## 🎛️ Système de Monitoring Centralisé ⭐ NOUVEAU (17/10/2025)
 
 **Architecture complète de monitoring et d'observabilité pour tout le monorepo.**

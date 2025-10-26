@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge'
 import { baseConfig } from './base.js'
 import { withI18n } from './withI18n.js'
 import { withPWA } from './withPWA.js'
+import withBundleAnalyzer from './with-bundle-analyzer.js'
 
 /**
  * Crée une config Next.js composée avec options
@@ -58,6 +59,9 @@ export function createNextConfig(options = {}) {
   if (pwa) {
     config = withPWA(config, pwaOptions)
   }
+
+  // Toujours appliquer bundle analyzer (activé seulement si ANALYZE=true)
+  config = withBundleAnalyzer(config)
 
   return config
 }

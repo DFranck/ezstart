@@ -77,37 +77,22 @@ export default function AnalyzePage() {
           const uploadData = context.getStepData('upload')
           const isUploadStep = context.currentStep === 0
           const hasFile = uploadData?.file
-          const hasCroppedImage = uploadData?.transformations?.crop
           const editingState = uploadData?._editingState
 
-          // Debug logs
-          console.log('🔍 [Stepper Debug]', {
-            hasFile: !!hasFile,
-            hasCroppedImage: !!hasCroppedImage,
-            isEditing: editingState?.isEditing,
-            canApply: editingState?.canApply,
-            editingState,
-          })
-
-          // Pour Step 1: bloquer si pas de fichier
-          const canProceedFromStep1 =
-            hasFile &&
-            // Si c'est un PDF, pas besoin de crop
-            (!uploadData.file?.type?.startsWith('image/') ||
-              // Si c'est une image, soit crop validé OU en cours d'édition avec possibilité d'apply
-              (hasCroppedImage || (editingState?.isEditing && editingState?.canApply)))
+          // Pour Step 1: juste besoin d'un fichier uploadé
+          const canProceedFromStep1 = hasFile
 
           // Handler async pour le bouton Next qui auto-valide le crop si nécessaire
           const handleNext = async () => {
-            // Si on est sur l'étape upload et qu'on est en édition avec un crop prêt
-            if (
-              isUploadStep &&
-              editingState?.isEditing &&
-              editingState?.canApply &&
-              !hasCroppedImage
-            ) {
-              // Auto-valider le crop avant de passer à l'étape suivante
-              await editingState.applyHandler()
+            // Si on est sur l'étape upload avec une image et qu'on est en édition
+            if (isUploadStep && uploadData.file?.type?.startsWith('image/')) {
+              // Si le crop est en cours d'édition et peut être appliqué
+              if (editingState?.isEditing && editingState?.canApply) {
+                // Auto-valider le crop avant de passer à l'étape suivante
+                await editingState.applyHandler()
+              }
+              // Sinon si aucun crop n'a été validé, on continue quand même
+              // (l'image sera utilisée telle quelle)
             }
             // Passer à l'étape suivante
             context.nextStep()

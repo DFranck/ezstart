@@ -15,7 +15,7 @@ import {
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * UploadStep
@@ -25,6 +25,11 @@ import { useState } from 'react'
  */
 const UploadStep = () => {
   const t = useTranslations()
+  const [editingState, setEditingState] = useState<{
+    isEditing: boolean
+    canApply: boolean
+    applyHandler: () => Promise<void>
+  } | null>(null)
 
   // Optional: only if PlanUploader exposes such knobs.
   const uploaderOptions = {
@@ -47,6 +52,17 @@ const UploadStep = () => {
     <StepContent stepId="upload">
       {(data: UploadStepData, updateData) => {
         const [isEditing, setIsEditing] = useState(false)
+
+        // Sync editingState to stepData via useEffect to avoid re-render loop
+        useEffect(() => {
+          if (editingState) {
+            updateData({
+              ...data,
+              _editingState: editingState,
+            })
+          }
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [editingState])
 
         const hasUploadedContent = !!(data?.file || data?.preview) || isEditing
         const isReturningToStep = !!(data?.file || data?.preview) && !isEditing
@@ -74,9 +90,9 @@ const UploadStep = () => {
             </Card>
 
             <PlanUploader
-              // ↓ Keep the API you already use; we just pass through data in a minimal shape
               onPlanUpload={(file, preview, transformations) => {
                 updateData({
+                  ...data,
                   file,
                   preview,
                   transformations: transformations ?? {
@@ -87,13 +103,7 @@ const UploadStep = () => {
                 })
               }}
               onEditingChange={setIsEditing}
-              onEditingStateChange={editingState => {
-                // Store editing state in stepData for the stepper to access
-                updateData({
-                  ...data,
-                  _editingState: editingState,
-                })
-              }}
+              onEditingStateChange={setEditingState}
               // Optional minimal-crop intent (ignored if PlanUploader doesn't support it)
               {...uploaderOptions}
             />

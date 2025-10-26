@@ -11,20 +11,23 @@
     "./pwa": "./src/pwa.js",
     "./withI18n": "./src/withI18n.js",
     "./withPWA": "./src/withPWA.js",
-    "./compose": "./src/compose.js"
+    "./compose": "./src/compose.js",
+    "./with-bundle-analyzer": "./src/with-bundle-analyzer.js"
   },
   "files": [
     "src/base.js",
     "src/pwa.js",
     "src/withI18n.js",
     "src/withPWA.js",
-    "src/compose.js"
+    "src/compose.js",
+    "src/with-bundle-analyzer.js"
   ],
   "peerDependencies": {
     "next": "^15.0.0"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
+    "@next/bundle-analyzer": "^16.0.0",
     "next": "^15.5.2",
     "typescript": "^5.7.3"
   },
