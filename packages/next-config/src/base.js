@@ -20,6 +20,10 @@ export const baseConfig = {
     } : false
   },
 
+  // ⚡ CRITICAL: Disable source maps in production (saves ~5-10MB per app)
+  // Source maps expose source code and add significant bundle size
+  productionBrowserSourceMaps: false,
+
   // Headers sécurisés par défaut
   async headers() {
     return [
