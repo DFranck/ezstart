@@ -87,7 +87,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
           <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
             {error}

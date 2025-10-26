@@ -1,0 +1,70 @@
+# Railway Configuration for @ezstart monorepo
+# Auto-deploy configuration for APIs on Railway
+# Docs: https://docs.railway.app/deploy/config-as-code
+
+# ======================
+# EZAuth API (Railway)
+# ======================
+[environments.ezauth]
+name = "ezauth"
+
+[environments.ezauth.build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezauth"
+
+[environments.ezauth.deploy]
+startCommand = "cd apps/ezauth/api && node dist/index.js"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Watch paths - trigger deploy only when these change
+[[environments.ezauth.deploy.watchPaths]]
+include = ["apps/ezauth/api/**", "packages/express-core/**", "packages/types/**", "packages/config/**", "packages/logger/**"]
+
+[environments.ezauth.deploy.healthcheck]
+path = "/api/health"
+timeout = 100
+interval = 60
+
+# Environment variables (secrets set in Railway dashboard)
+# NODE_ENV=production
+# PORT=5010
+# MONGO_URL=mongodb+srv://...
+# JWT_SECRET=...
+# GOOGLE_CLIENT_ID=...
+# GOOGLE_CLIENT_SECRET=...
+# GOOGLE_CALLBACK_URL=https://ezauth.up.railway.app/api/auth/google/callback
+# SENTRY_DSN=...
+
+# ======================
+# EZPay API (Railway)
+# ======================
+[environments.ezpay]
+name = "ezpay"
+
+[environments.ezpay.build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezpay"
+
+[environments.ezpay.deploy]
+startCommand = "cd apps/ezpay/api && node dist/index.js"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Watch paths - trigger deploy only when these change
+[[environments.ezpay.deploy.watchPaths]]
+include = ["apps/ezpay/api/**", "packages/express-core/**", "packages/types/**", "packages/config/**", "packages/logger/**"]
+
+[environments.ezpay.deploy.healthcheck]
+path = "/api/health"
+timeout = 100
+interval = 60
+
+# Environment variables (secrets set in Railway dashboard)
+# NODE_ENV=production
+# PORT=5040
+# MONGO_URL=mongodb+srv://...
+# STRIPE_SECRET_KEY=sk_...
+# STRIPE_WEBHOOK_SECRET=whsec_...
+# WEB_URL=https://ezpay.ezstart.xyz
+# SENTRY_DSN=...

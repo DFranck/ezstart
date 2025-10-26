@@ -1,0 +1,167 @@
+# Render Blueprint for @ezstart monorepo
+# Auto-deploy configuration for all APIs on Render
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ======================
+  # EZBill API (Render Free)
+  # ======================
+  - type: web
+    name: ezbill-api
+    runtime: node
+    region: oregon
+    plan: free
+    branch: master
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezbill
+    startCommand: cd apps/ezbill/api && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5020
+      - key: MONGO_URL
+        sync: false  # Secret - set in Render dashboard
+      - key: JWT_SECRET
+        sync: false  # Secret - set in Render dashboard
+      - key: SENTRY_DSN
+        sync: false  # Secret - set in Render dashboard
+    autoDeploy: true
+    # Build filters - only deploy when these paths change
+    buildFilter:
+      paths:
+        - apps/ezbill/api/**
+        - packages/express-core/**
+        - packages/types/**
+        - packages/config/**
+        - packages/logger/**
+      ignoredPaths:
+        - apps/ezstart/**
+        - apps/ezauth/**
+        - apps/tower-defense/**
+        - apps/fengshui/**
+        - apps/asc-tcd/**
+        - packages/ui/**
+        - packages/auth-sdk/**
+
+  # ======================
+  # Tower Defense API (Render Free)
+  # ======================
+  - type: web
+    name: tower-defense-api
+    runtime: node
+    region: oregon
+    plan: free
+    branch: master
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-tower-defense
+    startCommand: cd apps/tower-defense/api && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5030
+      - key: MONGO_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/tower-defense/api/**
+        - packages/express-core/**
+        - packages/types/**
+        - packages/config/**
+        - packages/logger/**
+      ignoredPaths:
+        - apps/ezstart/**
+        - apps/ezauth/**
+        - apps/ezbill/**
+        - apps/fengshui/**
+        - apps/asc-tcd/**
+        - packages/ui/**
+        - packages/auth-sdk/**
+
+  # ======================
+  # GreenPulse API (Render Free)
+  # ======================
+  - type: web
+    name: green-pulse-api
+    runtime: node
+    region: oregon
+    plan: free
+    branch: master
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-green-pulse
+    startCommand: cd apps/green-pulse/api && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5070
+      - key: MONGO_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/green-pulse/api/**
+        - packages/express-core/**
+        - packages/types/**
+        - packages/config/**
+        - packages/logger/**
+      ignoredPaths:
+        - apps/ezstart/**
+        - apps/ezauth/**
+        - apps/ezbill/**
+        - apps/tower-defense/**
+        - apps/fengshui/**
+        - apps/asc-tcd/**
+        - packages/ui/**
+        - packages/auth-sdk/**
+
+  # ======================
+  # Monitoring API (Render Free)
+  # ======================
+  - type: web
+    name: monitoring-api
+    runtime: node
+    region: oregon
+    plan: free
+    branch: master
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-monitoring
+    startCommand: cd apps/monitoring/api && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5080
+      - key: MONGO_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: HEALTH_CHECK_INTERVAL
+        value: 600000  # 10 minutes
+      - key: HEALTH_CHECK_TIMEOUT
+        value: 5000
+      - key: HEALTH_CHECK_RETRIES
+        value: 3
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/monitoring/api/**
+        - packages/express-core/**
+        - packages/types/**
+        - packages/config/**
+        - packages/logger/**
+        - packages/monitoring/**
+      ignoredPaths:
+        - apps/ezstart/**
+        - apps/ezauth/**
+        - apps/ezbill/**
+        - apps/tower-defense/**
+        - apps/fengshui/**
+        - apps/asc-tcd/**
+        - apps/green-pulse/**
+        - packages/ui/**
+        - packages/auth-sdk/**

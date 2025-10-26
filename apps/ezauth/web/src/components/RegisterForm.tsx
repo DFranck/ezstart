@@ -94,7 +94,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
           <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
             {error}
@@ -129,13 +129,13 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <FormField
             control={form.control}
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel className="text-xs md:text-sm">First Name</FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="John" {...field} />
                 </FormControl>
@@ -148,7 +148,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel className="text-xs md:text-sm">Last Name</FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="Doe" {...field} />
                 </FormControl>

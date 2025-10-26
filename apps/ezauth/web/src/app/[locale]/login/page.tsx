@@ -1,6 +1,7 @@
 'use client'
 
 import { LoginForm } from '@/components/LoginForm'
+import { OAuthButtons } from '@/components/OAuthButtons'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   BackButton,
@@ -29,17 +30,21 @@ function LoginContent() {
       <div className="absolute top-4 right-4">
         <ThemeSwitcher />
       </div>
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
-        <CardDescription>
+      <CardHeader className="text-center pb-4">
+        <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
+        <CardDescription className="text-xs md:text-sm">
           Sign in to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
-        <P variant={'description'} size={'xs'}>
+        <P variant={'description'} size={'xs'} className="hidden md:block">
           🌟 <strong>One account, all EZStart apps!</strong>
         </P>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
+        {/* OAuth Buttons (Google, GitHub) */}
+        <OAuthButtons app={app} redirect_uri={redirect_uri} />
+
+        {/* Classic Email/Password Form */}
         <LoginForm app={app} redirect_uri={redirect_uri} />
 
         <div className="text-center">

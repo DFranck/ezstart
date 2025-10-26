@@ -1,6 +1,7 @@
 'use client'
 
 import { RegisterForm } from '@/components/RegisterForm'
+import { OAuthButtons } from '@/components/OAuthButtons'
 import {
   BackButton,
   Card,
@@ -28,17 +29,21 @@ function RegisterContent() {
       <div className="absolute top-4 right-4">
         <ThemeSwitcher />
       </div>
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold">EZAuth</CardTitle>
-        <CardDescription>
+      <CardHeader className="text-center pb-4">
+        <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
+        <CardDescription className="text-xs md:text-sm">
           Create account to access <Span className="text-ezstart font-medium">{app}</Span>
         </CardDescription>
-        <P variant={'description'} size={'xs'}>
+        <P variant={'description'} size={'xs'} className="hidden md:block">
           🌟 <strong>One account, all EZStart apps!</strong>
         </P>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
+        {/* OAuth Buttons (Google, GitHub) */}
+        <OAuthButtons app={app} redirect_uri={searchParams.get('redirect_uri')} />
+
+        {/* Classic Email/Password Form */}
         <RegisterForm app={app} redirect_uri={searchParams.get('redirect_uri')} />
 
         <div className="text-center">

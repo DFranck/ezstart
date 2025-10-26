@@ -7,6 +7,7 @@
 - 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complete)
 - 📄 [docs/AUDIT-SUMMARY.md](./docs/AUDIT-SUMMARY.md) - Executive summary pour stakeholders
 - 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
+- 🤖 **[docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md)** - ⭐ **INFRASTRUCTURE AS CODE** (Railway/Render/Vercel)
 - 🧪 **[docs/TESTING-STRATEGY-V2.md](./docs/TESTING-STRATEGY-V2.md)** - ⭐ **STRATÉGIE TESTING** (Phase 3 roadmap)
 
 **Audits disponibles (score global 95/100 ⭐⭐⭐⭐⭐ EXCELLENT) :**
@@ -1626,6 +1627,94 @@ Tous les packages utilisent les configurations centralisées selon leur type :
    - Mettre à jour Root Directory dans Vercel
    - Tester le déploiement
    - Commit avec message descriptif
+
+## 🤖 CI/CD - Infrastructure as Code ⭐ NOUVEAU (26/10/2025)
+
+**Tous les déploiements sont maintenant configurés via des fichiers versionés !**
+
+### Architecture
+
+| Platform | Config File | Services | Auto-Deploy |
+|----------|-------------|----------|-------------|
+| **Render** | [render.yaml](./render.yaml) | 4 APIs (EZBill, TD, GreenPulse, Monitoring) | ✅ On commit |
+| **Railway** | [railway.toml](./railway.toml) | 2 APIs (EZAuth, EZPay) | ✅ On commit |
+| **Vercel** | `apps/*/web/vercel.json` | 8 Web Apps (tous) | ✅ On commit |
+
+### Avantages
+
+✅ **Infrastructure as Code** - Configuration versionée avec Git
+✅ **Reproducible** - Recréer un service en 1 clic
+✅ **Pas de setup manuel** - Fini les dashboards à configurer
+✅ **Deploy sélectif** - Build filters intelligents
+✅ **Review via PR** - Changements de config reviewés comme du code
+
+### Fichiers Créés
+
+**Render (monorepo-wide) :**
+- [render.yaml](./render.yaml) - Configuration de tous les services Render
+- Build filters pour chaque service (deploy sélectif)
+- Healthchecks configurés sur `/api/health`
+
+**Railway (monorepo-wide) :**
+- [railway.toml](./railway.toml) - Configuration de tous les services Railway
+- Watch paths pour deploy sélectif
+- Environments séparés (ezauth, ezpay)
+
+**Vercel (par app) :**
+- `apps/*/web/vercel.json` - Configuration Next.js standard
+- Build command optimisé avec dépendances
+- Output directory configuré (`.next`)
+
+### Quick Start
+
+**Render :**
+```bash
+# Dashboard → New Blueprint
+# Sélectionner render.yaml
+# Tous les services créés automatiquement ✅
+```
+
+**Railway :**
+```bash
+# Dashboard → New Service
+# Connecter repo GitHub
+# Root Directory: /
+# Railway détecte railway.toml automatiquement ✅
+```
+
+**Vercel :**
+```bash
+# Dashboard → New Project
+# Import repo → Sélectionner apps/[app]/web
+# Cocher "Include files outside root directory"
+# Vercel détecte vercel.json automatiquement ✅
+```
+
+### Build Filters - Deploy Sélectif
+
+**Packages critiques (trigger TOUS les APIs) :**
+- `packages/express-core/**`
+- `packages/config/**`
+- `packages/logger/**`
+- `packages/types/**`
+
+**Packages ignorés (ne trigger AUCUN API) :**
+- `packages/ui/**`
+- `packages/auth-sdk/**`
+- `packages/pay-sdk/**`
+
+**Résultat :** Modifier EZStart web ne trigger PAS de deploy des APIs ✅
+
+### Documentation Complète
+
+📚 **[docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md)** - Guide complet avec :
+- Configuration détaillée par platform
+- Variables d'environnement
+- Workflow de développement
+- Troubleshooting
+- Best practices
+
+---
 
 ## 🚀 DÉPLOIEMENT - Configuration Railway & Vercel ✅
 

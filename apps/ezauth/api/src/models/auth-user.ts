@@ -6,7 +6,7 @@ import { AuthUser } from '@ezstart/auth-sdk/server'
 export interface AuthUserDocument extends Document {
   email: string
   username: string
-  passwordHash: string
+  passwordHash?: string // Optional for OAuth-only users
   firstName?: string
   lastName?: string
   avatar?: string
@@ -14,7 +14,7 @@ export interface AuthUserDocument extends Document {
   apps: string[]
   createdAt: Date
   updatedAt: Date
-  
+
   // Methods
   comparePassword(password: string): Promise<boolean>
   toAuthUser(): AuthUser
@@ -38,7 +38,7 @@ const authUserSchema = new Schema<AuthUserDocument>({
   },
   passwordHash: {
     type: String,
-    required: true,
+    required: false, // Optional for OAuth-only users
   },
   firstName: {
     type: String,
@@ -67,8 +67,8 @@ const authUserSchema = new Schema<AuthUserDocument>({
 
 // Hash password before saving
 authUserSchema.pre('save', async function(next) {
-  if (!this.isModified('passwordHash')) return next()
-  
+  if (!this.isModified('passwordHash') || !this.passwordHash) return next()
+
   const salt = await bcrypt.genSalt(12)
   this.passwordHash = await bcrypt.hash(this.passwordHash, salt)
   next()
@@ -76,6 +76,9 @@ authUserSchema.pre('save', async function(next) {
 
 // Compare password method
 authUserSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
+  if (!this.passwordHash) {
+    return false // OAuth-only users have no password
+  }
   return bcrypt.compare(password, this.passwordHash)
 }
 
