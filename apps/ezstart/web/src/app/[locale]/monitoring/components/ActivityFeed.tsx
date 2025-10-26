@@ -225,7 +225,7 @@ function ActivityCard({ log }: { log: ActivityLog }) {
       icon: 'lucide:CheckCircle',
       iconColor: 'text-green-600 dark:text-green-500',
     },
-  }
+  } as const
 
   const config = severityConfig[log.severity]
 

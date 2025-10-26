@@ -1,3 +1,3 @@
-import baseConfig from '@ezstart/eslint-config/base.js'
+import { config as baseConfig } from '@ezstart/eslint-config/base'
 
-export default [...baseConfig]
+export default baseConfig
