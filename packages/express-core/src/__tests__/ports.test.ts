@@ -82,7 +82,6 @@ describe('@ezstart/express-core - Ports', () => {
     it('should throw error for apps without API', () => {
       delete process.env.PORT
 
-      // @ts-expect-error - Testing invalid app (ezstart has no API)
       expect(() => getApiPort('ezstart')).toThrow()
     })
 

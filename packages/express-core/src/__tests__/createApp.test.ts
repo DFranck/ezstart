@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createApp } from '../infra/createApp.js'
 
 describe('@ezstart/express-core - createApp', () => {
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>
+  let consoleLogSpy: any
+  let consoleWarnSpy: any
 
   beforeEach(() => {
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})

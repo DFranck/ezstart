@@ -1,0 +1,135 @@
+ WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+
+> ezstart@0.0.1 typecheck D:\ez-hub\@ezstart
+> turbo run typecheck
+
+• Packages in scope: @ezbill/test-utils, @ezbill/types, @ezstart/auth-sdk, @ezstart/config, @ezstart/eslint-config, @ezstart/express-core, @ezstart/logger, @ezstart/monitoring, @ezstart/next-config, @ezstart/next-theme, @ezstart/pay-sdk, @ezstart/playwright-config, @ezstart/seo-config, @ezstart/tailwind-config, @ezstart/test-utils, @ezstart/types, @ezstart/typescript-config, @ezstart/ui, @green-pulse/types, @tower-defense/config, @tower-defense/types, @tower-defense/utils, api-ezauth, api-ezbill, api-ezpay, api-green-pulse, api-monitoring, api-tower-defense, web-asc-tcd, web-ezauth, web-ezbill, web-ezpay, web-ezstart, web-fengshui, web-green-pulse, web-tower-defense
+• Running typecheck in 36 packages
+• Remote caching disabled
+@tower-defense/config:typecheck: cache hit, replaying logs 751b706837fba5cd
+@tower-defense/config:typecheck: 
+@tower-defense/config:typecheck: > @tower-defense/config@1.0.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\config
+@tower-defense/config:typecheck: > tsc --noEmit
+@tower-defense/config:typecheck: 
+@ezstart/types:typecheck: cache hit, replaying logs ea5ee8a59c94e948
+@ezstart/types:typecheck: 
+@ezstart/types:typecheck: > @ezstart/types@0.1.0 typecheck D:\ez-hub\@ezstart\packages\types
+@ezstart/types:typecheck: > tsc --noEmit
+@ezstart/types:typecheck: 
+@ezstart/config:typecheck: cache hit, replaying logs 6619656730f0d33f
+@ezstart/config:typecheck: 
+@ezstart/config:typecheck: > @ezstart/config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\config
+@ezstart/config:typecheck: > tsc --noEmit
+@ezstart/config:typecheck: 
+@ezstart/test-utils:typecheck: cache hit, replaying logs 334f4926b8a01cc5
+@ezstart/test-utils:typecheck: 
+@ezstart/test-utils:typecheck: > @ezstart/test-utils@1.0.0 typecheck D:\ez-hub\@ezstart\packages\test-utils
+@ezstart/test-utils:typecheck: > tsc --noEmit
+@ezstart/test-utils:typecheck: 
+@green-pulse/types:typecheck: cache hit, replaying logs cf8905288f1b1784
+@green-pulse/types:typecheck: 
+@green-pulse/types:typecheck: > @green-pulse/types@0.0.1 typecheck D:\ez-hub\@ezstart\apps\green-pulse\types
+@green-pulse/types:typecheck: > tsc --noEmit
+@green-pulse/types:typecheck: 
+@ezstart/seo-config:typecheck: cache hit, replaying logs b83c783fd8479755
+@ezstart/logger:typecheck: cache hit, replaying logs e853dfe79811535e
+@ezstart/seo-config:typecheck: 
+@ezstart/seo-config:typecheck: > @ezstart/seo-config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\seo-config
+@ezstart/seo-config:typecheck: > tsc --noEmit
+@ezstart/seo-config:typecheck: 
+@ezbill/types:typecheck: cache hit, replaying logs 62db2c5d457ebee8
+@ezbill/types:typecheck: 
+@ezbill/types:typecheck: > @ezbill/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\ezbill\types
+@ezbill/types:typecheck: > tsc --noEmit
+@ezbill/types:typecheck: 
+@tower-defense/types:typecheck: cache hit, replaying logs 19dd3a224a8c55ac
+@ezstart/ui:typecheck: cache miss, executing 47d5815d574a7029
+@tower-defense/types:typecheck: 
+@tower-defense/types:typecheck: > @tower-defense/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\types
+@tower-defense/types:typecheck: > tsc --noEmit
+@tower-defense/types:typecheck: 
+@ezstart/monitoring:typecheck: cache hit, replaying logs b3245cbfdd2aef67
+@ezstart/logger:typecheck:  WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+@ezstart/logger:typecheck: 
+@ezstart/logger:typecheck: > @ezstart/logger@0.0.1 typecheck D:\ez-hub\@ezstart\packages\logger
+@ezstart/logger:typecheck: > tsc --noEmit
+@ezstart/logger:typecheck: 
+@ezstart/monitoring:typecheck: 
+@ezstart/monitoring:typecheck: > @ezstart/monitoring@1.0.0 typecheck D:\ez-hub\@ezstart\packages\monitoring
+@ezstart/monitoring:typecheck: > tsc --noEmit
+@ezstart/monitoring:typecheck: 
+@ezbill/test-utils:typecheck: cache hit, replaying logs ae3649f95aa1f612
+@ezbill/test-utils:typecheck: 
+@ezbill/test-utils:typecheck: > @ezbill/test-utils@1.0.0 typecheck D:\ez-hub\@ezstart\apps\ezbill\test-utils
+@ezbill/test-utils:typecheck: > tsc --noEmit
+@ezbill/test-utils:typecheck: 
+@tower-defense/utils:typecheck: cache hit, replaying logs abcf0ca0c065c458
+@tower-defense/utils:typecheck: 
+@tower-defense/utils:typecheck: > @tower-defense/utils@1.0.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\utils
+@tower-defense/utils:typecheck: > tsc --noEmit
+@tower-defense/utils:typecheck: 
+@ezstart/express-core:typecheck: cache hit, replaying logs 3ec7248be5474776
+@ezstart/express-core:typecheck: 
+@ezstart/express-core:typecheck: > @ezstart/express-core@0.0.1 typecheck D:\ez-hub\@ezstart\packages\express-core
+@ezstart/express-core:typecheck: > tsc --noEmit
+@ezstart/express-core:typecheck: 
+api-monitoring:typecheck: cache miss, executing 817dd4987280674f
+api-ezbill:typecheck: cache hit, replaying logs d0d2ea203f343b5f
+api-ezbill:typecheck: 
+api-ezbill:typecheck: > api-ezbill@0.0.1 typecheck D:\ez-hub\@ezstart\apps\ezbill\api
+api-ezbill:typecheck: > tsc --noEmit
+api-ezbill:typecheck: 
+api-green-pulse:typecheck: cache hit, replaying logs c0299a417ba276cf
+api-green-pulse:typecheck: 
+api-green-pulse:typecheck: > api-green-pulse@0.0.1 typecheck D:\ez-hub\@ezstart\apps\green-pulse\api
+api-green-pulse:typecheck: > tsc --noEmit
+api-green-pulse:typecheck: 
+api-monitoring:typecheck:  WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+api-monitoring:typecheck: 
+api-monitoring:typecheck: > api-monitoring@1.0.0 typecheck D:\ez-hub\@ezstart\apps\monitoring\api
+api-monitoring:typecheck: > tsc --noEmit
+api-monitoring:typecheck: 
+@ezstart/ui:typecheck: 
+@ezstart/ui:typecheck: > @ezstart/ui@0.1.0 typecheck D:\ez-hub\@ezstart\packages\ui
+@ezstart/ui:typecheck: > tsc --noEmit
+@ezstart/ui:typecheck: 
+@ezstart/pay-sdk:typecheck: cache miss, executing ba2e974a78848e13
+api-tower-defense:typecheck: cache miss, executing c729abf0febc656e
+@ezstart/next-theme:typecheck: cache miss, executing 9258f46e55620c7d
+@ezstart/auth-sdk:typecheck: cache miss, executing 56eec016b58568e7
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(23,3): error TS2304: Cannot find name 'beforeEach'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(197,7): error TS2578: Unused '@ts-expect-error' directive.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(237,7): error TS2578: Unused '@ts-expect-error' directive.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(239,7): error TS2578: Unused '@ts-expect-error' directive.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(257,5): error TS2304: Cannot find name 'beforeEach'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(299,16): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(300,11): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(348,14): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(348,61): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(389,14): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(413,14): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck: src/__tests__/models/HealthCheck.test.ts(414,14): error TS2532: Object is possibly 'undefined'.
+api-monitoring:typecheck:  ELIFECYCLE  Command failed with exit code 1.
+@ezstart/next-theme:typecheck: 
+@ezstart/next-theme:typecheck: > @ezstart/next-theme@0.1.0 typecheck D:\ez-hub\@ezstart\packages\next-theme
+@ezstart/next-theme:typecheck: > tsc --noEmit
+@ezstart/next-theme:typecheck: 
+@ezstart/auth-sdk:typecheck: 
+@ezstart/auth-sdk:typecheck: > @ezstart/auth-sdk@1.0.0 typecheck D:\ez-hub\@ezstart\packages\auth-sdk
+@ezstart/auth-sdk:typecheck: > tsc --noEmit
+@ezstart/auth-sdk:typecheck: 
+api-tower-defense:typecheck: 
+api-tower-defense:typecheck: > api-tower-defense@0.0.1 typecheck D:\ez-hub\@ezstart\apps\tower-defense\api
+api-tower-defense:typecheck: > tsc --noEmit
+api-tower-defense:typecheck: 
+@ezstart/pay-sdk:typecheck: 
+@ezstart/pay-sdk:typecheck: > @ezstart/pay-sdk@1.0.0 typecheck D:\ez-hub\@ezstart\packages\pay-sdk
+@ezstart/pay-sdk:typecheck: > tsc --noEmit
+@ezstart/pay-sdk:typecheck: 
+
+ Tasks:    16 successful, 21 total
+Cached:    15 cached, 21 total
+  Time:    11.386s 
+Failed:    api-monitoring#typecheck
+
+ ELIFECYCLE  Command failed with exit code 1.

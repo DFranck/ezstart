@@ -9,9 +9,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const resolved = await requestLocale
   const finalLocale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
 
-  const [common, home] = await Promise.all([
+  const [common, home, forms] = await Promise.all([
     import(`../messages/${finalLocale}/common.json`),
     import(`../messages/${finalLocale}/home.json`),
+    import(`../messages/${finalLocale}/forms.json`),
   ])
 
   return {
@@ -20,6 +21,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messages: {
       ...common.default,
       ...home.default,
+      forms: forms.default,
     },
   }
 })

@@ -70,7 +70,10 @@ type FormItemContextValue = {
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue)
 
 function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
-  const id = React.useId()
+  const fieldContext = React.useContext(FormFieldContext)
+  // Use field name for stable ID generation instead of useId()
+  // This prevents hydration mismatches between server and client
+  const id = fieldContext.name
 
   return (
     <FormItemContext.Provider value={{ id }}>

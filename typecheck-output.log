@@ -1,0 +1,164 @@
+ WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+
+> ezstart@0.0.1 typecheck D:\ez-hub\@ezstart
+> turbo run typecheck
+
+turbo 2.5.5
+
+• Packages in scope: @ezbill/test-utils, @ezbill/types, @ezstart/auth-sdk, @ezstart/config, @ezstart/eslint-config, @ezstart/express-core, @ezstart/logger, @ezstart/monitoring, @ezstart/next-config, @ezstart/next-theme, @ezstart/pay-sdk, @ezstart/playwright-config, @ezstart/seo-config, @ezstart/tailwind-config, @ezstart/test-utils, @ezstart/types, @ezstart/typescript-config, @ezstart/ui, @green-pulse/types, @tower-defense/config, @tower-defense/types, @tower-defense/utils, api-ezauth, api-ezbill, api-ezpay, api-green-pulse, api-monitoring, api-tower-defense, web-asc-tcd, web-ezauth, web-ezbill, web-ezpay, web-ezstart, web-fengshui, web-green-pulse, web-tower-defense
+• Running typecheck in 36 packages
+• Remote caching disabled
+@ezstart/types:typecheck: cache miss, executing ea5ee8a59c94e948
+@tower-defense/config:typecheck: cache miss, executing 751b706837fba5cd
+@ezstart/test-utils:typecheck: cache miss, executing 334f4926b8a01cc5
+@ezstart/logger:typecheck: cache miss, executing e853dfe79811535e
+@ezstart/config:typecheck: cache miss, executing 0c406efb0dc627e1
+@ezstart/seo-config:typecheck: cache miss, executing b83c783fd8479755
+@green-pulse/types:typecheck: cache miss, executing cf8905288f1b1784
+@tower-defense/config:typecheck: 
+@tower-defense/config:typecheck: > @tower-defense/config@1.0.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\config
+@tower-defense/config:typecheck: > tsc --noEmit
+@tower-defense/config:typecheck: 
+@ezstart/test-utils:typecheck: 
+@ezstart/test-utils:typecheck: > @ezstart/test-utils@1.0.0 typecheck D:\ez-hub\@ezstart\packages\test-utils
+@ezstart/test-utils:typecheck: > tsc --noEmit
+@ezstart/test-utils:typecheck: 
+@green-pulse/types:typecheck: 
+@green-pulse/types:typecheck: > @green-pulse/types@0.0.1 typecheck D:\ez-hub\@ezstart\apps\green-pulse\types
+@green-pulse/types:typecheck: > tsc --noEmit
+@green-pulse/types:typecheck: 
+@ezstart/types:typecheck: 
+@ezstart/types:typecheck: > @ezstart/types@0.1.0 typecheck D:\ez-hub\@ezstart\packages\types
+@ezstart/types:typecheck: > tsc --noEmit
+@ezstart/types:typecheck: 
+@ezstart/seo-config:typecheck: 
+@ezstart/seo-config:typecheck: > @ezstart/seo-config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\seo-config
+@ezstart/seo-config:typecheck: > tsc --noEmit
+@ezstart/seo-config:typecheck: 
+@ezstart/config:typecheck: 
+@ezstart/config:typecheck: > @ezstart/config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\config
+@ezstart/config:typecheck: > tsc --noEmit
+@ezstart/config:typecheck: 
+@ezstart/logger:typecheck:  WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+@ezstart/logger:typecheck: 
+@ezstart/logger:typecheck: > @ezstart/logger@0.0.1 typecheck D:\ez-hub\@ezstart\packages\logger
+@ezstart/logger:typecheck: > tsc --noEmit
+@ezstart/logger:typecheck: 
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(20,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck:   No index signature with a parameter of type 'string' was found on type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(21,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck:   No index signature with a parameter of type 'string' was found on type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(29,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck:   No index signature with a parameter of type 'string' was found on type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(30,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck:   No index signature with a parameter of type 'string' was found on type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(38,16): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck:   No index signature with a parameter of type 'string' was found on type 'Record<AppName, AppUrls>'.
+@ezbill/types:typecheck: cache miss, executing 62db2c5d457ebee8
+@tower-defense/types:typecheck: cache miss, executing 19dd3a224a8c55ac
+@ezstart/config:typecheck:  ELIFECYCLE  Command failed with exit code 1.
+@tower-defense/types:typecheck: 
+@tower-defense/types:typecheck: > @tower-defense/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\types
+@tower-defense/types:typecheck: > tsc --noEmit
+@tower-defense/types:typecheck: 
+@ezbill/types:typecheck: 
+@ezbill/types:typecheck: > @ezbill/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\ezbill\types
+@ezbill/types:typecheck: > tsc --noEmit
+@ezbill/types:typecheck: 
+@ezstart/config:typecheck: ERROR: command finished with error: command (D:\ez-hub\@ezstart\packages\config) C:\Users\Poly\AppData\Local\pnpm\.tools\pnpm\10.12.2\bin\pnpm.CMD run typecheck exited (1)
+@ezstart/config#typecheck: command (D:\ez-hub\@ezstart\packages\config) C:\Users\Poly\AppData\Local\pnpm\.tools\pnpm\10.12.2\bin\pnpm.CMD run typecheck exited (1)
+
+ Tasks:    4 successful, 9 total
+Cached:    0 cached, 9 total
+  Time:    12.402s 
+Failed:    @ezstart/config#typecheck
+
+ ERROR  run failed: command  exited (1)
+ ELIFECYCLE  Command failed with exit code 1.
+ WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+
+> ezstart@0.0.1 typecheck D:\ez-hub\@ezstart
+> turbo run typecheck
+
+turbo 2.5.5
+
+• Packages in scope: @ezbill/test-utils, @ezbill/types, @ezstart/auth-sdk, @ezstart/config, @ezstart/eslint-config, @ezstart/express-core, @ezstart/logger, @ezstart/monitoring, @ezstart/next-config, @ezstart/next-theme, @ezstart/pay-sdk, @ezstart/playwright-config, @ezstart/seo-config, @ezstart/tailwind-config, @ezstart/test-utils, @ezstart/types, @ezstart/typescript-config, @ezstart/ui, @green-pulse/types, @tower-defense/config, @tower-defense/types, @tower-defense/utils, api-ezauth, api-ezbill, api-ezpay, api-green-pulse, api-monitoring, api-tower-defense, web-asc-tcd, web-ezauth, web-ezbill, web-ezpay, web-ezstart, web-fengshui, web-green-pulse, web-tower-defense
+• Running typecheck in 36 packages
+• Remote caching disabled
+@tower-defense/config:typecheck: cache hit, replaying logs 751b706837fba5cd
+@ezstart/types:typecheck: cache hit, replaying logs ea5ee8a59c94e948
+@ezstart/types:typecheck: 
+@ezstart/types:typecheck: > @ezstart/types@0.1.0 typecheck D:\ez-hub\@ezstart\packages\types
+@ezstart/types:typecheck: > tsc --noEmit
+@ezstart/types:typecheck: 
+@ezstart/config:typecheck: cache miss, executing 094616feb8f70992
+@ezstart/seo-config:typecheck: cache miss, executing b83c783fd8479755
+@tower-defense/config:typecheck: 
+@tower-defense/config:typecheck: > @tower-defense/config@1.0.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\config
+@tower-defense/config:typecheck: > tsc --noEmit
+@tower-defense/config:typecheck: 
+@ezstart/logger:typecheck: cache miss, executing e853dfe79811535e
+@ezstart/test-utils:typecheck: cache hit, replaying logs 334f4926b8a01cc5
+@ezstart/test-utils:typecheck: 
+@ezstart/test-utils:typecheck: > @ezstart/test-utils@1.0.0 typecheck D:\ez-hub\@ezstart\packages\test-utils
+@ezstart/test-utils:typecheck: > tsc --noEmit
+@ezstart/test-utils:typecheck: 
+@green-pulse/types:typecheck: cache hit, replaying logs cf8905288f1b1784
+@ezbill/types:typecheck: cache miss, executing 62db2c5d457ebee8
+@tower-defense/types:typecheck: cache miss, executing 19dd3a224a8c55ac
+@green-pulse/types:typecheck: 
+@green-pulse/types:typecheck: > @green-pulse/types@0.0.1 typecheck D:\ez-hub\@ezstart\apps\green-pulse\types
+@green-pulse/types:typecheck: > tsc --noEmit
+@green-pulse/types:typecheck: 
+@tower-defense/types:typecheck: 
+@tower-defense/types:typecheck: > @tower-defense/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\types
+@tower-defense/types:typecheck: > tsc --noEmit
+@tower-defense/types:typecheck: 
+@ezstart/config:typecheck: 
+@ezstart/config:typecheck: > @ezstart/config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\config
+@ezstart/config:typecheck: > tsc --noEmit
+@ezstart/config:typecheck: 
+@ezstart/seo-config:typecheck: 
+@ezstart/seo-config:typecheck: > @ezstart/seo-config@0.0.1 typecheck D:\ez-hub\@ezstart\packages\seo-config
+@ezstart/seo-config:typecheck: > tsc --noEmit
+@ezstart/seo-config:typecheck: 
+@ezbill/types:typecheck: 
+@ezbill/types:typecheck: > @ezbill/types@0.1.0 typecheck D:\ez-hub\@ezstart\apps\ezbill\types
+@ezbill/types:typecheck: > tsc --noEmit
+@ezbill/types:typecheck: 
+@ezstart/logger:typecheck:  WARN  Unsupported engine: wanted: {"node":"20.18.x"} (current: {"node":"v22.18.0","pnpm":"10.12.2"})
+@ezstart/logger:typecheck: 
+@ezstart/logger:typecheck: > @ezstart/logger@0.0.1 typecheck D:\ez-hub\@ezstart\packages\logger
+@ezstart/logger:typecheck: > tsc --noEmit
+@ezstart/logger:typecheck: 
+@ezbill/test-utils:typecheck: cache miss, executing ae3649f95aa1f612
+@tower-defense/utils:typecheck: cache miss, executing abcf0ca0c065c458
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(20,16): error TS7053: Element implicitly has an 'any' type because expression of type 'AppName' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(20,28): error TS2304: Cannot find name 'AppName'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(21,16): error TS7053: Element implicitly has an 'any' type because expression of type 'AppName' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(21,28): error TS2304: Cannot find name 'AppName'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(29,16): error TS7053: Element implicitly has an 'any' type because expression of type 'AppName' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(29,28): error TS2304: Cannot find name 'AppName'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(30,16): error TS7053: Element implicitly has an 'any' type because expression of type 'AppName' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(30,28): error TS2304: Cannot find name 'AppName'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(38,16): error TS7053: Element implicitly has an 'any' type because expression of type 'AppName' can't be used to index type 'Record<AppName, AppUrls>'.
+@ezstart/config:typecheck: src/__tests__/urls.test.ts(38,28): error TS2304: Cannot find name 'AppName'.
+@ezstart/config:typecheck:  ELIFECYCLE  Command failed with exit code 2.
+@ezbill/test-utils:typecheck: 
+@ezbill/test-utils:typecheck: > @ezbill/test-utils@1.0.0 typecheck D:\ez-hub\@ezstart\apps\ezbill\test-utils
+@ezbill/test-utils:typecheck: > tsc --noEmit
+@ezbill/test-utils:typecheck: 
+@tower-defense/utils:typecheck: 
+@tower-defense/utils:typecheck: > @tower-defense/utils@1.0.0 typecheck D:\ez-hub\@ezstart\apps\tower-defense\utils
+@tower-defense/utils:typecheck: > tsc --noEmit
+@tower-defense/utils:typecheck: 
+@ezstart/config:typecheck: ERROR: command finished with error: command (D:\ez-hub\@ezstart\packages\config) C:\Users\Poly\AppData\Local\pnpm\.tools\pnpm\10.12.2\bin\pnpm.CMD run typecheck exited (2)
+@ezstart/config#typecheck: command (D:\ez-hub\@ezstart\packages\config) C:\Users\Poly\AppData\Local\pnpm\.tools\pnpm\10.12.2\bin\pnpm.CMD run typecheck exited (2)
+
+ Tasks:    6 successful, 11 total
+Cached:    4 cached, 11 total
+  Time:    8.754s 
+Failed:    @ezstart/config#typecheck
+
+ ERROR  run failed: command  exited (2)
+ ELIFECYCLE  Command failed with exit code 2.

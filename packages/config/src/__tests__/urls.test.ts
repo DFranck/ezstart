@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getApiUrl, getWebUrl, getPort, URLS } from '../urls.js'
+import { getApiUrl, getWebUrl, getPort, URLS, type AppName } from '../urls.js'
 
 describe('@ezstart/config - URLs', () => {
   describe('URLS constant', () => {
@@ -17,8 +17,8 @@ describe('@ezstart/config - URLs', () => {
       ]
 
       appNames.forEach(app => {
-        expect(URLS[app]).toBeDefined()
-        expect(URLS[app].web).toBeDefined()
+        expect(URLS[app as AppName]).toBeDefined()
+        expect(URLS[app as AppName].web).toBeDefined()
       })
     })
 
@@ -26,8 +26,8 @@ describe('@ezstart/config - URLs', () => {
       const appsWithAPI = ['ezauth', 'ezbill', 'ezpay', 'tower-defense', 'green-pulse', 'monitoring']
 
       appsWithAPI.forEach(app => {
-        expect(URLS[app].api).toBeDefined()
-        expect(URLS[app].api?.local).toMatch(/^http:\/\/localhost:\d+$/)
+        expect(URLS[app as AppName].api).toBeDefined()
+        expect(URLS[app as AppName].api?.local).toMatch(/^http:\/\/localhost:\d+$/)
       })
     })
 
@@ -35,7 +35,7 @@ describe('@ezstart/config - URLs', () => {
       const frontendOnly = ['ezstart', 'fengshui', 'asc-tcd']
 
       frontendOnly.forEach(app => {
-        expect(URLS[app].api).toBeUndefined()
+        expect(URLS[app as AppName].api).toBeUndefined()
       })
     })
   })
