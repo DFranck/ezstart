@@ -1,5 +1,6 @@
 'use client'
 import { useTranslations } from 'next-intl'
+import { useAuthStore } from '@ezstart/auth-sdk'
 
 import { useProjects } from '@/hooks/useProjects'
 import { Card, CardContent, H3, P, Badge, Button } from '@ezstart/ui/components'
@@ -10,7 +11,8 @@ interface ProjectsListProps {
 }
 
 export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
-  const { data, isLoading, error } = useProjects('demo-user-1')
+  const { user } = useAuthStore()
+  const { data, isLoading, error } = useProjects(user?._id || '')
   const t = useTranslations('forms.projects')
 
   if (isLoading) {
@@ -27,7 +29,8 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
     )
   }
 
-  const projects = data?.data || []
+  // callApi wraps response: { ok, data: { success, data: { projects } } }
+  const projects = data?.data?.data || []
 
   if (projects.length === 0) {
     return (

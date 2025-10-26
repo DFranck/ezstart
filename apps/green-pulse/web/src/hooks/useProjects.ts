@@ -1,7 +1,8 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { callApi } from '@/utils/api'
+import { callApi, runWithFeedback } from '@/utils/api'
+import { useAuthStore } from '@ezstart/auth-sdk'
 
 export function useProjects(userId?: string) {
   return useQuery({
@@ -25,6 +26,7 @@ export function useProject(id: string) {
 
 export function useCreateProject() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async (data: {
@@ -35,9 +37,17 @@ export function useCreateProject() {
       companyAddress?: string
       companySector?: string
     }) => {
-      return callApi('/projects?userId=demo-user-1', {
-        method: 'POST',
-        body: data,
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/projects?userId=${user._id}`, {
+            method: 'POST',
+            body: data,
+          }),
+        toastLoading: { message: 'Creating project...' },
+        toastSuccess: { message: `Project "${data.name}" created successfully!` },
+        toastError: { message: 'Failed to create project' },
       })
     },
     onSuccess: () => {
@@ -48,6 +58,7 @@ export function useCreateProject() {
 
 export function useUpdateProject(id: string) {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async (data: Partial<{
@@ -58,9 +69,17 @@ export function useUpdateProject(id: string) {
       companyAddress: string
       companySector: string
     }>) => {
-      return callApi(`/projects/${id}`, {
-        method: 'PUT',
-        body: data,
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/projects/${id}`, {
+            method: 'PUT',
+            body: data,
+          }),
+        toastLoading: { message: 'Updating project...' },
+        toastSuccess: { message: 'Project updated successfully!' },
+        toastError: { message: 'Failed to update project' },
       })
     },
     onSuccess: () => {
@@ -72,11 +91,20 @@ export function useUpdateProject(id: string) {
 
 export function useDeleteProject(id: string) {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async () => {
-      return callApi(`/projects/${id}`, {
-        method: 'DELETE',
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/projects/${id}`, {
+            method: 'DELETE',
+          }),
+        toastLoading: { message: 'Deleting project...' },
+        toastSuccess: { message: 'Project deleted successfully!' },
+        toastError: { message: 'Failed to delete project' },
       })
     },
     onSuccess: () => {

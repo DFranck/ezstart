@@ -2,24 +2,24 @@
 
 import { CreateWorkspaceDialog } from '@/components/forms/CreateWorkspaceDialog'
 import { WorkspacesList } from '@/components/forms/WorkspacesList'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-import { Card, CardContent, CardHeader, H1, P, Section } from '@ezstart/ui/components'
-import { Suspense } from 'react'
+import { Badge, Card, CardContent, CardHeader, H1, P, Section } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { Suspense } from 'react'
 
 export default function DashboardPage() {
   const t = useTranslations('forms.workspaces')
 
   return (
-    <ProtectedRoute>
+    <>
       <Section size={'xl'} className="mt-20">
         <div>
-          <H1 size="h2" className="mb-2">
-            📋 {t('title')}
-          </H1>
-          <P className="text-muted-foreground">
-            {t('description')}
-          </P>
+          <div className="flex items-center gap-3 mb-2">
+            <H1 size="h2">📋 {t('title')}</H1>
+            <Badge variant="secondary" className="text-xs">
+              🚧 Under Development
+            </Badge>
+          </div>
+          <P className="text-muted-foreground">{t('description')}</P>
         </div>
 
         <CreateWorkspaceDialog />
@@ -28,7 +28,7 @@ export default function DashboardPage() {
       <Suspense fallback={<WorkspacesListSkeleton />}>
         <WorkspacesList />
       </Suspense>
-    </ProtectedRoute>
+    </>
   )
 }
 

@@ -28,7 +28,8 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
     )
   }
 
-  const forms = data?.data || []
+  // ✅ Fixed: callApi wraps response as { ok, data: { success, data: [...] } }
+  const forms = data?.data?.data || []
 
   if (forms.length === 0) {
     return (

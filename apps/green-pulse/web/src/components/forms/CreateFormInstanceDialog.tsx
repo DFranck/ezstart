@@ -60,7 +60,8 @@ export function CreateFormInstanceDialog({
     }
   }
 
-  const formConfigs = configsData?.data || []
+  // ✅ Fixed: callApi wraps response as { ok, data: { success, data: [...] } }
+  const formConfigs = configsData?.data?.data || []
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

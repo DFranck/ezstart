@@ -43,7 +43,11 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           : [
               { href: '/', label: 'Home', icon: 'lucide:Home' },
               { href: '/chat', label: 'LIA', icon: 'lucide:Bot' },
-              { href: '/dashboard', label: tForms('navigation.workspaces'), icon: 'lucide:Briefcase' },
+              {
+                href: '/dashboard',
+                label: tForms('navigation.workspaces'),
+                icon: 'lucide:Briefcase',
+              },
             ]
       }
       headerLeftContent={

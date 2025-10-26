@@ -1,17 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input, Label, TextArea } from '@ezstart/ui/components'
+import { Button, Input, Label, TextArea, P, Modal } from '@ezstart/ui/components'
 import { useCreateWorkspace } from '@/hooks/useWorkspaces'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@ezstart/ui/components'
 
 export function CreateWorkspaceDialog() {
   const [open, setOpen] = useState(false)
@@ -50,20 +41,30 @@ export function CreateWorkspaceDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>+ New Workspace</Button>
-      </DialogTrigger>
+    <>
+      <Button onClick={() => setOpen(true)}>+ New Workspace</Button>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create Workspace</DialogTitle>
-          <DialogDescription>
-            Create a new workspace to organize your forms and projects
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <Modal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Create Workspace"
+        description="Create a new workspace to organize your forms and projects"
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="create-workspace-form"
+              disabled={createWorkspace.isPending}
+            >
+              {createWorkspace.isPending ? 'Creating...' : 'Create Workspace'}
+            </Button>
+          </>
+        }
+      >
+        <form id="create-workspace-form" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Workspace Name *</Label>
             <Input
@@ -87,11 +88,19 @@ export function CreateWorkspaceDialog() {
               required
               minLength={3}
               maxLength={50}
-              pattern="[a-z0-9-]+"
+              pattern="[a-z0-9\-]+"
             />
             <P className="text-xs text-muted-foreground mt-1">
               /forms/w/<strong>{slug || 'workspace-slug'}</strong>/projects
             </P>
+            {createWorkspace.error && (
+              <P className="text-xs text-destructive mt-1">
+                {(createWorkspace.error as any)?.message?.includes('409') ||
+                 (createWorkspace.error as any)?.message?.includes('already exists')
+                  ? `Slug "${slug}" is already taken. Please try another.`
+                  : (createWorkspace.error as any)?.message || 'Failed to create workspace'}
+              </P>
+            )}
           </div>
 
           <div>
@@ -105,21 +114,8 @@ export function CreateWorkspaceDialog() {
               rows={3}
             />
           </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={createWorkspace.isPending}>
-              {createWorkspace.isPending ? 'Creating...' : 'Create Workspace'}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   )
-}
-
-function P({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <p className={className}>{children}</p>
 }

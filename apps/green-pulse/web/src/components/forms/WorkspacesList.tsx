@@ -4,10 +4,18 @@ import { useWorkspaces } from '@/hooks/useWorkspaces'
 import { Card, CardContent, CardHeader, H3, P, Badge } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { useAuthStore } from '@ezstart/auth-sdk'
 
 export function WorkspacesList() {
   const { data, isLoading, error } = useWorkspaces()
+  const { user } = useAuthStore()
   const t = useTranslations('forms.workspaces')
+
+  // Debug logs
+  console.log('[WorkspacesList] user:', user?._id)
+  console.log('[WorkspacesList] data:', data)
+  console.log('[WorkspacesList] isLoading:', isLoading)
+  console.log('[WorkspacesList] error:', error)
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -23,7 +31,8 @@ export function WorkspacesList() {
     )
   }
 
-  const workspaces = data?.data?.workspaces || []
+  // callApi wraps response: { ok, data: { success, data: { workspaces } } }
+  const workspaces = data?.data?.data?.workspaces || []
 
   if (workspaces.length === 0) {
     return (

@@ -58,9 +58,12 @@ export function ThreadComposer({
     e.preventDefault();
     if (!message.trim() || loading || disabled) return;
 
-    await onSubmit(message, files);
+    // Clear message IMMEDIATELY before submit (better UX)
+    const messageToSend = message;
     setMessage('');
     setTimeout(resizeTextarea, 0);
+
+    await onSubmit(messageToSend, files);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -88,7 +91,7 @@ export function ThreadComposer({
       )}
     >
       {welcomeMessage}
-      <div className='px-4'>
+      <div className='px-4 max-w-4xl mx-auto'>
         <form
           onSubmit={handleSubmit}
           className={cn(
@@ -127,6 +130,10 @@ export function ThreadComposer({
               placeholder={placeholder}
               disabled={disabled}
               rows={1}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               className={cn(
                 'w-full resize-none text-sm placeholder:text-muted-foreground',
                 'max-h-[110px] min-h-[36px] px-3 py-2',

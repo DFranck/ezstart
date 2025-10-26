@@ -30,7 +30,8 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
   const { data: workspacesData } = useWorkspaces()
 
   // Find workspace ID from slug
-  const workspace = workspacesData?.data?.workspaces?.find(
+  // callApi wraps response: { ok, data: { success, data: { workspaces } } }
+  const workspace = workspacesData?.data?.data?.workspaces?.find(
     (w: any) => w.slug === workspaceSlug
   )
 

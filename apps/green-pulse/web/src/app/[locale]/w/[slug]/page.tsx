@@ -1,12 +1,11 @@
 'use client'
 
-import { Suspense, use } from 'react'
-import { H1, P, Card, CardContent } from '@ezstart/ui/components'
-import { ProjectsList } from '@/components/forms/ProjectsList'
 import { CreateProjectDialog } from '@/components/forms/CreateProjectDialog'
+import { ProjectsList } from '@/components/forms/ProjectsList'
 import { WorkspaceBreadcrumbs } from '@/components/forms/WorkspaceBreadcrumbs'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { Card, CardContent, H1, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import { Suspense, use } from 'react'
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>
@@ -17,7 +16,7 @@ export default function WorkspacePage({ params }: PageProps) {
   const t = useTranslations('forms.projects')
 
   return (
-    <ProtectedRoute>
+    <>
       <div className="container mx-auto py-8 px-4">
         <WorkspaceBreadcrumbs workspaceSlug={slug} />
 
@@ -26,9 +25,7 @@ export default function WorkspacePage({ params }: PageProps) {
             <H1 size="h2" className="mb-2">
               {t('title')}
             </H1>
-            <P className="text-muted-foreground">
-              {t('description')}
-            </P>
+            <P className="text-muted-foreground">{t('description')}</P>
           </div>
 
           <CreateProjectDialog workspaceSlug={slug} />
@@ -38,7 +35,7 @@ export default function WorkspacePage({ params }: PageProps) {
           <ProjectsList workspaceSlug={slug} />
         </Suspense>
       </div>
-    </ProtectedRoute>
+    </>
   )
 }
 

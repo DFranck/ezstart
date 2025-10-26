@@ -1,7 +1,8 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { callApi } from '@/utils/api'
+import { callApi, runWithFeedback } from '@/utils/api'
+import { useAuthStore } from '@ezstart/auth-sdk'
 
 export function useFormConfigs() {
   return useQuery({
@@ -26,8 +27,10 @@ export function useFormInstances(userId?: string) {
   return useQuery({
     queryKey: ['form-instances', userId],
     queryFn: async () => {
-      return callApi(`/forms/instances?userId=${userId || 'demo-user-1'}`)
+      if (!userId) throw new Error('User not authenticated')
+      return callApi(`/forms/instances?userId=${userId}`)
     },
+    enabled: !!userId,
   })
 }
 
@@ -43,6 +46,7 @@ export function useFormInstance(id: string) {
 
 export function useCreateFormInstance() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async (data: {
@@ -50,9 +54,17 @@ export function useCreateFormInstance() {
       projectId?: string
       mode?: 'manual' | 'chat' | 'vocal'
     }) => {
-      return callApi('/forms/instances?userId=demo-user-1', {
-        method: 'POST',
-        body: data,
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/forms/instances?userId=${user._id}`, {
+            method: 'POST',
+            body: data,
+          }),
+        toastLoading: { message: 'Creating form instance...' },
+        toastSuccess: { message: 'Form instance created successfully!' },
+        toastError: { message: 'Failed to create form instance' },
       })
     },
     onSuccess: () => {
@@ -63,15 +75,24 @@ export function useCreateFormInstance() {
 
 export function useUpdateFormInstance(id: string) {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async (data: {
       fields?: Record<string, any>
       status?: 'draft' | 'in_progress' | 'completed' | 'submitted'
     }) => {
-      return callApi(`/forms/instances/${id}`, {
-        method: 'PUT',
-        body: data,
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/forms/instances/${id}`, {
+            method: 'PUT',
+            body: data,
+          }),
+        toastLoading: { message: 'Updating form...' },
+        toastSuccess: { message: 'Form updated successfully!' },
+        toastError: { message: 'Failed to update form' },
       })
     },
     onSuccess: () => {
@@ -83,11 +104,20 @@ export function useUpdateFormInstance(id: string) {
 
 export function useSubmitFormInstance(id: string) {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async () => {
-      return callApi(`/forms/instances/${id}/submit`, {
-        method: 'POST',
+      if (!user?._id) throw new Error('User not authenticated')
+
+      return runWithFeedback({
+        action: async () =>
+          callApi(`/forms/instances/${id}/submit`, {
+            method: 'POST',
+          }),
+        toastLoading: { message: 'Submitting form...' },
+        toastSuccess: { message: 'Form submitted successfully!' },
+        toastError: { message: 'Failed to submit form' },
       })
     },
     onSuccess: () => {

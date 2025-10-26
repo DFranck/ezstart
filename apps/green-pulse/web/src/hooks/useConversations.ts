@@ -1,6 +1,7 @@
 'use client'
 
 import { callApi } from '@/utils/api'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export type ConversationListItem = {
@@ -31,6 +32,7 @@ export type ConversationWithMessages = ConversationListItem & {
  */
 export function useConversations() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   // Query: Load all conversations
   const {
@@ -38,10 +40,14 @@ export function useConversations() {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: ['conversations'],
+    queryKey: ['conversations', user?._id],
     queryFn: async () => {
+      // Filter by userId to only show current user's conversations
+      const userId = user?._id
+      const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
+
       const response = await callApi<{ success: boolean; data: { conversations: any[] } }>(
-        '/conversations'
+        endpoint
       )
 
       if (response.ok && response.data?.data?.conversations) {

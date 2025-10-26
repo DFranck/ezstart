@@ -37,7 +37,7 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
     (messages.length > 0 || (isNewThread && streamingText));
 
   return (
-    <div className='flex flex-col h-full justify-end w-full'>
+    <div className='flex flex-col h-full justify-end w-full max-w-4xl mx-auto'>
       {messages.map((msg, index) => {
         if (renderMessage) {
           return renderMessage(msg, index);
