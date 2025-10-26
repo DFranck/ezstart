@@ -1,10 +1,17 @@
 'use client';
 
 import ContactsList from '@/components/contactsList';
-import { LampContainer } from '@/components/ui/lamp';
 import { H2, P } from '@ezstart/ui/components';
 import { useSafeTranslations } from '@/hooks/useSafeIntl';
+import dynamic from 'next/dynamic';
 import { FC, HTMLAttributes } from 'react';
+
+// ⚡ PERFORMANCE: Dynamic import to reduce initial bundle size
+// framer-motion (used by LampContainer) is ~150KB - only load on home page
+const LampContainer = dynamic(
+  () => import('@/components/ui/lamp').then((mod) => ({ default: mod.LampContainer })),
+  { ssr: false }
+);
 
 type Props = HTMLAttributes<HTMLElement>;
 
