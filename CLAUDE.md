@@ -2402,6 +2402,166 @@ describe('InvoiceService', () => {
 
 **Documentation complète :** [docs/TESTING-STRATEGY-V2.md](./docs/TESTING-STRATEGY-V2.md)
 
+## 🔒 Test Protection - Centralized Configuration ⭐ CRITIQUE (26/10/2025)
+
+**Protection absolue contre la suppression accidentelle de données en production.**
+
+### Contexte - Incident Critique Résolu
+
+**Incident du 26/10/2025 :**
+- ❌ Tests ont supprimé toutes les données production (EZAuth users, EZBill clients/invoices)
+- **Root Cause** : MongoMemoryServer a échoué → fallback vers `.env.local` avec URL MongoDB Atlas production
+- **Commande destructive** : `beforeEach(() => Model.deleteMany({}))` exécutée sur production
+- **Données perdues** : User DFranck, clients, invoices, receipts (MongoDB M0 = pas de backups)
+
+**User Request** : *"Tests ne peuvent PLUS toucher production faut que ce soit pour tout les test tjrs"*
+
+### Solution Centralisée - createVitestConfig()
+
+**Principe :** Factory function dans `@ezstart/test-utils` qui FORCE l'isolation des tests pour TOUS les APIs.
+
+#### Architecture
+
+```typescript
+// packages/test-utils/src/createVitestConfig.ts
+import { defineConfig, type UserConfig } from 'vitest/config'
+import { config } from 'dotenv'
+import { resolve } from 'path'
+
+export interface VitestConfigOptions {
+  dbName: string // Database name for test isolation
+  extend?: UserConfig['test']
+}
+
+export function createVitestConfig(options: VitestConfigOptions) {
+  const { dbName, extend = {} } = options
+
+  // 🔒 CRITICAL: Try to load .env.test if it exists
+  try {
+    const envTestPath = resolve(process.cwd(), '.env.test')
+    config({ path: envTestPath })
+  } catch {
+    // .env.test is optional, fallback to environment variables
+  }
+
+  return defineConfig({
+    test: {
+      globals: true,
+      environment: 'node',
+
+      // 🔒 CRITICAL: Force test environment variables
+      env: {
+        NODE_ENV: 'test',
+        // Fallback MongoDB URL - uses localhost NEVER production!
+        MONGO_URL: `mongodb://localhost:27017/${dbName}-test`,
+      },
+
+      testTimeout: 30000,
+      hookTimeout: 60000,
+
+      ...extend,
+    },
+  })
+}
+```
+
+#### Usage Standard (TOUS les APIs)
+
+**Pattern uniforme pour tous les APIs :**
+
+```typescript
+// apps/[api]/vitest.config.ts
+import { createVitestConfig } from '@ezstart/test-utils'
+
+export default createVitestConfig({
+  dbName: 'ezauth', // ou 'ezbilling', 'ezpay', 'tower-defense', etc.
+})
+```
+
+**Avec options personnalisées :**
+
+```typescript
+// apps/ezbill/api/vitest.config.ts
+import { createVitestConfig } from '@ezstart/test-utils'
+
+export default createVitestConfig({
+  dbName: 'ezbilling',
+  extend: {
+    include: ['src/__tests__/**/*.test.ts'],
+    hookTimeout: 60000,
+    testTimeout: 10000,
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
+  },
+})
+```
+
+### Protection Multi-Niveaux
+
+**Niveau 1 : NODE_ENV=test (Forcé)**
+- Toujours `NODE_ENV=test` dans les tests
+- Empêche connexion accidentelle à production
+
+**Niveau 2 : MONGO_URL localhost (Fallback)**
+- Si MongoMemoryServer échoue → fallback vers `localhost:27017/${dbName}-test`
+- **JAMAIS** vers production Atlas
+
+**Niveau 3 : .env.test (Optionnel)**
+- Si existe, chargé automatiquement en priorité
+- Peut override MONGO_URL avec URL test spécifique
+
+### APIs Migrés ✅ (6/6 Complet)
+
+- ✅ **EZAuth API** - `createVitestConfig({ dbName: 'ezauth' })`
+- ✅ **EZBill API** - `createVitestConfig({ dbName: 'ezbilling' })`
+- ✅ **EZPay API** - `createVitestConfig({ dbName: 'ezpay' })`
+- ✅ **Tower Defense API** - `createVitestConfig({ dbName: 'tower-defense' })`
+- ✅ **GreenPulse API** - `createVitestConfig({ dbName: 'green-pulse' })`
+- ✅ **Monitoring API** - `createVitestConfig({ dbName: 'ezstart-monitoring' })`
+
+### Avantages de l'Architecture
+
+✅ **Single Source of Truth** - Une seule fonction pour toute la config test
+✅ **Protection Absolue** - Impossible de toucher production par accident
+✅ **Type-Safe** - TypeScript valide les configs
+✅ **Maintenable** - Changement dans test-utils → tous les APIs updated
+✅ **Extensible** - Peut ajouter options custom via `extend`
+✅ **DRY** - Élimine duplication des .env.test individuels
+
+### Règles Obligatoires
+
+❌ **INTERDICTIONS ABSOLUES**
+1. **JAMAIS** créer de vitest.config.ts sans `createVitestConfig()`
+2. **JAMAIS** utiliser `.env.local` pour les tests
+3. **JAMAIS** hardcoder `MONGO_URL` vers production dans test config
+4. **JAMAIS** lancer `pnpm test` sans vérifier l'environnement
+
+✅ **OBLIGATIONS ABSOLUES**
+1. **TOUJOURS** utiliser `createVitestConfig({ dbName })` pour nouveaux APIs
+2. **TOUJOURS** vérifier que `NODE_ENV=test` dans les tests
+3. **TOUJOURS** tester avec MongoMemoryServer ou localhost
+4. **TOUJOURS** faire des backups hebdomadaires (voir `scripts/backup-mongodb.sh`)
+
+### Scripts de Récupération (Post-Incident)
+
+**Créés pour récupération manuelle des données :**
+- [apps/ezauth/api/scripts/restore-user-dfranck.ts](apps/ezauth/api/scripts/restore-user-dfranck.ts) - Recrée user avec ID correct
+- [apps/ezbill/api/scripts/check-remaining-data.ts](apps/ezbill/api/scripts/check-remaining-data.ts) - Inventaire données survivantes
+- [scripts/backup-mongodb.sh](scripts/backup-mongodb.sh) - Backup manuel hebdomadaire
+
+### Documentation
+
+**Fichiers importants :**
+- [packages/test-utils/src/createVitestConfig.ts](packages/test-utils/src/createVitestConfig.ts) - Factory function
+- [packages/test-utils/src/index.ts](packages/test-utils/src/index.ts:10) - Export centralisé
+- [DEV-RULES.md](./DEV-RULES.md) - Règles critiques de protection des données
+
+**Commit :** `9b0e29f` - feat(tests): centralize test protection with createVitestConfig factory
+
 ## 🎮 Tower Defense - Optimisations de Performance (11/10/2025)
 
 ### 📦 Package @tower-defense/config - Constantes Centralisées
