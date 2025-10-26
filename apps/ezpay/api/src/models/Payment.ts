@@ -1,6 +1,59 @@
-import { Schema, model } from 'mongoose'
+import { connectToMongo } from '@ezstart/express-core'
+import { Schema, Model, Document } from 'mongoose'
 
-const paymentSchema = new Schema(
+export interface PaymentDocument extends Document {
+  // Project Info
+  projectId: string
+  projectName: string
+
+  // Payment Type
+  type: 'donation' | 'purchase' | 'subscription' | 'invoice'
+
+  // Amount
+  amount: number
+  currency: string
+
+  // Customer Info (link avec EZAuth si connecté)
+  userId?: string
+  customerName?: string
+  customerEmail?: string
+  isAnonymous: boolean
+
+  // Payment Details
+  provider: 'stripe' | 'paypal'
+  paymentId: string
+  paymentMethod?: string
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
+
+  // Metadata (flexible pour différents use cases)
+  metadata?: {
+    // Pour donations
+    message?: string
+    isPublic?: boolean
+
+    // Pour purchases
+    productId?: string
+    productName?: string
+    quantity?: number
+
+    // Pour subscriptions
+    subscriptionId?: string
+    planId?: string
+    planName?: string
+    interval?: 'month' | 'year'
+
+    // Pour invoices
+    invoiceId?: string
+    invoiceNumber?: string
+  }
+
+  // Dates
+  createdAt: Date
+  updatedAt: Date
+  completedAt?: Date
+}
+
+const paymentSchema = new Schema<PaymentDocument>(
   {
     // Project Info
     projectId: { type: String, required: true, index: true },
@@ -58,12 +111,11 @@ const paymentSchema = new Schema(
     },
 
     // Dates
-    createdAt: { type: Date, default: Date.now, index: true },
-    updatedAt: { type: Date, default: Date.now },
     completedAt: { type: Date },
   },
   {
     timestamps: true,
+    bufferCommands: false, // Disable buffering for fail-fast
   }
 )
 
@@ -72,4 +124,15 @@ paymentSchema.index({ projectId: 1, createdAt: -1 })
 paymentSchema.index({ userId: 1, createdAt: -1 })
 paymentSchema.index({ type: 1, status: 1 })
 
-export const Payment = model('payments', paymentSchema)
+/**
+ * Factory function to get Payment model attached to shared connection
+ * MUST be called after connectToMongo() has been initialized
+ */
+export async function getPaymentModel(): Promise<Model<PaymentDocument>> {
+  const mongoose = await connectToMongo('ezpay')
+  return mongoose.models.Payment || mongoose.model<PaymentDocument>('Payment', paymentSchema)
+}
+
+// Legacy export for backward compatibility
+// TODO: Update all consuming code to use getPaymentModel()
+export const Payment = { get: getPaymentModel }

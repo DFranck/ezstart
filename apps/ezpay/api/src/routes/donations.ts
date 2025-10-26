@@ -1,5 +1,5 @@
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
-import { Payment } from '../models/Payment.js'
+import { getPaymentModel } from '../models/Payment.js'
 import { createCheckoutSession } from '../services/stripe.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -72,6 +72,7 @@ const donationStatsResponseSchema = z.object({
 // ========================================
 
 const createDonationHandler = async (req: Request, res: Response) => {
+  const Payment = await getPaymentModel();
   try {
     const {
       projectId,
@@ -146,6 +147,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
 }
 
 const getDonationsHandler = async (req: Request, res: Response) => {
+  const Payment = await getPaymentModel();
   try {
     const { projectId, limit = 10 } = req.query
 
@@ -181,6 +183,7 @@ const getDonationsHandler = async (req: Request, res: Response) => {
 }
 
 const getDonationStatsHandler = async (req: Request, res: Response) => {
+  const Payment = await getPaymentModel();
   try {
     const { projectId } = req.query
 
@@ -224,6 +227,7 @@ const getDonationStatsHandler = async (req: Request, res: Response) => {
 }
 
 const verifyPaymentHandler = async (req: Request, res: Response) => {
+  const Payment = await getPaymentModel();
   try {
     const { sessionId } = req.params
 

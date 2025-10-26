@@ -1,6 +1,6 @@
 import { Router } from '@ezstart/express-core'
 import { stripe } from '../services/stripe.js'
-import { Payment } from '../models/Payment.js'
+import { getPaymentModel } from '../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import Stripe from 'stripe'
 
@@ -8,6 +8,7 @@ const router: ExpressRouter = Router()
 
 // Stripe webhook handler
 router.post('/webhooks/stripe', async (req: Request, res: Response) => {
+  const Payment = await getPaymentModel();
   const sig = req.headers['stripe-signature']
 
   if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
