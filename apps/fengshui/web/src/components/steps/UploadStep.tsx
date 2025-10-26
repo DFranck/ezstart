@@ -87,6 +87,13 @@ const UploadStep = () => {
                 })
               }}
               onEditingChange={setIsEditing}
+              onEditingStateChange={editingState => {
+                // Store editing state in stepData for the stepper to access
+                updateData({
+                  ...data,
+                  _editingState: editingState,
+                })
+              }}
               // Optional minimal-crop intent (ignored if PlanUploader doesn't support it)
               {...uploaderOptions}
             />

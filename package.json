@@ -23,7 +23,7 @@
     "dev:ez": "turbo run dev --filter=web-ezstart... --filter=api-monitoring... --filter=api-ezauth... --filter=api-ezpay... --filter=api-ezbill... --filter=api-tower-defense... --filter=api-green-pulse... --concurrency=20",
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui... --filter=web-ezauth... --filter=api-ezauth... --filter=web-ezpay... --filter=api-ezpay... --concurrency=15",
-    "dev:gp": "turbo run dev --filter=web-green-pulse... --filter=api-green-pulse... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
+    "dev:gp": "turbo run dev --filter=web-green-pulse... --filter=api-green-pulse... --filter=@green-pulse/types... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
     "dev:pay": "turbo run dev --filter=web-ezpay... --filter=api-ezpay... --concurrency=15"
   },
   "jest": {

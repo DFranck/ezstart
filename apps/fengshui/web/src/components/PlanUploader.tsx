@@ -22,6 +22,11 @@ type Transformations = {
 interface PlanUploaderProps {
   onPlanUpload: (file: File, preview: string, transformations?: Transformations) => void
   onEditingChange?: (isEditing: boolean) => void
+  onEditingStateChange?: (state: {
+    isEditing: boolean
+    canApply: boolean
+    applyHandler: () => Promise<void>
+  }) => void
   className?: string
 }
 const MIN_W = 50
@@ -34,7 +39,12 @@ type CropPixels = { width: number; height: number; x: number; y: number }
 /* ------------------------------------------------------------------------------------------
  * Component (MINIMAL)
  * ----------------------------------------------------------------------------------------*/
-export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: PlanUploaderProps) {
+export function PlanUploader({
+  onPlanUpload,
+  onEditingChange,
+  onEditingStateChange,
+  className = '',
+}: PlanUploaderProps) {
   const t = useTranslations()
 
   // File & preview
@@ -75,6 +85,47 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
     window.addEventListener('resize', updateCropSize)
     return () => window.removeEventListener('resize', updateCropSize)
   }, [])
+
+  // Notify parent about editing state changes
+  useEffect(() => {
+    const canApply = Boolean(uploadedFile && preview && croppedAreaPixels)
+
+    onEditingStateChange?.({
+      isEditing,
+      canApply,
+      applyHandler: handleApply,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, uploadedFile, preview, croppedAreaPixels])
+
+  const handleApply = useCallback(async () => {
+    if (!uploadedFile || !preview || !croppedAreaPixels) return
+
+    const { file: outFile, dataUrl } = await getCroppedImg(preview, croppedAreaPixels, rotation)
+
+    setUploadedFile(outFile)
+    setPreview(dataUrl)
+    setIsEditing(false)
+    onEditingChange?.(false)
+
+    // reset transient edit state
+    setRotation(0)
+    setZoom(1)
+    setCrop({ x: 0, y: 0 })
+
+    onPlanUpload(outFile, dataUrl, {
+      rotation,
+      scale: 1,
+      position: { x: 0, y: 0 },
+      crop: {
+        x: croppedAreaPixels.x,
+        y: croppedAreaPixels.y,
+        width: croppedAreaPixels.width,
+        height: croppedAreaPixels.height,
+      },
+      zoom,
+    })
+  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange])
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -136,35 +187,6 @@ export function PlanUploader({ onPlanUpload, onEditingChange, className = '' }: 
     // react-easy-crop's Area = { x,y,width,height }
     setCroppedAreaPixels(areaPx as CropPixels)
   }, [])
-
-  const handleApply = useCallback(async () => {
-    if (!uploadedFile || !preview || !croppedAreaPixels) return
-
-    const { file: outFile, dataUrl } = await getCroppedImg(preview, croppedAreaPixels, rotation)
-
-    setUploadedFile(outFile)
-    setPreview(dataUrl)
-    setIsEditing(false)
-    onEditingChange?.(false)
-
-    // reset transient edit state
-    setRotation(0)
-    setZoom(1)
-    setCrop({ x: 0, y: 0 })
-
-    onPlanUpload(outFile, dataUrl, {
-      rotation,
-      scale: 1,
-      position: { x: 0, y: 0 },
-      crop: {
-        x: croppedAreaPixels.x,
-        y: croppedAreaPixels.y,
-        width: croppedAreaPixels.width,
-        height: croppedAreaPixels.height,
-      },
-      zoom,
-    })
-  }, [uploadedFile, preview, croppedAreaPixels, rotation, zoom, onPlanUpload, onEditingChange])
 
   const handleCancel = () => {
     setRotation(0)

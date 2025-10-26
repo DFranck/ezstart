@@ -137,6 +137,162 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 
 **Documentation complète :** [AUDIT-GUIDE.md](./docs/AUDIT-GUIDE.md)
 
+## 📝 GreenPulse Forms - Système de Formulaires Intelligents ⭐ NOUVEAU (26/10/2025)
+
+**Architecture complète de formulaires agnostiques avec extraction IA pour automatiser le remplissage.**
+
+### Vue d'Ensemble
+
+**Use Case Principal :** Inspecteurs/Prestataires visitant plusieurs entreprises avec formulaires répétitifs à remplir.
+
+**Innovations :**
+- ✅ **100% Agnostique** - Formulaires définis via JSON config (aucun code)
+- ✅ **Multi-User/Multi-Projet** - Partage et permissions granulaires (owner/editor/viewer)
+- ✅ **3 Modes de remplissage** - Manuel, Chat textuel IA, Vocal IA
+- ✅ **Extraction intelligente** - Gemini AI extrait les données de conversations naturelles
+
+### Architecture Backend (100% Complet ✅)
+
+**Types TypeScript :** [apps/green-pulse/types/src/](apps/green-pulse/types/src/)
+```typescript
+FormConfig        // Template de formulaire (champs, extraction hints, UI)
+FormInstance      // Formulaire rempli lié à un projet
+Project           // Dossier/cas avec membres et permissions
+ProjectMember     // User avec role (owner/editor/viewer)
+```
+
+**Models MongoDB :** Factory pattern
+- `getFormConfigModel()` - Templates de formulaires
+- `getFormInstanceModel()` - Formulaires remplis
+- `getProjectModel()` - Projets/dossiers
+
+**Routes API :**
+```
+/api/forms/configs              # CRUD templates
+/api/forms/instances            # CRUD instances
+/api/forms/extract              # Extraction IA ⭐
+/api/projects                   # CRUD projets
+/api/projects/:id/members       # Gestion permissions
+/api/projects/:id/forms         # Forms d'un projet
+```
+
+**Service d'Extraction IA :** [formExtractor.service.ts](apps/green-pulse/api/src/services/formExtractor.service.ts)
+```typescript
+extractFormData(formConfigId, conversationHistory)
+  → { extractedFields, confidence, missingFields, suggestions, aiResponse }
+```
+
+### Formulaires Seed Disponibles
+
+1. **Company Inspection Form** 🏢 (USE CASE PRINCIPAL)
+   - 10 champs : company, address, sector, employees, contact, date, notes
+   - Pour inspecteurs visitant plusieurs entreprises
+
+2. **Solar Grant Application** ☀️
+   - 5 champs : property, orientation, budget, panels, date
+   - Demande de subvention solaire
+
+3. **Carbon Emissions Report** 🌍
+   - 5 champs : company, employees, vehicles, electricity, waste
+
+4. **Waste Reduction Plan** ♻️
+   - 4 champs : current waste, target, timeline, actions
+
+**Seed Database :**
+```bash
+cd apps/green-pulse/api && pnpm seed:forms
+```
+
+### Workflow Inspecteur (Exemple)
+
+```
+1. Inspecteur ouvre /forms dashboard
+   ↓
+2. Crée nouveau projet "Inspection ABC Corp"
+   - Sélectionne template: Company Inspection Form
+   ↓
+3. Page /forms/{id} - Mode chat activé
+   - Parle naturellement: "Je visite ABC Corp à Paris, 50 employés"
+   ↓
+4. AI extrait automatiquement:
+   - company_name: "ABC Corp" (confidence: 0.95)
+   - company_address: "Paris" (confidence: 0.70)
+   - employee_count: 50 (confidence: 0.90)
+   ↓
+5. Form se pré-remplit automatiquement
+   - Champs avec confidence < 0.8 en orange pour vérification
+   ↓
+6. Inspecteur valide et submit
+   ↓
+7. Partage projet avec collègue (role: editor)
+```
+
+### Frontend (À Implémenter ⏳)
+
+**Pages :**
+- `/forms` - Dashboard global (tous projets)
+- `/projects/[id]` - Projet spécifique (liste forms)
+- `/forms/[id]` - Split-screen (form + AI interface)
+
+**Components :**
+- `FormChatInterface` - Chat textuel avec IA
+- `FormVocalInterface` - Conversation vocale (Web Speech API)
+- `FormRenderer` - Rendu dynamique des champs
+- `ProjectCard` - Carte projet avec stats
+
+**Documentation complète :** [apps/green-pulse/FORMS-IMPLEMENTATION.md](apps/green-pulse/FORMS-IMPLEMENTATION.md)
+
+### Exemple Configuration Form (JSON)
+
+```json
+{
+  "id": "company-inspection-2025",
+  "name": "Company Inspection Form",
+  "category": "report",
+
+  "extraction": {
+    "systemPrompt": "You are helping an inspector fill out company information...",
+    "fields": [
+      {
+        "id": "company_name",
+        "label": "Company Name",
+        "type": "text",
+        "required": true,
+        "extraction": {
+          "keywords": ["company", "business", "entreprise"],
+          "examples": ["ABC Corp", "Acme Industries"]
+        }
+      }
+    ]
+  },
+
+  "modes": {
+    "manual": true,
+    "chat": true,
+    "vocal": true,
+    "autoSubmit": false
+  }
+}
+```
+
+### Prochaines Étapes
+
+**Phase 1 : Frontend Basic (Semaines 1-2)**
+- [ ] Pages dashboard, project detail, form filling
+- [ ] Composants de base : ProjectCard, FormRow, FormRenderer
+
+**Phase 2 : AI Integration (Semaine 3)**
+- [ ] FormChatInterface avec extraction API
+- [ ] Real-time form updates + confidence scores
+
+**Phase 3 : Vocal & Polish (Semaine 4)**
+- [ ] FormVocalInterface avec Web Speech API
+- [ ] Text-to-speech responses
+
+**Phase 4 : Multi-User (Semaine 5)**
+- [ ] Permissions UI + Share dialog
+- [ ] Real-time collaboration
+
 ## 🐛 Error Tracking avec Sentry ⭐ NOUVEAU (21/10/2025)
 
 **Architecture centralisée pour le monitoring d'erreurs en production**
