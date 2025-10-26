@@ -50,7 +50,7 @@ export function CreateFormInstanceDialog({
 
       if (formInstanceId) {
         router.push(
-          `/en/forms/w/${workspaceSlug}/projects/${projectId}/forms/${formInstanceId}`
+          `/w/${workspaceSlug}/p/${projectId}/f/${formInstanceId}`
         )
       }
 

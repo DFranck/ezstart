@@ -18,7 +18,7 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
 
   if (error) {
     return (
-      <Card variant="destructive">
+      <Card className="border-destructive">
         <CardContent>
           <P>Error loading forms: {error.message}</P>
         </CardContent>
@@ -48,7 +48,7 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
       {forms.map((form: any) => (
         <Link
           key={form._id}
-          href={`/en/forms/w/${workspaceSlug}/projects/${projectId}/forms/${form._id}`}
+          href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}
         >
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-4">

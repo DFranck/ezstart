@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input, Label, Textarea, P } from '@ezstart/ui/components'
+import { Button, Input, Label, TextArea, P } from '@ezstart/ui/components'
 import { useCreateProject } from '@/hooks/useProjects'
 import { useWorkspaces } from '@/hooks/useWorkspaces'
 import {
@@ -92,7 +92,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea
+            <TextArea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}

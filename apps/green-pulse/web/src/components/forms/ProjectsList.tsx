@@ -17,7 +17,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
 
   if (error) {
     return (
-      <Card variant="destructive">
+      <Card className="border-destructive">
         <CardContent>
           <P>Error loading projects: {error.message}</P>
         </CardContent>
@@ -47,7 +47,7 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
       {projects.map((project: any) => (
         <Link
           key={project._id}
-          href={`/en/forms/w/${workspaceSlug}/projects/${project._id}`}
+          href={`/w/${workspaceSlug}/p/${project._id}`}
         >
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">

@@ -13,7 +13,7 @@ export function WorkspacesList() {
 
   if (error) {
     return (
-      <Card variant="destructive">
+      <Card className="border-destructive">
         <CardContent>
           <P>Error loading workspaces: {error.message}</P>
         </CardContent>
@@ -41,7 +41,7 @@ export function WorkspacesList() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {workspaces.map((workspace: any) => (
-        <Link key={workspace._id} href={`/en/forms/w/${workspace.slug}/projects`}>
+        <Link key={workspace._id} href={`/w/${workspace.slug}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between">

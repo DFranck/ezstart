@@ -20,14 +20,14 @@ export function WorkspaceBreadcrumbs({
 }: WorkspaceBreadcrumbsProps) {
   return (
     <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Link href="/en/forms" className="hover:text-foreground transition-colors">
-        📋 Forms
+      <Link href="/dashboard" className="hover:text-foreground transition-colors">
+        📋 Dashboard
       </Link>
 
       <span>/</span>
 
       <Link
-        href={`/en/forms/w/${workspaceSlug}/projects`}
+        href={`/w/${workspaceSlug}`}
         className="hover:text-foreground transition-colors"
       >
         {workspaceSlug}
@@ -38,7 +38,7 @@ export function WorkspaceBreadcrumbs({
           <span>/</span>
           {formId ? (
             <Link
-              href={`/en/forms/w/${workspaceSlug}/projects/${projectId}`}
+              href={`/w/${workspaceSlug}/p/${projectId}`}
               className="hover:text-foreground transition-colors"
             >
               {projectName || 'Project'}
