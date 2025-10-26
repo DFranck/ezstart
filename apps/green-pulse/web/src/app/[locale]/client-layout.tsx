@@ -42,6 +42,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           : [
               { href: '/', label: 'Home', icon: 'lucide:Home' },
               { href: '/chat', label: 'LIA', icon: 'lucide:Bot' },
+              { href: '/forms', label: 'Forms', icon: 'lucide:FileText' },
             ]
       }
       headerLeftContent={
@@ -65,6 +66,12 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
             <Link href="/chat">
               <Icon name="lucide:Bot" size={16} />
               Chat
+            </Link>
+          </Button>
+          <Button asChild variant={'ghost'} size={'sm'}>
+            <Link href="/forms">
+              <Icon name="lucide:FileText" size={16} />
+              Forms
             </Link>
           </Button>
         </Div>
