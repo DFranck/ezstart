@@ -1,10 +1,11 @@
-import { defineConfig } from 'vitest/config'
+import { createVitestConfig } from '@ezstart/test-utils'
 
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'node',
-    testTimeout: 30000, // 30 seconds for tests with database operations
-    hookTimeout: 30000, // 30 seconds for setup/teardown
+// 🔒 CRITICAL: Centralized test protection
+// Prevents tests from EVER touching production MongoDB
+export default createVitestConfig({
+  dbName: 'ezstart-monitoring',
+  extend: {
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 })

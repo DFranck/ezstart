@@ -3,8 +3,9 @@ import { createVitestConfig } from '@ezstart/test-utils'
 // 🔒 CRITICAL: Centralized test protection
 // Prevents tests from EVER touching production MongoDB
 export default createVitestConfig({
-  dbName: 'tower-defense',
+  dbName: 'green-pulse',
   extend: {
-    include: ['src/__tests__/**/*.test.ts'],
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 })

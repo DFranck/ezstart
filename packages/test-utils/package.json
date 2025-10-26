@@ -26,6 +26,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "mongodb-memory-server": "^10.1.2",
     "mongoose": "^8.9.3"
   }
