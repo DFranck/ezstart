@@ -4,3 +4,4 @@
 
 export * from './health-checker.js'
 export * from './project-health.js'
+export * from './sentryClient.js'

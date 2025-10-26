@@ -6,6 +6,7 @@ import { metricsRoutes, metricsRegistry } from './metrics.js'
 import projectsRouter from './projects.js'
 import historyRouter from './history.js'
 import triggerRouter from './trigger.js'
+import activityRouter from './activity.js'
 
 const router = Router()
 
@@ -17,6 +18,7 @@ router.use('/metrics', metricsRoutes)
 router.use('/projects', projectsRouter)
 router.use('/history', historyRouter)
 router.use('/trigger-checks', triggerRouter)
+router.use('/activity', activityRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -32,6 +34,9 @@ router.get('/', (_, res) => {
       metrics: '/api/metrics',
       history: '/api/history/:serviceId',
       projectHistory: '/api/history/project/:projectId',
+      activity: '/api/activity',
+      activityErrors: '/api/activity/errors',
+      activityStats: '/api/activity/stats',
       docs: '/api/docs',
     },
   })

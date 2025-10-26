@@ -422,8 +422,8 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 **Architecture des Tabs :**
 - ✅ **Projects** - Cartes groupées par projet (API + Web + Platform badges)
 - ✅ **Audits** - Tracking des audits et scores
+- ✅ **Activity** - ⭐ NOUVEAU (26/10/2025) - Feed d'activité avec erreurs Sentry
 - 🔜 **Deployments** - Status Railway/Vercel/Render, derniers déploiements
-- 🔜 **Logs** - Logs centralisés de tous les services
 - 🔜 **Metrics** - Graphiques de performance, tendances
 - 🔜 **Database** - MongoDB health, storage, connexions
 - 🔜 **Git** - Commits récents, branches, PRs
@@ -450,6 +450,80 @@ curl http://localhost:5080/api/metrics        # Métriques globales
 - **14 Audits** : Tracking automatique avec parsing des fichiers .md
 
 **Documentation complète :** [AUDIT-GUIDE.md](./docs/AUDIT-GUIDE.md)
+
+### Activity Feed - Intégration Sentry ⭐ NOUVEAU (26/10/2025)
+
+**Voir toutes les erreurs Sentry centralisées dans le dashboard monitoring.**
+
+#### Architecture
+
+**Package `@ezstart/monitoring` - SentryClient**
+- `SentryClient` - Fetch issues/events depuis Sentry REST API
+- `ActivityLog` - Format unifié pour tous types d'activité (errors, deployments, health changes)
+- Auto-conversion Sentry Issues → ActivityLogs
+
+**Monitoring API - Routes Activity**
+- `GET /api/activity` - Tous les logs (errors, deployments, health, audits)
+- `GET /api/activity/errors` - Seulement les erreurs Sentry
+- `GET /api/activity/stats` - Statistiques par type et severity
+
+**Dashboard - Onglet Activity**
+- **5 filtres** : All, Errors, Deploys, Health, Audits
+- **Cards détaillées** : Titre, message, source, timestamp, metadata
+- **Liens directs** : Lien vers Sentry issue pour debug
+- **Auto-refresh** : Toutes les 2 minutes
+
+#### Setup Sentry Auth Token
+
+**1. Créer Auth Token** sur https://sentry.io/settings/account/api/auth-tokens/
+- Name: "Monitoring Dashboard Read Access"
+- Scopes: `org:read`, `project:read`, `event:read`
+
+**2. Configurer `.env.local`** dans `apps/monitoring/api`:
+```env
+SENTRY_AUTH_TOKEN=sntrys_your_token_here
+SENTRY_ORG_SLUG=ezstart
+```
+
+**3. Redémarrer API** :
+```bash
+pnpm --filter api-monitoring dev
+```
+
+#### Usage
+
+```typescript
+// Fetch Sentry errors programmatically
+import { createSentryClient } from '@ezstart/monitoring'
+
+const client = createSentryClient()
+const issues = await client.fetchIssues({
+  project: 'ezauth-api',    // Optional: filter by project
+  status: 'unresolved',      // unresolved, resolved, ignored, all
+  limit: 50,                 // Max issues to fetch
+  since: '7d',               // Last 7 days
+})
+
+// Convert to activity logs
+const logs = client.issuesToActivityLogs(issues)
+```
+
+#### Features
+
+✅ **Unified Activity Feed** - Tous les événements au même endroit
+✅ **Real-time Updates** - Auto-refresh toutes les 2 minutes
+✅ **Smart Filtering** - Filtrer par type (error, deployment, health, audit)
+✅ **Rich Metadata** - Occurrences, users affected, tags
+✅ **Direct Links** - Clic vers Sentry pour details complets
+✅ **Extensible** - Facile d'ajouter d'autres sources (GitHub, Railway webhooks)
+
+#### Prochaines Étapes
+
+- [ ] Ajouter deployment events (Railway/Vercel webhooks)
+- [ ] Ajouter health change notifications
+- [ ] Ajouter audit update tracking
+- [ ] Email/Slack alerts sur erreurs critiques
+- [ ] Graphiques de tendances (errors over time)
 
 ## 📝 GreenPulse Forms - Système de Formulaires Intelligents ⭐ NOUVEAU (26/10/2025)
 
