@@ -4,9 +4,8 @@
     "composite": true,
     "outDir": "dist",
     "rootDir": "./src",
-    "types": ["vitest/globals", "node"],
-    "typeRoots": ["../../../packages/types", "./node_modules/@types"]
+    "types": ["vitest/globals", "node"]
   },
-  "include": ["src/**/*", "../../../packages/types/**/*.d.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

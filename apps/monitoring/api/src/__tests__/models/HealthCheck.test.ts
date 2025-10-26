@@ -194,10 +194,8 @@ describe('HealthCheck Model', () => {
 
       const found = await HealthCheckModel.findOne({ serviceId: 'ezauth-api' })
 
-      // @ts-expect-error - Mongoose type inference issue
       expect(found).toBeDefined()
-      // @ts-expect-error - Mongoose type inference issue
-      expect(found.serviceId).toBe('ezauth-api')
+      expect(found!.serviceId).toBe('ezauth-api')
     })
 
     it('should find all health checks for a service', async () => {
@@ -234,9 +232,7 @@ describe('HealthCheck Model', () => {
 
       const updated = await HealthCheckModel.findById(healthCheck._id)
 
-      // @ts-expect-error - Mongoose type inference issue
       expect(updated?.status).toBe('unhealthy')
-      // @ts-expect-error - Mongoose type inference issue
       expect(updated?.error).toBe('Connection lost')
     })
 
@@ -296,8 +292,8 @@ describe('HealthCheck Model', () => {
 
       expect(checks).toHaveLength(2)
       if (checks.length >= 2) {
-        expect(checks[0].timestamp.getTime()).toBeGreaterThanOrEqual(
-          checks[1].timestamp.getTime()
+        expect(checks[0]!.timestamp.getTime()).toBeGreaterThanOrEqual(
+          checks[1]!.timestamp.getTime()
         )
       }
     })
@@ -345,7 +341,7 @@ describe('HealthCheck Model', () => {
         .limit(2)
 
       expect(checks).toHaveLength(2)
-      expect(checks[0].timestamp.getTime()).toBeGreaterThan(checks[1].timestamp.getTime())
+      expect(checks[0]!.timestamp.getTime()).toBeGreaterThan(checks[1]!.timestamp.getTime())
     })
   })
 
@@ -386,7 +382,7 @@ describe('HealthCheck Model', () => {
       })
 
       expect(checks).toHaveLength(1)
-      expect(checks[0].timestamp.getDate()).toBe(15)
+      expect(checks[0]!.timestamp.getDate()).toBe(15)
     })
   })
 
@@ -410,8 +406,8 @@ describe('HealthCheck Model', () => {
       const history = await HealthCheckModel.find({ serviceId: service }).sort({ timestamp: 1 })
 
       expect(history).toHaveLength(4)
-      expect(history[2].status).toBe('unhealthy')
-      expect(history[2].error).toBe('Timeout')
+      expect(history[2]!.status).toBe('unhealthy')
+      expect(history[2]!.error).toBe('Timeout')
     })
 
     it('should calculate average response time for healthy services', async () => {

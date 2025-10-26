@@ -15,7 +15,7 @@ interface AuthCodeDocument {
 }
 
 describe('AuthCode Model', () => {
-  let AuthCodeModel: Model<AuthCodeDocument>
+  let AuthCodeModel: any
 
   beforeAll(async () => {
     await setupTestDatabase()
@@ -292,7 +292,7 @@ describe('AuthCode Model', () => {
 
       const unusedCodes = await AuthCodeModel.find({ isUsed: false })
       expect(unusedCodes).toHaveLength(1)
-      expect(unusedCodes[0].code).toBe('code1')
+      expect(unusedCodes[0]!.code).toBe('code1')
     })
 
     it('should find non-expired codes', async () => {
@@ -318,7 +318,7 @@ describe('AuthCode Model', () => {
       })
 
       expect(nonExpiredCodes).toHaveLength(1)
-      expect(nonExpiredCodes[0].code).toBe('code1')
+      expect(nonExpiredCodes[0]!.code).toBe('code1')
     })
   })
 

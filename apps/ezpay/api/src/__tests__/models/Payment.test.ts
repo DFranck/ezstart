@@ -479,7 +479,7 @@ describe('Payment Model', () => {
       })
 
       expect(completedDonations).toHaveLength(1)
-      expect(completedDonations[0].amount).toBe(10.00)
+      expect(completedDonations[0]!.amount).toBe(10.00)
     })
   })
 

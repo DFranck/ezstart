@@ -161,7 +161,7 @@ describe('GameManager', () => {
       const finishedGames = gameManager.getGamesByPhase('finished')
 
       expect(finishedGames).toHaveLength(1)
-      expect(finishedGames[0].id).toBe(game.id)
+      expect(finishedGames[0]!.id).toBe(game.id)
     })
   })
 
@@ -294,15 +294,11 @@ describe('GameManager', () => {
       const game = gameManager.createGame(testHostId)
       const mob: ActiveMob = {
         id: 'mob-1',
-        typeId: 'basic-slime',
-        hp: 30,
-        maxHp: 30,
-        speed: 5,
-        damage: 1,
-        playerId: testPlayerId,
+        mobTypeId: 'basic-slime',
+        currentHp: 30,
         position: { x: 0, y: 0 },
         pathIndex: 0,
-        effects: [],
+        targetPlayerId: testPlayerId,
       }
 
       gameManager.spawnMob(game.id, mob)
@@ -314,15 +310,11 @@ describe('GameManager', () => {
     it('should throw if game not found', () => {
       const mob: ActiveMob = {
         id: 'mob-1',
-        typeId: 'basic-slime',
-        hp: 30,
-        maxHp: 30,
-        speed: 5,
-        damage: 1,
-        playerId: testPlayerId,
+        mobTypeId: 'basic-slime',
+        currentHp: 30,
         position: { x: 0, y: 0 },
         pathIndex: 0,
-        effects: [],
+        targetPlayerId: testPlayerId,
       }
 
       expect(() => {

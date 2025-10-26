@@ -20,7 +20,7 @@ app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)
 
-connectToMongo('tower-defense')
+connectToMongo('towerdefense')
   .then(async () => {
     // Seed entity types (MobType/TowerType registry)
     await seedEntityTypes()

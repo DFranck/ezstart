@@ -194,7 +194,7 @@ describe('AuthUser Model', () => {
       await user.save()
 
       expect(user.passwordHash).not.toBe(plainPassword)
-      expect(user.passwordHash.length).toBeGreaterThan(50) // Bcrypt hashes are long
+      expect(user.passwordHash!.length).toBeGreaterThan(50) // Bcrypt hashes are long
     })
 
     it('should not rehash if password not modified', async () => {
@@ -350,7 +350,7 @@ describe('AuthUser Model', () => {
       const authUser = user.toAuthUser()
 
       expect(authUser).toEqual({
-        _id: user._id.toString(),
+        _id: String(user._id),
         email: 'test@example.com',
         username: 'testuser',
         firstName: 'John',

@@ -96,9 +96,9 @@ export function FormPreview({
                   className={isFilled ? 'border-primary' : ''}
                 />
 
-                {field.description && (
+                {field.helpText && (
                   <P className="text-xs text-muted-foreground mt-1">
-                    {field.description}
+                    {field.helpText}
                   </P>
                 )}
 
