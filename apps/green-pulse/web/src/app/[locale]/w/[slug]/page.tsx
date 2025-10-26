@@ -6,6 +6,7 @@ import { ProjectsList } from '@/components/forms/ProjectsList'
 import { CreateProjectDialog } from '@/components/forms/CreateProjectDialog'
 import { WorkspaceBreadcrumbs } from '@/components/forms/WorkspaceBreadcrumbs'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { useTranslations } from 'next-intl'
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>
@@ -13,6 +14,7 @@ interface PageProps {
 
 export default function WorkspacePage({ params }: PageProps) {
   const { slug } = use(params)
+  const t = useTranslations('forms.projects')
 
   return (
     <ProtectedRoute>
@@ -22,10 +24,10 @@ export default function WorkspacePage({ params }: PageProps) {
         <div className="flex items-center justify-between mb-8 mt-4">
           <div>
             <H1 size="h2" className="mb-2">
-              Projects
+              {t('title')}
             </H1>
             <P className="text-muted-foreground">
-              Manage your inspection cases and forms
+              {t('description')}
             </P>
           </div>
 

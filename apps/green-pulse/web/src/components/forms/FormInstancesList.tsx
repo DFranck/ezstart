@@ -1,4 +1,5 @@
 'use client'
+import { useTranslations } from 'next-intl'
 
 import { useProjectForms } from '@/hooks/useProjects'
 import { Card, CardContent, H3, P, Badge } from '@ezstart/ui/components'
@@ -11,6 +12,7 @@ interface FormInstancesListProps {
 
 export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesListProps) {
   const { data, isLoading, error } = useProjectForms(projectId)
+  const t = useTranslations('forms.forms')
 
   if (isLoading) {
     return <div>Loading forms...</div>
@@ -33,10 +35,10 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
       <Card>
         <CardContent className="text-center py-12">
           <H3 size="h4" className="mb-2">
-            No forms yet
+            {t('noForms')}
           </H3>
           <P className="text-muted-foreground mb-4">
-            Create your first form instance to start filling data
+            {t('noFormsDescription')}
           </P>
         </CardContent>
       </Card>

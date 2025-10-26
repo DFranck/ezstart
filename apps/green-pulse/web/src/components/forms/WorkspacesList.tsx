@@ -1,14 +1,16 @@
 'use client'
 
 import { useWorkspaces } from '@/hooks/useWorkspaces'
-import { Card, CardContent, CardHeader, H3, P, Badge, Button } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, H3, P, Badge } from '@ezstart/ui/components'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export function WorkspacesList() {
   const { data, isLoading, error } = useWorkspaces()
+  const t = useTranslations('forms.workspaces')
 
   if (isLoading) {
-    return <div>Loading workspaces...</div>
+    return <div>Loading...</div>
   }
 
   if (error) {
@@ -28,10 +30,10 @@ export function WorkspacesList() {
       <Card>
         <CardContent className="text-center py-12">
           <H3 size="h4" className="mb-2">
-            No workspaces yet
+            {t('noWorkspaces')}
           </H3>
           <P className="text-muted-foreground mb-4">
-            Create your first workspace to start managing forms
+            {t('noWorkspacesDescription')}
           </P>
         </CardContent>
       </Card>

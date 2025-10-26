@@ -14,6 +14,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
   const currentLocale = useLocale()
   const t = useTranslations()
+  const tForms = useTranslations('forms.navigation')
 
   const handleLocaleChange = (locale: string) => {
     if (!pathname) return
@@ -42,7 +43,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           : [
               { href: '/', label: 'Home', icon: 'lucide:Home' },
               { href: '/chat', label: 'LIA', icon: 'lucide:Bot' },
-              { href: '/dashboard', label: 'Forms', icon: 'lucide:FileText' },
+              { href: '/dashboard', label: tForms('workspaces'), icon: 'lucide:Briefcase' },
             ]
       }
       headerLeftContent={
@@ -71,7 +72,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           <Button asChild variant={'ghost'} size={'sm'}>
             <Link href="/dashboard">
               <Icon name="lucide:Briefcase" size={16} />
-              Forms
+              {tForms('workspaces')}
             </Link>
           </Button>
         </Div>

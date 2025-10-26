@@ -6,6 +6,7 @@ import { ProjectDetails } from '@/components/forms/ProjectDetails'
 import { FormInstancesList } from '@/components/forms/FormInstancesList'
 import { CreateFormInstanceDialog } from '@/components/forms/CreateFormInstanceDialog'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { useTranslations } from 'next-intl'
 
 interface PageProps {
   params: Promise<{ slug: string; id: string; locale: string }>
@@ -13,6 +14,7 @@ interface PageProps {
 
 export default function ProjectDetailPage({ params }: PageProps) {
   const { slug, id } = use(params)
+  const t = useTranslations('forms.projects')
 
   return (
     <ProtectedRoute>
@@ -24,10 +26,10 @@ export default function ProjectDetailPage({ params }: PageProps) {
         <div className="flex items-center justify-between mb-6 mt-8">
           <div>
             <H1 size="h3" className="mb-1">
-              Form Instances
+              {t('formInstances')}
             </H1>
             <P className="text-sm text-muted-foreground">
-              Forms filled for this project
+              {t('formInstancesDescription')}
             </P>
           </div>
 

@@ -5,17 +5,20 @@ import { WorkspacesList } from '@/components/forms/WorkspacesList'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Card, CardContent, CardHeader, H1, P, Section } from '@ezstart/ui/components'
 import { Suspense } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function DashboardPage() {
+  const t = useTranslations('forms.workspaces')
+
   return (
     <ProtectedRoute>
       <Section size={'xl'} className="mt-20">
         <div>
           <H1 size="h2" className="mb-2">
-            📋 Workspaces
+            📋 {t('title')}
           </H1>
           <P className="text-muted-foreground">
-            Your form workspaces - AI-powered intelligent form filling
+            {t('description')}
           </P>
         </div>
 

@@ -1,4 +1,5 @@
 'use client'
+import { useTranslations } from 'next-intl'
 
 import { useProjects } from '@/hooks/useProjects'
 import { Card, CardContent, H3, P, Badge, Button } from '@ezstart/ui/components'
@@ -10,6 +11,7 @@ interface ProjectsListProps {
 
 export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
   const { data, isLoading, error } = useProjects('demo-user-1')
+  const t = useTranslations('forms.projects')
 
   if (isLoading) {
     return <div>Loading projects...</div>
@@ -32,10 +34,10 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
       <Card>
         <CardContent className="text-center py-12">
           <H3 size="h4" className="mb-2">
-            No projects yet
+            {t('noProjects')}
           </H3>
           <P className="text-muted-foreground mb-4">
-            Create your first project to start filling forms
+            {t('noProjectsDescription')}
           </P>
         </CardContent>
       </Card>
