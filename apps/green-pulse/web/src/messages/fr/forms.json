@@ -1,0 +1,52 @@
+{
+  "navigation": {
+    "workspaces": "Espaces de travail",
+    "forms": "Formulaires",
+    "dashboard": "Tableau de bord"
+  },
+  "workspaces": {
+    "title": "Espaces de travail",
+    "description": "Vos espaces de formulaires - Remplissage intelligent avec IA",
+    "noWorkspaces": "Aucun espace de travail",
+    "noWorkspacesDescription": "Créez votre premier espace pour commencer à gérer vos formulaires",
+    "createWorkspace": "Créer un espace",
+    "members": "membres",
+    "projects": "projets"
+  },
+  "projects": {
+    "title": "Projets",
+    "description": "Gérez vos dossiers d'inspection et formulaires",
+    "noProjects": "Aucun projet",
+    "noProjectsDescription": "Créez votre premier projet pour commencer à remplir des formulaires",
+    "createProject": "Créer un projet",
+    "formInstances": "Instances de formulaires",
+    "formInstancesDescription": "Formulaires remplis pour ce projet"
+  },
+  "forms": {
+    "title": "Formulaires",
+    "createForm": "Nouveau formulaire",
+    "noForms": "Aucun formulaire",
+    "noFormsDescription": "Créez votre première instance pour commencer à saisir des données",
+    "fillForm": "Remplir le formulaire",
+    "submitForm": "Soumettre",
+    "submitting": "Soumission...",
+    "saving": "Sauvegarde...",
+    "draft": "Brouillon",
+    "inProgress": "En cours",
+    "submitted": "Soumis",
+    "archived": "Archivé"
+  },
+  "chat": {
+    "placeholder": "Tapez votre message ici...",
+    "send": "Envoyer",
+    "aiAssistant": "Assistant IA",
+    "chatMode": "Mode chat",
+    "vocalMode": "Mode vocal",
+    "manualMode": "Mode manuel"
+  },
+  "auth": {
+    "loginRequired": "Veuillez vous connecter pour accéder aux espaces de travail",
+    "loading": "Chargement...",
+    "redirecting": "Redirection vers la connexion..."
+  }
+}

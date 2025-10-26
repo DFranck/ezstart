@@ -70,7 +70,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
           </Button>
           <Button asChild variant={'ghost'} size={'sm'}>
             <Link href="/dashboard">
-              <Icon name="lucide:FileText" size={16} />
+              <Icon name="lucide:Briefcase" size={16} />
               Forms
             </Link>
           </Button>

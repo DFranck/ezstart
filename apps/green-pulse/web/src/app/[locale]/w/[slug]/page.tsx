@@ -1,37 +1,42 @@
-import { Suspense } from 'react'
+'use client'
+
+import { Suspense, use } from 'react'
 import { H1, P, Card, CardContent } from '@ezstart/ui/components'
 import { ProjectsList } from '@/components/forms/ProjectsList'
 import { CreateProjectDialog } from '@/components/forms/CreateProjectDialog'
 import { WorkspaceBreadcrumbs } from '@/components/forms/WorkspaceBreadcrumbs'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-export default async function WorkspacePage({ params }: PageProps) {
-  const { slug } = await params
+export default function WorkspacePage({ params }: PageProps) {
+  const { slug } = use(params)
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <WorkspaceBreadcrumbs workspaceSlug={slug} />
+    <ProtectedRoute>
+      <div className="container mx-auto py-8 px-4">
+        <WorkspaceBreadcrumbs workspaceSlug={slug} />
 
-      <div className="flex items-center justify-between mb-8 mt-4">
-        <div>
-          <H1 size="h2" className="mb-2">
-            Projects
-          </H1>
-          <P className="text-muted-foreground">
-            Manage your inspection cases and forms
-          </P>
+        <div className="flex items-center justify-between mb-8 mt-4">
+          <div>
+            <H1 size="h2" className="mb-2">
+              Projects
+            </H1>
+            <P className="text-muted-foreground">
+              Manage your inspection cases and forms
+            </P>
+          </div>
+
+          <CreateProjectDialog workspaceSlug={slug} />
         </div>
 
-        <CreateProjectDialog workspaceSlug={slug} />
+        <Suspense fallback={<ProjectsListSkeleton />}>
+          <ProjectsList workspaceSlug={slug} />
+        </Suspense>
       </div>
-
-      <Suspense fallback={<ProjectsListSkeleton />}>
-        <ProjectsList workspaceSlug={slug} />
-      </Suspense>
-    </div>
+    </ProtectedRoute>
   )
 }
 

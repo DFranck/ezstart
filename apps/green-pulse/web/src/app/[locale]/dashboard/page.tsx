@@ -1,17 +1,15 @@
-import { Suspense } from 'react'
-import { H1, P, Card, CardContent, CardHeader } from '@ezstart/ui/components'
-import { WorkspacesList } from '@/components/forms/WorkspacesList'
-import { CreateWorkspaceDialog } from '@/components/forms/CreateWorkspaceDialog'
+'use client'
 
-export const metadata = {
-  title: 'Dashboard - GreenPulse Forms',
-  description: 'Manage your workspaces and intelligent forms',
-}
+import { CreateWorkspaceDialog } from '@/components/forms/CreateWorkspaceDialog'
+import { WorkspacesList } from '@/components/forms/WorkspacesList'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { Card, CardContent, CardHeader, H1, P, Section } from '@ezstart/ui/components'
+import { Suspense } from 'react'
 
 export default function DashboardPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
+    <ProtectedRoute>
+      <Section size={'xl'} className="mt-20">
         <div>
           <H1 size="h2" className="mb-2">
             📋 Workspaces
@@ -22,12 +20,12 @@ export default function DashboardPage() {
         </div>
 
         <CreateWorkspaceDialog />
-      </div>
+      </Section>
 
       <Suspense fallback={<WorkspacesListSkeleton />}>
         <WorkspacesList />
       </Suspense>
-    </div>
+    </ProtectedRoute>
   )
 }
 

@@ -1,0 +1,52 @@
+{
+  "navigation": {
+    "workspaces": "Workspaces",
+    "forms": "Forms",
+    "dashboard": "Dashboard"
+  },
+  "workspaces": {
+    "title": "Workspaces",
+    "description": "Your form workspaces - AI-powered intelligent form filling",
+    "noWorkspaces": "No workspaces yet",
+    "noWorkspacesDescription": "Create your first workspace to start managing forms",
+    "createWorkspace": "Create Workspace",
+    "members": "members",
+    "projects": "projects"
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Manage your inspection cases and forms",
+    "noProjects": "No projects yet",
+    "noProjectsDescription": "Create your first project to start filling forms",
+    "createProject": "Create Project",
+    "formInstances": "Form Instances",
+    "formInstancesDescription": "Forms filled for this project"
+  },
+  "forms": {
+    "title": "Forms",
+    "createForm": "New Form",
+    "noForms": "No forms yet",
+    "noFormsDescription": "Create your first form instance to start filling data",
+    "fillForm": "Fill Form",
+    "submitForm": "Submit Form",
+    "submitting": "Submitting...",
+    "saving": "Saving...",
+    "draft": "Draft",
+    "inProgress": "In Progress",
+    "submitted": "Submitted",
+    "archived": "Archived"
+  },
+  "chat": {
+    "placeholder": "Type your message here...",
+    "send": "Send",
+    "aiAssistant": "AI Assistant",
+    "chatMode": "Chat Mode",
+    "vocalMode": "Vocal Mode",
+    "manualMode": "Manual Mode"
+  },
+  "auth": {
+    "loginRequired": "Please log in to access workspaces",
+    "loading": "Loading...",
+    "redirecting": "Redirecting to login..."
+  }
+}

@@ -1,39 +1,44 @@
-import { Suspense } from 'react'
+'use client'
+
+import { Suspense, use } from 'react'
 import { H1, P, Card, CardContent } from '@ezstart/ui/components'
 import { ProjectDetails } from '@/components/forms/ProjectDetails'
 import { FormInstancesList } from '@/components/forms/FormInstancesList'
 import { CreateFormInstanceDialog } from '@/components/forms/CreateFormInstanceDialog'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 interface PageProps {
   params: Promise<{ slug: string; id: string; locale: string }>
 }
 
-export default async function ProjectDetailPage({ params }: PageProps) {
-  const { slug, id } = await params
+export default function ProjectDetailPage({ params }: PageProps) {
+  const { slug, id } = use(params)
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Suspense fallback={<div className="h-6 w-64 bg-muted rounded mb-4 animate-pulse" />}>
-        <ProjectDetails projectId={id} workspaceSlug={slug} />
-      </Suspense>
+    <ProtectedRoute>
+      <div className="container mx-auto py-8 px-4">
+        <Suspense fallback={<div className="h-6 w-64 bg-muted rounded mb-4 animate-pulse" />}>
+          <ProjectDetails projectId={id} workspaceSlug={slug} />
+        </Suspense>
 
-      <div className="flex items-center justify-between mb-6 mt-8">
-        <div>
-          <H1 size="h3" className="mb-1">
-            Form Instances
-          </H1>
-          <P className="text-sm text-muted-foreground">
-            Forms filled for this project
-          </P>
+        <div className="flex items-center justify-between mb-6 mt-8">
+          <div>
+            <H1 size="h3" className="mb-1">
+              Form Instances
+            </H1>
+            <P className="text-sm text-muted-foreground">
+              Forms filled for this project
+            </P>
+          </div>
+
+          <CreateFormInstanceDialog projectId={id} workspaceSlug={slug} />
         </div>
 
-        <CreateFormInstanceDialog projectId={id} workspaceSlug={slug} />
+        <Suspense fallback={<FormsListSkeleton />}>
+          <FormInstancesList projectId={id} workspaceSlug={slug} />
+        </Suspense>
       </div>
-
-      <Suspense fallback={<FormsListSkeleton />}>
-        <FormInstancesList projectId={id} workspaceSlug={slug} />
-      </Suspense>
-    </div>
+    </ProtectedRoute>
   )
 }
 
