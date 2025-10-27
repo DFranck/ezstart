@@ -1,4 +1,6 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Generic Library",
   "extends": "./base.json",
   "compilerOptions": {
     "outDir": "./dist",

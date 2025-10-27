@@ -3,11 +3,9 @@
   "display": "React Library",
   "extends": "./base.json",
   "compilerOptions": {
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "types": ["react", "react/jsx-runtime"],
-    "lib": ["DOM", "ES2022", "DOM.Iterable"],
-    "module": "ES2022",
-    "moduleResolution": "bundler",
     "composite": true,
     "declaration": true,
     "declarationMap": true
