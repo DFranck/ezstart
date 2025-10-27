@@ -37,12 +37,12 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       mobileLogoSrc="/logo.png"
       mobileLogoAlt="Green Pulse Logo"
       mobileLogoHref="/"
-      bottomNavigation={
+      navLinks={
         isLiaPage
-          ? undefined
+          ? []
           : [
               { href: '/', label: 'Home', icon: 'lucide:Home' },
-              { href: '/chat', label: 'LIA', icon: 'lucide:Bot' },
+              { href: '/chat', label: 'Chat', icon: 'lucide:Bot' },
               {
                 href: '/dashboard',
                 label: tForms('navigation.workspaces'),
@@ -58,28 +58,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
             <H1 size={'sm'}>Green Pulse</H1>
           </Link>
         </Button>
-      }
-      headerCenterContent={
-        <Div className="hidden md:flex gap-2">
-          <Button asChild variant={'ghost'} size={'sm'}>
-            <Link href="/">
-              <Icon name="lucide:Home" size={16} />
-              Home
-            </Link>
-          </Button>
-          <Button asChild variant={'ghost'} size={'sm'}>
-            <Link href="/chat">
-              <Icon name="lucide:Bot" size={16} />
-              Chat
-            </Link>
-          </Button>
-          <Button asChild variant={'ghost'} size={'sm'}>
-            <Link href="/dashboard">
-              <Icon name="lucide:Briefcase" size={16} />
-              {tForms('navigation.workspaces')}
-            </Link>
-          </Button>
-        </Div>
       }
       headerRightContent={
         <Div>
