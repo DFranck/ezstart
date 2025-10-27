@@ -1,7 +1,7 @@
 'use client'
 
-import { pdf, type DocumentProps } from '@react-pdf/renderer'
-import React, { useState } from 'react'
+import { pdf } from '@react-pdf/renderer'
+import { useState } from 'react'
 
 interface UseGeneratePDFOptions {
   filename?: string
@@ -16,6 +16,33 @@ interface UseGeneratePDFReturn {
   error: Error | null
 }
 
+/**
+ * Generic hook for generating and downloading PDF documents.
+ *
+ * Uses @react-pdf/renderer to convert React components into PDF files.
+ *
+ * @param options - Configuration options
+ * @param options.filename - Default filename for downloads (default: 'document.pdf')
+ * @param options.onSuccess - Callback triggered after successful PDF generation
+ * @param options.onError - Callback triggered if PDF generation fails
+ *
+ * @returns Object with generatePDF, downloadPDF functions, loading state, and error
+ *
+ * @example
+ * const { downloadPDF, isGenerating, error } = useGeneratePDF({
+ *   filename: 'report.pdf',
+ *   onSuccess: () => toast.success('PDF downloaded'),
+ *   onError: (err) => toast.error(err.message),
+ * })
+ *
+ * // Download PDF with custom filename
+ * await downloadPDF(<MyPDFDocument />, 'custom-name.pdf')
+ *
+ * @example
+ * // Generate PDF blob without downloading
+ * const { generatePDF } = useGeneratePDF()
+ * await generatePDF(<MyPDFDocument />)
+ */
 export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGeneratePDFReturn {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -72,28 +99,6 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
   return {
     generatePDF,
     downloadPDF,
-    isGenerating,
-    error,
-  }
-}
-
-// Hook spécialisé pour les factures
-export function useInvoicePDF() {
-  const { downloadPDF, isGenerating, error } = useGeneratePDF({
-    onSuccess: () => console.log('PDF generated successfully'),
-    onError: (error) => console.error('PDF generation failed:', error),
-  })
-
-  const downloadInvoicePDF = async (
-    component: React.ReactElement<DocumentProps>,
-    documentNumber: string
-  ) => {
-    const filename = `invoice-${documentNumber}.pdf`
-    await downloadPDF(component, filename)
-  }
-
-  return {
-    downloadInvoicePDF,
     isGenerating,
     error,
   }
