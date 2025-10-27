@@ -2,7 +2,7 @@
 import { routing } from '@/i18n/routing'
 import { LoginButton } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { Button, ClientLayout, Div, H1, Icon, LocaleSwitcher } from '@ezstart/ui/components'
+import { Button, ClientLayout, Div, H1, LocaleSwitcher } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -52,10 +52,22 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
       }
       headerLeftContent={
         <Button asChild variant={'ghost'}>
-          <Link href="/">
-            <Image src="/logo.png" alt="Logo" width={32} height={32} className="mr-2" />
-            {/* <Icon name="lucide:Leaf" size={16} fontSize={16} /> */}
-            <H1 size={'sm'}>Green Pulse</H1>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="animate-pulse"
+              style={{
+                filter:
+                  'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
+              }}
+            />
+            <H1 size={'sm'} className="flex items-baseline">
+              <span>GreenPulse</span>
+              <span className="font-gugi">.AI</span>
+            </H1>
           </Link>
         </Button>
       }

@@ -6,6 +6,9 @@
 
 @import 'tw-animate-css';
 
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
+
 /* Generic animations */
 @import './animations/skeleton.css';
 @import './animations/gradient.css';
@@ -209,4 +212,9 @@
         350% 50%;
     }
   }
+}
+
+/* Custom font utilities */
+@utility font-gugi {
+  font-family: 'Gugi', sans-serif;
 }

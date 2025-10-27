@@ -76,7 +76,17 @@ export default function HomePage() {
       >
         {' '}
         <Div layout={'row'}>
-          <Image src="/logo.png" alt="Logo" width={60} height={60} className="mr-2" />
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={60}
+            height={60}
+            className="animate-pulse"
+            style={{
+              filter:
+                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
+            }}
+          />
 
           <H1 className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
             {t('hero.title')}
