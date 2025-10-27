@@ -159,6 +159,141 @@ Complete query schema for paginated list endpoints.
 - Date range filtering
 - OpenAPI documentation ready
 
+## 📄 OpenAPI Documentation Generation
+
+All schemas exported from this package include OpenAPI metadata for automatic API documentation.
+
+### Basic Usage with @ezstart/express-core
+
+The easiest way to generate OpenAPI documentation is using `@ezstart/express-core`:
+
+```typescript
+import { createApp, startServer, Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { z, mongoIdSchema, listingQuerySchema } from '@ezstart/types'
+
+const registry = new OpenAPIRegistry()
+const router = Router()
+
+// Define route with OpenAPI metadata
+registry.registerPath({
+  method: 'get',
+  path: '/api/items',
+  summary: 'List items with pagination',
+  request: {
+    query: listingQuerySchema,
+  },
+  responses: {
+    200: {
+      description: 'List of items',
+      content: {
+        'application/json': {
+          schema: z.object({
+            items: z.array(z.object({
+              _id: mongoIdSchema,
+              name: z.string(),
+            })),
+            total: z.number(),
+          }),
+        },
+      },
+    },
+  },
+})
+
+router.get('/items', async (req, res) => {
+  const query = listingQuerySchema.parse(req.query)
+  // ... implementation
+})
+
+// Start server with Swagger UI at /docs
+const app = createApp()
+app.use('/api', router)
+startServer(app, {
+  routes: router,
+  registries: [registry],
+  serviceName: 'My API',
+  port: 5000,
+})
+// Swagger UI available at http://localhost:5000/docs
+```
+
+### Manual OpenAPI Generation
+
+You can also generate OpenAPI specs manually:
+
+```typescript
+import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi'
+import { z, mongoIdSchema } from '@ezstart/types'
+
+const registry = new OpenAPIRegistry()
+
+// Register schemas
+registry.register('Item', z.object({
+  _id: mongoIdSchema,
+  name: z.string().describe('Item name'),
+  createdAt: z.string().datetime().describe('Creation timestamp'),
+}))
+
+// Generate OpenAPI document
+const generator = new OpenApiGeneratorV3(registry.definitions)
+const openApiDoc = generator.generateDocument({
+  openapi: '3.0.0',
+  info: {
+    title: 'My API',
+    version: '1.0.0',
+  },
+  servers: [
+    { url: 'http://localhost:5000', description: 'Local development' },
+  ],
+})
+
+console.log(JSON.stringify(openApiDoc, null, 2))
+```
+
+### OpenAPI Output Example
+
+When you use schemas from `@ezstart/types`, the generated OpenAPI spec includes:
+
+```json
+{
+  "components": {
+    "schemas": {
+      "ListingQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "default": 1,
+            "description": "Page number for pagination (min: 1)"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "description": "Number of items per page (min: 1, max: 100)"
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include soft-deleted items in the results (true/false)"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Benefits
+
+- ✅ **Single Source of Truth** - Schema = Validation + Types + Documentation
+- ✅ **No Duplication** - Write schema once, get OpenAPI for free
+- ✅ **Type Safety** - TypeScript types match OpenAPI spec exactly
+- ✅ **Auto Swagger UI** - Interactive documentation with `@ezstart/express-core`
+- ✅ **Client Generation** - Use OpenAPI spec to generate API clients
+
 ## Applications Using This Package
 
 **APIs:**
