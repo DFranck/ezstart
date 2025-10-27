@@ -6,12 +6,11 @@
  * License: Open Font License
  *
  * Usage: className="font-gugi"
+ *
+ * Note: Font is imported in globals.css (must be at top for Tailwind 4)
  */
 
-/* Import from Google Fonts (auto-manages versions) */
-@import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
-
-/* Utility class */
+/* Utility class - uses CSS variable from next/font/google */
 .font-gugi {
-  font-family: 'Gugi', sans-serif;
+  font-family: var(--font-gugi), 'Gugi', system-ui, sans-serif;
 }

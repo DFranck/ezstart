@@ -7,6 +7,9 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getMessages } from 'next-intl/server'
 import ClientLayout from './client-layout'
 import Script from 'next/script'
+import { Gugi } from 'next/font/google'
+
+const gugi = Gugi({ weight: '400', subsets: ['latin'], variable: '--font-gugi' })
 
 export const metadata = createMetadata({
   appName: 'GreenPulse',
@@ -46,7 +49,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning className={gugi.variable}>
       <body>
         <Script id="json-ld"
           type="application/ld+json"
