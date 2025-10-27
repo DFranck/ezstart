@@ -4,4 +4,5 @@ export * from './company.js';
 export * from './enums/index.js';
 export * from './mongo-id.js';
 export * from './payment-method.js';
+export * from './pdf/index.js';
 export * from './user.js';

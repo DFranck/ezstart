@@ -6,13 +6,14 @@
   "private": true,
   "scripts": {
     "dev": "node ../../../packages/config/bin/dev-server.js",
-    "build": "pnpm --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme --filter @ezbill/types build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme --filter @ezbill/types --filter @ezbill/templates build && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezbill/templates": "workspace:*",
     "@ezbill/types": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",

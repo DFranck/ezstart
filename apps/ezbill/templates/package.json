@@ -1,0 +1,22 @@
+{
+  "name": "@ezbill/templates",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.1.7",
+    "@ezbill/types": "workspace:*",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "@types/react": "^19.1.12",
+    "typescript": "^5.7.3"
+  }
+}

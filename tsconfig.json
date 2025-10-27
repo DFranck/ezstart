@@ -22,6 +22,7 @@
 
     // App-specific types/utils
     { "path": "./apps/ezbill/types" },
+    { "path": "./apps/ezbill/templates" },
     { "path": "./apps/tower-defense/types" },
     { "path": "./apps/tower-defense/config" },
     { "path": "./apps/tower-defense/utils" },

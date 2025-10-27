@@ -1,0 +1,12 @@
+{
+  "extends": "@ezstart/typescript-config/react-library.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../types" }
+  ]
+}

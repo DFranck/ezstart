@@ -1,5 +1,5 @@
 import { Client, Company, Invoice, PaymentMethod, Receipt } from '@ezbill/types'
-import { type PDFInvoiceData, type PDFReceiptData } from '@ezstart/ui/templates'
+import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
 
 /** Convertit les données pour le template PDF Invoice */
 export function convertToInvoicePDFData(

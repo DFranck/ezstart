@@ -4,7 +4,7 @@ import { useBillingContext } from '@/contexts/billing-context'
 import { getUserId } from '@/utils/get-user-id'
 import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import { InvoicePDF, ReceiptPDF } from '@ezstart/ui/templates'
+import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import { callApi } from '@/utils/api'
 import React from 'react'
 

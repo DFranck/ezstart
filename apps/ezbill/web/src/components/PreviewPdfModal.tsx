@@ -5,12 +5,8 @@ import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-co
 import { Invoice, Quote, Receipt } from '@ezbill/types'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@ezstart/ui/hooks'
-import {
-  InvoicePDF,
-  ReceiptPDF,
-  type PDFInvoiceData,
-  type PDFReceiptData,
-} from '@ezstart/ui/templates'
+import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
 import React, { useState } from 'react'
 
 /** Discriminated union for preview */

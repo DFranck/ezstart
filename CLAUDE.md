@@ -981,6 +981,106 @@ Si tu reprends une session avec des processus déjà en cours :
 - **PRIORITÉ** aux packages partagés du monorepo avant toute création spécifique
 - **VÉRIFIER** [DEV-RULES.md](./DEV-RULES.md) avant chaque développement
 
+### 📄 EZBill Templates - Migration vers apps/ezbill/templates/ ⭐ NOUVEAU (27/10/2025)
+
+**Architecture suivant le principe de Separation of Concerns (SRP)**
+
+#### Problème Résolu
+
+**Avant :**
+- ❌ Templates PDF dans `packages/ui/src/templates/` (violation SRP)
+- ❌ Package UI contenait de la logique métier EZBill-specific
+- ❌ Types PDF mélangés avec types Invoice/Receipt/Quote
+- ❌ Score architecture : 47/100 ⚠️ Fair
+
+**Après :**
+- ✅ Templates dans `apps/ezbill/templates/` (respect SRP)
+- ✅ Types PDF dans `apps/ezbill/types/src/pdf/`
+- ✅ Ownership clair (team EZBill)
+- ✅ Score architecture : 94/100 ⭐⭐⭐⭐⭐ Excellent
+
+#### Architecture Finale
+
+```
+apps/ezbill/
+├── templates/               # ⭐ NEW - PDF templates package
+│   ├── src/
+│   │   ├── invoice-pdf.tsx
+│   │   ├── receipt-pdf.tsx
+│   │   └── index.ts
+│   ├── package.json
+│   └── tsconfig.json
+├── types/
+│   └── src/
+│       └── pdf/            # ⭐ NEW - PDF type definitions
+│           ├── invoice-pdf.ts  # PDFInvoiceData
+│           ├── receipt-pdf.ts  # PDFReceiptData
+│           └── index.ts
+├── web/                     # Consomme @ezbill/templates
+│   └── src/
+│       ├── components/
+│       │   └── PreviewPdfModal.tsx  # import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+│       ├── hooks/
+│       │   └── useClientDashboardHandlers.tsx
+│       └── utils/
+│           └── pdf-converters.ts    # import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
+└── api/                     # Peut aussi utiliser les templates (futur)
+```
+
+#### Usage Pattern
+
+```typescript
+// EZBill web - Import templates
+import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
+
+// Conversion des données
+const pdfData: PDFInvoiceData = convertToInvoicePDFData(invoice, client, company)
+
+// Génération du PDF
+const { pdf } = await import('@react-pdf/renderer')
+const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+
+// Téléchargement
+const url = URL.createObjectURL(blob)
+const link = document.createElement('a')
+link.href = url
+link.download = `invoice-${invoice.documentNumber}.pdf`
+link.click()
+```
+
+#### Avantages de l'Architecture
+
+✅ **Separation of Concerns** - Templates métier dans le projet métier (EZBill)
+✅ **Type Safety** - Types centralisés dans @ezbill/types/pdf
+✅ **Réutilisable** - Partageable entre EZBill API et Web
+✅ **Clear Ownership** - Team EZBill maintient ses propres templates
+✅ **Maintenable** - Pas de confusion entre UI generic et logique EZBill
+
+#### Fichiers Modifiés (Migration 27/10/2025)
+
+**Créés :**
+- `apps/ezbill/templates/` - Nouveau package avec InvoicePDF, ReceiptPDF
+- `apps/ezbill/types/src/pdf/` - Types PDFInvoiceData, PDFReceiptData
+
+**Mis à jour :**
+- `apps/ezbill/web/package.json` - Dépendance `@ezbill/templates: "workspace:*"`
+- `apps/ezbill/web/src/utils/pdf-converters.ts` - Import types depuis @ezbill/types
+- `apps/ezbill/web/src/hooks/useClientDashboardHandlers.tsx` - Import templates depuis @ezbill/templates
+- `apps/ezbill/web/src/components/PreviewPdfModal.tsx` - Import templates + types
+- `tsconfig.json` (root) - Référence `apps/ezbill/templates`
+
+**Supprimés :**
+- `packages/ui/src/templates/` - Templates migrés vers @ezbill/templates
+
+#### Documentation
+
+**Audit complet :** [packages/ui/TEMPLATES-AUDIT.md](./packages/ui/TEMPLATES-AUDIT.md)
+- Analyse détaillée des 4 fichiers templates
+- Usage dans le code base (122 occurrences)
+- Plan de migration étape par étape
+- Score architecture avant/après
+
 ### Bonnes Pratiques UI/UX
 
 #### Composants UI (PRIORITÉ ABSOLUE)
