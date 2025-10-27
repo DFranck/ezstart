@@ -74,7 +74,7 @@ export async function callApi<T = any>(
     // Parse response body
     let data: T | ApiError | null = null
     try {
-      data = await res.json()
+      data = (await res.json()) as T | ApiError
     } catch {
       // Non-JSON response (e.g., 204 No Content)
       data = null

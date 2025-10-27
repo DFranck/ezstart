@@ -265,7 +265,9 @@ export function getCurrentEnvironment(): Environment {
   }
 
   // Client-side: Detect from window.location.hostname
-  if (typeof window !== 'undefined') {
+  // @ts-ignore - window exists in browser context
+  if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
+    // @ts-ignore - window exists in browser context
     const hostname = window.location.hostname
 
     // Production domains
