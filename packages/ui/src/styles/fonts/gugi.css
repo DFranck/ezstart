@@ -1,0 +1,17 @@
+/**
+ * Gugi Font
+ *
+ * A fun, rounded display font perfect for logos and headings
+ * Source: https://fonts.google.com/specimen/Gugi
+ * License: Open Font License
+ *
+ * Usage: className="font-gugi"
+ */
+
+/* Import from Google Fonts (auto-manages versions) */
+@import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
+
+/* Utility class */
+.font-gugi {
+  font-family: 'Gugi', sans-serif;
+}
