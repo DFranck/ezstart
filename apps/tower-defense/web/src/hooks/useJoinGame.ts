@@ -1,7 +1,7 @@
 // hooks/useJoinGame.ts
 'use client'
 
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@/utils/api'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 

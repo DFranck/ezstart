@@ -21,7 +21,7 @@ export function Providers({
   timeZone: string;
 }) {
   return (
-    <AuthProvider appName="asc-tcd">
+    <AuthProvider appName="asc-tcd" useHttpOnlyCookies={true}>
       <NextThemesProvider
         attribute='class'
         defaultTheme='system'

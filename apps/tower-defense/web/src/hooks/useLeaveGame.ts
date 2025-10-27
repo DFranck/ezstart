@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 

@@ -69,7 +69,18 @@ const tokenController = async (req: any, res: any) => {
     const data = req.body as TokenRequest
     console.log('✅ Parsed token request data:', data)
     const token = await AuthService.exchangeCodeForToken(data)
-    
+
+    // ✅ DUAL-MODE: Set httpOnly cookie for apps using httpOnly mode
+    // Frontend will decide whether to use the cookie or the accessToken from response
+    res.cookie('ezauth_token', token.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+    })
+
     res.json({
       success: true,
       ...token
@@ -83,21 +94,30 @@ const tokenController = async (req: any, res: any) => {
   }
 }
 
-// Get current user info
+// Get current user info (DUAL-MODE: supports httpOnly cookie + Authorization header)
 const meController = async (req: any, res: any) => {
   try {
-    const authHeader = req.headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) {
+    // ✅ Try httpOnly cookie first
+    let token = req.cookies?.ezauth_token
+
+    // ✅ Fallback to Authorization header (localStorage mode)
+    if (!token) {
+      const authHeader = req.headers.authorization
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.substring(7)
+      }
+    }
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         error: 'No token provided'
       })
     }
 
-    const token = authHeader.substring(7)
     const payload = await AuthService.verifyToken(token)
     const user = await AuthService.getUserById(payload.userId)
-    
+
     res.json({
       success: true,
       user
@@ -115,7 +135,7 @@ const meController = async (req: any, res: any) => {
 const verifyController = async (req: any, res: any) => {
   try {
     const { token, app } = req.body
-    
+
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -124,7 +144,7 @@ const verifyController = async (req: any, res: any) => {
     }
 
     const payload = await AuthService.verifyToken(token)
-    
+
     // Check app access if specified
     if (app) {
       const hasAccess = await AuthService.checkAppAccess(payload.userId, app)
@@ -135,7 +155,7 @@ const verifyController = async (req: any, res: any) => {
         })
       }
     }
-    
+
     res.json({
       success: true,
       valid: true,
@@ -154,6 +174,52 @@ const verifyController = async (req: any, res: any) => {
       error: error instanceof Error ? error.message : 'Invalid token'
     })
   }
+}
+
+// ✅ NEW: Login with httpOnly cookie (DUAL-MODE)
+const loginCookieController = async (req: any, res: any) => {
+  try {
+    const data = req.body as LoginRequest
+
+    // Get token directly (skip auth code)
+    const authResult = await AuthService.loginWithToken(data)
+
+    // ✅ Set httpOnly cookie
+    res.cookie('ezauth_token', authResult.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+    })
+
+    // Return user info (frontend will store in localStorage for client-side access)
+    res.json({
+      success: true,
+      user: authResult.user
+    })
+  } catch (error) {
+    console.error('Login cookie error:', error)
+    res.status(401).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Login failed'
+    })
+  }
+}
+
+// ✅ NEW: Logout (clear httpOnly cookie)
+const logoutController = async (req: any, res: any) => {
+  // Clear cookie
+  res.clearCookie('ezauth_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+  })
+
+  res.json({ success: true, message: 'Logged out successfully' })
 }
 
 // Define API routes with OpenAPI documentation
@@ -206,6 +272,24 @@ docRouter.post('/verify', verifyController, {
     401: { description: 'Invalid token', schema: errorResponseSchema },
     403: { description: 'No app access', schema: errorResponseSchema }
   }
+})
+
+// ✅ NEW: httpOnly cookie mode endpoints
+docRouter.post('/login-cookie', loginCookieController, {
+  summary: 'Login with httpOnly cookie (dual-mode)',
+  tags: ['Authentication'],
+  bodySchema: loginRequestSchema,
+  responseSchema: userResponseSchema,
+  extraResponses: {
+    401: { description: 'Login failed', schema: errorResponseSchema }
+  }
+})
+
+docRouter.post('/logout', logoutController, {
+  summary: 'Logout and clear httpOnly cookie',
+  tags: ['Authentication'],
+  responseSchema: errorResponseSchema,  // Using for success response too
+  status: 200
 })
 
 export default router

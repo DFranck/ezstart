@@ -80,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ErrorBoundary>
           <ThemeProvider>
-            <AuthProvider appName="tower-defense">
+            <AuthProvider appName="tower-defense" useHttpOnlyCookies={true}>
               <GamesSocketProvider>{children}</GamesSocketProvider>
             </AuthProvider>
           </ThemeProvider>

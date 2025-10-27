@@ -3,7 +3,7 @@
 import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Burger, Button, Dropdown, Icon } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'

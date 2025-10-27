@@ -17,7 +17,7 @@ export function Providers({
   timeZone: string
 }) {
   return (
-    <AuthProvider appName="ezstart">
+    <AuthProvider appName="ezstart" useHttpOnlyCookies={true}>
       <NextThemesProvider
         attribute="class"
         defaultTheme="system"

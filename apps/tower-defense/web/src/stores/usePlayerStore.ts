@@ -1,5 +1,5 @@
 // @/stores/playerStore.ts
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { Player, PlayerResponse } from '@tower-defense/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'

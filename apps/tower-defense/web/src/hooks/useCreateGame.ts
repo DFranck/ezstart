@@ -1,7 +1,7 @@
 // hooks/useCreateGame.ts
 'use client'
 
-import { callApi, runWithFeedback } from '@ezstart/ui/utils'
+import { callApi, runWithFeedback } from '@/utils/api'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

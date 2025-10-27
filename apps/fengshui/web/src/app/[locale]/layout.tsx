@@ -54,7 +54,7 @@ export default async function RootLayout({
         />
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
-            <AuthProvider appName="fengshui">
+            <AuthProvider appName="fengshui" useHttpOnlyCookies={true}>
               <PayProvider appName="fengshui">
                 <ClientLayout>{children}</ClientLayout>
               </PayProvider>

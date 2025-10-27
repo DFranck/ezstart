@@ -11,6 +11,7 @@
     // Core packages (ordre de dépendance)
     { "path": "./packages/types" },
     { "path": "./packages/logger" },
+    { "path": "./packages/fetch-client" },
 
     // Infrastructure packages
     { "path": "./packages/express-core" },

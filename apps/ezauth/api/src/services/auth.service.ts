@@ -77,6 +77,52 @@ export class AuthService {
     return this.generateAuthCode(user._id!.toString(), data.app, data.redirect_uri)
   }
 
+  // ✅ NEW: Login with direct token (httpOnly cookie mode)
+  static async loginWithToken(data: LoginRequest): Promise<AuthToken> {
+    const AuthUserModel = await getAuthUserModel()
+
+    // Find user by email OR username
+    const user = await AuthUserModel.findOne({
+      $or: [
+        { email: data.email },
+        { username: data.email }
+      ]
+    })
+
+    if (!user) {
+      throw new Error('Invalid credentials')
+    }
+
+    // Check password
+    const isValidPassword = await user.comparePassword(data.password)
+    if (!isValidPassword) {
+      throw new Error('Invalid credentials')
+    }
+
+    // Check if user has access to the app
+    if (!user.apps.includes(data.app)) {
+      user.apps.push(data.app)
+      await user.save()
+    }
+
+    // Generate JWT token directly (skip auth code)
+    const payload = {
+      userId: user._id!.toString(),
+      email: user.email,
+      username: user.username,
+      apps: user.apps
+    }
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+
+    return {
+      access_token: token,
+      token_type: 'Bearer',
+      expires_in: 7 * 24 * 60 * 60, // 7 days in seconds
+      user: user.toAuthUser(),
+    }
+  }
+
   // Exchange code for token
   static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
     const AuthCodeModel = await getAuthCodeModel()

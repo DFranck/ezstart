@@ -1,4 +1,4 @@
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { notFound } from 'next/navigation'
 
 export default async function PostGamePage(props: { params: Promise<{ gameId: string }> }) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useGameState } from '@/stores/useGameState'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { notFound, useParams } from 'next/navigation'
 
 import { Div } from '@ezstart/ui/components'

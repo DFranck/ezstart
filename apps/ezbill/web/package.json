@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "node ../../../packages/config/bin/dev-server.js",
-    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme --filter @ezbill/types build && next build",
+    "build": "pnpm --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme --filter @ezbill/types build && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -16,6 +16,7 @@
     "@ezbill/types": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/fetch-client": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",

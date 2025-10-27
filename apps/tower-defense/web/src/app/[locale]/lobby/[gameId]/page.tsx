@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@ezstart/logger'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import { LeaveGameButton } from '../../../../components/LeaveGameButton'
 import { LobbyWrapper } from './LobbyWrapper'
 import { useEffect, useState } from 'react'

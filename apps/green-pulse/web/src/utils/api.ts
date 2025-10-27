@@ -1,11 +1,11 @@
 /**
- * GreenPulse-specific API wrapper that automatically uses @ezstart/config
+ * GreenPulse-specific API wrapper that automatically uses @ezstart/fetch-client
  */
-import { callApi as baseCallApi, type CallApiOptions } from '@ezstart/ui/utils'
+import { callApi as baseCallApi, type CallApiOptions } from '@ezstart/fetch-client'
 
 // Re-export other utils unchanged
 export { runWithFeedback } from '@ezstart/ui/utils'
-export type { ApiResponse, ApiError, HttpMethod } from '@ezstart/ui/utils'
+export type { ApiResponse, ApiError, HttpMethod } from '@ezstart/fetch-client'
 
 /**
  * Wrapper around callApi that automatically sets appName to 'green-pulse'

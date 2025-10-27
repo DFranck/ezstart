@@ -2,7 +2,7 @@
 
 import { useGamesSocketInstance } from '@/contexts/GamesSocketContext'
 import { Button } from '@ezstart/ui/components'
-import { callApi } from '@ezstart/ui/utils'
+import { callApi } from '@/utils/api'
 import type { InGamePlayer } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'

@@ -61,6 +61,7 @@ export class AuthClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // ✅ Support httpOnly cookies
       body: JSON.stringify({
         code,
         app: this.config.appName,
@@ -82,12 +83,39 @@ export class AuthClient {
     }
   }
 
-  // Get current user info
-  async getCurrentUser(accessToken: string): Promise<AuthUser> {
-    const response = await fetch(`${this.config.baseURL}/me`, {
+  // ✅ NEW: Login with httpOnly cookie (direct, no redirect)
+  async loginWithCookie(email: string, password: string): Promise<AuthUser> {
+    const response = await fetch(`${this.config.baseURL}/login-cookie`, {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
+      credentials: 'include', // ✅ Required for httpOnly cookies
+      body: JSON.stringify({
+        email,
+        password,
+        app: this.config.appName,
+      }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Login failed')
+    }
+
+    return result.user
+  }
+
+  // Get current user info (dual-mode: httpOnly cookie OR accessToken)
+  async getCurrentUser(accessToken?: string): Promise<AuthUser> {
+    const response = await fetch(`${this.config.baseURL}/me`, {
+      headers: accessToken
+        ? {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        : {},
+      credentials: 'include', // ✅ Support httpOnly cookies
     })
 
     const result = await response.json()
@@ -107,6 +135,7 @@ export class AuthClient {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // ✅ Support httpOnly cookies
         body: JSON.stringify({
           token: accessToken,
           app: this.config.appName,
@@ -117,6 +146,19 @@ export class AuthClient {
       return result.success && result.valid
     } catch (error) {
       return false
+    }
+  }
+
+  // ✅ NEW: Logout and clear httpOnly cookie
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${this.config.baseURL}/logout`, {
+        method: 'POST',
+        credentials: 'include', // ✅ Required to clear httpOnly cookie
+      })
+    } catch (error) {
+      // Logout can fail silently - we still clear local state
+      console.error('Logout API call failed:', error)
     }
   }
 }

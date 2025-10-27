@@ -3,7 +3,7 @@
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { Icon, Input, Section, Span } from '@ezstart/ui/components'
-import { runWithFeedback } from '@ezstart/ui/utils'
+import { runWithFeedback } from '@/utils/api'
 import { useEffect, useRef, useState } from 'react'
 import { LoadingButton } from './LoadingButton'
 

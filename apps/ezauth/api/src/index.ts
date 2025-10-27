@@ -9,11 +9,23 @@ import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
 import { getOAuthAccountModel } from './models/oauth-account.js'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import { createCorsConfig } from '@ezstart/config/cors'
 
 const PORT = getApiPort('ezauth')
 
 // Create app with CORS configuration from @ezstart/config
 const app = createApp({ apiApp: 'ezauth' })
+
+// ✅ Override CORS to enable credentials (required for httpOnly cookies)
+app.use(cors({
+  ...createCorsConfig('ezauth'),
+  credentials: true  // CRITICAL for httpOnly cookies
+}))
+
+// ✅ Add cookie parser middleware (for httpOnly cookie support)
+app.use(cookieParser())
 
 // Initialize Passport
 app.use(passport.initialize())

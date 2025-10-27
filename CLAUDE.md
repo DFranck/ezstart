@@ -2063,6 +2063,130 @@ const { user, isAuthenticated, login, logout } = useAuth()
 2. **Créer** page `/auth/callback` dans chaque app
 3. **Single Sign-On** automatique entre toutes les apps
 
+### 🔒 Migration httpOnly Cookies - Dual-Mode Support ⭐ NOUVEAU (27/10/2025)
+
+**Architecture complète de migration progressive de localStorage vers httpOnly cookies.**
+
+#### Phase 1: Backend Dual-Mode ✅ COMPLET
+
+**Documentation :** [PHASE-1-COMPLETE.md](./PHASE-1-COMPLETE.md)
+
+Backend EZAuth API supporte maintenant **2 modes simultanément** :
+- ✅ **Mode localStorage** (existant) - Apps non-migrées continuent de fonctionner
+- ✅ **Mode httpOnly** (nouveau) - Prêt pour migration progressive
+
+**Nouveaux endpoints :**
+- `POST /api/auth/login-cookie` - Login direct avec httpOnly cookie (skip auth code)
+- `POST /api/auth/logout` - Clear httpOnly cookie
+- `GET /api/auth/me` - Modifié pour supporter dual-mode (cookie OU Authorization header)
+
+**Backend changes :**
+- `cookie-parser` middleware installé
+- CORS credentials enabled
+- Cookie configuration : httpOnly, secure, sameSite='lax', maxAge=7 days
+
+#### Phase 2: SDK Dual-Mode ✅ COMPLET
+
+**Documentation :** [PHASE-2-COMPLETE.md](./PHASE-2-COMPLETE.md)
+
+SDK @ezstart/auth-sdk supporte maintenant **2 modes avec opt-in flag** :
+- ✅ **Mode localStorage** (default) - Backward compatible 100%
+- ✅ **Mode httpOnly** (opt-in) - Flag `useHttpOnlyCookies={true}`
+
+**Nouveau type :**
+```typescript
+export type AuthMode = 'localStorage' | 'httpOnly'
+```
+
+**AuthState extended :**
+```typescript
+export interface AuthState {
+  user: AuthUser | null
+  accessToken: string | null
+  isAuthenticated: boolean
+  mode: AuthMode  // ✅ NEW
+
+  setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode) => void
+  logout: () => void
+  updateUser: (user: AuthUser) => void
+  getMode: () => AuthMode  // ✅ NEW
+}
+```
+
+**AuthClient nouvelles méthodes :**
+```typescript
+// Login direct avec httpOnly cookie
+async loginWithCookie(email: string, password: string): Promise<AuthUser>
+
+// Logout et clear httpOnly cookie
+async logout(): Promise<void>
+
+// getCurrentUser() dual-mode (cookie OU token)
+async getCurrentUser(accessToken?: string): Promise<AuthUser>
+```
+
+**AuthProvider opt-in flag :**
+```typescript
+interface AuthProviderProps {
+  children: ReactNode
+  appName: string
+  useHttpOnlyCookies?: boolean  // ✅ NEW (default: false)
+}
+```
+
+**Usage examples :**
+
+```typescript
+// Mode localStorage (existing apps - no change)
+<AuthProvider appName="ezbill">
+  {children}
+</AuthProvider>
+
+// Mode httpOnly (new apps - opt-in)
+<AuthProvider appName="ezbill" useHttpOnlyCookies={true}>
+  {children}
+</AuthProvider>
+
+// Check current mode
+const { mode, user, isAuthenticated } = useAuth()
+console.log('Current mode:', mode) // 'localStorage' or 'httpOnly'
+```
+
+**Features :**
+- ✅ Mode-aware token verification (localStorage: token-based, httpOnly: cookie-based)
+- ✅ Mode-aware logout (localStorage: clear store, httpOnly: clear cookie + store)
+- ✅ Mode-aware callback handling (localStorage: store token, httpOnly: only store user)
+- ✅ Automatic mode switching on prop change
+- ✅ `credentials: 'include'` on all fetch calls
+
+#### Phase 3: Migration Apps (À faire)
+
+**Ordre recommandé :**
+1. EZBill (30 min)
+2. Tower Defense (30 min)
+3. ASC-TCD (30 min)
+4. FengShui (45 min)
+5. GreenPulse (1h)
+6. EZPay (45 min)
+7. EZStart (1h)
+
+**Total :** ~5h sur 1 semaine
+
+**Étapes par app :**
+1. Ajouter `useHttpOnlyCookies={true}` dans AuthProvider
+2. Créer/modifier `lib/api.ts` wrapper avec `credentials: 'include'`
+3. Remplacer tous les `fetch()` directs par wrapper API
+4. Tester login/logout/navigation
+5. Vérifier que cookie est set correctement
+6. Déployer en production
+
+**Avantages httpOnly cookies :**
+- ✅ **XSS Protection** - JavaScript ne peut pas lire le token
+- ✅ **CSRF Protection** - sameSite='lax' + CORS credentials
+- ✅ **Stay Logged In** - Cookie maxAge=7 days (comme localStorage)
+- ✅ **SSO Preserved** - Fonctionne avec OAuth Google/GitHub
+- ✅ **0 Breaking Changes** - Migration progressive, app par app
+
 ## EZPay - Système de Paiement Universel ⭐ NOUVEAU
 
 ### Architecture
