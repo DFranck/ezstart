@@ -4,6 +4,7 @@ import { ThemeProvider } from '@ezstart/next-theme'
 import '@ezstart/ui/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import Script from 'next/script'
 import { ReactNode } from 'react'
 
 export const metadata = createMetadata({
@@ -33,12 +34,17 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <ThemeProvider>{children}</ThemeProvider>
-    </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-screen">
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   )
 }

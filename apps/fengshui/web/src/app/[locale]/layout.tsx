@@ -8,6 +8,7 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import ClientLayout from './client-layout'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -48,7 +49,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={cn(inter.className, 'min-h-screen flex flex-col')}>
-        <script
+        <Script id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />

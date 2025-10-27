@@ -4,6 +4,7 @@ import { Providers } from '@/components/providers'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
+import Script from 'next/script'
 import { ReactNode } from 'react'
 
 export const metadata = createMetadata({
@@ -38,16 +39,21 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages} locale={locale}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <Providers>
-        <div className="min-h-screen bg-background text-foreground flex items-center justify-center mx-2">
-          {children}
-        </div>
-      </Providers>
-    </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-screen">
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <Providers>
+            <div className="bg-background text-foreground flex items-center justify-center mx-2 min-h-screen">
+              {children}
+            </div>
+          </Providers>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   )
 }

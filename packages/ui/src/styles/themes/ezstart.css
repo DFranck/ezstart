@@ -1,0 +1,13 @@
+/* EZStart Theme Variables */
+
+:root {
+  --ezstart: oklch(0.5413 0.2466 293.01);
+}
+
+.dark {
+  --ezstart: oklch(0.5413 0.2466 293.01);
+}
+
+@theme inline {
+  --color-ezstart: var(--ezstart);
+}

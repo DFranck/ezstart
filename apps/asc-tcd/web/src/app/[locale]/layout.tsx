@@ -9,6 +9,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import ClientLayout from './client-layout'
+import Script from 'next/script'
 
 export const metadata = createMetadata({
   appName: 'ASC TCD',
@@ -60,7 +61,7 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
-        <script
+        <Script id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />

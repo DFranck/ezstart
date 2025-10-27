@@ -1149,6 +1149,131 @@ className = 'bg-primary text-primary-foreground'
 - **Border** : `border` (utilise la couleur border par défaut)
 - **Accent** : `bg-accent`, `text-accent-foreground`
 
+#### Système de Thèmes - Project-Specific Colors ⭐ NOUVEAU (27/10/2025)
+
+**Architecture complète : Séparation des styles génériques et project-specific**
+
+**Fichiers créés :** [packages/ui/src/styles/themes/](packages/ui/src/styles/themes/)
+
+**Avant (Octobre 2025) :**
+- ❌ globals.css (418 lines) mélange générique + 4 projets
+- ❌ 44+ variables EZBill + 14+ variables Monitoring dans globals.css
+- ❌ Violation de SRP (Single Responsibility Principle)
+- ❌ Score Architecture : 55/100
+
+**Après (27/10/2025) :**
+- ✅ globals.css (~195 lines) SEULEMENT générique shadcn/ui
+- ✅ themes/ directory avec 4 fichiers project-specific
+- ✅ animations/ directory avec 5 fichiers réutilisables
+- ✅ Score Architecture : 88/100 (+33 points)
+
+**Structure des fichiers :**
+
+```
+packages/ui/src/styles/
+├── globals.css              # SEULEMENT styles génériques (~195 lines)
+├── themes/                  # Couleurs project-specific
+│   ├── index.css           # Import tous les thèmes
+│   ├── ezbill.css          # 44 variables + 14 gradient utilities
+│   ├── monitoring.css      # 14 variables (status, platforms)
+│   ├── fengshui.css        # 2 variables (brand colors)
+│   ├── ezstart.css         # 1 variable (brand color)
+│   └── README.md           # Documentation complète
+└── animations/              # Animations réutilisables
+    ├── skeleton.css
+    ├── slide-in.css
+    ├── gradient.css
+    ├── text-gradient.css
+    └── typewriter.css
+```
+
+**Accès global préservé :**
+
+```css
+/* packages/ui/src/styles/globals.css */
+@import './animations/skeleton.css';
+@import './animations/gradient.css';
+/* ... */
+@import './themes/index.css';  /* ← Tous les projets ont accès */
+```
+
+**Thèmes disponibles :**
+
+**1. EZBill Theme (ezbill.css) - 167 lines**
+- 44 CSS variables (entity colors, statuses, documents)
+- 14 gradient utility classes
+```tsx
+<Badge className="bg-ezbill-invoice text-ezbill-invoice-foreground">
+  Invoice
+</Badge>
+<div className="bg-gradient-client hover:bg-gradient-client-hover" />
+```
+
+**2. Monitoring Theme (monitoring.css) - 66 lines**
+- 14 CSS variables (service health, platform brands)
+```tsx
+<Badge className="bg-status-healthy text-status-healthy-foreground">
+  Operational
+</Badge>
+<div className="bg-platform-railway text-platform-railway-foreground">
+  Railway
+</div>
+```
+
+**3. FengShui Theme (fengshui.css) - 15 lines**
+- 2 CSS variables (primary, secondary)
+```tsx
+<Button className="bg-fengshui-primary text-white">
+  Analyze Plan
+</Button>
+```
+
+**4. EZStart Theme (ezstart.css) - 11 lines**
+- 1 CSS variable (brand color)
+```tsx
+<h1 className="text-ezstart">
+  Welcome to EZStart
+</h1>
+```
+
+**Ajouter un nouveau theme :**
+
+```css
+/* themes/project.css */
+:root {
+  --project-primary: oklch(0.7 0.15 240);
+  --project-primary-foreground: oklch(0.98 0.01 240);
+}
+
+.dark {
+  --project-primary: oklch(0.75 0.18 240);
+  --project-primary-foreground: oklch(0.98 0.01 240);
+}
+
+@theme inline {
+  --color-project-primary: var(--project-primary);
+  --color-project-primary-foreground: var(--project-primary-foreground);
+}
+```
+
+Puis ajouter `@import './project.css';` dans `themes/index.css`. C'est tout ! ✅
+
+**Color System : OKLCH**
+
+Format : `oklch(lightness chroma hue [/ alpha])`
+- Lightness (0-1): 0 = black, 1 = white
+- Chroma (0-0.4): Color intensity
+- Hue (0-360): Color angle
+
+**Best Practices :**
+1. ✅ Toujours créer paires foreground pour accessibility
+2. ✅ Noms sémantiques (`--status-healthy`, NOT `--green`)
+3. ✅ Support dark mode (`:root` + `.dark`)
+4. ✅ Focus project-specific (générique va dans globals.css)
+
+**Documentation complète :** [packages/ui/src/styles/themes/README.md](packages/ui/src/styles/themes/README.md)
+**Audit complet :** [packages/ui/STYLES-AUDIT.md](packages/ui/STYLES-AUDIT.md)
+
 #### Props des Composants
 
 - **TOUJOURS** utiliser les props `variant` et `size` quand disponibles

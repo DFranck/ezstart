@@ -6,6 +6,7 @@ import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { getMessages } from 'next-intl/server'
 import ClientLayout from './client-layout'
+import Script from 'next/script'
 
 export const metadata = createMetadata({
   appName: 'GreenPulse',
@@ -46,7 +47,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
-        <script
+        <Script id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />

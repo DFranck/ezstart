@@ -9,6 +9,7 @@ import { Geist } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import Script from 'next/script'
 import { ReactNode } from 'react'
 
 const fontSans = Geist({
@@ -50,21 +51,26 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div className={`${fontSans.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        <ErrorBoundary>
-          <QueryProvider>
-            <ThemeProvider>
-              <AuthProvider appName="ezbill" useHttpOnlyCookies={true}>{children}</AuthProvider>
-            </ThemeProvider>
-          </QueryProvider>
-        </ErrorBoundary>
-        <Toaster />
-      </div>
-    </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={`${fontSans.variable} font-sans antialiased`}>
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <NextIntlClientProvider messages={messages}>
+          <div className="flex flex-col min-h-screen">
+            <ErrorBoundary>
+              <QueryProvider>
+                <ThemeProvider>
+                  <AuthProvider appName="ezbill" useHttpOnlyCookies={true}>{children}</AuthProvider>
+                </ThemeProvider>
+              </QueryProvider>
+            </ErrorBoundary>
+            <Toaster />
+          </div>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   )
 }
