@@ -222,6 +222,6 @@
 }
 
 /* Custom font utilities */
-@utility font-gugi {
+.font-gugi {
   font-family: 'Gugi', sans-serif;
 }
