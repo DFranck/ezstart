@@ -1,4 +1,7 @@
 import { notFound } from 'next/navigation';
+import QRCodePage from './(qr-code)/qr-code-page';
+import BusinessCardPage from './(business-card)/business-card-page';
+import CVGeneratorPage from './(cv-generator)/cv-generator-page';
 
 export default async function FeaturePage({
   params,
@@ -6,9 +9,15 @@ export default async function FeaturePage({
   params: Promise<{ feature: string }>;
 }) {
   const { feature } = await params;
-  console.log('feature page', feature);
 
-  // Features are handled by their respective (feature-name)/page.tsx files
-  // This file should not be reached
-  notFound();
+  switch (feature) {
+    case 'qr-code':
+      return <QRCodePage />;
+    case 'business-card':
+      return <BusinessCardPage />;
+    case 'cv-generator':
+      return <CVGeneratorPage />;
+    default:
+      notFound();
+  }
 }

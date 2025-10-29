@@ -1,9 +1,7 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const SYSTEM_PROMPT = `You are an expert CV/Resume optimizer and career advisor. Your role is to:
 1. Analyze job postings to identify key requirements, skills, and keywords
@@ -19,7 +17,18 @@ Guidelines:
 - Use industry-standard terminology
 - Keep descriptions concise but impactful (bullet points)
 - Include measurable achievements when possible
-- Ensure ATS compatibility (clear structure, standard formatting)`;
+- Ensure ATS compatibility (clear structure, standard formatting)
+
+Expected JSON Schema:
+{
+  "personalInfo": { "name", "title", "email", "phone", "location", "linkedIn", "github", "website" },
+  "summary": "string",
+  "experience": [{ "company", "position", "startDate", "endDate", "current", "description": ["string"], "technologies": ["string"] }],
+  "education": [{ "institution", "degree", "field", "startDate", "endDate", "gpa", "achievements": ["string"] }],
+  "skills": [{ "category", "skills": ["string"] }],
+  "languages": [{ "name", "proficiency" }],
+  "certifications": [{ "name", "issuer", "date", "credentialId", "url" }]
+}`;
 
 interface CVGenerationRequest {
   jobPosting: string;
@@ -70,24 +79,22 @@ export async function POST(req: NextRequest) {
 
     context += `Job Posting:\n${jobPosting}`;
 
-    // Generate optimized CV using OpenAI
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      temperature: 0.7,
-      messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT,
-        },
-        {
-          role: 'user',
-          content: `Based on the following information, generate an optimized CV that is tailored to the job posting. Return the complete CV data in JSON format matching the existing structure.\n\n${context}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
+    // Generate optimized CV using Gemini
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      systemInstruction: SYSTEM_PROMPT,
+      generationConfig: {
+        temperature: 0.7,
+        responseMimeType: 'application/json',
+      },
     });
 
-    const generatedCV = JSON.parse(response.choices[0]?.message?.content || '{}');
+    const result = await model.generateContent(
+      `Based on the following information, generate an optimized CV that is tailored to the job posting. Return the complete CV data in JSON format matching the expected schema.\n\n${context}`
+    );
+
+    const content = result.response.text();
+    const generatedCV = JSON.parse(content || '{}');
 
     // Merge with current data (preserve user's personal info if not enhanced by AI)
     const optimizedCV = {
