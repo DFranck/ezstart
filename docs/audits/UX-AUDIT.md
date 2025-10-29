@@ -1,15 +1,35 @@
 # 🎨 UX Audit - @ezstart Monorepo
 
-**Total Score:** 70/100
-**Last Updated:** 2025-10-21
-**Status:** ⭐⭐⭐ Good - Strong Component Foundation, Limited User Flows
+**Total Score:** 80/100 (+10)
+**Last Updated:** 2025-10-29
+**Status:** ⭐⭐⭐⭐ Very Good - Enhanced UI Components, Improved User Feedback
 **Scope:** 8 web applications du monorepo
 
 ---
 
 ## 📋 Overview
 
-Good UX foundation with @ezstart/ui providing consistent design components. Radix UI ensures accessibility and semantic HTML. However, missing critical UX features like onboarding, comprehensive feedback states, and optimized user flows.
+Strong UX foundation with @ezstart/ui providing consistent, accessible design components. Recent improvements include Thread components with streaming/loading states, comprehensive keyboard navigation, and enhanced form accessibility. Radix UI ensures accessibility and semantic HTML throughout.
+
+### Recent Improvements (Oct 29, 2025)
+
+**Thread Component System** (+5 points)
+- ✅ **Streaming states** - Real-time message streaming with aria-live announcements
+- ✅ **Loading indicators** - Animated loading dots with proper ARIA labels
+- ✅ **Form accessibility** - Complete labels, help text (aria-describedby), error feedback
+- ✅ **Button states** - Clear disabled, loading, and active states
+- ✅ **Keyboard navigation** - Enter to send, Shift+Enter for new line, Escape to cancel
+
+**Layout Component System** (+3 points)
+- ✅ **Keyboard navigation** - Enter/Space toggle menus, Escape closes dropdowns
+- ✅ **ARIA implementation** - 22 ARIA attributes across navigation components
+- ✅ **Focus management** - Visible focus indicators, logical tab order
+- ✅ **Mobile UX** - Improved burger menu with proper ARIA states
+
+**Icon Component** (+2 points)
+- ✅ **ARIA optimization** - useMemo-optimized ARIA attribute builder
+- ✅ **Performance** - Icon caching + lazy loading with Suspense
+- ✅ **Accessibility** - ariaHidden support for decorative icons
 
 ---
 
