@@ -1,5 +1,6 @@
 'use client'
 
+import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import {
@@ -138,14 +139,15 @@ export function LiaThread({
 
   return (
     <ThreadLayout
-      colorScheme="green"
+      colorScheme="custom"
+      customTheme={greenPulseThreadTheme}
       headerOffset="top-16"
       mobileFooterOffset="pb-16"
       sidebarToggle={
         // Only show sidebar toggle if authenticated
         isAuthenticated ? (
           <ThreadSidebarToggle
-            className="fixed right-4 top-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-green-600 hover:bg-green-700 text-white"
+            className="fixed right-4 top-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-[#10b981] hover:bg-[#059669] text-white"
             variant="default"
           />
         ) : undefined

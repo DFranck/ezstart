@@ -2,7 +2,7 @@
   "home": {
     "hero": {
       "title": "GreenPulse",
-      "subtitle": "Your ESG Assistant for Green Business Growth",
+      "subtitle": "Your environmental & ESG agent for green business groth",
       "typewriterText": "Reduce Costs • Develop Green Marketing • Access Finance • Grow Sustainably",
       "description": "AI-powered support to help SMEs reduce costs, develop solid green marketing, and access green finance.",
       "cta": "Be the first to know about our launch and get a free trial",
@@ -68,6 +68,133 @@
       "loading": "Adding to waitlist...",
       "alreadyRegistered": "This email is already registered!",
       "error": "Something went wrong. Please try again."
+    }
+  },
+  "homeV2": {
+    "hero": {
+      "title": "World's Best",
+      "subtitle": "AI Presentation Creator",
+      "description": "ChatGPT for Presentations - Generate stunning slides in minutes",
+      "cta": "Try for Free",
+      "noCreditCard": "No credit card required",
+      "noCreditCardNote": "No credit card required",
+      "trustedBy": "Trusted by over 10 million of the world's smartest presenters",
+      "brandName": "GreenPulse",
+      "tagline": "Your AI Partner for Sustainable Business Growth",
+      "typewriterText": "Reduce Costs • Improve ESG • Access Green Finance • Grow Sustainably",
+      "emailPlaceholder": "Enter your email address",
+      "notifyMe": "Get Early Access",
+      "loading": "Adding to waitlist...",
+      "thankYou": "Success! You'll be notified when we launch",
+      "alreadyRegistered": "This email is already registered!",
+      "error": "Something went wrong. Please try again."
+    },
+    "logoWall": {
+      "title": "Trusted by Leading Companies Worldwide",
+      "subtitle": "Join thousands of businesses already using AI for sustainability"
+    },
+    "stats": {
+      "stat1": {
+        "label": "Faster ESG reporting"
+      },
+      "stat2": {
+        "label": "Cost reduction through efficiency"
+      },
+      "stat3": {
+        "label": "Return on investment"
+      }
+    },
+    "features": {
+      "title": "Everything You Need for Sustainable Growth",
+      "subtitle": "Powerful AI-driven features to measure, improve, and communicate your environmental impact",
+      "feature1": {
+        "title": "AI Chat Assistant",
+        "description": "Get instant answers and personalized sustainability advice through natural conversations with LIA, your environmental intelligence assistant."
+      },
+      "feature2": {
+        "title": "Carbon Footprint Measurement",
+        "description": "Accurately measure your business's carbon emissions with our AI-powered assessment tools and benchmarking."
+      },
+      "feature3": {
+        "title": "Performance Tracking",
+        "description": "Track your sustainability progress with real-time dashboards, KPIs, and automated reporting."
+      },
+      "feature4": {
+        "title": "Action Roadmaps",
+        "description": "Get customized sustainability roadmaps with clear milestones, timelines, and ROI projections."
+      },
+      "feature5": {
+        "title": "Green Finance Access",
+        "description": "Qualify for green loans and sustainable finance opportunities with verified ESG credentials."
+      },
+      "feature6": {
+        "title": "Compliance & Certification",
+        "description": "Stay compliant with international standards (ISO, CSRD) and prepare for ESG certifications."
+      },
+      "feature7": {
+        "title": "Seamless Data Import",
+        "description": "Import data from documents, invoices, images, and voice notes for automated analysis."
+      },
+      "feature8": {
+        "title": "Analytics & Insights",
+        "description": "Visualize your environmental data with charts, trends, and actionable insights."
+      },
+      "feature9": {
+        "title": "Multi-language Support",
+        "description": "Access GreenPulse.AI in English, French, Vietnamese, and more languages."
+      }
+    },
+    "howItWorks": {
+      "title": "How GreenPulse.AI Works",
+      "subtitle": "From conversation to certification in 3 simple steps",
+      "step1": {
+        "title": "Share Your Business Context",
+        "description": "Simply chat with LIA about your business, operations, and sustainability goals. Our AI understands your unique challenges and opportunities."
+      },
+      "step2": {
+        "title": "Get Personalized Recommendations",
+        "description": "Receive tailored action plans to reduce costs, improve efficiency, and enhance your green credentials—all backed by data and ROI projections."
+      },
+      "step3": {
+        "title": "Track Progress & Scale Impact",
+        "description": "Monitor your improvements with real-time dashboards, generate ESG reports, and unlock green finance opportunities as you grow."
+      }
+    },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Real businesses achieving real sustainability impact",
+      "testimonial1": {
+        "quote": "GreenPulse.AI helped us reduce energy costs by 30% in just 3 months. The AI recommendations were spot-on and easy to implement.",
+        "author": "Sarah Chen",
+        "role": "Operations Manager",
+        "company": "GreenTech Solutions"
+      },
+      "testimonial2": {
+        "quote": "We qualified for a green loan thanks to the ESG reports generated by GreenPulse.AI. The ROI has been incredible—both financially and for our brand reputation.",
+        "author": "Marc Dubois",
+        "role": "CEO",
+        "company": "EcoManufacture SA"
+      },
+      "testimonial3": {
+        "quote": "As a small business, we couldn't afford an ESG manager. GreenPulse.AI gave us enterprise-level sustainability insights at a fraction of the cost.",
+        "author": "Nguyen Thi Lan",
+        "role": "Founder",
+        "company": "Sustainable Clinics Vietnam"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Sustainability into Growth?",
+      "description": "Join thousands of businesses using AI to reduce costs, improve ESG, and access green finance.",
+      "emailPlaceholder": "Enter your email",
+      "joinWaitlist": "Get Started Free",
+      "noCreditCard": "No credit card required • Cancel anytime",
+      "badge1": "Secure & Private",
+      "badge2": "Instant Setup",
+      "badge3": "Eco-Certified",
+      "loading": "Processing...",
+      "thankYou": "Welcome! Check your email for next steps",
+      "alreadyRegistered": "This email is already on our waitlist",
+      "error": "Oops! Please try again"
     }
   }
 }

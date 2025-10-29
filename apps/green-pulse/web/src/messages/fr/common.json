@@ -6,7 +6,7 @@
     "retry": "Réessayer"
   },
   "auth": {
-    "login": "Se connecter avec EZAuth",
+    "login": "Se connecter",
     "logout": "Se déconnecter",
     "loading": "Redirection..."
   }

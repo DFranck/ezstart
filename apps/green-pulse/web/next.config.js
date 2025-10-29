@@ -5,6 +5,7 @@ export default createNextConfig({
   i18n: true,
   extend: {
     transpilePackages: ['@ezstart/auth-sdk', '@ezstart/next-theme'],
+
     async rewrites() {
       return [
         {
@@ -13,5 +14,5 @@ export default createNextConfig({
         },
       ]
     },
-  }
+  },
 })

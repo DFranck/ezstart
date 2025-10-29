@@ -6,7 +6,7 @@
     "retry": "Try again"
   },
   "auth": {
-    "login": "Login with EZAuth",
+    "login": "Login",
     "logout": "Logout",
     "loading": "Redirecting..."
   }

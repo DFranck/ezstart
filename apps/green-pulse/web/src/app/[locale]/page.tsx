@@ -88,7 +88,7 @@ export default function HomePage() {
             }}
           />
 
-          <H1 className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+          <H1 className="font-normal">
             {t('hero.title')} <span className="font-gugi">AI</span>
           </H1>
         </Div>

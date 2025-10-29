@@ -41,7 +41,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }) => {
         isLiaPage
           ? []
           : [
-              { href: '/', label: 'Home', icon: 'lucide:Home' },
               { href: '/chat', label: 'Chat', icon: 'lucide:Bot' },
               {
                 href: '/dashboard',
