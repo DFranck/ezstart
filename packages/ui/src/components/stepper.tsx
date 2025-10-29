@@ -8,6 +8,50 @@ import { Icon, KnownIconName } from './icon'
 import { Div, Section, Span } from './tag'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 
+/**
+ * Stepper Component - Multi-Step Forms & Wizards
+ *
+ * Fully accessible stepper with context API, theming, and custom navigation.
+ * Perfect for multi-step forms, onboarding flows, and complex wizards.
+ *
+ * @example
+ * // Basic usage
+ * const steps = [
+ *   { id: 'info', title: 'Info', icon: 'lucide:User', component: <StepOne /> },
+ *   { id: 'details', title: 'Details', icon: 'lucide:FileText', component: <StepTwo /> }
+ * ]
+ *
+ * <Stepper
+ *   steps={steps}
+ *   onComplete={(data) => console.log('Completed:', data)}
+ * />
+ *
+ * @example
+ * // With theme customization
+ * <Stepper
+ *   steps={steps}
+ *   theme={{
+ *     primaryColor: '#10b981',
+ *     secondaryColor: '#3b82f6',
+ *     gradientDirection: 'to right'
+ *   }}
+ *   showStepNumbers
+ * />
+ *
+ * @example
+ * // With custom navigation buttons
+ * <Stepper
+ *   steps={steps}
+ *   renderButtons={(context) => ({
+ *     previous: { label: 'Back', variant: 'outline' },
+ *     next: { label: 'Continue', variant: 'default' },
+ *     custom: [
+ *       { label: 'Save Draft', icon: 'lucide:Save', onClick: handleSave }
+ *     ]
+ *   })}
+ * />
+ */
+
 // Composant wrapper pour les boutons avec tooltip
 interface TooltipButtonProps {
   button: StepButton

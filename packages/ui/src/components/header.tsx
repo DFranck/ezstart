@@ -3,6 +3,36 @@ import { cn } from '../lib/utils'
 import { Div, Tag } from './tag'
 import { headerVariantConfig } from './tag/src/variants/tags/header'
 
+/**
+ * Header Component - Responsive Site Header
+ *
+ * Flexible header with position variants, scroll effects, and content slots.
+ * Built on Tag component with semantic HTML and accessibility.
+ *
+ * @example
+ * // Basic header
+ * <Header
+ *   leftContent={<Logo />}
+ *   rightContent={<UserMenu />}
+ * />
+ *
+ * @example
+ * // Sticky header with scroll effects
+ * <Header
+ *   position="sticky"
+ *   layout="between"
+ *   leftContent={<Logo />}
+ *   centerContent={<Nav />}
+ *   rightContent={<Actions />}
+ * />
+ *
+ * @example
+ * // Fixed header with custom content
+ * <Header position="fixed">
+ *   <CustomHeaderContent />
+ * </Header>
+ */
+
 type Props = {
   leftContent?: React.ReactNode
   centerContent?: React.ReactNode
