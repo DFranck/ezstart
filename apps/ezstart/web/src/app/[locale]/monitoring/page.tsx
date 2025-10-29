@@ -22,11 +22,11 @@ import { MetricsOverview } from './components/MetricsOverview'
 import { ProjectCard } from './components/ProjectCard'
 import { ActivityFeed } from './components/ActivityFeed'
 
-// Get monitoring API URL based on environment
+// Get ezstart API URL based on environment
 const MONITORING_API_URL =
   process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5080'
-    : getApiUrl('monitoring', 'production')
+    ? 'http://localhost:5000'
+    : getApiUrl('ezstart', 'production')
 
 interface ProjectsData {
   projects: any[]

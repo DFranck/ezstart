@@ -68,13 +68,13 @@ pnpm dev:status
 
 | Service | Type | Port | URL |
 |---------|------|------|-----|
+| **EZStart** | API | 5000 | http://localhost:5000 |
 | **EZAuth** | API | 5010 | http://localhost:5010 |
 | **EZBill** | API | 5020 | http://localhost:5020 |
 | **EZPay** | API | 5040 | http://localhost:5040 |
 | **Tower Defense** | API | 5030 | http://localhost:5030 |
 | **GreenPulse** | API | 5070 | http://localhost:5070 |
-| **Monitoring** | API | 5080 | http://localhost:5080 |
-| **EZStart** | Web | 5050 | http://localhost:5050 |
+| **EZStart** | Web | 5005 | http://localhost:5005 |
 | **EZAuth** | Web | 5015 | http://localhost:5015 |
 | **EZBill** | Web | 5025 | http://localhost:5025 |
 | **EZPay** | Web | 5045 | http://localhost:5045 |
@@ -102,13 +102,13 @@ pnpm dev:status
 │   └── ...
 │
 ├── apps/                  # Applications
+│   ├── ezstart/          # Landing Page + Monitoring API
 │   ├── ezauth/           # SSO Authentication
 │   ├── ezpay/            # Payment System
 │   ├── ezbill/           # Invoicing
 │   ├── tower-defense/    # Game
 │   ├── green-pulse/      # AI Forms
 │   ├── fengshui/         # Feng Shui Analysis
-│   ├── ezstart/          # Landing Page
 │   └── asc-tcd/          # Association Website
 │
 └── docs/                  # Documentation

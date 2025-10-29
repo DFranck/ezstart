@@ -21,7 +21,6 @@ export type AppName =
   | 'tower-defense'
   | 'asc-tcd'
   | 'green-pulse'
-  | 'monitoring'
 
 export interface AppUrls {
   web: {
@@ -62,9 +61,13 @@ export interface ProjectMetadata {
 export const URLS: Record<AppName, AppUrls> = {
   ezstart: {
     web: {
-      local: 'http://localhost:5050',
+      local: 'http://localhost:5005',
       development: 'https://ezstart-web.vercel.app',
       production: 'https://www.ezstart.xyz',
+    },
+    api: {
+      local: 'http://localhost:5000',
+      production: 'https://ezstart-17v5.onrender.com',
     },
   },
 
@@ -145,17 +148,6 @@ export const URLS: Record<AppName, AppUrls> = {
     },
   },
 
-  monitoring: {
-    web: {
-      local: 'http://localhost:5050',
-      development: 'https://ezstart-web.vercel.app',
-      production: 'https://www.ezstart.xyz',
-    },
-    api: {
-      local: 'http://localhost:5080',
-      production: 'https://ezstart-17v5.onrender.com',
-    },
-  },
 }
 
 /**
@@ -164,11 +156,12 @@ export const URLS: Record<AppName, AppUrls> = {
 export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
   ezstart: {
     name: 'EZStart',
-    description: 'Monorepo hub and documentation platform',
+    description: 'Monorepo hub and monitoring platform',
     emoji: '🚀',
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/ezstart',
     webPlatform: 'vercel',
+    apiPlatform: 'render',
   },
 
   ezauth: {
@@ -239,14 +232,6 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     apiPlatform: 'render',
   },
 
-  monitoring: {
-    name: 'Monitoring',
-    description: 'Monorepo health and performance monitoring',
-    emoji: '📊',
-    githubPath: 'apps/monitoring',
-    webPlatform: 'vercel',
-    apiPlatform: 'render',
-  },
 }
 
 /**

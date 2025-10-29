@@ -159,7 +159,6 @@ describe('@ezstart/config - URLs', () => {
         'ezpay',
         'tower-defense',
         'green-pulse',
-        'monitoring',
       ]
 
       apps.forEach(app => {

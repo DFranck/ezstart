@@ -1,8 +1,8 @@
 {
-  "name": "api-monitoring",
+  "name": "api-ezstart",
   "version": "1.0.0",
   "type": "module",
-  "description": "Monitoring and observability API for @ezstart monorepo",
+  "description": "EZStart API - Monitoring and observability for @ezstart monorepo",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
