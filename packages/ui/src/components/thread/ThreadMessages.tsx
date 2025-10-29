@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { ThreadMessage } from './ThreadMessage';
 import { ThreadMessage as ThreadMessageType } from './types';
 
@@ -18,7 +19,7 @@ type ThreadMessagesProps<TMessage extends ThreadMessageType = ThreadMessageType>
   aiBubbleClassName?: string;
 };
 
-export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessageType>({
+export const ThreadMessages = React.memo(function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessageType>({
   messages,
   loading = false,
   streamingText = '',
@@ -77,23 +78,30 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
       {shouldShowLoading && (
         <ThreadMessage role='ai' aiBubbleClassName={aiBubbleClassName}>
           {streamingText ? (
-            <span>
+            <div role="status" aria-live="polite" aria-atomic="true">
               {streamingText}
-              <span className='inline-block animate-pulse'>|</span>
-            </span>
+              <span className='inline-block animate-pulse' aria-hidden="true">|</span>
+            </div>
           ) : (
-            <div className='flex items-center gap-1 text-muted-foreground italic'>
+            <div
+              role="status"
+              aria-live="polite"
+              aria-label="Loading response"
+              className='flex items-center gap-1 text-muted-foreground italic'
+            >
               {loadingText}
-              <span className='animate-bounce text-lg font-bold'>.</span>
+              <span className='animate-bounce text-lg font-bold' aria-hidden="true">.</span>
               <span
                 className='animate-bounce text-lg font-bold'
                 style={{ animationDelay: '0.2s' }}
+                aria-hidden="true"
               >
                 .
               </span>
               <span
                 className='animate-bounce text-lg font-bold'
                 style={{ animationDelay: '0.4s' }}
+                aria-hidden="true"
               >
                 .
               </span>
@@ -106,4 +114,6 @@ export function ThreadMessages<TMessage extends ThreadMessageType = ThreadMessag
       <div className='h-6' />
     </div>
   );
-}
+}) as <TMessage extends ThreadMessageType = ThreadMessageType>(
+  props: ThreadMessagesProps<TMessage>
+) => React.ReactElement;

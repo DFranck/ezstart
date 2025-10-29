@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { ReactNode, useState, useRef, useEffect } from 'react';
+import React, { ReactNode, useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Icon } from '../icon';
@@ -25,7 +25,7 @@ type ThreadMessageProps = {
   aiBubbleClassName?: string;
 };
 
-export function ThreadMessage({
+export const ThreadMessage = React.memo(function ThreadMessage({
   role,
   children,
   meta,
@@ -64,36 +64,36 @@ export function ThreadMessage({
     theme.message?.ai?.border
   );
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     if (onCopy && typeof children === 'string') {
       onCopy(children);
     }
-  };
+  }, [onCopy, children]);
 
-  const handleEditClick = () => {
+  const handleEditClick = useCallback(() => {
     setIsEditing(true);
-  };
+  }, []);
 
-  const handleEditCancel = () => {
+  const handleEditCancel = useCallback(() => {
     setIsEditing(false);
     setEditedContent(typeof children === 'string' ? children : '');
-  };
+  }, [children]);
 
-  const handleEditSave = () => {
+  const handleEditSave = useCallback(() => {
     if (onEdit && messageId && editedContent.trim()) {
       onEdit(messageId, editedContent.trim());
       setIsEditing(false);
     }
-  };
+  }, [onEdit, messageId, editedContent]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleEditSave();
     } else if (e.key === 'Escape') {
       handleEditCancel();
     }
-  };
+  }, [handleEditSave, handleEditCancel]);
 
   // Auto-focus and auto-resize textarea when editing
   useEffect(() => {
@@ -114,6 +114,8 @@ export function ThreadMessage({
 
   return (
     <article
+      role="article"
+      aria-label={isUser ? 'Your message' : 'Assistant response'}
       data-testid={`conversation-turn-${isUser ? 'user' : 'ai'}`}
       data-turn={role}
       tabIndex={-1}
@@ -147,23 +149,34 @@ export function ThreadMessage({
             >
               {isEditing ? (
                 <div className='flex flex-col gap-2'>
+                  <label htmlFor={`edit-${messageId}`} className="sr-only">
+                    Edit message content
+                  </label>
                   <textarea
+                    id={`edit-${messageId}`}
                     ref={textareaRef}
                     value={editedContent}
                     onChange={(e) => setEditedContent(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    aria-label="Edit message content"
+                    aria-describedby={`edit-help-${messageId}`}
                     className='w-full min-h-[60px] px-3 py-2 bg-background text-foreground rounded border border-border resize-none focus:outline-none focus:ring-2 focus:ring-primary'
                     placeholder='Edit your message...'
                   />
+                  <span id={`edit-help-${messageId}`} className="sr-only">
+                    Press Enter to save, Escape to cancel
+                  </span>
                   <div className='flex justify-end gap-2'>
                     <button
                       onClick={handleEditCancel}
+                      aria-label="Cancel editing"
                       className='px-3 py-1 text-xs rounded hover:bg-muted transition'
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleEditSave}
+                      aria-label="Save edited message"
                       className='px-3 py-1 text-xs rounded bg-primary text-primary-foreground hover:opacity-90 transition'
                     >
                       Save
@@ -205,6 +218,7 @@ export function ThreadMessage({
                     <div className='mt-3 text-xs flex justify-end'>
                       <button
                         onClick={onRetry}
+                        aria-label="Retry sending message"
                         className='underline hover:opacity-80 transition'
                       >
                         {retryText}
@@ -221,17 +235,17 @@ export function ThreadMessage({
                       <button
                         onClick={handleCopy}
                         className='p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-1'
-                        aria-label="Copy message"
+                        aria-label="Copy message to clipboard"
                       >
-                        <Icon name="lucide:Copy" size={12} />
+                        <Icon name="lucide:Copy" size={12} ariaHidden />
                         <span className="text-[10px]">Copy</span>
                       </button>
                       <button
                         onClick={handleEditClick}
                         className='p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-1'
-                        aria-label="Edit message"
+                        aria-label="Edit this message"
                       >
-                        <Icon name="lucide:Pencil" size={12} />
+                        <Icon name="lucide:Pencil" size={12} ariaHidden />
                         <span className="text-[10px]">Edit</span>
                       </button>
                     </div>
@@ -256,9 +270,9 @@ export function ThreadMessage({
                             isHover ? 'opacity-100' : 'opacity-0',
                             'flex items-center gap-1'
                           )}
-                          aria-label="Copy message"
+                          aria-label="Copy message to clipboard"
                         >
-                          <Icon name="lucide:Copy" size={12} />
+                          <Icon name="lucide:Copy" size={12} ariaHidden />
                           <span className="text-[10px]">Copy</span>
                         </button>
                       )}
@@ -272,4 +286,4 @@ export function ThreadMessage({
       </div>
     </article>
   );
-}
+});

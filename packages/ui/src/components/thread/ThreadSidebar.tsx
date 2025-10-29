@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Icon } from '../icon';
@@ -31,7 +31,7 @@ type ThreadSidebarProps = {
   renderConversation?: (conversation: Conversation, isActive: boolean) => ReactNode;
 };
 
-export function ThreadSidebar({
+export const ThreadSidebar = React.memo(function ThreadSidebar({
   conversations = [],
   activeConversationId,
   onConversationSelect,
@@ -47,7 +47,7 @@ export function ThreadSidebar({
   renderConversation,
 }: ThreadSidebarProps) {
   const layoutContext = useThreadLayout();
-  const formatTimestamp = (date?: Date) => {
+  const formatTimestamp = useCallback((date?: Date) => {
     if (!date) return '';
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -57,7 +57,7 @@ export function ThreadSidebar({
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
-  };
+  }, []);
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
@@ -70,15 +70,16 @@ export function ThreadSidebar({
             onClick={onNewConversation}
             className="w-full"
             variant="default"
+            aria-label="Create new conversation"
           >
-            <Icon name="lucide:Plus" size={16} className="mr-2" />
+            <Icon name="lucide:Plus" size={16} className="mr-2" ariaHidden />
             {newConversationLabel}
           </Button>
         </div>
       )}
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto">
+      <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto">
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm">
@@ -108,6 +109,8 @@ export function ThreadSidebar({
                       onClose?.(); // Legacy callback (optional)
                       layoutContext?.closeSidebar(); // Close sidebar on mobile after selection
                     }}
+                    aria-current={isActive ? 'page' : undefined}
+                    aria-label={`${conversation.title}${conversation.unread ? ' (unread)' : ''}`}
                     className={cn(
                       'w-full text-left p-3 pr-10',
                       conversation.unread && 'font-semibold'
@@ -120,7 +123,7 @@ export function ThreadSidebar({
                             {conversation.title}
                           </h3>
                           {conversation.unread && (
-                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" aria-hidden="true" />
                           )}
                         </div>
                         {conversation.preview && (
@@ -152,10 +155,10 @@ export function ThreadSidebar({
             })
           )}
         </div>
-      </div>
+      </nav>
 
       {/* Footer */}
       {footer && <div className="p-4 border-t">{footer}</div>}
     </div>
   );
-}
+});

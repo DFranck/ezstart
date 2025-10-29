@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import React, { ReactNode, useState, useCallback } from 'react'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
@@ -23,7 +23,7 @@ type ThreadLayoutProps = {
   customTheme?: Partial<ThreadTheme>
 }
 
-function ThreadLayoutInner({
+const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
   children,
   sidebar,
   sidebarToggle,
@@ -38,16 +38,16 @@ function ThreadLayoutInner({
   const { theme } = useThreadTheme()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     const newState = !isSidebarOpen
     setIsSidebarOpen(newState)
     onSidebarToggle?.(newState)
-  }
+  }, [isSidebarOpen, onSidebarToggle])
 
-  const closeSidebar = () => {
+  const closeSidebar = useCallback(() => {
     setIsSidebarOpen(false)
     onSidebarToggle?.(false)
-  }
+  }, [onSidebarToggle])
 
   if (!showSidebar || !sidebar) {
     return (
@@ -95,20 +95,26 @@ function ThreadLayoutInner({
             onClick={toggleSidebar}
             size="icon"
             variant="outline"
+            aria-expanded={isSidebarOpen}
+            aria-controls="thread-sidebar"
+            aria-label={isSidebarOpen ? 'Close conversations sidebar' : 'Open conversations sidebar'}
             className={cn(
               'fixed left-4 z-50 md:hidden',
               'shadow-lg backdrop-blur-sm bg-background/80',
               headerOffset,
               mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
             )}
-            aria-label="Toggle conversations"
           >
-            <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={20} />
+            <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={20} ariaHidden />
           </Button>
         )}
 
         {/* Sidebar - Desktop: always visible, Mobile: overlay */}
         <aside
+          id="thread-sidebar"
+          role="complementary"
+          aria-label="Conversations sidebar"
+          aria-hidden={!isSidebarOpen}
           className={cn(
             'fixed md:sticky left-0 z-40',
             'transition-transform duration-300 ease-in-out',
@@ -135,7 +141,12 @@ function ThreadLayoutInner({
 
         {/* Overlay - Mobile only */}
         {isSidebarOpen && (
-          <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={toggleSidebar} />
+          <div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={toggleSidebar}
+            role="button"
+            aria-label="Close sidebar"
+          />
         )}
 
         {/* Main Content - Thread */}
@@ -157,7 +168,7 @@ function ThreadLayoutInner({
       </div>
     </ThreadLayoutProvider>
   )
-}
+})
 
 export function ThreadLayout(props: ThreadLayoutProps) {
   const { colorScheme = 'neutral', customTheme, ...layoutProps } = props

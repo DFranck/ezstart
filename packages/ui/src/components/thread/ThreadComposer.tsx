@@ -1,7 +1,7 @@
 'use client';
 
 import { Send } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '../button';
 import { cn } from '../../lib/utils';
 import { useThreadLayout } from './ThreadLayoutContext';
@@ -21,7 +21,7 @@ type ThreadComposerProps = {
   sendLabel?: string;
 };
 
-export function ThreadComposer({
+export const ThreadComposer = React.memo(function ThreadComposer({
   onSubmit,
   loading = false,
   disabled = false,
@@ -39,7 +39,7 @@ export function ThreadComposer({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [message, setMessage] = useState('');
 
-  const resizeTextarea = () => {
+  const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
 
@@ -48,13 +48,13 @@ export function ThreadComposer({
     const h = Math.min(el.scrollHeight, MAX);
     el.style.height = `${h}px`;
     el.style.overflowY = el.scrollHeight > MAX ? 'auto' : 'hidden';
-  };
+  }, []);
 
   useEffect(() => {
     resizeTextarea();
-  }, [message]);
+  }, [message, resizeTextarea]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || loading || disabled) return;
 
@@ -64,22 +64,22 @@ export function ThreadComposer({
     setTimeout(resizeTextarea, 0);
 
     await onSubmit(messageToSend, files);
-  };
+  }, [message, loading, disabled, resizeTextarea, onSubmit, files]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!loading && !disabled && message.trim()) {
         handleSubmit(e);
       }
     }
-  };
+  }, [loading, disabled, message, handleSubmit]);
 
-  const removeFile = (index: number) => {
+  const removeFile = useCallback((index: number) => {
     if (onFilesChange) {
       onFilesChange(files.filter((_, i) => i !== index));
     }
-  };
+  }, [onFilesChange, files]);
 
   return (
     <div
@@ -122,7 +122,11 @@ export function ThreadComposer({
               </div>
             )}
 
+            <label htmlFor="thread-composer-input" className="sr-only">
+              Type your message
+            </label>
             <textarea
+              id="thread-composer-input"
               ref={textareaRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -134,6 +138,8 @@ export function ThreadComposer({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
+              aria-label="Message input"
+              aria-describedby="composer-help"
               className={cn(
                 'w-full resize-none text-sm placeholder:text-muted-foreground',
                 'max-h-[110px] min-h-[36px] px-3 py-2',
@@ -142,6 +148,9 @@ export function ThreadComposer({
                 'overflow-y-auto outline-none'
               )}
             />
+            <span id="composer-help" className="sr-only">
+              Press Enter to send, Shift+Enter for new line
+            </span>
 
             <div className='flex justify-between w-full px-2 pb-2'>
               <div className='flex items-center gap-1'>
@@ -154,12 +163,12 @@ export function ThreadComposer({
                 <Button
                   type='submit'
                   size='icon'
-                  aria-label={sendLabel}
+                  aria-label={loading ? 'Sending message...' : sendLabel}
                   disabled={loading || !message.trim() || disabled}
                   variant={message.trim() && !disabled ? 'default' : 'ghost'}
                   className='transition-color duration-200 ease-in-out'
                 >
-                  <Send size={16} />
+                  <Send size={16} aria-hidden="true" />
                 </Button>
               </div>
             </div>
@@ -168,4 +177,4 @@ export function ThreadComposer({
       </div>
     </div>
   );
-}
+});
