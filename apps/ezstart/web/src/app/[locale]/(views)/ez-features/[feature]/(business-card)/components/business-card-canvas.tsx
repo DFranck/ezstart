@@ -91,7 +91,7 @@ export function BusinessCardCanvas({ data, config }: BusinessCardCanvasProps) {
 
   if (!data.name) {
     return (
-      <Div layout='center' className='min-h-[300px]' variant='muted'>
+      <Div layout='center' className='min-h-[300px] bg-muted/50 rounded-lg'>
         <p className='text-muted-foreground'>Enter your name to preview</p>
       </Div>
     );

@@ -103,7 +103,7 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
 
   if (!config.url) {
     return (
-      <Div layout='center' className='min-h-[300px]' variant='muted'>
+      <Div layout='center' className='min-h-[300px] bg-muted/50 rounded-lg'>
         <p className='text-muted-foreground'>Enter a URL to generate QR code</p>
       </Div>
     );
@@ -141,7 +141,7 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
 
       {/* Info */}
       {config.redirectType === 'temporary' && (
-        <Div variant='muted' size='sm' className='text-sm'>
+        <Div variant='card' size='sm' className='text-sm bg-muted/50'>
           <Icon name='lucide:Info' size={16} className='inline mr-2' ariaHidden />
           <span className='text-muted-foreground'>
             Temporary redirect: URL can be changed later without regenerating the QR code
