@@ -1,22 +1,60 @@
 /**
- * Background health check scheduler
- * Keeps Render services awake by pinging them every 5 minutes
+ * Adaptive Health Check Scheduler with Exponential Backoff
+ *
+ * Strategy:
+ * - Services UP → Increase check interval progressively (save resources)
+ * - Services DOWN → Reset to minimum interval (fast recovery detection)
+ *
+ * Platform-specific behavior:
+ * - Railway APIs: Can go up to 60min intervals (save $)
+ * - Render APIs: Max 10min intervals (prevent sleep after 15min)
+ * - Vercel Web: Can go up to 60min intervals (no sleep)
  */
 
-import cron from 'node-cron'
-import { HealthChecker, MONITORED_SERVICES, SERVICE_PLATFORMS } from '@ezstart/monitoring'
+import {
+  HealthChecker,
+  MONITORED_SERVICES,
+  ADAPTIVE_CHECK_CONFIG,
+  calculateNextInterval,
+  getMaxIntervalForService,
+  type AdaptiveCheckState,
+  type MonitoredServiceId,
+} from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
-import type { ScheduledTask } from 'node-cron'
 import type { Server as IOServer } from 'socket.io'
 
 export class HealthCheckScheduler {
   private healthChecker: HealthChecker
   private isRunning = false
-  private cronJob: ScheduledTask | null = null
   private io: IOServer | null = null
+
+  // Track adaptive state for each service
+  private serviceStates = new Map<MonitoredServiceId, AdaptiveCheckState>()
+
+  // Track scheduled timeouts for each service
+  private scheduledChecks = new Map<MonitoredServiceId, NodeJS.Timeout>()
 
   constructor() {
     this.healthChecker = new HealthChecker()
+    this.initializeServiceStates()
+  }
+
+  /**
+   * Initialize adaptive states for all services
+   */
+  private initializeServiceStates() {
+    const allServiceIds = Object.keys(MONITORED_SERVICES) as MonitoredServiceId[]
+
+    for (const serviceId of allServiceIds) {
+      this.serviceStates.set(serviceId, {
+        serviceId,
+        consecutiveSuccesses: 0,
+        consecutiveFailures: 0,
+        currentInterval: ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS,
+        nextCheckAt: new Date(Date.now() + ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS),
+        lastStatus: 'unknown',
+      })
+    }
   }
 
   /**
@@ -28,9 +66,7 @@ export class HealthCheckScheduler {
   }
 
   /**
-   * Start the scheduler
-   * - In development: Ping production URLs only (for testing monitoring)
-   * - In production: Ping Render services every 5 minutes to prevent sleep
+   * Start the adaptive scheduler
    */
   start() {
     if (this.isRunning) {
@@ -41,159 +77,229 @@ export class HealthCheckScheduler {
     const isDev = process.env.NODE_ENV !== 'production'
     const envLabel = isDev ? 'development' : 'production'
 
-    console.log(`⏰ [Scheduler] Starting health check cron job in ${envLabel} mode...`)
-    console.log('⏰ [Scheduler] Will check ALL production URLs every 5 minutes')
-    console.log(`⏰ [Scheduler] Monitoring ${Object.keys(MONITORED_SERVICES).length} services (APIs + Web apps)`)
-
-    if (isDev) {
-      console.log('⚠️ [Scheduler] Running in DEV mode - pinging PRODUCTION URLs only (not localhost)')
-    }
-
-    // Run every 5 minutes: */5 * * * *
-    // This keeps Render free tier services awake (sleep after 15min of inactivity)
-    // Synced with UptimeRobot interval (5 minutes)
-    this.cronJob = cron.schedule('*/5 * * * *', async () => {
-      await this.performHealthChecks()
-    })
+    console.log(`⏰ [Scheduler] Starting ADAPTIVE health check scheduler in ${envLabel} mode...`)
+    console.log(
+      `⏰ [Scheduler] Monitoring ${Object.keys(MONITORED_SERVICES).length} services with exponential backoff`
+    )
+    console.log('⏰ [Scheduler] Config:')
+    console.log(`   - Min interval: ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000} minutes`)
+    console.log(`   - Max interval (Railway/Vercel): ${ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS / 60000} minutes`)
+    console.log(`   - Max interval (Render): ${ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS / 60000} minutes`)
+    console.log(`   - Backoff multiplier: ${ADAPTIVE_CHECK_CONFIG.BACKOFF_MULTIPLIER}x`)
 
     this.isRunning = true
 
-    // Wait before first health check to ensure MongoDB is fully operational
-    // Production (Render): Wait 30s for cold starts + MongoDB Atlas connection (15-20s)
-    // Development: Wait 5s for MongoDB connection only
+    // Start all services with initial delay
     const initialDelay = isDev ? 5000 : 30000
     const delayLabel = isDev ? '5 seconds' : '30 seconds'
 
     console.log(`⏰ [Scheduler] Waiting ${delayLabel} before first health check...`)
-    setTimeout(() => {
-      this.performHealthChecks().catch(err => {
-        console.error('❌ [Scheduler] Error during initial health check:', err)
-      })
-    }, initialDelay)
 
-    console.log(`✅ [Scheduler] Health check scheduler started (${envLabel} mode)`)
+    setTimeout(() => {
+      this.scheduleAllServices()
+      console.log(`✅ [Scheduler] Adaptive health check scheduler started (${envLabel} mode)`)
+    }, initialDelay)
   }
 
   /**
-   * Perform health checks on all production services
+   * Schedule health checks for all services
    */
-  private async performHealthChecks() {
+  private scheduleAllServices() {
+    const allServiceIds = Object.keys(MONITORED_SERVICES) as MonitoredServiceId[]
+
+    for (const serviceId of allServiceIds) {
+      this.scheduleNextCheck(serviceId)
+    }
+
+    console.log(`⏰ [Scheduler] Scheduled ${allServiceIds.length} services for adaptive health checks`)
+  }
+
+  /**
+   * Schedule the next health check for a specific service
+   */
+  private scheduleNextCheck(serviceId: MonitoredServiceId) {
+    // Clear existing timeout if any
+    const existingTimeout = this.scheduledChecks.get(serviceId)
+    if (existingTimeout) {
+      clearTimeout(existingTimeout)
+    }
+
+    const state = this.serviceStates.get(serviceId)
+    if (!state) {
+      console.error(`❌ [Scheduler] No state found for service ${serviceId}`)
+      return
+    }
+
+    const delay = state.nextCheckAt.getTime() - Date.now()
+    const delayMin = Math.round(delay / 60000)
+
+    const timeout = setTimeout(async () => {
+      await this.performHealthCheck(serviceId)
+    }, Math.max(delay, 0))
+
+    this.scheduledChecks.set(serviceId, timeout)
+
+    console.log(
+      `⏰ [Scheduler] ${serviceId}: Next check in ${delayMin}min (interval: ${state.currentInterval / 60000}min)`
+    )
+  }
+
+  /**
+   * Perform health check for a single service
+   */
+  private async performHealthCheck(serviceId: MonitoredServiceId) {
+    const state = this.serviceStates.get(serviceId)
+    if (!state) return
+
+    const config = MONITORED_SERVICES[serviceId]
     const startTime = Date.now()
-    console.log(`⏰ [Scheduler] Running health checks at ${new Date().toISOString()}`)
 
     try {
-      // Get shared MongoDB connection
       const HealthCheck = await getHealthCheckModel()
 
-      // Get ALL services (not just Render)
-      const allServiceIds = Object.keys(MONITORED_SERVICES) as Array<keyof typeof MONITORED_SERVICES>
+      // Check production URL
+      const result = await this.healthChecker.check({
+        name: config.name,
+        type: config.type,
+        url: config.productionUrl,
+        timeout: 10000,
+        interval: state.currentInterval,
+        retries: 0,
+      })
 
-      const results = await Promise.all(
-        allServiceIds.map(async serviceId => {
-          try {
-            const config = MONITORED_SERVICES[serviceId]
+      // Update adaptive state
+      if (result.status === 'healthy') {
+        state.consecutiveSuccesses++
+        state.consecutiveFailures = 0
+        state.lastStatus = 'healthy'
+      } else {
+        state.consecutiveSuccesses = 0
+        state.consecutiveFailures++
+        state.lastStatus = result.status
+      }
 
-            // Check production URL with short timeout (don't wait for cold start)
-            const result = await this.healthChecker.check({
-              name: config.name,
-              type: config.type,
-              url: config.productionUrl,
-              timeout: 10000, // 10s timeout
-              interval: 300000, // 5min
-              retries: 0, // No retries, just ping
-            })
+      // Calculate next interval using exponential backoff
+      const nextInterval = calculateNextInterval(state)
+      const maxInterval = getMaxIntervalForService(serviceId)
 
-            // Save to MongoDB for history/graphs
-            await HealthCheck.create({
-              serviceId,
-              status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
-              responseTime: result.responseTime,
-              timestamp: new Date(),
-              error: result.error,
-              metadata: result.metadata,
-            })
+      // Log if interval changed
+      if (nextInterval !== state.currentInterval) {
+        console.log(
+          `📊 [Scheduler] ${serviceId}: Interval ${state.currentInterval / 60000}min → ${nextInterval / 60000}min (status: ${result.status}, successes: ${state.consecutiveSuccesses})`
+        )
+      }
 
-            return { serviceId, result }
-          } catch (error) {
-            console.error(`❌ [Scheduler] Error checking ${serviceId}:`, error)
+      state.currentInterval = nextInterval
+      state.nextCheckAt = new Date(Date.now() + nextInterval)
 
-            // Still save failed check to MongoDB
-            try {
-              await HealthCheck.create({
-                serviceId,
-                status: 'unhealthy',
-                responseTime: null,
-                timestamp: new Date(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-              })
-            } catch (dbError) {
-              console.error(`❌ [Scheduler] Failed to save health check to DB:`, dbError)
-            }
-
-            return { serviceId, result: null }
-          }
-        })
-      )
+      // Save to MongoDB
+      await HealthCheck.create({
+        serviceId,
+        status: result.status === 'healthy' ? 'healthy' : 'unhealthy',
+        responseTime: result.responseTime,
+        timestamp: new Date(),
+        error: result.error,
+        metadata: {
+          ...result.metadata,
+          adaptiveInterval: nextInterval,
+          maxInterval,
+          consecutiveSuccesses: state.consecutiveSuccesses,
+          consecutiveFailures: state.consecutiveFailures,
+        },
+      })
 
       const duration = Date.now() - startTime
-      const healthyCount = results.filter(r => r.result?.status === 'healthy').length
-      const unhealthyCount = results.length - healthyCount
 
-      // Concise logging: Only show details when there are issues
-      if (unhealthyCount === 0) {
-        console.log(`✅ [Scheduler] All ${results.length} services healthy in ${duration}ms`)
+      // Log result
+      if (result.status === 'healthy') {
+        console.log(
+          `✅ [Scheduler] ${serviceId}: ${result.status} (${result.responseTime}ms) - Next in ${nextInterval / 60000}min`
+        )
       } else {
         console.log(
-          `⚠️ [Scheduler] Health checks completed in ${duration}ms: ${healthyCount}/${results.length} healthy`
+          `❌ [Scheduler] ${serviceId}: ${result.status} (${duration}ms) - Reset to ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000}min`
         )
-
-        // Only log unhealthy services
-        results.forEach(({ serviceId, result }) => {
-          if (result?.status !== 'healthy') {
-            const responseTime = result?.responseTime ? `${result.responseTime}ms` : 'timeout'
-            console.log(`  ❌ ${serviceId}: ${result?.status || 'error'} (${responseTime})`)
-          }
-        })
       }
 
-      // Emit real-time update to connected clients
+      // Emit real-time update
       if (this.io) {
-        this.io.emit('health-checks-updated', {
+        this.io.emit('health-check-updated', {
+          serviceId,
+          status: result.status,
+          responseTime: result.responseTime,
+          nextCheckIn: nextInterval,
           timestamp: new Date().toISOString(),
-          summary: {
-            total: results.length,
-            healthy: healthyCount,
-            unhealthy: results.length - healthyCount,
-          },
-          duration,
         })
-        console.log(`📡 [Scheduler] Emitted health-checks-updated event to ${this.io.engine.clientsCount} clients`)
       }
     } catch (error) {
-      console.error('❌ [Scheduler] Error during health checks:', error)
+      console.error(`❌ [Scheduler] Error checking ${serviceId}:`, error)
+
+      // Reset to minimum interval on error
+      state.consecutiveSuccesses = 0
+      state.consecutiveFailures++
+      state.lastStatus = 'unhealthy'
+      state.currentInterval = ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS
+      state.nextCheckAt = new Date(Date.now() + ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS)
+
+      // Save error to MongoDB
+      try {
+        const HealthCheck = await getHealthCheckModel()
+        await HealthCheck.create({
+          serviceId,
+          status: 'unhealthy',
+          responseTime: null,
+          timestamp: new Date(),
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      } catch (dbError) {
+        console.error(`❌ [Scheduler] Failed to save error to DB:`, dbError)
+      }
     }
+
+    // Schedule next check
+    this.scheduleNextCheck(serviceId)
   }
 
   /**
    * Stop the scheduler
    */
   stop() {
-    if (this.cronJob) {
-      this.cronJob.stop()
-      this.cronJob = null
-      this.isRunning = false
-      console.log('⏰ [Scheduler] Health check scheduler stopped')
+    // Clear all scheduled timeouts
+    for (const [serviceId, timeout] of this.scheduledChecks.entries()) {
+      clearTimeout(timeout)
     }
+
+    this.scheduledChecks.clear()
+    this.isRunning = false
+
+    console.log('⏰ [Scheduler] Adaptive health check scheduler stopped')
   }
 
   /**
    * Get scheduler status
    */
   getStatus() {
+    const states = Array.from(this.serviceStates.entries()).map(([serviceId, state]) => ({
+      serviceId,
+      currentInterval: `${state.currentInterval / 60000}min`,
+      nextCheckAt: state.nextCheckAt.toISOString(),
+      lastStatus: state.lastStatus,
+      consecutiveSuccesses: state.consecutiveSuccesses,
+      consecutiveFailures: state.consecutiveFailures,
+    }))
+
     return {
       isRunning: this.isRunning,
       environment: process.env.NODE_ENV,
-      nextRun: this.cronJob ? 'Every 5 minutes' : 'Not scheduled',
+      totalServices: this.serviceStates.size,
+      states,
     }
+  }
+
+  /**
+   * Get current state for a specific service
+   */
+  getServiceState(serviceId: MonitoredServiceId): AdaptiveCheckState | undefined {
+    return this.serviceStates.get(serviceId)
   }
 }

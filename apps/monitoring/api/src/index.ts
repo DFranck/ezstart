@@ -4,6 +4,7 @@ import { Sentry } from './instrument.mjs'
 import { createApp, startServer, connectToMongo, getApiPort, createSocketServer } from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries } from './routes/index.js'
+import { setScheduler } from './routes/scheduler.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
 import type { Server as IOServer } from 'socket.io'
 
@@ -21,6 +22,9 @@ let io: IOServer
 
 // Initialize health check scheduler
 const healthCheckScheduler = new HealthCheckScheduler()
+
+// Expose scheduler to routes
+setScheduler(healthCheckScheduler)
 
 // Health check endpoint
 app.get('/api/health', (_, res) => {

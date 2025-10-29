@@ -7,6 +7,7 @@ import projectsRouter from './projects.js'
 import historyRouter from './history.js'
 import triggerRouter from './trigger.js'
 import activityRouter from './activity.js'
+import { schedulerRoutes } from './scheduler.js'
 
 const router = Router()
 
@@ -19,6 +20,7 @@ router.use('/projects', projectsRouter)
 router.use('/history', historyRouter)
 router.use('/trigger-checks', triggerRouter)
 router.use('/activity', activityRouter)
+router.use('/scheduler', schedulerRoutes)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -37,6 +39,8 @@ router.get('/', (_, res) => {
       activity: '/api/activity',
       activityErrors: '/api/activity/errors',
       activityStats: '/api/activity/stats',
+      scheduler: '/api/scheduler/status',
+      schedulerService: '/api/scheduler/service/:serviceId',
       docs: '/api/docs',
     },
   })

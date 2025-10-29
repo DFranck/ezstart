@@ -42,6 +42,54 @@ export interface ServiceHealth {
 }
 
 /**
+ * Adaptive Health Check Configuration
+ * Implements exponential backoff for efficient monitoring
+ */
+export interface AdaptiveCheckState {
+  serviceId: MonitoredServiceId
+  consecutiveSuccesses: number
+  consecutiveFailures: number
+  currentInterval: number // Current interval in ms
+  nextCheckAt: Date
+  lastStatus: HealthStatus
+}
+
+/**
+ * Exponential Backoff Configuration
+ *
+ * Strategy:
+ * - Service UP → Increase interval progressively (save resources)
+ * - Service DOWN → Reset to minimum interval (fast recovery detection)
+ *
+ * Example progression:
+ * ✅ Check 1: UP → Next in 5 min (base)
+ * ✅ Check 2: UP → Next in 10 min (2x)
+ * ✅ Check 3: UP → Next in 20 min (2x)
+ * ✅ Check 4: UP → Next in 40 min (2x)
+ * ✅ Check 5: UP → Next in 60 min (max, capped)
+ * ❌ Check 6: DOWN → Next in 5 min (reset!)
+ */
+export const ADAPTIVE_CHECK_CONFIG = {
+  // Minimum interval (after failure or initial check)
+  MIN_INTERVAL_MS: 5 * 60 * 1000, // 5 minutes
+
+  // Maximum interval (for stable services)
+  MAX_INTERVAL_MS: 60 * 60 * 1000, // 60 minutes
+
+  // Multiplier for exponential backoff
+  BACKOFF_MULTIPLIER: 2,
+
+  // Number of consecutive successes needed before increasing interval
+  SUCCESS_THRESHOLD: 1,
+
+  // Number of consecutive failures before alerting
+  FAILURE_THRESHOLD: 3,
+
+  // Render-specific: Maximum interval to keep services awake (sleep after 15min)
+  RENDER_MAX_INTERVAL_MS: 10 * 60 * 1000, // 10 minutes (safe margin)
+} as const
+
+/**
  * Monitored services - Auto-generated from @ezstart/config
  * Single source of truth for all service URLs and ports
  */
@@ -148,17 +196,17 @@ export type MonitoredServiceId = keyof typeof MONITORED_SERVICES
  * Platform configuration for health checks
  */
 export const SERVICE_PLATFORMS = {
-  // Railway ($) - Check in prod for monitoring
+  // Railway ($) - Check in prod for monitoring, adaptive interval to save cost
   railway: ['ezauth-api', 'ezpay-api'] as MonitoredServiceId[],
 
-  // Render (free) - Check periodically to prevent sleep
+  // Render (free) - Check periodically to prevent sleep (max 10 min interval)
   render: [
     'ezbill-api',
     'tower-defense-api',
     'green-pulse-api',
   ] as MonitoredServiceId[],
 
-  // Vercel (free) - Web apps, check in prod
+  // Vercel (free) - Web apps, adaptive interval (they don't sleep)
   vercel: [
     'ezstart-web',
     'ezauth-web',
@@ -189,4 +237,44 @@ export function getUrlsToCheck(
 
   // Development: Only check local URLs
   return [{ url: config.localUrl, label: 'local' }]
+}
+
+/**
+ * Get maximum interval for a service based on platform
+ * Render services must be checked more frequently to prevent sleep
+ */
+export function getMaxIntervalForService(serviceId: MonitoredServiceId): number {
+  if (SERVICE_PLATFORMS.render.includes(serviceId)) {
+    return ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS
+  }
+  return ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS
+}
+
+/**
+ * Calculate next check interval using exponential backoff
+ *
+ * @param state Current adaptive check state
+ * @returns Next interval in milliseconds
+ */
+export function calculateNextInterval(state: AdaptiveCheckState): number {
+  const { currentInterval, consecutiveSuccesses, lastStatus } = state
+  const maxInterval = getMaxIntervalForService(state.serviceId)
+
+  // If last check failed, reset to minimum
+  if (lastStatus !== 'healthy') {
+    return ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS
+  }
+
+  // If not enough consecutive successes, keep current interval
+  if (consecutiveSuccesses < ADAPTIVE_CHECK_CONFIG.SUCCESS_THRESHOLD) {
+    return currentInterval
+  }
+
+  // Increase interval exponentially, but cap at max
+  const nextInterval = Math.min(
+    currentInterval * ADAPTIVE_CHECK_CONFIG.BACKOFF_MULTIPLIER,
+    maxInterval
+  )
+
+  return nextInterval
 }

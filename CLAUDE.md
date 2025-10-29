@@ -724,6 +724,121 @@ const logs = client.issuesToActivityLogs(issues)
 - [ ] Email/Slack alerts sur erreurs critiques
 - [ ] Graphiques de tendances (errors over time)
 
+### Adaptive Health Checks - Exponential Backoff ⭐ NOUVEAU (29/10/2025)
+
+**Monitoring intelligent qui s'adapte automatiquement selon la santé des services.**
+
+#### Problème Résolu
+
+**Double monitoring consommait tout :**
+- Monitoring API : Toutes les 5-10 min
+- UptimeRobot : Toutes les 5 min
+- **Résultat** : Railway $5 consommés en 1 semaine, Render 750h/mois dépassées
+
+#### Solution : Exponential Backoff Adaptatif
+
+```
+✅ Service UP stable → Augmente progressivement l'intervalle (économies)
+❌ Service DOWN → Reset immédiat à 5 min (réactivité maximale)
+```
+
+**Progression exemple (Railway/Vercel) :**
+```
+Check 1: UP → Next in 5 min
+Check 2: UP → Next in 10 min (2× backoff)
+Check 3: UP → Next in 20 min (2× backoff)
+Check 4: UP → Next in 40 min (2× backoff)
+Check 5: UP → Next in 60 min (capped at max)
+Check 6: DOWN → Next in 5 min (reset!)
+```
+
+**Progression exemple (Render - Keep Awake) :**
+```
+Check 1: UP → Next in 5 min
+Check 2: UP → Next in 10 min (capped, prevent sleep)
+Check 3: UP → Next in 10 min (reste à 10min)
+```
+
+#### Économies Réalisées
+
+| Métrique | Avant (Fixed 5min) | Après (Adaptive) | Amélioration |
+|----------|-------------------|------------------|--------------|
+| **Checks/jour** | 3,744 | ~500-1,000 | **-67 à -87%** |
+| **Railway coût** | $2-3/mois | $0.10-0.20/mois | **-92%** ✅ |
+| **Render checks** | 25,920/mois | 12,960/mois | **-50%** ✅ |
+| **Vercel checks** | ~15,000/mois | ~5,760/mois | **-62%** ✅ |
+
+#### Configuration
+
+```typescript
+// packages/monitoring/src/types/health.ts
+export const ADAPTIVE_CHECK_CONFIG = {
+  MIN_INTERVAL_MS: 5 * 60 * 1000,       // 5 min (après échec)
+  MAX_INTERVAL_MS: 60 * 60 * 1000,      // 60 min (Railway/Vercel stable)
+  RENDER_MAX_INTERVAL_MS: 10 * 60 * 1000,  // 10 min (Render keep awake)
+  BACKOFF_MULTIPLIER: 2,                // Double à chaque succès
+  SUCCESS_THRESHOLD: 1,                 // 1 succès avant d'augmenter
+  FAILURE_THRESHOLD: 3,                 // 3 échecs avant alerte
+}
+```
+
+#### Platform-Specific Limits
+
+```typescript
+// Railway APIs → Max 60 min (économiser $)
+getMaxIntervalForService('ezauth-api') // → 60 minutes
+
+// Render APIs → Max 10 min (empêcher sleep)
+getMaxIntervalForService('ezbill-api') // → 10 minutes
+
+// Vercel Web → Max 60 min (pas de sleep)
+getMaxIntervalForService('ezstart-web') // → 60 minutes
+```
+
+#### Endpoints API
+
+**GET /api/scheduler/status** - État complet du scheduler
+```json
+{
+  "isRunning": true,
+  "environment": "production",
+  "totalServices": 13,
+  "states": [
+    {
+      "serviceId": "ezauth-api",
+      "currentInterval": "60min",
+      "lastStatus": "healthy",
+      "consecutiveSuccesses": 5
+    }
+  ]
+}
+```
+
+**GET /api/scheduler/service/:serviceId** - État d'un service spécifique
+
+#### UptimeRobot Compatible
+
+**Stratégie hybride recommandée :**
+- ✅ **GARDER** : UptimeRobot pour Monitoring API uniquement (1 service)
+- ❌ **SUPPRIMER** : Tous les autres monitors (EZAuth, EZBill, etc.)
+- **Résultat** : Monitoring API éveillé 24/7 + Adaptive checks pour tous les autres
+
+#### Architecture
+
+**Scheduler Adaptatif** ([healthCheckScheduler.ts](apps/monitoring/api/src/services/healthCheckScheduler.ts))
+- ❌ Supprimé : cron job fixe
+- ✅ Ajouté : setTimeout individuel par service
+- ✅ Ajouté : Tracking `serviceStates` Map
+- ✅ Ajouté : Métadonnées MongoDB (`adaptiveInterval`, `consecutiveSuccesses`)
+
+**Types & Config** ([health.ts](packages/monitoring/src/types/health.ts))
+- `AdaptiveCheckState` interface
+- `ADAPTIVE_CHECK_CONFIG` constantes
+- `getMaxIntervalForService()` - Platform-specific limits
+- `calculateNextInterval()` - Exponential backoff logic
+
+**Documentation complète :** [docs/ADAPTIVE-MONITORING.md](./docs/ADAPTIVE-MONITORING.md)
+
 ## 📝 GreenPulse Forms - Système de Formulaires Intelligents ⭐ NOUVEAU (26/10/2025)
 
 **Architecture complète de formulaires agnostiques avec extraction IA pour automatiser le remplissage.**
