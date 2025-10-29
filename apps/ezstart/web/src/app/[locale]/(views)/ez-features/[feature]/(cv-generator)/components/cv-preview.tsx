@@ -46,7 +46,7 @@ export function CVPreview({ data, config }: CVPreviewProps) {
 
   if (!data.personalInfo.name) {
     return (
-      <Div layout='center' className='min-h-[400px]' variant='muted'>
+      <Div layout='center' className='min-h-[400px] bg-muted/50 rounded-lg'>
         <p className='text-muted-foreground'>Enter your information to preview CV</p>
       </Div>
     );
