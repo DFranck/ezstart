@@ -19,6 +19,8 @@ import {
 } from '@ezstart/ui/components';
 import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
+import { ResetButton } from '../../components/reset-button';
+import { ResponsivePreview } from '../../components/responsive-preview';
 
 export const HeadingPlayground = () => (
   <Section>
@@ -44,7 +46,7 @@ type TesterProps = {
 const HeadingVariantTester = ({ tag }: TesterProps) => {
   const meta = tagVariantsMeta[tag];
   const factory = headingVariants[tag] as any;
-  const [selected, setSelected] = useState(() => {
+  const getDefaultVariants = () => {
     const out: Record<string, string> = {};
     Object.entries(meta).forEach(([variantName, values]) => {
       if (variantName === 'size' && values.includes(tag)) {
@@ -53,12 +55,17 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
         out[variantName] = factory.defaultVariants?.[variantName] ?? values[0];
       }
     });
-
     return out;
-  });
+  };
+
+  const [selected, setSelected] = useState(getDefaultVariants);
 
   const handleChange = (prop: string, value: string) => {
     setSelected((prev) => ({ ...prev, [prop]: value }));
+  };
+
+  const handleReset = () => {
+    setSelected(getDefaultVariants());
   };
 
   const aliasComponent = `H${tag.slice(1)}`;
@@ -69,11 +76,13 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
   return (
     <Section size={'xs'}>
       {/* Preview */}
-      <div className='flex-1 min-w-0'>
-        <Tag as={tag} {...selected}>
-          {content}
-        </Tag>
-      </div>
+      <ResponsivePreview>
+        <div className='flex-1 min-w-0'>
+          <Tag as={tag} {...selected}>
+            {content}
+          </Tag>
+        </div>
+      </ResponsivePreview>
 
       {/* Controls & usage */}
       <Div variant={'outline'} layout={'grid'} className='w-full'>
@@ -81,6 +90,10 @@ const HeadingVariantTester = ({ tag }: TesterProps) => {
           fakeTagCode={fakeTagCode}
           fakeAliasCode={fakeAliasCode}
         />
+        <div className='flex items-center justify-between mb-3'>
+          <span className='text-sm font-medium'>Variants</span>
+          <ResetButton onReset={handleReset} />
+        </div>
         <PlaygroundVariantSelects
           meta={meta}
           selected={selected}

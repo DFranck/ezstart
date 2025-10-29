@@ -11,6 +11,8 @@ import {
 import { useState } from 'react';
 import PlaygroundCodeView from '../components/playground-code-view';
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
+import { ResetButton } from '../../components/reset-button';
+import { ResponsivePreview } from '../../components/responsive-preview';
 import { buildFakeTag } from '../utils/build-fake-tag';
 
 const meta = tagVariantsMeta['span'];
@@ -22,6 +24,10 @@ export default function SpanPlayground() {
 
   const handleChange = (prop: string, value: string) => {
     setSelected((prev) => ({ ...prev, [prop]: value }));
+  };
+
+  const handleReset = () => {
+    setSelected(DEFAULT_SPAN_VARIANTS);
   };
 
   const content = (
@@ -36,13 +42,21 @@ export default function SpanPlayground() {
 
   return (
     <>
-      <Span>{content}</Span>
+      {/* Responsive Preview */}
+      <ResponsivePreview>
+        {content}
+      </ResponsivePreview>
+
       <Section size={'xs'}>
         <Div layout={'grid'} variant={'outline'}>
           <PlaygroundCodeView
             fakeTagCode={fakeTagCode}
             fakeAliasCode={fakeAliasCode}
           />
+          <div className='flex items-center justify-between mb-3'>
+            <span className='text-sm font-medium'>Variants</span>
+            <ResetButton onReset={handleReset} />
+          </div>
           <PlaygroundVariantSelects
             meta={meta}
             selected={selected}

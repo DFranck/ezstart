@@ -1,4 +1,7 @@
+'use client';
+
 import { H6 } from '@ezstart/ui/components';
+import { CopyCodeButton } from '../../components/copy-code-button';
 
 interface PlaygroundCodeViewViewProps {
   fakeTagCode: string;
@@ -13,13 +16,19 @@ const PlaygroundCodeView = ({
     <div className='mb-3'>
       <div className='grid grid-cols-1 gap-2'>
         <div>
-          <H6 className='mb-1'>Usage</H6>
+          <div className='flex items-center justify-between mb-1'>
+            <H6>Usage</H6>
+            <CopyCodeButton code={fakeTagCode} />
+          </div>
           <pre className='bg-muted text-muted-foreground rounded p-2 text-xs overflow-x-auto'>
             <code>{fakeTagCode}</code>
           </pre>
         </div>
         <div>
-          <H6 className='mb-1'>Alias</H6>
+          <div className='flex items-center justify-between mb-1'>
+            <H6>Alias</H6>
+            <CopyCodeButton code={fakeAliasCode} />
+          </div>
           <pre className='bg-muted text-muted-foreground rounded p-2 text-xs overflow-x-auto'>
             <code>{fakeAliasCode}</code>
           </pre>
