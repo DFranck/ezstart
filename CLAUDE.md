@@ -168,6 +168,38 @@ className="bg-card text-foreground"
 - Primary: `bg-primary`, `text-primary-foreground`
 - Border: `border`
 
+### Architecture UI en 3 Layers (IMPORTANT)
+
+Le package `@ezstart/ui` suit une **architecture en 3 couches** pour flexibilité maximale:
+
+```
+Layer 3: Business Components
+├─ PasswordInput (Input + validation)
+├─ BackButton (Button + navigation)
+└─ LocaleSwitcher (Dropdown + i18n)
+         ↓ composent
+Layer 2: High-Level Components
+├─ Modal (Dialog avec defaults)
+├─ Dropdown (Select simplifié)
+└─ Hero (Section + media)
+         ↓ utilisent
+Layer 1: Primitives & Base
+├─ Dialog, Select (Radix wrappers)
+└─ Button, Input, Card...
+```
+
+**Quand utiliser chaque layer:**
+- **Layer 1:** Cas complexes avec layouts customs
+- **Layer 2:** 90% des cas standards
+- **Layer 3:** Patterns métier spécifiques
+
+**Pourquoi ne PAS merger les composants:**
+- ✅ PasswordInput = composition d'Input (pattern correct)
+- ✅ Modal ≠ Dialog (niveaux d'abstraction différents)
+- ✅ Suit les standards industrie (shadcn/ui, Radix UI)
+
+**Documentation complète:** [packages/ui/README.md](./packages/ui/README.md)
+
 ---
 
 ## 🏗️ Configuration Centralisée

@@ -1047,17 +1047,55 @@ The package is optimized for tree shaking, allowing bundlers to only include use
 <Button className="bg-red-500">Delete</Button>
 ```
 
-### 2. Component Composition
-✅ **Compose using provided components**
+### 2. Component Composition & Layered Architecture
+
+The component library follows a **3-layer architecture** for maximum flexibility and code reuse:
+
+```
+Layer 3: Business Components (Composition with Logic)
+├─ PasswordInput (Input + strength validation)
+├─ BackButton (Button + navigation logic)
+├─ Burger (Button + animation)
+└─ LocaleSwitcher (Dropdown + i18n)
+         ↓ compose
+Layer 2: High-Level Components (Opiniated APIs)
+├─ Modal (Dialog wrapper with defaults)
+├─ Dropdown (Select wrapper simplified)
+└─ Hero (Section + media logic)
+         ↓ use
+Layer 1: Primitives & Base Components (Unopinionated)
+├─ Dialog (Radix wrapper)
+├─ Select (Radix wrapper)
+├─ Button, Input, Card, Badge...
+```
+
+**Why this matters:**
+- **Layer 1 (Primitives):** Use for complex custom layouts
+- **Layer 2 (High-Level):** Use for standard use cases (90% of the time)
+- **Layer 3 (Business):** Use for specific patterns (password, navigation, etc.)
+
+**Examples:**
+
+✅ **Layer 2: Simple modal (recommended)**
 ```tsx
-<Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <p>Content</p>
-  </CardContent>
-</Card>
+<Modal isOpen={open} onClose={close} title="Delete Item">
+  Are you sure?
+</Modal>
+```
+
+✅ **Layer 1: Complex custom modal (advanced)**
+```tsx
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogTrigger asChild><Button>Open</Button></DialogTrigger>
+  <DialogContent>
+    <CustomComplexLayout />
+  </DialogContent>
+</Dialog>
+```
+
+✅ **Layer 3: Business pattern**
+```tsx
+<PasswordInput showStrength showRequirements />
 ```
 
 ❌ **Don't use HTML elements directly**
@@ -1067,6 +1105,11 @@ The package is optimized for tree shaking, allowing bundlers to only include use
   <p>Content</p>
 </div>
 ```
+
+**Why separate components instead of merging?**
+- PasswordInput is NOT a variant of Input (different responsibility)
+- Modal is NOT a replacement for Dialog (different abstraction levels)
+- This follows industry standards (shadcn/ui, Radix UI, Material-UI)
 
 ### 3. Accessibility First
 - Built on Radix UI primitives for maximum accessibility
