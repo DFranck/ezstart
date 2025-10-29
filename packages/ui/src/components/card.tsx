@@ -3,7 +3,28 @@ import * as React from 'react'
 
 import { cn } from '../lib/utils'
 
-const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border', {
+/**
+ * Card Component - Interactive & Configurable
+ *
+ * Versatile card with multiple variants, interactive states, and flexible sizing.
+ *
+ * @example
+ * // Basic card
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Title</CardTitle>
+ *   </CardHeader>
+ *   <CardContent>Content</CardContent>
+ * </Card>
+ *
+ * @example
+ * // Interactive clickable card
+ * <Card interactive hover="lift" onClick={() => {}}>
+ *   <CardContent>Click me!</CardContent>
+ * </Card>
+ */
+
+const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border transition-all', {
   variants: {
     variant: {
       default: 'bg-card shadow-sm shadow-foreground/5',
@@ -22,18 +43,37 @@ const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border',
       lg: 'gap-6 py-4 md:py-6',
       xl: 'gap-8 py-6 md:py-8',
     },
+    interactive: {
+      true: 'cursor-pointer',
+      false: '',
+    },
+    hover: {
+      none: '',
+      lift: 'hover:-translate-y-1 hover:shadow-xl',
+      glow: 'hover:shadow-xl hover:shadow-primary/20',
+      border: 'hover:border-primary',
+      scale: 'hover:scale-[1.02]',
+    },
   },
   defaultVariants: {
     variant: 'default',
     size: 'default',
+    interactive: false,
+    hover: 'none',
   },
 })
 
 interface CardProps extends React.ComponentProps<'div'>, VariantProps<typeof cardVariants> {}
 
-function Card({ className, variant, size, ...props }: CardProps) {
+function Card({ className, variant, size, interactive, hover, ...props }: CardProps) {
   return (
-    <div data-slot="card" className={cn(cardVariants({ variant, size }), className)} {...props} />
+    <div
+      data-slot="card"
+      className={cn(cardVariants({ variant, size, interactive, hover }), className)}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      {...props}
+    />
   )
 }
 

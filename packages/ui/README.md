@@ -128,9 +128,13 @@ import { Button } from '@ezstart/ui/components'
 **Variants:** `default`, `destructive`, `outline`, `secondary`, `ghost`, `linkedin`, `ezstart`
 
 #### Card
-```tsx
-import { Card, CardHeader, CardTitle, CardContent } from '@ezstart/ui/components'
 
+**Enhanced with interactive states** - Hover effects and clickable variants
+
+```tsx
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@ezstart/ui/components'
+
+// Basic card
 <Card variant="default">
   <CardHeader>
     <CardTitle>Card Title</CardTitle>
@@ -139,23 +143,266 @@ import { Card, CardHeader, CardTitle, CardContent } from '@ezstart/ui/components
     Card content here
   </CardContent>
 </Card>
+
+// Interactive clickable card
+<Card
+  interactive
+  hover="lift"
+  onClick={() => navigate('/details')}
+>
+  <CardHeader>
+    <CardTitle>Clickable Card</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Click me to navigate
+  </CardContent>
+</Card>
+
+// Hover effects
+<Card hover="glow">
+  <CardContent>Glowing hover effect</CardContent>
+</Card>
+
+<Card hover="scale">
+  <CardContent>Scale on hover</CardContent>
+</Card>
+
+<Card hover="border">
+  <CardContent>Border highlight on hover</CardContent>
+</Card>
+
+// Premium variant with gradient
+<Card variant="premium" size="lg">
+  <CardHeader>
+    <CardTitle>Premium Feature</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Beautiful gradient background
+  </CardContent>
+</Card>
 ```
 
 **Variants:** `default`, `ghost`, `floating`, `dark`, `premium`, `elevated`
 
-#### Input
-```tsx
-import { Input, Label } from '@ezstart/ui/components'
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`
 
+**Interactive Props:**
+- `interactive` - Makes card clickable (adds cursor pointer, role, tabIndex)
+- `hover` - Hover effect: `none`, `lift` (translate up), `glow` (shadow), `border` (highlight), `scale` (zoom)
+
+**Use Cases:**
+- Static information cards (`hover="none"`)
+- Navigation cards (`interactive hover="lift"`)
+- Feature highlights (`hover="glow"`)
+- Clickable tiles (`interactive hover="scale"`)
+
+#### Badge
+
+**100% configurable with dot indicator and pulse animation**
+
+```tsx
+import { Badge } from '@ezstart/ui/components'
+
+// Basic variants
+<Badge variant="default">Default</Badge>
+<Badge variant="success">Success</Badge>
+<Badge variant="destructive">Error</Badge>
+<Badge variant="warning">Warning</Badge>
+<Badge variant="info">Info</Badge>
+
+// With sizes
+<Badge size="sm">Small</Badge>
+<Badge size="default">Default</Badge>
+<Badge size="lg">Large</Badge>
+
+// With dot indicator
+<Badge variant="success" dot>3 new</Badge>
+<Badge variant="destructive" dot>5 errors</Badge>
+
+// With pulse animation (real-time status)
+<Badge variant="success" pulse>Live</Badge>
+<Badge variant="info" dot pulse>Processing...</Badge>
+
+// Color variants
+<Badge variant="purple">Purple</Badge>
+<Badge variant="cyan">Cyan</Badge>
+<Badge variant="indigo">Indigo</Badge>
+<Badge variant="pink">Pink</Badge>
+```
+
+**Props:**
+- `variant` - Color variant: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`, `info`, `purple`, `cyan`, `indigo`, `pink`
+- `size` - Size: `sm`, `default`, `lg`
+- `dot` - Show dot indicator before text
+- `pulse` - Pulse animation for real-time status
+
+**Use Cases:**
+- Status indicators (active, inactive, pending)
+- Notification counts (3 new messages)
+- Real-time status (live stream, processing)
+- Tags and labels
+
+#### Input
+
+**Enhanced with icon support** - Start and end icons for better UX
+
+```tsx
+import { Input, Label, Icon } from '@ezstart/ui/components'
+
+// Basic input
+<Input type="email" placeholder="Email" />
+
+// With start icon (search, email, etc.)
+<Input
+  type="search"
+  placeholder="Search..."
+  startIcon={<Icon name="lucide:Search" size={16} />}
+/>
+
+// With end icon (clear button, etc.)
+<Input
+  type="text"
+  placeholder="Username"
+  endIcon={<Icon name="lucide:X" size={16} />}
+/>
+
+// With label
 <div>
   <Label htmlFor="email">Email</Label>
-  <Input 
-    id="email" 
-    type="email" 
+  <Input
+    id="email"
+    type="email"
     placeholder="Enter your email"
+    startIcon={<Icon name="lucide:Mail" size={16} />}
   />
 </div>
 ```
+
+**Props:**
+- `startIcon` - Icon displayed at the start of input
+- `endIcon` - Icon displayed at the end of input
+- `wrapperClassName` - Custom className for icon wrapper
+
+#### Textarea
+
+**Enhanced with auto-resize and character counting**
+
+```tsx
+import { TextArea } from '@ezstart/ui/components'
+
+// Basic usage
+<TextArea label="Description" placeholder="Enter description..." />
+
+// With auto-resize (grows with content)
+<TextArea
+  label="Comments"
+  autoResize
+  maxRows={10}
+  placeholder="Type your comment..."
+/>
+
+// With character count
+<TextArea
+  label="Bio"
+  showCharCount
+  maxLength={500}
+  placeholder="Tell us about yourself..."
+/>
+
+// Combined features
+<TextArea
+  label="Message"
+  autoResize
+  maxRows={8}
+  showCharCount
+  maxLength={1000}
+  placeholder="Your message..."
+/>
+```
+
+**Props:**
+- `label` - Label text above textarea
+- `autoResize` - Automatically resize based on content
+- `maxRows` - Maximum rows when auto-resizing (default: 10)
+- `showCharCount` - Display character count
+- `maxLength` - Maximum character limit
+
+#### Dropdown
+
+**100% Configurable menu with custom triggers**
+
+```tsx
+import { Dropdown, Button, Icon } from '@ezstart/ui/components'
+
+// Basic dropdown
+<Dropdown
+  label="Actions"
+  items={[
+    { label: 'Edit', value: 'edit', onSelect: () => {} },
+    { label: 'Delete', value: 'delete', onSelect: () => {} }
+  ]}
+/>
+
+// Custom trigger
+<Dropdown
+  trigger={<Button variant="outline">Open Menu</Button>}
+  items={items}
+/>
+
+// With icons and dividers
+<Dropdown
+  label="Options"
+  items={[
+    {
+      label: 'Profile',
+      value: 'profile',
+      icon: <Icon name="lucide:User" size={16} />,
+      onSelect: () => {}
+    },
+    {
+      label: 'Settings',
+      value: 'settings',
+      icon: <Icon name="lucide:Settings" size={16} />,
+      onSelect: () => {},
+      divider: true
+    },
+    {
+      label: 'Logout',
+      value: 'logout',
+      icon: <Icon name="lucide:LogOut" size={16} />,
+      onSelect: () => {},
+      disabled: false
+    }
+  ]}
+/>
+
+// Custom positioning
+<Dropdown
+  label="Menu"
+  items={items}
+  align="start"      // 'start' | 'center' | 'end'
+  side="bottom"      // 'top' | 'bottom'
+  fullWidth
+/>
+```
+
+**Props:**
+- `label` - Button label (if no custom trigger)
+- `trigger` - Custom trigger element (replaces button)
+- `items` - Menu items array
+- `variant` - Button variant (when using label)
+- `align` - Horizontal alignment: `start`, `center`, `end`
+- `side` - Vertical position: `top`, `bottom`
+- `fullWidth` - Menu width matches trigger
+- `open` / `onOpenChange` - Controlled state
+
+**Item Props:**
+- `label` - Item text or ReactNode
+- `value` - Unique identifier
+- `onSelect` - Click callback
+- `icon` - Icon element
+- `disabled` - Disable item
+- `divider` - Show divider after item
 
 ### Form Components
 
@@ -223,7 +470,75 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@ezstart/ui/components
 
 ### Dialog Components
 
-#### Modal & Dialog
+#### Modal (Recommended)
+
+**100% Configurable & Accessible** - Built on Radix UI for WCAG 2.1 AA compliance.
+
+```tsx
+import { Modal } from '@ezstart/ui/components'
+
+// Basic usage
+<Modal isOpen={open} onClose={() => setOpen(false)}>
+  <p>Modal content</p>
+</Modal>
+
+// With title, description, and footer
+<Modal
+  isOpen={open}
+  onClose={() => setOpen(false)}
+  title="Create Invoice"
+  description="Fill in the invoice details"
+  footer={
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+      <Button onClick={handleSubmit}>Submit</Button>
+    </div>
+  }
+>
+  <InvoiceForm />
+</Modal>
+
+// Custom size
+<Modal isOpen={open} onClose={() => setOpen(false)} size="xl">
+  <LargeContent />
+</Modal>
+
+// Prevent closing on overlay click
+<Modal
+  isOpen={open}
+  onClose={() => setOpen(false)}
+  disableOverlayClick
+  disableEscapeKey
+>
+  <ImportantForm />
+</Modal>
+```
+
+**Props:**
+- `isOpen: boolean` - Whether the modal is open
+- `onClose?: () => void` - Callback when modal closes
+- `title?: string | ReactNode` - Modal title (DialogHeader)
+- `description?: string | ReactNode` - Description below title
+- `footer?: ReactNode` - Action buttons
+- `size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'` - Modal size preset (default: `'lg'`)
+- `scrollBehavior?: 'inside' | 'outside'` - Where scrolling happens (default: `'inside'`)
+- `noCross?: boolean` - Hide close button (default: `false`)
+- `disableOverlayClick?: boolean` - Prevent closing on overlay click
+- `disableEscapeKey?: boolean` - Prevent closing on Escape key
+- `className?: string` - Additional CSS classes
+
+**Accessibility Features:**
+- ✅ Focus trap within modal
+- ✅ Escape key to close (configurable)
+- ✅ Click outside to close (configurable)
+- ✅ Screen reader announcements
+- ✅ Proper ARIA attributes
+- ✅ Keyboard navigation support
+
+#### Dialog (Low-level primitives)
+
+For advanced use cases, use Dialog primitives directly:
+
 ```tsx
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@ezstart/ui/components'
 
@@ -239,6 +554,182 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from 
   </DialogContent>
 </Dialog>
 ```
+
+**When to use Dialog vs Modal:**
+- **Use Modal** ✅ - For 99% of use cases (recommended, simpler API)
+- **Use Dialog** - When you need full control over Radix Dialog primitives
+
+#### AlertDialog
+
+**Enhanced with semantic variants** - Automatic styling for different alert types
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@ezstart/ui/components'
+
+// Destructive alert (delete, remove)
+<AlertDialog variant="destructive" open={open} onOpenChange={setOpen}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. All your data will be permanently deleted.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction>Delete</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
+// Warning alert
+<AlertDialog variant="warning">
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+      <AlertDialogDescription>
+        You have unsaved changes. Are you sure you want to leave?
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Stay</AlertDialogCancel>
+      <AlertDialogAction>Leave</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
+// Info alert
+<AlertDialog variant="info">
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>New Feature Available</AlertDialogTitle>
+      <AlertDialogDescription>
+        Check out our new dashboard improvements!
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogAction>Got it</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+**Props:**
+- `variant` - Alert type: `default`, `destructive`, `warning`, `info`
+- Action button automatically styled based on variant (red for destructive, default for others)
+
+**Use Cases:**
+- Destructive actions (delete, remove, irreversible)
+- Warnings (unsaved changes, data loss)
+- Info (announcements, confirmations)
+
+### Form Components Enhancements
+
+#### Checkbox
+
+**Enhanced with indeterminate state** - Perfect for "select all" functionality
+
+```tsx
+import { Checkbox } from '@ezstart/ui/components'
+
+// Basic checkbox
+<Checkbox checked={checked} onCheckedChange={setChecked} />
+
+// With built-in label
+<Checkbox
+  id="terms"
+  label="I accept the terms and conditions"
+  checked={accepted}
+  onCheckedChange={setAccepted}
+/>
+
+// Indeterminate state (partial selection)
+<Checkbox
+  checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+  onCheckedChange={handleSelectAll}
+  label="Select all items"
+/>
+```
+
+**Features:**
+- ✅ `checked="indeterminate"` - Shows minus icon for partial selection
+- ✅ `label` prop - Built-in label with proper htmlFor binding
+- ✅ Accessible (ARIA, keyboard nav)
+
+**Use Cases:**
+- Select all with partial selection
+- Terms and conditions
+- Multi-step form checkboxes
+
+#### Tooltip
+
+**Enhanced with variants & positioning** - Semantic colors for different tooltip types
+
+```tsx
+import { Tooltip, TooltipTrigger, TooltipContent } from '@ezstart/ui/components'
+
+// Basic tooltip
+<Tooltip>
+  <TooltipTrigger>Hover me</TooltipTrigger>
+  <TooltipContent>Helpful information</TooltipContent>
+</Tooltip>
+
+// Positioned tooltip
+<Tooltip>
+  <TooltipTrigger>Info</TooltipTrigger>
+  <TooltipContent side="top" align="center">
+    Top center tooltip
+  </TooltipContent>
+</Tooltip>
+
+// Variant styles
+<Tooltip>
+  <TooltipTrigger>
+    <Icon name="lucide:Info" />
+  </TooltipTrigger>
+  <TooltipContent variant="info">
+    This is informational
+  </TooltipContent>
+</Tooltip>
+
+<Tooltip>
+  <TooltipTrigger>
+    <Icon name="lucide:AlertTriangle" />
+  </TooltipTrigger>
+  <TooltipContent variant="warning">
+    Warning message
+  </TooltipContent>
+</Tooltip>
+
+<Tooltip>
+  <TooltipTrigger>Success</TooltipTrigger>
+  <TooltipContent variant="success" hideArrow>
+    Operation completed
+  </TooltipContent>
+</Tooltip>
+```
+
+**Props:**
+- `variant` - Visual style: `default`, `info`, `success`, `warning`, `destructive`
+- `side` - Position: `top`, `right`, `bottom`, `left`
+- `align` - Alignment: `start`, `center`, `end`
+- `sideOffset` - Distance from trigger (default: 4px)
+- `hideArrow` - Hide the arrow pointer
+
+**Use Cases:**
+- Help text on hover
+- Icon explanations
+- Status indicators
+- Contextual information
 
 ### Advanced Components
 

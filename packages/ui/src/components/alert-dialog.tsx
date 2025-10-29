@@ -6,10 +6,59 @@ import * as React from "react"
 import { cn } from "../lib/utils"
 import { buttonVariants } from "./button"
 
-function AlertDialog({
-  ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+/**
+ * AlertDialog Component - Enhanced with Variants
+ *
+ * Accessible alert dialogs with semantic variants for different alert types.
+ * Built on Radix UI primitives for WCAG 2.1 AA compliance.
+ *
+ * @example
+ * // Destructive alert (delete, remove)
+ * <AlertDialog variant="destructive" open={open} onOpenChange={setOpen}>
+ *   <AlertDialogContent>
+ *     <AlertDialogHeader>
+ *       <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+ *       <AlertDialogDescription>
+ *         This action cannot be undone.
+ *       </AlertDialogDescription>
+ *     </AlertDialogHeader>
+ *     <AlertDialogFooter>
+ *       <AlertDialogCancel>Cancel</AlertDialogCancel>
+ *       <AlertDialogAction>Delete</AlertDialogAction>
+ *     </AlertDialogFooter>
+ *   </AlertDialogContent>
+ * </AlertDialog>
+ *
+ * @example
+ * // Warning alert
+ * <AlertDialog variant="warning">
+ *   <AlertDialogContent>
+ *     <AlertDialogHeader>
+ *       <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+ *       <AlertDialogDescription>
+ *         You have unsaved changes. Continue?
+ *       </AlertDialogDescription>
+ *     </AlertDialogHeader>
+ *   </AlertDialogContent>
+ * </AlertDialog>
+ */
+
+export type AlertDialogVariant = 'default' | 'destructive' | 'warning' | 'info'
+
+const AlertDialogContext = React.createContext<{ variant?: AlertDialogVariant }>({
+  variant: 'default',
+})
+
+interface AlertDialogRootProps extends React.ComponentProps<typeof AlertDialogPrimitive.Root> {
+  variant?: AlertDialogVariant
+}
+
+function AlertDialog({ variant = 'default', ...props }: AlertDialogRootProps) {
+  return (
+    <AlertDialogContext.Provider value={{ variant }}>
+      <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+    </AlertDialogContext.Provider>
+  )
 }
 
 function AlertDialogTrigger({
@@ -122,9 +171,19 @@ function AlertDialogAction({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
+  const { variant } = React.useContext(AlertDialogContext)
+
+  // Apply variant-specific styles to action button
+  const variantStyles = {
+    default: buttonVariants(),
+    destructive: buttonVariants({ variant: 'destructive' }),
+    warning: buttonVariants({ variant: 'default' }),
+    info: buttonVariants({ variant: 'default' }),
+  }
+
   return (
     <AlertDialogPrimitive.Action
-      className={cn(buttonVariants(), className)}
+      className={cn(variantStyles[variant || 'default'], className)}
       {...props}
     />
   )

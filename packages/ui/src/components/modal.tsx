@@ -10,48 +10,155 @@ import {
   DialogTitle,
 } from './dialog'
 
+/**
+ * Modal Component - 100% Configurable & Accessible
+ *
+ * Built on Radix UI Dialog primitives for maximum accessibility (WCAG 2.1 AA).
+ * Agnostic wrapper that supports all use cases from simple alerts to complex forms.
+ *
+ * @example
+ * // Basic usage
+ * <Modal isOpen={open} onClose={() => setOpen(false)}>
+ *   <p>Modal content</p>
+ * </Modal>
+ *
+ * @example
+ * // With title, description, and footer
+ * <Modal
+ *   isOpen={open}
+ *   onClose={() => setOpen(false)}
+ *   title="Create Invoice"
+ *   description="Fill in the invoice details"
+ *   footer={<Button>Submit</Button>}
+ * >
+ *   <InvoiceForm />
+ * </Modal>
+ *
+ * @example
+ * // Custom size and scroll behavior
+ * <Modal
+ *   isOpen={open}
+ *   onClose={() => setOpen(false)}
+ *   size="xl"
+ *   scrollBehavior="outside"
+ * >
+ *   <LargeContent />
+ * </Modal>
+ */
+
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
+export type ModalScrollBehavior = 'inside' | 'outside'
+
+export interface ModalProps {
+  /** Whether the modal is open */
+  isOpen: boolean
+  /** Callback when the modal should close */
+  onClose?: () => void
+  /** Additional CSS classes for DialogContent */
+  className?: string
+  /** Modal content */
+  children: React.ReactNode
+  /** Hide the close button (X icon) */
+  noCross?: boolean
+  /** Disable closing on overlay click */
+  disableOverlayClick?: boolean
+  /** Disable closing on Escape key */
+  disableEscapeKey?: boolean
+  /** Modal title (appears in DialogHeader) */
+  title?: string | React.ReactNode
+  /** Modal description (appears below title) */
+  description?: string | React.ReactNode
+  /** Modal footer (action buttons) */
+  footer?: React.ReactNode
+  /** Modal size preset */
+  size?: ModalSize
+  /** Where scrolling happens: inside content or whole modal */
+  scrollBehavior?: ModalScrollBehavior
+}
+
+const SIZE_CLASSES: Record<ModalSize, string> = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-2xl',
+  full: 'max-w-[95vw]',
+}
+
 export const Modal = ({
   isOpen,
   onClose,
   className,
   children,
-  noCross,
+  noCross = false,
+  disableOverlayClick = false,
+  disableEscapeKey = false,
   title: propTitle,
   description: propDescription,
   footer: propFooter,
-}: {
-  isOpen: boolean
-  onClose?: () => void
-  className?: string
-  children: React.ReactNode
-  noCross?: boolean
-  title?: string | React.ReactNode
-  description?: string | React.ReactNode
-  footer?: React.ReactNode
-}) => {
+  size = 'lg',
+  scrollBehavior = 'inside',
+}: ModalProps) => {
+  const handleOpenChange = (open: boolean) => {
+    if (!open && !disableOverlayClick && onClose) {
+      onClose()
+    }
+  }
+
+  const handleEscapeKeyDown = (e: KeyboardEvent) => {
+    if (disableEscapeKey) {
+      e.preventDefault()
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose?.()}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn(
-          'max-h-[80vh] max-w-[98vw] flex flex-col overflow-hidden bg-background shadow-2xl',
+          'flex flex-col bg-background shadow-2xl',
+          // Size classes
+          SIZE_CLASSES[size],
+          // Max width for mobile
+          'max-w-[98vw]',
+          // Scroll behavior
+          scrollBehavior === 'inside'
+            ? 'max-h-[90vh] overflow-hidden'
+            : 'max-h-[90vh] overflow-y-auto',
           className
         )}
         showCloseButton={!noCross}
+        onEscapeKeyDown={handleEscapeKeyDown as any}
       >
-        <DialogHeader>
-          <DialogTitle>
-            {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
-          </DialogTitle>
-          {propDescription && (
-            <DialogDescription id="modal-description">{propDescription}</DialogDescription>
-          )}
-        </DialogHeader>
+        {/* Header */}
+        {(propTitle || propDescription) && (
+          <DialogHeader>
+            <DialogTitle>
+              {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
+            </DialogTitle>
+            {propDescription && (
+              <DialogDescription>{propDescription}</DialogDescription>
+            )}
+          </DialogHeader>
+        )}
 
-        <div className="overflow-auto" style={{ maxHeight: 'calc(70vh - 6rem)' }}>
+        {/* Content */}
+        <div
+          className={cn(
+            scrollBehavior === 'inside' && 'overflow-auto flex-1',
+            scrollBehavior === 'inside' && 'max-h-[60vh]'
+          )}
+        >
           {children}
         </div>
+
+        {/* Footer */}
         {propFooter && <DialogFooter>{propFooter}</DialogFooter>}
       </DialogContent>
     </Dialog>
   )
 }
+
+/**
+ * Legacy export for backward compatibility
+ * @deprecated Use named export Modal instead
+ */
+export default Modal

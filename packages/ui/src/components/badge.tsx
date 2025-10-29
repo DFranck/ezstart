@@ -2,6 +2,29 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
 
+/**
+ * Badge Component - Display status, count, or label
+ *
+ * 100% configurable with variants, sizes, dot indicator, and pulse animation.
+ * Built for accessibility and visual clarity.
+ *
+ * @example
+ * // Basic usage
+ * <Badge>Default</Badge>
+ *
+ * @example
+ * // With variant and size
+ * <Badge variant="success" size="lg">Active</Badge>
+ *
+ * @example
+ * // With dot indicator
+ * <Badge variant="destructive" dot>3 errors</Badge>
+ *
+ * @example
+ * // With pulse animation (for real-time status)
+ * <Badge variant="success" pulse>Live</Badge>
+ */
+
 const badgeVariants = cva(
   'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
@@ -32,14 +55,53 @@ const badgeVariants = cva(
   }
 )
 
+const dotVariantClasses: Record<string, string> = {
+  default: 'bg-primary',
+  secondary: 'bg-secondary-foreground',
+  destructive: 'bg-destructive',
+  outline: 'bg-foreground',
+  success: 'bg-green-600 dark:bg-green-400',
+  warning: 'bg-yellow-600 dark:bg-yellow-400',
+  info: 'bg-blue-600 dark:bg-blue-400',
+  purple: 'bg-purple-600 dark:bg-purple-400',
+  cyan: 'bg-cyan-600 dark:bg-cyan-400',
+  indigo: 'bg-indigo-600 dark:bg-indigo-400',
+  pink: 'bg-pink-600 dark:bg-pink-400',
+}
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  /** Show a dot indicator before the text */
+  dot?: boolean
+  /** Pulse animation for real-time status */
+  pulse?: boolean
+}
 
-function Badge({ className, variant, size, ...props }: BadgeProps) {
+function Badge({ className, variant, size, dot, pulse, children, ...props }: BadgeProps) {
+  const dotColor = variant ? dotVariantClasses[variant] : dotVariantClasses.default
+
   return (
-    <div className={cn(badgeVariants({ variant, size }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant, size }), className)} {...props}>
+      {dot && (
+        <span
+          className={cn(
+            'inline-block size-2 rounded-full mr-1.5',
+            dotColor,
+            pulse && 'animate-pulse'
+          )}
+          aria-hidden="true"
+        />
+      )}
+      {children}
+    </div>
   )
 }
 
 export { Badge, badgeVariants }
+
+/**
+ * Legacy export for backward compatibility
+ * @deprecated Use named export Badge instead
+ */
+export default Badge
