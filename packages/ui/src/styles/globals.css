@@ -15,6 +15,7 @@
 @import './animations/slide-in.css';
 @import './animations/text-gradient.css';
 @import './animations/typewriter.css';
+@import './animations/icon-fade.css';
 
 /* Project themes */
 @import './themes/index.css';

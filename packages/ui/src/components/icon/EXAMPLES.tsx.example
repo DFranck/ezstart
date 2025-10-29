@@ -1,0 +1,348 @@
+/**
+ * Icon Component - Usage Examples
+ *
+ * This file demonstrates the various ways to use the Icon component
+ * with animations, accessibility, and styling options.
+ */
+
+import { Icon } from './src/components/icon'
+
+export function IconExamples() {
+  return (
+    <div className="space-y-8 p-8">
+      {/* ============================================ */}
+      {/* 1. Basic Icon Usage */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Basic Icons</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="lucide:Check" size={24} />
+          <Icon name="lucide:X" size={24} />
+          <Icon name="lucide:AlertCircle" size={24} />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 2. Icons with Fade Animation (Default) */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Fade-In Animation (Default)</h2>
+        <div className="flex gap-4 items-center">
+          {/* Default: 200ms fade-in */}
+          <Icon name="lucide:Sparkles" size={32} />
+
+          {/* Custom animation duration: 500ms */}
+          <Icon name="lucide:Star" size={32} animateDuration={500} />
+
+          {/* Disable animation */}
+          <Icon name="lucide:Zap" size={32} animate={false} />
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Icons fade-in smoothly by default (200ms). Customize with <code>animateDuration</code> or disable with <code>animate=false</code>.
+        </p>
+      </section>
+
+      {/* ============================================ */}
+      {/* 3. Spinning Icons */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Spinning Icons</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="lucide:Loader2" size={24} spin />
+          <Icon name="lucide:RefreshCw" size={24} spin />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 4. Semantic Icons (Screen Reader Accessible) */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Semantic Icons (Accessible)</h2>
+        <div className="flex gap-4 items-center">
+          {/* Success icon with ARIA label */}
+          <Icon
+            name="lucide:CheckCircle"
+            size={24}
+            ariaLabel="Success"
+            className="text-green-600"
+          />
+
+          {/* Warning icon with ARIA label */}
+          <Icon
+            name="lucide:AlertTriangle"
+            size={24}
+            ariaLabel="Warning"
+            className="text-yellow-600"
+          />
+
+          {/* Error icon with ARIA label and tooltip */}
+          <Icon
+            name="lucide:XCircle"
+            size={24}
+            ariaLabel="Error"
+            title="An error occurred"
+            className="text-red-600"
+          />
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Semantic icons automatically get <code>role="img"</code> when <code>ariaLabel</code> is provided.
+        </p>
+      </section>
+
+      {/* ============================================ */}
+      {/* 5. Decorative Icons (Hidden from Screen Readers) */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Decorative Icons</h2>
+        <div className="flex gap-4 items-center">
+          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded">
+            <Icon name="lucide:Download" size={16} ariaHidden />
+            Download
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded">
+            <Icon name="lucide:Share2" size={16} ariaHidden />
+            Share
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Icons next to text labels should be hidden from screen readers with <code>ariaHidden=true</code>.
+        </p>
+      </section>
+
+      {/* ============================================ */}
+      {/* 6. Rotated Icons */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Rotated Icons</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="lucide:ArrowUp" size={24} />
+          <Icon name="lucide:ArrowUp" size={24} rotate={45} />
+          <Icon name="lucide:ArrowUp" size={24} rotate={90} />
+          <Icon name="lucide:ArrowUp" size={24} rotate={180} />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 7. Different Icon Sizes */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Different Sizes</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="lucide:Heart" size={16} />
+          <Icon name="lucide:Heart" size={24} />
+          <Icon name="lucide:Heart" size={32} />
+          <Icon name="lucide:Heart" size={48} />
+          <Icon name="lucide:Heart" size={64} />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 8. FontAwesome Icons */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">FontAwesome Icons</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="fa:FaReact" size={32} className="text-blue-500" />
+          <Icon name="fa:FaNodeJs" size={32} className="text-green-500" />
+          <Icon name="fa:FaGithub" size={32} />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 9. Custom Icons */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Custom Icons</h2>
+        <div className="flex gap-4 items-center">
+          <Icon name="custom:EzStartLogo" size={48} />
+          <Icon name="custom:EzBillLogo" size={48} />
+          <Icon name="custom:EzAuthLogo" size={48} />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 10. Icon in Loading State */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Loading States</h2>
+        <div className="flex gap-4 items-center">
+          <button
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded"
+            disabled
+          >
+            <Icon name="lucide:Loader2" size={16} spin ariaHidden />
+            Loading...
+          </button>
+
+          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded">
+            <Icon
+              name="lucide:Save"
+              size={16}
+              ariaLabel="Save document"
+            />
+            <span aria-hidden="true">Save</span>
+          </button>
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* 11. Animation Comparison */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Animation Duration Comparison</h2>
+        <div className="grid grid-cols-5 gap-4">
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="lucide:Sparkles" size={32} animate={false} />
+            <span className="text-xs">No animation</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="lucide:Sparkles" size={32} animateDuration={100} />
+            <span className="text-xs">100ms</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="lucide:Sparkles" size={32} animateDuration={200} />
+            <span className="text-xs">200ms (default)</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="lucide:Sparkles" size={32} animateDuration={400} />
+            <span className="text-xs">400ms</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="lucide:Sparkles" size={32} animateDuration={800} />
+            <span className="text-xs">800ms</span>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Note: Refresh the page to see the fade-in effect again (icons are lazy-loaded once).
+        </p>
+      </section>
+
+      {/* ============================================ */}
+      {/* 12. Best Practices */}
+      {/* ============================================ */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">Accessibility Best Practices</h2>
+        <div className="space-y-4 text-sm">
+          <div className="p-4 border border-green-500 bg-green-50 dark:bg-green-950 rounded">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Icon name="lucide:CheckCircle" size={16} ariaHidden className="text-green-600" />
+              DO: Icon with text label
+            </h3>
+            <code className="block bg-white dark:bg-black p-2 rounded">
+              {'<Icon name="lucide:Home" ariaHidden /> Home'}
+            </code>
+            <p className="mt-2 text-muted-foreground">Hide decorative icons from screen readers</p>
+          </div>
+
+          <div className="p-4 border border-green-500 bg-green-50 dark:bg-green-950 rounded">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Icon name="lucide:CheckCircle" size={16} ariaHidden className="text-green-600" />
+              DO: Standalone semantic icon
+            </h3>
+            <code className="block bg-white dark:bg-black p-2 rounded">
+              {'<Icon name="lucide:Check" ariaLabel="Success" />'}
+            </code>
+            <p className="mt-2 text-muted-foreground">Provide aria-label for icons without text</p>
+          </div>
+
+          <div className="p-4 border border-red-500 bg-red-50 dark:bg-red-950 rounded">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Icon name="lucide:XCircle" size={16} ariaHidden className="text-red-600" />
+              DON'T: Icon without label or aria-label
+            </h3>
+            <code className="block bg-white dark:bg-black p-2 rounded">
+              {'<Icon name="lucide:Settings" />'}
+            </code>
+            <p className="mt-2 text-muted-foreground">Screen readers won't understand the icon's meaning</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// ============================================
+// TypeScript Usage Examples
+// ============================================
+
+/**
+ * Example 1: Basic icon with default animation
+ */
+function Example1() {
+  return <Icon name="lucide:Check" />
+}
+
+/**
+ * Example 2: Custom animation duration
+ */
+function Example2() {
+  return <Icon name="lucide:Star" animateDuration={500} />
+}
+
+/**
+ * Example 3: Disable animation
+ */
+function Example3() {
+  return <Icon name="lucide:Zap" animate={false} />
+}
+
+/**
+ * Example 4: Semantic icon for status
+ */
+function Example4() {
+  return (
+    <Icon
+      name="lucide:CheckCircle"
+      size={24}
+      ariaLabel="Task completed successfully"
+      title="Success"
+      className="text-green-600"
+    />
+  )
+}
+
+/**
+ * Example 5: Decorative icon in button
+ */
+function Example5() {
+  return (
+    <button>
+      <Icon name="lucide:Download" ariaHidden />
+      Download File
+    </button>
+  )
+}
+
+/**
+ * Example 6: Loading spinner
+ */
+function Example6({ isLoading }: { isLoading: boolean }) {
+  return (
+    <button disabled={isLoading}>
+      {isLoading ? (
+        <>
+          <Icon name="lucide:Loader2" spin ariaHidden />
+          Loading...
+        </>
+      ) : (
+        <>
+          <Icon name="lucide:Send" ariaHidden />
+          Submit
+        </>
+      )}
+    </button>
+  )
+}
+
+/**
+ * Example 7: Icon with custom role
+ */
+function Example7() {
+  return (
+    <Icon
+      name="lucide:AlertTriangle"
+      ariaRole="status"
+      ariaLabel="Warning: High CPU usage detected"
+    />
+  )
+}

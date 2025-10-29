@@ -89,6 +89,12 @@ export function Icon({
   className,
   style,
   size = 16,
+  animate = true,
+  animateDuration = 200,
+  ariaLabel,
+  ariaHidden,
+  ariaRole,
+  title,
   ...props
 }: IconProps) {
   if (!name) {
@@ -121,7 +127,7 @@ export function Icon({
   const tailwindSize = `w-[${size}px] h-[${size}px] min-w-[${size}px] min-h-[${size}px]`;
 
   const finalStyle =
-    rotate != null || size != null
+    rotate != null || size != null || (animate && animateDuration)
       ? {
           ...style,
           ...(rotate != null && { transform: `rotate(${rotate}deg)` }),
@@ -131,8 +137,36 @@ export function Icon({
             minWidth: size,
             minHeight: size,
           }),
+          ...(animate && {
+            animation: `icon-fade-in ${animateDuration}ms ease-out`,
+          }),
         }
       : style;
+
+  // Build ARIA attributes
+  const ariaAttributes = useMemo(() => {
+    const attrs: Record<string, any> = {};
+
+    // If ariaHidden is explicitly set, hide from screen readers
+    if (ariaHidden !== undefined) {
+      attrs['aria-hidden'] = ariaHidden;
+    }
+
+    // If ariaLabel is provided, add it
+    if (ariaLabel) {
+      attrs['aria-label'] = ariaLabel;
+    }
+
+    // If ariaRole is provided, add it (otherwise default to 'img' if semantic)
+    if (ariaRole) {
+      attrs['role'] = ariaRole;
+    } else if (ariaLabel && !ariaHidden) {
+      // If we have a label and not hidden, it's semantic -> role="img"
+      attrs['role'] = 'img';
+    }
+
+    return attrs;
+  }, [ariaLabel, ariaHidden, ariaRole]);
 
   return (
     <Suspense
@@ -143,16 +177,20 @@ export function Icon({
             height: size,
             display: 'inline-block',
           }}
+          aria-hidden="true"
         />
       }
     >
       <DynamicIcon
         {...(props as Omit<LucideProps, 'children'>)}
+        {...ariaAttributes}
         className={[tailwindSize, className, spin && 'animate-spin']
           .filter(Boolean)
           .join(' ')}
         style={finalStyle}
-      />
+      >
+        {title && <title>{title}</title>}
+      </DynamicIcon>
     </Suspense>
   );
 }
