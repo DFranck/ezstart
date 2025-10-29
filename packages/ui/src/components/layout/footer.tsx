@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import { Tag } from '../'
 import { useDevice } from '../../hooks'
 import { cn } from '../../lib'
@@ -31,7 +31,7 @@ interface FooterProps {
   stackOnMobile?: boolean // Stack content vertically on mobile
 }
 
-export function Footer({
+export const Footer = React.memo(function Footer({
   // Standard props
   appName,
   creator,
@@ -84,6 +84,7 @@ export function Footer({
     return (
       <Tag
         as="footer"
+        role="contentinfo"
         data-component="footer"
         layout="centered"
         className={cn('border-t', className)}
@@ -129,6 +130,7 @@ export function Footer({
     return (
       <Tag
         as="footer"
+        role="contentinfo"
         data-component="footer"
         layout="centered"
         className={cn('border-t', className)}
@@ -160,6 +162,7 @@ export function Footer({
   return (
     <Tag
       as="footer"
+      role="contentinfo"
       data-component="footer"
       layout="centered"
       className={cn('border-t', className)}
@@ -173,4 +176,4 @@ export function Footer({
       </div>
     </Tag>
   )
-}
+})

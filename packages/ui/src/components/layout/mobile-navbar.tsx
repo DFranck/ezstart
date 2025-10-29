@@ -1,9 +1,9 @@
 'use client'
 
+import React, { useEffect, useState, useCallback } from 'react'
 import { Icon, Tag } from '../'
 import { useDevice } from '../../hooks'
 import { cn } from '../../lib'
-import { useEffect, useState } from 'react'
 import { MobileNavMenu } from './mobile-nav-menu'
 import type { KnownIconName } from '../icon/src/types'
 import { NavigationItem, NavigationLink } from './types'
@@ -30,7 +30,7 @@ interface MobileNavbarProps {
   appName?: string
 }
 
-export function MobileNavbar({
+export const MobileNavbar = React.memo(function MobileNavbar({
   navigationItems = [],
   headerNavigation = [],
   currentPath = '/',
@@ -44,6 +44,14 @@ export function MobileNavbar({
 }: MobileNavbarProps) {
   const { isMobile } = useDevice()
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => !prev)
+  }, [])
 
   // Note: useClickOutside disabled - burger/X button handles all toggle logic
 
@@ -62,6 +70,10 @@ export function MobileNavbar({
         {/* Burger Menu */}
         {headerNavigation.length > 0 && (
           <div
+            id="mobile-burger-menu"
+            role="navigation"
+            aria-label="Mobile navigation menu"
+            aria-hidden={!isOpen}
             className={cn(
               'transition-all duration-500 border-t-2 ease-in-out overflow-hidden px-2',
               isOpen ? 'max-h-[400px] py-2' : 'max-h-0'
@@ -69,7 +81,7 @@ export function MobileNavbar({
           >
             <MobileNavMenu
               isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
+              onClose={handleClose}
               navigationItems={headerNavigation}
               LinkComponent={LinkComponent}
             />
@@ -77,7 +89,7 @@ export function MobileNavbar({
         )}
 
         {/* Bottom Navigation */}
-        <Tag as="nav" className={cn('border-t', className)}>
+        <Tag as="nav" role="navigation" aria-label="Primary mobile navigation" className={cn('border-t', className)}>
           <div className="flex items-center justify-around py-2">
             {navigationItems.map((item) => {
               const isActive = currentPath === item.href
@@ -85,6 +97,7 @@ export function MobileNavbar({
                 <LinkComponent
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
                     'flex flex-col items-center p-2 text-xs transition-colors',
                     isActive
@@ -98,6 +111,7 @@ export function MobileNavbar({
                       'h-5 w-5 mb-1',
                       isActive && 'text-primary'
                     )}
+                    ariaHidden
                   />
                   <span>{item.label}</span>
                 </LinkComponent>
@@ -107,15 +121,18 @@ export function MobileNavbar({
             {/* Burger button */}
             {headerNavigation.length > 0 && (
               <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={toggleMenu}
+                aria-expanded={isOpen}
+                aria-controls="mobile-burger-menu"
+                aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 className="flex flex-col items-center p-2 text-xs transition-colors text-muted-foreground hover:text-primary"
-                aria-label="Toggle menu"
               >
                 <Icon
                   name={isOpen ? 'lucide:X' : 'lucide:Menu'}
                   className="h-5 w-5 mb-1"
+                  ariaHidden
                 />
-                <span>Menu</span>
+                <span>{isOpen ? 'Close' : 'Menu'}</span>
               </button>
             )}
           </div>
@@ -130,6 +147,10 @@ export function MobileNavbar({
       {/* Burger Menu */}
       {headerNavigation.length > 0 && (
         <div
+          id="mobile-logo-burger-menu"
+          role="navigation"
+          aria-label="Mobile navigation menu"
+          aria-hidden={!isOpen}
           className={cn(
             'transition-all duration-500 border-t-2 ease-in-out overflow-hidden px-2',
             isOpen ? 'max-h-[400px] py-2' : 'max-h-0'
@@ -137,7 +158,7 @@ export function MobileNavbar({
         >
           <MobileNavMenu
             isOpen={isOpen}
-            onClose={() => setIsOpen(false)}
+            onClose={handleClose}
             navigationItems={headerNavigation}
             LinkComponent={LinkComponent}
           />
@@ -145,29 +166,32 @@ export function MobileNavbar({
       )}
 
       {/* Logo + Burger bar */}
-      <Tag as="nav" className={cn('border-t', className)}>
+      <Tag as="nav" role="navigation" aria-label="Primary mobile navigation" className={cn('border-t', className)}>
         <div className="grid grid-cols-2 items-center w-full">
-          <LinkComponent href={logoHref} className="w-full flex justify-center py-2">
+          <LinkComponent href={logoHref} aria-label={`Go to ${appName} home`} className="w-full flex justify-center py-2">
             {logoSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoSrc} alt={logoAlt || appName} className="h-6 w-auto" />
             ) : (
-              <Icon name={logoIcon} size={24} />
+              <Icon name={logoIcon} size={24} ariaHidden />
             )}
           </LinkComponent>
 
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleMenu}
+            aria-expanded={isOpen}
+            aria-controls="mobile-logo-burger-menu"
+            aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
             className="w-full flex justify-center py-2 text-muted-foreground hover:text-primary transition-colors"
-            aria-label="Toggle menu"
           >
             <Icon
               name={isOpen ? 'lucide:X' : 'lucide:Menu'}
               size={24}
+              ariaHidden
             />
           </button>
         </div>
       </Tag>
     </div>
   )
-}
+})

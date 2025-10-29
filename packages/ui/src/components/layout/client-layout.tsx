@@ -162,27 +162,62 @@ export function ClientLayout({
     if (!navLinks || !isDesktop) return null
 
     return (
-      <div className="hidden md:flex gap-2">
+      <nav role="navigation" aria-label="Primary navigation" className="hidden md:flex gap-2">
         {navLinks.map((link, index) => {
           if (isNavigationMenu(link)) {
-            // TODO: Implement dropdown menu for desktop
+            const isMenuOpen = openMenus.has(index)
+            const menuId = `desktop-menu-${index}`
+            const buttonId = `desktop-menu-button-${index}`
+
             return (
-              <div key={index} className="relative group">
-                <Button variant="ghost" size="sm">
-                  {link.icon && <Icon name={link.icon} className="w-4 h-4 mr-2" />}
+              <div key={index} className="relative">
+                <Button
+                  id={buttonId}
+                  variant="ghost"
+                  size="sm"
+                  aria-expanded={isMenuOpen}
+                  aria-haspopup="true"
+                  aria-controls={menuId}
+                  onClick={() => toggleMenu(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      toggleMenu(index)
+                    } else if (e.key === 'Escape' && isMenuOpen) {
+                      toggleMenu(index)
+                    }
+                  }}
+                >
+                  {link.icon && <Icon name={link.icon} className="w-4 h-4 mr-2" ariaHidden />}
                   {link.menuLabel}
-                  <Icon name="lucide:ChevronDown" className="w-3 h-3 ml-1" />
+                  <Icon
+                    name="lucide:ChevronDown"
+                    className={cn('w-3 h-3 ml-1 transition-transform', isMenuOpen && 'rotate-180')}
+                    ariaHidden
+                  />
                 </Button>
-                <div className="absolute top-full left-0 mt-1 min-w-[200px] bg-background border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  {link.menu.map(item => (
+                <div
+                  id={menuId}
+                  role="menu"
+                  aria-labelledby={buttonId}
+                  className={cn(
+                    'absolute top-full left-0 mt-1 min-w-[200px] bg-background border rounded-md shadow-lg transition-all duration-200',
+                    isMenuOpen
+                      ? 'opacity-100 visible'
+                      : 'opacity-0 invisible pointer-events-none'
+                  )}
+                >
+                  {link.menu.map((item) => (
                     <Button
                       key={item.href}
                       asChild
                       variant="ghost"
                       className="w-full justify-start rounded-none"
+                      role="menuitem"
+                      onClick={() => toggleMenu(index)}
                     >
                       <LinkTag href={item.href}>
-                        {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" />}
+                        {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" ariaHidden />}
                         {item.label}
                       </LinkTag>
                     </Button>
@@ -192,16 +227,24 @@ export function ClientLayout({
             )
           }
 
+          const isActive = currentPath === link.href
+
           return (
-            <Button key={link.href} asChild variant="ghost" size="sm">
+            <Button
+              key={link.href}
+              asChild
+              variant="ghost"
+              size="sm"
+              aria-current={isActive ? 'page' : undefined}
+            >
               <LinkTag href={link.href}>
-                {link.icon && <Icon name={link.icon} className="w-4 h-4 mr-2" />}
+                {link.icon && <Icon name={link.icon} className="w-4 h-4 mr-2" ariaHidden />}
                 {link.label}
               </LinkTag>
             </Button>
           )
         })}
-      </div>
+      </nav>
     )
   }
 
@@ -217,7 +260,14 @@ export function ClientLayout({
             <div className="flex items-center gap-2">
               {headerRightContent}
               {isTablet && navigationItems.length > 0 && (
-                <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
+                <button
+                  aria-expanded={isBurgerOpen}
+                  aria-controls="tablet-burger-menu"
+                  aria-label={isBurgerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                  onClick={() => setIsBurgerOpen(!isBurgerOpen)}
+                >
+                  <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
+                </button>
               )}
             </div>
           }
@@ -228,7 +278,11 @@ export function ClientLayout({
       {/* Burger dropdown menu (tablet only) - outside Header for full width */}
       {isTablet && navigationItems.length > 0 && (
         <div
+          id="tablet-burger-menu"
           ref={burgerMenuRef}
+          role="navigation"
+          aria-label="Tablet navigation menu"
+          aria-hidden={!isBurgerOpen}
           style={{ top: `${isTop ? 70 : 54}px` }}
           className={cn(
             'fixed inset-x-0 z-30',
@@ -241,45 +295,69 @@ export function ClientLayout({
               // Handle menu items (with submenus - collapsible)
               if (isNavigationMenu(item)) {
                 const isMenuOpen = openMenus.has(index)
+                const submenuId = `tablet-submenu-${index}`
+                const buttonId = `tablet-submenu-button-${index}`
+
                 return (
                   <div key={index} className="w-full">
                     {/* Menu label - clickable to toggle */}
                     <button
+                      id={buttonId}
+                      aria-expanded={isMenuOpen}
+                      aria-controls={submenuId}
                       onClick={() => toggleMenu(index)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          toggleMenu(index)
+                        } else if (e.key === 'Escape' && isMenuOpen) {
+                          toggleMenu(index)
+                        }
+                      }}
                       className="w-full flex items-center justify-center gap-2 px-2 py-2 text-sm font-semibold text-muted-foreground hover:bg-accent rounded-md transition-colors"
                     >
-                      {item.icon && <Icon name={item.icon} className="w-4 h-4" />}
+                      {item.icon && <Icon name={item.icon} className="w-4 h-4" ariaHidden />}
                       <span>{item.menuLabel}</span>
                       <Icon
                         name="lucide:ChevronDown"
                         className={cn('w-4 h-4 transition-transform', isMenuOpen && 'rotate-180')}
+                        ariaHidden
                       />
                     </button>
 
                     {/* Submenu items - collapsible */}
                     <div
+                      id={submenuId}
+                      role="menu"
+                      aria-labelledby={buttonId}
+                      aria-hidden={!isMenuOpen}
                       className={cn(
                         'overflow-hidden transition-all duration-300 ease-in-out',
                         isMenuOpen ? 'max-h-96 mt-1' : 'max-h-0'
                       )}
                     >
                       <div className="space-y-1 pl-2">
-                        {item.menu.map(subItem => (
-                          <Button
-                            key={subItem.href}
-                            asChild
-                            variant="ghost"
-                            className="w-full justify-center text-sm"
-                            onClick={() => setIsBurgerOpen(false)}
-                          >
-                            <LinkTag href={subItem.href}>
-                              {subItem.icon && (
-                                <Icon name={subItem.icon} className="w-4 h-4 mr-2" />
-                              )}
-                              {subItem.label}
-                            </LinkTag>
-                          </Button>
-                        ))}
+                        {item.menu.map(subItem => {
+                          const isActive = currentPath === subItem.href
+                          return (
+                            <Button
+                              key={subItem.href}
+                              asChild
+                              variant="ghost"
+                              className="w-full justify-center text-sm"
+                              role="menuitem"
+                              aria-current={isActive ? 'page' : undefined}
+                              onClick={() => setIsBurgerOpen(false)}
+                            >
+                              <LinkTag href={subItem.href}>
+                                {subItem.icon && (
+                                  <Icon name={subItem.icon} className="w-4 h-4 mr-2" ariaHidden />
+                                )}
+                                {subItem.label}
+                              </LinkTag>
+                            </Button>
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
@@ -287,16 +365,18 @@ export function ClientLayout({
               }
 
               // Handle regular links
+              const isActive = currentPath === item.href
               return (
                 <Button
                   key={item.href}
                   asChild
                   variant="ghost"
                   className="w-full justify-center"
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => setIsBurgerOpen(false)}
                 >
                   <LinkTag href={item.href}>
-                    {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" />}
+                    {item.icon && <Icon name={item.icon} className="w-4 h-4 mr-2" ariaHidden />}
                     {item.label}
                   </LinkTag>
                 </Button>
