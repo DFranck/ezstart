@@ -53,17 +53,17 @@ export const gradientColors = [
 
 export type GradientColor = (typeof gradientColors)[number]
 
-const textGradientVariants = cva('bg-clip-text text-transparent bg-gradient-to-r', {
+const textGradientVariants = cva('', {
   variants: {
     direction: {
-      'to-r': 'bg-gradient-to-r',
-      'to-l': 'bg-gradient-to-l',
-      'to-t': 'bg-gradient-to-t',
-      'to-b': 'bg-gradient-to-b',
-      'to-tr': 'bg-gradient-to-tr',
-      'to-tl': 'bg-gradient-to-tl',
-      'to-br': 'bg-gradient-to-br',
-      'to-bl': 'bg-gradient-to-bl',
+      'to-r': '',
+      'to-l': '',
+      'to-t': '',
+      'to-b': '',
+      'to-tr': '',
+      'to-tl': '',
+      'to-br': '',
+      'to-bl': '',
     },
   },
   defaultVariants: {
