@@ -1,0 +1,72 @@
+{
+  "cvGenerator": {
+    "hero": {
+      "title": "Générateur de CV avec IA",
+      "description": "Générez des CV optimisés et adaptés aux offres d'emploi grâce à l'IA. Exploitez GitHub, LinkedIn et du contexte personnalisé pour créer des CV percutants."
+    },
+    "generator": {
+      "aiConfig": {
+        "title": "Configuration IA",
+        "useAiLabel": "Utiliser l'IA pour optimiser le CV",
+        "jobPostingLabel": "Offre d'emploi",
+        "jobPostingPlaceholder": "Collez l'offre d'emploi ici...",
+        "githubLabel": "Nom d'utilisateur GitHub",
+        "githubPlaceholder": "votreutilisateur",
+        "githubHelp": "L'IA analysera vos dépôts et contributions",
+        "linkedInLabel": "URL du profil LinkedIn",
+        "linkedInPlaceholder": "https://linkedin.com/in/votrепрофиль",
+        "additionalContextLabel": "Contexte supplémentaire",
+        "additionalContextPlaceholder": "Ajoutez toute information supplémentaire pour aider l'IA à optimiser votre CV...",
+        "generateButton": "Générer avec l'IA",
+        "generating": "Génération en cours...",
+        "aiOptimizationNote": "💡 L'IA optimisera ceci en fonction de l'offre d'emploi"
+      },
+      "personalInfo": {
+        "title": "Informations Personnelles",
+        "nameLabel": "Nom Complet",
+        "namePlaceholder": "Jean Dupont",
+        "titleLabel": "Titre Professionnel",
+        "titlePlaceholder": "Ingénieur Logiciel Senior",
+        "emailLabel": "Email",
+        "emailPlaceholder": "jean@exemple.com",
+        "phoneLabel": "Téléphone",
+        "phonePlaceholder": "+33 1 23 45 67 89",
+        "locationLabel": "Localisation",
+        "locationPlaceholder": "Ville, Pays",
+        "githubLabel": "GitHub",
+        "githubPlaceholder": "github.com/utilisateur",
+        "linkedInLabel": "LinkedIn",
+        "linkedInPlaceholder": "linkedin.com/in/utilisateur"
+      },
+      "summary": {
+        "title": "Résumé Professionnel",
+        "label": "Résumé",
+        "placeholder": "Rédigez un résumé professionnel convaincant..."
+      },
+      "design": {
+        "title": "Modèle de Design",
+        "colorLabel": "Couleur d'accent"
+      },
+      "preview": {
+        "title": "Aperçu & Téléchargement"
+      },
+      "resetButton": "Tout Réinitialiser"
+    },
+    "features": {
+      "title": "Fonctionnalités Clés",
+      "description": "Des outils puissants pour créer des CV remarquables",
+      "aiOptimization": {
+        "title": "Optimisation IA",
+        "description": "Adaptez votre CV aux exigences du poste"
+      },
+      "templates": {
+        "title": "Modèles Professionnels",
+        "description": "Plusieurs options de design au choix"
+      },
+      "export": {
+        "title": "Prêt à l'Export",
+        "description": "Téléchargez en PDF pour un partage facile"
+      }
+    }
+  }
+}

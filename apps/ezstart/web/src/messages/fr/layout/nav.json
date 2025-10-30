@@ -1,13 +1,20 @@
 {
   "links": [
     { "label": "Accueil", "href": "/" },
-
     {
       "menuLabel": "Librairies",
       "menu": [
         { "label": "Mes Librairies", "href": "/ez-libs" },
         { "label": "Tag", "href": "/ez-libs/tag" },
         { "label": "Icon", "href": "/ez-libs/icon" }
+      ]
+    },
+    {
+      "menuLabel": "Fonctionnalités",
+      "menu": [
+        { "label": "Générateur de QR Code", "href": "/ez-features/qr-code" },
+        { "label": "Générateur de Cartes de Visite", "href": "/ez-features/business-card" },
+        { "label": "Générateur de CV", "href": "/ez-features/cv-generator" }
       ]
     },
     {

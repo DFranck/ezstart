@@ -10,6 +10,14 @@
       ]
     },
     {
+      "menuLabel": "Features",
+      "menu": [
+        { "label": "QR Code Generator", "href": "/ez-features/qr-code" },
+        { "label": "Business Card Generator", "href": "/ez-features/business-card" },
+        { "label": "CV Generator", "href": "/ez-features/cv-generator" }
+      ]
+    },
+    {
       "menuLabel": "Applications",
       "menu": [
         { "label": "EZMonitor", "href": "/monitoring" },

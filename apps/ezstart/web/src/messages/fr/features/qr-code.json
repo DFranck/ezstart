@@ -1,0 +1,54 @@
+{
+  "qrCode": {
+    "hero": {
+      "title": "Générateur de QR Code",
+      "description": "Générez des QR codes professionnels avec des options de personnalisation. Parfait pour les cartes de visite, supports marketing et billets d'événements."
+    },
+    "generator": {
+      "configuration": {
+        "title": "Configuration",
+        "urlLabel": "URL Cible",
+        "urlPlaceholder": "https://exemple.com",
+        "redirectTypeLabel": "Type de Redirection",
+        "redirectType": {
+          "permanent": "Permanente (Directe)",
+          "temporary": "Temporaire (Traçable)"
+        },
+        "sizeLabel": "Taille",
+        "foregroundColorLabel": "Couleur de Premier Plan",
+        "backgroundColorLabel": "Couleur de Fond",
+        "errorCorrectionLabel": "Niveau de Correction d'Erreur",
+        "errorCorrection": {
+          "low": "Faible (7%)",
+          "medium": "Moyen (15%)",
+          "quartile": "Quartile (25%)",
+          "high": "Élevé (30%)"
+        },
+        "errorCorrectionHelp": "Des niveaux plus élevés permettent une meilleure récupération en cas de dommage",
+        "includeMarginLabel": "Inclure une marge",
+        "resetButton": "Réinitialiser"
+      },
+      "preview": {
+        "title": "Aperçu & Téléchargement",
+        "downloadButton": "Télécharger le QR Code",
+        "emptyState": "Entrez du contenu pour générer le QR code"
+      }
+    },
+    "useCases": {
+      "title": "Cas d'Usage Courants",
+      "description": "Les QR codes sont polyvalents et peuvent être utilisés dans de nombreux scénarios",
+      "businessCards": {
+        "title": "Cartes de Visite",
+        "description": "Partagez vos coordonnées instantanément"
+      },
+      "marketing": {
+        "title": "Supports Marketing",
+        "description": "Liez à des campagnes et promotions"
+      },
+      "events": {
+        "title": "Billets d'Événements",
+        "description": "Enregistrement et validation rapides"
+      }
+    }
+  }
+}

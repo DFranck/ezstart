@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { useState } from 'react';
 import { CVPreview } from './components/cv-preview';
 import { TemplateSelector } from './components/template-selector';
@@ -37,6 +38,7 @@ const DEFAULT_CONFIG: CVConfig = {
 };
 
 export default function CVGeneratorPage() {
+  const t = useSafeTranslations('cvGenerator');
   const [data, setData] = useState<CVData>(DEFAULT_DATA);
   const [config, setConfig] = useState<CVConfig>(DEFAULT_CONFIG);
   const [jobPosting, setJobPosting] = useState('');
@@ -93,10 +95,9 @@ export default function CVGeneratorPage() {
       <Section size="full" className="bg-gradient-to-b from-primary/5 to-background py-12">
         <Div layout="center">
           <Icon name="lucide:FileText" className="w-16 h-16 text-primary mb-4" />
-          <H1>AI-Powered CV Generator</H1>
+          <H1>{t('hero.title')}</H1>
           <P size="lg" className="text-muted-foreground max-w-2xl">
-            Generate optimized CVs tailored to job postings using AI.
-            Leverage GitHub, LinkedIn, and custom context to create compelling resumes.
+            {t('hero.description')}
           </P>
         </Div>
       </Section>
@@ -109,7 +110,7 @@ export default function CVGeneratorPage() {
           {/* AI Configuration */}
           <Card variant='elevated'>
             <CardHeader>
-              <H3>AI Configuration</H3>
+              <H3>{t('generator.aiConfig.title')}</H3>
             </CardHeader>
             <CardContent className='space-y-4'>
               <div className='flex items-center gap-2'>
@@ -121,17 +122,17 @@ export default function CVGeneratorPage() {
                   className='h-4 w-4'
                 />
                 <Label htmlFor='use-ai' className='cursor-pointer'>
-                  Use AI to optimize CV
+                  {t('generator.aiConfig.useAiLabel')}
                 </Label>
               </div>
 
               {config.useAI && (
                 <>
                   <div className='space-y-2'>
-                    <Label htmlFor='job-posting'>Job Posting *</Label>
+                    <Label htmlFor='job-posting'>{t('generator.aiConfig.jobPostingLabel')} *</Label>
                     <textarea
                       id='job-posting'
-                      placeholder='Paste the job posting here...'
+                      placeholder={t('generator.aiConfig.jobPostingPlaceholder')}
                       value={jobPosting}
                       onChange={(e) => setJobPosting(e.target.value)}
                       className='w-full h-32 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y'
@@ -140,10 +141,10 @@ export default function CVGeneratorPage() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='github-username'>GitHub Username</Label>
+                    <Label htmlFor='github-username'>{t('generator.aiConfig.githubLabel')}</Label>
                     <Input
                       id='github-username'
-                      placeholder='yourusername'
+                      placeholder={t('generator.aiConfig.githubPlaceholder')}
                       value={config.aiSources.githubUsername}
                       onChange={(e) =>
                         updateConfig({
@@ -152,16 +153,16 @@ export default function CVGeneratorPage() {
                       }
                     />
                     <p className='text-xs text-muted-foreground'>
-                      AI will analyze your repositories and contributions
+                      {t('generator.aiConfig.githubHelp')}
                     </p>
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='linkedin-profile'>LinkedIn Profile URL</Label>
+                    <Label htmlFor='linkedin-profile'>{t('generator.aiConfig.linkedInLabel')}</Label>
                     <Input
                       id='linkedin-profile'
                       type='url'
-                      placeholder='https://linkedin.com/in/yourprofile'
+                      placeholder={t('generator.aiConfig.linkedInPlaceholder')}
                       value={config.aiSources.linkedInProfile}
                       onChange={(e) =>
                         updateConfig({
@@ -172,10 +173,10 @@ export default function CVGeneratorPage() {
                   </div>
 
                   <div className='space-y-2'>
-                    <Label htmlFor='additional-context'>Additional Context</Label>
+                    <Label htmlFor='additional-context'>{t('generator.aiConfig.additionalContextLabel')}</Label>
                     <textarea
                       id='additional-context'
-                      placeholder='Add any additional information to help AI optimize your CV...'
+                      placeholder={t('generator.aiConfig.additionalContextPlaceholder')}
                       value={config.aiSources.additionalContext}
                       onChange={(e) =>
                         updateConfig({
@@ -194,12 +195,12 @@ export default function CVGeneratorPage() {
                     {isGenerating ? (
                       <>
                         <Icon name='lucide:Loader2' size={16} spin ariaHidden />
-                        <span className='ml-2'>Generating...</span>
+                        <span className='ml-2'>{t('generator.aiConfig.generating')}</span>
                       </>
                     ) : (
                       <>
                         <Icon name='lucide:Sparkles' size={16} ariaHidden />
-                        <span className='ml-2'>Generate with AI</span>
+                        <span className='ml-2'>{t('generator.aiConfig.generateButton')}</span>
                       </>
                     )}
                   </Button>
@@ -211,14 +212,14 @@ export default function CVGeneratorPage() {
           {/* Personal Info */}
           <Card variant='elevated'>
             <CardHeader>
-              <H3>Personal Information</H3>
+              <H3>{t('generator.personalInfo.title')}</H3>
             </CardHeader>
             <CardContent className='space-y-4'>
               <div className='space-y-2'>
-                <Label htmlFor='cv-name'>Full Name *</Label>
+                <Label htmlFor='cv-name'>{t('generator.personalInfo.nameLabel')} *</Label>
                 <Input
                   id='cv-name'
-                  placeholder='John Doe'
+                  placeholder={t('generator.personalInfo.namePlaceholder')}
                   value={data.personalInfo.name}
                   onChange={(e) =>
                     updateData({
@@ -230,10 +231,10 @@ export default function CVGeneratorPage() {
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='cv-title'>Professional Title *</Label>
+                <Label htmlFor='cv-title'>{t('generator.personalInfo.titleLabel')} *</Label>
                 <Input
                   id='cv-title'
-                  placeholder='Senior Software Engineer'
+                  placeholder={t('generator.personalInfo.titlePlaceholder')}
                   value={data.personalInfo.title}
                   onChange={(e) =>
                     updateData({
@@ -246,11 +247,11 @@ export default function CVGeneratorPage() {
 
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
-                  <Label htmlFor='cv-email'>Email</Label>
+                  <Label htmlFor='cv-email'>{t('generator.personalInfo.emailLabel')}</Label>
                   <Input
                     id='cv-email'
                     type='email'
-                    placeholder='john@example.com'
+                    placeholder={t('generator.personalInfo.emailPlaceholder')}
                     value={data.personalInfo.email}
                     onChange={(e) =>
                       updateData({
@@ -261,11 +262,11 @@ export default function CVGeneratorPage() {
                 </div>
 
                 <div className='space-y-2'>
-                  <Label htmlFor='cv-phone'>Phone</Label>
+                  <Label htmlFor='cv-phone'>{t('generator.personalInfo.phoneLabel')}</Label>
                   <Input
                     id='cv-phone'
                     type='tel'
-                    placeholder='+1 234 567 8900'
+                    placeholder={t('generator.personalInfo.phonePlaceholder')}
                     value={data.personalInfo.phone}
                     onChange={(e) =>
                       updateData({
@@ -277,10 +278,10 @@ export default function CVGeneratorPage() {
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='cv-location'>Location</Label>
+                <Label htmlFor='cv-location'>{t('generator.personalInfo.locationLabel')}</Label>
                 <Input
                   id='cv-location'
-                  placeholder='City, Country'
+                  placeholder={t('generator.personalInfo.locationPlaceholder')}
                   value={data.personalInfo.location}
                   onChange={(e) =>
                     updateData({
@@ -292,10 +293,10 @@ export default function CVGeneratorPage() {
 
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
-                  <Label htmlFor='cv-github'>GitHub</Label>
+                  <Label htmlFor='cv-github'>{t('generator.personalInfo.githubLabel')}</Label>
                   <Input
                     id='cv-github'
-                    placeholder='github.com/username'
+                    placeholder={t('generator.personalInfo.githubPlaceholder')}
                     value={data.personalInfo.github}
                     onChange={(e) =>
                       updateData({
@@ -306,10 +307,10 @@ export default function CVGeneratorPage() {
                 </div>
 
                 <div className='space-y-2'>
-                  <Label htmlFor='cv-linkedin'>LinkedIn</Label>
+                  <Label htmlFor='cv-linkedin'>{t('generator.personalInfo.linkedInLabel')}</Label>
                   <Input
                     id='cv-linkedin'
-                    placeholder='linkedin.com/in/username'
+                    placeholder={t('generator.personalInfo.linkedInPlaceholder')}
                     value={data.personalInfo.linkedIn}
                     onChange={(e) =>
                       updateData({
@@ -325,21 +326,21 @@ export default function CVGeneratorPage() {
           {/* Professional Summary */}
           <Card variant='elevated'>
             <CardHeader>
-              <H3>Professional Summary</H3>
+              <H3>{t('generator.summary.title')}</H3>
             </CardHeader>
             <CardContent>
               <div className='space-y-2'>
-                <Label htmlFor='cv-summary'>Summary</Label>
+                <Label htmlFor='cv-summary'>{t('generator.summary.label')}</Label>
                 <textarea
                   id='cv-summary'
-                  placeholder='Write a compelling professional summary...'
+                  placeholder={t('generator.summary.placeholder')}
                   value={data.summary}
                   onChange={(e) => updateData({ summary: e.target.value })}
                   className='w-full h-32 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y'
                 />
                 {config.useAI && (
                   <p className='text-xs text-muted-foreground'>
-                    💡 AI will optimize this based on the job posting
+                    {t('generator.aiConfig.aiOptimizationNote')}
                   </p>
                 )}
               </div>
@@ -349,7 +350,7 @@ export default function CVGeneratorPage() {
           {/* Design Configuration */}
           <Card variant='elevated'>
             <CardHeader>
-              <H3>Design Template</H3>
+              <H3>{t('generator.design.title')}</H3>
             </CardHeader>
             <CardContent className='space-y-4'>
               <TemplateSelector
@@ -358,7 +359,7 @@ export default function CVGeneratorPage() {
               />
 
               <div className='space-y-2'>
-                <Label htmlFor='cv-color'>Accent Color</Label>
+                <Label htmlFor='cv-color'>{t('generator.design.colorLabel')}</Label>
                 <div className='flex gap-2'>
                   <input
                     id='cv-color'
@@ -379,14 +380,14 @@ export default function CVGeneratorPage() {
           </Card>
 
           <Button onClick={handleReset} variant='outline' className='w-full'>
-            Reset All
+            {t('generator.resetButton')}
           </Button>
         </div>
 
         {/* Preview Panel */}
         <Card variant='elevated' className='lg:sticky lg:top-6 h-fit'>
           <CardHeader>
-            <H3>Preview & Download</H3>
+            <H3>{t('generator.preview.title')}</H3>
           </CardHeader>
           <CardContent>
             <CVPreview data={data} config={config} />
@@ -398,35 +399,35 @@ export default function CVGeneratorPage() {
       {/* Features Section */}
       <Section size="narrow" className="bg-muted/50">
         <Div layout="center">
-          <H3>Key Features</H3>
+          <H3>{t('features.title')}</H3>
           <P className="text-muted-foreground mb-6">
-            Powerful tools to create standout CVs
+            {t('features.description')}
           </P>
           <div className="grid md:grid-cols-3 gap-4">
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Sparkles" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">AI Optimization</P>
+                <P weight="medium">{t('features.aiOptimization.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Tailor your CV to match job requirements
+                  {t('features.aiOptimization.description')}
                 </P>
               </CardContent>
             </Card>
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Palette" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">Professional Templates</P>
+                <P weight="medium">{t('features.templates.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Multiple design options to choose from
+                  {t('features.templates.description')}
                 </P>
               </CardContent>
             </Card>
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Download" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">Export Ready</P>
+                <P weight="medium">{t('features.export.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Download as PDF for easy sharing
+                  {t('features.export.description')}
                 </P>
               </CardContent>
             </Card>

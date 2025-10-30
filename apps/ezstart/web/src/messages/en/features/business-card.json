@@ -1,0 +1,62 @@
+{
+  "businessCard": {
+    "hero": {
+      "title": "Business Card Generator",
+      "description": "Create professional printable business cards with QR codes. Perfect for networking, conferences, and client meetings."
+    },
+    "generator": {
+      "contactInfo": {
+        "title": "Contact Information",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "John Doe",
+        "titleLabel": "Job Title",
+        "titlePlaceholder": "Software Engineer",
+        "companyLabel": "Company",
+        "companyPlaceholder": "ACME Inc.",
+        "emailLabel": "Email",
+        "emailPlaceholder": "john@example.com",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+1 234 567 8900",
+        "whatsappLabel": "WhatsApp",
+        "whatsappPlaceholder": "+1 234 567 8900",
+        "websiteLabel": "Website",
+        "websitePlaceholder": "https://example.com",
+        "addressLabel": "Address",
+        "addressPlaceholder": "123 Main St, City, Country"
+      },
+      "design": {
+        "title": "Design Configuration",
+        "primaryColorLabel": "Primary Color",
+        "secondaryColorLabel": "Secondary Color",
+        "qrContentLabel": "QR Code Content",
+        "qrContent": {
+          "vcard": "vCard (Contact Info)",
+          "website": "Website URL",
+          "whatsapp": "WhatsApp",
+          "email": "Email"
+        },
+        "includeQrLabel": "Include QR Code"
+      },
+      "preview": {
+        "title": "Preview & Export"
+      },
+      "resetButton": "Reset All"
+    },
+    "features": {
+      "title": "Why Use Digital Business Cards?",
+      "description": "Modern networking requires modern solutions",
+      "instantSharing": {
+        "title": "Instant Sharing",
+        "description": "QR codes make contact sharing effortless"
+      },
+      "customDesign": {
+        "title": "Custom Design",
+        "description": "Match your brand with colors and templates"
+      },
+      "printReady": {
+        "title": "Print Ready",
+        "description": "Export in standard business card size"
+      }
+    }
+  }
+}

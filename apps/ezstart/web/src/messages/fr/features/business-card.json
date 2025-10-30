@@ -1,0 +1,62 @@
+{
+  "businessCard": {
+    "hero": {
+      "title": "Générateur de Cartes de Visite",
+      "description": "Créez des cartes de visite professionnelles imprimables avec des QR codes. Parfait pour le réseautage, les conférences et les rencontres clients."
+    },
+    "generator": {
+      "contactInfo": {
+        "title": "Informations de Contact",
+        "nameLabel": "Nom Complet",
+        "namePlaceholder": "Jean Dupont",
+        "titleLabel": "Poste",
+        "titlePlaceholder": "Ingénieur Logiciel",
+        "companyLabel": "Entreprise",
+        "companyPlaceholder": "ACME Inc.",
+        "emailLabel": "Email",
+        "emailPlaceholder": "jean@exemple.com",
+        "phoneLabel": "Téléphone",
+        "phonePlaceholder": "+33 1 23 45 67 89",
+        "whatsappLabel": "WhatsApp",
+        "whatsappPlaceholder": "+33 1 23 45 67 89",
+        "websiteLabel": "Site Web",
+        "websitePlaceholder": "https://exemple.com",
+        "addressLabel": "Adresse",
+        "addressPlaceholder": "123 Rue Principale, Ville, Pays"
+      },
+      "design": {
+        "title": "Configuration du Design",
+        "primaryColorLabel": "Couleur Principale",
+        "secondaryColorLabel": "Couleur Secondaire",
+        "qrContentLabel": "Contenu du QR Code",
+        "qrContent": {
+          "vcard": "vCard (Infos de Contact)",
+          "website": "URL du Site Web",
+          "whatsapp": "WhatsApp",
+          "email": "Email"
+        },
+        "includeQrLabel": "Inclure le QR Code"
+      },
+      "preview": {
+        "title": "Aperçu & Export"
+      },
+      "resetButton": "Tout Réinitialiser"
+    },
+    "features": {
+      "title": "Pourquoi Utiliser des Cartes de Visite Numériques ?",
+      "description": "Le réseautage moderne nécessite des solutions modernes",
+      "instantSharing": {
+        "title": "Partage Instantané",
+        "description": "Les QR codes facilitent le partage de contacts"
+      },
+      "customDesign": {
+        "title": "Design Personnalisé",
+        "description": "Correspondez à votre marque avec couleurs et modèles"
+      },
+      "printReady": {
+        "title": "Prêt à Imprimer",
+        "description": "Exportez en taille standard de carte de visite"
+      }
+    }
+  }
+}

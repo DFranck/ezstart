@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
+import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { useState } from 'react';
 import { QRCodeCanvas } from './components/qrcode-canvas';
 import { QRCodeConfig } from './types';
@@ -16,6 +17,7 @@ const DEFAULT_CONFIG: QRCodeConfig = {
 };
 
 export default function QRCodeGeneratorPage() {
+  const t = useSafeTranslations('qrCode');
   const [config, setConfig] = useState<QRCodeConfig>(DEFAULT_CONFIG);
 
   const handleReset = () => {
@@ -32,10 +34,9 @@ export default function QRCodeGeneratorPage() {
       <Section size="full" className="bg-gradient-to-b from-primary/5 to-background py-12">
         <Div layout="center">
           <Icon name="lucide:QrCode" className="w-16 h-16 text-primary mb-4" />
-          <H1>QR Code Generator</H1>
+          <H1>{t('hero.title')}</H1>
           <P size="lg" className="text-muted-foreground max-w-2xl">
-            Generate professional QR codes with customization options.
-            Perfect for business cards, marketing materials, and event tickets.
+            {t('hero.description')}
           </P>
         </Div>
       </Section>
@@ -47,16 +48,16 @@ export default function QRCodeGeneratorPage() {
         {/* Configuration Panel */}
         <Card variant='elevated'>
           <CardHeader>
-            <H3>Configuration</H3>
+            <H3>{t('generator.configuration.title')}</H3>
           </CardHeader>
           <CardContent className='space-y-4'>
             {/* URL Input */}
             <div className='space-y-2'>
-              <Label htmlFor='qr-url'>Target URL *</Label>
+              <Label htmlFor='qr-url'>{t('generator.configuration.urlLabel')} *</Label>
               <Input
                 id='qr-url'
                 type='url'
-                placeholder='https://example.com'
+                placeholder={t('generator.configuration.urlPlaceholder')}
                 value={config.url}
                 onChange={(e) => updateConfig({ url: e.target.value })}
                 required
@@ -65,21 +66,21 @@ export default function QRCodeGeneratorPage() {
 
             {/* Redirect Type */}
             <div className='space-y-2'>
-              <Label htmlFor='redirect-type'>Redirect Type</Label>
+              <Label htmlFor='redirect-type'>{t('generator.configuration.redirectTypeLabel')}</Label>
               <select
                 id='redirect-type'
                 value={config.redirectType}
                 onChange={(e) => updateConfig({ redirectType: e.target.value as 'permanent' | 'temporary' })}
                 className='w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
               >
-                <option value='permanent'>Permanent (Direct)</option>
-                <option value='temporary'>Temporary (Trackable)</option>
+                <option value='permanent'>{t('generator.configuration.redirectType.permanent')}</option>
+                <option value='temporary'>{t('generator.configuration.redirectType.temporary')}</option>
               </select>
             </div>
 
             {/* Size Control */}
             <div className='space-y-2'>
-              <Label htmlFor='qr-size'>Size: {config.size}px</Label>
+              <Label htmlFor='qr-size'>{t('generator.configuration.sizeLabel')}: {config.size}px</Label>
               <input
                 id='qr-size'
                 type='range'
@@ -95,7 +96,7 @@ export default function QRCodeGeneratorPage() {
             {/* Color Controls */}
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='fg-color'>Foreground Color</Label>
+                <Label htmlFor='fg-color'>{t('generator.configuration.foregroundColorLabel')}</Label>
                 <div className='flex gap-2'>
                   <input
                     id='fg-color'
@@ -114,7 +115,7 @@ export default function QRCodeGeneratorPage() {
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='bg-color'>Background Color</Label>
+                <Label htmlFor='bg-color'>{t('generator.configuration.backgroundColorLabel')}</Label>
                 <div className='flex gap-2'>
                   <input
                     id='bg-color'
@@ -135,20 +136,20 @@ export default function QRCodeGeneratorPage() {
 
             {/* Error Correction Level */}
             <div className='space-y-2'>
-              <Label htmlFor='error-correction'>Error Correction Level</Label>
+              <Label htmlFor='error-correction'>{t('generator.configuration.errorCorrectionLabel')}</Label>
               <select
                 id='error-correction'
                 value={config.errorCorrectionLevel}
                 onChange={(e) => updateConfig({ errorCorrectionLevel: e.target.value as QRCodeConfig['errorCorrectionLevel'] })}
                 className='w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
               >
-                <option value='L'>Low (7%)</option>
-                <option value='M'>Medium (15%)</option>
-                <option value='Q'>Quartile (25%)</option>
-                <option value='H'>High (30%)</option>
+                <option value='L'>{t('generator.configuration.errorCorrection.low')}</option>
+                <option value='M'>{t('generator.configuration.errorCorrection.medium')}</option>
+                <option value='Q'>{t('generator.configuration.errorCorrection.quartile')}</option>
+                <option value='H'>{t('generator.configuration.errorCorrection.high')}</option>
               </select>
               <p className='text-sm text-muted-foreground'>
-                Higher levels allow better recovery from damage
+                {t('generator.configuration.errorCorrectionHelp')}
               </p>
             </div>
 
@@ -162,14 +163,14 @@ export default function QRCodeGeneratorPage() {
                 className='h-4 w-4'
               />
               <Label htmlFor='include-margin' className='cursor-pointer'>
-                Include margin
+                {t('generator.configuration.includeMarginLabel')}
               </Label>
             </div>
 
             {/* Actions */}
             <div className='flex gap-2 pt-4'>
               <Button onClick={handleReset} variant='outline' className='flex-1'>
-                Reset
+                {t('generator.configuration.resetButton')}
               </Button>
             </div>
           </CardContent>
@@ -178,7 +179,7 @@ export default function QRCodeGeneratorPage() {
         {/* Preview Panel */}
         <Card variant='elevated'>
           <CardHeader>
-            <H3>Preview & Download</H3>
+            <H3>{t('generator.preview.title')}</H3>
           </CardHeader>
           <CardContent>
             <QRCodeCanvas config={config} />
@@ -190,35 +191,35 @@ export default function QRCodeGeneratorPage() {
       {/* Use Cases Section */}
       <Section size="narrow" className="bg-muted/50">
         <Div layout="center">
-          <H3>Common Use Cases</H3>
+          <H3>{t('useCases.title')}</H3>
           <P className="text-muted-foreground mb-6">
-            QR codes are versatile and can be used in many scenarios
+            {t('useCases.description')}
           </P>
           <div className="grid md:grid-cols-3 gap-4">
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Briefcase" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">Business Cards</P>
+                <P weight="medium">{t('useCases.businessCards.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Share contact details instantly
+                  {t('useCases.businessCards.description')}
                 </P>
               </CardContent>
             </Card>
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Share2" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">Marketing</P>
+                <P weight="medium">{t('useCases.marketing.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Drive traffic to campaigns
+                  {t('useCases.marketing.description')}
                 </P>
               </CardContent>
             </Card>
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Ticket" className="w-8 h-8 mx-auto text-primary" />
-                <P weight="medium">Event Tickets</P>
+                <P weight="medium">{t('useCases.events.title')}</P>
                 <P size="sm" className="text-muted-foreground">
-                  Quick and secure entry
+                  {t('useCases.events.description')}
                 </P>
               </CardContent>
             </Card>

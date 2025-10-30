@@ -1,0 +1,54 @@
+{
+  "qrCode": {
+    "hero": {
+      "title": "QR Code Generator",
+      "description": "Generate professional QR codes with customization options. Perfect for business cards, marketing materials, and event tickets."
+    },
+    "generator": {
+      "configuration": {
+        "title": "Configuration",
+        "urlLabel": "Target URL",
+        "urlPlaceholder": "https://example.com",
+        "redirectTypeLabel": "Redirect Type",
+        "redirectType": {
+          "permanent": "Permanent (Direct)",
+          "temporary": "Temporary (Trackable)"
+        },
+        "sizeLabel": "Size",
+        "foregroundColorLabel": "Foreground Color",
+        "backgroundColorLabel": "Background Color",
+        "errorCorrectionLabel": "Error Correction Level",
+        "errorCorrection": {
+          "low": "Low (7%)",
+          "medium": "Medium (15%)",
+          "quartile": "Quartile (25%)",
+          "high": "High (30%)"
+        },
+        "errorCorrectionHelp": "Higher levels allow better recovery from damage",
+        "includeMarginLabel": "Include margin",
+        "resetButton": "Reset"
+      },
+      "preview": {
+        "title": "Preview & Download",
+        "downloadButton": "Download QR Code",
+        "emptyState": "Enter content to generate QR code"
+      }
+    },
+    "useCases": {
+      "title": "Common Use Cases",
+      "description": "QR codes are versatile and can be used in many scenarios",
+      "businessCards": {
+        "title": "Business Cards",
+        "description": "Share contact details instantly"
+      },
+      "marketing": {
+        "title": "Marketing Materials",
+        "description": "Link to campaigns and promotions"
+      },
+      "events": {
+        "title": "Event Tickets",
+        "description": "Quick check-in and validation"
+      }
+    }
+  }
+}

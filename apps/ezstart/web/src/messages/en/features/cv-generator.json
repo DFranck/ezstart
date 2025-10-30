@@ -1,0 +1,72 @@
+{
+  "cvGenerator": {
+    "hero": {
+      "title": "AI-Powered CV Generator",
+      "description": "Generate optimized CVs tailored to job postings using AI. Leverage GitHub, LinkedIn, and custom context to create compelling resumes."
+    },
+    "generator": {
+      "aiConfig": {
+        "title": "AI Configuration",
+        "useAiLabel": "Use AI to optimize CV",
+        "jobPostingLabel": "Job Posting",
+        "jobPostingPlaceholder": "Paste the job posting here...",
+        "githubLabel": "GitHub Username",
+        "githubPlaceholder": "yourusername",
+        "githubHelp": "AI will analyze your repositories and contributions",
+        "linkedInLabel": "LinkedIn Profile URL",
+        "linkedInPlaceholder": "https://linkedin.com/in/yourprofile",
+        "additionalContextLabel": "Additional Context",
+        "additionalContextPlaceholder": "Add any additional information to help AI optimize your CV...",
+        "generateButton": "Generate with AI",
+        "generating": "Generating...",
+        "aiOptimizationNote": "💡 AI will optimize this based on the job posting"
+      },
+      "personalInfo": {
+        "title": "Personal Information",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "John Doe",
+        "titleLabel": "Professional Title",
+        "titlePlaceholder": "Senior Software Engineer",
+        "emailLabel": "Email",
+        "emailPlaceholder": "john@example.com",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+1 234 567 8900",
+        "locationLabel": "Location",
+        "locationPlaceholder": "City, Country",
+        "githubLabel": "GitHub",
+        "githubPlaceholder": "github.com/username",
+        "linkedInLabel": "LinkedIn",
+        "linkedInPlaceholder": "linkedin.com/in/username"
+      },
+      "summary": {
+        "title": "Professional Summary",
+        "label": "Summary",
+        "placeholder": "Write a compelling professional summary..."
+      },
+      "design": {
+        "title": "Design Template",
+        "colorLabel": "Accent Color"
+      },
+      "preview": {
+        "title": "Preview & Download"
+      },
+      "resetButton": "Reset All"
+    },
+    "features": {
+      "title": "Key Features",
+      "description": "Powerful tools to create standout CVs",
+      "aiOptimization": {
+        "title": "AI Optimization",
+        "description": "Tailor your CV to match job requirements"
+      },
+      "templates": {
+        "title": "Professional Templates",
+        "description": "Multiple design options to choose from"
+      },
+      "export": {
+        "title": "Export Ready",
+        "description": "Download as PDF for easy sharing"
+      }
+    }
+  }
+}
