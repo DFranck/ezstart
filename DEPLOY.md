@@ -2,19 +2,26 @@
 
 ## 📍 URLs de Déploiement
 
-### APIs Railway (Usage Ponctuel - Free Plan $1/mois)
+### APIs Oracle Cloud (Free Tier - GRATUIT À VIE)
 
-| Service        | Platform | URL Production                   | Private URL              | Status    |
-| -------------- | -------- | -------------------------------- | ------------------------ | --------- |
-| **EZAuth API** | Railway  | https://ezauth.up.railway.app    | ezauth.railway.internal  | ✅ Active |
-| **EZPay API**  | Railway  | https://ezpay-api.up.railway.app | ezstart.railway.internal | ✅ Active |
+| Service               | Platform | URL Production                         | Port | Status    |
+| --------------------- | -------- | -------------------------------------- | ---- | --------- |
+| **EZAuth API**        | Oracle   | https://ezauth.ezstart.xyz/api         | 5010 | ✅ Active |
+| **EZPay API**         | Oracle   | https://ezpay.ezstart.xyz/api          | 5040 | ✅ Active |
+| **EZBill API**        | Oracle   | https://ezbill.ezstart.xyz/api         | 5020 | ✅ Active |
+| **Tower Defense API** | Oracle   | https://td-api.ezstart.xyz/api         | 5030 | ✅ Active |
+| **GreenPulse API**    | Oracle   | https://greenpulse.ezstart.xyz/api     | 5070 | ✅ Active |
+| **Monitoring API**    | Oracle   | https://monitoring.ezstart.xyz/api     | 5000 | ✅ Active |
 
-**Pourquoi Railway pour ces APIs ?**
+**Pourquoi Oracle Cloud Free Tier ?**
 
-- ✅ **0ms cold start** - Critique pour SSO (EZAuth) et paiements (EZPay)
-- ✅ **Usage ponctuel** - Authentification et paiements = pics courts, consommation faible
-- ✅ **Gratuit** - $1/mois suffit pour usage intermittent
-- ⚡ **Toujours actif** - Pas de sleep mode (contrairement à Render)
+- ✅ **GRATUIT À VIE** - Pas de limite de temps, aucune carte facturée
+- ✅ **Ressources généreuses** - 4 CPU ARM, 24GB RAM, 200GB storage
+- ✅ **0ms cold start** - Toujours actif, pas de sleep mode
+- ✅ **Haute performance** - ARM Ampere, excellentes performances Node.js
+- ✅ **10TB/mois bande passante** - Largement suffisant
+- ✅ **SSL/TLS inclus** - Let's Encrypt automatisé
+- ✅ **Une seule VM** - Toutes les APIs sur un serveur, facile à gérer
 
 ### Apps Web Vercel (Free Tier)
 
@@ -30,7 +37,93 @@
 
 ---
 
-## 🚂 Configuration Railway
+## ☁️ Configuration Oracle Cloud
+
+### Guide Complet
+
+Pour le guide complet de déploiement sur Oracle Cloud, consultez **[docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md)**
+
+### Quick Start
+
+**1. Prérequis:**
+- Compte Oracle Cloud (gratuit, carte requise mais jamais facturée)
+- VM créée (4 OCPU ARM, 24GB RAM)
+- DNS configurés (6 sous-domaines pointant vers l'IP de la VM)
+- Domaines : `ezauth.ezstart.xyz`, `ezpay.ezstart.xyz`, `ezbill.ezstart.xyz`, `td-api.ezstart.xyz`, `greenpulse.ezstart.xyz`, `monitoring.ezstart.xyz`
+
+**2. Sur la VM Oracle (via SSH):**
+
+```bash
+# 1. Installer Docker et Docker Compose
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu
+sudo apt install docker-compose-plugin -y
+
+# 2. Cloner le repository
+git clone https://github.com/DFranck/ezstart.git
+cd ezstart
+
+# 3. Configurer les variables d'environnement
+cp .env.oracle.example .env
+nano .env  # Remplir avec vos valeurs réelles
+
+# 4. Déployer toutes les APIs
+./scripts/oracle-deploy.sh
+
+# 5. Configurer SSL (après propagation DNS)
+./scripts/oracle-init-ssl.sh
+```
+
+**3. Scripts de gestion:**
+
+```bash
+# Vérifier la santé des APIs
+./scripts/oracle-health.sh
+
+# Voir les logs
+./scripts/oracle-logs.sh all          # Tous les containers
+./scripts/oracle-logs.sh ezauth       # Une API spécifique
+
+# Mettre à jour avec le nouveau code
+./scripts/oracle-update.sh
+```
+
+### Architecture Docker
+
+Toutes les APIs tournent dans des containers Docker orchestrés par Docker Compose :
+
+```
+Oracle Cloud VM (ARM)
+├── Nginx Reverse Proxy (ports 80/443)
+│   ├── SSL/TLS (Let's Encrypt)
+│   ├── Rate limiting
+│   └── Proxy vers APIs
+│
+└── Docker Compose
+    ├── ezauth-api (container)
+    ├── ezpay-api (container)
+    ├── ezbill-api (container)
+    ├── tower-defense-api (container)
+    ├── green-pulse-api (container)
+    ├── monitoring-api (container)
+    ├── nginx-proxy (container)
+    └── certbot (container)
+```
+
+### Fichiers de Configuration
+
+| Fichier | Description |
+|---------|-------------|
+| [docker-compose.yml](./docker-compose.yml) | Orchestration des 6 APIs + Nginx |
+| [nginx/nginx.conf](./nginx/nginx.conf) | Configuration reverse proxy et SSL |
+| [.env.oracle.example](./.env.oracle.example) | Template variables d'environnement |
+| apps/*/api/Dockerfile | Dockerfiles optimisés multi-stage |
+| [scripts/oracle-*.sh](./scripts/) | Scripts d'automatisation |
+
+---
+
+## 🚂 Configuration Railway (ANCIENNE - Maintenant sur Oracle)
 
 ### 1. EZAuth API
 

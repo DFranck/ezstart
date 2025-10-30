@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.env
+.env.local
+.env.production
+.git
+.github
+.vscode
+*.log
+*.md
+coverage
+.turbo
+.vercel

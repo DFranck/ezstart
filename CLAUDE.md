@@ -11,7 +11,8 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 **Lire en premier :**
 - 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ Règles de développement obligatoires
 - 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complets)
-- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
+- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Oracle/Vercel
+- ☁️ [docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md) - Guide complet Oracle Cloud
 - 🧪 [docs/TESTING.md](./docs/TESTING.md) - Stratégie de tests
 - 🤖 [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
 
@@ -299,12 +300,15 @@ export default createVitestConfig({
 
 ### Plateformes
 
-**Railway (APIs critiques) :**
-- EZAuth API - https://ezauth.up.railway.app
-- EZPay API - https://ezpay-api.up.railway.app
+**Oracle Cloud Free Tier (TOUTES les APIs - GRATUIT) :**
+- EZAuth API - https://ezauth.ezstart.xyz
+- EZPay API - https://ezpay.ezstart.xyz
+- EZBill API - https://ezbill.ezstart.xyz
+- Tower Defense API - https://td-api.ezstart.xyz
+- GreenPulse API - https://greenpulse.ezstart.xyz
+- Monitoring API - https://monitoring.ezstart.xyz
 
-**Render (APIs standard) :**
-- EZBill, Tower Defense, GreenPulse, Monitoring APIs
+**Ressources :** 1x VM ARM (4 cores, 24GB RAM, 200GB storage) - GRATUIT À VIE
 
 **Vercel (Web Apps) :**
 - EZStart - https://www.ezstart.xyz
@@ -313,11 +317,21 @@ export default createVitestConfig({
 ### Infrastructure as Code
 
 Fichiers de configuration :
-- [railway.toml](./railway.toml) - Configuration Railway
-- [render.yaml](./render.yaml) - Configuration Render
+- [docker-compose.yml](./docker-compose.yml) - Orchestration Docker (6 APIs)
+- [nginx/nginx.conf](./nginx/nginx.conf) - Reverse proxy et SSL
+- [.env.oracle.example](./.env.oracle.example) - Template variables Oracle
+- `apps/*/api/Dockerfile` - Dockerfiles multi-stage optimisés
+- `scripts/oracle-*.sh` - Scripts de gestion Oracle Cloud
 - `apps/*/web/vercel.json` - Configuration Vercel
 
-**Documentation complète :** [DEPLOY.md](./DEPLOY.md) + [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md)
+**Anciennes configs (deprecated) :**
+- [railway.toml](./railway.toml) - Configuration Railway (ancien)
+- [render.yaml](./render.yaml) - Configuration Render (ancien)
+
+**Documentation complète :**
+- [docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md) - Guide Oracle complet
+- [DEPLOY.md](./DEPLOY.md) - Vue d'ensemble déploiement
+- [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
 
 ---
 
