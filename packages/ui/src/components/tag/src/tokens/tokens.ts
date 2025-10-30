@@ -23,6 +23,7 @@ export const sizeText = {
   h5: cn(sizeTextCommon, 'text-base sm:text-lg md:text-xl'),
   h6: cn(sizeTextCommon, 'text-sm sm:text-base md:text-lg'),
   giant: 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
+  lg: 'text-lg sm:text-xl',
   sm: 'text-sm sm:text-base',
   xs: 'text-xs sm:text-sm',
 } as const

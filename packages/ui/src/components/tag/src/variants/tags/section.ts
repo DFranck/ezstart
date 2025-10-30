@@ -10,7 +10,8 @@ export const sectionVariant = {
 export type SectionVariant = keyof typeof sectionVariant
 
 export const sectionSize = {
-  default: '',
+  default: 'max-w-7xl px-4 py-8 md:px-6 md:py-12',
+  narrow: 'max-w-4xl px-4 py-8 md:px-6 md:py-12',
   xs: 'max-w-2xl px-1 py-2 md:px-2 md:py-4',
   sm: 'max-w-3xl px-2 py-4 md:px-4 md:py-6',
   md: 'max-w-4xl px-4 py-6 md:px-6 md:py-8',

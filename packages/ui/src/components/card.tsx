@@ -28,6 +28,7 @@ const cardVariants = cva('text-card-foreground flex flex-col rounded-xl border t
   variants: {
     variant: {
       default: 'bg-card shadow-sm shadow-foreground/5',
+      outline: 'bg-card border-border hover:border-primary/50 shadow-sm',
       ghost: 'bg-transparent border-transparent shadow-none',
       floating:
         'bg-background/70 backdrop-blur-sm border-background/20 shadow-lg shadow-foreground/10',
