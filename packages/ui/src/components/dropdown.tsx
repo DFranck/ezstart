@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from '../lib/utils'
 import { Button } from './button'
 import { LI, UL } from './tag'
@@ -106,7 +106,7 @@ export function Dropdown({
   const menuRef = useRef<HTMLUListElement>(null)
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
 
-  const menuId = `dropdown-menu-${Math.random().toString(36).slice(2)}`
+  const menuId = useId()
 
   // Compute menu position classes
   const alignClasses = {
