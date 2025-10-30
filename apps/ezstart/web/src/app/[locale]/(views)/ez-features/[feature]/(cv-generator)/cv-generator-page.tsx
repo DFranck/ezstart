@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, Div, H2, H3, Icon, Input, Label, Section } from '@ezstart/ui/components';
+import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { CVPreview } from './components/cv-preview';
 import { TemplateSelector } from './components/template-selector';
@@ -88,15 +88,22 @@ export default function CVGeneratorPage() {
   };
 
   return (
-    <Section className='space-y-6'>
-      <Div>
-        <H2>AI-Powered CV Generator</H2>
-        <p className='text-muted-foreground mt-2'>
-          Generate optimized CVs tailored to job postings using AI
-        </p>
-      </Div>
+    <>
+      {/* Hero Section */}
+      <Section size="full" className="bg-gradient-to-b from-primary/5 to-background py-12">
+        <Div layout="center">
+          <Icon name="lucide:FileText" className="w-16 h-16 text-primary mb-4" />
+          <H1>AI-Powered CV Generator</H1>
+          <P size="lg" className="text-muted-foreground max-w-2xl">
+            Generate optimized CVs tailored to job postings using AI.
+            Leverage GitHub, LinkedIn, and custom context to create compelling resumes.
+          </P>
+        </Div>
+      </Section>
 
-      <div className='grid lg:grid-cols-2 gap-6'>
+      {/* Generator Section */}
+      <Section size="default">
+        <div className='grid lg:grid-cols-2 gap-6'>
         {/* Configuration Panel */}
         <div className='space-y-6'>
           {/* AI Configuration */}
@@ -386,6 +393,46 @@ export default function CVGeneratorPage() {
           </CardContent>
         </Card>
       </div>
-    </Section>
+      </Section>
+
+      {/* Features Section */}
+      <Section size="narrow" className="bg-muted/50">
+        <Div layout="center">
+          <H3>Key Features</H3>
+          <P className="text-muted-foreground mb-6">
+            Powerful tools to create standout CVs
+          </P>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Sparkles" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">AI Optimization</P>
+                <P size="sm" className="text-muted-foreground">
+                  Tailor your CV to match job requirements
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Palette" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Professional Templates</P>
+                <P size="sm" className="text-muted-foreground">
+                  Multiple design options to choose from
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Download" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Export Ready</P>
+                <P size="sm" className="text-muted-foreground">
+                  Download as PDF for easy sharing
+                </P>
+              </CardContent>
+            </Card>
+          </div>
+        </Div>
+      </Section>
+    </>
   );
 }

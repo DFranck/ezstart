@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, Div, H2, H3, Input, Label, Section } from '@ezstart/ui/components';
+import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { BusinessCardCanvas } from './components/business-card-canvas';
 import { TemplateSelector } from './components/template-selector';
@@ -45,15 +45,22 @@ export default function BusinessCardGeneratorPage() {
   };
 
   return (
-    <Section className='space-y-6'>
-      <Div>
-        <H2>Business Card Generator</H2>
-        <p className='text-muted-foreground mt-2'>
-          Create professional printable business cards with QR codes
-        </p>
-      </Div>
+    <>
+      {/* Hero Section */}
+      <Section size="full" className="bg-gradient-to-b from-primary/5 to-background py-12">
+        <Div layout="center">
+          <Icon name="lucide:CreditCard" className="w-16 h-16 text-primary mb-4" />
+          <H1>Business Card Generator</H1>
+          <P size="lg" className="text-muted-foreground max-w-2xl">
+            Create professional printable business cards with QR codes.
+            Perfect for networking, conferences, and client meetings.
+          </P>
+        </Div>
+      </Section>
 
-      <div className='grid lg:grid-cols-2 gap-6'>
+      {/* Generator Section */}
+      <Section size="default">
+        <div className='grid lg:grid-cols-2 gap-6'>
         {/* Configuration Panel */}
         <div className='space-y-6'>
           <Card variant='elevated'>
@@ -247,6 +254,46 @@ export default function BusinessCardGeneratorPage() {
           </CardContent>
         </Card>
       </div>
-    </Section>
+      </Section>
+
+      {/* Features Section */}
+      <Section size="narrow" className="bg-muted/50">
+        <Div layout="center">
+          <H3>Why Use Digital Business Cards?</H3>
+          <P className="text-muted-foreground mb-6">
+            Modern networking requires modern solutions
+          </P>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Zap" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Instant Sharing</P>
+                <P size="sm" className="text-muted-foreground">
+                  QR codes make contact sharing effortless
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Palette" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Custom Design</P>
+                <P size="sm" className="text-muted-foreground">
+                  Match your brand with colors and templates
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Printer" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Print Ready</P>
+                <P size="sm" className="text-muted-foreground">
+                  Export in standard business card size
+                </P>
+              </CardContent>
+            </Card>
+          </div>
+        </Div>
+      </Section>
+    </>
   );
 }
