@@ -8,14 +8,14 @@ import { setScheduler } from './routes/scheduler.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
 import type { Server as IOServer } from 'socket.io'
 
-const PORT = getApiPort('monitoring')
+const PORT = getApiPort('ezstart')
 
 // Create Express app with CORS auto-configured
 // Monitoring API is called by ALL web apps (dashboard in EZStart)
-const app = createApp({ apiApp: 'monitoring' })
+const app = createApp({ apiApp: 'ezstart' })
 
 // Get CORS origins for Socket.IO (all web apps can connect)
-const socketCorsOrigins = getAllowedOrigins('monitoring')
+const socketCorsOrigins = getAllowedOrigins('ezstart')
 
 // Store Socket.IO instance to be used by scheduler
 let io: IOServer
