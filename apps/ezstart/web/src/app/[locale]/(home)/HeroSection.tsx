@@ -2,8 +2,8 @@
 
 import { SkillShowcase } from '@/components/JobShowing'
 import { AuroraBackground } from '@/components/ui/aurora-background'
-import { Div, H1, Section, TextGradient } from '@ezstart/ui/components'
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
+import { Div, H1, Section, TextGradient } from '@ezstart/ui/components'
 import Image from 'next/image'
 import ContactsList from '../../../components/contactsList'
 
@@ -29,7 +29,7 @@ const HeroSection = ({ id }: Props) => {
   const content = (
     <>
       <H1 size={'giant'} className="text-center md:text-wrap">
-        <TextGradient from="ezstart" speed={5}>
+        <TextGradient from="ezstart" via="primary" to="ezstart" speed={5}>
           {t('title')}
         </TextGradient>
       </H1>
