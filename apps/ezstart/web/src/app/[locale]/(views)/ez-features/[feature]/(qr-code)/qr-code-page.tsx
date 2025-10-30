@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, Div, H2, H3, Input, Label, Section } from '@ezstart/ui/components';
+import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
 import { useState } from 'react';
 import { QRCodeCanvas } from './components/qrcode-canvas';
 import { QRCodeConfig } from './types';
@@ -27,13 +27,21 @@ export default function QRCodeGeneratorPage() {
   };
 
   return (
-    <Section className='space-y-6'>
-      <Div>
-        <H2>QR Code Generator</H2>
-        <p className='text-muted-foreground mt-2'>
-          Generate professional QR codes with customization options
-        </p>
-      </Div>
+    <>
+      {/* Hero Section */}
+      <Section size="full" className="bg-gradient-to-b from-primary/5 to-background py-12">
+        <Div layout="center">
+          <Icon name="lucide:QrCode" className="w-16 h-16 text-primary mb-4" />
+          <H1>QR Code Generator</H1>
+          <P size="lg" className="text-muted-foreground max-w-2xl">
+            Generate professional QR codes with customization options.
+            Perfect for business cards, marketing materials, and event tickets.
+          </P>
+        </Div>
+      </Section>
+
+      {/* Generator Section */}
+      <Section size="default">
 
       <div className='grid lg:grid-cols-2 gap-6'>
         {/* Configuration Panel */}
@@ -177,6 +185,46 @@ export default function QRCodeGeneratorPage() {
           </CardContent>
         </Card>
       </div>
-    </Section>
+      </Section>
+
+      {/* Use Cases Section */}
+      <Section size="narrow" className="bg-muted/50">
+        <Div layout="center">
+          <H3>Common Use Cases</H3>
+          <P className="text-muted-foreground mb-6">
+            QR codes are versatile and can be used in many scenarios
+          </P>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Briefcase" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Business Cards</P>
+                <P size="sm" className="text-muted-foreground">
+                  Share contact details instantly
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Share2" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Marketing</P>
+                <P size="sm" className="text-muted-foreground">
+                  Drive traffic to campaigns
+                </P>
+              </CardContent>
+            </Card>
+            <Card variant="outline">
+              <CardContent className="text-center py-6 space-y-2">
+                <Icon name="lucide:Ticket" className="w-8 h-8 mx-auto text-primary" />
+                <P weight="medium">Event Tickets</P>
+                <P size="sm" className="text-muted-foreground">
+                  Quick and secure entry
+                </P>
+              </CardContent>
+            </Card>
+          </div>
+        </Div>
+      </Section>
+    </>
   );
 }
