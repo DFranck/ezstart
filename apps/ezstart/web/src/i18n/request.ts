@@ -25,6 +25,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
     legal,
     libraries,
     features,
+    qrCode,
+    cvGenerator,
+    businessCard,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -41,6 +44,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/legal-notices.json`),
     import(`../messages/${locale}/libraries.json`),
     import(`../messages/${locale}/features.json`),
+    // features
+    import(`../messages/${locale}/features/qr-code.json`),
+    import(`../messages/${locale}/features/cv-generator.json`),
+    import(`../messages/${locale}/features/business-card.json`),
   ]);
 
   return {
@@ -57,6 +64,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
       legal.default,
       libraries.default,
       features.default,
+      qrCode.default,
+      cvGenerator.default,
+      businessCard.default,
     ]),
   };
 });
