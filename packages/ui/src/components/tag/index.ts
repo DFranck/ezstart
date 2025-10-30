@@ -5,6 +5,7 @@ export * from './src/variants/groups/listing';
 export * from './src/variants/tags/aside';
 export * from './src/variants/tags/div';
 export * from './src/variants/tags/main';
+export * from './src/variants/tags/nav';
 export * from './src/variants/tags/p';
 export * from './src/variants/tags/section';
 export * from './src/variants/tags/span';
