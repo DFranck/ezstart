@@ -20,24 +20,18 @@ export function PlaygroundVariantSelects({
   meta,
   selected,
   onChange,
-  columns = 3,
 }: PlaygroundVariantSelectsProps) {
   return (
-    <div className={`grid gap-3 md:grid-cols-${columns}`}>
+    <div className="space-y-4">
       {Object.entries(meta).map(([variantName, values]) => (
-        <div key={variantName} className='flex flex-col gap-1'>
-          <Label className='text-xs font-medium text-neutral-400'>
-            {variantName}
-          </Label>
-          <Select
-            value={selected[variantName]}
-            onValueChange={(v: string) => onChange(variantName, v)}
-          >
-            <SelectTrigger className='w-full'>
-              <SelectValue placeholder={variantName} />
+        <div key={variantName} className="space-y-2">
+          <Label className="text-sm font-medium capitalize">{variantName}</Label>
+          <Select value={selected[variantName]} onValueChange={(v: string) => onChange(variantName, v)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={`Select ${variantName}`} />
             </SelectTrigger>
             <SelectContent>
-              {values.map((v) => (
+              {values.map(v => (
                 <SelectItem key={v} value={v}>
                   {v}
                 </SelectItem>
@@ -47,5 +41,5 @@ export function PlaygroundVariantSelects({
         </div>
       ))}
     </div>
-  );
+  )
 }

@@ -73,7 +73,7 @@ export function generateProjectConfig(): Record<ProjectId, ProjectConfig> {
 
   for (const app of allApps) {
     // Skip monitoring (no meta-monitoring)
-    if (app === 'monitoring') continue
+    if (app === 'monitoring' as AppName) continue
 
     const metadata = getProjectMetadata(app)
     const logoUrl = getLogoUrl(app)

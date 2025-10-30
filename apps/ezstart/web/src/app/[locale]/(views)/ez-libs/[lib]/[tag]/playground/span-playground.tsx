@@ -1,69 +1,37 @@
-'use client';
+'use client'
 
-import {
-  DEFAULT_SPAN_VARIANTS,
-  Div,
-  P,
-  Section,
-  Span,
-  tagVariantsMeta,
-} from '@ezstart/ui/components';
-import { useState } from 'react';
-import PlaygroundCodeView from '../components/playground-code-view';
-import { PlaygroundVariantSelects } from '../components/playground-variant-selects';
-import { ResetButton } from '../../components/reset-button';
-import { ResponsivePreview } from '../../components/responsive-preview';
-import { buildFakeTag } from '../utils/build-fake-tag';
+import { DEFAULT_SPAN_VARIANTS, P, Span, tagVariantsMeta } from '@ezstart/ui/components'
+import { useState } from 'react'
+import PlaygroundCodeView from '../components/playground-code-view'
+import { PlaygroundVariantSelects } from '../components/playground-variant-selects'
+import { ModernPlaygroundLayout } from '../components/modern-playground-layout'
+import { buildFakeTag } from '../utils/build-fake-tag'
 
-const meta = tagVariantsMeta['span'];
+const meta = tagVariantsMeta['span']
 
 export default function SpanPlayground() {
-  const [selected, setSelected] = useState<Record<string, string>>(
-    DEFAULT_SPAN_VARIANTS
-  );
+  const [selected, setSelected] = useState<Record<string, string>>(DEFAULT_SPAN_VARIANTS)
 
   const handleChange = (prop: string, value: string) => {
-    setSelected((prev) => ({ ...prev, [prop]: value }));
-  };
-
-  const handleReset = () => {
-    setSelected(DEFAULT_SPAN_VARIANTS);
-  };
+    setSelected(prev => ({ ...prev, [prop]: value }))
+  }
 
   const content = (
     <P>
-      I'm a paragraph with a <Span {...selected}>styled span</Span> inside. Play
-      with my variants below.
+      I'm a paragraph with a <Span {...selected}>styled span</Span> inside. Play with my variants on the right.
     </P>
-  );
+  )
 
-  const fakeTagCode = buildFakeTag('span', selected, undefined, 'Styled span');
-  const fakeAliasCode = buildFakeTag('span', selected, 'Span', 'Styled span');
+  const fakeTagCode = buildFakeTag('span', selected, undefined, 'Styled span')
+  const fakeAliasCode = buildFakeTag('span', selected, 'Span', 'Styled span')
 
   return (
-    <>
-      {/* Responsive Preview */}
-      <ResponsivePreview>
-        {content}
-      </ResponsivePreview>
-
-      <Section size={'xs'}>
-        <Div layout={'grid'} variant={'outline'}>
-          <PlaygroundCodeView
-            fakeTagCode={fakeTagCode}
-            fakeAliasCode={fakeAliasCode}
-          />
-          <div className='flex items-center justify-between mb-3'>
-            <span className='text-sm font-medium'>Variants</span>
-            <ResetButton onReset={handleReset} />
-          </div>
-          <PlaygroundVariantSelects
-            meta={meta}
-            selected={selected}
-            onChange={handleChange}
-          />
-        </Div>
-      </Section>
-    </>
-  );
+    <ModernPlaygroundLayout
+      title="<Span> Component Playground"
+      activeVariants={selected}
+      preview={content}
+      controls={<PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />}
+      codeView={<PlaygroundCodeView fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />}
+    />
+  )
 }
