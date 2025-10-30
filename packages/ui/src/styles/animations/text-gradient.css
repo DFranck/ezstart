@@ -2,7 +2,7 @@
   background: linear-gradient(
     270deg,
     var(--text-gradient-from, rgb(255, 0, 255)),
-    var(--text-gradient-via, #00fe26),
+    var(--text-gradient-via),
     var(--text-gradient-to, rgb(255, 0, 255))
   );
   background-size: 200% auto;

@@ -101,7 +101,6 @@ export const TextGradient = ({
   // Build gradient stops
   const gradientFrom = `var(--${from})`
   const gradientTo = `var(--${to})`
-  const gradientVia = via ? `var(--${via})` : gradientTo
 
   // Animation enabled if speed > 0 or animate = true
   const shouldAnimate = animate || speed > 0
@@ -118,7 +117,7 @@ export const TextGradient = ({
       style={
         {
           '--text-gradient-from': gradientFrom,
-          '--text-gradient-via': gradientVia,
+          ...(via && { '--text-gradient-via': `var(--${via})` }),
           '--text-gradient-to': gradientTo,
           ...(shouldAnimate && { '--gradient-speed': `${animationSpeed}s` }),
         } as React.CSSProperties
