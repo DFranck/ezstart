@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { MobileNavbar } from '.'
-import { useDevice, useOnScroll } from '../../hooks'
+import { useClickOutside, useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
@@ -122,6 +122,7 @@ export function ClientLayout({
   const [isBurgerOpen, setIsBurgerOpen] = useState(false)
   const [openMenus, setOpenMenus] = useState<Set<number>>(new Set())
   const burgerMenuRef = useRef<HTMLDivElement>(null)
+  const desktopMenuRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const LinkTag = LinkComponent as any
 
@@ -157,6 +158,40 @@ export function ClientLayout({
     }
   }, [isTablet, isBurgerOpen])
 
+  // Close desktop menus when clicking outside
+  useEffect(() => {
+    if (!isDesktop || openMenus.size === 0) return
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      let shouldCloseAny = false
+      const menusToClose: number[] = []
+
+      openMenus.forEach((menuIndex) => {
+        const menuRef = desktopMenuRefs.current.get(menuIndex)
+        if (menuRef && !menuRef.contains(event.target as Node)) {
+          menusToClose.push(menuIndex)
+          shouldCloseAny = true
+        }
+      })
+
+      if (shouldCloseAny) {
+        setOpenMenus((prev) => {
+          const next = new Set(prev)
+          menusToClose.forEach((index) => next.delete(index))
+          return next
+        })
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside as EventListener)
+    document.addEventListener('touchstart', handleClickOutside as EventListener)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside as EventListener)
+      document.removeEventListener('touchstart', handleClickOutside as EventListener)
+    }
+  }, [isDesktop, openMenus])
+
   // Render desktop navigation (supports menus)
   const renderDesktopNav = () => {
     if (!navLinks || !isDesktop) return null
@@ -170,7 +205,17 @@ export function ClientLayout({
             const buttonId = `desktop-menu-button-${index}`
 
             return (
-              <div key={index} className="relative">
+              <div
+                key={index}
+                className="relative"
+                ref={(el) => {
+                  if (el) {
+                    desktopMenuRefs.current.set(index, el)
+                  } else {
+                    desktopMenuRefs.current.delete(index)
+                  }
+                }}
+              >
                 <Button
                   id={buttonId}
                   variant="ghost"
