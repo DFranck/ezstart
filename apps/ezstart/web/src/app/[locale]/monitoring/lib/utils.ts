@@ -33,7 +33,7 @@ export function calculateAuditsHealth(audits: any[]) {
 }
 
 export function getMetricsData(
-  activeTab: 'projects' | 'audits' | 'activity',
+  activeTab: 'projects' | 'audits' | 'errors',
   summary: ProjectsData['summary'],
   audits: any[],
   projects: any[]
@@ -58,21 +58,34 @@ export function getMetricsData(
     }
   }
 
-  // Audits tab
-  const worstAudit = audits.length > 0
-    ? audits.reduce((worst: any, current: any) =>
-        (current.score || 0) < (worst.score || 0) ? current : worst
-      )
-    : null
+  if (activeTab === 'audits') {
+    // Audits tab
+    const worstAudit = audits.length > 0
+      ? audits.reduce((worst: any, current: any) =>
+          (current.score || 0) < (worst.score || 0) ? current : worst
+        )
+      : null
 
+    return {
+      servicesHealthy: audits.filter((a: any) => a.score >= 90).length,
+      servicesTotal: audits.length,
+      auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
+      auditsTotal: audits.length,
+      deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
+      deploymentsTotal: audits.length,
+      avgResponseTime: worstAudit ? worstAudit.score : 0,
+      worstAuditName: worstAudit ? worstAudit.name : '',
+    }
+  }
+
+  // Errors tab - return empty/placeholder data (MetricsOverview returns null for errors)
   return {
-    servicesHealthy: audits.filter((a: any) => a.score >= 90).length,
-    servicesTotal: audits.length,
-    auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
-    auditsTotal: audits.length,
-    deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
-    deploymentsTotal: audits.length,
-    avgResponseTime: worstAudit ? worstAudit.score : 0,
-    worstAuditName: worstAudit ? worstAudit.name : '',
+    servicesHealthy: 0,
+    servicesTotal: 0,
+    auditsComplete: 0,
+    auditsTotal: 0,
+    deploymentsActive: 0,
+    deploymentsTotal: 0,
+    avgResponseTime: 0,
   }
 }

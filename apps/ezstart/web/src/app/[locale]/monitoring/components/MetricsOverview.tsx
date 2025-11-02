@@ -51,7 +51,7 @@ function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
 }
 
 interface MetricsOverviewProps {
-  activeTab: 'projects' | 'audits' | 'activity'
+  activeTab: 'projects' | 'audits' | 'errors'
   metrics: {
     servicesHealthy: number
     servicesTotal: number
@@ -113,6 +113,6 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
     )
   }
 
-  // Activity tab - no metrics
+  // Errors tab - no metrics overview needed
   return null
 }

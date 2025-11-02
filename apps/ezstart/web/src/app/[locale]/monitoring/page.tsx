@@ -19,7 +19,7 @@ import { AuditCard } from './(health-tab)/components/AuditCard'
 import { TabScore } from './components/TabScore'
 import { MetricsOverview } from './components/MetricsOverview'
 import { ProjectCard } from './(health-tab)/components/ProjectCard'
-import { ActivityFeed } from './(activity-tab)/components/ActivityFeed'
+import { ErrorsFeed } from './(errors-tab)/components/ErrorsFeed'
 import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useMonitoringAudits } from './hooks/useMonitoringAudits'
 import { useSocket } from './hooks/useSocket'
@@ -28,7 +28,7 @@ import { calculateOverallHealth, calculateAuditsHealth, getMetricsData } from '.
 import { MONITORING_API_URL } from './lib/config'
 
 export default function MonitoringDashboard() {
-  const [activeTab, setActiveTab] = useState<'projects' | 'audits' | 'activity'>('projects')
+  const [activeTab, setActiveTab] = useState<'projects' | 'audits' | 'errors'>('projects')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
 
@@ -195,12 +195,12 @@ export default function MonitoringDashboard() {
       <Tabs
         defaultValue="projects"
         className="w-full max-w-7xl px-2"
-        onValueChange={value => setActiveTab(value as 'projects' | 'audits' | 'activity')}
+        onValueChange={value => setActiveTab(value as 'projects' | 'audits' | 'errors')}
       >
         <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
           <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="errors">Errors</TabsTrigger>
         </TabsList>
 
         <TabsContent value="projects" className="space-y-4 mt-6">
@@ -231,8 +231,8 @@ export default function MonitoringDashboard() {
           )}
         </TabsContent>
 
-        <TabsContent value="activity" className="space-y-4 mt-6">
-          <ActivityFeed apiUrl={MONITORING_API_URL} />
+        <TabsContent value="errors" className="space-y-4 mt-6">
+          <ErrorsFeed />
         </TabsContent>
       </Tabs>
     </>
