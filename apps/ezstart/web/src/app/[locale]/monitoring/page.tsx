@@ -116,7 +116,7 @@ export default function MonitoringDashboard() {
         }
       : {
           title: 'Error Status Score',
-          subtitle: `${errors.length} errors logged`,
+          subtitle: `Based on last 24 hours`,
         }
 
   const metricsData = getMetricsData(activeTab, summary, audits, projects, errors)

@@ -36,9 +36,18 @@ export function calculateErrorsHealth(errors: any[]) {
   // Score inversé: moins d'erreurs = meilleur score
   // Pondération par sévérité: critical = 10 points, error = 5, warning = 1
 
-  const criticalCount = errors.filter((e: any) => e.severity === 'critical').length
-  const errorCount = errors.filter((e: any) => e.severity === 'error').length
-  const warningCount = errors.filter((e: any) => e.severity === 'warning').length
+  // Filter errors from last 24 hours only
+  const now = new Date().getTime()
+  const last24h = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+
+  const recentErrors = errors.filter((e: any) => {
+    const errorTime = new Date(e.timestamp).getTime()
+    return (now - errorTime) <= last24h
+  })
+
+  const criticalCount = recentErrors.filter((e: any) => e.severity === 'critical').length
+  const errorCount = recentErrors.filter((e: any) => e.severity === 'error').length
+  const warningCount = recentErrors.filter((e: any) => e.severity === 'warning').length
 
   // Score de pénalité (plus c'est haut, plus c'est grave)
   const penaltyScore = (criticalCount * 10) + (errorCount * 5) + (warningCount * 1)
