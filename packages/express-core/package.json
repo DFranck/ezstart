@@ -29,7 +29,6 @@
     "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@ezstart/config": "workspace:*",
     "@ezstart/logger": "workspace:*",
-    "@ezstart/types": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.19.2",

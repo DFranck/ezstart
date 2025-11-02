@@ -24,7 +24,6 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@tower-defense/config": "workspace:*",
-    "@ezstart/types": "workspace:*",
     "zod": "^3.23.8"
   },
   "keywords": [],

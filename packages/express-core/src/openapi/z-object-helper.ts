@@ -1,4 +1,4 @@
-import { z } from '@ezstart/types'
+import { z } from '../types/zod.js'
 import { ZodTypeAny } from 'zod'
 
 /**

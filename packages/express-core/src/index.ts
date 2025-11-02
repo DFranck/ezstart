@@ -25,9 +25,12 @@ export { getApiPort } from './config/ports.js'
 export { validateParams } from './middlewares/validate-params.js'
 export { validateQuery } from './middlewares/validate-query.js'
 
-// OpenAPI helpers (incl. OpenAPIRegistry, z, createRouterWithDoc, etc.)
+// Types & Validation (Zod + OpenAPI)
+export { z, mongoIdSchema, listingQuerySchema } from './types/zod.js'
+export type { Infer, Input, ListingQuery } from './types/zod.js'
+
+// OpenAPI helpers (incl. OpenAPIRegistry, createRouterWithDoc, etc.)
 export { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'
-export { z } from '@ezstart/types'
 export { checkMissingDescriptions } from './openapi/check-missing-descriptions.js'
 export { openApiCompatible } from './openapi/openapi-compatible.js'
 export { createRouterWithDoc } from './openapi/route-with-doc.js'

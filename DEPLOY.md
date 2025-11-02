@@ -11,7 +11,7 @@
 | **EZBill API**        | Railway  | https://ezbill-api.up.railway.app/api  | 5020 | 🔄 Config |
 | **Tower Defense API** | Railway  | https://td-api.up.railway.app/api      | 5030 | 🔄 Config |
 | **GreenPulse API**    | Railway  | https://greenpulse-api.up.railway.app/api | 5070 | 🔄 Config |
-| **Monitoring API**    | Railway  | https://monitoring-api.up.railway.app/api | 5000 | 🔄 Config |
+| **EZStart API (Monitoring)** | Railway  | https://ezstart-api.up.railway.app/api | 5000 | 🔄 Config |
 
 **Pourquoi Railway Hobby Plan ?**
 

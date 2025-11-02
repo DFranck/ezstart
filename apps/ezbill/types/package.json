@@ -24,7 +24,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/types": "workspace:*",
     "zod": "^3.23.8"
   },
   "keywords": [],

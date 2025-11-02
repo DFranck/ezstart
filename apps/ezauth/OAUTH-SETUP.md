@@ -160,7 +160,7 @@ Si tu vois :
 - Test users dans Google OAuth Consent
 
 **Production** :
-- `https://ezauth.up.railway.app/api/auth/google/callback`
+- `https://ezauth-api.up.railway.app/api/auth/google/callback`
 - Publish OAuth Consent Screen (review Google)
 - Encrypt `accessToken` et `refreshToken` (TODO)
 
@@ -179,14 +179,14 @@ Le paramètre `state` contient `{ app, redirect_uri }` pour éviter les attaques
 ```env
 GOOGLE_CLIENT_ID=prod-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=prod-client-secret
-GOOGLE_CALLBACK_URL=https://ezauth.up.railway.app/api/auth/google/callback
+GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/api/auth/google/callback
 ```
 
 ### 2. Google Cloud Console
 
 Ajouter la redirect URI de production :
 ```
-https://ezauth.up.railway.app/api/auth/google/callback
+https://ezauth-api.up.railway.app/api/auth/google/callback
 ```
 
 ### 3. OAuth Consent Screen

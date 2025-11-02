@@ -423,9 +423,6 @@ importers:
 
   apps/ezbill/types:
     dependencies:
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../../../packages/types
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1232,9 +1229,6 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.4
         version: 7.3.4(zod@3.23.8)
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../../../packages/types
       '@tower-defense/config':
         specifier: workspace:*
         version: link:../config
@@ -1476,9 +1470,6 @@ importers:
       '@ezstart/logger':
         specifier: workspace:*
         version: link:../logger
-      '@ezstart/types':
-        specifier: workspace:*
-        version: link:../types
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1734,19 +1725,6 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@20.19.9)(lightningcss@1.30.1)(terser@5.44.0)
-
-  packages/types:
-    dependencies:
-      '@asteasolutions/zod-to-openapi':
-        specifier: ^7.3.4
-        version: 7.3.4(zod@3.23.8)
-      zod:
-        specifier: 3.23.8
-        version: 3.23.8
-    devDependencies:
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
 
   packages/typescript-config: {}
 

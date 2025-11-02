@@ -1,7 +1,14 @@
-// Extended Zod with OpenAPI support for APIs
+/**
+ * Extended Zod with OpenAPI support for APIs
+ *
+ * This module provides a Zod instance extended with OpenAPI metadata support,
+ * along with common validation schemas used across all APIs.
+ */
+
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import { z as baseZod } from 'zod'
 
+// Extend Zod with OpenAPI support
 extendZodWithOpenApi(baseZod)
 
 /**
@@ -10,7 +17,7 @@ extendZodWithOpenApi(baseZod)
  *
  * @example
  * ```typescript
- * import { z } from '@ezstart/types'
+ * import { z } from '@ezstart/express-core'
  *
  * const userSchema = z.object({
  *   name: z.string(),
@@ -59,7 +66,7 @@ export const mongoIdSchema = z
  * @example
  * ```typescript
  * // In API route
- * import { listingQuerySchema } from '@ezstart/types'
+ * import { listingQuerySchema } from '@ezstart/express-core'
  *
  * const query = listingQuerySchema.parse(req.query)
  * // query.page = 1 (default)
