@@ -24,7 +24,6 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   } = opts
 
   app.use(basePath || '/', routes)
-  app.get('/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
   if (registries.length > 0) {
     const allDefinitions = registries.flatMap(r => r.definitions)
