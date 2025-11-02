@@ -55,9 +55,11 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   }
 
   const server = createServer(app)
-  server.listen(port, () => {
+  // Bind to 0.0.0.0 to allow external connections (required for Railway/Docker)
+  const host = '0.0.0.0'
+  server.listen(port, host, () => {
     const url = `http://localhost:${port}`
-    logger.info({ service: serviceName, url, basePath: basePath || '/', port }, `🚀 Server started`)
+    logger.info({ service: serviceName, url, basePath: basePath || '/', port, host }, `🚀 Server started`)
     if (registries.length > 0) {
       logger.info({ docsUrl: `${url}/docs` }, '📖 API documentation available')
     }
