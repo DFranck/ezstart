@@ -8,7 +8,6 @@ export const app = createApp({ apiApp: 'green-pulse' })
 const PORT = getApiPort('green-pulse')
 
 app.use('/api', routes)
-app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok', service: 'green-pulse-api' }))
 
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)

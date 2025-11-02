@@ -7,12 +7,7 @@ import routes, { globalRegistry } from './routes/index.js'
 export const app = createApp({ apiApp: 'ezbill' })
 const PORT = getApiPort('ezbill')
 
-// Health check (for Render)
-app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'EZBill' }))
-app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'EZBill' }))
-
 app.use('/api', routes)
-app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)

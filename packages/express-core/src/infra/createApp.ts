@@ -83,5 +83,27 @@ export function createApp(options?: CreateAppOptions): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // ✅ Health check endpoints (automatically added to all APIs)
+  const serviceName = options?.apiApp || 'API';
+
+  // Simple health check for Railway/Render (no monitoring, no fetch)
+  // Used by: Railway Healthcheck Path
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      service: serviceName,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Root endpoint (same as /health for convenience)
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      service: serviceName,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   return app;
 }

@@ -30,15 +30,10 @@ app.use(cookieParser())
 // Initialize Passport
 app.use(passport.initialize())
 
-// Health check (for Render)
-app.get('/', (_: any, res: any) => res.status(200).json({ status: 'ok', service: 'EZAuth' }))
-app.get('/health', (_: any, res: any) => res.status(200).json({ status: 'ok', service: 'EZAuth' }))
-
 // API routes
 app.use('/api/auth', authRoutes)
 app.use('/api/auth', oauthRoutes) // OAuth routes (Google, GitHub)
 app.use('/api/waitlist', waitlistRoutes)
-app.get('/api/health', (_: any, res: any) => res.status(200).json({ status: 'ok' }))
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers

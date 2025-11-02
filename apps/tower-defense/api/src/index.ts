@@ -10,12 +10,7 @@ import { seedEntityTypes } from './services/entityRegistry.js'
 const app = createApp({ apiApp: 'tower-defense' })
 const PORT = getApiPort('tower-defense')
 
-// Health check (for Render)
-app.get('/', (_, res) => res.status(200).json({ status: 'ok', service: 'Tower Defense' }))
-app.get('/health', (_, res) => res.status(200).json({ status: 'ok', service: 'Tower Defense' }))
-
 app.use('/api', routes)
-app.get('/api/health', (_, res) => res.status(200).json({ status: 'ok' }))
 
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)
