@@ -69,7 +69,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5000',
-      production: 'https://ezstart-api.up.railway.app',
+      production: 'https://monitoring.ezstart.xyz',
     },
   },
 
@@ -81,7 +81,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5010',
-      production: 'https://ezauth-api.up.railway.app',
+      production: 'https://ezauth-api.ezstart.xyz',
     },
   },
 
@@ -93,7 +93,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5020',
-      production: 'https://ezbill-api.up.railway.app',
+      production: 'https://ezbill-api.ezstart.xyz',
     },
   },
 
@@ -105,7 +105,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5040',
-      production: 'https://ezpay-api.up.railway.app',
+      production: 'https://ezpay-api.ezstart.xyz',
     },
   },
 
@@ -125,7 +125,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5030',
-      production: 'https://td-api.up.railway.app',
+      production: 'https://td-api.ezstart.xyz',
     },
   },
 
@@ -145,7 +145,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5070',
-      production: 'https://greenpulse-api.up.railway.app',
+      production: 'https://greenpulse-api.ezstart.xyz',
     },
   },
 }
