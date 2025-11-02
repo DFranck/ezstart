@@ -218,12 +218,13 @@ Service Name: ezbill-api
 Root Directory: /
 Watch Paths:
   - apps/ezbill/api/**
+  - apps/ezbill/types/**
   - packages/express-core/**
   - packages/config/**
   - packages/logger/**
 
 Build Command:
-pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezbill
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core --filter @ezbill/types build && pnpm turbo build --filter=api-ezbill
 
 Start Command:
 pnpm --filter api-ezbill start
@@ -231,6 +232,8 @@ pnpm --filter api-ezbill start
 Healthcheck Path: /health
 Port: 8080
 ```
+
+**⚠️ Note:** EZBill nécessite le build de `@ezbill/types` avant l'API.
 
 **Environment Variables:**
 
@@ -288,12 +291,13 @@ Service Name: greenpulse-api
 Root Directory: /
 Watch Paths:
   - apps/green-pulse/api/**
+  - apps/green-pulse/types/**
   - packages/express-core/**
   - packages/config/**
   - packages/logger/**
 
 Build Command:
-pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-green-pulse
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core --filter @green-pulse/types build && pnpm turbo build --filter=api-green-pulse
 
 Start Command:
 pnpm --filter api-green-pulse start
@@ -311,6 +315,8 @@ JWT_SECRET=production-jwt-secret-gp
 OPENAI_API_KEY=sk-...
 ALLOWED_ORIGINS=https://greenpulse.ezstart.xyz,https://www.ezstart.xyz
 ```
+
+**⚠️ Note:** GreenPulse nécessite le build de `@green-pulse/types` avant l'API.
 
 ---
 

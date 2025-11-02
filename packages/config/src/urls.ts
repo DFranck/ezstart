@@ -160,7 +160,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/ezstart',
     webPlatform: 'vercel',
-    apiPlatform: 'render',
+    apiPlatform: 'railway',
   },
 
   ezauth: {
@@ -180,7 +180,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/ezbill',
     webPlatform: 'vercel',
-    apiPlatform: 'render',
+    apiPlatform: 'railway',
   },
 
   ezpay: {
@@ -209,7 +209,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/tower-defense',
     webPlatform: 'vercel',
-    apiPlatform: 'render',
+    apiPlatform: 'railway',
   },
 
   'asc-tcd': {
@@ -228,7 +228,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     logo: '/icons/icon-192x192.png',
     githubPath: 'apps/green-pulse',
     webPlatform: 'vercel',
-    apiPlatform: 'render',
+    apiPlatform: 'railway',
   },
 
 }

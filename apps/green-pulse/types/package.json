@@ -1,11 +1,24 @@
 {
   "name": "@green-pulse/types",
   "version": "0.0.1",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "default": "./dist/*.js"
+    }
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

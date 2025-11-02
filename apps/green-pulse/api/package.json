@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @ezstart/types build && pnpm --filter @green-pulse/types build",
+    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @green-pulse/types build",
     "build": "tsc && ls -la dist",
     "start": "ls -la && ls -la dist && node dist/index.js",
     "start:prod": "pnpm build && node dist/index.js",
