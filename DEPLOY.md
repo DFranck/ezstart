@@ -199,12 +199,12 @@ Port: 8080
 ```env
 NODE_ENV=production
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezpay?retryWrites=true&w=majority
-JWT_SECRET=production-jwt-secret-ezpay
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-FRONTEND_URL=https://ezpay.ezstart.xyz
-ALLOWED_ORIGINS=https://ezpay.ezstart.xyz,https://ezbill.ezstart.xyz,https://www.ezstart.xyz
-EZAUTH_API_URL=https://ezauth-api.up.railway.app
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+SENTRY_DSN=https://...@sentry.io/...
+# Note: URLs and CORS auto-configured via @ezstart/config
+# Stripe redirects determined dynamically based on projectId in payment request
 ```
 
 ---

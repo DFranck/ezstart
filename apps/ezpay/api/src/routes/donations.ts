@@ -1,4 +1,5 @@
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../models/Payment.js'
 import { createCheckoutSession } from '../services/stripe.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -88,8 +89,9 @@ const createDonationHandler = async (req: Request, res: Response) => {
       returnUrl,
     } = req.body
 
-    // Use custom returnUrl or fallback to WEB_URL (EZPay web)
-    const baseUrl = returnUrl || process.env.WEB_URL
+    // Use custom returnUrl or fallback to project's web URL based on projectId
+    // This allows EZPay to redirect back to the originating app (EZBill, Tower Defense, etc.)
+    const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({

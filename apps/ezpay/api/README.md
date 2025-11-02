@@ -47,8 +47,9 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 
-# URLs
-WEB_URL=http://localhost:5045
+# URLs are auto-configured via @ezstart/config
+# Stripe redirects are dynamically determined based on projectId
+# No need to set WEB_URL manually!
 
 # PayPal (optional)
 PAYPAL_CLIENT_ID=
@@ -241,11 +242,10 @@ cd apps/ezpay/api && node dist/index.js
 
 ```env
 NODE_ENV=production
-PORT=10000
 MONGO_URL=mongodb+srv://...
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-WEB_URL=https://ezpay.vercel.app
+# WEB_URL is no longer needed - auto-configured via @ezstart/config
 ```
 
 ### Health Check Path
