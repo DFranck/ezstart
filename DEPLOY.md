@@ -66,40 +66,43 @@ cmds = ['pnpm install --frozen-lockfile --shamefully-hoist']
 
 [phases.build]
 cmds = [
-  'pnpm --filter @ezstart/types build',
   'pnpm --filter @ezstart/config build',
   'pnpm --filter @ezstart/logger build',
   'pnpm --filter @ezstart/express-core build'
 ]
 ```
 
+**⚠️ Note:** Le package `@ezstart/types` a été consolidé dans `express-core` (plus besoin de le builder séparément)
+
 **Start Command (spécifique par API) :**
 
 ```bash
 # EZAuth API
-cd apps/ezauth/api && pnpm turbo build --filter=api-ezauth && node dist/index.js
+pnpm --filter api-ezauth start
 
 # EZPay API
-cd apps/ezpay/api && pnpm turbo build --filter=api-ezpay && node dist/index.js
+pnpm --filter api-ezpay start
 
 # EZBill API
-cd apps/ezbill/api && pnpm turbo build --filter=api-ezbill && node dist/index.js
+pnpm --filter api-ezbill start
 
 # Tower Defense API
-cd apps/tower-defense/api && pnpm turbo build --filter=api-tower-defense && node dist/index.js
+pnpm --filter api-tower-defense start
 
 # GreenPulse API
-cd apps/green-pulse/api && pnpm turbo build --filter=api-green-pulse && node dist/index.js
+pnpm --filter api-green-pulse start
 
-# Monitoring API
-cd apps/monitoring/api && pnpm turbo build --filter=api-monitoring && node dist/index.js
+# EZStart API (Monitoring)
+pnpm --filter api-ezstart start
 ```
 
 **Healthcheck Path (même pour tous) :**
 
 ```
-/api/health
+/health
 ```
+
+**⚠️ Note:** Railway utilise `/health` (simple, sans monitoring). Le endpoint `/api/health` (avec monitoring complet) est utilisé uniquement par votre dashboard de monitoring.
 
 **Networking (auto-généré par Railway) :**
 
@@ -110,94 +113,241 @@ cd apps/monitoring/api && pnpm turbo build --filter=api-monitoring && node dist/
 
 ---
 
+## 🎯 Configuration Détaillée par API
+
+### Structure de Configuration Railway
+
+**Pour chaque API, configurer :**
+
+1. **Service Settings:**
+   - Root Directory: `/`
+   - Watch Paths (pour rebuild ciblé)
+   - Build Command (construction packages)
+   - Start Command (démarrage API)
+   - Healthcheck Path: `/health`
+   - Port: `8080` (Railway standard)
+
+2. **Environment Variables:**
+   - Variables spécifiques à l'API
+   - Pas de préfixes nécessaires (contrairement à Docker)
+
+---
+
 ### 1. EZAuth API
 
-**Variables d'Environnement (8 variables) :**
+**Service Settings:**
+
+```
+Service Name: ezauth-api
+Root Directory: /
+Watch Paths:
+  - apps/ezauth/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezauth
+
+Start Command:
+pnpm --filter api-ezauth start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5010
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezauth?retryWrites=true&w=majority
 JWT_SECRET=production-jwt-secret-generate-with-openssl-rand-base64-64
 GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/api/auth/google/callback
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/auth/google/callback
+FRONTEND_URL=https://ezauth.ezstart.xyz
+ALLOWED_ORIGINS=https://ezauth.ezstart.xyz,https://ezbill.ezstart.xyz,https://ezpay.ezstart.xyz,https://www.ezstart.xyz,https://td.ezstart.xyz,https://greenpulse.ezstart.xyz
 ```
-
-**Note :** ALLOWED_ORIGINS auto-configuré par `@ezstart/config` (pas besoin de variable)
 
 ---
 
 ### 2. EZPay API
 
-**Variables d'Environnement :**
+**Service Settings:**
+
+```
+Service Name: ezpay-api
+Root Directory: /
+Watch Paths:
+  - apps/ezpay/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezpay
+
+Start Command:
+pnpm --filter api-ezpay start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5040
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezpay?retryWrites=true&w=majority
-STRIPE_SECRET_KEY=sk_live_...
+JWT_SECRET=production-jwt-secret-ezpay
+STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...
-WEB_URL=https://ezstart-ezpay.vercel.app
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+FRONTEND_URL=https://ezpay.ezstart.xyz
+ALLOWED_ORIGINS=https://ezpay.ezstart.xyz,https://ezbill.ezstart.xyz,https://www.ezstart.xyz
+EZAUTH_API_URL=https://ezauth-api.up.railway.app
 ```
 
 ---
 
 ### 3. EZBill API
 
-**Variables d'Environnement :**
+**Service Settings:**
+
+```
+Service Name: ezbill-api
+Root Directory: /
+Watch Paths:
+  - apps/ezbill/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezbill
+
+Start Command:
+pnpm --filter api-ezbill start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5020
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezbill?retryWrites=true&w=majority
 JWT_SECRET=production-jwt-secret-ezbill
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+EZAUTH_API_URL=https://ezauth-api.up.railway.app
+ALLOWED_ORIGINS=https://ezbill.ezstart.xyz,https://www.ezstart.xyz
 ```
 
 ---
 
 ### 4. Tower Defense API
 
-**Variables d'Environnement :**
+**Service Settings:**
+
+```
+Service Name: td-api
+Root Directory: /
+Watch Paths:
+  - apps/tower-defense/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-tower-defense
+
+Start Command:
+pnpm --filter api-tower-defense start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5030
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/tower-defense?retryWrites=true&w=majority
 JWT_SECRET=production-jwt-secret-td
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+EZAUTH_API_URL=https://ezauth-api.up.railway.app
+ALLOWED_ORIGINS=https://td.ezstart.xyz,https://www.ezstart.xyz
 ```
 
 ---
 
 ### 5. GreenPulse API
 
-**Variables d'Environnement :**
+**Service Settings:**
+
+```
+Service Name: greenpulse-api
+Root Directory: /
+Watch Paths:
+  - apps/green-pulse/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-green-pulse
+
+Start Command:
+pnpm --filter api-green-pulse start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5070
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/green-pulse?retryWrites=true&w=majority
 JWT_SECRET=production-jwt-secret-gp
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+OPENAI_API_KEY=sk-...
+ALLOWED_ORIGINS=https://greenpulse.ezstart.xyz,https://www.ezstart.xyz
 ```
 
 ---
 
-### 6. Monitoring API
+### 6. EZStart API (Monitoring)
 
-**Variables d'Environnement :**
+**Service Settings:**
+
+```
+Service Name: ezstart-api
+Root Directory: /
+Watch Paths:
+  - apps/ezstart/api/**
+  - packages/express-core/**
+  - packages/config/**
+  - packages/logger/**
+  - packages/monitoring/**
+
+Build Command:
+pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core --filter @ezstart/monitoring build && pnpm turbo build --filter=api-ezstart
+
+Start Command:
+pnpm --filter api-ezstart start
+
+Healthcheck Path: /health
+Port: 8080
+```
+
+**Environment Variables:**
 
 ```env
 NODE_ENV=production
-PORT=5000
-MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/monitoring?retryWrites=true&w=majority
-SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezstart?retryWrites=true&w=majority
+JWT_SECRET=production-jwt-secret-monitoring
+ALLOWED_ORIGINS=https://www.ezstart.xyz
 ```
+
+**Note:** Cette API inclut aussi le package `@ezstart/monitoring` pour le dashboard de monitoring.
 
 ---
 
@@ -410,13 +560,14 @@ nixPkgs = ['nodejs_20', 'pnpm']  # ← Seulement Node.js, pas de libs graphiques
 ### Ordre de Build
 
 **Dependencies (communes) :**
-1. `@ezstart/types` - Types TypeScript
-2. `@ezstart/config` - Configuration centralisée
-3. `@ezstart/logger` - Logging Pino
-4. `@ezstart/express-core` - Infrastructure API
+1. `@ezstart/config` - Configuration centralisée (URLs, CORS)
+2. `@ezstart/logger` - Logging Pino
+3. `@ezstart/express-core` - Infrastructure API (inclut maintenant les types Zod)
 
 **API Spécifique :**
-5. `api-[name]` - Build final de l'API
+4. `api-[name]` - Build final de l'API
+
+**Note:** Le package `@ezstart/types` a été consolidé dans `express-core/src/types/` (plus de package séparé)
 
 **⚠️ Packages NON buildés (utilisés uniquement côté web) :**
 
@@ -424,6 +575,7 @@ nixPkgs = ['nodejs_20', 'pnpm']  # ← Seulement Node.js, pas de libs graphiques
 - `@ezstart/auth-sdk` - Client authentification
 - `@ezstart/pay-sdk` - Client paiement
 - `@ezstart/next-theme` - Theme Next.js
+- `@ezstart/monitoring` - Dashboard monitoring (buildé seulement pour ezstart-api)
 
 ---
 
