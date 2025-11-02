@@ -53,12 +53,12 @@ describe('@ezstart/express-core - Ports', () => {
       expect(port).toBe(5070)
     })
 
-    it('should return port from @ezstart/config for monitoring', () => {
+    it('should return port from @ezstart/config for ezstart', () => {
       delete process.env.PORT
 
-      const port = getApiPort('monitoring')
+      const port = getApiPort('ezstart')
 
-      expect(port).toBe(5080)
+      expect(port).toBe(5000)
     })
 
     it('should override with PORT env var if provided', () => {
@@ -82,7 +82,8 @@ describe('@ezstart/express-core - Ports', () => {
     it('should throw error for apps without API', () => {
       delete process.env.PORT
 
-      expect(() => getApiPort('ezstart')).toThrow()
+      expect(() => getApiPort('fengshui')).toThrow()
+      expect(() => getApiPort('asc-tcd')).toThrow()
     })
 
     it('should return number type', () => {
