@@ -30,6 +30,7 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
       origins.push(...getAllWebUrls('ezpay'))
       origins.push(...getAllWebUrls('tower-defense')) // Donations
       origins.push(...getAllWebUrls('ezbill')) // Invoice payments
+      origins.push(...getAllWebUrls('fengshui')) // Feng Shui consultations
       break
 
     case 'ezbill':

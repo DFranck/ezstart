@@ -8,6 +8,12 @@ interface UseSocketOptions {
 
 export function useSocket({ onHealthChecksUpdated }: UseSocketOptions = {}): RefObject<Socket | null> {
   const socketRef = useRef<Socket | null>(null)
+  const callbackRef = useRef(onHealthChecksUpdated)
+
+  // Update callback ref when it changes
+  useEffect(() => {
+    callbackRef.current = onHealthChecksUpdated
+  }, [onHealthChecksUpdated])
 
   useEffect(() => {
     console.log('[Monitoring] Connecting to Socket.IO...')
@@ -24,7 +30,7 @@ export function useSocket({ onHealthChecksUpdated }: UseSocketOptions = {}): Ref
 
     socket.on('health-checks-updated', (data) => {
       console.log('[Monitoring] Received health-checks-updated event:', data)
-      onHealthChecksUpdated?.(data)
+      callbackRef.current?.(data)
     })
 
     socket.on('disconnect', () => {
@@ -39,7 +45,8 @@ export function useSocket({ onHealthChecksUpdated }: UseSocketOptions = {}): Ref
       console.log('[Monitoring] Disconnecting Socket.IO...')
       socket.disconnect()
     }
-  }, [onHealthChecksUpdated])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Connect only once on mount
 
   return socketRef
 }
