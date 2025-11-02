@@ -42,7 +42,7 @@ export function getMetricsData(
     return {
       servicesHealthy: summary.healthy,
       servicesTotal: summary.total,
-      auditsComplete: audits.filter((a: any) => a.status === 'complete').length,
+      auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
       auditsTotal: audits.length,
       deploymentsActive: summary.healthy,
       deploymentsTotal: summary.total,
@@ -68,7 +68,7 @@ export function getMetricsData(
   return {
     servicesHealthy: audits.filter((a: any) => a.score >= 80).length,
     servicesTotal: audits.length,
-    auditsComplete: audits.filter((a: any) => a.status === 'complete').length,
+    auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
     auditsTotal: audits.length,
     deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
     deploymentsTotal: audits.length,
