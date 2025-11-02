@@ -16,11 +16,11 @@ import {
 } from '@ezstart/ui/components'
 import { useEffect, useState, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { AuditCard } from './components/AuditCard'
-import { HealthScore } from './components/HealthScore'
+import { AuditCard } from './(health-tab)/components/AuditCard'
+import { TabScore } from './components/TabScore'
 import { MetricsOverview } from './components/MetricsOverview'
-import { ProjectCard } from './components/ProjectCard'
-import { ActivityFeed } from './components/ActivityFeed'
+import { ProjectCard } from './(health-tab)/components/ProjectCard'
+import { ActivityFeed } from './(activity-tab)/components/ActivityFeed'
 
 // Get ezstart API URL based on environment
 const MONITORING_API_URL =
@@ -338,7 +338,7 @@ export default function MonitoringDashboard() {
           </div>
         </Div>
         {/* Overall Health Score */}
-        <HealthScore score={score} status={status} />
+        <TabScore score={score} status={status} />
 
         {/* Metrics Overview */}
         <MetricsOverview metrics={metricsData} />
