@@ -5,7 +5,7 @@
 
 import type { AppName } from '@ezstart/config'
 import {
-  getAllApps,
+  getActiveApps,
   getProjectMetadata,
   hasApi,
   getApiUrl,
@@ -69,16 +69,13 @@ function generateEndpoints(app: AppName): ProjectConfig['endpoints'] {
 
 /**
  * Generate complete project configuration from @ezstart/config
- * Excludes 'monitoring' to avoid meta-monitoring
+ * Only includes active projects (excludes paused/archived)
  */
 export function generateProjectConfig(): Record<ProjectId, ProjectConfig> {
-  const allApps = getAllApps()
+  const activeApps = getActiveApps()
   const config: Partial<Record<ProjectId, ProjectConfig>> = {}
 
-  for (const app of allApps) {
-    // Skip monitoring (no meta-monitoring)
-    if (app === 'monitoring' as AppName) continue
-
+  for (const app of activeApps) {
     const metadata = getProjectMetadata(app)
     const logoUrl = getLogoUrl(app)
 

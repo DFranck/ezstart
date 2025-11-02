@@ -53,6 +53,8 @@ export interface ProjectMetadata {
   webPlatform?: 'vercel' | 'railway' | 'render' | 'custom'
   /** Deployment platform for API */
   apiPlatform?: 'vercel' | 'railway' | 'render' | 'custom'
+  /** Is project active? (false = paused/archived, excluded from monitoring) */
+  isActive?: boolean
 }
 
 /**
@@ -146,7 +148,6 @@ export const URLS: Record<AppName, AppUrls> = {
       production: 'https://greenpulse-api.up.railway.app',
     },
   },
-
 }
 
 /**
@@ -210,6 +211,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     githubPath: 'apps/tower-defense',
     webPlatform: 'vercel',
     apiPlatform: 'railway',
+    isActive: false, // Project paused
   },
 
   'asc-tcd': {
@@ -230,7 +232,6 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     webPlatform: 'vercel',
     apiPlatform: 'railway',
   },
-
 }
 
 /**
@@ -364,6 +365,26 @@ export function getProjectMetadata(app: AppName): ProjectMetadata {
  */
 export function getAllApps(): AppName[] {
   return Object.keys(URLS) as AppName[]
+}
+
+/**
+ * Get all active app names (excludes paused/archived projects)
+ */
+export function getActiveApps(): AppName[] {
+  return getAllApps().filter(app => {
+    const metadata = PROJECT_METADATA[app]
+    // Default to active if isActive is not specified
+    return metadata.isActive !== false
+  })
+}
+
+/**
+ * Check if app is active (not paused/archived)
+ */
+export function isActive(app: AppName): boolean {
+  const metadata = PROJECT_METADATA[app]
+  // Default to active if isActive is not specified
+  return metadata.isActive !== false
 }
 
 /**
