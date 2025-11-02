@@ -11,10 +11,8 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 **Lire en premier :**
 - 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ Règles de développement obligatoires
 - 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complets)
-- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Oracle/Vercel
-- ☁️ [docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md) - Guide complet Oracle Cloud
+- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
 - 🧪 [docs/TESTING.md](./docs/TESTING.md) - Stratégie de tests
-- 🤖 [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
 
 **Documentation détaillée :**
 - 🗂️ [docs/CLAUDE-ARCHIVE.md](./docs/CLAUDE-ARCHIVE.md) - Historique complet (4600+ lignes)

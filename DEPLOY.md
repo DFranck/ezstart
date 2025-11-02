@@ -2,26 +2,25 @@
 
 ## 📍 URLs de Déploiement
 
-### APIs Oracle Cloud (Free Tier - GRATUIT À VIE)
+### APIs Railway (Hobby Plan - $5/mois)
 
 | Service               | Platform | URL Production                         | Port | Status    |
 | --------------------- | -------- | -------------------------------------- | ---- | --------- |
-| **EZAuth API**        | Oracle   | https://ezauth.ezstart.xyz/api         | 5010 | ✅ Active |
-| **EZPay API**         | Oracle   | https://ezpay.ezstart.xyz/api          | 5040 | ✅ Active |
-| **EZBill API**        | Oracle   | https://ezbill.ezstart.xyz/api         | 5020 | ✅ Active |
-| **Tower Defense API** | Oracle   | https://td-api.ezstart.xyz/api         | 5030 | ✅ Active |
-| **GreenPulse API**    | Oracle   | https://greenpulse.ezstart.xyz/api     | 5070 | ✅ Active |
-| **Monitoring API**    | Oracle   | https://monitoring.ezstart.xyz/api     | 5000 | ✅ Active |
+| **EZAuth API**        | Railway  | https://ezauth-api.up.railway.app/api  | 5010 | ✅ Active |
+| **EZPay API**         | Railway  | https://ezpay-api.up.railway.app/api   | 5040 | 🔄 Config |
+| **EZBill API**        | Railway  | https://ezbill-api.up.railway.app/api  | 5020 | 🔄 Config |
+| **Tower Defense API** | Railway  | https://td-api.up.railway.app/api      | 5030 | 🔄 Config |
+| **GreenPulse API**    | Railway  | https://greenpulse-api.up.railway.app/api | 5070 | 🔄 Config |
+| **Monitoring API**    | Railway  | https://monitoring-api.up.railway.app/api | 5000 | 🔄 Config |
 
-**Pourquoi Oracle Cloud Free Tier ?**
+**Pourquoi Railway Hobby Plan ?**
 
-- ✅ **GRATUIT À VIE** - Pas de limite de temps, aucune carte facturée
-- ✅ **Ressources généreuses** - 4 CPU ARM, 24GB RAM, 200GB storage
-- ✅ **0ms cold start** - Toujours actif, pas de sleep mode
-- ✅ **Haute performance** - ARM Ampere, excellentes performances Node.js
-- ✅ **10TB/mois bande passante** - Largement suffisant
-- ✅ **SSL/TLS inclus** - Let's Encrypt automatisé
-- ✅ **Une seule VM** - Toutes les APIs sur un serveur, facile à gérer
+- ✅ **$5/mois pour TOUTES les APIs** - Unlimited services, 8GB RAM / 8 vCPU par service
+- ✅ **0ms cold start** - Toujours actif, pas de sleep mode (contrairement à Render Free)
+- ✅ **Déploiement automatique** - Push to deploy depuis GitHub
+- ✅ **Environnements isolés** - Variables par service sans préfixes
+- ✅ **Healthchecks automatiques** - Monitoring intégré
+- ✅ **Nixpacks optimisé** - Build minimal Node.js uniquement
 
 ### Apps Web Vercel (Free Tier)
 
@@ -37,170 +36,102 @@
 
 ---
 
-## ☁️ Configuration Oracle Cloud
+## 🚂 Configuration Railway
 
-### Guide Complet
+### Configuration Standard pour Toutes les APIs
 
-Pour le guide complet de déploiement sur Oracle Cloud, consultez **[docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md)**
+**Architecture Monorepo Railway :**
+- 1 Projet Railway = "ezstart"
+- 6 Services = 6 APIs (ezauth, ezpay, ezbill, tower-defense, green-pulse, monitoring)
+- Build automatique via [nixpacks.toml](./nixpacks.toml)
 
-### Quick Start
-
-**1. Prérequis:**
-- Compte Oracle Cloud (gratuit, carte requise mais jamais facturée)
-- VM créée (4 OCPU ARM, 24GB RAM)
-- DNS configurés (6 sous-domaines pointant vers l'IP de la VM)
-- Domaines : `ezauth.ezstart.xyz`, `ezpay.ezstart.xyz`, `ezbill.ezstart.xyz`, `td-api.ezstart.xyz`, `greenpulse.ezstart.xyz`, `monitoring.ezstart.xyz`
-
-**2. Sur la VM Oracle (via SSH):**
-
-```bash
-# 1. Installer Docker et Docker Compose
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker ubuntu
-sudo apt install docker-compose-plugin -y
-
-# 2. Cloner le repository
-git clone https://github.com/DFranck/ezstart.git
-cd ezstart
-
-# 3. Configurer les variables d'environnement
-cp .env.oracle.example .env
-nano .env  # Remplir avec vos valeurs réelles
-
-# 4. Déployer toutes les APIs
-./scripts/oracle-deploy.sh
-
-# 5. Configurer SSL (après propagation DNS)
-./scripts/oracle-init-ssl.sh
-```
-
-**3. Scripts de gestion:**
-
-```bash
-# Vérifier la santé des APIs
-./scripts/oracle-health.sh
-
-# Voir les logs
-./scripts/oracle-logs.sh all          # Tous les containers
-./scripts/oracle-logs.sh ezauth       # Une API spécifique
-
-# Mettre à jour avec le nouveau code
-./scripts/oracle-update.sh
-```
-
-### Architecture Docker
-
-Toutes les APIs tournent dans des containers Docker orchestrés par Docker Compose :
-
-```
-Oracle Cloud VM (ARM)
-├── Nginx Reverse Proxy (ports 80/443)
-│   ├── SSL/TLS (Let's Encrypt)
-│   ├── Rate limiting
-│   └── Proxy vers APIs
-│
-└── Docker Compose
-    ├── ezauth-api (container)
-    ├── ezpay-api (container)
-    ├── ezbill-api (container)
-    ├── tower-defense-api (container)
-    ├── green-pulse-api (container)
-    ├── monitoring-api (container)
-    ├── nginx-proxy (container)
-    └── certbot (container)
-```
-
-### Fichiers de Configuration
-
-| Fichier | Description |
-|---------|-------------|
-| [docker-compose.yml](./docker-compose.yml) | Orchestration des 6 APIs + Nginx |
-| [nginx/nginx.conf](./nginx/nginx.conf) | Configuration reverse proxy et SSL |
-| [.env.oracle.example](./.env.oracle.example) | Template variables d'environnement |
-| apps/*/api/Dockerfile | Dockerfiles optimisés multi-stage |
-| [scripts/oracle-*.sh](./scripts/) | Scripts d'automatisation |
-
----
-
-## 🚂 Configuration Railway (ANCIENNE - Maintenant sur Oracle)
-
-### 1. EZAuth API
-
-**Source Repository:**
+**Source Repository (même pour tous) :**
 
 ```
 Repository: DFranck/ezstart
 Branch: master
-Root Directory: (none - racine du monorepo)
+Root Directory: / (racine du monorepo)
 ```
 
-**Build Configuration:**
+**Build Configuration (automatique via nixpacks.toml) :**
+
+Le fichier [nixpacks.toml](./nixpacks.toml) gère le build pour TOUTES les APIs :
+
+```toml
+[phases.setup]
+nixPkgs = ['nodejs_20', 'pnpm']
+
+[phases.install]
+cmds = ['pnpm install --frozen-lockfile --shamefully-hoist']
+
+[phases.build]
+cmds = [
+  'pnpm --filter @ezstart/types build',
+  'pnpm --filter @ezstart/config build',
+  'pnpm --filter @ezstart/logger build',
+  'pnpm --filter @ezstart/express-core build'
+]
+```
+
+**Start Command (spécifique par API) :**
 
 ```bash
-# Build Command (OPTIMISÉ - seulement express-core nécessaire)
-pnpm install --frozen-lockfile --shamefully-hoist && \
-pnpm --filter @ezstart/express-core build && \
-pnpm turbo build --filter=api-ezauth
+# EZAuth API
+cd apps/ezauth/api && pnpm turbo build --filter=api-ezauth && node dist/index.js
 
-# Note: auth-sdk n'est utilisé que côté web, pas dans l'API
-# @ezstart/ui n'est pas nécessaire pour l'API
+# EZPay API
+cd apps/ezpay/api && pnpm turbo build --filter=api-ezpay && node dist/index.js
 
-# Start Command
-cd apps/ezauth/api && node dist/index.js
+# EZBill API
+cd apps/ezbill/api && pnpm turbo build --filter=api-ezbill && node dist/index.js
 
-# Healthcheck Path
+# Tower Defense API
+cd apps/tower-defense/api && pnpm turbo build --filter=api-tower-defense && node dist/index.js
+
+# GreenPulse API
+cd apps/green-pulse/api && pnpm turbo build --filter=api-green-pulse && node dist/index.js
+
+# Monitoring API
+cd apps/monitoring/api && pnpm turbo build --filter=api-monitoring && node dist/index.js
+```
+
+**Healthcheck Path (même pour tous) :**
+
+```
 /api/health
 ```
 
-**Variables d'Environnement:**
+**Networking (auto-généré par Railway) :**
+
+- Public: `[service-name].up.railway.app`
+- Private: `[service-name].railway.internal` (IPv6)
+- Region: Southeast Asia (Singapore) recommandé
+- Resources: 8GB RAM / 8 vCPU par service
+
+---
+
+### 1. EZAuth API
+
+**Variables d'Environnement (8 variables) :**
 
 ```env
 NODE_ENV=production
 PORT=5010
 MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezauth?retryWrites=true&w=majority
-JWT_SECRET=production-secure-jwt-secret-change-me
-ALLOWED_ORIGINS=https://ezauth.vercel.app,https://ezstart-ezbill.vercel.app,https://tower-defense-web.vercel.app,https://ezstart-ezpay.vercel.app
+JWT_SECRET=production-jwt-secret-generate-with-openssl-rand-base64-64
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/api/auth/google/callback
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
 ```
 
-**Networking:**
-
-- Public: `ezauth.up.railway.app` (Port 5010)
-- Private: `ezauth.railway.internal` (IPv6)
-- Healthcheck: `/api/health`
-- Region: Southeast Asia (Singapore)
-- Resources: 512MB RAM / 1 vCPU
+**Note :** ALLOWED_ORIGINS auto-configuré par `@ezstart/config` (pas besoin de variable)
 
 ---
 
 ### 2. EZPay API
 
-**Source Repository:**
-
-```
-Repository: DFranck/ezstart
-Branch: master
-Root Directory: (none - racine du monorepo)
-```
-
-**Build Configuration:**
-
-```bash
-# Build Command (OPTIMISÉ - seulement express-core nécessaire)
-pnpm install --frozen-lockfile --shamefully-hoist && \
-pnpm --filter @ezstart/express-core build && \
-pnpm turbo build --filter=api-ezpay
-
-# Note: pay-sdk n'est utilisé que côté web, pas dans l'API
-
-# Start Command
-cd apps/ezpay/api && node dist/index.js
-
-# Healthcheck Path
-/api/health
-```
-
-**Variables d'Environnement:**
+**Variables d'Environnement :**
 
 ```env
 NODE_ENV=production
@@ -210,15 +141,63 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 WEB_URL=https://ezstart-ezpay.vercel.app
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
 ```
 
-**Networking:**
+---
 
-- Public: `ezpay-api.up.railway.app` (Port 5040)
-- Private: `ezstart.railway.internal` (IPv6)
-- Healthcheck: `/api/health`
-- Region: Southeast Asia (Singapore)
-- Resources: 512MB RAM / 1 vCPU
+### 3. EZBill API
+
+**Variables d'Environnement :**
+
+```env
+NODE_ENV=production
+PORT=5020
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/ezbill?retryWrites=true&w=majority
+JWT_SECRET=production-jwt-secret-ezbill
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+```
+
+---
+
+### 4. Tower Defense API
+
+**Variables d'Environnement :**
+
+```env
+NODE_ENV=production
+PORT=5030
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/tower-defense?retryWrites=true&w=majority
+JWT_SECRET=production-jwt-secret-td
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+```
+
+---
+
+### 5. GreenPulse API
+
+**Variables d'Environnement :**
+
+```env
+NODE_ENV=production
+PORT=5070
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/green-pulse?retryWrites=true&w=majority
+JWT_SECRET=production-jwt-secret-gp
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+```
+
+---
+
+### 6. Monitoring API
+
+**Variables d'Environnement :**
+
+```env
+NODE_ENV=production
+PORT=5000
+MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/monitoring?retryWrites=true&w=majority
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+```
 
 ---
 
@@ -291,15 +270,27 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 Project Settings → Environment Variables
 
 Pour EZAuth Web:
-1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth.up.railway.app/api/auth
+1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
+
+Pour EZBill Web:
+1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
+2. NEXT_PUBLIC_API_URL = https://ezbill-api.up.railway.app/api
 
 Pour EZPay Web:
 1. NEXT_PUBLIC_API_URL = https://ezpay-api.up.railway.app/api
 2. NEXT_PUBLIC_WEB_URL = https://ezstart-ezpay.vercel.app
 3. NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = pk_live_...
 
+Pour Tower Defense Web:
+1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
+2. NEXT_PUBLIC_API_URL = https://td-api.up.railway.app/api
+
+Pour GreenPulse Web:
+1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
+2. NEXT_PUBLIC_API_URL = https://greenpulse-api.up.railway.app/api
+
 Environment: Production
-Branch: master (ou main)
+Branch: master
 ```
 
 ---
@@ -373,43 +364,85 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 
 ---
 
-## 🔧 Optimisation Build Railway
+## 🔧 Optimisation Build Railway avec Nixpacks
 
-### Pourquoi builder express-core avant l'API ?
+### Architecture Build en 2 Phases
 
-Les APIs dépendent de `@ezstart/express-core` qui doit être compilé AVANT :
+**Phase 1 : Build Dependencies (nixpacks.toml)**
 
-```bash
-# ❌ MAUVAIS (erreurs de build)
-pnpm turbo build --filter=api-ezauth
+Le fichier [nixpacks.toml](./nixpacks.toml) build les dépendances communes à TOUTES les APIs :
 
-# ✅ BON (express-core compilé d'abord)
-pnpm --filter @ezstart/express-core build && \
-pnpm turbo build --filter=api-ezauth
+```toml
+[phases.build]
+cmds = [
+  'pnpm --filter @ezstart/types build',
+  'pnpm --filter @ezstart/config build',
+  'pnpm --filter @ezstart/logger build',
+  'pnpm --filter @ezstart/express-core build'
+]
 ```
 
-**Ordre de build obligatoire :**
+**Phase 2 : Build API Spécifique (Start Command)**
 
-1. `@ezstart/express-core` - Infrastructure API commune (OBLIGATOIRE)
-2. `api-ezauth` ou `api-ezpay` - API finale
+Chaque API build uniquement son package final :
 
-**⚠️ SDKs NON nécessaires pour le build API :**
+```bash
+cd apps/ezauth/api && pnpm turbo build --filter=api-ezauth && node dist/index.js
+```
 
-- `@ezstart/auth-sdk` - Utilisé uniquement côté web
-- `@ezstart/pay-sdk` - Utilisé uniquement côté web
-- `@ezstart/ui` - Utilisé uniquement côté web
+### Pourquoi nixpacks.toml ?
+
+**Problème :** Railway Nixpacks installait 250+ packages inutiles (libgtk, libx11, mesa drivers, etc.)
+
+**Solution :** Forcer Node.js uniquement via nixpacks.toml :
+
+```toml
+[phases.setup]
+nixPkgs = ['nodejs_20', 'pnpm']  # ← Seulement Node.js, pas de libs graphiques
+```
+
+**Résultat :**
+- ✅ Build minimal (Node.js + pnpm uniquement)
+- ✅ Temps de build réduit (~5-10 min)
+- ✅ Taille image réduite
+- ✅ Pas de packages inutiles
+
+### Ordre de Build
+
+**Dependencies (communes) :**
+1. `@ezstart/types` - Types TypeScript
+2. `@ezstart/config` - Configuration centralisée
+3. `@ezstart/logger` - Logging Pino
+4. `@ezstart/express-core` - Infrastructure API
+
+**API Spécifique :**
+5. `api-[name]` - Build final de l'API
+
+**⚠️ Packages NON buildés (utilisés uniquement côté web) :**
+
+- `@ezstart/ui` - Composants React
+- `@ezstart/auth-sdk` - Client authentification
+- `@ezstart/pay-sdk` - Client paiement
+- `@ezstart/next-theme` - Theme Next.js
 
 ---
 
 ## 📊 Monitoring Usage Railway
 
-### Vérifier la Consommation
+### Plan Hobby : $5/mois pour TOUTES les APIs
 
-**Dashboard Railway :**
+**Ressources incluses :**
+- ✅ **Unlimited services** - 6 APIs sans frais supplémentaires
+- ✅ **8GB RAM / 8 vCPU** par service (largement suffisant)
+- ✅ **100GB bandwidth** inclus
+- ✅ **Pas de cold start** - Toujours actif
+- ✅ **Healthchecks automatiques**
+
+**Vérifier la Consommation :**
 
 ```
-Settings → Usage
-- CPU Usage
+Dashboard Railway → Project Settings → Usage
+- CPU Time (Execution time)
 - Memory Usage
 - Network (entrant/sortant)
 ```
@@ -417,17 +450,16 @@ Settings → Usage
 **Estimation Consommation :**
 
 ```
-EZAuth API (SSO ponctuel) : ~$0.10-0.20/mois
-EZPay API (paiements rares) : ~$0.10-0.20/mois
-TOTAL : ~$0.20-0.40/mois (reste $0.60-0.80 de marge)
+6 APIs (EZAuth, EZPay, EZBill, TD, GreenPulse, Monitoring)
+Usage moyen : ~$3-4/mois (reste $1-2 de marge)
 ```
 
-**Optimisations pour réduire la consommation :**
+**Optimisations :**
 
-- ✅ Healthcheck timeout à 300s (évite vérifications trop fréquentes)
-- ✅ Restart policy: On Failure (10 retries max)
-- ✅ Pas de cron jobs (évite réveils inutiles)
-- ✅ Regions optimisées (Southeast Asia proche utilisateurs)
+- ✅ Healthcheck path configuré (`/api/health`)
+- ✅ Pas de cold start (toujours actif)
+- ✅ Build optimisé (nixpacks.toml)
+- ✅ Regions optimisées (Southeast Asia)
 
 ---
 
@@ -568,11 +600,12 @@ Options:
 
 ### Configuration Railway
 
-- [ ] Build command inclut les dépendances workspace
-- [ ] Start command pointe vers `dist/index.js`
-- [ ] Variables d'environnement configurées
+- [ ] Repository GitHub connecté (DFranck/ezstart)
+- [ ] Root Directory: `/` (racine monorepo)
+- [ ] Start command: `cd apps/[api]/api && pnpm turbo build --filter=api-[name] && node dist/index.js`
+- [ ] Variables d'environnement configurées (SANS préfixes)
 - [ ] Healthcheck path configuré (`/api/health`)
-- [ ] Region optimisée (Southeast Asia)
+- [ ] nixpacks.toml présent à la racine (build automatique)
 
 ### Configuration Vercel
 
@@ -592,12 +625,13 @@ Options:
 
 ## 🎯 Best Practices
 
-1. **Railway Free Plan** : Réservé aux APIs critiques avec usage ponctuel (auth, paiements)
+1. **Railway Hobby Plan ($5/mois)** : Toutes les APIs sur un seul projet, unlimited services
 2. **Vercel Free Plan** : Parfait pour apps web Next.js avec Edge déploiement
-3. **Monorepo** : Toujours builder les dépendances workspace avant les apps
-4. **Secrets** : Utiliser `.env.local` en dev, Railway Variables en prod
-5. **Monitoring** : Surveiller usage Railway pour rester sous $1/mois
-6. **Healthchecks** : Obligatoires pour confirmer déploiements réussis
+3. **Monorepo Build** : nixpacks.toml build les deps communes, Start Command build l'API spécifique
+4. **Secrets** : Utiliser `.env.local` en dev, Railway Variables en prod (SANS préfixes)
+5. **Monitoring** : Surveiller usage Railway Dashboard → Usage
+6. **Healthchecks** : `/api/health` obligatoire pour confirmer déploiements réussis
+7. **Push to Deploy** : Railway déploie automatiquement sur push `master`
 
 ---
 
