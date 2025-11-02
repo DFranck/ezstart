@@ -188,7 +188,7 @@ export default function MonitoringDashboard() {
         <TabScore score={score} status={status} title={tabConfig.title} subtitle={tabConfig.subtitle} />
 
         {/* Metrics Overview */}
-        <MetricsOverview metrics={metricsData} />
+        <MetricsOverview activeTab={activeTab} metrics={metricsData} />
       </Section>
 
       {/* Tabs for different monitoring sections */}

@@ -51,6 +51,7 @@ function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
 }
 
 interface MetricsOverviewProps {
+  activeTab: 'projects' | 'audits' | 'activity'
   metrics: {
     servicesHealthy: number
     servicesTotal: number
@@ -62,27 +63,52 @@ interface MetricsOverviewProps {
   }
 }
 
-export function MetricsOverview({ metrics }: MetricsOverviewProps) {
+export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
   const servicesHealthPercentage = Math.round(
     (metrics.servicesHealthy / metrics.servicesTotal) * 100
   )
   const auditsCompletePercentage = Math.round((metrics.auditsComplete / metrics.auditsTotal) * 100)
 
-  return (
-    <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
-      <MetricCard
-        title="Projects Health"
-        value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
-        subtitle={`${servicesHealthPercentage}% operational`}
-        icon="🚀"
-      />
+  if (activeTab === 'projects') {
+    return (
+      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+        <MetricCard
+          title="Projects Health"
+          value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
+          subtitle={`${servicesHealthPercentage}% operational`}
+          icon="🚀"
+        />
 
-      <MetricCard
-        title="Avg Response Time"
-        value={`${metrics.avgResponseTime}ms`}
-        subtitle="Last 24 hours"
-        icon="⚡"
-      />
-    </div>
-  )
+        <MetricCard
+          title="Avg Response Time"
+          value={`${metrics.avgResponseTime}ms`}
+          subtitle="Last 24 hours"
+          icon="⚡"
+        />
+      </div>
+    )
+  }
+
+  if (activeTab === 'audits') {
+    return (
+      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+        <MetricCard
+          title="Audits Completed"
+          value={`${metrics.auditsComplete}/${metrics.auditsTotal}`}
+          subtitle={`${auditsCompletePercentage}% complete`}
+          icon="📊"
+        />
+
+        <MetricCard
+          title="Average Score"
+          value={`${metrics.avgResponseTime}/100`}
+          subtitle="Across all audits"
+          icon="⭐"
+        />
+      </div>
+    )
+  }
+
+  // Activity tab - no metrics
+  return null
 }
