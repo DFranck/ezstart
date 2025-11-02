@@ -66,7 +66,7 @@ export function getMetricsData(
     : null
 
   return {
-    servicesHealthy: audits.filter((a: any) => a.score >= 80).length,
+    servicesHealthy: audits.filter((a: any) => a.score >= 90).length,
     servicesTotal: audits.length,
     auditsComplete: audits.filter((a: any) => a.score !== null && a.score !== undefined).length,
     auditsTotal: audits.length,

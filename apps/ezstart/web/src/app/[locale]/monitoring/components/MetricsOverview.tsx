@@ -102,7 +102,7 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
         <MetricCard
           title="Passing Audits"
           value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
-          subtitle={`${passingPercentage}% passing (≥80/100)`}
+          subtitle={`${passingPercentage}% passing (≥90/100)`}
           icon="✅"
         />
 
