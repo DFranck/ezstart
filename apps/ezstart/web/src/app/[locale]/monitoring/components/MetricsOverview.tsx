@@ -95,13 +95,15 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
       ? metrics.worstAuditName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
       : 'N/A'
 
+    const passingPercentage = Math.round((metrics.servicesHealthy / metrics.servicesTotal) * 100)
+
     return (
       <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
         <MetricCard
-          title="Audits Completed"
-          value={`${metrics.auditsComplete}/${metrics.auditsTotal}`}
-          subtitle={`${auditsCompletePercentage}% complete`}
-          icon="📊"
+          title="Passing Audits"
+          value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
+          subtitle={`${passingPercentage}% passing (≥80/100)`}
+          icon="✅"
         />
 
         <MetricCard
