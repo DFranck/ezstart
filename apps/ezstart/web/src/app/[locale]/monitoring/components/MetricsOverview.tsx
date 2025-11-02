@@ -91,10 +91,7 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
   }
 
   if (activeTab === 'audits') {
-    const worstAuditLabel = metrics.worstAuditName
-      ? metrics.worstAuditName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      : 'N/A'
-
+    const worstAuditLabel = metrics.worstAuditName || 'N/A'
     const passingPercentage = Math.round((metrics.servicesHealthy / metrics.servicesTotal) * 100)
 
     return (

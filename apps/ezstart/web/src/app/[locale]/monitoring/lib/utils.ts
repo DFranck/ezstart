@@ -73,6 +73,6 @@ export function getMetricsData(
     deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
     deploymentsTotal: audits.length,
     avgResponseTime: worstAudit ? worstAudit.score : 0,
-    worstAuditName: worstAudit ? worstAudit.auditType : '',
+    worstAuditName: worstAudit ? worstAudit.name : '',
   }
 }
