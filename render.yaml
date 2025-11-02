@@ -12,7 +12,7 @@ services:
     region: oregon
     plan: free
     branch: master
-    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezbill
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/types --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-ezbill
     startCommand: cd apps/ezbill/api && node dist/index.js
     envVars:
       - key: NODE_ENV
@@ -52,7 +52,7 @@ services:
     region: oregon
     plan: free
     branch: master
-    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-tower-defense
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/types --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-tower-defense
     startCommand: cd apps/tower-defense/api && node dist/index.js
     envVars:
       - key: NODE_ENV
@@ -89,7 +89,7 @@ services:
     region: oregon
     plan: free
     branch: master
-    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-green-pulse
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/types --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-green-pulse
     startCommand: cd apps/green-pulse/api && node dist/index.js
     envVars:
       - key: NODE_ENV
@@ -129,7 +129,7 @@ services:
     region: oregon
     plan: free
     branch: master
-    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-monitoring
+    buildCommand: npm install -g pnpm@10.12.2 && pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/types --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-monitoring
     startCommand: cd apps/monitoring/api && node dist/index.js
     envVars:
       - key: NODE_ENV
