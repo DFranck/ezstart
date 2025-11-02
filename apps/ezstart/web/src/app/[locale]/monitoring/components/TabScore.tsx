@@ -42,7 +42,7 @@ export function TabScore({ score, status, title = 'Overall Score', subtitle }: T
   return (
     <Card
       variant="elevated"
-      className={`bg-gradient-to-br ${getBackgroundGradient()} w-full max-w-lg`}
+      className={`w-full bg-gradient-to-br ${getBackgroundGradient()} w-full`}
     >
       <CardHeader>
         <H2 size="h4" className="text-center">

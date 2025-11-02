@@ -4,7 +4,6 @@ import {
   Button,
   Div,
   H1,
-  Icon,
   P,
   Section,
   Spinner,
@@ -13,26 +12,32 @@ import {
   TabsList,
   TabsTrigger,
 } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
-import { AuditCard } from './(health-tab)/components/AuditCard'
-import { TabScore } from './components/TabScore'
-import { MetricsOverview } from './components/MetricsOverview'
-import { ProjectCard } from './(health-tab)/components/ProjectCard'
+import { useState } from 'react'
 import { ErrorsFeed } from './(errors-tab)/components/ErrorsFeed'
-import { useMonitoringProjects } from './hooks/useMonitoringProjects'
+import { AuditCard } from './(health-tab)/components/AuditCard'
+import { ProjectCard } from './(health-tab)/components/ProjectCard'
+import { MetricsOverview } from './components/MetricsOverview'
+import { TabScore } from './components/TabScore'
+import { useCountdown } from './hooks/useCountdown'
 import { useMonitoringAudits } from './hooks/useMonitoringAudits'
 import { useMonitoringErrors } from './hooks/useMonitoringErrors'
+import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useSocket } from './hooks/useSocket'
-import { useCountdown } from './hooks/useCountdown'
-import { calculateOverallHealth, calculateAuditsHealth, calculateErrorsHealth, getMetricsData } from './lib/utils'
 import { MONITORING_API_URL } from './lib/config'
+import {
+  calculateAuditsHealth,
+  calculateErrorsHealth,
+  calculateOverallHealth,
+  getMetricsData,
+} from './lib/utils'
 
 export default function MonitoringDashboard() {
   const [activeTab, setActiveTab] = useState<'projects' | 'audits' | 'errors'>('projects')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
-
+  const { isMobile } = useDevice()
   // Fetch data with React Query
   const {
     data: projectsData,
@@ -99,9 +104,7 @@ export default function MonitoringDashboard() {
   const errorsHealth = calculateErrorsHealth(errors)
 
   const { score, status } =
-    activeTab === 'projects' ? projectsHealth
-    : activeTab === 'audits' ? auditsHealth
-    : errorsHealth
+    activeTab === 'projects' ? projectsHealth : activeTab === 'audits' ? auditsHealth : errorsHealth
 
   const tabConfig =
     activeTab === 'projects'
@@ -110,14 +113,14 @@ export default function MonitoringDashboard() {
           subtitle: `${summary.total} projects monitored`,
         }
       : activeTab === 'audits'
-      ? {
-          title: 'Audits Quality Score',
-          subtitle: `${audits.length} audits completed`,
-        }
-      : {
-          title: 'Error Status Score',
-          subtitle: `Based on last 24 hours`,
-        }
+        ? {
+            title: 'Audits Quality Score',
+            subtitle: `${audits.length} audits completed`,
+          }
+        : {
+            title: 'Error Status Score',
+            subtitle: `Based on last 24 hours`,
+          }
 
   const metricsData = getMetricsData(activeTab, summary, audits, projects, errors)
 
@@ -152,12 +155,7 @@ export default function MonitoringDashboard() {
             <div className="text-6xl">⚠️</div>
             <P className="text-destructive font-semibold">Failed to load monitoring data</P>
             <P className="text-muted-foreground">{errorMessage}</P>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Retry
-            </button>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
           </div>
         </div>
       </Section>
@@ -169,7 +167,7 @@ export default function MonitoringDashboard() {
 
   return (
     <>
-      <Section size="full">
+      <Section size="full" className="max-w-7xl">
         {/* Header */}
         <Div layout={'center'}>
           <H1>System Monitoring Dashboard</H1>
@@ -177,7 +175,7 @@ export default function MonitoringDashboard() {
             Real-time monitoring of all projects across the @ezstart monorepo
           </P>
           <div className="flex items-center gap-3">
-            <Button
+            {/* <Button
               onClick={triggerHealthChecks}
               disabled={isRefreshing}
               variant="outline"
@@ -189,69 +187,75 @@ export default function MonitoringDashboard() {
                 className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
               />
               {isRefreshing ? 'Checking...' : 'Refresh Now'}
-            </Button>
+            </Button> */}
             <div className="flex flex-col items-end gap-1">
-              <P className="text-xs text-muted-foreground">
+              {/* <P className="text-xs text-muted-foreground">
                 Last refresh: {new Date().toLocaleTimeString()}
-              </P>
+              </P> */}
               <P className="text-xs text-muted-foreground">
                 Next update in: {minutes}:{String(seconds).padStart(2, '0')}
               </P>
             </div>
           </div>
         </Div>
-
-        {/* Tab-specific Score */}
-        <TabScore score={score} status={status} title={tabConfig.title} subtitle={tabConfig.subtitle} />
-
-        {/* Metrics Overview */}
-        <MetricsOverview activeTab={activeTab} metrics={metricsData} />
+        <Div layout="grid" size={'full'}>
+          {/* Tab-specific Score */}
+          <TabScore
+            score={score}
+            status={status}
+            title={tabConfig.title}
+            subtitle={tabConfig.subtitle}
+          />
+          {/* Metrics Overview */}
+          {!isMobile && <MetricsOverview activeTab={activeTab} metrics={metricsData} />}
+        </Div>
       </Section>
+      <Section size="full" className="max-w-7xl">
+        {/* Tabs for different monitoring sections */}
+        <Tabs
+          value={activeTab}
+          className="w-full"
+          onValueChange={value => setActiveTab(value as 'projects' | 'audits' | 'errors')}
+        >
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
+            <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
+            <TabsTrigger value="errors">Errors</TabsTrigger>
+          </TabsList>
 
-      {/* Tabs for different monitoring sections */}
-      <Tabs
-        defaultValue="projects"
-        className="w-full max-w-7xl px-2"
-        onValueChange={value => setActiveTab(value as 'projects' | 'audits' | 'errors')}
-      >
-        <TabsList className="grid w-full max-w-lg grid-cols-3">
-          <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
-          <TabsTrigger value="audits">Audits ({audits.length})</TabsTrigger>
-          <TabsTrigger value="errors">Errors</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="projects" className="space-y-4 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project: any) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
-
-          {projects.length === 0 && (
-            <div className="text-center py-12">
-              <P className="text-muted-foreground">No projects found</P>
+          <TabsContent value="projects" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project: any) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
             </div>
-          )}
-        </TabsContent>
 
-        <TabsContent value="audits" className="space-y-4 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {audits.map((audit: any) => (
-              <AuditCard key={audit.auditType} audit={audit} />
-            ))}
-          </div>
+            {projects.length === 0 && (
+              <div className="text-center py-12">
+                <P className="text-muted-foreground">No projects found</P>
+              </div>
+            )}
+          </TabsContent>
 
-          {audits.length === 0 && (
-            <div className="text-center py-12">
-              <P className="text-muted-foreground">No audits found</P>
+          <TabsContent value="audits" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {audits.map((audit: any) => (
+                <AuditCard key={audit.auditType} audit={audit} />
+              ))}
             </div>
-          )}
-        </TabsContent>
 
-        <TabsContent value="errors" className="space-y-4 mt-6">
-          <ErrorsFeed />
-        </TabsContent>
-      </Tabs>
+            {audits.length === 0 && (
+              <div className="text-center py-12">
+                <P className="text-muted-foreground">No audits found</P>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="errors" className="space-y-4 mt-6">
+            <ErrorsFeed />
+          </TabsContent>
+        </Tabs>
+      </Section>
     </>
   )
 }

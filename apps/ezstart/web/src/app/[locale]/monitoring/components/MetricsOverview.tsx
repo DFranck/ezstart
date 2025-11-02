@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, H3, P } from '@ezstart/ui/components'
+import { Card, CardContent, Div, H3, P } from '@ezstart/ui/components'
 
 interface MetricCardProps {
   title: string
@@ -26,25 +26,23 @@ function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
 
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <P className="text-sm text-muted-foreground">{title}</P>
-            <div className="flex items-baseline gap-2">
-              {icon && <span className="text-2xl">{icon}</span>}
-              <H3 size="h2" className="font-bold">
-                {value}
-              </H3>
-            </div>
-            {subtitle && <P className="text-xs text-muted-foreground">{subtitle}</P>}
+      <CardContent>
+        <Div layout={'center'}>
+          <P className="text-sm text-muted-foreground">{title}</P>
+          <div className="flex items-baseline gap-2">
+            {icon && <span className="text-2xl">{icon}</span>}
+            <H3 size="h2" className="font-bold">
+              {value}
+            </H3>
           </div>
-          {trend && (
-            <div className={`flex items-center gap-1 ${getTrendColor()}`}>
-              <span className="text-2xl">{getTrendIcon()}</span>
-              <P className="text-sm font-semibold">{Math.abs(trend.value)}%</P>
-            </div>
-          )}
-        </div>
+          {subtitle && <P className="text-xs text-muted-foreground">{subtitle}</P>}
+        </Div>
+        {trend && (
+          <div className={`flex items-center gap-1 ${getTrendColor()}`}>
+            <span className="text-2xl">{getTrendIcon()}</span>
+            <P className="text-sm font-semibold">{Math.abs(trend.value)}%</P>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -73,7 +71,7 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
 
   if (activeTab === 'projects') {
     return (
-      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+      <Div layout="grid" className="lg:grid-cols-1">
         <MetricCard
           title="Projects Health"
           value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
@@ -87,7 +85,7 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
           subtitle="Last 24 hours"
           icon="⚡"
         />
-      </div>
+      </Div>
     )
   }
 
@@ -96,21 +94,21 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
     const passingPercentage = Math.round((metrics.servicesHealthy / metrics.servicesTotal) * 100)
 
     return (
-      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+      <Div layout="grid" className="lg:grid-cols-1">
+        {' '}
         <MetricCard
           title="Passing Audits"
           value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
           subtitle={`${passingPercentage}% passing (≥90/100)`}
           icon="✅"
         />
-
         <MetricCard
           title="Lowest Score"
           value={`${metrics.avgResponseTime}/100`}
           subtitle={worstAuditLabel}
           icon="⚠️"
         />
-      </div>
+      </Div>
     )
   }
 
@@ -122,21 +120,21 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
     const worstProjectCount = metrics.deploymentsActive
 
     return (
-      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+      <Div layout="grid" className="lg:grid-cols-1">
+        {' '}
         <MetricCard
           title="Total Errors"
           value={totalErrors}
           subtitle={`${criticalAndErrors} critical/errors`}
           icon="🔴"
         />
-
         <MetricCard
           title="Most Affected Project"
           value={worstProjectCount > 0 ? worstProjectCount : '-'}
           subtitle={worstProjectName}
           icon="⚠️"
         />
-      </div>
+      </Div>
     )
   }
 
