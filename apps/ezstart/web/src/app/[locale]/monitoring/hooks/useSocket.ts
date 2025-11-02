@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
+import { useEffect, useRef, type RefObject } from 'react'
+import { io, type Socket } from 'socket.io-client'
 import { MONITORING_API_URL } from '../lib/config'
 
 interface UseSocketOptions {
   onHealthChecksUpdated?: (data: any) => void
 }
 
-export function useSocket({ onHealthChecksUpdated }: UseSocketOptions = {}) {
+export function useSocket({ onHealthChecksUpdated }: UseSocketOptions = {}): RefObject<Socket | null> {
   const socketRef = useRef<Socket | null>(null)
 
   useEffect(() => {
