@@ -1,5 +1,6 @@
 'use client'
 
+import { getApiUrl } from '@ezstart/config'
 import type { ProjectHealth } from '@ezstart/monitoring'
 import type { UptimeDataPoint } from '@ezstart/ui/components'
 import {
@@ -37,10 +38,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
     async function fetchHistory() {
       try {
         setIsLoadingHistory(true)
-        const MONITORING_API_URL =
-          process.env.NODE_ENV === 'development'
-            ? 'http://localhost:5080'
-            : 'https://ezstart-17v5.onrender.com'
+        // Use getApiUrl to get the correct monitoring API URL based on environment
+        const MONITORING_API_URL = getApiUrl('ezstart')
 
         const res = await fetch(`${MONITORING_API_URL}/api/history/project/${project.id}?hours=24`)
         if (!res.ok) throw new Error('Failed to fetch history')
