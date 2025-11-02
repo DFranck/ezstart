@@ -165,43 +165,48 @@ const DashboardPage = () => {
     )
   }
 
+  // Check if there's any meaningful data to show
+  const hasData = hasClients && (allInvoices.length > 0 || allQuotes.length > 0 || allReceipts.length > 0)
+
   return (
     <>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
-        {/* Stats Section - Only show when there's data */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <Div layout={'col'}>
-            <StatsCard
-              title="Total Revenue"
-              value={`$${totalRevenue.toFixed(2)}`}
-              icon="lucide:DollarSign"
-              iconGradient="bg-gradient-payment"
-            />
-            <StatsCard
-              title="Pending"
-              value={`$${pendingAmount.toFixed(2)}`}
-              icon="lucide:Clock"
-              iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
-              className="hidden md:flex"
-            />
-            <StatsCard
-              title="Total Invoices"
-              value={allInvoices.length.toString()}
-              icon="lucide:FileEdit"
-              iconGradient="bg-gradient-invoice"
-              className="hidden md:flex"
-            />
-            <StatsCard
-              title="Total Quotes"
-              value={allQuotes.length.toString()}
-              icon="lucide:FileText"
-              iconGradient="bg-gradient-receipt"
-              className="hidden md:flex"
-            />
-          </Div>
+        {/* Stats Section - Only show when there's meaningful data */}
+        {hasData && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Div layout={'col'}>
+              <StatsCard
+                title="Total Revenue"
+                value={`$${totalRevenue.toFixed(2)}`}
+                icon="lucide:DollarSign"
+                iconGradient="bg-gradient-payment"
+              />
+              <StatsCard
+                title="Pending"
+                value={`$${pendingAmount.toFixed(2)}`}
+                icon="lucide:Clock"
+                iconGradient="bg-gradient-to-r from-orange-400 to-red-400"
+                className="hidden md:flex"
+              />
+              <StatsCard
+                title="Total Invoices"
+                value={allInvoices.length.toString()}
+                icon="lucide:FileEdit"
+                iconGradient="bg-gradient-invoice"
+                className="hidden md:flex"
+              />
+              <StatsCard
+                title="Total Quotes"
+                value={allQuotes.length.toString()}
+                icon="lucide:FileText"
+                iconGradient="bg-gradient-receipt"
+                className="hidden md:flex"
+              />
+            </Div>
 
-          <RevenueChart invoices={allInvoices} className="h-fit" />
-        </div>
+            <RevenueChart invoices={allInvoices} className="h-fit" />
+          </div>
+        )}
         {/* Quick Actions - Only show when missing data */}
         {(!hasCompanies || !hasClients || paymentMethods.length === 0) && (
           <div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -236,46 +241,49 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {/* Charts Section */}
+        {/* Charts Section - Only show when there are invoices */}
         {allInvoices.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="mb-6 sm:mb-8">
             <TopClientsChart invoices={allInvoices} clients={clients} className="h-fit" />
-            {/* Clients Section */}
-            <DashboardSection
-              title="Clients"
-              description="Click on a client to manage their billing"
-              icon="lucide:Users"
-              iconGradient="bg-gradient-client"
-              onAdd={() => setIsClientModalOpen(true)}
-              addButtonText="Add Client"
-              addButtonIcon="lucide:UserPlus"
-              addButtonGradient="bg-gradient-client hover:bg-gradient-client-hover"
-              isEmpty={!hasClients}
-              emptyState={{
-                icon: 'lucide:Users',
-                iconBg: 'bg-gradient-client-light text-ezbill-client',
-                title: 'No clients yet',
-                description: 'Add your first client to start creating invoices and quotes',
-                buttonText: 'Add First Client',
-              }}
-            >
-              <CollapsibleGroup
-                groups={clientGroups}
-                renderItem={client => (
-                  <ClientCard
-                    client={client}
-                    onClick={handleClientClick}
-                    onEdit={handleEditClient}
-                    onDelete={handleDeleteClient}
-                  />
-                )}
-                getItemKey={client => client._id}
-                defaultOpenAll={false}
-                showToggleAll={true}
-                className="grid grid-cols-1 gap-4 sm:gap-6"
-              />
-            </DashboardSection>{' '}
           </div>
+        )}
+
+        {/* Clients Section - Always show if user has companies/payment methods set up */}
+        {hasCompanies && paymentMethods.length > 0 && (
+          <DashboardSection
+            title="Clients"
+            description="Click on a client to manage their billing"
+            icon="lucide:Users"
+            iconGradient="bg-gradient-client"
+            onAdd={() => setIsClientModalOpen(true)}
+            addButtonText="Add Client"
+            addButtonIcon="lucide:UserPlus"
+            addButtonGradient="bg-gradient-client hover:bg-gradient-client-hover"
+            isEmpty={!hasClients}
+            emptyState={{
+              icon: 'lucide:Users',
+              iconBg: 'bg-gradient-client-light text-ezbill-client',
+              title: 'No clients yet',
+              description: 'Add your first client to start creating invoices and quotes',
+              buttonText: 'Add First Client',
+            }}
+          >
+            <CollapsibleGroup
+              groups={clientGroups}
+              renderItem={client => (
+                <ClientCard
+                  client={client}
+                  onClick={handleClientClick}
+                  onEdit={handleEditClient}
+                  onDelete={handleDeleteClient}
+                />
+              )}
+              getItemKey={client => client._id}
+              defaultOpenAll={false}
+              showToggleAll={true}
+              className="grid grid-cols-1 gap-4 sm:gap-6"
+            />
+          </DashboardSection>
         )}
       </div>
 
