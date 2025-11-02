@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = ['nodejs_20', 'pnpm']
+
+[phases.install]
+cmds = ['pnpm install --frozen-lockfile --shamefully-hoist']
+
+[phases.build]
+cmds = [
+  'pnpm --filter @ezstart/types build',
+  'pnpm --filter @ezstart/config build',
+  'pnpm --filter @ezstart/logger build',
+  'pnpm --filter @ezstart/express-core build'
+]
