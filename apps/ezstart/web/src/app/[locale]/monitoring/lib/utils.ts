@@ -59,6 +59,12 @@ export function getMetricsData(
   }
 
   // Audits tab
+  const worstAudit = audits.length > 0
+    ? audits.reduce((worst: any, current: any) =>
+        (current.score || 0) < (worst.score || 0) ? current : worst
+      )
+    : null
+
   return {
     servicesHealthy: audits.filter((a: any) => a.score >= 80).length,
     servicesTotal: audits.length,
@@ -66,10 +72,7 @@ export function getMetricsData(
     auditsTotal: audits.length,
     deploymentsActive: audits.filter((a: any) => a.score >= 90).length,
     deploymentsTotal: audits.length,
-    avgResponseTime: Math.round(
-      audits.length > 0
-        ? audits.reduce((acc: number, a: any) => acc + (a.score || 0), 0) / audits.length
-        : 0
-    ),
+    avgResponseTime: worstAudit ? worstAudit.score : 0,
+    worstAuditName: worstAudit ? worstAudit.auditType : '',
   }
 }

@@ -60,6 +60,7 @@ interface MetricsOverviewProps {
     deploymentsActive: number
     deploymentsTotal: number
     avgResponseTime: number
+    worstAuditName?: string
   }
 }
 
@@ -90,6 +91,10 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
   }
 
   if (activeTab === 'audits') {
+    const worstAuditLabel = metrics.worstAuditName
+      ? metrics.worstAuditName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      : 'N/A'
+
     return (
       <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
         <MetricCard
@@ -100,10 +105,10 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
         />
 
         <MetricCard
-          title="Average Score"
+          title="Lowest Score"
           value={`${metrics.avgResponseTime}/100`}
-          subtitle="Across all audits"
-          icon="⭐"
+          subtitle={worstAuditLabel}
+          icon="⚠️"
         />
       </div>
     )
