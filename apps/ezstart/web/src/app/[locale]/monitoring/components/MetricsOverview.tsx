@@ -61,6 +61,7 @@ interface MetricsOverviewProps {
     deploymentsTotal: number
     avgResponseTime: number
     worstAuditName?: string
+    worstProjectName?: string
   }
 }
 
@@ -113,6 +114,31 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
     )
   }
 
-  // Errors tab - no metrics overview needed
+  // Errors tab
+  if (activeTab === 'errors') {
+    const totalErrors = metrics.servicesHealthy // Total errors count
+    const criticalAndErrors = metrics.servicesTotal // Critical + errors count
+    const worstProjectName = metrics.worstProjectName || 'None'
+    const worstProjectCount = metrics.deploymentsActive
+
+    return (
+      <div className="md:grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg hidden">
+        <MetricCard
+          title="Total Errors"
+          value={totalErrors}
+          subtitle={`${criticalAndErrors} critical/errors`}
+          icon="🔴"
+        />
+
+        <MetricCard
+          title="Most Affected Project"
+          value={worstProjectCount > 0 ? worstProjectCount : '-'}
+          subtitle={worstProjectName}
+          icon="⚠️"
+        />
+      </div>
+    )
+  }
+
   return null
 }

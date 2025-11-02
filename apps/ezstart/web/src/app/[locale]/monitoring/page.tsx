@@ -22,9 +22,10 @@ import { ProjectCard } from './(health-tab)/components/ProjectCard'
 import { ErrorsFeed } from './(errors-tab)/components/ErrorsFeed'
 import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useMonitoringAudits } from './hooks/useMonitoringAudits'
+import { useMonitoringErrors } from './hooks/useMonitoringErrors'
 import { useSocket } from './hooks/useSocket'
 import { useCountdown } from './hooks/useCountdown'
-import { calculateOverallHealth, calculateAuditsHealth, getMetricsData } from './lib/utils'
+import { calculateOverallHealth, calculateAuditsHealth, calculateErrorsHealth, getMetricsData } from './lib/utils'
 import { MONITORING_API_URL } from './lib/config'
 
 export default function MonitoringDashboard() {
@@ -48,6 +49,13 @@ export default function MonitoringDashboard() {
     isFetching: isFetchingAudits,
     refetch: refetchAudits,
   } = useMonitoringAudits()
+
+  const {
+    data: errorsData,
+    isLoading: isLoadingErrors,
+    error: errorsError,
+    isFetching: isFetchingErrors,
+  } = useMonitoringErrors()
 
   // Socket.IO real-time updates
   useSocket({
@@ -83,13 +91,17 @@ export default function MonitoringDashboard() {
   const projects = projectsData?.projects || []
   const summary = projectsData?.summary || { total: 0, healthy: 0, degraded: 0, unhealthy: 0 }
   const audits = auditsData?.audits || []
+  const errors = errorsData?.logs || []
 
   // Calculate health and metrics
   const projectsHealth = calculateOverallHealth(summary)
   const auditsHealth = calculateAuditsHealth(audits)
+  const errorsHealth = calculateErrorsHealth(errors)
 
   const { score, status } =
-    activeTab === 'projects' ? projectsHealth : auditsHealth
+    activeTab === 'projects' ? projectsHealth
+    : activeTab === 'audits' ? auditsHealth
+    : errorsHealth
 
   const tabConfig =
     activeTab === 'projects'
@@ -97,16 +109,21 @@ export default function MonitoringDashboard() {
           title: 'Projects Health Score',
           subtitle: `${summary.total} projects monitored`,
         }
-      : {
+      : activeTab === 'audits'
+      ? {
           title: 'Audits Quality Score',
           subtitle: `${audits.length} audits completed`,
         }
+      : {
+          title: 'Error Status Score',
+          subtitle: `${errors.length} errors logged`,
+        }
 
-  const metricsData = getMetricsData(activeTab, summary, audits, projects)
+  const metricsData = getMetricsData(activeTab, summary, audits, projects, errors)
 
-  const isLoading = isLoadingProjects || isLoadingAudits
-  const isRefreshing = isFetchingProjects || isFetchingAudits
-  const error = projectsError || auditsError
+  const isLoading = isLoadingProjects || isLoadingAudits || isLoadingErrors
+  const isRefreshing = isFetchingProjects || isFetchingAudits || isFetchingErrors
+  const error = projectsError || auditsError || errorsError
 
   // Loading state
   if (isLoading) {
