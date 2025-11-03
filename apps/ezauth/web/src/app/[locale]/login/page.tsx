@@ -12,6 +12,7 @@ import {
   CardTitle,
   P,
   Span,
+  Spinner,
 } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -65,7 +66,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Spinner variant="primary" size="lg" text="Loading..." />}>
       <LoginContent />
     </Suspense>
   )

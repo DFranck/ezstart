@@ -12,7 +12,7 @@ import { groupCompaniesAsOne } from '@/utils/group-companies'
 import { groupDeletedItems } from '@/utils/group-deleted-items'
 import { groupPaymentMethodsByType } from '@/utils/group-payment-methods'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
+import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger, Skeleton, SkeletonCard } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { callApi } from '@/utils/api'
 import { useEffect, useState } from 'react'
@@ -193,10 +193,17 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center py-12">
-        <div className="flex flex-col items-center gap-4">
-          <Icon name="lucide:Loader2" className="animate-spin" />
-          <P>Loading settings...</P>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 space-y-6">
+        {/* Tabs skeleton */}
+        <div className="flex gap-2 border-b">
+          <Skeleton className="h-10 w-32" variant="shimmer" />
+          <Skeleton className="h-10 w-32" variant="shimmer" />
+          <Skeleton className="h-10 w-32" variant="shimmer" />
+        </div>
+        {/* Content skeleton */}
+        <div className="space-y-4">
+          <SkeletonCard showHeader showFooter={false} lines={3} variant="shimmer" size="lg" />
+          <SkeletonCard showHeader showFooter={false} lines={2} variant="shimmer" size="lg" />
         </div>
       </div>
     )

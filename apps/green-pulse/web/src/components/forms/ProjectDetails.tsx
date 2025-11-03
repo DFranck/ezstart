@@ -1,7 +1,7 @@
 'use client'
 
 import { useProject } from '@/hooks/useProjects'
-import { H1, P, Badge, Card, CardContent } from '@ezstart/ui/components'
+import { H1, P, Badge, Card, CardContent, SkeletonCard, Skeleton } from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 
 interface ProjectDetailsProps {
@@ -13,7 +13,14 @@ export function ProjectDetails({ projectId, workspaceSlug }: ProjectDetailsProps
   const { data, isLoading } = useProject(projectId)
 
   if (isLoading) {
-    return <div>Loading project...</div>
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-6 w-48" variant="shimmer" />
+        <Skeleton className="h-10 w-64" variant="shimmer" />
+        <Skeleton className="h-4 w-96" variant="shimmer" />
+        <SkeletonCard showHeader showFooter={false} lines={3} variant="shimmer" />
+      </div>
+    )
   }
 
   const project = data?.data

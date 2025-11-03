@@ -25,7 +25,16 @@
     "dev:asc": "turbo run dev --filter=web-asc-tcd...",
     "dev:fs": "turbo run dev --filter=web-fengshui... --filter=web-ezauth... --filter=api-ezauth... --filter=web-ezpay... --filter=api-ezpay... --concurrency=15",
     "dev:gp": "turbo run dev --filter=web-green-pulse... --filter=api-green-pulse... --filter=@green-pulse/types... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
-    "dev:pay": "turbo run dev --filter=web-ezpay... --filter=api-ezpay... --concurrency=15"
+    "dev:pay": "turbo run dev --filter=web-ezpay... --filter=api-ezpay... --concurrency=15",
+    "icons:generate": "node packages/next-config/scripts/generate-all-icons.js",
+    "icons:ezstart": "cd apps/ezstart/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:ezauth": "cd apps/ezauth/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:ezpay": "cd apps/ezpay/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:ezbill": "cd apps/ezbill/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:tower-defense": "cd apps/tower-defense/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:green-pulse": "cd apps/green-pulse/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:fengshui": "cd apps/fengshui/web && node ../../../packages/next-config/scripts/generate-icons.js",
+    "icons:asc-tcd": "cd apps/asc-tcd/web && node ../../../packages/next-config/scripts/generate-icons.js"
   },
   "jest": {
     "projects": [

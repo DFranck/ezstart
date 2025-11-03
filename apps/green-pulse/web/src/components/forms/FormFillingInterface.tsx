@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useFormInstance, useFormConfig } from '@/hooks/useForms'
-import { H1, P, Badge, Button } from '@ezstart/ui/components'
+import { H1, P, Badge, Button, Skeleton, SkeletonForm } from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { FormChatInterface } from './FormChatInterface'
 import { FormPreview } from './FormPreview'
@@ -39,7 +39,19 @@ export function FormFillingInterface({
   }, [instance?.fields])
 
   if (instanceLoading || configLoading) {
-    return <div className="p-8">Loading...</div>
+    return (
+      <div className="h-screen flex">
+        {/* Left side - Form preview skeleton */}
+        <div className="flex-1 p-8 space-y-4">
+          <Skeleton className="h-8 w-64" variant="shimmer" />
+          <SkeletonForm fields={6} showButton variant="shimmer" />
+        </div>
+        {/* Right side - PDF preview skeleton */}
+        <div className="w-1/2 border-l p-8">
+          <Skeleton className="h-full w-full rounded-lg" variant="shimmer" />
+        </div>
+      </div>
+    )
   }
 
   if (!instance || !config) {

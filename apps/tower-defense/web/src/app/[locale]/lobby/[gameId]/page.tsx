@@ -7,6 +7,7 @@ import { LobbyWrapper } from './LobbyWrapper'
 import { useEffect, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { Game } from '@tower-defense/types'
+import { SkeletonCard, SkeletonList } from '@ezstart/ui/components'
 
 export default function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
   const [gameId, setGameId] = useState<string | null>(null)
@@ -33,7 +34,12 @@ export default function LobbyPage({ params }: { params: Promise<{ gameId: string
   }, [params])
 
   if (loading) {
-    return <div className="p-4 max-w-2xl mx-auto">Loading...</div>
+    return (
+      <div className="p-4 max-w-2xl mx-auto space-y-4">
+        <SkeletonCard showHeader showFooter lines={3} variant="shimmer" size="lg" />
+        <SkeletonList items={2} showAvatar={false} variant="shimmer" />
+      </div>
+    )
   }
 
   if (error || !game || !gameId) {
