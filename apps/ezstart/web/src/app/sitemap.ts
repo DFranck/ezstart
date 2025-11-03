@@ -3,6 +3,11 @@ import { createSitemap } from '@ezstart/seo-config/sitemap'
 export default function sitemap() {
   return createSitemap({
     app: 'ezstart',
-    routes: ['/'],
+    routes: [
+      '/',
+      '/ez-features',
+      '/ez-libs',
+      '/monitoring',
+    ],
   })
 }
