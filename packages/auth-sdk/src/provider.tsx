@@ -1,7 +1,8 @@
 'use client'
 import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
-import { useAuthStore } from './store.js'
+import { useAuthStore, type AuthMode } from './store.js'
+import { getCurrentEnvironment, isEzstartDomain } from '@ezstart/config'
 
 interface AuthContextValue {
   client: AuthClient
@@ -12,11 +13,113 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 interface AuthProviderProps {
   children: ReactNode
   appName: string
-  useHttpOnlyCookies?: boolean // ✅ NEW: Opt-in flag for httpOnly mode (default: false)
+  authMode?: AuthMode  // 🆕 Replaces useHttpOnlyCookies (default: 'localStorage')
+  jwtPublicKey?: string  // 🆕 Required if authMode='jwt'
+
+  // @deprecated Use authMode instead
+  useHttpOnlyCookies?: boolean
 }
 
-export function AuthProvider({ children, appName, useHttpOnlyCookies = false }: AuthProviderProps) {
+/**
+ * Determine the actual auth mode to use based on environment and configuration
+ *
+ * Auto-detection rules:
+ * 1. localhost → Always localStorage (httpOnly doesn't work cross-port)
+ * 2. production + ezstart domain + httpOnly → httpOnly
+ * 3. production + external domain + httpOnly → Warning + fallback localStorage
+ * 4. production + jwt → jwt
+ */
+function resolveAuthMode(
+  configuredMode: AuthMode,
+  hostname: string,
+  env: string,
+  jwtPublicKey?: string
+): AuthMode {
+  // Rule 1: Force localStorage in localhost
+  if (env === 'local') {
+    if (configuredMode !== 'localStorage') {
+      console.warn(
+        `⚠️ [AuthSDK] Forced localStorage mode in localhost`,
+        `\n  → Configured: ${configuredMode}`,
+        `\n  → Reason: httpOnly/jwt cookies don't work cross-port`,
+        `\n  → Domain: ${hostname}`
+      )
+    }
+    return 'localStorage'
+  }
+
+  // Rule 2: httpOnly on ezstart domain (OK)
+  if (configuredMode === 'httpOnly' && isEzstartDomain(hostname)) {
+    console.log(
+      `✅ [AuthSDK] httpOnly mode on ezstart domain`,
+      `\n  → Domain: ${hostname}`,
+      `\n  → Cookie: .ezstart.xyz`
+    )
+    return 'httpOnly'
+  }
+
+  // Rule 3: httpOnly on external domain (Warning + fallback)
+  if (configuredMode === 'httpOnly' && !isEzstartDomain(hostname)) {
+    console.warn(
+      `⚠️ [AuthSDK] httpOnly mode on non-ezstart domain!`,
+      `\n  → Domain: ${hostname}`,
+      `\n  → httpOnly only works on *.ezstart.xyz`,
+      `\n  → Falling back to localStorage`,
+      `\n  → Consider using authMode="jwt" for external domains`
+    )
+    return 'localStorage'
+  }
+
+  // Rule 4: JWT mode (validate publicKey)
+  if (configuredMode === 'jwt') {
+    if (!jwtPublicKey) {
+      console.error(
+        `❌ [AuthSDK] JWT mode requires jwtPublicKey!`,
+        `\n  → Add: jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_KEY}`,
+        `\n  → Falling back to localStorage`
+      )
+      return 'localStorage'
+    }
+    console.log(
+      `✅ [AuthSDK] JWT mode enabled`,
+      `\n  → Domain: ${hostname}`,
+      `\n  → Validation: Local (no API calls)`
+    )
+    return 'jwt'
+  }
+
+  // Rule 5: localStorage (warning in production)
+  if (configuredMode === 'localStorage' && env === 'production') {
+    console.warn(
+      `⚠️ [AuthSDK] localStorage mode in production`,
+      `\n  → Domain: ${hostname}`,
+      `\n  → Warning: Vulnerable to XSS attacks`,
+      `\n  → Consider authMode="httpOnly" or "jwt"`
+    )
+  }
+
+  return configuredMode
+}
+
+export function AuthProvider({
+  children,
+  appName,
+  authMode = 'localStorage',
+  jwtPublicKey,
+  useHttpOnlyCookies // deprecated
+}: AuthProviderProps) {
   const store = useAuthStore()
+
+  // Handle deprecated prop
+  if (useHttpOnlyCookies !== undefined) {
+    console.warn(
+      `⚠️ [AuthSDK] useHttpOnlyCookies is deprecated`,
+      `\n  → Use authMode="httpOnly" instead`,
+      `\n  → Old: useHttpOnlyCookies={true}`,
+      `\n  → New: authMode="httpOnly"`
+    )
+    authMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
+  }
 
   // Create client lazily to avoid SSR issues
   const getClient = () => {
@@ -31,20 +134,35 @@ export function AuthProvider({ children, appName, useHttpOnlyCookies = false }: 
 
   const client = getClient()
 
-  // Set mode on mount based on prop
+  // Auto-detect and set mode on mount
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const hostname = window.location.hostname
+    const env = getCurrentEnvironment()
+
+    // Resolve actual mode based on environment
+    const resolvedMode = resolveAuthMode(authMode, hostname, env, jwtPublicKey)
     const currentMode = store.getMode()
-    const targetMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
 
     // Update mode if it changed
-    if (currentMode !== targetMode && store.isAuthenticated) {
-      // Re-authenticate user with new mode
-      const user = store.user
-      if (user) {
-        store.setAuth(user, store.accessToken || undefined, targetMode)
+    if (currentMode !== resolvedMode) {
+      console.log(
+        `🔄 [AuthSDK] Switching auth mode`,
+        `\n  → From: ${currentMode}`,
+        `\n  → To: ${resolvedMode}`,
+        `\n  → App: ${appName}`
+      )
+
+      if (store.isAuthenticated) {
+        // Re-authenticate user with new mode
+        const user = store.user
+        if (user) {
+          store.setAuth(user, store.accessToken || undefined, resolvedMode)
+        }
       }
     }
-  }, [useHttpOnlyCookies, store])
+  }, [authMode, appName, jwtPublicKey, store])
 
   // Auto-verify token on mount and periodically (but NOT on callback pages)
   useEffect(() => {

@@ -19,7 +19,7 @@ export function Providers({
 }) {
   return (
     <QueryProvider>
-      <AuthProvider appName="green-pulse" useHttpOnlyCookies={true}>
+      <AuthProvider appName="green-pulse" authMode="httpOnly">
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"

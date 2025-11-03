@@ -63,10 +63,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <ErrorBoundary>
               <QueryProvider>
                 <ThemeProvider>
-                  <AuthProvider
-                    appName="ezbill"
-                    useHttpOnlyCookies={false}
-                  >
+                  <AuthProvider appName="ezbill" authMode="httpOnly">
                     {children}
                   </AuthProvider>
                 </ThemeProvider>

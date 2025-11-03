@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 import { useEffect, useState } from 'react'
 import type { AuthUser } from './types.js'
 
-export type AuthMode = 'localStorage' | 'httpOnly'
+export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
 
 export interface AuthState {
   user: AuthUser | null
