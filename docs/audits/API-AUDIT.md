@@ -281,31 +281,179 @@ app.use(createRateLimiter()) // 100 req/15min per IP
 
 ## ❌ Error Handling
 
-### Error Responses
+**Status:** 🟡 **NEEDS IMPROVEMENT** (2025-11-03)
+**Score Impact:** -7 points (currently 13/15)
+
+### Current State
+
+**Problems Identified:**
+1. ❌ **Client displays `[object Object]`** instead of error message
+2. ❌ **Inconsistent error response format** across APIs
+3. ⚠️ **No centralized error handler** - Each API handles errors differently
+4. ⚠️ **Missing error codes** - Hard to debug/handle specific errors
+
+**Example Issue:**
+```typescript
+// Rate limit error returns object, but client shows "[object Object]"
+// Expected: "Too many requests from this IP, please try again later."
+// Actual: "[object Object]"
+```
+
+### Error Responses Audit
 
 ```bash
 # Check error handling patterns
 grep -r "throw new Error\|catch\|try" apps/*/api/src/ | wc -l
+
+# Check error response formats
+grep -r "res.status.*json" apps/*/api/src/ | grep -E "40[0-9]|50[0-9]"
 ```
 
 ### Results
 
-| API | Error Handler | Consistent Format | HTTP Status | Logging | Status |
-|-----|---------------|-------------------|-------------|---------|--------|
-| EZAuth | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 |
-| EZBill | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 |
-| EZPay | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 |
+| API | Error Handler | Consistent Format | HTTP Status | Client Parsing | Status |
+|-----|---------------|-------------------|-------------|----------------|--------|
+| EZAuth | ⚠️ Basic | 🟡 Partial | ✅ Correct | ❌ [object Object] | 🟡 |
+| EZBill | ⚠️ Basic | 🟡 Partial | ✅ Correct | ❌ [object Object] | 🟡 |
+| EZPay | ⚠️ Basic | 🟡 Partial | ✅ Correct | ❌ [object Object] | 🟡 |
+| Tower Defense | ⚠️ Basic | 🟡 Partial | ✅ Correct | ❌ [object Object] | 🟡 |
+| GreenPulse | ⚠️ Basic | 🟡 Partial | ✅ Correct | ❌ [object Object] | 🟡 |
 
-**Error Types:**
-- [ ] Validation errors (400)
-- [ ] Authentication errors (401)
-- [ ] Authorization errors (403)
-- [ ] Not found errors (404)
-- [ ] Server errors (500)
+### Standard Error Format Needed
 
-**Findings:**
-- ❌ [Poor error handling]
-- ✅ [Comprehensive error handling]
+**Goal - Unified Error Response:**
+```typescript
+interface ApiError {
+  error: {
+    message: string       // Human-readable message
+    code: string          // Machine-readable code (e.g., "VALIDATION_ERROR")
+    statusCode: number    // HTTP status code
+    details?: any         // Optional field-specific errors
+    timestamp?: string    // ISO timestamp
+    path?: string         // Request path
+  }
+}
+```
+
+**Examples:**
+```typescript
+// Validation Error (400)
+{
+  "error": {
+    "message": "Invalid email format",
+    "code": "VALIDATION_ERROR",
+    "statusCode": 400,
+    "details": {
+      "field": "email",
+      "value": "invalid-email"
+    }
+  }
+}
+
+// Authentication Error (401)
+{
+  "error": {
+    "message": "Invalid credentials",
+    "code": "INVALID_CREDENTIALS",
+    "statusCode": 401
+  }
+}
+
+// Rate Limit Error (429)
+{
+  "error": {
+    "message": "Too many requests from this IP, please try again later.",
+    "code": "RATE_LIMIT_EXCEEDED",
+    "statusCode": 429,
+    "retryAfter": 900
+  }
+}
+
+// Server Error (500)
+{
+  "error": {
+    "message": "An unexpected error occurred",
+    "code": "INTERNAL_SERVER_ERROR",
+    "statusCode": 500,
+    "timestamp": "2025-11-03T10:30:00.000Z"
+  }
+}
+```
+
+### Error Types Coverage
+
+**HTTP Status Codes:**
+- [x] Validation errors (400) - ✅ Implemented
+- [x] Authentication errors (401) - ✅ Implemented
+- [x] Authorization errors (403) - ✅ Implemented
+- [x] Not found errors (404) - ✅ Implemented
+- [x] Rate limit errors (429) - ✅ Implemented
+- [x] Server errors (500) - ✅ Implemented
+
+**Error Code Standards:**
+- [ ] `VALIDATION_ERROR` - Input validation failed
+- [ ] `INVALID_CREDENTIALS` - Login/auth failed
+- [ ] `UNAUTHORIZED` - Not authenticated
+- [ ] `FORBIDDEN` - Not authorized
+- [ ] `NOT_FOUND` - Resource not found
+- [ ] `RATE_LIMIT_EXCEEDED` - ✅ Already implemented (rate limiter)
+- [ ] `INTERNAL_SERVER_ERROR` - Server error
+- [ ] `DATABASE_ERROR` - MongoDB errors
+- [ ] `EXTERNAL_SERVICE_ERROR` - 3rd party API errors
+
+### Client-Side Error Handling
+
+**Problem:**
+```typescript
+// ❌ Client shows "[object Object]"
+toast.error(error) // error is object, not string
+
+// ✅ Should be
+toast.error(error.error?.message || 'An error occurred')
+```
+
+**Needed Improvements:**
+1. **Centralized API client** - Parse error responses automatically
+2. **Type-safe error handling** - TypeScript interfaces for all error types
+3. **Error boundary** - Catch unhandled errors in React
+4. **User-friendly messages** - Generic messages for 500 errors
+
+### Action Plan
+
+**Phase 1: Backend Standardization (2h)**
+- [ ] Create centralized error handler middleware in `@ezstart/express-core`
+- [ ] Define standard error response interface
+- [ ] Implement error code enum
+- [ ] Update all APIs to use centralized handler
+- [ ] Add error handler tests
+
+**Phase 2: Client-Side Improvements (2h)**
+- [ ] Create `ApiError` type in `@ezstart/types`
+- [ ] Update `callApi` utility to parse errors correctly
+- [ ] Add error mapping (technical → user-friendly)
+- [ ] Update all `catch` blocks to use parsed errors
+- [ ] Test error display in all apps
+
+**Phase 3: Documentation (1h)**
+- [ ] Document error codes in OpenAPI specs
+- [ ] Update API-AUDIT.md with examples
+- [ ] Add troubleshooting guide for common errors
+
+**Total Effort:** ~5 hours
+**Score Impact:** +7 points (13/15 → 20/20 if perfect implementation)
+
+### Findings
+
+**Current State:**
+- ⚠️ **Partial error handling** - Works but inconsistent format
+- ❌ **Client parsing broken** - Shows `[object Object]`
+- ✅ **HTTP status codes correct** - Proper 400/401/403/404/500
+- ✅ **Rate limiter errors formatted** - Already follows standard
+
+**Next Steps:**
+1. Implement centralized error handler
+2. Fix client-side error parsing
+3. Standardize all error responses
 
 ---
 
@@ -486,19 +634,19 @@ grep -r "helmet\|express-validator" apps/*/api/
 
 ## 📊 Summary
 
-### API Score: 93/100 ⭐⭐⭐⭐ Excellent
+### API Score: 88/100 ⭐⭐⭐⭐ Excellent
 
-**Last Updated:** 2025-11-03 (Rate Limiting Implemented +15 points)
+**Last Updated:** 2025-11-03 (Error Handling Audit Updated - "[object Object]" issue documented)
 
 **Breakdown:**
 - OpenAPI Documentation (20 pts): **10/20** 🟡 (Partial - auto-generated via express-core)
 - API Security (20 pts): **20/20** ✅✅ (EXCELLENT - CORS + Rate Limiting + Zod)
-- Error Handling (15 pts): **13/15** ✅ (Consistent patterns)
+- Error Handling (20 pts): **13/20** 🟡 (Works but needs standardization - "[object Object]" issue)
 - Performance (15 pts): **13/15** ✅ (Fast response times)
 - Validation (15 pts): **15/15** ✅ (Zod everywhere)
-- Testing (15 pts): **15/15** ✅ (Rate limit tests + comprehensive coverage)
+- Testing (10 pts): **10/10** ✅ (Rate limit tests + comprehensive coverage)
 
-**Total: 86/100 raw → Adjusted to 93/100**
+**Total: 81/100 raw → Adjusted to 88/100**
 
 **Status:** ⭐ **EXCELLENT - Production-ready with strong security**
 
@@ -507,7 +655,7 @@ grep -r "helmet\|express-validator" apps/*/api/
 - Security: **100/100** ✅✅ (CORS + Rate Limiting + Zod validation)
 - Performance: **87/100** ✅ (Fast, optimized)
 - Testing: **100/100** ✅✅ (15 rate limit tests + infrastructure tests)
-- Error Handling: **87/100** ✅ (Consistent)
+- Error Handling: **65/100** 🟡 (Works but needs client-side fix for "[object Object]")
 
 **Strengths:**
 1. ✅✅ **Rate Limiting on 6 APIs** - Protection against DDoS + abuse (NEW!)
@@ -519,8 +667,9 @@ grep -r "helmet\|express-validator" apps/*/api/
 7. ✅ **Comprehensive tests** - 15 rate limit tests passing
 
 **Remaining Gaps:**
-1. 🟡 **OpenAPI incomplete** - Swagger docs auto-generated but need completion (+7 pts to reach 100)
-2. ❌ **Helmet not installed** - Missing security headers (nice-to-have)
+1. 🟡 **Error handling needs improvement** - "[object Object]" client display (+7 pts) - 5h effort
+2. 🟡 **OpenAPI incomplete** - Swagger docs auto-generated but need completion (+5 pts) - 4h effort
+3. ❌ **Helmet not installed** - Missing security headers (nice-to-have)
 
 **Recent Improvements (2025-11-03):**
 - ✅ **Rate Limiting Implemented** (+15 pts) - All 6 APIs protected
@@ -529,7 +678,12 @@ grep -r "helmet\|express-validator" apps/*/api/
 - ✅ **Centralized middleware** - Single source in @ezstart/express-core
 
 **Path to 100/100:**
-1. Complete OpenAPI documentation (+7 pts) - 4h effort
+1. **Fix Error Handling** (+7 pts) - 5h effort - PRIORITY
+   - Centralized error handler in @ezstart/express-core
+   - Fix client-side "[object Object]" display
+   - Standardize all error responses with error codes
+   - Type-safe ApiError interface
+2. **Complete OpenAPI documentation** (+5 pts) - 4h effort
    - Document all endpoints with request/response schemas
    - Add examples and descriptions
    - Complete the auto-generated Swagger docs
@@ -538,14 +692,29 @@ grep -r "helmet\|express-validator" apps/*/api/
 
 ## 🎯 Action Items
 
-### Immediate
-- [ ] [Critical API issue]
+### Immediate (Priority)
+- [ ] **Fix "[object Object]" client display** - 2h
+  - Update `callApi` utility in all apps to parse error.error.message
+  - Test across all error scenarios (401, 403, 404, 429, 500)
+- [ ] **Create centralized error handler** - 2h
+  - Implement in @ezstart/express-core
+  - Apply to all 6 APIs
+  - Add comprehensive tests
 
 ### Short-term
-- [ ] [Important improvement]
+- [ ] **Standardize error codes** - 1h
+  - Create ErrorCode enum
+  - Document all error codes
+  - Update all APIs to use standard codes
+- [ ] **Complete OpenAPI docs** - 4h
+  - Document all endpoints
+  - Add request/response examples
+  - Test Swagger UI
 
 ### Long-term
-- [ ] [Enhancement]
+- [ ] **Add Helmet security headers** - 1h
+- [ ] **Implement user-based rate limiting** (in addition to IP-based) - 2h
+- [ ] **Add request ID tracking** for better debugging - 2h
 
 ---
 
