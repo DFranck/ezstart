@@ -15,12 +15,11 @@
 
 **Je veux comprendre l'architecture:**
 - [audits/ARCHITECTURE-AUDIT.md](./audits/ARCHITECTURE-AUDIT.md) - Score 95/100
-- [CLAUDE-ARCHIVE.md](./CLAUDE-ARCHIVE.md) - Historique complet (4600+ lignes)
 
 **Je veux contribuer:**
 - [DEV-RULES.md](../DEV-RULES.md) - Règles obligatoires
-- [TESTING.md](./TESTING.md) - Stratégie de tests
-- [CI-CD-SETUP.md](./CI-CD-SETUP.md) - Infrastructure as Code
+- [guides/TESTING.md](./guides/TESTING.md) - Stratégie de tests
+- [guides/CI-CD-SETUP.md](./guides/CI-CD-SETUP.md) - Infrastructure as Code
 
 ---
 
@@ -45,10 +44,9 @@
 
 **Vue d'ensemble (10 min):**
 - [README.md](./README.md) - Dashboard des audits (Score: 84.8/100)
-- [AUDIT-SUMMARY.md](./AUDIT-SUMMARY.md) - Executive summary
 
 **Roadmap (5 min):**
-- [ROADMAP.md](./ROADMAP.md) - Vers 100/100 (Phase 3)
+- [reference/ROADMAP.md](./reference/ROADMAP.md) - Vers 100/100 (Phase 3)
 
 **Documentation détaillée:**
 - [audits/](./audits/) - 16 audits détaillés
@@ -59,7 +57,7 @@
 
 **Déploiement:**
 - [DEPLOY.md](../DEPLOY.md) - Guide complet Railway/Vercel/Oracle
-- [CI-CD-SETUP.md](./CI-CD-SETUP.md) - Pipeline et scripts
+- [guides/CI-CD-SETUP.md](./guides/CI-CD-SETUP.md) - Pipeline et scripts
 
 **Monitoring:**
 - [audits/MONITORING-AUDIT.md](./audits/MONITORING-AUDIT.md) - Score 80/100
@@ -70,7 +68,7 @@
 ### 🧪 QA / Testeur
 
 **Tests:**
-- [TESTING.md](./TESTING.md) - Stratégie complète (322 tests)
+- [guides/TESTING.md](./guides/TESTING.md) - Stratégie complète (322 tests)
 - [audits/TESTING-AUDIT.md](./audits/TESTING-AUDIT.md) - Score 82/100
 
 **Qualité:**
@@ -98,15 +96,10 @@
     │
     ├── guides/                   # 📚 Guides pratiques
     │   ├── TESTING.md           # Stratégie de tests
-    │   ├── CI-CD-SETUP.md       # Infrastructure as Code
-    │   ├── AUDIT-GUIDE.md       # Comment auditer
-    │   └── VSCODE-SETUP.md      # Setup IDE
+    │   └── CI-CD-SETUP.md       # Infrastructure as Code
     │
     ├── reference/                # 📖 Documentation de référence
-    │   ├── ROADMAP.md           # Roadmap Phase 3
-    │   ├── AUDIT-SUMMARY.md     # Executive summary
-    │   ├── CLAUDE-ARCHIVE.md    # Historique complet
-    │   └── PAGE-STRUCTURE.md    # Best practices UI
+    │   └── ROADMAP.md           # Roadmap Phase 3
     │
     └── audits/                   # 🔍 16 audits détaillés
         ├── ARCHITECTURE-AUDIT.md
@@ -144,9 +137,6 @@
 
 **...voir la roadmap**
 → [reference/ROADMAP.md](./reference/ROADMAP.md)
-
-**...comprendre l'historique**
-→ [reference/CLAUDE-ARCHIVE.md](./reference/CLAUDE-ARCHIVE.md)
 
 ---
 
@@ -214,9 +204,6 @@
 
 **Comprendre un package:**
 - Voir [packages/[name]/README.md](../packages/)
-
-**Autre:**
-- Consulter [CLAUDE-ARCHIVE.md](./reference/CLAUDE-ARCHIVE.md)
 
 ---
 
