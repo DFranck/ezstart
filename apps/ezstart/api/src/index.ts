@@ -1,7 +1,14 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
-import { createApp, startServer, connectToMongo, getApiPort, createSocketServer } from '@ezstart/express-core'
+import {
+  createApp,
+  createRateLimiter,
+  startServer,
+  connectToMongo,
+  getApiPort,
+  createSocketServer
+} from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries } from './routes/index.js'
 import { setScheduler } from './routes/scheduler.js'
@@ -13,6 +20,9 @@ const PORT = getApiPort('ezstart')
 // Create Express app with CORS auto-configured
 // Monitoring API is called by ALL web apps (dashboard in EZStart)
 const app = createApp({ apiApp: 'ezstart' })
+
+// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
+app.use(createRateLimiter())
 
 // Get CORS origins for Socket.IO (all web apps can connect)
 const socketCorsOrigins = getAllowedOrigins('ezstart')

@@ -1,7 +1,14 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
-import { connectToMongo, createApp, createSocketServer, startServer, getApiPort } from '@ezstart/express-core'
+import {
+  connectToMongo,
+  createApp,
+  createRateLimiter,
+  createSocketServer,
+  startServer,
+  getApiPort
+} from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 import { setIO } from './socketInstance.js'
 import { registerSocketHandlers } from './sockets/registerSocketHandlers.js'
@@ -9,6 +16,9 @@ import { seedEntityTypes } from './services/entityRegistry.js'
 
 const app = createApp({ apiApp: 'tower-defense' })
 const PORT = getApiPort('tower-defense')
+
+// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
+app.use(createRateLimiter())
 
 app.use('/api', routes)
 

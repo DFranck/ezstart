@@ -1,5 +1,11 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
-import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
+import {
+  connectToMongo,
+  createApp,
+  createRateLimiter,
+  getApiPort,
+  startServer
+} from '@ezstart/express-core'
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
 import routes, { registries } from './routes/index.js'
@@ -11,6 +17,9 @@ const app = createApp({
   rawBodyRoutes: ['/api/webhooks/stripe'],
   apiApp: 'ezpay',
 })
+
+// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
+app.use(createRateLimiter())
 
 // Mount API routes
 app.use('/api', routes)

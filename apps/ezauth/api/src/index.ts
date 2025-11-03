@@ -1,7 +1,14 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
-import { connectToMongo, createApp, getApiPort, startServer } from '@ezstart/express-core'
+import {
+  connectToMongo,
+  createApp,
+  createRateLimiter,
+  createStrictRateLimiter,
+  getApiPort,
+  startServer
+} from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import oauthRoutes from './routes/oauth.routes.js'
 import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
@@ -26,6 +33,9 @@ app.use(cors({
 
 // ✅ Add cookie parser middleware (for httpOnly cookie support)
 app.use(cookieParser())
+
+// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
+app.use(createRateLimiter())
 
 // Initialize Passport
 app.use(passport.initialize())

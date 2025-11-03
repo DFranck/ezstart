@@ -1,11 +1,21 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
-import { connectToMongo, createApp, startServer, Router, getApiPort } from '@ezstart/express-core'
+import {
+  connectToMongo,
+  createApp,
+  createRateLimiter,
+  startServer,
+  Router,
+  getApiPort
+} from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
 export const app = createApp({ apiApp: 'green-pulse' })
 const PORT = getApiPort('green-pulse')
+
+// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
+app.use(createRateLimiter())
 
 app.use('/api', routes)
 

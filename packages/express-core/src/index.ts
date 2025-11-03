@@ -24,6 +24,13 @@ export { getApiPort } from './config/ports.js'
 // Middlewares
 export { validateParams } from './middlewares/validate-params.js'
 export { validateQuery } from './middlewares/validate-query.js'
+export {
+  createRateLimiter,
+  createStrictRateLimiter,
+  createVeryStrictRateLimiter,
+  createModerateRateLimiter
+} from './middleware/rateLimit.js'
+export type { RateLimitOptions } from './middleware/rateLimit.js'
 
 // Types & Validation (Zod + OpenAPI)
 export { z, mongoIdSchema, listingQuerySchema } from './types/zod.js'
