@@ -12,20 +12,20 @@ import { notFound } from 'next/navigation'
 import ClientLayout from './client-layout'
 
 export const metadata = createMetadata({
+  app: 'ezstart',
   appName: 'EZStart',
   description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
-  domain: 'https://ezstart-web.vercel.app',
   keywords: ['development', 'platform', 'web apps', 'ezstart', 'tools'],
   themeColor: '#000000',
-  ogImage: 'https://ezstart-web.vercel.app/og-image.svg',
+  ogImage: 'https://www.ezstart.xyz/og-image.svg',
 })
 
 export const viewport = createViewport('#000000')
 
 const jsonLd = createJsonLd({
+  app: 'ezstart',
   appName: 'EZStart',
   description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
-  url: 'https://ezstart-web.vercel.app',
   applicationCategory: 'DeveloperApplication',
 })
 

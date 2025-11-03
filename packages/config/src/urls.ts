@@ -312,6 +312,36 @@ export function getApiUrl(app: AppName, env?: Environment): string {
 }
 
 /**
+ * Get canonical URL for SEO purposes (always returns production domain)
+ * Use this for: robots.txt, sitemap.xml, og:url, canonical meta tags
+ *
+ * This ensures consistent SEO across all deployments (Vercel preview + custom domain)
+ * by always pointing to the primary production domain.
+ *
+ * @example
+ * ```typescript
+ * // For SEO metadata
+ * const canonicalUrl = getCanonicalUrl('ezstart', 'web')
+ * // Returns: 'https://www.ezstart.xyz'
+ *
+ * // For API documentation
+ * const apiCanonical = getCanonicalUrl('ezauth', 'api')
+ * // Returns: 'https://ezauth-api.ezstart.xyz'
+ * ```
+ */
+export function getCanonicalUrl(app: AppName, type: 'web' | 'api' = 'web'): string {
+  if (type === 'api') {
+    const apiUrls = URLS[app].api
+    if (!apiUrls) {
+      throw new Error(`App ${app} does not have an API`)
+    }
+    return apiUrls.production
+  }
+
+  return URLS[app].web.production
+}
+
+/**
  * Get all web URLs for an app (useful for CORS)
  */
 export function getAllWebUrls(app: AppName): string[] {

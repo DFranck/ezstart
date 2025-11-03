@@ -1,43 +1,72 @@
 import type { Metadata } from 'next'
+import { getCanonicalUrl, type AppName } from '@ezstart/config/urls'
 
-export interface MetadataConfig {
-  appName: string
-  description: string
-  domain: string
-  keywords?: string[]
-  themeColor?: string
-  ogImage?: string
-  twitterHandle?: string
-  locale?: string
-  /** Custom icons (overrides default favicon detection) */
-  icons?: {
-    icon?: string | Array<{ url: string; sizes?: string; type?: string }>
-    apple?: string | Array<{ url: string; sizes?: string; type?: string }>
-    shortcut?: string
-  }
-}
+export type MetadataConfig =
+  | {
+      /** App name - auto-detects canonical URL from @ezstart/config */
+      app: AppName
+      appName: string
+      description: string
+      keywords?: string[]
+      themeColor?: string
+      ogImage?: string
+      twitterHandle?: string
+      locale?: string
+      /** Custom icons (overrides default favicon detection) */
+      icons?: {
+        icon?: string | Array<{ url: string; sizes?: string; type?: string }>
+        apple?: string | Array<{ url: string; sizes?: string; type?: string }>
+        shortcut?: string
+      }
+    }
+  | {
+      /** Manual domain (fallback for custom configs) */
+      domain: string
+      appName: string
+      description: string
+      keywords?: string[]
+      themeColor?: string
+      ogImage?: string
+      twitterHandle?: string
+      locale?: string
+      /** Custom icons (overrides default favicon detection) */
+      icons?: {
+        icon?: string | Array<{ url: string; sizes?: string; type?: string }>
+        apple?: string | Array<{ url: string; sizes?: string; type?: string }>
+        shortcut?: string
+      }
+    }
 
 /**
  * Crée une metadata Next.js complète avec Open Graph et Twitter Cards
  *
  * @example
  * ```ts
- * // apps/myapp/web/src/app/layout.tsx
+ * // apps/ezbill/web/src/app/layout.tsx
  * import { createMetadata } from '@ezstart/seo-config/metadata'
  *
  * export const metadata = createMetadata({
- *   appName: 'EZAuth',
- *   description: 'Centralized authentication service',
- *   domain: 'https://ezauth.vercel.app',
- *   keywords: ['auth', 'SSO', 'OAuth2']
+ *   app: 'ezbill',  // Auto-detects https://ezbill.ezstart.xyz
+ *   appName: 'EZBill',
+ *   description: 'Professional invoicing and billing',
+ *   keywords: ['invoicing', 'billing', 'business']
+ * })
+ *
+ * // Or with manual domain (fallback)
+ * export const metadata = createMetadata({
+ *   domain: 'https://myapp.vercel.app',
+ *   appName: 'MyApp',
+ *   description: 'App description',
+ *   keywords: ['app']
  * })
  * ```
  */
 export function createMetadata(config: MetadataConfig): Metadata {
+  // Auto-detect domain from app name or use manual domain
+  const domain = 'app' in config ? getCanonicalUrl(config.app, 'web') : config.domain
   const {
     appName,
     description,
-    domain,
     keywords = [],
     themeColor = '#000000',
     ogImage = `${domain}/og-image.png`,

@@ -1,24 +1,47 @@
 import type { Thing, WebApplication, WithContext } from 'schema-dts'
+import { getCanonicalUrl, type AppName } from '@ezstart/config/urls'
 
-export interface JsonLdConfig {
-  appName: string
-  description: string
-  url: string
-  applicationCategory?: string
-  operatingSystem?: string
-  offers?: {
-    price: string
-    priceCurrency: string
-  }
-  author?: {
-    name: string
-    url?: string
-  }
-  aggregateRating?: {
-    ratingValue: number
-    ratingCount: number
-  }
-}
+export type JsonLdConfig =
+  | {
+      /** App name - auto-detects canonical URL from @ezstart/config */
+      app: AppName
+      appName: string
+      description: string
+      applicationCategory?: string
+      operatingSystem?: string
+      offers?: {
+        price: string
+        priceCurrency: string
+      }
+      author?: {
+        name: string
+        url?: string
+      }
+      aggregateRating?: {
+        ratingValue: number
+        ratingCount: number
+      }
+    }
+  | {
+      /** Manual URL (fallback for custom configs) */
+      url: string
+      appName: string
+      description: string
+      applicationCategory?: string
+      operatingSystem?: string
+      offers?: {
+        price: string
+        priceCurrency: string
+      }
+      author?: {
+        name: string
+        url?: string
+      }
+      aggregateRating?: {
+        ratingValue: number
+        ratingCount: number
+      }
+    }
 
 /**
  * Crée un JSON-LD WebApplication schema pour rich snippets Google
@@ -29,9 +52,9 @@ export interface JsonLdConfig {
  * import { createJsonLd } from '@ezstart/seo-config/json-ld'
  *
  * const jsonLd = createJsonLd({
+ *   app: 'ezauth',  // Auto-detects https://ezauth.ezstart.xyz
  *   appName: 'EZAuth',
  *   description: 'Centralized authentication service',
- *   url: 'https://ezauth.vercel.app',
  *   applicationCategory: 'BusinessApplication',
  * })
  *
@@ -51,10 +74,11 @@ export interface JsonLdConfig {
  * ```
  */
 export function createJsonLd(config: JsonLdConfig): WithContext<WebApplication> {
+  // Auto-detect URL from app name or use manual URL
+  const url = 'app' in config ? getCanonicalUrl(config.app, 'web') : config.url
   const {
     appName,
     description,
-    url,
     applicationCategory = 'WebApplication',
     operatingSystem = 'Any',
     offers = {
@@ -63,7 +87,7 @@ export function createJsonLd(config: JsonLdConfig): WithContext<WebApplication> 
     },
     author = {
       name: 'EZStart Team',
-      url: 'https://ezstart-web.vercel.app',
+      url: 'https://www.ezstart.xyz',
     },
     aggregateRating,
   } = config

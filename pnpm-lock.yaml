@@ -1678,6 +1678,9 @@ importers:
 
   packages/seo-config:
     dependencies:
+      '@ezstart/config':
+        specifier: workspace:*
+        version: link:../config
       schema-dts:
         specifier: ^1.1.5
         version: 1.1.5

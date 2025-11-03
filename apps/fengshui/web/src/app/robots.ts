@@ -2,6 +2,6 @@ import { createRobots } from '@ezstart/seo-config/robots'
 
 export default function robots() {
   return createRobots({
-    domain: 'https://fengshui-web.vercel.app',
+    app: 'fengshui',
   })
 }

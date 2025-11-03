@@ -1,32 +1,52 @@
 import type { MetadataRoute } from 'next'
+import { getCanonicalUrl, type AppName } from '@ezstart/config/urls'
 
-export interface SitemapConfig {
-  domain: string
-  routes: string[]
-  changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
-  priority?: number
-  lastModified?: Date
-}
+export type SitemapConfig =
+  | {
+      /** App name - auto-detects canonical URL from @ezstart/config */
+      app: AppName
+      routes: string[]
+      changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+      priority?: number
+      lastModified?: Date
+    }
+  | {
+      /** Manual domain (fallback for custom configs) */
+      domain: string
+      routes: string[]
+      changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
+      priority?: number
+      lastModified?: Date
+    }
 
 /**
  * Crée un sitemap.xml standardisé pour les apps @ezstart
  *
  * @example
  * ```ts
- * // apps/myapp/web/src/app/sitemap.ts
+ * // apps/ezbill/web/src/app/sitemap.ts
  * import { createSitemap } from '@ezstart/seo-config/sitemap'
  *
  * export default function sitemap() {
  *   return createSitemap({
- *     domain: 'https://myapp.vercel.app',
+ *     app: 'ezbill',  // Auto-detects https://ezbill.ezstart.xyz
  *     routes: ['/', '/about', '/contact']
+ *   })
+ * }
+ *
+ * // Or with manual domain (fallback)
+ * export default function sitemap() {
+ *   return createSitemap({
+ *     domain: 'https://myapp.vercel.app',
+ *     routes: ['/', '/about']
  *   })
  * }
  * ```
  */
 export function createSitemap(config: SitemapConfig): MetadataRoute.Sitemap {
+  // Auto-detect domain from app name or use manual domain
+  const domain = 'app' in config ? getCanonicalUrl(config.app, 'web') : config.domain
   const {
-    domain,
     routes,
     changeFrequency = 'weekly',
     priority: defaultPriority,
