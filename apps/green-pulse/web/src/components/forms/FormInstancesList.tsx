@@ -2,7 +2,7 @@
 import { useTranslations } from 'next-intl'
 
 import { useProjectForms } from '@/hooks/useProjects'
-import { Card, CardContent, H3, P, Badge } from '@ezstart/ui/components'
+import { Card, CardContent, H3, P, Badge, SkeletonCard } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 interface FormInstancesListProps {
@@ -15,7 +15,13 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
   const t = useTranslations('forms.forms')
 
   if (isLoading) {
-    return <div>Loading forms...</div>
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" size="sm" />
+        ))}
+      </div>
+    )
   }
 
   if (error) {

@@ -17,6 +17,13 @@ export default {
       animation: {
         'spin-slow': 'spin 2s linear infinite',
         'spin-fast': 'spin 0.5s linear infinite',
+        shimmer: 'shimmer 2s linear infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
     },
   },

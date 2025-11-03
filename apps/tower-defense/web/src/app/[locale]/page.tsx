@@ -4,7 +4,7 @@ import CreateGameButton from '@/components/CreateGameButton'
 import { LoginSection } from '@/components/LoginSection'
 import { useGames } from '@/hooks/useGames'
 import { usePlayerStore } from '@/stores/usePlayerStore'
-import { Button, H1, Icon, LI, Main, P, Section, UL } from '@ezstart/ui/components'
+import { Button, H1, Icon, LI, Main, P, Section, UL, SkeletonList } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { Game } from '@tower-defense/types'
 import Link from 'next/link'
@@ -31,12 +31,12 @@ export default function Page() {
   if (player?._id && isLoading) {
     return (
       <Main>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Icon name={'fa:FaSpinner'} spin className="w-8 h-8 mb-4" />
-            <p className="text-gray-600">Loading games...</p>
-          </div>
-        </div>
+        <Section size={'xl'}>
+          <H1 className="md:text-center">Tower Defense</H1>
+        </Section>
+        <Section size={'xs'}>
+          <SkeletonList items={3} showAvatar={false} variant="shimmer" />
+        </Section>
       </Main>
     )
   }

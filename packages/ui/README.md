@@ -327,6 +327,121 @@ import { TextArea } from '@ezstart/ui/components'
 - `showCharCount` - Display character count
 - `maxLength` - Maximum character limit
 
+#### Skeleton
+
+**Loading state placeholders with shimmer animation**
+
+```tsx
+import {
+  Skeleton,
+  SkeletonText,
+  SkeletonCard,
+  SkeletonTable,
+  SkeletonList,
+  SkeletonAvatar,
+  SkeletonForm
+} from '@ezstart/ui/components'
+
+// Basic skeleton (custom shapes)
+<Skeleton className="h-12 w-full" />
+<Skeleton className="h-4 w-3/4" />
+
+// Text skeleton (multiple lines)
+<SkeletonText lines={3} />
+<SkeletonText lines={2} spacing="loose" variant="shimmer" />
+
+// Avatar skeleton
+<SkeletonAvatar size="md" />
+<SkeletonAvatar size="lg" variant="shimmer" />
+
+// Card skeleton (with header and content)
+<SkeletonCard />
+<SkeletonCard showHeader showFooter lines={4} variant="shimmer" />
+
+// Table skeleton
+<SkeletonTable rows={5} cols={4} showHeader />
+
+// List skeleton (with avatar + content)
+<SkeletonList items={3} showAvatar variant="shimmer" />
+
+// Form skeleton (input fields + button)
+<SkeletonForm fields={4} showButton />
+```
+
+**Real-world usage examples:**
+
+```tsx
+// Loading states in data-fetching components
+function WorkspacesList() {
+  const { data, isLoading } = useWorkspaces()
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} variant="shimmer" />
+        ))}
+      </div>
+    )
+  }
+
+  return <div>{/* actual content */}</div>
+}
+
+// Loading tables
+function InvoicesTable() {
+  const { invoices, isLoading } = useInvoices()
+
+  if (isLoading) {
+    return <SkeletonTable rows={10} cols={5} showHeader />
+  }
+
+  return <Table>{/* actual data */}</Table>
+}
+
+// Loading lists with avatars
+function UsersList() {
+  const { users, isLoading } = useUsers()
+
+  if (isLoading) {
+    return <SkeletonList items={5} showAvatar variant="shimmer" />
+  }
+
+  return <div>{/* actual users */}</div>
+}
+```
+
+**Components:**
+
+| Component | Purpose | Key Props |
+|-----------|---------|-----------|
+| `Skeleton` | Base skeleton for custom shapes | `variant`, `className` |
+| `SkeletonText` | Multiple lines of text | `lines`, `spacing` |
+| `SkeletonAvatar` | Circular profile pictures | `size` |
+| `SkeletonCard` | Card with header/content/footer | `showHeader`, `showFooter`, `lines`, `size` |
+| `SkeletonTable` | Table with rows and columns | `rows`, `cols`, `showHeader` |
+| `SkeletonList` | List items with avatar + content | `items`, `showAvatar` |
+| `SkeletonForm` | Form fields + submit button | `fields`, `showButton` |
+
+**Props:**
+- `variant` - Animation style: `default`, `lighter`, `darker`, `shimmer` (recommended)
+- `size` - Component size: `xs`, `sm`, `default`, `lg`, `xl`
+- `spacing` - Text line spacing: `tight`, `normal`, `loose`
+- All skeleton components accept `className` for custom styling
+
+**Best Practices:**
+- Use `variant="shimmer"` for modern loading animations
+- Match skeleton layout to actual content for smooth transitions
+- Show 3-5 skeleton items to indicate loading without overwhelming
+- Combine with Suspense boundaries for React 18+ streaming SSR
+
+**Use Cases:**
+- Data-fetching components (React Query, SWR, fetch)
+- Dashboard loading states
+- Table and list placeholders
+- Form initialization
+- Image loading placeholders
+
 #### Dropdown
 
 **100% Configurable menu with custom triggers**

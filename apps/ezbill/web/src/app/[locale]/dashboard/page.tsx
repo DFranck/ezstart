@@ -17,7 +17,7 @@ import { getUserId } from '@/utils/get-user-id'
 import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Div, Spinner } from '@ezstart/ui/components'
+import { Div, Spinner, SkeletonCard, Skeleton } from '@ezstart/ui/components'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -159,8 +159,30 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <Spinner variant="fancy" size="xl" text="Loading your dashboard..." textSize="md" />
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
+        {/* Stats + Chart Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <Div layout={'col'}>
+            <Skeleton className="h-24 w-full rounded-xl" variant="shimmer" />
+            <Skeleton className="h-24 w-full rounded-xl hidden md:block" variant="shimmer" />
+            <Skeleton className="h-24 w-full rounded-xl hidden md:block" variant="shimmer" />
+            <Skeleton className="h-24 w-full rounded-xl hidden md:block" variant="shimmer" />
+          </Div>
+          <Skeleton className="h-96 w-full rounded-xl" variant="shimmer" />
+        </div>
+
+        {/* Top Clients Chart Skeleton */}
+        <Skeleton className="h-64 w-full rounded-xl" variant="shimmer" />
+
+        {/* Clients Grid Skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" variant="shimmer" />
+          <div className="grid grid-cols-1 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

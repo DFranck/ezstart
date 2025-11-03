@@ -20,7 +20,7 @@ import { groupQuotesByMonth, groupQuotesByStatus } from '@/utils/group-quotes'
 import { groupReceiptsByMonth } from '@/utils/group-receipts'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Icon, P } from '@ezstart/ui/components'
+import { Button, Icon, P, Skeleton, SkeletonCard } from '@ezstart/ui/components'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
 
@@ -129,13 +129,35 @@ const ClientDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center w-full">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-ezbill-indigo-400/30 border-t-ezbill-indigo-600 rounded-full animate-spin"></div>
-            <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-company rounded-full opacity-20 animate-pulse"></div>
+      <div className="w-full">
+        {/* Header Skeleton */}
+        <div className="bg-card border-b border-border py-6 px-4">
+          <div className="max-w-7xl mx-auto space-y-4">
+            <Skeleton className="h-10 w-64" variant="shimmer" />
+            <Skeleton className="h-4 w-48" variant="shimmer" />
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-32" variant="shimmer" />
+              <Skeleton className="h-10 w-32" variant="shimmer" />
+            </div>
           </div>
-          <P className="text-foreground/60 font-medium">Loading client dashboard...</P>
+        </div>
+
+        {/* Body Skeleton */}
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6 pt-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" variant="shimmer" />
+            ))}
+          </div>
+
+          {/* Invoices Section */}
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" variant="shimmer" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
+            ))}
+          </div>
         </div>
       </div>
     )

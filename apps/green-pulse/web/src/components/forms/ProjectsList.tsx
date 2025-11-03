@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@ezstart/auth-sdk'
 
 import { useProjects } from '@/hooks/useProjects'
-import { Card, CardContent, H3, P, Badge, Button } from '@ezstart/ui/components'
+import { Card, CardContent, H3, P, Badge, Button, SkeletonCard } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 interface ProjectsListProps {
@@ -16,7 +16,13 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
   const t = useTranslations('forms.projects')
 
   if (isLoading) {
-    return <div>Loading projects...</div>
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} showHeader showFooter={false} lines={3} variant="shimmer" size="lg" />
+        ))}
+      </div>
+    )
   }
 
   if (error) {

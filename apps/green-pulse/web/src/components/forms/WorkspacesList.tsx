@@ -1,7 +1,7 @@
 'use client'
 
 import { useWorkspaces } from '@/hooks/useWorkspaces'
-import { Card, CardContent, CardHeader, H3, P, Badge } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, H3, P, Badge, SkeletonCard } from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@ezstart/auth-sdk'
@@ -18,7 +18,13 @@ export function WorkspacesList() {
   console.log('[WorkspacesList] error:', error)
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
+        ))}
+      </div>
+    )
   }
 
   if (error) {
