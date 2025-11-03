@@ -1,11 +1,22 @@
 import createIntlMiddleware from 'next-intl/middleware'
+import { createAuthMiddleware } from '@ezstart/auth-sdk'
 import { routing } from './i18n/routing'
 
-// TEMPORARY: Disabled auth middleware for localhost development
-// HttpOnly cookies don't work cross-port (localhost:5010 vs localhost:5025)
-// Using localStorage mode instead (useHttpOnlyCookies={false})
-// TODO: Re-enable in production with proper domain setup
-export default createIntlMiddleware(routing)
+// Create i18n middleware
+const intlMiddleware = createIntlMiddleware(routing)
+
+// Create auth middleware with auto-detection
+// - localhost: Automatically uses localStorage mode (no middleware checks)
+// - production *.ezstart.xyz: Uses httpOnly cookies
+// - external domains: Falls back to localStorage with warning
+export default createAuthMiddleware({
+  appName: 'ezbill',
+  authMode: 'httpOnly', // Auto-switches to localStorage in localhost
+  protectedPaths: ['/dashboard', '/clients', '/invoices', '/payments'],
+  locales: routing.locales,
+  defaultLocale: routing.defaultLocale,
+  intlMiddleware,
+})
 
 // Next.js requires a literal object for static analysis at build time
 export const config = {

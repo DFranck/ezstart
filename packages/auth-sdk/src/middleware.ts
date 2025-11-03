@@ -3,7 +3,8 @@
  *
  * Provides centralized authentication middleware that works with:
  * - next-intl for i18n routing
- * - httpOnly cookies for secure auth
+ * - 3 authentication modes (httpOnly, jwt, localStorage)
+ * - Auto-detection based on environment
  * - Dynamic redirects to EZAuth login
  *
  * @example
@@ -13,6 +14,7 @@
  *
  * export default createAuthMiddleware({
  *   appName: 'ezbill',
+ *   authMode: 'httpOnly',  // Auto-switches to localStorage in localhost
  *   protectedPaths: ['/dashboard', '/clients', '/invoices'],
  *   locales: ['en', 'fr'],
  *   defaultLocale: 'en'
@@ -21,13 +23,34 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
+import { getWebUrl, getCurrentEnvironment, isEzstartDomain } from '@ezstart/config/urls'
+
+export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
 
 export interface AuthMiddlewareConfig {
   /**
    * App name (e.g., 'ezbill', 'ezpay', 'tower-defense')
    */
   appName: string
+
+  /**
+   * Authentication mode
+   * - 'httpOnly': For *.ezstart.xyz domains (secure cookies)
+   * - 'jwt': For external domains (JWT validation)
+   * - 'localStorage': For dev/simple apps (client-side token)
+   *
+   * Auto-detection:
+   * - localhost → Always localStorage (regardless of config)
+   * - production → Uses configured mode with validation
+   *
+   * @default 'localStorage'
+   */
+  authMode?: AuthMode
+
+  /**
+   * JWT public key for token validation (required if authMode='jwt')
+   */
+  jwtPublicKey?: string
 
   /**
    * Paths that require authentication (e.g., ['/dashboard', '/settings'])
@@ -64,11 +87,46 @@ export interface AuthMiddlewareConfig {
 }
 
 /**
+ * Determine the actual auth mode to use based on environment and configuration
+ * Same logic as AuthProvider for consistency
+ */
+function resolveAuthMode(
+  configuredMode: AuthMode,
+  hostname: string,
+  env: string
+): AuthMode {
+  // Rule 1: Force localStorage in localhost (skip auth checks entirely)
+  if (env === 'local') {
+    return 'localStorage'
+  }
+
+  // Rule 2: httpOnly on ezstart domain (OK)
+  if (configuredMode === 'httpOnly' && isEzstartDomain(hostname)) {
+    return 'httpOnly'
+  }
+
+  // Rule 3: httpOnly on external domain (fallback)
+  if (configuredMode === 'httpOnly' && !isEzstartDomain(hostname)) {
+    return 'localStorage'
+  }
+
+  // Rule 4: JWT mode
+  if (configuredMode === 'jwt') {
+    return 'jwt'
+  }
+
+  return configuredMode
+}
+
+/**
  * Creates an authentication middleware for Next.js
  *
  * Features:
  * - ✅ Protects specified paths
- * - ✅ Checks httpOnly cookie for auth
+ * - ✅ Auto-detects auth mode based on environment
+ * - ✅ Skips auth checks in localhost (uses localStorage mode)
+ * - ✅ Checks httpOnly cookie in production *.ezstart.xyz
+ * - ✅ Validates JWT for external domains (coming soon)
  * - ✅ Redirects to EZAuth login with return URL
  * - ✅ Works with next-intl i18n
  * - ✅ Preserves original destination after login
@@ -76,6 +134,8 @@ export interface AuthMiddlewareConfig {
 export function createAuthMiddleware(config: AuthMiddlewareConfig) {
   const {
     appName,
+    authMode = 'localStorage',
+    jwtPublicKey,
     protectedPaths,
     locales = ['en', 'fr'],
     defaultLocale = 'en',
@@ -85,6 +145,15 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 
   return function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
+    const currentUrl = request.nextUrl.clone()
+    const hostname = currentUrl.hostname
+
+    // Detect environment
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+    const env = isLocalhost ? 'local' : getCurrentEnvironment()
+
+    // Resolve actual auth mode
+    const resolvedMode = resolveAuthMode(authMode, hostname, env)
 
     // Extract locale from pathname (e.g., /en/dashboard -> en, /dashboard -> null)
     let locale: string | null = null
@@ -112,34 +181,49 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
     })
 
     if (isProtectedPath) {
-      // Check for auth cookie (httpOnly mode)
-      const authCookie = request.cookies.get(cookieName)
-
-      if (!authCookie) {
-        // User not authenticated - redirect to EZAuth login
-        const currentUrl = request.nextUrl.clone()
-        const appOrigin = currentUrl.origin
-
-        // Get EZAuth URL based on environment
-        // IMPORTANT: Middleware runs server-side, so getCurrentEnvironment() may fallback to 'development'
-        // We need to detect localhost from the request hostname
-        const hostname = currentUrl.hostname
-        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-        const env = isLocalhost ? 'local' : getCurrentEnvironment()
-        const ezauthUrl = getWebUrl('ezauth', env)
-
-        // Build redirect URL with original path preserved
-        const redirectUri = `${appOrigin}/auth/callback`
-        const returnTo = pathname // Full path with locale
-        const loginUrl = new URL(`${ezauthUrl}/login`)
-
-        loginUrl.searchParams.set('app', appName)
-        loginUrl.searchParams.set('redirect_uri', redirectUri)
-        if (returnTo !== '/' && returnTo !== `/${locale}`) {
-          loginUrl.searchParams.set('return_to', returnTo) // Preserve original destination
+      // localStorage mode: Skip middleware auth checks (client-side handles auth)
+      // This is automatic in localhost, preventing redirect loops
+      if (resolvedMode === 'localStorage') {
+        // Client-side will handle redirect to login if needed
+        // No middleware auth check required
+        if (intlMiddleware) {
+          return intlMiddleware(request)
         }
+        return NextResponse.next()
+      }
 
-        return NextResponse.redirect(loginUrl)
+      // httpOnly mode: Check cookie
+      if (resolvedMode === 'httpOnly') {
+        const authCookie = request.cookies.get(cookieName)
+
+        if (!authCookie) {
+          // User not authenticated - redirect to EZAuth login
+          const appOrigin = currentUrl.origin
+          const ezauthUrl = getWebUrl('ezauth', env)
+
+          // Build redirect URL with original path preserved
+          const redirectUri = `${appOrigin}/auth/callback`
+          const returnTo = pathname // Full path with locale
+          const loginUrl = new URL(`${ezauthUrl}/login`)
+
+          loginUrl.searchParams.set('app', appName)
+          loginUrl.searchParams.set('redirect_uri', redirectUri)
+          if (returnTo !== '/' && returnTo !== `/${locale}`) {
+            loginUrl.searchParams.set('return_to', returnTo) // Preserve original destination
+          }
+
+          return NextResponse.redirect(loginUrl)
+        }
+      }
+
+      // jwt mode: Validate JWT token
+      if (resolvedMode === 'jwt') {
+        // TODO: Implement JWT validation
+        // For now, skip middleware check (client-side will handle)
+        if (intlMiddleware) {
+          return intlMiddleware(request)
+        }
+        return NextResponse.next()
       }
     }
 
