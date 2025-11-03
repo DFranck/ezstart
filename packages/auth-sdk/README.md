@@ -12,6 +12,16 @@ React SDK for EZAuth centralized authentication system.
 pnpm add @ezstart/auth-sdk
 ```
 
+## Features
+
+- ✅ **Centralized SSO** - Single Sign-On across all @ezstart apps
+- ✅ **httpOnly Cookies** - Secure authentication (XSS protection)
+- ✅ **OAuth2 Flow** - Industry-standard authorization code flow
+- ✅ **Protected Routes** - Next.js middleware for auth-required pages
+- ✅ **TypeScript** - Full type safety
+- ✅ **React Hooks** - Simple `useAuth()` hook
+- ✅ **Auto-Refresh** - Automatic token verification and refresh
+
 ## Quick Start
 
 ### 1. Setup AuthClient
@@ -97,6 +107,138 @@ export default function Dashboard() {
     </div>
   )
 }
+```
+
+## Protected Routes (Next.js Middleware)
+
+### Overview
+
+The SDK provides a **centralized authentication middleware** that protects routes without duplicating code across apps.
+
+**Features:**
+- ✅ Checks httpOnly cookie for auth
+- ✅ Redirects to EZAuth login with return URL
+- ✅ Works with next-intl i18n
+- ✅ Preserves original destination after login
+- ✅ Zero boilerplate per app
+
+### Setup
+
+**1. Create middleware.ts in your app:**
+
+```ts
+// apps/ezbill/web/src/middleware.ts
+import { createAuthMiddleware, authMiddlewareConfig } from '@ezstart/auth-sdk'
+import createIntlMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
+
+// Create i18n middleware
+const intlMiddleware = createIntlMiddleware(routing)
+
+// Create auth middleware with protected paths
+export default createAuthMiddleware({
+  appName: 'ezbill',
+  protectedPaths: ['/dashboard', '/clients', '/invoices', '/settings'],
+  locales: routing.locales,
+  defaultLocale: routing.defaultLocale,
+  intlMiddleware, // Optional: Apply i18n after auth check
+})
+
+export const config = authMiddlewareConfig
+```
+
+**2. Configure AuthProvider with httpOnly cookies:**
+
+```tsx
+// apps/ezbill/web/src/app/[locale]/layout.tsx
+import { AuthProvider } from '@ezstart/auth-sdk'
+
+export default function RootLayout({ children }) {
+  return (
+    <AuthProvider appName="ezbill" useHttpOnlyCookies={true}>
+      {children}
+    </AuthProvider>
+  )
+}
+```
+
+### Configuration Options
+
+```ts
+interface AuthMiddlewareConfig {
+  appName: string                         // Required: 'ezbill', 'ezpay', etc.
+  protectedPaths: string[]                // Required: ['/dashboard', '/settings']
+  locales?: readonly string[]             // Optional: ['en', 'fr'] (default)
+  defaultLocale?: string                  // Optional: 'en' (default)
+  cookieName?: string                     // Optional: 'ezauth_session' (default)
+  intlMiddleware?: (req) => Response      // Optional: next-intl middleware
+}
+```
+
+### How It Works
+
+1. **User visits protected path** (e.g., `/dashboard`)
+2. **Middleware checks cookie** (`ezauth_session`)
+3. **If not authenticated:**
+   - Redirect to `https://ezauth.ezstart.xyz/login`
+   - Pass `app=ezbill`, `redirect_uri=/auth/callback`, `return_to=/dashboard`
+4. **After EZAuth login:**
+   - User redirected to `/auth/callback?code=...`
+   - Token exchanged, cookie set
+   - User redirected back to `/dashboard` (original destination)
+
+### Path Matching
+
+```ts
+protectedPaths: ['/dashboard', '/clients']
+
+// Matches:
+✅ /dashboard
+✅ /dashboard/stats
+✅ /clients
+✅ /clients/123
+✅ /en/dashboard (with locales)
+✅ /fr/clients/456 (with locales)
+
+// Does NOT match:
+❌ /
+❌ /login
+❌ /public
+```
+
+### Examples
+
+**Minimal (no i18n):**
+
+```ts
+export default createAuthMiddleware({
+  appName: 'myapp',
+  protectedPaths: ['/dashboard'],
+})
+```
+
+**With i18n:**
+
+```ts
+const intlMiddleware = createIntlMiddleware(routing)
+
+export default createAuthMiddleware({
+  appName: 'ezbill',
+  protectedPaths: ['/dashboard', '/settings'],
+  locales: ['en', 'fr', 'es'],
+  defaultLocale: 'en',
+  intlMiddleware,
+})
+```
+
+**Custom cookie name:**
+
+```ts
+export default createAuthMiddleware({
+  appName: 'ezpay',
+  protectedPaths: ['/payments'],
+  cookieName: 'custom_auth_session',
+})
 ```
 
 ## API Reference

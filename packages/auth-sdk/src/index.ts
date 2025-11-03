@@ -9,6 +9,10 @@ export type { AuthState, AuthMode } from './store.js'
 // Provider and hooks
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
+// Middleware (Next.js)
+export { createAuthMiddleware, authMiddlewareConfig } from './middleware.js'
+export type { AuthMiddlewareConfig } from './middleware.js'
+
 // Components
 export { AuthCallbackPage } from './auth-callback-page.js'
 export { LoginButton } from './login-button.js'
