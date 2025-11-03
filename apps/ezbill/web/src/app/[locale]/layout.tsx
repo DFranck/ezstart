@@ -1,5 +1,5 @@
 import '@ezstart/ui/globals.css'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ErrorBoundary } from '@ezstart/ui/components'
 import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'

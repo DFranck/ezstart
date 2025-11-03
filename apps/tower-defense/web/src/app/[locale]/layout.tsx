@@ -1,12 +1,10 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
-import { Toaster } from '@ezstart/ui/components'
+import { Toaster, ErrorBoundary } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Script from 'next/script'
-
-import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { GamesSocketProvider } from '@/contexts/GamesSocketContext'
 import { PWAInstallPrompt } from '@ezstart/ui/components'
 

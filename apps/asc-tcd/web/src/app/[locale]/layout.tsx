@@ -1,6 +1,6 @@
 import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
-import { Toaster } from '@ezstart/ui/components'
+import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
@@ -65,9 +65,11 @@ export default async function LocaleLayout(props: {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Providers messages={messages} locale={locale} timeZone={timeZone}>
-          <ClientLayout>{children}</ClientLayout>
-        </Providers>
+        <ErrorBoundary title="Something went wrong in ASC-TCD">
+          <Providers messages={messages} locale={locale} timeZone={timeZone}>
+            <ClientLayout>{children}</ClientLayout>
+          </Providers>
+        </ErrorBoundary>
         <Toaster />
       </body>
     </html>

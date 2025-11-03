@@ -1,6 +1,7 @@
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { Providers } from '@/components/providers'
+import { ErrorBoundary } from '@ezstart/ui/components'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
@@ -47,11 +48,13 @@ export default async function LocaleLayout({ children, params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <Providers>
-            <div className="bg-background text-foreground flex items-center justify-center mx-2 min-h-screen">
-              {children}
-            </div>
-          </Providers>
+          <ErrorBoundary title="Something went wrong in EZAuth">
+            <Providers>
+              <div className="bg-background text-foreground flex items-center justify-center mx-2 min-h-screen">
+                {children}
+              </div>
+            </Providers>
+          </ErrorBoundary>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,6 +1,7 @@
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { PayProvider } from '@ezstart/pay-sdk'
+import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { cn } from '@ezstart/ui/lib'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
@@ -54,14 +55,17 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <AuthProvider appName="fengshui" useHttpOnlyCookies={true}>
-              <PayProvider appName="fengshui">
-                <ClientLayout>{children}</ClientLayout>
-              </PayProvider>
-            </AuthProvider>
-          </ThemeProvider>
+          <ErrorBoundary title="Something went wrong in FengShui">
+            <ThemeProvider>
+              <AuthProvider appName="fengshui" useHttpOnlyCookies={true}>
+                <PayProvider appName="fengshui">
+                  <ClientLayout>{children}</ClientLayout>
+                </PayProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </ErrorBoundary>
         </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   )
