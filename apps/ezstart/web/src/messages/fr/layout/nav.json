@@ -20,8 +20,8 @@
     {
       "menuLabel": "Applications",
       "menu": [
-        { "label": "EZBill", "href": "https://ezstart-ezbill.vercel.app/" },
-        { "label": "EZFengShui", "href": "https://ezfengshui.vercel.app/" },
+        { "label": "EZBill", "href": "https://ezbill.ezstart.xyz" },
+        { "label": "FengShui", "href": "https://ezfengshui.ezstart.xyz" },
         { "label": "GreenPulse", "href": "https://www.ai-greenpulse.com/" }
       ]
     }
