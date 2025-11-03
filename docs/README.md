@@ -8,23 +8,32 @@ Welcome to the centralized documentation for the @ezstart monorepo.
 
 ```
 docs/
-├── README.md              # This file (documentation index)
-├── AI-AGENT-CYCLE.md      # 🤖 Cycle d'amélioration continue pour agents IA
-└── audits/                # All audit reports
+├── 00-START-HERE.md       # 🚀 Navigation guide (START HERE!)
+├── README.md              # 📊 This file (audit dashboard)
+│
+├── ai-agents/             # 🤖 Pour agents IA
+│   ├── QUICK-REF.md      # Référence rapide (5 min)
+│   ├── CYCLE.md          # Cycle d'amélioration (15 min)
+│   └── EXAMPLES.md       # Exemples concrets (20 min)
+│
+├── guides/                # 📚 Guides pratiques
+│   ├── TESTING.md        # Stratégie de tests
+│   ├── CI-CD-SETUP.md    # Infrastructure as Code
+│   ├── AUDIT-GUIDE.md    # Comment auditer
+│   └── VSCODE-SETUP.md   # Setup IDE
+│
+├── reference/             # 📖 Documentation de référence
+│   ├── ROADMAP.md        # Roadmap Phase 3
+│   ├── AUDIT-SUMMARY.md  # Executive summary
+│   ├── CLAUDE-ARCHIVE.md # Historique complet
+│   ├── PAGE-STRUCTURE.md # Best practices UI
+│   └── ADAPTIVE-MONITORING.md # Monitoring patterns
+│
+└── audits/                # 🔍 16 audits détaillés
     ├── SECURITY-AUDIT.md
     ├── PERFORMANCE-AUDIT.md
     ├── ARCHITECTURE-AUDIT.md
-    ├── CODE-QUALITY-AUDIT.md
-    ├── DEPENDENCIES-AUDIT.md
-    ├── ACCESSIBILITY-AUDIT.md
-    ├── INFRASTRUCTURE-AUDIT.md
-    ├── API-AUDIT.md
-    ├── SEO-AUDIT.md
-    ├── WEB-APPS-AUDIT.md
-    ├── TESTING-AUDIT.md
-    ├── UX-AUDIT.md
-    ├── I18N-AUDIT.md
-    └── MONITORING-AUDIT.md
+    └── ... (13 autres)
 ```
 
 ---
@@ -358,28 +367,37 @@ When updating an audit:
 
 ## 📚 Additional Documentation
 
-### For AI Agents
-- 🤖 **[AI-AGENT-CYCLE.md](./AI-AGENT-CYCLE.md)** - Cycle d'amélioration continue ⭐⭐⭐
-  - Comment identifier les problèmes
-  - Comment planifier les solutions
-  - Comment documenter pour prévenir les régressions
-  - Comment mesurer l'impact
-  - Exemples concrets et checklists complètes
+### 🚀 Navigation
+- **[00-START-HERE.md](./00-START-HERE.md)** - Guide navigation complet ⭐⭐⭐
+  - Par rôle (Développeur, Agent IA, Manager, DevOps, QA)
+  - Par besoin (démarrer, tester, déployer, améliorer)
+  - Ordre de lecture recommandé
 
-### Audit Documentation
-- **[AUDIT-GUIDE.md](./AUDIT-GUIDE.md)** - Complete guide to auditing your monorepo ⭐
-- [audits/](./audits/) - Individual audit templates
+### 🤖 For AI Agents
+- **[ai-agents/QUICK-REF.md](./ai-agents/QUICK-REF.md)** - Référence rapide (5 min) ⭐⭐⭐
+- **[ai-agents/CYCLE.md](./ai-agents/CYCLE.md)** - Cycle d'amélioration (15 min) ⭐⭐
+- **[ai-agents/EXAMPLES.md](./ai-agents/EXAMPLES.md)** - Exemples concrets (20 min) ⭐
 
-### Testing Documentation
-- **[TESTING-STRATEGY-V2.md](./TESTING-STRATEGY-V2.md)** - Phase 3 testing strategy ⭐
-- **[IMPROVEMENT-ROADMAP.md](./IMPROVEMENT-ROADMAP.md)** - Roadmap to 85/100 score
+### 📚 Guides
+- **[guides/TESTING.md](./guides/TESTING.md)** - Stratégie de tests (322 tests) ⭐
+- **[guides/CI-CD-SETUP.md](./guides/CI-CD-SETUP.md)** - Infrastructure as Code
+- **[guides/AUDIT-GUIDE.md](./guides/AUDIT-GUIDE.md)** - Comment auditer
+- **[guides/VSCODE-SETUP.md](./guides/VSCODE-SETUP.md)** - Setup IDE
 
-### Root Level Docs
-- [CLAUDE.md](../CLAUDE.md) - Guide for Claude AI development
-- [DEPLOY.md](../DEPLOY.md) - Deployment guide (Railway & Vercel)
+### 📖 Reference
+- **[reference/ROADMAP.md](./reference/ROADMAP.md)** - Roadmap Phase 3 (84.8 → 100/100)
+- **[reference/AUDIT-SUMMARY.md](./reference/AUDIT-SUMMARY.md)** - Executive summary
+- **[reference/CLAUDE-ARCHIVE.md](./reference/CLAUDE-ARCHIVE.md)** - Historique complet (4600+ lignes)
+- **[reference/PAGE-STRUCTURE.md](./reference/PAGE-STRUCTURE.md)** - Best practices UI
+- **[reference/ADAPTIVE-MONITORING.md](./reference/ADAPTIVE-MONITORING.md)** - Monitoring patterns
+
+### 🏠 Root Level Docs
+- [CLAUDE.md](../CLAUDE.md) - Vue d'ensemble du monorepo
+- [DEV-RULES.md](../DEV-RULES.md) - Règles de développement
+- [DEPLOY.md](../DEPLOY.md) - Guide de déploiement
 - [README.md](../README.md) - Monorepo overview
 
-### Package READMEs
+### 📦 Package READMEs
 Each package in `packages/` has its own README with:
 - Installation instructions
 - Configuration

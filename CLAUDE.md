@@ -8,18 +8,24 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ## 📚 Documentation Essentielle
 
-**Lire en premier :**
-- ⚡ **[docs/AI-AGENT-QUICK-REF.md](./docs/AI-AGENT-QUICK-REF.md)** - ⭐⭐⭐ Référence rapide agents IA (5 min)
-- 🤖 **[docs/AI-AGENT-CYCLE.md](./docs/AI-AGENT-CYCLE.md)** - ⭐⭐ Cycle d'amélioration continue (15 min)
+**Navigation :**
+
+- 🚀 **[docs/00-START-HERE.md](./docs/00-START-HERE.md)** - ⭐⭐⭐ Guide navigation complet
 - 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ Règles de développement obligatoires
-- 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complets)
-- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
-- 🧪 [docs/TESTING.md](./docs/TESTING.md) - Stratégie de tests
+- 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (Score: 84.8/100)
+- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement (Railway/Vercel/Oracle)
+
+**Pour agents IA :**
+
+- ⚡ [docs/ai-agents/QUICK-REF.md](./docs/ai-agents/QUICK-REF.md) - Référence rapide (5 min)
+- 🤖 [docs/ai-agents/CYCLE.md](./docs/ai-agents/CYCLE.md) - Cycle d'amélioration (15 min)
+- 🎯 [docs/ai-agents/EXAMPLES.md](./docs/ai-agents/EXAMPLES.md) - Exemples concrets (20 min)
 
 **Documentation détaillée :**
-- 🗂️ [docs/CLAUDE-ARCHIVE.md](./docs/CLAUDE-ARCHIVE.md) - Historique complet (4600+ lignes)
-- 🎯 [docs/ROADMAP.md](./docs/ROADMAP.md) - Roadmap vers 100/100
-- 📄 [docs/AUDIT-SUMMARY.md](./docs/AUDIT-SUMMARY.md) - Résumé des audits
+
+- 🗂️ [docs/reference/CLAUDE-ARCHIVE.md](./docs/reference/CLAUDE-ARCHIVE.md) - Historique complet (4600+ lignes)
+- 🎯 [docs/reference/ROADMAP.md](./docs/reference/ROADMAP.md) - Roadmap vers 100/100
+- 📄 [docs/reference/AUDIT-SUMMARY.md](./docs/reference/AUDIT-SUMMARY.md) - Résumé des audits
 
 ---
 
@@ -27,17 +33,17 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ### Scores par Catégorie
 
-| Catégorie | Score | Status |
-|-----------|-------|--------|
-| **Tests** | 100/100 | ✅ Excellent |
-| **TypeCheck** | 100/100 | ✅ Excellent |
-| **Databases** | 100/100 | ✅ Excellent |
-| **Architecture** | 95/100 | ✅ Excellent |
-| **Security** | 95/100 | ✅ Excellent |
-| **Documentation** | 90/100 | ✅ Very Good |
-| **Performance** | 75/100 | ⚠️ Good |
-| **Accessibility** | 76/100 | ⚠️ Good |
-| **UX** | 70/100 | ⚠️ Good |
+| Catégorie         | Score   | Status       |
+| ----------------- | ------- | ------------ |
+| **Tests**         | 100/100 | ✅ Excellent |
+| **TypeCheck**     | 100/100 | ✅ Excellent |
+| **Databases**     | 100/100 | ✅ Excellent |
+| **Architecture**  | 95/100  | ✅ Excellent |
+| **Security**      | 95/100  | ✅ Excellent |
+| **Documentation** | 90/100  | ✅ Very Good |
+| **Performance**   | 75/100  | ⚠️ Good      |
+| **Accessibility** | 76/100  | ⚠️ Good      |
+| **UX**            | 70/100  | ⚠️ Good      |
 
 **Audits disponibles :** [docs/audits/](./docs/audits/) (16 fichiers)
 
@@ -67,22 +73,22 @@ pnpm dev:status
 
 ### Ports des Services
 
-| Service | Type | Port | URL |
-|---------|------|------|-----|
-| **EZStart** | API | 5000 | http://localhost:5000 |
-| **EZAuth** | API | 5010 | http://localhost:5010 |
-| **EZBill** | API | 5020 | http://localhost:5020 |
-| **EZPay** | API | 5040 | http://localhost:5040 |
-| **Tower Defense** | API | 5030 | http://localhost:5030 |
-| **GreenPulse** | API | 5070 | http://localhost:5070 |
-| **EZStart** | Web | 5005 | http://localhost:5005 |
-| **EZAuth** | Web | 5015 | http://localhost:5015 |
-| **EZBill** | Web | 5025 | http://localhost:5025 |
-| **EZPay** | Web | 5045 | http://localhost:5045 |
-| **Tower Defense** | Web | 5035 | http://localhost:5035 |
-| **FengShui** | Web | 5065 | http://localhost:5065 |
-| **ASC-TCD** | Web | 5055 | http://localhost:5055 |
-| **GreenPulse** | Web | 5075 | http://localhost:5075 |
+| Service           | Type | Port | URL                   |
+| ----------------- | ---- | ---- | --------------------- |
+| **EZStart**       | API  | 5000 | http://localhost:5000 |
+| **EZAuth**        | API  | 5010 | http://localhost:5010 |
+| **EZBill**        | API  | 5020 | http://localhost:5020 |
+| **EZPay**         | API  | 5040 | http://localhost:5040 |
+| **Tower Defense** | API  | 5030 | http://localhost:5030 |
+| **GreenPulse**    | API  | 5070 | http://localhost:5070 |
+| **EZStart**       | Web  | 5005 | http://localhost:5005 |
+| **EZAuth**        | Web  | 5015 | http://localhost:5015 |
+| **EZBill**        | Web  | 5025 | http://localhost:5025 |
+| **EZPay**         | Web  | 5045 | http://localhost:5045 |
+| **Tower Defense** | Web  | 5035 | http://localhost:5035 |
+| **FengShui**      | Web  | 5065 | http://localhost:5065 |
+| **ASC-TCD**       | Web  | 5055 | http://localhost:5055 |
+| **GreenPulse**    | Web  | 5075 | http://localhost:5075 |
 
 ---
 
@@ -157,13 +163,14 @@ pnpm dev:status
 
 ```tsx
 // ❌ Hardcodé
-className="bg-gray-100 text-gray-900"
+className = 'bg-gray-100 text-gray-900'
 
 // ✅ Sémantique
-className="bg-card text-foreground"
+className = 'bg-card text-foreground'
 ```
 
 **Palette sémantique :**
+
 - Background: `bg-background`, `bg-card`, `bg-muted`
 - Text: `text-foreground`, `text-muted-foreground`
 - Primary: `bg-primary`, `text-primary-foreground`
@@ -190,11 +197,13 @@ Layer 1: Primitives & Base
 ```
 
 **Quand utiliser chaque layer:**
+
 - **Layer 1:** Cas complexes avec layouts customs
 - **Layer 2:** 90% des cas standards
 - **Layer 3:** Patterns métier spécifiques
 
 **Pourquoi ne PAS merger les composants:**
+
 - ✅ PasswordInput = composition d'Input (pattern correct)
 - ✅ Modal ≠ Dialog (niveaux d'abstraction différents)
 - ✅ Suit les standards industrie (shadcn/ui, Radix UI)
@@ -210,6 +219,7 @@ Layer 1: Primitives & Base
 Tous les projets utilisent `@ezstart/typescript-config`
 
 **Variantes disponibles :**
+
 - `base.json` - Configuration de base
 - `api.json` - APIs Express
 - `nextjs.json` - Apps Next.js
@@ -283,11 +293,12 @@ Tous les APIs utilisent `createVitestConfig({ dbName })`
 import { createVitestConfig } from '@ezstart/test-utils'
 
 export default createVitestConfig({
-  dbName: 'ezauth'  // Database name pour isolation
+  dbName: 'ezauth', // Database name pour isolation
 })
 ```
 
 **Triple protection :**
+
 1. ✅ `NODE_ENV=test` forcé
 2. ✅ `MONGO_URL` fallback localhost (JAMAIS production)
 3. ✅ `.env.test` optionnel chargé automatiquement
@@ -301,22 +312,25 @@ export default createVitestConfig({
 ### Plateformes
 
 **Oracle Cloud Free Tier (TOUTES les APIs - GRATUIT) :**
-- EZAuth API - https://ezauth.ezstart.xyz
-- EZPay API - https://ezpay.ezstart.xyz
-- EZBill API - https://ezbill.ezstart.xyz
-- Tower Defense API - https://td-api.ezstart.xyz
-- GreenPulse API - https://greenpulse.ezstart.xyz
-- Monitoring API - https://monitoring.ezstart.xyz
+
+- EZAuth API - https://ezauth-api.up.railway.app
+- EZPay API - https://ezpay-api.up.railway.app
+- EZBill API - https://ezbill-api.up.railway.app
+- Tower Defense API -
+- GreenPulse API - https://greenpulse-api.up.railway.app
+- EZStart API - https://ezstart-api.up.railway.app
 
 **Ressources :** 1x VM ARM (4 cores, 24GB RAM, 200GB storage) - GRATUIT À VIE
 
 **Vercel (Web Apps) :**
+
 - EZStart - https://www.ezstart.xyz
 - Toutes les autres apps
 
 ### Infrastructure as Code
 
 Fichiers de configuration :
+
 - [docker-compose.yml](./docker-compose.yml) - Orchestration Docker (6 APIs)
 - [nginx/nginx.conf](./nginx/nginx.conf) - Reverse proxy et SSL
 - [.env.oracle.example](./.env.oracle.example) - Template variables Oracle
@@ -325,10 +339,12 @@ Fichiers de configuration :
 - `apps/*/web/vercel.json` - Configuration Vercel
 
 **Anciennes configs (deprecated) :**
+
 - [railway.toml](./railway.toml) - Configuration Railway (ancien)
 - [render.yaml](./render.yaml) - Configuration Render (ancien)
 
 **Documentation complète :**
+
 - [docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md) - Guide Oracle complet
 - [DEPLOY.md](./DEPLOY.md) - Vue d'ensemble déploiement
 - [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
@@ -343,6 +359,7 @@ Fichiers de configuration :
 ✅ **TOUJOURS** mettre à jour README des packages modifiés
 
 ❌ **JAMAIS** ajouter ces lignes :
+
 ```
 🤖 Generated with [Claude Code](...)
 Co-Authored-By: Claude <noreply@anthropic.com>
@@ -400,6 +417,7 @@ pnpm typecheck
 ### Audits Détaillés
 
 **16 audits disponibles :** [docs/audits/](./docs/audits/)
+
 - Security, Performance, Architecture, Code Quality
 - Dependencies, Accessibility, Infrastructure, API
 - SEO, Web Apps, Testing, UX, i18n, Monitoring
@@ -417,6 +435,7 @@ pnpm typecheck
 **Objectif :** Excellence (95 → 100/100)
 
 **Focus sur 5 domaines :**
+
 1. **UX Excellence** (70 → 90) - Loading states, error handling, mobile UX
 2. **Performance** (75 → 90) - Bundle optimization, images WebP/AVIF
 3. **Accessibility** (76 → 95) - ARIA attributes, keyboard navigation
