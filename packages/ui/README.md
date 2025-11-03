@@ -442,6 +442,140 @@ function UsersList() {
 - Form initialization
 - Image loading placeholders
 
+#### ErrorBoundary
+
+**Universal error boundary for catching React errors**
+
+```tsx
+import { ErrorBoundary } from '@ezstart/ui/components'
+
+// Basic usage
+<ErrorBoundary>
+  <MyComponent />
+</ErrorBoundary>
+
+// With custom title and description
+<ErrorBoundary
+  title="Something went wrong in MyApp"
+  description="Don't worry, your data is safe. Please try again."
+>
+  <MyApp />
+</ErrorBoundary>
+
+// With Sentry integration
+<ErrorBoundary
+  onError={(error, errorInfo) => {
+    Sentry.captureException(error, { extra: errorInfo })
+  }}
+  onReset={() => {
+    // Optional: cleanup before retry
+  }}
+>
+  <MyComponent />
+</ErrorBoundary>
+
+// Full page variant (for root layouts)
+<ErrorBoundary variant="full" maxRetries={3}>
+  <App />
+</ErrorBoundary>
+
+// Minimal variant (inline)
+<ErrorBoundary variant="minimal" showResetButton={false}>
+  <Widget />
+</ErrorBoundary>
+```
+
+**Real-world usage in app layouts:**
+
+```tsx
+// apps/myapp/web/src/app/[locale]/layout.tsx
+import { ErrorBoundary } from '@ezstart/ui/components'
+
+export default function Layout({ children }) {
+  return (
+    <html>
+      <body>
+        <ErrorBoundary
+          title="Something went wrong in MyApp"
+          onError={(error, errorInfo) => {
+            // Auto-send to monitoring service
+            Sentry.captureException(error, { extra: errorInfo })
+          }}
+        >
+          <Providers>
+            {children}
+          </Providers>
+        </ErrorBoundary>
+        <Toaster />
+      </body>
+    </html>
+  )
+}
+```
+
+**Variants:**
+
+| Variant | Description | Use Case |
+|---------|-------------|----------|
+| `default` | Inline card with icon and details | Component-level errors |
+| `minimal` | Icon + text + button only | Small widgets, sidebars |
+| `full` | Full-page centered card | Root layouts, critical errors |
+
+**Props:**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Components to wrap (required) |
+| `fallback` | `ReactNode \| Function` | - | Custom fallback UI |
+| `title` | `string` | "Something went wrong" | Error title |
+| `description` | `string` | "We encountered..." | Error description |
+| `showResetButton` | `boolean` | `true` | Show "Try Again" button |
+| `showDetails` | `boolean` | `dev only` | Show technical error details |
+| `onError` | `Function` | - | Callback for logging (Sentry) |
+| `onReset` | `Function` | - | Callback after retry |
+| `className` | `string` | - | Custom container className |
+| `variant` | `'default' \| 'minimal' \| 'full'` | `'default'` | Visual variant |
+| `maxRetries` | `number` | `3` | Max retry attempts |
+
+**Features:**
+
+- **Auto-detection:** Shows stack trace in dev, user-friendly messages in prod
+- **Retry mechanism:** "Try Again" button with attempt counter (1/3, 2/3, 3/3)
+- **Max retries:** After 3 attempts, shows permanent error with "Reload Page" option
+- **Accessibility:** Full ARIA support (`role="alert"`, `aria-live="assertive"`)
+- **Sentry integration:** Via `onError` callback for automatic error reporting
+- **Customizable:** Custom titles, descriptions, and complete fallback UI
+
+**Best Practices:**
+
+- Use `variant="full"` in root layouts for app-level errors
+- Use `variant="default"` for component-level errors
+- Use `variant="minimal"` for small UI components (widgets, cards)
+- Always provide `onError` callback for production error tracking
+- Set custom `title` to identify which app/feature failed
+- Keep `maxRetries={3}` to prevent infinite error loops
+
+**Development vs Production:**
+
+```tsx
+// In development
+- Shows full error stack trace
+- Technical details visible by default
+- Console logs errors
+
+// In production
+- User-friendly error messages
+- Stack trace hidden (can toggle via showDetails)
+- Only shows via onError callback
+```
+
+**Use Cases:**
+- Root app layouts (catch all errors)
+- Critical user flows (checkout, payment)
+- Data-heavy components (dashboards, reports)
+- Third-party integrations (maps, charts)
+- Complex forms with validation
+
 #### Dropdown
 
 **100% Configurable menu with custom triggers**
