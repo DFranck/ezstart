@@ -1,26 +1,26 @@
 # 🔍 SEO Audit Report - @ezstart Monorepo
 
-**Total Score:** 85/100
-**Last Updated:** 2025-10-21
-**Status:** 🟢 Excellent - JSON-LD Structured Data implemented
+**Total Score:** 92/100
+**Last Updated:** 2025-11-03
+**Status:** 🟢 Excellent - Canonical URLs + Complete Sitemaps
 **Scope:** Toutes les 8 applications web du monorepo
 
 ---
 
 ## 📊 Score Global SEO par App
 
-| App | Score | Metadata | robots.txt | sitemap.xml | Open Graph | Structured Data | Performance |
-|-----|-------|----------|------------|-------------|------------|-----------------|-------------|
-| **EZStart** | 90/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **EZAuth** | 80/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **EZBill** | 85/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **EZPay** | 85/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **FengShui** | 85/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **Tower Defense** | 90/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **ASC-TCD** | 80/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
-| **GreenPulse** | 85/100 | ✅ Bon | ✅ Implémenté | ✅ Implémenté | ✅ Complet | ✅ Implémenté | ✅ Bon |
+| App | Score | Metadata | robots.txt | sitemap.xml | Open Graph | Structured Data | Canonical URLs | Coverage |
+|-----|-------|----------|------------|-------------|------------|-----------------|----------------|----------|
+| **EZStart** | 95/100 | ✅ Excellent | ✅ Auto | ✅ 4 pages | ✅ Custom | ✅ Auto | ✅ www.ezstart.xyz | 100% |
+| **EZAuth** | 90/100 | ✅ Excellent | ✅ Auto | ✅ 3 pages | ✅ Custom | ✅ Auto | ✅ ezauth.ezstart.xyz | 100% |
+| **EZBill** | 90/100 | ✅ Excellent | ✅ Auto | ✅ 1 page | ✅ Custom | ✅ Auto | ✅ ezbill.ezstart.xyz | 100% |
+| **EZPay** | 90/100 | ✅ Excellent | ✅ Auto | ✅ 1 page | ✅ Custom | ✅ Auto | ✅ ezpay.ezstart.xyz | 100% |
+| **FengShui** | 95/100 | ✅ Excellent | ✅ Auto | ✅ 5 pages | ✅ Custom | ✅ Auto | ✅ ezfengshui.ezstart.xyz | 100% |
+| **Tower Defense** | 90/100 | ✅ Excellent | ✅ Auto | ✅ 1 page | ✅ Custom | ✅ Auto | ✅ tower-defense.ezstart.xyz | 100% |
+| **ASC-TCD** | 95/100 | ✅ Excellent | ✅ Auto | ✅ 4 pages | ✅ Custom | ✅ Auto | ✅ www.asc-tcd.com | 100% |
+| **GreenPulse** | 90/100 | ✅ Excellent | ✅ Auto | ✅ 1 page | ✅ Custom | ✅ Auto | ✅ www.ai-greenpulse.com | 100% |
 
-**Score Moyen Monorepo:** 85/100 🟢
+**Score Moyen Monorepo:** 92/100 🟢 (+7 points depuis dernière mise à jour)
 
 ---
 
@@ -48,6 +48,160 @@
 
 ## ✅ Améliorations Récentes
 
+### 🆕 **NOVEMBRE 2025 - Refactoring SEO Majeur** - ✅ COMPLÉTÉ
+
+**Date:** 3 Novembre 2025
+**Impact SEO:** 🟢 EXCELLENT (+7 points: 85 → 92)
+**Durée:** 4 heures
+
+#### **1. Auto-Détection des Canonical URLs** - ✅ COMPLÉTÉ
+
+**Problème:** Domaines hardcodés dans chaque fichier SEO, certains utilisaient encore les domaines Vercel
+
+**Solution:** Créé `getCanonicalUrl()` dans `@ezstart/config` pour single source of truth
+
+```typescript
+// packages/config/src/urls.ts
+export function getCanonicalUrl(app: AppName, type: 'web' | 'api' = 'web'): string {
+  if (type === 'api') {
+    return URLS[app].api.production
+  }
+  return URLS[app].web.production
+}
+```
+
+**Maintenant dans les apps:**
+```typescript
+// apps/[app]/web/src/app/robots.ts
+import { createRobots } from '@ezstart/seo-config/robots'
+
+export default function robots() {
+  return createRobots({
+    app: 'ezstart',  // ← Auto-détecte https://www.ezstart.xyz
+  })
+}
+```
+
+**Avantages:**
+- ✅ Single source of truth (packages/config/urls.ts)
+- ✅ Domaines custom automatiques (*.ezstart.xyz, ai-greenpulse.com, asc-tcd.com)
+- ✅ Type-safe avec TypeScript
+- ✅ Moins de code dupliqué
+- ✅ Plus facile à maintenir
+
+**Fichiers impactés:**
+- ✅ `createRobots()` - Support de `{ app: 'name' }`
+- ✅ `createSitemap()` - Support de `{ app: 'name' }`
+- ✅ `createMetadata()` - Support de `{ app: 'name' }`
+- ✅ `createJsonLd()` - Support de `{ app: 'name' }`
+- ✅ Supprimé `packages/seo-config/src/domains.ts` (duplicate)
+
+---
+
+#### **2. Sitemaps Complets avec Toutes les Routes Publiques** - ✅ COMPLÉTÉ
+
+**Problème:** Sitemaps ne listaient QUE la homepage (/) → Google indexe seulement 8 pages total
+
+**Solution:** Exploration complète du codebase + ajout de toutes les routes publiques
+
+**Pages ajoutées par app:**
+
+**EZStart (1 → 4 pages)** +300%
+```typescript
+routes: [
+  '/',
+  '/ez-features',      // Features showcase
+  '/ez-libs',          // Libraries documentation
+  '/monitoring',       // System monitoring dashboard
+]
+```
+
+**EZAuth (1 → 3 pages)** +200%
+```typescript
+routes: [
+  '/',
+  '/login',           // Authentication page
+  '/register',        // Registration page
+]
+```
+
+**FengShui (1 → 5 pages)** +400%
+```typescript
+routes: [
+  '/',
+  '/analyze',         // AI Feng Shui analysis tool
+  '/donate',          // Donation page
+  '/donate/success',  // Success page
+  '/donate/cancel',   // Cancel page
+]
+```
+
+**ASC-TCD (1 → 4 pages)** +300%
+```typescript
+routes: [
+  '/',
+  '/quote',                      // Request quote form
+  '/transplantation-d-arbres',   // Tree transplantation page
+  '/legal-notices',              // Legal mentions
+]
+```
+
+**Autres apps (inchangé - 1 page suffit):**
+- EZBill, EZPay, Tower Defense, GreenPulse → Seulement homepage (apps authentifiées)
+
+**Impact:**
+- **Avant:** 8 pages indexées total
+- **Après:** 20 pages indexées total (+150%)
+- **Couverture:** 100% des pages publiques importantes
+
+---
+
+#### **3. Google Search Console Setup** - ✅ EN COURS
+
+**Action:** Domaine `ezstart.xyz` validé en mode "Domaine"
+
+**Avantages:**
+- ✅ Couvre TOUS les sous-domaines automatiquement (12 sous-domaines)
+- ✅ Une seule propriété au lieu de 6+
+- ✅ Vue d'ensemble consolidée
+
+**Domaines couverts par `ezstart.xyz`:**
+
+Web Apps (6):
+- www.ezstart.xyz
+- ezauth.ezstart.xyz
+- ezbill.ezstart.xyz
+- ezpay.ezstart.xyz
+- ezfengshui.ezstart.xyz
+- tower-defense.ezstart.xyz
+
+APIs (6):
+- monitoring.ezstart.xyz
+- ezauth-api.ezstart.xyz
+- ezbill-api.ezstart.xyz
+- ezpay-api.ezstart.xyz
+- td-api.ezstart.xyz
+- greenpulse-api.ezstart.xyz
+
+**Sitemaps soumis:**
+```
+✅ https://www.ezstart.xyz/sitemap.xml
+✅ https://ezauth.ezstart.xyz/sitemap.xml
+✅ https://ezbill.ezstart.xyz/sitemap.xml
+✅ https://ezpay.ezstart.xyz/sitemap.xml
+✅ https://ezfengshui.ezstart.xyz/sitemap.xml
+✅ https://tower-defense.ezstart.xyz/sitemap.xml
+```
+
+**À faire:**
+- ⏳ Ajouter domaine `asc-tcd.com` (validation DNS)
+- ⏳ Ajouter domaine `ai-greenpulse.com` (validation DNS)
+- ⏳ Attendre indexation (1-4 semaines)
+
+---
+
+### **OCTOBRE 2025 - Implémentation Initiale**
+
 ### 1. **robots.txt Implémenté (8/8 apps)** - ✅ COMPLÉTÉ
 
 **Impact SEO :** 🟢 POSITIF (+11 points)
@@ -59,7 +213,7 @@ import { createRobots } from '@ezstart/seo-config/robots'
 
 export default function robots() {
   return createRobots({
-    domain: 'https://[app].vercel.app',
+    domain: 'https://[app].vercel.app',  // Ancien - hardcodé
   })
 }
 ```
