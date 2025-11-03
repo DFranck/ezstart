@@ -285,6 +285,23 @@ export function getCurrentEnvironment(): Environment {
 }
 
 /**
+ * Check if a hostname belongs to ezstart domain
+ * Useful for auth mode validation
+ *
+ * @example
+ * isEzstartDomain('ezbill.ezstart.xyz') // true
+ * isEzstartDomain('app-externe.com') // false
+ * isEzstartDomain('localhost') // false
+ */
+export function isEzstartDomain(hostname: string): boolean {
+  return (
+    hostname.endsWith('.ezstart.xyz') ||
+    hostname === 'ezstart.xyz' ||
+    hostname === 'www.ezstart.xyz'
+  )
+}
+
+/**
  * Get web URL for an app in the current environment
  */
 export function getWebUrl(app: AppName, env?: Environment): string {

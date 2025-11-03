@@ -43,7 +43,7 @@ export function isDevelopment(): boolean {
 }
 
 // Re-export for convenience
-export { getCurrentEnvironment }
+export { getCurrentEnvironment, isEzstartDomain } from './urls.js'
 
 // Import URLS for use in this file
 import { URLS } from './urls.js'
