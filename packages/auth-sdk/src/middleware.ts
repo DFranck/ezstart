@@ -121,7 +121,11 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
         const appOrigin = currentUrl.origin
 
         // Get EZAuth URL based on environment
-        const env = getCurrentEnvironment()
+        // IMPORTANT: Middleware runs server-side, so getCurrentEnvironment() may fallback to 'development'
+        // We need to detect localhost from the request hostname
+        const hostname = currentUrl.hostname
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+        const env = isLocalhost ? 'local' : getCurrentEnvironment()
         const ezauthUrl = getWebUrl('ezauth', env)
 
         // Build redirect URL with original path preserved
