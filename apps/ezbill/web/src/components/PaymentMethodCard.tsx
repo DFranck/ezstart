@@ -57,12 +57,12 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
 
         {paymentMethod.type === 'bank_transfer' && (
           <p className="text-muted-foreground/80 text-sm line-clamp-1">
-            {paymentMethod.bankName}
+            {paymentMethod.bankName} • {paymentMethod.iban}
           </p>
         )}
 
-        {['paypal', 'wise', 'revolut'].includes(paymentMethod.type) && (
-          <p className="text-muted-foreground/80 text-sm line-clamp-1">{paymentMethod.email}</p>
+        {paymentMethod.type === 'cash' && (
+          <p className="text-muted-foreground/80 text-sm line-clamp-1">Cash payment</p>
         )}
 
         {/* Floating Actions */}

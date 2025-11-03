@@ -66,12 +66,6 @@ export function convertToInvoicePDFData(
               swift: paymentMethod.type === 'bank_transfer' ? paymentMethod.swift : undefined,
               routingNumber:
                 paymentMethod.type === 'bank_transfer' ? paymentMethod.routingNumber : undefined,
-              email: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type)
-                ? paymentMethod.email
-                : undefined,
-              username: ['paypal', 'wise', 'revolut'].includes(paymentMethod.type)
-                ? paymentMethod.username
-                : undefined,
               instructions: paymentMethod.instructions,
             }
           })()

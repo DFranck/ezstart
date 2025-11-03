@@ -128,7 +128,7 @@ The SDK provides a **centralized authentication middleware** that protects route
 
 ```ts
 // apps/ezbill/web/src/middleware.ts
-import { createAuthMiddleware, authMiddlewareConfig } from '@ezstart/auth-sdk'
+import { createAuthMiddleware } from '@ezstart/auth-sdk'
 import createIntlMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -144,7 +144,10 @@ export default createAuthMiddleware({
   intlMiddleware, // Optional: Apply i18n after auth check
 })
 
-export const config = authMiddlewareConfig
+// IMPORTANT: Next.js requires a literal object for static analysis
+export const config = {
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
+}
 ```
 
 **2. Configure AuthProvider with httpOnly cookies:**

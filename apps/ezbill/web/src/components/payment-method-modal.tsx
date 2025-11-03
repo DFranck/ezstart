@@ -20,6 +20,25 @@ import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
+// Flexible form state (all fields optional during editing)
+type PaymentMethodFormData = {
+  userId: string
+  name: string
+  type: PaymentMethodType
+  isDefault: boolean
+  instructions?: string
+  // Bank transfer fields
+  iban?: string
+  swift?: string
+  bankName?: string
+  accountNumber?: string
+  routingNumber?: string
+  // Crypto fields
+  walletAddress?: string
+  network?: string
+  currency?: string
+}
+
 interface PaymentMethodModalProps {
   isOpen: boolean
   onClose: () => void
@@ -30,11 +49,7 @@ interface PaymentMethodModalProps {
 const paymentMethodTypes = [
   { value: 'bank_transfer', label: 'Bank Transfer', icon: 'lucide:Building' },
   { value: 'crypto_wallet', label: 'Crypto Wallet', icon: 'lucide:Wallet' },
-  { value: 'paypal', label: 'PayPal', icon: 'lucide:CreditCard' },
-  { value: 'stripe', label: 'Stripe', icon: 'lucide:CreditCard' },
-  { value: 'wise', label: 'Wise (TransferWise)', icon: 'lucide:Send' },
-  { value: 'revolut', label: 'Revolut', icon: 'lucide:Smartphone' },
-  { value: 'other', label: 'Other', icon: 'lucide:MoreHorizontal' },
+  { value: 'cash', label: 'Cash', icon: 'lucide:Banknote' },
 ] as const
 
 export function PaymentMethodModal({
@@ -45,22 +60,26 @@ export function PaymentMethodModal({
 }: PaymentMethodModalProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const [formData, setFormData] = useState<CreatePaymentMethod>({
+  const [formData, setFormData] = useState<PaymentMethodFormData>({
     userId: '',
     name: '',
     type: paymentMethod?.type || 'bank_transfer',
-    bankName: paymentMethod?.bankName || '',
-    accountNumber: paymentMethod?.accountNumber || '',
-    routingNumber: paymentMethod?.routingNumber || '',
-    iban: paymentMethod?.iban || '',
-    swift: paymentMethod?.swift || '',
-    walletAddress: paymentMethod?.walletAddress || '',
-    network: paymentMethod?.network || '',
-    currency: paymentMethod?.currency || '',
-    email: paymentMethod?.email || '',
-    username: paymentMethod?.username || '',
-    instructions: paymentMethod?.instructions || '',
     isDefault: paymentMethod?.isDefault || false,
+    instructions: paymentMethod?.instructions || '',
+    // Bank transfer
+    ...(paymentMethod?.type === 'bank_transfer' && {
+      bankName: paymentMethod.bankName,
+      iban: paymentMethod.iban,
+      swift: paymentMethod.swift,
+      accountNumber: paymentMethod.accountNumber,
+      routingNumber: paymentMethod.routingNumber,
+    }),
+    // Crypto
+    ...(paymentMethod?.type === 'crypto_wallet' && {
+      walletAddress: paymentMethod.walletAddress,
+      network: paymentMethod.network,
+      currency: paymentMethod.currency,
+    }),
   })
 
   // Update form data when paymentMethod changes
@@ -72,18 +91,22 @@ export function PaymentMethodModal({
       userId: '',
       name: selectedType?.label || '',
       type: paymentMethod?.type || 'bank_transfer',
-      bankName: paymentMethod?.bankName || '',
-      accountNumber: paymentMethod?.accountNumber || '',
-      routingNumber: paymentMethod?.routingNumber || '',
-      iban: paymentMethod?.iban || '',
-      swift: paymentMethod?.swift || '',
-      walletAddress: paymentMethod?.walletAddress || '',
-      network: paymentMethod?.network || '',
-      currency: paymentMethod?.currency || '',
-      email: paymentMethod?.email || '',
-      username: paymentMethod?.username || '',
-      instructions: paymentMethod?.instructions || '',
       isDefault: paymentMethod?.isDefault || false,
+      instructions: paymentMethod?.instructions || '',
+      // Bank transfer
+      ...(paymentMethod?.type === 'bank_transfer' && {
+        bankName: paymentMethod.bankName,
+        iban: paymentMethod.iban,
+        swift: paymentMethod.swift,
+        accountNumber: paymentMethod.accountNumber,
+        routingNumber: paymentMethod.routingNumber,
+      }),
+      // Crypto
+      ...(paymentMethod?.type === 'crypto_wallet' && {
+        walletAddress: paymentMethod.walletAddress,
+        network: paymentMethod.network,
+        currency: paymentMethod.currency,
+      }),
     })
   }, [paymentMethod])
 
@@ -241,46 +264,25 @@ export function PaymentMethodModal({
           </>
         )
 
-      case 'paypal':
-      case 'wise':
-      case 'revolut':
+      case 'cash':
         return (
           <div className="lg:col-span-2">
             <Label className="text-sm font-medium mb-3 block flex items-center">
-              <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-success" />
-              Email Address
-            </Label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Icon name="lucide:Mail" className="w-5 h-5 text-foreground/60 z-10" />
-              </div>
-              <Input
-                type="email"
-                value={formData.email || ''}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-                placeholder="your.email@example.com"
-                className="w-full pl-12 focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
-              />
-            </div>
-          </div>
-        )
-
-      default:
-        return (
-          <div className="lg:col-span-2">
-            <Label className="text-sm font-medium mb-3 block flex items-center">
-              <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-success" />
-              Account Details
+              <Icon name="lucide:Banknote" className="w-4 h-4 mr-2 text-success" />
+              Instructions (Optional)
             </Label>
             <TextArea
               value={formData.instructions || ''}
               onChange={e => setFormData({ ...formData, instructions: e.target.value })}
-              placeholder="Enter account details, instructions, or any relevant information..."
+              placeholder="E.g., Cash payment accepted at office, bring exact change..."
               rows={3}
               className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
             />
           </div>
         )
+
+      default:
+        return null
     }
   }
 

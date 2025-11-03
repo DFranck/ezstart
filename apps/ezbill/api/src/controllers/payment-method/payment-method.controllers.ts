@@ -1,4 +1,4 @@
-import { CreatePaymentMethod, createPaymentMethodSchema } from '@ezbill/types';
+import { CreatePaymentMethod, createPaymentMethodSchema, updatePaymentMethodSchema } from '@ezbill/types';
 import { Request, Response } from 'express';
 import { PaymentMethodModel } from '../../models/payment-method.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
@@ -67,7 +67,7 @@ export const createPaymentMethod = async (req: AuthRequest, res: Response) => {
 export const updatePaymentMethod = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const validated = createPaymentMethodSchema.partial().parse({ ...req.body, userId: req.userId });
+    const validated = updatePaymentMethodSchema.parse({ ...req.body, userId: req.userId });
     
     // If this is being set as default, unset other default payment methods
     if (validated.isDefault) {

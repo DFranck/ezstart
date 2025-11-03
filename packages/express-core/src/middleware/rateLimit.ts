@@ -48,9 +48,11 @@ export interface RateLimitOptions {
  * ```
  */
 export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequestHandler {
+  const isDev = process.env.NODE_ENV === 'development'
+
   const {
     windowMs = 15 * 60 * 1000, // 15 minutes
-    max = 100, // 100 requests per windowMs
+    max = isDev ? 1000 : 100, // More permissive in dev (1000 vs 100)
     message = 'Too many requests from this IP, please try again later.',
     skipPaths = ['/api/health']
   } = options

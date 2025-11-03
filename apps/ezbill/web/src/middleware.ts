@@ -1,4 +1,4 @@
-import { createAuthMiddleware, authMiddlewareConfig } from '@ezstart/auth-sdk'
+import { createAuthMiddleware } from '@ezstart/auth-sdk'
 import createIntlMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
 
@@ -14,4 +14,7 @@ export default createAuthMiddleware({
   intlMiddleware, // Apply i18n after auth check
 })
 
-export const config = authMiddlewareConfig
+// Next.js requires a literal object for static analysis at build time
+export const config = {
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
+}

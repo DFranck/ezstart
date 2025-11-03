@@ -303,8 +303,8 @@ export function InvoiceModal({
                                 ? 'lucide:Wallet'
                                 : method.type === 'bank_transfer'
                                   ? 'lucide:Building'
-                                  : method.type === 'paypal'
-                                    ? 'lucide:CreditCard'
+                                  : method.type === 'cash'
+                                    ? 'lucide:Banknote'
                                     : 'lucide:CreditCard'
                             }
                             className="w-4 h-4 mr-2 text-success"

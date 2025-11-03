@@ -94,21 +94,11 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
             </>
           )}
 
-          {['paypal', 'wise', 'revolut'].includes(paymentMethod.type) && (
-            <>
-              {paymentMethod.email && (
-                <p className="text-muted-foreground text-sm mb-1">
-                  <Icon name="lucide:Mail" className="w-3 h-3 inline mr-1" />
-                  {paymentMethod.email}
-                </p>
-              )}
-              {paymentMethod.username && (
-                <p className="text-muted-foreground/80 text-sm">
-                  <Icon name="lucide:User" className="w-3 h-3 inline mr-1" />@
-                  {paymentMethod.username}
-                </p>
-              )}
-            </>
+          {paymentMethod.type === 'cash' && (
+            <p className="text-muted-foreground text-sm">
+              <Icon name="lucide:Banknote" className="w-3 h-3 inline mr-1" />
+              Cash payment
+            </p>
           )}
 
           {paymentMethod.instructions && (

@@ -10,7 +10,7 @@ export type { AuthState, AuthMode } from './store.js'
 export { AuthProvider, useAuth, useAuthContext } from './provider.js'
 
 // Middleware (Next.js)
-export { createAuthMiddleware, authMiddlewareConfig } from './middleware.js'
+export { createAuthMiddleware, RECOMMENDED_MIDDLEWARE_MATCHER } from './middleware.js'
 export type { AuthMiddlewareConfig } from './middleware.js'
 
 // Components

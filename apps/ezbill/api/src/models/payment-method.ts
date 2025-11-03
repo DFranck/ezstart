@@ -7,10 +7,10 @@ const paymentMethodSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true },
-    type: { 
-      type: String, 
+    type: {
+      type: String,
       required: true,
-      enum: ['bank_transfer', 'crypto_wallet', 'paypal', 'stripe', 'wise', 'revolut', 'other']
+      enum: ['bank_transfer', 'crypto_wallet', 'cash']
     },
     // Bank transfer fields
     bankName: { type: String },

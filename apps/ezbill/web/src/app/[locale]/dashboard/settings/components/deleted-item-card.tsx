@@ -34,7 +34,9 @@ const getDescription = (item: DeletedItem, type: string): string => {
   }
   if (type === 'paymentMethods') {
     const pm = item as PaymentMethod
-    return `${pm.type} • ${pm.bankName || pm.email || pm.username || 'N/A'}`
+    if (pm.type === 'bank_transfer') return `${pm.type} • ${pm.bankName || 'N/A'}`
+    if (pm.type === 'crypto_wallet') return `${pm.type} • ${pm.currency || 'N/A'}`
+    return pm.type
   }
   return ''
 }

@@ -150,9 +150,17 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
 }
 
 /**
- * Matcher config for Next.js middleware
+ * Recommended matcher config for Next.js middleware
  * Excludes API routes, static files, etc.
+ *
+ * IMPORTANT: Next.js requires the config export to be a literal object in middleware.ts
+ * You MUST copy-paste this directly in your middleware.ts file:
+ *
+ * @example
+ * ```ts
+ * export const config = {
+ *   matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
+ * }
+ * ```
  */
-export const authMiddlewareConfig = {
-  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
-}
+export const RECOMMENDED_MIDDLEWARE_MATCHER = ['/((?!api|trpc|_next|_vercel|.*\\..*).*)']

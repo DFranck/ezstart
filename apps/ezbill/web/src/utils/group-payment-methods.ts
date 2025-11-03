@@ -5,27 +5,16 @@ import { GroupItem } from '@/components/CollapsibleGroup'
  * Group payment methods by type
  *
  * Groups:
- * - Bank Transfer: Bank account payment methods
- * - Digital Wallets: Stripe, PayPal, Wise, Revolut
+ * - Bank Transfer: Bank account payment methods (IBAN/SWIFT)
  * - Crypto: Cryptocurrency wallets
- * - Other: Other payment methods
+ * - Cash: Cash payment methods
  */
 export function groupPaymentMethodsByType(
   paymentMethods: PaymentMethod[]
 ): GroupItem<PaymentMethod>[] {
   const bankTransfer = paymentMethods.filter(pm => pm.type === 'bank_transfer')
-  const digitalWallets = paymentMethods.filter(pm =>
-    pm.type === 'stripe' || pm.type === 'paypal' || pm.type === 'wise' || pm.type === 'revolut'
-  )
   const crypto = paymentMethods.filter(pm => pm.type === 'crypto_wallet')
-  const other = paymentMethods.filter(
-    pm => pm.type !== 'bank_transfer' &&
-          pm.type !== 'stripe' &&
-          pm.type !== 'paypal' &&
-          pm.type !== 'wise' &&
-          pm.type !== 'revolut' &&
-          pm.type !== 'crypto_wallet'
-  )
+  const cash = paymentMethods.filter(pm => pm.type === 'cash')
 
   const groups: GroupItem<PaymentMethod>[] = []
 
@@ -38,15 +27,6 @@ export function groupPaymentMethodsByType(
     })
   }
 
-  if (digitalWallets.length > 0) {
-    groups.push({
-      id: 'digital-wallets',
-      label: 'Digital Wallets',
-      count: digitalWallets.length,
-      items: digitalWallets.sort((a, b) => a.name.localeCompare(b.name)),
-    })
-  }
-
   if (crypto.length > 0) {
     groups.push({
       id: 'crypto',
@@ -56,12 +36,12 @@ export function groupPaymentMethodsByType(
     })
   }
 
-  if (other.length > 0) {
+  if (cash.length > 0) {
     groups.push({
-      id: 'other',
-      label: 'Other',
-      count: other.length,
-      items: other.sort((a, b) => a.name.localeCompare(b.name)),
+      id: 'cash',
+      label: 'Cash',
+      count: cash.length,
+      items: cash.sort((a, b) => a.name.localeCompare(b.name)),
     })
   }
 
