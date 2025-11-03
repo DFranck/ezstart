@@ -1,0 +1,61 @@
+{
+  "title": "Tableau de bord de surveillance",
+  "loading": "Chargement des données de surveillance...",
+  "tabs": {
+    "projects": "Projets",
+    "audits": "Audits",
+    "errors": "Erreurs"
+  },
+  "metrics": {
+    "projectsHealth": {
+      "title": "Santé des projets",
+      "operational": "opérationnel"
+    },
+    "avgResponseTime": {
+      "title": "Temps de réponse moy.",
+      "subtitle": "Dernières 24 heures"
+    },
+    "passingAudits": {
+      "title": "Audits réussis",
+      "passing": "réussis",
+      "target": "≥90/100"
+    },
+    "lowestScore": {
+      "title": "Score le plus bas"
+    },
+    "totalErrors": {
+      "title": "Total d'erreurs",
+      "criticalErrors": "critiques/erreurs"
+    },
+    "mostAffectedProject": {
+      "title": "Projet le plus affecté",
+      "none": "Aucun"
+    }
+  },
+  "errors": {
+    "loading": "Chargement des journaux d'erreurs...",
+    "noErrors": "Aucune erreur trouvée",
+    "filters": {
+      "all": "Toutes",
+      "critical": "Critique",
+      "error": "Erreur",
+      "warning": "Avertissement"
+    }
+  },
+  "projects": {
+    "status": {
+      "healthy": "Sain",
+      "degraded": "Dégradé",
+      "down": "Hors ligne"
+    }
+  },
+  "audits": {
+    "score": {
+      "excellent": "Excellent",
+      "veryGood": "Très bien",
+      "good": "Bien",
+      "needsWork": "À améliorer",
+      "target": "Cible : 90+"
+    }
+  }
+}

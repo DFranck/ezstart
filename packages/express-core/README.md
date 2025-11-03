@@ -171,6 +171,60 @@ router.get('/health', (req, res) => res.json({ status: 'ok' }))
 
 ### 🛡️ Middleware
 
+#### Rate Limiting
+
+Protect your APIs from abuse with built-in rate limiting middleware:
+
+```typescript
+import { createRateLimiter, createStrictRateLimiter, createVeryStrictRateLimiter } from '@ezstart/express-core'
+
+// Standard rate limiting (100 req/15min per IP)
+// Automatically skips /api/health endpoint
+app.use(createRateLimiter())
+
+// Strict rate limiting for auth endpoints (5 req/min)
+app.post('/api/auth/login', createStrictRateLimiter(), loginHandler)
+
+// Very strict for account creation (3 req/hour)
+app.post('/api/auth/register', createVeryStrictRateLimiter(), registerHandler)
+
+// Custom configuration
+app.use(createRateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // 10 requests per minute
+  message: 'Custom rate limit message',
+  skipPaths: ['/api/health', '/api/public']
+}))
+```
+
+**Available Rate Limiters:**
+
+| Function | Default Limit | Use Case |
+|----------|--------------|----------|
+| `createRateLimiter()` | 100 req/15min | General API protection |
+| `createStrictRateLimiter()` | 5 req/min | Auth endpoints (login, logout) |
+| `createVeryStrictRateLimiter()` | 3 req/hour | Account creation, password reset |
+| `createModerateRateLimiter()` | 10 req/hour | Payments, donations |
+
+**Features:**
+- ✅ IP-based rate limiting
+- ✅ Standard rate limit headers (`RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`)
+- ✅ 429 status with `Retry-After` header
+- ✅ Automatic health check exclusion
+- ✅ Customizable limits and messages
+
+**Response Format (429 Too Many Requests):**
+
+```json
+{
+  "error": {
+    "message": "Too many requests from this IP, please try again later.",
+    "code": "RATE_LIMIT_EXCEEDED",
+    "retryAfter": 900
+  }
+}
+```
+
 #### Request Validation
 
 ```typescript
@@ -358,6 +412,7 @@ All @ezstart APIs use this shared infrastructure:
 - ✅ **Centralized Router export** - no direct `express` imports
 - ✅ **Built-in CORS** - configured in `createApp()`
 - ✅ **Automatic dotenv loading** - no manual `dotenv.config()`
+- ✅ **Rate limiting protection** via `createRateLimiter()` (100 req/15min per IP)
 - ✅ **OpenAPI documentation** via `createRouterWithDoc()`
 - ✅ **Request validation** via `validateParams()` and `validateQuery()`
 - ✅ **Socket.io support** via `createSocketServer()` (tower-defense)

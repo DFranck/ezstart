@@ -14,6 +14,7 @@ import {
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { ErrorsFeed } from './(errors-tab)/components/ErrorsFeed'
 import { AuditCard } from './(health-tab)/components/AuditCard'
@@ -34,6 +35,7 @@ import {
 } from './lib/utils'
 
 export default function MonitoringDashboard() {
+  const t = useTranslations('monitoring')
   const [activeTab, setActiveTab] = useState<'projects' | 'audits' | 'errors'>('projects')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
@@ -133,7 +135,7 @@ export default function MonitoringDashboard() {
     return (
       <Section size="full">
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Spinner size="xl" text="Loading monitoring data..." variant="fancy" />
+          <Spinner size="xl" text={t('loading')} variant="fancy" />
         </div>
       </Section>
     )

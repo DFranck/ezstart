@@ -1,5 +1,12 @@
 {
   "appName": "EZBill",
   "description": "Invoice and billing management platform",
-  "tagline": "Simplify your invoicing and payments"
+  "tagline": "Simplify your invoicing and payments",
+  "pwa": {
+    "install": {
+      "description": "Install EZBill on your device for quick access to your invoices and billing",
+      "installButton": "Install",
+      "laterButton": "Later"
+    }
+  }
 }

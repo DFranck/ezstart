@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, Div, H3, P } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 
 interface MetricCardProps {
   title: string
@@ -64,6 +65,8 @@ interface MetricsOverviewProps {
 }
 
 export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
+  const t = useTranslations('monitoring.metrics')
+
   const servicesHealthPercentage = Math.round(
     (metrics.servicesHealthy / metrics.servicesTotal) * 100
   )
@@ -73,16 +76,16 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
     return (
       <Div layout="grid" className="lg:grid-cols-1">
         <MetricCard
-          title="Projects Health"
+          title={t('projectsHealth.title')}
           value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
-          subtitle={`${servicesHealthPercentage}% operational`}
+          subtitle={`${servicesHealthPercentage}% ${t('projectsHealth.operational')}`}
           icon="🚀"
         />
 
         <MetricCard
-          title="Avg Response Time"
+          title={t('avgResponseTime.title')}
           value={`${metrics.avgResponseTime}ms`}
-          subtitle="Last 24 hours"
+          subtitle={t('avgResponseTime.subtitle')}
           icon="⚡"
         />
       </Div>
@@ -97,13 +100,13 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
       <Div layout="grid" className="lg:grid-cols-1">
         {' '}
         <MetricCard
-          title="Passing Audits"
+          title={t('passingAudits.title')}
           value={`${metrics.servicesHealthy}/${metrics.servicesTotal}`}
-          subtitle={`${passingPercentage}% passing (≥90/100)`}
+          subtitle={`${passingPercentage}% ${t('passingAudits.passing')} (${t('passingAudits.target')})`}
           icon="✅"
         />
         <MetricCard
-          title="Lowest Score"
+          title={t('lowestScore.title')}
           value={`${metrics.avgResponseTime}/100`}
           subtitle={worstAuditLabel}
           icon="⚠️"
@@ -116,20 +119,20 @@ export function MetricsOverview({ activeTab, metrics }: MetricsOverviewProps) {
   if (activeTab === 'errors') {
     const totalErrors = metrics.servicesHealthy // Total errors count
     const criticalAndErrors = metrics.servicesTotal // Critical + errors count
-    const worstProjectName = metrics.worstProjectName || 'None'
+    const worstProjectName = metrics.worstProjectName || t('mostAffectedProject.none')
     const worstProjectCount = metrics.deploymentsActive
 
     return (
       <Div layout="grid" className="lg:grid-cols-1">
         {' '}
         <MetricCard
-          title="Total Errors"
+          title={t('totalErrors.title')}
           value={totalErrors}
-          subtitle={`${criticalAndErrors} critical/errors`}
+          subtitle={`${criticalAndErrors} ${t('totalErrors.criticalErrors')}`}
           icon="🔴"
         />
         <MetricCard
-          title="Most Affected Project"
+          title={t('mostAffectedProject.title')}
           value={worstProjectCount > 0 ? worstProjectCount : '-'}
           subtitle={worstProjectName}
           icon="⚠️"

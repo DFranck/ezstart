@@ -1,0 +1,61 @@
+{
+  "title": "Monitoring Dashboard",
+  "loading": "Loading monitoring data...",
+  "tabs": {
+    "projects": "Projects",
+    "audits": "Audits",
+    "errors": "Errors"
+  },
+  "metrics": {
+    "projectsHealth": {
+      "title": "Projects Health",
+      "operational": "operational"
+    },
+    "avgResponseTime": {
+      "title": "Avg Response Time",
+      "subtitle": "Last 24 hours"
+    },
+    "passingAudits": {
+      "title": "Passing Audits",
+      "passing": "passing",
+      "target": "≥90/100"
+    },
+    "lowestScore": {
+      "title": "Lowest Score"
+    },
+    "totalErrors": {
+      "title": "Total Errors",
+      "criticalErrors": "critical/errors"
+    },
+    "mostAffectedProject": {
+      "title": "Most Affected Project",
+      "none": "None"
+    }
+  },
+  "errors": {
+    "loading": "Loading error logs...",
+    "noErrors": "No errors found",
+    "filters": {
+      "all": "All",
+      "critical": "Critical",
+      "error": "Error",
+      "warning": "Warning"
+    }
+  },
+  "projects": {
+    "status": {
+      "healthy": "Healthy",
+      "degraded": "Degraded",
+      "down": "Down"
+    }
+  },
+  "audits": {
+    "score": {
+      "excellent": "Excellent",
+      "veryGood": "Very Good",
+      "good": "Good",
+      "needsWork": "Needs Work",
+      "target": "Target: 90+"
+    }
+  }
+}

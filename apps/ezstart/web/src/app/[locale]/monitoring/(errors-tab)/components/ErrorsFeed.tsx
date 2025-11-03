@@ -12,9 +12,11 @@ import {
   P,
   Spinner,
 } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useMonitoringErrors, type ErrorLog } from '../../hooks'
 
 export function ErrorsFeed() {
+  const t = useTranslations('monitoring.errors')
   const { data, isLoading, error, refetch, isFetching } = useMonitoringErrors()
 
   const errorLogs = data?.logs || []
@@ -22,7 +24,7 @@ export function ErrorsFeed() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <Spinner size="lg" text="Loading error logs..." />
+        <Spinner size="lg" text={t('loading')} />
       </div>
     )
   }

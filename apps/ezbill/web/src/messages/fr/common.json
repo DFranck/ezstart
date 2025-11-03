@@ -1,5 +1,12 @@
 {
   "appName": "EZBill",
   "description": "Plateforme de gestion de facturation",
-  "tagline": "Simplifiez votre facturation et vos paiements"
+  "tagline": "Simplifiez votre facturation et vos paiements",
+  "pwa": {
+    "install": {
+      "description": "Installez EZBill sur votre appareil pour un accès rapide à vos factures et votre facturation",
+      "installButton": "Installer",
+      "laterButton": "Plus tard"
+    }
+  }
 }

@@ -2,7 +2,14 @@
 
 import { useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { ClientLayout as BaseClientLayout, Button, H1, Icon } from '@ezstart/ui/components'
+import {
+  ClientLayout as BaseClientLayout,
+  Button,
+  H1,
+  Icon,
+  PWAInstallPrompt,
+} from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -22,6 +29,7 @@ const ClientLayout = ({
   const { isAuthenticated, login, logout } = useAuth()
   const { theme } = useTheme()
   const pathname = usePathname()
+  const t = useTranslations()
 
   // Navigation links pour users authentifiés
   const navLinks: any[] = isAuthenticated
@@ -112,6 +120,12 @@ const ClientLayout = ({
       footerLayout="simple"
     >
       {children}
+      <PWAInstallPrompt
+        appName={'EzBill'}
+        description={t('pwa.install.description')}
+        installButtonText={t('pwa.install.installButton')}
+        laterButtonText={t('pwa.install.laterButton')}
+      />
     </BaseClientLayout>
   )
 }

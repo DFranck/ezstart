@@ -590,6 +590,7 @@ const user = await AuthUserModel.findOne({ email })
 ```typescript
 import {
   createApp,
+  createRateLimiter,
   connectToMongo,
   startServer,
   getApiPort,
@@ -600,6 +601,9 @@ import {
 
 const PORT = getApiPort('ezauth')
 const app = createApp({ apiApp: 'ezauth' }) // CORS auto + dotenv
+
+// ✅ Rate limiting protection (OBLIGATOIRE)
+app.use(createRateLimiter())
 
 // Routes
 const registry = new OpenAPIRegistry()
@@ -622,6 +626,51 @@ connectToMongo('ezauth')
     process.exit(1)
   })
 ```
+
+### 1.5 Rate Limiting OBLIGATOIRE
+
+**⚠️ TOUTES les APIs DOIVENT avoir du rate limiting** pour se protéger contre les abus et attaques DDoS.
+
+✅ **Standard (100 req/15min per IP)** :
+```typescript
+import { createRateLimiter } from '@ezstart/express-core'
+
+// Applique rate limiting sur toutes les routes (sauf /api/health)
+app.use(createRateLimiter())
+```
+
+✅ **Strict pour endpoints sensibles (5 req/min)** :
+```typescript
+import { createStrictRateLimiter } from '@ezstart/express-core'
+
+// Auth endpoints
+app.post('/api/auth/login', createStrictRateLimiter(), loginHandler)
+app.post('/api/auth/logout', createStrictRateLimiter(), logoutHandler)
+```
+
+✅ **Très strict pour création de compte (3 req/hour)** :
+```typescript
+import { createVeryStrictRateLimiter } from '@ezstart/express-core'
+
+// Account creation
+app.post('/api/auth/register', createVeryStrictRateLimiter(), registerHandler)
+app.post('/api/auth/reset-password', createVeryStrictRateLimiter(), resetHandler)
+```
+
+**Configuration automatique :**
+- Retourne 429 avec `Retry-After` header
+- Headers standards : `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
+- Skip automatique de `/api/health`
+- Format d'erreur standardisé :
+  ```json
+  {
+    "error": {
+      "message": "Too many requests from this IP, please try again later.",
+      "code": "RATE_LIMIT_EXCEEDED",
+      "retryAfter": 900
+    }
+  }
+  ```
 
 ### 2. Préfixe /api OBLIGATOIRE
 
