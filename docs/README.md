@@ -9,6 +9,7 @@ Welcome to the centralized documentation for the @ezstart monorepo.
 ```
 docs/
 ├── README.md              # This file (documentation index)
+├── AI-AGENT-CYCLE.md      # 🤖 Cycle d'amélioration continue pour agents IA
 └── audits/                # All audit reports
     ├── SECURITY-AUDIT.md
     ├── PERFORMANCE-AUDIT.md
@@ -356,6 +357,14 @@ When updating an audit:
 ---
 
 ## 📚 Additional Documentation
+
+### For AI Agents
+- 🤖 **[AI-AGENT-CYCLE.md](./AI-AGENT-CYCLE.md)** - Cycle d'amélioration continue ⭐⭐⭐
+  - Comment identifier les problèmes
+  - Comment planifier les solutions
+  - Comment documenter pour prévenir les régressions
+  - Comment mesurer l'impact
+  - Exemples concrets et checklists complètes
 
 ### Audit Documentation
 - **[AUDIT-GUIDE.md](./AUDIT-GUIDE.md)** - Complete guide to auditing your monorepo ⭐

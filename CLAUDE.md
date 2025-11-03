@@ -9,6 +9,7 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 ## 📚 Documentation Essentielle
 
 **Lire en premier :**
+- 🤖 **[docs/AI-AGENT-CYCLE.md](./docs/AI-AGENT-CYCLE.md)** - ⭐⭐⭐ Cycle d'amélioration continue pour agents IA
 - 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ Règles de développement obligatoires
 - 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (16/16 complets)
 - 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement Railway/Vercel
