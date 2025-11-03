@@ -70,18 +70,19 @@ function resolveAuthMode(
     return 'localStorage'
   }
 
-  // Rule 4: JWT mode (validate publicKey)
+  // Rule 4: JWT mode (validate publicKey - REQUIRED)
   if (configuredMode === 'jwt') {
     if (!jwtPublicKey) {
       console.error(
-        `❌ [AuthSDK] JWT mode requires jwtPublicKey!`,
-        `\n  → Add: jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_KEY}`,
-        `\n  → Falling back to localStorage`
+        `❌ [EZAuth SDK] JWT mode requires jwtPublicKey!`,
+        `\n  → Add: jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}`,
+        `\n  → Get your key from: https://dashboard.ezauth.app (or your EZAuth instance)`,
+        `\n  → Falling back to localStorage (INSECURE)`
       )
       return 'localStorage'
     }
     console.log(
-      `✅ [AuthSDK] JWT mode enabled`,
+      `✅ [EZAuth SDK] JWT mode enabled`,
       `\n  → Domain: ${hostname}`,
       `\n  → Validation: Local (no API calls)`
     )

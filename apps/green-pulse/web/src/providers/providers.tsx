@@ -19,7 +19,11 @@ export function Providers({
 }) {
   return (
     <QueryProvider>
-      <AuthProvider appName="green-pulse" authMode="httpOnly">
+      <AuthProvider
+        appName="green-pulse"
+        authMode="httpOnly"
+        jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}
+      >
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
