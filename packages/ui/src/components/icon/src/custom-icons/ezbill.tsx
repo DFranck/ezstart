@@ -4,7 +4,7 @@ export default function Ezbill(props: IconProps) {
   return (
     <svg
       {...props}
-      viewBox='0 0 47 47'
+      viewBox='0 0 49 49'
       xmlns='http://www.w3.org/2000/svg'
       fill='none'
       className={props.className}
@@ -17,22 +17,22 @@ export default function Ezbill(props: IconProps) {
       }}
     >
       {/* Top-right rectangle (cyan to blue gradient) */}
-      <rect x='24' y='1' width='22' height='22' rx='5' fill='url(#paint0_linear_ezbill)' />
+      <rect x='26' y='2' width='21' height='21' rx='5' fill='url(#paint0_linear_ezbill)' />
 
       {/* Top-left rectangle (green to teal gradient) */}
-      <rect x='1' y='1' width='22' height='22' rx='5' fill='url(#paint1_linear_ezbill)' />
+      <rect x='2' y='2' width='21' height='21' rx='5' fill='url(#paint1_linear_ezbill)' />
 
       {/* Bottom rectangle (violet to purple gradient) */}
-      <rect x='1' y='24' width='45' height='22' rx='5' fill='url(#paint2_linear_ezbill)' />
+      <rect x='2' y='26' width='45' height='21' rx='5' fill='url(#paint2_linear_ezbill)' />
 
       <defs>
         {/* Cyan to Blue gradient (top-right) */}
         <linearGradient
           id='paint0_linear_ezbill'
-          x1='24'
-          y1='12'
-          x2='46'
-          y2='12'
+          x1='26'
+          y1='12.5'
+          x2='47'
+          y2='12.5'
           gradientUnits='userSpaceOnUse'
         >
           <stop stopColor='#00D9F7' />
@@ -42,10 +42,10 @@ export default function Ezbill(props: IconProps) {
         {/* Green to Teal gradient (top-left) */}
         <linearGradient
           id='paint1_linear_ezbill'
-          x1='1'
-          y1='12'
+          x1='2'
+          y1='12.5'
           x2='23'
-          y2='12'
+          y2='12.5'
           gradientUnits='userSpaceOnUse'
         >
           <stop stopColor='#6DDC74' />
@@ -55,10 +55,10 @@ export default function Ezbill(props: IconProps) {
         {/* Violet to Purple gradient (bottom) */}
         <linearGradient
           id='paint2_linear_ezbill'
-          x1='1'
-          y1='35'
-          x2='46'
-          y2='35'
+          x1='2'
+          y1='36.5'
+          x2='47'
+          y2='36.5'
           gradientUnits='userSpaceOnUse'
         >
           <stop stopColor='#798EF3' />
