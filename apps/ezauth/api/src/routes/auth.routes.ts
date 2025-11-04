@@ -65,28 +65,33 @@ const loginController = async (req: any, res: any) => {
 // Exchange code for token
 const tokenController = async (req: any, res: any) => {
   try {
-    console.log('📋 Token exchange request body:', req.body)
+    console.log('📋 [TOKEN] Request body:', req.body)
     const data = req.body as TokenRequest
-    console.log('✅ Parsed token request data:', data)
+    console.log('✅ [TOKEN] Parsed data:', data)
     const token = await AuthService.exchangeCodeForToken(data)
+    console.log('🔑 [TOKEN] Token generated:', { userId: token.user._id, expiresIn: token.expires_in })
 
     // ✅ DUAL-MODE: Set httpOnly cookie for apps using httpOnly mode
-    // Frontend will decide whether to use the cookie or the accessToken from response
-    res.cookie('ezauth_token', token.access_token, {
+    const cookieConfig = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
       domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
-    })
+    }
+    console.log('🍪 [TOKEN] Setting cookie with config:', cookieConfig)
+
+    res.cookie('ezauth_token', token.access_token, cookieConfig)
+    console.log('✅ [TOKEN] Cookie set successfully')
 
     res.json({
       success: true,
       ...token
     })
+    console.log('📤 [TOKEN] Response sent with token')
   } catch (error) {
-    console.error('Token exchange error:', error)
+    console.error('❌ [TOKEN] Exchange error:', error)
     res.status(400).json({
       success: false,
       error: error instanceof Error ? error.message : 'Token exchange failed'
