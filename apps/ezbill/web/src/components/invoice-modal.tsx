@@ -1,4 +1,5 @@
 'use client'
+import { callApi, runWithFeedback } from '@/utils/api'
 import {
   BaseLineItem,
   Client,
@@ -11,7 +12,6 @@ import {
 import {
   Button,
   Checkbox,
-  H3,
   Icon,
   Input,
   Label,
@@ -21,6 +21,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
   Table,
   TableBody,
   TableCell,
@@ -29,7 +30,6 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@/utils/api'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
@@ -46,10 +46,9 @@ interface InvoiceModalProps {
   clientId?: string // Optional: if we're in a specific client context
 }
 
-const currencies: { value: Currency; label: string }[] = [
-  { value: 'EUR', label: 'EUR - Euro' },
-  { value: 'USD', label: 'USD - US Dollar' },
-  { value: 'GBP', label: 'GBP - British Pound' },
+const currencies: { value: Currency; label: string; symbol: string }[] = [
+  { value: 'EUR', label: 'EUR - Euro', symbol: '€' },
+  { value: 'USD', label: 'USD - US Dollar', symbol: '$' },
 ]
 
 export function InvoiceModal({
@@ -196,7 +195,7 @@ export function InvoiceModal({
             type="submit"
             disabled={!formData.clientId || formData.items.some(item => !item.label)}
             form="invoice-form"
-            className="bg-gradient-company hover:from-indigo-600 hover:to-purple-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-invoice hover:bg-gradient-invoice-hover text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={invoice ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {invoice ? 'Update Invoice' : 'Create Invoice'}
@@ -210,7 +209,7 @@ export function InvoiceModal({
             {!clientId && (
               <div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
-                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
+                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Client *
                 </Label>
                 <Select
@@ -228,10 +227,7 @@ export function InvoiceModal({
                         value={client._id}
                         className="hover:bg-primary/5"
                       >
-                        <div className="flex items-center">
-                          <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
-                          {client.clientName}
-                        </div>
+                        <div className="flex items-center">{client.clientName}</div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -241,7 +237,7 @@ export function InvoiceModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
                 Bill on behalf of
               </Label>
               <Select
@@ -256,7 +252,7 @@ export function InvoiceModal({
                 <SelectContent className="bg-popover border shadow-xl rounded-xl">
                   <SelectItem value="personal" className="hover:bg-primary/5">
                     <div className="flex items-center">
-                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
+                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                       Personal (your name)
                     </div>
                   </SelectItem>
@@ -267,7 +263,10 @@ export function InvoiceModal({
                       className="hover:bg-primary/5"
                     >
                       <div className="flex items-center">
-                        <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-accent" />
+                        <Icon
+                          name="lucide:Building2"
+                          className="w-4 h-4 mr-2 text-ezbill-company"
+                        />
                         {company.companyName}
                       </div>
                     </SelectItem>
@@ -278,7 +277,7 @@ export function InvoiceModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Payment Method
               </Label>
               {paymentMethods && paymentMethods.length > 0 ? (
@@ -307,7 +306,7 @@ export function InvoiceModal({
                                     ? 'lucide:Banknote'
                                     : 'lucide:CreditCard'
                             }
-                            className="w-4 h-4 mr-2 text-success"
+                            className="w-4 h-4 mr-2 text-ezbill-payment"
                           />
                           {method.name}
                           {method.isDefault && (
@@ -343,7 +342,7 @@ export function InvoiceModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                 Currency
               </Label>
               <Select
@@ -354,11 +353,13 @@ export function InvoiceModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                  {currencies.map(({ value, label }) => (
+                  {currencies.map(({ value, label, symbol }) => (
                     <SelectItem key={value} value={value} className="hover:bg-primary/5">
                       <div className="flex items-center">
-                        <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                         {label}
+                        <Span className="ml-2" intent={'warning'}>
+                          {symbol}
+                        </Span>
                       </div>
                     </SelectItem>
                   ))}
@@ -368,18 +369,14 @@ export function InvoiceModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-warning" />
                 Due Date
               </Label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Icon name="lucide:Calendar" className="w-5 h-5 text-muted-foreground/60" />
-                </div>
                 <Input
                   type="date"
                   value={formData.dueDate}
                   onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 />
               </div>
             </div>
@@ -435,10 +432,10 @@ export function InvoiceModal({
           </div>
 
           <div>
-            <div className="flex items-center mb-6">
+            {/* <div className="flex items-center mb-6">
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-accent" />
               <H3 className="text-xl font-bold ">Line Items</H3>
-            </div>
+            </div> */}
             <div className=" rounded-xl overflow-hidden">
               <Table>
                 <TableHeader>
@@ -466,17 +463,16 @@ export function InvoiceModal({
                 </TableHeader>
                 <TableBody>
                   {formData.items.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-primary/5/50">
-                      <TableCell className="p-3">
+                    <TableRow key={index}>
+                      <TableCell>
                         <Input
                           placeholder="Description"
                           value={item.label}
                           onChange={e => updateLineItem(index, 'label', e.target.value)}
                           required
-                          className="bg-background text-foreground border focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
-                      <TableCell className="p-3">
+                      <TableCell>
                         <Input
                           type="number"
                           placeholder="Qty"
@@ -491,10 +487,9 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
-                      <TableCell className="p-3">
+                      <TableCell>
                         <Input
                           type="number"
                           placeholder="Price"
@@ -509,15 +504,14 @@ export function InvoiceModal({
                             )
                           }
                           required
-                          className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                         />
                       </TableCell>
-                      <TableCell className="p-3">
+                      <TableCell>
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="destructive"
+                          size={'icon'}
                           onClick={() => removeLineItem(index)}
-                          className="w-8 h-8 p-0 bg-card border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 rounded-lg transition-all"
                           disabled={formData.items.length === 1}
                         >
                           <Icon name="lucide:X" className="w-4 h-4" />
@@ -566,7 +560,7 @@ export function InvoiceModal({
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center bg-gradient-company text-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center bg-gradient-invoice text-white rounded-lg p-4 shadow-lg">
                 <span className="flex items-center font-bold text-lg">
                   <Icon name="lucide:DollarSign" className="w-5 h-5 mr-2" />
                   Total:
