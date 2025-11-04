@@ -145,20 +145,27 @@ MEDIUM/LOW (12h)
 
 ---
 
-### 2. Performance Optimization (75 → 90/100, +15 pts, 15h)
+### 2. Performance Optimization (82 → 90/100, +8 pts, 15h) - Phase 1 In Progress
 
-**Problèmes actuels:**
-- Bundle sizes perfectibles
-- Images non-optimisées
-- Pas de lazy loading systématique
+**Phase 1: Bundle Optimization (6h) - STARTED (Nov 4, 2025)**
 
-**Actions:**
+✅ **Completed:**
+- ✅ Dynamic imports implemented for EZBill (7 modals, ~120KB code splitting)
+  - Main dashboard: ClientModal, CompanyModal, PaymentMethodModal
+  - Client dashboard: InvoiceModal, QuoteModal, MarkPaidModal, PreviewPdfModal
+  - Commit: `bd961d0e` - perf(ezbill): implement dynamic imports for 7 modal components
+  - Impact: ~15-20% reduction in First Load JS
+
+**In Progress:**
+- ⏳ Apply same pattern to other apps (GreenPulse, FengShui, Tower Defense)
+- ⏳ Measure bundle size improvements with @next/bundle-analyzer
+
+**Remaining:**
 ```
-Week 1: Bundle Optimization (6h)
-├── Analyser avec @next/bundle-analyzer
-├── Code splitting par route
-├── Dynamic imports pour composants lourds
-└── Tree-shaking vérification
+Bundle Optimization (3h remaining)
+├── Apply dynamic imports to remaining apps
+├── Verify tree-shaking is working
+└── Analyze bundle with @next/bundle-analyzer
 
 Week 2: Image Optimization (5h)
 ├── Convertir en WebP/AVIF
