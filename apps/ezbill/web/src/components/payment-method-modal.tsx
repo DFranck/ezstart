@@ -90,37 +90,39 @@ export function PaymentMethodModal({
     }),
   })
 
-  // Update form data when paymentMethod changes
+  // Update form data when paymentMethod changes or modal opens
   useEffect(() => {
-    const selectedType = paymentMethodTypes.find(
-      t => t.value === (paymentMethod?.type || 'bank_transfer')
-    )
-    setFormData({
-      userId: '',
-      name: selectedType?.label || '',
-      type: paymentMethod?.type || 'bank_transfer',
-      isDefault: paymentMethod?.isDefault || false,
-      instructions: paymentMethod?.instructions || '',
-      // Bank transfer - always set defaults
-      bankRegion:
-        paymentMethod?.type === 'bank_transfer' && paymentMethod.iban
-          ? 'international'
-          : 'international', // Default to international
-      ...(paymentMethod?.type === 'bank_transfer' && {
-        bankName: paymentMethod.bankName,
-        iban: paymentMethod.iban,
-        swift: paymentMethod.swift,
-        accountNumber: paymentMethod.accountNumber,
-        routingNumber: paymentMethod.routingNumber,
-      }),
-      // Crypto
-      ...(paymentMethod?.type === 'crypto_wallet' && {
-        walletAddress: paymentMethod.walletAddress,
-        network: paymentMethod.network,
-        currency: paymentMethod.currency,
-      }),
-    })
-  }, [paymentMethod])
+    if (isOpen) {
+      const selectedType = paymentMethodTypes.find(
+        t => t.value === (paymentMethod?.type || 'bank_transfer')
+      )
+      setFormData({
+        userId: '',
+        name: selectedType?.label || '',
+        type: paymentMethod?.type || 'bank_transfer',
+        isDefault: paymentMethod?.isDefault || false,
+        instructions: paymentMethod?.instructions || '',
+        // Bank transfer - always set defaults
+        bankRegion:
+          paymentMethod?.type === 'bank_transfer' && paymentMethod.iban
+            ? 'international'
+            : 'international', // Default to international
+        ...(paymentMethod?.type === 'bank_transfer' && {
+          bankName: paymentMethod.bankName,
+          iban: paymentMethod.iban,
+          swift: paymentMethod.swift,
+          accountNumber: paymentMethod.accountNumber,
+          routingNumber: paymentMethod.routingNumber,
+        }),
+        // Crypto
+        ...(paymentMethod?.type === 'crypto_wallet' && {
+          walletAddress: paymentMethod.walletAddress,
+          network: paymentMethod.network,
+          currency: paymentMethod.currency,
+        }),
+      })
+    }
+  }, [paymentMethod, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -230,7 +232,6 @@ export function PaymentMethodModal({
                 value={formData.bankName || ''}
                 onChange={e => setFormData({ ...formData, bankName: e.target.value })}
                 placeholder="JPMorgan Chase, BNP Paribas..."
-                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
 
@@ -243,7 +244,6 @@ export function PaymentMethodModal({
                 <Button
                   type="button"
                   variant={formData.bankRegion === 'international' ? 'default' : 'outline'}
-                  className="flex-1 h-auto py-4 px-4 flex flex-col items-center gap-2 transition-all duration-200"
                   onClick={() => setFormData({ ...formData, bankRegion: 'international' })}
                 >
                   <Icon name="lucide:Globe" className="w-6 h-6" />

@@ -35,23 +35,25 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
     !!(company?.city || company?.postalCode || company?.country)
   )
 
-  // Update form data when company changes
+  // Update form data when company changes or modal opens
   useEffect(() => {
-    setFormData({
-      userId: '',
-      companyName: company?.companyName || '',
-      email: company?.email || '',
-      phone: company?.phone || '',
-      address: company?.address || '',
-      city: company?.city || '',
-      postalCode: company?.postalCode || '',
-      country: company?.country || '',
-      companyRegistrationNumber: company?.companyRegistrationNumber || '',
-      taxNumber: company?.taxNumber || '',
-      website: company?.website || '',
-    })
-    setShowFullAddress(!!(company?.city || company?.postalCode || company?.country))
-  }, [company])
+    if (isOpen) {
+      setFormData({
+        userId: '',
+        companyName: company?.companyName || '',
+        email: company?.email || '',
+        phone: company?.phone || '',
+        address: company?.address || '',
+        city: company?.city || '',
+        postalCode: company?.postalCode || '',
+        country: company?.country || '',
+        companyRegistrationNumber: company?.companyRegistrationNumber || '',
+        taxNumber: company?.taxNumber || '',
+        website: company?.website || '',
+      })
+      setShowFullAddress(!!(company?.city || company?.postalCode || company?.country))
+    }
+  }, [company, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

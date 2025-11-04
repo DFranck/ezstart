@@ -1,5 +1,6 @@
 'use client'
 
+import { callApi, runWithFeedback } from '@/utils/api'
 import { BillingClient, Client } from '@ezbill/types'
 import {
   Button,
@@ -15,7 +16,6 @@ import {
   SelectValue,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@/utils/api'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
@@ -54,29 +54,31 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
     !!(client?.city || client?.postalCode || client?.country)
   )
 
-  // Update form data when client changes
+  // Update form data when client changes or modal opens
   useEffect(() => {
-    setFormData({
-      userId: client?.userId || '',
-      clientName: client?.clientName || '',
-      email: client?.email || '',
-      phone: client?.phone || '',
-      isCompany: client?.isCompany || false,
-      address: client?.address || '',
-      city: client?.city || '',
-      postalCode: client?.postalCode || '',
-      country: client?.country || '',
-      companyRegistrationNumber: client?.companyRegistrationNumber || '',
-      taxNumber: client?.taxNumber || '',
-      contactPersonName: client?.contactPersonName || '',
-      contactPersonEmail: client?.contactPersonEmail || '',
-      contactPersonPhone: client?.contactPersonPhone || '',
-      contactPersonTitle: client?.contactPersonTitle || '',
-      website: client?.website || '',
-      notes: client?.notes || '',
-    })
-    setShowFullAddress(!!(client?.city || client?.postalCode || client?.country))
-  }, [client])
+    if (isOpen) {
+      setFormData({
+        userId: client?.userId || '',
+        clientName: client?.clientName || '',
+        email: client?.email || '',
+        phone: client?.phone || '',
+        isCompany: client?.isCompany || false,
+        address: client?.address || '',
+        city: client?.city || '',
+        postalCode: client?.postalCode || '',
+        country: client?.country || '',
+        companyRegistrationNumber: client?.companyRegistrationNumber || '',
+        taxNumber: client?.taxNumber || '',
+        contactPersonName: client?.contactPersonName || '',
+        contactPersonEmail: client?.contactPersonEmail || '',
+        contactPersonPhone: client?.contactPersonPhone || '',
+        contactPersonTitle: client?.contactPersonTitle || '',
+        website: client?.website || '',
+        notes: client?.notes || '',
+      })
+      setShowFullAddress(!!(client?.city || client?.postalCode || client?.country))
+    }
+  }, [client, isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -147,18 +149,14 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
             Client Name *
           </Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Icon name="lucide:User" className="w-5 h-5 text-foreground/50 z-10" />
-            </div>
             <Input
               value={formData.clientName}
               onChange={e => setFormData({ ...formData, clientName: e.target.value })}
               required
-              className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="Enter client name"
             />
           </div>
@@ -166,26 +164,26 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-ezbill-client" />
             Client Type
           </Label>
           <Select
             value={formData.isCompany ? 'company' : 'individual'}
             onValueChange={value => setFormData({ ...formData, isCompany: value === 'company' })}
           >
-            <SelectTrigger className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
+            <SelectTrigger className="w-full ">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="individual" className="hover:bg-primary/5">
                 <div className="flex items-center">
-                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
+                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Individual
                 </div>
               </SelectItem>
               <SelectItem value="company" className="hover:bg-primary/5">
                 <div className="flex items-center">
-                  <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-accent" />
+                  <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Company
                 </div>
               </SelectItem>
@@ -195,18 +193,14 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-ezbill-client" />
             Email
           </Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Icon name="lucide:Mail" className="w-5 h-5 text-foreground/60 z-10" />
-            </div>
             <Input
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="client@example.com"
             />
           </div>
@@ -214,17 +208,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3  flex items-center">
-            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-ezbill-client" />
             Phone
           </Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Icon name="lucide:Phone" className="w-5 h-5 text-foreground/60 z-10" />
-            </div>
             <Input
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -232,18 +222,14 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-client" />
             Website
           </Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Icon name="lucide:Globe" className="w-5 h-5 text-foreground/60 z-10" />
-            </div>
             <Input
               type="url"
               value={formData.website}
               onChange={e => setFormData({ ...formData, website: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="https://example.com"
             />
           </div>
@@ -251,17 +237,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-client" />
             Address
           </Label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Icon name="lucide:MapPin" className="w-5 h-5 text-foreground/60 z-10" />
-            </div>
             <Input
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
-              className="w-full pl-12  focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
               placeholder="123 Main Street"
             />
           </div>
@@ -274,13 +256,12 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 id="showFullAddress"
                 checked={showFullAddress}
                 onCheckedChange={(checked: boolean) => setShowFullAddress(checked)}
-                className="border-primary/30 text-primary focus:ring-cyan-500"
               />
               <Label
                 htmlFor="showFullAddress"
                 className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Add detailed address (city, postal code, country)
               </Label>
             </div>
@@ -291,7 +272,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
           <>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-client" />
                 City
               </Label>
               <Input
@@ -304,7 +285,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3  flex items-center">
-                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Postal Code
               </Label>
               <Input
@@ -317,7 +298,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Country
               </Label>
               <Input
@@ -373,7 +354,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
           <>
             <div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
               <div className="flex items-center mb-4">
-                <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-primary" />
+                <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-ezbill-client" />
                 <h4 className="text-lg font-semibold text-foreground">Contact Person</h4>
                 <span className="ml-2 text-sm text-muted-foreground">(Optional)</span>
               </div>
@@ -381,7 +362,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:User" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Name
               </Label>
               <Input
@@ -394,7 +375,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Job Title
               </Label>
               <Input
@@ -407,7 +388,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Email
               </Label>
               <Input
@@ -421,7 +402,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-primary" />
+                <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Phone
               </Label>
               <Input
@@ -436,7 +417,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-client" />
             Notes
           </Label>
           <TextArea
