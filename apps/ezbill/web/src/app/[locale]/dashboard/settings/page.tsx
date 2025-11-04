@@ -8,13 +8,21 @@ import { PaymentMethodModal } from '@/components/payment-method-modal'
 import PaymentMethodCard from '@/components/PaymentMethodCard_v2'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useInvalidateBilling } from '@/hooks/useBillingQueries'
+import { callApi } from '@/utils/api'
 import { groupCompaniesAsOne } from '@/utils/group-companies'
 import { groupDeletedItems } from '@/utils/group-deleted-items'
 import { groupPaymentMethodsByType } from '@/utils/group-payment-methods'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import { Icon, P, Tabs, TabsContent, TabsList, TabsTrigger, Skeleton, SkeletonCard } from '@ezstart/ui/components'
+import {
+  Icon,
+  Skeleton,
+  SkeletonCard,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
-import { callApi } from '@/utils/api'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { getUserId } from '../../../../utils/get-user-id'
@@ -217,9 +225,9 @@ export default function SettingsPage() {
   const deletedItemGroups = groupDeletedItems(deletedItems)
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+    <div className="max-w-7xl w-full mx-auto py-6 sm:py-8 space-y-6">
       <div>
-        <Tabs defaultValue="business" className="space-y-8">
+        <Tabs defaultValue="business" className="space-y-8 mx-2 md:mx-4 lg:mx-6">
           <TabsList>
             <TabsTrigger value="business">
               <Icon name="lucide:Building2" />

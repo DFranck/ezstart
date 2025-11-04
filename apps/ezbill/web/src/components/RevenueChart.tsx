@@ -128,13 +128,6 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
               6 Months
             </Button>
             <Button
-              variant={period === '12m' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setPeriod('12m')}
-            >
-              12 Months
-            </Button>
-            <Button
               variant={period === 'year' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPeriod('year')}
@@ -189,7 +182,7 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
               dataKey="revenue"
               fill={CHART_COLORS.payment}
               radius={[4, 4, 0, 0]}
-              // Slightly tighter bars on mobile
+              barSize={isMobile ? 28 : 38}
             />
           </BarChart>
         </ChartContainer>

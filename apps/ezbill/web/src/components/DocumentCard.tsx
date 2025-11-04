@@ -79,13 +79,17 @@ export function DocumentCard({
                 className={cn(
                   'rounded-xl flex items-center justify-center',
                   iconGradient,
-                  type === 'invoice' || type === 'receipt' ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-12 h-12'
+                  type === 'invoice' || type === 'receipt'
+                    ? 'w-10 h-10 sm:w-12 sm:h-12'
+                    : 'w-12 h-12'
                 )}
               >
                 <Icon
                   name={icon}
                   className={
-                    type === 'invoice' || type === 'receipt' ? 'w-5 h-5 sm:w-6 sm:h-6 text-white' : 'w-6 h-6 text-white'
+                    type === 'invoice' || type === 'receipt'
+                      ? 'w-5 h-5 sm:w-6 sm:h-6 text-white'
+                      : 'w-6 h-6 text-white'
                   }
                 />
               </div>
@@ -123,11 +127,19 @@ export function DocumentCard({
                   : 'flex items-center space-x-4'
               }
             >
-              <div className={type === 'invoice' || type === 'receipt' ? 'text-left sm:text-right' : 'text-right'}>
+              <div
+                className={
+                  type === 'invoice' || type === 'receipt'
+                    ? 'text-left sm:text-right'
+                    : 'text-right'
+                }
+              >
                 <p
                   className={cn(
                     'font-bold text-foreground',
-                    type === 'invoice' || type === 'receipt' ? 'text-lg sm:text-xl lg:text-2xl' : 'text-2xl'
+                    type === 'invoice' || type === 'receipt'
+                      ? 'text-lg sm:text-xl lg:text-2xl'
+                      : 'text-2xl'
                   )}
                 >
                   ${total} {currency}
@@ -307,112 +319,112 @@ export function QuoteCard({
 
   return (
     <>
-    <DocumentCard
-      type="quote"
-      documentNumber={documentNumber}
-      status={status}
-      createdAt={createdAt}
-      total={total}
-      currency={currency}
-      icon="lucide:FileText"
-      iconGradient="bg-gradient-quote"
-      focusRingColor="focus:ring-2 focus:ring-ezbill-quote/30"
-      statusConfig={statusConfig}
-      onClick={onClick}
-      className={className}
-      additionalInfo={
-        <span className="text-sm text-muted-foreground">
-          Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
-        </span>
-      }
-      actions={
-        <>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onEdit}
-            disabled={!permissions.canEdit}
-            title={!permissions.canEdit ? permissions.reason : undefined}
-            className={cn({ hidden: !permissions.canEdit })}
-          >
-            <Icon name="lucide:Edit" className="w-4 h-4" />
-          </Button>
-          {permissions.canDelete && onDelete && (
+      <DocumentCard
+        type="quote"
+        documentNumber={documentNumber}
+        status={status}
+        createdAt={createdAt}
+        total={total}
+        currency={currency}
+        icon="lucide:FileText"
+        iconGradient="bg-gradient-quote"
+        focusRingColor="focus:ring-2 focus:ring-ezbill-quote/30"
+        statusConfig={statusConfig}
+        onClick={onClick}
+        className={className}
+        additionalInfo={
+          <span className="text-sm text-muted-foreground">
+            Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
+          </span>
+        }
+        actions={
+          <>
             <Button
               size="sm"
               variant="outline"
-              onClick={(e) => {
-                e.stopPropagation()
-                setDeleteDialog(true)
-              }}
-              className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
+              onClick={onEdit}
+              disabled={!permissions.canEdit}
+              title={!permissions.canEdit ? permissions.reason : undefined}
+              className={cn({ hidden: !permissions.canEdit })}
             >
-              <Icon name="lucide:Trash2" className="w-4 h-4" />
+              <Icon name="lucide:Edit" className="w-4 h-4" />
             </Button>
-          )}
-          {permissions.canSend && onSend && (
-            <Button
-              size="sm"
-              onClick={onSend}
-              className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
-            >
-              <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Send</span>
-            </Button>
-          )}
-          {permissions.canAccept && onAccept && (
-            <Button
-              size="sm"
-              onClick={onAccept}
-              className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground"
-            >
-              <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
-            </Button>
-          )}
-          {permissions.canDecline && onDecline && (
-            <Button
-              size="sm"
-              onClick={onDecline}
-              className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground"
-            >
-              <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
-            </Button>
-          )}
-          {onDownload && (
-            <Button size="sm" variant="outline" onClick={onDownload}>
-              <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Download</span>
-            </Button>
-          )}
-          {permissions.canConvertToInvoice && (
-            <Button
-              size="sm"
-              onClick={onConvertToInvoice}
-              className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
-            >
-              <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
-            </Button>
-          )}
-        </>
-      }
-    />
-
-    <DeleteConfirmationDialog
-      isOpen={deleteDialog}
-      onClose={() => setDeleteDialog(false)}
-      onConfirm={() => {
-        if (onDelete) {
-          onDelete({} as React.MouseEvent)
+            {permissions.canDelete && onDelete && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={e => {
+                  e.stopPropagation()
+                  setDeleteDialog(true)
+                }}
+                className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
+              >
+                <Icon name="lucide:Trash2" className="w-4 h-4" />
+              </Button>
+            )}
+            {permissions.canSend && onSend && (
+              <Button
+                size="sm"
+                onClick={onSend}
+                className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
+              >
+                <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
+                <span className="hidden xs:inline sm:hidden md:inline">Send</span>
+              </Button>
+            )}
+            {permissions.canAccept && onAccept && (
+              <Button
+                size="sm"
+                onClick={onAccept}
+                className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground"
+              >
+                <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
+                <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
+              </Button>
+            )}
+            {permissions.canDecline && onDecline && (
+              <Button
+                size="sm"
+                onClick={onDecline}
+                className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground"
+              >
+                <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
+                <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
+              </Button>
+            )}
+            {onDownload && (
+              <Button size="sm" variant="outline" onClick={onDownload}>
+                <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+                <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+              </Button>
+            )}
+            {permissions.canConvertToInvoice && (
+              <Button
+                size="sm"
+                onClick={onConvertToInvoice}
+                className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
+              >
+                <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
+                <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
+              </Button>
+            )}
+          </>
         }
-        setDeleteDialog(false)
-      }}
-      title="Delete Quote"
-      description={`Are you sure you want to delete quote #${documentNumber}? This will move it to trash.`}
-      confirmText="Delete Quote"
-    />
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        onConfirm={() => {
+          if (onDelete) {
+            onDelete({} as React.MouseEvent)
+          }
+          setDeleteDialog(false)
+        }}
+        title="Delete Quote"
+        description={`Are you sure you want to delete quote #${documentNumber}? This will move it to trash.`}
+        confirmText="Delete Quote"
+      />
     </>
   )
 }
@@ -453,11 +465,6 @@ export function ReceiptCard({
       statusConfig={statusConfig}
       onClick={onClick}
       className={className}
-      additionalInfo={
-        <span className="text-sm text-muted-foreground">
-          Payment: {paymentDate ? new Date(paymentDate).toLocaleDateString() : '-'}
-        </span>
-      }
       actions={
         onDownload && (
           <Button size="sm" variant="outline" onClick={onDownload} title="Download receipt">
