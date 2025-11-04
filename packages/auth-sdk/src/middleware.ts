@@ -201,8 +201,9 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
           const appOrigin = currentUrl.origin
           const ezauthUrl = getWebUrl('ezauth', env)
 
-          // Build redirect URL with original path preserved
-          const redirectUri = `${appOrigin}/auth/callback`
+          // Build redirect URL with locale preserved (important for i18n apps)
+          const localePrefix = locale ? `/${locale}` : ''
+          const redirectUri = `${appOrigin}${localePrefix}/auth/callback`
           const returnTo = pathname // Full path with locale
           const loginUrl = new URL(`${ezauthUrl}/login`)
 
