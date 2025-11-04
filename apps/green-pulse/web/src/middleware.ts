@@ -6,13 +6,13 @@ import { routing } from './i18n/routing'
 // Create i18n middleware
 const intlMiddleware = createIntlMiddleware(routing)
 
-// Create auth middleware with auto-detection
+// Create auth middleware with JWT mode for external domain
 // - localhost: Automatically uses localStorage mode (no middleware checks)
-// - production *.ezstart.xyz: Uses httpOnly cookies
-// - external domains: Falls back to localStorage with warning
+// - production www.ai-greenpulse.com: Uses JWT validation
+// - *.ezstart.xyz: Would use httpOnly cookies (not applicable here)
 export default createAuthMiddleware({
   appName: 'green-pulse',
-  authMode: 'httpOnly', // Auto-switches to localStorage in localhost
+  authMode: 'jwt', // External domain requires JWT mode
   protectedPaths: ['/dashboard', '/chat'],
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,
