@@ -12,6 +12,8 @@ const quoteSchema = createBillingDocSchema(
       default: () =>
         new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     },
+    paymentMethodId: { type: String, required: false }, // DEPRECATED: Use paymentMethodIds
+    paymentMethodIds: { type: [String], required: false }, // Array of payment method IDs
   },
   ['draft', 'sent', 'accepted', 'rejected', 'converted'],
   'draft'

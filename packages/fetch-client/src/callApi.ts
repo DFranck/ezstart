@@ -68,6 +68,7 @@ export async function callApi<T = any>(
         ...headers,
       },
       body: isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,
+      credentials: 'include', // Required for httpOnly cookies in cross-origin requests
       signal,
     })
 

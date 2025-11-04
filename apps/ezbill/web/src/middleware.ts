@@ -16,7 +16,7 @@ export default createAuthMiddleware({
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,
   intlMiddleware,
-  debug: true, // Enable debug mode to troubleshoot auth issues
+  debug: false, // Disabled - enables automatic redirect to EZAuth when unauthenticated
 })
 
 // Next.js requires a literal object for static analysis at build time

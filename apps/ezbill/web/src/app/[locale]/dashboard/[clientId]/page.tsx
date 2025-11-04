@@ -492,6 +492,7 @@ const ClientDashboardPage = () => {
         clients={clients}
         companies={companies}
         paymentMethods={paymentMethods}
+        clientId={clientId}
         onSave={refetchAll}
       />
 
@@ -501,6 +502,7 @@ const ClientDashboardPage = () => {
         quote={editingQuote}
         clients={clients}
         companies={companies}
+        clientId={clientId}
         onSave={refetchAll}
       />
 

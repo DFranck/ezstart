@@ -9,6 +9,8 @@ const receiptSchema = createBillingDocSchema(
   {
     paymentDate: { type: Date, default: Date.now },
     invoiceId: { type: String, default: null },
+    paymentMethodId: { type: String, required: false }, // DEPRECATED: Use paymentMethodIds
+    paymentMethodIds: { type: [String], required: false }, // Array of payment method IDs
   },
   ['issued', 'refunded'],
   'issued'

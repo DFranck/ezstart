@@ -13,7 +13,8 @@ const invoiceSchema = createBillingDocSchema(
         new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     },
     quoteId: { type: String, default: null },
-    paymentMethodId: { type: String, required: false },
+    paymentMethodId: { type: String, required: false }, // DEPRECATED: Use paymentMethodIds
+    paymentMethodIds: { type: [String], required: false }, // Array of payment method IDs
   },
   ['draft', 'sent', 'paid'],
   'draft'
