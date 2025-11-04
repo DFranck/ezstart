@@ -448,7 +448,11 @@ export function ClientLayout({
           bottomContent={footerBottomContent}
           layout={footerLayout}
           stackOnMobile={footerStackOnMobile}
-          className={footerClassName}
+          className={cn(
+            footerClassName,
+            // Add bottom padding when mobile nav is visible to prevent overlap
+            isMobile && !hideBottomNavOnMobile && mobileNavItems.length > 0 && 'pb-20'
+          )}
         />
       )}
 
