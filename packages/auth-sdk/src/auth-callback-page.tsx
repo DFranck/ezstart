@@ -1,5 +1,5 @@
 'use client'
-import { Icon } from '@ezstart/ui/components'
+import { Spinner } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useAuth } from './provider.js'
@@ -11,6 +11,8 @@ interface AuthCallbackPageProps {
   successMessage?: string
   /** Custom redirect message. Defaults to 'Redirecting...' */
   redirectMessage?: string
+  /** Custom processing message. Defaults to 'Processing authentication...' */
+  processingMessage?: string
   /** Custom error button text. Defaults to 'Go Back' */
   errorButtonText?: string
   /** Custom error button className */
@@ -21,6 +23,7 @@ function CallbackContent({
   redirectTo = '/',
   successMessage = 'Authentication successful!',
   redirectMessage = 'Redirecting...',
+  processingMessage = 'Processing authentication...',
   errorButtonText = 'Go Back',
   errorButtonClassName = 'px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
 }: AuthCallbackPageProps) {
@@ -33,41 +36,21 @@ function CallbackContent({
 
   // Extract and clean URL immediately on first render
   useEffect(() => {
-    console.log('🚀 [AuthCallbackPage] URL extraction useEffect triggered')
-    console.log('🚀 [AuthCallbackPage] Current URL:', window.location.href)
-    console.log('🚀 [AuthCallbackPage] searchParams:', Object.fromEntries(searchParams.entries()))
-    console.log('🚀 [AuthCallbackPage] Current code state:', code)
-
     const authCode = searchParams.get('code')
 
     if (authCode && !code) {
-      console.log('🔗 [AuthCallbackPage] Extracted auth code:', authCode)
       setCode(authCode)
-
       // Clean URL immediately to prevent any re-processing
       window.history.replaceState({}, document.title, window.location.pathname)
-      console.log('🧹 [AuthCallbackPage] URL cleaned, code saved for processing')
-      console.log('🧹 [AuthCallbackPage] New URL:', window.location.href)
     } else if (!authCode && !code) {
-      console.log('❌ [AuthCallbackPage] No authorization code found in URL')
       setStatus('error')
       setError('No authorization code found')
-    } else {
-      console.log(
-        '⏭️ [AuthCallbackPage] Skipping extraction - authCode:',
-        !!authCode,
-        'code state:',
-        !!code
-      )
     }
   }, [searchParams, code])
 
   // Process the saved code with global lock to prevent race conditions
   useEffect(() => {
-    console.log('🔧 Processing effect triggered. code:', code, 'status:', status)
-
     if (!code || status !== 'loading') {
-      console.log('⏭️ Skipping processing. code:', !!code, 'status:', status)
       return
     }
 
@@ -76,7 +59,6 @@ function CallbackContent({
 
     // Check if another instance is already processing this code
     if (typeof window !== 'undefined' && (window as any)[lockKey]) {
-      console.log('🔒 Another instance already processing this code, skipping')
       return
     }
 
@@ -84,26 +66,21 @@ function CallbackContent({
       // Set global lock
       if (typeof window !== 'undefined') {
         ;(window as any)[lockKey] = true
-        console.log('🔒 Lock acquired for code processing')
       }
 
       try {
-        console.log('🔄 Processing callback with saved code:', code)
         await handleCallback(code)
-        console.log('✅ Callback processed successfully')
-
         setStatus('success')
         // Redirect after successful auth
         setTimeout(() => router.push(redirectTo), 1500)
       } catch (err) {
-        console.error('❌ Auth callback error:', err)
+        console.error('❌ [AuthCallback] Authentication failed:', err)
         setStatus('error')
         setError(err instanceof Error ? err.message : 'Authentication failed')
       } finally {
         // Release global lock
         if (typeof window !== 'undefined') {
           delete (window as any)[lockKey]
-          console.log('🔓 Lock released for code processing')
         }
       }
     }
@@ -122,8 +99,8 @@ function CallbackContent({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Icon name="lucide:LoaderIcon" className="w-18 h-18 text-ezstart animate-spin" />
-          <p className="text-muted-foreground">Processing authentication...</p>
+          <Spinner />
+          <p className="text-muted-foreground">{processingMessage}</p>
         </div>
       </div>
     )
@@ -214,7 +191,7 @@ export function AuthCallbackPage(props: AuthCallbackPageProps) {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <Spinner />
         </div>
       }
     >

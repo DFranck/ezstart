@@ -78,7 +78,7 @@ export default function HomePage() {
       </div>
 
       {/* Login Section */}
-      <Card id="login" variant="floating" className="w-full max-w-md">
+      <Card id="login" variant="ghost" className="w-full max-w-md">
         <CardHeader>
           <H2>Get Started</H2>
         </CardHeader>
