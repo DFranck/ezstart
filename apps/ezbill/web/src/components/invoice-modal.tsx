@@ -65,7 +65,7 @@ export function InvoiceModal({
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
 
-  const [formData, setFormData] = useState<CreateInvoice & { paymentMethodId?: string }>({
+  const [formData, setFormData] = useState<CreateInvoice & { paymentMethodIds?: string[] }>({
     userId: '', // Will be set in handleSubmit
     clientId:
       invoice?.clientId || clientId || (clients.length > 0 && clients[0] ? clients[0]._id : ''),
@@ -81,7 +81,7 @@ export function InvoiceModal({
     terms: invoice?.terms || '',
     taxRate: invoice?.taxRate || 0,
     status: invoice?.status || 'draft',
-    paymentMethodId: paymentMethods?.find(p => p.isDefault)?._id || '',
+    paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
   })
 
   // Update form data when invoice changes
@@ -102,7 +102,7 @@ export function InvoiceModal({
       terms: invoice?.terms || '',
       taxRate: invoice?.taxRate || 0,
       status: invoice?.status || 'draft',
-      paymentMethodId: paymentMethods?.find(p => p.isDefault)?._id || '',
+      paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
     })
     setShowTaxes(invoice?.taxRate ? invoice.taxRate > 0 : false)
   }, [invoice, clientId, clients, paymentMethods])
@@ -276,26 +276,31 @@ export function InvoiceModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium  mb-3 block flex items-center">
+              <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
-                Payment Method
+                Payment Methods
               </Label>
               {paymentMethods && paymentMethods.length > 0 ? (
-                <Select
-                  value={formData.paymentMethodId || ''}
-                  onValueChange={value => setFormData({ ...formData, paymentMethodId: value })}
-                >
-                  <SelectTrigger className="w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md">
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                    {paymentMethods.map(method => (
-                      <SelectItem
-                        key={method._id}
-                        value={method._id}
-                        className="hover:bg-primary/5"
-                      >
-                        <div className="flex items-center">
+                <div className="space-y-2 border rounded-lg p-3">
+                  {paymentMethods.map(method => {
+                    const isChecked = formData.paymentMethodIds?.includes(method._id) || false
+                    return (
+                      <div key={method._id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`payment-${method._id}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked: boolean) => {
+                            const currentIds = formData.paymentMethodIds || []
+                            const newIds = checked
+                              ? [...currentIds, method._id]
+                              : currentIds.filter(id => id !== method._id)
+                            setFormData({ ...formData, paymentMethodIds: newIds })
+                          }}
+                        />
+                        <Label
+                          htmlFor={`payment-${method._id}`}
+                          className="flex items-center flex-1 cursor-pointer"
+                        >
                           <Icon
                             name={
                               method.type === 'crypto_wallet'
@@ -308,15 +313,15 @@ export function InvoiceModal({
                             }
                             className="w-4 h-4 mr-2 text-ezbill-payment"
                           />
-                          {method.name}
+                          <span>{method.name}</span>
                           {method.isDefault && (
                             <span className="ml-2 text-xs text-success">(Default)</span>
                           )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                        </Label>
+                      </div>
+                    )
+                  })}
+                </div>
               ) : (
                 <div className="bg-orange-50/50 backdrop-blur-sm rounded-xl p-4 border border-orange-200/30">
                   <div className="flex items-center justify-between">

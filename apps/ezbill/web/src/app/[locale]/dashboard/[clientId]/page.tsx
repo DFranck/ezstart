@@ -15,12 +15,16 @@ import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useClientDashboardHandlers } from '@/hooks/useClientDashboardHandlers'
 import { getBillingPermissions } from '@/utils/billing-permissions'
-import { groupInvoicesByMonth, groupInvoicesByStatus, groupInvoicesByWeek } from '@/utils/group-invoices'
+import {
+  groupInvoicesByMonth,
+  groupInvoicesByStatus,
+  groupInvoicesByWeek,
+} from '@/utils/group-invoices'
 import { groupQuotesByMonth, groupQuotesByStatus } from '@/utils/group-quotes'
 import { groupReceiptsByMonth } from '@/utils/group-receipts'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Icon, P, Skeleton, SkeletonCard } from '@ezstart/ui/components'
+import { Button, Icon, Skeleton, SkeletonCard } from '@ezstart/ui/components'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
 
@@ -239,7 +243,7 @@ const ClientDashboardPage = () => {
               {clientInvoices.length >= 3 ? (
                 <CollapsibleGroup
                   groups={invoiceGroups}
-                  renderItem={(invoice) => {
+                  renderItem={invoice => {
                     const permissions = getBillingPermissions(invoice, 'invoice')
                     return (
                       <InvoiceCard
@@ -294,15 +298,15 @@ const ClientDashboardPage = () => {
           title="Quotes"
           description={`${clientQuotes.length} total quotes`}
           icon="lucide:FileText"
-          iconGradient="bg-gradient-payment"
+          iconGradient="bg-gradient-quote"
           onAdd={handleCreateQuote}
           addButtonText="Create Quote"
           addButtonIcon="lucide:Plus"
-          addButtonGradient="bg-gradient-payment hover:bg-gradient-payment-hover"
+          addButtonGradient="bg-gradient-quote hover:bg-gradient-payment-hover"
           isEmpty={clientQuotes.length === 0}
           emptyState={{
             icon: 'lucide:FileText',
-            iconBg: 'bg-gradient-payment-light text-ezbill-quote',
+            iconBg: 'bg-gradient-quote-light text-ezbill-quote',
             title: 'No quotes yet',
             description: 'Create your first quote to get started',
             buttonText: 'Create First Quote',
@@ -336,7 +340,7 @@ const ClientDashboardPage = () => {
               {clientQuotes.length >= 3 ? (
                 <CollapsibleGroup
                   groups={quoteGroups}
-                  renderItem={(quote) => {
+                  renderItem={quote => {
                     const permissions = getBillingPermissions(quote, 'quote')
                     return (
                       <QuoteCard
@@ -418,7 +422,7 @@ const ClientDashboardPage = () => {
               {clientReceipts.length >= 3 ? (
                 <CollapsibleGroup
                   groups={receiptGroups}
-                  renderItem={(receipt) => (
+                  renderItem={receipt => (
                     <ReceiptCard
                       key={receipt._id}
                       documentNumber={receipt.documentNumber}
