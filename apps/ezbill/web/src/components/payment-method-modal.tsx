@@ -216,38 +216,40 @@ export function PaymentMethodModal({
             </div>
 
             <div>
-              <Label className="text-sm font-medium mb-3 block flex items-center">
+              <Label className="text-sm font-medium mb-3 flex items-center">
                 <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Region *
               </Label>
-              <Select
-                value={formData.bankRegion || 'international'}
-                onValueChange={(value: BankRegion) =>
-                  setFormData({ ...formData, bankRegion: value })
-                }
-              >
-                <SelectTrigger className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="international">
-                    <div className="flex items-center">
-                      <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-payment" />
-                      International (IBAN/SWIFT)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="domestic">
-                    <div className="flex items-center">
-                      <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
-                      Domestic (Account/Routing)
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={formData.bankRegion === 'international' ? 'default' : 'outline'}
+                  className="flex-1 h-auto py-4 px-4 flex flex-col items-center gap-2 transition-all duration-200"
+                  onClick={() => setFormData({ ...formData, bankRegion: 'international' })}
+                >
+                  <Icon name="lucide:Globe" className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-semibold">International</div>
+                    <div className="text-xs opacity-80">IBAN/SWIFT</div>
+                  </div>
+                </Button>
+                <Button
+                  type="button"
+                  variant={formData.bankRegion === 'domestic' ? 'default' : 'outline'}
+                  className="flex-1 h-auto py-4 px-4 flex flex-col items-center gap-2 transition-all duration-200"
+                  onClick={() => setFormData({ ...formData, bankRegion: 'domestic' })}
+                >
+                  <Icon name="lucide:Building" className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-semibold">Domestic</div>
+                    <div className="text-xs opacity-80">Account/Routing</div>
+                  </div>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
                 {formData.bankRegion === 'international'
-                  ? 'For Europe, Middle East, Africa (SEPA)'
-                  : 'For USA, Canada, UK, Asia'}
+                  ? 'For Europe, Middle East, Africa (SEPA transfers)'
+                  : 'For USA, Canada, UK, Asia (local transfers)'}
               </p>
             </div>
 
