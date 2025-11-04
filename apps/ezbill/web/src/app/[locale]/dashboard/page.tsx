@@ -1,13 +1,10 @@
 'use client'
 
-import { ClientModal } from '@/components/client-modal'
 import ClientCard from '@/components/ClientCard_v2'
 import CollapsibleGroup from '@/components/CollapsibleGroup'
-import { CompanyModal } from '@/components/company-modal'
 import DashboardSection from '@/components/DashboardSection'
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import FirstActionCard from '@/components/FirstActionCard'
-import { PaymentMethodModal } from '@/components/payment-method-modal'
 import { RevenueChart } from '@/components/RevenueChart'
 import StatsCard from '@/components/StatsCard'
 import { TopClientsChart } from '@/components/TopClientsChart'
@@ -18,9 +15,26 @@ import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Div, Spinner, SkeletonCard, Skeleton } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+
+// Dynamic imports for modals (lazy load on demand) - Performance optimization
+const ClientModal = dynamic(() => import('@/components/client-modal').then(mod => ({ default: mod.ClientModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+const CompanyModal = dynamic(() => import('@/components/company-modal').then(mod => ({ default: mod.CompanyModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+const PaymentMethodModal = dynamic(() => import('@/components/payment-method-modal').then(mod => ({ default: mod.PaymentMethodModal })), {
+  loading: () => null,
+  ssr: false
+})
 
 const DashboardPage = () => {
   const router = useRouter()

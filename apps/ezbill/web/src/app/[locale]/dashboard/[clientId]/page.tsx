@@ -8,10 +8,6 @@ import { ClientStats } from '@/components/ClientStats'
 import CollapsibleGroup from '@/components/CollapsibleGroup'
 import DashboardSection from '@/components/DashboardSection'
 import { InvoiceCard, QuoteCard, ReceiptCard } from '@/components/DocumentCard'
-import { InvoiceModal } from '@/components/invoice-modal'
-import { MarkPaidModal } from '@/components/mark-paid-modal'
-import { PreviewPdfModal, type PreviewState } from '@/components/PreviewPdfModal'
-import { QuoteModal } from '@/components/quote-modal'
 import { useBillingContext } from '@/contexts/billing-context'
 import { useClientDashboardHandlers } from '@/hooks/useClientDashboardHandlers'
 import { getBillingPermissions } from '@/utils/billing-permissions'
@@ -25,8 +21,37 @@ import { groupReceiptsByMonth } from '@/utils/group-receipts'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Button, Icon, Skeleton, SkeletonCard } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
+
+// Dynamic imports for modals (lazy load on demand) - Performance optimization
+const InvoiceModal = dynamic(() => import('@/components/invoice-modal').then(mod => ({ default: mod.InvoiceModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+const QuoteModal = dynamic(() => import('@/components/quote-modal').then(mod => ({ default: mod.QuoteModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+const MarkPaidModal = dynamic(() => import('@/components/mark-paid-modal').then(mod => ({ default: mod.MarkPaidModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+const PreviewPdfModal = dynamic(() => import('@/components/PreviewPdfModal').then(mod => ({ default: mod.PreviewPdfModal })), {
+  loading: () => null,
+  ssr: false
+})
+
+// Type import for PreviewState
+type PreviewState = {
+  isOpen: boolean
+  pdfUrl: string | null
+  title: string
+}
 
 const ClientDashboardPage = () => {
   const params = useParams()
@@ -42,7 +67,7 @@ const ClientDashboardPage = () => {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined)
   const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined)
-  const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
+  const [preview, setPreview] = useState<PreviewState>({ isOpen: false, pdfUrl: null, title: '' })
   const [invoiceGroupBy, setInvoiceGroupBy] = useState<'month' | 'week' | 'status'>('month')
   const [quoteGroupBy, setQuoteGroupBy] = useState<'month' | 'status'>('month')
 
