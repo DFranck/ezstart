@@ -16,6 +16,7 @@ export default createAuthMiddleware({
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,
   intlMiddleware,
+  debug: true, // Enable debug mode to troubleshoot auth issues
 })
 
 // Next.js requires a literal object for static analysis at build time
