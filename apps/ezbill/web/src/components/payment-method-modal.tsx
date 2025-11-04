@@ -135,24 +135,38 @@ export function PaymentMethodModal({
 
     // Auto-generate name from type
     const selectedType = paymentMethodTypes.find(t => t.value === formData.type)
-    // Remove bankRegion before sending (it's just for UX)
-    const { bankRegion, ...dataWithoutRegion } = formData
+
+    // Remove bankRegion and build clean data
+    const { bankRegion, ...baseData } = formData
 
     // Clean up bank transfer fields based on region
+    let cleanData: any = { ...baseData }
     if (formData.type === 'bank_transfer' && bankRegion) {
       if (bankRegion === 'international') {
-        // Keep IBAN/SWIFT, remove Account/Routing
-        delete dataWithoutRegion.accountNumber
-        delete dataWithoutRegion.routingNumber
+        // Keep IBAN/SWIFT only (remove spaces from IBAN)
+        cleanData = {
+          type: formData.type,
+          isDefault: formData.isDefault,
+          instructions: formData.instructions,
+          bankName: formData.bankName,
+          ...(formData.iban && { iban: formData.iban.replace(/\s/g, '') }), // Remove all spaces
+          ...(formData.swift && { swift: formData.swift }),
+        }
       } else {
-        // Keep Account/Routing, remove IBAN/SWIFT
-        delete dataWithoutRegion.iban
-        delete dataWithoutRegion.swift
+        // Keep Account/Routing only
+        cleanData = {
+          type: formData.type,
+          isDefault: formData.isDefault,
+          instructions: formData.instructions,
+          bankName: formData.bankName,
+          ...(formData.accountNumber && { accountNumber: formData.accountNumber }),
+          ...(formData.routingNumber && { routingNumber: formData.routingNumber }),
+        }
       }
     }
 
     const dataToSend = {
-      ...dataWithoutRegion,
+      ...cleanData,
       userId: getUserId(),
       name: selectedType?.label || formData.type,
     }
@@ -207,7 +221,7 @@ export function PaymentMethodModal({
       case 'bank_transfer':
         return (
           <>
-            <div className=''>
+            <div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Name *
@@ -220,7 +234,7 @@ export function PaymentMethodModal({
               />
             </div>
 
-            <div>
+            <div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 flex items-center">
                 <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Region *
