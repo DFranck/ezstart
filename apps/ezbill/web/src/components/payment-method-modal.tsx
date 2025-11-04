@@ -70,11 +70,13 @@ export function PaymentMethodModal({
     type: paymentMethod?.type || 'bank_transfer',
     isDefault: paymentMethod?.isDefault || false,
     instructions: paymentMethod?.instructions || '',
-    // Bank transfer
+    // Bank transfer - always set defaults for new payment methods
+    bankRegion:
+      paymentMethod?.type === 'bank_transfer' && paymentMethod.iban
+        ? 'international'
+        : 'international', // Default to international
     ...(paymentMethod?.type === 'bank_transfer' && {
       bankName: paymentMethod.bankName,
-      // Auto-detect region based on existing data
-      bankRegion: paymentMethod.iban ? 'international' : 'domestic',
       iban: paymentMethod.iban,
       swift: paymentMethod.swift,
       accountNumber: paymentMethod.accountNumber,
@@ -99,10 +101,13 @@ export function PaymentMethodModal({
       type: paymentMethod?.type || 'bank_transfer',
       isDefault: paymentMethod?.isDefault || false,
       instructions: paymentMethod?.instructions || '',
-      // Bank transfer
+      // Bank transfer - always set defaults
+      bankRegion:
+        paymentMethod?.type === 'bank_transfer' && paymentMethod.iban
+          ? 'international'
+          : 'international', // Default to international
       ...(paymentMethod?.type === 'bank_transfer' && {
         bankName: paymentMethod.bankName,
-        bankRegion: paymentMethod.iban ? 'international' : 'domestic',
         iban: paymentMethod.iban,
         swift: paymentMethod.swift,
         accountNumber: paymentMethod.accountNumber,
@@ -202,7 +207,7 @@ export function PaymentMethodModal({
       case 'bank_transfer':
         return (
           <>
-            <div>
+            <div className=''>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Name *
