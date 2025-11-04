@@ -132,6 +132,20 @@ export function PaymentMethodModal({
     const selectedType = paymentMethodTypes.find(t => t.value === formData.type)
     // Remove bankRegion before sending (it's just for UX)
     const { bankRegion, ...dataWithoutRegion } = formData
+
+    // Clean up bank transfer fields based on region
+    if (formData.type === 'bank_transfer' && bankRegion) {
+      if (bankRegion === 'international') {
+        // Keep IBAN/SWIFT, remove Account/Routing
+        delete dataWithoutRegion.accountNumber
+        delete dataWithoutRegion.routingNumber
+      } else {
+        // Keep Account/Routing, remove IBAN/SWIFT
+        delete dataWithoutRegion.iban
+        delete dataWithoutRegion.swift
+      }
+    }
+
     const dataToSend = {
       ...dataWithoutRegion,
       userId: getUserId(),
