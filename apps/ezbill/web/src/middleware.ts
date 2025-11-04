@@ -16,6 +16,7 @@ export default createAuthMiddleware({
   locales: routing.locales,
   defaultLocale: routing.defaultLocale,
   intlMiddleware,
+  cookieName: 'ezauth_token', // Match the actual cookie name from EZAuth API
   debug: false, // Disabled - enables automatic redirect to EZAuth when unauthenticated
 })
 
