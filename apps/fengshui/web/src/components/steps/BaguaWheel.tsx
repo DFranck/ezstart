@@ -139,14 +139,14 @@ export default function BaguaWheel({
   }, [rot]) // labelR, cx, cy et r ne bougent pas pendant le rendu
 
   return (
-    <div className="mx-auto" style={{ width: size }}>
+    <div className="w-full h-auto aspect-square max-w-[90vw] sm:max-w-[600px] mx-auto">
       <div
         className="relative"
         onMouseLeave={() => {
           if (!pinnedDir) setHoverLabelDir(null)
         }}
       >
-        <svg viewBox="0 0 100 100" className="w-full h-auto" role="img" aria-label="Roue Bagua">
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Roue Bagua">
           <defs>
             <clipPath id={clipId}>
               <circle cx={cx} cy={cy} r={r} />

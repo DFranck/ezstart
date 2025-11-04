@@ -1,10 +1,10 @@
 'use client'
 
+import { callApi, runWithFeedback } from '@/utils/api'
 import { BaseLineItem, Client, Company, CreateQuote, Currency, Quote } from '@ezbill/types'
 import {
   Button,
   Checkbox,
-  H3,
   Icon,
   Input,
   Label,
@@ -14,6 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
   Table,
   TableBody,
   TableCell,
@@ -22,7 +23,6 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@/utils/api'
 import { useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
@@ -37,10 +37,9 @@ interface QuoteModalProps {
   clientId?: string // Optional: if we're in a specific client context
 }
 
-const currencies: { value: Currency; label: string }[] = [
-  { value: 'EUR', label: 'EUR - Euro' },
-  { value: 'USD', label: 'USD - US Dollar' },
-  { value: 'GBP', label: 'GBP - British Pound' },
+const currencies: { value: Currency; label: string; symbol: string }[] = [
+  { value: 'EUR', label: 'EUR - Euro', symbol: '€' },
+  { value: 'USD', label: 'USD - US Dollar', symbol: '$' },
 ]
 
 export function QuoteModal({
@@ -154,7 +153,7 @@ export function QuoteModal({
               type="submit"
               disabled={!formData.clientId || formData.items.some(item => !item.label)}
               form="quote-form"
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="bg-gradient-quote text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <Icon name={quote ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
               {quote ? 'Update Quote' : 'Create Quote'}
@@ -169,7 +168,7 @@ export function QuoteModal({
             {!clientId && (
               <div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
-                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-amber-500" />
+                  <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Client *
                 </Label>
                 <Select
@@ -182,11 +181,12 @@ export function QuoteModal({
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {clients.map(client => (
-                      <SelectItem key={client._id} value={client._id} className="hover:bg-warning/5">
-                        <div className="flex items-center">
-                          <Icon name="lucide:User" className="w-4 h-4 mr-2 text-amber-500" />
-                          {client.clientName}
-                        </div>
+                      <SelectItem
+                        key={client._id}
+                        value={client._id}
+                        className="hover:bg-warning/5"
+                      >
+                        <div className="flex items-center">{client.clientName}</div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -196,7 +196,7 @@ export function QuoteModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-amber-500" />
+                <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
                 Bill on behalf of
               </Label>
               <Select
@@ -211,14 +211,21 @@ export function QuoteModal({
                 <SelectContent className="bg-popover border shadow-xl rounded-xl">
                   <SelectItem value="personal" className="hover:bg-warning/5">
                     <div className="flex items-center">
-                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-success" />
+                      <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                       Personal (your name)
                     </div>
                   </SelectItem>
                   {companies?.map(company => (
-                    <SelectItem key={company._id} value={company._id} className="hover:bg-warning/5">
+                    <SelectItem
+                      key={company._id}
+                      value={company._id}
+                      className="hover:bg-warning/5"
+                    >
                       <div className="flex items-center">
-                        <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-accent" />
+                        <Icon
+                          name="lucide:Building2"
+                          className="w-4 h-4 mr-2 text-ezbill-company"
+                        />
                         {company.companyName}
                       </div>
                     </SelectItem>
@@ -229,7 +236,7 @@ export function QuoteModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-amber-500" />
+                <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-ezbill-quote" />
                 Currency
               </Label>
               <Select
@@ -240,11 +247,13 @@ export function QuoteModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border shadow-xl rounded-xl">
-                  {currencies.map(({ value, label }) => (
+                  {currencies.map(({ value, label, symbol }) => (
                     <SelectItem key={value} value={value} className="hover:bg-warning/5">
                       <div className="flex items-center">
-                        <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                         {label}
+                        <Span className="ml-2" intent={'warning'}>
+                          {symbol}
+                        </Span>
                       </div>
                     </SelectItem>
                   ))}
@@ -254,18 +263,14 @@ export function QuoteModal({
 
             <div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
-                <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-amber-500" />
+                <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-ezbill-quote" />
                 Valid Until
               </Label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Icon name="lucide:Calendar" className="w-5 h-5 text-muted-foreground/60" />
-                </div>
                 <Input
                   type="date"
                   value={formData.validUntil}
                   onChange={e => setFormData({ ...formData, validUntil: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                 />
               </div>
             </div>
@@ -318,10 +323,10 @@ export function QuoteModal({
           </div>
 
           <div>
-            <div className="flex items-center mb-6">
+            {/* <div className="flex items-center mb-6">
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-warning" />
               <H3 className="text-xl font-bold ">Line Items</H3>
-            </div>
+            </div> */}
             <div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
               <Table>
                 <TableHeader>
@@ -389,9 +394,9 @@ export function QuoteModal({
                       <TableCell className="p-3">
                         <Button
                           type="button"
-                          variant="outline"
+                          size="icon"
+                          variant="destructive"
                           onClick={() => removeLineItem(index)}
-                          className="w-8 h-8 p-0 bg-card border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 rounded-lg transition-all"
                           disabled={formData.items.length === 1}
                         >
                           <Icon name="lucide:X" className="w-4 h-4" />
@@ -402,12 +407,7 @@ export function QuoteModal({
                 </TableBody>
               </Table>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addLineItem}
-              className="mt-4 bg-card border-warning/30 text-amber-600 hover:bg-warning/5 hover:border-warning/50 px-4 py-2 rounded-xl transition-all duration-200"
-            >
+            <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
               <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
               Add Line Item
             </Button>
@@ -415,7 +415,7 @@ export function QuoteModal({
           {/* Totals */}
           <div className="">
             <div className="flex items-center mb-3">
-              <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-amber-600" />
+              <Icon name="lucide:Calculator" className="w-4 h-4 mr-2" />
               <h4 className="font-semibold ">Quote Summary</h4>
             </div>
             <div className="space-y-2">
@@ -433,7 +433,7 @@ export function QuoteModal({
                   </span>
                 </div>
               )}
-              <div className="flex justify-between bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-3 shadow">
+              <div className="flex justify-between bg-gradient-quote text-white rounded-lg p-3 shadow">
                 <span className="font-bold">Total:</span>
                 <span className="font-bold text-lg">
                   {total.toFixed(2)} {formData.currency}
@@ -443,7 +443,7 @@ export function QuoteModal({
           </div>
           <div>
             <Label className="text-sm font-medium  mb-3 block flex items-center">
-              <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-amber-500" />
+              <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
               Notes
             </Label>
             <TextArea
@@ -457,7 +457,7 @@ export function QuoteModal({
 
           <div>
             <Label className="text-sm font-medium  mb-3 block flex items-center">
-              <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-amber-500" />
+              <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 " />
               Terms & Conditions
             </Label>
             <TextArea

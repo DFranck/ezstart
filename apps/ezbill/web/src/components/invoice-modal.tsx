@@ -436,98 +436,97 @@ export function InvoiceModal({
               <Icon name="lucide:List" className="w-5 h-5 mr-2 text-accent" />
               <H3 className="text-xl font-bold ">Line Items</H3>
             </div> */}
-            <div className=" rounded-xl overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-semibold ">
-                      <div className="flex items-center">
-                        <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
-                        Description
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold ">
-                      <div className="flex items-center">
-                        <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
-                        Qty
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold ">
-                      <div className="flex items-center">
-                        <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
-                        Price
-                      </div>
-                    </TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formData.items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Input
-                          placeholder="Description"
-                          value={item.label}
-                          onChange={e => updateLineItem(index, 'label', e.target.value)}
-                          required
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          placeholder="Qty"
-                          min="0"
-                          step="0.5"
-                          value={item.quantity === 0 ? '' : item.quantity}
-                          onChange={e =>
-                            updateLineItem(
-                              index,
-                              'quantity',
-                              parseFloat(e.target.value.replace(',', '.')) || 0
-                            )
-                          }
-                          required
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          placeholder="Price"
-                          min="0"
-                          step="0.5"
-                          value={item.price === 0 ? '' : item.price}
-                          onChange={e =>
-                            updateLineItem(
-                              index,
-                              'price',
-                              parseFloat(e.target.value.replace(',', '.')) || 0
-                            )
-                          }
-                          required
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size={'icon'}
-                          onClick={() => removeLineItem(index)}
-                          disabled={formData.items.length === 1}
-                        >
-                          <Icon name="lucide:X" className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="rounded-xl overflow-hidden">
+                <Table className="w-full min-w-[600px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-semibold ">
+                        <div className="flex items-center">
+                          <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
+                          Description
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold w-24">
+                        <div className="flex items-center">
+                          <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
+                          Qty
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold w-28">
+                        <div className="flex items-center">
+                          <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
+                          Price
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-12"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {formData.items.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="min-w-[200px]">
+                          <Input
+                            placeholder="Description"
+                            value={item.label}
+                            onChange={e => updateLineItem(index, 'label', e.target.value)}
+                            required
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            placeholder="Qty"
+                            min="0"
+                            step="0.5"
+                            value={item.quantity === 0 ? '' : item.quantity}
+                            onChange={e =>
+                              updateLineItem(
+                                index,
+                                'quantity',
+                                parseFloat(e.target.value.replace(',', '.')) || 0
+                              )
+                            }
+                            required
+                            className="w-20"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            placeholder="Price"
+                            min="0"
+                            step="0.5"
+                            value={item.price === 0 ? '' : item.price}
+                            onChange={e =>
+                              updateLineItem(
+                                index,
+                                'price',
+                                parseFloat(e.target.value.replace(',', '.')) || 0
+                              )
+                            }
+                            required
+                            className="w-24"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size={'icon'}
+                            onClick={() => removeLineItem(index)}
+                            disabled={formData.items.length === 1}
+                          >
+                            <Icon name="lucide:X" className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addLineItem}
-              className="mt-4 border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/30 px-4 py-2 rounded-xl transition-all duration-200"
-            >
+            <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
               <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
               Add Line Item
             </Button>

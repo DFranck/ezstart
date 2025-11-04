@@ -117,9 +117,9 @@ export function FormFillingInterface({
       </div>
 
       {/* Split Screen: Chat + Form Preview */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left: Chat Interface */}
-        <div className="w-1/2 border-r flex flex-col">
+        <div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 border-b lg:border-b-0 lg:border-r flex flex-col overflow-y-auto">
           <FormChatInterface
             formConfig={config}
             formInstanceId={formInstanceId}
@@ -130,7 +130,7 @@ export function FormFillingInterface({
         </div>
 
         {/* Right: Form Preview */}
-        <div className="w-1/2 overflow-y-auto">
+        <div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 overflow-y-auto">
           <FormPreview
             formConfig={config}
             extractedFields={extractedFields}

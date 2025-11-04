@@ -319,39 +319,42 @@ export function PlanUploader({
               </div>
 
               {/* Controls: ONLY zoom, rotation, width, height */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {/* Zoom */}
-                <div className="flex items-center gap-3">
-                  <label className="text-sm  w-24">{t('uploader.zoom')}</label>
-                  <input
-                    type="range"
-                    min={0.1}
-                    max={3}
-                    step={0.1}
-                    value={zoom}
-                    onChange={e => setZoom(Number(e.target.value))}
-                    className="w-full appearance-none bg-transparent cursor-pointer
-                      [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
-                      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
-                      [&::-webkit-slider-runnable-track]:to-fengshui-secondary
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
-                      [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
-                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-1.5
-                      [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                  />
-                  <span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</span>
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm block">{t('uploader.zoom')}</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={0.1}
+                      max={3}
+                      step={0.1}
+                      value={zoom}
+                      onChange={e => setZoom(Number(e.target.value))}
+                      className="w-full h-8 sm:h-6 appearance-none bg-transparent cursor-pointer
+                        [&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-full
+                        [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-fengshui-primary
+                        [&::-webkit-slider-runnable-track]:to-fengshui-secondary
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
+                        sm:[&::-webkit-slider-thumb]:w-5 sm:[&::-webkit-slider-thumb]:h-5
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                        [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-fengshui-primary
+                        [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:-mt-2 sm:[&::-webkit-slider-thumb]:-mt-1.5
+                        [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
+                    />
+                    <span className="text-xs w-10 text-right">{zoom.toFixed(1)}x</span>
+                  </div>
                 </div>
 
                 {/* Rotation */}
-                <div className="flex items-center gap-3">
-                  <label className="text-sm w-24">{t('uploader.rotation')}</label>
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm block">{t('uploader.rotation')}</label>
                   <div className="flex items-center gap-2 w-full">
                     <Button
                       onClick={() => setRotation(prev => prev - 90)}
                       size="sm"
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 h-10 sm:h-9"
                     >
                       - 90°
                       <Icon name="lucide:RotateCcw" className="w-4 h-4" />
@@ -360,7 +363,7 @@ export function PlanUploader({
                       onClick={() => setRotation(prev => prev + 90)}
                       size="sm"
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 h-10 sm:h-9"
                     >
                       + 90°
                       <Icon name="lucide:RotateCw" className="w-4 h-4" />
