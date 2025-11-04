@@ -2,15 +2,15 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { MobileNavbar } from '.'
-import { useClickOutside, useDevice, useOnScroll } from '../../hooks'
+import { useDevice, useOnScroll } from '../../hooks'
 import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
-import { Header } from '../header'
 import { Icon } from '../icon'
 import { Div, Main } from '../tag'
 import { headerVariantConfig } from '../tag/src/variants/tags/header'
 import { Footer } from './footer'
+import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
 
 export interface ClientLayoutProps {
@@ -166,7 +166,7 @@ export function ClientLayout({
       let shouldCloseAny = false
       const menusToClose: number[] = []
 
-      openMenus.forEach((menuIndex) => {
+      openMenus.forEach(menuIndex => {
         const menuRef = desktopMenuRefs.current.get(menuIndex)
         if (menuRef && !menuRef.contains(event.target as Node)) {
           menusToClose.push(menuIndex)
@@ -175,9 +175,9 @@ export function ClientLayout({
       })
 
       if (shouldCloseAny) {
-        setOpenMenus((prev) => {
+        setOpenMenus(prev => {
           const next = new Set(prev)
-          menusToClose.forEach((index) => next.delete(index))
+          menusToClose.forEach(index => next.delete(index))
           return next
         })
       }
@@ -208,7 +208,7 @@ export function ClientLayout({
               <div
                 key={index}
                 className="relative"
-                ref={(el) => {
+                ref={el => {
                   if (el) {
                     desktopMenuRefs.current.set(index, el)
                   } else {
@@ -224,7 +224,7 @@ export function ClientLayout({
                   aria-haspopup="true"
                   aria-controls={menuId}
                   onClick={() => toggleMenu(index)}
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
                       toggleMenu(index)
@@ -247,12 +247,10 @@ export function ClientLayout({
                   aria-labelledby={buttonId}
                   className={cn(
                     'absolute top-full left-0 mt-1 min-w-[200px] bg-background border rounded-md shadow-lg transition-all duration-200',
-                    isMenuOpen
-                      ? 'opacity-100 visible'
-                      : 'opacity-0 invisible pointer-events-none'
+                    isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
                   )}
                 >
-                  {link.menu.map((item) => (
+                  {link.menu.map(item => (
                     <Button
                       key={item.href}
                       asChild
@@ -350,7 +348,7 @@ export function ClientLayout({
                       aria-expanded={isMenuOpen}
                       aria-controls={submenuId}
                       onClick={() => toggleMenu(index)}
-                      onKeyDown={(e) => {
+                      onKeyDown={e => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault()
                           toggleMenu(index)

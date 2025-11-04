@@ -1,7 +1,7 @@
-import { useOnScroll } from '../hooks'
-import { cn } from '../lib/utils'
-import { Div, Tag } from './tag'
-import { headerVariantConfig } from './tag/src/variants/tags/header'
+import { useOnScroll } from '../../hooks'
+import { cn } from '../../lib/utils'
+import { Div, Tag } from '../tag'
+import { headerVariantConfig } from '../tag/src/variants/tags/header'
 
 /**
  * Header Component - Responsive Site Header

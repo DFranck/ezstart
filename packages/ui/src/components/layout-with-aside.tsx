@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cn } from '.././lib/utils';
 import { useDevice } from '../hooks';
 import { Burger } from './burger';
-import { Header } from './header';
+import { Header } from './layout/header';
 import { Aside, Div, Main } from './tag';
 
 const debug = false;
