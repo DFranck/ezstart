@@ -7,7 +7,7 @@ export type ReceiptDocument = Receipt;
 
 const receiptSchema = createBillingDocSchema(
   {
-    paymentDate: { type: String, default: Date.now() },
+    paymentDate: { type: Date, default: Date.now },
     invoiceId: { type: String, default: null },
   },
   ['issued', 'refunded'],
