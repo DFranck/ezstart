@@ -60,4 +60,24 @@ export interface PDFInvoiceData {
     // General
     instructions?: string
   }
+  // Support multiple payment methods
+  paymentMethods?: Array<{
+    methodName?: string
+    type?: string
+    // Crypto fields
+    walletAddress?: string
+    currency?: string
+    network?: string
+    // Bank fields
+    bankName?: string
+    accountNumber?: string
+    iban?: string
+    swift?: string
+    routingNumber?: string
+    // Digital payment fields
+    email?: string
+    username?: string
+    // General
+    instructions?: string
+  }>
 }

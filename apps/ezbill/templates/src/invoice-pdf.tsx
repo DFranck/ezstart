@@ -63,6 +63,26 @@ interface PDFInvoiceData {
     // General
     instructions?: string
   }
+  // Support multiple payment methods
+  paymentMethods?: Array<{
+    methodName?: string
+    type?: string
+    // Crypto fields
+    walletAddress?: string
+    currency?: string
+    network?: string
+    // Bank fields
+    bankName?: string
+    accountNumber?: string
+    iban?: string
+    swift?: string
+    routingNumber?: string
+    // Digital payment fields
+    email?: string
+    username?: string
+    // General
+    instructions?: string
+  }>
 }
 
 // Styles PDF
@@ -435,54 +455,98 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
         <View style={styles.footer}>
           {/* Compact Layout: Payment + Notes/Terms */}
           <View style={styles.footerGrid}>
-            {/* Payment Details Section */}
-            {data.paymentDetails && (
+            {/* Payment Methods Section - Support multiple methods */}
+            {(data.paymentMethods && data.paymentMethods.length > 0) || data.paymentDetails ? (
               <View style={styles.paymentSection}>
-                <Text style={styles.paymentTitle}>
-                  💳 {data.paymentDetails.methodName || 'Payment Details'}
-                </Text>
+                <Text style={styles.paymentTitle}>💳 Payment Methods</Text>
 
-                {/* Crypto Wallet */}
-                {data.paymentDetails.type === 'crypto_wallet' &&
-                  data.paymentDetails.walletAddress && (
+                {/* Multiple payment methods */}
+                {data.paymentMethods && data.paymentMethods.length > 0 ? (
+                  data.paymentMethods.map((method, index) => (
+                    <View key={index} style={{ marginBottom: 8 }}>
+                      <Text style={{ ...styles.paymentText, fontWeight: 'bold', marginBottom: 3 }}>
+                        {method.methodName || `Method ${index + 1}`}
+                      </Text>
+
+                      {/* Crypto Wallet */}
+                      {method.type === 'crypto_wallet' && method.walletAddress && (
+                        <>
+                          <Text style={styles.paymentText}>
+                            {method.currency || 'USDC'} • {method.network || 'Blockchain'}
+                          </Text>
+                          <Text style={styles.walletAddress}>{method.walletAddress}</Text>
+                        </>
+                      )}
+
+                      {/* Bank Transfer */}
+                      {method.type === 'bank_transfer' && (
+                        <>
+                          {method.bankName && (
+                            <Text style={styles.paymentText}>{method.bankName}</Text>
+                          )}
+                          {method.iban && (
+                            <Text style={styles.paymentText}>IBAN: {method.iban}</Text>
+                          )}
+                          {method.swift && (
+                            <Text style={styles.paymentText}>SWIFT: {method.swift}</Text>
+                          )}
+                        </>
+                      )}
+
+                      {/* Digital Payments */}
+                      {['paypal', 'wise', 'revolut'].includes(method.type || '') &&
+                        method.email && <Text style={styles.paymentText}>{method.email}</Text>}
+                    </View>
+                  ))
+                ) : (
+                  /* Legacy single payment method */
+                  data.paymentDetails && (
                     <>
                       <Text style={styles.paymentText}>
-                        {data.paymentDetails.currency || 'USDC'} •{' '}
-                        {data.paymentDetails.network || 'Blockchain'}
+                        {data.paymentDetails.methodName || 'Payment Details'}
                       </Text>
-                      <Text style={styles.paymentText}>Wallet Address:</Text>
-                      <Text style={styles.walletAddress}>{data.paymentDetails.walletAddress}</Text>
-                      <Text style={styles.paymentHint}>
-                        Copy the entire address above for payment
-                      </Text>
+
+                      {/* Crypto Wallet */}
+                      {data.paymentDetails.type === 'crypto_wallet' &&
+                        data.paymentDetails.walletAddress && (
+                          <>
+                            <Text style={styles.paymentText}>
+                              {data.paymentDetails.currency || 'USDC'} •{' '}
+                              {data.paymentDetails.network || 'Blockchain'}
+                            </Text>
+                            <Text style={styles.walletAddress}>
+                              {data.paymentDetails.walletAddress}
+                            </Text>
+                          </>
+                        )}
+
+                      {/* Bank Transfer */}
+                      {data.paymentDetails.type === 'bank_transfer' && (
+                        <>
+                          {data.paymentDetails.bankName && (
+                            <Text style={styles.paymentText}>{data.paymentDetails.bankName}</Text>
+                          )}
+                          {data.paymentDetails.iban && (
+                            <Text style={styles.paymentText}>IBAN: {data.paymentDetails.iban}</Text>
+                          )}
+                          {data.paymentDetails.swift && (
+                            <Text style={styles.paymentText}>
+                              SWIFT: {data.paymentDetails.swift}
+                            </Text>
+                          )}
+                        </>
+                      )}
+
+                      {/* Digital Payments */}
+                      {['paypal', 'wise', 'revolut'].includes(data.paymentDetails.type || '') &&
+                        data.paymentDetails.email && (
+                          <Text style={styles.paymentText}>{data.paymentDetails.email}</Text>
+                        )}
                     </>
-                  )}
-
-                {/* Bank Transfer */}
-                {data.paymentDetails.type === 'bank_transfer' && (
-                  <>
-                    {data.paymentDetails.bankName && (
-                      <Text style={styles.paymentText}>{data.paymentDetails.bankName}</Text>
-                    )}
-                    {data.paymentDetails.iban && (
-                      <Text style={styles.paymentText}>IBAN: {data.paymentDetails.iban}</Text>
-                    )}
-                    {data.paymentDetails.swift && (
-                      <Text style={styles.paymentText}>SWIFT: {data.paymentDetails.swift}</Text>
-                    )}
-                  </>
-                )}
-
-                {/* Digital Payments */}
-                {['paypal', 'wise', 'revolut'].includes(data.paymentDetails.type || '') && (
-                  <>
-                    {data.paymentDetails.email && (
-                      <Text style={styles.paymentText}>{data.paymentDetails.email}</Text>
-                    )}
-                  </>
+                  )
                 )}
               </View>
-            )}
+            ) : null}
 
             {/* Notes and Terms in compact format */}
             <View style={styles.notesTermsSection}>
@@ -501,7 +565,6 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
               )}
             </View>
           </View>
-
         </View>
 
         {/* Elegant signature in bottom right */}

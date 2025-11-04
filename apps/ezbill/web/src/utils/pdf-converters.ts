@@ -46,6 +46,7 @@ export function convertToInvoicePDFData(
       : undefined,
     notes: invoice.notes,
     terms: invoice.terms,
+    // Legacy single payment method support (deprecated)
     paymentDetails:
       invoice.paymentMethodId && paymentMethods
         ? (() => {
@@ -69,6 +70,35 @@ export function convertToInvoicePDFData(
               instructions: paymentMethod.instructions,
             }
           })()
+        : undefined,
+    // Multiple payment methods support
+    paymentMethods:
+      invoice.paymentMethodIds && paymentMethods && invoice.paymentMethodIds.length > 0
+        ? invoice.paymentMethodIds
+            .map(methodId => {
+              const paymentMethod = paymentMethods.find(pm => pm._id === methodId)
+              if (!paymentMethod) return null
+
+              return {
+                methodName: paymentMethod.name,
+                type: paymentMethod.type,
+                walletAddress:
+                  paymentMethod.type === 'crypto_wallet' ? paymentMethod.walletAddress : undefined,
+                currency:
+                  paymentMethod.type === 'crypto_wallet' ? paymentMethod.currency : undefined,
+                network: paymentMethod.type === 'crypto_wallet' ? paymentMethod.network : undefined,
+                bankName:
+                  paymentMethod.type === 'bank_transfer' ? paymentMethod.bankName : undefined,
+                accountNumber:
+                  paymentMethod.type === 'bank_transfer' ? paymentMethod.accountNumber : undefined,
+                iban: paymentMethod.type === 'bank_transfer' ? paymentMethod.iban : undefined,
+                swift: paymentMethod.type === 'bank_transfer' ? paymentMethod.swift : undefined,
+                routingNumber:
+                  paymentMethod.type === 'bank_transfer' ? paymentMethod.routingNumber : undefined,
+                instructions: paymentMethod.instructions,
+              }
+            })
+            .filter((method): method is NonNullable<typeof method> => method !== null)
         : undefined,
   }
 }
