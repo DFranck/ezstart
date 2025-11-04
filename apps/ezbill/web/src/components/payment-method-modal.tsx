@@ -1,6 +1,7 @@
 'use client'
 
-import { CreatePaymentMethod, PaymentMethod, PaymentMethodType } from '@ezbill/types'
+import { callApi, runWithFeedback } from '@/utils/api'
+import { PaymentMethod, PaymentMethodType } from '@ezbill/types'
 import {
   Button,
   Checkbox,
@@ -15,10 +16,12 @@ import {
   SelectValue,
   TextArea,
 } from '@ezstart/ui/components'
-import { callApi, runWithFeedback } from '@/utils/api'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
+
+// Bank region types
+type BankRegion = 'international' | 'domestic'
 
 // Flexible form state (all fields optional during editing)
 type PaymentMethodFormData = {
@@ -28,6 +31,7 @@ type PaymentMethodFormData = {
   isDefault: boolean
   instructions?: string
   // Bank transfer fields
+  bankRegion?: BankRegion // Helper field for UX
   iban?: string
   swift?: string
   bankName?: string
@@ -69,6 +73,8 @@ export function PaymentMethodModal({
     // Bank transfer
     ...(paymentMethod?.type === 'bank_transfer' && {
       bankName: paymentMethod.bankName,
+      // Auto-detect region based on existing data
+      bankRegion: paymentMethod.iban ? 'international' : 'domestic',
       iban: paymentMethod.iban,
       swift: paymentMethod.swift,
       accountNumber: paymentMethod.accountNumber,
@@ -96,6 +102,7 @@ export function PaymentMethodModal({
       // Bank transfer
       ...(paymentMethod?.type === 'bank_transfer' && {
         bankName: paymentMethod.bankName,
+        bankRegion: paymentMethod.iban ? 'international' : 'domestic',
         iban: paymentMethod.iban,
         swift: paymentMethod.swift,
         accountNumber: paymentMethod.accountNumber,
@@ -113,10 +120,20 @@ export function PaymentMethodModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Validation: Check if IBAN or Account Number is provided for bank transfer
+    if (formData.type === 'bank_transfer') {
+      if (!formData.iban && !formData.accountNumber) {
+        // This will be caught by the toast
+        throw new Error('Either IBAN or Account Number is required for bank transfers')
+      }
+    }
+
     // Auto-generate name from type
     const selectedType = paymentMethodTypes.find(t => t.value === formData.type)
+    // Remove bankRegion before sending (it's just for UX)
+    const { bankRegion, ...dataWithoutRegion } = formData
     const dataToSend = {
-      ...formData,
+      ...dataWithoutRegion,
       userId: getUserId(),
       name: selectedType?.label || formData.type,
     }
@@ -173,8 +190,8 @@ export function PaymentMethodModal({
           <>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-success" />
-                Bank Name
+                <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                Bank Name *
               </Label>
               <Input
                 value={formData.bankName || ''}
@@ -183,42 +200,98 @@ export function PaymentMethodModal({
                 className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
             </div>
+
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-success" />
-                Account Number
+                <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                Bank Region *
               </Label>
-              <Input
-                value={formData.accountNumber || ''}
-                onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
-                placeholder="1234567890"
-                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
-              />
+              <Select
+                value={formData.bankRegion || 'international'}
+                onValueChange={(value: BankRegion) =>
+                  setFormData({ ...formData, bankRegion: value })
+                }
+              >
+                <SelectTrigger className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="international">
+                    <div className="flex items-center">
+                      <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                      International (IBAN/SWIFT)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="domestic">
+                    <div className="flex items-center">
+                      <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                      Domestic (Account/Routing)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {formData.bankRegion === 'international'
+                  ? 'For Europe, Middle East, Africa (SEPA)'
+                  : 'For USA, Canada, UK, Asia'}
+              </p>
             </div>
-            <div>
-              <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-success" />
-                IBAN
-              </Label>
-              <Input
-                value={formData.iban || ''}
-                onChange={e => setFormData({ ...formData, iban: e.target.value })}
-                placeholder="FR14 2004 1010 0505 0001 3M02 606"
-                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-success" />
-                SWIFT/BIC Code
-              </Label>
-              <Input
-                value={formData.swift || ''}
-                onChange={e => setFormData({ ...formData, swift: e.target.value })}
-                placeholder="BNPAFRPP"
-                className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
-              />
-            </div>
+
+            {formData.bankRegion === 'international' ? (
+              <>
+                <div>
+                  <Label className="text-sm font-medium mb-3 flex items-center">
+                    <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                    IBAN *
+                  </Label>
+                  <Input
+                    value={formData.iban || ''}
+                    onChange={e => setFormData({ ...formData, iban: e.target.value })}
+                    placeholder="FR14 2004 1010 0505 0001 3M02 606"
+                    className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-3 flex items-center">
+                    <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                    SWIFT/BIC Code
+                  </Label>
+                  <Input
+                    value={formData.swift || ''}
+                    onChange={e => setFormData({ ...formData, swift: e.target.value })}
+                    placeholder="BNPAFRPP"
+                    className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label className="text-sm font-medium mb-3 flex items-center">
+                    <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                    Account Number *
+                  </Label>
+                  <Input
+                    value={formData.accountNumber || ''}
+                    onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
+                    placeholder="1234567890"
+                    className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-3 flex items-center">
+                    <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-payment" />
+                    Routing/Sort Code
+                  </Label>
+                  <Input
+                    value={formData.routingNumber || ''}
+                    onChange={e => setFormData({ ...formData, routingNumber: e.target.value })}
+                    placeholder="026009593 (USA) or 12-34-56 (UK)"
+                    className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
+                  />
+                </div>
+              </>
+            )}
           </>
         )
 
@@ -227,7 +300,7 @@ export function PaymentMethodModal({
           <>
             <div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-success" />
+                <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Wallet Address *
               </Label>
               <Input
@@ -239,7 +312,7 @@ export function PaymentMethodModal({
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-success" />
+                <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Network
               </Label>
               <Input
@@ -251,7 +324,7 @@ export function PaymentMethodModal({
             </div>
             <div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
-                <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-success" />
+                <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Currency/Token
               </Label>
               <Input
@@ -268,7 +341,7 @@ export function PaymentMethodModal({
         return (
           <div className="lg:col-span-2">
             <Label className="text-sm font-medium mb-3 block flex items-center">
-              <Icon name="lucide:Banknote" className="w-4 h-4 mr-2 text-success" />
+              <Icon name="lucide:Banknote" className="w-4 h-4 mr-2 text-ezbill-payment" />
               Instructions (Optional)
             </Label>
             <TextArea
@@ -308,7 +381,7 @@ export function PaymentMethodModal({
             type="submit"
             disabled={formData.type === 'crypto_wallet' && !formData.walletAddress}
             form="payment-method-form"
-            className="bg-gradient-payment hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="bg-gradient-payment text-white transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <Icon name={paymentMethod ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {paymentMethod ? 'Update' : 'Add'} Payment Method
@@ -323,7 +396,7 @@ export function PaymentMethodModal({
       >
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
-            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-success" />
+            <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-ezbill-payment" />
             Payment Type *
           </Label>
           <Select
@@ -337,7 +410,7 @@ export function PaymentMethodModal({
               {paymentMethodTypes.map(type => (
                 <SelectItem key={type.value} value={type.value}>
                   <div className="flex items-center">
-                    <Icon name={type.icon} className="w-4 h-4 mr-2 text-success" />
+                    <Icon name={type.icon} className="w-4 h-4 mr-2 text-ezbill-payment" />
                     {type.label}
                   </div>
                 </SelectItem>
@@ -350,7 +423,7 @@ export function PaymentMethodModal({
           <div className="flex items-center mb-4">
             <Icon
               name={selectedType?.icon || 'lucide:Settings'}
-              className="w-5 h-5 mr-2 text-success"
+              className="w-5 h-5 mr-2 text-ezbill-payment"
             />
             <h4 className="text-lg font-semibold ">{selectedType?.label} Details</h4>
           </div>
@@ -359,7 +432,7 @@ export function PaymentMethodModal({
 
         <div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
-            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-success" />
+            <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-payment" />
             Additional Instructions
           </Label>
           <TextArea
@@ -380,13 +453,13 @@ export function PaymentMethodModal({
                 onCheckedChange={(checked: boolean) =>
                   setFormData({ ...formData, isDefault: checked })
                 }
-                className="border-green-300 text-success focus:ring-success"
+                className="border-green-300 text-ezbill-payment focus:ring-success"
               />
               <Label
                 htmlFor="isDefault"
                 className="text-sm font-medium flex items-center cursor-pointer"
               >
-                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-success" />
+                <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Make this my default payment method
               </Label>
             </div>
