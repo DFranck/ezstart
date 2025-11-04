@@ -20,7 +20,15 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        'bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]',
+        'bg-muted text-muted-foreground inline-flex h-9 items-center rounded-lg p-[3px]',
+        // Responsive: scroll horizontally on small screens instead of wrapping
+        'overflow-x-auto overflow-y-hidden',
+        // Hide scrollbar using custom scrollbar styles
+        '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
+        // On mobile, remove justify-center to prevent first tab from being cut off
+        'md:justify-center',
+        // On mobile, make full width to enable scroll
+        'w-full md:w-fit',
         className
       )}
       {...props}

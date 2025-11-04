@@ -305,14 +305,13 @@ export function ClientLayout({
             <div className="flex items-center gap-2">
               {headerRightContent}
               {isTablet && navigationItems.length > 0 && (
-                <button
+                <Burger
+                  isOpen={isBurgerOpen}
+                  setIsOpen={setIsBurgerOpen}
                   aria-expanded={isBurgerOpen}
                   aria-controls="tablet-burger-menu"
                   aria-label={isBurgerOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                  onClick={() => setIsBurgerOpen(!isBurgerOpen)}
-                >
-                  <Burger isOpen={isBurgerOpen} setIsOpen={setIsBurgerOpen} />
-                </button>
+                />
               )}
             </div>
           }
