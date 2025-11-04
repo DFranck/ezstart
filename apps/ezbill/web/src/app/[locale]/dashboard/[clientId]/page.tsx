@@ -49,8 +49,8 @@ const PreviewPdfModal = dynamic(() => import('@/components/PreviewPdfModal').the
 // Type import for PreviewState
 type PreviewState = {
   isOpen: boolean
-  pdfUrl: string | null
-  title: string
+  kind?: 'invoice' | 'quote' | 'receipt'
+  doc?: any
 }
 
 const ClientDashboardPage = () => {
@@ -67,7 +67,7 @@ const ClientDashboardPage = () => {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined)
   const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(undefined)
-  const [preview, setPreview] = useState<PreviewState>({ isOpen: false, pdfUrl: null, title: '' })
+  const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
   const [invoiceGroupBy, setInvoiceGroupBy] = useState<'month' | 'week' | 'status'>('month')
   const [quoteGroupBy, setQuoteGroupBy] = useState<'month' | 'status'>('month')
 
