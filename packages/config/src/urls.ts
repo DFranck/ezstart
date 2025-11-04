@@ -69,7 +69,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5000',
-      production: 'https://ezstart-api.up.railway.app',
+      production: 'https://ezstart-api.ezstart.xyz',
     },
   },
 
@@ -81,7 +81,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5010',
-      production: 'https://ezauth-api.up.railway.app',
+      production: 'https://ezauth-api.ezstart.xyz',
     },
   },
 
@@ -93,7 +93,7 @@ export const URLS: Record<AppName, AppUrls> = {
     },
     api: {
       local: 'http://localhost:5020',
-      production: 'https://ezbill-api.up.railway.app',
+      production: 'https://ezbill-api.ezstart.xyz',
     },
   },
 
