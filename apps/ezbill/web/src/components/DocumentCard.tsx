@@ -69,7 +69,7 @@ export function DocumentCard({
         <CardContent>
           <div
             className={
-              type === 'invoice'
+              type === 'invoice' || type === 'receipt'
                 ? 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'
                 : 'flex items-center justify-between'
             }
@@ -79,13 +79,13 @@ export function DocumentCard({
                 className={cn(
                   'rounded-xl flex items-center justify-center',
                   iconGradient,
-                  type === 'invoice' ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-12 h-12'
+                  type === 'invoice' || type === 'receipt' ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-12 h-12'
                 )}
               >
                 <Icon
                   name={icon}
                   className={
-                    type === 'invoice' ? 'w-5 h-5 sm:w-6 sm:h-6 text-white' : 'w-6 h-6 text-white'
+                    type === 'invoice' || type === 'receipt' ? 'w-5 h-5 sm:w-6 sm:h-6 text-white' : 'w-6 h-6 text-white'
                   }
                 />
               </div>
@@ -93,7 +93,7 @@ export function DocumentCard({
                 <h3
                   className={cn(
                     'font-semibold text-foreground',
-                    type === 'invoice' ? 'text-base sm:text-lg' : 'text-lg'
+                    type === 'invoice' || type === 'receipt' ? 'text-base sm:text-lg' : 'text-lg'
                   )}
                 >
                   #{documentNumber}
@@ -118,16 +118,16 @@ export function DocumentCard({
 
             <div
               className={
-                type === 'invoice'
+                type === 'invoice' || type === 'receipt'
                   ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0'
                   : 'flex items-center space-x-4'
               }
             >
-              <div className={type === 'invoice' ? 'text-left sm:text-right' : 'text-right'}>
+              <div className={type === 'invoice' || type === 'receipt' ? 'text-left sm:text-right' : 'text-right'}>
                 <p
                   className={cn(
                     'font-bold text-foreground',
-                    type === 'invoice' ? 'text-lg sm:text-xl lg:text-2xl' : 'text-2xl'
+                    type === 'invoice' || type === 'receipt' ? 'text-lg sm:text-xl lg:text-2xl' : 'text-2xl'
                   )}
                 >
                   ${total} {currency}
@@ -137,7 +137,7 @@ export function DocumentCard({
               {actions && (
                 <div
                   className={
-                    type === 'invoice'
+                    type === 'invoice' || type === 'receipt'
                       ? 'flex flex-wrap gap-2 justify-start sm:justify-end'
                       : 'flex space-x-2'
                   }
