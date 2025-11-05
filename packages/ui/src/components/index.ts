@@ -1,6 +1,7 @@
 export * from './accordion'
 export * from './aceternity-carousel'
 export * from './alert-dialog'
+export * from './analytics'
 export * from './animated-icon-toggle'
 export * from './back-button'
 export * from './badge'

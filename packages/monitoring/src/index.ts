@@ -36,3 +36,7 @@ export * from './utils/index.js'
 
 // Collectors
 export * from './collectors/index.js'
+
+// Client-side monitoring (React components and hooks)
+// Note: Only use these exports in Next.js apps with 'use client' directive
+export * from './client/index.js'

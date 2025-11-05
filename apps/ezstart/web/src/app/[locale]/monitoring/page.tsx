@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { ErrorsFeed } from './(errors-tab)/components/ErrorsFeed'
 import { AuditCard } from './(health-tab)/components/AuditCard'
 import { ProjectCard } from './(health-tab)/components/ProjectCard'
+import { TrendingMetrics } from './(health-tab)/components/TrendingMetrics'
 import { MetricsOverview } from './components/MetricsOverview'
 import { TabScore } from './components/TabScore'
 import { useCountdown } from './hooks/useCountdown'
@@ -225,7 +226,19 @@ export default function MonitoringDashboard() {
             <TabsTrigger value="errors">Errors</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="projects" className="space-y-4 mt-6">
+          <TabsContent value="projects" className="space-y-6 mt-6">
+            {/* Trending Metrics for All Projects */}
+            <div className="space-y-6">
+              {projects.slice(0, 3).map((project: any) => (
+                <TrendingMetrics
+                  key={project.id}
+                  projectId={project.id}
+                  projectName={project.name}
+                />
+              ))}
+            </div>
+
+            {/* Project Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project: any) => (
                 <ProjectCard key={project.id} project={project} />

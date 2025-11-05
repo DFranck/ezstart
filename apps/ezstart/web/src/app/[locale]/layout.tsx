@@ -84,6 +84,13 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
+        {/* Plausible Analytics - Privacy-focused, GDPR compliant */}
+        <Script
+          defer
+          data-domain="ezstart.xyz"
+          src="https://plausible.io/js/script.outbound-links.file-downloads.js"
+          strategy="afterInteractive"
+        />
         <Script
           id="json-ld"
           type="application/ld+json"

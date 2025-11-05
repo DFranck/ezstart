@@ -29,13 +29,14 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ---
 
-## 🎯 Score Global : 95.4/100 ⭐⭐⭐⭐⭐ EXCELLENT
+## 🎯 Score Global : 96.6/100 ⭐⭐⭐⭐⭐ EXCELLENT
 
 ### Scores par Catégorie
 
 | Catégorie         | Score   | Status       |
 | ----------------- | ------- | ------------ |
 | **API**           | 100/100 | ✅ Excellent |
+| **Monitoring**    | 100/100 | ✅ Excellent |
 | **Tests**         | 100/100 | ✅ Excellent |
 | **TypeCheck**     | 100/100 | ✅ Excellent |
 | **Databases**     | 100/100 | ✅ Excellent |
@@ -49,6 +50,11 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 **Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
 
 **Dernière mise à jour :** 6 Novembre 2025
+- 📊 **Monitoring:** 80→100/100 (+20 points) 🎉 **PERFECT SCORE!**
+  - Trending graphs (Recharts) avec 6h/12h/24h/48h/7d time ranges
+  - Plausible Analytics (privacy-first, GDPR compliant)
+  - APM complet avec p50/p95/p99 metrics
+  - Package `@ezstart/monitoring/client` avec PlausibleAnalytics + usePerformance
 - 🎨 **UX:** 87→96/100 (+9 points) 🎉 - Welcome modals + Progress indicators !
   - WelcomeModal component (3 apps: EZBill, GreenPulse, FengShui)
   - Progress bars (FengShui file uploads)
@@ -56,7 +62,7 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 - 📱 **Mobile UX:** 85→93/100 (+8 points) - Toutes les phases terminées !
   - Design System complet + 17 composants
   - Safe-area support universel (iPhone notch)
-- 🎯 **10 audits ≥90/100** (59% excellence rate) 🚀
+- 🎯 **11 audits ≥90/100** (65% excellence rate) 🚀
 
 ---
 
