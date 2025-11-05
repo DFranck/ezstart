@@ -1,11 +1,12 @@
 import { Currency, currencyEnum } from '@ezbill/types';
-import ExchangeRate from '../models/billing/exchange-rate.js';
+import { getExchangeRateModel } from '../models/billing/exchange-rate.js';
 import { fetchExchangeRate } from '../utils/fetch-exchange-rate.js';
 const pairs: [Currency, Currency][] = currencyEnum.options
   .filter((c) => c !== 'USD')
   .map((c) => [c as Currency, 'USD' as Currency]);
 
 export async function updateAllExchangeRates() {
+  const ExchangeRate = await getExchangeRateModel();
   for (const [from, to] of pairs) {
     try {
       const rate = await fetchExchangeRate(from, to);

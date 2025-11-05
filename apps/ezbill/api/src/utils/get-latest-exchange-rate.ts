@@ -1,6 +1,7 @@
-import ExchangeRate from '../models/billing/exchange-rate.js';
+import { getExchangeRateModel } from '../models/billing/exchange-rate.js';
 
 export async function getLatestExchangeRate(from: string, to: string) {
+  const ExchangeRate = await getExchangeRateModel();
   const doc = await ExchangeRate.findOne({ from, to })
     .sort({ fetchedAt: -1 })
     .lean();
