@@ -62,7 +62,7 @@ export const Header = ({
       className={cn(
         'px-2 md:px-6',
         (position === 'sticky' || position === 'fixed') && [
-          'transition-all duration-200 ease-out backdrop-blur-sm',
+          'transition-all duration-200 ease-out backdrop-blur-sm pt-safe-top',
           isTop ? 'bg-background/0  py-4' : 'bg-background/80  py-2',
         ],
         className

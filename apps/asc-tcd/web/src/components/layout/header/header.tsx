@@ -30,7 +30,7 @@ export default function Header() {
   }, [isTablet, isOpen])
 
   return (
-    <Tag as="header" layout={'spaced'} position={'fixed'} className="flex-col">
+    <Tag as="header" layout={'spaced'} position={'fixed'} className="flex-col pt-safe-top">
       <div
         className={cn(
           ' py-4 pr-2 pl-4 md:px-6 flex items-center justify-between transition-all duration-300',
