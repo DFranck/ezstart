@@ -1,9 +1,9 @@
 'use client'
 
-import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { callApi, parseApiError } from '@/utils/api'
+import { useAuth } from '@ezstart/auth-sdk'
 
 // Query keys
 export const billingKeys = {
@@ -18,11 +18,13 @@ export const billingKeys = {
 
 // Individual query hooks
 export function useClients() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.clients(),
     queryFn: async () => {
-      const response = await callApi<Client[]>('/clients', { userId })
+      const response = await callApi<Client[]>('/clients', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
@@ -33,11 +35,13 @@ export function useClients() {
 }
 
 export function useInvoices() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.invoices(),
     queryFn: async () => {
-      const response = await callApi<Invoice[]>('/invoices', { userId })
+      const response = await callApi<Invoice[]>('/invoices', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
@@ -48,11 +52,13 @@ export function useInvoices() {
 }
 
 export function useQuotes() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.quotes(),
     queryFn: async () => {
-      const response = await callApi<Quote[]>('/quotes', { userId })
+      const response = await callApi<Quote[]>('/quotes', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
@@ -63,11 +69,13 @@ export function useQuotes() {
 }
 
 export function useReceipts() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.receipts(),
     queryFn: async () => {
-      const response = await callApi<Receipt[]>('/receipts', { userId })
+      const response = await callApi<Receipt[]>('/receipts', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
@@ -78,11 +86,13 @@ export function useReceipts() {
 }
 
 export function useCompanies() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.companies(),
     queryFn: async () => {
-      const response = await callApi<Company[]>('/companies', { userId })
+      const response = await callApi<Company[]>('/companies', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
@@ -93,11 +103,13 @@ export function useCompanies() {
 }
 
 export function usePaymentMethods() {
-  const userId = getUserId()
+  const { user } = useAuth()
+  const userId = user?._id
+
   return useQuery({
     queryKey: billingKeys.paymentMethods(),
     queryFn: async () => {
-      const response = await callApi<PaymentMethod[]>('/payment-methods', { userId })
+      const response = await callApi<PaymentMethod[]>('/payment-methods', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
