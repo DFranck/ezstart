@@ -9,6 +9,7 @@ import { Button } from '../button'
 import { Icon } from '../icon'
 import { Div, Main } from '../tag'
 import { headerVariantConfig } from '../tag/src/variants/tags/header'
+import { SkipLink } from '../skip-link'
 import { Footer } from './footer'
 import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
@@ -293,6 +294,9 @@ export function ClientLayout({
 
   return (
     <Div className={cn('min-h-screen flex flex-col', className)}>
+      {/* Skip to main content link (WCAG 2.1 AA) */}
+      <SkipLink href="#main-content">Skip to main content</SkipLink>
+
       {/* Header with smart navigation */}
       {showHeader && (
         <Header
@@ -429,7 +433,9 @@ export function ClientLayout({
       )}
 
       {/* Main content */}
-      <Main className={cn()}>{children}</Main>
+      <Main id="main-content" className={cn()}>
+        {children}
+      </Main>
 
       {/* Footer */}
       {showFooter && (
