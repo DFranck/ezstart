@@ -52,7 +52,7 @@ export function ClientHeader({ client, onCreateQuote, onCreateInvoice }: ClientH
                 >
                   <Icon
                     name={client.isCompany ? 'lucide:Building2' : 'lucide:User'}
-                    className="w-3 h-3 mr-1"
+                    className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                   />
                   {client.isCompany ? 'Company' : 'Individual'}
                 </span>

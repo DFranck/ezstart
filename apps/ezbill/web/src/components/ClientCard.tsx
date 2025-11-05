@@ -53,24 +53,24 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
             <Button
               size="sm"
               variant="outline"
-              className="bg-card backdrop-blur-sm shadow-lg border-0"
+              className="bg-card backdrop-blur-sm shadow-lg border-0 min-w-[44px]"
               onClick={e => {
                 e.stopPropagation()
                 onEdit(client)
               }}
             >
-              <Icon name="lucide:Edit" className="w-3 h-3" />
+              <Icon name="lucide:Edit" className="w-4 h-4 sm:w-3 sm:h-3" />
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="bg-background/90 backdrop-blur-sm shadow-lg border-0 text-destructive hover:bg-destructive/10"
+              className="bg-background/90 backdrop-blur-sm shadow-lg border-0 text-destructive hover:bg-destructive/10 min-w-[44px]"
               onClick={e => {
                 e.stopPropagation()
                 onDelete(client)
               }}
             >
-              <Icon name="lucide:Trash2" className="w-3 h-3" />
+              <Icon name="lucide:Trash2" className="w-4 h-4 sm:w-3 sm:h-3" />
             </Button>
           </div>
         </CardContent>

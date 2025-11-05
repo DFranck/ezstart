@@ -31,25 +31,25 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
         <CardContent>
           {company.email && (
             <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
-              <Icon name="lucide:Mail" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:Mail" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.email}
             </p>
           )}
           {company.phone && (
             <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
-              <Icon name="lucide:Phone" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:Phone" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.phone}
             </p>
           )}
           {(company.city || company.country || company.address) && (
             <p className="text-muted-foreground/80 text-sm line-clamp-2">
-              <Icon name="lucide:MapPin" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:MapPin" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {[company.address, company.city, company.country].filter(Boolean).join(', ')}
             </p>
           )}
           {company.website && (
             <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
-              <Icon name="lucide:Globe" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:Globe" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               <a
                 href={company.website}
                 target="_blank"
@@ -76,7 +76,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
               onEdit(company)
             }}
           >
-            <Icon name="lucide:Edit" className="w-3 h-3" />
+            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
           <Button
             size="sm"
@@ -87,7 +87,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
               onDelete(company)
             }}
           >
-            <Icon name="lucide:Trash2" className="w-3 h-3" />
+            <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
         </CardFooter>
       </Card>

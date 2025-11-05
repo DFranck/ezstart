@@ -79,7 +79,7 @@ const ClientLayout = ({
                   variant="destructive"
                   className="font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200"
                 >
-                  <Icon name="lucide:LogOut" className="w-4 h-4 sm:mr-2" />
+                  <Icon name="lucide:LogOut" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Logout</span>
                 </Button>
               )}
@@ -93,7 +93,7 @@ const ClientLayout = ({
               className="font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200"
             >
               <>
-                <Icon name="lucide:LogIn" className="w-4 h-4 sm:mr-2" />
+                <Icon name="lucide:LogIn" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Get Started</span>
               </>
             </Button>

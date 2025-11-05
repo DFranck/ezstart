@@ -267,7 +267,7 @@ export function PlanUploader({
                   aria-label="Edit/Crop image"
                   type="button"
                 >
-                  <Icon name="lucide:Edit3" className="w-4 h-4 mr-1" />
+                  <Icon name="lucide:Edit3" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
                   <span className="hidden sm:inline">{t('uploader.edit')}</span>
                 </Button>
               )}
@@ -275,11 +275,11 @@ export function PlanUploader({
                 onClick={removeFile}
                 variant="ghost"
                 size="sm"
-                className="p-1"
+                className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1"
                 aria-label="Remove file"
                 type="button"
               >
-                <Icon name="lucide:X" className="w-5 h-5 text-gray-500" />
+                <Icon name="lucide:X" className="w-6 h-6 sm:w-5 sm:h-5 text-gray-500" />
               </Button>
             </div>
           </div>
@@ -357,7 +357,7 @@ export function PlanUploader({
                       className="flex-1 h-10 sm:h-9"
                     >
                       - 90°
-                      <Icon name="lucide:RotateCcw" className="w-4 h-4" />
+                      <Icon name="lucide:RotateCcw" className="w-5 h-5 sm:w-4 sm:h-4" />
                     </Button>
                     <Button
                       onClick={() => setRotation(prev => prev + 90)}
@@ -366,7 +366,7 @@ export function PlanUploader({
                       className="flex-1 h-10 sm:h-9"
                     >
                       + 90°
-                      <Icon name="lucide:RotateCw" className="w-4 h-4" />
+                      <Icon name="lucide:RotateCw" className="w-5 h-5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </div>
@@ -461,11 +461,11 @@ export function PlanUploader({
               {/* Actions */}
               <div className="flex gap-3">
                 <Button onClick={handleApply} className="flex-1" type="button">
-                  <Icon name="lucide:Check" className="w-4 h-4 mr-2" />
+                  <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                   {t('uploader.apply')}
                 </Button>
                 <Button variant="outline" onClick={handleCancel} type="button">
-                  <Icon name="lucide:X" className="w-4 h-4 mr-2" />
+                  <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                   {t('uploader.cancel')}
                 </Button>
               </div>

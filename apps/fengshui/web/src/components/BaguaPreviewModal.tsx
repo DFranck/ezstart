@@ -904,7 +904,7 @@ export function BaguaPreviewModal({
                                         ? 'lucide:RectangleHorizontal'
                                         : 'lucide:Waves'
                               }
-                              className="w-3 h-3 mr-1"
+                              className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                               style={{ color: accent }}
                             />
                           )}
@@ -922,7 +922,7 @@ export function BaguaPreviewModal({
                           >
                             <Icon
                               name="lucide:Star"
-                              className="w-3 h-3 mr-1"
+                              className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                               style={{
                                 color: sector.star.status === 'bonne' ? '#22c55e' : '#ef4444',
                               }}
@@ -935,7 +935,7 @@ export function BaguaPreviewModal({
                           >
                             {sector.star.remedies?.length > 0 && (
                               <>
-                                <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
+                                <Icon name="lucide:Shield" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" />
                                 {sector.star.remedies?.join(', ')}
                               </>
                             )}
@@ -1042,7 +1042,7 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name={(sector.icon as any) || 'lucide:Info'} className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          <Icon name={(sector.icon as any) || 'lucide:Info'} className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
                           {sector.summary.length > 35 ? sector.summary.substring(0, 32) + '...' : sector.summary}
                         </div>
                       )}
@@ -1053,7 +1053,7 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name="lucide:ArrowRightLeft" className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          <Icon name="lucide:ArrowRightLeft" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
                           {sector.nourisher && `${t('bagua.nourishedBy')}: ${sector.nourisher}`}
                           {sector.nourisher && sector.controller && ' • '}
                           {sector.controller && `${t('bagua.controlledBy')}: ${sector.controller}`}
@@ -1066,7 +1066,7 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name="lucide:Layers" className="w-3 h-3 mr-1" style={{ color: accent }} />
+                          <Icon name="lucide:Layers" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
                           {sector.matiere.length > 32 ? sector.matiere.substring(0, 29) + '...' : sector.matiere}
                         </div>
                       )}
@@ -1090,7 +1090,7 @@ export function BaguaPreviewModal({
                                         ? 'lucide:RectangleHorizontal'
                                         : 'lucide:Waves'
                               }
-                              className="w-3 h-3 mr-1"
+                              className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                               style={{ color: accent }}
                             />
                           )}
@@ -1109,7 +1109,7 @@ export function BaguaPreviewModal({
                           >
                             <Icon
                               name="lucide:Star"
-                              className="w-3 h-3 mr-1"
+                              className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                               style={{
                                 color: sector.star.status === 'bonne' ? '#22c55e' : '#ef4444',
                               }}
@@ -1122,7 +1122,7 @@ export function BaguaPreviewModal({
                           >
                             {sector.star.remedies?.length > 0 && (
                               <>
-                                <Icon name="lucide:Shield" className="w-3 h-3 mr-1" />
+                                <Icon name="lucide:Shield" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" />
                                 {sector.star.remedies?.join(', ')}
                               </>
                             )}

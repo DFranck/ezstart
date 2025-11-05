@@ -76,7 +76,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
               onEdit(paymentMethod)
             }}
           >
-            <Icon name="lucide:Edit" className="w-3 h-3" />
+            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
           <Button
             size="sm"
@@ -87,7 +87,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
               onDelete(paymentMethod)
             }}
           >
-            <Icon name="lucide:Trash2" className="w-3 h-3" />
+            <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
         </div>
         </CardContent>

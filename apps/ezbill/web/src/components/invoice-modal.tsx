@@ -187,7 +187,7 @@ export function InvoiceModal({
             disabled={isLoading}
             className="bg-card border  hover:bg-muted font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            <Icon name="lucide:X" className="w-4 h-4 mr-2" />
+            <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
             Cancel
           </Button>
           <LoadingButton
@@ -197,7 +197,7 @@ export function InvoiceModal({
             form="invoice-form"
             className="bg-gradient-invoice hover:bg-gradient-invoice-hover text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <Icon name={invoice ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
+            <Icon name={invoice ? 'lucide:Save' : 'lucide:Plus'} className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
             {invoice ? 'Update Invoice' : 'Create Invoice'}
           </LoadingButton>
         </div>
@@ -336,7 +336,7 @@ export function InvoiceModal({
                         onClick={onManagePaymentMethods}
                         className="bg-orange-500 hover:bg-orange-600 text-white"
                       >
-                        <Icon name="lucide:Plus" className="w-4 h-4 mr-1" />
+                        <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-1" />
                         Add Method
                       </Button>
                     )}
@@ -522,7 +522,7 @@ export function InvoiceModal({
                             onClick={() => removeLineItem(index)}
                             disabled={formData.items.length === 1}
                           >
-                            <Icon name="lucide:X" className="w-4 h-4" />
+                            <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -532,7 +532,7 @@ export function InvoiceModal({
               </div>
             </div>
             <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
-              <Icon name="lucide:Plus" className="w-4 h-4 mr-2" />
+              <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
               Add Line Item
             </Button>
           </div>

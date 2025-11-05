@@ -64,7 +64,7 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
               onEdit(client)
             }}
           >
-            <Icon name="lucide:Edit" className="w-3 h-3" />
+            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
           <Button
             size="sm"
@@ -75,7 +75,7 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => 
               onDelete(client)
             }}
           >
-            <Icon name="lucide:Trash2" className="w-3 h-3" />
+            <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
         </CardFooter>
       </Card>

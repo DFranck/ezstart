@@ -27,7 +27,7 @@ const ClientCard = ({ client }: Props) => {
               ? 'bg-ezbill-company/10 text-ezbill-company border-ezbill-company/30'
               : 'bg-ezbill-client/10 text-ezbill-client border-ezbill-client/30'
           }`}>
-            <Icon name={client.isCompany ? 'lucide:Building2' : 'lucide:User'} className="w-3 h-3 mr-1" />
+            <Icon name={client.isCompany ? 'lucide:Building2' : 'lucide:User'} className="w-4 h-4 sm:w-3 sm:h-3 mr-1" />
             {client.isCompany ? 'Company' : 'Individual'}
           </div>
         </div>

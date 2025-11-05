@@ -48,19 +48,19 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
         </CardHeader>
         <CardContent className="">
           <p className="text-muted-foreground text-sm mb-2 capitalize">
-            <Icon name="lucide:Info" className="w-3 h-3 inline mr-1" />
+            <Icon name="lucide:Info" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
             {paymentMethod.type.replace(/_/g, ' ')}
           </p>
 
           {paymentMethod.type === 'crypto_wallet' && (
             <>
               <p className="text-muted-foreground text-sm mb-1">
-                <Icon name="lucide:Coins" className="w-3 h-3 inline mr-1" />
+                <Icon name="lucide:Coins" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                 {paymentMethod.currency} • {paymentMethod.network}
               </p>
               {paymentMethod.walletAddress && (
                 <p className="text-muted-foreground/80 text-xs line-clamp-1 font-mono break-all">
-                  <Icon name="lucide:Hash" className="w-3 h-3 inline mr-1" />
+                  <Icon name="lucide:Hash" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   {paymentMethod.walletAddress}
                 </p>
               )}
@@ -71,13 +71,13 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
             <>
               {paymentMethod.bankName && (
                 <p className="text-muted-foreground text-sm mb-1">
-                  <Icon name="lucide:Building2" className="w-3 h-3 inline mr-1" />
+                  <Icon name="lucide:Building2" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   {paymentMethod.bankName}
                 </p>
               )}
               {paymentMethod.accountNumber && (
                 <p className="text-muted-foreground/80 text-sm mb-1">
-                  <Icon name="lucide:CreditCard" className="w-3 h-3 inline mr-1" />
+                  <Icon name="lucide:CreditCard" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   Account: {paymentMethod.accountNumber}
                 </p>
               )}
@@ -96,14 +96,14 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
 
           {paymentMethod.type === 'cash' && (
             <p className="text-muted-foreground text-sm">
-              <Icon name="lucide:Banknote" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:Banknote" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               Cash payment
             </p>
           )}
 
           {paymentMethod.instructions && (
             <p className="text-muted-foreground/60 text-xs mt-2 italic line-clamp-2">
-              <Icon name="lucide:MessageCircle" className="w-3 h-3 inline mr-1" />
+              <Icon name="lucide:MessageCircle" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {paymentMethod.instructions}
             </p>
           )}
@@ -119,7 +119,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
               onEdit(paymentMethod)
             }}
           >
-            <Icon name="lucide:Edit" className="w-3 h-3" />
+            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
           <Button
             size="sm"
@@ -130,7 +130,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
               onDelete(paymentMethod)
             }}
           >
-            <Icon name="lucide:Trash2" className="w-3 h-3" />
+            <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
         </CardFooter>
       </Card>

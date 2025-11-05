@@ -203,7 +203,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                                   ? 'lucide:RectangleHorizontal'
                                   : 'lucide:Waves'
                         }
-                        className="w-3 h-3 mr-1"
+                        className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
                         style={{ color: accent }}
                       />
                     )}
@@ -232,7 +232,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
 
             <Icon
               name={isExpanded ? 'lucide:ChevronUp' : 'lucide:ChevronDown'}
-              className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground transition-transform flex-shrink-0"
+              className="w-5 h-5 text-muted-foreground transition-transform flex-shrink-0"
             />
           </div>
           </Button>

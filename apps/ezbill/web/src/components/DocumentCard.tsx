@@ -229,7 +229,7 @@ export function InvoiceCard({
             title={!permissions.canEdit ? permissions.reason : undefined}
             className={cn({ hidden: !permissions.canEdit })}
           >
-            <Icon name="lucide:Edit" className="w-4 h-4" />
+            <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
           </Button>
           {permissions.canSend && (
             <Button
@@ -237,17 +237,17 @@ export function InvoiceCard({
               onClick={onSend}
               className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
             >
-              <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
+              <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Send</span>
             </Button>
           )}
           <Button size="sm" variant="outline" onClick={onDownload}>
-            <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+            <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
             <span className="hidden xs:inline sm:hidden md:inline">Download</span>
           </Button>
           {status === 'paid' && onDownloadReceipt && (
             <Button size="sm" variant="outline" onClick={onDownloadReceipt}>
-              <Icon name="lucide:Receipt" className="w-4 h-4 sm:mr-1" />
+              <Icon name="lucide:Receipt" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Receipt</span>
             </Button>
           )}
@@ -257,7 +257,7 @@ export function InvoiceCard({
               onClick={onMarkPaid}
               className="bg-ezbill-paid hover:bg-ezbill-paid/90 text-ezbill-paid-foreground"
             >
-              <Icon name="lucide:CheckCircle" className="w-4 h-4 sm:mr-1" />
+              <Icon name="lucide:CheckCircle" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
               <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
               <span className="inline xs:hidden sm:inline md:hidden">Paid</span>
             </Button>
@@ -347,7 +347,7 @@ export function QuoteCard({
               title={!permissions.canEdit ? permissions.reason : undefined}
               className={cn({ hidden: !permissions.canEdit })}
             >
-              <Icon name="lucide:Edit" className="w-4 h-4" />
+              <Icon name="lucide:Edit" className="w-5 h-5 sm:w-4 sm:h-4" />
             </Button>
             {permissions.canDelete && onDelete && (
               <Button
@@ -359,7 +359,7 @@ export function QuoteCard({
                 }}
                 className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
               >
-                <Icon name="lucide:Trash2" className="w-4 h-4" />
+                <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
               </Button>
             )}
             {permissions.canSend && onSend && (
@@ -368,7 +368,7 @@ export function QuoteCard({
                 onClick={onSend}
                 className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
               >
-                <Icon name="lucide:Send" className="w-4 h-4 sm:mr-1" />
+                <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden xs:inline sm:hidden md:inline">Send</span>
               </Button>
             )}
@@ -378,7 +378,7 @@ export function QuoteCard({
                 onClick={onAccept}
                 className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground"
               >
-                <Icon name="lucide:Check" className="w-4 h-4 sm:mr-1" />
+                <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
               </Button>
             )}
@@ -388,13 +388,13 @@ export function QuoteCard({
                 onClick={onDecline}
                 className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground"
               >
-                <Icon name="lucide:X" className="w-4 h-4 sm:mr-1" />
+                <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
               </Button>
             )}
             {onDownload && (
               <Button size="sm" variant="outline" onClick={onDownload}>
-                <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+                <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden xs:inline sm:hidden md:inline">Download</span>
               </Button>
             )}
@@ -404,7 +404,7 @@ export function QuoteCard({
                 onClick={onConvertToInvoice}
                 className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
               >
-                <Icon name="lucide:ArrowRight" className="w-4 h-4 sm:mr-1" />
+                <Icon name="lucide:ArrowRight" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
               </Button>
             )}
@@ -468,7 +468,7 @@ export function ReceiptCard({
       actions={
         onDownload && (
           <Button size="sm" variant="outline" onClick={onDownload} title="Download receipt">
-            <Icon name="lucide:Download" className="w-4 h-4 sm:mr-1" />
+            <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
             <span className="hidden xs:inline sm:hidden md:inline">Download</span>
           </Button>
         )
