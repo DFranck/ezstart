@@ -225,6 +225,76 @@ app.use(createRateLimiter({
 }
 ```
 
+#### API Versioning
+
+Support backward-compatible API versioning with dual-path routing:
+
+```typescript
+import { createVersionedRouter, addVersionHeader, extractVersionFromPath } from '@ezstart/express-core'
+import { Router } from 'express'
+
+const app = createApp({ apiApp: 'myapi' })
+
+// Add version headers to all responses
+app.use(addVersionHeader('v1'))
+
+const authRoutes = Router()
+authRoutes.post('/login', loginHandler)
+authRoutes.post('/register', registerHandler)
+
+// Support both /api/auth and /api/v1/auth
+app.use(createVersionedRouter('/api/auth', authRoutes))
+
+// For version-specific logic
+app.use(extractVersionFromPath())
+authRoutes.get('/me', (req, res) => {
+  const version = (req as any).apiVersion // 'v1', 'v2', etc.
+  if (version === 'v2') {
+    // v2-specific logic
+  } else {
+    // v1 logic (default)
+  }
+})
+```
+
+**Available Functions:**
+
+| Function | Purpose | Example |
+|----------|---------|---------|
+| `createVersionedRouter(basePath, router, version?)` | Dual-path routing | Both `/api/users` and `/api/v1/users` work |
+| `addVersionHeader(version?)` | Response headers | Adds `API-Version: v1` header |
+| `extractVersionFromPath()` | Extract version | Adds `req.apiVersion` property |
+
+**Features:**
+- ✅ Backward compatibility (existing `/api/resource` paths continue working)
+- ✅ Version headers (`API-Version`, `X-API-Version`)
+- ✅ Easy migration path for future versions
+- ✅ No breaking changes for existing clients
+
+**Migration Example (v1 → v2):**
+
+```typescript
+import { Router } from 'express'
+import { createVersionedRouter } from '@ezstart/express-core'
+
+// v1 routes (legacy)
+const v1Router = Router()
+v1Router.get('/users', getUsersV1)
+
+// v2 routes (new)
+const v2Router = Router()
+v2Router.get('/users', getUsersV2) // Breaking changes OK
+
+// Register both versions
+app.use(createVersionedRouter('/api', v1Router, 'v1'))
+app.use(createVersionedRouter('/api', v2Router, 'v2'))
+
+// Clients can now use:
+// - /api/users → defaults to v1 (backward compatible)
+// - /api/v1/users → explicit v1
+// - /api/v2/users → new version
+```
+
 #### Request Validation
 
 ```typescript

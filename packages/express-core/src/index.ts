@@ -32,6 +32,9 @@ export {
 } from './middleware/rateLimit.js'
 export type { RateLimitOptions } from './middleware/rateLimit.js'
 
+// Versioning
+export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from './versioning.js'
+
 // Types & Validation (Zod + OpenAPI)
 export { z, mongoIdSchema, listingQuerySchema } from './types/zod.js'
 export type { Infer, Input, ListingQuery } from './types/zod.js'

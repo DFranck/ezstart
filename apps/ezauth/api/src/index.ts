@@ -7,7 +7,9 @@ import {
   createRateLimiter,
   createStrictRateLimiter,
   getApiPort,
-  startServer
+  startServer,
+  createVersionedRouter,
+  addVersionHeader
 } from '@ezstart/express-core'
 import authRoutes, { authRegistry } from './routes/auth.routes.js'
 import oauthRoutes from './routes/oauth.routes.js'
@@ -40,10 +42,14 @@ app.use(createRateLimiter())
 // Initialize Passport
 app.use(passport.initialize())
 
-// API routes
-app.use('/api/auth', authRoutes)
-app.use('/api/auth', oauthRoutes) // OAuth routes (Google, GitHub)
-app.use('/api/waitlist', waitlistRoutes)
+// ✅ Add API version headers to all responses
+app.use(addVersionHeader('v1'))
+
+// ✅ API routes with versioning support
+// Supports both /api/auth and /api/v1/auth (backward compatible)
+app.use(createVersionedRouter('/api/auth', authRoutes))
+app.use(createVersionedRouter('/api/auth', oauthRoutes)) // OAuth routes (Google, GitHub)
+app.use(createVersionedRouter('/api/waitlist', waitlistRoutes))
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers
