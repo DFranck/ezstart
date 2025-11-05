@@ -29,7 +29,7 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ---
 
-## 🎯 Score Global : 94.7/100 ⭐⭐⭐⭐⭐ EXCELLENT
+## 🎯 Score Global : 94.9/100 ⭐⭐⭐⭐⭐ EXCELLENT
 
 ### Scores par Catégorie
 
@@ -43,8 +43,8 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 | **Accessibility** | 95/100  | ✅ Excellent |
 | **Documentation** | 95/100  | ✅ Excellent |
 | **Mobile UX**     | 93/100  | ✅ Excellent |
+| **UX**            | 87/100  | ✅ Very Good |
 | **Performance**   | 82/100  | ✅ Very Good |
-| **UX**            | 80/100  | ✅ Very Good |
 
 **Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
 
@@ -52,6 +52,9 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 - 📱 **Mobile UX:** 85→93/100 (+8 points) 🎉 - Toutes les phases terminées !
   - Design System complet + 17 composants
   - Safe-area support universel (iPhone notch)
+- 🎨 **UX:** 70→87/100 (+17 points) - Skeleton loaders + Error boundaries
+  - 7 skeleton variants (shimmer animation)
+  - Universal error boundaries (8 apps)
 - 🎯 **9 audits ≥90/100** (50% excellence rate)
 
 ---
