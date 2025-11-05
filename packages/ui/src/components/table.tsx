@@ -41,7 +41,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
  * </Table>
  */
 
-const tableVariants = cva('w-full caption-bottom text-sm', {
+const tableVariants = cva('w-full caption-bottom text-base sm:text-sm', {
   variants: {
     variant: {
       default: 'border-collapse',
@@ -50,9 +50,9 @@ const tableVariants = cva('w-full caption-bottom text-sm', {
       hoverable: '[&_tbody_tr]:hover:bg-muted/50 [&_tbody_tr]:transition-colors',
     },
     size: {
-      compact: '[&_td]:py-1 [&_td]:px-2 [&_th]:py-1 [&_th]:px-2',
-      default: '[&_td]:py-2 [&_td]:px-3 [&_th]:py-2 [&_th]:px-3',
-      comfortable: '[&_td]:py-3 [&_td]:px-4 [&_th]:py-3 [&_th]:px-4',
+      compact: '[&_td]:py-1.5 [&_td]:px-3 [&_td]:sm:py-1 [&_td]:sm:px-2 [&_th]:py-1.5 [&_th]:px-3 [&_th]:sm:py-1 [&_th]:sm:px-2',
+      default: '[&_td]:py-3 [&_td]:px-4 [&_td]:sm:py-2 [&_td]:sm:px-3 [&_th]:py-3 [&_th]:px-4 [&_th]:sm:py-2 [&_th]:sm:px-3',
+      comfortable: '[&_td]:py-4 [&_td]:px-5 [&_td]:sm:py-3 [&_td]:sm:px-4 [&_th]:py-4 [&_th]:px-5 [&_th]:sm:py-3 [&_th]:sm:px-4',
     },
   },
   defaultVariants: {

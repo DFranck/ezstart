@@ -146,9 +146,9 @@ function SkeletonCard({
   size = 'default',
 }: SkeletonCardProps) {
   const sizeClasses = {
-    sm: 'p-4 gap-3',
-    default: 'p-6 gap-4',
-    lg: 'p-8 gap-6',
+    sm: 'p-4 gap-3 sm:p-3 sm:gap-2.5',
+    default: 'p-4 gap-4 sm:p-6 sm:gap-4',
+    lg: 'p-6 gap-5 sm:p-8 sm:gap-6',
   }
 
   return (
