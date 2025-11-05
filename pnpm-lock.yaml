@@ -770,6 +770,9 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.13.8
         version: 3.13.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       deepmerge:
         specifier: ^4.3.1
         version: 4.3.1
@@ -803,6 +806,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
+      recharts:
+        specifier: 2.15.4
+        version: 2.15.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       sharp:
         specifier: ^0.34.3
         version: 0.34.3
