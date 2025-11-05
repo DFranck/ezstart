@@ -192,16 +192,36 @@ MEDIUM/LOW (12h)
 Bundle Optimization (1-2h remaining - Optional)
 ├── Verify tree-shaking is working
 └── Measure actual bundle size improvements with ANALYZE=true
+```
 
-Week 2: Image Optimization (5h)
-├── Convertir en WebP/AVIF
-├── Lazy loading images below-fold
-├── Responsive images avec srcset
-└── CDN pour assets statiques
+**Phase 2: Image Optimization (5h) - STARTED (Nov 5, 2025)**
 
-Week 3: Runtime Performance (4h)
-├── React.memo sur composants lourds
-├── useMemo/useCallback où nécessaire
+✅ **Completed (1h):**
+- ✅ Image audit: 128 images, 38.9MB total (11 files >1MB)
+- ✅ Next.js automatic image optimization configured
+  - AVIF/WebP formats (30-80% size reduction)
+  - Responsive sizes for all devices
+  - Lazy loading by default
+  - 1-year cache for optimized images
+- ✅ Centralized in `@ezstart/next-config/base.js`
+- ✅ Applied to all 8 web apps automatically
+- ✅ Developer guide documented in Performance Audit
+
+**Impact:**
+- Expected: 38.9MB → 12-20MB (50-70% reduction)
+- No source file conversion needed
+- Automatic optimization on-demand
+
+**Remaining (4h - Optional):**
+```
+Image Optimization Advanced
+├── Verify <Image> usage in critical paths (1h)
+├── Replace remaining <img> with <Image> where beneficial (2h)
+└── Test optimization in production build (1h)
+
+Runtime Performance (4h)
+├── React.memo sur composants lourds (already done in Oct 29)
+├── useMemo/useCallback où nécessaire (already done in Oct 29)
 ├── Virtualization pour longues listes
 └── Web Workers pour calculs lourds
 ```

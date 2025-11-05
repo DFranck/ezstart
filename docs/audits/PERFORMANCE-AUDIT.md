@@ -232,6 +232,67 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
 - ✅ First Load JS: **1.73 MB → 1.68 MB** (50 KB saved)
 - ✅ Score: **65 → 75** (+10 points)
 
+### 📦 Phase 2: Image Optimization - IN PROGRESS (Nov 5, 2025)
+
+**Audit Results:**
+- **Total images**: 128 files across all web apps
+- **Total size**: 38.9MB (25MB EZStart + 12MB ASC-TCD + 1.9MB Tower Defense)
+- **Critical files (>2MB)**:
+  - 4.3MB - lima-prod-mobile.png
+  - 3.9MB - transplantation-arbres-mobile.png
+  - 3.0MB - zephyrus-desktop.png
+  - 2.8MB - fond-noisy.jpg (ASC-TCD)
+  - 2.5MB - transplantation-arbres-desktop.png
+  - 2.5MB - bergerac-2023-web.png (ASC-TCD)
+- **Large files (1-2MB)**: 5 additional files
+
+**✅ Implemented (Nov 5, 2025):**
+
+**1. Next.js Automatic Image Optimization** ✅
+```javascript
+// packages/next-config/src/base.js
+images: {
+  formats: ['image/avif', 'image/webp'], // AVIF first (70% smaller), fallback WebP
+  deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Responsive
+  imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Icons/avatars
+  minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year cache
+}
+```
+
+**How it works:**
+- Next.js `<Image>` component automatically serves AVIF/WebP
+- Generates responsive sizes on-demand
+- Lazy loads by default (below fold)
+- No source file conversion needed!
+
+**Impact:**
+- **Automatic 30-80% size reduction** on all images using `<Image>` component
+- 4.3MB PNG → ~650KB-1.2MB AVIF (70-85% reduction)
+- Browser automatically picks best format (AVIF > WebP > original)
+- Responsive images for all screen sizes
+- **Applied to all 8 apps via centralized config**
+
+**Expected savings:**
+- 25MB EZStart → ~7-12MB (52-68% reduction)
+- 12MB ASC-TCD → ~3-6MB (50-75% reduction)
+- **Total: 38.9MB → ~12-20MB** (50-70% reduction)
+
+**Files modified:**
+- [packages/next-config/src/base.js](../../packages/next-config/src/base.js) - Added images config
+
+**📝 Developer Guide:**
+```tsx
+// ✅ GOOD - Automatic optimization
+import Image from 'next/image'
+<Image src="/images/hero.jpg" width={1200} height={800} alt="Hero" />
+
+// ❌ BAD - No optimization
+<img src="/images/hero.jpg" alt="Hero" />
+
+// ⚠️ OK for dynamic/base64 - Next.js can't optimize
+<img src={dataUrl} alt="Dynamic" />
+```
+
 ---
 
 ## 🚀 API Response Times
