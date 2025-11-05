@@ -18,86 +18,92 @@ export const billingKeys = {
 
 // Individual query hooks
 export function useClients() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.clients(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<Client[]>('/clients', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
 export function useInvoices() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.invoices(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<Invoice[]>('/invoices', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
 export function useQuotes() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.quotes(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<Quote[]>('/quotes', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
 export function useReceipts() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.receipts(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<Receipt[]>('/receipts', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
 export function useCompanies() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.companies(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<Company[]>('/companies', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
 export function usePaymentMethods() {
+  const userId = getUserId()
   return useQuery({
     queryKey: billingKeys.paymentMethods(),
     queryFn: async () => {
-      const userId = getUserId()
       const response = await callApi<PaymentMethod[]>('/payment-methods', { userId })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
+    enabled: !!userId, // Only run query when userId is available
   })
 }
 
