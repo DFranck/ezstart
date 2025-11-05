@@ -4,12 +4,13 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import * as React from 'react'
 
 import { cn } from '../lib/utils'
+import { touchHeight, gap } from '../lib/design-system/tokens'
 
 function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn('flex flex-col gap-2', className)}
+      className={cn('flex flex-col', gap.default, className)}
       {...props}
     />
   )
@@ -20,7 +21,8 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        'bg-muted text-muted-foreground inline-flex h-9 items-center rounded-lg p-[3px]',
+        'bg-muted text-muted-foreground inline-flex items-center rounded-lg p-[3px]',
+        touchHeight.default, // h-11 sm:h-9 (44px mobile, 36px desktop)
         // Responsive: scroll horizontally on small screens instead of wrapping
         'overflow-x-auto overflow-y-hidden',
         // Hide scrollbar using custom scrollbar styles

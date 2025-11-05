@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
+import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
 
 /**
  * Badge Component - Display status, count, or label
@@ -26,7 +27,7 @@ import { cn } from '../lib/utils'
  */
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center rounded-full font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
       variant: {
@@ -43,9 +44,9 @@ const badgeVariants = cva(
         pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
       },
       size: {
-        default: 'px-2.5 py-0.5 text-xs',
-        sm: 'px-2 py-0.5 text-[10px]',
-        lg: 'px-3 py-1 text-sm',
+        default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '), // px-3 sm:px-2, py-1 sm:py-0.5, text-sm sm:text-xs
+        sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '), // px-2 sm:px-1, py-1 sm:py-0.5, text-xs sm:text-[10px]
+        lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '), // px-4 sm:px-3, py-2 sm:py-1, text-base sm:text-sm
       },
     },
     defaultVariants: {

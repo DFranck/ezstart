@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from './dialog'
+import { responsive } from '../lib/design-system/tokens'
 
 /**
  * Modal Component - 100% Configurable & Accessible
@@ -77,11 +78,11 @@ export interface ModalProps {
 }
 
 const SIZE_CLASSES: Record<ModalSize, string> = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-2xl',
-  full: 'max-w-[95vw]',
+  sm: responsive.modalWidth.sm, // max-w-sm
+  md: responsive.modalWidth.md, // max-w-md
+  lg: responsive.modalWidth.lg, // max-w-lg
+  xl: responsive.modalWidth.xl, // max-w-2xl
+  full: responsive.modalWidth.full, // max-w-[95vw]
 }
 
 export const Modal = ({

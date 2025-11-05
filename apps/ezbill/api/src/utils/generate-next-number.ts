@@ -33,7 +33,7 @@ export async function generateNextNumber(
     userId: userId,
     deletedAt: null,
   })
-    .sort({ createdAt: -1 })
+    .sort({ documentNumber: -1 })
     .lean()) as { documentNumber?: string } | null;
 
   const lastNumber = last?.documentNumber?.split('-')?.[2] ?? '0000';
