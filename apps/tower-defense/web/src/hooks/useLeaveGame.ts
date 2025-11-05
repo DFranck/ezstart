@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi } from '@/utils/api'
+import { callApi, parseApiError } from '@/utils/api'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -15,7 +15,7 @@ export function useLeaveGame() {
         body: { playerId },
       })
 
-      if (!res.ok) throw new Error('Failed to leave game')
+      if (!res.ok) throw new Error(parseApiError(res.data))
       router.push('/')
     } catch (err) {
       console.error('[games:leave]', err)

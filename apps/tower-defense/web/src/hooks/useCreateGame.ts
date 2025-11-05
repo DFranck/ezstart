@@ -1,7 +1,7 @@
 // hooks/useCreateGame.ts
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { CreateGamePayload, CreateGameResponse } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -30,7 +30,7 @@ export function useCreateGame() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to create game')
+          throw new Error(parseApiError(response.data))
         }
 
         if (!response.data?.gameId) {

@@ -3,7 +3,7 @@
 import { getUserId } from '@/utils/get-user-id'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { callApi } from '@/utils/api'
+import { callApi, parseApiError } from '@/utils/api'
 
 // Query keys
 export const billingKeys = {
@@ -23,7 +23,8 @@ export function useClients() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<Client[]>('/clients', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch clients')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
@@ -36,7 +37,8 @@ export function useInvoices() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<Invoice[]>('/invoices', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch invoices')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
@@ -49,7 +51,8 @@ export function useQuotes() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<Quote[]>('/quotes', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch quotes')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
@@ -62,7 +65,8 @@ export function useReceipts() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<Receipt[]>('/receipts', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch receipts')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
@@ -75,7 +79,8 @@ export function useCompanies() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<Company[]>('/companies', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch companies')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },
@@ -88,7 +93,8 @@ export function usePaymentMethods() {
     queryFn: async () => {
       const userId = getUserId()
       const response = await callApi<PaymentMethod[]>('/payment-methods', { userId })
-      if (!response.ok || !response.data) throw new Error('Failed to fetch payment methods')
+      if (!response.ok) throw new Error(parseApiError(response.data))
+      if (!response.data) throw new Error('No data returned from API')
       // Filter out soft-deleted items
       return response.data.filter((item) => !item.deletedAt)
     },

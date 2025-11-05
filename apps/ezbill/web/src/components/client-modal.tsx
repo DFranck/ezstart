@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { BillingClient, Client } from '@ezbill/types'
 import {
   Button,
@@ -91,14 +91,14 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             userId: getUserId(),
             body: formData,
           })
-          if (!res.ok) throw new Error('Failed to update client')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/clients', {
             method: 'POST',
             userId: getUserId(),
             body: formData,
           })
-          if (!res.ok) throw new Error('Failed to create client')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

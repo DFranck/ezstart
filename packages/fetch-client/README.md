@@ -182,9 +182,82 @@ await callApi('/users', { appName: 'ezbill', method: 'POST', body })
 await callApi('/users', { method: 'POST', body }) // appName auto-injected
 ```
 
+## Integration with `runWithFeedback()`
+
+**CRITICAL:** When using `runWithFeedback()` from `@ezstart/ui`, you MUST use `parseApiError()` when throwing errors:
+
+### ❌ WRONG - Generic error message
+
+```typescript
+import { runWithFeedback } from '@ezstart/ui/utils'
+
+await runWithFeedback({
+  action: async () => {
+    const res = await callApi('/clients', { method: 'POST', body })
+    if (!res.ok) throw new Error('Failed to create client') // ❌ Generic message
+    return res.data
+  },
+  toastError: { message: 'Failed to create client' }
+})
+```
+
+**Result:** User sees generic "Failed to create client" instead of actual API error like "Email already exists"
+
+### ✅ CORRECT - Real API error message
+
+```typescript
+import { runWithFeedback } from '@ezstart/ui/utils'
+import { parseApiError } from '@/utils/api'
+
+await runWithFeedback({
+  action: async () => {
+    const res = await callApi('/clients', { method: 'POST', body })
+    if (!res.ok) throw new Error(parseApiError(res.data)) // ✅ Parse API error
+    return res.data
+  },
+  toastError: { message: 'An error occurred' } // Fallback only
+})
+```
+
+**Result:** User sees actual API error: "Client email already exists" ✅
+
+### Why This Matters
+
+`runWithFeedback()` catches errors and displays `error.message` in toast:
+
+```typescript
+// Inside runWithFeedback (simplified)
+try {
+  const result = await action()
+  return result
+} catch (e) {
+  toast.error(e.message) // ← Uses error.message from thrown Error
+}
+```
+
+**Without `parseApiError()`:**
+- Thrown error: `new Error('Failed to create client')`
+- User sees: "Failed to create client" (generic, not helpful)
+
+**With `parseApiError()`:**
+- Thrown error: `new Error(parseApiError(res.data))` → `new Error('Client email already exists')`
+- User sees: "Client email already exists" (specific, actionable)
+
 ## Best Practices
 
-### 1. Always use `parseApiError()` for error display
+### 1. Always use `parseApiError()` when throwing errors
+
+```typescript
+// ✅ Good - Real API error message
+const res = await callApi('/users', { method: 'POST', body })
+if (!res.ok) throw new Error(parseApiError(res.data))
+
+// ❌ Bad - Generic hardcoded message
+const res = await callApi('/users', { method: 'POST', body })
+if (!res.ok) throw new Error('Failed to create user')
+```
+
+### 2. Always use `parseApiError()` for direct toast display
 
 ```typescript
 // ✅ Good
@@ -195,7 +268,7 @@ toast.error(errorMessage)
 toast.error(response.data) // Shows [object Object]
 ```
 
-### 2. Use TypeScript generics for type safety
+### 3. Use TypeScript generics for type safety
 
 ```typescript
 // ✅ Good - Type-safe
@@ -211,7 +284,7 @@ if (response.ok) {
 }
 ```
 
-### 3. Handle both success and error cases
+### 4. Handle both success and error cases
 
 ```typescript
 const response = await callApi<User>('/users/123')

@@ -1,4 +1,4 @@
-import { callApi } from '@/utils/api'
+import { callApi, parseApiError } from '@/utils/api'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -44,7 +44,8 @@ export const useUserStore = create<UserStore>()(
           body: { username: trimmedUsername },
         })
 
-        if (!createRes.ok || !createRes.data) throw new Error('Failed to register user')
+        if (!createRes.ok) throw new Error(parseApiError(createRes.data))
+        if (!createRes.data) throw new Error('No data returned from API')
         const user = createRes.data.user
         set({ user })
         return user

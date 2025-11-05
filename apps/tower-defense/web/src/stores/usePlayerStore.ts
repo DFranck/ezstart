@@ -1,5 +1,5 @@
 // @/stores/playerStore.ts
-import { callApi } from '@/utils/api'
+import { callApi, parseApiError } from '@/utils/api'
 import { Player, PlayerResponse } from '@tower-defense/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -21,7 +21,8 @@ export const usePlayerStore = create<PlayerStore>()(
           body: { name, userId },
         })
 
-        if (!res.ok || !res.data) throw new Error('Failed to register player')
+        if (!res.ok) throw new Error(parseApiError(res.data))
+        if (!res.data) throw new Error('No data returned from API')
         const player = res.data.player
         set({ player })
         return player

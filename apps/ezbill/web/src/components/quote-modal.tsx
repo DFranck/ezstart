@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { BaseLineItem, Client, Company, CreateQuote, Currency, Quote } from '@ezbill/types'
 import {
   Button,
@@ -111,14 +111,14 @@ export function QuoteModal({
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to update quote')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/quotes', {
             method: 'POST',
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to create quote')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

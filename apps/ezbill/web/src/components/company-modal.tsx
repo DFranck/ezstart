@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
 import { useEffect, useState } from 'react'
@@ -70,14 +70,14 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to update company')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/companies', {
             method: 'POST',
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to create company')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

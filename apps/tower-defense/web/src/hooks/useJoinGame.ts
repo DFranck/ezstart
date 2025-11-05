@@ -1,7 +1,7 @@
 // hooks/useJoinGame.ts
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -32,7 +32,7 @@ export function useJoinGame() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to join game')
+          throw new Error(parseApiError(response.data))
         }
 
         // Redirection vers le lobby

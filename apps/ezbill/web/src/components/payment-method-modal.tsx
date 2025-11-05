@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { PaymentMethod, PaymentMethodType } from '@ezbill/types'
 import {
   Button,
@@ -181,14 +181,14 @@ export function PaymentMethodModal({
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to update payment method')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/payment-methods', {
             method: 'POST',
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to create payment method')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

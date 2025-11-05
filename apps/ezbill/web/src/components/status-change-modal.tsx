@@ -2,7 +2,7 @@
 
 import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
-import { callApi } from '@/utils/api'
+import { callApi, parseApiError } from '@/utils/api'
 import { getUserId } from '../utils/get-user-id';
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
@@ -65,7 +65,7 @@ export function StatusChangeModal({
             userId: getUserId(),
           body: { status: newStatus },
         });
-        if (!res.ok) throw new Error(`Failed to update ${documentType} status`);
+        if (!res.ok) throw new Error(parseApiError(res.data));
         onSave();
         onClose();
       },

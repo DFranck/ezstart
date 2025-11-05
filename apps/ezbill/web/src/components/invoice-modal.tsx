@@ -1,5 +1,5 @@
 'use client'
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import {
   BaseLineItem,
   Client,
@@ -154,14 +154,14 @@ export function InvoiceModal({
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to update invoice')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/invoices', {
             method: 'POST',
             userId: getUserId(),
             body: dataToSend,
           })
-          if (!res.ok) throw new Error('Failed to create invoice')
+          if (!res.ok) throw new Error(parseApiError(res.data))
         }
         onSave()
         onClose()

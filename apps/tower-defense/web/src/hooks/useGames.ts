@@ -4,7 +4,7 @@ import { useGamesSocket } from '@/contexts/GamesSocketContext'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { logger } from '@ezstart/logger'
 import { isDebug } from '@ezstart/ui/lib'
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { mockGames, type Game } from '@tower-defense/types'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -90,7 +90,7 @@ export function useGames(options: UseGamesOptions = {}) {
 
         const res = await callApi('/games?phase=waiting&phase=playing')
         if (!res.ok) {
-          throw new Error('Failed to fetch games')
+          throw new Error(parseApiError(res.data))
         }
 
         const games = res.data as Game[]
