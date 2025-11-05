@@ -4,7 +4,9 @@ import {
   createApp,
   createRateLimiter,
   getApiPort,
-  startServer
+  startServer,
+  createVersionedRouter,
+  addVersionHeader
 } from '@ezstart/express-core'
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
@@ -21,8 +23,11 @@ const app = createApp({
 // ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
 app.use(createRateLimiter())
 
-// Mount API routes
-app.use('/api', routes)
+// ✅ Add API version headers to all responses
+app.use(addVersionHeader('v1'))
+
+// ✅ API routes with versioning support (supports both /api and /api/v1)
+app.use(createVersionedRouter('/api', routes))
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers

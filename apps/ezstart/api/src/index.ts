@@ -7,7 +7,9 @@ import {
   startServer,
   connectToMongo,
   getApiPort,
-  createSocketServer
+  createSocketServer,
+  createVersionedRouter,
+  addVersionHeader
 } from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
 import { routes, registries } from './routes/index.js'
@@ -24,6 +26,9 @@ const app = createApp({ apiApp: 'ezstart' })
 // ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
 app.use(createRateLimiter())
 
+// ✅ Add API version headers to all responses
+app.use(addVersionHeader('v1'))
+
 // Get CORS origins for Socket.IO (all web apps can connect)
 const socketCorsOrigins = getAllowedOrigins('ezstart')
 
@@ -36,7 +41,7 @@ const healthCheckScheduler = new HealthCheckScheduler()
 // Expose scheduler to routes
 setScheduler(healthCheckScheduler)
 
-// Health check endpoint
+// Health check endpoint (non-versioned for simplicity)
 app.get('/api/health', (_, res) => {
   res.status(200).json({
     status: 'ok',
@@ -46,8 +51,8 @@ app.get('/api/health', (_, res) => {
   })
 })
 
-// Mount API routes
-app.use('/api', routes)
+// ✅ API routes with versioning support (supports both /api and /api/v1)
+app.use(createVersionedRouter('/api', routes))
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers
