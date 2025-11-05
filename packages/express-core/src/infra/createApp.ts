@@ -36,6 +36,11 @@ export interface CreateAppOptions {
 export function createApp(options?: CreateAppOptions): Express {
   const app = express();
 
+  // Trust proxy - Required when behind reverse proxy (Railway, Vercel, Oracle nginx)
+  // Allows Express to read X-Forwarded-* headers for real client IP
+  // Critical for rate limiting to work correctly
+  app.set('trust proxy', true);
+
   // Configure CORS
   let corsOptions: any;
 
