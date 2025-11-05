@@ -1,6 +1,5 @@
 'use client'
 
-import { LoginForm } from '@/components/LoginForm'
 import { OAuthButtons } from '@/components/OAuthButtons'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
@@ -14,9 +13,17 @@ import {
   Span,
   Spinner,
 } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+
+// Dynamic import for LoginForm (144 lines)
+// Form is only shown after user clicks "Sign in with email"
+// Reduces initial bundle size
+const LoginForm = dynamic(() => import('@/components/LoginForm').then(mod => ({ default: mod.LoginForm })), {
+  loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
+})
 
 function LoginContent() {
   const searchParams = useSearchParams()

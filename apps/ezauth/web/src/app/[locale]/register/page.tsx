@@ -1,6 +1,5 @@
 'use client'
 
-import { RegisterForm } from '@/components/RegisterForm'
 import { OAuthButtons } from '@/components/OAuthButtons'
 import {
   BackButton,
@@ -13,9 +12,17 @@ import {
   Span,
 } from '@ezstart/ui/components'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+
+// Dynamic import for RegisterForm (182 lines)
+// Form is only shown after user clicks "Sign up with email"
+// Reduces initial bundle size
+const RegisterForm = dynamic(() => import('@/components/RegisterForm').then(mod => ({ default: mod.RegisterForm })), {
+  loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
+})
 
 function RegisterContent() {
   const searchParams = useSearchParams()
