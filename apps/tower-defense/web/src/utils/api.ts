@@ -5,6 +5,7 @@ import { callApi as baseCallApi, type CallApiOptions } from '@ezstart/fetch-clie
 
 // Re-export other utils unchanged
 export { runWithFeedback } from '@ezstart/ui/utils'
+export { parseApiError } from '@ezstart/fetch-client'
 export type { ApiResponse, ApiError, HttpMethod } from '@ezstart/fetch-client'
 
 /**

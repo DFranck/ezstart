@@ -1,14 +1,20 @@
 # @ezstart/fetch-client
 
-Type-safe HTTP client for the @ezstart monorepo with automatic URL resolution and error handling.
+Type-safe HTTP client for @ezstart monorepo with automatic API URL resolution and error parsing.
 
-## Overview
+## Features
 
-`@ezstart/fetch-client` provides a centralized HTTP client that automatically resolves API URLs from `@ezstart/config` and handles common API patterns like JSON serialization, error logging, and request cancellation.
+- ✅ Type-safe API calls with TypeScript generics
+- ✅ Automatic URL resolution from `@ezstart/config`
+- ✅ Automatic `/api` prefix normalization
+- ✅ JSON body serialization
+- ✅ Error parsing with `parseApiError()` - **NO MORE `[object Object]`** ✅
+- ✅ httpOnly cookie support (`credentials: 'include'`)
+- ✅ AbortSignal support for request cancellation
 
 ## Installation
 
-This package is automatically included in all @ezstart applications:
+This package is automatically included in all @ezstart web apps:
 
 ```json
 {
@@ -18,345 +24,291 @@ This package is automatically included in all @ezstart applications:
 }
 ```
 
-## Quick Start
+## Usage
 
-### Basic Usage
+### Basic GET Request
 
 ```typescript
-import { callApi } from '@ezstart/fetch-client'
+import { callApi } from '@/utils/api' // App-specific wrapper
 
-// GET request
-const response = await callApi<User[]>('/users', {
-  appName: 'ezbill'
-})
+const response = await callApi<User[]>('/users')
 
 if (response.ok) {
-  console.log('Users:', response.data)
+  console.log('Users:', response.data) // Type: User[]
 } else {
-  console.error('Error:', response.data?.error)
+  console.error('Error:', response.data) // Type: ApiError | null
 }
 ```
 
-### POST Request
+### POST Request with Body
 
 ```typescript
+import { callApi, parseApiError } from '@/utils/api'
+import { toast } from 'sonner'
+
 const response = await callApi<User>('/users', {
-  appName: 'ezbill',
   method: 'POST',
-  body: {
-    name: 'John Doe',
-    email: 'john@example.com'
-  }
+  body: { name: 'John', email: 'john@example.com' }
 })
+
+if (response.ok) {
+  toast.success('User created!')
+  console.log('Created user:', response.data)
+} else {
+  // ✅ Parse error correctly (NO MORE "[object Object]")
+  const errorMessage = parseApiError(response.data)
+  toast.error(errorMessage) // Shows: "User email already exists"
+}
 ```
 
 ### With Query Parameters
 
 ```typescript
 const response = await callApi<Invoice[]>('/invoices', {
-  appName: 'ezbill',
-  query: {
-    status: 'paid',
-    limit: 10
-  }
+  query: { status: 'paid', limit: 10 }
 })
-// URL: https://ezbill-api.up.railway.app/api/invoices?status=paid&limit=10
+// Calls: http://localhost:5020/api/invoices?status=paid&limit=10
 ```
 
-### With Custom Headers
+## Error Handling
+
+### ❌ Before (Shows "[object Object]")
 
 ```typescript
-const response = await callApi<Payment>('/payments', {
-  appName: 'ezpay',
-  method: 'POST',
-  headers: {
-    'X-Idempotency-Key': 'unique-key-123'
-  },
-  body: { amount: 100 }
-})
+const response = await callApi('/users', { method: 'POST', body })
+
+if (!response.ok) {
+  toast.error(response.data) // ❌ [object Object]
+}
 ```
 
-### With AbortSignal
+### ✅ After (Shows actual message)
 
 ```typescript
-const controller = new AbortController()
+import { parseApiError } from '@/utils/api'
 
-const response = await callApi<Data>('/data', {
-  appName: 'monitoring',
-  signal: controller.signal
-})
+const response = await callApi('/users', { method: 'POST', body })
 
-// Cancel request
-controller.abort()
+if (!response.ok) {
+  const errorMessage = parseApiError(response.data)
+  toast.error(errorMessage) // ✅ "User email already exists"
+}
+```
+
+### Error Formats Supported
+
+`parseApiError()` handles all these formats automatically:
+
+```typescript
+// Rate limit errors
+{ error: { message: "Too many requests", code: "RATE_LIMIT_EXCEEDED", retryAfter: 900 } }
+// → "Too many requests"
+
+// Validation errors
+{ error: { message: "Invalid email format", code: "VALIDATION_ERROR" } }
+// → "Invalid email format"
+
+// Standard errors
+{ error: "Invalid credentials" }
+// → "Invalid credentials"
+
+// Legacy errors
+{ message: "User not found" }
+// → "User not found"
+
+// Null/undefined
+null
+// → "An unexpected error occurred. Please try again."
 ```
 
 ## API Reference
 
-### `callApi<T>(endpoint: string, options: CallApiOptions): Promise<ApiResponse<T>>`
+### `callApi<T>(endpoint, options)`
 
-Main function to make HTTP requests to @ezstart APIs.
+Makes a type-safe HTTP request to the API.
 
-#### Parameters
+**Parameters:**
+- `endpoint` (string): API endpoint (e.g., `/users`, `/invoices/123`)
+- `options` (CallApiOptions):
+  - `method?` (HttpMethod): 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' (default: 'GET')
+  - `query?` (Record<string, any>): Query parameters
+  - `body?` (any): Request body (will be JSON.stringified)
+  - `headers?` (Record<string, string>): Custom headers
+  - `signal?` (AbortSignal): Abort controller signal
+  - `userId?` (string): User ID for X-User-Id header
+  - `appName` (AppName): **REQUIRED** - App name for URL resolution
 
-- **endpoint** (string): API endpoint path (e.g., `/users`, `/invoices/123`)
-- **options** (CallApiOptions):
-  - **appName** (AppName, required): App name to resolve API URL (`'ezauth' | 'ezbill' | 'ezpay' | ...`)
-  - **method** (HttpMethod, optional): HTTP method (default: `'GET'`)
-  - **query** (Record<string, any>, optional): Query parameters
-  - **body** (any, optional): Request body (auto-serialized to JSON)
-  - **headers** (Record<string, string>, optional): Custom headers
-  - **signal** (AbortSignal, optional): For request cancellation
-  - **userId** (string, optional): Adds `X-User-Id` header
+**Returns:** `Promise<ApiResponse<T>>`
 
-#### Returns
-
-`Promise<ApiResponse<T>>` where:
-
+**Type:** 
 ```typescript
-type ApiResponse<T> =
+ApiResponse<T> = 
   | { ok: true; status: number; url: string; data: T }
   | { ok: false; status: number; url: string; data: ApiError | null }
 ```
 
+### `parseApiError(errorData)`
+
+Parses API error response into human-readable message (always in English).
+
+**Parameters:**
+- `errorData` (ApiError | null | undefined): Error data from API response
+
+**Returns:** `string` - Human-readable error message
+
+**Always returns English messages** for consistency across the monorepo.
+
 ## App-Specific Wrappers
 
-For better DX, create a wrapper in each app that auto-fills `appName`:
+Each app has a wrapper that automatically injects the `appName`:
 
 ```typescript
 // apps/ezbill/web/src/utils/api.ts
-import { callApi as baseCallApi, type CallApiOptions } from '@ezstart/fetch-client'
-
 export async function callApi<T = any>(
   endpoint: string,
   options: Omit<CallApiOptions, 'appName'> = {}
 ) {
   return baseCallApi<T>(endpoint, { ...options, appName: 'ezbill' })
 }
-
-// Re-export types
-export type { ApiResponse, ApiError, HttpMethod } from '@ezstart/fetch-client'
 ```
 
-Usage in app:
+This allows cleaner code in components:
 
 ```typescript
-import { callApi } from '@/utils/api'
+// ❌ Without wrapper
+await callApi('/users', { appName: 'ezbill', method: 'POST', body })
 
-// appName auto-filled!
-const response = await callApi<Invoice[]>('/invoices')
+// ✅ With wrapper
+await callApi('/users', { method: 'POST', body }) // appName auto-injected
 ```
-
-## Features
-
-### ✅ Automatic URL Resolution
-
-URLs are automatically resolved from `@ezstart/config` based on environment:
-
-```typescript
-// Local: http://localhost:5020/api/invoices
-// Prod: https://ezbill-api.up.railway.app/api/invoices
-const response = await callApi('/invoices', { appName: 'ezbill' })
-```
-
-### ✅ Automatic /api Prefix
-
-The `/api` prefix is automatically normalized:
-
-```typescript
-// All equivalent:
-callApi('/users', { appName: 'ezauth' })
-callApi('/api/users', { appName: 'ezauth' })
-callApi('users', { appName: 'ezauth' })
-// → https://ezauth-api.up.railway.app/api/users
-```
-
-### ✅ Type Safety
-
-Full TypeScript support with generic response types:
-
-```typescript
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-const response = await callApi<User[]>('/users', { appName: 'ezauth' })
-
-if (response.ok) {
-  // response.data is typed as User[]
-  response.data.forEach(user => console.log(user.name))
-}
-```
-
-### ✅ Error Handling
-
-Detailed error logging for debugging:
-
-```typescript
-const response = await callApi('/invalid', { appName: 'ezbill' })
-
-if (!response.ok) {
-  // Logs to console:
-  // [callApi] API returned !ok
-  // [callApi] Method: GET
-  // [callApi] URL: http://localhost:5020/api/invalid
-  // [callApi] Status: 404
-  // [callApi] Response: { error: 'Not found' }
-
-  console.error(response.data?.error)
-}
-```
-
-### ✅ Request Cancellation
-
-Built-in support for AbortController:
-
-```typescript
-const controller = new AbortController()
-
-setTimeout(() => controller.abort(), 5000) // Cancel after 5s
-
-const response = await callApi('/slow-endpoint', {
-  appName: 'monitoring',
-  signal: controller.signal
-})
-```
-
-## Migration from @ezstart/ui/utils
-
-If migrating from the old `@ezstart/ui/utils` package:
-
-```typescript
-// Before
-import { callApi } from '@ezstart/ui/utils'
-
-const response = await callApi('/users', {
-  appName: 'ezbill' // Optional
-})
-
-// After
-import { callApi } from '@ezstart/fetch-client'
-
-const response = await callApi('/users', {
-  appName: 'ezbill' // Required
-})
-```
-
-**Breaking changes:**
-- ✅ `appName` is now required (no more fallback to env vars)
-- ✅ No more `getApiUrl` dependency (fully self-contained)
 
 ## Best Practices
 
-### 1. Use App Wrappers
-
-Create a wrapper in each app to avoid repetition:
+### 1. Always use `parseApiError()` for error display
 
 ```typescript
 // ✅ Good
-import { callApi } from '@/utils/api' // Wrapper with appName
-const response = await callApi('/users')
+const errorMessage = parseApiError(response.data)
+toast.error(errorMessage)
 
-// ❌ Avoid
-import { callApi } from '@ezstart/fetch-client'
-const response = await callApi('/users', { appName: 'ezbill' })
+// ❌ Bad
+toast.error(response.data) // Shows [object Object]
 ```
 
-### 2. Type Your Responses
-
-Always provide type parameters for better type safety:
+### 2. Use TypeScript generics for type safety
 
 ```typescript
-// ✅ Good
-const response = await callApi<Invoice[]>('/invoices', { appName: 'ezbill' })
-
-// ❌ Avoid
-const response = await callApi('/invoices', { appName: 'ezbill' }) // any
-```
-
-### 3. Handle Errors Gracefully
-
-Check `response.ok` before accessing data:
-
-```typescript
-// ✅ Good
-const response = await callApi<User>('/users/123', { appName: 'ezauth' })
+// ✅ Good - Type-safe
+const response = await callApi<User[]>('/users')
 if (response.ok) {
-  return response.data
-} else {
-  toast.error(response.data?.error || 'Failed to fetch user')
-  return null
+  response.data.forEach(user => console.log(user.name)) // ✅ Autocomplete works
 }
 
-// ❌ Avoid
-const response = await callApi<User>('/users/123', { appName: 'ezauth' })
-return response.data // Might be ApiError!
+// ❌ Bad - No type safety
+const response = await callApi('/users')
+if (response.ok) {
+  response.data.forEach(user => console.log(user.name)) // ❌ No autocomplete
+}
 ```
 
-### 4. Use with React Query
-
-Perfect companion for `@tanstack/react-query`:
+### 3. Handle both success and error cases
 
 ```typescript
-import { useQuery } from '@tanstack/react-query'
-import { callApi } from '@/utils/api'
+const response = await callApi<User>('/users/123')
 
-function useUsers() {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      const response = await callApi<User[]>('/users')
-      if (!response.ok) throw new Error(response.data?.error || 'Failed')
-      return response.data
-    }
-  })
+if (response.ok) {
+  // ✅ Handle success
+  console.log('User:', response.data)
+} else {
+  // ✅ Handle error
+  const errorMessage = parseApiError(response.data)
+  console.error('Failed to fetch user:', errorMessage)
 }
 ```
 
-## Applications Using This Package
+## Examples
 
-All @ezstart applications use this HTTP client:
+### Complete CRUD Example
 
-- ✅ **ezbill/web** - Invoicing API calls
-- ✅ **ezpay/web** - Payment API calls
-- ✅ **tower-defense/web** - Game API calls
-- ✅ **green-pulse/web** - Forms API calls
-- ✅ **ezauth/web** - Authentication API calls
-- ✅ **ezstart/web** - Monitoring API calls
-- ✅ **fengshui/web** - Analysis API calls
+```typescript
+import { callApi, parseApiError } from '@/utils/api'
+import { toast } from 'sonner'
+
+// CREATE
+async function createUser(data: CreateUserInput) {
+  const response = await callApi<User>('/users', {
+    method: 'POST',
+    body: data
+  })
+
+  if (response.ok) {
+    toast.success('User created!')
+    return response.data
+  } else {
+    toast.error(parseApiError(response.data))
+    return null
+  }
+}
+
+// READ
+async function getUser(id: string) {
+  const response = await callApi<User>(`/users/${id}`)
+
+  if (response.ok) {
+    return response.data
+  } else {
+    toast.error(parseApiError(response.data))
+    return null
+  }
+}
+
+// UPDATE
+async function updateUser(id: string, data: UpdateUserInput) {
+  const response = await callApi<User>(`/users/${id}`, {
+    method: 'PUT',
+    body: data
+  })
+
+  if (response.ok) {
+    toast.success('User updated!')
+    return response.data
+  } else {
+    toast.error(parseApiError(response.data))
+    return null
+  }
+}
+
+// DELETE
+async function deleteUser(id: string) {
+  const response = await callApi(`/users/${id}`, {
+    method: 'DELETE'
+  })
+
+  if (response.ok) {
+    toast.success('User deleted!')
+    return true
+  } else {
+    toast.error(parseApiError(response.data))
+    return false
+  }
+}
+```
 
 ## Related Packages
 
-- [`@ezstart/config`](../config/README.md) - URL configuration and app registry
-- [`@ezstart/ui`](../ui/README.md) - UI components (removed callApi in v2.0)
-- [`@ezstart/auth-sdk`](../auth-sdk/README.md) - Uses fetch-client internally
+- `@ezstart/config` - API URL configuration
+- `@ezstart/ui` - Toast notifications (`sonner`)
+- `@ezstart/types` - Shared TypeScript types
 
-## Development
+## Changelog
 
-### Building the Package
+### v0.2.0 (2025-11-05)
 
-```bash
-# Build TypeScript
-pnpm build
+- ✅ Added `parseApiError()` utility - **Fixes `[object Object]` display**
+- ✅ Supports nested error objects (rate limit, validation, etc.)
+- ✅ Always returns English error messages
+- ✅ Comprehensive documentation with examples
 
-# Watch mode
-pnpm dev
+### v0.1.0
 
-# Type check
-pnpm typecheck
-```
-
-### Testing
-
-```bash
-# Run tests
-pnpm test
-
-# Watch mode
-pnpm test:watch
-```
-
-## License
-
-MIT
+- Initial release with `callApi()` function
