@@ -17,13 +17,15 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
   const { user, isAuthenticated } = useAuth()
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
-  // Use React Query hooks
-  const { data: clients = [], isLoading: clientsLoading } = useClients()
-  const { data: invoices = [], isLoading: invoicesLoading } = useInvoices()
-  const { data: quotes = [], isLoading: quotesLoading } = useQuotes()
-  const { data: receipts = [], isLoading: receiptsLoading } = useReceipts()
-  const { data: companies = [], isLoading: companiesLoading } = useCompanies()
-  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = usePaymentMethods()
+  const userId = user?._id
+
+  // Use React Query hooks - pass userId to each hook
+  const { data: clients = [], isLoading: clientsLoading } = useClients(userId)
+  const { data: invoices = [], isLoading: invoicesLoading } = useInvoices(userId)
+  const { data: quotes = [], isLoading: quotesLoading } = useQuotes(userId)
+  const { data: receipts = [], isLoading: receiptsLoading } = useReceipts(userId)
+  const { data: companies = [], isLoading: companiesLoading } = useCompanies(userId)
+  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = usePaymentMethods(userId)
 
   const { invalidateAll } = useInvalidateBilling()
 

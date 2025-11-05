@@ -3,7 +3,6 @@
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { callApi, parseApiError } from '@/utils/api'
-import { useAuth } from '@ezstart/auth-sdk'
 
 // Query keys
 export const billingKeys = {
@@ -17,10 +16,7 @@ export const billingKeys = {
 }
 
 // Individual query hooks
-export function useClients() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function useClients(userId?: string) {
   return useQuery({
     queryKey: billingKeys.clients(),
     queryFn: async () => {
@@ -34,10 +30,7 @@ export function useClients() {
   })
 }
 
-export function useInvoices() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function useInvoices(userId?: string) {
   return useQuery({
     queryKey: billingKeys.invoices(),
     queryFn: async () => {
@@ -51,10 +44,7 @@ export function useInvoices() {
   })
 }
 
-export function useQuotes() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function useQuotes(userId?: string) {
   return useQuery({
     queryKey: billingKeys.quotes(),
     queryFn: async () => {
@@ -68,10 +58,7 @@ export function useQuotes() {
   })
 }
 
-export function useReceipts() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function useReceipts(userId?: string) {
   return useQuery({
     queryKey: billingKeys.receipts(),
     queryFn: async () => {
@@ -85,10 +72,7 @@ export function useReceipts() {
   })
 }
 
-export function useCompanies() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function useCompanies(userId?: string) {
   return useQuery({
     queryKey: billingKeys.companies(),
     queryFn: async () => {
@@ -102,10 +86,7 @@ export function useCompanies() {
   })
 }
 
-export function usePaymentMethods() {
-  const { user } = useAuth()
-  const userId = user?._id
-
+export function usePaymentMethods(userId?: string) {
   return useQuery({
     queryKey: billingKeys.paymentMethods(),
     queryFn: async () => {
