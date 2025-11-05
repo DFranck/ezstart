@@ -29,23 +29,24 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ---
 
-## 🎯 Score Global : 95/100 ⭐⭐⭐⭐⭐ EXCELLENT
+## 🎯 Score Global : 94.3/100 ⭐⭐⭐⭐⭐ EXCELLENT
 
 ### Scores par Catégorie
 
 | Catégorie         | Score   | Status       |
 | ----------------- | ------- | ------------ |
+| **API**           | 100/100 | ✅ Excellent |
 | **Tests**         | 100/100 | ✅ Excellent |
 | **TypeCheck**     | 100/100 | ✅ Excellent |
 | **Databases**     | 100/100 | ✅ Excellent |
 | **Architecture**  | 95/100  | ✅ Excellent |
-| **Security**      | 95/100  | ✅ Excellent |
-| **Documentation** | 90/100  | ✅ Very Good |
-| **Performance**   | 75/100  | ⚠️ Good      |
-| **Accessibility** | 76/100  | ⚠️ Good      |
-| **UX**            | 70/100  | ⚠️ Good      |
+| **Accessibility** | 95/100  | ✅ Excellent |
+| **Documentation** | 95/100  | ✅ Excellent |
+| **Mobile UX**     | 85/100  | ✅ Very Good |
+| **Performance**   | 82/100  | ✅ Very Good |
+| **UX**            | 80/100  | ✅ Very Good |
 
-**Audits disponibles :** [docs/audits/](./docs/audits/) (16 fichiers)
+**Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
 
 ---
 

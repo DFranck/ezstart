@@ -49,7 +49,7 @@
 - [reference/ROADMAP.md](./reference/ROADMAP.md) - Vers 100/100 (Phase 3)
 
 **Documentation détaillée:**
-- [audits/](./audits/) - 16 audits détaillés
+- [audits/](./audits/) - 18 audits détaillés (17 complets + 1 en cours)
 
 ---
 
@@ -101,10 +101,12 @@
     ├── reference/                # 📖 Documentation de référence
     │   └── ROADMAP.md           # Roadmap Phase 3
     │
-    └── audits/                   # 🔍 16 audits détaillés
+    └── audits/                   # 🔍 18 audits détaillés
         ├── ARCHITECTURE-AUDIT.md
         ├── CODE-QUALITY-AUDIT.md
         ├── SECURITY-AUDIT.md
+        ├── MOBILE-UX-AUDIT.md
+        ├── LANDING-PAGES-AUDIT.md
         └── ... (13 autres)
 ```
 
