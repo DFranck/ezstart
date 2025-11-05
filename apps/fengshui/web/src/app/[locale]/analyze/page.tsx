@@ -1,13 +1,23 @@
 /* path: /app/[locale]/analyze/page.tsx */
 'use client'
 
-import AnalysisStep from '@/components/steps/AnalysisStep'
-import CardinalPointsStep from '@/components/steps/CardinalPointsStep-v2'
-import UploadStep from '@/components/steps/UploadStep'
 import { THEME_COLORS } from '@/lib/theme-colors'
 import { Stepper, type StepperTheme } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+
+// Dynamic imports for heavy step components (~900 lines total)
+// Reduces initial bundle size and improves First Load JS
+const AnalysisStep = dynamic(() => import('@/components/steps/AnalysisStep'), {
+  loading: () => <div className="flex items-center justify-center p-8">Loading analysis...</div>,
+})
+const CardinalPointsStep = dynamic(() => import('@/components/steps/CardinalPointsStep-v2'), {
+  loading: () => <div className="flex items-center justify-center p-8">Loading compass...</div>,
+})
+const UploadStep = dynamic(() => import('@/components/steps/UploadStep'), {
+  loading: () => <div className="flex items-center justify-center p-8">Loading uploader...</div>,
+})
 
 export default function AnalyzePage() {
   const [triggerPreview, setTriggerPreview] = useState(0)

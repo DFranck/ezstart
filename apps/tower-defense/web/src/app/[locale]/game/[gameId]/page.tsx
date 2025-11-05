@@ -2,16 +2,24 @@
 
 import { useGameState } from '@/stores/useGameState'
 import { callApi } from '@/utils/api'
-import { notFound, useParams } from 'next/navigation'
-
 import { Div, Spinner } from '@ezstart/ui/components'
 import { Game } from '@tower-defense/types'
+import dynamic from 'next/dynamic'
+import { notFound, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { GameCanvasCanvas } from '../components/GameCanvasCanvas'
 import { GameInitializer } from '../components/GameInitializer'
 import { Hud } from '../components/Hud'
-import { MobShop } from '../components/MobShop'
-import { TowerShop } from '../components/TowerShop'
+
+// Dynamic imports for heavy game components (~630 lines total)
+// TowerShop (240 lines) and MobShop (187 lines) are only shown when game is active
+// Reduces initial bundle size and improves First Load JS
+const TowerShop = dynamic(() => import('../components/TowerShop').then(mod => ({ default: mod.TowerShop })), {
+  loading: () => <div className="animate-pulse bg-muted rounded-lg h-32" />,
+})
+const MobShop = dynamic(() => import('../components/MobShop').then(mod => ({ default: mod.MobShop })), {
+  loading: () => <div className="animate-pulse bg-muted rounded-lg h-32" />,
+})
 
 export default function GamePage() {
   const params = useParams<{ gameId: string }>()

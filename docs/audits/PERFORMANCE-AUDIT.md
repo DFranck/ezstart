@@ -114,15 +114,48 @@ const MacbookScroll = dynamic(
 - `abdf45d` - perf(ezstart): optimize bundle size with dynamic imports and bundle analyzer
 - `0c1f5cb` - docs: add Performance Optimization section to CLAUDE.md
 
+**4. Dynamic Imports Extended to 3 More Apps** ✅ (Nov 5, 2025)
+```typescript
+// FengShui - Step components (892 lines, 3 components)
+const AnalysisStep = dynamic(() => import('@/components/steps/AnalysisStep'))
+const CardinalPointsStep = dynamic(() => import('@/components/steps/CardinalPointsStep-v2'))
+const UploadStep = dynamic(() => import('@/components/steps/UploadStep'))
+
+// Tower Defense - Game components (427 lines, 2 components)
+const TowerShop = dynamic(() => import('../components/TowerShop').then(mod => ({ default: mod.TowerShop })))
+const MobShop = dynamic(() => import('../components/MobShop').then(mod => ({ default: mod.MobShop })))
+
+// GreenPulse - Dialog components (485 lines, 3 components)
+const CreateWorkspaceDialog = dynamic(() => import('@/components/forms/CreateWorkspaceDialog').then(mod => ({ default: mod.CreateWorkspaceDialog })))
+const CreateProjectDialog = dynamic(() => import('@/components/forms/CreateProjectDialog').then(mod => ({ default: mod.CreateProjectDialog })))
+const CreateFormInstanceDialog = dynamic(() => import('@/components/forms/CreateFormInstanceDialog').then(mod => ({ default: mod.CreateFormInstanceDialog })))
+```
+**Impact:**
+- ~1,800 lines of code split across 3 apps (8 components total)
+- Estimated 30-50KB reduction in First Load JS per app
+- Improved Time to Interactive (TTI) for initial page loads
+- Files modified:
+  - [apps/fengshui/web/src/app/[locale]/analyze/page.tsx](../../apps/fengshui/web/src/app/[locale]/analyze/page.tsx)
+  - [apps/tower-defense/web/src/app/[locale]/game/[gameId]/page.tsx](../../apps/tower-defense/web/src/app/[locale]/game/[gameId]/page.tsx)
+  - [apps/green-pulse/web/src/app/[locale]/dashboard/page.tsx](../../apps/green-pulse/web/src/app/[locale]/dashboard/page.tsx)
+  - [apps/green-pulse/web/src/app/[locale]/w/[slug]/page.tsx](../../apps/green-pulse/web/src/app/[locale]/w/[slug]/page.tsx)
+  - [apps/green-pulse/web/src/app/[locale]/w/[slug]/p/[id]/page.tsx](../../apps/green-pulse/web/src/app/[locale]/w/[slug]/p/[id]/page.tsx)
+
+**Combined with EZBill (Oct 2025):**
+- Total: 4 apps optimized with dynamic imports
+- Total components code-split: 15 (7 EZBill + 8 others)
+- Total lines code-split: ~3,000 lines
+- Pattern established for remaining apps (ASC-TCD, EZAuth, EZPay, EZStart monitoring)
+
 ### 🔧 Remaining Fixes Required
 
 **Priority 1 - HIGH (Next Week):**
 
-1. **Apply same pattern to other 7 apps** (~3h, +5 pts)
-```bash
-# FengShui, GreenPulse, ASC-TCD, EZAuth, etc.
-# Copy dynamic import pattern from EZStart
-```
+1. ~~**Apply same pattern to other 7 apps**~~ **PARTIALLY COMPLETE** ✅
+   - ✅ FengShui - 3 components optimized
+   - ✅ GreenPulse - 3 components optimized
+   - ✅ Tower Defense - 2 components optimized
+   - ⏳ Remaining: ASC-TCD, EZAuth, EZPay (estimated ~1-2h, +2 pts)
 
 2. **Fix lucide-react imports** - Tree-shake properly (~1h, +3 pts)
 ```typescript

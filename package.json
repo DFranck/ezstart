@@ -45,6 +45,7 @@
     "@axe-core/react": "^4.11.0",
     "@ezstart/eslint-config": "workspace:*",
     "@ezstart/typescript-config": "workspace:*",
+    "@next/bundle-analyzer": "^16.0.0",
     "@types/fs-extra": "^11.0.4",
     "@types/jest": "^29.5.14",
     "eslint": "^9.27.0",

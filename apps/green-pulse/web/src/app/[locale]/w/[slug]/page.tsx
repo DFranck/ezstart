@@ -1,11 +1,18 @@
 'use client'
 
-import { CreateProjectDialog } from '@/components/forms/CreateProjectDialog'
 import { ProjectsList } from '@/components/forms/ProjectsList'
 import { WorkspaceBreadcrumbs } from '@/components/forms/WorkspaceBreadcrumbs'
 import { Card, CardContent, H1, P } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { Suspense, use } from 'react'
+
+// Dynamic import for CreateProjectDialog (153 lines)
+// Dialog is only shown when user clicks "Create Project" button
+// Reduces initial bundle size
+const CreateProjectDialog = dynamic(() => import('@/components/forms/CreateProjectDialog').then(mod => ({ default: mod.CreateProjectDialog })), {
+  loading: () => <div className="animate-pulse bg-muted rounded h-10 w-40" />,
+})
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>

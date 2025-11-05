@@ -1,10 +1,17 @@
 'use client'
 
-import { CreateWorkspaceDialog } from '@/components/forms/CreateWorkspaceDialog'
 import { WorkspacesList } from '@/components/forms/WorkspacesList'
 import { Badge, Card, CardContent, CardHeader, H1, P, Section } from '@ezstart/ui/components'
+import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
+
+// Dynamic import for CreateWorkspaceDialog (121 lines)
+// Dialog is only shown when user clicks "Create Workspace" button
+// Reduces initial bundle size
+const CreateWorkspaceDialog = dynamic(() => import('@/components/forms/CreateWorkspaceDialog').then(mod => ({ default: mod.CreateWorkspaceDialog })), {
+  loading: () => <div className="animate-pulse bg-muted rounded h-10 w-40" />,
+})
 
 export default function DashboardPage() {
   const t = useTranslations('forms.workspaces')
