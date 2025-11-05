@@ -271,7 +271,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
             {/* Cycles des éléments */}
             <CardContent size="xs">
               <h5 className="font-semibold mb-2">{t('bagua.fiveElementsCycles')}</h5>
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2 bg-green-100 rounded border border-green-300">
                   <p className="font-medium text-green-800">{t('bagua.nourishedBy')}</p>
                   <p className="text-green-700">{sector.nourisher}</p>

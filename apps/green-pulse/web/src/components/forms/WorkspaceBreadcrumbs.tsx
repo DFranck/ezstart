@@ -19,7 +19,7 @@ export function WorkspaceBreadcrumbs({
   formName,
 }: WorkspaceBreadcrumbsProps) {
   return (
-    <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+    <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap overflow-x-auto">
       <Link href="/dashboard" className="hover:text-foreground transition-colors">
         📋 Dashboard
       </Link>

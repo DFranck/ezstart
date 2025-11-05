@@ -199,7 +199,7 @@ export default function HomePage() {
           </P>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, idx) => (
             <Card
               key={idx}
@@ -327,7 +327,7 @@ export default function HomePage() {
                 <span className={GRADIENT_TEXT}>{t('cta.title')}</span>
               </H2>
 
-              <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
                 <div className="flex flex-col items-center">
                   <Icon name="lucide:Star" className="w-8 h-8 text-yellow-500 mb-2" />
                   <span className="text-sm font-semibold text-foreground">
