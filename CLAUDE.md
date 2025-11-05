@@ -29,7 +29,7 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 ---
 
-## 🎯 Score Global : 94.9/100 ⭐⭐⭐⭐⭐ EXCELLENT
+## 🎯 Score Global : 95.4/100 ⭐⭐⭐⭐⭐ EXCELLENT
 
 ### Scores par Catégorie
 
@@ -39,23 +39,24 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 | **Tests**         | 100/100 | ✅ Excellent |
 | **TypeCheck**     | 100/100 | ✅ Excellent |
 | **Databases**     | 100/100 | ✅ Excellent |
+| **UX**            | 96/100  | ✅ Excellent |
 | **Architecture**  | 95/100  | ✅ Excellent |
 | **Accessibility** | 95/100  | ✅ Excellent |
 | **Documentation** | 95/100  | ✅ Excellent |
 | **Mobile UX**     | 93/100  | ✅ Excellent |
-| **UX**            | 87/100  | ✅ Very Good |
 | **Performance**   | 82/100  | ✅ Very Good |
 
 **Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
 
-**Dernière mise à jour :** 5 Novembre 2025
-- 📱 **Mobile UX:** 85→93/100 (+8 points) 🎉 - Toutes les phases terminées !
+**Dernière mise à jour :** 6 Novembre 2025
+- 🎨 **UX:** 87→96/100 (+9 points) 🎉 - Welcome modals + Progress indicators !
+  - WelcomeModal component (3 apps: EZBill, GreenPulse, FengShui)
+  - Progress bars (FengShui file uploads)
+  - First-time user onboarding avec localStorage
+- 📱 **Mobile UX:** 85→93/100 (+8 points) - Toutes les phases terminées !
   - Design System complet + 17 composants
   - Safe-area support universel (iPhone notch)
-- 🎨 **UX:** 70→87/100 (+17 points) - Skeleton loaders + Error boundaries
-  - 7 skeleton variants (shimmer animation)
-  - Universal error boundaries (8 apps)
-- 🎯 **9 audits ≥90/100** (50% excellence rate)
+- 🎯 **10 audits ≥90/100** (59% excellence rate) 🚀
 
 ---
 

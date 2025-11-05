@@ -2,7 +2,7 @@
 'use client'
 
 import { getCroppedImg } from '@/utils/image'
-import { Button, Icon, Input } from '@ezstart/ui/components'
+import { Button, Icon, Input, Progress } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -51,6 +51,8 @@ export function PlanUploader({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [originalPreview, setOriginalPreview] = useState<string | null>(null) // Garder l'image originale
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Minimal editing state
   const [isEditing, setIsEditing] = useState(false)
@@ -133,10 +135,27 @@ export function PlanUploader({
       if (!file) return
 
       setUploadedFile(file)
+      setIsProcessing(true)
+      setUploadProgress(0)
 
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
+
+        // Simulate progress for better UX feedback
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval)
+              return prev
+            }
+            return prev + 10
+          })
+        }, 50)
+
         reader.onload = e => {
+          clearInterval(progressInterval)
+          setUploadProgress(100)
+
           const result = e.target?.result as string
           setPreview(result)
           setOriginalPreview(result) // Sauvegarder l'image originale
@@ -153,10 +172,23 @@ export function PlanUploader({
             scale: 1,
             position: { x: 0, y: 0 },
           })
+
+          setTimeout(() => {
+            setIsProcessing(false)
+            setUploadProgress(0)
+          }, 300)
         }
+
+        reader.onerror = () => {
+          clearInterval(progressInterval)
+          setIsProcessing(false)
+          setUploadProgress(0)
+        }
+
         reader.readAsDataURL(file)
       } else {
         // PDFs: no image editing; pass straight to parent
+        setUploadProgress(100)
         const pdfPreview = '/api/pdf-preview'
         setPreview(pdfPreview)
         onPlanUpload(file, pdfPreview, {
@@ -164,6 +196,11 @@ export function PlanUploader({
           scale: 1,
           position: { x: 0, y: 0 },
         })
+
+        setTimeout(() => {
+          setIsProcessing(false)
+          setUploadProgress(0)
+        }, 300)
       }
     },
     [onPlanUpload, onEditingChange]
@@ -226,6 +263,14 @@ export function PlanUploader({
             </p>
             <p className="text-sm ">{t('uploader.clickToSelect')}</p>
             <p className="text-xs ">{t('uploader.acceptedFormats')}</p>
+            {isProcessing && (
+              <div className="w-full max-w-xs mt-4">
+                <Progress value={uploadProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('uploader.processing')} {uploadProgress}%
+                </p>
+              </div>
+            )}
           </div>
         </div>
       ) : (

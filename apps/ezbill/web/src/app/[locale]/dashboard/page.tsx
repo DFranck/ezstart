@@ -14,7 +14,7 @@ import { getUserId } from '@/utils/get-user-id'
 import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Div, Spinner, SkeletonCard, Skeleton } from '@ezstart/ui/components'
+import { Div, Spinner, SkeletonCard, Skeleton, WelcomeModal } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -206,6 +206,35 @@ const DashboardPage = () => {
 
   return (
     <>
+      <WelcomeModal
+        appName="EZBill"
+        title="Welcome to EZBill! 💼"
+        description="Professional invoicing and billing made simple"
+        features={[
+          {
+            icon: "lucide:FileText",
+            title: "Create Invoices & Quotes",
+            description: "Generate professional invoices and quotes in seconds with customizable templates"
+          },
+          {
+            icon: "lucide:Users",
+            title: "Manage Clients",
+            description: "Keep track of all your clients and companies in one organized dashboard"
+          },
+          {
+            icon: "lucide:CreditCard",
+            title: "Track Payments",
+            description: "Monitor payment status, send reminders, and accept multiple payment methods"
+          },
+          {
+            icon: "lucide:BarChart3",
+            title: "Revenue Analytics",
+            description: "Visualize your revenue trends and identify your top clients with insightful charts"
+          }
+        ]}
+        ctaText="Start Creating"
+      />
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
         {/* Stats Section - Only show when there's meaningful data */}
         {hasData && (

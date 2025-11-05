@@ -2,7 +2,7 @@
 'use client'
 
 import { THEME_COLORS } from '@/lib/theme-colors'
-import { Stepper, type StepperTheme } from '@ezstart/ui/components'
+import { Stepper, type StepperTheme, WelcomeModal } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -67,6 +67,35 @@ export default function AnalyzePage() {
 
   return (
     <>
+      <WelcomeModal
+        appName="FengShui"
+        title="Welcome to FengShui Analyzer! 🧭"
+        description="Traditional Feng Shui wisdom meets modern AI technology"
+        features={[
+          {
+            icon: "lucide:Upload",
+            title: "Upload Your Floor Plan",
+            description: "Upload any floor plan image and crop it to focus on the area you want to analyze"
+          },
+          {
+            icon: "lucide:Compass",
+            title: "Set Cardinal Direction",
+            description: "Use our interactive compass to precisely define your home's orientation"
+          },
+          {
+            icon: "lucide:Sparkles",
+            title: "AI-Powered Bagua Analysis",
+            description: "Get instant Feng Shui insights with our AI analyzing energy flow and balance"
+          },
+          {
+            icon: "lucide:FileText",
+            title: "Detailed PDF Report",
+            description: "Download a comprehensive report with recommendations for each life area"
+          }
+        ]}
+        ctaText="Start Your Analysis"
+      />
+
       <Stepper
         steps={
           steps as unknown as Array<{

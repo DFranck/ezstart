@@ -1,16 +1,16 @@
-import '@ezstart/ui/globals.css'
-import { ErrorBoundary } from '@ezstart/ui/components'
 import { QueryProvider } from '@/providers/query-provider'
 import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
-import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
-import { Geist } from 'next/font/google'
-import { Toaster } from 'sonner'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { ErrorBoundary } from '@ezstart/ui/components'
+import '@ezstart/ui/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { Geist } from 'next/font/google'
 import Script from 'next/script'
 import { ReactNode } from 'react'
+import { Toaster } from 'sonner'
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -35,7 +35,7 @@ export const metadata = createMetadata({
 export const viewport = createViewport('#3B82F6')
 
 const jsonLd = createJsonLd({
-  appName: 'EZ Billing',
+  appName: 'EZBill',
   description: 'Simple and efficient billing management for businesses',
   url: 'https://ezbill-web.vercel.app',
   applicationCategory: 'BusinessApplication',
