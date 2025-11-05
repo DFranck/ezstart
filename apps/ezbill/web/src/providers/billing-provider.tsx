@@ -43,11 +43,7 @@ export const BillingProvider = ({ children }: { children: React.ReactNode }) => 
     invalidateAll()
   }
 
-  // Don't render if not authenticated
-  if (!user || !isAuthenticated) {
-    return null
-  }
-
+  // Provider should always render - auth check is done at page level
   return (
     <BillingContext.Provider
       value={{
