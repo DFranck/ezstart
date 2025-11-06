@@ -1,0 +1,27 @@
+{
+  "name": "@ezstart/ai-sdk",
+  "version": "1.0.0",
+  "description": "Reusable AI SDK for backend APIs with configurable providers, preprompts, and hooks",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openai": "^4.77.3"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
