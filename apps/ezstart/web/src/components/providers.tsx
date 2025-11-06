@@ -31,7 +31,7 @@ export function Providers({
 }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider appName="ezstart" useHttpOnlyCookies={true}>
+      <AuthProvider appName="ezstart" authMode="httpOnly">
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
