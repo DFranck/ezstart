@@ -31,6 +31,8 @@ export {
   createModerateRateLimiter
 } from './middleware/rateLimit.js'
 export type { RateLimitOptions } from './middleware/rateLimit.js'
+export { securityHeaders, securityHeadersPresets } from './middleware/security-headers.js'
+export type { SecurityHeadersOptions } from './middleware/security-headers.js'
 
 // Versioning
 export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from './versioning.js'

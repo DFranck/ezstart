@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import express, { Express } from 'express';
 import type { AppName } from '@ezstart/config/urls';
 import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors';
+import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js';
 
 // Load .env.local first (priority), then .env as fallback
 dotenv.config({ path: '.env.local' });
@@ -76,6 +77,23 @@ export function createApp(options?: CreateAppOptions): Express {
   }
 
   app.use(cors(corsOptions));
+
+  // Security Headers - Add comprehensive security headers to all responses
+  // Automatically detects environment (NODE_ENV) and applies appropriate preset
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  if (isProduction) {
+    app.use(securityHeaders(securityHeadersPresets.moderate()));
+    console.log('🔒 [Security] Production security headers enabled');
+  } else if (isDevelopment) {
+    app.use(securityHeaders(securityHeadersPresets.development()));
+    console.log('🔓 [Security] Development mode - relaxed headers');
+  } else {
+    // Default to moderate for other environments (test, staging, etc.)
+    app.use(securityHeaders(securityHeadersPresets.moderate()));
+    console.log('🔒 [Security] Moderate security headers enabled');
+  }
 
   // Apply raw body parser for specific routes BEFORE JSON parser
   if (options?.rawBodyRoutes) {
