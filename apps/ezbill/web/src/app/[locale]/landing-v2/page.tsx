@@ -1,15 +1,12 @@
+'use client'
 /**
  * EZBill Landing Page V2 - Modern Landing with SEO Optimization
  *
- * Uses components from @ezstart/ui and data from @ezstart/seo-config
+ * Client Component for interactive landing page
+ * Metadata handled in layout.tsx (Server Component)
  */
 
-import {
-  generateLandingMetadata,
-  generateFAQSchema,
-  generateSoftwareSchema,
-  getAppSEO,
-} from '@ezstart/seo-config'
+import { getAppSEO } from '@ezstart/seo-config'
 import {
   LandingHero,
   FeatureGrid,
@@ -19,28 +16,12 @@ import {
   LandingStats,
 } from '@ezstart/ui/components'
 
-// Generate metadata for this page
-export const metadata = generateLandingMetadata('ezbill')
-
 export default function LandingV2Page() {
   // Get SEO data for EZBill
   const seoData = getAppSEO('ezbill')
 
-  // Generate Schema.org structured data
-  const faqSchema = generateFAQSchema('ezbill')
-  const softwareSchema = generateSoftwareSchema('ezbill')
-
   return (
     <>
-      {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-      />
 
       {/* Hero Section */}
       <LandingHero

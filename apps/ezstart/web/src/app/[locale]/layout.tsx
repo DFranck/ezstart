@@ -2,8 +2,8 @@ import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
 import { Toaster, ErrorBoundary } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
-import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
-import { createJsonLd } from '@ezstart/seo-config/json-ld'
+import { createEnhancedMetadata, createEnhancedViewport } from '@ezstart/seo-config/metadata-enhanced'
+import { generateOrganizationSchema } from '@ezstart/seo-config'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
@@ -11,23 +11,24 @@ import Script from 'next/script'
 import { notFound } from 'next/navigation'
 import ClientLayout from './client-layout'
 
-export const metadata = createMetadata({
+// ✅ NOUVEAU - Utilise les données riches de docs/seo/01-EZSTART-DEEP-DIVE.md
+// via packages/seo-config/src/apps/ezstart.ts
+export const metadata = createEnhancedMetadata({
   app: 'ezstart',
-  appName: 'EZStart',
-  description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
-  keywords: ['development', 'platform', 'web apps', 'ezstart', 'tools'],
   themeColor: '#000000',
   ogImage: 'https://www.ezstart.xyz/og-image.svg',
 })
+// Ceci charge AUTOMATIQUEMENT:
+// - seoData.shortDescription (ou longDescription pour landing)
+// - seoData.keywords.primary + secondary + longTail
+// - seoData.appName
+// - Open Graph complet
+// - Twitter Cards
 
-export const viewport = createViewport('#000000')
+export const viewport = createEnhancedViewport('#000000')
 
-const jsonLd = createJsonLd({
-  app: 'ezstart',
-  appName: 'EZStart',
-  description: 'Modern web development platform - Build and launch applications faster with EZStart suite',
-  applicationCategory: 'DeveloperApplication',
-})
+// ✅ NOUVEAU - Schema.org Organization depuis SEO config
+const jsonLd = generateOrganizationSchema('ezstart')
 
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }))

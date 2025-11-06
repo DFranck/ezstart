@@ -1,46 +1,27 @@
+'use client'
 /**
  * GreenPulse Landing Page V2 - AI Form Builder
  *
- * Modern landing page showcasing AI-powered form generation
+ * Client Component for interactive landing page
+ * Metadata handled in layout.tsx (Server Component)
  */
 
+import { getAppSEO } from '@ezstart/seo-config'
 import {
-  generateLandingMetadata,
-  generateFAQSchema,
-  generateSoftwareSchema,
-  getAppSEO,
-} from '@ezstart/seo-config'
-import {
-  LandingHero,
-  FeatureGrid,
-  UseCases,
-  LandingFAQ,
   CTA,
+  FeatureGrid,
+  LandingFAQ,
+  LandingHero,
   LandingStats,
+  UseCases,
 } from '@ezstart/ui/components'
-
-// Generate metadata for this page
-export const metadata = generateLandingMetadata('green-pulse')
 
 export default function LandingV2Page() {
   // Get SEO data for GreenPulse
   const seoData = getAppSEO('green-pulse')
 
-  // Generate Schema.org structured data
-  const faqSchema = generateFAQSchema('green-pulse')
-  const softwareSchema = generateSoftwareSchema('green-pulse')
-
   return (
     <>
-      {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-      />
 
       {/* Hero Section with Gradient */}
       <LandingHero
@@ -81,17 +62,12 @@ export default function LandingV2Page() {
               The Only Form Builder Where AI Does the Work
             </h2>
             <p className="text-lg text-muted-foreground">
-              Describe what you need in plain English. AI generates complete, working
-              forms instantly.
+              Describe what you need in plain English. AI generates complete, working forms
+              instantly.
             </p>
           </div>
 
-          <FeatureGrid
-            features={seoData.features}
-            columns={3}
-            variant="floating"
-            expandable
-          />
+          <FeatureGrid features={seoData.features} columns={3} variant="floating" expandable />
         </div>
       </section>
 
@@ -99,9 +75,7 @@ export default function LandingV2Page() {
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              From Idea to Form in 3 Steps
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">From Idea to Form in 3 Steps</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -111,8 +85,8 @@ export default function LandingV2Page() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Describe Your Form</h3>
               <p className="text-muted-foreground">
-                Tell AI what you need: "Create a customer feedback survey with rating
-                scales and open text."
+                Tell AI what you need: "Create a customer feedback survey with rating scales and
+                open text."
               </p>
             </div>
 
@@ -122,8 +96,8 @@ export default function LandingV2Page() {
               </div>
               <h3 className="text-xl font-semibold mb-3">AI Generates Instantly</h3>
               <p className="text-muted-foreground">
-                AI analyzes your prompt, determines field types, adds validation rules,
-                and structures multi-step flow.
+                AI analyzes your prompt, determines field types, adds validation rules, and
+                structures multi-step flow.
               </p>
             </div>
 
@@ -133,8 +107,8 @@ export default function LandingV2Page() {
               </div>
               <h3 className="text-xl font-semibold mb-3">Customize & Export</h3>
               <p className="text-muted-foreground">
-                Get 80% perfect instantly. Customize the final 20% if needed. Export as
-                React components or use via API.
+                Get 80% perfect instantly. Customize the final 20% if needed. Export as React
+                components or use via API.
               </p>
             </div>
           </div>
@@ -158,9 +132,7 @@ export default function LandingV2Page() {
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              {seoData.usps.title}
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">{seoData.usps.title}</h2>
             <p className="text-lg text-muted-foreground">{seoData.usps.description}</p>
           </div>
 
@@ -196,9 +168,7 @@ export default function LandingV2Page() {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              How GreenPulse Compares
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">How GreenPulse Compares</h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -211,15 +181,10 @@ export default function LandingV2Page() {
 
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Competitors:
-                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">Competitors:</div>
                     <div className="flex flex-wrap gap-2">
                       {comparison.competitors.map((competitor, idx) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1 rounded-full bg-muted text-sm"
-                        >
+                        <span key={idx} className="px-3 py-1 rounded-full bg-muted text-sm">
                           {competitor}
                         </span>
                       ))}
@@ -227,9 +192,7 @@ export default function LandingV2Page() {
                   </div>
 
                   <div>
-                    <div className="text-sm font-semibold text-primary mb-2">
-                      Our Advantage:
-                    </div>
+                    <div className="text-sm font-semibold text-primary mb-2">Our Advantage:</div>
                     <p className="text-sm">{comparison.ourAdvantage}</p>
                   </div>
                 </div>
