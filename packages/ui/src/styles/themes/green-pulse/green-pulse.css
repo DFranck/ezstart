@@ -1,0 +1,116 @@
+/* GreenPulse Theme Variables */
+
+:root {
+  /* Primary green for eco/sustainability theme */
+  --green-pulse-primary: oklch(0.6 0.18 145);
+  --green-pulse-primary-foreground: oklch(0.98 0.01 145);
+
+  /* Accent colors */
+  --green-pulse-accent: oklch(0.55 0.15 140);
+  --green-pulse-accent-foreground: oklch(0.98 0.01 140);
+
+  /* Secondary colors */
+  --green-pulse-secondary: oklch(0.65 0.12 160);
+  --green-pulse-secondary-foreground: oklch(0.2 0.05 160);
+
+  /* Gradient variables - Hero/Section backgrounds (light mode) */
+  --green-pulse-gradient-hero-from: oklch(0.97 0.02 145); /* green-50 */
+  --green-pulse-gradient-hero-to: oklch(0.97 0.02 240); /* blue-50 */
+
+  /* Gradient variables - Text */
+  --green-pulse-gradient-text-from: oklch(0.6 0.18 145); /* green-600 */
+  --green-pulse-gradient-text-via: oklch(0.6 0.15 240); /* blue-600 */
+  --green-pulse-gradient-text-to: oklch(0.65 0.17 160); /* emerald-600 */
+
+  /* Gradient variables - Button/Interactive */
+  --green-pulse-gradient-button-from: oklch(0.68 0.17 145); /* green-500 */
+  --green-pulse-gradient-button-to: oklch(0.65 0.17 240); /* blue-500 */
+  --green-pulse-gradient-button-hover-from: oklch(0.6 0.18 145); /* green-600 */
+  --green-pulse-gradient-button-hover-to: oklch(0.6 0.15 240); /* blue-600 */
+
+  /* Gradient variables - Premium card */
+  --green-pulse-gradient-premium-from: oklch(0.97 0.02 145); /* green-50 */
+  --green-pulse-gradient-premium-to: oklch(0.99 0 0); /* white */
+
+  /* Gradient variables - Golden card */
+  --green-pulse-gradient-golden-from: oklch(0.97 0.02 80); /* yellow-50 */
+  --green-pulse-gradient-golden-to: oklch(0.99 0 0); /* white */
+
+  /* Gradient variables - CTA section */
+  --green-pulse-gradient-cta-from: oklch(0.6 0.18 145); /* green-600 */
+  --green-pulse-gradient-cta-to: oklch(0.6 0.15 240); /* blue-600 */
+}
+
+.dark {
+  /* Primary green for eco/sustainability theme (dark mode) */
+  --green-pulse-primary: oklch(0.7 0.2 145);
+  --green-pulse-primary-foreground: oklch(0.15 0.05 145);
+
+  /* Accent colors (dark mode) */
+  --green-pulse-accent: oklch(0.65 0.18 140);
+  --green-pulse-accent-foreground: oklch(0.15 0.05 140);
+
+  /* Secondary colors (dark mode) */
+  --green-pulse-secondary: oklch(0.75 0.15 160);
+  --green-pulse-secondary-foreground: oklch(0.15 0.05 160);
+
+  /* Gradient variables - Hero/Section backgrounds (dark mode) */
+  --green-pulse-gradient-hero-from: oklch(0.35 0.08 145); /* green-900 */
+  --green-pulse-gradient-hero-to: oklch(0.35 0.08 240); /* blue-900 */
+
+  /* Gradient variables - Premium card (dark mode) */
+  --green-pulse-gradient-premium-from: oklch(0.35 0.08 145); /* green-900 */
+  --green-pulse-gradient-premium-to: oklch(0.25 0.02 240); /* gray-900 */
+
+  /* Gradient variables - Golden card (dark mode) */
+  --green-pulse-gradient-golden-from: oklch(0.35 0.08 80); /* yellow-900 */
+  --green-pulse-gradient-golden-to: oklch(0.25 0.02 240); /* gray-900 */
+}
+
+@theme inline {
+  --color-green-pulse-primary: var(--green-pulse-primary);
+  --color-green-pulse-primary-foreground: var(--green-pulse-primary-foreground);
+  --color-green-pulse-accent: var(--green-pulse-accent);
+  --color-green-pulse-accent-foreground: var(--green-pulse-accent-foreground);
+  --color-green-pulse-secondary: var(--green-pulse-secondary);
+  --color-green-pulse-secondary-foreground: var(--green-pulse-secondary-foreground);
+}
+
+@layer utilities {
+  /* GreenPulse Gradient Classes */
+
+  /* Hero/Section backgrounds */
+  .bg-gradient-hero {
+    background: linear-gradient(to bottom right, var(--green-pulse-gradient-hero-from), var(--green-pulse-gradient-hero-to));
+  }
+
+  /* Text gradient (with via point) */
+  .bg-gradient-text {
+    background: linear-gradient(to right, var(--green-pulse-gradient-text-from), var(--green-pulse-gradient-text-via), var(--green-pulse-gradient-text-to));
+  }
+
+  /* Button/Cursor gradient */
+  .bg-gradient-button {
+    background: linear-gradient(to right, var(--green-pulse-gradient-button-from), var(--green-pulse-gradient-button-to));
+  }
+
+  /* Button hover gradient */
+  .hover\:bg-gradient-button-hover:hover {
+    background: linear-gradient(to right, var(--green-pulse-gradient-button-hover-from), var(--green-pulse-gradient-button-hover-to));
+  }
+
+  /* Premium card gradient */
+  .bg-gradient-premium {
+    background: linear-gradient(to bottom, var(--green-pulse-gradient-premium-from), var(--green-pulse-gradient-premium-to));
+  }
+
+  /* Golden card gradient */
+  .bg-gradient-golden {
+    background: linear-gradient(to bottom, var(--green-pulse-gradient-golden-from), var(--green-pulse-gradient-golden-to));
+  }
+
+  /* CTA section gradient */
+  .bg-gradient-cta {
+    background: linear-gradient(to right, var(--green-pulse-gradient-cta-from), var(--green-pulse-gradient-cta-to));
+  }
+}

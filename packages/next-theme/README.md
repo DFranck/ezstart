@@ -174,6 +174,130 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
+## Theme Customization with ThemeSelector
+
+### Overview
+
+ThemeSelector allows users to customize theme colors in real-time with **zero CSS duplication**. CSS files are auto-generated from source CSS files and imported directly from `@ezstart/ui/styles`.
+
+### Features
+
+- ✅ **Zero duplication** - CSS is source of truth, TypeScript exports are auto-generated
+- ✅ **Centralized** - One component works for all apps
+- ✅ **Simple imports** - Import CSS strings directly from `@ezstart/ui/styles`
+- ✅ **Auto-generation** - Run `pnpm generate:themes` to sync CSS → TS exports
+
+### Setup
+
+**1. Import CSS in Client Component (Providers):**
+
+```tsx
+'use client'
+
+import { ThemeProvider } from '@ezstart/next-theme'
+import { globalThemeCss, greenPulseThemeCss } from '@ezstart/ui/styles'
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider
+      defaultTheme="system"
+      enableSystem
+      themeSelector={{
+        appName: 'green-pulse',
+        globalCss: globalThemeCss,
+        appCss: greenPulseThemeCss,
+      }}
+    >
+      {children}
+    </ThemeProvider>
+  )
+}
+```
+
+**2. Use in layout.tsx:**
+
+```tsx
+import { Providers } from '@/providers/providers'
+import '@ezstart/ui/globals.css'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+**3. Use ThemeSelector component:**
+
+```tsx
+'use client'
+
+import { ThemeSelector, ThemeSwitcher } from '@ezstart/next-theme/components'
+
+export function Header() {
+  return (
+    <header>
+      <ThemeSelector adminOnly={false} enableHistory={true} />
+      <ThemeSwitcher />
+    </header>
+  )
+}
+```
+
+### Available Theme CSS Exports
+
+Import from `@ezstart/ui/styles`:
+
+```typescript
+import {
+  globalThemeCss,      // Global :root and .dark variables
+  greenPulseThemeCss,  // GreenPulse theme
+  ezbillThemeCss,      // EZBill theme
+  ezpayThemeCss,       // EZPay theme
+  ezauthThemeCss,      // EZAuth theme
+  ezstartThemeCss,     // EZStart theme
+  fengshuiThemeCss,    // FengShui theme
+  towerDefenseThemeCss,// Tower Defense theme
+  ascTcdThemeCss,      // ASC-TCD theme
+} from '@ezstart/ui/styles'
+```
+
+### Auto-Generation
+
+CSS files are in `packages/ui/src/styles/themes/{app-name}/{app-name}.css`
+
+To regenerate TypeScript exports after editing CSS:
+
+```bash
+pnpm --filter @ezstart/ui generate:themes
+pnpm --filter @ezstart/ui build
+```
+
+### Architecture
+
+**Single source of truth:**
+```
+packages/ui/src/styles/
+├── globals.css                           ← Global variables (source)
+├── globals.ts                            ← Auto-generated export
+└── themes/
+    └── green-pulse/
+        ├── green-pulse.css               ← Theme variables (source)
+        └── green-pulse.ts                ← Auto-generated export
+```
+
+### How It Works
+
+1. **CSS files** are the source of truth in `packages/ui/src/styles/`
+2. **Auto-generation script** creates `.ts` exports from `.css` files
+3. **ThemeProvider** receives CSS strings via props (optional `themeSelector`)
+4. **ThemeSelector** reads CSS from context and renders UI
+5. **Changes saved** to database and applied via dynamic `<style>` tag
+
 ## License
 
 MIT © EZStart

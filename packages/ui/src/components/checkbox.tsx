@@ -4,8 +4,10 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { CheckIcon, MinusIcon } from 'lucide-react'
 import * as React from 'react'
 
-import { cn } from '../lib/utils'
 import { touchSmall } from '../lib/design-system/tokens'
+import { cn } from '../lib/utils'
+import { Label } from './label'
+import { Span } from './tag'
 
 /**
  * Checkbox Component - Enhanced with Indeterminate State
@@ -37,53 +39,47 @@ export interface CheckboxProps extends React.ComponentProps<typeof CheckboxPrimi
   label?: string
 }
 
-const Checkbox = React.forwardRef<
-  React.ElementRef<typeof CheckboxPrimitive.Root>,
-  CheckboxProps
->(({ className, label, id, ...props }, ref) => {
-  const checkboxElement = (
-    <CheckboxPrimitive.Root
-      ref={ref}
-      id={id}
-      data-slot="checkbox"
-      className={cn(
-        'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
-        touchSmall.checkbox, // size-5 sm:size-4 (20px mobile, 16px desktop)
-        // Indeterminate state styling
-        'data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground data-[state=indeterminate]:border-primary',
-        className
-      )}
-      {...props}
-    >
-      <CheckboxPrimitive.Indicator
-        data-slot="checkbox-indicator"
-        className="flex items-center justify-center text-current transition-none"
-      >
-        {props.checked === 'indeterminate' ? (
-          <MinusIcon className="size-3.5" />
-        ) : (
-          <CheckIcon className="size-3.5" />
+const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
+  ({ className, label, id, ...props }, ref) => {
+    const checkboxElement = (
+      <CheckboxPrimitive.Root
+        ref={ref}
+        id={id}
+        data-slot="checkbox"
+        className={cn(
+          'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+          touchSmall.checkbox, // size-5 sm:size-4 (20px mobile, 16px desktop)
+          // Indeterminate state styling
+          'data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground data-[state=indeterminate]:border-primary',
+          className
         )}
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-  )
-
-  if (label) {
-    return (
-      <div className="flex items-center gap-2">
-        {checkboxElement}
-        <label
-          htmlFor={id}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+        {...props}
+      >
+        <CheckboxPrimitive.Indicator
+          data-slot="checkbox-indicator"
+          className="flex items-center justify-center text-current transition-none"
         >
-          {label}
-        </label>
-      </div>
+          {props.checked === 'indeterminate' ? (
+            <MinusIcon className="size-3.5" />
+          ) : (
+            <CheckIcon className="size-3.5" />
+          )}
+        </CheckboxPrimitive.Indicator>
+      </CheckboxPrimitive.Root>
     )
-  }
 
-  return checkboxElement
-})
+    if (label) {
+      return (
+        <Span className="flex items-center">
+          {checkboxElement}
+          <Label htmlFor={id}>{label}</Label>
+        </Span>
+      )
+    }
+
+    return checkboxElement
+  }
+)
 
 Checkbox.displayName = 'Checkbox'
 

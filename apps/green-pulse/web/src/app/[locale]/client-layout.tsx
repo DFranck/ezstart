@@ -1,18 +1,9 @@
 'use client'
 import { routing } from '@/i18n/routing'
 import { LoginButton } from '@ezstart/auth-sdk'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import {
-  Button,
-  ClientLayout,
-  Div,
-  H1,
-  LocaleSwitcher,
-  ThemeSelector,
-} from '@ezstart/ui/components'
-import { globalThemeCss, greenPulseThemeCss } from '@ezstart/ui/themes'
+import { ThemeSwitcher, ThemeSelector } from '@ezstart/next-theme/components'
+import { Button, ClientLayout, Div, H1, LocaleSwitcher } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
-import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -24,8 +15,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
   const currentLocale = useLocale()
   const t = useTranslations()
   const tForms = useTranslations('forms')
-  const { theme, resolvedTheme } = useTheme()
-  const actualTheme = resolvedTheme || theme
 
   const handleLocaleChange = (locale: string) => {
     if (!pathname) return
@@ -93,15 +82,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
             currentLocale={currentLocale}
             onLocaleChange={handleLocaleChange}
           />
-          <ThemeSelector
-            themeSwitcher={<ThemeSwitcher />}
-            globalCss={globalThemeCss}
-            appCss={greenPulseThemeCss}
-            appName="green-pulse"
-            currentTheme={actualTheme === 'dark' ? 'dark' : 'light'}
-            adminOnly={false}
-            enableHistory={true}
-          />
+          <ThemeSelector adminOnly={false} enableHistory={true} />
           <ThemeSwitcher />
         </Div>
       }

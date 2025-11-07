@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { ThemeProvider as NextThemesProvider, type Attribute } from 'next-themes'
+import { ThemeSelectorProvider } from './theme-selector-context'
 
 export interface ThemeProviderProps {
   children: any
@@ -10,6 +11,15 @@ export interface ThemeProviderProps {
   enableSystem?: boolean
   disableTransitionOnChange?: boolean
   attribute?: Attribute
+  /** Optional: Enable ThemeSelector with app-specific themes */
+  themeSelector?: {
+    /** App name (e.g., 'green-pulse', 'ezbill') */
+    appName: string
+    /** Global theme CSS (loaded server-side) */
+    globalCss: string
+    /** App-specific theme CSS (loaded server-side) */
+    appCss: string
+  }
 }
 
 /**
@@ -25,6 +35,10 @@ export interface ThemeProviderProps {
  * - defaultTheme: 'system' (respects OS preference by default)
  * - enableSystem: true (allows system theme detection)
  * - disableTransitionOnChange: true (prevents animation flash on theme change)
+ *
+ * ThemeSelector (optional):
+ * - Pass `themeSelector` prop to enable theme customization UI
+ * - CSS is loaded server-side via loadGlobalThemeCss() and loadAppThemeCss()
  */
 export function ThemeProvider({
   children,
@@ -33,9 +47,10 @@ export function ThemeProvider({
   enableSystem = true,
   disableTransitionOnChange = true,
   attribute = 'class',
+  themeSelector,
   ...props
 }: ThemeProviderProps) {
-  return (
+  const content = (
     <NextThemesProvider
       attribute={attribute}
       defaultTheme={defaultTheme}
@@ -47,4 +62,19 @@ export function ThemeProvider({
       {children}
     </NextThemesProvider>
   )
+
+  // Wrap with ThemeSelectorProvider if theme customization is enabled
+  if (themeSelector) {
+    return (
+      <ThemeSelectorProvider
+        appName={themeSelector.appName}
+        globalCss={themeSelector.globalCss}
+        appCss={themeSelector.appCss}
+      >
+        {content}
+      </ThemeSelectorProvider>
+    )
+  }
+
+  return content
 }

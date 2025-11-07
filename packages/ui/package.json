@@ -19,7 +19,8 @@
     "dev": "tsc -b --watch",
     "build": "tsc -b",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "generate:themes": "tsx scripts/generate-theme-exports.ts"
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
@@ -87,9 +88,9 @@
       "import": "./dist/templates/index.js",
       "types": "./dist/templates/index.d.ts"
     },
-    "./themes": {
-      "import": "./dist/themes/index.js",
-      "types": "./dist/themes/index.d.ts"
+    "./styles": {
+      "import": "./dist/styles/index.js",
+      "types": "./dist/styles/index.d.ts"
     },
     "./utils": {
       "import": "./dist/utils/index.js",

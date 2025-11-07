@@ -1,9 +1,16 @@
-/* Import all project themes */
-@import './asc-tcd.css';
-@import './ezbill.css';
-@import './ezauth.css';
-@import './ezpay.css';
-@import './ezstart.css';
-@import './fengshui.css';
-@import './green-pulse.css';
-@import './tower-defense.css';
+/**
+ * Theme CSS imports
+ * Each app loads its specific theme CSS file which includes:
+ * - CSS variables (:root and .dark)
+ * - Utility classes (@layer utilities)
+ * - Gradients and custom styles
+ */
+
+@import './green-pulse/green-pulse.css';
+@import './ezbill/ezbill.css';
+@import './ezpay/ezpay.css';
+@import './ezauth/ezauth.css';
+@import './ezstart/ezstart.css';
+@import './fengshui/fengshui.css';
+@import './tower-defense/tower-defense.css';
+@import './asc-tcd/asc-tcd.css';

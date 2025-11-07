@@ -1,19 +1,25 @@
-import { Providers } from '@/providers/providers'
 import { getTimeZoneFromLocale } from '@/i18n/routing'
-import { Toaster, ErrorBoundary } from '@ezstart/ui/components'
-import '@ezstart/ui/globals.css'
-import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { Providers } from '@/providers/providers'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
+import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
+import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
+import '@ezstart/ui/globals.css'
 import { getMessages } from 'next-intl/server'
-import ClientLayout from './client-layout'
+import { Gugi, K2D } from 'next/font/google'
 import Script from 'next/script'
-import { Gugi } from 'next/font/google'
+import ClientLayout from './client-layout'
 
 const gugi = Gugi({ weight: '400', subsets: ['latin'], variable: '--font-gugi' })
+const k2d = K2D({
+  weight: ['300', '400', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-k2d',
+})
 
 export const metadata = createMetadata({
   appName: 'GreenPulse',
-  description: 'AI-powered sustainable development assistant - Track and improve your environmental impact',
+  description:
+    'AI-powered sustainable development assistant - Track and improve your environmental impact',
   domain: 'https://www.ai-greenpulse.com',
   keywords: ['sustainability', 'environment', 'AI', 'green', 'climate'],
   themeColor: '#10b981',
@@ -33,7 +39,8 @@ export const viewport = createViewport('#10b981')
 
 const jsonLd = createJsonLd({
   appName: 'GreenPulse',
-  description: 'AI-powered sustainable development assistant - Track and improve your environmental impact',
+  description:
+    'AI-powered sustainable development assistant - Track and improve your environmental impact',
   url: 'https://www.ai-greenpulse.com',
   applicationCategory: 'UtilitiesApplication',
 })
@@ -49,14 +56,20 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   const timeZone = getTimeZoneFromLocale(locale)
 
   return (
-    <html lang={locale} suppressHydrationWarning className={gugi.variable}>
+    <html lang={locale} suppressHydrationWarning className={`${gugi.variable} ${k2d.variable}`}>
       <body>
-        <Script id="json-ld"
+        <Script
+          id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ErrorBoundary title="Something went wrong in GreenPulse">
-          <Providers messages={messages} locale={locale} timeZone={timeZone}>
+          <Providers
+            messages={messages}
+            locale={locale}
+            timeZone={timeZone}
+            enableThemeSelector={true}
+          >
             <ClientLayout>{children}</ClientLayout>
           </Providers>
         </ErrorBoundary>

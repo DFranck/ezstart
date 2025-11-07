@@ -19,20 +19,22 @@ interface MarkPaidModalProps {
 export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: MarkPaidModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   
-  const [formData, setFormData] = useState<CreateReceipt>({
+  const [formData, setFormData] = useState<CreateReceipt & { paymentDate?: string }>({
     userId: '',
     clientId: invoice.clientId,
     companyId: invoice.companyId || '',
-    items: invoice.items.map(item => ({
+    billingType: invoice.billingType || 'itemized',
+    items: invoice.items?.map(item => ({
       label: item.label,
       quantity: item.quantity,
       price: item.price,
     })),
+    description: invoice.description,
+    flatRateAmount: invoice.flatRateAmount,
     currency: invoice.currency,
     notes: `Payment received for invoice ${invoice.documentNumber}`,
     terms: '',
     taxRate: invoice.taxRate,
-    status: 'issued',
     paymentDate: new Date().toISOString().split('T')[0],
   });
 

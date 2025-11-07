@@ -67,10 +67,20 @@ function inferCategory(varName: string): ThemeVariableCategory {
   if (name.includes('primary')) return 'primary'
   if (name.includes('secondary')) return 'secondary'
   if (name.includes('accent')) return 'accent'
-  if (name.includes('status') || name.includes('success') || name.includes('error') || name.includes('warning')) {
+  if (
+    name.includes('status') ||
+    name.includes('success') ||
+    name.includes('error') ||
+    name.includes('warning')
+  ) {
     return 'status'
   }
-  if (name.includes('platform') || name.includes('railway') || name.includes('vercel') || name.includes('render')) {
+  if (
+    name.includes('platform') ||
+    name.includes('railway') ||
+    name.includes('vercel') ||
+    name.includes('render')
+  ) {
     return 'platform'
   }
 
@@ -146,18 +156,4 @@ export function extractDarkVariables(cssContent: string): ThemeVariable[] {
   }
 
   return parseThemeCSS(darkBlock)
-}
-
-/**
- * Parse theme from CSS file path (for Node.js environments)
- */
-export async function parseThemeFromFile(filePath: string): Promise<ThemeVariable[]> {
-  try {
-    const fs = await import('fs/promises')
-    const cssContent = await fs.readFile(filePath, 'utf-8')
-    return extractRootVariables(cssContent)
-  } catch (error) {
-    console.error('Failed to parse theme file:', error)
-    return []
-  }
 }

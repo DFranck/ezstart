@@ -8,6 +8,7 @@ import { Label } from '../label'
 import { Modal } from '../modal'
 import { Spinner } from '../spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs'
+import { Span } from '../tag'
 import { ColorVariableEditor } from './components/color-variable-editor'
 import { useTheme } from './hooks/use-theme'
 import { useThemeEditor } from './hooks/use-theme-editor'
@@ -115,7 +116,10 @@ export function ThemeSelector({
       ...localThemeChanges,
     }
 
-    console.log(`[ThemeSelector] currentTheme: ${currentTheme}, merged values:`, Object.entries(merged).slice(0, 3))
+    console.log(
+      `[ThemeSelector] currentTheme: ${currentTheme}, merged values:`,
+      Object.entries(merged).slice(0, 3)
+    )
     console.log(`[ThemeSelector] All overrides:`, overrides)
     console.log(`[ThemeSelector] Local changes:`, editor.localChanges)
     return merged
@@ -218,7 +222,28 @@ export function ThemeSelector({
         onClose={handleClose}
         title={<>Theme Editor {themeSwitcher}</>}
         description={
-          <>Customize the colors of your {appName} application. Changes are applied in real-time.</>
+          <>
+            Customize the colors of your {appName} application. Changes are applied in real-time.{' '}
+            {/* Auto-invert checkbox */}
+            <Span className="flex flex-col">
+              <Checkbox
+                id="auto-invert"
+                checked={autoInvertForOppositeTheme}
+                onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
+                className="mt-1"
+              />
+              <Label
+                htmlFor="auto-invert"
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                Auto-generate opposite theme colors
+                <span className="block text-xs text-muted-foreground font-normal mt-1">
+                  Changing a color in {currentTheme} mode will automatically invert it for{' '}
+                  {currentTheme === 'light' ? 'dark' : 'light'} mode
+                </span>
+              </Label>
+            </Span>
+          </>
         }
         size="xl"
         aria-labelledby="theme-editor-title"
@@ -265,28 +290,8 @@ export function ThemeSelector({
           {/* Editor content */}
           {!isLoading && (
             <>
-              {/* Auto-invert checkbox */}
-              <div className="flex items-start space-x-2 pb-4 border-b border-border">
-                <Checkbox
-                  id="auto-invert"
-                  checked={autoInvertForOppositeTheme}
-                  onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
-                  className="mt-1"
-                />
-                <Label
-                  htmlFor="auto-invert"
-                  className="text-sm font-medium leading-none cursor-pointer"
-                >
-                  Auto-generate opposite theme colors
-                  <span className="block text-xs text-muted-foreground font-normal mt-1">
-                    Changing a color in {currentTheme} mode will automatically invert it for{' '}
-                    {currentTheme === 'light' ? 'dark' : 'light'} mode
-                  </span>
-                </Label>
-              </div>
-
               {/* Tabs: Global vs App */}
-              <Tabs defaultValue="global" className="w-full">
+              <Tabs defaultValue="app" className="w-full">
                 <TabsList className="w-full sticky top-0 z-10">
                   <TabsTrigger value="global" className="flex-1">
                     Global ({globalTheme.variables.length})
@@ -304,7 +309,9 @@ export function ThemeSelector({
                       const prefixedVarName = `${currentTheme}:${variable.name}`
 
                       const handleChange = (_: string, value: string) => {
-                        console.log(`[handleChange] ${variable.name} = ${value} in ${currentTheme} mode`)
+                        console.log(
+                          `[handleChange] ${variable.name} = ${value} in ${currentTheme} mode`
+                        )
 
                         // Update current theme
                         editor.updateVariable(prefixedVarName, value)
@@ -314,7 +321,9 @@ export function ThemeSelector({
                           const oppositeTheme = currentTheme === 'light' ? 'dark' : 'light'
                           const oppositePrefixedVarName = `${oppositeTheme}:${variable.name}`
                           const invertedValue = invertColor(value)
-                          console.log(`[handleChange] Auto-invert: ${oppositePrefixedVarName} = ${invertedValue}`)
+                          console.log(
+                            `[handleChange] Auto-invert: ${oppositePrefixedVarName} = ${invertedValue}`
+                          )
                           editor.updateVariable(oppositePrefixedVarName, invertedValue)
                         }
                       }

@@ -18,7 +18,7 @@
 @import './animations/typewriter.css';
 @import './animations/icon-fade.css';
 
-/* Project themes */
+/* Project themes - CSS variables + utilities (gradients, etc.) */
 @import './themes/index.css';
 
 @custom-variant dark (&:is(.dark *));

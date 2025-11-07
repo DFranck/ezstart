@@ -70,10 +70,7 @@ export default function HomePage(): any {
   return (
     <>
       {/* Hero Section */}
-      <Section
-        size={'full'}
-        className="text-center dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900 bg-gradient-to-br from-green-50 to-blue-50 "
-      >
+      <Section size={'full'} className="text-center bg-gradient-hero">
         {' '}
         <Div layout={'row'}>
           <Image
@@ -88,8 +85,9 @@ export default function HomePage(): any {
             }}
           />
 
-          <H1 className="font-normal">
-            {t('hero.title')} <span className="font-gugi">AI</span>
+          <H1 className="font-k2d">
+            {t('hero.title')}
+            <span className="font-gugi">.AI</span>
           </H1>
         </Div>
         <div>
@@ -99,11 +97,11 @@ export default function HomePage(): any {
               {
                 text: t('hero.typewriterText'),
                 className:
-                  'text-base sm:text-lg lg:text-xl font-medium text-center bg-gradient-to-r from-green-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent',
+                  'text-base sm:text-lg lg:text-xl font-medium text-center text-green-pulse-primary-foreground',
               },
             ]}
             className="flex justify-center "
-            cursorClassName="bg-gradient-to-r from-green-500 to-blue-500"
+            cursorClassName="bg-green-pulse-primary"
             duration={3}
             delay={0.5}
           />
@@ -122,7 +120,7 @@ export default function HomePage(): any {
             />
             <Button
               type="submit"
-              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+              className="bg-gradient-button hover:bg-gradient-button-hover text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
             >
               {t('hero.notifyMe')}
             </Button>
@@ -169,10 +167,7 @@ export default function HomePage(): any {
       </Section>
 
       {/* Example Interaction Section */}
-      <Section
-        size={'xl'}
-        className="max-w-full bg-gradient-to-br from-green-50 to-blue-50 dark:bg-gradient-to-br dark:from-green-900 dark:to-blue-900"
-      >
+      <Section size={'xl'} className="max-w-full bg-gradient-hero">
         <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
         <Card variant={'ghost'} className="p-0 space-y-6">
           <div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
@@ -229,7 +224,7 @@ export default function HomePage(): any {
             </Card>
 
             {/* Premium Package */}
-            <Card className="p-8 border-2 border-primary/30 bg-gradient-to-b from-green-50 to-white relative dark:bg-gradient-to-b dark:from-green-900 dark:to-gray-900">
+            <Card className="p-8 border-2 border-primary/30 bg-gradient-premium relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
                   {t('packages.premium.badge')}
@@ -267,7 +262,7 @@ export default function HomePage(): any {
             </Card>
 
             {/* Golden Package */}
-            <Card className="p-8 border-2 border-amber-300 bg-gradient-to-b from-yellow-50 to-white dark:bg-gradient-to-b dark:from-yellow-900 dark:to-gray-900">
+            <Card className="p-8 border-2 border-amber-300 bg-gradient-golden">
               <div className="text-center mb-6">
                 <Icon name="lucide:Award" className="w-12 h-12 text-amber-500 mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
@@ -303,7 +298,7 @@ export default function HomePage(): any {
       </Section>
 
       {/* Bottom CTA Section */}
-      <Section size={'xl'} className="max-w-full bg-gradient-to-r from-green-600 to-blue-600 ">
+      <Section size={'xl'} className="max-w-full bg-gradient-cta">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
             {' '}
