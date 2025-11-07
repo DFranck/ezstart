@@ -13,7 +13,7 @@ import type { Request, Response } from 'express'
 const execAsync = promisify(exec)
 
 export const registry = new OpenAPIRegistry()
-export const router = Router()
+export const router: ReturnType<typeof Router> = Router()
 const docRouter = createRouterWithDoc(registry, router)
 
 const getDeploymentByIdHandler = async (req: Request, res: Response) => {
