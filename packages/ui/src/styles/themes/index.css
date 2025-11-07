@@ -1,4 +1,9 @@
 /* Import all project themes */
+@import './asc-tcd.css';
 @import './ezbill.css';
+@import './ezauth.css';
+@import './ezpay.css';
 @import './ezstart.css';
 @import './fengshui.css';
+@import './green-pulse.css';
+@import './tower-defense.css';

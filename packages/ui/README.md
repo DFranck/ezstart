@@ -127,6 +127,56 @@ import { Button } from '@ezstart/ui/components'
 
 **Variants:** `default`, `destructive`, `outline`, `secondary`, `ghost`, `linkedin`, `ezstart`
 
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Money with formatting: $50,000
+<AnimatedCounter value={50000} prefix="$" separator="," />
+
+// Percentage: 95%
+<AnimatedCounter value={95} suffix="%" />
+
+// Growth indicator: +250K
+<AnimatedCounter value={250} prefix="+" suffix="K" />
+
+// Custom duration and easing
+<AnimatedCounter
+  value={1000}
+  duration={3000}
+  easing="easeOutQuart"
+/>
+
+// Stats dashboard example
+<div className="text-5xl font-bold text-primary">
+  <AnimatedCounter value={10000} suffix="+" separator="," />
+</div>
+```
+
+**Props:**
+- `value` - Target number to count to **(required)**
+- `prefix` / `suffix` - Text before/after number (e.g., "$", "K", "%")
+- `separator` - Thousand separator: `","` | `"."` | `" "` | `""`
+- `decimals` - Number of decimal places (default: `0`)
+- `duration` - Animation duration in ms (default: `2000`)
+- `easing` - `'linear'` | `'easeOutQuart'` | `'easeInOutQuart'`
+- `animate` - Enable/disable animation (default: `true`)
+- `observeIntersection` - Trigger when visible (default: `true`)
+
+**Use Cases:**
+- Landing page statistics ("10,000+ Happy Customers")
+- Dashboard metrics (revenue, users, growth)
+- Real-time counters (live viewers, downloads)
+- Achievement displays (points scored, levels completed)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
 #### Card
 
 **Enhanced with interactive states** - Hover effects and clickable variants
