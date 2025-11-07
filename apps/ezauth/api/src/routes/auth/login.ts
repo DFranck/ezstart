@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import {
@@ -11,6 +11,9 @@ import {
 export const loginRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(loginRegistry, router)
+
+// ✅ Rate limiting for login endpoint (5 req/min per IP)
+const loginRateLimiter = createStrictRateLimiter()
 
 // Login user
 const loginController = async (req: any, res: any) => {
@@ -33,13 +36,14 @@ const loginController = async (req: any, res: any) => {
   }
 }
 
-docRouter.post('/login', loginController, {
+docRouter.post('/login', [loginRateLimiter, loginController], {
   summary: 'Login user',
   tags: ['Authentication'],
   bodySchema: loginRequestSchema,
   responseSchema: authCodeResponseSchema,
   extraResponses: {
-    401: { description: 'Login failed', schema: errorResponseSchema }
+    401: { description: 'Login failed', schema: errorResponseSchema },
+    429: { description: 'Too many login attempts', schema: errorResponseSchema }
   }
 })
 

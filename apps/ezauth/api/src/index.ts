@@ -34,8 +34,9 @@ app.use(cors({
 // ✅ Add cookie parser middleware (for httpOnly cookie support)
 app.use(cookieParser())
 
-// ✅ Rate limiting protection (100 req/15min per IP, excludes /api/health)
-app.use(createRateLimiter())
+// ❌ REMOVED: Global rate limiting was too aggressive for development scripts
+// Rate limiting is now applied per-route (see routes/auth.ts for specific endpoints)
+// app.use(createRateLimiter())
 
 // Initialize Passport
 app.use(passport.initialize())
