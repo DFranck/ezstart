@@ -28,7 +28,7 @@ import { toast } from 'sonner'
 import { getUserId } from '../../../../utils/get-user-id'
 import { DeletedItemCard } from './components/deleted-item-card'
 
-export default function SettingsPage() {
+export default function SettingsPage(): any {
   const { companies, paymentMethods, refetchAll } = useBillingContext()
   const {
     invalidateClients,

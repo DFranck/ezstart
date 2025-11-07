@@ -19,7 +19,7 @@ const UploadStep = dynamic(() => import('@/components/steps/UploadStep'), {
   loading: () => <div className="flex items-center justify-center p-8">Loading uploader...</div>,
 })
 
-export default function AnalyzePage() {
+export default function AnalyzePage(): any {
   const [triggerPreview, setTriggerPreview] = useState(0)
   const t = useTranslations()
 

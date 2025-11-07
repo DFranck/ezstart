@@ -18,7 +18,7 @@ interface PageProps {
   params: Promise<{ slug: string; id: string; locale: string }>
 }
 
-export default function ProjectDetailPage({ params }: PageProps) {
+export default function ProjectDetailPage({ params }: PageProps): any {
   const { slug, id } = use(params)
   const t = useTranslations('forms.projects')
 

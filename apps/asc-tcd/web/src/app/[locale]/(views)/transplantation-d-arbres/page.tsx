@@ -7,7 +7,7 @@ import { cn } from '@ezstart/ui/lib'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
-export default function PageTransplantationArbres() {
+export default function PageTransplantationArbres(): any {
   const { isDesktop } = useDevice()
   const videoRef = useRef<HTMLVideoElement>(null)
 

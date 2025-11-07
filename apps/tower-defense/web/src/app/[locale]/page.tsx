@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { JoinGameButton } from '../../components/JoinGameButton'
 
-export default function Page() {
+export default function Page(): any {
   const { player } = usePlayerStore()
 
   const { waitingGames, allGames, isLoading, error, fetchGames, refreshGames } = useGames({

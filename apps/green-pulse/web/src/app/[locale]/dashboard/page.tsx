@@ -13,7 +13,7 @@ const CreateWorkspaceDialog = dynamic(() => import('@/components/forms/CreateWor
   loading: () => <div className="animate-pulse bg-muted rounded h-10 w-40" />,
 })
 
-export default function DashboardPage() {
+export default function DashboardPage(): any {
   const t = useTranslations('forms.workspaces')
 
   return (

@@ -24,7 +24,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-export default function HomePage() {
+export default function HomePage(): any {
   const [currentYear] = useState(new Date().getFullYear())
   const t = useTranslations()
 

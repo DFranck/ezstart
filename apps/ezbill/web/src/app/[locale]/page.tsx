@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, H1, H2, H3, Icon, P } from '@ezstart/ui/
 import { redirect } from 'next/navigation'
 import { useEffect } from 'react'
 
-export default function HomePage() {
+export default function HomePage(): any {
   const { user, isAuthenticated } = useAuth()
 
   useEffect(() => {

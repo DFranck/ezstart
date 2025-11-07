@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function DonateSuccessPage() {
+export default function DonateSuccessPage(): any {
   const t = useTranslations('donate')
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')

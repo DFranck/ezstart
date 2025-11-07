@@ -4,7 +4,7 @@ import HeroSection from './(home)/HeroSection'
 import LibsSection from './(home)/LibsSection'
 import ProjectsSection from './(home)/ProjectsSection'
 import { SkillsSection } from './(home)/SkillsSection'
-export default function Page() {
+export default function Page(): any {
   return (
     <Main className="text-center overflow-hidden">
       <HeroSection id="hero-home" />

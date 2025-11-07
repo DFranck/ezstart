@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import { Game } from '@tower-defense/types'
 import { SkeletonCard, SkeletonList } from '@ezstart/ui/components'
 
-export default function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
+export default function LobbyPage({ params }: { params: Promise<{ gameId: string }> }): any {
   const [gameId, setGameId] = useState<string | null>(null)
   const [game, setGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
