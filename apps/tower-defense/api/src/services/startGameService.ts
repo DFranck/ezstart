@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/logger'
+import { logger } from '@ezstart/logger/server'
 import { ZONE_HEIGHT, ZONE_WIDTH } from '@tower-defense/config'
 import { mockShopItems } from '@tower-defense/types'
 import { Types } from 'mongoose'

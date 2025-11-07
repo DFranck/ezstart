@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/logger'
+import { logger } from '@ezstart/logger/server'
 import { CreateOrFindPlayerPayload, Player } from '@tower-defense/types'
 import { PlayerModel } from '../../models/Player.js'
 

@@ -1,5 +1,5 @@
 // services/joinGameService.ts
-import { logger } from '@ezstart/logger'
+import { logger } from '@ezstart/logger/server'
 import { createDefaultGamePlayer } from '../lib/createDefaultGamePlayer.js'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'

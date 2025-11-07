@@ -1,4 +1,4 @@
-import { logger } from '@ezstart/logger'
+import { logger } from '@ezstart/logger/server'
 import { GameModel } from '../models/Game.js'
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { syncTickerWithDatabase } from '../tickers/tickerEngine.js'
