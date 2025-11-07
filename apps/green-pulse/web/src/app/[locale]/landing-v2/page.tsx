@@ -75,7 +75,7 @@ export default function LandingV2Page() {
                 <Div className="aspect-video bg-gradient-to-br from-emerald-900/40 to-teal-900/40 flex items-center justify-center backdrop-blur-sm">
                   <Div className="text-center space-y-4 p-8">
                     <Div className="w-20 h-20 mx-auto rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
-                      <Span className="text-4xl">📹</Span>
+                      <span className="text-4xl">📹</span>
                     </Div>
                     <P className="text-white font-semibold text-lg">AI Demo Video Placeholder</P>
                     <P className="text-white/80 text-sm max-w-md">
@@ -113,7 +113,7 @@ export default function LandingV2Page() {
                 {/* 🎬 GIF PLACEHOLDER */}
                 <Div className="aspect-video rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-950 dark:to-teal-950 flex items-center justify-center overflow-hidden">
                   <Div className="text-center space-y-2">
-                    <Span className="text-3xl">🎬</Span>
+                    <span className="text-3xl">🎬</span>
                     <P className="text-xs text-muted-foreground px-4">
                       GIF: AI generating form fields from prompt
                     </P>
@@ -133,7 +133,7 @@ export default function LandingV2Page() {
                 {/* 🎬 GIF PLACEHOLDER */}
                 <Div className="aspect-video rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-950 dark:to-cyan-950 flex items-center justify-center overflow-hidden">
                   <Div className="text-center space-y-2">
-                    <Span className="text-3xl">🎬</Span>
+                    <span className="text-3xl">🎬</span>
                     <P className="text-xs text-muted-foreground px-4">
                       GIF: Live preview and form filling
                     </P>
@@ -153,7 +153,7 @@ export default function LandingV2Page() {
                 {/* 🎬 GIF PLACEHOLDER */}
                 <Div className="aspect-video rounded-lg bg-gradient-to-br from-green-100 to-lime-100 dark:from-green-950 dark:to-lime-950 flex items-center justify-center overflow-hidden">
                   <Div className="text-center space-y-2">
-                    <Span className="text-3xl">🎬</Span>
+                    <span className="text-3xl">🎬</span>
                     <P className="text-xs text-muted-foreground px-4">
                       GIF: Export to React code
                     </P>
@@ -190,7 +190,7 @@ export default function LandingV2Page() {
             <Div className="relative rounded-xl overflow-hidden shadow-2xl border-2 border-emerald-200 dark:border-emerald-800 group">
               <Div className="aspect-video bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 flex items-center justify-center">
                 <Div className="text-center space-y-3 p-8">
-                  <Span className="text-4xl">📸</Span>
+                  <span className="text-4xl">📸</span>
                   <P className="font-semibold">Form Builder Screenshot</P>
                   <P className="text-sm text-muted-foreground">builder.webp (1920x1080)</P>
                   <Badge variant="outline">AI prompt visible + generated fields</Badge>
@@ -203,7 +203,7 @@ export default function LandingV2Page() {
             <Div className="relative rounded-xl overflow-hidden shadow-2xl border-2 border-teal-200 dark:border-teal-800 group">
               <Div className="aspect-video bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 flex items-center justify-center">
                 <Div className="text-center space-y-3 p-8">
-                  <Span className="text-4xl">📸</Span>
+                  <span className="text-4xl">📸</span>
                   <P className="font-semibold">Live Preview Screenshot</P>
                   <P className="text-sm text-muted-foreground">preview.webp (1920x1080)</P>
                   <Badge variant="outline">Form preview with validation</Badge>
@@ -304,7 +304,7 @@ export default function LandingV2Page() {
                   <CardContent className="p-6">
                     <Div className="flex items-start gap-3">
                       <Div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0">
-                        <Span className="text-white text-lg">✨</Span>
+                        <span className="text-white text-lg">✨</span>
                       </Div>
                       <Div>
                         <H3 className="font-semibold mb-2">{title}</H3>
