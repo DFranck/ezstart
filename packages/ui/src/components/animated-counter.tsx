@@ -59,15 +59,18 @@ const animatedCounterVariants = cva(
         destructive: 'text-red-600 dark:text-red-400 font-semibold',
       },
       size: {
-        xs: fontSize.xs, // text-xs
-        sm: fontSize.sm, // text-sm
+        xs: fontSize.xs, // text-xs sm:text-[10px]
+        sm: fontSize.sm, // text-sm sm:text-xs
         default: fontSize.base, // text-base sm:text-sm
         lg: fontSize.lg, // text-lg sm:text-base
         xl: fontSize.xl, // text-xl sm:text-lg
-        '2xl': fontSize['2xl'], // text-2xl sm:text-xl
-        '3xl': 'text-3xl sm:text-2xl',
-        '4xl': 'text-4xl sm:text-3xl',
-        '5xl': 'text-5xl sm:text-4xl',
+        h6: fontSize.h6, // text-sm sm:text-base md:text-lg
+        h5: fontSize.h5, // text-base sm:text-lg md:text-xl
+        h4: fontSize.h4, // text-lg sm:text-xl md:text-2xl
+        h3: fontSize.h3, // text-xl sm:text-2xl md:text-3xl
+        h2: fontSize.h2, // text-2xl sm:text-3xl md:text-4xl
+        h1: fontSize.h1, // text-3xl sm:text-4xl md:text-5xl
+        giant: fontSize.giant, // text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
       },
     },
     defaultVariants: {

@@ -137,45 +137,1956 @@ import { AnimatedCounter } from '@ezstart/ui/components'
 // Simple counter (0 → 1000)
 <AnimatedCounter value={1000} />
 
-// Money with formatting: $50,000
-<AnimatedCounter value={50000} prefix="$" separator="," />
-
-// Percentage: 95%
-<AnimatedCounter value={95} suffix="%" />
-
-// Growth indicator: +250K
-<AnimatedCounter value={250} prefix="+" suffix="K" />
-
-// Custom duration and easing
+// Stats variant (landing pages)
 <AnimatedCounter
-  value={1000}
-  duration={3000}
-  easing="easeOutQuart"
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
 />
 
-// Stats dashboard example
-<div className="text-5xl font-bold text-primary">
-  <AnimatedCounter value={10000} suffix="+" separator="," />
-</div>
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
 ```
 
-**Props:**
-- `value` - Target number to count to **(required)**
-- `prefix` / `suffix` - Text before/after number (e.g., "$", "K", "%")
-- `separator` - Thousand separator: `","` | `"."` | `" "` | `""`
-- `decimals` - Number of decimal places (default: `0`)
-- `duration` - Animation duration in ms (default: `2000`)
-- `easing` - `'linear'` | `'easeOutQuart'` | `'easeInOutQuart'`
-- `animate` - Enable/disable animation (default: `true`)
-- `observeIntersection` - Trigger when visible (default: `true`)
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
 
-**Use Cases:**
-- Landing page statistics ("10,000+ Happy Customers")
-- Dashboard metrics (revenue, users, growth)
-- Real-time counters (live viewers, downloads)
-- Achievement displays (points scored, levels completed)
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
 
 **See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
+#### AnimatedCounter
+
+**Smooth animated number counter** - Perfect for stats, metrics, dashboards
+
+```tsx
+import { AnimatedCounter } from '@ezstart/ui/components'
+
+// Simple counter (0 → 1000)
+<AnimatedCounter value={1000} />
+
+// Stats variant (landing pages)
+<AnimatedCounter
+  value={50000}
+  variant="stats"
+  size="4xl"
+  prefix="$"
+  separator=","
+/>
+
+// Dashboard metric
+<AnimatedCounter
+  value={95.5}
+  variant="metric"
+  size="2xl"
+  suffix="%"
+  decimals={1}
+/>
+
+// Success/Warning/Error
+<AnimatedCounter value={1543} variant="success" suffix="+" />
+<AnimatedCounter value={23} variant="warning" suffix="% down" />
+<AnimatedCounter value={5} variant="destructive" suffix=" errors" />
+```
+
+**Variants:** `default`, `stats`, `metric`, `subtle`, `success`, `warning`, `destructive`
+
+**Sizes:** `xs`, `sm`, `default`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` (responsive)
+
+**See:** [Full docs →](./src/components/animated-counter.md)
+
 
 #### Card
 
