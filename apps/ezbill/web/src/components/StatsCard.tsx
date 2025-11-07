@@ -9,7 +9,7 @@ type Props = {
   className?: string
 }
 
-const StatsCard = ({ title, value, icon, iconGradient, className }: Props) => {
+const StatsCard = ({ title, value, icon, iconGradient, className }: Props): any => {
   return (
     <Card variant="floating" className={cn('', className)}>
       <CardContent className="flex items-center">

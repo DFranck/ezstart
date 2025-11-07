@@ -53,7 +53,7 @@ type PreviewState = {
   doc?: any
 }
 
-const ClientDashboardPage = () => {
+const ClientDashboardPage = (): any => {
   const params = useParams()
   const clientId = params.clientId as string
 

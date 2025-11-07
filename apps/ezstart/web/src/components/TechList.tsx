@@ -7,7 +7,7 @@ type Props = {
   tech: string[];
 };
 
-const TechList = ({ tech }: Props) => {
+const TechList = ({ tech }: Props): any => {
   const { isMobile } = useDevice();
 
   const techList = tech ? mapProjectTechToSkills(tech, skillsJson.skills) : [];

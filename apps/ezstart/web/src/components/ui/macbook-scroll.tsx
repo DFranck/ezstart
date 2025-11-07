@@ -703,7 +703,7 @@ export const OptionKey = ({ className }: { className: string }) => {
   );
 };
 
-const AceternityLogo = () => {
+const AceternityLogo = (): any => {
   return (
     <svg
       width='66'

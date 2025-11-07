@@ -19,7 +19,7 @@ type Props = {
   id?: string;
 };
 
-const LibsSection = ({ id }: Props) => {
+const LibsSection = ({ id }: Props): any => {
   const t = useTranslations('libraries');
   return (
     <MacbookScroll

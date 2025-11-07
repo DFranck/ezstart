@@ -3,7 +3,7 @@
 import ClientLayout from '@/components/ClientLayout'
 import { BillingProvider } from '@/providers/billing-provider'
 
-const LayoutDashboard = ({ children }: { children: React.ReactNode }) => {
+const LayoutDashboard = ({ children }: { children: React.ReactNode }): any => {
   return (
     <BillingProvider>
       <DashboardLayoutWithData>{children}</DashboardLayoutWithData>
@@ -11,7 +11,7 @@ const LayoutDashboard = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayoutWithData = ({ children }: { children: React.ReactNode }): any => {
   return (
     <ClientLayout showSettingsButton showLogoutButton>
       {children}

@@ -20,7 +20,7 @@ type ClientLayoutProps = {
   children: ReactNode
 }
 
-const ClientLayout = ({ children }: ClientLayoutProps) => {
+const ClientLayout = ({ children }: ClientLayoutProps): any => {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   const pathname = usePathname()

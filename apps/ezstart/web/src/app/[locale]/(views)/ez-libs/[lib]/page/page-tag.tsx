@@ -21,7 +21,7 @@ import {
 import Link from 'next/link'
 import { HeaderLib } from '../components/header-lib'
 
-const EzTagPage = () => {
+const EzTagPage = (): any => {
   const t = useSafeTranslations('libraries')
   const commonT = useSafeTranslations('common')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')

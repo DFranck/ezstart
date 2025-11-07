@@ -14,7 +14,7 @@ type ClientLayoutProps = {
   children: ReactNode
 }
 
-const ClientLayout = ({ children }: ClientLayoutProps) => {
+const ClientLayout = ({ children }: ClientLayoutProps): any => {
   const { isAuthenticated, login, logout } = useAuth()
   const { theme } = useTheme()
   const t = useTranslations()

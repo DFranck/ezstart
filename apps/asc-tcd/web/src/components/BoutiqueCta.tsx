@@ -6,7 +6,7 @@ type Props = {
   label?: string;
 };
 
-const BoutiqueCta = ({ label = 'Equipez vous', icon }: Props) => {
+const BoutiqueCta = ({ label = 'Equipez vous', icon }: Props): any => {
   return (
     <Button asChild>
       <a

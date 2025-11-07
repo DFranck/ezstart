@@ -47,7 +47,7 @@ const DEFAULT_COLOR = '#6366f1' // Indigo color visible on both themes
 const DEFAULT_STROKE_WIDTH = 2
 const DEFAULT_OPACITY = 100
 
-const IconPlayground = ({ title }: Props) => {
+const IconPlayground = ({ title }: Props): any => {
   const [playgroundValue, setPlaygroundValue] = useState<KnownIconName | ''>('')
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)

@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 type Props = { className?: string };
 
-const ContactsList = ({ className }: Props) => {
+const ContactsList = ({ className }: Props): any => {
   const { isMobile } = useDevice();
   const t = useTranslations('contact');
   const links = t.raw('links') as {
