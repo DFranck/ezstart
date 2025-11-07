@@ -1,5 +1,5 @@
 // Centralized Sentry initialization from @ezstart/logger
-import { initSentry, Sentry } from '@ezstart/logger'
+import { initSentry, Sentry } from '@ezstart/logger/server'
 
 // Initialize Sentry for EZPay API
 const sentry = initSentry('EZPay API')
