@@ -8,6 +8,7 @@
 
 /* Custom fonts utilities */
 @import './fonts/gugi.css';
+@import './fonts/k2d.css';
 
 /* Generic animations */
 @import './animations/skeleton.css';

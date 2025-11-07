@@ -1,4 +1,11 @@
-/* GreenPulse Theme Variables */
+/**
+ * GreenPulse Theme CSS
+ * Source: packages/ui/src/styles/themes/green-pulse.css
+ *
+ * This is the SINGLE SOURCE OF TRUTH for GreenPulse theme colors.
+ * Any changes should be made in the CSS file, not here.
+ */
+export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
 :root {
   /* Primary green for eco/sustainability theme */
@@ -26,13 +33,4 @@
   /* Secondary colors (dark mode) */
   --green-pulse-secondary: oklch(0.75 0.15 160);
   --green-pulse-secondary-foreground: oklch(0.15 0.05 160);
-}
-
-@theme inline {
-  --color-green-pulse-primary: var(--green-pulse-primary);
-  --color-green-pulse-primary-foreground: var(--green-pulse-primary-foreground);
-  --color-green-pulse-accent: var(--green-pulse-accent);
-  --color-green-pulse-accent-foreground: var(--green-pulse-accent-foreground);
-  --color-green-pulse-secondary: var(--green-pulse-secondary);
-  --color-green-pulse-secondary-foreground: var(--green-pulse-secondary-foreground);
-}
+}`

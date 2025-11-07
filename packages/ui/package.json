@@ -37,6 +37,7 @@
     "@react-pdf/renderer": "^4.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "culori": "^4.0.2",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.475.0",
     "motion": "^12.23.19",
@@ -60,6 +61,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@turbo/gen": "^2.4.2",
+    "@types/culori": "^4.0.1",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
@@ -84,6 +86,10 @@
     "./templates": {
       "import": "./dist/templates/index.js",
       "types": "./dist/templates/index.d.ts"
+    },
+    "./themes": {
+      "import": "./dist/themes/index.js",
+      "types": "./dist/themes/index.d.ts"
     },
     "./utils": {
       "import": "./dist/utils/index.js",

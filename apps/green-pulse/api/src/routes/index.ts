@@ -8,6 +8,7 @@ import conversationRoutes, { conversationRegistries } from './conversations/inde
 import formRoutes, { formRegistries } from './forms/index.js'
 import projectRoutes, { projectRegistries } from './projects/index.js'
 import workspaceRoutes, { workspaceRegistries } from './workspaces/index.js'
+import themeRoutes, { themeRegistries } from './theme/index.js'
 
 const router: any = Router()
 
@@ -21,6 +22,7 @@ export const globalRegistry = [
   ...formRegistries,         // Spread the array of form registries
   ...projectRegistries,      // Spread the array of project registries
   ...workspaceRegistries,    // Spread the array of workspace registries
+  ...themeRegistries,        // Spread the array of theme registries
 ]
 
 router
@@ -33,5 +35,6 @@ router
   .use('/forms', formRoutes)
   .use('/projects', projectRoutes)
   .use('/workspaces', workspaceRoutes)
+  .use('/theme', themeRoutes)
 
 export default router

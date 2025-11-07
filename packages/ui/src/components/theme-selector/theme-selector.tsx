@@ -1,0 +1,397 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Button } from '../button'
+import { Checkbox } from '../checkbox'
+import { Icon } from '../icon'
+import { Label } from '../label'
+import { Modal } from '../modal'
+import { Spinner } from '../spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs'
+import { ColorVariableEditor } from './components/color-variable-editor'
+import { useTheme } from './hooks/use-theme'
+import { useThemeEditor } from './hooks/use-theme-editor'
+import type { ThemeSelectorProps } from './types'
+import {
+  extractDarkVariables,
+  extractRootVariables,
+  invertColor,
+  variablesToRecord,
+  variablesToThemeConfig,
+} from './utils'
+
+export function ThemeSelector({
+  themeSwitcher,
+  globalCss,
+  appCss,
+  appName,
+  currentTheme = 'light',
+  apiEndpoint = '/theme',
+  adminOnly = true,
+  onSave,
+  onError,
+  enableHistory = true,
+  showPresets = false,
+}: ThemeSelectorProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [autoInvertForOppositeTheme, setAutoInvertForOppositeTheme] = useState(true)
+
+  // Parse global CSS variables (light or dark)
+  const globalTheme = useMemo(() => {
+    const variables =
+      currentTheme === 'dark' ? extractDarkVariables(globalCss) : extractRootVariables(globalCss)
+    console.log(
+      `[ThemeSelector] Parsed ${variables.length} global variables (${currentTheme} mode)`,
+      variables.slice(0, 3)
+    )
+    return variablesToThemeConfig(variables, 'global')
+  }, [globalCss, currentTheme])
+
+  // Parse app-specific CSS variables
+  const appTheme = useMemo(() => {
+    const variables = extractRootVariables(appCss)
+    console.log(
+      `[ThemeSelector] Parsed ${variables.length} app variables for ${appName}`,
+      variables.slice(0, 3)
+    )
+    return variablesToThemeConfig(variables, appName)
+  }, [appCss, appName])
+
+  // Combined default theme for API
+  const defaultTheme = useMemo(() => {
+    return {
+      variables: [...globalTheme.variables, ...appTheme.variables],
+      metadata: { appName, version: '1.0.0' },
+    }
+  }, [globalTheme, appTheme, appName])
+
+  // Load theme from API
+  const { variables, overrides, isLoading, error, reloadTheme, isCustomized } = useTheme({
+    appName,
+    defaultTheme,
+    apiEndpoint,
+    onError,
+  })
+
+  // Editor state with optimistic updates
+  const editor = useThemeEditor(overrides, {
+    enableHistory,
+    onSave: updatedOverrides => {
+      onSave?.(updatedOverrides)
+      reloadTheme()
+    },
+    onError,
+  })
+
+  // Get current values for the active theme mode
+  const currentValues = useMemo(() => {
+    // 1. Start with merged variables (default + DB overrides for current theme)
+    const baseValues = variablesToRecord(variables)
+
+    // 2. Filter overrides for current theme mode (light: or dark: prefix)
+    const themePrefix = `${currentTheme}:`
+    const themeModeOverrides: Record<string, string> = {}
+
+    Object.entries(overrides).forEach(([key, value]) => {
+      if (key.startsWith(themePrefix)) {
+        // Remove prefix: "light:--background" → "--background"
+        const varName = key.substring(themePrefix.length)
+        themeModeOverrides[varName] = value
+      }
+    })
+
+    // 3. Apply local changes for current theme
+    const localThemeChanges: Record<string, string> = {}
+    Object.entries(editor.localChanges).forEach(([key, value]) => {
+      if (key.startsWith(themePrefix)) {
+        const varName = key.substring(themePrefix.length)
+        localThemeChanges[varName] = value
+      }
+    })
+
+    const merged = {
+      ...baseValues,
+      ...themeModeOverrides,
+      ...localThemeChanges,
+    }
+
+    console.log(`[ThemeSelector] currentTheme: ${currentTheme}, merged values:`, Object.entries(merged).slice(0, 3))
+    console.log(`[ThemeSelector] All overrides:`, overrides)
+    console.log(`[ThemeSelector] Local changes:`, editor.localChanges)
+    return merged
+  }, [variables, overrides, editor.localChanges, currentTheme])
+
+  const handleSave = useCallback(async () => {
+    try {
+      await editor.saveChanges(apiEndpoint, defaultTheme)
+      setIsOpen(false)
+    } catch (error) {
+      // Error already handled by hook
+      console.error('Failed to save theme:', error)
+    }
+  }, [editor, apiEndpoint, defaultTheme])
+
+  const handleReset = useCallback(() => {
+    // Reset All: Clear all customizations (falls back to CSS defaults)
+    // We DON'T respect auto-invert checkbox here - reset means "back to original"
+    editor.resetLocalChanges()
+  }, [editor])
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const hasLocalChanges = Object.keys(editor.localChanges).length > 0
+
+  // Apply theme overrides to DOM (both saved + local changes)
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+
+    const root = document.documentElement
+    const allOverrides = { ...overrides, ...editor.localChanges }
+
+    // Create or update style tag for theme overrides
+    let styleTag = document.getElementById('theme-selector-overrides') as HTMLStyleElement
+    if (!styleTag) {
+      styleTag = document.createElement('style')
+      styleTag.id = 'theme-selector-overrides'
+      document.head.appendChild(styleTag)
+    }
+
+    // Build CSS rules for both light and dark themes
+    const lightOverrides: string[] = []
+    const darkOverrides: string[] = []
+
+    Object.entries(allOverrides).forEach(([key, value]) => {
+      if (key.startsWith('light:')) {
+        const varName = key.substring(6) // Remove "light:" prefix
+        lightOverrides.push(`  ${varName}: ${value};`)
+      } else if (key.startsWith('dark:')) {
+        const varName = key.substring(5) // Remove "dark:" prefix
+        darkOverrides.push(`  ${varName}: ${value};`)
+      } else {
+        // App-specific variables (no prefix)
+        lightOverrides.push(`  ${key}: ${value};`)
+        darkOverrides.push(`  ${key}: ${value};`)
+      }
+    })
+
+    // Generate CSS
+    let css = ''
+    if (lightOverrides.length > 0) {
+      css += `:root {\n${lightOverrides.join('\n')}\n}\n`
+    }
+    if (darkOverrides.length > 0) {
+      css += `.dark {\n${darkOverrides.join('\n')}\n}\n`
+    }
+
+    styleTag.textContent = css
+  }, [overrides, editor.localChanges])
+
+  if (adminOnly) {
+    // TODO: Add auth check here
+    // if (!user?.roles.includes('admin')) return null
+  }
+
+  return (
+    <>
+      {/* Trigger Button - Opens modal directly */}
+      <Button
+        onClick={() => setIsOpen(true)}
+        variant="ghost"
+        size="icon"
+        aria-label="Edit theme colors"
+        title="Edit theme colors"
+      >
+        <Icon name="lucide:Palette" />
+        {isCustomized && (
+          <span
+            className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"
+            title="Theme customized"
+          />
+        )}
+      </Button>
+
+      {/* Theme Editor Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={<>Theme Editor {themeSwitcher}</>}
+        description={
+          <>Customize the colors of your {appName} application. Changes are applied in real-time.</>
+        }
+        size="xl"
+        aria-labelledby="theme-editor-title"
+        aria-describedby="theme-editor-description"
+        footer={
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-border w-full">
+            <div className="flex items-center gap-2">
+              <Button onClick={handleReset} variant="outline" size="sm">
+                <Icon name="lucide:RotateCcw" size={16} />
+                <span className="ml-2">Reset All</span>
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={handleClose} variant="ghost">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                variant="default"
+                disabled={editor.isSaving || !hasLocalChanges}
+              >
+                {editor.isSaving && (
+                  <Icon name="lucide:Loader2" className="animate-spin mr-2" size={16} />
+                )}
+                <span>{editor.isSaving ? 'Saving...' : 'Save Changes'}</span>
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div className="space-y-6 relative">
+          {/* Loading state */}
+          {isLoading && <Spinner size="lg" className="mx-auto my-20" />}
+
+          {/* Error state */}
+          {error && !isLoading && (
+            <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+              <Icon name="lucide:AlertCircle" className="inline mr-2" />
+              Failed to load theme. Using default values.
+            </div>
+          )}
+
+          {/* Editor content */}
+          {!isLoading && (
+            <>
+              {/* Auto-invert checkbox */}
+              <div className="flex items-start space-x-2 pb-4 border-b border-border">
+                <Checkbox
+                  id="auto-invert"
+                  checked={autoInvertForOppositeTheme}
+                  onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
+                  className="mt-1"
+                />
+                <Label
+                  htmlFor="auto-invert"
+                  className="text-sm font-medium leading-none cursor-pointer"
+                >
+                  Auto-generate opposite theme colors
+                  <span className="block text-xs text-muted-foreground font-normal mt-1">
+                    Changing a color in {currentTheme} mode will automatically invert it for{' '}
+                    {currentTheme === 'light' ? 'dark' : 'light'} mode
+                  </span>
+                </Label>
+              </div>
+
+              {/* Tabs: Global vs App */}
+              <Tabs defaultValue="global" className="w-full">
+                <TabsList className="w-full sticky top-0 z-10">
+                  <TabsTrigger value="global" className="flex-1">
+                    Global ({globalTheme.variables.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="app" className="flex-1">
+                    {appName} ({appTheme.variables.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Global Variables Tab */}
+                <TabsContent value="global" className="mt-6">
+                  <div className="space-y-3 pr-2" role="group" aria-label="Global theme variables">
+                    {globalTheme.variables.map(variable => {
+                      // Add theme prefix to variable name for storage
+                      const prefixedVarName = `${currentTheme}:${variable.name}`
+
+                      const handleChange = (_: string, value: string) => {
+                        console.log(`[handleChange] ${variable.name} = ${value} in ${currentTheme} mode`)
+
+                        // Update current theme
+                        editor.updateVariable(prefixedVarName, value)
+
+                        // Auto-invert for opposite theme if enabled
+                        if (autoInvertForOppositeTheme) {
+                          const oppositeTheme = currentTheme === 'light' ? 'dark' : 'light'
+                          const oppositePrefixedVarName = `${oppositeTheme}:${variable.name}`
+                          const invertedValue = invertColor(value)
+                          console.log(`[handleChange] Auto-invert: ${oppositePrefixedVarName} = ${invertedValue}`)
+                          editor.updateVariable(oppositePrefixedVarName, invertedValue)
+                        }
+                      }
+
+                      const handleReset = () => {
+                        // Reset: Remove customization for current theme (falls back to CSS defaults)
+                        // We DON'T auto-generate opposite on reset - that doesn't make sense
+                        // The goal is to go back to the original CSS values
+
+                        // For now, just delete the override by setting to default
+                        editor.updateVariable(prefixedVarName, variable.value)
+                      }
+
+                      return (
+                        <ColorVariableEditor
+                          key={variable.name}
+                          variable={variable}
+                          value={currentValues[variable.name] || variable.value}
+                          onChange={handleChange}
+                          onReset={handleReset}
+                          showReset={true}
+                        />
+                      )
+                    })}
+
+                    {globalTheme.variables.length === 0 && (
+                      <div className="py-8 text-center text-muted-foreground">
+                        No global variables found
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                {/* App-Specific Variables Tab */}
+                <TabsContent value="app" className="mt-6">
+                  <div
+                    className="space-y-3 pr-2"
+                    role="group"
+                    aria-label={`${appName} theme variables`}
+                  >
+                    {appTheme.variables.map(variable => (
+                      <ColorVariableEditor
+                        key={variable.name}
+                        variable={variable}
+                        value={currentValues[variable.name] || variable.value}
+                        onChange={editor.updateVariable}
+                        onReset={varName => editor.updateVariable(varName, variable.value)}
+                        showReset={true}
+                      />
+                    ))}
+
+                    {appTheme.variables.length === 0 && (
+                      <div className="py-8 text-center text-muted-foreground">
+                        No {appName}-specific variables found
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {/* Save error */}
+              {editor.saveError && (
+                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+                  <Icon name="lucide:AlertCircle" className="inline mr-2" />
+                  {editor.saveError.message}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Screen reader announcements */}
+        <div role="status" aria-live="polite" className="sr-only">
+          {editor.isSaving && 'Saving theme changes...'}
+          {hasLocalChanges && !editor.isSaving && 'Theme has unsaved changes'}
+        </div>
+      </Modal>
+    </>
+  )
+}
