@@ -63,11 +63,11 @@ export type ESGCredentials = z.infer<typeof ESGCredentialsSchema>
 
 // Webhook Event
 export const WebhookEventSchema = z.object({
-  event_type: z.enum(['report.completed', 'report.failed', 'data.processed']),
-  job_id: z.string(),
-  status: z.string(),
-  data: z.any(),
-  timestamp: z.string().datetime(),
+  event_type: z.enum(['report.completed', 'report.failed', 'data.processed']).describe('Type of event that triggered the webhook'),
+  job_id: z.string().describe('Unique identifier for the job'),
+  status: z.string().describe('Current status of the job'),
+  data: z.any().describe('Event-specific payload data'),
+  timestamp: z.string().datetime().describe('ISO timestamp when the event occurred'),
 })
 
 export type WebhookEvent = z.infer<typeof WebhookEventSchema>

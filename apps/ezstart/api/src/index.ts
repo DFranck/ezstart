@@ -85,7 +85,7 @@ connectToMongo('ezstart-monitoring')
     })
   })
   .then(() => {
-    console.log('✅ Server started, MongoDB fully operational')
+    console.log('✅ [Scheduler] Starting health check scheduler...')
     // Start background health check scheduler ONLY after MongoDB is ready
     healthCheckScheduler.start()
   })

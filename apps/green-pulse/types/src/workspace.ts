@@ -71,10 +71,10 @@ export type Workspace = z.infer<typeof WorkspaceSchema>
  * Create Workspace Request
  */
 export const CreateWorkspaceRequestSchema = z.object({
-  name: z.string().min(1).max(100),
-  slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/),
-  description: z.string().max(500).optional(),
-  settings: WorkspaceSettingsSchema.partial().optional(),
+  name: z.string().min(1).max(100).describe('Workspace name (e.g., "Acme Inspections")'),
+  slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/).describe('URL-friendly slug (lowercase, numbers, hyphens only)'),
+  description: z.string().max(500).optional().describe('Detailed workspace description'),
+  settings: WorkspaceSettingsSchema.partial().optional().describe('Initial workspace settings'),
 })
 export type CreateWorkspaceRequest = z.infer<typeof CreateWorkspaceRequestSchema>
 
@@ -82,12 +82,12 @@ export type CreateWorkspaceRequest = z.infer<typeof CreateWorkspaceRequestSchema
  * Update Workspace Request
  */
 export const UpdateWorkspaceRequestSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).optional(),
-  settings: WorkspaceSettingsSchema.partial().optional(),
-  logoUrl: z.string().url().optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-  status: WorkspaceStatusSchema.optional(),
+  name: z.string().min(1).max(100).optional().describe('Updated workspace name'),
+  description: z.string().max(500).optional().describe('Updated workspace description'),
+  settings: WorkspaceSettingsSchema.partial().optional().describe('Updated workspace settings'),
+  logoUrl: z.string().url().optional().describe('URL to workspace logo image'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional().describe('Primary brand color in hex format'),
+  status: WorkspaceStatusSchema.optional().describe('Updated workspace status (active, suspended, archived)'),
 })
 export type UpdateWorkspaceRequest = z.infer<typeof UpdateWorkspaceRequestSchema>
 
@@ -96,7 +96,7 @@ export type UpdateWorkspaceRequest = z.infer<typeof UpdateWorkspaceRequestSchema
  */
 export const AddWorkspaceMemberRequestSchema = z.object({
   userId: z.string().describe('User ID to invite'),
-  role: WorkspaceRoleSchema.default('member'),
+  role: WorkspaceRoleSchema.default('member').describe('Role to assign (owner, admin, member, viewer)'),
 })
 export type AddWorkspaceMemberRequest = z.infer<typeof AddWorkspaceMemberRequestSchema>
 
@@ -104,7 +104,7 @@ export type AddWorkspaceMemberRequest = z.infer<typeof AddWorkspaceMemberRequest
  * Update Workspace Member Request
  */
 export const UpdateWorkspaceMemberRequestSchema = z.object({
-  role: WorkspaceRoleSchema,
+  role: WorkspaceRoleSchema.describe('New role to assign (owner, admin, member, viewer)'),
 })
 export type UpdateWorkspaceMemberRequest = z.infer<typeof UpdateWorkspaceMemberRequestSchema>
 

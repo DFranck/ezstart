@@ -129,31 +129,31 @@ export const FormConfigSchema = z.object({
   id: z.string().describe('Unique form identifier'),
   name: z.string().describe('Human-readable form name'),
   description: z.string().describe('Form description'),
-  category: FormCategorySchema,
+  category: FormCategorySchema.describe('Category of the form (grant, report, declaration, custom)'),
   icon: z.string().optional().describe('Emoji or icon'),
 
   // AI Extraction
-  extraction: FormExtractionConfigSchema,
+  extraction: FormExtractionConfigSchema.describe('AI extraction configuration for fields'),
 
   // Modes
-  modes: FormModesSchema,
+  modes: FormModesSchema.describe('Enabled form filling modes (manual, chat, vocal)'),
 
   // UI
-  ui: FormUIConfigSchema,
+  ui: FormUIConfigSchema.describe('UI customization options (theme, layout, progress)'),
 
   // Validation
-  validation: z.array(ValidationRuleSchema).optional(),
+  validation: z.array(ValidationRuleSchema).optional().describe('Cross-field validation rules'),
 
   // Submission
   submitEndpoint: z.string().optional().describe('API endpoint for form submission'),
 
   // Metadata
-  createdBy: z.string().optional(),
-  version: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  createdBy: z.string().optional().describe('User ID who created this form configuration'),
+  version: z.string().optional().describe('Version string for form configuration'),
+  tags: z.array(z.string()).optional().describe('Tags for categorizing and searching forms'),
 
   // Timestamps (added by MongoDB)
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  createdAt: z.date().optional().describe('Date when form configuration was created'),
+  updatedAt: z.date().optional().describe('Date when form configuration was last updated'),
 })
 export type FormConfig = z.infer<typeof FormConfigSchema>

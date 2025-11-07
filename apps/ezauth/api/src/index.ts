@@ -59,7 +59,7 @@ connectToMongo('ezauth')
     await getAuthUserModel()
     await getAuthCodeModel()
     await getOAuthAccountModel()
-    console.log('✅ Models initialized (AuthUser, AuthCode, OAuthAccount)')
+    console.log('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount')
 
     return startServer(app, {
       routes,

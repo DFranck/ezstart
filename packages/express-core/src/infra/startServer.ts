@@ -2,7 +2,6 @@ import { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-open
 import express from 'express'
 import { createServer, Server as HTTPServer } from 'http'
 import * as swaggerUi from 'swagger-ui-express'
-import { logger } from '@ezstart/logger'
 
 type StartServerOptions = {
   routes: express.Router
@@ -45,11 +44,10 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
       0
     )
 
-    logger.info({
-      modules: registries.length,
-      paths: pathsCount,
-      operations: operationsCount
-    }, '📋 OpenAPI Documentation generated')
+    console.log('📏 [OpenAPI] Documentation generated')
+    console.log(`   Modules: ${registries.length}`)
+    console.log(`   Paths: ${pathsCount}`)
+    console.log(`   Operations: ${operationsCount}`)
 
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDoc))
   }
@@ -57,9 +55,10 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   const server = createServer(app)
   server.listen(port, () => {
     const url = `http://localhost:${port}`
-    logger.info({ service: serviceName, url, basePath: basePath || '/', port }, `🚀 Server started`)
+    console.log(`🚀 [${serviceName}] Server started`)
+    console.log(`   URL: ${url}`)
     if (registries.length > 0) {
-      logger.info({ docsUrl: `${url}/docs` }, '📖 API documentation available')
+      console.log(`   Docs: ${url}/docs`)
     }
   })
 
@@ -67,13 +66,13 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
   const signals = ['SIGINT', 'SIGTERM'] as const
   signals.forEach(signal => {
     process.on(signal, () => {
-      logger.info({ signal }, '\n📴 Gracefully shutting down server')
+      console.log(`\n📴 [${serviceName}] Gracefully shutting down server (${signal})`)
       server.close((err) => {
         if (err) {
-          logger.error({ error: err }, '❌ Error during server shutdown')
+          console.error('❌ Error during server shutdown', err)
           process.exit(1)
         }
-        logger.info('✅ Server closed successfully')
+        console.log('✅ Server closed successfully')
         process.exit(0)
       })
     })

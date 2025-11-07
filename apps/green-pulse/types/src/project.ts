@@ -66,13 +66,13 @@ export type Project = z.infer<typeof ProjectSchema>
  */
 export const CreateProjectRequestSchema = z.object({
   workspaceId: z.string().describe('Workspace to create project in'),
-  name: z.string(),
-  description: z.string().optional(),
-  companyName: z.string().optional(),
-  companyAddress: z.string().optional(),
-  companySector: z.string().optional(),
-  formConfigIds: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
+  name: z.string().describe('Project name (e.g., "Inspection ABC Corp")'),
+  description: z.string().optional().describe('Detailed project description'),
+  companyName: z.string().optional().describe('Name of company being inspected or evaluated'),
+  companyAddress: z.string().optional().describe('Address of the company'),
+  companySector: z.string().optional().describe('Industry sector of the company'),
+  formConfigIds: z.array(z.string()).optional().describe('Form template IDs to use in this project'),
+  tags: z.array(z.string()).optional().describe('Tags for categorizing and searching projects'),
 })
 export type CreateProjectRequest = z.infer<typeof CreateProjectRequestSchema>
 
@@ -80,14 +80,14 @@ export type CreateProjectRequest = z.infer<typeof CreateProjectRequestSchema>
  * Request to update a project
  */
 export const UpdateProjectRequestSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  companyName: z.string().optional(),
-  companyAddress: z.string().optional(),
-  companySector: z.string().optional(),
-  status: ProjectStatusSchema.optional(),
-  formConfigIds: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
+  name: z.string().optional().describe('Updated project name'),
+  description: z.string().optional().describe('Updated project description'),
+  companyName: z.string().optional().describe('Updated company name'),
+  companyAddress: z.string().optional().describe('Updated company address'),
+  companySector: z.string().optional().describe('Updated company industry sector'),
+  status: ProjectStatusSchema.optional().describe('Updated project status (active, completed, archived, cancelled)'),
+  formConfigIds: z.array(z.string()).optional().describe('Updated list of form template IDs'),
+  tags: z.array(z.string()).optional().describe('Updated tags for categorization'),
 })
 export type UpdateProjectRequest = z.infer<typeof UpdateProjectRequestSchema>
 
@@ -95,8 +95,8 @@ export type UpdateProjectRequest = z.infer<typeof UpdateProjectRequestSchema>
  * Request to add a member to a project
  */
 export const AddProjectMemberRequestSchema = z.object({
-  userId: z.string(),
-  role: ProjectRoleSchema,
+  userId: z.string().describe('User ID to add as project member'),
+  role: ProjectRoleSchema.describe('Role to assign (owner, editor, viewer)'),
 })
 export type AddProjectMemberRequest = z.infer<typeof AddProjectMemberRequestSchema>
 
@@ -104,7 +104,7 @@ export type AddProjectMemberRequest = z.infer<typeof AddProjectMemberRequestSche
  * Request to update member role
  */
 export const UpdateProjectMemberRequestSchema = z.object({
-  userId: z.string(),
-  role: ProjectRoleSchema,
+  userId: z.string().describe('User ID whose role to update'),
+  role: ProjectRoleSchema.describe('New role to assign (owner, editor, viewer)'),
 })
 export type UpdateProjectMemberRequest = z.infer<typeof UpdateProjectMemberRequestSchema>

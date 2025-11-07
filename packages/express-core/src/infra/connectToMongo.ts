@@ -41,8 +41,6 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
     ? (MONGO_URL.includes('mongodb.net') || MONGO_URL.includes('cloud.mongodb.com') ? 'Atlas' : 'custom')
     : 'localhost';
 
-  console.log(`🔌 [MongoDB] Connecting to database: ${dbName} (${connectionSource})`);
-
   // Disable buffering for fail-fast behavior
   mongoose.set('bufferCommands', false);
   mongoose.set('bufferTimeoutMS', 30000); // 30s instead of 10s
@@ -62,9 +60,9 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
     // Test the connection with a ping
     if (mongoose.connection.db) {
       await mongoose.connection.db.admin().ping();
-      console.log(`✅ [MongoDB] Connected to '${mongoose.connection.name}' (read/write ready)`);
+      console.log(`🔌 [MongoDB] Connected to '${mongoose.connection.name}' (${connectionSource}, read/write ready)`);
     } else {
-      console.log(`✅ [MongoDB] Connected to '${mongoose.connection.name}'`);
+      console.log(`🔌 [MongoDB] Connected to '${mongoose.connection.name}' (${connectionSource})`);
     }
 
     isConnecting = false;
@@ -74,14 +72,14 @@ export async function connectToMongo(dbName: string): Promise<typeof mongoose> {
 
     // Fallback to localhost only if MONGO_URL was provided (avoid double localhost attempt)
     if (process.env.MONGO_URL) {
-      console.log(`🔌 [MongoDB] Trying fallback: localhost:27017/${dbName}`);
+      console.log(`🔌 [MongoDB] Trying fallback to localhost:27017/${dbName}...`);
 
       try {
         await mongoose.connect(`mongodb://localhost:27017/${dbName}`, options);
 
         if (mongoose.connection.db) {
           await mongoose.connection.db.admin().ping();
-          console.log(`✅ [MongoDB] Connected to '${mongoose.connection.name}' (read/write ready)`);
+          console.log(`🔌 [MongoDB] Connected to '${mongoose.connection.name}' (localhost, read/write ready)`);
         }
 
         isConnecting = false;

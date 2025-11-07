@@ -18,7 +18,7 @@ export function checkMissingDescriptions(schema: ZodTypeAny, name: string) {
 
   if (missing.length > 0) {
     console.warn(
-      `⚠️ [${name}] Missing descriptions for: ${missing.join(', ')}`
+      `⚠️ [OpenAPI] ${name} - Missing descriptions for: ${missing.join(', ')}`
     );
   }
 }
