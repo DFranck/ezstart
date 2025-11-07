@@ -49,14 +49,14 @@ class AlertingService {
     }
 
     // Initialize email transporter if enabled
-    if (this.config.email.enabled && this.config.email.smtpUser && this.config.email.smtpPass) {
-      this.emailTransporter = nodemailer.createTransporter({
-        host: this.config.email.smtpHost,
-        port: this.config.email.smtpPort,
-        secure: this.config.email.smtpPort === 465,
+    if (this.config.email?.enabled && this.config.email?.smtpUser && this.config.email?.smtpPass) {
+      this.emailTransporter = nodemailer.createTransport({
+        host: this.config.email?.smtpHost,
+        port: this.config.email?.smtpPort,
+        secure: this.config.email?.smtpPort === 465,
         auth: {
-          user: this.config.email.smtpUser,
-          pass: this.config.email.smtpPass,
+          user: this.config.email?.smtpUser,
+          pass: this.config.email?.smtpPass,
         },
       })
     }
@@ -84,11 +84,11 @@ class AlertingService {
    * Send email alert
    */
   private async sendEmailAlert(alert: Alert): Promise<void> {
-    if (!this.config.email.enabled || !this.emailTransporter) {
+    if (!this.config.email?.enabled || !this.emailTransporter) {
       return
     }
 
-    if (this.config.email.to.length === 0) {
+    if (this.config.email.to?.length === 0) {
       console.warn('[Alerting] No email recipients configured')
       return
     }
@@ -151,20 +151,20 @@ class AlertingService {
     `
 
     await this.emailTransporter.sendMail({
-      from: this.config.email.from,
-      to: this.config.email.to,
+      from: this.config.email?.from,
+      to: this.config.email?.to,
       subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
       html,
     })
 
-    console.log(`[Alerting] Email alert sent to ${this.config.email.to.length} recipient(s)`)
+    console.log(`[Alerting] Email alert sent to ${this.config.email?.to?.length} recipient(s)`)
   }
 
   /**
    * Send Slack alert via webhook
    */
   private async sendSlackAlert(alert: Alert): Promise<void> {
-    if (!this.config.slack.enabled || !this.config.slack.webhookUrl) {
+    if (!this.config.slack?.enabled || !this.config.slack?.webhookUrl) {
       return
     }
 
@@ -212,7 +212,7 @@ class AlertingService {
       ],
     }
 
-    const response = await fetch(this.config.slack.webhookUrl, {
+    const response = await fetch(this.config.slack?.webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -271,13 +271,13 @@ class AlertingService {
   getStatus() {
     return {
       email: {
-        enabled: this.config.email.enabled,
+        enabled: this.config.email?.enabled,
         configured: !!this.emailTransporter,
-        recipients: this.config.email.to.length,
+        recipients: this.config.email?.to?.length,
       },
       slack: {
-        enabled: this.config.slack.enabled,
-        configured: !!this.config.slack.webhookUrl,
+        enabled: this.config.slack?.enabled,
+        configured: !!this.config.slack?.webhookUrl,
       },
     }
   }
