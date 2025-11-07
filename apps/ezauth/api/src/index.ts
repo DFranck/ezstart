@@ -11,9 +11,7 @@ import {
   createVersionedRouter,
   addVersionHeader
 } from '@ezstart/express-core'
-import authRoutes, { authRegistry } from './routes/auth.routes.js'
-import oauthRoutes from './routes/oauth.routes.js'
-import waitlistRoutes, { waitlistRegistry } from './routes/waitlist.js'
+import routes, { allRegistries } from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
@@ -47,9 +45,8 @@ app.use(addVersionHeader('v1'))
 
 // ✅ API routes with versioning support
 // Supports both /api/auth and /api/v1/auth (backward compatible)
-app.use(createVersionedRouter('/api/auth', authRoutes))
-app.use(createVersionedRouter('/api/auth', oauthRoutes)) // OAuth routes (Google, GitHub)
-app.use(createVersionedRouter('/api/waitlist', waitlistRoutes))
+app.use(createVersionedRouter('/api/auth', routes))
+app.use(createVersionedRouter('/api/waitlist', routes))
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers
@@ -65,8 +62,8 @@ connectToMongo('ezauth')
     console.log('✅ Models initialized (AuthUser, AuthCode, OAuthAccount)')
 
     return startServer(app, {
-      routes: authRoutes,
-      registries: [authRegistry, waitlistRegistry],
+      routes,
+      registries: allRegistries,
       serviceName: 'EZAuth',
       port: Number(PORT),
     })

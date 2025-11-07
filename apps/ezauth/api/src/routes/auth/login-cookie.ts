@@ -1,0 +1,57 @@
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
+import { AuthService } from '../../services/auth.service.js'
+import {
+  LoginRequest,
+  loginRequestSchema,
+  userResponseSchema,
+  errorResponseSchema
+} from '@ezstart/auth-sdk/server'
+
+export const loginCookieRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(loginCookieRegistry, router)
+
+// Login with httpOnly cookie (DUAL-MODE)
+const loginCookieController = async (req: any, res: any) => {
+  try {
+    const data = req.body as LoginRequest
+
+    // Get token directly (skip auth code)
+    const authResult = await AuthService.loginWithToken(data)
+
+    // Set httpOnly cookie
+    res.cookie('ezauth_token', authResult.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+    })
+
+    // Return user info (frontend will store in localStorage for client-side access)
+    res.json({
+      success: true,
+      user: authResult.user
+    })
+  } catch (error) {
+    console.error('Login cookie error:', error)
+    res.status(401).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Login failed'
+    })
+  }
+}
+
+docRouter.post('/login-cookie', loginCookieController, {
+  summary: 'Login with httpOnly cookie (dual-mode)',
+  tags: ['Authentication'],
+  bodySchema: loginRequestSchema,
+  responseSchema: userResponseSchema,
+  extraResponses: {
+    401: { description: 'Login failed', schema: errorResponseSchema }
+  }
+})
+
+export default router

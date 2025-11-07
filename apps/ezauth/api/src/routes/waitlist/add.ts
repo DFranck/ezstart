@@ -1,0 +1,99 @@
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
+import { getWaitlistModel } from '../../models/waitlist.js'
+import { z } from 'zod'
+
+export const waitlistAddRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(waitlistAddRegistry, router)
+
+// Schemas for validation and documentation
+const addEmailSchema = z.object({
+  email: z.string().email('Invalid email format').describe('Email address to add to the waitlist')
+})
+
+const waitlistResponseSchema = z.object({
+  success: z.boolean().describe('Indicates if the operation was successful'),
+  message: z.string().optional().describe('Optional success message'),
+  alreadyExists: z.boolean().optional().describe('Indicates if the email was already in the waitlist'),
+  count: z.number().describe('Total number of emails in the waitlist'),
+  appName: z.string().optional().describe('Name of the application'),
+  emails: z.array(z.string()).optional().describe('List of emails in the waitlist (admin only)')
+})
+
+const errorSchema = z.object({
+  success: z.literal(false).describe('Always false for error responses'),
+  error: z.string().describe('Error message explaining what went wrong')
+})
+
+// Add email to waitlist for an app
+const addEmailController = async (req: any, res: any) => {
+  try {
+    const WaitlistModel = await getWaitlistModel()
+
+    const { appName } = req.params
+    const { email } = req.body
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid email address'
+      })
+    }
+
+    // Find or create waitlist for this app
+    // @ts-expect-error - Mongoose type inference issue
+    let waitlist = await WaitlistModel.findOne({ appName })
+
+    if (!waitlist) {
+      waitlist = new WaitlistModel({
+        appName,
+        emails: []
+      })
+    }
+
+    // Check if email already exists
+    const emailLower = email.toLowerCase()
+    const exists = waitlist.emails.some((e: string) => e === emailLower)
+
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        error: 'Email already registered',
+        code: 'EMAIL_EXISTS',
+        count: waitlist.emails.length
+      })
+    }
+
+    // Add email
+    waitlist.emails.push(emailLower)
+    await waitlist.save()
+
+    res.status(201).json({
+      success: true,
+      message: 'Successfully added to waitlist',
+      count: waitlist.emails.length
+    })
+  } catch (error) {
+    console.error('Error adding to waitlist:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Failed to add email to waitlist'
+    })
+  }
+}
+
+docRouter.post('/:appName/add', addEmailController, {
+  summary: 'Add email to waitlist for specific app',
+  tags: ['Waitlist'],
+  bodySchema: addEmailSchema,
+  responseSchema: waitlistResponseSchema,
+  status: 201,
+  extraResponses: {
+    400: { description: 'Invalid email', schema: errorSchema },
+    409: { description: 'Email already exists', schema: errorSchema },
+    500: { description: 'Server error', schema: errorSchema }
+  }
+})
+
+export default router

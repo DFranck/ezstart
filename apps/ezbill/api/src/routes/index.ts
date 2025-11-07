@@ -1,21 +1,21 @@
 import { Router } from '@ezstart/express-core';
-import clientRoutes, { clientsRegistry } from './clients.js';
-import companiesRoutes, { companiesRegistry } from './companies.js';
-import invoiceRoutes, { invoiceRegistry } from './invoices.js';
-import paymentMethodRoutes, { paymentMethodsRegistry } from './payment-methods.js';
-import quoteRoutes, { quotesRegistry } from './quotes.js';
-import receiptRoutes, { receiptRegistry } from './receipts.js';
-import usersRoutes, { usersRegistry } from './users.js';
+import clientRoutes, { clientsRegistries } from './clients/index.js';
+import companiesRoutes, { companiesRegistries } from './companies/index.js';
+import invoiceRoutes, { invoicesRegistries } from './invoices/index.js';
+import paymentMethodRoutes, { paymentMethodsRegistries } from './payment-methods/index.js';
+import quoteRoutes, { quotesRegistries } from './quotes/index.js';
+import receiptRoutes, { receiptsRegistries } from './receipts/index.js';
+import usersRoutes, { usersRegistries } from './users/index.js';
 
 const router = Router();
 export const globalRegistry = [
-  clientsRegistry,
-  companiesRegistry,
-  invoiceRegistry,
-  paymentMethodsRegistry,
-  quotesRegistry,
-  receiptRegistry,
-  usersRegistry,
+  ...clientsRegistries,
+  ...companiesRegistries,
+  ...invoicesRegistries,
+  ...paymentMethodsRegistries,
+  ...quotesRegistries,
+  ...receiptsRegistries,
+  ...usersRegistries,
 ];
 
 router

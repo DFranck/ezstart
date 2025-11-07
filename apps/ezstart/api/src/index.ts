@@ -12,8 +12,7 @@ import {
   addVersionHeader
 } from '@ezstart/express-core'
 import { getAllowedOrigins } from '@ezstart/config/cors'
-import { routes, registries } from './routes/index.js'
-import { setScheduler } from './routes/scheduler.js'
+import { routes, registries, setScheduler } from './routes/index.js'
 import { HealthCheckScheduler } from './services/healthCheckScheduler.js'
 import type { Server as IOServer } from 'socket.io'
 

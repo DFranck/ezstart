@@ -1,9 +1,10 @@
 import { Router } from '@ezstart/express-core'
-import gamesRoutes, { gamesRegistry } from './games.js'
+import { gamesRegistries, gamesRouters } from './games/index.js'
 import playerRoutes, { playersRegistry } from './players.js'
 const router = Router()
-export const globalRegistry = [gamesRegistry, playersRegistry]
+export const globalRegistry = [...gamesRegistries, playersRegistry]
 
-router.use('/games', gamesRoutes).use('/players', playerRoutes)
+gamesRouters.forEach(r => router.use('/games', r))
+router.use('/players', playerRoutes)
 
 export default router

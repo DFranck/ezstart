@@ -1,28 +1,28 @@
 import { Router } from '@ezstart/express-core'
-import { healthRoutes, healthRegistry } from './health.js'
-import { auditRoutes, auditRegistry } from './audit.js'
-import { deploymentRoutes, deploymentRegistry } from './deployment.js'
-import { metricsRoutes, metricsRegistry } from './metrics.js'
-import projectsRouter from './projects.js'
-import historyRouter from './history.js'
+import healthRouter, { healthRegistries } from './health/index.js'
+import auditRouter, { auditRegistries } from './audit/index.js'
+import deploymentRouter, { deploymentRegistries } from './deployment/index.js'
+import metricsRouter, { metricsRegistries } from './metrics/index.js'
+import projectsRouter from './projects/index.js'
+import historyRouter from './history/index.js'
 import triggerRouter from './trigger.js'
-import activityRouter from './activity.js'
-import performanceRouter from './performance.js'
-import { schedulerRoutes } from './scheduler.js'
+import activityRouter from './activity/index.js'
+import performanceRouter from './performance/index.js'
+import schedulerRouter, { setScheduler } from './scheduler/index.js'
 
 const router = Router()
 
 // Mount sub-routes
-router.use('/health-checks', healthRoutes)
-router.use('/audits', auditRoutes)
-router.use('/deployments', deploymentRoutes)
-router.use('/metrics', metricsRoutes)
+router.use('/health-checks', healthRouter)
+router.use('/audits', auditRouter)
+router.use('/deployments', deploymentRouter)
+router.use('/metrics', metricsRouter)
 router.use('/projects', projectsRouter)
 router.use('/history', historyRouter)
 router.use('/trigger-checks', triggerRouter)
 router.use('/activity', activityRouter)
 router.use('/performance', performanceRouter)
-router.use('/scheduler', schedulerRoutes)
+router.use('/scheduler', schedulerRouter)
 
 // Root endpoint
 router.get('/', (_, res) => {
@@ -51,4 +51,12 @@ router.get('/', (_, res) => {
 })
 
 export const routes = router as ReturnType<typeof Router>
-export const registries = [healthRegistry, auditRegistry, deploymentRegistry, metricsRegistry]
+export const registries = [
+  ...healthRegistries,
+  ...auditRegistries,
+  ...deploymentRegistries,
+  ...metricsRegistries,
+]
+
+// Re-export setScheduler for backward compatibility
+export { setScheduler }
