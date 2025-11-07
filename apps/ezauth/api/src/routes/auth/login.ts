@@ -36,7 +36,7 @@ const loginController = async (req: any, res: any) => {
   }
 }
 
-docRouter.post('/login', [loginRateLimiter, loginController], {
+docRouter.post('/login', loginRateLimiter, loginController, {
   summary: 'Login user',
   tags: ['Authentication'],
   bodySchema: loginRequestSchema,

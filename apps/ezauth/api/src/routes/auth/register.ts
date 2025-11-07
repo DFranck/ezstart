@@ -36,7 +36,7 @@ const registerController = async (req: any, res: any) => {
   }
 }
 
-docRouter.post('/register', [registerRateLimiter, registerController], {
+docRouter.post('/register', registerRateLimiter, registerController, {
   summary: 'Register new user',
   tags: ['Authentication'],
   bodySchema: registerRequestSchema,
