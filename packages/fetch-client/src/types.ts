@@ -8,6 +8,8 @@ export type ApiResponse<T> =
   | { ok: true; status: number; url: string; data: T }
   | { ok: false; status: number; url: string; data: ApiError | null }
 
+export type LogLevel = 'none' | 'errors' | 'all'
+
 export type CallApiOptions = {
   /** HTTP method (default: GET) */
   method?: HttpMethod
@@ -23,4 +25,14 @@ export type CallApiOptions = {
   userId?: string
   /** App name to automatically resolve API URL from @ezstart/config (REQUIRED) */
   appName: AppName
+  /**
+   * Log level for this request
+   * - 'none': No logging
+   * - 'errors': Only log errors (default)
+   * - 'all': Log request + response for all calls
+   *
+   * Can also be controlled globally via localStorage: callApiLogLevel
+   * @default 'errors'
+   */
+  logLevel?: LogLevel
 }

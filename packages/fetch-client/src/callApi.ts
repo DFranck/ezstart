@@ -1,5 +1,25 @@
 import { getApiUrl } from '@ezstart/config/urls'
-import type { ApiError, ApiResponse, CallApiOptions } from './types'
+import type { ApiError, ApiResponse, CallApiOptions, LogLevel } from './types'
+
+/**
+ * Get global log level from localStorage (browser) or environment (server)
+ */
+function getGlobalLogLevel(): LogLevel {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const stored = localStorage.getItem('callApiLogLevel') as LogLevel | null
+    if (stored === 'none' || stored === 'errors' || stored === 'all') {
+      return stored
+    }
+  }
+  // Server-side or no localStorage: check environment
+  if (typeof process !== 'undefined' && process.env?.CALL_API_LOG_LEVEL) {
+    const envLevel = process.env.CALL_API_LOG_LEVEL as LogLevel
+    if (envLevel === 'none' || envLevel === 'errors' || envLevel === 'all') {
+      return envLevel
+    }
+  }
+  return 'errors' // Default
+}
 
 /**
  * Type-safe HTTP client for @ezstart monorepo
@@ -8,6 +28,7 @@ import type { ApiError, ApiResponse, CallApiOptions } from './types'
  * - Automatic URL resolution from @ezstart/config
  * - Automatic /api prefix normalization
  * - JSON body serialization
+ * - Configurable logging (none/errors/all)
  * - Error handling with detailed logging
  * - AbortSignal support for cancellation
  *
@@ -28,13 +49,25 @@ import type { ApiError, ApiResponse, CallApiOptions } from './types'
  *   appName: 'ezbill',
  *   query: { status: 'paid', limit: 10 }
  * })
+ *
+ * // Enable logging for specific call
+ * const response = await callApi<User>('/users/123', {
+ *   appName: 'ezbill',
+ *   logLevel: 'all' // Log request + response
+ * })
+ *
+ * // Enable logging globally in browser console:
+ * localStorage.setItem('callApiLogLevel', 'all')
  * ```
  */
 export async function callApi<T = any>(
   endpoint: string,
   options: CallApiOptions
 ): Promise<ApiResponse<T>> {
-  const { method = 'GET', query, body, headers = {}, signal, userId, appName } = options
+  const { method = 'GET', query, body, headers = {}, signal, userId, appName, logLevel } = options
+
+  // Determine effective log level (option > global > default)
+  const effectiveLogLevel = logLevel || getGlobalLogLevel()
 
   // Resolve base URL from @ezstart/config
   const baseUrl = getApiUrl(appName)
@@ -59,6 +92,20 @@ export async function callApi<T = any>(
   const isStringBody = typeof body === 'string'
   const isJsonBody = !isFormUrlEncoded && !isStringBody
 
+  // Log request if enabled
+  if (effectiveLogLevel === 'all') {
+    console.group(`🌐 [callApi] ${method} ${url}`)
+    console.log('📤 Request:', {
+      method,
+      url,
+      query,
+      body,
+      headers: { ...headers, ...(userId ? { 'X-User-Id': userId } : {}) },
+    })
+  }
+
+  const startTime = Date.now()
+
   try {
     const res = await fetch(url, {
       method,
@@ -72,6 +119,8 @@ export async function callApi<T = any>(
       signal,
     })
 
+    const duration = Date.now() - startTime
+
     // Parse response body
     let data: T | ApiError | null = null
     try {
@@ -82,6 +131,12 @@ export async function callApi<T = any>(
     }
 
     if (res.ok) {
+      // Log successful response if enabled
+      if (effectiveLogLevel === 'all') {
+        console.log(`✅ Response [${res.status}] (${duration}ms):`, data)
+        console.groupEnd()
+      }
+
       return {
         ok: true as const,
         status: res.status,
@@ -89,15 +144,22 @@ export async function callApi<T = any>(
         data: data as T,
       }
     } else {
-      // Log error details for debugging
-      console.warn('[callApi] API returned !ok')
-      console.warn('[callApi] Method:', method)
-      console.warn('[callApi] URL:', url)
-      console.warn('[callApi] Status:', res.status)
-      console.warn('[callApi] Body:', body)
-      console.warn('[callApi] Headers:', headers)
-      console.warn('[callApi] Query:', query)
-      console.warn('[callApi] Response:', data)
+      // Log error details if enabled (errors or all)
+      if (effectiveLogLevel === 'errors' || effectiveLogLevel === 'all') {
+        if (effectiveLogLevel === 'errors') {
+          console.group(`❌ [callApi] ${method} ${url} - ${res.status}`)
+        }
+        console.warn(`🔴 Response [${res.status}] (${duration}ms):`, {
+          url,
+          method,
+          status: res.status,
+          query,
+          body,
+          headers,
+          response: data,
+        })
+        console.groupEnd()
+      }
 
       return {
         ok: false as const,
@@ -107,11 +169,23 @@ export async function callApi<T = any>(
       }
     }
   } catch (err) {
-    // Network error or request failed
-    console.error('[callApi] Fetch failed:', err)
-    console.error('[callApi] Endpoint:', endpoint)
-    console.error('[callApi] Body:', body)
-    console.error('[callApi] Query:', query)
+    const duration = Date.now() - startTime
+
+    // Log network error if enabled (errors or all)
+    if (effectiveLogLevel === 'errors' || effectiveLogLevel === 'all') {
+      if (effectiveLogLevel === 'errors') {
+        console.group(`💥 [callApi] ${method} ${url} - NETWORK ERROR`)
+      }
+      console.error(`🔴 Fetch failed (${duration}ms):`, {
+        error: (err as Error).message,
+        endpoint,
+        url,
+        method,
+        query,
+        body,
+      })
+      console.groupEnd()
+    }
 
     return {
       status: 0,

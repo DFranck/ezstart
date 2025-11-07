@@ -9,6 +9,7 @@ Type-safe HTTP client for @ezstart monorepo with automatic API URL resolution an
 - ✅ Automatic `/api` prefix normalization
 - ✅ JSON body serialization
 - ✅ Error parsing with `parseApiError()` - **NO MORE `[object Object]`** ✅
+- ✅ **Configurable logging** (none/errors/all) - Debug API calls easily
 - ✅ httpOnly cookie support (`credentials: 'include'`)
 - ✅ AbortSignal support for request cancellation
 
@@ -373,7 +374,88 @@ async function deleteUser(id: string) {
 - `@ezstart/ui` - Toast notifications (`sonner`)
 - `@ezstart/types` - Shared TypeScript types
 
+## Logging
+
+`callApi()` now supports configurable logging to help debug API issues!
+
+### Log Levels
+
+- **`'none'`** - No logging at all
+- **`'errors'`** - Only log failed requests (default)
+- **`'all'`** - Log all requests + responses (verbose)
+
+### Enable Logging Globally
+
+In browser console:
+
+```javascript
+// Enable full logging for all callApi calls
+localStorage.setItem('callApiLogLevel', 'all')
+
+// Disable all logging
+localStorage.setItem('callApiLogLevel', 'none')
+
+// Only log errors (default)
+localStorage.setItem('callApiLogLevel', 'errors')
+```
+
+### Enable Logging Per-Request
+
+```typescript
+// Log this specific request
+const response = await callApi<User>('/users/123', {
+  logLevel: 'all' // Override global setting
+})
+```
+
+### Log Output Examples
+
+**Success (logLevel: 'all'):**
+```
+🌐 [callApi] POST http://localhost:5020/api/invoices
+  📤 Request: { method: 'POST', url: '...', query: {...}, body: {...} }
+  ✅ Response [201] (245ms): { id: '123', status: 'paid', ... }
+```
+
+**Error (logLevel: 'errors' or 'all'):**
+```
+❌ [callApi] POST http://localhost:5020/api/invoices - 400
+  🔴 Response [400] (123ms): {
+    url: 'http://localhost:5020/api/invoices',
+    method: 'POST',
+    status: 400,
+    response: { error: 'Client email already exists' }
+  }
+```
+
+**Network Error (logLevel: 'errors' or 'all'):**
+```
+💥 [callApi] GET http://localhost:5020/api/users - NETWORK ERROR
+  🔴 Fetch failed (5ms): {
+    error: 'Failed to fetch',
+    endpoint: '/users',
+    url: 'http://localhost:5020/api/users'
+  }
+```
+
+### Server-Side Logging
+
+Set environment variable:
+
+```bash
+# In .env.local
+CALL_API_LOG_LEVEL=all  # or 'errors' or 'none'
+```
+
 ## Changelog
+
+### v0.3.0 (2025-11-07)
+
+- ✅ Added configurable logging system (`logLevel` option)
+- ✅ Support for global logging via `localStorage.callApiLogLevel`
+- ✅ Server-side logging via `CALL_API_LOG_LEVEL` env variable
+- ✅ Beautiful log output with emojis and timing
+- ✅ Grouped console logs for better readability
 
 ### v0.2.0 (2025-11-05)
 
