@@ -9,7 +9,7 @@ type Props = {
   id?: string
 }
 
-export const SkillsSection = ({ id }: Props) => {
+export const SkillsSection = ({ id }: Props): JSX.Element => {
   const t = useSafeTranslations('skills')
   const { isMobile } = useDevice()
 

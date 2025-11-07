@@ -5,7 +5,6 @@ import { LoginSection } from '@/components/LoginSection'
 import { useGames } from '@/hooks/useGames'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { Button, H1, Icon, LI, Main, P, Section, UL, SkeletonList } from '@ezstart/ui/components'
-import { logger } from '@ezstart/logger'
 import { Game } from '@tower-defense/types'
 import Link from 'next/link'
 import { useEffect } from 'react'
@@ -113,7 +112,7 @@ export default function Page(): any {
                     game.players?.some(inGamePlayer => inGamePlayer?.player?._id === player?._id) ??
                     false
 
-                  logger.debug('alreadyJoined', alreadyJoined)
+                  console.debug('alreadyJoined', alreadyJoined)
 
                   return (
                     <LI

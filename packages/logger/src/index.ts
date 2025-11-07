@@ -1,73 +1,49 @@
-import pino from 'pino'
-
 /**
- * Base Pino logger instance
- */
-const pinoLogger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: process.env.NODE_ENV === 'development'
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:HH:MM:ss',
-          ignore: 'pid,hostname',
-        },
-      }
-    : undefined,
-})
-
-/**
- * Logger interface compatible with existing codebase
+ * Browser-safe logger (no Sentry, no Pino)
  *
- * Supports both old format: logger.info(msg, data)
- * And Pino format: logger.info(data, msg)
+ * Use this in web apps (Next.js client components)
+ * For server-side logging with Sentry, use '@ezstart/logger/server'
  *
  * @example
  * ```typescript
+ * // In web apps (client components)
  * import { logger } from '@ezstart/logger'
+ * logger.info('User clicked button', { buttonId: '123' })
  *
- * // Old format (backward compatible)
- * logger.info('User logged in', { userId: '123' })
- * logger.error('Payment failed', { error, paymentId })
- *
- * // Pino format (preferred)
- * logger.info({ userId: '123', email: 'user@example.com' }, 'User logged in')
- * logger.error({ error, paymentId }, 'Payment processing failed')
+ * // In APIs (server-side)
+ * import { logger } from '@ezstart/logger/server'
+ * logger.error('Database error', { error, userId })
  * ```
  */
 export const logger = {
   info: (msgOrObj: string | object, dataOrMsg?: any) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.info(dataOrMsg || {}, msgOrObj)
+      console.log(`[INFO] ${msgOrObj}`, dataOrMsg || '')
     } else {
-      pinoLogger.info(msgOrObj, dataOrMsg as string)
+      console.log(`[INFO] ${dataOrMsg}`, msgOrObj)
     }
   },
   warn: (msgOrObj: string | object, dataOrMsg?: any) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.warn(dataOrMsg || {}, msgOrObj)
+      console.warn(`[WARN] ${msgOrObj}`, dataOrMsg || '')
     } else {
-      pinoLogger.warn(msgOrObj, dataOrMsg as string)
+      console.warn(`[WARN] ${dataOrMsg}`, msgOrObj)
     }
   },
   error: (msgOrObj: string | object, dataOrMsg?: any) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.error(dataOrMsg || {}, msgOrObj)
+      console.error(`[ERROR] ${msgOrObj}`, dataOrMsg || '')
     } else {
-      pinoLogger.error(msgOrObj, dataOrMsg as string)
+      console.error(`[ERROR] ${dataOrMsg}`, msgOrObj)
     }
   },
   debug: (msgOrObj: string | object, dataOrMsg?: any) => {
     if (typeof msgOrObj === 'string') {
-      pinoLogger.debug(dataOrMsg || {}, msgOrObj)
+      console.debug(`[DEBUG] ${msgOrObj}`, dataOrMsg || '')
     } else {
-      pinoLogger.debug(msgOrObj, dataOrMsg as string)
+      console.debug(`[DEBUG] ${dataOrMsg}`, msgOrObj)
     }
   },
 }
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug'
-
-// Export Sentry utilities
-export { initSentry, Sentry } from './sentry.js'
