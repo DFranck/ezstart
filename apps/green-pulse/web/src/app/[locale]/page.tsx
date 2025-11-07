@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useState } from 'react'
 
-export default function HomePage() {
+export default function HomePage(): any {
   const [email, setEmail] = useState('')
   const t = useTranslations('home')
 

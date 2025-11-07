@@ -26,7 +26,7 @@ import {
   Button,
 } from '@ezstart/ui/components'
 
-export default function LandingV2Page() {
+export default function LandingV2Page(): any {
   // Get SEO data for GreenPulse
   const seoData = getAppSEO('green-pulse')
 

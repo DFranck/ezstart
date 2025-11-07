@@ -36,7 +36,7 @@ const PaymentMethodModal = dynamic(() => import('@/components/payment-method-mod
   ssr: false
 })
 
-const DashboardPage = () => {
+const DashboardPage = (): any => {
   const router = useRouter()
   const { user, isAuthenticated, login } = useAuth()
   const { clients, companies, paymentMethods, invoices, quotes, receipts, refetchAll, loading } =

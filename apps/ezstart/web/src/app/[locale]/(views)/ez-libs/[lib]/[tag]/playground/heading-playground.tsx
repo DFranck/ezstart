@@ -37,7 +37,7 @@ type TesterProps = {
   tag: (typeof HEADING_TAGS)[number]
 }
 
-const HeadingVariantTester = ({ tag }: TesterProps) => {
+const HeadingVariantTester = ({ tag }: TesterProps): any => {
   const meta = tagVariantsMeta[tag]
   const factory = headingVariants[tag] as any
   const getDefaultVariants = () => {

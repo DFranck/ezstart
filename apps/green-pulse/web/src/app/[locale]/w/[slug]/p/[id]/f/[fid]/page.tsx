@@ -7,7 +7,7 @@ interface PageProps {
   params: Promise<{ slug: string; id: string; fid: string; locale: string }>
 }
 
-export default function FormFillingPage({ params }: PageProps) {
+export default function FormFillingPage({ params }: PageProps): any {
   const { slug, id, fid } = use(params)
 
   return (

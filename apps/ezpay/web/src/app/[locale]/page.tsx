@@ -1,4 +1,4 @@
-export default function HomePage() {
+export default function HomePage(): any {
   return (
     <main className="container mx-auto py-12 px-4">
       <div className="max-w-4xl mx-auto text-center">

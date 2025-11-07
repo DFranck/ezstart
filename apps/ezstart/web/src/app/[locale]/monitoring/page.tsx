@@ -36,7 +36,7 @@ import {
   getMetricsData,
 } from './lib/utils'
 
-export default function MonitoringDashboard() {
+export default function MonitoringDashboard(): any {
   const t = useTranslations('monitoring')
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'audits' | 'errors'>(
     'overview'

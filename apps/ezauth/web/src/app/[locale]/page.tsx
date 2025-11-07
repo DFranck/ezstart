@@ -27,7 +27,7 @@ function HomeContent() {
   )
 }
 
-export default function HomePage() {
+export default function HomePage(): any {
   return (
     <Suspense
       fallback={

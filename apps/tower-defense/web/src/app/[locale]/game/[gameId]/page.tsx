@@ -21,7 +21,7 @@ const MobShop = dynamic(() => import('../components/MobShop').then(mod => ({ def
   loading: () => <div className="animate-pulse bg-muted rounded-lg h-32" />,
 })
 
-export default function GamePage() {
+export default function GamePage(): any {
   const params = useParams<{ gameId: string }>()
   const gameId = params.gameId
   const [game, setGame] = useState<Game | null>(null)

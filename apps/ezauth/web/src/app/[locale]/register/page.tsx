@@ -69,7 +69,7 @@ function RegisterContent() {
   )
 }
 
-export default function RegisterPage() {
+export default function RegisterPage(): any {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <RegisterContent />

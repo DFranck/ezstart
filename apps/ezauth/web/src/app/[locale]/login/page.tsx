@@ -71,7 +71,7 @@ function LoginContent() {
   )
 }
 
-export default function LoginPage() {
+export default function LoginPage(): any {
   return (
     <Suspense fallback={<Spinner variant="primary" size="lg" text="Loading..." />}>
       <LoginContent />

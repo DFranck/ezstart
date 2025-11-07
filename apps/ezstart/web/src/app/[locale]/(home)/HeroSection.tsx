@@ -9,7 +9,7 @@ import ContactsList from '../../../components/contactsList'
 
 type Props = { id?: string }
 
-const HeroSection = ({ id }: Props) => {
+const HeroSection = ({ id }: Props): any => {
   const t = useSafeTranslations('home.hero')
   const skillsShowcase = t.raw('skillsShowcase') as Array<{
     first: string

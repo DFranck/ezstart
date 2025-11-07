@@ -6,7 +6,7 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 import { H1, P, Section } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
-export default function DonatePage() {
+export default function DonatePage(): any {
   const { user } = useAuth()
   const t = useTranslations('donate')
 

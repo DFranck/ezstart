@@ -6,7 +6,7 @@ import { getApiUrl } from '@ezstart/config'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { useMemo, useState } from 'react'
 
-export default function LiaPage() {
+export default function LiaPage(): any {
   // Get user from Zustand store (localStorage 'ezauth-storage')
   const { user, isAuthenticated } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)

@@ -4,7 +4,7 @@ import { Button, Div, H2, Hero, Icon, Main, P, Section } from '@ezstart/ui/compo
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function Page() {
+export default function Page(): any {
   return (
     <Main>
       {/* Hero Section */}

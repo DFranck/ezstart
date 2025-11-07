@@ -9,7 +9,7 @@ type Props = {
   className?: string
 }
 
-const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props) => {
+const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props): any => {
   return (
     <div key={paymentMethod._id} className="group relative">
       <Card

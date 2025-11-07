@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import IconPlayground from '../(Icon)/IconPlayground'
 import { HeaderLib } from '../components/header-lib'
 
-const EzIconPage = () => {
+const EzIconPage = (): any => {
   const t = useSafeTranslations('libraries')
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === 'icon')

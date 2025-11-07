@@ -293,7 +293,7 @@ const CardinalWheel = ({
   )
 }
 
-const CardinalPointsStep = () => {
+const CardinalPointsStep = (): any => {
   const { isMobile } = useDevice()
   const t = useTranslations()
 

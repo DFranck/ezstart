@@ -9,7 +9,7 @@ import { Badge, Button, Card, CardContent, CardHeader, H2, H3, Icon, Main, P } f
  * Access at: http://localhost:5025/dashboard/colors-showcase
  */
 
-export default function ColorsShowcasePage() {
+export default function ColorsShowcasePage(): any {
   return (
     <Main>
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-12">

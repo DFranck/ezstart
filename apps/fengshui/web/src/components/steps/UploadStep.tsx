@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from 'react'
  * - Responsive container (full width on mobile, clamps at sm/2xl)
  * - Minimal crop intent via optional uploaderOptions (no extra toolbars)
  */
-const UploadStep = () => {
+const UploadStep = (): any => {
   const t = useTranslations()
   const [editingState, setEditingState] = useState<{
     isEditing: boolean

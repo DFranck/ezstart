@@ -1,7 +1,7 @@
 import { callApi } from '@/utils/api'
 import { notFound } from 'next/navigation'
 
-export default async function PostGamePage(props: { params: Promise<{ gameId: string }> }) {
+export default async function PostGamePage(props: { params: Promise<{ gameId: string }> }): Promise<any> {
   const { params } = props
   const { gameId } = await params
 

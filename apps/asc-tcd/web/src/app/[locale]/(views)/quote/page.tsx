@@ -3,7 +3,7 @@
 import { Button, Checkbox, H1, Input, Label, Main, P, Section } from '@ezstart/ui/components'
 import { useState } from 'react'
 
-export default function PageQuote() {
+export default function PageQuote(): any {
   const [form, setForm] = useState({
     organisation: '',
     contactName: '',

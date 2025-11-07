@@ -5,5 +5,5 @@
  * Only use these in Next.js apps (requires 'use client' directive).
  */
 
-export * from './PlausibleAnalytics'
-export * from './usePerformance'
+export * from './PlausibleAnalytics.js'
+export * from './usePerformance.js'

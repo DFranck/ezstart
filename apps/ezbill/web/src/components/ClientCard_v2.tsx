@@ -19,7 +19,7 @@ type Props = {
   className?: string
 }
 
-const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props) => {
+const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): any => {
   return (
     <div key={client._id} className="group relative">
       <Card

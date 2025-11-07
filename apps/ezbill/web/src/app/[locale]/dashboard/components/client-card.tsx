@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 
 type Props = { client: Client };
-const ClientCard = ({ client }: Props) => {
+const ClientCard = ({ client }: Props): any => {
   return (
     <Card className={`w-full cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-105 ${
       client.isCompany

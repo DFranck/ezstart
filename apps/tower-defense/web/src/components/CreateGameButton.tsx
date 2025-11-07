@@ -6,7 +6,7 @@ type Props = {
   playerId: string
 }
 
-const CreateGameButton = ({ playerId }: Props) => {
+const CreateGameButton = ({ playerId }: Props): any => {
   const { createGame, loading } = useCreateGame()
   const isDisabled = !playerId
 

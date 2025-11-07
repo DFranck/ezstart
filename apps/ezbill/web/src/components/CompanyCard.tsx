@@ -9,7 +9,7 @@ type Props = {
   className?: string
 }
 
-const CompanyCard = ({ company, onEdit, onDelete, className }: Props) => {
+const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
   return (
     <div key={company._id} className="group relative">
       <Card

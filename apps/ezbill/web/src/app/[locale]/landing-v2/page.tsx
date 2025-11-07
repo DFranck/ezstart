@@ -25,7 +25,7 @@ import {
   Badge,
 } from '@ezstart/ui/components'
 
-export default function LandingV2Page() {
+export default function LandingV2Page(): any {
   // Get SEO data for EZBill
   const seoData = getAppSEO('ezbill')
 

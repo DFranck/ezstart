@@ -26,7 +26,7 @@ function CallbackContent({
   processingMessage = 'Processing authentication...',
   errorButtonText = 'Go Back',
   errorButtonClassName = 'px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
-}: AuthCallbackPageProps) {
+}: AuthCallbackPageProps): any {
   const { handleCallback } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -186,7 +186,7 @@ function CallbackContent({
  * }
  * ```
  */
-export function AuthCallbackPage(props: AuthCallbackPageProps) {
+export function AuthCallbackPage(props: AuthCallbackPageProps): any {
   return (
     <Suspense
       fallback={
