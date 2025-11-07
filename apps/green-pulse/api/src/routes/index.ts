@@ -5,7 +5,7 @@ import uploadRoutes, { uploadRegistry } from './upload.js'
 import esgRoutes, { esgRegistry } from './esg.js'
 import webhookRoutes, { webhookRegistry } from './webhooks.js'
 import conversationRoutes, { conversationRegistries } from './conversations/index.js'
-import formRoutes, { formRegistry } from './forms.js'
+import formRoutes, { formRegistries } from './forms/index.js'
 import projectRoutes, { projectRegistry } from './projects.js'
 import workspaceRoutes, { workspaceRegistry } from './workspaces.js'
 
@@ -18,7 +18,7 @@ export const globalRegistry = [
   esgRegistry,
   webhookRegistry,
   ...conversationRegistries, // Spread the array of conversation registries
-  formRegistry,
+  ...formRegistries,         // Spread the array of form registries
   projectRegistry,
   workspaceRegistry,
 ]
