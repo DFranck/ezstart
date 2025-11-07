@@ -4,7 +4,7 @@ import chatV2Routes, { chatV2Registry } from './chat-v2.js'
 import uploadRoutes, { uploadRegistry } from './upload.js'
 import esgRoutes, { esgRegistry } from './esg.js'
 import webhookRoutes, { webhookRegistry } from './webhooks.js'
-import conversationRoutes, { conversationRegistry } from './conversations.js'
+import conversationRoutes, { conversationRegistries } from './conversations/index.js'
 import formRoutes, { formRegistry } from './forms.js'
 import projectRoutes, { projectRegistry } from './projects.js'
 import workspaceRoutes, { workspaceRegistry } from './workspaces.js'
@@ -17,7 +17,7 @@ export const globalRegistry = [
   uploadRegistry,
   esgRegistry,
   webhookRegistry,
-  conversationRegistry,
+  ...conversationRegistries, // Spread the array of conversation registries
   formRegistry,
   projectRegistry,
   workspaceRegistry,

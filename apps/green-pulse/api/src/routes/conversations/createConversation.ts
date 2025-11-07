@@ -1,0 +1,72 @@
+/**
+ * POST /api/conversations
+ * Create new conversation
+ */
+
+import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Conversation } from '../../models/Conversation.js'
+import {
+  CreateConversationSchema,
+  ConversationSchema,
+  ApiResponseSchema,
+} from '@green-pulse/types'
+
+export const createConversationRegistry = new OpenAPIRegistry()
+const router: any = Router()
+export const createConversationRouter = createRouterWithDoc(
+  createConversationRegistry,
+  router,
+  '/'
+)
+
+createConversationRouter.post(
+  '/',
+  async (req, res) => {
+    try {
+      const validation = CreateConversationSchema.safeParse(req.body)
+      if (!validation.success) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid request',
+          details: validation.error.errors,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
+      const { title, userId } = validation.data
+
+      // @ts-expect-error - Mongoose create() type inference issue
+      const conversation = await Conversation.create({
+        title: title || 'New Chat',
+        userId,
+        messages: [],
+      })
+
+      res.json({
+        success: true,
+        data: {
+          id: conversation._id.toString(),
+          title: conversation.title,
+          createdAt: conversation.createdAt,
+          updatedAt: conversation.updatedAt,
+        },
+        timestamp: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.error('Create conversation error:', error)
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create conversation',
+        timestamp: new Date().toISOString(),
+      })
+    }
+  },
+  {
+    summary: 'Create new conversation',
+    tags: ['Conversations'],
+    bodySchema: CreateConversationSchema,
+    responseSchema: ApiResponseSchema(ConversationSchema),
+  }
+)
+
+export default router

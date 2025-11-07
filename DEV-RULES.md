@@ -672,7 +672,70 @@ app.post('/api/auth/reset-password', createVeryStrictRateLimiter(), resetHandler
   }
   ```
 
-### 2. Préfixe /api OBLIGATOIRE
+### 2. Action-Based Routing OBLIGATOIRE
+
+✅ **Organisation des routes par action** (1 fichier = 1 action) :
+
+```
+src/routes/
+├── {feature}/
+│   ├── {action}.ts         # createUser.ts, listUsers.ts, etc.
+│   └── index.ts            # Feature router
+└── index.ts                # Main router
+```
+
+**Naming convention:**
+- `create{Entity}.ts` - POST action
+- `list{Entities}.ts` - GET collection
+- `get{Entity}ById.ts` - GET single
+- `update{Entity}.ts` - PATCH/PUT action
+- `delete{Entity}.ts` - DELETE action
+- `{action}With{Modifier}.ts` - Special actions (generateFormWithAI.ts)
+
+**Example: Conversations feature**
+```
+routes/conversations/
+├── createConversation.ts      # POST /conversations
+├── listConversations.ts       # GET /conversations
+├── getConversationById.ts     # GET /conversations/:id
+├── updateConversation.ts      # PATCH /conversations/:id
+├── deleteConversation.ts      # DELETE /conversations/:id
+└── index.ts                   # Exports router
+```
+
+**Single action file:**
+```typescript
+// createConversation.ts
+import { Router } from '@ezstart/express-core'
+import { createConversationController } from '../../controllers/conversations/createConversation.js'
+
+export const createConversationRouter = Router()
+createConversationRouter.post('/', createConversationController)
+```
+
+**Feature index:**
+```typescript
+// conversations/index.ts
+import { Router } from '@ezstart/express-core'
+import { createConversationRouter } from './createConversation.js'
+import { listConversationsRouter } from './listConversations.js'
+
+export const conversationsRouter = Router()
+conversationsRouter
+  .use('/', createConversationRouter)
+  .use('/', listConversationsRouter)
+```
+
+**Benefits:**
+- ✅ One file = One action (clear responsibility)
+- ✅ Easy to find (`getConversationById.ts`)
+- ✅ No merge conflicts
+- ✅ Easy to test individually
+- ✅ Clear git history
+
+**See:** [apps/green-pulse/api/docs/ROUTING-PATTERN.md](./apps/green-pulse/api/docs/ROUTING-PATTERN.md)
+
+### 3. Préfixe /api OBLIGATOIRE
 
 ✅ **Toutes les routes DOIVENT commencer par `/api`** :
 
@@ -688,7 +751,7 @@ app.get('/api/health', healthCheck)
 - Convention universelle (Next.js, Express)
 - Règles CORS/auth plus simples
 
-### 3. Point d'Entrée index.ts
+### 4. Point d'Entrée index.ts
 
 ✅ **Convention Node.js standard** :
 
