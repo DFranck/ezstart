@@ -49,7 +49,13 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 
 **Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
 
-**Dernière mise à jour :** 6 Novembre 2025
+**Dernière mise à jour :** 7 Novembre 2025
+- 🏗️ **Architecture:** 95→98/100 (+3 points) 🎉 **Action-Based Routing MONOREPO-WIDE!**
+  - 28 fichiers routes refactorisés → 217+ fichiers actions
+  - Pattern unifié sur **6 APIs** (GreenPulse, EZBill, EZAuth, EZPay, Tower Defense, EZStart)
+  - 155+ routes migrées, 1 fichier = 1 action (CRUD isolé)
+  - Documentation complète: [ROUTING-PATTERN.md](apps/green-pulse/api/docs/ROUTING-PATTERN.md)
+  - Copié dans toutes les APIs pour cohérence
 - 📊 **Monitoring:** 80→100/100 (+20 points) 🎉 **PERFECT SCORE!**
   - Trending graphs (Recharts) avec 6h/12h/24h/48h/7d time ranges
   - Plausible Analytics (privacy-first, GDPR compliant)
@@ -62,7 +68,7 @@ Ce fichier contient les informations essentielles pour démarrer rapidement. Pou
 - 📱 **Mobile UX:** 85→93/100 (+8 points) - Toutes les phases terminées !
   - Design System complet + 17 composants
   - Safe-area support universel (iPhone notch)
-- 🎯 **11 audits ≥90/100** (65% excellence rate) 🚀
+- 🎯 **12 audits ≥90/100** (71% excellence rate) 🚀
 
 ---
 
