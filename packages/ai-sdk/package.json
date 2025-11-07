@@ -1,6 +1,7 @@
 {
   "name": "@ezstart/ai-sdk",
   "version": "1.0.0",
+  "type": "module",
   "description": "Reusable AI SDK for backend APIs with configurable providers, preprompts, and hooks",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
