@@ -93,17 +93,18 @@ interface ChartTooltipProps extends React.ComponentProps<typeof RechartsPrimitiv
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-const ChartTooltipContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<'div'> & {
-      hideLabel?: boolean
-      hideIndicator?: boolean
-      indicator?: 'line' | 'dot' | 'dashed'
-      nameKey?: string
-      labelKey?: string
-    }
->(
+type ChartTooltipContentProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  React.ComponentProps<'div'> & {
+    hideLabel?: boolean
+    hideIndicator?: boolean
+    indicator?: 'line' | 'dot' | 'dashed'
+    nameKey?: string
+    labelKey?: string
+  }
+
+const ChartTooltipContent: React.ForwardRefExoticComponent<
+  ChartTooltipContentProps & React.RefAttributes<HTMLDivElement>
+> = React.forwardRef<HTMLDivElement, ChartTooltipContentProps>(
   (
     {
       active,
