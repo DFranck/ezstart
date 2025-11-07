@@ -1,17 +1,21 @@
 import { z, type infer as ZodInfer } from 'zod';
 import { quoteStatusEnum } from '../enums/index.js';
 import {
-  baseBillingDocSchema,
+  baseBillingDocSchemaRaw,
+  addBillingTypeValidation,
   getBillingDocsQuerySchema,
   withBillingOutputFields,
 } from './billing-base.js';
 
-export const createQuoteSchema = baseBillingDocSchema.extend({
+// Extend raw schema first, then apply validation
+const createQuoteSchemaRaw = baseBillingDocSchemaRaw.extend({
   status: quoteStatusEnum.default('draft').describe('Quote status'),
   validUntil: z.string().optional().describe('Quote validity expiration date (ISO date string)'),
 });
-export const updateQuoteSchema = createQuoteSchema.partial();
-export const quoteSchema = withBillingOutputFields(createQuoteSchema);
+
+export const createQuoteSchema = addBillingTypeValidation(createQuoteSchemaRaw);
+export const updateQuoteSchema = createQuoteSchemaRaw.partial();
+export const quoteSchema = withBillingOutputFields(createQuoteSchemaRaw);
 export const getQuotesQuerySchema = getBillingDocsQuerySchema(quoteStatusEnum);
 
 // Schema for converting quote to invoice

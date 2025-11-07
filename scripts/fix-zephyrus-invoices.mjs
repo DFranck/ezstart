@@ -9,10 +9,12 @@ const CLIENT_ID = '6909e7b013f65ab63afea60c'
 const USER_ID = '68fe026cf237788372bece7b'
 
 // Correct invoice data from timesheet - using API schema (label, price, quantity, currency)
+// createdAt = End date of work period, dueDate = +30 days
 const INVOICES = [
   {
-    status: 'paid',
-    dueDate: '2025-04-06',
+    status: 'sent',
+    createdAt: '2025-03-07', // End of work period
+    dueDate: '2025-04-06',   // +30 days
     currency: 'USD',
     items: [{
       label: 'Development work - Feb 25 to Mar 07, 2025 (45 hours @ $17/hour)',
@@ -22,7 +24,8 @@ const INVOICES = [
     notes: 'Period: February 25 - March 07, 2025\nTotal: $765.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-03-21',
     dueDate: '2025-04-20',
     currency: 'USD',
     items: [{
@@ -33,7 +36,8 @@ const INVOICES = [
     notes: 'Period: March 10 - March 21, 2025\nTotal: $731.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-04-01',
     dueDate: '2025-05-01',
     currency: 'USD',
     items: [{
@@ -44,7 +48,8 @@ const INVOICES = [
     notes: 'Period: March 24 - April 01, 2025\nTotal: $680.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-04-18',
     dueDate: '2025-05-18',
     currency: 'USD',
     items: [{
@@ -55,7 +60,8 @@ const INVOICES = [
     notes: 'Period: April 11 - April 18, 2025\nTotal: $663.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-04-25',
     dueDate: '2025-05-25',
     currency: 'USD',
     items: [{
@@ -66,7 +72,8 @@ const INVOICES = [
     notes: 'Period: April 21 - April 25, 2025\nTotal: $578.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-06-27',
     dueDate: '2025-07-27',
     currency: 'USD',
     items: [{
@@ -77,7 +84,8 @@ const INVOICES = [
     notes: 'Period: June 17 - June 27, 2025\nTotal: $527.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-07-11',
     dueDate: '2025-08-10',
     currency: 'USD',
     items: [{
@@ -88,7 +96,8 @@ const INVOICES = [
     notes: 'Period: June 30 - July 11, 2025\nTotal: $969.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-07-25',
     dueDate: '2025-08-24',
     currency: 'USD',
     items: [{
@@ -99,7 +108,8 @@ const INVOICES = [
     notes: 'Period: July 14 - July 25, 2025\nTotal: $782.00'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-08-08',
     dueDate: '2025-09-07',
     currency: 'USD',
     items: [{
@@ -110,7 +120,8 @@ const INVOICES = [
     notes: 'Period: July 29 - August 08, 2025\nTotal: $416.50'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-08-22',
     dueDate: '2025-09-21',
     currency: 'USD',
     items: [{
@@ -121,7 +132,8 @@ const INVOICES = [
     notes: 'Period: August 12 - August 22, 2025\nTotal: $535.50'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-09-08',
     dueDate: '2025-10-08',
     currency: 'USD',
     items: [{
@@ -132,7 +144,8 @@ const INVOICES = [
     notes: 'Period: August 25 - September 08, 2025\nTotal: $246.50'
   },
   {
-    status: 'paid',
+    status: 'sent',
+    createdAt: '2025-09-29',
     dueDate: '2025-10-29',
     currency: 'USD',
     items: [{

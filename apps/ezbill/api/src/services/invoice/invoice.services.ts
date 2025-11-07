@@ -5,7 +5,7 @@ import {
   UpdateInvoice,
 } from '@ezbill/types';
 import { getInvoiceModel } from '../../models/billing/invoice.js';
-import { calculateTotals } from '../../utils/calculate-totals.js';
+import { calculateBillingTotals } from '../../utils/calculate-totals.js';
 import { generateNextNumber } from '../../utils/generate-next-number.js';
 import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
@@ -28,7 +28,12 @@ export async function createInvoiceService(
     };
   }
 
-  const totals = calculateTotals(data.items, data.taxRate ?? 0);
+  const billingType = data.billingType || 'itemized';
+  const totals = calculateBillingTotals(billingType, data.taxRate ?? 0, {
+    items: data.items,
+    flatRateAmount: data.flatRateAmount,
+  });
+
   const documentNumber = await generateNextNumber('invoice', data.userId);
   const doc = new InvoiceModel({
     ...data,
@@ -86,16 +91,24 @@ export async function updateInvoiceService(
   data: UpdateInvoice
 ): Promise<Invoice | null> {
   const InvoiceModel = await getInvoiceModel();
-  // Only recalculate totals if items or taxRate are being updated
-  const shouldRecalculateTotals = data.items !== undefined || data.taxRate !== undefined;
+  // Only recalculate totals if relevant fields are being updated
+  const shouldRecalculateTotals =
+    data.items !== undefined ||
+    data.taxRate !== undefined ||
+    data.billingType !== undefined ||
+    data.flatRateAmount !== undefined;
 
   let updateData = { ...data };
   if (shouldRecalculateTotals) {
     const existingInvoice = await InvoiceModel.findById(id);
     if (existingInvoice) {
-      const items = data.items ?? existingInvoice.items ?? [];
+      const billingType = data.billingType ?? existingInvoice.billingType ?? 'itemized';
       const taxRate = data.taxRate ?? existingInvoice.taxRate ?? 0;
-      const totals = calculateTotals(items, taxRate);
+
+      const totals = calculateBillingTotals(billingType, taxRate, {
+        items: data.items ?? existingInvoice.items,
+        flatRateAmount: data.flatRateAmount ?? existingInvoice.flatRateAmount,
+      });
       updateData = { ...updateData, ...totals };
     }
   }

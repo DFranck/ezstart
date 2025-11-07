@@ -31,7 +31,12 @@ export const exchangeRateSchema = z.object({
   fetchedAt: z.string(),
 });
 
-export const baseBillingDocSchema = z.object({
+// Enum for billing type
+export const billingTypeEnum = z.enum(['itemized', 'flat-rate']).describe('Type of billing: itemized (line items) or flat-rate (single description + price)');
+export type BillingType = z.infer<typeof billingTypeEnum>;
+
+// Base schema WITHOUT validation - used for extending
+export const baseBillingDocSchemaRaw = z.object({
   userId: z
     .string()
     .min(1, 'User ID is required')
@@ -44,7 +49,10 @@ export const baseBillingDocSchema = z.object({
     .string()
     .optional()
     .describe('Optional company identifier - bill on behalf of this company'),
-  items: z.array(baseLineItemSchema).min(1).describe('List of billing line items'),
+  billingType: billingTypeEnum.default('itemized').describe('Billing type: itemized or flat-rate'),
+  items: z.array(baseLineItemSchema).optional().describe('List of billing line items (required for itemized type)'),
+  description: z.string().optional().describe('Flat-rate description (required for flat-rate type)'),
+  flatRateAmount: z.number().min(0).optional().describe('Flat-rate amount (required for flat-rate type)'),
   currency: currencyEnum.describe('Currency used for billing'),
   dueDate: z.string().optional().describe('Due date for payment (ISO date string)'),
   notes: z.string().optional().describe('Additional notes for the billing document'),
@@ -53,6 +61,43 @@ export const baseBillingDocSchema = z.object({
   paymentMethodId: z.string().optional().describe('DEPRECATED: Use paymentMethodIds instead'),
   paymentMethodIds: z.array(z.string()).optional().describe('Payment method identifiers to display on invoice'),
 });
+
+// Validation function to be applied after extending
+export function addBillingTypeValidation<T extends typeof baseBillingDocSchemaRaw>(schema: T) {
+  return schema.superRefine((data, ctx) => {
+    // Validate itemized type
+    if (data.billingType === 'itemized') {
+      if (!data.items || data.items.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Items are required for itemized billing type',
+          path: ['items'],
+        });
+      }
+    }
+
+    // Validate flat-rate type
+    if (data.billingType === 'flat-rate') {
+      if (!data.description || data.description.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Description is required for flat-rate billing type',
+          path: ['description'],
+        });
+      }
+      if (data.flatRateAmount === undefined || data.flatRateAmount === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Flat-rate amount is required for flat-rate billing type',
+          path: ['flatRateAmount'],
+        });
+      }
+    }
+  });
+}
+
+// Base schema WITH validation - for direct use
+export const baseBillingDocSchema = addBillingTypeValidation(baseBillingDocSchemaRaw);
 export type BaseBillingDoc = ZodInfer<typeof baseBillingDocSchema>;
 
 export function withBillingOutputFields<T extends ZodRawShape>(

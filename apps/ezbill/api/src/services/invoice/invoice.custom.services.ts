@@ -48,10 +48,11 @@ export async function markInvoiceAsPaidService(
     return { invoice: toApiObject<Invoice>(invoice) };
   }
 
-  // Update invoice status to paid
+  // Update invoice status to paid and set paidAt date
+  const paidAtDate = options?.paymentDate ? new Date(options.paymentDate).toISOString() : new Date().toISOString();
   const updatedInvoice = await InvoiceModel.findByIdAndUpdate(
     id,
-    { status: 'paid' },
+    { status: 'paid', paidAt: paidAtDate },
     { new: true }
   );
 

@@ -1,5 +1,8 @@
-import { BaseLineItem } from '@ezbill/types';
+import { BaseLineItem, BillingType } from '@ezbill/types';
 
+/**
+ * Calculate totals for itemized billing (line items)
+ */
 export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
   console.log('🔍 calculateTotals called with:');
   console.log('  items:', JSON.stringify(items, null, 2));
@@ -67,4 +70,49 @@ export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
   }
 
   return result;
+}
+
+/**
+ * Calculate totals for flat-rate billing
+ */
+export function calculateFlatRateTotals(flatRateAmount: number, taxRate = 0) {
+  console.log('🔍 calculateFlatRateTotals called with:');
+  console.log('  flatRateAmount:', flatRateAmount);
+  console.log('  taxRate:', taxRate);
+
+  // Validate inputs
+  const validAmount = typeof flatRateAmount === 'number' && !isNaN(flatRateAmount) ? flatRateAmount : 0;
+  const validTaxRate = typeof taxRate === 'number' && !isNaN(taxRate) ? taxRate : 0;
+
+  const subtotal = validAmount;
+  const taxAmount = subtotal * (validTaxRate / 100);
+  const total = subtotal + taxAmount;
+
+  const result = {
+    subtotal: Math.round(subtotal * 100) / 100,
+    taxAmount: Math.round(taxAmount * 100) / 100,
+    total: Math.round(total * 100) / 100,
+  };
+
+  console.log('🔍 calculateFlatRateTotals result:', result);
+
+  return result;
+}
+
+/**
+ * Unified function that handles both billing types
+ */
+export function calculateBillingTotals(
+  billingType: BillingType,
+  taxRate = 0,
+  options: {
+    items?: BaseLineItem[];
+    flatRateAmount?: number;
+  }
+) {
+  if (billingType === 'flat-rate') {
+    return calculateFlatRateTotals(options.flatRateAmount || 0, taxRate);
+  } else {
+    return calculateTotals(options.items || [], taxRate);
+  }
 }

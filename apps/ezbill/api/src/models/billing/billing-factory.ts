@@ -12,7 +12,10 @@ export function createBillingDocSchema(
       userId: { type: String, required: true },
       clientId: { type: String, required: true },
       companyId: { type: String, required: false }, // Optional: facturer au nom d'une company
-      items: { type: [baseLineItemSchema], required: true },
+      billingType: { type: String, enum: ['itemized', 'flat-rate'], default: 'itemized' },
+      items: { type: [baseLineItemSchema], required: false }, // Optional: required only for itemized type
+      description: { type: String, required: false }, // Optional: required only for flat-rate type
+      flatRateAmount: { type: Number, min: 0, required: false }, // Optional: required only for flat-rate type
       currency: { type: String, enum: currencyEnum.options, default: 'USD' },
       exchangeRate: {
         type: {

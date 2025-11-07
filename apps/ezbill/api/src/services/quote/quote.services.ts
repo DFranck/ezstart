@@ -7,7 +7,7 @@ import {
   UpdateQuote,
 } from '@ezbill/types';
 import { getQuoteModel } from '../../models/billing/quote.js';
-import { calculateTotals } from '../../utils/calculate-totals.js';
+import { calculateBillingTotals } from '../../utils/calculate-totals.js';
 import { generateNextNumber } from '../../utils/generate-next-number.js';
 import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
@@ -30,10 +30,16 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
     };
   }
 
-  console.log('🔍 About to calculate totals with items:', JSON.stringify(data.items, null, 2));
+  const billingType = data.billingType || 'itemized';
+  console.log('🔍 Billing type:', billingType);
+  console.log('🔍 Items:', JSON.stringify(data.items, null, 2));
+  console.log('🔍 Flat rate amount:', data.flatRateAmount);
   console.log('🔍 Tax rate:', data.taxRate);
 
-  const totals = calculateTotals(data.items, data.taxRate ?? 0);
+  const totals = calculateBillingTotals(billingType, data.taxRate ?? 0, {
+    items: data.items,
+    flatRateAmount: data.flatRateAmount,
+  });
   console.log('🔍 Calculated totals:', totals);
 
   const documentNumber = await generateNextNumber('quote', data.userId);
@@ -105,19 +111,19 @@ export async function updateQuoteService(
   data: UpdateQuote
 ): Promise<Quote | null> {
   const QuoteModel = await getQuoteModel();
-  // If items or taxRate are not provided, get existing values
-  let itemsToCalculate = data.items;
-  let taxRateToUse = data.taxRate;
 
-  if (!itemsToCalculate || taxRateToUse === undefined) {
-    const existingDoc = await QuoteModel.findById(id);
-    if (!existingDoc) return null;
+  // Get existing quote to merge values
+  const existingDoc = await QuoteModel.findById(id);
+  if (!existingDoc) return null;
 
-    itemsToCalculate = data.items ?? existingDoc.items;
-    taxRateToUse = data.taxRate ?? existingDoc.taxRate ?? 0;
-  }
+  const billingType = data.billingType ?? existingDoc.billingType ?? 'itemized';
+  const taxRate = data.taxRate ?? existingDoc.taxRate ?? 0;
 
-  const totals = calculateTotals(itemsToCalculate, taxRateToUse);
+  const totals = calculateBillingTotals(billingType, taxRate, {
+    items: data.items ?? existingDoc.items,
+    flatRateAmount: data.flatRateAmount ?? existingDoc.flatRateAmount,
+  });
+
   const doc = await QuoteModel.findByIdAndUpdate(
     id,
     { ...data, ...totals },

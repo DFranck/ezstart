@@ -190,9 +190,19 @@ export function AuthProvider({
           if (user) {
             store.updateUser(user)
           }
-        } catch (error) {
-          // Cookie expired or invalid
-          store.logout()
+        } catch (error: any) {
+          // Only logout on 401 (unauthorized) - not on network/server errors
+          const isAuthFailure = error?.message?.includes('401') ||
+                               error?.status === 401 ||
+                               error?.message?.toLowerCase().includes('unauthorized')
+
+          if (isAuthFailure) {
+            console.log('🔒 [AuthSDK] Session expired, logging out')
+            store.logout()
+          } else {
+            // Transient error (network, server down, etc.) - keep session
+            console.warn('⚠️ [AuthSDK] Token verification failed (non-auth error), retrying later:', error)
+          }
         }
       }
     }
@@ -275,9 +285,12 @@ export function useAuth() {
         const user = await client.getCurrentUser(store.accessToken)
         store.updateUser(user)
         return user
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to refresh user:', error)
-        store.logout()
+        // Only logout on 401 - keep session on transient errors
+        if (error?.status === 401) {
+          store.logout()
+        }
         throw error
       }
     } else if (mode === 'httpOnly') {
@@ -285,9 +298,12 @@ export function useAuth() {
         const user = await client.getCurrentUser()
         store.updateUser(user)
         return user
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to refresh user:', error)
-        store.logout()
+        // Only logout on 401 - keep session on transient errors
+        if (error?.status === 401) {
+          store.logout()
+        }
         throw error
       }
     }
