@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Centralized monitoring, auditing, and health check system for @ezstart monorepo",
-  "main": "dist/server.js",
-  "types": "dist/server.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./client": {
       "types": "./dist/client/index.d.ts",

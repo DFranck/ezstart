@@ -1,16 +1,11 @@
 /**
- * @ezstart/monitoring
+ * @ezstart/monitoring - Server-side exports
  *
- * Centralized monitoring, auditing, and observability system for @ezstart monorepo
+ * This entry point provides server-only monitoring utilities.
+ * Use this in APIs and backend services.
  *
- * This package provides:
- * - Type-safe monitoring types
- * - Health check utilities
- * - Audit tracking
- * - Deployment monitoring
- * - Database health checks
- * - Git/commit tracking
- * - Metrics and dashboard data
+ * For client-side monitoring (React components/hooks), use:
+ * import { ... } from '@ezstart/monitoring/client'
  *
  * @example
  * ```typescript
@@ -37,6 +32,5 @@ export * from './utils/index.js'
 // Collectors
 export * from './collectors/index.js'
 
-// Client-side monitoring (React components and hooks)
-// Note: Only use these exports in Next.js apps with 'use client' directive
-export * from './client/index.js'
+// NOTE: Client exports (PlausibleAnalytics, usePerformance) are available at:
+// import { ... } from '@ezstart/monitoring/client'

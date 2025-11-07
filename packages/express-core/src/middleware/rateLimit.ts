@@ -69,6 +69,9 @@ export function createRateLimiter(options: RateLimitOptions = {}): RateLimitRequ
     },
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers
+    // Trust proxy is enabled in createApp() for Railway/Vercel deployment
+    // We trust X-Forwarded-For header from our reverse proxies
+    validate: { trustProxy: false },
     skip: (req) => {
       // Skip rate limiting for health checks
       return skipPaths.some(path => req.path === path)
