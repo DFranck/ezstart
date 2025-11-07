@@ -8,7 +8,7 @@ import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-c
 import type { Request, Response } from 'express'
 
 export const registry = new OpenAPIRegistry()
-export const router = Router()
+export const router: ReturnType<typeof Router> = Router()
 const docRouter = createRouterWithDoc(registry, router)
 
 const getDashboardMetricsHandler = async (_: Request, res: Response) => {

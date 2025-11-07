@@ -13,7 +13,7 @@ import { Router } from '@ezstart/express-core'
 import { getPerformanceMetricModel, type IPerformanceMetric } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
 
-export const router = Router()
+export const router: ReturnType<typeof Router> = Router()
 
 const getByServiceHandler = async (req: Request, res: Response) => {
   try {

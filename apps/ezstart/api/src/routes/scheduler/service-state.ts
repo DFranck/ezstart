@@ -8,7 +8,7 @@ import { Router } from '@ezstart/express-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
 import type { Request, Response } from 'express'
 
-export const router = Router()
+export const router: ReturnType<typeof Router> = Router()
 
 let scheduler: HealthCheckScheduler | null = null
 

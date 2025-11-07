@@ -8,7 +8,7 @@ import { Router } from '@ezstart/express-core'
 import { ProjectHealthChecker } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 
-export const router = Router()
+export const router: ReturnType<typeof Router> = Router()
 
 const projectHealthChecker = new ProjectHealthChecker()
 
