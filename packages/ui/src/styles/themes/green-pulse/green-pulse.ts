@@ -18,6 +18,7 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
   /* Generic gradient (green to blue) */
   --gp-gradient-from: oklch(0.6 0.18 145); /* green-600 */
+  --gp-gradient-via: oklch(0.65 0.17 160); /* emerald-600 */
   --gp-gradient-to: oklch(0.6 0.15 240); /* blue-600 */
 }
 
@@ -32,6 +33,7 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
   /* Generic gradient (dark mode) */
   --gp-gradient-from: oklch(0.35 0.08 145); /* green-900 */
+  --gp-gradient-via: oklch(0.3 0.06 160); /* emerald-900 */
   --gp-gradient-to: oklch(0.35 0.08 240); /* blue-900 */
 }
 
@@ -45,7 +47,12 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 @layer utilities {
   /* GreenPulse Generic Gradient */
   .bg-gp-gradient {
-    background: linear-gradient(to right, var(--gp-gradient-from), var(--gp-gradient-to));
+    background: linear-gradient(
+      to right,
+      var(--gp-gradient-from),
+      var(--gp-gradient-via),
+      var(--gp-gradient-to)
+    );
   }
 }
 `
