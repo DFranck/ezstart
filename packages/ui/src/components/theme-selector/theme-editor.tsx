@@ -397,7 +397,7 @@ export function ThemeEditor({
               <Button variant="outline" size="sm" disabled={editor.isSaving}>
                 <Icon name="lucide:RotateCcw" size={16} />
                 <span className="ml-2">Reset</span>
-                <Icon name="lucide:ChevronDown" size={14} className="ml-1" />
+                <Icon name="lucide:ChevronUp" size={14} className="ml-1" />
               </Button>
             }
             items={[
@@ -425,6 +425,7 @@ export function ThemeEditor({
               },
             ]}
             align="start"
+            side="top"
           />
 
           <div className="flex-1" />
