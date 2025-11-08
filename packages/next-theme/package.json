@@ -15,6 +15,11 @@
       "import": "./dist/components/index.js",
       "require": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts"
     }
   },
   "scripts": {

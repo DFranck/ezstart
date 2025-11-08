@@ -4,6 +4,7 @@ import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
+import { ThemeStyleInjector } from '@ezstart/next-theme/server'
 import { getMessages } from 'next-intl/server'
 import { Gugi, K2D } from 'next/font/google'
 import Script from 'next/script'
@@ -57,6 +58,9 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
 
   return (
     <html lang={locale} suppressHydrationWarning className={`${gugi.variable} ${k2d.variable}`}>
+      <head>
+        <ThemeStyleInjector appName="green-pulse" />
+      </head>
       <body>
         <Script
           id="json-ld"
