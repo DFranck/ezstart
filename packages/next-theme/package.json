@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/config": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "next-themes": "^0.4.6"
   },

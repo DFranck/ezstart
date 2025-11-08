@@ -1,5 +1,6 @@
 'use client'
 
+import { getApiUrl } from '@ezstart/config/urls'
 import { ThemeSelector as UIThemeSelector } from '@ezstart/ui/components'
 import { useTheme } from 'next-themes'
 import { useThemeSelectorContext } from '../theme-selector-context'
@@ -32,6 +33,10 @@ export function ThemeSelector({
   const { theme, resolvedTheme } = useTheme()
   const actualTheme = resolvedTheme || theme
 
+  // Build full API URL for theme endpoint
+  const apiUrl = getApiUrl(appName as any)
+  const apiEndpoint = `${apiUrl}/api/theme`
+
   return (
     <UIThemeSelector
       themeSwitcher={<ThemeSwitcher />}
@@ -39,6 +44,7 @@ export function ThemeSelector({
       appCss={appCss}
       appName={appName}
       currentTheme={actualTheme === 'dark' ? 'dark' : 'light'}
+      apiEndpoint={apiEndpoint}
       adminOnly={adminOnly}
       enableHistory={enableHistory}
       showPresets={showPresets}
