@@ -176,6 +176,15 @@ export function FloatingPanel({
 
   if (!open) return null
 
+  // Separate footer from other children
+  const childrenArray = React.Children.toArray(children)
+  const footer = childrenArray.find(
+    child => React.isValidElement(child) && child.type === FloatingPanelFooter
+  )
+  const contentChildren = childrenArray.filter(
+    child => React.isValidElement(child) && child.type !== FloatingPanelFooter
+  )
+
   return (
     <div
       ref={panelRef}
@@ -230,12 +239,15 @@ export function FloatingPanel({
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content - scrollable */}
       {!isMinimized && (
         <div className="flex-1 overflow-auto p-4" onClick={e => e.stopPropagation()}>
-          {children}
+          {contentChildren}
         </div>
       )}
+
+      {/* Footer - sticky at bottom */}
+      {!isMinimized && footer}
     </div>
   )
 }
@@ -283,7 +295,13 @@ export function FloatingPanelFooter({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex items-center justify-end gap-2 pt-3', className)} {...props}>
+    <div
+      className={cn(
+        'flex items-center justify-end gap-2 px-4 py-3 border-t border-border bg-card mt-auto',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   )

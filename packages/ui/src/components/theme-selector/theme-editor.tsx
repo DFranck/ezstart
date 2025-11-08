@@ -389,7 +389,7 @@ export function ThemeEditor({
         </div>
 
         {/* Footer with actions */}
-        <FloatingPanelFooter className="border-t border-border pt-4 mt-6">
+        <FloatingPanelFooter>
           <Button onClick={handleReset} variant="outline" size="sm">
             <Icon name="lucide:RotateCcw" size={16} />
             <span className="ml-2">Reset All</span>
