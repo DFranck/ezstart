@@ -81,11 +81,18 @@ export const themeConfigSchema = z.object({
 })
 
 /**
+ * CSS variable name with optional theme prefix (light: or dark:)
+ */
+export const cssVariableNameWithPrefixSchema = z
+  .string()
+  .regex(/^(light:|dark:)?--[a-z0-9-]+$/, 'CSS variable must be --name or light:--name or dark:--name')
+
+/**
  * Theme overrides (saved in DB)
  */
 export const themeOverridesSchema = z.object({
   appName: z.string().min(1),
-  overrides: z.record(cssVariableNameSchema, z.string()),
+  overrides: z.record(cssVariableNameWithPrefixSchema, z.string()),
   updatedAt: z.string().datetime(),
   updatedBy: z.string().optional(),
 })
@@ -103,7 +110,7 @@ export const themeApiResponseSchema = z.object({
  * API request for PUT /theme
  */
 export const themeApiRequestSchema = z.object({
-  overrides: z.record(cssVariableNameSchema, z.string()),
+  overrides: z.record(cssVariableNameWithPrefixSchema, z.string()),
 })
 
 // Type exports
