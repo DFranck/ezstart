@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { runWithFeedback } from '../../utils'
 import { Button } from '../button'
 import { Checkbox } from '../checkbox'
+import { Dropdown } from '../dropdown'
 import { FloatingPanel, FloatingPanelFooter } from '../floating-panel'
 import { Icon } from '../icon'
 import { Spinner } from '../spinner'
@@ -41,20 +42,14 @@ export function ThemeEditor({
   const globalTheme = useMemo(() => {
     const variables =
       currentTheme === 'dark' ? extractDarkVariables(globalCss) : extractRootVariables(globalCss)
-    console.log(
-      `[ThemeSelector] Parsed ${variables.length} global variables (${currentTheme} mode)`,
-      variables.slice(0, 3)
-    )
+
     return variablesToThemeConfig(variables, 'global')
   }, [globalCss, currentTheme])
 
   // Parse app-specific CSS variables
   const appTheme = useMemo(() => {
     const variables = extractRootVariables(appCss)
-    console.log(
-      `[ThemeSelector] Parsed ${variables.length} app variables for ${appName}`,
-      variables.slice(0, 3)
-    )
+
     return variablesToThemeConfig(variables, appName)
   }, [appCss, appName])
 
@@ -116,12 +111,6 @@ export function ThemeEditor({
       ...localThemeChanges,
     }
 
-    console.log(
-      `[ThemeSelector] currentTheme: ${currentTheme}, merged values:`,
-      Object.entries(merged).slice(0, 3)
-    )
-    console.log(`[ThemeSelector] All overrides:`, overrides)
-    console.log(`[ThemeSelector] Local changes:`, editor.localChanges)
     return merged
   }, [variables, overrides, editor.localChanges, currentTheme])
 
@@ -140,9 +129,25 @@ export function ThemeEditor({
     })
   }, [editor, apiEndpoint, defaultTheme])
 
-  const handleReset = useCallback(() => {
-    // Reset All: Clear all customizations (falls back to CSS defaults)
-    // We DON'T respect auto-invert checkbox here - reset means "back to original"
+  const handleResetToDefaults = useCallback(async () => {
+    // Reset to CSS Defaults: Delete all DB overrides (permanent)
+    await runWithFeedback({
+      action: async () => {
+        await editor.resetToDefaults(apiEndpoint)
+        await reloadTheme()
+        setIsOpen(false)
+      },
+      toastLoading: { message: 'Resetting to defaults...' },
+      toastSuccess: { message: 'Theme reset to CSS defaults!' },
+      toastError: { message: 'Failed to reset theme' },
+      onError: error => {
+        console.error('Failed to reset theme:', error)
+      },
+    })
+  }, [editor, apiEndpoint, reloadTheme])
+
+  const handleDiscardChanges = useCallback(() => {
+    // Discard Changes: Clear unsaved local edits only
     editor.resetLocalChanges()
   }, [editor])
 
@@ -253,7 +258,7 @@ export function ThemeEditor({
             </div>
           </>
         }
-        size="xl"
+        size="md"
         closable
         minimizable
         maximizable
@@ -387,19 +392,47 @@ export function ThemeEditor({
 
         {/* Footer with actions */}
         <FloatingPanelFooter>
-          <Button onClick={handleReset} variant="outline" size="sm">
-            <Icon name="lucide:RotateCcw" size={16} />
-            <span className="ml-2">Reset All</span>
-          </Button>
+          <Dropdown
+            trigger={
+              <Button variant="outline" size="sm" disabled={editor.isSaving}>
+                <Icon name="lucide:RotateCcw" size={16} />
+                <span className="ml-2">Reset</span>
+                <Icon name="lucide:ChevronDown" size={14} className="ml-1" />
+              </Button>
+            }
+            items={[
+              {
+                label: (
+                  <span className="flex items-center gap-2">
+                    <Icon name="lucide:RotateCcw" size={16} />
+                    Reset to Defaults
+                  </span>
+                ),
+                value: 'reset-defaults',
+                onSelect: handleResetToDefaults,
+                disabled: !isCustomized,
+              },
+              {
+                label: (
+                  <span className="flex items-center gap-2">
+                    <Icon name="lucide:X" size={16} />
+                    Discard Changes
+                  </span>
+                ),
+                value: 'discard-changes',
+                onSelect: handleDiscardChanges,
+                disabled: !hasLocalChanges,
+              },
+            ]}
+            align="start"
+          />
 
           <div className="flex-1" />
 
-          <Button onClick={handleClose} variant="ghost">
-            Cancel
-          </Button>
           <Button
             onClick={handleSave}
             variant="default"
+            size="sm"
             disabled={editor.isSaving || !hasLocalChanges}
           >
             {editor.isSaving && (

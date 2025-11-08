@@ -96,7 +96,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
       LinkComponent={Link}
     >
       {children}
-      <VersionSwitch v1Label="Current" v2Label="New Design" position="bottom-left" />
+      <VersionSwitch v1Label="V1" v2Label="V2" position="bottom-left" />
     </ClientLayout>
   )
 }

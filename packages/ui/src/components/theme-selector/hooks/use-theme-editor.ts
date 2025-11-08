@@ -1,9 +1,8 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import type { ThemeHistoryEntry, UseThemeEditorOptions } from '../types'
+import type { ThemeConfig, ThemeHistoryEntry, UseThemeEditorOptions } from '../types'
 import { applyThemeVariables, getThemeDiff, sanitizeColorValues } from '../utils'
-import type { ThemeConfig } from '../types'
 
 export interface UseThemeEditorReturn {
   /** Local changes (not yet saved) */
@@ -18,8 +17,11 @@ export interface UseThemeEditorReturn {
   /** Save changes to API */
   saveChanges: (apiEndpoint: string, defaultTheme: ThemeConfig) => Promise<void>
 
-  /** Reset all local changes */
+  /** Reset all local changes (unsaved edits only) */
   resetLocalChanges: () => void
+
+  /** Reset to CSS defaults (delete all DB overrides) */
+  resetToDefaults: (apiEndpoint: string) => Promise<void>
 
   /** Saving state */
   isSaving: boolean
@@ -196,7 +198,7 @@ export function useThemeEditor(
   )
 
   /**
-   * Reset all local changes
+   * Reset all local changes (unsaved edits)
    */
   const resetLocalChanges = useCallback(() => {
     setLocalChanges({})
@@ -211,6 +213,51 @@ export function useThemeEditor(
     ])
     setHistoryIndex(0)
   }, [])
+
+  /**
+   * Reset to CSS defaults (delete all overrides from DB)
+   */
+  const resetToDefaults = useCallback(
+    async (apiEndpoint: string) => {
+      setIsSaving(true)
+      setSaveError(null)
+
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to reset theme: ${response.statusText}`)
+        }
+
+        const data = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to reset theme')
+        }
+
+        // Clear local changes too
+        setLocalChanges({})
+        setSaveError(null)
+
+        // Success!
+        onSave?.({})
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Unknown error')
+        setSaveError(error)
+        onError?.(error)
+        throw error
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [onSave, onError]
+  )
 
   /**
    * Undo last change
@@ -250,6 +297,7 @@ export function useThemeEditor(
     updateVariables,
     saveChanges,
     resetLocalChanges,
+    resetToDefaults,
     isSaving,
     saveError,
     history,

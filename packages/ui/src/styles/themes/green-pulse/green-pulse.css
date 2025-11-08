@@ -81,7 +81,7 @@
   /* GreenPulse Gradient Classes */
 
   /* Hero/Section backgrounds */
-  .bg-gradient-hero {
+  .bg-gp-gradient-hero {
     background: linear-gradient(
       to bottom right,
       var(--green-pulse-gradient-hero-from),
@@ -91,7 +91,7 @@
   }
 
   /* Text gradient (with via point) */
-  .bg-gradient-text {
+  .bg-gp-gradient-text {
     background: linear-gradient(
       to right,
       var(--green-pulse-gradient-text-from),
@@ -101,7 +101,7 @@
   }
 
   /* Button/Cursor gradient */
-  .bg-gradient-button {
+  .bg-gp-gradient-button {
     background: linear-gradient(
       to right,
       var(--green-pulse-gradient-button-from),
@@ -110,7 +110,7 @@
   }
 
   /* Button hover gradient */
-  .hover\:bg-gradient-button-hover:hover {
+  .hover\:bg-gp-gradient-button-hover:hover {
     background: linear-gradient(
       to right,
       var(--green-pulse-gradient-button-hover-from),
@@ -119,7 +119,7 @@
   }
 
   /* Premium card gradient */
-  .bg-gradient-premium {
+  .bg-gp-gradient-premium {
     background: linear-gradient(
       to bottom,
       var(--green-pulse-gradient-premium-from),
@@ -128,7 +128,7 @@
   }
 
   /* Golden card gradient */
-  .bg-gradient-golden {
+  .bg-gp-gradient-golden {
     background: linear-gradient(
       to bottom,
       var(--green-pulse-gradient-golden-from),
@@ -137,7 +137,7 @@
   }
 
   /* CTA section gradient */
-  .bg-gradient-cta {
+  .bg-gp-gradient-cta {
     background: linear-gradient(
       to right,
       var(--green-pulse-gradient-cta-from),

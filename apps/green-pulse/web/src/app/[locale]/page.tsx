@@ -70,7 +70,7 @@ export default function HomePage(): any {
   return (
     <>
       {/* Hero Section */}
-      <Section size={'full'} className="text-center bg-gradient-hero">
+      <Section size={'full'} className="text-center bg-gp-gradient-hero">
         {' '}
         <Div layout={'row'}>
           <Image
@@ -120,7 +120,7 @@ export default function HomePage(): any {
             />
             <Button
               type="submit"
-              className="bg-gradient-button hover:bg-gradient-button-hover text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+              className="bg-gp-gradient-button hover:bg-gp-gradient-button-hover text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
             >
               {t('hero.notifyMe')}
             </Button>
@@ -167,7 +167,7 @@ export default function HomePage(): any {
       </Section>
 
       {/* Example Interaction Section */}
-      <Section size={'xl'} className="max-w-full bg-gradient-hero">
+      <Section size={'xl'} className="max-w-full bg-gp-gradient-hero">
         <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
         <Card variant={'ghost'} className="p-0 space-y-6">
           <div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
@@ -224,7 +224,7 @@ export default function HomePage(): any {
             </Card>
 
             {/* Premium Package */}
-            <Card className="p-8 border-2 border-primary/30 bg-gradient-premium relative">
+            <Card className="p-8 border-2 border-primary/30 bg-gp-gradient-premium relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
                   {t('packages.premium.badge')}
@@ -262,7 +262,7 @@ export default function HomePage(): any {
             </Card>
 
             {/* Golden Package */}
-            <Card className="p-8 border-2 border-amber-300 bg-gradient-golden">
+            <Card className="p-8 border-2 border-amber-300 bg-gp-gradient-golden">
               <div className="text-center mb-6">
                 <Icon name="lucide:Award" className="w-12 h-12 text-amber-500 mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
@@ -298,7 +298,7 @@ export default function HomePage(): any {
       </Section>
 
       {/* Bottom CTA Section */}
-      <Section size={'xl'} className="max-w-full bg-gradient-cta">
+      <Section size={'xl'} className="max-w-full bg-gp-gradient-cta">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
             {' '}
