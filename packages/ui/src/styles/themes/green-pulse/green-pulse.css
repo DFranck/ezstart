@@ -15,6 +15,7 @@
 
   /* Gradient variables - Hero/Section backgrounds (light mode) */
   --green-pulse-gradient-hero-from: oklch(0.97 0.02 145); /* green-50 */
+  --green-pulse-gradient-hero-via: oklch(0.6 0.15 240); /* blue-600 */
   --green-pulse-gradient-hero-to: oklch(0.97 0.02 240); /* blue-50 */
 
   /* Gradient variables - Text */
@@ -81,36 +82,66 @@
 
   /* Hero/Section backgrounds */
   .bg-gradient-hero {
-    background: linear-gradient(to bottom right, var(--green-pulse-gradient-hero-from), var(--green-pulse-gradient-hero-to));
+    background: linear-gradient(
+      to bottom right,
+      var(--green-pulse-gradient-hero-from),
+      var(--green-pulse-gradient-hero-via),
+      var(--green-pulse-gradient-hero-to)
+    );
   }
 
   /* Text gradient (with via point) */
   .bg-gradient-text {
-    background: linear-gradient(to right, var(--green-pulse-gradient-text-from), var(--green-pulse-gradient-text-via), var(--green-pulse-gradient-text-to));
+    background: linear-gradient(
+      to right,
+      var(--green-pulse-gradient-text-from),
+      var(--green-pulse-gradient-text-via),
+      var(--green-pulse-gradient-text-to)
+    );
   }
 
   /* Button/Cursor gradient */
   .bg-gradient-button {
-    background: linear-gradient(to right, var(--green-pulse-gradient-button-from), var(--green-pulse-gradient-button-to));
+    background: linear-gradient(
+      to right,
+      var(--green-pulse-gradient-button-from),
+      var(--green-pulse-gradient-button-to)
+    );
   }
 
   /* Button hover gradient */
   .hover\:bg-gradient-button-hover:hover {
-    background: linear-gradient(to right, var(--green-pulse-gradient-button-hover-from), var(--green-pulse-gradient-button-hover-to));
+    background: linear-gradient(
+      to right,
+      var(--green-pulse-gradient-button-hover-from),
+      var(--green-pulse-gradient-button-hover-to)
+    );
   }
 
   /* Premium card gradient */
   .bg-gradient-premium {
-    background: linear-gradient(to bottom, var(--green-pulse-gradient-premium-from), var(--green-pulse-gradient-premium-to));
+    background: linear-gradient(
+      to bottom,
+      var(--green-pulse-gradient-premium-from),
+      var(--green-pulse-gradient-premium-to)
+    );
   }
 
   /* Golden card gradient */
   .bg-gradient-golden {
-    background: linear-gradient(to bottom, var(--green-pulse-gradient-golden-from), var(--green-pulse-gradient-golden-to));
+    background: linear-gradient(
+      to bottom,
+      var(--green-pulse-gradient-golden-from),
+      var(--green-pulse-gradient-golden-to)
+    );
   }
 
   /* CTA section gradient */
   .bg-gradient-cta {
-    background: linear-gradient(to right, var(--green-pulse-gradient-cta-from), var(--green-pulse-gradient-cta-to));
+    background: linear-gradient(
+      to right,
+      var(--green-pulse-gradient-cta-from),
+      var(--green-pulse-gradient-cta-to)
+    );
   }
 }

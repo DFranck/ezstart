@@ -1,8 +1,15 @@
 'use client'
 import { routing } from '@/i18n/routing'
 import { LoginButton } from '@ezstart/auth-sdk'
-import { ThemeSwitcher, ThemeSelector } from '@ezstart/next-theme/components'
-import { Button, ClientLayout, Div, H1, LocaleSwitcher } from '@ezstart/ui/components'
+import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
+import {
+  Button,
+  ClientLayout,
+  Div,
+  H1,
+  LocaleSwitcher,
+  VersionSwitch,
+} from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -82,13 +89,14 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
             currentLocale={currentLocale}
             onLocaleChange={handleLocaleChange}
           />
-          <ThemeSelector adminOnly={false} enableHistory={true} />
+          <ThemeEditor adminOnly={false} enableHistory={true} />
           <ThemeSwitcher />
         </Div>
       }
       LinkComponent={Link}
     >
       {children}
+      <VersionSwitch v1Label="Current" v2Label="New Design" position="bottom-left" />
     </ClientLayout>
   )
 }

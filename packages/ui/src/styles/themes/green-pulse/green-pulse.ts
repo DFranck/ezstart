@@ -22,6 +22,7 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
   /* Gradient variables - Hero/Section backgrounds (light mode) */
   --green-pulse-gradient-hero-from: oklch(0.97 0.02 145); /* green-50 */
+  --green-pulse-gradient-hero-via: oklch(0.6 0.15 240); /* blue-600 */
   --green-pulse-gradient-hero-to: oklch(0.97 0.02 240); /* blue-50 */
 
   /* Gradient variables - Text */
@@ -88,7 +89,7 @@ export const greenPulseThemeCss = `/* GreenPulse Theme Variables */
 
   /* Hero/Section backgrounds */
   .bg-gradient-hero {
-    background: linear-gradient(to bottom right, var(--green-pulse-gradient-hero-from), var(--green-pulse-gradient-hero-to));
+    background: linear-gradient(to bottom right, var(--green-pulse-gradient-hero-from), var(--green-pulse-gradient-hero-via), var(--green-pulse-gradient-hero-to));
   }
 
   /* Text gradient (with via point) */
