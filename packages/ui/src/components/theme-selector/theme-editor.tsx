@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs'
 import { ColorVariableEditor } from './components/color-variable-editor'
 import { useTheme } from './hooks/use-theme'
 import { useThemeEditor } from './hooks/use-theme-editor'
-import type { ThemeSelectorProps } from './types'
+import type { ThemeEditorProps } from './types'
 import {
   extractDarkVariables,
   extractRootVariables,
