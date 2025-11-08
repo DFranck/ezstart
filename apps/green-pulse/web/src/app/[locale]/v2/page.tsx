@@ -97,11 +97,11 @@ export default function HomePage(): any {
               {
                 text: t('hero.typewriterText'),
                 className:
-                  'text-base sm:text-lg lg:text-xl font-medium text-center text-green-pulse-primary-foreground',
+                  'text-base sm:text-lg lg:text-xl font-medium text-center text-gp-primary-foreground',
               },
             ]}
             className="flex justify-center "
-            cursorClassName="bg-green-pulse-primary"
+            cursorClassName="bg-gp-primary"
             duration={3}
             delay={0.5}
           />
