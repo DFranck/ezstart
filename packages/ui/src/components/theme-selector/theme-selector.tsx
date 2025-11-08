@@ -1,14 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { runWithFeedback } from '../../utils'
 import { Button } from '../button'
 import { Checkbox } from '../checkbox'
+import { FloatingPanel, FloatingPanelFooter } from '../floating-panel'
 import { Icon } from '../icon'
 import { Label } from '../label'
-import { Modal } from '../modal'
 import { Spinner } from '../spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs'
-import { Span } from '../tag'
 import { ColorVariableEditor } from './components/color-variable-editor'
 import { useTheme } from './hooks/use-theme'
 import { useThemeEditor } from './hooks/use-theme-editor'
@@ -126,13 +126,18 @@ export function ThemeSelector({
   }, [variables, overrides, editor.localChanges, currentTheme])
 
   const handleSave = useCallback(async () => {
-    try {
-      await editor.saveChanges(apiEndpoint, defaultTheme)
-      setIsOpen(false)
-    } catch (error) {
-      // Error already handled by hook
-      console.error('Failed to save theme:', error)
-    }
+    await runWithFeedback({
+      action: async () => {
+        await editor.saveChanges(apiEndpoint, defaultTheme)
+        setIsOpen(false)
+      },
+      toastLoading: { message: 'Saving theme...' },
+      toastSuccess: { message: 'Theme saved successfully!' },
+      toastError: { message: 'Failed to save theme' },
+      onError: error => {
+        console.error('Failed to save theme:', error)
+      },
+    })
   }, [editor, apiEndpoint, defaultTheme])
 
   const handleReset = useCallback(() => {
@@ -216,65 +221,47 @@ export function ThemeSelector({
         )}
       </Button>
 
-      {/* Theme Editor Modal */}
-      <Modal
-        isOpen={isOpen}
+      {/* Theme Editor Floating Panel */}
+      <FloatingPanel
+        open={isOpen}
         onClose={handleClose}
-        title={<>Theme Editor {themeSwitcher}</>}
-        description={
+        title={
           <>
-            Customize the colors of your {appName} application. Changes are applied in real-time.{' '}
-            {/* Auto-invert checkbox */}
-            <Span className="flex flex-col">
-              <Checkbox
-                id="auto-invert"
-                checked={autoInvertForOppositeTheme}
-                onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
-                className="mt-1"
-              />
-              <Label
-                htmlFor="auto-invert"
-                className="text-sm font-medium leading-none cursor-pointer"
-              >
-                Auto-generate opposite theme colors
-                <span className="block text-xs text-muted-foreground font-normal mt-1">
-                  Changing a color in {currentTheme} mode will automatically invert it for{' '}
-                  {currentTheme === 'light' ? 'dark' : 'light'} mode
-                </span>
-              </Label>
-            </Span>
+            <span>Theme Editor</span>
+            {themeSwitcher && <div className="ml-auto">{themeSwitcher}</div>}
           </>
         }
         size="xl"
-        aria-labelledby="theme-editor-title"
-        aria-describedby="theme-editor-description"
-        footer={
-          <div className="flex items-center justify-between gap-4 pt-4 border-t border-border w-full">
-            <div className="flex items-center gap-2">
-              <Button onClick={handleReset} variant="outline" size="sm">
-                <Icon name="lucide:RotateCcw" size={16} />
-                <span className="ml-2">Reset All</span>
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button onClick={handleClose} variant="ghost">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                variant="default"
-                disabled={editor.isSaving || !hasLocalChanges}
-              >
-                {editor.isSaving && (
-                  <Icon name="lucide:Loader2" className="animate-spin mr-2" size={16} />
-                )}
-                <span>{editor.isSaving ? 'Saving...' : 'Save Changes'}</span>
-              </Button>
-            </div>
-          </div>
-        }
+        closable
+        minimizable
+        maximizable
+        draggable
       >
+        {/* Description */}
+        <div className="mb-4 pb-3 border-b border-border">
+          <p className="text-sm text-muted-foreground">
+            Customize the colors of your {appName} application. Changes are applied in real-time.
+          </p>
+        </div>
+
+        {/* Auto-invert checkbox */}
+        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg mb-4">
+          <Checkbox
+            id="auto-invert"
+            checked={autoInvertForOppositeTheme}
+            onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
+          />
+          <div className="flex-1">
+            <Label htmlFor="auto-invert" className="text-sm font-medium cursor-pointer">
+              Auto-generate opposite theme colors
+            </Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Changing a color in {currentTheme} mode will automatically invert it for{' '}
+              {currentTheme === 'light' ? 'dark' : 'light'} mode
+            </p>
+          </div>
+        </div>
+
         <div className="space-y-6 relative">
           {/* Loading state */}
           {isLoading && <Spinner size="lg" className="mx-auto my-20" />}
@@ -400,7 +387,31 @@ export function ThemeSelector({
           {editor.isSaving && 'Saving theme changes...'}
           {hasLocalChanges && !editor.isSaving && 'Theme has unsaved changes'}
         </div>
-      </Modal>
+
+        {/* Footer with actions */}
+        <FloatingPanelFooter className="border-t border-border pt-4 mt-6">
+          <Button onClick={handleReset} variant="outline" size="sm">
+            <Icon name="lucide:RotateCcw" size={16} />
+            <span className="ml-2">Reset All</span>
+          </Button>
+
+          <div className="flex-1" />
+
+          <Button onClick={handleClose} variant="ghost">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="default"
+            disabled={editor.isSaving || !hasLocalChanges}
+          >
+            {editor.isSaving && (
+              <Icon name="lucide:Loader2" className="animate-spin mr-2" size={16} />
+            )}
+            <span>{editor.isSaving ? 'Saving...' : 'Save Changes'}</span>
+          </Button>
+        </FloatingPanelFooter>
+      </FloatingPanel>
     </>
   )
 }
