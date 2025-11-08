@@ -6,9 +6,9 @@ import { Button } from '../button'
 import { Checkbox } from '../checkbox'
 import { FloatingPanel, FloatingPanelFooter } from '../floating-panel'
 import { Icon } from '../icon'
-import { Label } from '../label'
 import { Spinner } from '../spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../tooltip'
 import { ColorVariableEditor } from './components/color-variable-editor'
 import { useTheme } from './hooks/use-theme'
 import { useThemeEditor } from './hooks/use-theme-editor'
@@ -228,7 +228,29 @@ export function ThemeEditor({
         title={
           <>
             <span>Theme Editor</span>
-            {themeSwitcher && <div className="ml-auto">{themeSwitcher}</div>}
+            <div className="ml-auto flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <Checkbox
+                        id="auto-invert-header"
+                        checked={autoInvertForOppositeTheme}
+                        onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-xs">
+                      Auto-generate opposite theme colors: changing a color in {currentTheme} mode
+                      will automatically invert it for {currentTheme === 'light' ? 'dark' : 'light'}{' '}
+                      mode
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {themeSwitcher}
+            </div>
           </>
         }
         size="xl"
@@ -237,31 +259,6 @@ export function ThemeEditor({
         maximizable
         draggable
       >
-        {/* Description */}
-        <div className="mb-4 pb-3 border-b border-border">
-          <p className="text-sm text-muted-foreground">
-            Customize the colors of your {appName} application. Changes are applied in real-time.
-          </p>
-        </div>
-
-        {/* Auto-invert checkbox */}
-        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg mb-4">
-          <Checkbox
-            id="auto-invert"
-            checked={autoInvertForOppositeTheme}
-            onCheckedChange={checked => setAutoInvertForOppositeTheme(checked === true)}
-          />
-          <div className="flex-1">
-            <Label htmlFor="auto-invert" className="text-sm font-medium cursor-pointer">
-              Auto-generate opposite theme colors
-            </Label>
-            <p className="text-xs text-muted-foreground mt-1">
-              Changing a color in {currentTheme} mode will automatically invert it for{' '}
-              {currentTheme === 'light' ? 'dark' : 'light'} mode
-            </p>
-          </div>
-        </div>
-
         <div className="space-y-6 relative">
           {/* Loading state */}
           {isLoading && <Spinner size="lg" className="mx-auto my-20" />}
