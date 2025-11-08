@@ -129,25 +129,31 @@ export function ThemeEditor({
     })
   }, [editor, apiEndpoint, defaultTheme])
 
-  const handleResetToDefaults = useCallback(async () => {
-    // Reset to CSS Defaults: Delete all DB overrides (permanent)
-    await runWithFeedback({
-      action: async () => {
-        await editor.resetToDefaults(apiEndpoint)
-        await reloadTheme()
-        setIsOpen(false)
-      },
-      toastLoading: { message: 'Resetting to defaults...' },
-      toastSuccess: { message: 'Theme reset to CSS defaults!' },
-      toastError: { message: 'Failed to reset theme' },
-      onError: error => {
-        console.error('Failed to reset theme:', error)
-      },
+  const handleResetToDefaults = useCallback(() => {
+    // Reset to CSS Defaults: Load all CSS default values into editor
+    // This ignores DB overrides and loads pure CSS values
+    // User must click "Save" to persist this reset to DB
+
+    // Build a record of all CSS defaults with theme prefixes
+    const cssDefaults: Record<string, string> = {}
+
+    // For BOTH light and dark themes, set all variables to CSS defaults
+    const allVariables = [...globalTheme.variables, ...appTheme.variables]
+
+    ;['light', 'dark'].forEach(theme => {
+      allVariables.forEach(variable => {
+        const prefixedName = `${theme}:${variable.name}`
+        cssDefaults[prefixedName] = variable.value
+      })
     })
-  }, [editor, apiEndpoint, reloadTheme])
+
+    // Replace local changes with CSS defaults (clears DB overrides in editor)
+    editor.updateVariables(cssDefaults)
+  }, [editor, globalTheme, appTheme])
 
   const handleDiscardChanges = useCallback(() => {
     // Discard Changes: Clear unsaved local edits only
+    // Falls back to DB overrides (or CSS defaults if no DB overrides exist)
     editor.resetLocalChanges()
   }, [editor])
 
