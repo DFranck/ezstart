@@ -416,7 +416,7 @@ export function ThemeEditor({
                 ),
                 value: 'reset-defaults',
                 onSelect: handleResetToDefaults,
-                disabled: !isCustomized,
+                disabled: !isCustomized && !hasLocalChanges,
               },
               {
                 label: (
