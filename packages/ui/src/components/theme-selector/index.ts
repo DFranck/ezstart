@@ -1,5 +1,9 @@
-export { ThemeSelector } from './theme-selector'
+// Main exports
+export { ThemeEditor } from './theme-editor'
 export { ColorVariableEditor } from './components/color-variable-editor'
+
+// Legacy export for backward compatibility
+export { ThemeEditor as ThemeSelector } from './theme-editor'
 
 export * from './types'
 export * from './hooks'

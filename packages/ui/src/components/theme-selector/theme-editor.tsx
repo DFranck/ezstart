@@ -21,7 +21,7 @@ import {
   variablesToThemeConfig,
 } from './utils'
 
-export function ThemeSelector({
+export function ThemeEditor({
   themeSwitcher,
   globalCss,
   appCss,
@@ -33,7 +33,7 @@ export function ThemeSelector({
   onError,
   enableHistory = true,
   showPresets = false,
-}: ThemeSelectorProps) {
+}: ThemeEditorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [autoInvertForOppositeTheme, setAutoInvertForOppositeTheme] = useState(true)
 

@@ -1,13 +1,13 @@
 'use client'
 
 import { getApiUrl } from '@ezstart/config/urls'
-import { ThemeSelector as UIThemeSelector } from '@ezstart/ui/components'
+import { ThemeEditor as UIThemeEditor } from '@ezstart/ui/components'
 import { useTheme } from 'next-themes'
 import { useThemeSelectorContext } from '../theme-selector-context'
 import { ThemeSwitcher } from './ThemeSwitcher'
 
 /**
- * ThemeSelector component integrated with next-themes
+ * ThemeEditor component integrated with next-themes
  *
  * Usage:
  * 1. Enable in ThemeProvider with `themeSelector` prop
@@ -16,11 +16,11 @@ import { ThemeSwitcher } from './ThemeSwitcher'
  * Example:
  * ```tsx
  * <ThemeProvider themeSelector={{ appName: 'green-pulse', globalCss, appCss }}>
- *   <ThemeSelector />
+ *   <ThemeEditor />
  * </ThemeProvider>
  * ```
  */
-export function ThemeSelector({
+export function ThemeEditor({
   adminOnly = false,
   enableHistory = true,
   showPresets = false,
@@ -38,7 +38,7 @@ export function ThemeSelector({
   const apiEndpoint = `${apiUrl}/api/theme`
 
   return (
-    <UIThemeSelector
+    <UIThemeEditor
       themeSwitcher={<ThemeSwitcher />}
       globalCss={globalCss}
       appCss={appCss}
@@ -51,3 +51,6 @@ export function ThemeSelector({
     />
   )
 }
+
+/** @deprecated Use ThemeEditor instead */
+export const ThemeSelector = ThemeEditor

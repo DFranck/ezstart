@@ -30,7 +30,8 @@ export interface ThemeOverrides {
   updatedBy?: string
 }
 
-export interface ThemeSelectorProps {
+/** Props for ThemeEditor component */
+export interface ThemeEditorProps {
   /** Global CSS variables (from globals.css) */
   globalCss: string
 
@@ -63,6 +64,9 @@ export interface ThemeSelectorProps {
   /** Theme switcher component */
   themeSwitcher?: React.ReactNode
 }
+
+/** @deprecated Use ThemeEditorProps instead */
+export interface ThemeSelectorProps extends ThemeEditorProps {}
 
 export interface UseThemeOptions {
   appName: string
