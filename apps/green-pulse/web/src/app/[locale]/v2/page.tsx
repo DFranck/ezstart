@@ -69,45 +69,79 @@ export default function HomePage(): any {
 
   return (
     <>
-      {/* Hero Section */}
-      <Section size={'full'} className="text-center bg-gp-gradient">
-        {' '}
-        <Div layout={'row'}>
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={60}
-            height={60}
-            className="animate-pulse"
-            style={{
-              filter:
-                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
-            }}
-          />
-
-          <H1 className="font-k2d">
-            {t('hero.title')}
-            <span className="font-gugi">.AI</span>
-          </H1>
-        </Div>
-        <div>
-          <H2 size={'h3'}>{t('hero.subtitle')}</H2>
-          <TypewriterEffectSmooth
-            words={[
-              {
-                text: t('hero.typewriterText'),
-                className:
-                  'text-base sm:text-lg lg:text-xl font-medium text-center text-gp-primary-foreground',
-              },
-            ]}
-            className="flex justify-center "
-            cursorClassName="bg-gp-primary"
-            duration={3}
-            delay={0.5}
-          />
-          <P>{t('hero.description')}</P>
+      {/* Hero Section - Mix of slide presentation + v2 */}
+      <Section size={'full'} className="text-center bg-gp-gradient py-12 sm:py-16 lg:py-20">
+        {/* Logo with circular rings (from slide) */}
+        <div className="mb-8">
+          <div className="relative inline-block">
+            {/* Animated rings */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gp-primary/30 animate-ping" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-gp-primary/50" />
+            </div>
+            <div className="relative">
+              <Image
+                src="/logo.png"
+                alt="GreenPulse Logo"
+                width={80}
+                height={80}
+                className="animate-pulse"
+                style={{
+                  filter:
+                    'drop-shadow(0 0 12px rgb(16 185 129 / 0.9)) drop-shadow(0 0 24px rgb(16 185 129 / 0.6))',
+                }}
+              />
+            </div>
+          </div>
         </div>
-        <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg max-w-2xl mx-auto">
+
+        {/* Title: GreenPulse.AI (from slide) */}
+        <H1 className="font-k2d text-5xl sm:text-6xl lg:text-7xl mb-4 bg-gradient-to-r from-gp-primary via-gp-secondary to-gp-primary bg-clip-text text-transparent">
+          {t('hero.title')}
+          <span className="font-gugi">.AI</span>
+        </H1>
+
+        {/* Subtitle: Your New Green Agent (from slide) */}
+        <H2 size={'h3'} className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-8">
+          Your New Green Agent
+        </H2>
+
+        {/* Feature tags (from slide) */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 max-w-5xl mx-auto px-4">
+          {[
+            'Smart Data Extraction',
+            'ESG Assistant',
+            'AI-Driven',
+            'Automated Reporting',
+            'Tailored Strategy',
+          ].map((feature, index) => (
+            <div
+              key={index}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-card/80 backdrop-blur-sm border border-gp-primary/20 text-sm sm:text-base font-medium text-foreground shadow-md hover:shadow-lg hover:border-gp-primary/40 transition-all duration-200"
+            >
+              {feature}
+            </div>
+          ))}
+        </div>
+
+        {/* Typewriter effect (from v2) */}
+        <TypewriterEffectSmooth
+          words={[
+            {
+              text: t('hero.typewriterText'),
+              className: 'text-base sm:text-lg lg:text-xl font-medium text-center text-foreground',
+            },
+          ]}
+          className="flex justify-center mb-6"
+          cursorClassName="bg-gp-primary"
+          duration={3}
+          delay={0.5}
+        />
+
+        {/* CTA Form (from v2) */}
+        <div className="bg-background/90 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
           <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
           <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Input
@@ -120,7 +154,7 @@ export default function HomePage(): any {
             />
             <Button
               type="submit"
-              className="bg-gp-gradient hover:bg-gp-gradient-hover text-primary-foreground font-semibold px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+              className="bg-gp-primary hover:bg-gp-primary/90 text-gp-primary-foreground font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
             >
               {t('hero.notifyMe')}
             </Button>
