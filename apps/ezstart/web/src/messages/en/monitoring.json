@@ -1,6 +1,7 @@
 {
-  "title": "Monitoring Dashboard",
-  "loading": "Loading monitoring data...",
+  "monitoring": {
+    "title": "Monitoring Dashboard",
+    "loading": "Loading monitoring data...",
   "tabs": {
     "projects": "Projects",
     "audits": "Audits",
@@ -57,5 +58,6 @@
       "needsWork": "Needs Work",
       "target": "Target: 90+"
     }
+  }
   }
 }

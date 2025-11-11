@@ -28,6 +28,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     qrCode,
     cvGenerator,
     businessCard,
+    monitoring,
   ] = await Promise.all([
     // common
     import(`../messages/${locale}/common.json`),
@@ -48,6 +49,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/features/qr-code.json`),
     import(`../messages/${locale}/features/cv-generator.json`),
     import(`../messages/${locale}/features/business-card.json`),
+    // monitoring
+    import(`../messages/${locale}/monitoring.json`),
   ]);
 
   return {
@@ -67,6 +70,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       qrCode.default,
       cvGenerator.default,
       businessCard.default,
+      monitoring.default,
     ]),
   };
 });

@@ -66,8 +66,18 @@ export function UptimeGraph({
   showTitle = true,
 }: UptimeGraphProps) {
   // Aggregate data into groups for better readability
-  // Group by 6 checks (30 minutes) to get ~48 bars for 24h instead of 288
-  const aggregateData = (rawData: UptimeDataPoint[], groupSize: number = 6) => {
+  // Dynamic grouping based on data density
+  // - If we have lots of data (>100 checks), group by 6 to get ~48 bars
+  // - If we have sparse data (<100 checks), show all bars individually
+  const aggregateData = (rawData: UptimeDataPoint[], groupSize?: number) => {
+    // Auto-calculate groupSize based on data density
+    if (!groupSize) {
+      if (rawData.length > 100) {
+        groupSize = Math.ceil(rawData.length / 60) // Target ~60 bars max
+      } else {
+        groupSize = 1 // Show all bars for sparse data
+      }
+    }
     const aggregated: Array<{
       index: number
       value: number
@@ -101,8 +111,8 @@ export function UptimeGraph({
     return aggregated
   }
 
-  // Transform data for Recharts (aggregate to ~48 bars)
-  const chartData = aggregateData(data, 6)
+  // Transform data for Recharts (auto-aggregate based on density)
+  const chartData = aggregateData(data)
 
   // Calculate uptime if not provided
   const calculatedUptime =

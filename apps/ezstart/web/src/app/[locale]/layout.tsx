@@ -7,6 +7,7 @@ import { generateOrganizationSchema } from '@ezstart/seo-config'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import { notFound } from 'next/navigation'
 import ClientLayout from './client-layout'
@@ -85,13 +86,8 @@ export default async function LocaleLayout(props: {
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
-        {/* Plausible Analytics - Privacy-focused, GDPR compliant */}
-        <Script
-          defer
-          data-domain="ezstart.xyz"
-          src="https://plausible.io/js/script.outbound-links.file-downloads.js"
-          strategy="afterInteractive"
-        />
+        {/* Vercel Analytics - Free with Vercel hosting */}
+        <Analytics />
         <Script
           id="json-ld"
           type="application/ld+json"

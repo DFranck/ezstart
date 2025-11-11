@@ -1,6 +1,7 @@
 {
-  "title": "Tableau de bord de surveillance",
-  "loading": "Chargement des données de surveillance...",
+  "monitoring": {
+    "title": "Tableau de bord de surveillance",
+    "loading": "Chargement des données de surveillance...",
   "tabs": {
     "projects": "Projets",
     "audits": "Audits",
@@ -57,5 +58,6 @@
       "needsWork": "À améliorer",
       "target": "Cible : 90+"
     }
+  }
   }
 }

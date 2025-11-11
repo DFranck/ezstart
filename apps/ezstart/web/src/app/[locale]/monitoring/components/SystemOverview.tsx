@@ -335,7 +335,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => router.push('/monitoring?tab=projects')}
+                onClick={() => router.push('/monitoring/health')}
               >
                 <Icon name="lucide:Boxes" className="w-4 h-4" />
                 View All Projects
@@ -343,7 +343,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => router.push('/monitoring?tab=audits')}
+                onClick={() => router.push('/monitoring/audits')}
               >
                 <Icon name="lucide:FileCheck" className="w-4 h-4" />
                 Run Quality Audits
@@ -351,7 +351,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => router.push('/monitoring?tab=errors')}
+                onClick={() => router.push('/monitoring/errors')}
               >
                 <Icon name="lucide:Bug" className="w-4 h-4" />
                 View Error Logs
@@ -359,7 +359,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => window.open('https://sentry.io', '_blank')}
+                onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
               >
                 <Icon name="lucide:ExternalLink" className="w-4 h-4" />
                 Open Sentry Dashboard
@@ -367,10 +367,10 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
-                onClick={() => window.open('https://plausible.io', '_blank')}
+                onClick={() => window.open('https://vercel.com/ezstart/analytics', '_blank')}
               >
                 <Icon name="lucide:BarChart3" className="w-4 h-4" />
-                View Analytics
+                View Analytics (Vercel)
               </Button>
             </Div>
           </CardContent>

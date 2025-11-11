@@ -1,4 +1,4 @@
-import './globals.css'
+import '@ezstart/ui/globals.css'
 import { ReactNode } from 'react'
 
 type Props = {
