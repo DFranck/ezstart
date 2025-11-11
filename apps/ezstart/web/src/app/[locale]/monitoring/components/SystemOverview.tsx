@@ -19,6 +19,7 @@ import type { KnownIconName } from '@ezstart/ui/components'
 type IconName = KnownIconName
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface SystemOverviewProps {
   projects: any[]
@@ -55,6 +56,7 @@ interface SystemStatusItem {
 
 export function SystemOverview({ projects, audits, errors, summary }: SystemOverviewProps) {
   const router = useRouter()
+  const t = useTranslations('monitoring')
 
   // Calculate global health score (same as docs/README.md)
   const globalHealthScore = 96.6
@@ -93,32 +95,32 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
   // Quick stats cards
   const stats: StatCard[] = [
     {
-      title: 'Global Health',
+      title: t('overview.stats.globalHealth.title'),
       value: `${globalHealthScore}/100`,
-      subtitle: '11 audits ≥90/100',
+      subtitle: `11 ${t('overview.stats.globalHealth.subtitle')}`,
       icon: 'lucide:Activity',
       variant: 'success',
       trend: { value: 1.2, isPositive: true },
     },
     {
-      title: 'Services Uptime',
+      title: t('overview.stats.servicesUptime.title'),
       value: `${uptimePercent}%`,
-      subtitle: `${healthyServices}/${totalServices} healthy`,
+      subtitle: `${healthyServices}/${totalServices} ${t('overview.stats.servicesUptime.healthy')}`,
       icon: 'lucide:Server',
       variant: uptimePercent >= 90 ? 'success' : uptimePercent >= 70 ? 'warning' : 'destructive',
     },
     {
-      title: 'Critical Errors',
+      title: t('overview.stats.criticalErrors.title'),
       value: criticalErrors,
-      subtitle: 'Last 24 hours',
+      subtitle: t('overview.stats.criticalErrors.subtitle'),
       icon: 'lucide:AlertTriangle',
       variant: criticalErrors === 0 ? 'success' : criticalErrors < 5 ? 'warning' : 'destructive',
       trend: criticalErrors === 0 ? { value: 100, isPositive: true } : undefined,
     },
     {
-      title: 'Avg Response Time',
+      title: t('overview.stats.avgResponseTime.title'),
       value: `${avgResponseTime}ms`,
-      subtitle: 'Across all APIs',
+      subtitle: t('overview.stats.avgResponseTime.subtitle'),
       icon: 'lucide:Zap',
       variant: avgResponseTime < 200 ? 'success' : avgResponseTime < 500 ? 'warning' : 'destructive',
     },
@@ -127,36 +129,36 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
   // System status breakdown
   const systemStatus: SystemStatusItem[] = [
     {
-      category: 'Projects Health',
+      category: t('overview.systemStatus.projectsHealth.title'),
       score: uptimePercent,
       status: uptimePercent >= 90 ? 'excellent' : uptimePercent >= 70 ? 'good' : 'warning',
       issues: summary.degraded + summary.unhealthy,
       icon: 'lucide:Boxes',
-      description: `${healthyServices}/${totalServices} services operational`,
+      description: `${healthyServices}/${totalServices} ${t('overview.systemStatus.projectsHealth.description')}`,
     },
     {
-      category: 'Code Quality',
+      category: t('overview.systemStatus.codeQuality.title'),
       score: avgAuditScore,
       status: avgAuditScore >= 90 ? 'excellent' : avgAuditScore >= 70 ? 'good' : 'warning',
       issues: audits.filter((a: any) => a.score < 80).length,
       icon: 'lucide:CheckCircle2',
-      description: `${audits.length} audits completed`,
+      description: `${audits.length} ${t('overview.systemStatus.codeQuality.description')}`,
     },
     {
-      category: 'Error Monitoring',
+      category: t('overview.systemStatus.errorMonitoring.title'),
       score: recentErrors.length === 0 ? 100 : Math.max(0, 100 - recentErrors.length * 5),
       status: recentErrors.length === 0 ? 'excellent' : recentErrors.length < 10 ? 'good' : 'critical',
       issues: recentErrors.length,
       icon: 'lucide:Bug',
-      description: `${recentErrors.length} errors in 24h`,
+      description: `${recentErrors.length} ${t('overview.systemStatus.errorMonitoring.description')}`,
     },
     {
-      category: 'Performance',
+      category: t('overview.systemStatus.performance.title'),
       score: avgResponseTime < 200 ? 95 : avgResponseTime < 500 ? 80 : 60,
       status: avgResponseTime < 200 ? 'excellent' : avgResponseTime < 500 ? 'good' : 'warning',
       issues: projects.filter((p: any) => p.avgResponseTime > 500).length,
       icon: 'lucide:Gauge',
-      description: `${avgResponseTime}ms avg response`,
+      description: `${avgResponseTime}ms ${t('overview.systemStatus.performance.description')}`,
     },
   ]
 
@@ -164,7 +166,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
   const recentActivity = [
     ...projects.slice(0, 3).map((p: any) => ({
       type: 'health_check' as const,
-      message: `Health check passed: ${p.name}`,
+      message: `${t('overview.recentActivity.healthCheckPassed')}: ${p.name}`,
       timestamp: p.lastCheck,
       status: p.status === 'healthy' ? ('success' as const) : ('warning' as const),
     })),
@@ -251,7 +253,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
       {/* System Status Grid */}
       <Card variant="outline">
         <CardHeader>
-          <CardTitle>System Status</CardTitle>
+          <CardTitle>{t('overview.systemStatus.title')}</CardTitle>
           <CardDescription>Real-time health across all monitoring categories</CardDescription>
         </CardHeader>
         <CardContent>
@@ -274,7 +276,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <P>{item.description}</P>
                   {item.issues > 0 && (
-                    <P className="text-destructive font-medium">{item.issues} issue(s)</P>
+                    <P className="text-destructive font-medium">{item.issues} {t('overview.systemStatus.issues')}</P>
                   )}
                 </div>
               </div>
@@ -289,7 +291,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>{t('overview.recentActivity.title')}</CardTitle>
                 <CardDescription>Latest events from all services</CardDescription>
               </div>
               <Icon name="lucide:Activity" className="w-4 h-4 text-muted-foreground" />
@@ -317,7 +319,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
               ))}
               {recentActivity.length === 0 && (
                 <P className="text-sm text-muted-foreground text-center py-4">
-                  No recent activity
+                  {t('overview.recentActivity.noRecentActivity')}
                 </P>
               )}
             </div>
@@ -327,7 +329,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
         {/* Quick Actions */}
         <Card variant="outline">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>{t('overview.quickActions.title')}</CardTitle>
             <CardDescription>Manage your monitoring dashboard</CardDescription>
           </CardHeader>
           <CardContent>
@@ -338,7 +340,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 onClick={() => router.push('/monitoring/health')}
               >
                 <Icon name="lucide:Boxes" className="w-4 h-4" />
-                View All Projects
+                {t('overview.quickActions.viewAllProjects')}
               </Button>
               <Button
                 variant="outline"
@@ -346,7 +348,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 onClick={() => router.push('/monitoring/audits')}
               >
                 <Icon name="lucide:FileCheck" className="w-4 h-4" />
-                Run Quality Audits
+                {t('overview.quickActions.runQualityAudits')}
               </Button>
               <Button
                 variant="outline"
@@ -354,7 +356,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 onClick={() => router.push('/monitoring/errors')}
               >
                 <Icon name="lucide:Bug" className="w-4 h-4" />
-                View Error Logs
+                {t('overview.quickActions.viewErrorLogs')}
               </Button>
               <Button
                 variant="outline"
@@ -362,7 +364,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 onClick={() => window.open('https://ezstart.sentry.io/insights/projects/', '_blank')}
               >
                 <Icon name="lucide:ExternalLink" className="w-4 h-4" />
-                Open Sentry Dashboard
+                {t('overview.quickActions.openSentry')}
               </Button>
               <Button
                 variant="outline"
@@ -370,7 +372,7 @@ export function SystemOverview({ projects, audits, errors, summary }: SystemOver
                 onClick={() => window.open('https://vercel.com/ezstart/analytics', '_blank')}
               >
                 <Icon name="lucide:BarChart3" className="w-4 h-4" />
-                View Analytics (Vercel)
+                {t('overview.quickActions.viewAnalytics')}
               </Button>
             </Div>
           </CardContent>

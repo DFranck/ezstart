@@ -58,6 +58,59 @@
       "needsWork": "À améliorer",
       "target": "Cible : 90+"
     }
+  },
+  "overview": {
+    "stats": {
+      "globalHealth": {
+        "title": "Santé Globale",
+        "subtitle": "audits ≥90/100"
+      },
+      "servicesUptime": {
+        "title": "Disponibilité des Services",
+        "healthy": "opérationnels"
+      },
+      "criticalErrors": {
+        "title": "Erreurs Critiques",
+        "subtitle": "Dernières 24 heures"
+      },
+      "avgResponseTime": {
+        "title": "Temps de Réponse Moyen",
+        "subtitle": "Toutes les APIs"
+      }
+    },
+    "systemStatus": {
+      "title": "État du Système",
+      "projectsHealth": {
+        "title": "Santé des Projets",
+        "description": "services opérationnels"
+      },
+      "codeQuality": {
+        "title": "Qualité du Code",
+        "description": "audits complétés"
+      },
+      "errorMonitoring": {
+        "title": "Surveillance des Erreurs",
+        "description": "erreurs en 24h"
+      },
+      "performance": {
+        "title": "Performance",
+        "description": "réponse moy."
+      },
+      "issues": "problèmes"
+    },
+    "recentActivity": {
+      "title": "Activité Récente",
+      "healthCheckPassed": "Vérification réussie",
+      "noRecentActivity": "Aucune activité récente"
+    },
+    "quickActions": {
+      "title": "Actions Rapides",
+      "viewAllProjects": "Voir Tous les Projets",
+      "runQualityAudits": "Lancer les Audits Qualité",
+      "viewErrorLogs": "Voir les Logs d'Erreurs",
+      "openSentry": "Ouvrir Sentry",
+      "viewAnalytics": "Voir Analytics (Vercel)"
+    }
   }
   }
 }

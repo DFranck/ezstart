@@ -58,6 +58,59 @@
       "needsWork": "Needs Work",
       "target": "Target: 90+"
     }
+  },
+  "overview": {
+    "stats": {
+      "globalHealth": {
+        "title": "Global Health",
+        "subtitle": "audits ≥90/100"
+      },
+      "servicesUptime": {
+        "title": "Services Uptime",
+        "healthy": "healthy"
+      },
+      "criticalErrors": {
+        "title": "Critical Errors",
+        "subtitle": "Last 24 hours"
+      },
+      "avgResponseTime": {
+        "title": "Avg Response Time",
+        "subtitle": "Across all APIs"
+      }
+    },
+    "systemStatus": {
+      "title": "System Status",
+      "projectsHealth": {
+        "title": "Projects Health",
+        "description": "services operational"
+      },
+      "codeQuality": {
+        "title": "Code Quality",
+        "description": "audits completed"
+      },
+      "errorMonitoring": {
+        "title": "Error Monitoring",
+        "description": "errors in 24h"
+      },
+      "performance": {
+        "title": "Performance",
+        "description": "avg response"
+      },
+      "issues": "issues"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "healthCheckPassed": "Health check passed",
+      "noRecentActivity": "No recent activity"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "viewAllProjects": "View All Projects",
+      "runQualityAudits": "Run Quality Audits",
+      "viewErrorLogs": "View Error Logs",
+      "openSentry": "Open Sentry Dashboard",
+      "viewAnalytics": "View Analytics (Vercel)"
+    }
   }
   }
 }
