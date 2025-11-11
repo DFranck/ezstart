@@ -10,7 +10,6 @@ import { useMonitoringProjects } from '../hooks/useMonitoringProjects'
 import { useSocket } from '../hooks/useSocket'
 import { calculateOverallHealth, getMetricsData } from '../lib/utils'
 import { ProjectCard } from './components/ProjectCard'
-import { TrendingMetrics } from './components/TrendingMetrics'
 
 export default function HealthMonitoringPage(): any {
   const t = useTranslations('monitoring')
@@ -100,20 +99,6 @@ export default function HealthMonitoringPage(): any {
           {/* Metrics Overview */}
           <MetricsOverview activeTab="projects" metrics={metricsData} />
         </Div>
-      </Section>
-
-      {/* Trending Metrics Section */}
-      <Section size="full" className="max-w-7xl">
-        <Div layout="center">
-          <H2>Trending Metrics</H2>
-          <P className="text-muted-foreground">Performance trends for top monitored projects</P>
-        </Div>
-
-        <div className="space-y-6">
-          {projects.slice(0, 3).map((project: any) => (
-            <TrendingMetrics key={project.id} projectId={project.id} projectName={project.name} />
-          ))}
-        </div>
       </Section>
 
       {/* Projects Grid Section */}
