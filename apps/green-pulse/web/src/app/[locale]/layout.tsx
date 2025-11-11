@@ -1,10 +1,10 @@
 import { getTimeZoneFromLocale } from '@/i18n/routing'
 import { Providers } from '@/providers/providers'
+import { ThemeStyleInjector } from '@ezstart/next-theme/server'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
 import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
-import { ThemeStyleInjector } from '@ezstart/next-theme/server'
 import { getMessages } from 'next-intl/server'
 import { Gugi, K2D } from 'next/font/google'
 import Script from 'next/script'
@@ -61,7 +61,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       <head>
         <ThemeStyleInjector appName="green-pulse" />
       </head>
-      <body>
+      <body className="font-k2d bg-gp-gradient">
         <Script
           id="json-ld"
           type="application/ld+json"

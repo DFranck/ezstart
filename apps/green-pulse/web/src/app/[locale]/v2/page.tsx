@@ -5,6 +5,11 @@ import {
   Button,
   Card,
   Div,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
   H1,
   H2,
   H3,
@@ -13,44 +18,58 @@ import {
   KnownIconName,
   P,
   Section,
+  SplitSection,
+  SplitSectionItem,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+const emailSchema = z.object({
+  email: z.string().email('Invalid email address'),
+})
+
+type EmailFormData = z.infer<typeof emailSchema>
 
 export default function HomePage(): any {
-  const [email, setEmail] = useState('')
   const t = useTranslations('home')
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<EmailFormData>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
 
+  const onSubmit = async (data: EmailFormData) => {
     await runWithFeedback({
       action: async () => {
         const apiUrl = getApiUrl('ezauth')
         const response = await fetch(`${apiUrl}/api/auth/waitlist/green-pulse/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email: data.email }),
         })
 
-        const data = await response.json()
+        const responseData = await response.json()
 
         if (!response.ok) {
           // Status 409 = email already exists, use specific message
-          if (response.status === 409 && data.code === 'EMAIL_EXISTS') {
+          if (response.status === 409 && responseData.code === 'EMAIL_EXISTS') {
             throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
           } else {
             throw new Error(
-              data.error || t('cta.error') || 'Something went wrong. Please try again.'
+              responseData.error || t('cta.error') || 'Something went wrong. Please try again.'
             )
           }
         }
 
-        setEmail('')
-        return data
+        form.reset()
+        return responseData
       },
       toastLoading: { message: t('cta.loading') || 'Adding to waitlist...' },
       toastSuccess: {
@@ -70,104 +89,158 @@ export default function HomePage(): any {
   return (
     <>
       {/* Hero Section - Mix of slide presentation + v2 */}
-      <Section size={'full'} className="text-center bg-gp-gradient py-12 sm:py-16 lg:py-20">
-        {/* Logo with circular rings (from slide) */}
-        <div className="mb-8">
-          <div className="relative inline-block">
-            {/* Animated rings */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gp-primary/30 animate-ping" />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-gp-primary/50" />
-            </div>
-            <div className="relative">
+      <Section size={'full'}>
+        <Div layout={'row'}>
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={60}
+            height={60}
+            className="animate-pulse"
+            style={{
+              filter:
+                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
+            }}
+          />
+
+          <H1>
+            {t('hero.title')}
+            <span className="font-gugi font-medium">.AI</span>
+          </H1>
+        </Div>
+        <Div layout={'center'}>
+          {/* Subtitle: Your New Green Agent (from slide) */}
+          <H2 size={'h3'}>Your New Green Agent</H2>
+
+          {/* Feature tags (from slide) */}
+          <Div layout={'row'} className="hidden lg:flex ">
+            {[
+              'Smart Data Extraction',
+              'ESG Assistant',
+              'AI-Driven',
+              'Automated Reporting',
+              'Tailored Strategy',
+            ].map((feature, index) => (
+              <Button key={index} className="rounded-full">
+                {feature}
+              </Button>
+            ))}
+          </Div>
+
+          {/* Typewriter effect (from v2) */}
+          <TypewriterEffectSmooth
+            words={[
+              {
+                text: t('hero.typewriterText'),
+              },
+            ]}
+            cursorClassName="bg-gp-primary text-center"
+            duration={3}
+            delay={0.5}
+          />
+        </Div>
+        {/* CTA Form (from v2) */}
+        <Div className="bg-background/90 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
+          <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
+          <Form {...form}>
+            <Div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input type="email" placeholder={t('hero.emailPlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+                {t('hero.notifyMe')}
+              </Button>
+            </Div>
+          </Form>
+        </Div>
+      </Section>
+
+      {/* Challenge Context Section - Using SplitSection with diagonal */}
+      <SplitSection
+        diagonal={true}
+        diagonalDirection="left"
+        diagonalAngle={15}
+        align="stretch"
+        inverted
+      >
+        {/* Left side - Content */}
+        <SplitSectionItem>
+          <Div className="space-y-8 py-12">
+            <Div className="flex items-center gap-4">
               <Image
                 src="/logo.png"
                 alt="GreenPulse Logo"
-                width={80}
-                height={80}
+                width={40}
+                height={40}
                 className="animate-pulse"
-                style={{
-                  filter:
-                    'drop-shadow(0 0 12px rgb(16 185 129 / 0.9)) drop-shadow(0 0 24px rgb(16 185 129 / 0.6))',
-                }}
               />
-            </div>
-          </div>
-        </div>
+              <H1 size={'h3'} className="text-gp-primary">
+                GreenPulse<span className="font-gugi">.AI</span>
+              </H1>
+            </Div>
 
-        {/* Title: GreenPulse.AI (from slide) */}
-        <H1 className="font-k2d text-5xl sm:text-6xl lg:text-7xl mb-4 bg-gradient-to-r from-gp-primary via-gp-secondary to-gp-primary bg-clip-text text-transparent">
-          {t('hero.title')}
-          <span className="font-gugi">.AI</span>
-        </H1>
+            <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
+              Challenge context :
+            </H2>
 
-        {/* Subtitle: Your New Green Agent (from slide) */}
-        <H2 size={'h3'} className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-8">
-          Your New Green Agent
-        </H2>
+            <Card className="p-6 lg:p-8 bg-card border-l-4 border-amber-500">
+              <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
+                The world is facing extreme weather due to climate change : Companies are pushed to
+                move beyond Business as Usual and to aim to sustainable growth:
+              </H3>
 
-        {/* Feature tags (from slide) */}
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 max-w-5xl mx-auto px-4">
-          {[
-            'Smart Data Extraction',
-            'ESG Assistant',
-            'AI-Driven',
-            'Automated Reporting',
-            'Tailored Strategy',
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-card/80 backdrop-blur-sm border border-gp-primary/20 text-sm sm:text-base font-medium text-foreground shadow-md hover:shadow-lg hover:border-gp-primary/40 transition-all duration-200"
-            >
-              {feature}
-            </div>
-          ))}
-        </div>
+              <Div className="space-y-4">
+                {[
+                  'Limited resources to establish robust ESG frameworks and demonstrate real climate impact',
+                  'Lack of structured documentation to meet investor ESG requirements for fundraising',
+                  'Gaps in expertise to navigate international standards (GRI, SFDR, CSRD) required by impact investors',
+                ].map((challenge, index) => (
+                  <Div key={index} className="flex items-start gap-3">
+                    <Div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                    <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
+                  </Div>
+                ))}
+              </Div>
+            </Card>
+          </Div>
+        </SplitSectionItem>
 
-        {/* Typewriter effect (from v2) */}
-        <TypewriterEffectSmooth
-          words={[
-            {
-              text: t('hero.typewriterText'),
-              className: 'text-base sm:text-lg lg:text-xl font-medium text-center text-foreground',
-            },
-          ]}
-          className="flex justify-center mb-6"
-          cursorClassName="bg-gp-primary"
-          duration={3}
-          delay={0.5}
-        />
+        {/* Right side - 3 images with fixed height (no layout push) */}
+        <SplitSectionItem className="bg-gp-gradient shadow-2xl p-8 lg:p-12 h-full">
+          <Div className="grid grid-rows-3 gap-4 h-full">
+            {/* Image 1 - Climate/Fire */}
+            <Div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg shadow-lg flex items-center justify-center">
+              <Icon name="lucide:Flame" className="w-16 h-16 text-white opacity-60" />
+            </Div>
 
-        {/* CTA Form (from v2) */}
-        <div className="bg-background/90 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
-          <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
-          <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Input
-              type="email"
-              placeholder={t('hero.emailPlaceholder')}
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              className="bg-gp-primary hover:bg-gp-primary/90 text-gp-primary-foreground font-semibold px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
-            >
-              {t('hero.notifyMe')}
-            </Button>
-          </form>
-        </div>
-      </Section>
+            {/* Image 2 - Network */}
+            <Div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center">
+              <Icon name="lucide:Network" className="w-20 h-20 text-white opacity-60" />
+            </Div>
+
+            {/* Image 3 - Nature */}
+            <Div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg shadow-lg flex items-center justify-center">
+              <Icon name="lucide:Leaf" className="w-16 h-16 text-white opacity-60" />
+            </Div>
+          </Div>
+        </SplitSectionItem>
+      </SplitSection>
 
       {/* Value Proposition Section */}
       <Section size={'xl'}>
-        <div className="container mx-auto">
+        <Div className="container mx-auto">
           <Card className="max-w-4xl mx-auto p-8 lg:p-12 border-l-4 border-primary">
             <P className="text-lg lg:text-xl  mb-6 leading-relaxed">{t('value.intro')}</P>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 {
                   icon: 'lucide:MessageCircle',
@@ -187,54 +260,54 @@ export default function HomePage(): any {
                   text: t('value.points.qualify'),
                 },
               ].map((item, index) => (
-                <div key={index} className="flex items-start space-x-3">
+                <Div key={index} className="flex items-start space-x-3">
                   <Icon
                     name={item.icon as KnownIconName}
                     className="w-6 h-6 text-primary mt-1 flex-shrink-0"
                   />
                   <P className="">{item.text}</P>
-                </div>
+                </Div>
               ))}
-            </div>
+            </Div>
           </Card>
-        </div>
+        </Div>
       </Section>
 
       {/* Example Interaction Section */}
       <Section size={'xl'} className="max-w-full bg-gp-gradient">
         <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
         <Card variant={'ghost'} className="p-0 space-y-6">
-          <div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
-            <div className="flex items-start space-x-3 ">
+          <Div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
+            <Div className="flex items-start space-x-3 ">
               <Icon name="lucide:User" className="w-6 h-6 text-primary mt-1" />
-              <div>
+              <Div>
                 <P className="font-semibold text-primary mb-2">{t('example.user')}</P>
                 <P className="">{t('example.userMessage')}</P>
-              </div>
-            </div>
-          </div>
+              </Div>
+            </Div>
+          </Div>
 
-          <div className="bg-accent/50 p-6 rounded-xl border-l-4 border-accent-foreground">
-            <div className="flex items-start space-x-3">
+          <Div className="bg-accent/50 p-6 rounded-xl border-l-4 border-accent-foreground">
+            <Div className="flex items-start space-x-3">
               <Icon name="lucide:Bot" className="w-6 h-6 text-accent-foreground mt-1" />
-              <div>
+              <Div>
                 <P className="font-semibold text-accent-foreground mb-2">{t('example.ai')}</P>
                 <P className="">{t('example.aiMessage')}</P>
-              </div>
-            </div>
-          </div>
+              </Div>
+            </Div>
+          </Div>
         </Card>
       </Section>
 
       {/* Packages Section */}
       <Section size={'full'}>
-        <div className="container mx-auto">
+        <Div className="container mx-auto">
           <H3 className="text-4xl font-bold text-center mb-16">{t('packages.title')}</H3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {/* Free Package */}
             <Card className="p-8 border-2 hover:border-primary transition-colors duration-200">
-              <div className="text-center mb-6">
+              <Div className="text-center mb-6">
                 <Icon
                   name="lucide:MessageCircle"
                   className="w-12 h-12 text-muted-foreground mx-auto mb-4"
@@ -243,29 +316,29 @@ export default function HomePage(): any {
                 <P className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                   {t('packages.free.subtitle')}
                 </P>
-              </div>
+              </Div>
 
               <P className="text-muted-foreground mb-6 text-sm leading-relaxed">
                 {t('packages.free.description')}
               </P>
 
-              <ul className="space-y-3">
-                <li className="flex items-center space-x-3">
+              <Div className="space-y-3">
+                <Div className="flex items-center space-x-3">
                   <Icon name="lucide:MessageCircle" className="w-5 h-5 text-primary" />
-                  <span className="">{t('packages.free.features.chat')}</span>
-                </li>
-              </ul>
+                  <P className="">{t('packages.free.features.chat')}</P>
+                </Div>
+              </Div>
             </Card>
 
             {/* Premium Package */}
             <Card className="p-8 border-2 border-primary/30 bg-card relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
+              <Div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <P className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
                   {t('packages.premium.badge')}
-                </span>
-              </div>
+                </P>
+              </Div>
 
-              <div className="text-center mb-6">
+              <Div className="text-center mb-6">
                 <Icon name="lucide:TrendingUp" className="w-12 h-12 text-primary mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
                   {t('packages.premium.title')}
@@ -273,13 +346,13 @@ export default function HomePage(): any {
                 <P className="text-sm font-medium text-primary uppercase tracking-wide">
                   {t('packages.premium.subtitle')}
                 </P>
-              </div>
+              </Div>
 
               <P className="text-muted-foreground mb-6 text-sm leading-relaxed">
                 {t('packages.premium.description')}
               </P>
 
-              <ul className="space-y-3">
+              <Div className="space-y-3">
                 {[
                   { icon: 'lucide:MessageCircle', text: t('packages.premium.features.chat') },
                   { icon: 'lucide:BarChart3', text: t('packages.premium.features.tools') },
@@ -287,17 +360,17 @@ export default function HomePage(): any {
                   { icon: 'lucide:PieChart', text: t('packages.premium.features.analysis') },
                   { icon: 'lucide:ClipboardList', text: t('packages.premium.features.plans') },
                 ].map((item, index) => (
-                  <li key={index} className="flex items-center space-x-3">
+                  <Div key={index} className="flex items-center space-x-3">
                     <Icon name={item.icon as KnownIconName} className="w-5 h-5 text-primary" />
-                    <span className=" text-sm">{item.text}</span>
-                  </li>
+                    <P className="text-sm">{item.text}</P>
+                  </Div>
                 ))}
-              </ul>
+              </Div>
             </Card>
 
             {/* Golden Package */}
             <Card className="p-8 border-2 border-amber-300 bg-card">
-              <div className="text-center mb-6">
+              <Div className="text-center mb-6">
                 <Icon name="lucide:Award" className="w-12 h-12 text-amber-500 mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
                   {t('packages.golden.title')}
@@ -305,13 +378,13 @@ export default function HomePage(): any {
                 <P className="text-sm font-medium text-amber-600 uppercase tracking-wide">
                   {t('packages.golden.subtitle')}
                 </P>
-              </div>
+              </Div>
 
               <P className="text-muted-foreground mb-6 text-sm leading-relaxed">
                 {t('packages.golden.description')}
               </P>
 
-              <ul className="space-y-3">
+              <Div className="space-y-3">
                 {[
                   { icon: 'lucide:Star', text: t('packages.golden.features.all') },
                   {
@@ -320,47 +393,55 @@ export default function HomePage(): any {
                   },
                   { icon: 'lucide:UserCheck', text: t('packages.golden.features.replace') },
                 ].map((item, index) => (
-                  <li key={index} className="flex items-center space-x-3">
+                  <Div key={index} className="flex items-center space-x-3">
                     <Icon name={item.icon as KnownIconName} className="w-5 h-5 text-amber-500" />
-                    <span className=" text-sm">{item.text}</span>
-                  </li>
+                    <P className="text-sm">{item.text}</P>
+                  </Div>
                 ))}
-              </ul>
+              </Div>
             </Card>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Section>
 
       {/* Bottom CTA Section */}
       <Section size={'xl'} className="max-w-full bg-gp-gradient">
-        <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            {' '}
+        <Div className="container mx-auto text-center">
+          <Div className="max-w-3xl mx-auto">
             <H3 className="text-3xl lg:text-4xl font-bold text-primary-foreground mb-6">
               {t('cta.title')}
             </H3>
             <P className="text-xl text-primary-foreground/90 mb-8">{t('cta.description')}</P>
-            <form
-              onSubmit={handleEmailSubmit}
-              className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
-            >
-              <Input
-                type="email"
-                placeholder={t('hero.emailPlaceholder')}
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="flex-1 bg-white"
-              />
-              <Button
-                type="submit"
-                className="bg-background text-primary hover:bg-background/80 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                {t('cta.joinWaitlist')}
-              </Button>
-            </form>
-          </div>
-        </div>
+            <Form {...form}>
+              <Div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder={t('hero.emailPlaceholder')}
+                          {...field}
+                          className="bg-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  onClick={form.handleSubmit(onSubmit)}
+                  className="bg-background text-primary hover:bg-background/80 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  {t('cta.joinWaitlist')}
+                </Button>
+              </Div>
+            </Form>
+          </Div>
+        </Div>
       </Section>
     </>
   )
