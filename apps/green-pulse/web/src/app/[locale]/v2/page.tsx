@@ -171,55 +171,61 @@ export default function HomePage(): any {
         diagonalAngle={15}
         align="stretch"
         inverted
-        className="p-0 bg-gp-gradient "
-        bgClass=""
       >
         {/* Left side - Content */}
-        <SplitSectionItem className="bg-background">
-          <Div>
-            <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
-              Challenge context :
-            </H2>
+        <SplitSectionItem si>
+          <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
+            Challenge context :
+          </H2>
 
-            <Card className="p-6 lg:p-8 bg-card border-l-4 border-amber-500">
-              <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
-                The world is facing extreme weather due to climate change : Companies are pushed to
-                move beyond Business as Usual and to aim to sustainable growth:
-              </H3>
+          <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
+            The world is facing extreme weather due to climate change : Companies are pushed to move
+            beyond Business as Usual and to aim to sustainable growth:
+          </H3>
 
-              <Div className="space-y-4">
-                {[
-                  'Limited resources to establish robust ESG frameworks and demonstrate real climate impact',
-                  'Lack of structured documentation to meet investor ESG requirements for fundraising',
-                  'Gaps in expertise to navigate international standards (GRI, SFDR, CSRD) required by impact investors',
-                ].map((challenge, index) => (
-                  <Div key={index} className="flex items-start gap-3">
-                    <Div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
-                    <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
-                  </Div>
-                ))}
+          <Div className="space-y-4">
+            {[
+              'Limited resources to establish robust ESG frameworks and demonstrate real climate impact',
+              'Lack of structured documentation to meet investor ESG requirements for fundraising',
+              'Gaps in expertise to navigate international standards (GRI, SFDR, CSRD) required by impact investors',
+            ].map((challenge, index) => (
+              <Div key={index} className="flex items-start gap-3">
+                <Div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
               </Div>
-            </Card>
+            ))}
           </Div>
         </SplitSectionItem>
 
-        {/* Right side - 3 images with fixed height (no layout push) */}
-        <SplitSectionItem className="shadow-2xl p-8 lg:p-12 h-full">
-          <Div className="grid grid-rows-3 gap-4 h-full">
-            {/* Image 1 - Climate/Fire */}
-            <Div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg shadow-lg flex items-center justify-center">
-              <Icon name="lucide:Flame" className="w-16 h-16 text-white opacity-60" />
-            </Div>
+        {/* Right side - 3 images */}
+        <SplitSectionItem>
+          <Div className="grid grid-rows-3 gap-4 ">
+            {/* Image 1 - Climate */}
+            <Image
+              src="/images/climate.webp"
+              alt="Climate change and extreme weather illustration"
+              width={800}
+              height={400}
+              className="w-full h-full object-cover rounded-lg shadow-lg"
+            />
 
             {/* Image 2 - Network */}
-            <Div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center">
-              <Icon name="lucide:Network" className="w-20 h-20 text-white opacity-60" />
-            </Div>
+            <Image
+              src="/images/network.webp"
+              alt="International standards network (GRI, SFDR, CSRD)"
+              width={800}
+              height={400}
+              className="w-full h-full object-cover rounded-lg shadow-lg"
+            />
 
             {/* Image 3 - Nature */}
-            <Div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg shadow-lg flex items-center justify-center">
-              <Icon name="lucide:Leaf" className="w-16 h-16 text-white opacity-60" />
-            </Div>
+            <Image
+              src="/images/nature.webp"
+              alt="Sustainable growth and ESG frameworks"
+              width={800}
+              height={400}
+              className="w-full h-full object-cover rounded-lg shadow-lg"
+            />
           </Div>
         </SplitSectionItem>
       </SplitSection>
