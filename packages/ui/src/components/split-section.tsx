@@ -39,7 +39,7 @@ const splitSectionVariants = cva('relative w-full', {
   defaultVariants: {
     layout: 'horizontal',
     align: 'stretch',
-    padding: 'lg',
+    padding: 'none',
   },
 })
 
@@ -192,6 +192,7 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
               <div
                 key={index}
                 className={cn(
+                  'h-full',
                   isFirstItem &&
                     shouldApplyDiagonal &&
                     layout === 'horizontal' &&
@@ -205,7 +206,7 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
 
           // Apply diagonal to this item
           return (
-            <div key={index} className={cn('relative', layout === 'horizontal' && 'lg:-ml-16')}>
+            <div key={index} className={cn('relative h-full', layout === 'horizontal' && 'lg:-ml-16')}>
               <div
                 className="relative h-full"
                 style={{
