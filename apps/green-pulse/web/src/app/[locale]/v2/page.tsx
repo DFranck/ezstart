@@ -173,7 +173,7 @@ export default function HomePage(): any {
         inverted
       >
         {/* Left side - Content */}
-        <SplitSectionItem si>
+        <SplitSectionItem size="xl">
           <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
             Challenge context :
           </H2>
@@ -199,14 +199,14 @@ export default function HomePage(): any {
 
         {/* Right side - 3 images */}
         <SplitSectionItem>
-          <Div className="grid grid-rows-3 gap-4 ">
+          <Div className="grid grid-rows-3 gap-4 h-full p-6 lg:p-8">
             {/* Image 1 - Climate */}
             <Image
               src="/images/climate.webp"
               alt="Climate change and extreme weather illustration"
               width={800}
               height={400}
-              className="w-full h-full object-cover rounded-lg shadow-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
 
             {/* Image 2 - Network */}
@@ -215,7 +215,7 @@ export default function HomePage(): any {
               alt="International standards network (GRI, SFDR, CSRD)"
               width={800}
               height={400}
-              className="w-full h-full object-cover rounded-lg shadow-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
 
             {/* Image 3 - Nature */}
@@ -224,7 +224,7 @@ export default function HomePage(): any {
               alt="Sustainable growth and ESG frameworks"
               width={800}
               height={400}
-              className="w-full h-full object-cover rounded-lg shadow-lg"
+              className="w-full h-full object-contain rounded-lg"
             />
           </Div>
         </SplitSectionItem>
