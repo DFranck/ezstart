@@ -198,7 +198,7 @@ export default function HomePage(): any {
         </SplitSectionItem>
 
         {/* Right side - 3 images */}
-        <SplitSectionItem>
+        <SplitSectionItem className="h-full">
           <Div className="grid grid-rows-3 h-full">
             {/* Image 1 - Climate */}
             <Div className="relative w-full h-full">
