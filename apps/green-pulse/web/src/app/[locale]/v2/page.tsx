@@ -198,20 +198,20 @@ export default function HomePage(): any {
         </SplitSectionItem>
 
         {/* Right side - 3 images */}
-        <SplitSectionItem className="flex items-center">
-          <Div className="flex flex-col gap-4 w-full p-6 lg:p-8">
+        <SplitSectionItem>
+          <Div className="grid grid-rows-3 h-full">
             {/* Image 1 - Climate */}
-            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+            <Div className="relative w-full h-full">
               <Image
                 src="/images/climate.webp"
                 alt="Climate change and extreme weather illustration"
                 fill
-                className="object-contain"
+                className="object-cover"
               />
             </Div>
 
             {/* Image 2 - Network */}
-            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+            <Div className="relative w-full h-full">
               <Image
                 src="/images/network.webp"
                 alt="International standards network (GRI, SFDR, CSRD)"
@@ -221,12 +221,12 @@ export default function HomePage(): any {
             </Div>
 
             {/* Image 3 - Nature */}
-            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+            <Div className="relative w-full h-full">
               <Image
                 src="/images/nature.webp"
                 alt="Sustainable growth and ESG frameworks"
                 fill
-                className="object-contain"
+                className="object-cover"
               />
             </Div>
           </Div>
@@ -273,7 +273,7 @@ export default function HomePage(): any {
 
       {/* Example Interaction Section */}
       <Section size={'xl'} className="max-w-full bg-gp-gradient">
-        <H3 className="text-3xl font-bold text-center mb-12">{t('example.title')}</H3>
+        <H3>{t('example.title')}</H3>
         <Card variant={'ghost'} className="p-0 space-y-6">
           <Div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
             <Div className="flex items-start space-x-3 ">
