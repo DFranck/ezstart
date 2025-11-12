@@ -89,7 +89,7 @@ export default function HomePage(): any {
   return (
     <>
       {/* Hero Section - Mix of slide presentation + v2 */}
-      <Section size={'full'}>
+      <Section size={'full'} className={'bg-gp-gradient'}>
         <Div layout={'row'}>
           <Image
             src="/logo.png"
@@ -108,7 +108,7 @@ export default function HomePage(): any {
             <span className="font-gugi font-medium">.AI</span>
           </H1>
         </Div>
-        <Div layout={'center'}>
+        <Div layout={'center'} className="gap-6">
           {/* Subtitle: Your New Green Agent (from slide) */}
           <H2 size={'h3'}>Your New Green Agent</H2>
 
@@ -171,23 +171,12 @@ export default function HomePage(): any {
         diagonalAngle={15}
         align="stretch"
         inverted
+        className="p-0 bg-gp-gradient "
+        bgClass=""
       >
         {/* Left side - Content */}
-        <SplitSectionItem>
-          <Div className="space-y-8 py-12">
-            <Div className="flex items-center gap-4">
-              <Image
-                src="/logo.png"
-                alt="GreenPulse Logo"
-                width={40}
-                height={40}
-                className="animate-pulse"
-              />
-              <H1 size={'h3'} className="text-gp-primary">
-                GreenPulse<span className="font-gugi">.AI</span>
-              </H1>
-            </Div>
-
+        <SplitSectionItem className="bg-background">
+          <Div>
             <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
               Challenge context :
             </H2>
@@ -215,7 +204,7 @@ export default function HomePage(): any {
         </SplitSectionItem>
 
         {/* Right side - 3 images with fixed height (no layout push) */}
-        <SplitSectionItem className="bg-gp-gradient shadow-2xl p-8 lg:p-12 h-full">
+        <SplitSectionItem className="shadow-2xl p-8 lg:p-12 h-full">
           <Div className="grid grid-rows-3 gap-4 h-full">
             {/* Image 1 - Climate/Fire */}
             <Div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg shadow-lg flex items-center justify-center">

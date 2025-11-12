@@ -61,7 +61,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       <head>
         <ThemeStyleInjector appName="green-pulse" />
       </head>
-      <body className="font-k2d bg-gp-gradient">
+      <body className="font-k2d">
         <Script
           id="json-ld"
           type="application/ld+json"
