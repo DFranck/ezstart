@@ -198,34 +198,37 @@ export default function HomePage(): any {
         </SplitSectionItem>
 
         {/* Right side - 3 images */}
-        <SplitSectionItem>
-          <Div className="grid grid-rows-3 gap-4 h-full p-6 lg:p-8">
+        <SplitSectionItem className="flex items-center">
+          <Div className="flex flex-col gap-4 w-full p-6 lg:p-8">
             {/* Image 1 - Climate */}
-            <Image
-              src="/images/climate.webp"
-              alt="Climate change and extreme weather illustration"
-              width={800}
-              height={400}
-              className="w-full h-full object-contain rounded-lg"
-            />
+            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+              <Image
+                src="/images/climate.webp"
+                alt="Climate change and extreme weather illustration"
+                fill
+                className="object-contain"
+              />
+            </Div>
 
             {/* Image 2 - Network */}
-            <Image
-              src="/images/network.webp"
-              alt="International standards network (GRI, SFDR, CSRD)"
-              width={800}
-              height={400}
-              className="w-full h-full object-contain rounded-lg"
-            />
+            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+              <Image
+                src="/images/network.webp"
+                alt="International standards network (GRI, SFDR, CSRD)"
+                fill
+                className="object-cover"
+              />
+            </Div>
 
             {/* Image 3 - Nature */}
-            <Image
-              src="/images/nature.webp"
-              alt="Sustainable growth and ESG frameworks"
-              width={800}
-              height={400}
-              className="w-full h-full object-contain rounded-lg"
-            />
+            <Div className="relative w-full aspect-[2/1] max-h-[33vh]">
+              <Image
+                src="/images/nature.webp"
+                alt="Sustainable growth and ESG frameworks"
+                fill
+                className="object-contain"
+              />
+            </Div>
           </Div>
         </SplitSectionItem>
       </SplitSection>
