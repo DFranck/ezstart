@@ -6,7 +6,7 @@ import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
 /**
  * Badge Component - Display status, count, or label
  *
- * 100% configurable with variants, sizes, dot indicator, and pulse animation.
+ * 100% configurable with variants, sizes, shapes, dot indicator, and pulse animation.
  * Built for accessibility and visual clarity.
  *
  * @example
@@ -18,6 +18,14 @@ import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
  * <Badge variant="success" size="lg">Active</Badge>
  *
  * @example
+ * // Circle badge for step numbers
+ * <Badge circle circleSize="lg">1</Badge>
+ *
+ * @example
+ * // Circle badge with custom variant
+ * <Badge circle circleSize="xl" variant="secondary">2</Badge>
+ *
+ * @example
  * // With dot indicator
  * <Badge variant="destructive" dot>3 errors</Badge>
  *
@@ -27,7 +35,7 @@ import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
  */
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'inline-flex items-center font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
   {
     variants: {
       variant: {
@@ -44,9 +52,19 @@ const badgeVariants = cva(
         pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
       },
       size: {
+        none: '', // No size classes - used for circle variant
         default: [paddingX.sm, paddingY.xs, fontSize.sm].join(' '), // px-3 sm:px-2, py-1 sm:py-0.5, text-sm sm:text-xs
         sm: [paddingX.xs, paddingY.xs, fontSize.xs].join(' '), // px-2 sm:px-1, py-1 sm:py-0.5, text-xs sm:text-[10px]
         lg: [paddingX.default, paddingY.sm, fontSize.base].join(' '), // px-4 sm:px-3, py-2 sm:py-1, text-base sm:text-sm
+      },
+      circle: {
+        true: 'aspect-square justify-center p-0',
+      },
+      circleSize: {
+        sm: 'w-8 h-8 text-sm',
+        md: 'w-10 h-10 text-base',
+        lg: 'w-12 h-12 text-xl',
+        xl: 'w-16 h-16 text-2xl',
       },
     },
     defaultVariants: {
@@ -79,11 +97,31 @@ export interface BadgeProps
   pulse?: boolean
 }
 
-function Badge({ className, variant, size, dot, pulse, children, ...props }: BadgeProps) {
+function Badge({
+  className,
+  variant,
+  size,
+  circle,
+  circleSize,
+  dot,
+  pulse,
+  children,
+  ...props
+}: BadgeProps) {
   const dotColor = variant ? dotVariantClasses[variant] : dotVariantClasses.default
 
+  // When circle=true, use circleSize instead of size
+  const effectiveSize = circle ? undefined : size
+  const effectiveCircleSize = circle ? circleSize : undefined
+
   return (
-    <div className={cn(badgeVariants({ variant, size }), className)} {...props}>
+    <div
+      className={cn(
+        badgeVariants({ variant, size: effectiveSize, circle, circleSize: effectiveCircleSize }),
+        className
+      )}
+      {...props}
+    >
       {dot && (
         <span
           className={cn(

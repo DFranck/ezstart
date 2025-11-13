@@ -1,6 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
 import { cn } from '../lib'
+import { size } from '../lib/design-system/tokens'
+import { Div, Section } from './tag'
 
 // ============================================================================
 // SplitSection Variants
@@ -87,6 +89,10 @@ export interface SplitSectionProps
    * Background color for the section
    */
   bgClass?: string
+  /**
+   * Size of the section
+   */
+  size?: keyof typeof size | 'default'
 
   /**
    * Children elements (minimum 2 for diagonal to work)
@@ -150,11 +156,12 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
       children,
       asSection = true,
       style,
+      size,
       ...props
     },
     ref
   ) => {
-    const Component = asSection ? 'section' : 'div'
+    const Component = asSection ? Section : Div
 
     // Convert children to array
     const childrenArray = React.Children.toArray(children)
@@ -171,6 +178,7 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
     return (
       <Component
         ref={ref as any}
+        size={size}
         className={cn(
           splitSectionVariants({ layout, align, padding }),
           bgClass,
@@ -206,7 +214,10 @@ const SplitSection = React.forwardRef<HTMLElement, SplitSectionProps>(
 
           // Apply diagonal to this item
           return (
-            <div key={index} className={cn('relative h-full', layout === 'horizontal' && 'lg:-ml-16')}>
+            <div
+              key={index}
+              className={cn('relative h-full', layout === 'horizontal' && 'lg:-ml-16')}
+            >
               <div
                 className="relative h-full"
                 style={{
@@ -231,17 +242,19 @@ SplitSection.displayName = 'SplitSection'
 
 export interface SplitSectionItemProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * Content to display
+   * Size variant for padding and gap
+   * Accepts EzTag size variants: xs, sm, md, lg, xl, full
    */
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'default'
   children: React.ReactNode
 }
 
 const SplitSectionItem = React.forwardRef<HTMLDivElement, SplitSectionItemProps>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, size, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('w-full', className)} {...props}>
+      <Div ref={ref} size={size} className={cn(className)} {...props}>
         {children}
-      </div>
+      </Div>
     )
   }
 )

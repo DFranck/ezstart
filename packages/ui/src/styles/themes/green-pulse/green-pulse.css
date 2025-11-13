@@ -35,6 +35,9 @@
   --color-gp-primary-foreground: var(--gp-primary-foreground);
   --color-gp-secondary: var(--gp-secondary);
   --color-gp-secondary-foreground: var(--gp-secondary-foreground);
+  --color-gp-gradient-from: var(--gp-gradient-from);
+  --color-gp-gradient-via: var(--gp-gradient-via);
+  --color-gp-gradient-to: var(--gp-gradient-to);
 }
 
 @layer utilities {

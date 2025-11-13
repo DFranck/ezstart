@@ -2,8 +2,11 @@
 
 import { getApiUrl } from '@ezstart/config/urls'
 import {
+  Badge,
   Button,
   Card,
+  CardContent,
+  CardHeader,
   Div,
   Form,
   FormControl,
@@ -173,7 +176,7 @@ export default function HomePage(): any {
         inverted
       >
         {/* Left side - Content */}
-        <SplitSectionItem size="xl">
+        <SplitSectionItem size="xl" className="xl:mx-20">
           <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
             Challenge context :
           </H2>
@@ -232,7 +235,127 @@ export default function HomePage(): any {
           </Div>
         </SplitSectionItem>
       </SplitSection>
+      {/* Data Transformation Section */}
+      <Section size="full">
+        <H2 size="h3">GreenPulse.AI: Transform complex Data into impact strategies</H2>
+        <Div>
+          <Div size={'xs'} className="bg-gp-gradient w-full rounded-full relative"></Div>
+          {/* 3-Step Process with AI in center */}
+          <Div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto ">
+            {/* Arrow connections - Desktop only */}
+            <Div className="hidden md:block absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+              <Icon name="lucide:ArrowRight" size={30} className=" text-gp-primary" />
+            </Div>
+            <Div className="hidden md:block absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+              <Icon name="lucide:ArrowRight" size={30} className="font-black text-gp-secondary" />
+            </Div>
+            {/* Step 1: Discuss & Upload */}
+            <Card variant="ghost" className="relative space-y-4">
+              <CardHeader className="flex items-center">
+                <Badge circle circleSize={'lg'} className="bg-gp-gradient-from">
+                  1
+                </Badge>
+                <H3 size="h5" className="ml-2 w-fit">
+                  DISCUSS & UPLOAD
+                </H3>
+              </CardHeader>
+              <CardContent>
+                <Div className="flex justify-around items-center gap-4 bg-muted p-8 rounded-lg">
+                  <Icon name="lucide:FileText" size={30} />
+                  <Icon name="lucide:Mic" size={30} />
+                  <Icon name="lucide:Camera" size={30} />
+                  <Icon name="lucide:Paperclip" size={30} />
+                  <Icon name="lucide:MessageCircle" size={30} />
+                </Div>
+              </CardContent>
+            </Card>
+            {/* Step 2: Let GPA Works (AI Center) */}
+            <Card variant="ghost" className="relative space-y-4">
+              <CardHeader className="flex items-center">
+                <Badge circle circleSize={'lg'} className="bg-gp-gradient-via">
+                  2
+                </Badge>
+                <H3 size="h5" className="ml-2 w-fit">
+                  LET GPA WORKS FOR YOU
+                </H3>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center">
+                <Div className="bg-gp-gradient border-4 border-primary rounded-2xl p-8 w-fit">
+                  <Icon name="lucide:Brain" size={30} />
+                </Div>
+              </CardContent>
+            </Card>
+            {/* Step 3: Get Results */}
+            <Card variant="ghost" className="relative space-y-4">
+              <CardHeader className="flex items-center ">
+                <Badge circle circleSize={'lg'} className="bg-gp-gradient-to">
+                  3
+                </Badge>
+                <H3 size="h5" className="ml-2 w-fit">
+                  GET YOUR STRATEGY & KPIs
+                </H3>
+              </CardHeader>
+              <CardContent>
+                <Div className="flex justify-around items-center gap-4 bg-muted p-8 rounded-lg">
+                  <Icon name="lucide:FileCheck" size={30} />
+                  <Icon name="lucide:BarChart3" size={30} />
+                  <Icon name="lucide:Network" size={30} />
+                </Div>
+              </CardContent>
+            </Card>
+          </Div>
+        </Div>
+        {/* 3 Feature Cards */}
+        <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {/* Data Extraction */}
+          <Card variant="outline">
+            <CardHeader>
+              <Div className="flex items-center gap-3 mb-3">
+                <Icon name="lucide:Database" className="w-8 h-8 text-primary" />
+                <H3 size="h5">Powerful data extraction & centralisation</H3>
+              </Div>
+            </CardHeader>
+            <CardContent>
+              <P className="text-muted-foreground">
+                Voice, photo, and seamless integration with existing software (ERP, CRM, Excel) for
+                automated data extraction and pre-filling.
+              </P>
+            </CardContent>
+          </Card>
 
+          {/* ESG Analysis */}
+          <Card variant="outline">
+            <CardHeader>
+              <Div className="flex items-center gap-3 mb-3">
+                <Icon name="lucide:TrendingUp" className="w-8 h-8 text-primary" />
+                <H3 size="h5">Instant ESG Analysis</H3>
+              </Div>
+            </CardHeader>
+            <CardContent>
+              <P className="text-muted-foreground">
+                Real-time evaluation and scoring of projects and portfolios with customizable ESG
+                criteria and instant recommendations.
+              </P>
+            </CardContent>
+          </Card>
+
+          {/* Strategy & Reporting */}
+          <Card variant="outline">
+            <CardHeader>
+              <Div className="flex items-center gap-3 mb-3">
+                <Icon name="lucide:FileText" className="w-8 h-8 text-primary" />
+                <H3 size="h5">Tailored Strategy & Reporting</H3>
+              </Div>
+            </CardHeader>
+            <CardContent>
+              <P className="text-muted-foreground">
+                Conversational AI agent for personalized recommendations and compliant reports (GRI,
+                SFDR) tailored to your needs.
+              </P>
+            </CardContent>
+          </Card>
+        </Div>
+      </Section>
       {/* Value Proposition Section */}
       <Section size={'xl'}>
         <Div className="container mx-auto">
@@ -300,7 +423,7 @@ export default function HomePage(): any {
       {/* Packages Section */}
       <Section size={'full'}>
         <Div className="container mx-auto">
-          <H3 className="text-4xl font-bold text-center mb-16">{t('packages.title')}</H3>
+          <H3 className="text-4xl font-bold text-center ">{t('packages.title')}</H3>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {/* Free Package */}
