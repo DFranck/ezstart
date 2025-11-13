@@ -30,6 +30,7 @@ export {
   // Typography
   P,
   Span,
+  Strong,
   // Layout
   Div,
   Section,

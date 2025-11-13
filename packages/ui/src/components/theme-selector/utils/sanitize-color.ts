@@ -60,25 +60,27 @@ export function isHexColor(value: string): boolean {
 /**
  * Extract OKLCH components from string
  * Returns { l, c, h, a } or null if invalid
+ * Supports both decimal (0.62) and percentage (62%) formats for lightness
  */
 export function parseOklch(
   value: string
 ): { l: number; c: number; h: number; a?: number } | null {
-  const match = value.match(/oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/)
+  // Match OKLCH with optional % on lightness: oklch(62.104% 0.134 244.743) or oklch(0.62104 0.134 244.743)
+  const match = value.match(/oklch\(([\d.]+)%?\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/)
 
   if (!match || !match[1] || !match[2] || !match[3]) return null
 
-  const l = match[1]
-  const c = match[2]
-  const h = match[3]
-  const a = match[4]
+  let l = Number.parseFloat(match[1])
+  const c = Number.parseFloat(match[2])
+  const h = Number.parseFloat(match[3])
+  const a = match[4] ? Number.parseFloat(match[4]) : undefined
 
-  return {
-    l: Number.parseFloat(l),
-    c: Number.parseFloat(c),
-    h: Number.parseFloat(h),
-    a: a ? Number.parseFloat(a) : undefined,
+  // If lightness is > 1, assume it's a percentage (e.g., 62.104% → 0.62104)
+  if (l > 1) {
+    l = l / 100
   }
+
+  return { l, c, h, a }
 }
 
 /**

@@ -71,6 +71,16 @@ export const P = createAlias('p')
  */
 export const Span = createAlias('span')
 
+/**
+ * Strong - Strong emphasis (bold text)
+ * Semantic alternative to <Span className="font-bold">
+ * @example
+ * <Strong>Important text</Strong>
+ * <Strong className="text-destructive">Critical warning</Strong>
+ * <Strong className="bg-primary/20 px-1 rounded">Highlighted stat</Strong>
+ */
+export const Strong = createAlias('strong')
+
 // ============================================================================
 // LAYOUT
 // ============================================================================

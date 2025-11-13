@@ -165,6 +165,7 @@ export type TypographyTag =
   | 'h6'
   | 'p'
   | 'span'
+  | 'strong'
 
 /**
  * Layout tags

@@ -9,3 +9,6 @@ export * from './src/variants/tags/nav';
 export * from './src/variants/tags/p';
 export * from './src/variants/tags/section';
 export * from './src/variants/tags/span';
+
+// EzTag v2 - Export new components not present in v1
+export { Strong } from './src/v2';

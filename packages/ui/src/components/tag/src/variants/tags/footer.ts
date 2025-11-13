@@ -24,19 +24,16 @@ export const footerVariantConfig = {
   },
 } as const
 
-export const footerVariants = cva(
-  'container mx-auto w-full border-t border-border mt-10 pt-4 pb-4',
-  {
-    variants: footerVariantConfig,
-    defaultVariants: {
-      variant: 'default',
-      size: 'full',
-      intent: 'default',
-      layout: 'default',
-      withFixedMobilebar: false,
-    },
-  }
-)
+export const footerVariants = cva('container mx-auto w-full border-t border-border pt-4 pb-4', {
+  variants: footerVariantConfig,
+  defaultVariants: {
+    variant: 'default',
+    size: 'full',
+    intent: 'default',
+    layout: 'default',
+    withFixedMobilebar: false,
+  },
+})
 
 // Footer alias (optionnel si besoin)
 export const FooterTag = createAlias('footer')

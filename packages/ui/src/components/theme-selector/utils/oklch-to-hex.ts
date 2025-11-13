@@ -59,6 +59,7 @@ export function hexToOklch(hexString: string): string {
 
 /**
  * Convert any color string (OKLCH or Hex) to Hex
+ * Returns #000000 for non-color values (like 0.625rem)
  */
 export function toHex(colorString: string): string {
   const trimmed = colorString.trim()
@@ -74,8 +75,8 @@ export function toHex(colorString: string): string {
     return hex
   }
 
-  // Unknown format
-  console.warn(`[toHex] Unknown format: ${trimmed}`)
+  // Non-color value (like 0.625rem, 1.5, etc.) - return fallback silently
+  // Don't log warning for every non-color CSS variable
   return '#000000'
 }
 

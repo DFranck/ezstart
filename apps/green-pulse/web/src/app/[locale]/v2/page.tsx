@@ -21,8 +21,10 @@ import {
   KnownIconName,
   P,
   Section,
+  Span,
   SplitSection,
   SplitSectionItem,
+  Strong,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
@@ -92,7 +94,7 @@ export default function HomePage(): any {
   return (
     <>
       {/* Hero Section - Mix of slide presentation + v2 */}
-      <Section size={'full'} className={'bg-gp-gradient'}>
+      <Section size={'full'} className={'t'}>
         <Div layout={'row'}>
           <Image
             src="/logo.png"
@@ -102,13 +104,13 @@ export default function HomePage(): any {
             className="animate-pulse"
             style={{
               filter:
-                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
+                'drop-shadow(0 0 8px rgb(16 185 129 / 1)) drop-shadow(0 0 16px rgb(16 185 129 / 0.8))',
             }}
           />
 
           <H1>
             {t('hero.title')}
-            <span className="font-gugi font-medium">.AI</span>
+            <span className="font-gugi font-medium text-gp-primary">.AI</span>
           </H1>
         </Div>
         <Div layout={'center'} className="gap-6">
@@ -137,13 +139,13 @@ export default function HomePage(): any {
                 text: t('hero.typewriterText'),
               },
             ]}
-            cursorClassName="bg-gp-primary text-center"
+            className="text-gp-primary text-center"
             duration={3}
             delay={0.5}
           />
         </Div>
         {/* CTA Form (from v2) */}
-        <Div className="bg-background/90 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
+        <Div className=" backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
           <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
           <Form {...form}>
             <Div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -159,14 +161,17 @@ export default function HomePage(): any {
                   </FormItem>
                 )}
               />
-              <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+              <Button
+                type="submit"
+                onClick={form.handleSubmit(onSubmit)}
+                className="bg-gp-primary hover:bg-gp-primary/80"
+              >
                 {t('hero.notifyMe')}
               </Button>
             </Div>
           </Form>
         </Div>
       </Section>
-
       {/* Challenge Context Section - Using SplitSection with diagonal */}
       <SplitSection
         diagonal={true}
@@ -174,16 +179,14 @@ export default function HomePage(): any {
         diagonalAngle={15}
         align="stretch"
         inverted
+        className="lg:pb-20"
       >
         {/* Left side - Content */}
         <SplitSectionItem size="xl" className="xl:mx-20">
-          <H2 size={'h3'} className="text-2xl lg:text-3xl font-bold text-foreground">
-            Challenge context :
-          </H2>
-
           <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
-            The world is facing extreme weather due to climate change : Companies are pushed to move
-            beyond Business as Usual and to aim to sustainable growth:
+            The world is facing <Strong className="text-warning">extreme weather</Strong> due to
+            climate change, Companies are pushed to move beyond Business as Usual and to aim to
+            sustainable growth.
           </H3>
 
           <Div className="space-y-4">
@@ -193,7 +196,7 @@ export default function HomePage(): any {
               'Gaps in expertise to navigate international standards (GRI, SFDR, CSRD) required by impact investors',
             ].map((challenge, index) => (
               <Div key={index} className="flex items-start gap-3">
-                <Div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
               </Div>
             ))}
@@ -202,7 +205,7 @@ export default function HomePage(): any {
 
         {/* Right side - 3 images */}
         <SplitSectionItem className="h-full">
-          <Div className="grid grid-rows-3 h-full">
+          <Div className="grid grid-rows-1 h-full">
             {/* Image 1 - Climate */}
             <Div className="relative w-full h-full">
               <Image
@@ -212,47 +215,19 @@ export default function HomePage(): any {
                 className="object-cover"
               />
             </Div>
-
-            {/* Image 2 - Network */}
-            <Div className="relative w-full h-full">
-              <Image
-                src="/images/network.webp"
-                alt="International standards network (GRI, SFDR, CSRD)"
-                fill
-                className="object-cover"
-              />
-            </Div>
-
-            {/* Image 3 - Nature */}
-            <Div className="relative w-full h-full">
-              <Image
-                src="/images/nature.webp"
-                alt="Sustainable growth and ESG frameworks"
-                fill
-                className="object-cover"
-              />
-            </Div>
           </Div>
         </SplitSectionItem>
       </SplitSection>
       {/* Data Transformation Section */}
-      <Section size="full">
-        <H2 size="h3">GreenPulse.AI: Transform complex Data into impact strategies</H2>
+      <Section size="xl">
+        <H2 size="h3">GreenPulse.AI easily transform complex Data into impact strategies</H2>
         <Div>
-          <Div size={'xs'} className="bg-gp-gradient w-full rounded-full relative"></Div>
           {/* 3-Step Process with AI in center */}
           <Div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto ">
-            {/* Arrow connections - Desktop only */}
-            <Div className="hidden md:block absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-              <Icon name="lucide:ArrowRight" size={30} className=" text-gp-primary" />
-            </Div>
-            <Div className="hidden md:block absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-              <Icon name="lucide:ArrowRight" size={30} className="font-black text-gp-secondary" />
-            </Div>
             {/* Step 1: Discuss & Upload */}
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
-                <Badge circle circleSize={'lg'} className="bg-gp-gradient-from">
+                <Badge circle circleSize={'lg'} className="bg-gp-primary">
                   1
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
@@ -272,7 +247,7 @@ export default function HomePage(): any {
             {/* Step 2: Let GPA Works (AI Center) */}
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
-                <Badge circle circleSize={'lg'} className="bg-gp-gradient-via">
+                <Badge circle circleSize={'lg'} className="bg-gp-primary">
                   2
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
@@ -280,7 +255,7 @@ export default function HomePage(): any {
                 </H3>
               </CardHeader>
               <CardContent className="flex justify-center items-center">
-                <Div className="bg-gp-gradient border-4 border-primary rounded-2xl p-8 w-fit">
+                <Div className="bg-gp-primary border-4 border-primary rounded-2xl p-8 w-fit">
                   <Icon name="lucide:Brain" size={30} />
                 </Div>
               </CardContent>
@@ -288,7 +263,7 @@ export default function HomePage(): any {
             {/* Step 3: Get Results */}
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center ">
-                <Badge circle circleSize={'lg'} className="bg-gp-gradient-to">
+                <Badge circle circleSize={'lg'} className="bg-gp-primary">
                   3
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
@@ -308,12 +283,12 @@ export default function HomePage(): any {
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {/* Data Extraction */}
-          <Card variant="outline">
-            <CardHeader>
-              <Div className="flex items-center gap-3 mb-3">
-                <Icon name="lucide:Database" className="w-8 h-8 text-primary" />
-                <H3 size="h5">Powerful data extraction & centralisation</H3>
-              </Div>
+          <Card>
+            <CardHeader className="flex items-center gap-3">
+              <Icon name="lucide:Database" size={30} />
+              <H3 size="h6" className="w-fit">
+                Powerful data extraction & centralisation
+              </H3>
             </CardHeader>
             <CardContent>
               <P className="text-muted-foreground">
@@ -324,12 +299,10 @@ export default function HomePage(): any {
           </Card>
 
           {/* ESG Analysis */}
-          <Card variant="outline">
-            <CardHeader>
-              <Div className="flex items-center gap-3 mb-3">
-                <Icon name="lucide:TrendingUp" className="w-8 h-8 text-primary" />
-                <H3 size="h5">Instant ESG Analysis</H3>
-              </Div>
+          <Card>
+            <CardHeader className="flex items-center gap-3">
+              <Icon name="lucide:TrendingUp" size={30} />
+              <H3 size="h6">Instant ESG Analysis</H3>
             </CardHeader>
             <CardContent>
               <P className="text-muted-foreground">
@@ -340,12 +313,10 @@ export default function HomePage(): any {
           </Card>
 
           {/* Strategy & Reporting */}
-          <Card variant="outline">
-            <CardHeader>
-              <Div className="flex items-center gap-3 mb-3">
-                <Icon name="lucide:FileText" className="w-8 h-8 text-primary" />
-                <H3 size="h5">Tailored Strategy & Reporting</H3>
-              </Div>
+          <Card>
+            <CardHeader className="flex items-center gap-3">
+              <Icon name="lucide:FileText" size={30} />
+              <H3 size="h6">Tailored Strategy & Reporting</H3>
             </CardHeader>
             <CardContent>
               <P className="text-muted-foreground">
@@ -356,59 +327,283 @@ export default function HomePage(): any {
           </Card>
         </Div>
       </Section>
-      {/* Value Proposition Section */}
+      {/* Problem Statement Section */}
       <Section size={'xl'}>
         <Div className="container mx-auto">
-          <Card className="max-w-4xl mx-auto p-8 lg:p-12 border-l-4 border-primary">
-            <P className="text-lg lg:text-xl  mb-6 leading-relaxed">{t('value.intro')}</P>
-            <Div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                {
-                  icon: 'lucide:MessageCircle',
-                  text: t('value.points.chat'),
-                },
-                { icon: 'lucide:Gauge', text: t('value.points.measure') },
-                {
-                  icon: 'lucide:TrendingUp',
-                  text: t('value.points.improve'),
-                },
-                {
-                  icon: 'lucide:Target',
-                  text: t('value.points.roadmap'),
-                },
-                {
-                  icon: 'lucide:Banknote',
-                  text: t('value.points.qualify'),
-                },
-              ].map((item, index) => (
-                <Div key={index} className="flex items-start space-x-3">
-                  <Icon
-                    name={item.icon as KnownIconName}
-                    className="w-6 h-6 text-primary mt-1 flex-shrink-0"
+          <Div className="text-center mb-12">
+            <H2 size="h3" className="mb-4">
+              Sustainability Teams Are <Strong className="text-warning">Drowning</Strong> in
+              Complexity
+            </H2>
+            <P className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              You're not alone.{' '}
+              <Strong className="text-gp-primary">78% of sustainability managers</Strong> and{' '}
+              <Strong className="text-gp-primary">SMIs</Strong> report feeling overwhelmed by data
+              collection, compliance requirements, and stakeholder expectations.
+            </P>
+          </Div>
+
+          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                icon: 'lucide:Clock',
+                title: 'Hours Lost to Manual Work',
+                descriptionHtml:
+                  'Data entry, supplier emails, and report compilation consume <strong class="text-gp-primary ">60% of your week</strong> leaving little time for strategic initiatives.',
+              },
+              {
+                icon: 'lucide:FileWarning',
+                title: 'Compliance Anxiety',
+                descriptionHtml:
+                  'Keeping up with <strong class="text-gp-primary ">GRI, SFDR, CSRD, and ISSB</strong> frameworks feels like a full-time job. One missed update could derail investor confidence.',
+              },
+              {
+                icon: 'lucide:Users',
+                title: 'Resource Constraints',
+                descriptionHtml:
+                  'Your team is expected to deliver <strong class="text-gp-primary">enterprise-grade ESG programs</strong>, but budgets and headcount remain frozen.',
+              },
+            ].map((item, index) => (
+              <Card key={index}>
+                <CardHeader className="flex items-center gap-3">
+                  <Icon name={item.icon as KnownIconName} size={30} className="mr-3" />
+                  <H3 size="h6" className="w-fit">
+                    {item.title}
+                  </H3>
+                </CardHeader>
+                <CardContent>
+                  <P
+                    className="text-muted-foreground text-sm"
+                    dangerouslySetInnerHTML={{ __html: item.descriptionHtml }}
                   />
-                  <P className="">{item.text}</P>
-                </Div>
-              ))}
-            </Div>
-          </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </Div>
         </Div>
       </Section>
+      {/* Team Credibility Section */}
+      <Section size={'xl'} layout={'grid'}>
+        <Div className="px-6 py-12 md:px-12">
+          <H2 size="h3" className="mb-6">
+            Built by ESG Experts, Not Just Engineers
+          </H2>
+          <P className="text-lg text-muted-foreground mb-6 leading-relaxed">
+            GreenPulse.AI is created by sustainability professionals who've spent years in the
+            trenches—navigating compliance frameworks, managing stakeholder expectations, and
+            transforming raw data into actionable strategies.
+          </P>
+          <Div className="space-y-4">
+            {[
+              {
+                icon: 'lucide:Award',
+                text: '20+ years combined experience in ESG consulting and corporate sustainability',
+              },
+              {
+                icon: 'lucide:GraduationCap',
+                text: 'Certified GHG Protocol practitioners and ISSB framework specialists',
+              },
+              {
+                icon: 'lucide:Building2',
+                text: 'Worked with Fortune 500 companies and impact investors across 15+ industries',
+              },
+            ].map((item, index) => (
+              <Div key={index} className="flex items-start gap-3">
+                <Icon name={item.icon as KnownIconName} className="w-6 h-6  mt-1 flex-shrink-0" />
+                <P className="text-base">{item.text}</P>
+              </Div>
+            ))}
+          </Div>
+        </Div>
+        <Div className="relative w-full h-full min-h-[400px]">
+          <Image
+            src="/images/team-experts.webp"
+            alt="GreenPulse team of ESG experts and sustainability professionals"
+            fill
+            className="object-cover rounded-r-xl"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </Div>
+      </Section>
+      {/* Social Proof Section */}
+      <Section size={'xl'} className="bg-background">
+        <Div className="container mx-auto">
+          <H2 size="h4" className="text-center mb-12">
+            Trusted by Forward-Thinking Organizations
+          </H2>
+          Option 1:
+          <Div className="text-center max-w-3xl mx-auto mb-16">
+            <H3 size="h5" className="mb-4">
+              Integration Partners
+            </H3>
+            <P className="text-muted-foreground">
+              GreenPulse integrates with leading ESG platforms and reporting frameworks.
+              <Strong className="text-foreground"> We're expanding our partner ecosystem</Strong> to
+              help companies streamline their sustainability workflows across multiple platforms.
+            </P>
+            <P className="text-sm text-muted-foreground mt-4">
+              Platform provider?{' '}
+              <a href="#contact" className="text-primary hover:underline">
+                Let's discuss integration opportunities
+              </a>
+            </P>
+          </Div>
+          Option 2 :
+          <Div className="text-center max-w-3xl mx-auto mb-16">
+            <H3 size="h5" className="mb-4">
+              Built for Interoperability
+            </H3>
+            <P className="text-muted-foreground">
+              GreenPulse acts as a <Strong className="text-foreground">central hub</Strong> that
+              connects to ESG platforms, rating agencies, and reporting tools—helping users manage
+              data across their entire sustainability tech stack.
+            </P>
+            <Div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
+              <P className="text-sm">
+                <Strong>For Platform Partners:</Strong> Expand your reach with seamless API
+                integration. Acquire customers through our network while enriching your data
+                ecosystem.
+              </P>
+            </Div>
+          </Div>
+          Option 3 :
+          <Div className="text-center max-w-2xl mx-auto mb-16">
+            <H3 size="h5" className="text-muted-foreground mb-3">
+              Integration Ecosystem
+            </H3>
+            <P className="text-muted-foreground text-sm">
+              We connect to ESG platforms, reporting frameworks, and rating agencies through secure
+              APIs.
+              <br />
+              <a
+                href="mailto:partnerships@greenpulse.ai"
+                className="text-primary hover:underline mt-2 inline-block"
+              >
+                Platform providers: explore partnership opportunities →
+              </a>
+            </P>
+          </Div>
+          {/* <Div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-16">
+            {[1, 2, 3, 4].map(i => (
+              <Div
+                key={i}
+                className="h-20 bg-muted rounded-lg flex items-center justify-center border border-border"
+              >
+                <P className="text-muted-foreground text-sm">Partner Logo {i}</P>
+              </Div>
+            ))}
+          </Div> */}
+          <Div>
+            <H3 size="h5" className="text-center mb-8 text-muted-foreground">
+              As Featured In
+            </H3>
+            <Div layout={'center'} className="max-w-3xl mx-auto">
+              {[
+                {
+                  publication: 'VietStock',
+                  quote: '"Tay xanh" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế',
+                  logo: '/images/vietstock.svg',
+                  url: 'https://vietstock.vn/2025/11/tay-xanh-duoi-goc-nhin-cua-chuyen-gia-tu-van-esg-quoc-te-761-1365211.htm',
+                  date: 'November 2025',
+                },
+              ].map((item, index) => (
+                <a
+                  key={index}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full"
+                >
+                  <Card className="p-6 border-l-4 border-gp-primary hover:shadow-lg transition-shadow">
+                    <Div className="flex items-start gap-6">
+                      <Div className="flex-shrink-0 w-32 h-12 relative">
+                        <Image
+                          src={item.logo}
+                          alt={item.publication}
+                          fill
+                          className="object-contain"
+                        />
+                      </Div>
+                      <Div className="flex-1">
+                        <P className="font-semibold mb-2">
+                          {item.publication}{' '}
+                          <Span size={'xs'} variant={'description'}>
+                            {item.date}
+                          </Span>
+                        </P>
+                        <P className="text-muted-foreground italic">{item.quote}</P>
+                      </Div>
+                    </Div>
+                  </Card>
+                </a>
+              ))}
+            </Div>
+          </Div>
+        </Div>
+      </Section>
+      {/* FAQ Section */}
+      <Section size={'xl'} className="bg-muted/30">
+        <Div className="container mx-auto max-w-4xl">
+          <H2 size="h3" className="text-center mb-12">
+            Common Questions
+          </H2>
 
+          <Div className="space-y-4">
+            {[
+              {
+                question: 'How is GreenPulse different from ChatGPT or other general AI tools?',
+                answer:
+                  "GreenPulse is purpose-built for ESG compliance and sustainability reporting. Unlike ChatGPT, we're trained on international frameworks (GRI, SFDR, CSRD, ISSB) and integrate with your existing data sources (ERP, CRM, Excel). We provide structured outputs that meet regulatory requirements—not generic text that needs manual review.",
+              },
+              {
+                question: 'Is my data secure? Do you share it with third parties?',
+                answer:
+                  'Your data is encrypted end-to-end and stored in SOC 2 Type II compliant infrastructure. We never share your data with third parties or use it to train AI models. All processing happens within your secure tenant, and you maintain full ownership of your sustainability data.',
+              },
+              {
+                question: "Doesn't AI generate emissions? How do you manage this?",
+                answer:
+                  "Yes, AI computing does generate emissions—which is why we offset 200% of our carbon footprint through verified carbon removal projects. More importantly, GreenPulse's automation reduces the need for travel, paper reports, and redundant manual work, resulting in a net-negative carbon impact for our users.",
+              },
+              {
+                question: 'Can GreenPulse integrate with our existing tools?',
+                answer:
+                  'Absolutely. GreenPulse connects with major ERP systems (SAP, Oracle), CRMs (Salesforce, HubSpot), and data sources (Excel, Google Sheets, CSV). Our API allows custom integrations for proprietary systems. Most implementations are live within 2 weeks.',
+              },
+              {
+                question: 'What if GreenPulse makes a mistake in compliance reporting?',
+                answer:
+                  'GreenPulse provides transparency in all outputs—showing which frameworks and data points inform each recommendation. All reports include human-in-the-loop review checkpoints before finalization. We also offer audit trails and version control to ensure regulatory confidence.',
+              },
+            ].map((item, index) => (
+              <Card key={index} className="p-6 bg-card">
+                <Div>
+                  <H3 size="h5" className="mb-3 flex items-start gap-3">
+                    <Icon name="lucide:HelpCircle" className="w-6 h-6  flex-shrink-0 mt-1" />
+                    <Span>{item.question}</Span>
+                  </H3>
+                  <P className="text-muted-foreground leading-relaxed pl-9">{item.answer}</P>
+                </Div>
+              </Card>
+            ))}
+          </Div>
+        </Div>
+      </Section>
       {/* Example Interaction Section */}
-      <Section size={'xl'} className="max-w-full bg-gp-gradient">
+      <Section size={'xl'} className="max-w-full t">
         <H3>{t('example.title')}</H3>
         <Card variant={'ghost'} className="p-0 space-y-6">
           <Div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
             <Div className="flex items-start space-x-3 ">
-              <Icon name="lucide:User" className="w-6 h-6 text-primary mt-1" />
+              <Icon name="lucide:User" className="w-6 h-6  mt-1" />
               <Div>
-                <P className="font-semibold text-primary mb-2">{t('example.user')}</P>
+                <P className="font-semibold  mb-2">{t('example.user')}</P>
                 <P className="">{t('example.userMessage')}</P>
               </Div>
             </Div>
           </Div>
 
-          <Div className="bg-accent/50 p-6 rounded-xl border-l-4 border-accent-foreground">
+          <Div className="bg-muted p-6 rounded-xl border-l-4 border-accent-foreground">
             <Div className="flex items-start space-x-3">
               <Icon name="lucide:Bot" className="w-6 h-6 text-accent-foreground mt-1" />
               <Div>
@@ -419,9 +614,8 @@ export default function HomePage(): any {
           </Div>
         </Card>
       </Section>
-
       {/* Packages Section */}
-      <Section size={'full'}>
+      <Section size="full">
         <Div className="container mx-auto">
           <H3 className="text-4xl font-bold text-center ">{t('packages.title')}</H3>
 
@@ -445,26 +639,20 @@ export default function HomePage(): any {
 
               <Div className="space-y-3">
                 <Div className="flex items-center space-x-3">
-                  <Icon name="lucide:MessageCircle" className="w-5 h-5 text-primary" />
+                  <Icon name="lucide:MessageCircle" className="w-5 h-5 " />
                   <P className="">{t('packages.free.features.chat')}</P>
                 </Div>
               </Div>
             </Card>
 
             {/* Premium Package */}
-            <Card className="p-8 border-2 border-primary/30 bg-card relative">
-              <Div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <P className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                  {t('packages.premium.badge')}
-                </P>
-              </Div>
-
+            <Card className="p-8 border-2 border-primary/30  relative">
               <Div className="text-center mb-6">
-                <Icon name="lucide:TrendingUp" className="w-12 h-12 text-primary mx-auto mb-4" />
+                <Icon name="lucide:TrendingUp" className="w-12 h-12  mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
                   {t('packages.premium.title')}
                 </H3>
-                <P className="text-sm font-medium text-primary uppercase tracking-wide">
+                <P className="text-sm font-medium  uppercase tracking-wide">
                   {t('packages.premium.subtitle')}
                 </P>
               </Div>
@@ -482,7 +670,7 @@ export default function HomePage(): any {
                   { icon: 'lucide:ClipboardList', text: t('packages.premium.features.plans') },
                 ].map((item, index) => (
                   <Div key={index} className="flex items-center space-x-3">
-                    <Icon name={item.icon as KnownIconName} className="w-5 h-5 text-primary" />
+                    <Icon name={item.icon as KnownIconName} className="w-5 h-5 " />
                     <P className="text-sm">{item.text}</P>
                   </Div>
                 ))}
@@ -490,7 +678,7 @@ export default function HomePage(): any {
             </Card>
 
             {/* Golden Package */}
-            <Card className="p-8 border-2 border-amber-300 bg-card">
+            <Card className="p-8 border-2 border-amber-300 ">
               <Div className="text-center mb-6">
                 <Icon name="lucide:Award" className="w-12 h-12 text-amber-500 mx-auto mb-4" />
                 <H3 className="text-2xl font-bold text-foreground mb-2">
@@ -524,15 +712,12 @@ export default function HomePage(): any {
           </Div>
         </Div>
       </Section>
-
       {/* Bottom CTA Section */}
-      <Section size={'xl'} className="max-w-full bg-gp-gradient">
+      <Section size={'xl'} className="max-w-full t">
         <Div className="container mx-auto text-center">
           <Div className="max-w-3xl mx-auto">
-            <H3 className="text-3xl lg:text-4xl font-bold text-primary-foreground mb-6">
-              {t('cta.title')}
-            </H3>
-            <P className="text-xl text-primary-foreground/90 mb-8">{t('cta.description')}</P>
+            <H3 className="text-3xl lg:text-4xl font-bold  mb-6">{t('cta.title')}</H3>
+            <P className="text-xl mb-8">{t('cta.description')}</P>
             <Form {...form}>
               <Div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <FormField
@@ -541,22 +726,13 @@ export default function HomePage(): any {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder={t('hero.emailPlaceholder')}
-                          {...field}
-                          className="bg-white"
-                        />
+                        <Input type="email" placeholder={t('hero.emailPlaceholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="submit"
-                  onClick={form.handleSubmit(onSubmit)}
-                  className="bg-background text-primary hover:bg-background/80 font-semibold px-8 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
+                <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
                   {t('cta.joinWaitlist')}
                 </Button>
               </Div>

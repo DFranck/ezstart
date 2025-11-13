@@ -35,12 +35,17 @@ export function ColorVariableEditor({
 
   const handleInputChange = useCallback(
     (newValue: string) => {
-      setInputValue(newValue)
+      console.log('[ColorVariableEditor] handleInputChange called:', {
+        variable: variable.name,
+        newValue,
+        currentValue: value
+      })
 
       // Basic validation (you can make this stricter)
       const isOklch = /^oklch\([\d.]+ [\d.]+ [\d.]+/.test(newValue.trim())
       const isHex = /^#[0-9A-Fa-f]{3,6}$/.test(newValue.trim())
 
+      console.log('[ColorVariableEditor] Validation:', { isOklch, isHex })
       setIsValid(isOklch || isHex)
 
       // Only update if valid
@@ -56,13 +61,21 @@ export function ColorVariableEditor({
         if (originalIsOklch && inputIsHex) {
           // Convert HEX → OKLCH to preserve format
           finalValue = toOklch(finalValue)
-          setInputValue(finalValue) // Update input to show OKLCH
+          console.log('[ColorVariableEditor] Converted HEX to OKLCH:', finalValue)
         }
 
+        // Update local input state AFTER conversion
+        setInputValue(finalValue)
+
+        // Notify parent of change
+        console.log('[ColorVariableEditor] Calling onChange:', { name: variable.name, value: finalValue })
         onChange(variable.name, finalValue)
+      } else {
+        // Invalid input - still update local state to show what user typed
+        setInputValue(newValue)
       }
     },
-    [variable.name, variable.value, onChange]
+    [variable.name, variable.value, value, onChange]
   )
 
   const handleReset = useCallback(() => {
