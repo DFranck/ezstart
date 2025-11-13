@@ -37,6 +37,9 @@ export function mergeTheme(
 /**
  * Get only the variables that differ from default theme
  * Returns a record of overridden variables
+ *
+ * IMPORTANT: Handles prefixed variable names (light:--background, dark:--background)
+ * by stripping the prefix before comparing with defaultTheme
  */
 export function getThemeDiff(
   defaultTheme: ThemeConfig,
@@ -45,7 +48,11 @@ export function getThemeDiff(
   const diff: Record<string, string> = {}
 
   for (const [varName, currentValue] of Object.entries(currentValues)) {
-    const defaultVar = defaultTheme.variables.find(v => v.name === varName)
+    // Strip theme prefix (light:, dark:) if present
+    const unprefixedVarName = varName.replace(/^(light|dark):/, '')
+
+    // Find default variable using unprefixed name
+    const defaultVar = defaultTheme.variables.find(v => v.name === unprefixedVarName)
 
     // Include if value changed or variable is new
     if (!defaultVar || defaultVar.value !== currentValue) {
