@@ -1,10 +1,10 @@
 /**
- * Convert OKLCH to Hex color
+ * Convert OKLCH to Hex color (and vice versa)
  * Uses culori for accurate color space conversions
  */
 
-import { formatHex, oklch } from 'culori'
-import { parseOklch } from './sanitize-color'
+import { formatHex, oklch, parseHex } from 'culori'
+import { parseOklch, stringifyOklch } from './sanitize-color'
 
 /**
  * Convert OKLCH string to Hex
@@ -32,6 +32,32 @@ export function oklchToHex(oklchString: string): string {
 }
 
 /**
+ * Convert Hex string to OKLCH
+ * Returns oklch(...) string if conversion succeeds
+ */
+export function hexToOklch(hexString: string): string {
+  try {
+    const color = parseHex(hexString)
+    if (!color) {
+      console.error('[hexToOklch] Failed to parse:', hexString)
+      return hexString
+    }
+
+    const oklchColor = oklch(color)
+    if (!oklchColor) {
+      console.error('[hexToOklch] Failed to convert to OKLCH:', hexString)
+      return hexString
+    }
+
+    const { l, c, h } = oklchColor
+    return stringifyOklch(l || 0, c || 0, h || 0)
+  } catch (error) {
+    console.error('[hexToOklch] Error:', error, 'for input:', hexString)
+    return hexString
+  }
+}
+
+/**
  * Convert any color string (OKLCH or Hex) to Hex
  */
 export function toHex(colorString: string): string {
@@ -51,4 +77,25 @@ export function toHex(colorString: string): string {
   // Unknown format
   console.warn(`[toHex] Unknown format: ${trimmed}`)
   return '#000000'
+}
+
+/**
+ * Convert any color string to OKLCH
+ */
+export function toOklch(colorString: string): string {
+  const trimmed = colorString.trim()
+
+  // Already OKLCH
+  if (trimmed.startsWith('oklch(')) {
+    return trimmed
+  }
+
+  // Hex
+  if (trimmed.startsWith('#')) {
+    return hexToOklch(trimmed)
+  }
+
+  // Unknown format
+  console.warn(`[toOklch] Unknown format: ${trimmed}`)
+  return 'oklch(0 0 0)'
 }

@@ -6,7 +6,7 @@ import { Icon } from '../../icon'
 import { Input } from '../../input'
 import { Label } from '../../label'
 import type { ThemeVariable } from '../types'
-import { toHex } from '../utils/oklch-to-hex'
+import { toHex, toOklch } from '../utils/oklch-to-hex'
 
 interface ColorVariableEditorProps {
   variable: ThemeVariable
@@ -45,10 +45,24 @@ export function ColorVariableEditor({
 
       // Only update if valid
       if (isOklch || isHex) {
-        onChange(variable.name, newValue.trim())
+        // IMPORTANT: Preserve original format
+        // If original variable was OKLCH and user inputs HEX (from color picker),
+        // convert back to OKLCH to maintain format consistency
+        let finalValue = newValue.trim()
+
+        const originalIsOklch = variable.value.trim().startsWith('oklch(')
+        const inputIsHex = finalValue.startsWith('#')
+
+        if (originalIsOklch && inputIsHex) {
+          // Convert HEX → OKLCH to preserve format
+          finalValue = toOklch(finalValue)
+          setInputValue(finalValue) // Update input to show OKLCH
+        }
+
+        onChange(variable.name, finalValue)
       }
     },
-    [variable.name, onChange]
+    [variable.name, variable.value, onChange]
   )
 
   const handleReset = useCallback(() => {
