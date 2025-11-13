@@ -52,6 +52,7 @@ docRouter.put(
       // const userId = req.user?.id
 
       // Upsert theme override
+      // @ts-ignore - Mongoose type overload issue with lean option + exec()
       const themeOverride = await ThemeOverride.findOneAndUpdate(
         { appName },
         {
@@ -65,7 +66,7 @@ docRouter.put(
           new: true,
           lean: true,
         }
-      )
+      ).exec()
 
       // Convert Map to Object
       const overridesObj: Record<string, string> = {}
@@ -97,7 +98,7 @@ docRouter.put(
   {
     summary: 'Update theme overrides',
     tags: ['Theme'],
-    requestSchema: UpdateThemeRequestSchema,
+    bodySchema: UpdateThemeRequestSchema,
     responseSchema: ThemeResponseSchema,
   }
 )

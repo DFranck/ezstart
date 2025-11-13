@@ -3,7 +3,7 @@ import getThemeRouter, { getThemeRegistry } from './getTheme.js'
 import updateThemeRouter, { updateThemeRegistry } from './updateTheme.js'
 import deleteThemeRouter, { deleteThemeRegistry } from './deleteTheme.js'
 
-const router = Router()
+const router: any = Router()
 
 router.use(getThemeRouter)
 router.use(updateThemeRouter)

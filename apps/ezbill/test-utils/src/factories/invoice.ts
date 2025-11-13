@@ -14,6 +14,7 @@ export function createTestInvoice(overrides: Partial<Invoice> = {}): Invoice {
     clientId: Math.random().toString(36).substring(7),
     documentNumber: 'INV-001',
     status: 'draft',
+    billingType: 'itemized',
     items: [
       {
         _id: Math.random().toString(36).substring(7),

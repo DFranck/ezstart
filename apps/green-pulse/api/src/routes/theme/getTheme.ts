@@ -31,7 +31,8 @@ docRouter.get(
       // In the future, this could be multi-tenant
       const appName = 'green-pulse'
 
-      const themeOverride = await ThemeOverride.findOne({ appName }).lean()
+      // @ts-ignore - Mongoose type overload issue with lean() + exec()
+      const themeOverride = await ThemeOverride.findOne({ appName }).lean().exec()
 
       if (!themeOverride) {
         return res.json({
