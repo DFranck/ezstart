@@ -2,13 +2,21 @@
   "name": "@ezstart/ai-sdk",
   "version": "1.0.0",
   "type": "module",
-  "description": "Reusable AI SDK for backend APIs with configurable providers, preprompts, and hooks",
+  "description": "Unified AI SDK with multi-provider support (OpenAI, Gemini, Claude) for backend and frontend",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
     }
   },
   "scripts": {
@@ -18,11 +26,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "openai": "^4.77.3"
+    "openai": "^4.77.3",
+    "@google/generative-ai": "^0.21.0",
+    "zustand": "^4.5.5"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1 || ^19.0.0"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
+    "@ezstart/ui": "workspace:*",
+    "@ezstart/fetch-client": "workspace:*",
     "@types/node": "^22.10.2",
+    "@types/react": "^19.1.12",
+    "react": "^19.1.1",
     "typescript": "^5.7.2"
   }
 }
