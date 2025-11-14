@@ -1,10 +1,9 @@
 'use client'
 
 import type { AuthUser } from '@ezstart/auth-sdk'
-import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
+import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
 import { useRBAC } from '@ezstart/rbac'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac-ui'
 import {
   Badge,
   Button,
@@ -28,7 +27,6 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { UserEditModal } from './components/user-edit-modal'
 import { UserManagementTable } from './components/user-management-table'
-import { useAuth } from '@ezstart/auth-sdk'
 
 interface PaginatedUsers {
   users: AuthUser[]
@@ -40,11 +38,13 @@ interface PaginatedUsers {
   }
 }
 
-function AdminPanelContent() {
-  const { user } = useAuth()
+export default function AdminPage() {
+  // ✅ ALL HOOKS MUST BE CALLED FIRST (before any conditional returns)
+  const { user, isAuthenticated } = useAuthStore()
   const t = useTranslations()
   const rbac = useRBAC(user)
   const [users, setUsers] = useState<AuthUser[]>([])
+  const [isHydrated, setIsHydrated] = useState(false)
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,6 +75,7 @@ function AdminPanelContent() {
         setUsers(response.data.users)
         setPagination(response.data.pagination)
       } else {
+        // Show specific error from API (e.g., "Unauthorized", "Forbidden")
         const errorMsg =
           response.status === 401
             ? 'Unauthorized - Please login again'
@@ -91,9 +92,66 @@ function AdminPanelContent() {
     }
   }
 
+  // Wait for client-side hydration
   useEffect(() => {
-    fetchUsers()
-  }, [searchQuery, roleFilter])
+    // Simple check: wait one tick for Zustand to hydrate from localStorage
+    const timer = setTimeout(() => setIsHydrated(true), 0)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // ✅ useEffect MUST be before conditional returns
+  useEffect(() => {
+    if (isAuthenticated && rbac.hasAnyRole(['admin', 'superadmin'])) {
+      fetchUsers()
+    }
+  }, [searchQuery, roleFilter, isAuthenticated])
+
+  // ✅ NOW we can do conditional returns (after all hooks)
+
+  // Show loading while hydrating
+  if (!isHydrated) {
+    return (
+      <Section size="full">
+        <Spinner size="lg" />
+      </Section>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Section size="full">
+        <Card variant={'ghost'}>
+          <CardHeader>
+            <H2>Access Denied</H2>
+          </CardHeader>
+          <CardContent size="xl" className="flex flex-col gap-4 ">
+            <P className="text-muted-foreground mt-2">You must be logged in to access this page.</P>
+            <LoginButton>{isAuthenticated ? t('auth.logout') : t('auth.login')}</LoginButton>
+          </CardContent>
+        </Card>
+      </Section>
+    )
+  }
+
+  if (!rbac.hasAnyRole(['superadmin'])) {
+    return (
+      <Section size={'full'}>
+        <Card variant={'ghost'}>
+          <CardHeader>
+            <H2>Access Denied</H2>
+          </CardHeader>
+          <CardContent size="xl" className="flex flex-col gap-4 ">
+            <P className="text-muted-foreground mt-2">
+              You don't have permission to access the admin panel.
+            </P>
+            <Badge variant="destructive" className="w-fit self-center">
+              Required: Superadmin role
+            </Badge>
+          </CardContent>
+        </Card>
+      </Section>
+    )
+  }
 
   return (
     <Div size={'xs'}>
@@ -201,41 +259,5 @@ function AdminPanelContent() {
         />
       )}
     </Div>
-  )
-}
-
-export default function AdminPage() {
-  const t = useTranslations()
-
-  return (
-    <RequireAuth
-      loadingComponent={
-        <Section size="full">
-          <Spinner size="lg" />
-        </Section>
-      }
-      fallbackComponent={
-        <Section size="full">
-          <Card variant={'ghost'}>
-            <AccessDenied>
-              <LoginButton>{t('auth.login')}</LoginButton>
-            </AccessDenied>
-          </Card>
-        </Section>
-      }
-    >
-      <RequireRole
-        roles="superadmin"
-        fallbackComponent={
-          <Section size={'full'}>
-            <Card variant={'ghost'}>
-              <InsufficientPermissions requiredRoles="superadmin" />
-            </Card>
-          </Section>
-        }
-      >
-        <AdminPanelContent />
-      </RequireRole>
-    </RequireAuth>
   )
 }
