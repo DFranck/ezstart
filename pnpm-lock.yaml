@@ -1071,6 +1071,9 @@ importers:
 
   apps/green-pulse/web:
     dependencies:
+      '@ezstart/ai-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/ai-sdk
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../../../packages/auth-sdk
@@ -1420,25 +1423,6 @@ importers:
         version: 0.34.3
       typescript:
         specifier: ^5.7.3
-        version: 5.7.3
-
-  packages/ai-chat:
-    dependencies:
-      '@ezstart/fetch-client':
-        specifier: workspace:*
-        version: link:../fetch-client
-      react:
-        specifier: ^18.3.1 || ^19.0.0
-        version: 19.1.1
-    devDependencies:
-      '@ezstart/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/react':
-        specifier: ^19.1.12
-        version: 19.1.12
-      typescript:
-        specifier: ^5.7.2
         version: 5.7.3
 
   packages/ai-sdk:

@@ -6,12 +6,13 @@
   "scripts": {
     "dev": "node ../../../packages/config/bin/dev-server.js",
     "dev:port": "next dev -p $PORT",
-    "build": "pnpm --filter @green-pulse/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/rbac --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @green-pulse/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/rbac --filter @ezstart/ai-sdk --filter @ezstart/next-theme build && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ezstart/ai-sdk": "workspace:*",
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",

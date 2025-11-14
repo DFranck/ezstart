@@ -5,6 +5,7 @@ import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { getApiUrl } from '@ezstart/config'
 import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { useProviders } from '@ezstart/ai-sdk/client'
 import { Button, Card, CardContent, Div, H3, Icon, Input, P, Section, Spinner } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -17,6 +18,9 @@ function LiaPageContent(): any {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [onConversationCreated, setOnConversationCreated] = useState<(() => void) | null>(null)
 
+  // Load AI providers from API
+  const { providers, selectedProvider, setSelectedProvider } = useProviders('green-pulse')
+
   const config = useMemo(
     () => ({
       endpoint: `${getApiUrl('green-pulse')}/api/chat`,
@@ -28,6 +32,7 @@ function LiaPageContent(): any {
         const payload: any = {
           message,
           extract_esg: false,
+          providerId: selectedProvider, // AI provider selection
           // Include userId if authenticated
           ...(isAuthenticated && user?._id && { userId: user._id }),
         }
@@ -56,8 +61,8 @@ function LiaPageContent(): any {
         console.error('LIA Chat Error:', error)
       },
     }),
-    [isAuthenticated, user, activeConversationId, onConversationCreated]
-  ) // Re-create when auth state or activeConversationId changes
+    [isAuthenticated, user, activeConversationId, onConversationCreated, selectedProvider]
+  ) // Re-create when auth state, activeConversationId, or selectedProvider changes
 
   return (
     <ThreadProvider config={config}>
@@ -65,6 +70,9 @@ function LiaPageContent(): any {
         activeConversationId={activeConversationId}
         setActiveConversationId={setActiveConversationId}
         onRegisterConversationCreatedCallback={setOnConversationCreated}
+        providers={providers}
+        selectedProvider={selectedProvider}
+        onProviderChange={setSelectedProvider}
       />
     </ThreadProvider>
   )

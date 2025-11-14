@@ -54,6 +54,8 @@ export type ThreadComposerProps = {
   welcomeMessage?: React.ReactNode
   showFileUpload?: boolean
   className?: string
+  headerSlot?: React.ReactNode
+  isNewThread?: boolean
 }
 
 export type ThreadWelcomeProps = {

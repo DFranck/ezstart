@@ -3,6 +3,8 @@
 import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
 import { useAuthStore } from '@ezstart/auth-sdk'
+import type { AIProviderInfo } from '@ezstart/ai-sdk'
+import { AISelector } from '@ezstart/ai-sdk/client'
 import {
   Conversation,
   Thread,
@@ -20,12 +22,18 @@ type LiaThreadProps = {
   activeConversationId: string | null
   setActiveConversationId: (id: string | null) => void
   onRegisterConversationCreatedCallback?: (callback: () => void) => void
+  providers?: AIProviderInfo[]
+  selectedProvider?: string | null
+  onProviderChange?: (providerId: string) => void
 }
 
 export function LiaThread({
   activeConversationId,
   setActiveConversationId,
   onRegisterConversationCreatedCallback,
+  providers = [],
+  selectedProvider,
+  onProviderChange,
 }: LiaThreadProps) {
   // Check if user is authenticated
   const { isAuthenticated } = useAuthStore()
@@ -192,6 +200,18 @@ export function LiaThread({
             title="Welcome to LIA"
             description="Your AI assistant for sustainability and ESG reporting"
           />
+        }
+        headerSlot={
+          providers.length > 0 && selectedProvider && onProviderChange ? (
+            <div className="px-4 py-2 border-b border-border bg-muted/30">
+              <AISelector
+                value={selectedProvider}
+                onChange={onProviderChange}
+                providers={providers}
+                showCapabilities={true}
+              />
+            </div>
+          ) : null
         }
       />
     </ThreadLayout>

@@ -19,6 +19,7 @@ type ThreadComposerProps = {
   onFilesChange?: (files: File[]) => void;
   removeFileText?: string;
   sendLabel?: string;
+  headerSlot?: React.ReactNode;
 };
 
 export const ThreadComposer = React.memo(function ThreadComposer({
@@ -34,6 +35,7 @@ export const ThreadComposer = React.memo(function ThreadComposer({
   onFilesChange,
   removeFileText = 'Remove',
   sendLabel = 'Send message',
+  headerSlot,
 }: ThreadComposerProps) {
   const layoutContext = useThreadLayout();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -100,6 +102,7 @@ export const ThreadComposer = React.memo(function ThreadComposer({
             'w-full'
           )}
         >
+          {headerSlot}
           <div className='flex flex-col w-full items-end'>
             {files.length > 0 && (
               <div className='w-full px-3 pt-2 pb-1 space-y-1'>
