@@ -5,8 +5,9 @@ import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { getApiUrl } from '@ezstart/config'
 import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
-import { Button, Card, CardContent, Div, H3, Icon, P, Section, Spinner } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, H3, Icon, Input, P, Section, Spinner } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -71,7 +72,26 @@ function LiaPageContent(): any {
 
 function BetaAccessRequest() {
   const { user } = useAuthStore()
-  const [requested, setRequested] = useState(false)
+  const [accessCode, setAccessCode] = useState('')
+
+  // Refetch user helper
+  const refetchUser = async () => {
+    // Force re-login to refresh roles
+    window.location.reload()
+  }
+
+  // Check waitlist status
+  const { data: waitlistStatus, refetch: refetchStatus } = useQuery({
+    queryKey: ['waitlist-status', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null
+      const apiUrl = getApiUrl('ezauth')
+      const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`)
+      if (!response.ok) return null
+      return response.json()
+    },
+    enabled: !!user?.email,
+  })
 
   const handleRequest = async () => {
     if (!user?.email) return
@@ -88,42 +108,128 @@ function BetaAccessRequest() {
         const data = await response.json()
 
         if (!response.ok) {
-          if (response.status === 409 && data.code === 'EMAIL_EXISTS') {
-            throw new Error('You are already on the waitlist!')
-          }
           throw new Error(data.error || 'Failed to request beta access')
         }
 
-        setRequested(true)
+        await refetchStatus()
         return data
       },
       toastLoading: { message: 'Requesting beta access...' },
-      toastSuccess: { message: 'Beta access requested! We will review your request soon.' },
-      toastError: false,
-      onError: error => {
-        toast.error(error instanceof Error ? error.message : 'Failed to request beta access')
-      },
+      toastSuccess: { message: 'Beta access requested! Waiting for admin approval.' },
     })
   }
+
+  const handleActivate = async () => {
+    if (!accessCode || !user?.email) return
+
+    await runWithFeedback({
+      action: async () => {
+        const apiUrl = getApiUrl('ezauth')
+        const response = await fetch(`${apiUrl}/api/auth/register-with-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            accessCode: accessCode.trim().toUpperCase(),
+          }),
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Invalid access code')
+        }
+
+        await refetchUser()
+        return response.json()
+      },
+      toastLoading: { message: 'Activating...' },
+      toastSuccess: { message: 'Access activated! Refreshing session...' },
+    })
+  }
+
+  const handleRefreshSession = async () => {
+    await runWithFeedback({
+      action: async () => {
+        await refetchUser()
+      },
+      toastLoading: { message: 'Refreshing session...' },
+      toastSuccess: { message: 'Session refreshed! You now have access.' },
+    })
+  }
+
+  const status = waitlistStatus?.status
 
   return (
     <Section size={'full'}>
       <Card variant={'ghost'}>
         <CardContent className="text-center py-12 space-y-6">
           <InsufficientPermissions requiredRoles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']} />
-          {!requested ? (
+
+          {/* Pending state */}
+          {status === 'pending' && (
+            <Div className="space-y-4">
+              <Icon name="lucide:Clock" className="w-12 h-12 mx-auto text-orange-500" />
+              <P className="text-orange-600 font-medium">Request submitted!</P>
+              <P className="text-sm text-muted-foreground">
+                Waiting for admin approval. We'll notify you once approved.
+              </P>
+            </Div>
+          )}
+
+          {/* Invited state - needs to enter code */}
+          {status === 'invited' && (
+            <Div className="space-y-4">
+              <Icon name="lucide:Mail" className="w-12 h-12 mx-auto text-blue-500" />
+              <P className="text-blue-600 font-medium">You've been approved!</P>
+              <P className="text-sm text-muted-foreground">
+                Enter your access code to activate beta access:
+              </P>
+              <Input
+                type="text"
+                placeholder="BETA-GP-XXXXXXXX"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                className="max-w-xs mx-auto"
+              />
+              <Button onClick={handleActivate} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+                <Icon name="lucide:Check" className="mr-2" />
+                Activate Access
+              </Button>
+            </Div>
+          )}
+
+          {/* Activated state - needs to refresh */}
+          {status === 'activated' && (
+            <Div className="space-y-4">
+              <Icon name="lucide:CheckCircle2" className="w-12 h-12 mx-auto text-green-500" />
+              <P className="text-green-600 font-medium">Access granted!</P>
+              <P className="text-sm text-muted-foreground">
+                Your beta access has been activated. Click below to refresh your session.
+              </P>
+              <Button onClick={handleRefreshSession} size="lg" className="bg-green-600 hover:bg-green-700">
+                <Icon name="lucide:RefreshCw" className="mr-2" />
+                Refresh Session
+              </Button>
+            </Div>
+          )}
+
+          {/* Rejected state */}
+          {status === 'rejected' && (
+            <Div className="space-y-4">
+              <Icon name="lucide:XCircle" className="w-12 h-12 mx-auto text-red-500" />
+              <P className="text-red-600 font-medium">Access denied</P>
+              <P className="text-sm text-muted-foreground">
+                Your beta access request was rejected. Please contact support for more information.
+              </P>
+            </Div>
+          )}
+
+          {/* No status - can request */}
+          {!status && !waitlistStatus?.found && (
             <Button onClick={handleRequest} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
               <Icon name="lucide:Sparkles" className="mr-2" />
               Request Beta Access
             </Button>
-          ) : (
-            <Div className="space-y-2">
-              <Icon name="lucide:CheckCircle2" className="w-12 h-12 mx-auto text-green-500" />
-              <P className="text-green-600 font-medium">Request submitted successfully!</P>
-              <P className="text-sm text-muted-foreground">
-                We will review your request and notify you via email.
-              </P>
-            </Div>
           )}
         </CardContent>
       </Card>
