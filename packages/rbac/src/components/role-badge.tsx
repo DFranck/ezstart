@@ -1,6 +1,16 @@
 import React from 'react'
+import { Badge } from '@ezstart/ui/components'
 import { type Role } from '../types'
-import { getRoleLabel, getRoleBadgeClasses, getRoleIcon } from '../helpers'
+import { getRoleLabel } from '../helpers'
+
+// Map roles to Badge variants
+const roleToBadgeVariant = {
+  superadmin: 'destructive' as const,
+  admin: 'warning' as const,
+  manager: 'primary' as const,
+  'beta-tester': 'purple' as const,
+  client: 'success' as const,
+}
 
 export interface RoleBadgeProps {
   role: Role
@@ -12,7 +22,7 @@ export interface RoleBadgeProps {
  * RoleBadge - Display a role with appropriate styling
  *
  * Automatically applies the correct color, icon, and label based on the role.
- * Uses RBAC helpers for consistent styling across the app.
+ * Uses Badge component from @ezstart/ui for consistent styling.
  *
  * @example
  * ```tsx
@@ -22,11 +32,10 @@ export interface RoleBadgeProps {
  */
 export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, showIcon = false, className }) => {
   const label = getRoleLabel(role)
-  const badgeClasses = getRoleBadgeClasses(role)
-  const iconName = getRoleIcon(role)
+  const variant = roleToBadgeVariant[role] || 'default'
 
   return (
-    <span className={`${badgeClasses} ${className || ''}`}>
+    <Badge variant={variant} size="sm" className={className}>
       {showIcon && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +77,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, showIcon = false, cl
         </svg>
       )}
       {label}
-    </span>
+    </Badge>
   )
 }
 
