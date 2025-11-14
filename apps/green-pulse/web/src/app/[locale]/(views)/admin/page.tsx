@@ -9,20 +9,26 @@ import { WaitlistManagement } from './components/WaitlistManagement'
 function AdminPageContent() {
   const { user } = useAuthStore()
 
+  // Gather all roles from globalRoles and appRoles
+  const allRoles = [
+    ...(user?.globalRoles || []),
+    ...(user?.appRoles?.['green-pulse'] || []),
+  ]
+
   return (
     <Div size="xs">
       <Section size="xl" className="mt-10">
         <H1>GreenPulse Admin Panel</H1>
         <P className="text-muted-foreground mt-2">Manage beta access requests for GreenPulse</P>
         <Div className="mt-4 flex gap-2">
-          {user?.roles?.map(role => (
+          {allRoles.map((role, idx) => (
             <Badge
-              key={role}
+              key={`${role}-${idx}`}
               variant={
                 role === 'superadmin' ? 'destructive' : role === 'admin' ? 'default' : 'secondary'
               }
             >
-              {role}
+              {role === 'superadmin' ? '🌟 superadmin (global)' : role}
             </Badge>
           ))}
         </Div>
@@ -58,6 +64,7 @@ export default function AdminPage() {
     >
       <RequireRole
         roles={['admin', 'superadmin']}
+        appName="green-pulse"
         fallbackComponent={
           <Section size="full">
             <Card variant="ghost">
