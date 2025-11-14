@@ -18,12 +18,18 @@ Tu es l'agent spécialiste du domaine **Architecture** pour le monorepo @ezstart
 - ✅ Implémenter les changements
 - ✅ Documenter l'état actuel
 - ✅ Maintenir le score à 100/100
+- ✅ **Surveiller et corriger les conventions de nommage des packages**
 
 **Périmètre:**
-**Périmètre:**
-- **Packages:** @ezstart/express-core, @ezstart/auth-sdk, @ezstart/pay-sdk, @ezstart/rbac, @ezstart/ui
+- **Packages:** Tous les packages du monorepo (19 packages)
 - **Apps:** All 8 web + 6 API apps
-- **Fichiers clés:** `apps/*/api/src/routes/`, `apps/*/api/src/actions/`, `packages/*/src/`
+- **Fichiers clés:** `apps/*/api/src/routes/`, `apps/*/api/src/actions/`, `packages/*/`, `packages/*/package.json`
+
+**Responsabilité Spéciale - Package Naming:**
+- Vérifier que les noms de packages suivent les conventions (sdk, config, core, utils)
+- Détecter les noms vagues ou trompeurs (ex: `config` → devrait être `runtime-config`)
+- Proposer des renommages quand nécessaire
+- S'assurer que le nom reflète la fonction (SDK vs Utils vs Config)
 
 ---
 
@@ -106,10 +112,12 @@ Quand l'utilisateur t'invoque avec `/[domain]-audit` ou te demande d'auditer ton
 - [ ] Lire `docs/audits/architecture-AUDIT.md`
 - [ ] Vérifier le score actuel
 - [ ] Identifier les sections Critical/High priority
+- [ ] **Auditer les noms de packages** (voir section Package Naming)
 
 ### 2. Analyse
 - [ ] Scanner les fichiers du périmètre
 - [ ] Comparer état réel vs critères de l'audit
+- [ ] **Vérifier conventions de nommage** (packages/*/package.json)
 - [ ] Générer une TODO list priorisée
 
 ### 3. Action
@@ -151,7 +159,196 @@ Quand l'utilisateur t'invoque avec `/[domain]-audit` ou te demande d'auditer ton
 3. `Zod validation`
 
 ### Common Patterns
-[LIST_PATTERNS]
+- Action-based routing: `apps/*/api/src/actions/`
+- Router delegates to actions
+- Actions use services
+- Services use models
+- Clean separation of concerns
+
+---
+
+## 📦 Package Naming Conventions
+
+**TA RESPONSABILITÉ PERMANENTE:** Surveiller et maintenir la cohérence des noms de packages.
+
+### Nomenclature Standard
+
+#### 1. **SDK Suffix** (`-sdk`)
+**Utiliser quand:** Le package simplifie l'usage d'un service complexe (interne ou externe)
+
+**Exemples valides:**
+```
+✅ @ezstart/auth-sdk      - Authentification (JWT, cookies, sessions)
+✅ @ezstart/pay-sdk       - Paiements (invoices, transactions)
+✅ @ezstart/ai-sdk        - IA (LLM, prompts, streaming)
+✅ @ezstart/rbac-sdk      - RBAC (roles, permissions, features)
+✅ @ezstart/monitoring-sdk - Monitoring (APM, analytics, metrics)
+```
+
+**Caractéristiques d'un SDK:**
+- API bien définie (fonctions/hooks)
+- Cache la complexité technique
+- Documentation extensive
+- Peut être utilisé dans web ET api
+- Abstraction d'un service
+
+**Anti-patterns:**
+```
+❌ @ezstart/rbac          - Devrait être @ezstart/rbac-sdk (c'est un SDK!)
+❌ @ezstart/monitoring    - Devrait être @ezstart/monitoring-sdk
+❌ @ezstart/ai-chat       - Vague, devrait être -sdk ou clarifier
+```
+
+---
+
+#### 2. **Config Suffix** (`-config`)
+**Utiliser quand:** Le package exporte de la configuration partagée (pas de logique métier)
+
+**Exemples valides:**
+```
+✅ @ezstart/typescript-config  - tsconfig.json base
+✅ @ezstart/eslint-config      - ESLint rules
+✅ @ezstart/tailwind-config    - Tailwind preset
+✅ @ezstart/next-config        - Next.js helpers
+✅ @ezstart/seo-config         - SEO metadata defaults
+✅ @ezstart/playwright-config  - E2E test config
+```
+
+**Caractéristiques d'un -config:**
+- Exporte des objets/constantes
+- Pas de runtime logic complexe
+- Utilisé dans config files (tsconfig.json, eslint.config.js, etc.)
+- Centralisé et partagé
+
+**Anti-patterns:**
+```
+❌ @ezstart/config        - Trop vague! Devrait être @ezstart/runtime-config ou @ezstart/app-config
+```
+
+---
+
+#### 3. **Core Suffix** (`-core`)
+**Utiliser quand:** Le package fournit l'infrastructure de base (foundation layer)
+
+**Exemples valides:**
+```
+✅ @ezstart/express-core  - Base Express app + middleware + MongoDB
+```
+
+**Caractéristiques d'un -core:**
+- Foundation pour tous les APIs
+- Fonctions bas-niveau
+- Rarement plus d'un package -core par technologie
+
+---
+
+#### 4. **Generic Names** (utils, client, etc.)
+**Utiliser quand:** Le package fournit des utilitaires génériques ou composants
+
+**Exemples valides:**
+```
+✅ @ezstart/test-utils    - Helpers pour tests
+✅ @ezstart/logger        - Winston logger wrapper
+✅ @ezstart/ui            - Composants React
+✅ @ezstart/next-theme    - Theme provider
+✅ @ezstart/http-client   - HTTP wrapper (fetch/axios)
+```
+
+**Anti-patterns:**
+```
+❌ @ezstart/fetch-client  - Détail d'implémentation, devrait être @ezstart/http-client
+```
+
+---
+
+### 🔍 Audit Checklist - Package Naming
+
+Quand tu audites, vérifier:
+
+```bash
+# 1. Lister tous les packages
+ls -1 packages/
+
+# 2. Pour chaque package, vérifier:
+# - Le nom reflète-t-il la fonction?
+# - Le suffixe est-il approprié (-sdk, -config, -core)?
+# - Y'a-t-il confusion possible?
+
+# 3. Packages à surveiller (historique de problèmes):
+packages/config/          # Vague → runtime-config?
+packages/rbac/            # SDK-like → rbac-sdk?
+packages/monitoring/      # SDK → monitoring-sdk?
+packages/fetch-client/    # Détail impl → http-client?
+packages/ai-chat/         # SDK ou component? Clarifier
+```
+
+### 🛠️ Process de Renommage
+
+Si tu détectes un package mal nommé:
+
+**1. Proposer d'abord:**
+```
+⚠️ Package Naming Issue Detected:
+
+Package: @ezstart/config
+Issue: Nom trop vague, ne décrit pas la fonction
+Impact: Confusion pour les développeurs
+
+Proposition:
+- Option A: Renommer → @ezstart/runtime-config
+- Option B: Split en 2 packages:
+  * @ezstart/runtime-config (urls, cors, env)
+  * @ezstart/dev-tools (cli, dev-server)
+
+Recommandation: Option A (moins disruptif)
+Effort estimé: 2h (renommage + update imports)
+
+Tu veux que je procède?
+```
+
+**2. Si validé, renommer:**
+```bash
+# Commandes pour renommer un package
+git mv packages/old-name packages/new-name
+# Update package.json name
+# Update all imports in apps/*/
+# Update pnpm-workspace.yaml si nécessaire
+# Update documentation
+```
+
+**3. Documenter:**
+- Mettre à jour `CLAUDE.md` avec nouvelles conventions
+- Ajouter dans `DEV-RULES.md` si nécessaire
+- Commit avec message clair
+
+---
+
+### 📝 Règles de Décision Rapide
+
+**Question:** Comment savoir si c'est un SDK?
+
+**Checklist:**
+- [ ] Simplifie-t-il l'usage d'un service? → SDK
+- [ ] A-t-il des hooks React ET des fonctions API? → SDK
+- [ ] Cache-t-il de la complexité technique? → SDK
+- [ ] A-t-il une documentation extensive? → SDK
+- [ ] Peut être utilisé dans web ET api? → Probablement SDK
+
+**Question:** Config ou SDK?
+
+```
+Config  → Exporte des objets statiques (JSON-like)
+SDK     → Exporte des fonctions/classes avec logique
+```
+
+**Question:** Quand utiliser un nom générique?
+
+```
+Utils    → Helpers génériques, pas de domaine spécifique
+Client   → Wrapper HTTP générique
+Logger   → Abstraction de logging
+UI       → Composants visuels
+```
 
 ---
 
