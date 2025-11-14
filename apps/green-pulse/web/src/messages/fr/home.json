@@ -68,134 +68,15 @@
       "loading": "Ajout à la liste d'attente...",
       "alreadyRegistered": "Cet email est déjà enregistré !",
       "error": "Une erreur est survenue. Veuillez réessayer."
-    }
-  },
-  "homeV2": {
-    "hero": {
-      "title": "Le meilleur du monde",
-      "subtitle": "Créateur de présentations IA",
-      "description": "ChatGPT for Presentations - Générez de superbes diapositives en quelques minutes",
-      "cta": "Essayez gratuitement",
-      "noCreditCard": "Aucune carte de crédit requise",
-      "noCreditCardNote": "Aucune carte de crédit requise",
-      "trustedBy": "Plus de 10 millions des présentateurs les plus intelligents du monde nous font confiance",
-      "brandName": "GreenPulse",
-      "tagline": "Votre Partenaire IA pour la Croissance Durable",
-      "typewriterText": "Réduire les Coûts • Améliorer l'ESG • Accéder au Financement Vert • Croître Durablement",
-      "emailPlaceholder": "Entrez votre adresse e-mail",
-      "notifyMe": "Accès Anticipé",
-      "loading": "Ajout à la liste d'attente...",
-      "thankYou": "Succès ! Vous serez notifié lors du lancement",
-      "alreadyRegistered": "Cet e-mail est déjà enregistré !",
-      "error": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "logoWall": {
-      "title": "La Confiance des Entreprises Leaders Mondiales",
-      "subtitle": "Rejoignez des milliers d'entreprises utilisant déjà l'IA pour la durabilité"
-    },
-    "stats": {
-      "stat1": {
-        "label": "Reporting ESG plus rapide"
-      },
-      "stat2": {
-        "label": "Réduction des coûts par l'efficacité"
-      },
-      "stat3": {
-        "label": "Retour sur investissement"
-      }
-    },
-    "features": {
-      "title": "Tout ce dont Vous Avez Besoin pour une Croissance Durable",
-      "subtitle": "Des fonctionnalités puissantes alimentées par l'IA pour mesurer, améliorer et communiquer votre impact environnemental",
-      "feature1": {
-        "title": "Assistant Chat IA",
-        "description": "Obtenez des réponses instantanées et des conseils personnalisés en durabilité grâce à des conversations naturelles avec LIA, votre assistante d'intelligence environnementale."
-      },
-      "feature2": {
-        "title": "Mesure de l'Empreinte Carbone",
-        "description": "Mesurez avec précision les émissions de carbone de votre entreprise grâce à nos outils d'évaluation et d'analyse comparative alimentés par l'IA."
-      },
-      "feature3": {
-        "title": "Suivi des Performances",
-        "description": "Suivez vos progrès en durabilité avec des tableaux de bord en temps réel, des KPI et des rapports automatisés."
-      },
-      "feature4": {
-        "title": "Feuilles de Route d'Action",
-        "description": "Obtenez des feuilles de route de durabilité personnalisées avec des jalons clairs, des délais et des projections de ROI."
-      },
-      "feature5": {
-        "title": "Accès au Financement Vert",
-        "description": "Qualifiez-vous pour des prêts verts et des opportunités de financement durable avec des références ESG vérifiées."
-      },
-      "feature6": {
-        "title": "Conformité et Certification",
-        "description": "Restez conforme aux normes internationales (ISO, CSRD) et préparez-vous aux certifications ESG."
-      },
-      "feature7": {
-        "title": "Import de Données Fluide",
-        "description": "Importez des données depuis des documents, factures, images et notes vocales pour une analyse automatisée."
-      },
-      "feature8": {
-        "title": "Analyses et Perspectives",
-        "description": "Visualisez vos données environnementales avec des graphiques, tendances et informations exploitables."
-      },
-      "feature9": {
-        "title": "Support Multilingue",
-        "description": "Accédez à GreenPulse.AI en anglais, français, vietnamien et d'autres langues."
-      }
-    },
-    "howItWorks": {
-      "title": "Comment Fonctionne GreenPulse.AI",
-      "subtitle": "De la conversation à la certification en 3 étapes simples",
-      "step1": {
-        "title": "Partagez le Contexte de Votre Entreprise",
-        "description": "Discutez simplement avec LIA de votre entreprise, de vos opérations et de vos objectifs de durabilité. Notre IA comprend vos défis et opportunités uniques."
-      },
-      "step2": {
-        "title": "Recevez des Recommandations Personnalisées",
-        "description": "Recevez des plans d'action sur mesure pour réduire les coûts, améliorer l'efficacité et renforcer vos références vertes—le tout soutenu par des données et des projections de ROI."
-      },
-      "step3": {
-        "title": "Suivez les Progrès et Amplifiez l'Impact",
-        "description": "Surveillez vos améliorations avec des tableaux de bord en temps réel, générez des rapports ESG et débloquez des opportunités de financement vert au fur et à mesure de votre croissance."
-      }
-    },
-    "testimonials": {
-      "title": "Ce que Disent Nos Clients",
-      "subtitle": "De vraies entreprises obtenant un véritable impact en durabilité",
-      "testimonial1": {
-        "quote": "GreenPulse.AI nous a aidés à réduire nos coûts énergétiques de 30% en seulement 3 mois. Les recommandations de l'IA étaient précises et faciles à mettre en œuvre.",
-        "author": "Sarah Chen",
-        "role": "Responsable des Opérations",
-        "company": "GreenTech Solutions"
-      },
-      "testimonial2": {
-        "quote": "Nous avons été qualifiés pour un prêt vert grâce aux rapports ESG générés par GreenPulse.AI. Le retour sur investissement a été incroyable—tant financièrement que pour la réputation de notre marque.",
-        "author": "Marc Dubois",
-        "role": "PDG",
-        "company": "EcoManufacture SA"
-      },
-      "testimonial3": {
-        "quote": "En tant que petite entreprise, nous ne pouvions pas nous permettre un gestionnaire ESG. GreenPulse.AI nous a fourni des informations de niveau entreprise à une fraction du coût.",
-        "author": "Nguyen Thi Lan",
-        "role": "Fondatrice",
-        "company": "Cliniques Durables Vietnam"
-      }
-    },
-    "cta": {
-      "title": "Prêt à Transformer la Durabilité en Croissance ?",
-      "description": "Rejoignez des milliers d'entreprises utilisant l'IA pour réduire les coûts, améliorer l'ESG et accéder au financement vert.",
-      "emailPlaceholder": "Entrez votre e-mail",
-      "joinWaitlist": "Commencer Gratuitement",
-      "noCreditCard": "Aucune carte de crédit requise • Annulation à tout moment",
-      "badge1": "Sécurisé et Privé",
-      "badge2": "Configuration Instantanée",
-      "badge3": "Éco-Certifié",
-      "loading": "Traitement...",
-      "thankYou": "Bienvenue ! Consultez votre e-mail pour les prochaines étapes",
-      "alreadyRegistered": "Cet e-mail est déjà sur notre liste d'attente",
-      "error": "Oups ! Veuillez réessayer"
-    },
+    "subtitle": "Votre nouvel agent vert",
+    "heroFeatures": [
+      "Extraction intelligente de données",
+      "Assistant ESG",
+      "Piloté par l'IA",
+      "Reporting automatisé",
+      "Stratégie sur mesure"
+    ],
     "challenge": {
       "title": "Le monde fait face à des <strong>conditions climatiques extrêmes</strong> en raison du changement climatique. Les entreprises sont poussées à aller au-delà du Business as Usual et à viser une croissance durable.",
       "challenges": [
@@ -311,14 +192,6 @@
           "answer": "GreenPulse offre de la transparence dans tous les résultats—montrant quels cadres et points de données informent chaque recommandation. Tous les rapports incluent des points de contrôle humain avant finalisation. Nous offrons également des pistes d'audit et un contrôle de version pour assurer la confiance réglementaire."
         }
       ]
-    },
-    "heroFeatures": [
-      "Extraction intelligente de données",
-      "Assistant ESG",
-      "Piloté par l'IA",
-      "Reporting automatisé",
-      "Stratégie sur mesure"
-    ],
-    "subtitle": "Votre nouvel agent vert"
+    }
   }
 }
