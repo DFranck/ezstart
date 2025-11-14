@@ -180,8 +180,11 @@ export default function HomePage(): any {
           <H3
             size={'h4'}
             className="text-xl lg:text-2xl font-bold mb-6 leading-tight"
-            dangerouslySetInnerHTML={{ __html: t('challenge.title') }}
-          />
+          >
+            {t.rich('challenge.title', {
+              strong: chunks => <Strong>{chunks}</Strong>,
+            })}
+          </H3>
 
           <Div className="space-y-4">
             {(t.raw('challenge.challenges') as string[]).map((challenge: string, index: number) => (
