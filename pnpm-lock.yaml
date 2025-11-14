@@ -667,9 +667,6 @@ importers:
 
   apps/ezstart/api:
     dependencies:
-      '@ezstart/auth-sdk':
-        specifier: workspace:*
-        version: link:../../../packages/auth-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
@@ -682,18 +679,12 @@ importers:
       '@ezstart/monitoring':
         specifier: workspace:*
         version: link:../../../packages/monitoring
-      cookie-parser:
-        specifier: ^1.4.7
-        version: 1.4.7
       cors:
         specifier: ^2.8.5
         version: 2.8.5
       express:
         specifier: ^4.19.2
         version: 4.21.2
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.2
       mongodb:
         specifier: ^6.12.0
         version: 6.20.0(socks@2.8.6)
@@ -722,18 +713,12 @@ importers:
       '@ezstart/typescript-config':
         specifier: workspace:*
         version: link:../../../packages/typescript-config
-      '@types/cookie-parser':
-        specifier: ^1.4.7
-        version: 1.4.10(@types/express@4.17.23)
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.19
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.23
-      '@types/jsonwebtoken':
-        specifier: ^9.0.7
-        version: 9.0.10
       '@types/mongoose':
         specifier: ^5.11.97
         version: 5.11.97(socks@2.8.6)
@@ -1092,6 +1077,9 @@ importers:
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
+      '@ezstart/rbac':
+        specifier: workspace:*
+        version: link:../../../packages/rbac
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
