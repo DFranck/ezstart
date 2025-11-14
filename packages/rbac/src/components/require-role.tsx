@@ -1,6 +1,7 @@
 'use client'
 
 import React, { type ReactNode } from 'react'
+import { useAuth } from '@ezstart/auth-sdk'
 import { useRBAC } from '@ezstart/rbac/client'
 import { type Role } from '@ezstart/rbac'
 
@@ -51,7 +52,8 @@ export function RequireRole({
   fallbackComponent,
   requireAll = false,
 }: RequireRoleProps) {
-  const rbac = useRBAC()
+  const { user } = useAuth()
+  const rbac = useRBAC(user)
 
   // Normalize roles to array
   const roleArray = Array.isArray(roles) ? roles : [roles]

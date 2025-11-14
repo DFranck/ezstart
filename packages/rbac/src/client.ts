@@ -3,7 +3,7 @@
  * For use in React components (Next.js, etc.)
  */
 
-import type { AuthUser } from '@ezstart/auth-sdk'
+import type { AuthUser } from '@ezstart/auth-sdk/server'
 import { ROLE_HIERARCHY, ROLE_PERMISSIONS, ROLE_FEATURES, type Role, type Permission, type Feature } from './types'
 
 /**

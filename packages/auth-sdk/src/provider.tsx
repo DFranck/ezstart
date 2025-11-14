@@ -315,6 +315,7 @@ export function useAuth() {
     user: store.user,
     accessToken: store.accessToken,
     isAuthenticated: store.isAuthenticated,
+    isLoggingIn: store.isLoggingIn,
     mode, // ✅ Expose mode
 
     // Actions
@@ -323,5 +324,6 @@ export function useAuth() {
     logout, // ✅ Now async and mode-aware
     handleCallback,
     verifyAndRefresh,
+    setLoggingIn: store.setLoggingIn,
   }
 }

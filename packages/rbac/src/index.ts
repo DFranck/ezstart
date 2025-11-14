@@ -8,4 +8,11 @@
 export * from './types'
 export * from './client'
 export * from './helpers'
-export * from './components'
+
+// React Components - Explicit exports to avoid loading React in Node.js context
+export { RoleBadge, RoleBadgeList } from './components/role-badge'
+export type { RoleBadgeProps, RoleBadgeListProps } from './components/role-badge'
+export { RequireRole } from './components/require-role'
+export type { RequireRoleProps } from './components/require-role'
+export { InsufficientPermissions } from './components/insufficient-permissions'
+export type { InsufficientPermissionsProps } from './components/insufficient-permissions'

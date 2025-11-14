@@ -12,12 +12,14 @@ export interface AuthState {
   accessToken: string | null
   isAuthenticated: boolean
   mode: AuthMode
+  isLoggingIn: boolean
 
   // Actions
   setAuth: (user: AuthUser, accessToken?: string, mode?: AuthMode) => void
   logout: () => void
   updateUser: (user: AuthUser) => void
   getMode: () => AuthMode
+  setLoggingIn: (isLoggingIn: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,13 +29,15 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       isAuthenticated: false,
       mode: 'localStorage', // Default to localStorage for backward compatibility
+      isLoggingIn: false,
 
       setAuth: (user: AuthUser, accessToken?: string, mode: AuthMode = 'localStorage') => {
         set({
           user,
           accessToken: mode === 'localStorage' ? accessToken : null, // Only store token for localStorage mode
           isAuthenticated: true,
-          mode
+          mode,
+          isLoggingIn: false
         })
       },
 
@@ -53,7 +57,11 @@ export const useAuthStore = create<AuthState>()(
         }))
       },
 
-      getMode: () => get().mode
+      getMode: () => get().mode,
+
+      setLoggingIn: (isLoggingIn: boolean) => {
+        set({ isLoggingIn })
+      }
     }),
     {
       name: 'ezauth-storage',

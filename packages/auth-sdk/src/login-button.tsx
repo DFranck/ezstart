@@ -1,7 +1,6 @@
 'use client'
 
 import { Button, Icon, KnownIconName } from '@ezstart/ui/components'
-import { useState } from 'react'
 import { useAuth } from './provider.js'
 
 export interface LoginButtonProps {
@@ -33,11 +32,9 @@ export function LoginButton({
   onClick,
   loading: externalLoading,
 }: LoginButtonProps) {
-  const { login, logout, isAuthenticated } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasStartedLogin, setHasStartedLogin] = useState(false)
+  const { login, logout, isAuthenticated, isLoggingIn, setLoggingIn } = useAuth()
 
-  const loading = externalLoading ?? isLoading ?? hasStartedLogin
+  const loading = externalLoading ?? isLoggingIn
 
   // Set default children based on auth state and translation props
   const defaultChildren = isAuthenticated ? logoutText : loginText
@@ -49,21 +46,18 @@ export function LoginButton({
     // Call custom onClick first if provided
     onClick?.()
 
-    setIsLoading(true)
-    setHasStartedLogin(true)
+    setLoggingIn(true)
 
     try {
       if (isAuthenticated) {
         logout() // logout is synchronous, just resets store
-        setIsLoading(false)
-        setHasStartedLogin(false)
+        setLoggingIn(false)
       } else {
         await login() // login redirects, so no need to reset loading
       }
     } catch (error) {
       console.error(isAuthenticated ? 'Logout failed:' : 'Login failed:', error)
-      setIsLoading(false)
-      setHasStartedLogin(false)
+      setLoggingIn(false)
     }
   }
 
