@@ -115,17 +115,12 @@ export default function HomePage(): any {
         </Div>
         <Div layout={'center'} className="gap-6">
           {/* Subtitle: Your New Green Agent (from slide) */}
-          <H2 size={'h3'}>Your New Green Agent</H2>
+          <H2 size={'h3'}>{t('home.subtitle')}</H2>
 
           {/* Feature tags (from slide) */}
           <Div layout={'row'} className="hidden lg:flex ">
-            {[
-              'Smart Data Extraction',
-              'ESG Assistant',
-              'AI-Driven',
-              'Automated Reporting',
-              'Tailored Strategy',
-            ].map((feature, index) => (
+            {/* @ts-expect-error - returnObjects is valid but not typed */}
+            {(t('home.heroFeatures', { returnObjects: true }) as unknown as string[]).map((feature: string, index: number) => (
               <Button key={index} className="rounded-full">
                 {feature}
               </Button>
@@ -183,18 +178,15 @@ export default function HomePage(): any {
       >
         {/* Left side - Content */}
         <SplitSectionItem size="xl" className="xl:mx-20">
-          <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
-            The world is facing <Strong className="text-warning">extreme weather</Strong> due to
-            climate change, Companies are pushed to move beyond Business as Usual and to aim to
-            sustainable growth.
-          </H3>
+          <H3
+            size={'h4'}
+            className="text-xl lg:text-2xl font-bold mb-6 leading-tight"
+            dangerouslySetInnerHTML={{ __html: t('home.challenge.title') }}
+          />
 
           <Div className="space-y-4">
-            {[
-              'Limited resources to establish robust ESG frameworks and demonstrate real climate impact',
-              'Lack of structured documentation to meet investor ESG requirements for fundraising',
-              'Gaps in expertise to navigate international standards (GRI, SFDR, CSRD) required by impact investors',
-            ].map((challenge, index) => (
+            {/* @ts-expect-error - returnObjects is valid but not typed */}
+            {(t('home.challenge.challenges', { returnObjects: true }) as unknown as string[]).map((challenge: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
@@ -220,7 +212,7 @@ export default function HomePage(): any {
       </SplitSection>
       {/* Data Transformation Section */}
       <Section size="xl">
-        <H2 size="h3">GreenPulse.AI easily transform complex Data into impact strategies</H2>
+        <H2 size="h3">{t('home.transformation.title')}</H2>
         <Div>
           {/* 3-Step Process with AI in center */}
           <Div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto ">
@@ -228,10 +220,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  1
+                  {t('home.transformation.steps.step1.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  DISCUSS & UPLOAD
+                  {t('home.transformation.steps.step1.title')}
                 </H3>
               </CardHeader>
               <CardContent>
@@ -248,10 +240,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  2
+                  {t('home.transformation.steps.step2.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  LET GPA WORKS FOR YOU
+                  {t('home.transformation.steps.step2.title')}
                 </H3>
               </CardHeader>
               <CardContent className="flex justify-center items-center">
@@ -264,10 +256,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center ">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  3
+                  {t('home.transformation.steps.step3.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  GET YOUR STRATEGY & KPIs
+                  {t('home.transformation.steps.step3.title')}
                 </H3>
               </CardHeader>
               <CardContent>
@@ -282,91 +274,58 @@ export default function HomePage(): any {
         </Div>
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {/* Data Extraction */}
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <Icon name="lucide:Database" size={30} />
-              <H3 size="h6" className="w-fit">
-                Powerful data extraction & centralisation
-              </H3>
-            </CardHeader>
-            <CardContent>
-              <P className="text-muted-foreground">
-                Voice, photo, and seamless integration with existing software (ERP, CRM, Excel) for
-                automated data extraction and pre-filling.
-              </P>
-            </CardContent>
-          </Card>
-
-          {/* ESG Analysis */}
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <Icon name="lucide:TrendingUp" size={30} />
-              <H3 size="h6">Instant ESG Analysis</H3>
-            </CardHeader>
-            <CardContent>
-              <P className="text-muted-foreground">
-                Real-time evaluation and scoring of projects and portfolios with customizable ESG
-                criteria and instant recommendations.
-              </P>
-            </CardContent>
-          </Card>
-
-          {/* Strategy & Reporting */}
-          <Card>
-            <CardHeader className="flex items-center gap-3">
-              <Icon name="lucide:FileText" size={30} />
-              <H3 size="h6">Tailored Strategy & Reporting</H3>
-            </CardHeader>
-            <CardContent>
-              <P className="text-muted-foreground">
-                Conversational AI agent for personalized recommendations and compliant reports (GRI,
-                SFDR) tailored to your needs.
-              </P>
-            </CardContent>
-          </Card>
+          {/* @ts-expect-error - returnObjects is valid but not typed */}
+          {(t('home.transformation.features', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((feature, index) => (
+            <Card key={index}>
+              <CardHeader className="flex items-center gap-3">
+                <Icon
+                  name={index === 0 ? 'lucide:Database' : index === 1 ? 'lucide:TrendingUp' : 'lucide:FileText'}
+                  size={30}
+                />
+                <H3 size="h6" className="w-fit">
+                  {feature.title}
+                </H3>
+              </CardHeader>
+              <CardContent>
+                <P className="text-muted-foreground">
+                  {feature.description}
+                </P>
+              </CardContent>
+            </Card>
+          ))}
         </Div>
       </Section>
       {/* Problem Statement Section */}
       <Section size={'xl'}>
         <Div className="container mx-auto">
           <Div className="text-center mb-12">
-            <H2 size="h3" className="mb-4">
-              Sustainability Teams Are <Strong className="text-warning">Drowning</Strong> in
-              Complexity
-            </H2>
-            <P className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              You're not alone.{' '}
-              <Strong className="text-gp-primary">78% of sustainability managers</Strong> and{' '}
-              <Strong className="text-gp-primary">SMIs</Strong> report feeling overwhelmed by data
-              collection, compliance requirements, and stakeholder expectations.
-            </P>
+            <H2
+              size="h3"
+              className="mb-4"
+              dangerouslySetInnerHTML={{ __html: t('home.problem.title') }}
+            />
+            <P
+              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+              dangerouslySetInnerHTML={{ __html: t('home.problem.subtitle') }}
+            />
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                icon: 'lucide:Clock',
-                title: 'Hours Lost to Manual Work',
-                descriptionHtml:
-                  'Data entry, supplier emails, and report compilation consume <strong class="text-gp-primary ">60% of your week</strong> leaving little time for strategic initiatives.',
-              },
-              {
-                icon: 'lucide:FileWarning',
-                title: 'Compliance Anxiety',
-                descriptionHtml:
-                  'Keeping up with <strong class="text-gp-primary ">GRI, SFDR, CSRD, and ISSB</strong> frameworks feels like a full-time job. One missed update could derail investor confidence.',
-              },
-              {
-                icon: 'lucide:Users',
-                title: 'Resource Constraints',
-                descriptionHtml:
-                  'Your team is expected to deliver <strong class="text-gp-primary">enterprise-grade ESG programs</strong>, but budgets and headcount remain frozen.',
-              },
-            ].map((item, index) => (
+            {/* @ts-expect-error - returnObjects is valid but not typed */}
+            {(t('home.problem.problems', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((item, index) => (
               <Card key={index}>
                 <CardHeader className="flex items-center gap-3">
-                  <Icon name={item.icon as KnownIconName} size={30} className="mr-3" />
+                  <Icon
+                    name={
+                      (index === 0
+                        ? 'lucide:Clock'
+                        : index === 1
+                        ? 'lucide:FileWarning'
+                        : 'lucide:Users') as KnownIconName
+                    }
+                    size={30}
+                    className="mr-3"
+                  />
                   <H3 size="h6" className="w-fit">
                     {item.title}
                   </H3>
@@ -374,7 +333,7 @@ export default function HomePage(): any {
                 <CardContent>
                   <P
                     className="text-muted-foreground text-sm"
-                    dangerouslySetInnerHTML={{ __html: item.descriptionHtml }}
+                    dangerouslySetInnerHTML={{ __html: item.description }}
                   />
                 </CardContent>
               </Card>
@@ -386,31 +345,26 @@ export default function HomePage(): any {
       <Section size={'xl'} layout={'grid'}>
         <Div className="px-6 py-12 md:px-12">
           <H2 size="h3" className="mb-6">
-            Built by ESG Experts, Not Just Engineers
+            {t('home.team.title')}
           </H2>
           <P className="text-lg text-muted-foreground mb-6 leading-relaxed">
-            GreenPulse.AI is created by sustainability professionals who've spent years in the
-            trenches navigating compliance frameworks, managing stakeholder expectations, and
-            transforming raw data into actionable strategies.
+            {t('home.team.description')}
           </P>
           <Div className="space-y-4">
-            {[
-              {
-                icon: 'lucide:Award',
-                text: '20+ years combined experience in ESG consulting and corporate sustainability',
-              },
-              {
-                icon: 'lucide:GraduationCap',
-                text: 'Certified GHG Protocol practitioners and ISSB framework specialists',
-              },
-              {
-                icon: 'lucide:Building2',
-                text: 'Worked with Fortune 500 companies and impact investors across 15+ industries',
-              },
-            ].map((item, index) => (
+            {/* @ts-expect-error - returnObjects is valid but not typed */}
+            {(t('home.team.credentials', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
-                <Icon name={item.icon as KnownIconName} className="w-6 h-6  mt-1 flex-shrink-0" />
-                <P className="text-base">{item.text}</P>
+                <Icon
+                  name={
+                    (index === 0
+                      ? 'lucide:Award'
+                      : index === 1
+                      ? 'lucide:GraduationCap'
+                      : 'lucide:Building2') as KnownIconName
+                  }
+                  className="w-6 h-6  mt-1 flex-shrink-0"
+                />
+                <P className="text-base">{text}</P>
               </Div>
             ))}
           </Div>
@@ -428,76 +382,56 @@ export default function HomePage(): any {
       {/* Social Proof Section */}
       <Section size={'xl'}>
         <H2 size="h4" className="text-center mb-4">
-          Partnership Opportunity
+          {t('home.partnership.title')}
         </H2>
 
         <Div>
           <H3 size="h5" className="mb-6 text-center">
-            For ESG Platform Providers & Rating Agencies
+            {t('home.partnership.subtitle')}
           </H3>
 
           <P className="text-muted-foreground mb-6 leading-relaxed">
-            GreenPulse connects SMEs with sustainability challenges to the right solutions. We
-            handle customer acquisition and initial engagement you provide the data infrastructure
-            and reporting capabilities that power their compliance journey.
+            {t('home.partnership.description')}
           </P>
 
           <Div className="bg-muted/30 rounded-lg p-6 mb-6">
             <H3 size="h6" className="mb-4">
-              The Exchange:
+              {t('home.partnership.exchange.title')}
             </H3>
             <Div className="space-y-3">
-              <Div className="flex items-start gap-3">
-                <Icon
-                  name="lucide:CheckCircle2"
-                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
-                />
-                <P className="text-sm">
-                  <Strong>You get:</Strong> Pre-qualified customers through our SME network
-                </P>
-              </Div>
-              <Div className="flex items-start gap-3">
-                <Icon
-                  name="lucide:CheckCircle2"
-                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
-                />
-                <P className="text-sm">
-                  <Strong>We get:</Strong> Access to your data systems and reporting frameworks
-                </P>
-              </Div>
-              <Div className="flex items-start gap-3">
-                <Icon
-                  name="lucide:CheckCircle2"
-                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
-                />
-                <P className="text-sm">
-                  <Strong>SMEs get:</Strong> Seamless sustainability management from inquiry to
-                  compliance
-                </P>
-              </Div>
+              {/* @ts-expect-error - returnObjects is valid but not typed */}
+              {(t('home.partnership.exchange.items', { returnObjects: true }) as unknown as string[]).map((item: string, index: number) => (
+                <Div key={index} className="flex items-start gap-3">
+                  <Icon
+                    name="lucide:CheckCircle2"
+                    className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                  />
+                  <P className="text-sm" dangerouslySetInnerHTML={{ __html: item }} />
+                </Div>
+              ))}
             </Div>
           </Div>
 
           <Div className="mb-6">
             <H3 size="h6" className="mb-4">
-              Current Focus: Seeking partners for:
+              {t('home.partnership.focus.title')}
             </H3>
             <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { icon: 'lucide:Database', text: 'ESG data collection platforms' },
-                { icon: 'lucide:Leaf', text: 'Carbon accounting tools' },
-                {
-                  icon: 'lucide:FileText',
-                  text: 'Regulatory reporting frameworks (EU CSRD, Vietnam TCFD, etc.)',
-                },
-              ].map((item, index) => (
+              {/* @ts-expect-error - returnObjects is valid but not typed */}
+              {(t('home.partnership.focus.partners', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
                 <Card key={index} className="p-4 bg-background">
                   <Div className="flex items-start gap-3">
                     <Icon
-                      name={item.icon as KnownIconName}
+                      name={
+                        (index === 0
+                          ? 'lucide:Database'
+                          : index === 1
+                          ? 'lucide:Leaf'
+                          : 'lucide:FileText') as KnownIconName
+                      }
                       className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
                     />
-                    <P className="text-sm">{item.text}</P>
+                    <P className="text-sm">{text}</P>
                   </Div>
                 </Card>
               ))}
@@ -506,7 +440,7 @@ export default function HomePage(): any {
 
           <Div className="text-center">
             <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-              <a href="mailto:partnerships@greenpulse.ai">Let's build together →</a>
+              <a href="mailto:partnerships@greenpulse.ai">{t('home.partnership.cta')}</a>
             </Button>
           </Div>
         </Div>
@@ -522,7 +456,7 @@ export default function HomePage(): any {
           </Div> */}
         <Div>
           <H3 size="h5" className="text-center mb-8 text-muted-foreground">
-            As Featured In
+            {t('homeV2.press.title')}
           </H3>
           <Div layout={'center'} className="max-w-3xl mx-auto">
             {[
@@ -554,7 +488,7 @@ export default function HomePage(): any {
                     <Div className="flex-1">
                       <P className="font-semibold mb-2">
                         {item.publication}{' '}
-                        <Span size={'xs'} variant={'description'}>
+                        <Span className="text-xs text-muted-foreground">
                           {item.date}
                         </Span>
                       </P>
@@ -571,37 +505,16 @@ export default function HomePage(): any {
       <Section size={'xl'} className="bg-muted/30">
         <Div className="container mx-auto max-w-4xl">
           <H2 size="h3" className="text-center mb-12">
-            Common Questions
+            {t('homeV2.faq.title')}
           </H2>
 
           <Div className="space-y-4">
-            {[
-              {
-                question: 'How is GreenPulse different from ChatGPT or other general AI tools?',
-                answer:
-                  "GreenPulse is purpose-built for ESG compliance and sustainability reporting. Unlike ChatGPT, we're trained on international frameworks (GRI, SFDR, CSRD, ISSB) and integrate with your existing data sources (ERP, CRM, Excel). We provide structured outputs that meet regulatory requirements not generic text that needs manual review.",
-              },
-              {
-                question: 'Is my data secure? Do you share it with third parties?',
-                answer:
-                  'Your data is encrypted end-to-end and stored in SOC 2 Type II compliant infrastructure. We never share your data with third parties or use it to train AI models. All processing happens within your secure tenant, and you maintain full ownership of your sustainability data.',
-              },
-              {
-                question: "Doesn't AI generate emissions? How do you manage this?",
-                answer:
-                  "Yes, AI computing does generate emissions which is why we offset 200% of our carbon footprint through verified carbon removal projects. More importantly, GreenPulse's automation reduces the need for travel, paper reports, and redundant manual work, resulting in a net-negative carbon impact for our users.",
-              },
-              {
-                question: 'Can GreenPulse integrate with our existing tools?',
-                answer:
-                  'Absolutely. GreenPulse connects with major ERP systems (SAP, Oracle), CRMs (Salesforce, HubSpot), and data sources (Excel, Google Sheets, CSV). Our API allows custom integrations for proprietary systems. Most implementations are live within 2 weeks.',
-              },
-              {
-                question: 'What if GreenPulse makes a mistake in compliance reporting?',
-                answer:
-                  'GreenPulse provides transparency in all outputs showing which frameworks and data points inform each recommendation. All reports include human-in-the-loop review checkpoints before finalization. We also offer audit trails and version control to ensure regulatory confidence.',
-              },
-            ].map((item, index) => (
+            {(
+              t('homeV2.faq.questions', { returnObjects: true }) as unknown as Array<{
+                question: string
+                answer: string
+              }>
+            ).map((item, index) => (
               <Card key={index} className="p-6 bg-card">
                 <Div>
                   <H3 size="h5" className="mb-3 flex items-start gap-3">

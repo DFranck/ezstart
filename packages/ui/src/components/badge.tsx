@@ -1,7 +1,7 @@
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '../lib/utils'
+import * as React from 'react'
 import { fontSize, paddingX, paddingY } from '../lib/design-system/tokens'
+import { cn } from '../lib/utils'
 
 /**
  * Badge Component - Display status, count, or label

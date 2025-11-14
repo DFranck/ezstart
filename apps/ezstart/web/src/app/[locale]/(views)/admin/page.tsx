@@ -112,11 +112,7 @@ export default function AdminPage() {
   if (!isHydrated) {
     return (
       <Section size="full">
-        <Card>
-          <CardContent className="flex justify-center py-12">
-            <Spinner size="lg" />
-          </CardContent>
-        </Card>
+        <Spinner size="lg" />
       </Section>
     )
   }
@@ -124,7 +120,7 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <Section size="full">
-        <Card>
+        <Card variant={'ghost'}>
           <CardHeader>
             <H2>Access Denied</H2>
           </CardHeader>
@@ -137,17 +133,19 @@ export default function AdminPage() {
     )
   }
 
-  if (!rbac.hasAnyRole(['admin', 'superadmin'])) {
+  if (!rbac.hasAnyRole(['superadmin'])) {
     return (
       <Section size={'full'}>
-        <Card>
-          <CardContent className="text-center py-12">
+        <Card variant={'ghost'}>
+          <CardHeader>
             <H2>Access Denied</H2>
+          </CardHeader>
+          <CardContent size="xl" className="flex flex-col gap-4 ">
             <P className="text-muted-foreground mt-2">
               You don't have permission to access the admin panel.
             </P>
-            <Badge variant="destructive" className="mt-4">
-              Required: Admin or Superadmin role
+            <Badge variant="destructive" className="w-fit self-center">
+              Required: Superadmin role
             </Badge>
           </CardContent>
         </Card>
@@ -169,11 +167,7 @@ export default function AdminPage() {
           <H2>User Management</H2>
         </CardHeader>
         <CardContent>
-          {loading && (
-            <Div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </Div>
-          )}
+          {loading && <Spinner size="lg" />}
 
           {error && (
             <Div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-4">
