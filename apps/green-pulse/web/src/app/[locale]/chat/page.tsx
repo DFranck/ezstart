@@ -5,7 +5,8 @@ import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { getApiUrl } from '@ezstart/config'
 import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
-import { Card, Section, Spinner } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, H3, Icon, P, Section, Spinner } from '@ezstart/ui/components'
+import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -68,6 +69,78 @@ function LiaPageContent(): any {
   )
 }
 
+function BetaAccessRequest() {
+  const { user } = useAuthStore()
+  const [requested, setRequested] = useState(false)
+
+  const handleRequest = async () => {
+    if (!user?.email) return
+
+    await runWithFeedback({
+      action: async () => {
+        const apiUrl = getApiUrl('ezauth')
+        const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          if (response.status === 409 && data.code === 'EMAIL_EXISTS') {
+            throw new Error('You are already on the waitlist!')
+          }
+          throw new Error(data.error || 'Failed to request beta access')
+        }
+
+        setRequested(true)
+        return data
+      },
+      toastLoading: { message: 'Requesting beta access...' },
+      toastSuccess: { message: 'Beta access requested! We will review your request soon.' },
+      toastError: false,
+      onError: error => {
+        toast.error(error instanceof Error ? error.message : 'Failed to request beta access')
+      },
+    })
+  }
+
+  return (
+    <Section size={'full'}>
+      <Card variant={'ghost'}>
+        <CardContent className="text-center py-12 space-y-6">
+          <Icon name="lucide:Sparkles" className="w-16 h-16 mx-auto text-gp-primary" />
+          <Div>
+            <H3>Beta Access Required</H3>
+            <P className="text-muted-foreground mt-2 max-w-md mx-auto">
+              The AI Chat feature is currently in private beta. Request access to start using GreenPulse
+              AI.
+            </P>
+          </Div>
+          {!requested ? (
+            <Button onClick={handleRequest} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+              <Icon name="lucide:Sparkles" className="mr-2" />
+              Request Beta Access
+            </Button>
+          ) : (
+            <Div className="space-y-2">
+              <Icon name="lucide:CheckCircle2" className="w-12 h-12 mx-auto text-green-500" />
+              <P className="text-green-600 font-medium">Request submitted successfully!</P>
+              <P className="text-sm text-muted-foreground">
+                We will review your request and notify you via email.
+              </P>
+            </Div>
+          )}
+          <Div className="pt-4">
+            <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
+          </Div>
+        </CardContent>
+      </Card>
+    </Section>
+  )
+}
+
 export default function LiaPage() {
   const t = useTranslations('auth')
 
@@ -88,16 +161,7 @@ export default function LiaPage() {
         </Section>
       }
     >
-      <RequireRole
-        roles={['client', 'beta-tester']}
-        fallbackComponent={
-          <Section size={'full'}>
-            <Card variant={'ghost'}>
-              <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
-            </Card>
-          </Section>
-        }
-      >
+      <RequireRole roles={['client', 'beta-tester']} fallbackComponent={<BetaAccessRequest />}>
         <LiaPageContent />
       </RequireRole>
     </RequireAuth>

@@ -17,6 +17,7 @@ import {
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { WaitlistManagement } from './components/WaitlistManagement'
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuthStore()
@@ -183,6 +184,13 @@ export default function AdminPage() {
           </Card>
         )}
       </Div>
+
+      {/* Beta Waitlist Management - Admin+ */}
+      {(isAdmin || isSuperAdmin) && (
+        <Section size="xl" className="mt-12">
+          <WaitlistManagement />
+        </Section>
+      )}
 
       {/* Quick Actions */}
       <Section size="xl" className="mt-12">
