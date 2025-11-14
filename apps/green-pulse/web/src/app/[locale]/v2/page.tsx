@@ -54,7 +54,7 @@ export default function HomePage(): any {
     await runWithFeedback({
       action: async () => {
         const apiUrl = getApiUrl('ezauth')
-        const response = await fetch(`${apiUrl}/api/auth/waitlist/green-pulse/add`, {
+        const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: data.email }),
