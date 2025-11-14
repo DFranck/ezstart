@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
+import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
 
@@ -75,7 +76,52 @@ const inviteWaitlistController = async (req: any, res: any) => {
     // Generate access code
     const accessCode = waitlist.generateAccessCode()
 
-    // Update entry
+    // Check if user already exists with this email
+    const AuthUserModel = await getAuthUserModel()
+    // @ts-expect-error - Mongoose type inference issue
+    const existingUser = await AuthUserModel.findOne({ email: email.toLowerCase() })
+
+    if (existingUser) {
+      // User exists - auto-grant access immediately
+      console.log(`✅ User exists: ${email} - Auto-granting beta-tester role`)
+
+      // Add beta-tester role if not already present
+      if (!existingUser.roles.includes('beta-tester')) {
+        existingUser.roles.push('beta-tester')
+      }
+
+      // Add app to user's apps if not already present
+      if (!existingUser.apps.includes(appName)) {
+        existingUser.apps.push(appName)
+      }
+
+      await existingUser.save()
+
+      // Update waitlist entry to 'activated' (not 'invited')
+      entry.status = 'activated'
+      entry.accessCode = accessCode
+      entry.invitedAt = new Date()
+      entry.invitedBy = currentUser._id
+      entry.activatedAt = new Date()
+      if (notes) {
+        entry.notes = notes
+      }
+
+      await waitlist.save()
+
+      console.log(`✅ Auto-granted beta-tester role to ${email} for ${appName}`)
+
+      return res.json({
+        success: true,
+        accessCode,
+        email: entry.email,
+        appName: waitlist.appName,
+        autoGranted: true,
+        message: 'User already exists - access granted immediately'
+      })
+    }
+
+    // User doesn't exist - standard invite flow
     entry.status = 'invited'
     entry.accessCode = accessCode
     entry.invitedAt = new Date()
@@ -93,7 +139,9 @@ const inviteWaitlistController = async (req: any, res: any) => {
       success: true,
       accessCode,
       email: entry.email,
-      appName: waitlist.appName
+      appName: waitlist.appName,
+      autoGranted: false,
+      message: 'Access code generated - user needs to register with code'
     })
   } catch (error) {
     console.error('Error inviting from waitlist:', error)

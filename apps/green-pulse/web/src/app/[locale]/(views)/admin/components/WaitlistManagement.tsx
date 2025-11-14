@@ -1,7 +1,7 @@
 'use client'
 
-import { getApiUrl } from '@ezstart/config'
 import { useAuthStore } from '@ezstart/auth-sdk'
+import { callApi } from '@ezstart/fetch-client'
 import {
   Badge,
   Button,
@@ -50,32 +50,19 @@ export function WaitlistManagement() {
   const queryClient = useQueryClient()
   const [filter, setFilter] = useState<'all' | 'pending' | 'invited' | 'activated' | 'rejected'>('pending')
 
-  // Get token from localStorage
-  const getToken = () => {
-    if (typeof window === 'undefined') return null
-    const storage = localStorage.getItem('ezauth-storage')
-    if (!storage) return null
-    try {
-      const parsed = JSON.parse(storage)
-      return parsed.state?.token || null
-    } catch {
-      return null
-    }
-  }
-
   // Fetch waitlist
-  const { data, isLoading } = useQuery<WaitlistResponse>({
+  const { data, isLoading, error } = useQuery<WaitlistResponse>({
     queryKey: ['waitlist', 'green-pulse'],
     queryFn: async () => {
-      const token = getToken()
-      const apiUrl = getApiUrl('ezauth')
-      const response = await fetch(`${apiUrl}/api/admin/green-pulse`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await callApi<WaitlistResponse>('/admin/green-pulse', {
+        appName: 'ezauth',
       })
-      if (!response.ok) throw new Error('Failed to fetch waitlist')
-      return response.json()
+
+      if (!response.ok || !response.data) {
+        throw new Error(`Failed to fetch waitlist: ${response.status}`)
+      }
+
+      return response.data
     },
     enabled: !!user,
   })
@@ -83,18 +70,13 @@ export function WaitlistManagement() {
   // Approve mutation (invite)
   const approveMutation = useMutation({
     mutationFn: async (email: string) => {
-      const token = getToken()
-      const apiUrl = getApiUrl('ezauth')
-      const response = await fetch(`${apiUrl}/api/admin/green-pulse/${encodeURIComponent(email)}/invite`, {
+      const response = await callApi(`/admin/green-pulse/${encodeURIComponent(email)}/invite`, {
+        appName: 'ezauth',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ notes: 'Approved via admin panel' }),
+        body: { notes: 'Approved via admin panel' },
       })
       if (!response.ok) throw new Error('Failed to approve')
-      return response.json()
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] })
@@ -104,19 +86,14 @@ export function WaitlistManagement() {
   // Reject mutation (update user to remove beta-tester role if needed)
   const rejectMutation = useMutation({
     mutationFn: async (email: string) => {
-      const token = getToken()
       // For now, just update status in waitlist
       // TODO: If user exists, remove beta-tester role
-      const apiUrl = getApiUrl('ezauth')
-      const response = await fetch(`${apiUrl}/api/admin/green-pulse/${encodeURIComponent(email)}/reject`, {
+      const response = await callApi(`/admin/green-pulse/${encodeURIComponent(email)}/reject`, {
+        appName: 'ezauth',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
       })
       if (!response.ok) throw new Error('Failed to reject')
-      return response.json()
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['waitlist'] })
@@ -173,6 +150,18 @@ export function WaitlistManagement() {
         <CardContent className="py-12 text-center">
           <Icon name="lucide:Loader2" className="w-8 h-8 mx-auto animate-spin" />
           <P className="text-muted-foreground mt-2">Loading waitlist...</P>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Icon name="lucide:AlertCircle" className="w-12 h-12 mx-auto text-destructive mb-2" />
+          <P className="text-destructive font-medium">Failed to load waitlist</P>
+          <P className="text-sm text-muted-foreground mt-2">{error instanceof Error ? error.message : 'Unknown error'}</P>
         </CardContent>
       </Card>
     )
