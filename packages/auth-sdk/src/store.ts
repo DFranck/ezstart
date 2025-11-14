@@ -70,6 +70,35 @@ export const useAuthStore = create<AuthState>()(
 // Expose store globally for cross-package access (e.g., @ezstart/ui ThemeEditor)
 if (typeof window !== 'undefined') {
   (window as any).__ezauth_store__ = useAuthStore
+
+  // Cross-tab/cross-app synchronization (for localhost development)
+  const authChannel = new BroadcastChannel('ezauth-sync')
+
+  // Listen for auth changes from other tabs/apps
+  authChannel.onmessage = (event) => {
+    const { type, user, accessToken, mode } = event.data
+
+    if (type === 'LOGIN') {
+      useAuthStore.getState().setAuth(user, accessToken, mode)
+    } else if (type === 'LOGOUT') {
+      useAuthStore.getState().logout()
+    }
+  }
+
+  // Broadcast auth changes to other tabs/apps
+  const originalSetAuth = useAuthStore.getState().setAuth
+  const originalLogout = useAuthStore.getState().logout
+
+  useAuthStore.setState({
+    setAuth: (user, accessToken, mode) => {
+      originalSetAuth(user, accessToken, mode)
+      authChannel.postMessage({ type: 'LOGIN', user, accessToken, mode })
+    },
+    logout: () => {
+      originalLogout()
+      authChannel.postMessage({ type: 'LOGOUT' })
+    }
+  })
 }
 
 // SSR-safe hook that waits for hydration

@@ -54,9 +54,9 @@ const addEmailController = async (req: any, res: any) => {
 
     // Check if email already exists
     const emailLower = email.toLowerCase()
-    const exists = waitlist.emails.some((e: string) => e === emailLower)
+    const existingEntry = waitlist.findEntryByEmail(emailLower)
 
-    if (exists) {
+    if (existingEntry) {
       return res.status(409).json({
         success: false,
         error: 'Email already registered',
@@ -65,8 +65,17 @@ const addEmailController = async (req: any, res: any) => {
       })
     }
 
-    // Add email
-    waitlist.emails.push(emailLower)
+    // Add email with default status 'pending'
+    waitlist.emails.push({
+      email: emailLower,
+      status: 'pending',
+      accessCode: null,
+      invitedAt: null,
+      invitedBy: null,
+      activatedAt: null,
+      notes: '',
+      addedAt: new Date()
+    })
     await waitlist.save()
 
     res.status(201).json({

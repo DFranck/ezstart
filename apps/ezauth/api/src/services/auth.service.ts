@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { getAuthUserModel, AuthUserDocument } from '../models/auth-user.js'
 import { getAuthCodeModel } from '../models/auth-code.js'
+import { getWaitlistModel } from '../models/waitlist.js'
 import {
   LoginRequest,
   RegisterRequest,
@@ -11,6 +12,7 @@ import {
   AuthCodeResponse,
   JWTPayload
 } from '@ezstart/auth-sdk/server'
+import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
@@ -29,6 +31,39 @@ export class AuthService {
       throw new Error('User already exists with this email or username')
     }
 
+    // Validate access code if provided
+    let isBetaTester = false
+    if (data.accessCode) {
+      const WaitlistModel = await getWaitlistModel()
+
+      // Find waitlist entry with this access code
+      // @ts-expect-error - Mongoose type inference issue
+      const waitlist = await WaitlistModel.findOne({
+        'emails.accessCode': data.accessCode
+      })
+
+      if (!waitlist) {
+        throw new Error('Invalid access code')
+      }
+
+      const entry = waitlist.emails.find((e: any) => e.accessCode === data.accessCode)
+
+      if (!entry) {
+        throw new Error('Invalid access code')
+      }
+
+      if (entry.status !== 'invited') {
+        throw new Error('Access code is not valid (already used or expired)')
+      }
+
+      // Mark as activated
+      entry.status = 'activated'
+      entry.activatedAt = new Date()
+      await waitlist.save()
+
+      isBetaTester = true
+    }
+
     // Create new user
     const user = new AuthUserModel({
       email: data.email,
@@ -38,6 +73,10 @@ export class AuthService {
       lastName: data.lastName,
       apps: [data.app], // Grant access to the requesting app
       isVerified: true, // For simplicity in v1
+      // Assign role and permissions
+      roles: isBetaTester ? ['beta-tester'] : [],
+      permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
+      features: isBetaTester ? ROLE_FEATURES['beta-tester'] : [],
     })
 
     await user.save()
