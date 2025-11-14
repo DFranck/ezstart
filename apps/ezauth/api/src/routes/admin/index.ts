@@ -3,13 +3,15 @@ import getUserRouter, { getUserRegistry } from './get-user.js'
 import updateUserRouter, { updateUserRegistry } from './update-user.js'
 import inviteWaitlistRouter, { inviteWaitlistRegistry } from './invite-waitlist.js'
 import listWaitlistRouter, { listWaitlistRegistry } from './list-waitlist.js'
+import getWaitlistRouter, { getWaitlistRegistry } from './get-waitlist.js'
 
 export const adminRegistries = [
   listUsersRegistry,
   getUserRegistry,
   updateUserRegistry,
   inviteWaitlistRegistry,
-  listWaitlistRegistry
+  listWaitlistRegistry,
+  getWaitlistRegistry
 ]
 
 export const adminRouters = [
@@ -17,5 +19,6 @@ export const adminRouters = [
   getUserRouter,
   updateUserRouter,
   inviteWaitlistRouter,
-  listWaitlistRouter
+  listWaitlistRouter,
+  getWaitlistRouter
 ]

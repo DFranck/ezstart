@@ -1,0 +1,107 @@
+import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { Router as ExpressRouter } from 'express'
+import { getWaitlistModel } from '../../models/waitlist.js'
+import { verifyTokenMiddleware } from '../../middleware/auth.js'
+import { z } from 'zod'
+
+export const getWaitlistRegistry = new OpenAPIRegistry()
+const router: ExpressRouter = Router()
+const docRouter = createRouterWithDoc(getWaitlistRegistry, router)
+
+// Schemas
+const waitlistEntrySchema = z.object({
+  _id: z.string().optional(),
+  email: z.string().describe('Email address'),
+  status: z.enum(['pending', 'invited', 'activated', 'rejected']).describe('Current status'),
+  accessCode: z.string().nullable().describe('Access code if invited'),
+  invitedAt: z.date().nullable().describe('Date when invited'),
+  activatedAt: z.date().nullable().describe('Date when activated'),
+  addedAt: z.date().describe('Date when added to waitlist'),
+  notes: z.string().describe('Optional notes'),
+})
+
+const waitlistStatsSchema = z.object({
+  total: z.number(),
+  pending: z.number(),
+  invited: z.number(),
+  activated: z.number(),
+  rejected: z.number(),
+})
+
+const getWaitlistResponseSchema = z.object({
+  entries: z.array(waitlistEntrySchema).describe('Array of waitlist entries'),
+  stats: waitlistStatsSchema.describe('Statistics about the waitlist'),
+})
+
+const errorSchema = z.object({
+  success: z.literal(false),
+  error: z.string().describe('Error message'),
+})
+
+// Get waitlist for specific app (admin endpoint)
+const getWaitlistController = async (req: any, res: any) => {
+  try {
+    const currentUser = req.user
+    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Admin access required'
+      })
+    }
+
+    const WaitlistModel = await getWaitlistModel()
+    const { appName } = req.params
+
+    // Find waitlist
+    // @ts-expect-error - Mongoose type inference issue
+    const waitlist = await WaitlistModel.findOne({ appName })
+
+    if (!waitlist) {
+      // Return empty waitlist if not found
+      return res.json({
+        entries: [],
+        stats: {
+          total: 0,
+          pending: 0,
+          invited: 0,
+          activated: 0,
+          rejected: 0,
+        }
+      })
+    }
+
+    // Calculate stats
+    const stats = {
+      total: waitlist.emails.length,
+      pending: waitlist.emails.filter((e: any) => e.status === 'pending').length,
+      invited: waitlist.emails.filter((e: any) => e.status === 'invited').length,
+      activated: waitlist.emails.filter((e: any) => e.status === 'activated').length,
+      rejected: waitlist.emails.filter((e: any) => e.status === 'rejected').length,
+    }
+
+    res.json({
+      entries: waitlist.emails,
+      stats,
+    })
+  } catch (error) {
+    console.error('Error fetching waitlist:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch waitlist'
+    })
+  }
+}
+
+docRouter.get('/:appName', verifyTokenMiddleware, getWaitlistController, {
+  summary: 'Get waitlist for specific app (admin)',
+  tags: ['Admin', 'Waitlist'],
+  responseSchema: getWaitlistResponseSchema,
+  extraResponses: {
+    403: { description: 'Forbidden - Admin access required', schema: errorSchema },
+    500: { description: 'Server error', schema: errorSchema }
+  }
+})
+
+export default router
