@@ -110,14 +110,7 @@ function BetaAccessRequest() {
     <Section size={'full'}>
       <Card variant={'ghost'}>
         <CardContent className="text-center py-12 space-y-6">
-          <Icon name="lucide:Sparkles" className="w-16 h-16 mx-auto text-gp-primary" />
-          <Div>
-            <H3>Beta Access Required</H3>
-            <P className="text-muted-foreground mt-2 max-w-md mx-auto">
-              The AI Chat feature is currently in private beta. Request access to start using GreenPulse
-              AI.
-            </P>
-          </Div>
+          <InsufficientPermissions requiredRoles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']} />
           {!requested ? (
             <Button onClick={handleRequest} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
               <Icon name="lucide:Sparkles" className="mr-2" />
@@ -132,9 +125,6 @@ function BetaAccessRequest() {
               </P>
             </Div>
           )}
-          <Div className="pt-4">
-            <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
-          </Div>
         </CardContent>
       </Card>
     </Section>
@@ -161,7 +151,7 @@ export default function LiaPage() {
         </Section>
       }
     >
-      <RequireRole roles={['client', 'beta-tester']} fallbackComponent={<BetaAccessRequest />}>
+      <RequireRole roles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']} fallbackComponent={<BetaAccessRequest />}>
         <LiaPageContent />
       </RequireRole>
     </RequireAuth>

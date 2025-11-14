@@ -51,12 +51,16 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         isLiaPage
           ? []
           : [
-              { href: '/chat', label: 'Chat', icon: 'lucide:Bot' },
+              { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
               {
                 href: '/dashboard',
                 label: tForms('navigation.workspaces'),
-                icon: 'lucide:Briefcase',
+                icon: 'lucide:Briefcase' as const,
               },
+              // Admin link: visible only for admin/superadmin
+              ...(rbac.hasAnyRole(['admin', 'superadmin'])
+                ? [{ href: '/admin', label: t('navigation.admin'), icon: 'lucide:Shield' as const }]
+                : []),
             ]
       }
       headerLeftContent={

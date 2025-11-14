@@ -9,5 +9,8 @@
     "login": "Login",
     "logout": "Logout",
     "loading": "Redirecting..."
+  },
+  "navigation": {
+    "admin": "Admin"
   }
 }
