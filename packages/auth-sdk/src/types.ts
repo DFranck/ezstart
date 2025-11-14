@@ -10,6 +10,16 @@ export interface AuthUser {
   avatar?: string
   isVerified: boolean
   apps: string[]
+
+  // RBAC - Role-Based Access Control
+  roles?: string[] // ['superadmin', 'admin', 'manager', 'beta-tester', 'client']
+  permissions?: string[] // ['theme:edit', 'users:manage', 'analytics:view']
+  features?: string[] // ['beta-features', 'early-access', 'advanced-analytics']
+
+  // Metadata
+  organizationId?: string // For client managers
+  managedBy?: string // User ID of manager (for clients)
+
   createdAt: string
   updatedAt: string
 }
@@ -64,6 +74,9 @@ export interface JWTPayload {
   email: string
   username: string
   apps: string[]
+  roles?: string[]
+  permissions?: string[]
+  features?: string[]
   iat?: number
   exp?: number
 }

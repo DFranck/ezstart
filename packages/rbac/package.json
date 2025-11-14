@@ -1,0 +1,22 @@
+{
+  "name": "@ezstart/rbac",
+  "version": "1.0.0",
+  "description": "Role-Based Access Control utilities for @ezstart monorepo",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "dev": "echo 'RBAC package (TypeScript source - no build needed)'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ezstart/auth-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

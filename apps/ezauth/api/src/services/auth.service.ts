@@ -110,7 +110,10 @@ export class AuthService {
       userId: user._id!.toString(),
       email: user.email,
       username: user.username,
-      apps: user.apps
+      apps: user.apps,
+      roles: user.roles || [],
+      permissions: user.permissions || [],
+      features: user.features || []
     }
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
@@ -178,7 +181,10 @@ export class AuthService {
       userId: user._id!.toString(),
       email: user.email,
       username: user.username,
-      apps: user.apps
+      apps: user.apps,
+      roles: user.roles || [],
+      permissions: user.permissions || [],
+      features: user.features || []
     }
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })

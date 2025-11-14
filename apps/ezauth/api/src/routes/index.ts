@@ -3,22 +3,32 @@ import type { Router as ExpressRouter } from 'express'
 import { authRegistries, authRouters } from './auth/index.js'
 import { oauthRegistries, oauthRouters } from './oauth/index.js'
 import { waitlistRegistries, waitlistRouters } from './waitlist/index.js'
+import { adminRegistries, adminRouters } from './admin/index.js'
 
-const router: ExpressRouter = Router()
+// Create separate routers for each group
+export const authRouter: ExpressRouter = Router()
+export const oauthRouter: ExpressRouter = Router()
+export const waitlistRouter: ExpressRouter = Router()
+export const adminRouter: ExpressRouter = Router()
 
 export const allRegistries = [
   ...authRegistries,
   ...oauthRegistries,
-  ...waitlistRegistries
+  ...waitlistRegistries,
+  ...adminRegistries
 ]
 
-// Mount all auth routes
-authRouters.forEach(r => router.use('/', r))
+// Mount auth routes (login, register, etc.)
+authRouters.forEach(r => authRouter.use('/', r))
 
-// Mount all oauth routes
-oauthRouters.forEach(r => router.use('/', r))
+// Mount oauth routes (google, callback, etc.)
+oauthRouters.forEach(r => oauthRouter.use('/', r))
 
-// Mount all waitlist routes (will be under /waitlist in main app)
-waitlistRouters.forEach(r => router.use('/', r))
+// Mount admin routes (users management)
+adminRouters.forEach(r => adminRouter.use('/', r))
 
-export default router
+// Mount waitlist routes (add, get, list)
+waitlistRouters.forEach(r => waitlistRouter.use('/', r))
+
+// Default export for backward compatibility (auth routes)
+export default authRouter

@@ -12,12 +12,26 @@ export interface AuthUserDocument extends Document {
   avatar?: string
   isVerified: boolean
   apps: string[]
+
+  // RBAC - Role-Based Access Control
+  roles: string[] // ['superadmin', 'admin', 'manager', 'beta-tester', 'client']
+  permissions: string[] // ['theme:edit', 'users:manage', 'analytics:view']
+  features: string[] // ['beta-features', 'early-access', 'advanced-analytics']
+
+  // Metadata
+  organizationId?: string // For client managers
+  managedBy?: string // User ID of manager (for clients)
+
   createdAt: Date
   updatedAt: Date
 
   // Methods
   comparePassword(password: string): Promise<boolean>
   toAuthUser(): AuthUser
+  hasRole(role: string): boolean
+  hasPermission(permission: string): boolean
+  hasFeature(feature: string): boolean
+  hasAnyRole(roles: string[]): boolean
 }
 
 const authUserSchema = new Schema<AuthUserDocument>({
@@ -59,6 +73,29 @@ const authUserSchema = new Schema<AuthUserDocument>({
     type: String,
     enum: ['ezbill', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'], // Add more apps as needed
   }],
+  // RBAC fields
+  roles: [{
+    type: String,
+    enum: ['superadmin', 'admin', 'manager', 'beta-tester', 'client'],
+    default: []
+  }],
+  permissions: [{
+    type: String,
+    default: []
+  }],
+  features: [{
+    type: String,
+    default: []
+  }],
+  // Metadata
+  organizationId: {
+    type: String,
+    required: false
+  },
+  managedBy: {
+    type: String,
+    required: false
+  }
 }, {
   timestamps: true,
   collection: 'auth_users', // Separate collection from other apps
@@ -82,6 +119,27 @@ authUserSchema.methods.comparePassword = async function(password: string): Promi
   return bcrypt.compare(password, this.passwordHash)
 }
 
+// RBAC methods
+authUserSchema.methods.hasRole = function(role: string): boolean {
+  return this.roles?.includes(role) || false
+}
+
+authUserSchema.methods.hasPermission = function(permission: string): boolean {
+  // Superadmin has all permissions
+  if (this.hasRole('superadmin')) return true
+  return this.permissions?.includes(permission) || false
+}
+
+authUserSchema.methods.hasFeature = function(feature: string): boolean {
+  // Superadmin has all features
+  if (this.hasRole('superadmin')) return true
+  return this.features?.includes(feature) || false
+}
+
+authUserSchema.methods.hasAnyRole = function(roles: string[]): boolean {
+  return roles.some(role => this.hasRole(role))
+}
+
 // Transform to API object
 authUserSchema.methods.toAuthUser = function(): AuthUser {
   return {
@@ -93,6 +151,11 @@ authUserSchema.methods.toAuthUser = function(): AuthUser {
     avatar: this.avatar,
     isVerified: this.isVerified,
     apps: this.apps,
+    roles: this.roles || [],
+    permissions: this.permissions || [],
+    features: this.features || [],
+    organizationId: this.organizationId,
+    managedBy: this.managedBy,
     createdAt: this.createdAt.toISOString(),
     updatedAt: this.updatedAt.toISOString(),
   }

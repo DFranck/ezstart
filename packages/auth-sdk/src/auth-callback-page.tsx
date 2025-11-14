@@ -71,8 +71,22 @@ function CallbackContent({
       try {
         await handleCallback(code)
         setStatus('success')
+
+        // Get saved redirect URL from localStorage (set by redirectToLogin)
+        const savedRedirect = typeof window !== 'undefined'
+          ? localStorage.getItem('ezauth_redirect_after_login')
+          : null
+
+        // Use saved redirect if available, otherwise use prop default
+        const finalRedirect = savedRedirect || redirectTo
+
+        // Clear saved redirect
+        if (typeof window !== 'undefined' && savedRedirect) {
+          localStorage.removeItem('ezauth_redirect_after_login')
+        }
+
         // Redirect after successful auth
-        setTimeout(() => router.push(redirectTo), 1500)
+        setTimeout(() => router.push(finalRedirect), 1500)
       } catch (err) {
         console.error('❌ [AuthCallback] Authentication failed:', err)
         setStatus('error')

@@ -39,6 +39,12 @@ export const authUserSchema = z.object({
   avatar: z.string().optional().describe('Avatar URL'),
   isVerified: z.boolean().describe('Email verification status'),
   apps: z.array(z.string()).describe('Accessible applications'),
+  // RBAC fields
+  roles: z.array(z.string()).optional().describe('User roles (superadmin, admin, manager, etc.)'),
+  permissions: z.array(z.string()).optional().describe('User permissions'),
+  features: z.array(z.string()).optional().describe('Enabled features'),
+  organizationId: z.string().optional().describe('Organization ID'),
+  managedBy: z.string().optional().describe('Manager user ID'),
   createdAt: z.string().describe('Account creation timestamp'),
   updatedAt: z.string().describe('Last update timestamp')
 }).describe('User information')

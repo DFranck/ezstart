@@ -32,6 +32,12 @@ export class AuthClient {
 
   // Redirect to EZAuth login page
   redirectToLogin(additionalParams?: Record<string, string>) {
+    // Save current URL for post-login redirect
+    if (typeof window !== 'undefined') {
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash
+      localStorage.setItem('ezauth_redirect_after_login', currentUrl)
+    }
+
     const params = new URLSearchParams({
       app: this.config.appName,
       redirect_uri: this.config.redirectUri,

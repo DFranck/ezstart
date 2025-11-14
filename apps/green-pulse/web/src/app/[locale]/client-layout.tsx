@@ -89,7 +89,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
             currentLocale={currentLocale}
             onLocaleChange={handleLocaleChange}
           />
-          <ThemeEditor adminOnly={false} enableHistory={true} />
+          <ThemeEditor adminOnly={true} enableHistory={true} />
           <ThemeSwitcher />
         </Div>
       }

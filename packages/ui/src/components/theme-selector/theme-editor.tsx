@@ -208,9 +208,34 @@ export function ThemeEditor({
     styleTag.textContent = css
   }, [overrides, editor.localChanges])
 
+  // Admin-only check using RBAC
   if (adminOnly) {
-    // TODO: Add auth check here
-    // if (!user?.roles.includes('admin')) return null
+    // Check if running in a Next.js/React environment with zustand auth
+    if (typeof window !== 'undefined') {
+      try {
+        // Dynamically import the auth store (optional dependency)
+        const authStore = (window as any).__ezauth_store__
+        if (authStore) {
+          const { user, isAuthenticated } = authStore.getState()
+
+          // User must be authenticated AND have admin/superadmin role OR theme:edit permission
+          if (!isAuthenticated) return null
+
+          const hasAdminRole = user?.roles?.includes('admin') || user?.roles?.includes('superadmin')
+          const hasThemePermission = user?.permissions?.includes('theme:edit')
+
+          if (!hasAdminRole && !hasThemePermission) {
+            return null
+          }
+        } else {
+          // No auth store available - hide for safety
+          return null
+        }
+      } catch {
+        // Failed to check auth - hide for safety
+        return null
+      }
+    }
   }
 
   return (

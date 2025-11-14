@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Green BIDV x GreenPulse.AI - Strategic Partnership</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        position: relative;
+        text-align: center;
+        border-bottom: 4px solid #2e7d32;
+        padding-bottom: 30px;
+        margin-bottom: 40px;
+      }
+
+      .header h1 {
+        color: #2e7d32;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .header h1 img {
+        max-height: 60px;
+        object-fit: contain;
+      }
+
+      .header .subtitle {
+        color: #1565c0;
+        font-size: 1.3em;
+        font-weight: 300;
+      }
+
+      .header .logo-greenpulse {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        max-width: 200px;
+        max-height: 100px;
+        object-fit: contain;
+      }
+
+      .section {
+        margin-bottom: 50px;
+      }
+
+      .section-title {
+        background: linear-gradient(135deg, #2e7d32 0%, #1565c0 100%);
+        color: white;
+        padding: 15px 25px;
+        font-size: 1.5em;
+        margin-bottom: 25px;
+        border-radius: 5px;
+      }
+
+      .journey-step {
+        background: #f9f9f9;
+        border-left: 4px solid #2e7d32;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+
+      .journey-step h3 {
+        color: #2e7d32;
+        margin-bottom: 10px;
+      }
+
+      .journey-step ul {
+        list-style: none;
+        padding-left: 20px;
+      }
+
+      .journey-step ul li {
+        padding: 5px 0;
+        position: relative;
+      }
+
+      .journey-step ul li:before {
+        content: '→';
+        color: #2e7d32;
+        font-weight: bold;
+        position: absolute;
+        left: -20px;
+      }
+
+      .flow-diagram {
+        background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
+        padding: 30px;
+        border-radius: 10px;
+        margin: 30px 0;
+      }
+
+      .flow-step {
+        background: white;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #2e7d32;
+        position: relative;
+      }
+
+      .flow-step:after {
+        content: '↓';
+        display: block;
+        text-align: center;
+        font-size: 2em;
+        color: #2e7d32;
+        margin: 10px 0;
+      }
+
+      .flow-step:last-child:after {
+        display: none;
+      }
+
+      .flow-step h4 {
+        color: #1565c0;
+        margin-bottom: 10px;
+      }
+
+      .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .benefit-card {
+        background: #f9f9f9;
+        padding: 25px;
+        border-radius: 10px;
+        border-top: 4px solid #2e7d32;
+      }
+
+      .benefit-card h3 {
+        color: #1565c0;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+      }
+
+      .benefit-card ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .benefit-card ul li {
+        padding: 8px 0;
+        padding-left: 25px;
+        position: relative;
+      }
+
+      .benefit-card ul li:before {
+        content: '✓';
+        color: #2e7d32;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+      }
+
+      .use-case {
+        background: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        padding: 30px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+
+      .use-case h3 {
+        color: #e65100;
+        margin-bottom: 20px;
+      }
+
+      .use-case-steps {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .use-case-step {
+        padding: 10px;
+        margin: 5px 0;
+        border-left: 3px solid #e65100;
+        padding-left: 15px;
+      }
+
+      .roadmap-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .roadmap-table th {
+        background: #2e7d32;
+        color: white;
+        padding: 15px;
+        text-align: left;
+      }
+
+      .roadmap-table td {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .roadmap-table tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      .stage-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+
+      .badge-mvp {
+        background: #4caf50;
+        color: white;
+      }
+
+      .badge-enhanced {
+        background: #2196f3;
+        color: white;
+      }
+
+      .badge-v1 {
+        background: #ff9800;
+        color: white;
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .feature-list li {
+        padding: 10px;
+        margin: 5px 0;
+        background: white;
+        border-radius: 5px;
+        border-left: 3px solid #2e7d32;
+        padding-left: 15px;
+      }
+
+      .cta-box {
+        background: linear-gradient(135deg, #1565c0 0%, #2e7d32 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      .cta-box h3 {
+        margin-bottom: 15px;
+      }
+
+      .cta-box ol {
+        text-align: left;
+        display: inline-block;
+        margin: 20px 0;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+        color: #666;
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+        .container {
+          box-shadow: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header .logo-greenpulse {
+          position: static;
+          display: block;
+          margin: 0 auto 20px auto;
+          max-width: 150px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img src="web/public/logo_complet.svg" alt="GreenPulse.AI" class="logo-greenpulse" />
+        <h1>
+          Workflow
+          <img src="web/public/images/bidv-logo.jpeg" alt="BIDV Bank" />
+        </h1>
+        <p class="subtitle">Concept: Green BIDV powered by GreenPulse.AI</p>
+        <p style="font-size: 1em; color: #666; margin-top: 10px;">Strategic Partnership Workflow & Implementation Roadmap</p>
+      </div>
+
+      <!-- User Journey -->
+      <div class="section">
+        <h2 class="section-title">User Journey (SME Client)</h2>
+
+        <div class="journey-step">
+          <h3>Step 1: Access</h3>
+          <p>BIDV offers "Green BIDV powered by GreenPulse" to SME clients</p>
+          <ul>
+            <li>Free access as BIDV customer benefit</li>
+            <li>QR code + access code distribution</li>
+          </ul>
+        </div>
+
+        <div class="journey-step">
+          <h3>Step 2: Platform Entry</h3>
+          <p>SME downloads app or accesses via web (BIDV-branded interface)</p>
+        </div>
+
+        <div class="journey-step">
+          <h3>Step 3: AI Assistance</h3>
+          <p><strong>ESG Fundamentals:</strong></p>
+          <ul>
+            <li>Calculate carbon footprint</li>
+            <li>Get ESG compliance guidance</li>
+            <li>Prepare sustainability reports</li>
+          </ul>
+          <p style="margin-top: 15px"><strong>BIDV-Specific Business Growth Support:</strong></p>
+          <ul>
+            <li>Green loan eligibility assessment (SBV requirements)</li>
+            <li>Sustainable growth strategies (revenue + cost reduction)</li>
+            <li>Export readiness support (international compliance)</li>
+            <li>Green bonds and impact finance opportunities</li>
+          </ul>
+        </div>
+
+        <div class="journey-step">
+          <h3>Step 4: Results & Actions</h3>
+          <p>AI generates:</p>
+          <ul>
+            <li>ESG compliance report</li>
+            <li>Business growth roadmap (cost reduction + revenue opportunities)</li>
+            <li>Recommended next steps with financing needs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Data Flow -->
+      <div class="section">
+        <h2 class="section-title">Data Flow: The Virtuous Circle</h2>
+
+        <div style="text-align: center; margin: 30px 0; overflow: hidden">
+          <img
+            src="web/public/images/Data Flow.svg"
+            alt="Data Flow Diagram"
+            style="
+              max-width: 100%;
+              height: auto;
+              max-height: 500px;
+              object-fit: cover;
+              object-position: top;
+            "
+          />
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="section">
+        <h2 class="section-title">Benefits for BIDV (ROI-Focused)</h2>
+
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3>1. Loan Acquisition Pipeline</h3>
+            <ul>
+              <li>AI identifies specific financing needs</li>
+              <li>Clients return with clear loan ask</li>
+              <li>Higher conversion rate (pre-qualified)</li>
+            </ul>
+          </div>
+
+          <div class="benefit-card">
+            <h3>2. Client Retention</h3>
+            <ul>
+              <li>Tool helps SMEs increase revenue</li>
+              <li>Growing clients need more services</li>
+              <li>BIDV seen as growth partner</li>
+            </ul>
+          </div>
+
+          <div class="benefit-card">
+            <h3>3. Green Portfolio Growth</h3>
+            <ul>
+              <li>Meet SBV green credit targets</li>
+              <li>Access preferential SBV rates</li>
+              <li>Lower capital requirements (Basel III)</li>
+            </ul>
+          </div>
+
+          <div class="benefit-card">
+            <h3>4. Risk Mitigation</h3>
+            <ul>
+              <li>Sustainable = more resilient (lower NPL)</li>
+              <li>ESG compliance = avoid penalties</li>
+              <li>Better climate risk preparedness</li>
+            </ul>
+          </div>
+
+          <div class="benefit-card">
+            <h3>5. Competitive Edge</h3>
+            <ul>
+              <li>Only bank with AI-powered ESG tool</li>
+              <li>"Green BIDV" brand positioning</li>
+              <li>SME acquisition from competitors</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Use Case -->
+      <div class="section">
+        <div class="use-case">
+          <h3>Example Use Case: Textile SME Success Story</h3>
+          <div class="use-case-steps">
+            <div class="use-case-step">
+              1. Calculates carbon footprint → discovers high energy costs
+            </div>
+            <div class="use-case-step">
+              2. AI recommends: solar panels + energy-efficient machines
+            </div>
+            <div class="use-case-step">
+              3. Shows ROI: 30% energy cost reduction = $50K/year savings
+            </div>
+            <div class="use-case-step">4. Identifies: needs $200K loan for equipment</div>
+            <div class="use-case-step">5. Returns to BIDV with clear business case</div>
+            <div class="use-case-step">
+              6. BIDV approves green loan (lower rate, preferential SBV refinancing)
+            </div>
+            <div class="use-case-step">7. SME implements → saves money → grows revenue</div>
+            <div class="use-case-step">
+              8. SME needs bigger working capital 2 years later → stays with BIDV
+            </div>
+            <div
+              style="
+                margin-top: 20px;
+                padding: 15px;
+                background: #4caf50;
+                color: white;
+                border-radius: 5px;
+                text-align: center;
+                font-weight: bold;
+              "
+            >
+              Result: BIDV gains loyal, growing, low-risk client + green loan assets
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Implementation Roadmap -->
+      <div class="section">
+        <h2 class="section-title">Implementation Roadmap by Funding Stage</h2>
+
+        <!-- MVP Features -->
+        <div style="margin-bottom: 40px">
+          <span class="stage-badge badge-mvp">MVP FEATURES</span>
+          <p style="margin: 10px 0; font-size: 1.1em">
+            <strong>Budget: $50-80K (Business Angel Funding)</strong>
+          </p>
+          <p style="margin-bottom: 15px; color: #666">✓ Ready for 4-month free beta testing</p>
+
+          <div style="background: #e8f5e9; padding: 20px; border-radius: 8px">
+            <h4 style="color: #2e7d32; margin-bottom: 15px">Core Platform:</h4>
+            <ul class="feature-list">
+              <li>AI conversational agent (ESG guidance, carbon footprint calculation)</li>
+              <li>ESG compliance reports generation</li>
+              <li>Sustainable growth strategy recommendations</li>
+              <li>Step-by-step implementation support</li>
+              <li>Financing needs identification</li>
+              <li>BIDV loan application integration with pre-filled ESG data</li>
+              <li>Direct calendar booking with BIDV loan officers</li>
+            </ul>
+
+            <h4 style="color: #2e7d32; margin: 20px 0 15px 0">Scoring & Assessment:</h4>
+            <ul class="feature-list">
+              <li>ESG Risk Score (0-100)</li>
+              <li>Business Resilience Score</li>
+              <li>Green Loan Eligibility assessment (Yes/No + improvement roadmap)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Enhanced Features -->
+        <div style="margin-bottom: 40px">
+          <span class="stage-badge badge-enhanced">ENHANCED FEATURES</span>
+          <p style="margin: 10px 0; font-size: 1.1em">
+            <strong>Budget: $150K+ (Significant Equity Round)</strong>
+          </p>
+          <p style="margin-bottom: 15px; color: #666">
+            ✓ Extended capabilities for scaled deployment
+          </p>
+
+          <div style="background: #e3f2fd; padding: 20px; border-radius: 8px">
+            <h4 style="color: #1565c0; margin-bottom: 15px">BIDV Dashboard:</h4>
+            <ul class="feature-list">
+              <li>Portfolio ESG health monitoring</li>
+              <li>Client segmentation: "Green Loan Ready" (score >70) / "High Risk" (score <40)</li>
+              <li>Pipeline forecasting (projected green loans in 6 months)</li>
+            </ul>
+
+            <h4 style="color: #1565c0; margin: 20px 0 15px 0">Advanced Tools:</h4>
+            <ul class="feature-list">
+              <li>
+                <strong>Green Loan Calculator:</strong> Input equipment details → Output ROI
+                projections, payback period, BIDV rate comparison → "Apply Now" button
+              </li>
+              <li>
+                <strong>Export Readiness Check:</strong> EU compliance gap analysis → 6-month action
+                plan → Trade finance opportunities → "Talk to BIDV Export Team" button
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- V1 Paid Features -->
+        <div style="margin-bottom: 40px">
+          <span class="stage-badge badge-v1">V1 PAID FEATURES</span>
+          <p style="margin: 10px 0; font-size: 1.1em"><strong>Post 4-Month Beta Testing</strong></p>
+          <p style="margin-bottom: 15px; color: #666">✓ Revenue-generating premium tier</p>
+
+          <div style="background: #fff3e0; padding: 20px; border-radius: 8px">
+            <ul class="feature-list">
+              <li>Portfolio Health Dashboard (bank-level analytics)</li>
+              <li>Advanced benchmarking tools</li>
+              <li>Multi-location/multi-entity management</li>
+              <li>Priority support</li>
+              <li>Custom reporting templates</li>
+              <li>API access for ERP integration</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Customization -->
+        <div
+          style="
+            background: linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 100%);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #7b1fa2;
+          "
+        >
+          <h4 style="color: #7b1fa2; margin-bottom: 15px">Customization Commitment</h4>
+          <p>
+            We remain fully open to implementing custom features benefiting both SME clients
+            (improved user experience, sector-specific tools) and BIDV operations (integration with
+            existing systems, custom analytics).
+          </p>
+          <p style="margin-top: 10px">
+            Our development roadmap is flexible and client-driven to ensure maximum value delivery
+            and strategic alignment with BIDV's green banking objectives.
+          </p>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="cta-box">
+        <h3>NEXT STEPS</h3>
+        <div style="text-align: left; max-width: 900px; margin: 0 auto">
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">1. STRATEGIC VALIDATION</strong>
+            <p style="margin: 8px 0 0 20px">
+              BIDV reviews and validates workflow alignment with green banking priorities
+            </p>
+          </div>
+
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">2. MOU DEVELOPMENT</strong>
+            <p style="margin: 8px 0 0 20px">
+              Formalize partnership framework and confirm MVP feature scope for beta testing
+            </p>
+          </div>
+
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">3. FUNDING & TIMELINE</strong>
+            <ul style="margin: 8px 0 0 20px; list-style: none; padding: 0">
+              <li style="margin: 5px 0">
+                • GreenPulse secures Series Seed ($50-80K) from business angels & VC
+              </li>
+              <li style="margin: 5px 0">
+                • Estimated: 2-3 months fundraising + 3-4 months MVP development
+              </li>
+              <li style="margin: 5px 0">• Beta deployment: 4 months free for BIDV clients</li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">4. PRE-LAUNCH COLLABORATION</strong>
+            <p style="margin: 8px 0 0 20px">
+              Define success metrics, technical integration requirements, and onboarding materials
+              during development phase
+            </p>
+          </div>
+
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">5. BETA LAUNCH & DISTRIBUTION</strong>
+            <ul style="margin: 8px 0 0 20px; list-style: none; padding: 0">
+              <li style="margin: 5px 0">
+                • Deploy BIDV-branded platform with QR code + access code system
+              </li>
+              <li style="margin: 5px 0">• Train BIDV teams on dashboard and client support</li>
+              <li style="margin: 5px 0">
+                • Phased rollout: Pilot (5-15 SMEs) → Expansion → Full deployment
+              </li>
+              <li style="margin: 5px 0">• Co-branded marketing campaign activation</li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              margin: 20px 0;
+              padding: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 8px;
+            "
+          >
+            <strong style="font-size: 1.1em">6. CONTINUOUS CUSTOMIZATION</strong>
+            <p style="margin: 8px 0 0 20px">
+              BIDV input integrated throughout development to ensure operational alignment
+            </p>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+          "
+        >
+          <h3 style="margin-bottom: 15px">NEXT ENGAGEMENT</h3>
+          <p style="font-size: 1.1em; line-height: 1.8">
+            <strong>Your choice:</strong><br />
+            Send us your review to initiate MOU draft preparation<br />
+            <strong>OR</strong> schedule detailed discussion with BIDV HQ to align on terms<br />
+            <strong>OR both:</strong> Discussion first, then formal MOU development
+          </p>
+          <p style="margin-top: 15px; font-size: 1.2em; font-weight: bold">
+            We're ready to proceed at your preferred pace.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p><strong>Amber Seradni</strong></p>
+        <p>Co-founder & CEO, GreenPulse.AI</p>
+        <p>aseradni@nexora-venture.com | +84 33 720 3601</p>
+        <p style="margin-top: 10px; color: #999; font-size: 0.9em">Ho Chi Minh City, Vietnam</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -15,8 +15,10 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/fetch-client": "workspace:*",
     "@ezstart/monitoring": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
+    "@ezstart/rbac": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-dropdown-menu": "^2.1.14",

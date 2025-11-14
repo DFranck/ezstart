@@ -67,6 +67,11 @@ export const useAuthStore = create<AuthState>()(
   )
 )
 
+// Expose store globally for cross-package access (e.g., @ezstart/ui ThemeEditor)
+if (typeof window !== 'undefined') {
+  (window as any).__ezauth_store__ = useAuthStore
+}
+
 // SSR-safe hook that waits for hydration
 export function useAuthStoreSSR() {
   const [mounted, setMounted] = useState(false)

@@ -11,7 +11,7 @@ import {
   createVersionedRouter,
   addVersionHeader
 } from '@ezstart/express-core'
-import routes, { allRegistries } from './routes/index.js'
+import routes, { allRegistries, authRouter, oauthRouter, waitlistRouter, adminRouter } from './routes/index.js'
 import passport from './config/passport.js'
 import { getAuthUserModel } from './models/auth-user.js'
 import { getAuthCodeModel } from './models/auth-code.js'
@@ -45,9 +45,13 @@ app.use(passport.initialize())
 app.use(addVersionHeader('v1'))
 
 // ✅ API routes with versioning support
-// Supports both /api/auth and /api/v1/auth (backward compatible)
-app.use(createVersionedRouter('/api/auth', routes))
-app.use(createVersionedRouter('/api/waitlist', routes))
+// /api/auth/* - All authentication (credentials + OAuth)
+// /api/admin/* - All admin/authorization routes
+// /api/waitlist/* - Waitlist routes
+app.use(createVersionedRouter('/api/auth', authRouter))   // /api/auth/login, /api/auth/register, /api/auth/token, etc.
+app.use(createVersionedRouter('/api/auth', oauthRouter))  // /api/auth/google, /api/auth/callback (OAuth)
+app.use(createVersionedRouter('/api/admin', adminRouter)) // /api/admin/users
+app.use(createVersionedRouter('/api/waitlist', waitlistRouter)) // /api/waitlist/:appName/add
 
 // Sentry error handler (called automatically by expressIntegration)
 // MUST be AFTER all routes/controllers
