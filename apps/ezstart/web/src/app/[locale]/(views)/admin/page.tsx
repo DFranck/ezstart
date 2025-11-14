@@ -3,8 +3,7 @@
 import type { AuthUser } from '@ezstart/auth-sdk'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
-import { useRBAC } from '@ezstart/rbac'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac-ui'
+import { useRBAC, RequireRole, InsufficientPermissions } from '@ezstart/rbac'
 import {
   Badge,
   Button,
