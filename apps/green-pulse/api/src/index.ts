@@ -1,3 +1,4 @@
+// Updated: 2025-11-15 - App-specific roles support
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
