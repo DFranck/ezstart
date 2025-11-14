@@ -509,6 +509,7 @@ export default function HomePage(): any {
           </H2>
 
           <Div className="space-y-4">
+            {/* @ts-expect-error - returnObjects is valid but not typed */}
             {(
               t('homeV2.faq.questions', { returnObjects: true }) as unknown as Array<{
                 question: string
