@@ -3,7 +3,7 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
-import { ErrorBoundary, VersionSwitch } from '@ezstart/ui/components'
+import { ErrorBoundary } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
@@ -11,6 +11,7 @@ import { Geist } from 'next/font/google'
 import Script from 'next/script'
 import { ReactNode } from 'react'
 import { Toaster } from 'sonner'
+import ProtectedVersionSwitch from './protected-version-switch'
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -60,12 +61,12 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
-            <VersionSwitch />
             <ErrorBoundary>
               <QueryProvider>
                 <ThemeProvider>
                   <AuthProvider appName="ezbill" authMode="httpOnly">
                     {children}
+                    <ProtectedVersionSwitch />
                   </AuthProvider>
                 </ThemeProvider>
               </QueryProvider>

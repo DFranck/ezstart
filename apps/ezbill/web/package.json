@@ -19,6 +19,7 @@
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
+    "@ezstart/rbac": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@react-pdf/renderer": "^4.3.0",
