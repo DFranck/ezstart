@@ -4,7 +4,7 @@
  */
 
 import type { AuthUser } from '@ezstart/auth-sdk/server'
-import { ROLE_HIERARCHY, ROLE_PERMISSIONS, ROLE_FEATURES, type Role, type Permission, type Feature } from './types'
+import { ROLE_HIERARCHY, ROLE_PERMISSIONS, ROLE_FEATURES, type Role, type Permission, type Feature } from './types.js'
 
 /**
  * Check if user has a specific role

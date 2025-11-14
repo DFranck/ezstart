@@ -2,7 +2,7 @@
  * RBAC Helpers - UI utilities for roles, permissions, and features
  */
 
-import { Role } from './types'
+import { Role } from './types.js'
 
 export type RoleColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
 

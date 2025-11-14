@@ -1,7 +1,7 @@
 import React from 'react'
 import { Badge } from '@ezstart/ui/components'
-import { type Role } from '../types'
-import { getRoleLabel } from '../helpers'
+import { type Role } from '../types.js'
+import { getRoleLabel } from '../helpers.js'
 
 // Map roles to Badge variants
 const roleToBadgeVariant = {
