@@ -45,11 +45,11 @@ const ClientLayout = ({
       currentPath={pathname}
       headerPosition="sticky"
       mobileLogoIcon="custom:Ezbill"
-      mobileLogoHref={isAuthenticated ? '/dashboard' : '/'}
+      mobileLogoHref={'/'}
       headerLeftContent={
         <div className="flex items-center space-x-4">
           <Link
-            href={isAuthenticated ? '/dashboard' : '/'}
+            href={'/'}
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <Icon name="custom:Ezbill" size={30} />

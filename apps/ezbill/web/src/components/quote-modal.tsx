@@ -262,7 +262,7 @@ export function QuoteModal({
                     <SelectItem key={value} value={value} className="hover:bg-warning/5">
                       <div className="flex items-center">
                         {label}
-                        <Span className="ml-2" intent={'warning'}>
+                        <Span className="ml-2 text-warning">
                           {symbol}
                         </Span>
                       </div>

@@ -1,16 +1,24 @@
 'use client'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button } from '@ezstart/ui/components'
+import { Button, Card, CardContent, CardHeader, H3 } from '@ezstart/ui/components'
+import Link from 'next/link'
 
 export function EZAuthLoginSection() {
   const { user, isAuthenticated, login } = useAuth()
 
   if (isAuthenticated && user) {
     return (
-      <div className="text-center">
-        <p className="text-success mb-2">Welcome back, {user.username}!</p>
-        <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
-      </div>
+      <Card variant={'ghost'}>
+        <CardHeader>
+          <H3 size={'h6'}>Welcome back, {user.username}!</H3>
+        </CardHeader>
+        <CardContent className="flex justify-center">
+          <Button asChild>
+            <Link href={'/dashboard'}>Dashboard</Link>
+          </Button>
+        </CardContent>
+        {/* <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p> */}
+      </Card>
     )
   }
 

@@ -14,7 +14,9 @@ export interface AuthUserDocument extends Document {
   apps: string[]
 
   // RBAC - Role-Based Access Control
-  roles: string[] // ['superadmin', 'admin', 'manager', 'beta-tester', 'client']
+  roles: string[] // DEPRECATED - Use globalRoles or appRoles instead (kept for backwards compatibility)
+  globalRoles: string[] // Cross-app roles (only 'superadmin' allowed)
+  appRoles: Map<string, string[]> // App-specific roles: { 'green-pulse': ['admin'], 'ezbill': ['beta-tester'] }
   permissions: string[] // ['theme:edit', 'users:manage', 'analytics:view']
   features: string[] // ['beta-features', 'early-access', 'advanced-analytics']
 
@@ -28,10 +30,12 @@ export interface AuthUserDocument extends Document {
   // Methods
   comparePassword(password: string): Promise<boolean>
   toAuthUser(): AuthUser
-  hasRole(role: string): boolean
+  hasRole(role: string, appName?: string): boolean
+  hasGlobalRole(role: string): boolean
+  hasAppRole(appName: string, role: string): boolean
+  hasAnyRole(roles: string[], appName?: string): boolean
   hasPermission(permission: string): boolean
   hasFeature(feature: string): boolean
-  hasAnyRole(roles: string[]): boolean
 }
 
 const authUserSchema = new Schema<AuthUserDocument>({
@@ -78,7 +82,20 @@ const authUserSchema = new Schema<AuthUserDocument>({
     type: String,
     enum: ['superadmin', 'admin', 'manager', 'beta-tester', 'client'],
     default: []
+  }], // DEPRECATED - kept for backwards compatibility
+  globalRoles: [{
+    type: String,
+    enum: ['superadmin'], // Only superadmin can be global
+    default: []
   }],
+  appRoles: {
+    type: Map,
+    of: [{
+      type: String,
+      enum: ['admin', 'manager', 'beta-tester', 'client']
+    }],
+    default: {}
+  },
   permissions: [{
     type: String,
     default: []
@@ -120,28 +137,67 @@ authUserSchema.methods.comparePassword = async function(password: string): Promi
 }
 
 // RBAC methods
-authUserSchema.methods.hasRole = function(role: string): boolean {
-  return this.roles?.includes(role) || false
+authUserSchema.methods.hasGlobalRole = function(role: string): boolean {
+  return this.globalRoles?.includes(role) || false
+}
+
+authUserSchema.methods.hasAppRole = function(appName: string, role: string): boolean {
+  const appRoles = this.appRoles?.get(appName) || []
+  return appRoles.includes(role)
+}
+
+authUserSchema.methods.hasRole = function(role: string, appName?: string): boolean {
+  // Check global roles first (superadmin is always global)
+  if (role === 'superadmin') {
+    return this.hasGlobalRole('superadmin')
+  }
+
+  // If appName specified, check app-specific role
+  if (appName) {
+    return this.hasAppRole(appName, role)
+  }
+
+  // Check both old roles (backwards compat) and global roles
+  const hasOldRole = this.roles?.includes(role) || false
+  const hasNewGlobalRole = this.globalRoles?.includes(role) || false
+
+  // Check if has role in ANY app
+  const hasInAnyApp = Array.from(this.appRoles?.keys() || []).some(app =>
+    this.hasAppRole(app, role)
+  )
+
+  return hasOldRole || hasNewGlobalRole || hasInAnyApp
+}
+
+authUserSchema.methods.hasAnyRole = function(roles: string[], appName?: string): boolean {
+  // Superadmin always has access
+  if (this.hasGlobalRole('superadmin')) return true
+
+  return roles.some(role => this.hasRole(role, appName))
 }
 
 authUserSchema.methods.hasPermission = function(permission: string): boolean {
   // Superadmin has all permissions
-  if (this.hasRole('superadmin')) return true
+  if (this.hasGlobalRole('superadmin')) return true
   return this.permissions?.includes(permission) || false
 }
 
 authUserSchema.methods.hasFeature = function(feature: string): boolean {
   // Superadmin has all features
-  if (this.hasRole('superadmin')) return true
+  if (this.hasGlobalRole('superadmin')) return true
   return this.features?.includes(feature) || false
-}
-
-authUserSchema.methods.hasAnyRole = function(roles: string[]): boolean {
-  return roles.some(role => this.hasRole(role))
 }
 
 // Transform to API object
 authUserSchema.methods.toAuthUser = function(): AuthUser {
+  // Convert Map to plain object for appRoles
+  const appRolesObj: Record<string, string[]> = {}
+  if (this.appRoles) {
+    (this.appRoles as Map<string, string[]>).forEach((roles: string[], appName: string) => {
+      appRolesObj[appName] = roles
+    })
+  }
+
   return {
     _id: this._id.toString(),
     email: this.email,
@@ -151,7 +207,9 @@ authUserSchema.methods.toAuthUser = function(): AuthUser {
     avatar: this.avatar,
     isVerified: this.isVerified,
     apps: this.apps,
-    roles: this.roles || [],
+    roles: this.roles || [], // DEPRECATED - kept for backwards compatibility
+    globalRoles: this.globalRoles || [],
+    appRoles: appRolesObj,
     permissions: this.permissions || [],
     features: this.features || [],
     organizationId: this.organizationId,

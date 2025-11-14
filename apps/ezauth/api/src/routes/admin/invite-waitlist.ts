@@ -78,14 +78,24 @@ const inviteWaitlistController = async (req: any, res: any) => {
 
     // Check if user already exists with this email
     const AuthUserModel = await getAuthUserModel()
-    // @ts-expect-error - Mongoose type inference issue
     const existingUser = await AuthUserModel.findOne({ email: email.toLowerCase() })
 
     if (existingUser) {
       // User exists - auto-grant access immediately
-      console.log(`✅ User exists: ${email} - Auto-granting beta-tester role`)
+      console.log(`✅ User exists: ${email} - Auto-granting beta-tester role for ${appName}`)
 
-      // Add beta-tester role if not already present
+      // Add beta-tester role to appRoles if not already present
+      if (!existingUser.appRoles) {
+        existingUser.appRoles = new Map<string, string[]>()
+      }
+
+      const currentAppRoles = existingUser.appRoles.get(appName) || []
+      if (!currentAppRoles.includes('beta-tester')) {
+        currentAppRoles.push('beta-tester')
+        existingUser.appRoles.set(appName, currentAppRoles)
+      }
+
+      // Add beta-tester to old roles field for backwards compatibility
       if (!existingUser.roles.includes('beta-tester')) {
         existingUser.roles.push('beta-tester')
       }

@@ -3,7 +3,7 @@ import { AuthProvider } from '@ezstart/auth-sdk'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { createJsonLd } from '@ezstart/seo-config/json-ld'
 import { createMetadata, createViewport } from '@ezstart/seo-config/metadata'
-import { ErrorBoundary } from '@ezstart/ui/components'
+import { ErrorBoundary, VersionSwitch } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
@@ -60,6 +60,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider messages={messages}>
           <div className="flex flex-col min-h-screen">
+            <VersionSwitch />
             <ErrorBoundary>
               <QueryProvider>
                 <ThemeProvider>

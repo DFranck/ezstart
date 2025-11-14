@@ -86,7 +86,7 @@ waitlistSchema.methods.findEntryByEmail = function(email: string): WaitlistEntry
 
 // Generate unique access code for an app
 waitlistSchema.methods.generateAccessCode = function(): string {
-  const appPrefix = this.appName.split('-').map((word: string) => word[0].toUpperCase()).join('')
+  const appPrefix = this.appName.split('-').map((word: string) => word[0]?.toUpperCase() || '').join('')
   const random = crypto.randomBytes(4).toString('hex').toUpperCase()
   return `BETA-${appPrefix}-${random}`
 }

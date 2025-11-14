@@ -14,6 +14,8 @@ export interface RequireRoleProps {
   fallbackComponent?: ReactNode
   /** Require ALL roles instead of ANY (optional, default: false) */
   requireAll?: boolean
+  /** Optional app name for app-specific role checking */
+  appName?: string
 }
 
 /**
@@ -51,14 +53,15 @@ export function RequireRole({
   children,
   fallbackComponent,
   requireAll = false,
+  appName,
 }: RequireRoleProps) {
   const { user } = useAuth()
-  const rbac = useRBAC(user)
+  const rbac = useRBAC(user, appName)
 
   // Normalize roles to array
   const roleArray = Array.isArray(roles) ? roles : [roles]
 
-  // Check authorization
+  // Check authorization (appName is already passed to useRBAC)
   const isAuthorized = requireAll
     ? rbac.hasAllRoles(roleArray)
     : rbac.hasAnyRole(roleArray)

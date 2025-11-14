@@ -42,7 +42,7 @@ interface PaginatedUsers {
 function AdminPanelContent() {
   const { user } = useAuth()
   const t = useTranslations()
-  const rbac = useRBAC(user)
+  const rbac = useRBAC(user, 'ezstart') // Pass appName for app-specific checks
   const [users, setUsers] = useState<AuthUser[]>([])
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 })
   const [loading, setLoading] = useState(true)

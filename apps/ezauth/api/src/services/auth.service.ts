@@ -12,7 +12,7 @@ import {
   AuthCodeResponse,
   JWTPayload
 } from '@ezstart/auth-sdk/server'
-import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac'
+import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac/server'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
 const JWT_EXPIRES_IN = '7d'
@@ -65,6 +65,11 @@ export class AuthService {
     }
 
     // Create new user
+    const appRoles = new Map<string, string[]>()
+    if (isBetaTester) {
+      appRoles.set(data.app, ['beta-tester'])
+    }
+
     const user = new AuthUserModel({
       email: data.email,
       username: data.username,
@@ -73,10 +78,12 @@ export class AuthService {
       lastName: data.lastName,
       apps: [data.app], // Grant access to the requesting app
       isVerified: true, // For simplicity in v1
-      // Assign role and permissions
-      roles: isBetaTester ? ['beta-tester'] : [],
+      // Assign role and permissions (app-specific)
+      appRoles,
       permissions: isBetaTester ? ROLE_PERMISSIONS['beta-tester'] : [],
       features: isBetaTester ? ROLE_FEATURES['beta-tester'] : [],
+      // Keep old roles for backwards compatibility
+      roles: isBetaTester ? ['beta-tester'] : [],
     })
 
     await user.save()
@@ -145,12 +152,22 @@ export class AuthService {
     }
 
     // Generate JWT token directly (skip auth code)
+    // Convert appRoles Map to plain object for JWT
+    const appRolesObj: Record<string, string[]> = {}
+    if (user.appRoles) {
+      user.appRoles.forEach((roles: string[], appName: string) => {
+        appRolesObj[appName] = roles
+      })
+    }
+
     const payload = {
       userId: user._id!.toString(),
       email: user.email,
       username: user.username,
       apps: user.apps,
-      roles: user.roles || [],
+      roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
+      globalRoles: user.globalRoles || [],
+      appRoles: appRolesObj,
       permissions: user.permissions || [],
       features: user.features || []
     }
@@ -216,12 +233,22 @@ export class AuthService {
     }
 
     // Generate JWT token
+    // Convert appRoles Map to plain object for JWT
+    const appRolesObj: Record<string, string[]> = {}
+    if (user.appRoles) {
+      user.appRoles.forEach((roles: string[], appName: string) => {
+        appRolesObj[appName] = roles
+      })
+    }
+
     const payload = {
       userId: user._id!.toString(),
       email: user.email,
       username: user.username,
       apps: user.apps,
-      roles: user.roles || [],
+      roles: user.roles || [], // DEPRECATED - kept for backwards compatibility
+      globalRoles: user.globalRoles || [],
+      appRoles: appRolesObj,
       permissions: user.permissions || [],
       features: user.features || []
     }

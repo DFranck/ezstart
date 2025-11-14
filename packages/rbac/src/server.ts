@@ -6,6 +6,10 @@
 import type { Request, Response, NextFunction } from 'express'
 import type { Permission, Role, Feature } from './types'
 
+// Re-export types and helpers for server use
+export * from './types'
+export * from './helpers'
+
 /**
  * Express middleware to require authentication
  */

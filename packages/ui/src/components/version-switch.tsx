@@ -1,7 +1,7 @@
 'use client'
 
+import { Label, Switch } from '@ezstart/ui/components'
 import * as React from 'react'
-import { Switch, Label } from '@ezstart/ui/components'
 
 export interface VersionSwitchProps {
   /**
@@ -53,9 +53,7 @@ export function VersionSwitch({
     if (typeof window === 'undefined') return
 
     // Get base path (remove v2 suffix if present)
-    const basePath = pathname.endsWith(v2Suffix)
-      ? pathname.slice(0, -v2Suffix.length)
-      : pathname
+    const basePath = pathname.endsWith(v2Suffix) ? pathname.slice(0, -v2Suffix.length) : pathname
 
     if (checked) {
       // Switch to v2 - add suffix

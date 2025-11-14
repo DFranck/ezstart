@@ -1,0 +1,206 @@
+{
+  "landing": {
+    "hero": {
+      "badge": "No Monthly Fees • Own It Forever",
+      "title": "Professional Invoicing",
+      "subtitle": "Without Subscription Fees",
+      "typewriter": "Save $360/year • Beautiful PDFs • Client Management • Payment Tracking",
+      "description": "Stop paying $30/month for basic invoicing. Get professional invoicing software you own forever.",
+      "cta": "Start your free trial",
+      "emailPlaceholder": "Enter your email"
+    },
+    "problem": {
+      "title": "Tired of <strong>Paying Forever</strong> for Simple Invoicing?",
+      "subtitle": "You're not alone. <strong>73% of freelancers</strong> and <strong>small businesses</strong> feel trapped by monthly subscription fees for basic features.",
+      "problems": [
+        {
+          "title": "Monthly Fees Add Up",
+          "description": "$30-50/month = <strong>$360-600/year</strong> for features you could own. After 3 years, you've paid $1,800+ for software you'll never own."
+        },
+        {
+          "title": "Feature Restrictions",
+          "description": "Limited clients, invoices per month, or storage. Need more? <strong>Pay extra</strong>. Every time."
+        },
+        {
+          "title": "Locked-In Data",
+          "description": "Stop paying? <strong>Lose access to your invoices</strong>. Export fees, migration headaches, and vendor lock-in."
+        }
+      ]
+    },
+    "solution": {
+      "title": "Own Your Invoicing System Forever",
+      "description": "EZBill is a one-time purchase. No subscriptions, no limits, no surprises.",
+      "steps": {
+        "step1": {
+          "badge": "1",
+          "title": "SET UP YOUR BUSINESS",
+          "description": "Add your company info, logo, payment methods"
+        },
+        "step2": {
+          "badge": "2",
+          "title": "CREATE INVOICES",
+          "description": "Professional templates, automatic calculations"
+        },
+        "step3": {
+          "badge": "3",
+          "title": "GET PAID FASTER",
+          "description": "PDF export, payment tracking, receipts"
+        }
+      },
+      "features": [
+        {
+          "title": "Unlimited Everything",
+          "description": "Unlimited clients, invoices, quotes, and receipts. No artificial limits to upsell you later."
+        },
+        {
+          "title": "Your Data, Your Control",
+          "description": "Self-hosted option available. Export anytime. No vendor lock-in, no data hostage situations."
+        },
+        {
+          "title": "Professional Templates",
+          "description": "Beautiful, customizable invoice templates. Add your logo, colors, and branding in minutes."
+        }
+      ]
+    },
+    "features": {
+      "title": "Everything You Need. Nothing You Don't.",
+      "subtitle": "Professional invoicing without the bloat",
+      "list": [
+        {
+          "title": "Client Management",
+          "description": "Organize clients with detailed contact info and payment history"
+        },
+        {
+          "title": "Invoice Creation",
+          "description": "Create professional invoices in under 60 seconds"
+        },
+        {
+          "title": "Quote System",
+          "description": "Send quotes that convert to invoices with one click"
+        },
+        {
+          "title": "Payment Tracking",
+          "description": "Track payments, send reminders, manage receipts"
+        },
+        {
+          "title": "PDF Export",
+          "description": "Beautiful PDFs ready to email or print"
+        },
+        {
+          "title": "Multi-Currency",
+          "description": "Support for 150+ currencies with automatic conversion"
+        }
+      ]
+    },
+    "comparison": {
+      "title": "How Much Will You Save?",
+      "description": "Compare EZBill to subscription-based alternatives",
+      "competitors": [
+        {
+          "name": "FreshBooks",
+          "price": "$30/month",
+          "yearCost": "$360/year",
+          "limits": "Limited clients, 5GB storage"
+        },
+        {
+          "name": "QuickBooks",
+          "price": "$40/month",
+          "yearCost": "$480/year",
+          "limits": "Limited invoices per month"
+        },
+        {
+          "name": "Zoho Invoice",
+          "price": "$29/month",
+          "yearCost": "$348/year",
+          "limits": "Limited users, limited automation"
+        }
+      ],
+      "ezbill": {
+        "price": "One-time payment",
+        "yearCost": "$0/year after purchase",
+        "limits": "Unlimited everything"
+      },
+      "savings": "Save $360-600 every year"
+    },
+    "useCases": {
+      "title": "Built For Real Businesses",
+      "subtitle": "From freelancers to growing agencies",
+      "cases": [
+        {
+          "persona": "Freelance Designer",
+          "challenge": "Paying $40/month for FreshBooks but only invoicing 5 clients",
+          "solution": "Switched to EZBill, paid once, saved $480/year",
+          "result": "ROI in 3 months"
+        },
+        {
+          "persona": "Marketing Agency",
+          "challenge": "QuickBooks limits to 10 users, needed to pay $150/month for team",
+          "solution": "EZBill's unlimited users, self-hosted for team access",
+          "result": "Saved $1,800/year"
+        },
+        {
+          "persona": "Consulting Firm",
+          "challenge": "Hit invoice limits on Zoho, forced to upgrade to $79/month plan",
+          "solution": "EZBill's unlimited invoices, no artificial restrictions",
+          "result": "Eliminated $948/year in fees"
+        }
+      ]
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "items": [
+        {
+          "quote": "I was paying $360/year for FreshBooks. EZBill paid for itself in 3 months.",
+          "author": "Sarah Chen",
+          "role": "Freelance Graphic Designer"
+        },
+        {
+          "quote": "Finally, invoicing software that doesn't treat me like a cash cow.",
+          "author": "Marcus Rodriguez",
+          "role": "Web Development Agency"
+        },
+        {
+          "quote": "Clean interface, no bloat, just what I need. Wish I switched years ago.",
+          "author": "Emily Thompson",
+          "role": "Business Consultant"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Common Questions",
+      "questions": [
+        {
+          "question": "Is this really a one-time payment? No hidden fees?",
+          "answer": "Yes. Pay once, use forever. No monthly fees, no annual renewals, no surprise charges. Updates and bug fixes included."
+        },
+        {
+          "question": "What if I need help or support?",
+          "answer": "First year of support included. Community forum and documentation always free. Extended support available for purchase."
+        },
+        {
+          "question": "Can I try it before buying?",
+          "answer": "Absolutely. 14-day free trial, no credit card required. Export your data anytime if it's not a fit."
+        },
+        {
+          "question": "Is my data secure?",
+          "answer": "Your data is encrypted and backed up daily. Self-hosted option available for full control. We never sell your data."
+        },
+        {
+          "question": "Can I migrate from FreshBooks/QuickBooks?",
+          "answer": "Yes. Import tools for CSV data from major platforms. Migration guide included. Takes about 15 minutes."
+        },
+        {
+          "question": "Do you offer refunds?",
+          "answer": "30-day money-back guarantee. If EZBill isn't saving you money and time, we'll refund you—no questions asked."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop Paying Monthly. Own Your Invoicing.",
+      "description": "Join thousands of freelancers and businesses who took control of their invoicing costs.",
+      "primary": "Start Free Trial",
+      "secondary": "See Pricing",
+      "guarantee": "14-day free trial • No credit card required • 30-day money-back guarantee"
+    }
+  }
+}

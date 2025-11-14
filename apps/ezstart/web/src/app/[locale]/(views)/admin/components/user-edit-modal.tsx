@@ -27,11 +27,14 @@ interface UserEditModalProps {
   onSave: () => void
 }
 
-const ALL_ROLES = ['superadmin', 'admin', 'manager', 'beta-tester', 'client']
-const ALL_APPS = ['ezbill', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd']
+const ALL_GLOBAL_ROLES = ['superadmin'] // Only superadmin can be global
+const ALL_APP_ROLES = ['admin', 'manager', 'beta-tester', 'client']
+const ALL_APPS = ['ezbill', 'tower-defense', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd', 'ezpay', 'ezauth']
 
 export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: UserEditModalProps) {
-  const [roles, setRoles] = useState<string[]>(user.roles || [])
+  // State for new role structure
+  const [globalRoles, setGlobalRoles] = useState<string[]>(user.globalRoles || [])
+  const [appRoles, setAppRoles] = useState<Record<string, string[]>>(user.appRoles || {})
   const [apps, setApps] = useState<string[]>(user.apps || [])
   const [customPermissions, setCustomPermissions] = useState<string[]>(user.permissions || [])
   const [customFeatures, setCustomFeatures] = useState<string[]>(user.features || [])
@@ -41,27 +44,57 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
 
   const isSuperAdmin = rbac.hasRole('superadmin')
 
-  // Calculate inherited permissions and features from roles
+  // Calculate inherited permissions and features from all roles
   const inheritedPermissions = new Set<string>()
   const inheritedFeatures = new Set<string>()
 
-  roles.forEach((role) => {
+  // Add permissions from global roles
+  globalRoles.forEach((role) => {
     const rolePerms = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || []
     const roleFeats = ROLE_FEATURES[role as keyof typeof ROLE_FEATURES] || []
     rolePerms.forEach((p) => inheritedPermissions.add(p))
     roleFeats.forEach((f) => inheritedFeatures.add(f))
   })
 
-  const toggleRole = (role: string) => {
-    if (roles.includes(role)) {
-      setRoles(roles.filter((r) => r !== role))
+  // Add permissions from app-specific roles
+  Object.values(appRoles).forEach((roles) => {
+    roles.forEach((role) => {
+      const rolePerms = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || []
+      const roleFeats = ROLE_FEATURES[role as keyof typeof ROLE_FEATURES] || []
+      rolePerms.forEach((p) => inheritedPermissions.add(p))
+      roleFeats.forEach((f) => inheritedFeatures.add(f))
+    })
+  })
+
+  const toggleGlobalRole = (role: string) => {
+    if (globalRoles.includes(role)) {
+      setGlobalRoles(globalRoles.filter((r) => r !== role))
     } else {
-      setRoles([...roles, role])
+      setGlobalRoles([...globalRoles, role])
+    }
+  }
+
+  const toggleAppRole = (app: string, role: string) => {
+    const currentRoles = appRoles[app] || []
+    if (currentRoles.includes(role)) {
+      setAppRoles({
+        ...appRoles,
+        [app]: currentRoles.filter((r) => r !== role),
+      })
+    } else {
+      setAppRoles({
+        ...appRoles,
+        [app]: [...currentRoles, role],
+      })
     }
   }
 
   const toggleApp = (app: string) => {
     if (apps.includes(app)) {
+      // Remove app and its roles
+      const newAppRoles = { ...appRoles }
+      delete newAppRoles[app]
+      setAppRoles(newAppRoles)
       setApps(apps.filter((a) => a !== app))
     } else {
       setApps([...apps, app])
@@ -77,7 +110,8 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
         appName: 'ezauth',
         method: 'PATCH',
         body: {
-          roles,
+          globalRoles,
+          appRoles,
           apps,
           permissions: customPermissions,
           features: customFeatures,
@@ -159,20 +193,23 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
           </Label>
         </Div>
 
-        {/* Roles */}
+        {/* Global Roles (Superadmin only) */}
         <Div>
-          <H3 className="mb-3">Roles</H3>
+          <H3 className="mb-3">Global Roles (Cross-App Access)</H3>
+          <P className="text-sm text-muted-foreground mb-2">
+            Only superadmin can be a global role with access to everything everywhere
+          </P>
           <Div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {ALL_ROLES.map((role) => {
-              const disabled = role === 'superadmin' && !isSuperAdmin
+            {ALL_GLOBAL_ROLES.map((role) => {
+              const disabled = !isSuperAdmin
               return (
                 <Label key={role} className="flex items-center gap-2">
                   <Checkbox
-                    checked={roles.includes(role)}
-                    onCheckedChange={() => toggleRole(role)}
+                    checked={globalRoles.includes(role)}
+                    onCheckedChange={() => toggleGlobalRole(role)}
                     disabled={disabled}
                   />
-                  <Span className="capitalize">{role}</Span>
+                  <Span className="capitalize font-semibold text-orange-600">{role}</Span>
                   {disabled && <Icon name="lucide:Lock" className="text-muted-foreground" />}
                 </Label>
               )
@@ -180,16 +217,40 @@ export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: User
           </Div>
         </Div>
 
-        {/* Apps */}
+        {/* Apps and App-Specific Roles */}
         <Div>
-          <H3 className="mb-3">Applications Access</H3>
-          <Div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {ALL_APPS.map((app) => (
-              <Label key={app} className="flex items-center gap-2">
-                <Checkbox checked={apps.includes(app)} onCheckedChange={() => toggleApp(app)} />
-                <Span className="capitalize">{app}</Span>
-              </Label>
-            ))}
+          <H3 className="mb-3">Applications Access & App-Specific Roles</H3>
+          <P className="text-sm text-muted-foreground mb-3">
+            Select which apps the user can access and assign roles for each app
+          </P>
+          <Div className="space-y-4">
+            {ALL_APPS.map((app) => {
+              const hasAccess = apps.includes(app)
+              return (
+                <Div key={app} className="border rounded-lg p-4">
+                  {/* App Checkbox */}
+                  <Label className="flex items-center gap-2 mb-3">
+                    <Checkbox checked={hasAccess} onCheckedChange={() => toggleApp(app)} />
+                    <Span className="capitalize font-semibold">{app}</Span>
+                  </Label>
+
+                  {/* App-Specific Roles (only if app is checked) */}
+                  {hasAccess && (
+                    <Div className="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {ALL_APP_ROLES.map((role) => (
+                        <Label key={role} className="flex items-center gap-2">
+                          <Checkbox
+                            checked={appRoles[app]?.includes(role) || false}
+                            onCheckedChange={() => toggleAppRole(app, role)}
+                          />
+                          <Span className="capitalize text-sm">{role}</Span>
+                        </Label>
+                      ))}
+                    </Div>
+                  )}
+                </Div>
+              )
+            })}
           </Div>
         </Div>
 

@@ -10,10 +10,15 @@ const docRouter = createRouterWithDoc(updateUserRegistry, router)
 
 // Schemas
 const updateUserRequestSchema = z.object({
+  // New role structure
+  globalRoles: z.array(z.enum(['superadmin'])).optional(),
+  appRoles: z.record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client']))).optional(),
+  // Legacy fields
   roles: z.array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client'])).optional(),
   permissions: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
   apps: z.array(z.string()).optional(),
+  isVerified: z.boolean().optional(),
   organizationId: z.string().optional(),
   managedBy: z.string().optional()
 })
@@ -22,10 +27,13 @@ const userSchema = z.object({
   _id: z.string(),
   email: z.string(),
   username: z.string().optional(),
+  globalRoles: z.array(z.string()).optional(),
+  appRoles: z.record(z.string(), z.array(z.string())).optional(),
   roles: z.array(z.string()),
   permissions: z.array(z.string()),
   features: z.array(z.string()),
   apps: z.array(z.string()).optional(),
+  isVerified: z.boolean().optional(),
   organizationId: z.string().optional(),
   managedBy: z.string().optional(),
   createdAt: z.string(),
@@ -50,10 +58,10 @@ const updateUserController = async (req: any, res: any) => {
     }
 
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isSuperAdmin = currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
 
-    if (!isAdmin) {
-      return res.status(403).json({ error: 'Admin access required' })
+    if (!isSuperAdmin) {
+      return res.status(403).json({ error: 'Superadmin access required for user management from ezstart' })
     }
 
     const AuthUser = await getAuthUserModel()
@@ -63,21 +71,23 @@ const updateUserController = async (req: any, res: any) => {
       return res.status(404).json({ error: 'User not found' })
     }
 
-    // Check if admin has permission to modify this user
-    if (!currentUser.roles?.includes('superadmin')) {
-      if (user.roles?.includes('superadmin')) {
-        return res.status(403).json({ error: 'Cannot modify superadmin users' })
-      }
-      if (req.body.roles?.includes('superadmin')) {
-        return res.status(403).json({ error: 'Cannot assign superadmin role' })
-      }
-      if (currentUser.apps?.length > 0 && !user.apps?.some((app: string) => currentUser.apps.includes(app))) {
-        return res.status(403).json({ error: 'User not in your apps' })
-      }
+    // Update globalRoles (only superadmin can do this)
+    if (req.body.globalRoles !== undefined) {
+      user.globalRoles = req.body.globalRoles
     }
 
-    // Update fields
-    const allowedFields = ['roles', 'permissions', 'features', 'apps', 'organizationId', 'managedBy']
+    // Update appRoles
+    if (req.body.appRoles !== undefined) {
+      // Convert plain object to Map
+      const appRolesMap = new Map<string, string[]>()
+      Object.entries(req.body.appRoles).forEach(([app, roles]) => {
+        appRolesMap.set(app, roles as string[])
+      })
+      user.appRoles = appRolesMap
+    }
+
+    // Update other fields
+    const allowedFields = ['roles', 'permissions', 'features', 'apps', 'isVerified', 'organizationId', 'managedBy']
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
         (user as any)[field] = req.body[field]
@@ -86,13 +96,24 @@ const updateUserController = async (req: any, res: any) => {
 
     await user.save()
 
+    // Convert appRoles Map to object for response
+    const appRolesObj: Record<string, string[]> = {}
+    if (user.appRoles) {
+      user.appRoles.forEach((roles: string[], appName: string) => {
+        appRolesObj[appName] = roles
+      })
+    }
+
     res.json({
       user: {
         ...user.toObject(),
-        _id: user._id.toString(),
+        _id: (user._id as any).toString(),
+        globalRoles: user.globalRoles || [],
+        appRoles: appRolesObj,
         roles: user.roles || [],
         permissions: user.permissions || [],
-        features: user.features || []
+        features: user.features || [],
+        isVerified: user.isVerified
       },
       message: 'User updated successfully'
     })

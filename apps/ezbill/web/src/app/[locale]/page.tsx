@@ -2,25 +2,22 @@
 
 import ClientLayout from '@/components/ClientLayout'
 import { EZAuthLoginSection } from '@/components/ezauth-login-section'
-import { cleanupOldAuth } from '@/utils/cleanup-old-auth'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Card, CardContent, CardHeader, H1, H2, H3, Icon, P } from '@ezstart/ui/components'
-import { redirect } from 'next/navigation'
-import { useEffect } from 'react'
 
 export default function HomePage(): any {
   const { user, isAuthenticated } = useAuth()
 
-  useEffect(() => {
-    cleanupOldAuth()
-    if (isAuthenticated && user) {
-      redirect('/dashboard')
-    }
-  }, [isAuthenticated, user])
+  // useEffect(() => {
+  //   cleanupOldAuth()
+  //   if (isAuthenticated && user) {
+  //     redirect('/dashboard')
+  //   }
+  // }, [isAuthenticated, user])
 
-  if (isAuthenticated && user) {
-    return null
-  }
+  // if (isAuthenticated && user) {
+  //   return null
+  // }
 
   return (
     <ClientLayout>

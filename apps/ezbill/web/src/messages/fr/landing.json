@@ -1,0 +1,206 @@
+{
+  "landing": {
+    "hero": {
+      "badge": "Sans Frais Mensuels • Propriété À Vie",
+      "title": "Facturation Professionnelle",
+      "subtitle": "Sans Abonnement",
+      "typewriter": "Économisez 360$/an • PDFs Élégants • Gestion Clients • Suivi Paiements",
+      "description": "Arrêtez de payer 30$/mois pour une facturation basique. Obtenez un logiciel de facturation professionnel que vous possédez à vie.",
+      "cta": "Commencer l'essai gratuit",
+      "emailPlaceholder": "Entrez votre email"
+    },
+    "problem": {
+      "title": "Fatigué de <strong>Payer Indéfiniment</strong> pour une Facturation Simple?",
+      "subtitle": "Vous n'êtes pas seul. <strong>73% des freelances</strong> et <strong>petites entreprises</strong> se sentent piégés par les frais d'abonnement mensuels pour des fonctionnalités basiques.",
+      "problems": [
+        {
+          "title": "Les Frais Mensuels S'Accumulent",
+          "description": "30-50$/mois = <strong>360-600$/an</strong> pour des fonctionnalités que vous pourriez posséder. Après 3 ans, vous avez payé 1 800$+ pour un logiciel que vous ne posséderez jamais."
+        },
+        {
+          "title": "Restrictions de Fonctionnalités",
+          "description": "Clients limités, factures par mois, ou stockage limité. Besoin de plus? <strong>Payez en plus</strong>. À chaque fois."
+        },
+        {
+          "title": "Données Verrouillées",
+          "description": "Arrêtez de payer? <strong>Perdez l'accès à vos factures</strong>. Frais d'export, problèmes de migration, et enfermement propriétaire."
+        }
+      ]
+    },
+    "solution": {
+      "title": "Possédez Votre Système de Facturation À Vie",
+      "description": "EZBill est un achat unique. Pas d'abonnement, pas de limites, pas de surprises.",
+      "steps": {
+        "step1": {
+          "badge": "1",
+          "title": "CONFIGUREZ VOTRE ENTREPRISE",
+          "description": "Ajoutez vos infos, logo, méthodes de paiement"
+        },
+        "step2": {
+          "badge": "2",
+          "title": "CRÉEZ DES FACTURES",
+          "description": "Templates professionnels, calculs automatiques"
+        },
+        "step3": {
+          "badge": "3",
+          "title": "SOYEZ PAYÉ PLUS VITE",
+          "description": "Export PDF, suivi paiements, reçus"
+        }
+      },
+      "features": [
+        {
+          "title": "Tout Illimité",
+          "description": "Clients, factures, devis et reçus illimités. Aucune limite artificielle pour vous faire payer plus tard."
+        },
+        {
+          "title": "Vos Données, Votre Contrôle",
+          "description": "Option auto-hébergée disponible. Exportez quand vous voulez. Pas d'enfermement, pas de rétention de données."
+        },
+        {
+          "title": "Templates Professionnels",
+          "description": "Templates de factures élégants et personnalisables. Ajoutez votre logo, couleurs et branding en quelques minutes."
+        }
+      ]
+    },
+    "features": {
+      "title": "Tout Ce Dont Vous Avez Besoin. Rien de Superflu.",
+      "subtitle": "Facturation professionnelle sans le superflu",
+      "list": [
+        {
+          "title": "Gestion Clients",
+          "description": "Organisez vos clients avec infos détaillées et historique paiements"
+        },
+        {
+          "title": "Création Factures",
+          "description": "Créez des factures professionnelles en moins de 60 secondes"
+        },
+        {
+          "title": "Système Devis",
+          "description": "Envoyez des devis qui se convertissent en factures en un clic"
+        },
+        {
+          "title": "Suivi Paiements",
+          "description": "Suivez les paiements, envoyez des rappels, gérez les reçus"
+        },
+        {
+          "title": "Export PDF",
+          "description": "PDFs élégants prêts à envoyer par email ou imprimer"
+        },
+        {
+          "title": "Multi-Devises",
+          "description": "Support de 150+ devises avec conversion automatique"
+        }
+      ]
+    },
+    "comparison": {
+      "title": "Combien Allez-Vous Économiser?",
+      "description": "Comparez EZBill aux alternatives par abonnement",
+      "competitors": [
+        {
+          "name": "FreshBooks",
+          "price": "30$/mois",
+          "yearCost": "360$/an",
+          "limits": "Clients limités, 5GB stockage"
+        },
+        {
+          "name": "QuickBooks",
+          "price": "40$/mois",
+          "yearCost": "480$/an",
+          "limits": "Factures limitées par mois"
+        },
+        {
+          "name": "Zoho Invoice",
+          "price": "29$/mois",
+          "yearCost": "348$/an",
+          "limits": "Utilisateurs limités, automation limitée"
+        }
+      ],
+      "ezbill": {
+        "price": "Paiement unique",
+        "yearCost": "0$/an après achat",
+        "limits": "Tout illimité"
+      },
+      "savings": "Économisez 360-600$ chaque année"
+    },
+    "useCases": {
+      "title": "Conçu Pour de Vraies Entreprises",
+      "subtitle": "Des freelances aux agences en croissance",
+      "cases": [
+        {
+          "persona": "Designer Freelance",
+          "challenge": "Payait 40$/mois pour FreshBooks mais facturait seulement 5 clients",
+          "solution": "Passé à EZBill, payé une fois, économisé 480$/an",
+          "result": "ROI en 3 mois"
+        },
+        {
+          "persona": "Agence Marketing",
+          "challenge": "QuickBooks limite à 10 utilisateurs, devait payer 150$/mois pour l'équipe",
+          "solution": "Utilisateurs illimités EZBill, auto-hébergé pour accès équipe",
+          "result": "Économisé 1 800$/an"
+        },
+        {
+          "persona": "Cabinet Conseil",
+          "challenge": "Limite factures atteinte sur Zoho, forcé de passer à 79$/mois",
+          "solution": "Factures illimitées EZBill, aucune restriction artificielle",
+          "result": "Éliminé 948$/an de frais"
+        }
+      ]
+    },
+    "testimonials": {
+      "title": "Ce Que Disent Nos Utilisateurs",
+      "items": [
+        {
+          "quote": "Je payais 360$/an pour FreshBooks. EZBill s'est rentabilisé en 3 mois.",
+          "author": "Sarah Chen",
+          "role": "Designer Graphique Freelance"
+        },
+        {
+          "quote": "Enfin, un logiciel de facturation qui ne me traite pas comme une vache à lait.",
+          "author": "Marcus Rodriguez",
+          "role": "Agence Développement Web"
+        },
+        {
+          "quote": "Interface propre, pas de superflu, juste ce dont j'ai besoin. J'aurais dû changer il y a des années.",
+          "author": "Emily Thompson",
+          "role": "Consultante Business"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Questions Fréquentes",
+      "questions": [
+        {
+          "question": "C'est vraiment un paiement unique? Pas de frais cachés?",
+          "answer": "Oui. Payez une fois, utilisez à vie. Pas de frais mensuels, pas de renouvellements annuels, pas de frais surprise. Mises à jour et corrections de bugs incluses."
+        },
+        {
+          "question": "Et si j'ai besoin d'aide ou de support?",
+          "answer": "Première année de support incluse. Forum communautaire et documentation toujours gratuits. Support étendu disponible à l'achat."
+        },
+        {
+          "question": "Puis-je l'essayer avant d'acheter?",
+          "answer": "Absolument. Essai gratuit de 14 jours, sans carte de crédit. Exportez vos données à tout moment si ça ne convient pas."
+        },
+        {
+          "question": "Mes données sont-elles sécurisées?",
+          "answer": "Vos données sont cryptées et sauvegardées quotidiennement. Option auto-hébergée disponible pour contrôle total. Nous ne vendons jamais vos données."
+        },
+        {
+          "question": "Puis-je migrer depuis FreshBooks/QuickBooks?",
+          "answer": "Oui. Outils d'import pour données CSV des plateformes majeures. Guide de migration inclus. Prend environ 15 minutes."
+        },
+        {
+          "question": "Offrez-vous des remboursements?",
+          "answer": "Garantie satisfait ou remboursé 30 jours. Si EZBill ne vous fait pas économiser temps et argent, nous vous remboursons—sans questions."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Arrêtez de Payer Mensuellement. Possédez Votre Facturation.",
+      "description": "Rejoignez des milliers de freelances et entreprises qui ont pris le contrôle de leurs coûts de facturation.",
+      "primary": "Essai Gratuit",
+      "secondary": "Voir Tarifs",
+      "guarantee": "Essai gratuit 14 jours • Pas de carte requise • Garantie remboursement 30 jours"
+    }
+  }
+}

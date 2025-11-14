@@ -376,7 +376,7 @@ export function InvoiceModal({
                     <SelectItem key={value} value={value} className="hover:bg-primary/5">
                       <div className="flex items-center">
                         {label}
-                        <Span className="ml-2" intent={'warning'}>
+                        <Span className="ml-2 text-warning">
                           {symbol}
                         </Span>
                       </div>
