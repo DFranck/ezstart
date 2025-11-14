@@ -1,4 +1,4 @@
-// Updated: 2025-11-15 - App-specific roles support
+// Updated: 2025-11-15 - App-specific roles support + AI SDK integration
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
@@ -13,6 +13,7 @@ import {
   addVersionHeader
 } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
+import { initializeAIProviders } from './config/ai-providers.js'
 
 export const app = createApp({ apiApp: 'green-pulse' })
 const PORT = getApiPort('green-pulse')
@@ -28,6 +29,9 @@ app.use(createVersionedRouter('/api', routes))
 
 // Sentry error handler MUST be AFTER all routes
 Sentry.setupExpressErrorHandler(app)
+
+// Initialize AI providers
+initializeAIProviders()
 
 // Start server with MongoDB
 connectToMongo('greenpulse')

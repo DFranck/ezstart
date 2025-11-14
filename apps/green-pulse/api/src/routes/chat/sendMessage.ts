@@ -1,6 +1,7 @@
 /**
  * POST /api/chat
  * Main chat endpoint with optional ESG extraction
+ * Now supports multiple AI providers via @ezstart/ai-sdk
  */
 
 import {
@@ -8,7 +9,8 @@ import {
   OpenAPIRegistry,
   Router
 } from '@ezstart/express-core'
-import { chatWithExtraction, validateEsgData } from '../../services/gemini.service.js'
+import { UnifiedChat } from '@ezstart/ai-sdk'
+import { validateEsgData } from '../../services/gemini.service.js'
 import { Conversation } from '../../models/Conversation.js'
 import {
   ChatRequestSchema,
@@ -39,7 +41,10 @@ sendMessageRouter.post(
         })
       }
 
-      let { message, extract_esg, session_id, conversation_id, userId } = validation.data
+      let { message, extract_esg, session_id, conversation_id, userId, providerId } = validation.data
+
+      // Default to gemini-flash if not specified
+      const selectedProvider = providerId || 'gemini-flash'
 
       // Auto-create conversation if not provided
       if (!conversation_id) {
@@ -78,8 +83,25 @@ sendMessageRouter.post(
         }
       }
 
-      // Chat with optional ESG extraction and conversation history
-      const result = await chatWithExtraction(message, extract_esg, conversationHistory)
+      // System prompt for ESG context
+      const systemPrompt = extract_esg
+        ? `You are a structured extractor. From the conversation text, output ONLY valid JSON conforming to the ESG schema (company, sites, period, scopes, targets, evidence). Do not include explanations. Fill missing values with null and list them in _missing.`
+        : `You are GreenPulse.AI, an ESG advisor for SMEs in Southeast Asia. Speak clearly and practically. When the user shares data, confirm assumptions, surface missing fields, and prepare normalized JSON for ESG reporting.`
+
+      // Chat using UnifiedChat from @ezstart/ai-sdk
+      const aiResponse = await UnifiedChat.send(message, selectedProvider, {
+        systemPrompt,
+        history: conversationHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        extractJson: extract_esg,
+      })
+
+      const result = {
+        response: aiResponse.text,
+        extractedData: aiResponse.extractedData,
+      }
 
       // If ESG extraction was successful, validate the data
       let validationResult: any = null

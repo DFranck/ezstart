@@ -1,6 +1,7 @@
 import { Router } from '@ezstart/express-core'
 import chatRoutes, { chatRegistries } from './chat/index.js'
 import chatV2Routes, { chatV2Registry } from './chat-v2.js'
+import providersRoutes, { providersRegistry } from './providers.js'
 import uploadRoutes, { uploadRegistries } from './upload/index.js'
 import esgRoutes, { esgRegistries } from './esg/index.js'
 import webhookRoutes, { webhookRegistries } from './webhooks/index.js'
@@ -15,6 +16,7 @@ const router: any = Router()
 export const globalRegistry = [
   ...chatRegistries,
   chatV2Registry,
+  providersRegistry,
   ...uploadRegistries,
   ...esgRegistries,
   ...webhookRegistries,
@@ -28,6 +30,7 @@ export const globalRegistry = [
 router
   .use('/chat', chatRoutes)
   .use('/chat-v2', chatV2Routes) // New endpoint using @ezstart/ai-sdk
+  .use('/providers', providersRoutes) // AI providers list
   .use('/upload', uploadRoutes)
   .use('/esg', esgRoutes)
   .use('/webhooks', webhookRoutes)
