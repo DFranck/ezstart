@@ -17,6 +17,10 @@ export type { AuthMiddlewareConfig } from './middleware.js'
 export { AuthCallbackPage } from './auth-callback-page.js'
 export { LoginButton } from './login-button.js'
 export type { LoginButtonProps } from './login-button.js'
+export { RequireAuth } from './require-auth.js'
+export type { RequireAuthProps } from './require-auth.js'
+export { AccessDenied } from './access-denied.js'
+export type { AccessDeniedProps } from './access-denied.js'
 
 // Re-export types
 export type {
