@@ -4,12 +4,30 @@
   "description": "Role-Based Access Control utilities for @ezstart monorepo",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./client": "./src/client.ts",
-    "./server": "./src/server.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./dist/client.js"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./dist/server.js"
+    },
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./dist/types.js"
+    },
+    "./helpers": {
+      "types": "./src/helpers.ts",
+      "default": "./dist/helpers.js"
+    }
   },
   "scripts": {
-    "dev": "echo 'RBAC package (TypeScript source - no build needed)'",
+    "build": "tsc",
+    "dev": "tsc --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
