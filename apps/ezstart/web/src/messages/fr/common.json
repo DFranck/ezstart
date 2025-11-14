@@ -1,7 +1,9 @@
 {
   "common": {
     "learnMore": "En savoir plus",
-    "inProgress": "En cours"
+    "inProgress": "En cours",
+    "viewProject": "Voir le projet →",
+    "privateProject": "Projet privé"
   },
   "auth": {
     "login": "Connexion",

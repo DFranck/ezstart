@@ -1,6 +1,7 @@
 'use client'
 
 import { ProjectItem } from '@/types/projects'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
 import { Badge, Button, Div, H3, LI, P } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import Image from 'next/image'
@@ -14,6 +15,7 @@ type Props = {
 
 export function ProjectCard({ project }: Props) {
   const { isMobile } = useDevice()
+  const t = useSafeTranslations('common')
 
   return (
     <LI variant="outline" layout="col" className="p-2">
@@ -60,11 +62,11 @@ export function ProjectCard({ project }: Props) {
         {project.link ? (
           <Link href={project.link} target="_blank" rel="noopener noreferrer">
             <Button variant="default" size="sm">
-              View Project →
+              {t('viewProject')}
             </Button>
           </Link>
         ) : project.private ? (
-          <P variant="description">Projet privé</P>
+          <P variant="description">{t('privateProject')}</P>
         ) : null}
       </Div>
     </LI>

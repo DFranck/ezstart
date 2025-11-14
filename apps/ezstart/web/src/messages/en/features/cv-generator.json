@@ -50,7 +50,11 @@
       "preview": {
         "title": "Preview & Download"
       },
-      "resetButton": "Reset All"
+      "resetButton": "Reset All",
+      "errors": {
+        "jobPostingRequired": "Please paste the job posting first",
+        "generationFailed": "Failed to generate CV. Please try again."
+      }
     },
     "features": {
       "title": "Key Features",

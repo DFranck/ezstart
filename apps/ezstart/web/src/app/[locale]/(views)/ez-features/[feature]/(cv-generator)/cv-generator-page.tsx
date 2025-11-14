@@ -62,7 +62,7 @@ function CVGeneratorContent() {
 
   const handleAIGenerate = async () => {
     if (!jobPosting) {
-      alert('Please paste the job posting first');
+      alert(t('generator.errors.jobPostingRequired'));
       return;
     }
 
@@ -85,7 +85,7 @@ function CVGeneratorContent() {
       setData(generatedData);
     } catch (error) {
       console.error('AI generation error:', error);
-      alert('Failed to generate CV. Please try again.');
+      alert(t('generator.errors.generationFailed'));
     } finally {
       setIsGenerating(false);
     }

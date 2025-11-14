@@ -50,7 +50,11 @@
       "preview": {
         "title": "Aperçu & Téléchargement"
       },
-      "resetButton": "Tout Réinitialiser"
+      "resetButton": "Tout Réinitialiser",
+      "errors": {
+        "jobPostingRequired": "Veuillez coller l'offre d'emploi d'abord",
+        "generationFailed": "Échec de la génération du CV. Veuillez réessayer."
+      }
     },
     "features": {
       "title": "Fonctionnalités Clés",

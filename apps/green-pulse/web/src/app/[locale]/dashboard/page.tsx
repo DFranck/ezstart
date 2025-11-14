@@ -1,7 +1,9 @@
 'use client'
 
 import { WorkspacesList } from '@/components/forms/WorkspacesList'
-import { Badge, Card, CardContent, CardHeader, H1, P, Section, WelcomeModal } from '@ezstart/ui/components'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { Badge, Card, CardContent, CardHeader, H1, P, Section, Spinner, WelcomeModal } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { Suspense } from 'react'
@@ -13,7 +15,7 @@ const CreateWorkspaceDialog = dynamic(() => import('@/components/forms/CreateWor
   loading: () => <div className="animate-pulse bg-muted rounded h-10 w-40" />,
 })
 
-export default function DashboardPage(): any {
+function DashboardContent(): any {
   const t = useTranslations('forms.workspaces')
 
   return (
@@ -84,5 +86,41 @@ function WorkspacesListSkeleton() {
         </Card>
       ))}
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  const t = useTranslations('auth')
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <RequireRole
+        roles={['client', 'beta-tester']}
+        fallbackComponent={
+          <Section size={'full'}>
+            <Card variant={'ghost'}>
+              <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
+            </Card>
+          </Section>
+        }
+      >
+        <DashboardContent />
+      </RequireRole>
+    </RequireAuth>
   )
 }

@@ -3,10 +3,13 @@
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { getApiUrl } from '@ezstart/config'
-import { useAuthStore } from '@ezstart/auth-sdk'
+import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { Card, Section, Spinner } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-export default function LiaPage(): any {
+function LiaPageContent(): any {
   // Get user from Zustand store (localStorage 'ezauth-storage')
   const { user, isAuthenticated } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -62,5 +65,41 @@ export default function LiaPage(): any {
         onRegisterConversationCreatedCallback={setOnConversationCreated}
       />
     </ThreadProvider>
+  )
+}
+
+export default function LiaPage() {
+  const t = useTranslations('auth')
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <RequireRole
+        roles={['client', 'beta-tester']}
+        fallbackComponent={
+          <Section size={'full'}>
+            <Card variant={'ghost'}>
+              <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
+            </Card>
+          </Section>
+        }
+      >
+        <LiaPageContent />
+      </RequireRole>
+    </RequireAuth>
   )
 }

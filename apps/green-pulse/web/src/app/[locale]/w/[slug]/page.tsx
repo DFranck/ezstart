@@ -2,7 +2,9 @@
 
 import { ProjectsList } from '@/components/forms/ProjectsList'
 import { WorkspaceBreadcrumbs } from '@/components/forms/WorkspaceBreadcrumbs'
-import { Card, CardContent, H1, P } from '@ezstart/ui/components'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { Card, CardContent, H1, P, Section, Spinner } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { Suspense, use } from 'react'
@@ -18,7 +20,7 @@ interface PageProps {
   params: Promise<{ slug: string; locale: string }>
 }
 
-export default function WorkspacePage({ params }: PageProps): any {
+function WorkspacePageContent({ params }: PageProps): any {
   const { slug } = use(params)
   const t = useTranslations('forms.projects')
 
@@ -62,5 +64,41 @@ function ProjectsListSkeleton() {
         </Card>
       ))}
     </div>
+  )
+}
+
+export default function WorkspacePage({ params }: PageProps) {
+  const t = useTranslations('auth')
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <RequireRole
+        roles={['client', 'beta-tester']}
+        fallbackComponent={
+          <Section size={'full'}>
+            <Card variant={'ghost'}>
+              <InsufficientPermissions requiredRoles={['client', 'beta-tester']} />
+            </Card>
+          </Section>
+        }
+      >
+        <WorkspacePageContent params={params} />
+      </RequireRole>
+    </RequireAuth>
   )
 }
