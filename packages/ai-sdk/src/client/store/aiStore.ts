@@ -6,7 +6,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface AIProviderInfo {
+export interface AIProviderInfo {
   id: string
   name: string
   type: string

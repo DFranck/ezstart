@@ -37,6 +37,7 @@
     "@ezstart/typescript-config": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/config": "workspace:*",
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.12",
     "react": "^19.1.1",

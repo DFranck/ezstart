@@ -7,8 +7,9 @@
 import { useEffect, useState } from 'react'
 import { useAIStore } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
+import type { AppName } from '@ezstart/config/urls'
 
-export function useProviders(appName: string = 'green-pulse') {
+export function useProviders(appName: AppName = 'green-pulse') {
   const { providers, setProviders } = useAIStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)

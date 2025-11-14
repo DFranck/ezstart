@@ -36,7 +36,7 @@ export function AISelector({
       {providers.map(provider => (
         <SelectItem key={provider.id} value={provider.id}>
           <div className="flex items-center gap-2">
-            <Icon name={getProviderIcon(provider.type)} size={16} />
+            <Icon name={getProviderIcon(provider.type) as any} size={16} />
             <span>{provider.name}</span>
 
             {showCapabilities && (

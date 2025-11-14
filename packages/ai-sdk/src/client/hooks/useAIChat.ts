@@ -7,6 +7,7 @@
 import { useState, useCallback } from 'react'
 import { useAIStore } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
+import type { AppName } from '@ezstart/config/urls'
 
 interface ChatMessage {
   id: string
@@ -20,7 +21,7 @@ interface UseAIChatOptions {
   conversationId?: string
   systemPrompt?: string
   extractData?: boolean
-  appName?: string
+  appName?: AppName
 }
 
 export function useAIChat(options: UseAIChatOptions = {}) {
