@@ -1,6 +1,7 @@
 'use client'
 import { routing } from '@/i18n/routing'
-import { LoginButton } from '@ezstart/auth-sdk'
+import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
+import { useRBAC } from '@ezstart/rbac'
 import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   Button,
@@ -22,6 +23,8 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
   const currentLocale = useLocale()
   const t = useTranslations()
   const tForms = useTranslations('forms')
+  const { user } = useAuthStore()
+  const rbac = useRBAC(user)
 
   const handleLocaleChange = (locale: string) => {
     if (!pathname) return
@@ -89,14 +92,20 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
             currentLocale={currentLocale}
             onLocaleChange={handleLocaleChange}
           />
-          <ThemeEditor adminOnly={true} enableHistory={true} />
+          {/* ThemeEditor: visible only for manager, admin, superadmin */}
+          {rbac.hasAnyRole(['manager', 'admin', 'superadmin']) && (
+            <ThemeEditor adminOnly={true} enableHistory={true} />
+          )}
           <ThemeSwitcher />
         </Div>
       }
       LinkComponent={Link}
     >
       {children}
-      <VersionSwitch v1Label="V1" v2Label="V2" position="bottom-left" />
+      {/* VersionSwitch: visible only for manager, admin, superadmin */}
+      {rbac.hasAnyRole(['manager', 'admin', 'superadmin']) && (
+        <VersionSwitch v1Label="V1" v2Label="V2" position="bottom-left" />
+      )}
     </ClientLayout>
   )
 }
