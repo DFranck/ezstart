@@ -34,9 +34,15 @@
 **Exemples concrets (20 min):**
 3. 🎯 [ai-agents/EXAMPLES.md](./ai-agents/EXAMPLES.md) - Cas réels avec code
 
+**Agents Spécialisés par Domaine (NOUVEAU!):**
+4. 🎯 [../.claude/missions/README.md](../.claude/missions/README.md) - **18 agents experts** (i18n, architecture, performance, security, etc.)
+   - Chaque agent maintient son domaine à 100/100
+   - Cycle AUPD: Audit → Update → Propose → Document
+   - Invocation: "Audit i18n", "Check l'architecture", "Améliore les perfs"
+
 **Ensuite:**
-4. 📐 [DEV-RULES.md](../DEV-RULES.md) - Règles obligatoires
-5. 📊 [README.md](./README.md) - Dashboard des audits
+5. 📐 [DEV-RULES.md](../DEV-RULES.md) - Règles obligatoires
+6. 📊 [README.md](./README.md) - Dashboard des audits
 
 ---
 
