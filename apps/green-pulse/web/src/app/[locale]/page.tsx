@@ -119,8 +119,7 @@ export default function HomePage(): any {
 
           {/* Feature tags (from slide) */}
           <Div layout={'row'} className="hidden lg:flex ">
-            {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('heroFeatures', { returnObjects: true }) as unknown as string[]).map((feature: string, index: number) => (
+            {(t.raw('heroFeatures') as string[]).map((feature: string, index: number) => (
               <Button key={index} className="rounded-full">
                 {feature}
               </Button>
@@ -185,8 +184,7 @@ export default function HomePage(): any {
           />
 
           <Div className="space-y-4">
-            {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('challenge.challenges', { returnObjects: true }) as unknown as string[]).map((challenge: string, index: number) => (
+            {(t.raw('challenge.challenges') as string[]).map((challenge: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
@@ -274,8 +272,7 @@ export default function HomePage(): any {
         </Div>
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {/* @ts-expect-error - returnObjects is valid but not typed */}
-          {(t('transformation.features', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((feature, index) => (
+          {(t.raw('transformation.features') as Array<{title: string, description: string}>).map((feature, index) => (
             <Card key={index}>
               <CardHeader className="flex items-center gap-3">
                 <Icon
@@ -311,8 +308,7 @@ export default function HomePage(): any {
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('problem.problems', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((item, index) => (
+            {(t.raw('problem.problems') as Array<{title: string, description: string}>).map((item, index) => (
               <Card key={index}>
                 <CardHeader className="flex items-center gap-3">
                   <Icon
@@ -351,8 +347,7 @@ export default function HomePage(): any {
             {t('team.description')}
           </P>
           <Div className="space-y-4">
-            {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('team.credentials', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
+            {(t.raw('team.credentials') as string[]).map((text: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Icon
                   name={
@@ -399,8 +394,7 @@ export default function HomePage(): any {
               {t('partnership.exchange.title')}
             </H3>
             <Div className="space-y-3">
-              {/* @ts-expect-error - returnObjects is valid but not typed */}
-              {(t('partnership.exchange.items', { returnObjects: true }) as unknown as string[]).map((item: string, index: number) => (
+              {(t.raw('partnership.exchange.items') as string[]).map((item: string, index: number) => (
                 <Div key={index} className="flex items-start gap-3">
                   <Icon
                     name="lucide:CheckCircle2"
@@ -417,8 +411,7 @@ export default function HomePage(): any {
               {t('partnership.focus.title')}
             </H3>
             <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* @ts-expect-error - returnObjects is valid but not typed */}
-              {(t('partnership.focus.partners', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
+              {(t.raw('partnership.focus.partners') as string[]).map((text: string, index: number) => (
                 <Card key={index} className="p-4 bg-background">
                   <Div className="flex items-start gap-3">
                     <Icon
@@ -509,9 +502,8 @@ export default function HomePage(): any {
           </H2>
 
           <Div className="space-y-4">
-            {/* @ts-expect-error - returnObjects is valid but not typed */}
             {(
-              t('faq.questions', { returnObjects: true }) as unknown as Array<{
+              t.raw('faq.questions') as Array<{
                 question: string
                 answer: string
               }>

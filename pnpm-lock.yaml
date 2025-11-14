@@ -767,6 +767,9 @@ importers:
       '@ezstart/rbac':
         specifier: workspace:*
         version: link:../../../packages/rbac
+      '@ezstart/rbac-ui':
+        specifier: workspace:*
+        version: link:../../../packages/rbac-ui
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../../../packages/ui
@@ -1785,9 +1788,6 @@ importers:
       '@ezstart/auth-sdk':
         specifier: workspace:*
         version: link:../auth-sdk
-      react:
-        specifier: ^19.1.1
-        version: 19.1.1
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -1795,9 +1795,6 @@ importers:
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.23
-      '@types/react':
-        specifier: ^19.1.12
-        version: 19.1.12
       typescript:
         specifier: ^5.7.2
         version: 5.7.3

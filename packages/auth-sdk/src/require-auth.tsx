@@ -1,6 +1,6 @@
 'use client'
 
-import React, { type ReactNode } from 'react'
+import React, { type ReactNode, useEffect, useState } from 'react'
 import { useAuth } from './provider'
 
 export interface RequireAuthProps {
@@ -38,7 +38,13 @@ export function RequireAuth({
   fallbackComponent,
   redirectTo,
 }: RequireAuthProps) {
-  const { isAuthenticated, isHydrated } = useAuth()
+  const { isAuthenticated } = useAuth()
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Wait for client-side hydration
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   // Show loading while hydrating
   if (!isHydrated) {
