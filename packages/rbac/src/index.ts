@@ -7,4 +7,5 @@
 export * from './types'
 export * from './client'
 export * from './helpers'
-export * from './components'
+// Components are exported separately via '@ezstart/rbac/components'
+// to avoid React dependency in server-side code
