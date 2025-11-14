@@ -1,7 +1,7 @@
 'use client'
 
 import React, { type ReactNode } from 'react'
-import { useAuth } from './store'
+import { useAuth } from './provider'
 
 export interface RequireAuthProps {
   /** Content to show when authenticated */
