@@ -2,6 +2,26 @@
   "monitoring": {
     "title": "Monitoring Dashboard",
     "loading": "Loading monitoring data...",
+    "apiOffline": "Monitoring API is offline or sleeping. Please wait 30-60s, then refresh.",
+    "health": {
+      "title": "Projects Health",
+      "description": "Real-time health monitoring of all services across the @ezstart monorepo",
+      "detailsSubtitle": "Detailed health status for each project",
+      "noProjects": "No projects found"
+    },
+    "auditsPage": {
+      "title": "Quality Audits",
+      "description": "Comprehensive quality audits across all categories of the monorepo",
+      "detailsSubtitle": "Detailed scores for each audit category",
+      "noAudits": "No audits found"
+    },
+    "errorsPage": {
+      "title": "Error Monitoring",
+      "description": "Real-time error tracking and logs from all monitored services",
+      "metricsSubtitle": "Based on last 24 hours",
+      "recentTitle": "Recent Errors",
+      "recentDescription": "Live feed of errors from all monitored services"
+    },
   "tabs": {
     "projects": "Projects",
     "audits": "Audits",

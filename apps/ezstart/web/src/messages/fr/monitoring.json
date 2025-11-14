@@ -2,6 +2,26 @@
   "monitoring": {
     "title": "Tableau de bord de surveillance",
     "loading": "Chargement des données de surveillance...",
+    "apiOffline": "L'API de monitoring est hors ligne ou en veille. Veuillez attendre 30-60s, puis rafraîchir.",
+    "health": {
+      "title": "Santé des Projets",
+      "description": "Surveillance en temps réel de tous les services du monorepo @ezstart",
+      "detailsSubtitle": "État de santé détaillé pour chaque projet",
+      "noProjects": "Aucun projet trouvé"
+    },
+    "auditsPage": {
+      "title": "Audits de Qualité",
+      "description": "Audits de qualité complets sur toutes les catégories du monorepo",
+      "detailsSubtitle": "Scores détaillés pour chaque catégorie d'audit",
+      "noAudits": "Aucun audit trouvé"
+    },
+    "errorsPage": {
+      "title": "Surveillance des Erreurs",
+      "description": "Suivi en temps réel des erreurs et logs de tous les services surveillés",
+      "metricsSubtitle": "Basé sur les dernières 24 heures",
+      "recentTitle": "Erreurs Récentes",
+      "recentDescription": "Flux en direct des erreurs de tous les services surveillés"
+    },
   "tabs": {
     "projects": "Projets",
     "audits": "Audits",

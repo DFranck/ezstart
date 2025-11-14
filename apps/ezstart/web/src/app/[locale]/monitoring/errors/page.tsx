@@ -59,7 +59,7 @@ function ErrorsMonitoringContent(): any {
     const errorMessage =
       error instanceof Error
         ? error.message === 'Failed to fetch'
-          ? 'Monitoring API is offline or sleeping. Please wait 30-60s, then refresh.'
+          ? t('apiOffline')
           : error.message
         : 'Unknown error'
 
@@ -84,9 +84,9 @@ function ErrorsMonitoringContent(): any {
       {/* Hero Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
-          <H1>Error Monitoring</H1>
+          <H1>{t('errorsPage.title')}</H1>
           <P className="text-muted-foreground">
-            Real-time error tracking and logs from all monitored services
+            {t('errorsPage.description')}
           </P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
@@ -101,7 +101,7 @@ function ErrorsMonitoringContent(): any {
             score={errorsHealth.score}
             status={errorsHealth.status}
             title="Error Status Score"
-            subtitle="Based on last 24 hours"
+            subtitle={t('errorsPage.metricsSubtitle')}
           />
           {/* Metrics Overview */}
           <MetricsOverview activeTab="errors" metrics={metricsData} />
@@ -111,8 +111,8 @@ function ErrorsMonitoringContent(): any {
       {/* Errors Feed Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
-          <H2>Recent Errors</H2>
-          <P className="text-muted-foreground">Live feed of errors from all monitored services</P>
+          <H2>{t('errorsPage.recentTitle')}</H2>
+          <P className="text-muted-foreground">{t('errorsPage.recentDescription')}</P>
         </Div>
 
         <ErrorsFeed />

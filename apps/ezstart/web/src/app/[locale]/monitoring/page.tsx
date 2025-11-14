@@ -65,7 +65,7 @@ function MonitoringOverviewContent(): any {
     const errorMessage =
       error instanceof Error
         ? error.message === 'Failed to fetch'
-          ? 'Monitoring API is offline or sleeping. Please wait 30-60s, then refresh.'
+          ? t('apiOffline')
           : error.message
         : 'Unknown error'
 

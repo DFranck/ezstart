@@ -54,7 +54,7 @@ function HealthMonitoringContent(): any {
     const errorMessage =
       error instanceof Error
         ? error.message === 'Failed to fetch'
-          ? 'Monitoring API is offline or sleeping. Please wait 30-60s, then refresh.'
+          ? t('apiOffline')
           : error.message
         : 'Unknown error'
 
@@ -79,9 +79,9 @@ function HealthMonitoringContent(): any {
       {/* Hero Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
-          <H1>Projects Health</H1>
+          <H1>{t('health.title')}</H1>
           <P className="text-muted-foreground">
-            Real-time health monitoring of all services across the @ezstart monorepo
+            {t('health.description')}
           </P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
@@ -107,7 +107,7 @@ function HealthMonitoringContent(): any {
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
           <H2>All Projects ({projects.length})</H2>
-          <P className="text-muted-foreground">Detailed health status for each project</P>
+          <P className="text-muted-foreground">{t('health.detailsSubtitle')}</P>
         </Div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -118,7 +118,7 @@ function HealthMonitoringContent(): any {
 
         {projects.length === 0 && (
           <div className="text-center py-12">
-            <P className="text-muted-foreground">No projects found</P>
+            <P className="text-muted-foreground">{t('health.noProjects')}</P>
           </div>
         )}
       </Section>

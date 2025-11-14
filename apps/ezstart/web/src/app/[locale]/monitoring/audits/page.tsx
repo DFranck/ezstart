@@ -54,7 +54,7 @@ function AuditsMonitoringContent(): any {
     const errorMessage =
       error instanceof Error
         ? error.message === 'Failed to fetch'
-          ? 'Monitoring API is offline or sleeping. Please wait 30-60s, then refresh.'
+          ? t('apiOffline')
           : error.message
         : 'Unknown error'
 
@@ -79,9 +79,9 @@ function AuditsMonitoringContent(): any {
       {/* Hero Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
-          <H1>Quality Audits</H1>
+          <H1>{t('auditsPage.title')}</H1>
           <P className="text-muted-foreground">
-            Comprehensive quality audits across all categories of the monorepo
+            {t('auditsPage.description')}
           </P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
@@ -107,7 +107,7 @@ function AuditsMonitoringContent(): any {
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
           <H2>All Audits ({audits.length})</H2>
-          <P className="text-muted-foreground">Detailed scores for each audit category</P>
+          <P className="text-muted-foreground">{t('auditsPage.detailsSubtitle')}</P>
         </Div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -118,7 +118,7 @@ function AuditsMonitoringContent(): any {
 
         {audits.length === 0 && (
           <div className="text-center py-12">
-            <P className="text-muted-foreground">No audits found</P>
+            <P className="text-muted-foreground">{t('auditsPage.noAudits')}</P>
           </div>
         )}
       </Section>
