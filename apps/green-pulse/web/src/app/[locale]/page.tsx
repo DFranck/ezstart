@@ -390,7 +390,7 @@ export default function HomePage(): any {
           </H2>
           <P className="text-lg text-muted-foreground mb-6 leading-relaxed">
             GreenPulse.AI is created by sustainability professionals who've spent years in the
-            trenches—navigating compliance frameworks, managing stakeholder expectations, and
+            trenches navigating compliance frameworks, managing stakeholder expectations, and
             transforming raw data into actionable strategies.
           </P>
           <Div className="space-y-4">
@@ -426,64 +426,91 @@ export default function HomePage(): any {
         </Div>
       </Section>
       {/* Social Proof Section */}
-      <Section size={'xl'} className="bg-background">
-        <Div className="container mx-auto">
-          <H2 size="h4" className="text-center mb-12">
-            Trusted by Forward-Thinking Organizations
-          </H2>
-          Option 1:
-          <Div className="text-center max-w-3xl mx-auto mb-16">
-            <H3 size="h5" className="mb-4">
-              Integration Partners
+      <Section size={'xl'}>
+        <H2 size="h4" className="text-center mb-4">
+          Partnership Opportunity
+        </H2>
+
+        <Div>
+          <H3 size="h5" className="mb-6 text-center">
+            For ESG Platform Providers & Rating Agencies
+          </H3>
+
+          <P className="text-muted-foreground mb-6 leading-relaxed">
+            GreenPulse connects SMEs with sustainability challenges to the right solutions. We
+            handle customer acquisition and initial engagement you provide the data infrastructure
+            and reporting capabilities that power their compliance journey.
+          </P>
+
+          <Div className="bg-muted/30 rounded-lg p-6 mb-6">
+            <H3 size="h6" className="mb-4">
+              The Exchange:
             </H3>
-            <P className="text-muted-foreground">
-              GreenPulse integrates with leading ESG platforms and reporting frameworks.
-              <Strong className="text-foreground"> We're expanding our partner ecosystem</Strong> to
-              help companies streamline their sustainability workflows across multiple platforms.
-            </P>
-            <P className="text-sm text-muted-foreground mt-4">
-              Platform provider?{' '}
-              <a href="#contact" className="text-primary hover:underline">
-                Let's discuss integration opportunities
-              </a>
-            </P>
-          </Div>
-          Option 2 :
-          <Div className="text-center max-w-3xl mx-auto mb-16">
-            <H3 size="h5" className="mb-4">
-              Built for Interoperability
-            </H3>
-            <P className="text-muted-foreground">
-              GreenPulse acts as a <Strong className="text-foreground">central hub</Strong> that
-              connects to ESG platforms, rating agencies, and reporting tools—helping users manage
-              data across their entire sustainability tech stack.
-            </P>
-            <Div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
-              <P className="text-sm">
-                <Strong>For Platform Partners:</Strong> Expand your reach with seamless API
-                integration. Acquire customers through our network while enriching your data
-                ecosystem.
-              </P>
+            <Div className="space-y-3">
+              <Div className="flex items-start gap-3">
+                <Icon
+                  name="lucide:CheckCircle2"
+                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                />
+                <P className="text-sm">
+                  <Strong>You get:</Strong> Pre-qualified customers through our SME network
+                </P>
+              </Div>
+              <Div className="flex items-start gap-3">
+                <Icon
+                  name="lucide:CheckCircle2"
+                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                />
+                <P className="text-sm">
+                  <Strong>We get:</Strong> Access to your data systems and reporting frameworks
+                </P>
+              </Div>
+              <Div className="flex items-start gap-3">
+                <Icon
+                  name="lucide:CheckCircle2"
+                  className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                />
+                <P className="text-sm">
+                  <Strong>SMEs get:</Strong> Seamless sustainability management from inquiry to
+                  compliance
+                </P>
+              </Div>
             </Div>
           </Div>
-          Option 3 :
-          <Div className="text-center max-w-2xl mx-auto mb-16">
-            <H3 size="h5" className="text-muted-foreground mb-3">
-              Integration Ecosystem
+
+          <Div className="mb-6">
+            <H3 size="h6" className="mb-4">
+              Current Focus: Seeking partners for:
             </H3>
-            <P className="text-muted-foreground text-sm">
-              We connect to ESG platforms, reporting frameworks, and rating agencies through secure
-              APIs.
-              <br />
-              <a
-                href="mailto:partnerships@greenpulse.ai"
-                className="text-primary hover:underline mt-2 inline-block"
-              >
-                Platform providers: explore partnership opportunities →
-              </a>
-            </P>
+            <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { icon: 'lucide:Database', text: 'ESG data collection platforms' },
+                { icon: 'lucide:Leaf', text: 'Carbon accounting tools' },
+                {
+                  icon: 'lucide:FileText',
+                  text: 'Regulatory reporting frameworks (EU CSRD, Vietnam TCFD, etc.)',
+                },
+              ].map((item, index) => (
+                <Card key={index} className="p-4 bg-background">
+                  <Div className="flex items-start gap-3">
+                    <Icon
+                      name={item.icon as KnownIconName}
+                      className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
+                    />
+                    <P className="text-sm">{item.text}</P>
+                  </Div>
+                </Card>
+              ))}
+            </Div>
           </Div>
-          {/* <Div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-16">
+
+          <Div className="text-center">
+            <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+              <a href="mailto:partnerships@greenpulse.ai">Let's build together →</a>
+            </Button>
+          </Div>
+        </Div>
+        {/* <Div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-16">
             {[1, 2, 3, 4].map(i => (
               <Div
                 key={i}
@@ -493,51 +520,50 @@ export default function HomePage(): any {
               </Div>
             ))}
           </Div> */}
-          <Div>
-            <H3 size="h5" className="text-center mb-8 text-muted-foreground">
-              As Featured In
-            </H3>
-            <Div layout={'center'} className="max-w-3xl mx-auto">
-              {[
-                {
-                  publication: 'VietStock',
-                  quote: '"Tay xanh" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế',
-                  logo: '/images/vietstock.svg',
-                  url: 'https://vietstock.vn/2025/11/tay-xanh-duoi-goc-nhin-cua-chuyen-gia-tu-van-esg-quoc-te-761-1365211.htm',
-                  date: 'November 2025',
-                },
-              ].map((item, index) => (
-                <a
-                  key={index}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full"
-                >
-                  <Card className="p-6 border-l-4 border-gp-primary hover:shadow-lg transition-shadow">
-                    <Div className="flex items-start gap-6">
-                      <Div className="flex-shrink-0 w-32 h-12 relative">
-                        <Image
-                          src={item.logo}
-                          alt={item.publication}
-                          fill
-                          className="object-contain"
-                        />
-                      </Div>
-                      <Div className="flex-1">
-                        <P className="font-semibold mb-2">
-                          {item.publication}{' '}
-                          <Span size={'xs'} variant={'description'}>
-                            {item.date}
-                          </Span>
-                        </P>
-                        <P className="text-muted-foreground italic">{item.quote}</P>
-                      </Div>
+        <Div>
+          <H3 size="h5" className="text-center mb-8 text-muted-foreground">
+            As Featured In
+          </H3>
+          <Div layout={'center'} className="max-w-3xl mx-auto">
+            {[
+              {
+                publication: 'VietStock',
+                quote: '"Tay xanh" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế',
+                logo: '/images/vietstock.svg',
+                url: 'https://vietstock.vn/2025/11/tay-xanh-duoi-goc-nhin-cua-chuyen-gia-tu-van-esg-quoc-te-761-1365211.htm',
+                date: 'November 2025',
+              },
+            ].map((item, index) => (
+              <a
+                key={index}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full"
+              >
+                <Card className="p-6 border-l-4 border-gp-primary hover:shadow-lg transition-shadow">
+                  <Div className="flex items-start gap-6">
+                    <Div className="flex-shrink-0 w-32 h-12 relative">
+                      <Image
+                        src={item.logo}
+                        alt={item.publication}
+                        fill
+                        className="object-contain"
+                      />
                     </Div>
-                  </Card>
-                </a>
-              ))}
-            </Div>
+                    <Div className="flex-1">
+                      <P className="font-semibold mb-2">
+                        {item.publication}{' '}
+                        <Span size={'xs'} variant={'description'}>
+                          {item.date}
+                        </Span>
+                      </P>
+                      <P className="text-muted-foreground italic">{item.quote}</P>
+                    </Div>
+                  </Div>
+                </Card>
+              </a>
+            ))}
           </Div>
         </Div>
       </Section>
@@ -553,7 +579,7 @@ export default function HomePage(): any {
               {
                 question: 'How is GreenPulse different from ChatGPT or other general AI tools?',
                 answer:
-                  "GreenPulse is purpose-built for ESG compliance and sustainability reporting. Unlike ChatGPT, we're trained on international frameworks (GRI, SFDR, CSRD, ISSB) and integrate with your existing data sources (ERP, CRM, Excel). We provide structured outputs that meet regulatory requirements—not generic text that needs manual review.",
+                  "GreenPulse is purpose-built for ESG compliance and sustainability reporting. Unlike ChatGPT, we're trained on international frameworks (GRI, SFDR, CSRD, ISSB) and integrate with your existing data sources (ERP, CRM, Excel). We provide structured outputs that meet regulatory requirements not generic text that needs manual review.",
               },
               {
                 question: 'Is my data secure? Do you share it with third parties?',
@@ -563,7 +589,7 @@ export default function HomePage(): any {
               {
                 question: "Doesn't AI generate emissions? How do you manage this?",
                 answer:
-                  "Yes, AI computing does generate emissions—which is why we offset 200% of our carbon footprint through verified carbon removal projects. More importantly, GreenPulse's automation reduces the need for travel, paper reports, and redundant manual work, resulting in a net-negative carbon impact for our users.",
+                  "Yes, AI computing does generate emissions which is why we offset 200% of our carbon footprint through verified carbon removal projects. More importantly, GreenPulse's automation reduces the need for travel, paper reports, and redundant manual work, resulting in a net-negative carbon impact for our users.",
               },
               {
                 question: 'Can GreenPulse integrate with our existing tools?',
@@ -573,7 +599,7 @@ export default function HomePage(): any {
               {
                 question: 'What if GreenPulse makes a mistake in compliance reporting?',
                 answer:
-                  'GreenPulse provides transparency in all outputs—showing which frameworks and data points inform each recommendation. All reports include human-in-the-loop review checkpoints before finalization. We also offer audit trails and version control to ensure regulatory confidence.',
+                  'GreenPulse provides transparency in all outputs showing which frameworks and data points inform each recommendation. All reports include human-in-the-loop review checkpoints before finalization. We also offer audit trails and version control to ensure regulatory confidence.',
               },
             ].map((item, index) => (
               <Card key={index} className="p-6 bg-card">
