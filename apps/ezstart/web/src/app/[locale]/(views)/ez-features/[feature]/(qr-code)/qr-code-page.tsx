@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
+import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section, Spinner } from '@ezstart/ui/components';
+import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk';
 import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { useState } from 'react';
 import { QRCodeCanvas } from './components/qrcode-canvas';
@@ -16,7 +17,7 @@ const DEFAULT_CONFIG: QRCodeConfig = {
   redirectType: 'permanent',
 };
 
-export default function QRCodeGeneratorPage() {
+function QRCodeGeneratorContent() {
   const t = useSafeTranslations('qrCode');
   const [config, setConfig] = useState<QRCodeConfig>(DEFAULT_CONFIG);
 
@@ -227,5 +228,30 @@ export default function QRCodeGeneratorPage() {
         </Div>
       </Section>
     </>
+  );
+}
+
+export default function QRCodeGeneratorPage() {
+  const t = useSafeTranslations('auth');
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <QRCodeGeneratorContent />
+    </RequireAuth>
   );
 }

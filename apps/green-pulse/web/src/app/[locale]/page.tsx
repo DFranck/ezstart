@@ -302,12 +302,18 @@ export default function HomePage(): any {
             <H2
               size="h3"
               className="mb-4"
-              dangerouslySetInnerHTML={{ __html: t('problem.title') }}
-            />
+            >
+              {t.rich('problem.title', {
+                strong: chunks => <Strong>{chunks}</Strong>,
+              })}
+            </H2>
             <P
               className="text-xl text-muted-foreground max-w-3xl mx-auto"
-              dangerouslySetInnerHTML={{ __html: t('problem.subtitle') }}
-            />
+            >
+              {t.rich('problem.subtitle', {
+                strong: chunks => <Strong>{chunks}</Strong>,
+              })}
+            </P>
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">

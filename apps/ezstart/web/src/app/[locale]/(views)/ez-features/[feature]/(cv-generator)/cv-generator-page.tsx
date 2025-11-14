@@ -1,6 +1,8 @@
 'use client';
 
-import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section } from '@ezstart/ui/components';
+import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section, Spinner } from '@ezstart/ui/components';
+import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk';
+import { RequireRole, InsufficientPermissions } from '@ezstart/rbac';
 import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { useState } from 'react';
 import { CVPreview } from './components/cv-preview';
@@ -37,7 +39,7 @@ const DEFAULT_CONFIG: CVConfig = {
   },
 };
 
-export default function CVGeneratorPage() {
+function CVGeneratorContent() {
   const t = useSafeTranslations('cvGenerator');
   const [data, setData] = useState<CVData>(DEFAULT_DATA);
   const [config, setConfig] = useState<CVConfig>(DEFAULT_CONFIG);
@@ -435,5 +437,41 @@ export default function CVGeneratorPage() {
         </Div>
       </Section>
     </>
+  );
+}
+
+export default function CVGeneratorPage() {
+  const t = useSafeTranslations('auth');
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <RequireRole
+        roles="superadmin"
+        fallbackComponent={
+          <Section size={'full'}>
+            <Card variant={'ghost'}>
+              <InsufficientPermissions requiredRoles="superadmin" />
+            </Card>
+          </Section>
+        }
+      >
+        <CVGeneratorContent />
+      </RequireRole>
+    </RequireAuth>
   );
 }

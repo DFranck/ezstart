@@ -3,9 +3,138 @@
     "title": "Projects",
     "items": [
       {
+        "id": "coreum-dex-platform",
+        "title": "Coreum DEX Platform",
+        "subtitle": "Full-Stack DeFi Trading Platform on Cosmos",
+        "roles": ["Backend Lead", "Frontend Developer"],
+        "summary": "Led the complete backend architecture migration from raw SQL to Prisma ORM for a DeFi trading platform on Coreum blockchain. Built real-time features with SSE and WebSocket, implemented complex analytics (PnL, OHLCV, APR), and integrated frontend with React Query. Delivered 320 hours across 8 weeks with 200+ commits.",
+        "description": "Full-stack development of a decentralized exchange (DEX) platform on Coreum blockchain. Led the complete backend modernization by migrating from raw SQL queries to Prisma ORM, achieving 3-4x performance improvements through PostgreSQL optimizations (materialized views, CTEs, window functions). Architected and implemented real-time features using Server-Sent Events (SSE) for live price updates, trending tokens, and swap notifications. Built WebSocket infrastructure for chat system with typing indicators, image uploads, and token holdings display. Developed complex financial analytics including PnL calculations (realized/unrealized), OHLCV charting with multiple timeframes, liquidity pool APR tracking, and trader portfolio analytics. Frontend integration using React Query for data fetching, Zustand for state management, and real-time cache invalidation.",
+        "link": "https://app.cruise-control.xyz/dashboard",
+        "src": {
+          "desktop": "/images/projects/coreum-dex-desktop.png",
+          "mobile": "/images/projects/coreum-dex-mobile.png",
+          "logo": "/images/projects/coreum-logo.png"
+        },
+        "tech": [
+          "Prisma",
+          "PostgreSQL",
+          "Elysia",
+          "SSE",
+          "WebSocket",
+          "React Query",
+          "Zustand",
+          "Next.js",
+          "TypeScript"
+        ],
+        "highlights": [
+          "Migrated 100% of SQL queries to Prisma ORM achieving 3-4x performance improvement",
+          "Built complete SSE infrastructure for real-time price updates across 200+ pools and 500+ tokens",
+          "Implemented WebSocket chat system with typing indicators and token holdings display",
+          "Developed comprehensive PnL tracking with 93-100% historical price coverage",
+          "Created auto-graduation system migrating 16 tokens from CURVE to DEX",
+          "Built OHLCV charting with 6 timeframes and intelligent data sampling",
+          "Migrated 20+ frontend components from GraphQL to unified REST API",
+          "Optimized PostgreSQL with materialized views, CTEs, and window functions"
+        ],
+        "private": true,
+        "featured": true,
+        "order": 1
+      },
+      {
+        "id": "greenpulse-ai-forms",
+        "title": "GreenPulse - AI Form System",
+        "subtitle": "Intelligent ESG Data Collection Platform",
+        "roles": ["CTO", "Fullstack"],
+        "summary": "Built a complete intelligent form system for environmental, social, and governance (ESG) data collection. Developed multi-modal interfaces (manual, AI chat, voice) transforming 45-minute paper forms into 8-15 minute AI-assisted workflows. Delivered production-ready backend (72 endpoints, 6 models) with MVP frontend using Google Gemini AI.",
+        "description": "Full-stack development of an innovative form management and AI extraction platform for sustainability reporting and field inspections. Architected complete backend with 72 API endpoints, 6 MongoDB models, and comprehensive multi-tenant workspace system. Implemented AI-powered extraction using Google Gemini (free tier) with OpenAI GPT-4 fallback for natural language to structured data conversion with confidence scoring. Built multi-modal form filling: manual mode with real-time validation, chat mode with AI extraction and adaptive prompting, and planned vocal mode for hands-free operation. Developed role-based access control (owner/editor/viewer), project collaboration with team sharing, and file handling (image OCR, document upload, audio transcription). Created agnostic form system with JSON-based templates, configurable extraction hints, and custom validation rules. Frontend using Next.js 15, React Query for server state, Zod validation, and i18n support (EN/FR). Designed for ESG inspectors and consultants visiting multiple companies to collect compliance and sustainability data efficiently.",
+        "link": "https://www.ai-greenpulse.com/",
+        "src": {
+          "desktop": "/images/projects/greenpulse-desktop.png",
+          "mobile": "/images/projects/greenpulse-mobile.png",
+          "logo": "/images/projects/greenpulse-logo.png"
+        },
+        "tech": [
+          "Next.js",
+          "Express.js",
+          "MongoDB",
+          "Google Gemini",
+          "React Query",
+          "Zod",
+          "TypeScript",
+          "Tailwind",
+          "next-intl"
+        ],
+        "duration": "Ongoing",
+        "metrics": {
+          "totalHours": 200,
+          "commits": 150,
+          "features": 72,
+          "performance": "8-15 min forms (vs 45 min paper)"
+        },
+        "highlights": [
+          "Built complete backend with 72 API endpoints and 6 MongoDB models for multi-tenant architecture",
+          "Implemented AI extraction engine using Google Gemini with confidence scoring and field validation",
+          "Developed multi-modal form filling: manual, AI chat, and vocal (planned) interfaces",
+          "Created agnostic form system supporting any JSON-defined template with custom validation",
+          "Architected workspace and project collaboration with role-based permissions (owner/editor/viewer)",
+          "Built file handling system with image OCR, document upload, and audio transcription support",
+          "Reduced form filling time from 45 minutes (paper) to 8-15 minutes (AI-assisted)",
+          "Integrated real-time extraction with color-coded confidence indicators (green/orange/red)"
+        ],
+        "private": false,
+        "featured": true,
+        "order": 2
+      },
+      {
+        "id": "clausia-ai-chat",
+        "title": "ClausIA - AI Chat Platform",
+        "subtitle": "Enterprise RAG-powered Chat Application",
+        "roles": ["Frontend Developer"],
+        "summary": "Built a complete AI chat application with RAG (Retrieval-Augmented Generation) for an enterprise client. Implemented real-time streaming with SSE, conversation management, file uploads, and authentication flows. Delivered 123 hours across 8 weeks with 90+ commits in 3 structured lots.",
+        "description": "Frontend development of an enterprise-grade AI chat platform featuring RAG-powered responses with source citations. Developed real-time streaming interface using Server-Sent Events (SSE) with character-by-character display and adaptive speed control. Implemented complete authentication flow including password change with comprehensive validation (9+ chars, strength indicators, visual feedback). Built conversation management system with sidebar, pagination, rename functionality, and persistent state using Zustand. Created file upload system with validation, progress tracking, and error handling. Optimized for mobile devices with iOS-specific textarea fixes and responsive design. Integrated client branding with logo optimization using Next.js Image. Implemented complete i18n support (EN/FR) with next-intl. Built Next.js API proxy to handle Mixed Content issues and enable streaming through Vercel. Added RAG sources display with URL parsing, external link detection, and proper citations rendering.",
+        "link": null,
+        "src": {
+          "desktop": "/images/projects/clausia-desktop.png",
+          "mobile": "",
+          "logo": "/images/projects/clausia-logo.png"
+        },
+        "tech": [
+          "Next.js",
+          "TypeScript",
+          "Tailwind",
+          "Zustand",
+          "SSE",
+          "Zod",
+          "next-intl",
+          "React"
+        ],
+        "duration": "8 weeks",
+        "metrics": {
+          "totalHours": 123,
+          "commits": 90,
+          "features": 30,
+          "performance": "Real-time streaming"
+        },
+        "highlights": [
+          "Built complete SSE streaming with character-by-character display and adaptive speed",
+          "Implemented comprehensive password validation with real-time visual feedback",
+          "Created RAG sources display with URL parsing and external link detection",
+          "Optimized mobile experience with iOS-specific textarea fixes",
+          "Built conversation management with pagination and rename functionality",
+          "Implemented file upload system with progress tracking and validation",
+          "Added complete i18n support (EN/FR) across all components",
+          "Created Next.js API proxy for seamless streaming through Vercel"
+        ],
+        "private": true,
+        "featured": false,
+        "order": 3
+      },
+      {
+        "id": "eventoapp",
         "title": "EventoApp.io",
         "subtitle": "Event creation and ticket sales",
         "roles": ["CTO", "Fullstack"],
+        "summary": "A complete online event creation platform. I co-built and developed EventoApp.io as CTO, managing the entire stack: frontend PWA with Next.js/React, backend Express/MongoDB, state management via Zustand, real-time communication with Socket.io, and integration of a modular REST API.",
         "description": "A complete online event creation platform. I co-built and developed EventoApp.io as CTO, managing the entire stack: frontend PWA with Next.js/React, backend Express/MongoDB, state management via Zustand, real-time communication with Socket.io, and integration of a modular REST API. The app allows creating events with custom RSVPs, co-hosts, media uploads, upcoming chat features, and discovery via interest filters. Automated deployment through CI/CD.",
         "link": "https://www.evento-app.io/",
         "src": {
@@ -25,9 +154,11 @@
         ]
       },
       {
+        "id": "hydro-marketplace",
         "title": "Hydro Marketplace",
         "subtitle": "Web3 NFT on Cosmos",
         "roles": ["Frontend"],
+        "summary": "A decentralized marketplace to sell and buy NFT assets linked to the Cosmos blockchain. I contributed as a Frontend Developer using Next.js, React.js, TypeScript, CosmosKit, and Supabase.",
         "description": "A decentralized marketplace to sell and buy NFT assets linked to the Cosmos blockchain. I contributed as a Frontend Developer using Next.js, React.js, TypeScript, CosmosKit, and Supabase.",
         "link": "https://hydro.cosmos.network/",
         "src": {
@@ -37,9 +168,11 @@
         "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
       },
       {
+        "id": "transplantation-arbres",
         "title": "Tree Transplantation",
         "subtitle": "Online catalog",
         "roles": ["CTO", "Fullstack"],
+        "summary": "Development of a multilingual showcase website (FR/EN) presenting tree transplantation equipment. Added and optimized product sections (catalog with filters, product sheets), improved SEO (title tags, meta descriptions, Open Graph), and enabled smooth content updates via CMS.",
         "description": "Development of a multilingual showcase website (FR/EN) presenting tree transplantation equipment. Added and optimized product sections (catalog with filters, product sheets), improved SEO (title tags, meta descriptions, Open Graph), and enabled smooth content updates via CMS. Full-stack work including mobile/desktop-friendly frontend integration, i18n management, and quote request form handling.",
         "link": "https://www.transplantation-arbres.fr",
         "src": {
@@ -50,21 +183,54 @@
         "private": false
       },
       {
-        "title": "Zephyrus",
-        "subtitle": "Web3 NFT Aggregator on CosmosHub",
-        "roles": ["Frontend"],
-        "description": "NFT aggregator on CosmosHub. I contributed as a Frontend Developer using Next.js, React.js, TypeScript, and CosmosKit. The goal was to simplify and gamify the user experience of https://hydro.cosmos.network/",
+        "id": "zephyrus",
+        "title": "Zephyrus - Gamified DeFi Platform",
+        "subtitle": "Web3 Liquid Staking & NFT Aggregator on Cosmos",
+        "roles": ["Frontend Developer"],
+        "summary": "Built a complete gamified DeFi platform on CosmosHub with liquid staking, vessel NFT management, governance voting, and rewards system. Implemented complex blockchain interactions with CosmosKit, multi-chain IBC transfers, and real-time data synchronization. Delivered 474 hours across 10 months with 400+ commits.",
+        "description": "Frontend development of a gamified decentralized finance platform on Cosmos blockchain featuring liquid staking (LSM), NFT vessel management, and governance participation. Built complete vessel lifecycle system including creation (build), management (upgrade, decommission, refloat), and rewards claiming across multiple harbors. Implemented multi-chain support with IBC transfers between Cosmos Hub and Neutron chains. Developed dynamic world/denom selection system supporting multiple voting power sources. Created comprehensive transaction handling with batch operations, gas estimation, and transaction link generation. Built real-time data synchronization with round auto-refresh, proposal voting system, and harbor filtering. Implemented whitelist gatekeeper integration with proof generation for capacity limits. Optimized mobile experience with responsive overlays and custom scrolling. Created immersive onboarding tutorial system with step-by-step guidance. Integrated CosmosKit for wallet management with Keplr support and multi-chain client initialization.",
         "link": "https://zephyrus-dev.vercel.app/",
         "src": {
           "desktop": "/images/projects/zephyrus-desktop.png",
           "mobile": "/images/projects/zephyrus-mobile.png"
         },
-        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit"]
+        "tech": [
+          "Next.js",
+          "TypeScript",
+          "CosmosKit",
+          "Zustand",
+          "CosmWasm",
+          "IBC",
+          "Tailwind",
+          "React"
+        ],
+        "duration": "10 months",
+        "metrics": {
+          "totalHours": 474,
+          "commits": 400,
+          "features": 60,
+          "performance": "Multi-chain IBC"
+        },
+        "highlights": [
+          "Built complete vessel lifecycle system (build, upgrade, decommission, refloat) with batch operations",
+          "Implemented multi-chain IBC transfers with gas estimation and proof generation",
+          "Created dynamic governance voting system with proposal management and harbor filtering",
+          "Developed comprehensive rewards claiming system with client-side validation",
+          "Built real-time round auto-refresh with transaction monitoring and data synchronization",
+          "Implemented whitelist gatekeeper integration with dynamic capacity limits",
+          "Created immersive onboarding tutorial with gamified vessel building flow",
+          "Optimized complex blockchain store architecture with typed Zustand slices"
+        ],
+        "private": false,
+        "featured": false,
+        "order": 4
       },
       {
+        "id": "lima-prod",
         "title": "Lima Prod",
         "subtitle": "Video production, France, Vietnam, Asia",
         "roles": ["Frontend", "SEO"],
+        "summary": "Partial redesign of the Wix site for Lima Prod. I added and structured new sections to improve content readability, optimized SEO by updating metadata (title, description, OG images), and improved the heading hierarchy.",
         "description": "Partial redesign of the Wix site for Lima Prod. I added and structured new sections to improve content readability, optimized SEO by updating metadata (title, description, OG images), and improved the heading hierarchy. The goal was to better position the site on search engines and enhance the user experience.",
         "link": "https://www.limaprod.fr/",
         "src": {

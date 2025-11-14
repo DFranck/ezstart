@@ -1,6 +1,7 @@
 'use client'
 
-import { P, Section, Spinner } from '@ezstart/ui/components'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { Card, P, Section, Spinner } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { SystemOverview } from './components/SystemOverview'
@@ -11,7 +12,7 @@ import { useMonitoringProjects } from './hooks/useMonitoringProjects'
 import { useSocket } from './hooks/useSocket'
 import { getMetricsData } from './lib/utils'
 
-export default function MonitoringOverviewPage(): any {
+function MonitoringOverviewContent(): any {
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
@@ -91,5 +92,30 @@ export default function MonitoringOverviewPage(): any {
         <SystemOverview projects={projects} audits={audits} errors={errors} summary={summary} />
       </Section>
     </>
+  )
+}
+
+export default function MonitoringOverviewPage() {
+  const t = useTranslations('auth')
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <MonitoringOverviewContent />
+    </RequireAuth>
   )
 }

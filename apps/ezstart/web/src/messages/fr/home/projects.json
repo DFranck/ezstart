@@ -3,10 +3,139 @@
     "title": "Projets",
     "items": [
       {
-        "title": "EventoApp.io",
-        "subtitle": "Création et vente d’événements",
+        "id": "coreum-dex-platform",
+        "title": "Plateforme DEX Coreum",
+        "subtitle": "Plateforme DeFi Full-Stack sur Cosmos",
+        "roles": ["Lead Backend", "Développeur Frontend"],
+        "summary": "J'ai dirigé la migration complète de l'architecture backend de SQL brut vers Prisma ORM pour une plateforme de trading DeFi sur la blockchain Coreum. Développement de fonctionnalités temps réel avec SSE et WebSocket, implémentation d'analytics complexes (PnL, OHLCV, APR), et intégration frontend avec React Query. 320 heures sur 8 semaines avec 200+ commits.",
+        "description": "Développement full-stack d'une plateforme d'échange décentralisée (DEX) sur la blockchain Coreum. Direction de la modernisation complète du backend en migrant les requêtes SQL brutes vers Prisma ORM, atteignant des améliorations de performances de 3-4x grâce aux optimisations PostgreSQL (vues matérialisées, CTEs, fonctions fenêtre). Architecture et implémentation de fonctionnalités temps réel utilisant Server-Sent Events (SSE) pour les mises à jour de prix en direct, tokens tendance, et notifications de swap. Construction de l'infrastructure WebSocket pour le système de chat avec indicateurs de frappe, uploads d'images, et affichage des holdings de tokens. Développement d'analytics financières complexes incluant calculs PnL (réalisé/non-réalisé), graphiques OHLCV avec plusieurs timeframes, suivi APR des pools de liquidité, et analytics de portfolio trader. Intégration frontend avec React Query pour le data fetching, Zustand pour la gestion d'état, et invalidation de cache temps réel.",
+        "link": "https://app.cruise-control.xyz/dashboard",
+        "src": {
+          "desktop": "/images/projects/coreum-dex-desktop.png",
+          "mobile": "/images/projects/coreum-dex-mobile.png",
+          "logo": "/images/projects/coreum-logo.png"
+        },
+        "tech": [
+          "Prisma",
+          "PostgreSQL",
+          "Elysia",
+          "SSE",
+          "WebSocket",
+          "React Query",
+          "Zustand",
+          "Next.js",
+          "TypeScript"
+        ],
+        "highlights": [
+          "Migration de 100% des requêtes SQL vers Prisma ORM avec amélioration des performances de 3-4x",
+          "Construction de l'infrastructure SSE complète pour mises à jour prix temps réel sur 200+ pools et 500+ tokens",
+          "Implémentation du système de chat WebSocket avec indicateurs de frappe et affichage des holdings",
+          "Développement du tracking PnL complet avec couverture historique des prix de 93-100%",
+          "Création du système d'auto-graduation migrant 16 tokens de CURVE vers DEX",
+          "Construction des graphiques OHLCV avec 6 timeframes et échantillonnage intelligent des données",
+          "Migration de 20+ composants frontend de GraphQL vers API REST unifiée",
+          "Optimisation PostgreSQL avec vues matérialisées, CTEs, et fonctions fenêtre"
+        ],
+        "private": true,
+        "featured": true,
+        "order": 1
+      },
+      {
+        "id": "greenpulse-ai-forms",
+        "title": "GreenPulse - Système de Formulaires IA",
+        "subtitle": "Plateforme Intelligente de Collecte de Données ESG",
         "roles": ["CTO", "Fullstack"],
-        "description": "Plateforme complète de création d’événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l’intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d’une API REST modulaire. L’app permet de créer des événements avec RSVP personnalisés, co-hôtes, uploads média, chat à venir, et découverte via filtres d’intérêts. Déploiement automatisé via CI/CD.",
+        "summary": "Construction d'un système de formulaires intelligent complet pour la collecte de données environnementales, sociales et de gouvernance (ESG). Développement d'interfaces multi-modales (manuel, chat IA, vocal) transformant des formulaires papier de 45 minutes en workflows assistés par IA de 8-15 minutes. Backend production-ready (72 endpoints, 6 modèles) avec frontend MVP utilisant Google Gemini AI.",
+        "description": "Développement full-stack d'une plateforme innovante de gestion de formulaires et d'extraction IA pour le reporting de durabilité et les inspections terrain. Architecture backend complète avec 72 endpoints API, 6 modèles MongoDB, et système multi-tenant de workspaces. Implémentation de l'extraction IA avec Google Gemini (tier gratuit) et fallback OpenAI GPT-4 pour conversion langage naturel vers données structurées avec scoring de confiance. Construction de remplissage multi-modal: mode manuel avec validation temps réel, mode chat avec extraction IA et prompting adaptatif, et mode vocal prévu pour opération mains libres. Développement du contrôle d'accès basé sur les rôles (owner/editor/viewer), collaboration projet avec partage d'équipe, et gestion de fichiers (OCR image, upload document, transcription audio). Création de système de formulaires agnostique avec templates JSON, hints d'extraction configurables, et règles de validation personnalisées. Frontend utilisant Next.js 15, React Query pour l'état serveur, validation Zod, et support i18n (EN/FR). Conçu pour les inspecteurs ESG et consultants visitant plusieurs entreprises pour collecter efficacement les données de conformité et de durabilité.",
+        "link": "https://www.ai-greenpulse.com/",
+        "src": {
+          "desktop": "/images/projects/greenpulse-desktop.png",
+          "mobile": "/images/projects/greenpulse-mobile.png",
+          "logo": "/images/projects/greenpulse-logo.png"
+        },
+        "tech": [
+          "Next.js",
+          "Express.js",
+          "MongoDB",
+          "Google Gemini",
+          "React Query",
+          "Zod",
+          "TypeScript",
+          "Tailwind",
+          "next-intl"
+        ],
+        "duration": "En cours",
+        "metrics": {
+          "totalHours": 200,
+          "commits": 150,
+          "features": 72,
+          "performance": "Formulaires 8-15 min (vs 45 min papier)"
+        },
+        "highlights": [
+          "Construction du backend complet avec 72 endpoints API et 6 modèles MongoDB pour architecture multi-tenant",
+          "Implémentation du moteur d'extraction IA avec Google Gemini et scoring de confiance avec validation",
+          "Développement de remplissage multi-modal: interfaces manuel, chat IA, et vocal (prévu)",
+          "Création de système de formulaires agnostique supportant tout template JSON avec validation personnalisée",
+          "Architecture de collaboration workspace et projet avec permissions basées sur rôles (owner/editor/viewer)",
+          "Construction du système de gestion fichiers avec OCR image, upload document, et transcription audio",
+          "Réduction du temps de remplissage de 45 minutes (papier) à 8-15 minutes (assisté IA)",
+          "Intégration extraction temps réel avec indicateurs de confiance colorés (vert/orange/rouge)"
+        ],
+        "private": false,
+        "featured": true,
+        "order": 2
+      },
+      {
+        "id": "clausia-ai-chat",
+        "title": "ClausIA - Plateforme Chat IA",
+        "subtitle": "Application Chat d'Entreprise avec RAG",
+        "roles": ["Développeur Frontend"],
+        "summary": "Construction d'une application de chat IA complète avec RAG (Retrieval-Augmented Generation) pour un client entreprise. Implémentation du streaming temps réel avec SSE, gestion des conversations, uploads de fichiers, et flux d'authentification. Livré 123 heures sur 8 semaines avec 90+ commits en 3 lots structurés.",
+        "description": "Développement frontend d'une plateforme de chat IA de niveau entreprise avec réponses RAG et citations de sources. Développement d'une interface de streaming temps réel utilisant Server-Sent Events (SSE) avec affichage caractère par caractère et contrôle de vitesse adaptatif. Implémentation d'un flux d'authentification complet incluant changement de mot de passe avec validation complète (9+ caractères, indicateurs de force, feedback visuel). Construction d'un système de gestion des conversations avec sidebar, pagination, fonctionnalité de renommage, et état persistant via Zustand. Création d'un système d'upload de fichiers avec validation, suivi de progression, et gestion d'erreurs. Optimisation pour appareils mobiles avec corrections spécifiques iOS du textarea et design responsive. Intégration du branding client avec optimisation des logos via Next.js Image. Implémentation du support i18n complet (EN/FR) avec next-intl. Construction d'un proxy API Next.js pour gérer les problèmes de Mixed Content et activer le streaming via Vercel. Ajout de l'affichage des sources RAG avec parsing d'URL, détection de liens externes, et rendu des citations.",
+        "link": null,
+        "src": {
+          "desktop": "/images/projects/clausia-desktop.png",
+          "mobile": "/images/projects/clausia-mobile.png",
+          "logo": "/images/projects/clausia-logo.png"
+        },
+        "tech": [
+          "Next.js",
+          "TypeScript",
+          "Tailwind",
+          "Zustand",
+          "SSE",
+          "Zod",
+          "next-intl",
+          "React"
+        ],
+        "duration": "8 semaines",
+        "metrics": {
+          "totalHours": 123,
+          "commits": 90,
+          "features": 30,
+          "performance": "Streaming temps réel"
+        },
+        "highlights": [
+          "Construction du streaming SSE complet avec affichage caractère par caractère et vitesse adaptative",
+          "Implémentation de la validation de mot de passe complète avec feedback visuel temps réel",
+          "Création de l'affichage des sources RAG avec parsing d'URL et détection de liens externes",
+          "Optimisation de l'expérience mobile avec corrections spécifiques iOS du textarea",
+          "Construction de la gestion des conversations avec pagination et fonctionnalité de renommage",
+          "Implémentation du système d'upload de fichiers avec suivi de progression et validation",
+          "Ajout du support i18n complet (EN/FR) sur tous les composants",
+          "Création d'un proxy API Next.js pour le streaming via Vercel"
+        ],
+        "private": true,
+        "featured": false,
+        "order": 3
+      },
+      {
+        "id": "eventoapp",
+        "title": "EventoApp.io",
+        "subtitle": "Création et vente d'événements",
+        "roles": ["CTO", "Fullstack"],
+        "summary": "Plateforme complète de création d'événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l'intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d'une API REST modulaire.",
+        "description": "Plateforme complète de création d'événements en ligne. Je participe et développé EventoApp.io en tant que CTO, en gérant l'intégralité de la stack : frontend PWA en Next.js/React, backend Express/MongoDB, gestion des états via Zustand, communication temps réel avec Socket.io, et intégration d'une API REST modulaire. L'app permet de créer des événements avec RSVP personnalisés, co-hôtes, uploads média, chat à venir, et découverte via filtres d'intérêts. Déploiement automatisé via CI/CD.",
         "link": "https://www.evento-app.io/",
         "src": {
           "desktop": "/images/projects/evento-app.io-desktop.png",
@@ -25,9 +154,11 @@
         ]
       },
       {
+        "id": "hydro-marketplace",
         "title": "Hydro Marketplace",
         "subtitle": "NFT Web3 sur CosmosHub",
         "roles": ["Frontend"],
+        "summary": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
         "description": "Marketplace décentralisée pour vendre et acheter des assets NFT liés à la blockchain Cosmos. J'ai participé en tant que développeur Frontend avec Next.js, React.js, TypeScript, CosmosKit et Supabase.",
         "link": "https://hydro.cosmos.network/",
         "src": {
@@ -37,10 +168,12 @@
         "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit", "Supabase"]
       },
       {
+        "id": "transplantation-arbres",
         "title": "Transplantation Arbres",
         "subtitle": "Catalogue en ligne",
         "roles": ["CTO", "Fullstack"],
-        "description": "Développement d’un site vitrine multilingue (FR/EN) présentant les équipements de transplantation d’arbres. Ajout et optimisation de sections produits (catalogue avec filtres, fiche produit), amélioration du SEO (balises title, meta descriptions, Open Graph), et mise à jour fluide du contenu via CMS. Travail full‑stack incluant intégration front adaptée mobile/desktop, gestion i18n, et gestion de formulaire de devis.",
+        "summary": "Développement d'un site vitrine multilingue (FR/EN) présentant les équipements de transplantation d'arbres. Ajout et optimisation de sections produits (catalogue avec filtres, fiche produit), amélioration du SEO (balises title, meta descriptions, Open Graph), et mise à jour fluide du contenu via CMS.",
+        "description": "Développement d'un site vitrine multilingue (FR/EN) présentant les équipements de transplantation d'arbres. Ajout et optimisation de sections produits (catalogue avec filtres, fiche produit), amélioration du SEO (balises title, meta descriptions, Open Graph), et mise à jour fluide du contenu via CMS. Travail full‑stack incluant intégration front adaptée mobile/desktop, gestion i18n, et gestion de formulaire de devis.",
         "link": "https://www.transplantation-arbres.fr",
         "src": {
           "desktop": "/images/projects/transplantation-arbres-desktop.png",
@@ -50,21 +183,54 @@
         "private": false
       },
       {
-        "title": "Zephyrus",
-        "subtitle": "NFT Web3 sur CosmosHub",
-        "roles": ["Frontend"],
-        "description": "Aggregateur de NFT Web3 sur CosmosHub. J'ai participé en tant que Frontend Developer avec Next.js, React.js, TypeScript, CosmosKit. Le but étant de simplifier et gamifier l'utilisation de https://hydro.cosmos.network/",
+        "id": "zephyrus",
+        "title": "Zephyrus - Plateforme DeFi Gamifiée",
+        "subtitle": "Liquid Staking Web3 & Agrégateur NFT sur Cosmos",
+        "roles": ["Développeur Frontend"],
+        "summary": "Construction d'une plateforme DeFi gamifiée complète sur CosmosHub avec liquid staking, gestion de NFT vessels, vote de gouvernance, et système de récompenses. Implémentation d'interactions blockchain complexes avec CosmosKit, transferts IBC multi-chaînes, et synchronisation de données temps réel. Livré 474 heures sur 10 mois avec 400+ commits.",
+        "description": "Développement frontend d'une plateforme de finance décentralisée gamifiée sur la blockchain Cosmos incluant liquid staking (LSM), gestion de NFT vessels, et participation à la gouvernance. Construction d'un système complet de cycle de vie des vessels incluant création (build), gestion (upgrade, decommission, refloat), et claim de récompenses à travers plusieurs harbors. Implémentation du support multi-chaînes avec transferts IBC entre Cosmos Hub et chaînes Neutron. Développement d'un système de sélection dynamique world/denom supportant plusieurs sources de voting power. Création d'une gestion de transactions complète avec opérations batch, estimation de gas, et génération de liens de transactions. Construction de la synchronisation de données temps réel avec auto-refresh des rounds, système de vote de propositions, et filtrage par harbor. Implémentation de l'intégration whitelist gatekeeper avec génération de proof pour les limites de capacité. Optimisation de l'expérience mobile avec overlays responsive et scroll personnalisé. Création d'un système de tutorial d'onboarding immersif avec guidage pas-à-pas. Intégration de CosmosKit pour la gestion des wallets avec support Keplr et initialisation de clients multi-chaînes.",
         "link": "https://zephyrus-dev.vercel.app/",
         "src": {
           "desktop": "/images/projects/zephyrus-desktop.png",
           "mobile": "/images/projects/zephyrus-mobile.png"
         },
-        "tech": ["Next.js", "React.js", "TypeScript", "CosmosKit"]
+        "tech": [
+          "Next.js",
+          "TypeScript",
+          "CosmosKit",
+          "Zustand",
+          "CosmWasm",
+          "IBC",
+          "Tailwind",
+          "React"
+        ],
+        "duration": "10 mois",
+        "metrics": {
+          "totalHours": 474,
+          "commits": 400,
+          "features": 60,
+          "performance": "IBC multi-chaînes"
+        },
+        "highlights": [
+          "Construction du système complet de cycle de vie des vessels (build, upgrade, decommission, refloat) avec opérations batch",
+          "Implémentation des transferts IBC multi-chaînes avec estimation de gas et génération de proof",
+          "Création du système de vote de gouvernance dynamique avec gestion des propositions et filtrage par harbor",
+          "Développement du système complet de claim de récompenses avec validation côté client",
+          "Construction de l'auto-refresh temps réel des rounds avec monitoring de transactions et synchronisation des données",
+          "Implémentation de l'intégration whitelist gatekeeper avec limites de capacité dynamiques",
+          "Création du tutorial d'onboarding immersif avec flux de construction de vessel gamifié",
+          "Optimisation de l'architecture complexe du store blockchain avec slices Zustand typées"
+        ],
+        "private": false,
+        "featured": false,
+        "order": 4
       },
       {
+        "id": "lima-prod",
         "title": "Lima Prod",
         "subtitle": "Production vidéo, France, Vietnam, Asie",
         "roles": ["Frontend", "SEO"],
+        "summary": "Refonte partielle du site Wix pour Lima Prod. J'ai ajouté et structuré de nouvelles sections afin d'améliorer la lisibilité du contenu, optimisé le référencement naturel (SEO) en modifiant les métadonnées (title, description, images OG) et en travaillant sur la hiérarchie des balises.",
         "description": "Refonte partielle du site Wix pour Lima Prod. J'ai ajouté et structuré de nouvelles sections afin d'améliorer la lisibilité du contenu, optimisé le référencement naturel (SEO) en modifiant les métadonnées (title, description, images OG) et en travaillant sur la hiérarchie des balises. L'objectif était de mieux positionner le site sur les moteurs de recherche et d'offrir une meilleure expérience utilisateur.",
         "link": "https://www.limaprod.fr/",
         "src": {

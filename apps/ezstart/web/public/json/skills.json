@@ -29,6 +29,11 @@
           "icon": "custom:Zustand"
         },
         {
+          "name": "React Query",
+          "className": "optimal",
+          "icon": "fa:FaDatabase"
+        },
+        {
           "name": "Tailwind",
           "className": "optimal",
           "icon": "custom:Tailwind"
@@ -59,14 +64,34 @@
           "icon": "custom:Expressjs"
         },
         {
+          "name": "Elysia",
+          "className": "optimal",
+          "icon": "fa:FaServer"
+        },
+        {
           "name": "socket.io",
           "className": "sub",
           "icon": "custom:Socketio"
         },
         {
+          "name": "WebSocket",
+          "className": "optimal",
+          "icon": "fa:FaBolt"
+        },
+        {
+          "name": "SSE",
+          "className": "optimal",
+          "icon": "fa:FaStream"
+        },
+        {
           "name": "prisma",
           "className": "optimal",
           "icon": "custom:Prisma"
+        },
+        {
+          "name": "TypedSQL",
+          "className": "sub",
+          "icon": "fa:FaCode"
         },
         {
           "name": "auth.js",
@@ -82,6 +107,11 @@
           "name": "MongoDB",
           "className": "optimal",
           "icon": "custom:Mongodb"
+        },
+        {
+          "name": "PostgreSQL",
+          "className": "optimal",
+          "icon": "fa:FaDatabase"
         },
         {
           "name": "Supabase",
@@ -101,6 +131,26 @@
       ]
     },
     {
+      "category": "AI & Data",
+      "items": [
+        {
+          "name": "Google Gemini",
+          "className": "optimal",
+          "icon": "fa:FaBrain"
+        },
+        {
+          "name": "OpenAI",
+          "className": "optimal",
+          "icon": "fa:FaRobot"
+        },
+        {
+          "name": "Zod",
+          "className": "optimal",
+          "icon": "custom:Zod"
+        }
+      ]
+    },
+    {
       "category": "Other",
       "items": [
         {
@@ -112,11 +162,6 @@
           "name": "Jest",
           "className": "sub",
           "icon": "custom:Jest"
-        },
-        {
-          "name": "Zod",
-          "className": "optimal",
-          "icon": "custom:Zod"
         },
         {
           "name": "Npm",

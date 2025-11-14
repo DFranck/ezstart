@@ -1,6 +1,8 @@
 'use client'
 
-import { Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { ErrorsFeed } from './components/ErrorsFeed'
@@ -11,7 +13,7 @@ import { useMonitoringErrors } from '../hooks/useMonitoringErrors'
 import { useSocket } from '../hooks/useSocket'
 import { calculateErrorsHealth, getMetricsData } from '../lib/utils'
 
-export default function ErrorsMonitoringPage(): any {
+function ErrorsMonitoringContent(): any {
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
@@ -116,5 +118,41 @@ export default function ErrorsMonitoringPage(): any {
         <ErrorsFeed />
       </Section>
     </>
+  )
+}
+
+export default function ErrorsMonitoringPage() {
+  const t = useTranslations('auth')
+
+  return (
+    <RequireAuth
+      loadingComponent={
+        <Section size="full">
+          <Spinner size="lg" />
+        </Section>
+      }
+      fallbackComponent={
+        <Section size="full">
+          <Card variant={'ghost'}>
+            <AccessDenied>
+              <LoginButton>{t('login')}</LoginButton>
+            </AccessDenied>
+          </Card>
+        </Section>
+      }
+    >
+      <RequireRole
+        roles="superadmin"
+        fallbackComponent={
+          <Section size={'full'}>
+            <Card variant={'ghost'}>
+              <InsufficientPermissions requiredRoles="superadmin" />
+            </Card>
+          </Section>
+        }
+      >
+        <ErrorsMonitoringContent />
+      </RequireRole>
+    </RequireAuth>
   )
 }
