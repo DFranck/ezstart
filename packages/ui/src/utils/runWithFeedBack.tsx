@@ -63,13 +63,28 @@ export async function runWithFeedback<T>({
     if (toastId) toast.dismiss(toastId)
 
     if (toastSuccess !== false) {
-      toast.success(String(toastSuccess?.message ?? ''), {
-        duration: toastSuccess?.duration,
-        unstyled: isMinimal(toastSuccess),
-        className: isMinimal(toastSuccess)
-          ? 'w-auto p-2 !max-w-fit bg-background rounded-lg'
-          : undefined,
-      })
+      if (isMinimal(toastSuccess)) {
+        // Minimal mode: show icon with success color
+        toast.custom(
+          () => (
+            <Icon
+              name="lucide:CircleCheck"
+              className="w-auto p-2 !max-w-fit bg-success/10 text-success rounded-lg"
+              size={20}
+            />
+          ),
+          {
+            duration: toastSuccess?.duration ?? 2000,
+            unstyled: true,
+          }
+        )
+      } else {
+        // Standard mode: show message
+        const successMessage = toastSuccess?.message || 'Success!'
+        toast.success(String(successMessage), {
+          duration: toastSuccess?.duration,
+        })
+      }
     }
 
     onSuccess?.()
@@ -78,13 +93,36 @@ export async function runWithFeedback<T>({
     if (toastId) toast.dismiss(toastId)
 
     if (toastError !== false) {
-      toast.error(String(toastError?.message ?? ''), {
-        duration: toastError?.duration,
-        unstyled: isMinimal(toastError),
-        className: isMinimal(toastError)
-          ? 'w-auto p-2 !max-w-fit bg-background rounded-lg'
-          : undefined,
-      })
+      // Extract error message from exception
+      const errorMessage =
+        toastError?.message ||
+        (e instanceof Error ? e.message : undefined) ||
+        (typeof e === 'object' && e !== null && 'message' in e
+          ? String((e as { message: unknown }).message)
+          : undefined) ||
+        'An error occurred'
+
+      if (isMinimal(toastError)) {
+        // Minimal mode: show icon with error color
+        toast.custom(
+          () => (
+            <Icon
+              name="lucide:CircleX"
+              className="w-auto p-2 !max-w-fit bg-destructive/10 text-destructive rounded-lg"
+              size={20}
+            />
+          ),
+          {
+            duration: toastError?.duration ?? 3000,
+            unstyled: true,
+          }
+        )
+      } else {
+        // Standard mode: show message
+        toast.error(String(errorMessage), {
+          duration: toastError?.duration,
+        })
+      }
     }
 
     onError?.(e)

@@ -22,6 +22,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 /**
  * Express middleware to require specific role(s)
+ * Checks both globalRoles and appRoles
  */
 export function requireRole(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -29,18 +30,32 @@ export function requireRole(...roles: Role[]) {
       return res.status(401).json({ error: 'Authentication required' })
     }
 
-    const userRoles = (req.user as any).roles || []
-    const hasRole = roles.some(role => userRoles.includes(role))
+    const user = req.user as any
 
-    if (!hasRole) {
-      return res.status(403).json({
-        error: 'Insufficient permissions',
-        required: roles,
-        current: userRoles,
-      })
+    // Check globalRoles (e.g., superadmin)
+    const globalRoles = user.globalRoles || []
+    if (roles.some(role => globalRoles.includes(role))) {
+      return next()
     }
 
-    next()
+    // Check appRoles for current app (if available)
+    const appRoles = user.appRoles || {}
+    const allAppRoles = Object.values(appRoles).flat()
+    if (roles.some(role => allAppRoles.includes(role))) {
+      return next()
+    }
+
+    // Fallback: check legacy roles
+    const legacyRoles = user.roles || []
+    if (roles.some(role => legacyRoles.includes(role))) {
+      return next()
+    }
+
+    return res.status(403).json({
+      error: 'Insufficient permissions',
+      required: roles,
+      current: { globalRoles, appRoles, legacyRoles },
+    })
   }
 }
 
@@ -55,8 +70,8 @@ export function requirePermission(...permissions: Permission[]) {
 
     const user = req.user as any
 
-    // Superadmin has all permissions
-    if (user.roles?.includes('superadmin')) {
+    // Superadmin has all permissions (check globalRoles)
+    if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
       return next()
     }
 
@@ -86,8 +101,8 @@ export function requireFeature(...features: Feature[]) {
 
     const user = req.user as any
 
-    // Superadmin has all features
-    if (user.roles?.includes('superadmin')) {
+    // Superadmin has all features (check globalRoles)
+    if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
       return next()
     }
 
@@ -114,17 +129,21 @@ export function canManageUser(req: Request, targetUserId: string): boolean {
 
   const user = req.user as any
 
-  // Superadmin can manage everyone
-  if (user.roles?.includes('superadmin')) return true
+  // Superadmin can manage everyone (check globalRoles)
+  if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
+    return true
+  }
 
-  // Admin can manage users in their organization
-  if (user.roles?.includes('admin')) {
+  // Admin can manage users in their organization (check appRoles)
+  const appRoles = user.appRoles || {}
+  const allRoles = Object.values(appRoles).flat()
+  if (allRoles.includes('admin') || user.roles?.includes('admin')) {
     // TODO: Add organization check when implemented
     return true
   }
 
   // Manager can manage users they created
-  if (user.roles?.includes('manager')) {
+  if (allRoles.includes('manager') || user.roles?.includes('manager')) {
     return user._id === targetUserId
   }
 

@@ -9,7 +9,14 @@ declare global {
     interface User {
       _id: string
       email: string
-      roles: Role[]
+
+      // RBAC - Role-Based Access Control
+      roles?: Role[] // DEPRECATED - kept for backwards compatibility
+      globalRoles?: string[] // Cross-app roles (only 'superadmin' allowed)
+      appRoles?: Record<string, string[]> // App-specific roles
+      permissions?: string[]
+      features?: string[]
+
       [key: string]: any
     }
 
