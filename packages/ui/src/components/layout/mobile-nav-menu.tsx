@@ -1,6 +1,6 @@
 'use client'
 
-import React, { forwardRef, useState, useCallback } from 'react'
+import React, { forwardRef, useState, useCallback, useEffect } from 'react'
 import { Icon } from '../'
 import { cn } from '../../lib'
 import { isNavigationMenu, NavigationLink } from './types'
@@ -30,6 +30,13 @@ export const MobileNavMenu = React.memo(
           return next
         })
       }, [])
+
+      // Reset submenu state when menu closes
+      useEffect(() => {
+        if (!isOpen) {
+          setOpenMenus(new Set())
+        }
+      }, [isOpen])
 
     return (
       <div

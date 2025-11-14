@@ -159,6 +159,13 @@ export function ClientLayout({
     }
   }, [isTablet, isBurgerOpen])
 
+  // Reset submenu state when burger menu closes
+  useEffect(() => {
+    if (!isBurgerOpen) {
+      setOpenMenus(new Set())
+    }
+  }, [isBurgerOpen])
+
   // Close desktop menus when clicking outside
   useEffect(() => {
     if (!isDesktop || openMenus.size === 0) return

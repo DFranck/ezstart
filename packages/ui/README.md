@@ -2,6 +2,22 @@
 
 Modern, accessible, and reusable UI components library for the @ezstart monorepo.
 
+## Recent Updates
+
+### 2025-11-14 - Mobile Navigation Bugfix
+
+**Fixed:** Submenu state persistence in mobile/tablet navigation
+- **Issue:** When clicking a navigation link, the burger menu would close but submenus remained in "open" state. Reopening the burger menu would show previously opened submenus still expanded.
+- **Root cause:** `openMenus` state was not reset when burger menu closed
+- **Solution:** Added `useEffect` hook to reset submenu state whenever menu closes
+- **Technical details:**
+  - Simplified dependency array to only watch `isOpen`/`isBurgerOpen` (removed `openMenus.size` to prevent stale closure issues)
+  - Reset happens immediately when menu closes, ensuring clean state for next opening
+- **Files changed:**
+  - [client-layout.tsx:162-167](./src/components/layout/client-layout.tsx#L162-L167) - Reset tablet burger submenu state
+  - [mobile-nav-menu.tsx:34-39](./src/components/layout/mobile-nav-menu.tsx#L34-L39) - Reset mobile menu submenu state
+- **Impact:** Improved UX consistency - submenus now always start in collapsed state when reopening navigation menu
+
 ## Overview
 
 `@ezstart/ui` is a comprehensive design system built on **Radix UI** and **Tailwind CSS v4**. It provides 50+ high-quality components, custom hooks, utilities, and a complete theming system designed for maximum reusability across all @ezstart applications.
