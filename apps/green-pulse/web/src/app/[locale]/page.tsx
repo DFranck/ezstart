@@ -42,6 +42,7 @@ type EmailFormData = z.infer<typeof emailSchema>
 
 export default function HomePage(): any {
   const t = useTranslations('home')
+  const tV2 = useTranslations('homeV2')
 
   const form = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
@@ -115,12 +116,12 @@ export default function HomePage(): any {
         </Div>
         <Div layout={'center'} className="gap-6">
           {/* Subtitle: Your New Green Agent (from slide) */}
-          <H2 size={'h3'}>{t('homeV2.subtitle')}</H2>
+          <H2 size={'h3'}>{tV2('subtitle')}</H2>
 
           {/* Feature tags (from slide) */}
           <Div layout={'row'} className="hidden lg:flex ">
             {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('homeV2.heroFeatures', { returnObjects: true }) as unknown as string[]).map((feature: string, index: number) => (
+            {(tV2('heroFeatures', { returnObjects: true }) as unknown as string[]).map((feature: string, index: number) => (
               <Button key={index} className="rounded-full">
                 {feature}
               </Button>
@@ -181,12 +182,12 @@ export default function HomePage(): any {
           <H3
             size={'h4'}
             className="text-xl lg:text-2xl font-bold mb-6 leading-tight"
-            dangerouslySetInnerHTML={{ __html: t('homeV2.challenge.title') }}
+            dangerouslySetInnerHTML={{ __html: tV2('challenge.title') }}
           />
 
           <Div className="space-y-4">
             {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('homeV2.challenge.challenges', { returnObjects: true }) as unknown as string[]).map((challenge: string, index: number) => (
+            {(tV2('challenge.challenges', { returnObjects: true }) as unknown as string[]).map((challenge: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
@@ -212,7 +213,7 @@ export default function HomePage(): any {
       </SplitSection>
       {/* Data Transformation Section */}
       <Section size="xl">
-        <H2 size="h3">{t('homeV2.transformation.title')}</H2>
+        <H2 size="h3">{tV2('transformation.title')}</H2>
         <Div>
           {/* 3-Step Process with AI in center */}
           <Div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto ">
@@ -220,10 +221,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('homeV2.transformation.steps.step1.badge')}
+                  {tV2('transformation.steps.step1.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  {t('homeV2.transformation.steps.step1.title')}
+                  {tV2('transformation.steps.step1.title')}
                 </H3>
               </CardHeader>
               <CardContent>
@@ -240,10 +241,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('homeV2.transformation.steps.step2.badge')}
+                  {tV2('transformation.steps.step2.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  {t('homeV2.transformation.steps.step2.title')}
+                  {tV2('transformation.steps.step2.title')}
                 </H3>
               </CardHeader>
               <CardContent className="flex justify-center items-center">
@@ -256,10 +257,10 @@ export default function HomePage(): any {
             <Card variant="ghost" className="relative space-y-4">
               <CardHeader className="flex items-center ">
                 <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('homeV2.transformation.steps.step3.badge')}
+                  {tV2('transformation.steps.step3.badge')}
                 </Badge>
                 <H3 size="h5" className="ml-2 w-fit">
-                  {t('homeV2.transformation.steps.step3.title')}
+                  {tV2('transformation.steps.step3.title')}
                 </H3>
               </CardHeader>
               <CardContent>
@@ -275,7 +276,7 @@ export default function HomePage(): any {
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {/* @ts-expect-error - returnObjects is valid but not typed */}
-          {(t('homeV2.transformation.features', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((feature, index) => (
+          {(tV2('transformation.features', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((feature, index) => (
             <Card key={index}>
               <CardHeader className="flex items-center gap-3">
                 <Icon
@@ -302,17 +303,17 @@ export default function HomePage(): any {
             <H2
               size="h3"
               className="mb-4"
-              dangerouslySetInnerHTML={{ __html: t('homeV2.problem.title') }}
+              dangerouslySetInnerHTML={{ __html: tV2('problem.title') }}
             />
             <P
               className="text-xl text-muted-foreground max-w-3xl mx-auto"
-              dangerouslySetInnerHTML={{ __html: t('homeV2.problem.subtitle') }}
+              dangerouslySetInnerHTML={{ __html: tV2('problem.subtitle') }}
             />
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('homeV2.problem.problems', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((item, index) => (
+            {(tV2('problem.problems', { returnObjects: true }) as unknown as Array<{title: string, description: string}>).map((item, index) => (
               <Card key={index}>
                 <CardHeader className="flex items-center gap-3">
                   <Icon
@@ -345,14 +346,14 @@ export default function HomePage(): any {
       <Section size={'xl'} layout={'grid'}>
         <Div className="px-6 py-12 md:px-12">
           <H2 size="h3" className="mb-6">
-            {t('homeV2.team.title')}
+            {tV2('team.title')}
           </H2>
           <P className="text-lg text-muted-foreground mb-6 leading-relaxed">
-            {t('homeV2.team.description')}
+            {tV2('team.description')}
           </P>
           <Div className="space-y-4">
             {/* @ts-expect-error - returnObjects is valid but not typed */}
-            {(t('homeV2.team.credentials', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
+            {(tV2('team.credentials', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Icon
                   name={
@@ -382,25 +383,25 @@ export default function HomePage(): any {
       {/* Social Proof Section */}
       <Section size={'xl'}>
         <H2 size="h4" className="text-center mb-4">
-          {t('homeV2.partnership.title')}
+          {tV2('partnership.title')}
         </H2>
 
         <Div>
           <H3 size="h5" className="mb-6 text-center">
-            {t('homeV2.partnership.subtitle')}
+            {tV2('partnership.subtitle')}
           </H3>
 
           <P className="text-muted-foreground mb-6 leading-relaxed">
-            {t('homeV2.partnership.description')}
+            {tV2('partnership.description')}
           </P>
 
           <Div className="bg-muted/30 rounded-lg p-6 mb-6">
             <H3 size="h6" className="mb-4">
-              {t('homeV2.partnership.exchange.title')}
+              {tV2('partnership.exchange.title')}
             </H3>
             <Div className="space-y-3">
               {/* @ts-expect-error - returnObjects is valid but not typed */}
-              {(t('homeV2.partnership.exchange.items', { returnObjects: true }) as unknown as string[]).map((item: string, index: number) => (
+              {(tV2('partnership.exchange.items', { returnObjects: true }) as unknown as string[]).map((item: string, index: number) => (
                 <Div key={index} className="flex items-start gap-3">
                   <Icon
                     name="lucide:CheckCircle2"
@@ -414,11 +415,11 @@ export default function HomePage(): any {
 
           <Div className="mb-6">
             <H3 size="h6" className="mb-4">
-              {t('homeV2.partnership.focus.title')}
+              {tV2('partnership.focus.title')}
             </H3>
             <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* @ts-expect-error - returnObjects is valid but not typed */}
-              {(t('homeV2.partnership.focus.partners', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
+              {(tV2('partnership.focus.partners', { returnObjects: true }) as unknown as string[]).map((text: string, index: number) => (
                 <Card key={index} className="p-4 bg-background">
                   <Div className="flex items-start gap-3">
                     <Icon
@@ -440,7 +441,7 @@ export default function HomePage(): any {
 
           <Div className="text-center">
             <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-              <a href="mailto:partnerships@greenpulse.ai">{t('homeV2.partnership.cta')}</a>
+              <a href="mailto:partnerships@greenpulse.ai">{tV2('partnership.cta')}</a>
             </Button>
           </Div>
         </Div>
@@ -456,7 +457,7 @@ export default function HomePage(): any {
           </Div> */}
         <Div>
           <H3 size="h5" className="text-center mb-8 text-muted-foreground">
-            {t('homeV2.press.title')}
+            {tV2('press.title')}
           </H3>
           <Div layout={'center'} className="max-w-3xl mx-auto">
             {[
@@ -505,13 +506,13 @@ export default function HomePage(): any {
       <Section size={'xl'} className="bg-muted/30">
         <Div className="container mx-auto max-w-4xl">
           <H2 size="h3" className="text-center mb-12">
-            {t('homeV2.faq.title')}
+            {tV2('faq.title')}
           </H2>
 
           <Div className="space-y-4">
             {/* @ts-expect-error - returnObjects is valid but not typed */}
             {(
-              t('homeV2.faq.questions', { returnObjects: true }) as unknown as Array<{
+              tV2('faq.questions', { returnObjects: true }) as unknown as Array<{
                 question: string
                 answer: string
               }>
