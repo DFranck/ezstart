@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useAuthStore, detectAuthMode } from '@ezstart/auth-sdk'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
 import {
   Badge,
@@ -46,13 +46,9 @@ type WaitlistResponse = {
 }
 
 export function WaitlistManagement() {
-  const { user, accessToken } = useAuthStore()
+  const { user } = useAuthStore()
   const queryClient = useQueryClient()
   const [filter, setFilter] = useState<'all' | 'pending' | 'invited' | 'activated' | 'rejected'>('pending')
-
-  // Auto-detect auth mode and get token if needed
-  const authMode = detectAuthMode()
-  const tokenToSend = authMode === 'jwt' && accessToken ? accessToken : undefined
 
   // Fetch waitlist
   const { data, isLoading, error } = useQuery<WaitlistResponse>({
@@ -60,7 +56,6 @@ export function WaitlistManagement() {
     queryFn: async () => {
       const response = await callApi<WaitlistResponse>('/admin/green-pulse', {
         appName: 'ezauth',
-        accessToken: tokenToSend,
       })
 
       if (!response.ok || !response.data) {
@@ -79,7 +74,6 @@ export function WaitlistManagement() {
         appName: 'ezauth',
         method: 'POST',
         body: { notes: 'Approved via admin panel' },
-        accessToken: tokenToSend,
       })
       if (!response.ok) throw new Error('Failed to approve')
       return response.data
@@ -97,7 +91,6 @@ export function WaitlistManagement() {
       const response = await callApi(`/admin/green-pulse/${encodeURIComponent(email)}/reject`, {
         appName: 'ezauth',
         method: 'POST',
-        accessToken: tokenToSend,
       })
       if (!response.ok) throw new Error('Failed to reject')
       return response.data
