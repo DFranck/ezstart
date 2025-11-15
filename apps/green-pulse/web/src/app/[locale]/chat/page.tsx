@@ -59,6 +59,8 @@ function LiaPageContent(): any {
       },
       onError: (error: Error) => {
         console.error('LIA Chat Error:', error)
+        // Show error toast to user
+        toast.error(error.message || 'Failed to send message. Please try again.')
       },
     }),
     [isAuthenticated, user, activeConversationId, onConversationCreated, selectedProvider]

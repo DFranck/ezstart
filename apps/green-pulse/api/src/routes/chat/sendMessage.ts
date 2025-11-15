@@ -43,8 +43,8 @@ sendMessageRouter.post(
 
       let { message, extract_esg, session_id, conversation_id, userId, providerId } = validation.data
 
-      // Default to gemini-pro if not specified
-      const selectedProvider = providerId || 'gemini-pro'
+      // Default to gemini-flash if not specified
+      const selectedProvider = providerId || 'gemini-flash'
 
       // Auto-create conversation if not provided
       if (!conversation_id) {
