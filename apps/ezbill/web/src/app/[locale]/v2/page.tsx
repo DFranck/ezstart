@@ -105,8 +105,8 @@ export default function LandingV2Page(): any {
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {(t.raw('problem.problems') as Array<{ title: string; description: string }>).map(
-              (item, index) => (
+            {(Array.isArray(t.raw('problem.problems')) ? t.raw('problem.problems') : []).map(
+              (item: { title: string; description: string }, index: number) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="flex items-center gap-3">
                     <Icon
