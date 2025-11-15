@@ -278,7 +278,9 @@ export function InvoiceModal({
         {/* Main Form */}
         <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div
+              className={`grid gap-6 ${showAIAssistant ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}
+            >
               {!clientId && (
                 <div>
                   <Label className="text-sm font-medium  mb-3 block flex items-center">
