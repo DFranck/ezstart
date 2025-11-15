@@ -5,8 +5,13 @@ import { useConversations } from '@/hooks/useConversations'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
 import { useAuthStore } from '@ezstart/auth-sdk'
+import { useRBAC } from '@ezstart/rbac'
 import {
+  Button,
   Conversation,
+  Div,
+  H1,
+  Icon,
   Thread,
   ThreadComposer,
   ThreadLayout,
@@ -15,7 +20,11 @@ import {
   ThreadSidebarToggle,
   ThreadWelcome,
 } from '@ezstart/ui/components'
-import { useCallback, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useThreadContext } from './ThreadProvider'
 
 type LiaThreadProps = {
@@ -36,7 +45,11 @@ export function LiaThread({
   onProviderChange,
 }: LiaThreadProps) {
   // Check if user is authenticated
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
+  const rbac = useRBAC(user, 'green-pulse')
+  const pathname = usePathname()
+  const t = useTranslations('common')
+  const tForms = useTranslations('forms')
 
   const {
     messages,
@@ -145,6 +158,65 @@ export function LiaThread({
     },
     [softDeleteConversation, activeConversationId, clearMessages]
   )
+  const header = (
+    <Div size={'xs'} layout={'center'}>
+      <Button asChild variant={'ghost'} className="w-full">
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={32}
+            height={32}
+            className="animate-pulse"
+            style={{
+              filter:
+                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
+            }}
+          />
+          <H1 size={'sm'} className="flex items-baseline">
+            <span className="font-k2d">GreenPulse</span>
+            <span className="font-gugi">.AI</span>
+          </H1>
+        </Link>
+      </Button>
+    </Div>
+  )
+
+  // Navigation items
+  const navItems = useMemo(
+    () => [
+      { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
+      {
+        href: '/dashboard',
+        label: tForms('navigation.workspaces'),
+        icon: 'lucide:Briefcase' as const,
+      },
+      ...(rbac.hasAnyRole(['admin', 'superadmin'])
+        ? [{ href: '/admin', label: t('navigation.admin'), icon: 'lucide:Shield' as const }]
+        : []),
+    ],
+    [rbac, t, tForms]
+  )
+
+  const beforeConv = (
+    <nav className="space-y-1">
+      {navItems.map(item => {
+        const isActive = pathname === item.href
+        return (
+          <Link key={item.href} href={item.href}>
+            <Button
+              variant={isActive ? 'secondary' : 'ghost'}
+              className="w-full justify-start"
+              size="sm"
+            >
+              <Icon name={item.icon} className="mr-2" size={16} />
+              {item.label}
+            </Button>
+          </Link>
+        )
+      })}
+    </nav>
+  )
 
   return (
     <ThreadLayout
@@ -163,6 +235,8 @@ export function LiaThread({
         // Only show conversations list if authenticated
         isAuthenticated ? (
           <ThreadSidebar
+            header={header}
+            beforeConversations={beforeConv}
             conversations={conversations}
             activeConversationId={activeConversationId || undefined}
             onConversationSelect={handleConversationSelect}
