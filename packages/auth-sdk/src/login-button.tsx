@@ -16,6 +16,8 @@ export interface LoginButtonProps {
   disabled?: boolean
   onClick?: () => void
   loading?: boolean
+  /** Always show text on all screen sizes (disable responsive hiding) */
+  alwaysShowText?: boolean
 }
 
 export function LoginButton({
@@ -31,6 +33,7 @@ export function LoginButton({
   disabled = false,
   onClick,
   loading: externalLoading,
+  alwaysShowText = false,
 }: LoginButtonProps) {
   const { login, logout, isAuthenticated, isLoggingIn, setLoggingIn } = useAuth()
 
@@ -81,7 +84,9 @@ export function LoginButton({
           />
         )
       )}
-      <span className="hidden md:inline">{loading ? loadingText : buttonText}</span>
+      <span className={alwaysShowText ? '' : 'hidden md:inline'}>
+        {loading ? loadingText : buttonText}
+      </span>
     </Button>
   )
 }
