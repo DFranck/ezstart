@@ -16,11 +16,11 @@ const router: any = Router()
 export const updateConversationRouter = createRouterWithDoc(
   updateConversationRegistry,
   router,
-  '/:id'
+  '/conversations'
 )
 
 updateConversationRouter.patch(
-  '/',
+  '/:id',
   async (req, res) => {
     try {
       const { id } = req.params

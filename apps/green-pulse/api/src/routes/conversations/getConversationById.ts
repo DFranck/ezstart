@@ -12,25 +12,28 @@ const router: any = Router()
 export const getConversationByIdRouter = createRouterWithDoc(
   getConversationByIdRegistry,
   router,
-  '/:id'
+  '/conversations'
 )
 
 getConversationByIdRouter.get(
-  '/',
+  '/:id',
   async (req, res) => {
     try {
       const { id } = req.params
+      console.log('[GET /conversations/:id] 🔍 Fetching conversation:', id)
 
       // @ts-expect-error - Mongoose findById type inference issue
       const conversation = await Conversation.findById(id).lean().exec()
 
       if (!conversation) {
+        console.log('[GET /conversations/:id] ❌ Conversation not found:', id)
         return res.status(404).json({
           success: false,
           error: 'Conversation not found',
           timestamp: new Date().toISOString(),
         })
       }
+      console.log('[GET /conversations/:id] ✅ Conversation found:', conversation._id)
 
       if (conversation.deletedAt) {
         return res.status(410).json({

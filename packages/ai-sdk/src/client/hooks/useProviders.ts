@@ -10,7 +10,7 @@ import { callApi } from '@ezstart/fetch-client'
 import type { AppName } from '@ezstart/config/urls'
 
 export function useProviders(appName: AppName = 'green-pulse') {
-  const { providers, setProviders } = useAIStore()
+  const { providers, setProviders, selectedProvider, setSelectedProvider } = useAIStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
@@ -31,5 +31,5 @@ export function useProviders(appName: AppName = 'green-pulse') {
     fetchProviders()
   }, [appName, setProviders])
 
-  return { providers, loading, error }
+  return { providers, loading, error, selectedProvider, setSelectedProvider }
 }

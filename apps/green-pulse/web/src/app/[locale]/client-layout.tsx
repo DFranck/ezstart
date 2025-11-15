@@ -1,8 +1,8 @@
 'use client'
 import { routing } from '@/i18n/routing'
 import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
-import { useRBAC } from '@ezstart/rbac'
 import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
+import { useRBAC } from '@ezstart/rbac'
 import {
   Button,
   ClientLayout,
@@ -36,19 +36,18 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
 
   // Hide header/footer/mobile-nav on full-page layouts
   const isChatPage = pathname?.includes('/chat')
-  const isLiaPage = pathname?.includes('/lia')
 
   return (
     <ClientLayout
       appName="Green Pulse"
       currentPath={pathname}
-      // showHeader={!isChatPage && !isLiaPage}
-      showFooter={!isChatPage && !isLiaPage}
+      showHeader={!isChatPage}
+      showFooter={!isChatPage}
       mobileLogoSrc="/logo.png"
       mobileLogoAlt="Green Pulse Logo"
       mobileLogoHref="/"
       navLinks={
-        isLiaPage
+        isChatPage
           ? []
           : [
               { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },

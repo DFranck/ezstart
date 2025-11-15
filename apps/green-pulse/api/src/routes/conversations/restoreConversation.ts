@@ -11,11 +11,11 @@ const router: any = Router()
 export const restoreConversationRouter = createRouterWithDoc(
   restoreConversationRegistry,
   router,
-  '/:id/restore'
+  '/conversations'
 )
 
 restoreConversationRouter.post(
-  '/',
+  '/:id/restore',
   async (req, res) => {
     try {
       const { id } = req.params

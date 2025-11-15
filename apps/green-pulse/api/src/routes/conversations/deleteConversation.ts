@@ -11,11 +11,11 @@ const router: any = Router()
 export const deleteConversationRouter = createRouterWithDoc(
   deleteConversationRegistry,
   router,
-  '/:id'
+  '/conversations'
 )
 
 deleteConversationRouter.delete(
-  '/',
+  '/:id',
   async (req, res) => {
     try {
       const { id } = req.params

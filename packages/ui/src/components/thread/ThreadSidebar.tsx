@@ -1,35 +1,35 @@
-'use client';
+'use client'
 
-import React, { ReactNode, useCallback } from 'react';
-import { cn } from '../../lib/utils';
-import { Button } from '../button';
-import { Icon } from '../icon';
-import { ConversationItemActions } from './ConversationItemActions';
-import { useThreadLayout } from './ThreadLayoutContext';
+import React, { ReactNode, useCallback } from 'react'
+import { cn } from '../../lib/utils'
+import { Button } from '../button'
+import { Icon } from '../icon'
+import { ConversationItemActions } from './ConversationItemActions'
+import { useThreadLayout } from './ThreadLayoutContext'
 
 export type Conversation = {
-  id: string;
-  title: string;
-  preview?: string;
-  timestamp?: Date;
-  unread?: boolean;
-};
+  id: string
+  title: string
+  preview?: string
+  timestamp?: Date
+  unread?: boolean
+}
 
 type ThreadSidebarProps = {
-  conversations?: Conversation[];
-  activeConversationId?: string;
-  onConversationSelect?: (id: string) => void;
-  onNewConversation?: () => void;
-  onRename?: (id: string, newTitle: string) => void | Promise<void>;
-  onDelete?: (id: string) => void | Promise<void>;
-  onClose?: () => void; // Callback to close sidebar (mobile)
-  newConversationLabel?: string;
-  emptyState?: ReactNode;
-  header?: ReactNode;
-  footer?: ReactNode;
-  className?: string;
-  renderConversation?: (conversation: Conversation, isActive: boolean) => ReactNode;
-};
+  conversations?: Conversation[]
+  activeConversationId?: string
+  onConversationSelect?: (id: string) => void
+  onNewConversation?: () => void
+  onRename?: (id: string, newTitle: string) => void | Promise<void>
+  onDelete?: (id: string) => void | Promise<void>
+  onClose?: () => void // Callback to close sidebar (mobile)
+  newConversationLabel?: string
+  emptyState?: ReactNode
+  header?: ReactNode
+  footer?: ReactNode
+  className?: string
+  renderConversation?: (conversation: Conversation, isActive: boolean) => ReactNode
+}
 
 export const ThreadSidebar = React.memo(function ThreadSidebar({
   conversations = [],
@@ -46,18 +46,18 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
   className,
   renderConversation,
 }: ThreadSidebarProps) {
-  const layoutContext = useThreadLayout();
+  const layoutContext = useThreadLayout()
   const formatTimestamp = useCallback((date?: Date) => {
-    if (!date) return '';
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (!date) return ''
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
-  }, []);
+    if (days === 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    if (days < 7) return `${days}d ago`
+    return date.toLocaleDateString()
+  }, [])
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
@@ -86,11 +86,11 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
               {emptyState || 'No conversations yet'}
             </div>
           ) : (
-            conversations.map((conversation) => {
-              const isActive = conversation.id === activeConversationId;
+            conversations.map(conversation => {
+              const isActive = conversation.id === activeConversationId
 
               if (renderConversation) {
-                return renderConversation(conversation, isActive);
+                return renderConversation(conversation, isActive)
               }
 
               return (
@@ -105,9 +105,9 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
                 >
                   <button
                     onClick={() => {
-                      onConversationSelect?.(conversation.id);
-                      onClose?.(); // Legacy callback (optional)
-                      layoutContext?.closeSidebar(); // Close sidebar on mobile after selection
+                      onConversationSelect?.(conversation.id)
+                      onClose?.() // Legacy callback (optional)
+                      layoutContext?.closeSidebar() // Close sidebar on mobile after selection
                     }}
                     aria-current={isActive ? 'page' : undefined}
                     aria-label={`${conversation.title}${conversation.unread ? ' (unread)' : ''}`}
@@ -119,11 +119,12 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-medium truncate">
-                            {conversation.title}
-                          </h3>
+                          <h3 className="text-sm font-medium truncate">{conversation.title}</h3>
                           {conversation.unread && (
-                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" aria-hidden="true" />
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full flex-shrink-0"
+                              aria-hidden="true"
+                            />
                           )}
                         </div>
                         {conversation.preview && (
@@ -151,7 +152,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
                     />
                   </div>
                 </div>
-              );
+              )
             })
           )}
         </div>
@@ -160,5 +161,5 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
       {/* Footer */}
       {footer && <div className="p-4 border-t">{footer}</div>}
     </div>
-  );
-});
+  )
+})

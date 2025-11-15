@@ -2,9 +2,9 @@
 
 import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
-import { useAuthStore } from '@ezstart/auth-sdk'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
+import { useAuthStore } from '@ezstart/auth-sdk'
 import {
   Conversation,
   Thread,
@@ -63,6 +63,11 @@ export function LiaThread({
   // Use React Query to fetch conversation (CACHED! ✅)
   const { data: conversationData } = useConversation(activeConversationId)
 
+  // Debug: Log when activeConversationId changes
+  useEffect(() => {
+    console.log('[LiaThread] 🔴 activeConversationId changed:', activeConversationId)
+  }, [activeConversationId])
+
   // Register callback to reload conversations when auto-created
   useEffect(() => {
     if (onRegisterConversationCreatedCallback && loadConversations) {
@@ -73,6 +78,7 @@ export function LiaThread({
 
   // Load messages from cache when conversationData changes
   useEffect(() => {
+    console.log('[LiaThread] 🟢 conversationData changed:', conversationData?.id, conversationData)
     if (conversationData && conversationData.messages) {
       const threadMessages = conversationData.messages.map((msg: any) => ({
         id: `${msg.role}-${msg.timestamp.getTime()}`,
@@ -80,6 +86,7 @@ export function LiaThread({
         content: msg.content,
         timestamp: msg.timestamp.toISOString(),
       }))
+      console.log('[LiaThread] 🟢 Loading messages:', threadMessages.length)
       loadMessages(threadMessages)
     }
   }, [conversationData, loadMessages])
@@ -109,11 +116,13 @@ export function LiaThread({
   // Handle conversation select (NO MORE REFETCH! Uses cache ✅)
   const handleConversationSelect = useCallback(
     (id: string) => {
+      console.log('[LiaThread] 🔵 Conversation selected:', id)
+      console.log('[LiaThread] 🔵 Current activeConversationId:', activeConversationId)
       setActiveConversationId(id)
       // React Query automatically fetches from cache if available!
       // useConversation(id) hook will handle the rest
     },
-    [setActiveConversationId]
+    [setActiveConversationId, activeConversationId]
   )
 
   // Handle rename
@@ -149,8 +158,6 @@ export function LiaThread({
     <ThreadLayout
       colorScheme="custom"
       customTheme={greenPulseThreadTheme}
-      headerOffset="top-16"
-      mobileFooterOffset="pb-16"
       sidebarToggle={
         // Only show sidebar toggle if authenticated
         isAuthenticated ? (
@@ -192,12 +199,12 @@ export function LiaThread({
       <ThreadComposer
         onSubmit={sendMessage}
         loading={loading}
-        placeholder="Ask LIA anything about sustainability..."
+        placeholder="Ask GP.A anything about sustainability..."
         isNewThread={isNewThread}
         welcomeMessage={
           <ThreadWelcome
             show={isNewThread}
-            title="Welcome to LIA"
+            title="Welcome to GP.A"
             description="Your AI assistant for sustainability and ESG reporting"
           />
         }

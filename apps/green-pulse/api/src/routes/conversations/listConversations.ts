@@ -12,7 +12,7 @@ const router: any = Router()
 export const listConversationsRouter = createRouterWithDoc(
   listConversationsRegistry,
   router,
-  '/'
+  '/conversations'
 )
 
 listConversationsRouter.get(
