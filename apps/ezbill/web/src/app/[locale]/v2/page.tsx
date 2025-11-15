@@ -196,12 +196,8 @@ export default function LandingV2Page(): any {
 
         {/* Feature Grid - 3 main features */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {(
-            t.raw('solution.features') as Array<{
-              title: string
-              description: string
-            }>
-          ).map((feature, index) => (
+          {(Array.isArray(t.raw('solution.features')) ? t.raw('solution.features') : []).map(
+            (feature: { title: string; description: string }, index: number) => (
             <Card key={index} variant="floating" className="hover:shadow-xl transition-all">
               <CardHeader className="flex items-center gap-3">
                 <Icon
@@ -228,12 +224,8 @@ export default function LandingV2Page(): any {
 
         {/* Additional features - 6 cards */}
         <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(
-            t.raw('features.list') as Array<{
-              title: string
-              description: string
-            }>
-          ).map((feature, index) => (
+          {(Array.isArray(t.raw('features.list')) ? t.raw('features.list') : []).map(
+            (feature: { title: string; description: string }, index: number) => (
             <Card key={index} className="hover:border-ezbill-invoice/50 transition-colors">
               <CardHeader>
                 <H3 size="h6">{feature.title}</H3>
@@ -260,14 +252,8 @@ export default function LandingV2Page(): any {
         {/* Comparison Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {/* Competitors */}
-          {(
-            t.raw('comparison.competitors') as Array<{
-              name: string
-              price: string
-              yearCost: string
-              limits: string
-            }>
-          ).map((competitor, index) => (
+          {(Array.isArray(t.raw('comparison.competitors')) ? t.raw('comparison.competitors') : []).map(
+            (competitor: { name: string; price: string; yearCost: string; limits: string }, index: number) => (
             <Card key={index} className="bg-muted/50">
               <CardContent className="p-6 space-y-4">
                 <H3 size="h5" className="text-center">
@@ -326,14 +312,8 @@ export default function LandingV2Page(): any {
         </Div>
 
         <Div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {(
-            t.raw('useCases.cases') as Array<{
-              persona: string
-              challenge: string
-              solution: string
-              result: string
-            }>
-          ).map((useCase, index) => (
+          {(Array.isArray(t.raw('useCases.cases')) ? t.raw('useCases.cases') : []).map(
+            (useCase: { persona: string; challenge: string; solution: string; result: string }, index: number) => (
             <Card key={index} className="hover:shadow-xl transition-all">
               <CardHeader>
                 <Badge className="mb-2 w-fit">{useCase.persona}</Badge>
@@ -365,13 +345,8 @@ export default function LandingV2Page(): any {
         </H2>
 
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {(
-            t.raw('testimonials.items') as Array<{
-              quote: string
-              author: string
-              role: string
-            }>
-          ).map((testimonial, index) => (
+          {(Array.isArray(t.raw('testimonials.items')) ? t.raw('testimonials.items') : []).map(
+            (testimonial: { quote: string; author: string; role: string }, index: number) => (
             <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-6 space-y-4">
                 <P className="text-white/90 italic">&ldquo;{testimonial.quote}&rdquo;</P>
@@ -393,12 +368,8 @@ export default function LandingV2Page(): any {
           </H2>
 
           <Div className="space-y-4">
-            {(
-              t.raw('faq.questions') as Array<{
-                question: string
-                answer: string
-              }>
-            ).map((item, index) => (
+            {(Array.isArray(t.raw('faq.questions')) ? t.raw('faq.questions') : []).map(
+              (item: { question: string; answer: string }, index: number) => (
               <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
                 <Div>
                   <H3 size="h5" className="mb-3 flex items-start gap-3">

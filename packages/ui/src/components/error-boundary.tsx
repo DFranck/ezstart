@@ -1,11 +1,11 @@
 'use client'
 
-import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { Card, CardContent } from './card'
-import { Button } from './button'
-import { H3, P } from './tag/src/v2/aliases'
-import { Icon } from './icon'
+import { Component, ErrorInfo, ReactNode } from 'react'
 import { cn } from '../lib/utils'
+import { Button } from './button'
+import { Card, CardContent } from './card'
+import { Icon } from './icon'
+import { H3, P } from './tag/src/v2/aliases'
 
 /**
  * ErrorBoundary Component - Catch React errors and display fallback UI
@@ -150,7 +150,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       showResetButton = true,
       showDetails,
       className,
-      variant = 'default',
+      variant = 'full',
       maxRetries = 3,
     } = this.props
 
@@ -239,10 +239,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                       Try Again {retryCount > 0 && `(${retryCount}/${maxRetries})`}
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.reload()}
-                  >
+                  <Button variant="outline" onClick={() => window.location.reload()}>
                     <Icon name="lucide:RefreshCw" className="mr-2 h-4 w-4" />
                     Reload Page
                   </Button>
