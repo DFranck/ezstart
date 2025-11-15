@@ -48,7 +48,6 @@ export function LiaThread({
   const { isAuthenticated, user } = useAuthStore()
   const rbac = useRBAC(user, 'green-pulse')
   const pathname = usePathname()
-  const t = useTranslations('common')
   const tForms = useTranslations('forms')
 
   const {
@@ -188,14 +187,14 @@ export function LiaThread({
       { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
       {
         href: '/dashboard',
-        label: tForms('navigation.workspaces'),
+        label: tForms('navigation.workspaces') || 'Workspaces',
         icon: 'lucide:Briefcase' as const,
       },
       ...(rbac.hasAnyRole(['admin', 'superadmin'])
-        ? [{ href: '/admin', label: t('navigation.admin'), icon: 'lucide:Shield' as const }]
+        ? [{ href: '/admin', label: 'Admin', icon: 'lucide:Shield' as const }]
         : []),
     ],
-    [rbac, t, tForms]
+    [rbac, tForms]
   )
 
   const beforeConv = (

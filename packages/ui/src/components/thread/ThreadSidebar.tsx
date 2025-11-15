@@ -68,6 +68,9 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
       {/* Custom header slot (above everything) */}
       {header && <div className="border-b">{header}</div>}
 
+      {/* Before conversations slot (navigation, filters, etc.) */}
+      {beforeConversations && <div className="p-2 border-b">{beforeConversations}</div>}
+
       {/* New conversation button (always visible if onNewConversation provided) */}
       {onNewConversation && (
         <div className="p-4 border-b">
@@ -85,8 +88,6 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
 
       {/* Conversations List */}
       <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto">
-        {/* Before conversations slot */}
-        {beforeConversations && <div className="p-2">{beforeConversations}</div>}
 
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
