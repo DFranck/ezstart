@@ -7,9 +7,9 @@ import { cn } from '../../lib'
 import { Burger } from '../burger'
 import { Button } from '../button'
 import { Icon } from '../icon'
+import { SkipLink } from '../skip-link'
 import { Div, Main } from '../tag'
 import { headerVariantConfig } from '../tag/src/variants/tags/header'
-import { SkipLink } from '../skip-link'
 import { Footer } from './footer'
 import { Header } from './header'
 import { NavigationItem, NavigationLink, isNavigationMenu } from './types'
@@ -324,7 +324,7 @@ export function ClientLayout({
               )}
             </div>
           }
-          className={headerClassName}
+          className={cn(headerClassName, { 'bg-background': isBurgerOpen })}
         />
       )}
 
