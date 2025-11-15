@@ -100,7 +100,7 @@ export const Modal = ({
   size = 'lg',
   scrollBehavior = 'inside',
 }: ModalProps) => {
-  const isMobile = useDevice()
+  const { isMobile } = useDevice()
   const handleOpenChange = (open: boolean) => {
     if (!open && !disableOverlayClick && onClose) {
       onClose()
@@ -121,7 +121,7 @@ export const Modal = ({
           // Size classes (will be most restrictive on desktop where size < 98vw from DialogContent)
           SIZE_CLASSES[size],
           // Scroll behavior
-          'max-w-[98vw]',
+          isMobile && 'max-w-[98vw]',
           scrollBehavior === 'inside'
             ? 'max-h-[90vh] overflow-hidden'
             : 'max-h-[90vh] overflow-y-auto',
