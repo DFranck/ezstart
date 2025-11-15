@@ -4,7 +4,7 @@ import React, { ReactNode, useCallback } from 'react'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
-import { ConversationItemActions } from './ConversationItemActions'
+import { ConversationItem } from './ConversationItem'
 import { useThreadLayout } from './ThreadLayoutContext'
 
 export type Conversation = {
@@ -94,64 +94,23 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
               }
 
               return (
-                <div
+                <ConversationItem
                   key={conversation.id}
-                  className={cn(
-                    'relative group',
-                    'w-full rounded-lg transition-colors',
-                    'hover:bg-accent',
-                    isActive && 'bg-accent'
-                  )}
-                >
-                  <button
-                    onClick={() => {
-                      onConversationSelect?.(conversation.id)
-                      onClose?.() // Legacy callback (optional)
-                      layoutContext?.closeSidebar() // Close sidebar on mobile after selection
-                    }}
-                    aria-current={isActive ? 'page' : undefined}
-                    aria-label={`${conversation.title}${conversation.unread ? ' (unread)' : ''}`}
-                    className={cn(
-                      'w-full text-left p-3 pr-10',
-                      conversation.unread && 'font-semibold'
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-medium truncate">{conversation.title}</h3>
-                          {conversation.unread && (
-                            <span
-                              className="w-2 h-2 bg-primary rounded-full flex-shrink-0"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </div>
-                        {conversation.preview && (
-                          <p className="text-xs text-muted-foreground truncate mt-1">
-                            {conversation.preview}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {conversation.timestamp && (
-                          <span className="text-xs text-muted-foreground flex-shrink-0">
-                            {formatTimestamp(conversation.timestamp)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                  {/* Actions positioned absolutely outside button to avoid nested button error */}
-                  <div className="absolute right-3 top-3 z-10">
-                    <ConversationItemActions
-                      conversationId={conversation.id}
-                      conversationTitle={conversation.title}
-                      onRename={onRename}
-                      onDelete={onDelete}
-                    />
-                  </div>
-                </div>
+                  id={conversation.id}
+                  title={conversation.title}
+                  preview={conversation.preview}
+                  timestamp={conversation.timestamp}
+                  unread={conversation.unread}
+                  isActive={isActive}
+                  onSelect={(id) => {
+                    onConversationSelect?.(id)
+                    onClose?.()
+                    layoutContext?.closeSidebar()
+                  }}
+                  onRename={onRename}
+                  onDelete={onDelete}
+                  formatTimestamp={formatTimestamp}
+                />
               )
             })
           )}
