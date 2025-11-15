@@ -2,6 +2,7 @@
 
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
+import { useConversations } from '@/hooks/useConversations'
 import { getApiUrl } from '@ezstart/config'
 import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
@@ -21,6 +22,9 @@ function LiaPageContent(): any {
   // Load AI providers from API
   const { providers, selectedProvider, setSelectedProvider } = useProviders('green-pulse')
 
+  // Get refreshConversation to invalidate cache after sending message
+  const { refreshConversation } = useConversations()
+
   const config = useMemo(
     () => ({
       endpoint: `${getApiUrl('green-pulse')}/api/chat`,
@@ -32,9 +36,12 @@ function LiaPageContent(): any {
         const payload: any = {
           message,
           extract_esg: false,
-          providerId: selectedProvider, // AI provider selection
           // Include userId if authenticated
           ...(isAuthenticated && user?._id && { userId: user._id }),
+        }
+        // Only include providerId if it exists (avoid sending null)
+        if (selectedProvider) {
+          payload.providerId = selectedProvider
         }
         // Only include conversation_id if it exists (avoid sending null)
         if (activeConversationId) {
@@ -46,15 +53,22 @@ function LiaPageContent(): any {
         return data.data?.response || data.response || 'No response'
       },
       onSuccess: (data: any) => {
+        const conversationId = data.data?.conversation_id
+
         // Save conversation_id for subsequent messages
-        if (data.data?.conversation_id && !activeConversationId) {
+        if (conversationId && !activeConversationId) {
           const userInfo = isAuthenticated && user?._id ? `userId: ${user._id}` : 'anonymous'
-          console.log(`✅ Conversation created: ${data.data.conversation_id} (${userInfo})`)
-          setActiveConversationId(data.data.conversation_id)
+          console.log(`✅ Conversation created: ${conversationId} (${userInfo})`)
+          setActiveConversationId(conversationId)
           // Trigger conversation list reload
           if (onConversationCreated) {
             onConversationCreated()
           }
+        }
+
+        // Refresh conversation to load new messages
+        if (conversationId) {
+          refreshConversation(conversationId)
         }
       },
       onError: (error: Error) => {
@@ -63,8 +77,8 @@ function LiaPageContent(): any {
         toast.error(error.message || 'Failed to send message. Please try again.')
       },
     }),
-    [isAuthenticated, user, activeConversationId, onConversationCreated, selectedProvider]
-  ) // Re-create when auth state, activeConversationId, or selectedProvider changes
+    [isAuthenticated, user, activeConversationId, onConversationCreated, selectedProvider, refreshConversation]
+  ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
 
   return (
     <ThreadProvider config={config}>

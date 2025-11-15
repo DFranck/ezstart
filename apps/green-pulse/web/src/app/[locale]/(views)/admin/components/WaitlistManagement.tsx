@@ -227,8 +227,8 @@ export function WaitlistManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEntries.map(entry => (
-                <TableRow key={entry._id}>
+              {filteredEntries.map((entry, index) => (
+                <TableRow key={entry._id || `waitlist-${index}`}>
                   <TableCell className="font-medium">{entry.email}</TableCell>
                   <TableCell>{getStatusBadge(entry.status)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">

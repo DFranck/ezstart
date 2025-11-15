@@ -25,8 +25,10 @@ type ThreadSidebarProps = {
   onClose?: () => void // Callback to close sidebar (mobile)
   newConversationLabel?: string
   emptyState?: ReactNode
-  header?: ReactNode
-  footer?: ReactNode
+  header?: ReactNode // Custom header (replaces default "New conversation" button)
+  footer?: ReactNode // Custom footer at bottom
+  beforeConversations?: ReactNode // Custom content before conversation list
+  afterConversations?: ReactNode // Custom content after conversation list
   className?: string
   renderConversation?: (conversation: Conversation, isActive: boolean) => ReactNode
 }
@@ -43,6 +45,8 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
   emptyState,
   header,
   footer,
+  beforeConversations,
+  afterConversations,
   className,
   renderConversation,
 }: ThreadSidebarProps) {
@@ -80,6 +84,9 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
 
       {/* Conversations List */}
       <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto">
+        {/* Before conversations slot */}
+        {beforeConversations && <div className="p-2">{beforeConversations}</div>}
+
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm">
@@ -115,6 +122,9 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
             })
           )}
         </div>
+
+        {/* After conversations slot */}
+        {afterConversations && <div className="p-2">{afterConversations}</div>}
       </nav>
 
       {/* Footer */}

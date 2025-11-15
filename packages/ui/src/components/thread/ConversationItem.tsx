@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../lib/utils'
 import { Icon } from '../icon'
 
@@ -115,29 +115,30 @@ export function ConversationItem({
                 ref={inputRef}
                 type="text"
                 value={isEditing ? editedTitle : title}
-                onChange={(e) => setEditedTitle(e.target.value)}
+                onChange={e => setEditedTitle(e.target.value)}
                 onBlur={handleRename}
                 onKeyDown={handleKeyDown}
                 disabled={!isEditing}
                 className={cn(
                   'text-sm font-medium truncate w-full',
                   'bg-transparent border-none outline-none',
-                  'disabled:cursor-pointer',
+                  !isEditing && 'pointer-events-none', // Disable clicks when not editing
                   isEditing && 'cursor-text bg-background px-2 py-0.5 rounded border border-primary'
                 )}
-                onClick={(e) => {
+                onClick={e => {
                   if (isEditing) {
                     e.stopPropagation()
                   }
                 }}
               />
               {unread && (
-                <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" aria-hidden="true" />
+                <span
+                  className="w-2 h-2 bg-primary rounded-full flex-shrink-0"
+                  aria-hidden="true"
+                />
               )}
             </div>
-            {preview && (
-              <p className="text-xs text-muted-foreground truncate mt-1">{preview}</p>
-            )}
+            {preview && <p className="text-xs text-muted-foreground truncate mt-1">{preview}</p>}
           </div>
           <div className="flex items-center gap-1">
             {timestamp && (
@@ -155,11 +156,11 @@ export function ConversationItem({
           <div
             role="button"
             tabIndex={0}
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               setIsMenuOpen(!isMenuOpen)
             }}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
                 e.stopPropagation()
@@ -183,7 +184,7 @@ export function ConversationItem({
                 <div className="p-1">
                   {onRename && (
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation()
                         setIsEditing(true)
                         setIsMenuOpen(false)
@@ -196,7 +197,7 @@ export function ConversationItem({
                   )}
                   {onDelete && (
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation()
                         handleDelete()
                       }}

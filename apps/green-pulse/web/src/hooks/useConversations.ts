@@ -229,5 +229,7 @@ export function useConversations() {
 
     // Manual refetch (rarely needed with React Query)
     loadConversations: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
+    refreshConversation: (id: string) =>
+      queryClient.invalidateQueries({ queryKey: ['conversation', id] }),
   }
 }

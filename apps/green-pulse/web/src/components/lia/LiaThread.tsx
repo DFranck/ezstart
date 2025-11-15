@@ -58,6 +58,7 @@ export function LiaThread({
     softDeleteConversation,
     useConversation,
     loadConversations,
+    refreshConversation,
   } = useConversations()
 
   // Use React Query to fetch conversation (CACHED! ✅)
