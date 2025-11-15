@@ -23,6 +23,8 @@ export type CallApiOptions = {
   signal?: AbortSignal
   /** User ID for X-User-Id header */
   userId?: string
+  /** Access token for Authorization header (JWT mode for cross-domain) */
+  accessToken?: string
   /** App name to automatically resolve API URL from @ezstart/config (REQUIRED) */
   appName: AppName
   /**

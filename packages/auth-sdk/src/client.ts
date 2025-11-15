@@ -1,5 +1,6 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
 import type { AuthToken, AuthUser } from './types.js'
+import type { AuthMode } from './store.js'
 
 export interface AuthClientConfig {
   baseURL?: string
@@ -16,6 +17,56 @@ function getEZAuthUrls() {
     apiBaseURL: `${getApiUrl('ezauth', env)}/api/auth`,
     webBaseURL: getWebUrl('ezauth', env),
   }
+}
+
+/**
+ * Auto-detect the appropriate auth mode based on environment and domain
+ *
+ * Logic:
+ * - localhost → localStorage (httpOnly doesn't work in dev)
+ * - same root domain → httpOnly (secure, XSS-protected)
+ * - cross-domain → jwt (Authorization header for different domains)
+ *
+ * @example
+ * ```ts
+ * // localhost:3000 → 'localStorage'
+ * // ezstart.xyz → ezauth-api.ezstart.xyz → 'httpOnly' (same domain)
+ * // ai-greenpulse.com → ezauth-api.ezstart.xyz → 'jwt' (cross-domain)
+ * ```
+ */
+export function detectAuthMode(): AuthMode {
+  // SSR: default to httpOnly (will be corrected on client)
+  if (typeof window === 'undefined') return 'httpOnly'
+
+  const currentHost = window.location.hostname
+  const env = getCurrentEnvironment()
+
+  // 1. Development (localhost) → localStorage
+  if (env === 'local' || currentHost === 'localhost' || currentHost.startsWith('127.0.0.1')) {
+    return 'localStorage'
+  }
+
+  // 2. Production → check if same domain
+  const apiUrl = getApiUrl('ezauth', env)
+  const apiHost = new URL(apiUrl).hostname
+
+  // Extract root domain (ezstart.xyz from www.ezstart.xyz)
+  const getRootDomain = (hostname: string) => {
+    const parts = hostname.split('.')
+    if (parts.length <= 2) return hostname // Already root domain
+    return parts.slice(-2).join('.') // Last 2 parts (domain.tld)
+  }
+
+  const currentRootDomain = getRootDomain(currentHost)
+  const apiRootDomain = getRootDomain(apiHost)
+
+  // 3. Same root domain → httpOnly (secure cookies)
+  if (currentRootDomain === apiRootDomain) {
+    return 'httpOnly'
+  }
+
+  // 4. Cross-domain → JWT in Authorization header
+  return 'jwt'
 }
 
 export class AuthClient {

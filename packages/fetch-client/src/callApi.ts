@@ -2,6 +2,25 @@ import { getApiUrl } from '@ezstart/config/urls'
 import type { ApiError, ApiResponse, CallApiOptions, LogLevel } from './types'
 
 /**
+ * Get access token from auth store if available (browser only)
+ * This allows callApi to automatically inject JWT tokens for cross-domain requests
+ */
+function getAccessTokenFromStore(): string | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    // Access Zustand store directly from localStorage
+    const stored = localStorage.getItem('ezauth-storage')
+    if (!stored) return null
+
+    const parsed = JSON.parse(stored)
+    return parsed?.state?.accessToken || null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Get global log level from localStorage (browser) or environment (server)
  */
 function getGlobalLogLevel(): LogLevel {
@@ -56,6 +75,12 @@ function getGlobalLogLevel(): LogLevel {
  *   logLevel: 'all' // Log request + response
  * })
  *
+ * // Cross-domain request with JWT
+ * const response = await callApi<User>('/admin/users', {
+ *   appName: 'ezauth',
+ *   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+ * })
+ *
  * // Enable logging globally in browser console:
  * localStorage.setItem('callApiLogLevel', 'all')
  * ```
@@ -64,7 +89,35 @@ export async function callApi<T = any>(
   endpoint: string,
   options: CallApiOptions
 ): Promise<ApiResponse<T>> {
-  const { method = 'GET', query, body, headers = {}, signal, userId, appName, logLevel } = options
+  const { method = 'GET', query, body, headers = {}, signal, userId, accessToken, appName, logLevel } = options
+
+  // Auto-inject access token for cross-domain requests if not explicitly provided
+  let finalAccessToken = accessToken
+  if (!finalAccessToken && typeof window !== 'undefined') {
+    // Detect auth mode using same logic as @ezstart/auth-sdk
+    const currentHost = window.location.hostname
+    const isLocalhost = currentHost === 'localhost' || currentHost.startsWith('127.0.0.1')
+
+    if (!isLocalhost) {
+      // Check if this is a cross-domain request
+      const apiUrl = getApiUrl(appName)
+      const apiHost = new URL(apiUrl).hostname
+
+      const getRootDomain = (hostname: string) => {
+        const parts = hostname.split('.')
+        if (parts.length <= 2) return hostname
+        return parts.slice(-2).join('.')
+      }
+
+      const currentRootDomain = getRootDomain(currentHost)
+      const apiRootDomain = getRootDomain(apiHost)
+
+      // If cross-domain, auto-inject token from store
+      if (currentRootDomain !== apiRootDomain) {
+        finalAccessToken = getAccessTokenFromStore() || undefined
+      }
+    }
+  }
 
   // Determine effective log level (option > global > default)
   const effectiveLogLevel = logLevel || getGlobalLogLevel()
@@ -100,7 +153,11 @@ export async function callApi<T = any>(
       url,
       query,
       body,
-      headers: { ...headers, ...(userId ? { 'X-User-Id': userId } : {}) },
+      headers: {
+        ...headers,
+        ...(userId ? { 'X-User-Id': userId } : {}),
+        ...(finalAccessToken ? { Authorization: `Bearer ${finalAccessToken}` } : {}),
+      },
     })
   }
 
@@ -112,6 +169,7 @@ export async function callApi<T = any>(
       headers: {
         ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
         ...(userId ? { 'X-User-Id': userId } : {}),
+        ...(finalAccessToken ? { Authorization: `Bearer ${finalAccessToken}` } : {}),
         ...headers,
       },
       body: isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,

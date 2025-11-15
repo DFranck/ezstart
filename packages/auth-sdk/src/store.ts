@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       isAuthenticated: false,
-      mode: 'localStorage', // Default to localStorage for backward compatibility
+      mode: 'localStorage', // Will be auto-detected on first use
       isLoggingIn: false,
 
       setAuth: (user: AuthUser, accessToken?: string, mode: AuthMode = 'localStorage') => {
