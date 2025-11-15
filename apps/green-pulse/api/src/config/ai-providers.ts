@@ -16,12 +16,12 @@ export function initializeAIProviders() {
   // Register Gemini (primary)
   if (process.env.GEMINI_API_KEY) {
     providerRegistry.register({
-      id: 'gemini-flash',
-      name: 'Gemini 1.5 Flash',
+      id: 'gemini-pro',
+      name: 'Gemini Pro',
       type: 'gemini',
       enabled: true,
       apiKey: process.env.GEMINI_API_KEY,
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-pro',
       capabilities: {
         text: true,
         vision: true,
@@ -31,7 +31,7 @@ export function initializeAIProviders() {
         jsonMode: true,
       },
     })
-    console.log('✅ [AI SDK] Registered: Gemini 1.5 Flash')
+    console.log('✅ [AI SDK] Registered: Gemini Pro')
   } else {
     console.warn('⚠️  [AI SDK] Gemini API key not found - provider disabled')
   }

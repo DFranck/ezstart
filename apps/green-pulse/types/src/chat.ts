@@ -23,7 +23,7 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>
 // Chat Request
 export const ChatRequestSchema = z.object({
   message: z.string().min(1).describe('User message or question'),
-  providerId: z.string().optional().describe('AI provider ID (e.g., "gemini-flash", "openai-gpt4"). Defaults to "gemini-flash" if not specified'),
+  providerId: z.string().optional().describe('AI provider ID (e.g., "gemini-pro", "openai-gpt4"). Defaults to "gemini-pro" if not specified'),
   session_id: z.string().optional().describe('Session ID for conversation continuity (deprecated, use userId)'),
   conversation_id: z.string().optional().describe('Conversation ID to save messages to'),
   context: z.array(ChatMessageSchema).optional().describe('Previous conversation context'),
