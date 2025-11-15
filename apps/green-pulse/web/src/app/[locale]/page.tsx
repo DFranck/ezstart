@@ -119,7 +119,7 @@ export default function HomePage(): any {
 
           {/* Feature tags (from slide) */}
           <Div layout={'row'} className="hidden lg:flex ">
-            {(t.raw('heroFeatures') as string[]).map((feature: string, index: number) => (
+            {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map((feature: string, index: number) => (
               <Button key={index} className="rounded-full">
                 {feature}
               </Button>
@@ -187,7 +187,7 @@ export default function HomePage(): any {
           </H3>
 
           <Div className="space-y-4">
-            {(t.raw('challenge.challenges') as string[]).map((challenge: string, index: number) => (
+            {(Array.isArray(t.raw('challenge.challenges')) ? t.raw('challenge.challenges') : []).map((challenge: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
@@ -275,7 +275,7 @@ export default function HomePage(): any {
         </Div>
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {(t.raw('transformation.features') as Array<{title: string, description: string}>).map((feature, index) => (
+          {(Array.isArray(t.raw('transformation.features')) ? t.raw('transformation.features') : []).map((feature: {title: string, description: string}, index: number) => (
             <Card key={index}>
               <CardHeader className="flex items-center gap-3">
                 <Icon
@@ -317,7 +317,7 @@ export default function HomePage(): any {
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {(t.raw('problem.problems') as Array<{title: string, description: string}>).map((item, index) => (
+            {(Array.isArray(t.raw('problem.problems')) ? t.raw('problem.problems') : []).map((item: {title: string, description: string}, index: number) => (
               <Card key={index}>
                 <CardHeader className="flex items-center gap-3">
                   <Icon
@@ -356,7 +356,7 @@ export default function HomePage(): any {
             {t('team.description')}
           </P>
           <Div className="space-y-4">
-            {(t.raw('team.credentials') as string[]).map((text: string, index: number) => (
+            {(Array.isArray(t.raw('team.credentials')) ? t.raw('team.credentials') : []).map((text: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Icon
                   name={
@@ -403,7 +403,7 @@ export default function HomePage(): any {
               {t('partnership.exchange.title')}
             </H3>
             <Div className="space-y-3">
-              {(t.raw('partnership.exchange.items') as string[]).map((item: string, index: number) => (
+              {(Array.isArray(t.raw('partnership.exchange.items')) ? t.raw('partnership.exchange.items') : []).map((item: string, index: number) => (
                 <Div key={index} className="flex items-start gap-3">
                   <Icon
                     name="lucide:CheckCircle2"
@@ -420,7 +420,7 @@ export default function HomePage(): any {
               {t('partnership.focus.title')}
             </H3>
             <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(t.raw('partnership.focus.partners') as string[]).map((text: string, index: number) => (
+              {(Array.isArray(t.raw('partnership.focus.partners')) ? t.raw('partnership.focus.partners') : []).map((text: string, index: number) => (
                 <Card key={index} className="p-4 bg-background">
                   <Div className="flex items-start gap-3">
                     <Icon
