@@ -1,5 +1,7 @@
 'use client'
 
+import { useAuthStore } from '@ezstart/auth-sdk'
+import { useRBAC } from '@ezstart/rbac'
 import { useMessages } from 'next-intl'
 
 export type NavMenu = {
@@ -10,6 +12,10 @@ export type NavLink = { label: string; href: string }
 export type NavItem = NavLink | NavMenu
 
 export const useNavLinks = (): NavItem[] => {
+  // Get user and RBAC
+  const { user } = useAuthStore()
+  const rbac = useRBAC(user, 'ezstart')
+
   // SSR-safe messages handling
   let messages: Record<string, any> = {}
   try {
@@ -20,5 +26,18 @@ export const useNavLinks = (): NavItem[] => {
     return []
   }
 
-  return Array.isArray(messages.links) ? messages.links : []
+  const baseLinks = Array.isArray(messages.links) ? messages.links : []
+
+  // Add Admin link only for superadmins
+  if (rbac.hasRole('superadmin')) {
+    return [
+      ...baseLinks,
+      {
+        label: 'Admin',
+        href: '/admin',
+      },
+    ]
+  }
+
+  return baseLinks
 }
