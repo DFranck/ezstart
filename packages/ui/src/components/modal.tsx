@@ -1,5 +1,6 @@
 'use client'
 
+import { useDevice } from '../hooks'
 import { responsive } from '../lib/design-system/tokens'
 import { cn } from '../lib/utils'
 import {
@@ -99,6 +100,7 @@ export const Modal = ({
   size = 'lg',
   scrollBehavior = 'inside',
 }: ModalProps) => {
+  const isMobile = useDevice()
   const handleOpenChange = (open: boolean) => {
     if (!open && !disableOverlayClick && onClose) {
       onClose()
@@ -115,12 +117,11 @@ export const Modal = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn(
-          'flex flex-col bg-background shadow-2xl w-full',
-          // Mobile padding: limit to 98vw (leaves 1% on each side)
-          'max-w-[98vw]',
-          // Size classes (will be most restrictive on desktop where size < 98vw)
+          'flex flex-col bg-background shadow-2xl',
+          // Size classes (will be most restrictive on desktop where size < 98vw from DialogContent)
           SIZE_CLASSES[size],
           // Scroll behavior
+          'max-w-[98vw]',
           scrollBehavior === 'inside'
             ? 'max-h-[90vh] overflow-hidden'
             : 'max-h-[90vh] overflow-y-auto',
