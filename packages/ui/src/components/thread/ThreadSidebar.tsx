@@ -25,9 +25,9 @@ type ThreadSidebarProps = {
   onClose?: () => void // Callback to close sidebar (mobile)
   newConversationLabel?: string
   emptyState?: ReactNode
-  header?: ReactNode // Custom header (replaces default "New conversation" button)
-  footer?: ReactNode // Custom footer at bottom
-  beforeConversations?: ReactNode // Custom content before conversation list
+  header?: ReactNode // Custom content above "New conversation" button
+  footer?: ReactNode // Custom content at bottom
+  beforeConversations?: ReactNode // Custom content between "New conversation" and conversation list
   afterConversations?: ReactNode // Custom content after conversation list
   className?: string
   renderConversation?: (conversation: Conversation, isActive: boolean) => ReactNode
@@ -65,10 +65,11 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
-      {/* Header */}
-      {header ? (
-        header
-      ) : (
+      {/* Custom header slot (above everything) */}
+      {header && <div className="border-b">{header}</div>}
+
+      {/* New conversation button (always visible if onNewConversation provided) */}
+      {onNewConversation && (
         <div className="p-4 border-b">
           <Button
             onClick={onNewConversation}
