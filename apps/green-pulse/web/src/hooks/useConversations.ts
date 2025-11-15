@@ -47,8 +47,7 @@ export function useConversations() {
       const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
 
       const response = await callApi<{ success: boolean; data: { conversations: any[] } }>(
-        endpoint,
-        { appName: 'green-pulse' }
+        endpoint
       )
 
       if (!response.ok) {
@@ -74,9 +73,7 @@ export function useConversations() {
       queryFn: async () => {
         if (!id) return null
 
-        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`, {
-          appName: 'green-pulse',
-        })
+        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
 
         if (response.ok && response.data?.data) {
           const conversation = response.data.data
@@ -106,7 +103,6 @@ export function useConversations() {
           title,
           userId: user?._id, // Link conversation to user
         },
-        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -139,7 +135,6 @@ export function useConversations() {
       const response = await callApi(`/conversations/${id}`, {
         method: 'PATCH',
         body: { title: newTitle },
-        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -160,7 +155,6 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}`, {
         method: 'DELETE',
-        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -183,7 +177,6 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/hard`, {
         method: 'DELETE',
-        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -204,7 +197,6 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/restore`, {
         method: 'POST',
-        appName: 'green-pulse',
       })
 
       if (!response.ok) {

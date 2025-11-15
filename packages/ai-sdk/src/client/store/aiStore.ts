@@ -5,15 +5,9 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { AIProviderInfo } from '../../server/registry/types.js'
 
-export interface AIProviderInfo {
-  id: string
-  name: string
-  type: string
-  enabled: boolean
-  capabilities: any
-  model?: string
-}
+export type { AIProviderInfo }
 
 interface AIStore {
   providers: AIProviderInfo[]
