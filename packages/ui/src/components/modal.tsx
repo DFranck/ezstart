@@ -1,5 +1,6 @@
 'use client'
 
+import { responsive } from '../lib/design-system/tokens'
 import { cn } from '../lib/utils'
 import {
   Dialog,
@@ -9,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from './dialog'
-import { responsive } from '../lib/design-system/tokens'
 
 /**
  * Modal Component - 100% Configurable & Accessible
@@ -115,11 +115,11 @@ export const Modal = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn(
-          'flex flex-col bg-background shadow-2xl',
-          // Size classes
-          SIZE_CLASSES[size],
-          // Max width for mobile
+          'flex flex-col bg-background shadow-2xl w-full',
+          // Mobile padding: limit to 98vw (leaves 1% on each side)
           'max-w-[98vw]',
+          // Size classes (will be most restrictive on desktop where size < 98vw)
+          SIZE_CLASSES[size],
           // Scroll behavior
           scrollBehavior === 'inside'
             ? 'max-h-[90vh] overflow-hidden'
@@ -135,9 +135,7 @@ export const Modal = ({
             <DialogTitle>
               {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
             </DialogTitle>
-            {propDescription && (
-              <DialogDescription>{propDescription}</DialogDescription>
-            )}
+            {propDescription && <DialogDescription>{propDescription}</DialogDescription>}
           </DialogHeader>
         )}
 

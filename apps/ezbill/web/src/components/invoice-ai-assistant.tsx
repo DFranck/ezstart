@@ -106,68 +106,89 @@ export function InvoiceAIAssistant({
         onClick={onToggle}
         variant="outline"
         size="sm"
-        className="absolute top-4 right-4 z-10"
+        className="absolute top-2 right-2 z-10 bg-gradient-to-r from-violet-500/10 to-purple-500/10 hover:from-violet-500/20 hover:to-purple-500/20 border-violet-300/30 backdrop-blur-sm"
       >
-        <Icon name="lucide:Sparkles" className="mr-2" />
-        AI Assistant
+        <Icon name="lucide:Sparkles" className="mr-2 text-violet-600" />
+        <span className="hidden sm:inline">AI Assistant</span>
+        <span className="sm:hidden">AI</span>
       </Button>
     )
   }
 
   return (
-    <Div className="flex flex-col h-full border-l border-border bg-muted/20">
+    <Div className="flex flex-col h-full border-l border-white/20 bg-gradient-to-br from-violet-50/50 to-purple-50/50 backdrop-blur-sm">
       {/* Header */}
-      <Div className="flex items-center justify-between p-4 border-b border-border bg-card">
+      <Div className="flex items-center justify-between p-3 sm:p-4 border-b border-white/30 bg-white/60 backdrop-blur-md">
         <Div className="flex items-center gap-2">
-          <Icon name="lucide:Sparkles" className="text-ezbill-invoice" />
-          <Span className="font-semibold">AI Assistant</Span>
+          <Icon name="lucide:Sparkles" className="text-violet-600 w-5 h-5" />
+          <Span className="font-semibold text-sm sm:text-base bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            AI Assistant
+          </Span>
         </Div>
         {onToggle && (
-          <Button onClick={onToggle} variant="ghost" size="sm">
-            <Icon name="lucide:X" />
+          <Button
+            onClick={onToggle}
+            variant="ghost"
+            size="sm"
+            className="hover:bg-white/50"
+          >
+            <Icon name="lucide:ChevronRight" className="w-4 h-4" />
           </Button>
         )}
       </Div>
 
       {/* Messages */}
-      <Div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <Div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
         {messages.map((message, index) => (
           <Div
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <Div
-              className={`max-w-[80%] rounded-lg p-3 ${
+              className={`max-w-[85%] sm:max-w-[80%] rounded-xl p-2.5 sm:p-3 ${
                 message.role === 'user'
-                  ? 'bg-ezbill-invoice text-white'
-                  : 'bg-card border border-border'
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
+                  : 'bg-white/80 backdrop-blur-sm border border-white/50 shadow-sm'
               }`}
             >
-              <P className="text-sm whitespace-pre-line">{message.content}</P>
+              <P className="text-xs sm:text-sm whitespace-pre-line leading-relaxed">
+                {message.content}
+              </P>
             </Div>
           </Div>
         ))}
         {isLoading && (
           <Div className="flex justify-start">
-            <Div className="bg-card border border-border rounded-lg p-3">
-              <P className="text-sm text-muted-foreground">Extracting data...</P>
+            <Div className="bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl p-2.5 sm:p-3 shadow-sm">
+              <P className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                <Icon name="lucide:Loader2" className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                Extracting data...
+              </P>
             </Div>
           </Div>
         )}
       </Div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 border-t border-border bg-card">
+      <form
+        onSubmit={handleSubmit}
+        className="p-3 sm:p-4 border-t border-white/30 bg-white/60 backdrop-blur-md"
+      >
         <Div className="flex gap-2">
           <Input
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Describe the invoice..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm bg-white/80 backdrop-blur-sm border-white/50 focus:border-violet-400 focus:ring-violet-400/20"
           />
-          <Button type="submit" disabled={isLoading || !input.trim()} size="sm">
-            <Icon name="lucide:Send" />
+          <Button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            size="sm"
+            className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white shadow-md"
+          >
+            <Icon name="lucide:Send" className="w-4 h-4" />
           </Button>
         </Div>
       </form>
