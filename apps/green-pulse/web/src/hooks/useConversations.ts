@@ -47,7 +47,8 @@ export function useConversations() {
       const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
 
       const response = await callApi<{ success: boolean; data: { conversations: any[] } }>(
-        endpoint
+        endpoint,
+        { appName: 'green-pulse' }
       )
 
       if (!response.ok) {
@@ -73,7 +74,9 @@ export function useConversations() {
       queryFn: async () => {
         if (!id) return null
 
-        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
+        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`, {
+          appName: 'green-pulse',
+        })
 
         if (response.ok && response.data?.data) {
           const conversation = response.data.data
@@ -99,7 +102,11 @@ export function useConversations() {
     mutationFn: async (title: string = 'New Chat') => {
       const response = await callApi<{ success: boolean; data: any }>('/conversations', {
         method: 'POST',
-        body: { title },
+        body: {
+          title,
+          userId: user?._id, // Link conversation to user
+        },
+        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -119,7 +126,7 @@ export function useConversations() {
     },
     onSuccess: newConv => {
       // Optimistic update: Add to cache immediately
-      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) => [
+      queryClient.setQueryData(['conversations', user?._id], (old: ConversationListItem[] = []) => [
         newConv,
         ...old,
       ])
@@ -132,6 +139,7 @@ export function useConversations() {
       const response = await callApi(`/conversations/${id}`, {
         method: 'PATCH',
         body: { title: newTitle },
+        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -141,7 +149,7 @@ export function useConversations() {
     },
     onSuccess: ({ id, newTitle }) => {
       // Optimistic update
-      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+      queryClient.setQueryData(['conversations', user?._id], (old: ConversationListItem[] = []) =>
         old.map(conv => (conv.id === id ? { ...conv, title: newTitle, updatedAt: new Date() } : conv))
       )
     },
@@ -152,6 +160,7 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}`, {
         method: 'DELETE',
+        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -161,7 +170,7 @@ export function useConversations() {
     },
     onSuccess: id => {
       // Optimistic update
-      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+      queryClient.setQueryData(['conversations', user?._id], (old: ConversationListItem[] = []) =>
         old.filter(conv => conv.id !== id)
       )
       // Invalidate specific conversation cache
@@ -174,6 +183,7 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/hard`, {
         method: 'DELETE',
+        appName: 'green-pulse',
       })
 
       if (!response.ok) {
@@ -182,7 +192,7 @@ export function useConversations() {
       return id
     },
     onSuccess: id => {
-      queryClient.setQueryData(['conversations'], (old: ConversationListItem[] = []) =>
+      queryClient.setQueryData(['conversations', user?._id], (old: ConversationListItem[] = []) =>
         old.filter(conv => conv.id !== id)
       )
       queryClient.removeQueries({ queryKey: ['conversation', id] })
@@ -194,6 +204,7 @@ export function useConversations() {
     mutationFn: async (id: string) => {
       const response = await callApi(`/conversations/${id}/restore`, {
         method: 'POST',
+        appName: 'green-pulse',
       })
 
       if (!response.ok) {
