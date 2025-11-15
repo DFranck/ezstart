@@ -186,6 +186,7 @@ export function QuoteModal({
       onClose={onClose}
       title={quote ? 'Edit Quote' : 'Create Quote'}
       description={quote ? 'Update quote information' : 'Create a new quote for your client'}
+      size="xl"
       footer={
         <div className="space-y-4">
           <div className="flex gap-3 justify-end">
@@ -218,7 +219,7 @@ export function QuoteModal({
         </div>
       }
     >
-      <div className="flex gap-0 relative">
+      <div className="flex flex-col lg:flex-row gap-0 relative">
         {/* AI Assistant Toggle Button (when collapsed) */}
         {!showAIAssistant && (
           <InvoiceAIAssistant
@@ -229,7 +230,7 @@ export function QuoteModal({
         )}
 
         {/* Main Form */}
-        <div className={showAIAssistant ? 'w-2/3 pr-4' : 'w-full'}>
+        <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="quote-form" onSubmit={handleSubmit} className="space-y-6 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!clientId && (
@@ -612,7 +613,7 @@ export function QuoteModal({
 
         {/* AI Assistant Sidebar (when expanded) */}
         {showAIAssistant && (
-          <div className="w-1/3 h-[600px]">
+          <div className="w-full lg:w-1/3 h-[400px] lg:h-[600px] mt-4 lg:mt-0">
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}

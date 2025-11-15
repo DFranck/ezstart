@@ -232,6 +232,7 @@ export function InvoiceModal({
       onClose={onClose}
       title={invoice ? 'Edit Invoice' : 'Create Invoice'}
       description={invoice ? 'Update invoice information' : 'Create a new invoice for your client'}
+      size="xl"
       footer={
         <div className="flex gap-3">
           <Button
@@ -262,7 +263,7 @@ export function InvoiceModal({
         </div>
       }
     >
-      <div className="flex gap-0 relative">
+      <div className="flex flex-col lg:flex-row gap-0 relative">
         {/* AI Assistant Toggle Button (when collapsed) */}
         {!showAIAssistant && (
           <InvoiceAIAssistant
@@ -273,7 +274,7 @@ export function InvoiceModal({
         )}
 
         {/* Main Form */}
-        <div className={showAIAssistant ? 'w-2/3 pr-4' : 'w-full'}>
+        <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!clientId && (
@@ -748,7 +749,7 @@ export function InvoiceModal({
 
         {/* AI Assistant Sidebar (when expanded) */}
         {showAIAssistant && (
-          <div className="w-1/3 h-[600px]">
+          <div className="w-full lg:w-1/3 h-[400px] lg:h-[600px] mt-4 lg:mt-0">
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}
