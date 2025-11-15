@@ -23,10 +23,8 @@ createConversationRouter.post(
   '/',
   async (req, res) => {
     try {
-      console.log('[POST /conversations] 🆕 Creating conversation, body:', req.body)
       const validation = CreateConversationSchema.safeParse(req.body)
       if (!validation.success) {
-        console.log('[POST /conversations] ❌ Validation failed:', validation.error.errors)
         return res.status(400).json({
           success: false,
           error: 'Invalid request',
@@ -36,19 +34,12 @@ createConversationRouter.post(
       }
 
       const { title, userId } = validation.data
-      console.log('[POST /conversations] ✅ Validated data:', { title, userId })
 
       // @ts-expect-error - Mongoose create() type inference issue
       const conversation = await Conversation.create({
         title: title || 'New Chat',
         userId,
         messages: [],
-      })
-
-      console.log('[POST /conversations] ✅ Created conversation:', {
-        _id: conversation._id.toString(),
-        userId: conversation.userId,
-        title: conversation.title,
       })
 
       res.json({

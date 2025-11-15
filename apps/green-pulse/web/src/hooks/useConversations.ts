@@ -100,7 +100,6 @@ export function useConversations() {
   // Mutation: Create new conversation
   const createConversationMutation = useMutation({
     mutationFn: async (title: string = 'New Chat') => {
-      console.log('[useConversations] 🆕 Creating conversation:', { title, userId: user?._id })
       const response = await callApi<{ success: boolean; data: any }>('/conversations', {
         method: 'POST',
         body: {
@@ -110,16 +109,12 @@ export function useConversations() {
         appName: 'green-pulse',
       })
 
-      console.log('[useConversations] 📡 POST response:', response)
-
       if (!response.ok) {
-        console.error('[useConversations] ❌ Failed to create conversation:', response.data)
         throw new Error(parseApiError(response.data))
       }
 
       if (response.data?.data) {
         const conversation = response.data.data
-        console.log('[useConversations] ✅ Conversation created:', conversation)
         return {
           ...conversation,
           createdAt: new Date(conversation.createdAt),
