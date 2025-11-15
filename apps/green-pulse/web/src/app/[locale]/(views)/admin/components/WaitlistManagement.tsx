@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState } from 'react'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
 import {
@@ -21,7 +22,6 @@ import {
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 
 type WaitlistEntry = {
   _id: string
@@ -249,7 +249,7 @@ export function WaitlistManagement() {
                   <TableCell className="text-right">
                     <Div className="flex gap-2 justify-end">
                       {entry.status === 'pending' && (
-                        <>
+                        <React.Fragment key={`actions-${entry._id}`}>
                           <Button
                             size="sm"
                             onClick={() => handleApprove(entry.email)}
@@ -268,20 +268,20 @@ export function WaitlistManagement() {
                             <Icon name="lucide:X" className="mr-1" />
                             Reject
                           </Button>
-                        </>
+                        </React.Fragment>
                       )}
                       {entry.status === 'invited' && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" key={`invited-${entry._id}`}>
                           ✉️ Waiting for registration
                         </Badge>
                       )}
                       {entry.status === 'activated' && (
-                        <Badge variant="default">
+                        <Badge variant="default" key={`activated-${entry._id}`}>
                           ✅ Active user
                         </Badge>
                       )}
                       {entry.status === 'rejected' && (
-                        <Badge variant="destructive">
+                        <Badge variant="destructive" key={`rejected-${entry._id}`}>
                           ❌ Rejected
                         </Badge>
                       )}
