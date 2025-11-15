@@ -3,11 +3,21 @@
 import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { useConversations } from '@/hooks/useConversations'
-import { getApiUrl } from '@ezstart/config'
-import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { useProviders } from '@ezstart/ai-sdk/client'
-import { Button, Card, CardContent, Div, H3, Icon, Input, P, Section, Spinner } from '@ezstart/ui/components'
+import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { getApiUrl } from '@ezstart/config'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import {
+  Button,
+  Card,
+  CardContent,
+  Div,
+  Icon,
+  Input,
+  P,
+  Section,
+  Spinner,
+} from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -77,7 +87,14 @@ function LiaPageContent(): any {
         toast.error(error.message || 'Failed to send message. Please try again.')
       },
     }),
-    [isAuthenticated, user, activeConversationId, onConversationCreated, selectedProvider, refreshConversation]
+    [
+      isAuthenticated,
+      user,
+      activeConversationId,
+      onConversationCreated,
+      selectedProvider,
+      refreshConversation,
+    ]
   ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
 
   return (
@@ -110,7 +127,9 @@ function BetaAccessRequest() {
     queryFn: async () => {
       if (!user?.email) return null
       const apiUrl = getApiUrl('ezauth')
-      const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`)
+      const response = await fetch(
+        `${apiUrl}/api/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`
+      )
       if (!response.ok) return null
       return response.json()
     },
@@ -187,7 +206,9 @@ function BetaAccessRequest() {
     <Section size={'full'}>
       <Card variant={'ghost'}>
         <CardContent className="text-center py-12 space-y-6">
-          <InsufficientPermissions requiredRoles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']} />
+          <InsufficientPermissions
+            requiredRoles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']}
+          />
 
           {/* Pending state */}
           {status === 'pending' && (
@@ -212,10 +233,14 @@ function BetaAccessRequest() {
                 type="text"
                 placeholder="BETA-GP-XXXXXXXX"
                 value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                onChange={e => setAccessCode(e.target.value.toUpperCase())}
                 className="max-w-xs mx-auto"
               />
-              <Button onClick={handleActivate} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+              <Button
+                onClick={handleActivate}
+                size="lg"
+                className="bg-gp-primary hover:bg-gp-primary/80"
+              >
                 <Icon name="lucide:Check" className="mr-2" />
                 Activate Access
               </Button>
@@ -230,7 +255,11 @@ function BetaAccessRequest() {
               <P className="text-sm text-muted-foreground">
                 Your beta access has been activated. Click below to refresh your session.
               </P>
-              <Button onClick={handleRefreshSession} size="lg" className="bg-green-600 hover:bg-green-700">
+              <Button
+                onClick={handleRefreshSession}
+                size="lg"
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <Icon name="lucide:RefreshCw" className="mr-2" />
                 Refresh Session
               </Button>
@@ -250,7 +279,11 @@ function BetaAccessRequest() {
 
           {/* No status - can request */}
           {!status && !waitlistStatus?.found && (
-            <Button onClick={handleRequest} size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
+            <Button
+              onClick={handleRequest}
+              size="lg"
+              className="bg-gp-primary hover:bg-gp-primary/80"
+            >
               <Icon name="lucide:Sparkles" className="mr-2" />
               Request Beta Access
             </Button>
@@ -275,13 +308,16 @@ export default function LiaPage() {
         <Section size="full">
           <Card variant={'ghost'}>
             <AccessDenied>
-              <LoginButton>{t('login')}</LoginButton>
+              <LoginButton alwaysShowText>{t('login')}</LoginButton>
             </AccessDenied>
           </Card>
         </Section>
       }
     >
-      <RequireRole roles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']} fallbackComponent={<BetaAccessRequest />}>
+      <RequireRole
+        roles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']}
+        fallbackComponent={<BetaAccessRequest />}
+      >
         <LiaPageContent />
       </RequireRole>
     </RequireAuth>

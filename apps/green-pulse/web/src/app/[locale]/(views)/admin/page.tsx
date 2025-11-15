@@ -10,10 +10,7 @@ function AdminPageContent() {
   const { user } = useAuthStore()
 
   // Gather all roles from globalRoles and appRoles
-  const allRoles = [
-    ...(user?.globalRoles || []),
-    ...(user?.appRoles?.['green-pulse'] || []),
-  ]
+  const allRoles = [...(user?.globalRoles || []), ...(user?.appRoles?.['green-pulse'] || [])]
 
   return (
     <Div size="xs">
@@ -56,7 +53,7 @@ export default function AdminPage() {
         <Section size="full">
           <Card variant="ghost">
             <AccessDenied>
-              <LoginButton>{t('auth.login')}</LoginButton>
+              <LoginButton alwaysShowText>{t('auth.login')}</LoginButton>
             </AccessDenied>
           </Card>
         </Section>

@@ -224,10 +224,7 @@ export function LiaThread({
       sidebarToggle={
         // Only show sidebar toggle if authenticated
         isAuthenticated ? (
-          <ThreadSidebarToggle
-            className="fixed right-4 top-20 z-50 md:hidden shadow-lg backdrop-blur-sm bg-[#10b981] hover:bg-[#059669] text-white"
-            variant="default"
-          />
+          <ThreadSidebarToggle className="fixed right-4 top-4 z-50 md:hidden " variant="default" />
         ) : undefined
       }
       sidebar={
