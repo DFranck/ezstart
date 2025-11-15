@@ -1,4 +1,5 @@
 import { Router } from '@ezstart/express-core';
+import aiRoutes from './ai/index.js';
 import clientRoutes, { clientsRegistries } from './clients/index.js';
 import companiesRoutes, { companiesRegistries } from './companies/index.js';
 import invoiceRoutes, { invoicesRegistries } from './invoices/index.js';
@@ -19,6 +20,7 @@ export const globalRegistry = [
 ];
 
 router
+  .use('/ai', aiRoutes)
   .use('/clients', clientRoutes)
   .use('/companies', companiesRoutes)
   .use('/invoices', invoiceRoutes)

@@ -318,6 +318,9 @@ importers:
       '@ezbill/types':
         specifier: workspace:*
         version: link:../types
+      '@ezstart/ai-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/ai-sdk
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config

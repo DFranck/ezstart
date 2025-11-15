@@ -33,6 +33,7 @@ import {
 } from '@ezstart/ui/components'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
+import { InvoiceAIAssistant } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
 interface InvoiceModalProps {
@@ -65,6 +66,7 @@ export function InvoiceModal({
 }: InvoiceModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
+  const [showAIAssistant, setShowAIAssistant] = useState(false)
 
   const [formData, setFormData] = useState<CreateInvoice & { paymentMethodIds?: string[] }>({
     userId: '', // Will be set in handleSubmit
@@ -133,6 +135,49 @@ export function InvoiceModal({
       const updatedItems = formData.items.filter((_, i) => i !== index)
       setFormData({ ...formData, items: updatedItems })
     }
+  }
+
+  // Handle AI-extracted data
+  const handleAIExtraction = (data: {
+    clientName?: string
+    items?: Array<{ label: string; quantity: number; price: number }>
+    description?: string
+    dueDate?: string
+    notes?: string
+    currency?: 'USD' | 'EUR'
+    taxRate?: number
+  }) => {
+    const updates: Partial<typeof formData> = {}
+
+    // Try to find matching client by name
+    if (data.clientName && clients.length > 0) {
+      const matchingClient = clients.find(
+        c =>
+          c.clientName?.toLowerCase().includes(data.clientName!.toLowerCase()) ||
+          c.email?.toLowerCase().includes(data.clientName!.toLowerCase())
+      )
+      if (matchingClient) {
+        updates.clientId = matchingClient._id
+      }
+    }
+
+    // Update items if provided
+    if (data.items && data.items.length > 0) {
+      updates.items = data.items
+      updates.billingType = 'itemized'
+    }
+
+    // Update other fields
+    if (data.description) updates.description = data.description
+    if (data.dueDate) updates.dueDate = data.dueDate
+    if (data.notes) updates.notes = data.notes
+    if (data.currency) updates.currency = data.currency
+    if (data.taxRate !== undefined) {
+      updates.taxRate = data.taxRate
+      setShowTaxes(data.taxRate > 0)
+    }
+
+    setFormData(prev => ({ ...prev, ...updates }))
   }
 
   // Calculs
@@ -217,8 +262,19 @@ export function InvoiceModal({
         </div>
       }
     >
-      <div className="">
-        <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
+      <div className="flex gap-0 relative">
+        {/* AI Assistant Toggle Button (when collapsed) */}
+        {!showAIAssistant && (
+          <InvoiceAIAssistant
+            isCollapsed={true}
+            onToggle={() => setShowAIAssistant(true)}
+            onDataExtracted={handleAIExtraction}
+          />
+        )}
+
+        {/* Main Form */}
+        <div className={showAIAssistant ? 'w-2/3 pr-4' : 'w-full'}>
+          <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {!clientId && (
               <div>
@@ -688,6 +744,18 @@ export function InvoiceModal({
             />
           </div>
         </form>
+        </div>
+
+        {/* AI Assistant Sidebar (when expanded) */}
+        {showAIAssistant && (
+          <div className="w-1/3 h-[600px]">
+            <InvoiceAIAssistant
+              isCollapsed={false}
+              onToggle={() => setShowAIAssistant(false)}
+              onDataExtracted={handleAIExtraction}
+            />
+          </div>
+        )}
       </div>
     </Modal>
   )
