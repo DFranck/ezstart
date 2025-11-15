@@ -106,9 +106,9 @@ export function InvoiceAIAssistant({
         onClick={onToggle}
         variant="outline"
         size="sm"
-        className="absolute top-2 right-2 z-10 bg-gradient-to-r from-violet-500/10 to-purple-500/10 hover:from-violet-500/20 hover:to-purple-500/20 border-violet-300/30 backdrop-blur-sm"
+        className="absolute top-2 right-2 z-10 bg-primary/10 hover:bg-primary/20 border-primary/30 backdrop-blur-sm"
       >
-        <Icon name="lucide:Sparkles" className="mr-2 text-violet-600" />
+        <Icon name="lucide:Sparkles" className="mr-2 text-primary" />
         <span className="hidden sm:inline">AI Assistant</span>
         <span className="sm:hidden">AI</span>
       </Button>
@@ -116,22 +116,17 @@ export function InvoiceAIAssistant({
   }
 
   return (
-    <Div className="flex flex-col h-full border-l border-white/20 bg-gradient-to-br from-violet-50/50 to-purple-50/50 backdrop-blur-sm">
+    <Div className="flex flex-col h-full border-l border bg-muted/30 backdrop-blur-sm">
       {/* Header */}
-      <Div className="flex items-center justify-between p-3 sm:p-4 border-b border-white/30 bg-white/60 backdrop-blur-md">
+      <Div className="flex items-center justify-between p-3 sm:p-4 border-b border bg-card/60 backdrop-blur-md">
         <Div className="flex items-center gap-2">
-          <Icon name="lucide:Sparkles" className="text-violet-600 w-5 h-5" />
-          <Span className="font-semibold text-sm sm:text-base bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+          <Icon name="lucide:Sparkles" className="text-primary w-5 h-5" />
+          <Span className="font-semibold text-sm sm:text-base text-primary">
             AI Assistant
           </Span>
         </Div>
         {onToggle && (
-          <Button
-            onClick={onToggle}
-            variant="ghost"
-            size="sm"
-            className="hover:bg-white/50"
-          >
+          <Button onClick={onToggle} variant="ghost" size="sm" className="hover:bg-muted/50">
             <Icon name="lucide:ChevronRight" className="w-4 h-4" />
           </Button>
         )}
@@ -147,8 +142,8 @@ export function InvoiceAIAssistant({
             <Div
               className={`max-w-[85%] sm:max-w-[80%] rounded-xl p-2.5 sm:p-3 ${
                 message.role === 'user'
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-md'
-                  : 'bg-white/80 backdrop-blur-sm border border-white/50 shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'bg-card/80 backdrop-blur-sm border shadow-sm'
               }`}
             >
               <P className="text-xs sm:text-sm whitespace-pre-line leading-relaxed">
@@ -159,7 +154,7 @@ export function InvoiceAIAssistant({
         ))}
         {isLoading && (
           <Div className="flex justify-start">
-            <Div className="bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl p-2.5 sm:p-3 shadow-sm">
+            <Div className="bg-card/80 backdrop-blur-sm border rounded-xl p-2.5 sm:p-3 shadow-sm">
               <P className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
                 <Icon name="lucide:Loader2" className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
                 Extracting data...
@@ -172,7 +167,7 @@ export function InvoiceAIAssistant({
       {/* Input */}
       <form
         onSubmit={handleSubmit}
-        className="p-3 sm:p-4 border-t border-white/30 bg-white/60 backdrop-blur-md"
+        className="p-3 sm:p-4 border-t border bg-card/60 backdrop-blur-md"
       >
         <Div className="flex gap-2">
           <Input
@@ -180,13 +175,13 @@ export function InvoiceAIAssistant({
             onChange={e => setInput(e.target.value)}
             placeholder="Describe the invoice..."
             disabled={isLoading}
-            className="flex-1 text-xs sm:text-sm bg-white/80 backdrop-blur-sm border-white/50 focus:border-violet-400 focus:ring-violet-400/20"
+            className="flex-1 text-xs sm:text-sm bg-background backdrop-blur-sm focus:border-primary focus:ring-primary/20"
           />
           <Button
             type="submit"
             disabled={isLoading || !input.trim()}
             size="sm"
-            className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white shadow-md"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
           >
             <Icon name="lucide:Send" className="w-4 h-4" />
           </Button>
