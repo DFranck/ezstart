@@ -1,30 +1,27 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { ErrorsFeed } from './components/ErrorsFeed'
 import { MetricsOverview } from '../components/MetricsOverview'
 import { TabScore } from '../components/TabScore'
 import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringErrors } from '../hooks/useMonitoringErrors'
 import { useSocket } from '../hooks/useSocket'
 import { calculateErrorsHealth, getMetricsData } from '../lib/utils'
+import { ErrorsFeed } from './components/ErrorsFeed'
 
 function ErrorsMonitoringContent(): any {
+  const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
 
   // Fetch errors data
-  const {
-    data: errorsData,
-    isLoading,
-    error,
-    isFetching,
-  } = useMonitoringErrors()
+  const { data: errorsData, isLoading, error, isFetching } = useMonitoringErrors()
 
   // Socket.IO real-time updates
   useSocket({
@@ -85,9 +82,7 @@ function ErrorsMonitoringContent(): any {
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
           <H1>{t('errorsPage.title')}</H1>
-          <P className="text-muted-foreground">
-            {t('errorsPage.description')}
-          </P>
+          <P className="text-muted-foreground">{t('errorsPage.description')}</P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
               Next update in: {minutes}:{String(seconds).padStart(2, '0')}
@@ -104,7 +99,7 @@ function ErrorsMonitoringContent(): any {
             subtitle={t('errorsPage.metricsSubtitle')}
           />
           {/* Metrics Overview */}
-          <MetricsOverview activeTab="errors" metrics={metricsData} />
+          {isDesktop && <MetricsOverview activeTab="errors" metrics={metricsData} />}
         </Div>
       </Section>
 

@@ -1,15 +1,18 @@
 import { Providers } from '@/components/providers'
 import { getTimeZoneFromLocale, routing } from '@/i18n/routing'
-import { Toaster, ErrorBoundary } from '@ezstart/ui/components'
-import '@ezstart/ui/globals.css'
-import { createEnhancedMetadata, createEnhancedViewport } from '@ezstart/seo-config/metadata-enhanced'
 import { generateOrganizationSchema } from '@ezstart/seo-config'
+import {
+  createEnhancedMetadata,
+  createEnhancedViewport,
+} from '@ezstart/seo-config/metadata-enhanced'
+import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
+import '@ezstart/ui/globals.css'
+import { Analytics } from '@vercel/analytics/next'
 import { hasLocale } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import Script from 'next/script'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import ClientLayout from './client-layout'
 
 // ✅ NOUVEAU - Utilise les données riches de docs/seo/01-EZSTART-DEEP-DIVE.md

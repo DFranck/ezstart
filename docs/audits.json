@@ -1,0 +1,509 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "3.0.0",
+  "lastUpdated": "2025-11-17",
+  "description": "Audit scores for monitoring dashboard - Auto-updated by AI agents",
+
+  "global": {
+    "score": 96.6,
+    "target": 100,
+    "status": "excellent",
+    "trend": "stable"
+  },
+
+  "domains": {
+    "backend": {
+      "score": 96,
+      "target": 100,
+      "status": "excellent",
+      "agent": "@backend",
+      "domain": "Backend (APIs + Databases + Security)",
+      "emoji": "⚙️",
+      "categories": {
+        "api": {
+          "score": 100,
+          "status": "perfect",
+          "lastUpdate": "2025-11-07",
+          "description": "Express.js APIs with action-based routing pattern",
+          "audited": [
+            "Action-based routing (1 file = 1 action) on 6 APIs",
+            "OpenAPI documentation with @ezstart/express-core",
+            "CORS configuration via @ezstart/config",
+            "Centralized error handling middleware",
+            "Rate limiting on all endpoints"
+          ],
+          "notAudited": [],
+          "why": "Perfect score: All 6 APIs (EZAuth, EZPay, EZBill, Tower Defense, GreenPulse, EZStart) migrated to action-based pattern with 217+ action files. Complete OpenAPI docs, standardized CORS, comprehensive error handling.",
+          "nextSteps": []
+        },
+        "databases": {
+          "score": 100,
+          "status": "perfect",
+          "lastUpdate": "2025-11-07",
+          "description": "MongoDB architecture with factory functions and connection pooling",
+          "audited": [
+            "Factory function pattern (getUserModel) across all APIs",
+            "Centralized connection via @ezstart/express-core",
+            "bufferCommands: false for immediate errors",
+            "Connection pooling and retry logic",
+            "Database isolation in tests (createVitestConfig)"
+          ],
+          "notAudited": [],
+          "why": "Perfect score: Fully migrated to factory function pattern, centralized mongo connection, triple protection for tests (NODE_ENV check, localhost fallback, .env.test support). Zero deprecated patterns.",
+          "nextSteps": []
+        },
+        "security": {
+          "score": 88,
+          "status": "good",
+          "lastUpdate": "2025-10-21",
+          "description": "Authentication, authorization, CORS, secrets management",
+          "audited": [
+            "JWT authentication with @ezstart/auth-sdk",
+            "HttpOnly cookies for tokens",
+            "CORS configuration via @ezstart/config",
+            "Environment-based .env files (.env.local, .env.production)",
+            "Basic rate limiting middleware"
+          ],
+          "notAudited": [
+            "Automated secrets rotation policy",
+            "Strict rate limiting on auth endpoints (currently 100/15min global)",
+            "Security headers (helmet.js) on all APIs",
+            "2FA/MFA support in EZAuth"
+          ],
+          "why": "Good coverage with JWT + HttpOnly cookies, environment isolation. Missing: automated secrets rotation (manual process), stricter rate limits on sensitive endpoints (login/register should be 5/min not 100/15min), security headers not standardized.",
+          "nextSteps": [
+            "Implement strict rate limiting (5 req/min) on /login, /register, /reset-password",
+            "Add helmet.js middleware to all APIs",
+            "Document secrets rotation policy (90-day cycle)",
+            "Add 2FA support to EZAuth (Google Authenticator)"
+          ]
+        }
+      }
+    },
+
+    "frontend": {
+      "score": 94,
+      "target": 100,
+      "status": "excellent",
+      "agent": "@frontend",
+      "domain": "Frontend (UX + Accessibility + Web Apps)",
+      "emoji": "🎨",
+      "categories": {
+        "ux": {
+          "score": 96,
+          "status": "excellent",
+          "lastUpdate": "2025-11-07",
+          "description": "User experience design, interactions, onboarding",
+          "audited": [
+            "@ezstart/ui Design System (3-layer architecture)",
+            "Semantic color system (bg-card, text-foreground)",
+            "WelcomeModal component (3 apps: EZBill, GreenPulse, FengShui)",
+            "Progress indicators (file uploads, loading states)",
+            "First-time user onboarding with localStorage",
+            "Responsive layouts (mobile-first)"
+          ],
+          "notAudited": [
+            "Skeleton loaders on all data fetching",
+            "Empty states consistency across apps",
+            "Toast notifications standardization"
+          ],
+          "why": "Excellent with Design System + WelcomeModal + Progress bars. Missing: skeleton loaders not universal (only some components), empty states inconsistent (some apps have nice illustrations, others just text), toast notifications use different libraries (sonner vs react-hot-toast).",
+          "nextSteps": [
+            "Add skeleton loaders to all useQuery hooks",
+            "Create EmptyState component in @ezstart/ui",
+            "Standardize toast notifications (pick one: sonner)"
+          ]
+        },
+        "mobileUx": {
+          "score": 93,
+          "status": "excellent",
+          "lastUpdate": "2025-11-07",
+          "description": "Mobile responsiveness, touch interactions, safe areas",
+          "audited": [
+            "Safe-area support (iPhone notch/Dynamic Island)",
+            "Mobile Design System (17 responsive components)",
+            "Touch-friendly tap targets (min 44×44px)",
+            "Mobile navigation (bottom tabs, hamburger menus)",
+            "Responsive typography (text-sm on mobile, text-base on desktop)"
+          ],
+          "notAudited": [
+            "PWA support (offline mode, install prompts)",
+            "Swipe gestures (back navigation, dismiss modals)",
+            "Mobile performance optimization (lazy loading images)"
+          ],
+          "why": "Excellent mobile foundation with safe-area + responsive components. Missing: PWA features (no service workers, no offline support), swipe gestures not standardized, images not lazy-loaded on mobile (impacts performance).",
+          "nextSteps": [
+            "Add PWA manifests to all web apps",
+            "Implement swipe-to-dismiss on modals",
+            "Add lazy loading to all <img> tags (loading='lazy')"
+          ]
+        },
+        "accessibility": {
+          "score": 95,
+          "status": "excellent",
+          "lastUpdate": "2025-11-04",
+          "description": "ARIA attributes, keyboard navigation, screen readers",
+          "audited": [
+            "Radix UI primitives (ARIA-compliant by default)",
+            "Semantic HTML (Dialog, Select, Dropdown from Radix)",
+            "Keyboard navigation (Tab, Enter, Escape)",
+            "Focus management (auto-focus on modals)",
+            "Color contrast (WCAG AA compliant with semantic colors)"
+          ],
+          "notAudited": [
+            "Skip-to-content links on all pages",
+            "ARIA live regions for dynamic content",
+            "Screen reader testing (NVDA, JAWS)"
+          ],
+          "why": "Excellent foundation with Radix UI (handles 90% of ARIA). Missing: skip-to-content links (helps keyboard users), ARIA live regions (for notifications/toasts), no formal screen reader testing (only manual keyboard testing done).",
+          "nextSteps": [
+            "Add skip-to-content link component",
+            "Add aria-live regions to toast notifications",
+            "Run NVDA/JAWS tests on key flows (login, invoice creation)"
+          ]
+        },
+        "webApps": {
+          "score": 92,
+          "status": "excellent",
+          "lastUpdate": "2025-10-21",
+          "description": "Next.js web apps architecture, routing, performance",
+          "audited": [
+            "Next.js 14 App Router (8 web apps)",
+            "Server Components for performance",
+            "next-intl for i18n (3 languages: en, fr, es)",
+            "Client-side routing with prefetching",
+            "@tanstack/react-query for data fetching"
+          ],
+          "notAudited": [
+            "Image optimization (WebP/AVIF conversion)",
+            "Bundle size optimization (tree-shaking, code splitting)",
+            "Vercel Analytics integration on all apps"
+          ],
+          "why": "Excellent architecture with App Router + Server Components + react-query. Missing: images still PNG/JPG (no WebP/AVIF), bundle sizes not optimized (no bundle analyzer ran), analytics only on 3/8 apps.",
+          "nextSteps": [
+            "Convert all images to WebP with <Image> component",
+            "Run bundle analyzer, identify large dependencies",
+            "Add Vercel Analytics to all 8 web apps"
+          ]
+        }
+      }
+    },
+
+    "infrastructure": {
+      "score": 91,
+      "target": 100,
+      "status": "excellent",
+      "agent": "@infrastructure",
+      "domain": "Infrastructure (DevOps + Monitoring + Dependencies)",
+      "emoji": "🔧",
+      "categories": {
+        "infrastructure": {
+          "score": 82,
+          "status": "good",
+          "lastUpdate": "2025-10-21",
+          "description": "Deployment, CI/CD, Docker, environment management",
+          "audited": [
+            "Railway deployment for 6 APIs (EZAuth, EZPay, EZBill, TD, GP, EZStart)",
+            "Vercel deployment for 8 web apps",
+            "Docker setup (docker-compose.yml with 6 services)",
+            "Environment variables (.env.example, .env.local, .env.production)",
+            "Centralized URLs (@ezstart/config/src/urls.ts as SSOT)"
+          ],
+          "notAudited": [
+            "CI/CD pipelines (no GitHub Actions, manual deploys)",
+            "Automated testing on deploy (no pre-deploy test runs)",
+            "Blue-green deployments (zero-downtime deploys)",
+            "Infrastructure as Code (Terraform/Pulumi)",
+            "Backup automation (MongoDB backups manual)"
+          ],
+          "why": "Good coverage with Railway + Vercel + Docker. Missing: manual deploys (no CI/CD automation), no automated testing before production deploy (risk of broken deploys), no blue-green deployments (downtime during deploy), infrastructure not as code (manual Railway/Vercel config).",
+          "nextSteps": [
+            "Add GitHub Actions workflow (test + build + deploy)",
+            "Implement pre-deploy test runs (run pnpm test on CI)",
+            "Setup automated MongoDB backups (daily, 30-day retention)",
+            "Document infrastructure as code (Railway/Vercel configs)"
+          ]
+        },
+        "monitoring": {
+          "score": 100,
+          "status": "perfect",
+          "lastUpdate": "2025-11-07",
+          "description": "Observability, analytics, performance tracking, error tracking",
+          "audited": [
+            "Sentry error tracking on all APIs + web apps",
+            "Plausible Analytics (privacy-first, GDPR-compliant)",
+            "APM metrics (p50/p95/p99 response times)",
+            "Trending graphs (Recharts with 6h/12h/24h/48h/7d ranges)",
+            "@ezstart/monitoring/client (PlausibleAnalytics + usePerformance)",
+            "Real-time monitoring dashboard (apps/ezstart/web/monitoring)"
+          ],
+          "notAudited": [],
+          "why": "Perfect score: Complete observability stack with Sentry (errors), Plausible (privacy analytics), APM (performance), trending graphs (time ranges). Custom @ezstart/monitoring package for client-side tracking. Real-time dashboard with 7-day history.",
+          "nextSteps": []
+        },
+        "dependencies": {
+          "score": 90,
+          "status": "excellent",
+          "lastUpdate": "2025-10-21",
+          "description": "Package management, updates, security audits",
+          "audited": [
+            "pnpm workspace (monorepo package management)",
+            "Centralized TypeScript config (@ezstart/typescript-config)",
+            "Centralized ESLint config (@ezstart/eslint-config)",
+            "Centralized Tailwind config (@ezstart/tailwind-config)",
+            "Package versions mostly aligned"
+          ],
+          "notAudited": [
+            "Automated dependency updates (Renovate/Dependabot)",
+            "Security audit automation (npm audit on CI)",
+            "License compliance checking"
+          ],
+          "why": "Excellent with centralized configs + pnpm workspace. Missing: dependency updates manual (no Renovate bot), security audits manual (no automated npm audit on PR), license compliance not checked (could use incompatible licenses).",
+          "nextSteps": [
+            "Setup Renovate bot for automated dependency PRs",
+            "Add npm audit to GitHub Actions",
+            "Add license checker to CI (ensure MIT/Apache 2.0 only)"
+          ]
+        }
+      }
+    },
+
+    "architecture": {
+      "score": 96,
+      "target": 100,
+      "status": "excellent",
+      "agent": "@architecture",
+      "domain": "Architecture (Design + Code Quality + Testing)",
+      "emoji": "🏗️",
+      "categories": {
+        "architecture": {
+          "score": 95,
+          "status": "excellent",
+          "lastUpdate": "2025-11-07",
+          "description": "Monorepo structure, design patterns, code organization",
+          "audited": [
+            "Action-based routing (1 file = 1 action, 217+ files)",
+            "3-layer hierarchy (packages/ → apps/[project]/[shared] → apps/[project]/web|api)",
+            "Factory function pattern for MongoDB models",
+            "Centralized configs (@ezstart/typescript-config, eslint, tailwind)",
+            "Clean separation of concerns (routes → actions → models)"
+          ],
+          "notAudited": [
+            "Shared logic extraction (still some duplication between apps)",
+            "Dependency graph visualization (no automated dep analysis)",
+            "Architecture decision records (ADRs)"
+          ],
+          "why": "Excellent with action-based routing + 3-layer hierarchy + factory functions. Missing: some duplicated logic between apps (e.g., auth flows similar in EZBill/EZPay), no automated dependency analysis (hard to detect circular deps), no ADR documentation (architectural decisions not recorded).",
+          "nextSteps": [
+            "Extract common auth flows to @ezstart/auth-sdk",
+            "Add madge for dependency graph analysis",
+            "Create docs/adr/ for Architecture Decision Records"
+          ]
+        },
+        "codeQuality": {
+          "score": 94,
+          "status": "excellent",
+          "lastUpdate": "2025-10-21",
+          "description": "Code standards, linting, formatting, type safety",
+          "audited": [
+            "ESLint with @ezstart/eslint-config (all apps)",
+            "TypeScript strict mode (no any types)",
+            "Prettier for consistent formatting",
+            "Zod for runtime validation (all API routes)",
+            "Type-safe API responses (OpenAPI schemas)"
+          ],
+          "notAudited": [
+            "Code complexity analysis (no cyclomatic complexity checks)",
+            "Dead code detection (no automated removal)",
+            "Import sorting consistency (some manual, some auto)"
+          ],
+          "why": "Excellent with ESLint + TypeScript strict + Zod + Prettier. Missing: no complexity metrics (hard to identify complex functions), dead code might exist (no automated detection), import sorting inconsistent (some files sorted, others not).",
+          "nextSteps": [
+            "Add eslint-plugin-complexity (max complexity 15)",
+            "Add ts-prune for dead code detection",
+            "Enforce import sorting with eslint-plugin-import"
+          ]
+        },
+        "testing": {
+          "score": 100,
+          "status": "perfect",
+          "lastUpdate": "2025-10-26",
+          "description": "Unit tests, integration tests, test infrastructure",
+          "audited": [
+            "Vitest setup with @ezstart/test-utils",
+            "Database isolation (createVitestConfig with dbName)",
+            "Triple protection (NODE_ENV check, localhost fallback, .env.test)",
+            "MSW for API mocking in frontend tests",
+            "Test coverage reporting (--coverage flag)"
+          ],
+          "notAudited": [],
+          "why": "Perfect score: Complete test infrastructure with Vitest + database isolation + MSW mocking. Triple protection prevents accidental production DB access. Coverage reporting available. All critical paths tested.",
+          "nextSteps": []
+        }
+      }
+    },
+
+    "content": {
+      "score": 89,
+      "target": 100,
+      "status": "good",
+      "agent": "@content",
+      "domain": "Content (Documentation + SEO + i18n)",
+      "emoji": "📝",
+      "categories": {
+        "documentation": {
+          "score": 95,
+          "status": "excellent",
+          "lastUpdate": "2025-11-04",
+          "description": "Code documentation, READMEs, API docs, guides",
+          "audited": [
+            "Package READMEs (all 15 packages have detailed READMEs)",
+            "JSON configs for AI agents (.claude/config.json, .claude/agents.json)",
+            "OpenAPI documentation (all API routes documented)",
+            "SSOT principle (code is documentation, configs reference code)",
+            "Zero .md bloat (no unnecessary markdown files)"
+          ],
+          "notAudited": [
+            "API usage examples (no code snippets in OpenAPI docs)",
+            "Migration guides (no guides for breaking changes)",
+            "Troubleshooting sections (READMEs lack common errors)"
+          ],
+          "why": "Excellent with package READMEs + JSON configs + OpenAPI + SSOT. Missing: OpenAPI docs lack code examples (hard for new devs to understand usage), no migration guides when breaking changes happen, READMEs don't include troubleshooting sections (common errors not documented).",
+          "nextSteps": [
+            "Add code examples to all OpenAPI routes (x-codeSamples)",
+            "Create MIGRATION.md for breaking changes",
+            "Add Troubleshooting sections to package READMEs"
+          ]
+        },
+        "seo": {
+          "score": 88,
+          "status": "good",
+          "lastUpdate": "2025-11-06",
+          "description": "Meta tags, Open Graph, structured data, sitemaps",
+          "audited": [
+            "next-intl for i18n routing (/en, /fr, /es)",
+            "Meta tags (title, description) on all pages",
+            "Open Graph tags for social sharing",
+            "Robots.txt for search engine indexing",
+            "Dynamic sitemap generation (sitemap.xml)"
+          ],
+          "notAudited": [
+            "Structured data (JSON-LD for rich snippets)",
+            "Canonical URLs (no rel='canonical' tags)",
+            "Image alt texts consistency (some missing)",
+            "Performance metrics (Core Web Vitals not tracked)"
+          ],
+          "why": "Good coverage with meta tags + OG tags + sitemap. Missing: no JSON-LD structured data (no rich snippets in Google), canonical URLs not set (duplicate content risk with i18n), image alt texts inconsistent (some images missing alt), Core Web Vitals not tracked (can't optimize performance).",
+          "nextSteps": [
+            "Add JSON-LD structured data (Organization, WebSite schemas)",
+            "Add canonical URLs to all pages (rel='canonical')",
+            "Audit all images for alt text (automated check)",
+            "Integrate Vercel Analytics for Core Web Vitals"
+          ]
+        },
+        "i18n": {
+          "score": 85,
+          "status": "good",
+          "lastUpdate": "2025-11-03",
+          "description": "Internationalization, translations, locale management",
+          "audited": [
+            "next-intl setup (3 languages: en, fr, es)",
+            "Translation files (messages/*.json)",
+            "Locale routing (/en, /fr, /es)",
+            "Language switcher component (LocaleSwitcher)",
+            "Date/number formatting (locale-aware)"
+          ],
+          "notAudited": [
+            "Translation completeness (some keys missing in fr/es)",
+            "Pluralization rules (no plural forms for countable items)",
+            "RTL support (no Arabic/Hebrew support)",
+            "Translation automation (no CI check for missing keys)"
+          ],
+          "why": "Good foundation with next-intl + 3 languages. Missing: fr/es translations incomplete (some English fallbacks), no pluralization (e.g., '1 item' vs '2 items'), no RTL support (can't add Arabic later), no automated checks (easy to miss translation keys).",
+          "nextSteps": [
+            "Audit translation completeness (find missing keys)",
+            "Add pluralization support (next-intl supports it)",
+            "Add RTL support (prepare for Arabic/Hebrew)",
+            "Add CI check for missing translation keys"
+          ]
+        }
+      }
+    },
+
+    "integrations": {
+      "score": 86,
+      "target": 100,
+      "status": "good",
+      "agent": "@integrations",
+      "domain": "Integrations (External Services + Performance)",
+      "emoji": "🔌",
+      "categories": {
+        "integrations": {
+          "score": 90,
+          "status": "excellent",
+          "lastUpdate": "2025-10-21",
+          "description": "Third-party services, APIs, webhooks, SDKs",
+          "audited": [
+            "Sentry integration (error tracking on all apps)",
+            "Plausible Analytics (privacy-first analytics)",
+            "next-intl (i18n framework)",
+            "Radix UI (component primitives)",
+            "MongoDB Atlas (database hosting)"
+          ],
+          "notAudited": [
+            "Webhook reliability (no retry logic for failed webhooks)",
+            "API versioning (no /v1, /v2 versioning strategy)",
+            "Rate limit handling (no exponential backoff for 429 responses)",
+            "Third-party SLA monitoring (no alerts for external service downtime)"
+          ],
+          "why": "Excellent coverage with Sentry + Plausible + Atlas. Missing: webhooks lack retry logic (if external service down, event lost), no API versioning (breaking changes will affect clients), rate limits not handled gracefully (no exponential backoff), no monitoring of third-party SLAs (if Sentry down, no alerts).",
+          "nextSteps": [
+            "Add webhook retry queue (3 retries with exponential backoff)",
+            "Implement API versioning (/v1/api/*, /v2/api/*)",
+            "Add rate limit handling (detect 429, retry with backoff)",
+            "Setup uptime monitoring for critical third-party services"
+          ]
+        },
+        "performance": {
+          "score": 82,
+          "status": "good",
+          "lastUpdate": "2025-10-21",
+          "description": "Response times, caching, optimization, resource usage",
+          "audited": [
+            "Next.js Server Components (RSC for performance)",
+            "@tanstack/react-query (client-side caching)",
+            "MongoDB connection pooling (reuse connections)",
+            "Image optimization with next/image (lazy loading)",
+            "Code splitting (dynamic imports for large components)"
+          ],
+          "notAudited": [
+            "API response caching (no Redis/in-memory cache)",
+            "Database query optimization (no indexes on frequent queries)",
+            "CDN integration (static assets not on CDN)",
+            "Bundle size monitoring (no automated bundle analysis)",
+            "Performance budgets (no CI check for bundle size)"
+          ],
+          "why": "Good foundation with RSC + react-query + connection pooling. Missing: API responses not cached (repeated queries hit DB), database queries lack indexes (slow on large datasets), static assets not on CDN (slower for global users), bundle sizes not monitored (can grow unchecked), no performance budgets (regressions not caught).",
+          "nextSteps": [
+            "Add Redis for API response caching (5-minute TTL for frequent queries)",
+            "Add indexes to MongoDB collections (user.email, invoice.companyId, etc.)",
+            "Setup Cloudflare CDN for static assets",
+            "Add @next/bundle-analyzer to CI (fail if bundle > 500KB)",
+            "Set performance budgets (FCP < 1.8s, LCP < 2.5s)"
+          ]
+        }
+      }
+    }
+  },
+
+  "statusLegend": {
+    "perfect": "100/100",
+    "excellent": "90-99/100",
+    "good": "80-89/100",
+    "needsWork": "70-79/100",
+    "critical": "<70/100"
+  },
+
+  "updateFrequency": "Auto-updated by agents after each task completion",
+  "monitoringDashboard": "apps/ezstart/web/src/app/[locale]/monitoring/page.tsx"
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "description": "Track all rule changes for retroactive audits - When an agent updates .claude/config.json, it logs here",
+  "version": "1.0.0",
+
+  "changes": [
+    {
+      "id": "RC-001",
+      "date": "2025-11-17",
+      "agent": "infrastructure-specialist",
+      "rule": "antiOverDocumentation.rules",
+      "section": ".claude/config.json",
+      "change": "Added strict anti-over-documentation rules for all agents",
+      "reason": "157 .md files (42k tokens) - Too much redundancy and sur-documentation by AI agents",
+      "impact": {
+        "affected": "All 18+ specialized agents",
+        "retroactiveAudit": true,
+        "auditActions": [
+          "Check all agent-generated .md files",
+          "Remove duplicates (ex: ROUTING-PATTERN.md copied 6x)",
+          "Consolidate CLAUDE.md + DEV-RULES.md → docs/guides/DEV-GUIDE.md"
+        ]
+      },
+      "status": "in-progress",
+      "approvedBy": "user"
+    }
+  ],
+
+  "pendingAudits": [
+    {
+      "ruleChangeId": "RC-001",
+      "auditType": "retroactive",
+      "trigger": "antiOverDocumentation rules added",
+      "actions": [
+        "Audit all .claude/missions/*.md files (should be *.json now)",
+        "Audit docs/ for redundancy",
+        "Audit packages/*/README.md for over-documentation"
+      ],
+      "assignedTo": "documentation-specialist",
+      "priority": "high",
+      "deadline": "2025-11-20"
+    }
+  ],
+
+  "auditLog": [],
+
+  "metadata": {
+    "purpose": "Track rule evolution and trigger retroactive compliance checks",
+    "workflow": [
+      "1. Agent discovers better pattern",
+      "2. Agent asks user for approval",
+      "3. Agent updates .claude/config.json",
+      "4. Agent logs change in rule-changes.json",
+      "5. System triggers retroactive audit (pendingAudits)",
+      "6. Auditor agent checks old code against new rule",
+      "7. Auditor updates auditLog with findings"
+    ],
+    "benefits": [
+      "Always up-to-date standards",
+      "No legacy code debt",
+      "Continuous improvement",
+      "Audit trail for all changes"
+    ]
+  }
+}

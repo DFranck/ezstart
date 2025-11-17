@@ -1,8 +1,8 @@
 'use client'
 
 import { useSafeTranslations } from '@/hooks/useSafeIntl'
-import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import {
   Button,
   Card,

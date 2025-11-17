@@ -1,25 +1,36 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { MetricsOverview } from '../components/MetricsOverview'
 import { TabScore } from '../components/TabScore'
-import { AuditCard } from '../health/components/AuditCard'
 import { useCountdown } from '../hooks/useCountdown'
 import { useMonitoringAudits } from '../hooks/useMonitoringAudits'
 import { useSocket } from '../hooks/useSocket'
 import { calculateAuditsHealth, getMetricsData } from '../lib/utils'
+import { AuditCard } from './components/AuditCard'
+import { AuditsFilters } from './components/AuditsFilters'
 
 function AuditsMonitoringContent(): any {
+  const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
 
   // Fetch audits data
   const { data: auditsData, isLoading, error, isFetching } = useMonitoringAudits()
+
+  // Extract data - Filter out domain-level audits (only keep categories)
+  const allAudits = auditsData?.audits || []
+  const audits = allAudits.filter((audit: any) => {
+    // Domain-level audits have filePath like "docs/audits.json → domains.backend"
+    // Category-level audits have filePath like "docs/audits.json → domains.backend.categories.api"
+    return audit.filePath && audit.filePath.includes('.categories.')
+  })
 
   // Socket.IO real-time updates
   useSocket({
@@ -30,8 +41,6 @@ function AuditsMonitoringContent(): any {
     },
   })
 
-  // Extract data
-  const audits = auditsData?.audits || []
   const summary = { total: 0, healthy: 0, degraded: 0, unhealthy: 0 }
 
   // Calculate health and metrics
@@ -80,9 +89,7 @@ function AuditsMonitoringContent(): any {
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
           <H1>{t('auditsPage.title')}</H1>
-          <P className="text-muted-foreground">
-            {t('auditsPage.description')}
-          </P>
+          <P className="text-muted-foreground">{t('auditsPage.description')}</P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
               Next update in: {minutes}:{String(seconds).padStart(2, '0')}
@@ -99,28 +106,60 @@ function AuditsMonitoringContent(): any {
             subtitle={`${audits.length} audits completed`}
           />
           {/* Metrics Overview */}
-          <MetricsOverview activeTab="audits" metrics={metricsData} />
+          {isDesktop && <MetricsOverview activeTab="audits" metrics={metricsData} />}{' '}
         </Div>
       </Section>
 
       {/* Audits Grid Section */}
       <Section size="full" className="max-w-7xl">
         <Div layout="center">
-          <H2>All Audits ({audits.length})</H2>
+          <H2>Audits Overview ({audits.length})</H2>
           <P className="text-muted-foreground">{t('auditsPage.detailsSubtitle')}</P>
         </Div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {audits.map((audit: any) => (
-            <AuditCard key={audit.auditType} audit={audit} />
-          ))}
-        </div>
+        {/* Filters */}
+        <AuditsFilters audits={audits}>
+          {filteredAudits => {
+            // Adaptive grid columns based on number of audits
+            // Mobile: always 1 col
+            // Tablet: max 2 cols (1 if 1 audit, 2 if 2+)
+            // Desktop: max 3 cols (1 if 1 audit, 2 if 2 audits, 3 if 3+)
+            const count = filteredAudits.length
+            const gridCols =
+              count === 0
+                ? 'grid-cols-1'
+                : count === 1
+                  ? 'grid-cols-1'
+                  : count === 2
+                    ? 'grid-cols-1 md:grid-cols-2'
+                    : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 
-        {audits.length === 0 && (
-          <div className="text-center py-12">
-            <P className="text-muted-foreground">{t('auditsPage.noAudits')}</P>
-          </div>
-        )}
+            return (
+              <>
+                {/* Audits Grid */}
+                <div className={`grid ${gridCols} gap-4 mt-4`}>
+                  {filteredAudits.map((audit: any) => (
+                    <div key={audit.auditType} id={`audit-${audit.auditType}`}>
+                      <AuditCard audit={audit} />
+                    </div>
+                  ))}
+                </div>
+
+                {filteredAudits.length === 0 && audits.length > 0 && (
+                  <div className="text-center py-12">
+                    <P className="text-muted-foreground">No audits match your filters.</P>
+                  </div>
+                )}
+
+                {audits.length === 0 && (
+                  <div className="text-center py-12">
+                    <P className="text-muted-foreground">{t('auditsPage.noAudits')}</P>
+                  </div>
+                )}
+              </>
+            )
+          }}
+        </AuditsFilters>
       </Section>
     </>
   )

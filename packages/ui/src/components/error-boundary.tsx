@@ -6,6 +6,7 @@ import { Button } from './button'
 import { Card, CardContent } from './card'
 import { Icon } from './icon'
 import { H3, P } from './tag/src/v2/aliases'
+import { toast } from 'sonner'
 
 /**
  * ErrorBoundary Component - Catch React errors and display fallback UI
@@ -141,6 +142,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     })
   }
 
+  copyErrorToClipboard = () => {
+    const { error, errorInfo } = this.state
+
+    if (!error) return
+
+    const errorText = `Error: ${error.toString()}\n\nComponent Stack:\n${errorInfo?.componentStack || 'N/A'}\n\nUser Agent: ${navigator.userAgent}\nTimestamp: ${new Date().toISOString()}`
+
+    navigator.clipboard
+      .writeText(errorText)
+      .then(() => {
+        toast.success('Error copied to clipboard')
+      })
+      .catch(err => {
+        console.error('Failed to copy error:', err)
+        toast.error('Failed to copy error')
+      })
+  }
+
   render() {
     const {
       children,
@@ -184,10 +203,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <P className="text-sm text-muted-foreground">{description}</P>
             </div>
             {showResetButton && !maxRetriesExceeded && (
-              <Button onClick={this.resetError} variant="outline" size="sm">
-                <Icon name="lucide:RotateCcw" className="mr-2 h-4 w-4" />
-                Try Again
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={this.resetError} variant="outline" size="sm">
+                  <Icon name="lucide:RotateCcw" className="mr-2 h-4 w-4" />
+                  Try Again
+                </Button>
+                <Button onClick={this.copyErrorToClipboard} variant="ghost" size="sm">
+                  <Icon name="lucide:Copy" className="mr-2 h-4 w-4" />
+                  Copy
+                </Button>
+              </div>
             )}
           </div>
         )
@@ -232,7 +257,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   </div>
                 )}
 
-                <div className="mt-6 flex justify-center gap-3">
+                <div className="mt-6 flex justify-center gap-3 flex-wrap">
                   {showResetButton && !maxRetriesExceeded && (
                     <Button onClick={this.resetError} variant="destructive">
                       <Icon name="lucide:RotateCcw" className="mr-2 h-4 w-4" />
@@ -242,6 +267,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   <Button variant="outline" onClick={() => window.location.reload()}>
                     <Icon name="lucide:RefreshCw" className="mr-2 h-4 w-4" />
                     Reload Page
+                  </Button>
+                  <Button variant="ghost" onClick={this.copyErrorToClipboard}>
+                    <Icon name="lucide:Copy" className="mr-2 h-4 w-4" />
+                    Copy Error
                   </Button>
                 </div>
               </CardContent>
@@ -284,10 +313,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   )}
 
                   {showResetButton && !maxRetriesExceeded && (
-                    <div className="mt-4">
+                    <div className="mt-4 flex gap-2">
                       <Button onClick={this.resetError} variant="destructive" size="sm">
                         <Icon name="lucide:RotateCcw" className="mr-2 h-3 w-3" />
                         Try Again {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+                      </Button>
+                      <Button onClick={this.copyErrorToClipboard} variant="ghost" size="sm">
+                        <Icon name="lucide:Copy" className="mr-2 h-3 w-3" />
+                        Copy Error
                       </Button>
                     </div>
                   )}

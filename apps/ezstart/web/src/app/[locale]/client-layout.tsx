@@ -1,7 +1,7 @@
 'use client'
 
 import { useNavLinks } from '@/hooks/useNavLinks'
-import { LoginButton, useAuth } from '@ezstart/auth-sdk'
+import { LoginButton, RequireAuth, useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   ClientLayout as BaseClientLayout,
@@ -11,6 +11,7 @@ import {
   PWAInstallPrompt,
   type NavigationLink,
 } from '@ezstart/ui/components'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -22,6 +23,7 @@ type ClientLayoutProps = {
 
 const ClientLayout = ({ children }: ClientLayoutProps): any => {
   const { isAuthenticated } = useAuth()
+  const { isMobile } = useDevice()
   const router = useRouter()
   const pathname = usePathname()
   const t = useTranslations()
@@ -121,13 +123,17 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
       >
         {children}
       </BaseClientLayout>
-      <PWAInstallPrompt
-        appName={t('pwa.install.title')}
-        description={t('pwa.install.description')}
-        installButtonText={t('pwa.install.installButton')}
-        laterButtonText={t('pwa.install.laterButton')}
-        // showInDev
-      />
+      {isMobile && (
+        <RequireAuth>
+          <PWAInstallPrompt
+            appName={t('pwa.install.title')}
+            description={t('pwa.install.description')}
+            installButtonText={t('pwa.install.installButton')}
+            laterButtonText={t('pwa.install.laterButton')}
+            // showInDev
+          />
+        </RequireAuth>
+      )}
     </>
   )
 }

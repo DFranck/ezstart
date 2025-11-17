@@ -3,10 +3,11 @@
  *
  * Get all audits with metadata
  * Returns all available audits with their scores, status, and metadata
+ *
+ * Now reads from docs/audits.json (single JSON file) instead of multiple .md files
  */
 
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { AUDIT_METADATA } from '@ezstart/monitoring'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -56,59 +57,82 @@ const errorResponseSchema = z.object({
 
 const getAllAuditsHandler = (_: Request, res: Response) => {
   try {
-    const audits = Object.entries(AUDIT_METADATA).map(([auditType, metadata]) => {
-      const filePath = join(process.cwd(), '../../../', metadata.filePath)
-      const exists = existsSync(filePath)
+    // Read audits.json file
+    const auditsJsonPath = join(process.cwd(), '../../../docs/audits.json')
+    const exists = existsSync(auditsJsonPath)
 
-      let score: number | null = null
-      let lastUpdated: Date | null = null
-      let status: 'not-audited' | 'partial' | 'complete' = 'not-audited'
+    if (!exists) {
+      return res.status(404).json({
+        error: 'Audits file not found',
+        message: 'docs/audits.json does not exist',
+      })
+    }
 
-      if (exists) {
-        try {
-          const content = readFileSync(filePath, 'utf-8')
-          const scoreMatch = content.match(/\*\*Total Score:\*\*\s*(\d+)\/100/i)
-          if (scoreMatch && scoreMatch[1]) {
-            score = parseInt(scoreMatch[1], 10)
-            status = score >= 90 ? 'complete' : 'partial'
-          }
+    const auditsJson = JSON.parse(readFileSync(auditsJsonPath, 'utf-8'))
+    const { domains } = auditsJson
 
-          const dateMatch = content.match(/\*\*Last Updated:\*\*\s*(\d{4}-\d{2}-\d{2})/i)
-          if (dateMatch && dateMatch[1]) {
-            lastUpdated = new Date(dateMatch[1])
-          }
-        } catch (parseError) {
-          console.warn(`Failed to parse audit file: ${filePath}`, parseError)
+    // Transform audits.json structure to match expected API format
+    const audits = Object.entries(domains).flatMap(([domainKey, domainData]: [string, any]) => {
+      return Object.entries(domainData.categories || {}).map(([categoryKey, categoryData]: [string, any]) => {
+        const score = categoryData.score
+        const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
+
+        return {
+          auditType: categoryKey,
+          emoji: domainData.emoji || '📊',
+          name: categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
+          description: categoryData.description || `${domainData.agent} - ${categoryKey}`,
+          filePath: `docs/audits.json → domains.${domainKey}.categories.${categoryKey}`,
+          score,
+          lastUpdated: categoryData.lastUpdate || auditsJson.lastUpdated,
+          status,
+          exists: true,
+          // New human-readable fields
+          audited: categoryData.audited || [],
+          notAudited: categoryData.notAudited || [],
+          why: categoryData.why || '',
+          nextSteps: categoryData.nextSteps || [],
         }
-      }
+      })
+    })
+
+    // Add domain-level scores as well
+    const domainAudits = Object.entries(domains).map(([domainKey, domainData]: [string, any]) => {
+      const score = domainData.score
+      const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
 
       return {
-        auditType,
-        ...metadata,
+        auditType: domainKey,
+        emoji: domainData.emoji || '📊',
+        name: domainData.domain || domainKey,
+        description: domainData.domain || `${domainData.agent} - Overall ${domainKey} score`,
+        filePath: `docs/audits.json → domains.${domainKey}`,
         score,
-        lastUpdated,
+        lastUpdated: auditsJson.lastUpdated,
         status,
-        exists,
+        exists: true,
+        // Domain-level doesn't have these detailed fields
+        audited: [],
+        notAudited: [],
+        why: `Overall ${domainKey} score aggregated from ${Object.keys(domainData.categories || {}).length} categories`,
+        nextSteps: [],
       }
     })
 
+    const allAudits = [...domainAudits, ...audits]
+
     res.json({
-      audits,
+      audits: allAudits,
       summary: {
-        total: audits.length,
-        complete: audits.filter(a => a.status === 'complete').length,
-        partial: audits.filter(a => a.status === 'partial').length,
-        notAudited: audits.filter(a => a.status === 'not-audited').length,
-        averageScore:
-          audits.filter(a => a.score !== null).length > 0
-            ? Math.round(
-                audits.reduce((sum, a) => sum + (a.score || 0), 0) /
-                  audits.filter(a => a.score !== null).length
-              )
-            : null,
+        total: allAudits.length,
+        complete: allAudits.filter(a => a.status === 'complete').length,
+        partial: allAudits.filter(a => a.status === 'partial').length,
+        notAudited: allAudits.filter(a => a.status === 'not-audited').length,
+        averageScore: auditsJson.global?.score || null,
       },
     })
   } catch (error) {
+    console.error('[Audits] Error reading audits.json:', error)
     res.status(500).json({
       error: 'Failed to get audits',
       message: error instanceof Error ? error.message : 'Unknown error',

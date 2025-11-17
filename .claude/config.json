@@ -1,0 +1,438 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "3.0.0",
+  "lastUpdated": "2025-11-17",
+  "description": "Infrastructure rules for ALL AI agents - Single source of truth",
+
+  "antiOverDocumentation": {
+    "manifesto": "Code is documentation. Docs explain WHY, not WHAT. Less is more.",
+
+    "rules": [
+      "❌ NEVER create new .md files without explicit user request",
+      "❌ NEVER duplicate information across files",
+      "❌ NEVER write verbose comments in code (code should be self-explanatory)",
+      "❌ NEVER create README for trivial components",
+      "❌ NEVER document obvious code (ex: 'getUserById fetches user by ID')",
+      "❌ NEVER add 'Generated with Claude Code' footer in commits",
+      "❌ NEVER add 'Co-Authored-By: Claude' in commits",
+      "✅ Update existing docs ONLY when significant changes occur",
+      "✅ Use .claude/config.json as single source of truth",
+      "✅ Link to docs/ instead of duplicating content",
+      "✅ Keep package READMEs under 300 lines",
+      "✅ Document WHY, not WHAT (code shows WHAT)",
+      "✅ Ask user before creating ANY documentation file"
+    ],
+
+    "limits": {
+      "maxLinesPerReadme": 300,
+      "maxFilesInClaudeFolder": 30,
+      "maxMissionFileLines": 100,
+      "maxAuditFileLines": 600,
+      "maxCodeCommentLines": 3
+    },
+
+    "whenToDocument": {
+      "yes": [
+        "New package created (API reference needed)",
+        "Breaking API changes (migration guide)",
+        "Complex algorithm implementation (rationale)",
+        "Non-obvious architectural decision (context)",
+        "Security-critical code (warnings)",
+        "Performance optimization (measurements)"
+      ],
+      "no": [
+        "Simple CRUD operations",
+        "Obvious utility functions",
+        "Standard React components",
+        "Self-explanatory code",
+        "Temporary fixes",
+        "Trivial refactoring"
+      ]
+    },
+
+    "beforeCreatingDoc": {
+      "checklist": [
+        "1. Does this info already exist? (search docs/ and .claude/)",
+        "2. Is this for humans or agents? (choose docs/ vs .claude/)",
+        "3. Can I update existing file instead of creating new one?",
+        "4. Is this truly necessary or just nice-to-have?",
+        "5. Will this be maintained or become stale in 3 months?",
+        "6. Did I ask the user for permission?"
+      ]
+    }
+  },
+
+  "agentWorkflow": {
+    "description": "How ALL specialized agents should work",
+    "steps": [
+      "1. Read .claude/config.json (this file) for common rules",
+      "2. Read .claude/agents.json for specific agent mission and SSOT references",
+      "3. Read SSOT files (code) for dynamic data (URLs, platforms, architecture...)",
+      "4. Execute task (generate/modify code following patterns)",
+      "5. Detect new patterns → Ask user if should become standard rule",
+      "6. If approved: Update .claude/config.json + log in .claude/rules-log.json",
+      "7. Calculate new score if code changed → Update docs/audits.json",
+      "8. Auto-sync .claude/agents.json if score changed (read from docs/audits.json)",
+      "9. Commit changes (code + configs + audits.json) with clear message"
+    ],
+    "autoUpdate": {
+      "agents.json": {
+        "trigger": "Score changed",
+        "action": "Agent reads docs/audits.json → updates .claude/agents.json → currentScore",
+        "frequency": "After each task completion"
+      },
+      "config.json": {
+        "trigger": "New pattern discovered that improves codebase",
+        "action": "Agent asks user approval → updates relevant section → logs in rules-log.json",
+        "frequency": "On new pattern discovery"
+      },
+      "audits.json": {
+        "trigger": "Code changed or pattern updated",
+        "action": "Agent calculates new score → updates docs/audits.json",
+        "frequency": "After each significant change",
+        "format": "JSON only (no .md files)"
+      }
+    },
+    "communication": [
+      "Use French for user communication",
+      "Be concise and actionable",
+      "Provide file paths with line numbers: file.ts:42",
+      "Link to docs/ for detailed explanations",
+      "Ask clarifying questions before assuming"
+    ],
+    "ssotPrinciple": {
+      "rule": "Code is the Single Source of Truth (SSOT) - Agents consume code, not duplicate data",
+      "examples": [
+        "Deployment URLs/platforms: Read packages/config/src/urls.ts (NOT .claude/missions/*.json)",
+        "Current scores: Read docs/audits/*-AUDIT.md (NOT hardcoded in agent configs)",
+        "Dependencies/versions: Read package.json (NOT duplicated in docs)",
+        "Architecture: Read actual code structure (NOT described in static docs)"
+      ],
+      "neverDuplicate": [
+        "URLs (always in packages/config/src/urls.ts)",
+        "Deployment platforms (always in packages/config/src/urls.ts → apiPlatform/webPlatform)",
+        "Audit scores (always in docs/audits/*-AUDIT.md)",
+        "Package versions (always in package.json)",
+        "Environment variables (always in .env.example files)"
+      ],
+      "agentConfigsContain": [
+        "Agent responsibilities (what they do)",
+        "Workflow patterns (how they work)",
+        "Scope definition (which packages/apps)",
+        "Reference to SSOT files (where to read dynamic data)"
+      ]
+    }
+  },
+
+  "naming": {
+    "files": {
+      "components": "PascalCase (UserProfile.tsx, InvoiceForm.tsx)",
+      "routes": "verbEntity (createUser.ts, listInvoices.ts, getUserById.ts)",
+      "utilities": "camelCase (formatDate.ts, validateEmail.ts)",
+      "types": "PascalCase (User.ts, Invoice.ts, ApiResponse.ts)",
+      "tests": "[name].test.ts or [name].spec.ts",
+      "configs": "camelCase (routes.ts, models.ts, middleware.ts)"
+    },
+    "folders": {
+      "features": "kebab-case (user-management/, invoice-system/)",
+      "private": "_prefixed (_helpers/, _utils/)",
+      "index": "All multi-export folders need index.ts"
+    },
+    "variables": {
+      "general": "camelCase (userId, currentUser, invoiceTotal)",
+      "constants": "UPPERCASE (MAX_RETRIES, API_VERSION, DEFAULT_TIMEOUT)",
+      "booleans": "is/has/should prefix (isLoading, hasError, shouldRender)"
+    },
+    "functions": {
+      "general": "camelCase (getUserById, calculateTotal, validateEmail)",
+      "components": "PascalCase (UserProfile, InvoiceList)",
+      "hooks": "use prefix (useAuth, useInvoices, useTheme)"
+    },
+    "routePatterns": {
+      "create": "create{Entity}.ts (createUser.ts, createInvoice.ts)",
+      "list": "list{Entities}.ts (listUsers.ts, listInvoices.ts)",
+      "getById": "get{Entity}ById.ts (getUserById.ts, getInvoiceById.ts)",
+      "update": "update{Entity}.ts (updateUser.ts, updateInvoice.ts)",
+      "delete": "delete{Entity}.ts (deleteUser.ts, deleteInvoice.ts)",
+      "special": "{action}With{Modifier}.ts (generateFormWithAI.ts)"
+    }
+  },
+
+  "architecture": {
+    "hierarchy": {
+      "priority": [
+        "1. packages/ - Cross-project reusable code (HIGHEST priority)",
+        "2. apps/[project]/[shared] - Web+API shared code (MEDIUM priority)",
+        "3. apps/[project]/web|api - Layer-specific code (LOWEST priority)"
+      ],
+      "rule": "ALWAYS create code in the HIGHEST layer possible for maximum reusability"
+    },
+    "packageStructure": {
+      "shared": [
+        "@ezstart/config - URLs, ports, CORS, environment detection",
+        "@ezstart/ui - 340+ UI components (3-layer architecture)",
+        "@ezstart/types - Shared TypeScript types",
+        "@ezstart/express-core - API infrastructure (Express, MongoDB, rate limiting)",
+        "@ezstart/auth-sdk - Authentication SDK (JWT, sessions, SSO)",
+        "@ezstart/pay-sdk - Payment SDK (Stripe integration)",
+        "@ezstart/monitoring - Observability (Plausible, APM, metrics)",
+        "@ezstart/next-theme - Theme provider (dark/light mode)",
+        "@ezstart/logger - Centralized logging",
+        "@ezstart/fetch-client - HTTP client wrapper",
+        "@ezstart/rbac - Role-based access control",
+        "@ezstart/test-utils - Testing infrastructure"
+      ],
+      "projectSpecific": [
+        "apps/[app]/types - Project-specific types",
+        "apps/[app]/utils - Project-specific utilities",
+        "apps/[app]/config - Project-specific config"
+      ]
+    },
+    "webAppStructure": [
+      "app/ - Next.js app router (pages, layouts, route handlers)",
+      "components/ - React components",
+      "hooks/ - Custom React hooks",
+      "lib/ - Utilities and helpers",
+      "utils/ - Utility functions",
+      "contexts/ - React contexts",
+      "stores/ - State management (Zustand)",
+      "i18n/ - Internationalization config",
+      "messages/ - Translation files",
+      "middleware.ts - Next.js middleware"
+    ],
+    "apiStructure": [
+      "routes/ - Action-based routes (1 file = 1 action)",
+      "models/ - MongoDB models (factory functions)",
+      "services/ - Business logic",
+      "controllers/ - Route controllers",
+      "middleware/ - Express middleware",
+      "types/ - TypeScript types",
+      "config/ - Configuration",
+      "__tests__/ - Test files"
+    ],
+    "circularDeps": {
+      "rule": "STRICTLY FORBIDDEN - Zero tolerance",
+      "check": "pnpm turbo run build --dry-run",
+      "currentStatus": "✅ Zero circular dependencies (verified 2025-11-17)"
+    }
+  },
+
+  "ports": {
+    "pattern": "50X0 for APIs, 50X5 for web apps",
+    "apis": {
+      "ezstart": 5000,
+      "ezauth": 5010,
+      "ezbill": 5020,
+      "tower-defense": 5030,
+      "ezpay": 5040,
+      "green-pulse": 5070
+    },
+    "webs": {
+      "ezstart": 5005,
+      "ezauth": 5015,
+      "ezbill": 5025,
+      "tower-defense": 5035,
+      "ezpay": 5045,
+      "asc-tcd": 5055,
+      "fengshui": 5065,
+      "green-pulse": 5075
+    }
+  },
+
+  "ui": {
+    "mandatoryRules": [
+      "❌ NEVER use native HTML (div, button, input, h1, h2, p, etc.)",
+      "✅ ALWAYS use @ezstart/ui components",
+      "❌ NEVER hardcode colors (bg-red-50, text-gray-600, border-blue-200)",
+      "✅ ALWAYS use semantic colors (bg-card, text-foreground, border)",
+      "❌ NEVER import from shadcn/ui directly",
+      "✅ ALWAYS import from @ezstart/ui/components",
+      "✅ ALWAYS use ThemeProvider from @ezstart/next-theme",
+      "✅ ALWAYS support dark/light modes automatically"
+    ],
+    "architecture": {
+      "layer1": "Primitives & Base (Dialog, Select, Button, Input, Card - Radix wrappers)",
+      "layer2": "High-Level Components (Modal, Dropdown, Hero - Simplified abstractions)",
+      "layer3": "Business Components (PasswordInput, BackButton, LocaleSwitcher - Domain-specific)"
+    },
+    "semanticColors": {
+      "background": ["bg-background", "bg-card", "bg-muted", "bg-popover"],
+      "text": ["text-foreground", "text-muted-foreground", "text-card-foreground"],
+      "primary": ["bg-primary", "text-primary-foreground"],
+      "secondary": ["bg-secondary", "text-secondary-foreground"],
+      "accent": ["bg-accent", "text-accent-foreground"],
+      "destructive": ["bg-destructive", "text-destructive-foreground"],
+      "border": ["border"],
+      "input": ["bg-input", "border-input"],
+      "ring": ["ring-ring"]
+    },
+    "docsReference": "packages/ui/README.md"
+  },
+
+  "mongodb": {
+    "connection": "@ezstart/express-core/connectToMongo",
+    "pattern": "Factory functions (async getModel())",
+    "example": "export async function getUserModel() { const mongoose = await connectToMongo('dbname'); return mongoose.models.User || mongoose.model('User', schema); }",
+    "schemaOptions": {
+      "bufferCommands": false
+    },
+    "protection": [
+      "✅ .env.test exists with localhost URL",
+      "✅ vitest.config.ts loads .env.test FIRST",
+      "✅ NODE_ENV=test forced in vitest config",
+      "✅ Triple check before running tests",
+      "✅ Recent backup available (< 7 days)"
+    ],
+    "docsReference": "packages/express-core/MONGODB-ARCHITECTURE.md"
+  },
+
+  "api": {
+    "framework": "Express.js via @ezstart/express-core",
+    "routingPattern": {
+      "type": "Action-based (1 file = 1 action)",
+      "structure": "routes/[feature]/[verbEntity].ts",
+      "export": "routes/[feature]/index.ts exports router + registries"
+    },
+    "prefix": "/api",
+    "rateLimiting": {
+      "standard": "100 req/15min (general endpoints)",
+      "strict": "5 req/min (sensitive operations)",
+      "veryStrict": "3 req/hour (critical actions like password reset)"
+    },
+    "requirements": [
+      "✅ CORS via @ezstart/config/createCorsConfig",
+      "✅ Health check at /api/health",
+      "✅ OpenAPI documentation (Swagger)",
+      "✅ TypeScript strict mode",
+      "✅ Rate limiting on ALL endpoints",
+      "✅ Error handling middleware",
+      "✅ Request validation (Zod schemas)"
+    ],
+    "docsReference": "docs/reference/ROUTING.md"
+  },
+
+  "packages": {
+    "ssot": {
+      "description": "Single Source of Truth - Centralized configs",
+      "typescript": "@ezstart/typescript-config (6 variants: base, api, nextjs, react-library, types)",
+      "eslint": "@ezstart/eslint-config (3 variants: base, react, next)",
+      "tailwind": "@ezstart/tailwind-config (semantic colors, theme presets)",
+      "next": "@ezstart/next-config (i18n, performance, security)",
+      "postcss": "@ezstart/ui/postcss.config",
+      "cors": "@ezstart/config/cors.ts",
+      "urls": "@ezstart/config/urls.ts"
+    },
+    "naming": "@[scope]/[package-name] (ex: @ezstart/ui, @tower-defense/types)",
+    "coverage": "100% - ALL projects use centralized configs"
+  },
+
+  "testing": {
+    "framework": "Vitest",
+    "protection": [
+      "✅ .env.test exists with MONGO_URL=mongodb://localhost:27017/[db]-test",
+      "✅ vitest.config.ts uses createVitestConfig({ dbName })",
+      "✅ NODE_ENV=test forced",
+      "✅ MongoMemoryServer for isolated tests",
+      "✅ Recent production backup available"
+    ],
+    "commands": {
+      "all": "pnpm test",
+      "single": "pnpm --filter [package] test",
+      "coverage": "pnpm test -- --coverage",
+      "watch": "pnpm test -- --watch"
+    },
+    "docsReference": "docs/guides/TESTING.md"
+  },
+
+  "git": {
+    "commitRules": [
+      "✅ Commit after significant changes",
+      "✅ Document changes clearly in commit message",
+      "✅ Update relevant READMEs if packages modified",
+      "✅ Follow conventional commits: type: description",
+      "❌ NEVER add 'Generated with Claude Code' footer",
+      "❌ NEVER add 'Co-Authored-By: Claude <noreply@anthropic.com>' line"
+    ],
+    "structure": "type: brief description\n\n- Detailed changes list\n- Technical modifications\n- Impact/results",
+    "types": ["feat", "fix", "docs", "refactor", "test", "chore", "perf", "style"]
+  },
+
+  "env": {
+    "files": {
+      ".env.example": "Template without secrets (COMMITTED to git)",
+      ".env.local": "Dev secrets (GITIGNORED)",
+      ".env.test": "Test config with localhost URLs (GITIGNORED)",
+      ".env.production": "Production secrets (GITIGNORED)"
+    },
+    "autoLoad": "express-core auto-loads .env.local with priority",
+    "portDetection": "Auto-detected from @ezstart/config (no PORT= needed)"
+  },
+
+  "validations": {
+    "beforeCommit": [
+      "✅ pnpm typecheck (zero errors)",
+      "✅ pnpm test (if API/package modified)",
+      "✅ Update relevant READMEs",
+      "✅ Verify no secrets in staged files"
+    ],
+    "beforePR": [
+      "✅ All tests passing",
+      "✅ No TypeScript errors",
+      "✅ Documentation updated",
+      "✅ No console.log/debugger left",
+      "✅ Commit messages follow convention"
+    ]
+  },
+
+
+  "deployment": {
+    "platforms": {
+      "apis": "Oracle Cloud (6 APIs in 1 VM ARM - FREE TIER)",
+      "webs": "Vercel (8 web apps - FREE TIER)"
+    },
+    "infrastructure": [
+      "docker-compose.yml - Orchestration (6 APIs)",
+      "nginx/nginx.conf - Reverse proxy + SSL",
+      ".env.oracle - Production secrets",
+      "apps/*/api/Dockerfile - Multi-stage builds",
+      "scripts/oracle-*.sh - Deployment scripts"
+    ],
+    "docsReference": "docs/ORACLE-CLOUD-DEPLOY.md"
+  },
+
+  "scores": {
+    "global": "96.6/100 (Excellent)",
+    "target": "100/100",
+    "audits": {
+      "api": 100,
+      "monitoring": 100,
+      "tests": 100,
+      "typecheck": 100,
+      "databases": 100,
+      "ux": 96,
+      "architecture": 95,
+      "accessibility": 95,
+      "documentation": 95,
+      "mobile-ux": 93,
+      "performance": 82
+    },
+    "auditFiles": "docs/audits/*-AUDIT.md (18 files)"
+  },
+
+  "references": {
+    "humanDocs": {
+      "quickStart": "docs/00-START-HERE.md",
+      "devGuide": "docs/guides/DEV-GUIDE.md (will replace CLAUDE.md + DEV-RULES.md)",
+      "deploy": "docs/guides/DEPLOY.md",
+      "testing": "docs/guides/TESTING.md",
+      "architecture": "docs/reference/ARCHITECTURE.md",
+      "routing": "docs/reference/ROUTING.md"
+    },
+    "agentDocs": {
+      "config": ".claude/config.json (this file)",
+      "missions": ".claude/missions/[domain].json",
+      "workflow": ".claude/README.md",
+      "template": ".claude/missions/_template.md"
+    }
+  }
+}

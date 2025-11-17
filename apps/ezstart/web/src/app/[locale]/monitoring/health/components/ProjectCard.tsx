@@ -14,6 +14,7 @@ import {
   P,
   UptimeGraph,
 } from '@ezstart/ui/components'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface ProjectCardProps {
@@ -112,12 +113,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Card
       variant="floating"
-      onClick={e => {
-        if (project.githubUrl) {
-          window.open(project.githubUrl, '_blank', 'noopener,noreferrer')
-        }
-      }}
-      className="hover:border-primary/50 transition-colors flex flex-col cursor-pointer"
+      // onClick={e => {
+      //   if (project.githubUrl) {
+      //     window.open(project.githubUrl, '_blank', 'noopener,noreferrer')
+      //   }
+      // }}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -182,30 +182,34 @@ export function ProjectCard({ project }: ProjectCardProps) {
                       {/* URLs */}
                       <div className="flex flex-col gap-1 mt-2">
                         {/* Main URL */}
-                        <a
-                          href={endpoint.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
-                          title={endpoint.url}
-                        >
-                          <Icon name="lucide:ExternalLink" className="w-3 h-3 flex-shrink-0" />
-                          {endpoint.url}
-                        </a>
-
-                        {/* Swagger Docs URL for APIs */}
-                        {endpoint.metadata?.swaggerUrl && (
-                          <a
-                            href={endpoint.metadata.swaggerUrl}
+                        <P asChild variant={'link'}>
+                          <Link
+                            href={endpoint.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
-                            title={endpoint.metadata.swaggerUrl}
+                            className="text-xs w-fit transition-colors block truncate inline-flex items-center gap-1"
+                            title={endpoint.url}
                           >
-                            📖 {endpoint.metadata.swaggerUrl}
-                          </a>
+                            <Icon name="lucide:ExternalLink" className="w-3 h-3 flex-shrink-0" />
+                            {endpoint.url}
+                          </Link>
+                        </P>
+
+                        {/* Swagger Docs URL for APIs */}
+                        {endpoint.metadata?.swaggerUrl && (
+                          <P asChild variant={'link'}>
+                            <Link
+                              href={endpoint.metadata.swaggerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="text-xs w-fit text-muted-foreground hover:text-primary transition-colors block truncate inline-flex items-center gap-1"
+                              title={endpoint.metadata.swaggerUrl}
+                            >
+                              📖 {endpoint.metadata.swaggerUrl}
+                            </Link>
+                          </P>
                         )}
                       </div>
                     </div>

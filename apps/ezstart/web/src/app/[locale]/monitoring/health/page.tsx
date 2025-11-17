@@ -1,8 +1,9 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
-import { RequireRole, InsufficientPermissions } from '@ezstart/rbac'
+import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { Card, Div, H1, H2, P, Section, Spinner } from '@ezstart/ui/components'
+import { useDevice } from '@ezstart/ui/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { MetricsOverview } from '../components/MetricsOverview'
@@ -14,6 +15,7 @@ import { calculateOverallHealth, getMetricsData } from '../lib/utils'
 import { ProjectCard } from './components/ProjectCard'
 
 function HealthMonitoringContent(): any {
+  const { isDesktop } = useDevice()
   const t = useTranslations('monitoring')
   const queryClient = useQueryClient()
   const { secondsLeft, reset: resetCountdown } = useCountdown(300) // 5 minutes
@@ -80,9 +82,7 @@ function HealthMonitoringContent(): any {
       <Section size="full" className="max-w-7xl">
         <Div layout={'center'}>
           <H1>{t('health.title')}</H1>
-          <P className="text-muted-foreground">
-            {t('health.description')}
-          </P>
+          <P className="text-muted-foreground">{t('health.description')}</P>
           <div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
               Next update in: {minutes}:{String(seconds).padStart(2, '0')}
@@ -99,7 +99,7 @@ function HealthMonitoringContent(): any {
             subtitle={`${summary.total} projects monitored`}
           />
           {/* Metrics Overview */}
-          <MetricsOverview activeTab="projects" metrics={metricsData} />
+          {isDesktop && <MetricsOverview activeTab="projects" metrics={metricsData} />}
         </Div>
       </Section>
 

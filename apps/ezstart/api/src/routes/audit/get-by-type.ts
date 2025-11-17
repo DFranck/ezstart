@@ -3,10 +3,11 @@
  *
  * Get specific audit by type
  * Returns detailed information about a specific audit including its content
+ *
+ * Now reads from docs/audits.json instead of .md files
  */
 
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
-import { AUDIT_METADATA, type AuditType } from '@ezstart/monitoring'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -48,50 +49,74 @@ const errorResponseSchema = z.object({
 const getSpecificAuditHandler = (req: Request, res: Response) => {
   try {
     const { type: auditType } = req.params
-    const metadata = AUDIT_METADATA[auditType as AuditType]
 
-    if (!metadata) {
-      return res.status(404).json({ error: 'Audit type not found' })
-    }
-
-    const filePath = join(process.cwd(), '../../../', metadata.filePath)
-    const exists = existsSync(filePath)
-
-    if (!exists) {
-      return res.json({
-        auditType,
-        ...metadata,
-        status: 'not-audited',
-        score: null,
-        lastUpdated: null,
-        content: null,
+    if (!auditType) {
+      return res.status(400).json({
+        error: 'Invalid request',
+        message: 'Audit type parameter is required',
       })
     }
 
-    const content = readFileSync(filePath, 'utf-8')
-
-    let score: number | null = null
-    let lastUpdated: Date | null = null
-
-    const scoreMatch = content.match(/\*\*Total Score:\*\*\s*(\d+)\/100/i)
-    if (scoreMatch && scoreMatch[1]) {
-      score = parseInt(scoreMatch[1], 10)
+    // Read audits.json
+    const auditsJsonPath = join(process.cwd(), '../../../docs/audits.json')
+    if (!existsSync(auditsJsonPath)) {
+      return res.status(404).json({
+        error: 'Audits file not found',
+        message: 'docs/audits.json does not exist',
+      })
     }
 
-    const dateMatch = content.match(/\*\*Last Updated:\*\*\s*(\d{4}-\d{2}-\d{2})/i)
-    if (dateMatch && dateMatch[1]) {
-      lastUpdated = new Date(dateMatch[1])
+    const auditsJson = JSON.parse(readFileSync(auditsJsonPath, 'utf-8'))
+    const { domains } = auditsJson
+
+    // Find audit by type (search in domains and categories)
+    let auditData: any = null
+    let domainKey: string | null = null
+
+    // First check if it's a domain-level audit
+    for (const [key, domain] of Object.entries(domains) as [string, any][]) {
+      if (key === auditType) {
+        auditData = domain
+        domainKey = key
+        break
+      }
+      // Then check categories
+      if (domain.categories && domain.categories[auditType]) {
+        auditData = domain.categories[auditType]
+        domainKey = key
+        break
+      }
     }
+
+    if (!auditData || !domainKey) {
+      return res.status(404).json({
+        error: 'Audit type not found',
+        message: `No audit found for type: ${auditType}`,
+      })
+    }
+
+    const score = auditData.score || null
+    const lastUpdated = auditData.lastUpdate || auditsJson.lastUpdated
+    const status = score === null ? 'not-audited' : score >= 90 ? 'complete' : 'partial'
 
     res.json({
       auditType,
-      ...metadata,
+      emoji: domains[domainKey]?.emoji || '📊',
+      name: auditType.charAt(0).toUpperCase() + auditType.slice(1),
+      description: auditData.description || `${domains[domainKey]?.agent || 'Agent'} - ${auditType}`,
+      filePath: `docs/audits.json → domains.${domainKey}${auditData.score ? '' : '.categories.' + auditType}`,
       score,
       lastUpdated,
-      status: score === null ? 'not-audited' : score >= 90 ? 'complete' : 'partial',
-      content,
+      status,
+      content: JSON.stringify(auditData, null, 2), // Return JSON instead of markdown
+      // New human-readable fields
+      audited: auditData.audited || [],
+      notAudited: auditData.notAudited || [],
+      why: auditData.why || '',
+      nextSteps: auditData.nextSteps || [],
     })
   } catch (error) {
+    console.error('[Audits] Error reading audit by type:', error)
     res.status(500).json({
       error: 'Failed to get audit',
       message: error instanceof Error ? error.message : 'Unknown error',
