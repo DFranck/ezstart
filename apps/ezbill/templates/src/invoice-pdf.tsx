@@ -393,6 +393,31 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
     return `${amount.toFixed(2)} ${data.currency}`
   }
 
+  // Format description with bullet points on separate lines
+  const formatDescription = (label: string) => {
+    // Split by bullet point • (keeping the bullet)
+    const parts = label.split('•').filter(p => p.trim())
+
+    // If no bullets, return as-is
+    if (parts.length <= 1) {
+      return <Text>{label}</Text>
+    }
+
+    // First part is the title (date), rest are bullet points
+    const [title, ...bullets] = parts
+
+    return (
+      <View>
+        <Text style={{ fontWeight: 500, marginBottom: 3 }}>{title.trim()}</Text>
+        {bullets.map((bullet, idx) => (
+          <Text key={idx} style={{ fontSize: 8, lineHeight: 1.4, marginLeft: 8, marginBottom: 1 }}>
+            • {bullet.trim()}
+          </Text>
+        ))}
+      </View>
+    )
+  }
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -475,7 +500,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
 
           {data.items.map((item, index) => (
             <View key={index} style={styles.tableRow}>
-              <Text style={styles.tableColDescription}>{item.label}</Text>
+              <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
               <Text style={styles.tableColQuantity}>{item.quantity}</Text>
               <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
               <Text style={styles.tableColTotal}>{formatCurrency(item.quantity * item.price)}</Text>
