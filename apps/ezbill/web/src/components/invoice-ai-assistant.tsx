@@ -23,8 +23,25 @@ interface ExtractedInvoiceData {
   taxRate?: number
 }
 
+// Action types from backend
+export type InvoiceAction =
+  | { type: 'update_items'; items: Array<{ label: string; quantity: number; price: number }> }
+  | { type: 'add_items'; items: Array<{ label: string; quantity: number; price: number }> }
+  | { type: 'remove_items'; indices: number[] }
+  | { type: 'update_client'; clientName: string }
+  | { type: 'update_description'; description: string }
+  | { type: 'update_payment_terms'; notes: string }
+  | {
+      type: 'update_currency'
+      currency: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
+    }
+  | { type: 'update_due_date'; dueDate: string }
+  | { type: 'update_tax_rate'; taxRate: number }
+  | { type: 'replace_all'; data: ExtractedInvoiceData }
+
 interface InvoiceAIAssistantProps {
   onDataExtracted: (data: ExtractedInvoiceData) => void
+  onAction?: (action: InvoiceAction) => void // NEW: Handle incremental actions
   isCollapsed?: boolean
   onToggle?: () => void
   initialHistory?: Message[] // Load existing conversation
@@ -34,6 +51,7 @@ interface InvoiceAIAssistantProps {
 
 export function InvoiceAIAssistant({
   onDataExtracted,
+  onAction,
   isCollapsed = false,
   onToggle,
   initialHistory,
@@ -87,49 +105,55 @@ Examples:
     setIsLoading(true)
 
     try {
-      // Prepare context message if editing existing invoice
-      let contextualInput = inputMessage
-      if (currentInvoiceData && currentInvoiceData.items && currentInvoiceData.items.length > 0 && messages.length <= 2) {
-        // First user message when editing - add context
-        const currentContext = `Current invoice has ${currentInvoiceData.items.length} items:\n${currentInvoiceData.items.map((item, i) => `${i + 1}. ${item.label} (${item.quantity}h @ $${item.price}/h)`).join('\n')}\n\nUser request: ${inputMessage}`
-        contextualInput = currentContext
-      }
-
-      // Call AI extraction API
+      // Call conversational AI API with current invoice context
       const response = await callApi<{
         success: boolean
-        data: ExtractedInvoiceData
-        rawResponse?: string
+        action: InvoiceAction
+        message: string
+        suggestions?: string[]
+        conversationState?: string
       }>('/ai/extract-invoice-data', {
         method: 'POST',
         body: {
-          text: contextualInput,
+          text: inputMessage,
           conversationHistory: messages,
+          currentInvoiceData, // Send current form data for context
         },
       })
 
       if (response.ok && response.data?.success) {
-        const extractedData = response.data.data
+        const { action, message: aiMessage, suggestions } = response.data
 
-        // Add assistant response
+        // Add assistant response with suggestions
         const assistantMessage: Message = {
           role: 'assistant',
-          content: `Got it! I've extracted the following:\n${extractedData.clientName ? `• Client: ${extractedData.clientName}\n` : ''}${extractedData.items ? `• Items: ${extractedData.items.map(i => `${i.label} (${i.quantity}x $${i.price})`).join(', ')}\n` : ''}${extractedData.description ? `• Description: ${extractedData.description}\n` : ''}${extractedData.dueDate ? `• Due Date: ${extractedData.dueDate}\n` : ''}${extractedData.currency ? `• Currency: ${extractedData.currency}\n` : ''}\nI'll fill in the form now!`,
+          content: suggestions
+            ? `${aiMessage}\n\n${suggestions.map(s => `• ${s}`).join('\n')}`
+            : aiMessage,
         }
 
         setMessages(prev => [...prev, assistantMessage])
 
-        // Send extracted data to parent component to fill the form
-        onDataExtracted(extractedData)
+        // Handle action incrementally
+        if (onAction) {
+          // NEW: Use action handler for incremental updates
+          onAction(action)
+        } else {
+          // FALLBACK: Convert action to data for backward compatibility
+          const extractedData = actionToData(action)
+          if (extractedData) {
+            onDataExtracted(extractedData)
+          }
+        }
       } else {
         const errorMessage: Message = {
           role: 'assistant',
-          content: "Sorry, I couldn't extract invoice data from that. Can you try rephrasing?",
+          content: "Sorry, I couldn't understand that. Can you try rephrasing?",
         }
         setMessages(prev => [...prev, errorMessage])
       }
     } catch (error) {
-      console.error('AI extraction error:', error)
+      console.error('AI conversation error:', error)
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Oops! Something went wrong. Please try again.',
@@ -137,6 +161,31 @@ Examples:
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Helper: Convert action to data for backward compatibility
+  const actionToData = (action: InvoiceAction): ExtractedInvoiceData | null => {
+    switch (action.type) {
+      case 'replace_all':
+        return action.data
+      case 'update_items':
+      case 'add_items':
+        return { items: action.items }
+      case 'update_client':
+        return { clientName: action.clientName }
+      case 'update_currency':
+        return { currency: action.currency }
+      case 'update_payment_terms':
+        return { notes: action.notes }
+      case 'update_due_date':
+        return { dueDate: action.dueDate }
+      case 'update_tax_rate':
+        return { taxRate: action.taxRate }
+      case 'update_description':
+        return { description: action.description }
+      default:
+        return null
     }
   }
 

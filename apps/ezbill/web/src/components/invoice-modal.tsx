@@ -34,7 +34,7 @@ import {
 import { cn } from '@ezstart/ui/lib'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
-import { InvoiceAIAssistant } from './invoice-ai-assistant'
+import { InvoiceAIAssistant, InvoiceAction } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
 interface InvoiceModalProps {
@@ -149,7 +149,101 @@ export function InvoiceModal({
     }
   }
 
-  // Handle AI-extracted data
+  // NEW: Handle incremental AI actions
+  const handleAIAction = (action: InvoiceAction) => {
+    switch (action.type) {
+      case 'replace_all': {
+        const data = action.data
+        const updates: Partial<typeof formData> = {}
+
+        // Try to find matching client by name
+        if (data.clientName && clients.length > 0) {
+          const matchingClient = clients.find(
+            c =>
+              c.clientName?.toLowerCase().includes(data.clientName!.toLowerCase()) ||
+              c.email?.toLowerCase().includes(data.clientName!.toLowerCase())
+          )
+          if (matchingClient) {
+            updates.clientId = matchingClient._id
+          }
+        }
+
+        // Update items if provided
+        if (data.items && data.items.length > 0) {
+          updates.items = data.items
+          updates.billingType = 'itemized'
+        }
+
+        // Update other fields
+        if (data.description) updates.description = data.description
+        if (data.dueDate) updates.dueDate = data.dueDate
+        if (data.notes) updates.notes = data.notes
+        if (data.currency) updates.currency = data.currency
+        if (data.taxRate !== undefined) {
+          updates.taxRate = data.taxRate
+          setShowTaxes(data.taxRate > 0)
+        }
+
+        setFormData(prev => ({ ...prev, ...updates }))
+        break
+      }
+
+      case 'update_items':
+        setFormData(prev => ({ ...prev, items: action.items, billingType: 'itemized' }))
+        break
+
+      case 'add_items':
+        setFormData(prev => ({
+          ...prev,
+          items: [...(prev.items || []), ...action.items],
+          billingType: 'itemized',
+        }))
+        break
+
+      case 'remove_items':
+        setFormData(prev => ({
+          ...prev,
+          items: prev.items?.filter((_, index) => !action.indices.includes(index)) || [],
+        }))
+        break
+
+      case 'update_client': {
+        // Try to find matching client
+        const matchingClient = clients.find(
+          c =>
+            c.clientName?.toLowerCase().includes(action.clientName.toLowerCase()) ||
+            c.email?.toLowerCase().includes(action.clientName.toLowerCase())
+        )
+        if (matchingClient) {
+          setFormData(prev => ({ ...prev, clientId: matchingClient._id }))
+        }
+        break
+      }
+
+      case 'update_description':
+        setFormData(prev => ({ ...prev, description: action.description }))
+        break
+
+      case 'update_payment_terms':
+        setFormData(prev => ({ ...prev, notes: action.notes }))
+        break
+
+      case 'update_currency':
+        setFormData(prev => ({ ...prev, currency: action.currency }))
+        break
+
+      case 'update_due_date':
+        setFormData(prev => ({ ...prev, dueDate: action.dueDate }))
+        break
+
+      case 'update_tax_rate':
+        setFormData(prev => ({ ...prev, taxRate: action.taxRate }))
+        setShowTaxes(action.taxRate > 0)
+        break
+    }
+  }
+
+  // LEGACY: Keep old handler for backward compatibility
   const handleAIExtraction = (data: {
     clientName?: string
     items?: Array<{ label: string; quantity: number; price: number }>
@@ -159,37 +253,7 @@ export function InvoiceModal({
     currency?: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
     taxRate?: number
   }) => {
-    const updates: Partial<typeof formData> = {}
-
-    // Try to find matching client by name
-    if (data.clientName && clients.length > 0) {
-      const matchingClient = clients.find(
-        c =>
-          c.clientName?.toLowerCase().includes(data.clientName!.toLowerCase()) ||
-          c.email?.toLowerCase().includes(data.clientName!.toLowerCase())
-      )
-      if (matchingClient) {
-        updates.clientId = matchingClient._id
-      }
-    }
-
-    // Update items if provided
-    if (data.items && data.items.length > 0) {
-      updates.items = data.items
-      updates.billingType = 'itemized'
-    }
-
-    // Update other fields
-    if (data.description) updates.description = data.description
-    if (data.dueDate) updates.dueDate = data.dueDate
-    if (data.notes) updates.notes = data.notes
-    if (data.currency) updates.currency = data.currency
-    if (data.taxRate !== undefined) {
-      updates.taxRate = data.taxRate
-      setShowTaxes(data.taxRate > 0)
-    }
-
-    setFormData(prev => ({ ...prev, ...updates }))
+    handleAIAction({ type: 'replace_all', data })
   }
 
   // Calculs
@@ -252,6 +316,7 @@ export function InvoiceModal({
             <InvoiceAIAssistant
               isCollapsed={true}
               onToggle={() => setShowAIAssistant(true)}
+              onAction={handleAIAction}
               onDataExtracted={handleAIExtraction}
               initialHistory={aiConversationHistory}
               onHistoryChange={setAiConversationHistory}
@@ -776,6 +841,7 @@ export function InvoiceModal({
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}
+              onAction={handleAIAction}
               onDataExtracted={handleAIExtraction}
               initialHistory={aiConversationHistory}
               onHistoryChange={setAiConversationHistory}
