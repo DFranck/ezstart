@@ -11,9 +11,28 @@ import React from 'react'
 export function useClientDashboardHandlers() {
   const { clients, companies, paymentMethods, receipts, refetchAll } = useBillingContext()
 
-  const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
-    e?.stopPropagation()
+  const generateInvoicePdfUrl = async (invoice: Invoice): Promise<string | null> => {
+    try {
+      const client = clients.find(c => c._id === invoice.clientId)
+      const company = invoice.companyId
+        ? companies.find(c => c._id === invoice.companyId)
+        : undefined
 
+      if (!client) {
+        return null
+      }
+
+      const pdfData = convertToInvoicePDFData(invoice, client, company, paymentMethods)
+      const { pdf } = await import('@react-pdf/renderer')
+      const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
+      return URL.createObjectURL(blob)
+    } catch (error) {
+      console.error('Error generating invoice PDF URL:', error)
+      return null
+    }
+  }
+
+  const markInvoiceAsSent = async (invoice: Invoice) => {
     try {
       const response = await callApi(`/invoices/${invoice._id}`, {
         method: 'PUT',
@@ -25,13 +44,21 @@ export function useClientDashboardHandlers() {
 
       if (response.ok) {
         await refetchAll()
+        return true
       } else {
         alert('Failed to send invoice')
+        return false
       }
     } catch (error) {
       console.error('Error sending invoice:', error)
       alert('Error sending invoice')
+      return false
     }
+  }
+
+  const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    await markInvoiceAsSent(invoice)
   }
 
   const handleDownloadInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
@@ -153,9 +180,28 @@ export function useClientDashboardHandlers() {
     }
   }
 
-  const handleSendQuote = async (quote: Quote, e?: React.MouseEvent) => {
-    e?.stopPropagation()
+  const generateQuotePdfUrl = async (quote: Quote): Promise<string | null> => {
+    try {
+      const client = clients.find(c => c._id === quote.clientId)
+      const company = quote.companyId
+        ? companies.find(c => c._id === quote.companyId)
+        : undefined
 
+      if (!client) {
+        return null
+      }
+
+      // TODO: Implement QuotePDF component and converter
+      // For now, return null
+      console.warn('Quote PDF generation not implemented yet')
+      return null
+    } catch (error) {
+      console.error('Error generating quote PDF URL:', error)
+      return null
+    }
+  }
+
+  const markQuoteAsSent = async (quote: Quote) => {
     try {
       const response = await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
@@ -167,13 +213,21 @@ export function useClientDashboardHandlers() {
 
       if (response.ok) {
         await refetchAll()
+        return true
       } else {
         alert('Failed to send quote')
+        return false
       }
     } catch (error) {
       console.error('Error sending quote:', error)
       alert('Error sending quote')
+      return false
     }
+  }
+
+  const handleSendQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    await markQuoteAsSent(quote)
   }
 
   const handleAcceptQuote = async (quote: Quote, e?: React.MouseEvent) => {
@@ -276,5 +330,9 @@ export function useClientDashboardHandlers() {
     handleDeclineQuote,
     handleDownloadQuote,
     handleDeleteQuote,
+    generateInvoicePdfUrl,
+    generateQuotePdfUrl,
+    markInvoiceAsSent,
+    markQuoteAsSent,
   }
 }

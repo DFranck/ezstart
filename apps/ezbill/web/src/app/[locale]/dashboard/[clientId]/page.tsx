@@ -46,11 +46,23 @@ const PreviewPdfModal = dynamic(() => import('@/components/PreviewPdfModal').the
   ssr: false
 })
 
+const ShareModal = dynamic(() => import('@/components/share-modal').then(mod => ({ default: mod.ShareModal })), {
+  loading: () => null,
+  ssr: false
+})
+
 // Type import for PreviewState
 type PreviewState = {
   isOpen: boolean
   kind?: 'invoice' | 'quote' | 'receipt'
   doc?: any
+}
+
+type ShareState = {
+  isOpen: boolean
+  type: 'invoice' | 'quote'
+  document?: Invoice | Quote
+  pdfUrl?: string
 }
 
 const ClientDashboardPage = (): any => {
@@ -70,6 +82,7 @@ const ClientDashboardPage = (): any => {
   const [preview, setPreview] = useState<PreviewState>({ isOpen: false })
   const [invoiceGroupBy, setInvoiceGroupBy] = useState<'month' | 'week' | 'status'>('month')
   const [quoteGroupBy, setQuoteGroupBy] = useState<'month' | 'status'>('month')
+  const [shareState, setShareState] = useState<ShareState>({ isOpen: false, type: 'invoice' })
 
   // Use the custom hook for all document handlers
   const handlers = useClientDashboardHandlers()
@@ -137,6 +150,50 @@ const ClientDashboardPage = (): any => {
   }
 
   const closePreview = () => setPreview({ isOpen: false })
+
+  const handleSendInvoice = async (invoice: Invoice, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    const pdfUrl = await handlers.generateInvoicePdfUrl(invoice)
+    if (pdfUrl) {
+      setShareState({ isOpen: true, type: 'invoice', document: invoice, pdfUrl })
+    } else {
+      alert('Failed to generate PDF for sharing')
+    }
+  }
+
+  const handleSendQuote = async (quote: Quote, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    const pdfUrl = await handlers.generateQuotePdfUrl(quote)
+    if (pdfUrl) {
+      setShareState({ isOpen: true, type: 'quote', document: quote, pdfUrl })
+    } else {
+      alert('Quote PDF generation not implemented yet')
+    }
+  }
+
+  const handleMarkAsSent = async () => {
+    if (!shareState.document) return
+
+    const success = shareState.type === 'invoice'
+      ? await handlers.markInvoiceAsSent(shareState.document as Invoice)
+      : await handlers.markQuoteAsSent(shareState.document as Quote)
+
+    if (success) {
+      // Cleanup PDF URL
+      if (shareState.pdfUrl) {
+        URL.revokeObjectURL(shareState.pdfUrl)
+      }
+      setShareState({ isOpen: false, type: 'invoice' })
+    }
+  }
+
+  const handleCloseShareModal = () => {
+    // Cleanup PDF URL
+    if (shareState.pdfUrl) {
+      URL.revokeObjectURL(shareState.pdfUrl)
+    }
+    setShareState({ isOpen: false, type: 'invoice' })
+  }
 
   // Group invoices based on selected grouping
   const invoiceGroups = useMemo(() => {
@@ -281,7 +338,7 @@ const ClientDashboardPage = (): any => {
                         permissions={permissions}
                         onClick={() => openPreview('invoice', invoice)}
                         onEdit={e => handleEditInvoice(invoice, e)}
-                        onSend={e => handlers.handleSendInvoice(invoice, e)}
+                        onSend={e => handleSendInvoice(invoice, e)}
                         onDownload={e => handlers.handleDownloadInvoice(invoice, e)}
                         onDownloadReceipt={e => handlers.handleDownloadReceiptByInvoice(invoice, e)}
                         onMarkPaid={e => handleMarkPaid(invoice, e)}
@@ -306,7 +363,7 @@ const ClientDashboardPage = (): any => {
                       permissions={permissions}
                       onClick={() => openPreview('invoice', invoice)}
                       onEdit={e => handleEditInvoice(invoice, e)}
-                      onSend={e => handlers.handleSendInvoice(invoice, e)}
+                      onSend={e => handleSendInvoice(invoice, e)}
                       onDownload={e => handlers.handleDownloadInvoice(invoice, e)}
                       onDownloadReceipt={e => handlers.handleDownloadReceiptByInvoice(invoice, e)}
                       onMarkPaid={e => handleMarkPaid(invoice, e)}
@@ -380,7 +437,7 @@ const ClientDashboardPage = (): any => {
                         onClick={() => openPreview('quote', quote)}
                         onEdit={e => handleEditQuote(quote, e)}
                         onDelete={e => handlers.handleDeleteQuote(quote, e)}
-                        onSend={e => handlers.handleSendQuote(quote, e)}
+                        onSend={e => handleSendQuote(quote, e)}
                         onAccept={e => handlers.handleAcceptQuote(quote, e)}
                         onDecline={e => handlers.handleDeclineQuote(quote, e)}
                         onDownload={e => handlers.handleDownloadQuote(quote, e)}
@@ -408,7 +465,7 @@ const ClientDashboardPage = (): any => {
                       onClick={() => openPreview('quote', quote)}
                       onEdit={e => handleEditQuote(quote, e)}
                       onDelete={e => handlers.handleDeleteQuote(quote, e)}
-                      onSend={e => handlers.handleSendQuote(quote, e)}
+                      onSend={e => handleSendQuote(quote, e)}
                       onAccept={e => handlers.handleAcceptQuote(quote, e)}
                       onDecline={e => handlers.handleDeclineQuote(quote, e)}
                       onDownload={e => handlers.handleDownloadQuote(quote, e)}
@@ -523,6 +580,28 @@ const ClientDashboardPage = (): any => {
         doc={preview.doc}
         onClose={closePreview}
       />
+
+      {/* Share Modal */}
+      {shareState.document && shareState.pdfUrl && (
+        <ShareModal
+          isOpen={shareState.isOpen}
+          onClose={handleCloseShareModal}
+          onMarkAsSent={handleMarkAsSent}
+          pdfUrl={shareState.pdfUrl}
+          documentType={shareState.type}
+          documentNumber={
+            (shareState.document as Invoice).documentNumber ||
+            (shareState.document as Quote).documentNumber ||
+            ''
+          }
+          clientName={client?.name || ''}
+          documentStatus={
+            (shareState.document as Invoice).status ||
+            (shareState.document as Quote).status ||
+            ''
+          }
+        />
+      )}
     </>
   )
 }

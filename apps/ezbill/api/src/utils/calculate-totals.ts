@@ -4,51 +4,41 @@ import { BaseLineItem, BillingType } from '@ezbill/types';
  * Calculate totals for itemized billing (line items)
  */
 export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
-  console.log('🔍 calculateTotals called with:');
-  console.log('  items:', JSON.stringify(items, null, 2));
-  console.log('  taxRate:', taxRate);
-
   // Validate inputs
   if (!Array.isArray(items)) {
-    console.error('🔍 ERROR: items is not an array:', items);
+    console.error('❌ calculateTotals: items is not an array');
     items = [];
   }
 
   if (typeof taxRate !== 'number' || isNaN(taxRate)) {
-    console.error('🔍 ERROR: taxRate is not a valid number:', taxRate);
+    console.error('❌ calculateTotals: invalid taxRate');
     taxRate = 0;
   }
 
-  const subtotal = items.reduce(
-    (acc, item) => {
-      // Validate item structure
-      if (!item || typeof item !== 'object') {
-        console.error('🔍 ERROR: Invalid item:', item);
-        return acc;
-      }
+  const subtotal = items.reduce((acc, item) => {
+    // Validate item structure
+    if (!item || typeof item !== 'object') {
+      console.error('❌ calculateTotals: Invalid item');
+      return acc;
+    }
 
-      const quantity = Number(item.quantity) || 0;
-      const price = Number(item.price) || 0;
+    const quantity = Number(item.quantity) || 0;
+    const price = Number(item.price) || 0;
 
-      if (isNaN(quantity) || isNaN(price)) {
-        console.error(`🔍 ERROR: Invalid quantity or price: quantity=${item.quantity}, price=${item.price}`);
-        return acc;
-      }
+    if (isNaN(quantity) || isNaN(price)) {
+      console.error(`❌ calculateTotals: Invalid quantity or price in item: ${item.label}`);
+      return acc;
+    }
 
-      console.log(`🔍   Processing item: quantity=${quantity}, price=${price}, label=${item.label}`);
-      const itemTotal = quantity * price;
-      console.log(`🔍   Item total: ${itemTotal}`);
+    const itemTotal = quantity * price;
 
-      if (isNaN(itemTotal)) {
-        console.error('🔍 ERROR: Item total is NaN');
-        return acc;
-      }
+    if (isNaN(itemTotal)) {
+      console.error('❌ calculateTotals: Item total is NaN');
+      return acc;
+    }
 
-      return acc + itemTotal;
-    },
-    0
-  );
-  console.log('🔍 Final subtotal:', subtotal);
+    return acc + itemTotal;
+  }, 0);
 
   // Ensure subtotal is valid
   const validSubtotal = isNaN(subtotal) ? 0 : subtotal;
@@ -61,11 +51,9 @@ export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
     total: Math.round(total * 100) / 100,
   };
 
-  console.log('🔍 calculateTotals result:', result);
-
   // Final validation
   if (isNaN(result.subtotal) || isNaN(result.taxAmount) || isNaN(result.total)) {
-    console.error('🔍 ERROR: Final result contains NaN values:', result);
+    console.error('❌ calculateTotals: Final result contains NaN');
     return { subtotal: 0, taxAmount: 0, total: 0 };
   }
 
@@ -76,10 +64,6 @@ export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
  * Calculate totals for flat-rate billing
  */
 export function calculateFlatRateTotals(flatRateAmount: number, taxRate = 0) {
-  console.log('🔍 calculateFlatRateTotals called with:');
-  console.log('  flatRateAmount:', flatRateAmount);
-  console.log('  taxRate:', taxRate);
-
   // Validate inputs
   const validAmount = typeof flatRateAmount === 'number' && !isNaN(flatRateAmount) ? flatRateAmount : 0;
   const validTaxRate = typeof taxRate === 'number' && !isNaN(taxRate) ? taxRate : 0;
@@ -93,8 +77,6 @@ export function calculateFlatRateTotals(flatRateAmount: number, taxRate = 0) {
     taxAmount: Math.round(taxAmount * 100) / 100,
     total: Math.round(total * 100) / 100,
   };
-
-  console.log('🔍 calculateFlatRateTotals result:', result);
 
   return result;
 }

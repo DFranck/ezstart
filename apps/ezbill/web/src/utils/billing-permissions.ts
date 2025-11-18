@@ -28,6 +28,7 @@ export function getQuotePermissions(quote: Quote): BillingPermissions {
       return {
         canEdit: false,
         canDelete: true,  // Can delete if client doesn't respond
+        canSend: true,
         canAccept: true,
         canReject: true,
         canDecline: true,  // alias for canReject
@@ -73,6 +74,7 @@ export function getInvoicePermissions(invoice: Invoice): BillingPermissions {
       return {
         canEdit: false,
         canDelete: false,
+        canSend: true,
         canMarkAsPaid: true,
         reason: 'Invoice has been sent to client. Awaiting payment.'
       }

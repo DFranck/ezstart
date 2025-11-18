@@ -90,7 +90,7 @@ export function InvoiceModal({
     notes: invoice?.notes || '',
     terms: invoice?.terms || '',
     taxRate: invoice?.taxRate || 0,
-    paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+    paymentMethodIds: invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
     aiConversationHistory: invoice?.aiConversationHistory || [],
   })
 
@@ -120,7 +120,7 @@ export function InvoiceModal({
       notes: invoice?.notes || '',
       terms: invoice?.terms || '',
       taxRate: invoice?.taxRate || 0,
-      paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+      paymentMethodIds: invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
       aiConversationHistory: invoice?.aiConversationHistory || [],
     })
     setShowTaxes(invoice?.taxRate ? invoice.taxRate > 0 : false)
@@ -657,11 +657,13 @@ export function InvoiceModal({
                           {formData.items?.map((item, index) => (
                             <TableRow key={index}>
                               <TableCell className="min-w-[200px]">
-                                <Input
+                                <TextArea
                                   placeholder="Description"
                                   value={item.label}
                                   onChange={e => updateLineItem(index, 'label', e.target.value)}
                                   required
+                                  rows={3}
+                                  className="resize-y min-h-[60px]"
                                 />
                               </TableCell>
                               <TableCell>
