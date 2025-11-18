@@ -301,7 +301,7 @@ export async function chatWithInvoiceAssistant(
 ): Promise<ConversationalResponse> {
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp', // Function calling requires 2.0
+      model: 'gemini-2.5-flash', // Use 2.5-flash (better quota than 2.0-exp)
       systemInstruction: CONVERSATIONAL_PROMPT,
       tools,
       generationConfig: {
