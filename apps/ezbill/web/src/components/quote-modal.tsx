@@ -112,7 +112,7 @@ export function QuoteModal({
     description?: string
     dueDate?: string
     notes?: string
-    currency?: 'USD' | 'EUR'
+    currency?: Currency
     taxRate?: number
   }) => {
     const updates: Partial<typeof formData> = {}
@@ -463,12 +463,13 @@ export function QuoteModal({
                           {formData.items?.map((item, index) => (
                             <TableRow key={index} className="hover:bg-warning/5">
                               <TableCell className="p-3">
-                                <Input
+                                <TextArea
                                   placeholder="Description"
                                   value={item.label}
                                   onChange={e => updateLineItem(index, 'label', e.target.value)}
                                   required
-                                  className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning"
+                                  rows={3}
+                                  className="bg-background text-foreground border rounded-lg focus:ring-2 focus:ring-warning focus:border-warning resize-y min-h-[60px]"
                                 />
                               </TableCell>
                               <TableCell className="p-3">
