@@ -48,11 +48,17 @@ Output: {"clientName":"TechCorp","items":[{"label":"Mon: Frontend dev","quantity
 IMPORTANT:
 - Return ONLY the JSON object, no markdown, no explanation
 - Keep item labels concise but informative (max 150 chars for detailed work logs)
-- For timesheets: use format "Day: Task details" (preserve technical details when present)
+- For timesheets: ONE item per day (not separate items for frontend/backend)
 - If price is not mentioned, use 0 (user will fill it in later)
 - Extract hours/quantities from timesheets and create items accordingly
 - When reformatting: PRESERVE all technical details (feature names, technologies, etc.)
-- Use bullet points (• or -) or line breaks for better readability if needed`
+- Bullet points should be INSIDE the label text, NOT create separate items
+- DO NOT split a day's work into multiple items (keep frontend+backend together)
+
+Formatting rules:
+- Use bullet points (• or -) WITHIN the label to separate tasks
+- Format: "Day: Task1 • Task2 • Task3" or use line breaks within the label
+- Keep the SAME number of items as the original (don't duplicate)`
 
 export async function extractInvoiceData(
   message: string,
