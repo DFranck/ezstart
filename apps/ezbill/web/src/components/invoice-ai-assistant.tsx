@@ -1,7 +1,7 @@
 'use client'
 
 import { callApi } from '@/utils/api'
-import { Button, Div, Icon, Input, P, Span } from '@ezstart/ui/components'
+import { Button, Div, Icon, Span, Thread, ThreadMessage, ThreadComposer } from '@ezstart/ui/components'
 import { useState, useEffect } from 'react'
 
 interface Message {
@@ -70,7 +70,6 @@ Examples:
       ? initialHistory
       : [getInitialMessage()]
   )
-  const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   // Save conversation history on every message change
@@ -80,22 +79,19 @@ Examples:
     }
   }, [messages, onHistoryChange])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (inputMessage: string) => {
+    if (!inputMessage.trim() || isLoading) return
 
-    if (!input.trim() || isLoading) return
-
-    const userMessage: Message = { role: 'user', content: input }
+    const userMessage: Message = { role: 'user', content: inputMessage }
     setMessages(prev => [...prev, userMessage])
-    setInput('')
     setIsLoading(true)
 
     try {
       // Prepare context message if editing existing invoice
-      let contextualInput = input
+      let contextualInput = inputMessage
       if (currentInvoiceData && currentInvoiceData.items && currentInvoiceData.items.length > 0 && messages.length <= 2) {
         // First user message when editing - add context
-        const currentContext = `Current invoice has ${currentInvoiceData.items.length} items:\n${currentInvoiceData.items.map((item, i) => `${i + 1}. ${item.label} (${item.quantity}h @ $${item.price}/h)`).join('\n')}\n\nUser request: ${input}`
+        const currentContext = `Current invoice has ${currentInvoiceData.items.length} items:\n${currentInvoiceData.items.map((item, i) => `${i + 1}. ${item.label} (${item.quantity}h @ $${item.price}/h)`).join('\n')}\n\nUser request: ${inputMessage}`
         contextualInput = currentContext
       }
 
@@ -160,7 +156,7 @@ Examples:
   }
 
   return (
-    <Div className="flex flex-col h-[60vh] sticky top-0 border-l border bg-muted/30 backdrop-blur-sm ">
+    <Div className="flex flex-col h-[60vh] sticky top-0 border-l border bg-muted/30 backdrop-blur-sm">
       {/* Header */}
       <Div className="flex items-center justify-between p-3 sm:p-4 border-b border bg-card/60 backdrop-blur-md">
         <Div className="flex items-center gap-2">
@@ -174,61 +170,41 @@ Examples:
         )}
       </Div>
 
-      {/* Messages */}
-      <Div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+      {/* Messages using Thread component */}
+      <Thread className="flex-1 p-0 bg-transparent">
         {messages.map((message, index) => (
-          <Div
+          <ThreadMessage
             key={index}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            role={message.role === 'assistant' ? 'ai' : 'user'}
+            userBubbleClassName="bg-primary text-primary-foreground shadow-md text-xs sm:text-sm"
+            aiBubbleClassName="bg-card/80 backdrop-blur-sm border shadow-sm text-xs sm:text-sm"
+            showCopyButton={false}
           >
-            <Div
-              className={`max-w-[85%] sm:max-w-[80%] rounded-xl p-2.5 sm:p-3 ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'bg-card/80 backdrop-blur-sm border shadow-sm'
-              }`}
-            >
-              <P className="text-xs sm:text-sm whitespace-pre-line leading-relaxed">
-                {message.content}
-              </P>
-            </Div>
-          </Div>
+            {message.content}
+          </ThreadMessage>
         ))}
         {isLoading && (
-          <Div className="flex justify-start">
-            <Div className="bg-card/80 backdrop-blur-sm border rounded-xl p-2.5 sm:p-3 shadow-sm">
-              <P className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
-                <Icon name="lucide:Loader2" className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                Extracting data...
-              </P>
-            </Div>
-          </Div>
-        )}
-      </Div>
-
-      {/* Input */}
-      <form
-        onSubmit={handleSubmit}
-        className="p-3 sm:p-4 border-t border bg-card/60 backdrop-blur-md"
-      >
-        <Div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Describe the invoice..."
-            disabled={isLoading}
-            className="flex-1 text-xs sm:text-sm bg-background backdrop-blur-sm focus:border-primary focus:ring-primary/20"
-          />
-          <Button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+          <ThreadMessage
+            role="ai"
+            aiBubbleClassName="bg-card/80 backdrop-blur-sm border shadow-sm text-xs sm:text-sm"
+            showCopyButton={false}
           >
-            <Icon name="lucide:Send" className="w-4 h-4" />
-          </Button>
-        </Div>
-      </form>
+            <Div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="lucide:Loader2" className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+              Extracting data...
+            </Div>
+          </ThreadMessage>
+        )}
+      </Thread>
+
+      {/* Input using ThreadComposer */}
+      <ThreadComposer
+        onSubmit={handleSubmit}
+        loading={isLoading}
+        placeholder="Describe the invoice..."
+        sendLabel="Send invoice request"
+        className="border-t border bg-card/60 backdrop-blur-md pb-0"
+      />
     </Div>
   )
 }
