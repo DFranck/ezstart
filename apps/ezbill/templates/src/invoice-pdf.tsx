@@ -1,4 +1,27 @@
-import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+
+// Register Roboto font family (supports Vietnamese characters)
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
+      fontWeight: 300,
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
+      fontWeight: 400,
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf',
+      fontWeight: 500,
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
+      fontWeight: 700,
+    },
+  ],
+})
 
 // Logo EZStart en base64 (version simple pour démonstration)
 const EZSTART_LOGO_BASE64 =
@@ -91,7 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 20,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
   },
   header: {
     flexDirection: 'row',
@@ -256,7 +279,8 @@ const styles = StyleSheet.create({
   walletAddress: {
     fontSize: 8,
     color: '#6b7280',
-    fontFamily: 'Courier',
+    fontFamily: 'Roboto',
+    fontWeight: 400,
     backgroundColor: '#f9fafb',
     padding: 6,
     borderRadius: 4,
