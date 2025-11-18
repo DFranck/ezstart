@@ -3,7 +3,7 @@
  * Extract invoice/quote data from natural language text
  */
 import { Request, Response } from 'express'
-import { extractInvoiceData as extractWithGemini } from '../../services/gemini.service'
+import { extractInvoiceData as extractWithGemini } from '../../services/gemini.service.js'
 
 interface ExtractInvoiceRequest {
   text: string

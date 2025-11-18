@@ -50,7 +50,7 @@ export async function extractInvoiceData(
 ): Promise<ExtractedInvoiceData> {
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash', // Updated to use available model
       systemInstruction: SYSTEM_PROMPT,
       generationConfig: {
         temperature: 0.3,
