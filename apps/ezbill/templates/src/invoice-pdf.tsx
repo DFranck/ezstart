@@ -4,21 +4,49 @@ import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/
 Font.register({
   family: 'Roboto',
   fonts: [
+    // Light
     {
       src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
       fontWeight: 300,
+      fontStyle: 'normal',
     },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-lightitalic-webfont.ttf',
+      fontWeight: 300,
+      fontStyle: 'italic',
+    },
+    // Regular
     {
       src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
       fontWeight: 400,
+      fontStyle: 'normal',
     },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-italic-webfont.ttf',
+      fontWeight: 400,
+      fontStyle: 'italic',
+    },
+    // Medium
     {
       src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf',
       fontWeight: 500,
+      fontStyle: 'normal',
     },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-mediumitalic-webfont.ttf',
+      fontWeight: 500,
+      fontStyle: 'italic',
+    },
+    // Bold
     {
       src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
       fontWeight: 700,
+      fontStyle: 'normal',
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bolditalic-webfont.ttf',
+      fontWeight: 700,
+      fontStyle: 'italic',
     },
   ],
 })
