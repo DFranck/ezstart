@@ -25,7 +25,7 @@ Return JSON with this structure (omit fields if not mentioned):
     {
       "label": "string (item/service description)",
       "quantity": number,
-      "price": number (unit price)
+      "price": number (unit price, use 0 if not specified)
     }
   ],
   "description": "string (overall invoice description)",
@@ -42,7 +42,13 @@ Output: {"clientName":"John Doe","items":[{"label":"Consulting","quantity":3,"pr
 Input: "Quote for ABC Corp: 2 laptops at 1200€ each, 1 monitor at 300€"
 Output: {"clientName":"ABC Corp","items":[{"label":"Laptop","quantity":2,"price":1200},{"label":"Monitor","quantity":1,"price":300}],"currency":"EUR"}
 
-IMPORTANT: Return ONLY the JSON object, no markdown, no explanation.`
+Input: "Timesheet for TechCorp: Monday 3h, Tuesday 5h, Wednesday 8h"
+Output: {"clientName":"TechCorp","items":[{"label":"Monday development","quantity":3,"price":0},{"label":"Tuesday development","quantity":5,"price":0},{"label":"Wednesday development","quantity":8,"price":0}],"description":"Timesheet work"}
+
+IMPORTANT:
+- Return ONLY the JSON object, no markdown, no explanation
+- If price is not mentioned, use 0 (user will fill it in later)
+- Extract hours/quantities from timesheets and create items accordingly`
 
 export async function extractInvoiceData(
   message: string,
