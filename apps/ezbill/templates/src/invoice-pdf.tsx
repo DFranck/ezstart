@@ -499,7 +499,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
           </View>
 
           {data.items.map((item, index) => (
-            <View key={index} style={styles.tableRow}>
+            <View key={index} style={styles.tableRow} wrap={false}>
               <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
               <Text style={styles.tableColQuantity}>{item.quantity}</Text>
               <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
