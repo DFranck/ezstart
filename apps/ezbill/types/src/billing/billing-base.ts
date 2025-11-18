@@ -60,6 +60,10 @@ export const baseBillingDocSchemaRaw = z.object({
   taxRate: z.number().min(0).max(100).optional().describe('Tax rate percentage (0-100)'),
   paymentMethodId: z.string().optional().describe('DEPRECATED: Use paymentMethodIds instead'),
   paymentMethodIds: z.array(z.string()).optional().describe('Payment method identifiers to display on invoice'),
+  aiConversationHistory: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string(),
+  })).optional().describe('AI assistant conversation history for this invoice/quote'),
 });
 
 // Validation function to be applied after extending

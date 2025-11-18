@@ -2,7 +2,7 @@
 
 import { callApi } from '@/utils/api'
 import { Button, Div, Icon, Input, P, Span } from '@ezstart/ui/components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -19,7 +19,7 @@ interface ExtractedInvoiceData {
   description?: string
   dueDate?: string
   notes?: string
-  currency?: 'USD' | 'EUR'
+  currency?: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
   taxRate?: number
 }
 
@@ -27,22 +27,58 @@ interface InvoiceAIAssistantProps {
   onDataExtracted: (data: ExtractedInvoiceData) => void
   isCollapsed?: boolean
   onToggle?: () => void
+  initialHistory?: Message[] // Load existing conversation
+  onHistoryChange?: (history: Message[]) => void // Save conversation on each message
+  currentInvoiceData?: ExtractedInvoiceData // Current invoice content for context
 }
 
 export function InvoiceAIAssistant({
   onDataExtracted,
   isCollapsed = false,
   onToggle,
+  initialHistory,
+  onHistoryChange,
+  currentInvoiceData,
 }: InvoiceAIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
+  // Generate initial message based on context
+  const getInitialMessage = (): Message => {
+    if (currentInvoiceData && currentInvoiceData.items && currentInvoiceData.items.length > 0) {
+      // Editing existing invoice - provide context
+      const itemsCount = currentInvoiceData.items.length
+      const totalHours = currentInvoiceData.items.reduce((sum, item) => sum + item.quantity, 0)
+      return {
+        role: 'assistant',
+        content: `Hi! I can see you're editing an invoice with ${itemsCount} items (${totalHours} hours total). How can I help you improve it?
+
+Examples:
+- "Shorten the descriptions"
+- "Make descriptions more readable"
+- "Add bullet points to items"
+- "Change date format"`,
+      }
+    }
+    // Creating new invoice
+    return {
       role: 'assistant',
       content:
         "Hi! I'm your invoice assistant. Tell me about the invoice you want to create, and I'll fill in the details for you. Try: 'Invoice for John Doe, 3 hours consulting at $50/hr'",
-    },
-  ])
+    }
+  }
+
+  const [messages, setMessages] = useState<Message[]>(
+    initialHistory && initialHistory.length > 0
+      ? initialHistory
+      : [getInitialMessage()]
+  )
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Save conversation history on every message change
+  useEffect(() => {
+    if (onHistoryChange && messages.length > 0) {
+      onHistoryChange(messages)
+    }
+  }, [messages, onHistoryChange])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,6 +91,14 @@ export function InvoiceAIAssistant({
     setIsLoading(true)
 
     try {
+      // Prepare context message if editing existing invoice
+      let contextualInput = input
+      if (currentInvoiceData && currentInvoiceData.items && currentInvoiceData.items.length > 0 && messages.length <= 2) {
+        // First user message when editing - add context
+        const currentContext = `Current invoice has ${currentInvoiceData.items.length} items:\n${currentInvoiceData.items.map((item, i) => `${i + 1}. ${item.label} (${item.quantity}h @ $${item.price}/h)`).join('\n')}\n\nUser request: ${input}`
+        contextualInput = currentContext
+      }
+
       // Call AI extraction API
       const response = await callApi<{
         success: boolean
@@ -63,7 +107,7 @@ export function InvoiceAIAssistant({
       }>('/ai/extract-invoice-data', {
         method: 'POST',
         body: {
-          text: input,
+          text: contextualInput,
           conversationHistory: messages,
         },
       })
@@ -106,7 +150,7 @@ export function InvoiceAIAssistant({
         onClick={onToggle}
         variant="outline"
         size="sm"
-        className="absolute top-2 right-2 z-10 bg-primary/10 hover:bg-primary/20 border-primary/30 backdrop-blur-sm"
+        className="absolute top-2 right-12 z-10 bg-primary/10 hover:bg-primary/20 border-primary/30 backdrop-blur-sm"
       >
         <Icon name="lucide:Sparkles" className="mr-2 text-primary" />
         <span className="hidden sm:inline">AI Assistant</span>
@@ -116,14 +160,12 @@ export function InvoiceAIAssistant({
   }
 
   return (
-    <Div className="flex flex-col h-full border-l border bg-muted/30 backdrop-blur-sm">
+    <Div className="flex flex-col h-[60vh] sticky top-0 border-l border bg-muted/30 backdrop-blur-sm ">
       {/* Header */}
       <Div className="flex items-center justify-between p-3 sm:p-4 border-b border bg-card/60 backdrop-blur-md">
         <Div className="flex items-center gap-2">
           <Icon name="lucide:Sparkles" className="text-primary w-5 h-5" />
-          <Span className="font-semibold text-sm sm:text-base text-primary">
-            AI Assistant
-          </Span>
+          <Span className="font-semibold text-sm sm:text-base text-primary">AI Assistant</Span>
         </Div>
         {onToggle && (
           <Button onClick={onToggle} variant="ghost" size="sm" className="hover:bg-muted/50">

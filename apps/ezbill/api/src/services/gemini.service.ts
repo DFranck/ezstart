@@ -23,7 +23,7 @@ Return JSON with this structure (omit fields if not mentioned):
   "clientName": "string (client/customer name)",
   "items": [
     {
-      "label": "string (item/service description)",
+      "label": "string (item description, max 150 chars for detailed work, 50 chars for simple items)",
       "quantity": number,
       "price": number (unit price, use 0 if not specified)
     }
@@ -37,18 +37,22 @@ Return JSON with this structure (omit fields if not mentioned):
 
 Examples:
 Input: "Invoice for John Doe, 3 hours consulting at $50/hr"
-Output: {"clientName":"John Doe","items":[{"label":"Consulting","quantity":3,"price":50}],"currency":"USD"}
+Output: {"clientName":"John Doe","items":[{"label":"Consulting services","quantity":3,"price":50}],"currency":"USD"}
 
 Input: "Quote for ABC Corp: 2 laptops at 1200€ each, 1 monitor at 300€"
 Output: {"clientName":"ABC Corp","items":[{"label":"Laptop","quantity":2,"price":1200},{"label":"Monitor","quantity":1,"price":300}],"currency":"EUR"}
 
-Input: "Timesheet for TechCorp: Monday 3h, Tuesday 5h, Wednesday 8h"
-Output: {"clientName":"TechCorp","items":[{"label":"Monday development","quantity":3,"price":0},{"label":"Tuesday development","quantity":5,"price":0},{"label":"Wednesday development","quantity":8,"price":0}],"description":"Timesheet work"}
+Input: "Timesheet for TechCorp: Monday 3h frontend dev, Tuesday 5h backend, Wednesday 8h full-stack"
+Output: {"clientName":"TechCorp","items":[{"label":"Mon: Frontend dev","quantity":3,"price":0},{"label":"Tue: Backend dev","quantity":5,"price":0},{"label":"Wed: Full-stack dev","quantity":8,"price":0}],"description":"Development timesheet"}
 
 IMPORTANT:
 - Return ONLY the JSON object, no markdown, no explanation
+- Keep item labels concise but informative (max 150 chars for detailed work logs)
+- For timesheets: use format "Day: Task details" (preserve technical details when present)
 - If price is not mentioned, use 0 (user will fill it in later)
-- Extract hours/quantities from timesheets and create items accordingly`
+- Extract hours/quantities from timesheets and create items accordingly
+- When reformatting: PRESERVE all technical details (feature names, technologies, etc.)
+- Use bullet points (• or -) or line breaks for better readability if needed`
 
 export async function extractInvoiceData(
   message: string,
@@ -69,7 +73,13 @@ export async function extractInvoiceData(
     // If conversation history exists, use chat mode for context
     if (conversationHistory && conversationHistory.length > 0) {
       // Convert conversation history to Gemini format
-      const history = conversationHistory.map(msg => ({
+      // Filter out initial assistant message if history starts with assistant
+      let filteredHistory = conversationHistory
+      if (conversationHistory[0]?.role === 'assistant') {
+        filteredHistory = conversationHistory.slice(1) // Remove first assistant message
+      }
+
+      const history = filteredHistory.map(msg => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }],
       }))

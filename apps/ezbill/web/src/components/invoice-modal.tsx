@@ -31,6 +31,7 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
+import { cn } from '@ezstart/ui/lib'
 import { useEffect, useState } from 'react'
 import { getUserId } from '../utils/get-user-id'
 import { InvoiceAIAssistant } from './invoice-ai-assistant'
@@ -67,6 +68,9 @@ export function InvoiceModal({
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
+  const [aiConversationHistory, setAiConversationHistory] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>(
+    invoice?.aiConversationHistory || []
+  )
 
   const [formData, setFormData] = useState<CreateInvoice & { paymentMethodIds?: string[] }>({
     userId: '', // Will be set in handleSubmit
@@ -87,10 +91,17 @@ export function InvoiceModal({
     terms: invoice?.terms || '',
     taxRate: invoice?.taxRate || 0,
     paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+    aiConversationHistory: invoice?.aiConversationHistory || [],
   })
 
-  // Update form data when invoice changes
+  // Sync AI conversation history to formData
   useEffect(() => {
+    setFormData(prev => ({ ...prev, aiConversationHistory }))
+  }, [aiConversationHistory])
+
+  // Update form data and AI history when invoice changes
+  useEffect(() => {
+    setAiConversationHistory(invoice?.aiConversationHistory || [])
     setFormData({
       userId: '', // Will be set in handleSubmit
       clientId:
@@ -110,6 +121,7 @@ export function InvoiceModal({
       terms: invoice?.terms || '',
       taxRate: invoice?.taxRate || 0,
       paymentMethodIds: paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+      aiConversationHistory: invoice?.aiConversationHistory || [],
     })
     setShowTaxes(invoice?.taxRate ? invoice.taxRate > 0 : false)
   }, [invoice, clientId, clients, paymentMethods])
@@ -144,7 +156,7 @@ export function InvoiceModal({
     description?: string
     dueDate?: string
     notes?: string
-    currency?: 'USD' | 'EUR'
+    currency?: 'USD' | 'EUR' | 'GBP' | 'JPY' | 'VND' | 'THB' | 'AUD' | 'CAD' | 'CNY' | 'CHF'
     taxRate?: number
   }) => {
     const updates: Partial<typeof formData> = {}
@@ -230,10 +242,28 @@ export function InvoiceModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      className={cn('', { 'max-w-5xl': showAIAssistant })}
       title={invoice ? 'Edit Invoice' : 'Create Invoice'}
       description={invoice ? 'Update invoice information' : 'Create a new invoice for your client'}
       footer={
         <div className="flex gap-3">
+          {/* AI Assistant Toggle Button (when collapsed) */}
+          {!showAIAssistant && (
+            <InvoiceAIAssistant
+              isCollapsed={true}
+              onToggle={() => setShowAIAssistant(true)}
+              onDataExtracted={handleAIExtraction}
+              initialHistory={aiConversationHistory}
+              onHistoryChange={setAiConversationHistory}
+              currentInvoiceData={{
+                items: formData.items,
+                currency: formData.currency,
+                description: formData.description,
+                notes: formData.notes,
+                taxRate: formData.taxRate,
+              }}
+            />
+          )}
           <Button
             variant="outline"
             onClick={onClose}
@@ -266,15 +296,6 @@ export function InvoiceModal({
       }
     >
       <div className="flex flex-col lg:flex-row gap-0 relative">
-        {/* AI Assistant Toggle Button (when collapsed) */}
-        {!showAIAssistant && (
-          <InvoiceAIAssistant
-            isCollapsed={true}
-            onToggle={() => setShowAIAssistant(true)}
-            onDataExtracted={handleAIExtraction}
-          />
-        )}
-
         {/* Main Form */}
         <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
@@ -751,11 +772,20 @@ export function InvoiceModal({
 
         {/* AI Assistant Sidebar (when expanded) */}
         {showAIAssistant && (
-          <div className="w-full lg:w-1/3 h-[400px] lg:h-[600px] mt-4 lg:mt-0">
+          <div className="w-full lg:w-1/3 mt-4 lg:mt-0">
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}
               onDataExtracted={handleAIExtraction}
+              initialHistory={aiConversationHistory}
+              onHistoryChange={setAiConversationHistory}
+              currentInvoiceData={{
+                items: formData.items,
+                currency: formData.currency,
+                description: formData.description,
+                notes: formData.notes,
+                taxRate: formData.taxRate,
+              }}
             />
           </div>
         )}
