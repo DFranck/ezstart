@@ -1,6 +1,5 @@
 'use client'
 
-import { LoginButton, useAuth, useAuthStore } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -27,8 +26,6 @@ import Link from 'next/link'
 
 export default function HomePage(): any {
   const t = useTranslations('home')
-  const { isAuthenticated } = useAuthStore()
-  const { login } = useAuth()
 
   return (
     <>
@@ -57,11 +54,13 @@ export default function HomePage(): any {
 
           {/* Feature tags (from slide) */}
           <Div layout={'row'} className="hidden lg:flex ">
-            {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map((feature: string, index: number) => (
-              <Button key={index} className="rounded-full">
-                {feature}
-              </Button>
-            ))}
+            {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
+              (feature: string, index: number) => (
+                <Button key={index} className="rounded-full">
+                  {feature}
+                </Button>
+              )
+            )}
           </Div>
 
           {/* Typewriter effect (from v2) */}
@@ -77,20 +76,15 @@ export default function HomePage(): any {
           />
         </Div>
         {/* CTA Button */}
-        {isAuthenticated ? (
-          <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6">
-            <Link href="/chat">{t('hero.getStarted')}</Link>
-          </Button>
-        ) : (
-          <LoginButton
-            size="lg"
-            className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
-            loginText={t('hero.getStarted')}
-            onClick={() => login({ redirect_uri: `${window.location.origin}/chat` })}
-            alwaysShowText
-            showIcon={false}
-          />
-        )}
+        <Button
+          asChild
+          size="lg"
+          className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
+        >
+          <Link href="/chat" target="_blank" rel="noopener noreferrer">
+            {t('hero.getStarted')}
+          </Link>
+        </Button>
       </Section>
       {/* Challenge Context Section - Using SplitSection with diagonal */}
       <SplitSection
@@ -103,17 +97,17 @@ export default function HomePage(): any {
       >
         {/* Left side - Content */}
         <SplitSectionItem size="xl" className="xl:mx-20">
-          <H3
-            size={'h4'}
-            className="text-xl lg:text-2xl font-bold mb-6 leading-tight"
-          >
+          <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
             {t.rich('challenge.title', {
               strong: chunks => <Strong>{chunks}</Strong>,
             })}
           </H3>
 
           <Div className="space-y-4">
-            {(Array.isArray(t.raw('challenge.challenges')) ? t.raw('challenge.challenges') : []).map((challenge: string, index: number) => (
+            {(Array.isArray(t.raw('challenge.challenges'))
+              ? t.raw('challenge.challenges')
+              : []
+            ).map((challenge: string, index: number) => (
               <Div key={index} className="flex items-start gap-3">
                 <Div className="w-2 h-2 bg-gp-primary rounded-full mt-2 flex-shrink-0" />
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
@@ -201,11 +195,20 @@ export default function HomePage(): any {
         </Div>
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {(Array.isArray(t.raw('transformation.features')) ? t.raw('transformation.features') : []).map((feature: {title: string, description: string}, index: number) => (
+          {(Array.isArray(t.raw('transformation.features'))
+            ? t.raw('transformation.features')
+            : []
+          ).map((feature: { title: string; description: string }, index: number) => (
             <Card key={index}>
               <CardHeader className="flex items-center gap-3">
                 <Icon
-                  name={index === 0 ? 'lucide:Database' : index === 1 ? 'lucide:TrendingUp' : 'lucide:FileText'}
+                  name={
+                    index === 0
+                      ? 'lucide:Database'
+                      : index === 1
+                        ? 'lucide:TrendingUp'
+                        : 'lucide:FileText'
+                  }
                   size={30}
                 />
                 <H3 size="h6" className="w-fit">
@@ -213,9 +216,7 @@ export default function HomePage(): any {
                 </H3>
               </CardHeader>
               <CardContent>
-                <P className="text-muted-foreground">
-                  {feature.description}
-                </P>
+                <P className="text-muted-foreground">{feature.description}</P>
               </CardContent>
             </Card>
           ))}
@@ -225,17 +226,12 @@ export default function HomePage(): any {
       <Section size={'xl'}>
         <Div className="container mx-auto">
           <Div className="text-center mb-12">
-            <H2
-              size="h3"
-              className="mb-4"
-            >
+            <H2 size="h3" className="mb-4">
               {t.rich('problem.title', {
                 strong: chunks => <Strong>{chunks}</Strong>,
               })}
             </H2>
-            <P
-              className="text-xl text-muted-foreground max-w-3xl mx-auto"
-            >
+            <P className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t.rich('problem.subtitle', {
                 strong: chunks => <Strong>{chunks}</Strong>,
               })}
@@ -243,32 +239,34 @@ export default function HomePage(): any {
           </Div>
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {(Array.isArray(t.raw('problem.problems')) ? t.raw('problem.problems') : []).map((item: {title: string, description: string}, index: number) => (
-              <Card key={index}>
-                <CardHeader className="flex items-center gap-3">
-                  <Icon
-                    name={
-                      (index === 0
-                        ? 'lucide:Clock'
-                        : index === 1
-                        ? 'lucide:FileWarning'
-                        : 'lucide:Users') as KnownIconName
-                    }
-                    size={30}
-                    className="mr-3"
-                  />
-                  <H3 size="h6" className="w-fit">
-                    {item.title}
-                  </H3>
-                </CardHeader>
-                <CardContent>
-                  <P
-                    className="text-muted-foreground text-sm"
-                    dangerouslySetInnerHTML={{ __html: item.description }}
-                  />
-                </CardContent>
-              </Card>
-            ))}
+            {(Array.isArray(t.raw('problem.problems')) ? t.raw('problem.problems') : []).map(
+              (item: { title: string; description: string }, index: number) => (
+                <Card key={index}>
+                  <CardHeader className="flex items-center gap-3">
+                    <Icon
+                      name={
+                        (index === 0
+                          ? 'lucide:Clock'
+                          : index === 1
+                            ? 'lucide:FileWarning'
+                            : 'lucide:Users') as KnownIconName
+                      }
+                      size={30}
+                      className="mr-3"
+                    />
+                    <H3 size="h6" className="w-fit">
+                      {item.title}
+                    </H3>
+                  </CardHeader>
+                  <CardContent>
+                    <P
+                      className="text-muted-foreground text-sm"
+                      dangerouslySetInnerHTML={{ __html: item.description }}
+                    />
+                  </CardContent>
+                </Card>
+              )
+            )}
           </Div>
         </Div>
       </Section>
@@ -282,21 +280,23 @@ export default function HomePage(): any {
             {t('team.description')}
           </P>
           <Div className="space-y-4">
-            {(Array.isArray(t.raw('team.credentials')) ? t.raw('team.credentials') : []).map((text: string, index: number) => (
-              <Div key={index} className="flex items-start gap-3">
-                <Icon
-                  name={
-                    (index === 0
-                      ? 'lucide:Award'
-                      : index === 1
-                      ? 'lucide:GraduationCap'
-                      : 'lucide:Building2') as KnownIconName
-                  }
-                  className="w-6 h-6  mt-1 flex-shrink-0"
-                />
-                <P className="text-base">{text}</P>
-              </Div>
-            ))}
+            {(Array.isArray(t.raw('team.credentials')) ? t.raw('team.credentials') : []).map(
+              (text: string, index: number) => (
+                <Div key={index} className="flex items-start gap-3">
+                  <Icon
+                    name={
+                      (index === 0
+                        ? 'lucide:Award'
+                        : index === 1
+                          ? 'lucide:GraduationCap'
+                          : 'lucide:Building2') as KnownIconName
+                    }
+                    className="w-6 h-6  mt-1 flex-shrink-0"
+                  />
+                  <P className="text-base">{text}</P>
+                </Div>
+              )
+            )}
           </Div>
         </Div>
         <Div className="relative w-full h-full min-h-[400px]">
@@ -329,7 +329,10 @@ export default function HomePage(): any {
               {t('partnership.exchange.title')}
             </H3>
             <Div className="space-y-3">
-              {(Array.isArray(t.raw('partnership.exchange.items')) ? t.raw('partnership.exchange.items') : []).map((item: string, index: number) => (
+              {(Array.isArray(t.raw('partnership.exchange.items'))
+                ? t.raw('partnership.exchange.items')
+                : []
+              ).map((item: string, index: number) => (
                 <Div key={index} className="flex items-start gap-3">
                   <Icon
                     name="lucide:CheckCircle2"
@@ -346,7 +349,10 @@ export default function HomePage(): any {
               {t('partnership.focus.title')}
             </H3>
             <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(Array.isArray(t.raw('partnership.focus.partners')) ? t.raw('partnership.focus.partners') : []).map((text: string, index: number) => (
+              {(Array.isArray(t.raw('partnership.focus.partners'))
+                ? t.raw('partnership.focus.partners')
+                : []
+              ).map((text: string, index: number) => (
                 <Card key={index} className="p-4 bg-background">
                   <Div className="flex items-start gap-3">
                     <Icon
@@ -354,8 +360,8 @@ export default function HomePage(): any {
                         (index === 0
                           ? 'lucide:Database'
                           : index === 1
-                          ? 'lucide:Leaf'
-                          : 'lucide:FileText') as KnownIconName
+                            ? 'lucide:Leaf'
+                            : 'lucide:FileText') as KnownIconName
                       }
                       className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
                     />
@@ -416,9 +422,7 @@ export default function HomePage(): any {
                     <Div className="flex-1">
                       <P className="font-semibold mb-2">
                         {item.publication}{' '}
-                        <Span className="text-xs text-muted-foreground">
-                          {item.date}
-                        </Span>
+                        <Span className="text-xs text-muted-foreground">{item.date}</Span>
                       </P>
                       <P className="text-muted-foreground italic">{item.quote}</P>
                     </Div>
@@ -585,20 +589,15 @@ export default function HomePage(): any {
           <Div className="max-w-3xl mx-auto">
             <H3 className="text-3xl lg:text-4xl font-bold mb-6">{t('cta.title')}</H3>
             <P className="text-xl mb-8">{t('cta.description')}</P>
-            {isAuthenticated ? (
-              <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6">
-                <Link href="/chat">{t('cta.getStarted')}</Link>
-              </Button>
-            ) : (
-              <LoginButton
-                size="lg"
-                className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
-                loginText={t('cta.getStarted')}
-                onClick={() => login({ redirect_uri: `${window.location.origin}/chat` })}
-                alwaysShowText
-                showIcon={false}
-              />
-            )}
+            <Button
+              asChild
+              size="lg"
+              className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
+            >
+              <Link href="/chat" target="_blank" rel="noopener noreferrer">
+                {t('cta.getStarted')}
+              </Link>
+            </Button>
           </Div>
         </Div>
       </Section>
