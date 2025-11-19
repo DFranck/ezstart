@@ -1,6 +1,6 @@
 'use client'
 
-import { getApiUrl } from '@ezstart/config/urls'
+import { LoginButton, useAuth, useAuthStore } from '@ezstart/auth-sdk'
 import {
   Badge,
   Button,
@@ -8,16 +8,10 @@ import {
   CardContent,
   CardHeader,
   Div,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
   H1,
   H2,
   H3,
   Icon,
-  Input,
   KnownIconName,
   P,
   Section,
@@ -27,69 +21,14 @@ import {
   Strong,
   TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
-import { runWithFeedback, toast } from '@ezstart/ui/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-
-const emailSchema = z.object({
-  email: z.string().email('Invalid email address'),
-})
-
-type EmailFormData = z.infer<typeof emailSchema>
+import Link from 'next/link'
 
 export default function HomePage(): any {
   const t = useTranslations('home')
-
-  const form = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: {
-      email: '',
-    },
-  })
-
-  const onSubmit = async (data: EmailFormData) => {
-    await runWithFeedback({
-      action: async () => {
-        const apiUrl = getApiUrl('ezauth')
-        const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: data.email }),
-        })
-
-        const responseData = await response.json()
-
-        if (!response.ok) {
-          // Status 409 = email already exists, use specific message
-          if (response.status === 409 && responseData.code === 'EMAIL_EXISTS') {
-            throw new Error(t('cta.alreadyRegistered') || 'Email already registered!')
-          } else {
-            throw new Error(
-              responseData.error || t('cta.error') || 'Something went wrong. Please try again.'
-            )
-          }
-        }
-
-        form.reset()
-        return responseData
-      },
-      toastLoading: { message: t('cta.loading') || 'Adding to waitlist...' },
-      toastSuccess: {
-        message: t('cta.thankYou') || "Thank you! You've been added to the waitlist.",
-      },
-      toastError: false,
-      onError: error => {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t('cta.error') || 'Something went wrong. Please try again.'
-        toast.error(errorMessage)
-      },
-    })
-  }
+  const { isAuthenticated } = useAuthStore()
+  const { login } = useAuth()
 
   return (
     <>
@@ -137,33 +76,21 @@ export default function HomePage(): any {
             delay={0.5}
           />
         </Div>
-        {/* CTA Form (from v2) */}
-        <Div className=" backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-xl max-w-2xl mx-auto">
-          <P className="text-base sm:text-lg font-medium mb-4">{t('hero.cta')}</P>
-          <Form {...form}>
-            <Div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input type="email" placeholder={t('hero.emailPlaceholder')} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                onClick={form.handleSubmit(onSubmit)}
-                className="bg-gp-primary hover:bg-gp-primary/80"
-              >
-                {t('hero.notifyMe')}
-              </Button>
-            </Div>
-          </Form>
-        </Div>
+        {/* CTA Button */}
+        {isAuthenticated ? (
+          <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6">
+            <Link href="/chat">{t('hero.getStarted')}</Link>
+          </Button>
+        ) : (
+          <LoginButton
+            size="lg"
+            className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
+            loginText={t('hero.getStarted')}
+            onClick={() => login({ redirect_uri: `${window.location.origin}/chat` })}
+            alwaysShowText
+            showIcon={false}
+          />
+        )}
       </Section>
       {/* Challenge Context Section - Using SplitSection with diagonal */}
       <SplitSection
@@ -656,27 +583,22 @@ export default function HomePage(): any {
       <Section size={'xl'} className="max-w-full t">
         <Div className="container mx-auto text-center">
           <Div className="max-w-3xl mx-auto">
-            <H3 className="text-3xl lg:text-4xl font-bold  mb-6">{t('cta.title')}</H3>
+            <H3 className="text-3xl lg:text-4xl font-bold mb-6">{t('cta.title')}</H3>
             <P className="text-xl mb-8">{t('cta.description')}</P>
-            <Form {...form}>
-              <Div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Input type="email" placeholder={t('hero.emailPlaceholder')} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-                  {t('cta.joinWaitlist')}
-                </Button>
-              </Div>
-            </Form>
+            {isAuthenticated ? (
+              <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6">
+                <Link href="/chat">{t('cta.getStarted')}</Link>
+              </Button>
+            ) : (
+              <LoginButton
+                size="lg"
+                className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
+                loginText={t('cta.getStarted')}
+                onClick={() => login({ redirect_uri: `${window.location.origin}/chat` })}
+                alwaysShowText
+                showIcon={false}
+              />
+            )}
           </Div>
         </Div>
       </Section>

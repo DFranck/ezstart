@@ -183,7 +183,6 @@ export function LiaThread({
   // Navigation items
   const navItems = useMemo(
     () => [
-      { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
       {
         href: '/dashboard',
         label: tForms('navigation.workspaces') || 'Workspaces',

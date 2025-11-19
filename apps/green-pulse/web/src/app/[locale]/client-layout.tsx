@@ -43,7 +43,6 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         isChatPage
           ? []
           : [
-              { href: '/chat', label: 'GPA', icon: 'lucide:Bot' as const },
               ...(rbac.hasAnyRole(['admin', 'superadmin'])
                 ? [
                     {
@@ -81,11 +80,17 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
       }
       headerRightContent={
         <Div>
-          <LoginButton
-            loginText={t('auth.login')}
-            logoutText={t('auth.logout')}
-            loadingText={t('auth.loading')}
-          />
+          {user ? (
+            <LoginButton
+              loginText={t('auth.login')}
+              logoutText={t('auth.logout')}
+              loadingText={t('auth.loading')}
+            />
+          ) : (
+            <Button asChild size="default" className="bg-gp-primary hover:bg-gp-primary/80">
+              <Link href="/chat">{t('auth.getStarted')}</Link>
+            </Button>
+          )}
           <LocaleSwitcher
             locales={[...routing.locales]}
             currentLocale={currentLocale}

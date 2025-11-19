@@ -7,7 +7,8 @@
       "description": "Un accompagnement basé sur l'IA pour aider les PME à réduire leurs coûts, développer un marketing vert solide et accéder à la finance verte.",
       "cta": "Soyez le premier informé de notre lancement et bénéficiez d'une version d'essai gratuite",
       "emailPlaceholder": "Votre adresse e-mail",
-      "notifyMe": "Prévenez-moi"
+      "notifyMe": "Prévenez-moi",
+      "getStarted": "Commencer"
     },
     "value": {
       "intro": "Avec GreenPulse.AI, pas besoin d'être un expert environnemental ou d'en embaucher un. Grâce à une simple conversation avec votre assistant personnalisé, vous recevrez des conseils étape par étape pour :",
@@ -64,6 +65,7 @@
       "title": "GreenPulse.AI sera bientôt lancé",
       "description": "Inscrivez-vous pour recevoir des mises à jour exclusives et un accès GRATUIT anticipé.",
       "joinWaitlist": "Rejoignez la liste d'attente",
+      "getStarted": "Commencer",
       "thankYou": "Merci ! Vous serez notifié dès le lancement de GreenPulse.AI",
       "loading": "Ajout à la liste d'attente...",
       "alreadyRegistered": "Cet email est déjà enregistré !",

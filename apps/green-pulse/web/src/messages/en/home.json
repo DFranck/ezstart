@@ -7,7 +7,8 @@
       "description": "AI-powered support to help SMEs reduce costs, develop solid green marketing, and access green finance.",
       "cta": "Be the first to know about our launch and get a free trial",
       "emailPlaceholder": "Your email address",
-      "notifyMe": "Notify me"
+      "notifyMe": "Notify me",
+      "getStarted": "Get Started"
     },
     "value": {
       "intro": "With GreenPulse.AI, no need to be an environmental expert or hire one. Through a simple conversation with your personalized assistant, you'll receive step-by-step advice to:",
@@ -64,6 +65,7 @@
       "title": "GreenPulse.AI launching soon",
       "description": "Sign up to receive exclusive updates and FREE early access.",
       "joinWaitlist": "Join the waitlist",
+      "getStarted": "Get Started",
       "thankYou": "Thank you! You will be notified as soon as GreenPulse.AI launches",
       "loading": "Adding to waitlist...",
       "alreadyRegistered": "This email is already registered!",
