@@ -9,7 +9,12 @@
     "login": "Se connecter",
     "logout": "Se déconnecter",
     "loading": "Redirection...",
-    "getStarted": "Commencer"
+    "getStarted": "Commencer",
+    "welcome": {
+      "title": "Commencez votre parcours vert",
+      "description": "Connectez-vous pour utiliser GreenPulse.AI gratuitement et transformez la durabilité de votre entreprise",
+      "login": "Se connecter pour commencer"
+    }
   },
   "navigation": {
     "admin": "Admin"

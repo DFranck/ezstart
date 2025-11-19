@@ -9,7 +9,12 @@
     "login": "Login",
     "logout": "Logout",
     "loading": "Redirecting...",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "welcome": {
+      "title": "Start Your Green Journey",
+      "description": "Login to use GreenPulse.AI for free and transform your business sustainability",
+      "login": "Login to Get Started"
+    }
   },
   "navigation": {
     "admin": "Admin"

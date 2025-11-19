@@ -4,7 +4,7 @@ import { LiaThread } from '@/components/lia/LiaThread'
 import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { useConversations } from '@/hooks/useConversations'
 import { useProviders } from '@ezstart/ai-sdk/client'
-import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import {
@@ -12,6 +12,7 @@ import {
   Card,
   CardContent,
   Div,
+  H2,
   Icon,
   Input,
   P,
@@ -21,6 +22,7 @@ import {
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 function LiaPageContent(): any {
@@ -306,10 +308,44 @@ export default function LiaPage() {
       }
       fallbackComponent={
         <Section size="full">
-          <Card variant={'ghost'}>
-            <AccessDenied>
-              <LoginButton alwaysShowText>{t('login')}</LoginButton>
-            </AccessDenied>
+          <Card variant={'ghost'} className="max-w-md mx-auto text-center">
+            <CardContent className="py-12 space-y-6">
+              {/* Logo GreenPulse */}
+              <Div className="flex justify-center">
+                <Image
+                  src="/logo_complet_light.svg"
+                  alt="GreenPulse.AI Logo"
+                  width={200}
+                  height={40}
+                  className="animate-glow-pulse-sm dark:hidden"
+                />
+                <Image
+                  src="/logo_complet_dark.svg"
+                  alt="GreenPulse.AI Logo"
+                  width={200}
+                  height={40}
+                  className="animate-glow-pulse-sm hidden dark:block"
+                />
+              </Div>
+
+              {/* Positive messaging */}
+              <Div className="space-y-3">
+                <H2 size="h4" className="text-gp-primary">
+                  {t('welcome.title')}
+                </H2>
+                <P className="text-muted-foreground">{t('welcome.description')}</P>
+              </Div>
+
+              {/* Login button */}
+              <LoginButton
+                size="lg"
+                className="bg-gp-primary hover:bg-gp-primary/80"
+                alwaysShowText
+                showIcon={false}
+              >
+                {t('welcome.login')}
+              </LoginButton>
+            </CardContent>
           </Card>
         </Section>
       }
