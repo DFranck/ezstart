@@ -1,6 +1,10 @@
 'use client'
 
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
   Badge,
   Button,
   Card,
@@ -470,24 +474,26 @@ export default function HomePage(): any {
             {t('faq.title')}
           </H2>
 
-          <Div className="space-y-4">
+          <Accordion type="multiple" className="space-y-4">
             {(
               t.raw('faq.questions') as Array<{
                 question: string
                 answer: string
               }>
             ).map((item, index) => (
-              <Card key={index} className="p-6 bg-card">
-                <Div>
-                  <H3 size="h5" className="mb-3 flex items-start gap-3">
-                    <Icon name="lucide:HelpCircle" className="w-6 h-6  flex-shrink-0 mt-1" />
-                    <Span>{item.question}</Span>
-                  </H3>
-                  <P className="text-muted-foreground leading-relaxed pl-9">{item.answer}</P>
-                </Div>
-              </Card>
+              <AccordionItem key={index} value={`faq-${index}`} className="bg-card border rounded-lg">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <Div className="flex items-start gap-3 text-left">
+                    <Icon name="lucide:HelpCircle" className="w-5 h-5 flex-shrink-0 mt-1 text-gp-primary" />
+                    <Span className="font-medium">{item.question}</Span>
+                  </Div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-4">
+                  <P className="text-muted-foreground leading-relaxed pl-8">{item.answer}</P>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </Div>
+          </Accordion>
         </Div>
       </Section>
       {/* Example Interaction Section */}
