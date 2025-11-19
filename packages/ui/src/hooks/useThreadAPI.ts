@@ -92,23 +92,98 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const data = await response.json();
-        const responseTime = Date.now() - requestStartTime;
-        const aiResponse = formatResponse(data);
+        // Handle streaming response
+        if (enableStreaming && response.body) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullText = '';
+          let lastData: any = null;
 
-        // Add AI response
-        const aiMessage: ThreadMessage = {
-          id: `ai-${Date.now()}`,
-          role: 'ai',
-          content: aiResponse,
-          timestamp: new Date().toISOString(),
-          responseTime,
-        };
+          // Add placeholder AI message for streaming
+          const aiMessageId = `ai-${Date.now()}`;
+          const aiMessage: ThreadMessage = {
+            id: aiMessageId,
+            role: 'ai',
+            content: '',
+            timestamp: new Date().toISOString(),
+            streaming: true,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
 
-        setMessages((prev) => [...prev, aiMessage]);
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-        if (onSuccess) {
-          onSuccess(data);
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const dataStr = line.slice(6).trim();
+                  if (dataStr === '[DONE]') continue;
+
+                  try {
+                    const data = JSON.parse(dataStr);
+                    lastData = data;
+
+                    // Extract text from the response
+                    const text = formatResponse(data);
+                    if (text) {
+                      fullText += text;
+                      setStreamingText(fullText);
+
+                      // Update message content
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === aiMessageId ? { ...msg, content: fullText } : msg
+                        )
+                      );
+                    }
+                  } catch (e) {
+                    console.warn('Failed to parse SSE data:', dataStr);
+                  }
+                }
+              }
+            }
+          } finally {
+            reader.releaseLock();
+          }
+
+          const responseTime = Date.now() - requestStartTime;
+
+          // Finalize the message
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? { ...msg, content: fullText, responseTime, streaming: false }
+                : msg
+            )
+          );
+
+          if (onSuccess && lastData) {
+            onSuccess(lastData);
+          }
+        } else {
+          // Non-streaming response
+          const data = await response.json();
+          const responseTime = Date.now() - requestStartTime;
+          const aiResponse = formatResponse(data);
+
+          // Add AI response
+          const aiMessage: ThreadMessage = {
+            id: `ai-${Date.now()}`,
+            role: 'ai',
+            content: aiResponse,
+            timestamp: new Date().toISOString(),
+            responseTime,
+          };
+
+          setMessages((prev) => [...prev, aiMessage]);
+
+          if (onSuccess) {
+            onSuccess(data);
+          }
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to send message';

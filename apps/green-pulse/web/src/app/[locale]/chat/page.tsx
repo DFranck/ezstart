@@ -44,9 +44,11 @@ function LiaPageContent(): any {
       headers: {
         'Content-Type': 'application/json',
       },
+      enableStreaming: true,
       formatRequest: (message: string) => {
         const payload: any = {
           message,
+          stream: true,
           extract_esg: false,
           // Include userId if authenticated
           ...(isAuthenticated && user?._id && { userId: user._id }),
@@ -62,7 +64,8 @@ function LiaPageContent(): any {
         return payload
       },
       formatResponse: (data: any) => {
-        return data.data?.response || data.response || 'No response'
+        // For streaming, data contains chunks of text
+        return data.delta || data.data?.response || data.response || ''
       },
       onSuccess: (data: any) => {
         const conversationId = data.data?.conversation_id
