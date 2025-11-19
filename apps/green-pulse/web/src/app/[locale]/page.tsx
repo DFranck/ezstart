@@ -401,11 +401,15 @@ export default function HomePage(): any {
           <Div layout={'center'} className="max-w-3xl mx-auto">
             {[
               {
-                publication: 'VietStock',
-                quote: '"Tay xanh" dưới góc nhìn của chuyên gia tư vấn ESG quốc tế',
+                publication: t('press.vietstock.publication'),
+                title: t('press.vietstock.title'),
+                quote: t('press.vietstock.quote'),
+                // Vietnamese quote (hardcoded - always displayed)
+                quoteVi:
+                  'Gần đây, chúng tôi đang thử nghiệm một ứng dụng có tên GreenPulse.AI. Đây là một trợ lý ứng dụng trí tuệ nhân tạo (AI) giúp các doanh nghiệp SME tại Việt Nam và Đông Nam Á dễ dàng thực hành bền vững. Người dùng sẽ được hướng dẫn từng bước để giải quyết các vấn đề như giảm chi phí điện, đáp ứng yêu cầu xuất khẩu, đi kèm bảng điều khiển theo dõi tiến độ. Nền tảng còn tích hợp công cụ báo cáo ESG tự động theo tiêu chuẩn quốc tế. Mục đích chính là giúp các doanh nghiệp tránh bẫy "tẩy xanh", chứng minh các cải tiến có thể đo lường, và mở rộng cơ hội tiếp cận nhà đầu tư, khách hàng cùng thị trường quốc tế.',
                 logo: '/images/vietstock.svg',
                 url: 'https://vietstock.vn/2025/11/tay-xanh-duoi-goc-nhin-cua-chuyen-gia-tu-van-esg-quoc-te-761-1365211.htm',
-                date: 'November 2025',
+                date: t('press.vietstock.date'),
               },
             ].map((item, index) => (
               <a
@@ -425,12 +429,20 @@ export default function HomePage(): any {
                         className="object-contain"
                       />
                     </Div>
-                    <Div className="flex-1">
-                      <P className="font-semibold mb-2">
-                        {item.publication}{' '}
-                        <Span className="text-xs text-muted-foreground">{item.date}</Span>
+                    <Div className="flex-1 space-y-3">
+                      <Div>
+                        <P className="font-semibold mb-1">
+                          {item.publication}{' '}
+                          <Span className="text-xs text-muted-foreground">{item.date}</Span>
+                        </P>
+                        <P className="text-sm font-medium text-foreground">{item.title}</P>
+                      </Div>
+                      {/* Vietnamese quote (always shown) */}
+                      <P className="text-muted-foreground italic text-sm border-l-2 border-muted pl-3">
+                        {item.quoteVi}
                       </P>
-                      <P className="text-muted-foreground italic">{item.quote}</P>
+                      {/* Translated quote (EN/FR based on locale) */}
+                      <P className="text-muted-foreground italic text-sm">{item.quote}</P>
                     </Div>
                   </Div>
                 </Card>

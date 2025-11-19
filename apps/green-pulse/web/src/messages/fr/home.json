@@ -168,7 +168,13 @@
       "cta": "Construisons ensemble →"
     },
     "press": {
-      "title": "Vu dans"
+      "title": "Vu dans",
+      "vietstock": {
+        "publication": "VietStock",
+        "date": "Novembre 2025",
+        "title": "\"Écoblanchiment\" sous l'angle d'un consultant ESG international",
+        "quote": "Récemment, nous testons une application appelée GreenPulse.AI. Il s'agit d'un assistant d'intelligence artificielle (IA) qui aide les PME au Vietnam et en Asie du Sud-Est à pratiquer facilement la durabilité. Les utilisateurs seront guidés étape par étape pour résoudre des problèmes tels que la réduction des coûts d'électricité, le respect des exigences d'exportation, avec un tableau de bord pour suivre les progrès. La plateforme intègre également des outils de reporting ESG automatique selon les normes internationales. L'objectif principal est d'aider les entreprises à éviter le piège de 'l'écoblanchiment', à démontrer des améliorations mesurables et à élargir l'accès aux investisseurs, aux clients et aux marchés internationaux."
+      }
     },
     "faq": {
       "title": "Questions fréquentes",

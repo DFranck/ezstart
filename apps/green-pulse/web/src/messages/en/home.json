@@ -168,7 +168,13 @@
       "cta": "Let's build together →"
     },
     "press": {
-      "title": "As Featured In"
+      "title": "As Featured In",
+      "vietstock": {
+        "publication": "VietStock",
+        "date": "November 2025",
+        "title": "\"Greenwashing\" from the perspective of an international ESG consultant",
+        "quote": "Recently, we have been testing an application called GreenPulse.AI. This is an artificial intelligence (AI) assistant that helps SMEs in Vietnam and Southeast Asia easily practice sustainability. Users will be guided step-by-step to solve issues such as reducing electricity costs, meeting export requirements, with a dashboard to track progress. The platform also integrates automatic ESG reporting tools according to international standards. The main purpose is to help businesses avoid the 'greenwashing' trap, demonstrate measurable improvements, and expand access to investors, customers and international markets."
+      }
     },
     "faq": {
       "title": "Common Questions",
