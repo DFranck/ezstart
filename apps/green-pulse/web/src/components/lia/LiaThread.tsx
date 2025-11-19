@@ -10,7 +10,6 @@ import {
   Button,
   Conversation,
   Div,
-  H1,
   Icon,
   Thread,
   ThreadComposer,
@@ -160,22 +159,22 @@ export function LiaThread({
   const header = (
     <Div size={'xs'} layout={'center'}>
       <Button asChild variant={'ghost'} className="w-full">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/">
           <Image
-            src="/logo.png"
-            alt="Logo"
-            width={32}
+            src="/logo_complet_light.svg"
+            alt="GreenPulse.AI Logo"
+            width={150}
             height={32}
-            className="animate-pulse"
-            style={{
-              filter:
-                'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
-            }}
+            className="animate-glow-pulse-sm dark:hidden"
           />
-          <H1 size={'sm'} className="flex items-baseline">
-            <span className="font-k2d">GreenPulse</span>
-            <span className="font-gugi">.AI</span>
-          </H1>
+          <Image
+            src="/logo_complet_dark.svg"
+            alt="GreenPulse.AI Logo"
+            width={150}
+            height={32}
+            className="animate-glow-pulse-sm hidden dark:block"
+          />
+          <span className="sr-only">GreenPulse.AI</span>
         </Link>
       </Button>
     </Div>

@@ -3,14 +3,7 @@ import { routing } from '@/i18n/routing'
 import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
 import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
-import {
-  Button,
-  ClientLayout,
-  Div,
-  H1,
-  LocaleSwitcher,
-  VersionSwitch,
-} from '@ezstart/ui/components'
+import { Button, ClientLayout, Div, LocaleSwitcher, VersionSwitch } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -50,12 +43,16 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         isChatPage
           ? []
           : [
-              { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
-              {
-                href: '/dashboard',
-                label: tForms('navigation.workspaces'),
-                icon: 'lucide:Briefcase' as const,
-              },
+              { href: '/chat', label: 'GPA', icon: 'lucide:Bot' as const },
+              ...(rbac.hasAnyRole(['admin', 'superadmin'])
+                ? [
+                    {
+                      href: '/dashboard',
+                      label: tForms('navigation.workspaces'),
+                      icon: 'lucide:Briefcase' as const,
+                    },
+                  ]
+                : []),
               ...(rbac.hasAnyRole(['admin', 'superadmin'])
                 ? [{ href: '/admin', label: t('navigation.admin'), icon: 'lucide:Shield' as const }]
                 : []),
@@ -63,22 +60,22 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
       }
       headerLeftContent={
         <Button asChild variant={'ghost'}>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/">
             <Image
-              src="/logo.png"
-              alt="Logo"
-              width={32}
+              src="/logo_complet_light.svg"
+              alt="GreenPulse.AI Logo"
+              width={150}
               height={32}
-              className="animate-pulse"
-              style={{
-                filter:
-                  'drop-shadow(0 0 8px rgb(16 185 129 / 0.8)) drop-shadow(0 0 16px rgb(16 185 129 / 0.6))',
-              }}
+              className="animate-glow-pulse-sm dark:hidden"
             />
-            <H1 size={'sm'} className="flex items-baseline">
-              <span className="font-k2d">GreenPulse</span>
-              <span className="font-gugi">.AI</span>
-            </H1>
+            <Image
+              src="/logo_complet_dark.svg"
+              alt="GreenPulse.AI Logo"
+              width={150}
+              height={32}
+              className="animate-glow-pulse-sm hidden dark:block"
+            />
+            <span className="sr-only">GreenPulse.AI</span>
           </Link>
         </Button>
       }

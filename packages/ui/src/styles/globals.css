@@ -17,6 +17,7 @@
 @import './animations/text-gradient.css';
 @import './animations/typewriter.css';
 @import './animations/icon-fade.css';
+@import './animations/glow-pulse.css';
 
 /* Project themes - CSS variables + utilities (gradients, etc.) */
 @import './themes/index.css';

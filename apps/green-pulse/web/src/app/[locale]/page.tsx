@@ -97,22 +97,21 @@ export default function HomePage(): any {
       <Section size={'full'} className={'t'}>
         <Div layout={'row'}>
           <Image
-            src="/logo.png"
-            alt="Logo"
-            width={60}
+            src="/logo_complet_light.svg"
+            alt="GreenPulse.AI Logo"
+            width={300}
             height={60}
-            className="animate-pulse"
-            style={{
-              filter:
-                'drop-shadow(0 0 8px rgb(16 185 129 / 1)) drop-shadow(0 0 16px rgb(16 185 129 / 0.8))',
-            }}
+            className="animate-glow-pulse dark:hidden"
           />
-
-          <H1>
-            {t('hero.title')}
-            <span className="font-gugi font-medium text-gp-primary">.AI</span>
-          </H1>
+          <Image
+            src="/logo_complet_dark.svg"
+            alt="GreenPulse.AI Logo"
+            width={300}
+            height={60}
+            className="animate-glow-pulse hidden dark:block"
+          />
         </Div>
+        <H1 className="sr-only">{t('hero.title')}</H1>
         <Div layout={'center'} className="gap-6">
           {/* Subtitle: Your New Green Agent (from slide) */}
           <H2 size={'h3'}>{t('subtitle')}</H2>

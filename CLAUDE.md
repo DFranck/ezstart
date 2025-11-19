@@ -199,6 +199,40 @@ className = 'bg-card text-foreground'
 - Primary: `bg-primary`, `text-primary-foreground`
 - Border: `border`
 
+### Animations & Styles Personnalisés (CRITIQUE)
+
+❌ **JAMAIS** ajouter animations/keyframes dans `tailwind.config.ts` local
+✅ **TOUJOURS** créer dans `packages/ui/src/styles/`
+
+**Structure :**
+```
+packages/ui/src/styles/
+├── animations/          # Animations réutilisables
+│   ├── glow-pulse.css  # Animation custom
+│   ├── gradient.css
+│   └── ...
+├── themes/             # Thèmes par projet
+└── globals.css         # Import de toutes les animations
+```
+
+**Exemple :**
+```css
+/* packages/ui/src/styles/animations/glow-pulse.css */
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(...); }
+  50% { filter: drop-shadow(...); }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s infinite;
+}
+```
+
+**Puis importer dans `globals.css` :**
+```css
+@import './animations/glow-pulse.css';
+```
+
 ### Architecture UI en 3 Layers (IMPORTANT)
 
 Le package `@ezstart/ui` suit une **architecture en 3 couches** pour flexibilité maximale:
