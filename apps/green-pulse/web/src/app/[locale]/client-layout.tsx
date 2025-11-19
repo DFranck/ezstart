@@ -15,8 +15,9 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
   const router = useRouter()
   const currentLocale = useLocale()
   const t = useTranslations()
+  const tAuth = useTranslations('auth')
   const tForms = useTranslations('forms')
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const rbac = useRBAC(user)
 
   const handleLocaleChange = (locale: string) => {
@@ -80,15 +81,17 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
       }
       headerRightContent={
         <Div>
-          {user ? (
+          {isAuthenticated ? (
             <LoginButton
-              loginText={t('auth.login')}
-              logoutText={t('auth.logout')}
-              loadingText={t('auth.loading')}
+              loginText={tAuth('login')}
+              logoutText={tAuth('logout')}
+              loadingText={tAuth('loading')}
             />
           ) : (
             <Button asChild size="default" className="bg-gp-primary hover:bg-gp-primary/80">
-              <Link href="/chat">{t('auth.getStarted')}</Link>
+              <Link href="/chat" target="_blank" rel="noopener noreferrer">
+                {tAuth('getStarted')}
+              </Link>
             </Button>
           )}
           <LocaleSwitcher
