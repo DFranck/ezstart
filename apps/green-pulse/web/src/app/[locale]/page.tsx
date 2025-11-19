@@ -99,10 +99,10 @@ export default function HomePage(): any {
         <SplitSectionItem size="xl" className="xl:mx-20">
           <H3 size={'h4'} className="text-xl lg:text-2xl font-bold mb-6 leading-tight">
             {t.rich('challenge.title', {
-              strong: chunks => <Strong>{chunks}</Strong>,
+              strong: chunks => <Strong className="text-warning">{chunks}</Strong>,
             })}
           </H3>
-
+          {/* 
           <Div className="space-y-4">
             {(Array.isArray(t.raw('challenge.challenges'))
               ? t.raw('challenge.challenges')
@@ -113,7 +113,7 @@ export default function HomePage(): any {
                 <P className="text-base lg:text-lg text-muted-foreground">{challenge}</P>
               </Div>
             ))}
-          </Div>
+          </Div> */}
         </SplitSectionItem>
 
         {/* Right side - 3 images */}
@@ -131,6 +131,7 @@ export default function HomePage(): any {
           </Div>
         </SplitSectionItem>
       </SplitSection>
+      <Image src={'/images/pierced_seal.svg'} width={500} height={500} alt="" />
       {/* Data Transformation Section */}
       <Section size="xl">
         <H2 size="h3">{t('transformation.title')}</H2>
@@ -233,7 +234,7 @@ export default function HomePage(): any {
             </H2>
             <P className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t.rich('problem.subtitle', {
-                strong: chunks => <Strong>{chunks}</Strong>,
+                strong: chunks => <Strong className="text-warning">{chunks}</Strong>,
               })}
             </P>
           </Div>
@@ -259,10 +260,11 @@ export default function HomePage(): any {
                     </H3>
                   </CardHeader>
                   <CardContent>
-                    <P
-                      className="text-muted-foreground text-sm"
-                      dangerouslySetInnerHTML={{ __html: item.description }}
-                    />
+                    <P className="text-muted-foreground text-sm">
+                      {t.rich(`problem.problems.${index}.description`, {
+                        strong: chunks => <Strong className="text-gp-primary">{chunks}</Strong>,
+                      })}
+                    </P>
                   </CardContent>
                 </Card>
               )
@@ -332,13 +334,17 @@ export default function HomePage(): any {
               {(Array.isArray(t.raw('partnership.exchange.items'))
                 ? t.raw('partnership.exchange.items')
                 : []
-              ).map((item: string, index: number) => (
+              ).map((_item: string, index: number) => (
                 <Div key={index} className="flex items-start gap-3">
                   <Icon
                     name="lucide:CheckCircle2"
                     className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
                   />
-                  <P className="text-sm" dangerouslySetInnerHTML={{ __html: item }} />
+                  <P className="text-sm">
+                    {t.rich(`partnership.exchange.items.${index}`, {
+                      strong: chunks => <Strong className="text-gp-primary">{chunks}</Strong>,
+                    })}
+                  </P>
                 </Div>
               ))}
             </Div>
