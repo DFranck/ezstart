@@ -420,15 +420,27 @@ export default function HomePage(): any {
                 className="block w-full"
               >
                 <Card className="p-6 border-l-4 border-gp-primary hover:shadow-lg transition-shadow">
-                  <Div className="flex items-start gap-6">
-                    <Div className="flex-shrink-0 w-32 h-12 relative">
-                      <Image
-                        src={item.logo}
-                        alt={item.publication}
-                        fill
-                        className="object-contain"
-                      />
+                  <Div className="flex flex-col md:flex-row items-start gap-6">
+                    {/* Left side - Logo + Cover Image */}
+                    <Div className="flex-shrink-0 w-full md:w-48 space-y-4">
+                      <Div className="w-32 h-12 relative">
+                        <Image
+                          src={item.logo}
+                          alt={item.publication}
+                          fill
+                          className="object-contain"
+                        />
+                      </Div>
+                      <Div className="w-full aspect-[16/9] relative rounded-md overflow-hidden border border-border">
+                        <Image
+                          src="/images/GLC-cover.jpg"
+                          alt="GreenPulse.AI Article Cover"
+                          fill
+                          className="object-cover"
+                        />
+                      </Div>
                     </Div>
+                    {/* Right side - Content */}
                     <Div className="flex-1 space-y-3">
                       <Div>
                         <P className="font-semibold mb-1">
