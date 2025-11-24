@@ -1,5 +1,6 @@
 'use client'
 
+import { getAppTheme } from '@/config/app-themes'
 import { OAuthButtons } from '@/components/OAuthButtons'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
@@ -21,14 +22,18 @@ import { Suspense } from 'react'
 // Dynamic import for LoginForm (144 lines)
 // Form is only shown after user clicks "Sign in with email"
 // Reduces initial bundle size
-const LoginForm = dynamic(() => import('@/components/LoginForm').then(mod => ({ default: mod.LoginForm })), {
-  loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
-})
+const LoginForm = dynamic(
+  () => import('@/components/LoginForm').then(mod => ({ default: mod.LoginForm })),
+  {
+    loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
+  }
+)
 
 function LoginContent() {
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
   const redirect_uri = searchParams.get('redirect_uri')
+  const theme = getAppTheme(app)
 
   return (
     <Card className="max-w-md w-full relative">
@@ -41,11 +46,13 @@ function LoginContent() {
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Sign in to access <Span className="text-ezstart font-medium">{app}</Span>
+          Sign in to access <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
         </CardDescription>
-        <P variant={'description'} size={'xs'} className="hidden md:block">
-          🌟 <strong>One account, all EZStart apps!</strong>
-        </P>
+        {theme.showEzstartMessage && (
+          <P variant={'description'} size={'xs'} className="hidden md:block">
+            One account, all EZStart apps!
+          </P>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -60,7 +67,7 @@ function LoginContent() {
             Don't have an account?{' '}
             <Link
               href={`/register?${searchParams.toString()}`}
-              className="text-primary hover:text-primary/80 font-medium"
+              className={`${theme.primaryColor} hover:opacity-80 font-medium`}
             >
               Sign up
             </Link>

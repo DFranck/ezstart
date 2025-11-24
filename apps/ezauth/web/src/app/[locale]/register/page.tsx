@@ -1,5 +1,6 @@
 'use client'
 
+import { getAppTheme } from '@/config/app-themes'
 import { OAuthButtons } from '@/components/OAuthButtons'
 import {
   BackButton,
@@ -27,6 +28,7 @@ const RegisterForm = dynamic(() => import('@/components/RegisterForm').then(mod 
 function RegisterContent() {
   const searchParams = useSearchParams()
   const app = searchParams.get('app') || 'ezstart'
+  const theme = getAppTheme(app)
 
   return (
     <Card className="max-w-md w-full relative">
@@ -39,11 +41,13 @@ function RegisterContent() {
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Create account to access <Span className="text-ezstart font-medium">{app}</Span>
+          Create account to access <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
         </CardDescription>
-        <P variant={'description'} size={'xs'} className="hidden md:block">
-          🌟 <strong>One account, all EZStart apps!</strong>
-        </P>
+        {theme.showEzstartMessage && (
+          <P variant={'description'} size={'xs'} className="hidden md:block">
+            One account, all EZStart apps!
+          </P>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -54,15 +58,15 @@ function RegisterContent() {
         <RegisterForm app={app} redirect_uri={searchParams.get('redirect_uri')} />
 
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">
+          <P size={'xs'}>
             Already have an account?{' '}
             <Link
               href={`/login?${searchParams.toString()}`}
-              className="text-primary hover:text-primary/80 font-medium"
+              className={`${theme.primaryColor} hover:opacity-80 font-medium`}
             >
               Sign in
             </Link>
-          </p>
+          </P>
         </div>
       </CardContent>
     </Card>
