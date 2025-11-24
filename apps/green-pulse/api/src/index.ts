@@ -14,6 +14,7 @@ import {
 } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 import { initializeAIProviders } from './config/ai-providers.js'
+import { seedDefaultPrompts } from './services/prompt.service.js'
 
 export const app = createApp({ apiApp: 'green-pulse' })
 const PORT = getApiPort('green-pulse')
@@ -35,15 +36,18 @@ initializeAIProviders()
 
 // Start server with MongoDB
 connectToMongo('greenpulse')
-  .then(() =>
-    startServer(app, {
+  .then(async () => {
+    // Seed default prompts if database is empty
+    await seedDefaultPrompts()
+
+    return startServer(app, {
       routes,
       registries: globalRegistry,
       basePath: '/api',
       serviceName: 'GreenPulse',
       port: PORT,
     })
-  )
+  })
   .catch(err => {
     console.error('❌ Failed to start GreenPulse API', err)
     process.exit(1)

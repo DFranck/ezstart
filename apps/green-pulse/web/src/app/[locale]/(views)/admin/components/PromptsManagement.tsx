@@ -51,7 +51,19 @@ type PromptsResponse = {
   data: SystemPrompt[]
 }
 
+// Only show types currently implemented in /chat
+// extract_esg is hardcoded to false in chat/page.tsx, so only 'general' is used
 const PROMPT_TYPES = [
+  { value: 'general', label: 'General (Chat)' },
+  // TODO: Enable when extract_esg feature is activated
+  // { value: 'extraction', label: 'Extraction (ESG)' },
+  // { value: 'validation', label: 'Validation' },
+  // { value: 'vision', label: 'Vision' },
+  // { value: 'custom', label: 'Custom' },
+]
+
+// All types for the form (in case admin wants to prepare future prompts)
+const ALL_PROMPT_TYPES = [
   { value: 'general', label: 'General (Chat)' },
   { value: 'extraction', label: 'Extraction (ESG)' },
   { value: 'validation', label: 'Validation' },
@@ -212,9 +224,13 @@ export function PromptsManagement() {
     })
   }
 
-  const filteredPrompts = data?.data?.filter(p =>
-    filter === 'all' ? true : p.type === filter
-  ) || []
+  // Filter by active types only (general, extraction) + selected filter
+  const activeTypes = PROMPT_TYPES.map(t => t.value)
+  const filteredPrompts = data?.data?.filter(p => {
+    const isActiveType = activeTypes.includes(p.type)
+    const matchesFilter = filter === 'all' ? true : p.type === filter
+    return isActiveType && matchesFilter
+  }) || []
 
   const getTypeBadge = (type: SystemPrompt['type']) => {
     const colors = {
@@ -280,7 +296,7 @@ export function PromptsManagement() {
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
             >
-              All ({data?.data?.length || 0})
+              All ({data?.data?.filter(p => activeTypes.includes(p.type)).length || 0})
             </Button>
             {PROMPT_TYPES.map(t => (
               <Button
@@ -415,7 +431,7 @@ export function PromptsManagement() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {PROMPT_TYPES.map(t => (
+                    {ALL_PROMPT_TYPES.map(t => (
                       <SelectItem key={t.value} value={t.value}>
                         {t.label}
                       </SelectItem>

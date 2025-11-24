@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
+import { clearPromptCache } from '../../services/prompt.service.js'
 
 export const updatePromptRegistry = new OpenAPIRegistry()
 
@@ -57,6 +58,9 @@ docRouter.patch(
       })
 
       await prompt.save()
+
+      // Clear cache so next chat request gets updated prompt
+      clearPromptCache()
 
       res.json({
         success: true,

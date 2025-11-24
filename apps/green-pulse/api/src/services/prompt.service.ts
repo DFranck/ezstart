@@ -1,5 +1,41 @@
 import { SystemPrompt, PromptType, ProviderTarget } from '../models/SystemPrompt.js'
 
+// ============================================================================
+// CACHE - Avoid DB query on every chat request
+// ============================================================================
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const promptCache = new Map<string, { content: string; expiresAt: number }>()
+
+function getCacheKey(type: PromptType, provider: ProviderTarget): string {
+  return `${type}:${provider}`
+}
+
+function getFromCache(type: PromptType, provider: ProviderTarget): string | null {
+  const key = getCacheKey(type, provider)
+  const cached = promptCache.get(key)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.content
+  }
+  // Expired or not found
+  if (cached) promptCache.delete(key)
+  return null
+}
+
+function setCache(type: PromptType, provider: ProviderTarget, content: string): void {
+  const key = getCacheKey(type, provider)
+  promptCache.set(key, { content, expiresAt: Date.now() + CACHE_TTL_MS })
+}
+
+/** Clear cache - call this when prompts are updated via admin */
+export function clearPromptCache(): void {
+  promptCache.clear()
+  console.log('[PromptService] Cache cleared')
+}
+
+// ============================================================================
+// DEFAULT PROMPTS - Fallback if DB is empty
+// ============================================================================
+
 // Default prompts (fallback if DB is empty)
 const DEFAULT_PROMPTS: Record<string, { content: string; name: string; description: string }> = {
   'general': {
@@ -39,32 +75,28 @@ FORMATAGE :
 - \`code\` pour termes techniques ou JSON
 - Privilégie la lisibilité et le conversationnel`,
   },
-  'extraction': {
-    name: 'ESG Data Extractor',
-    description: 'System prompt for structured ESG data extraction',
-    content: `You are a structured extractor. From the conversation text,
-output ONLY valid JSON conforming to the ESG schema (company, sites, period, scopes, targets, evidence).
-Do not include explanations. Fill missing values with null and list them in _missing.`,
-  },
-  'validation': {
-    name: 'ESG Data Validator',
-    description: 'System prompt for validating ESG data',
-    content: `Validate this ESG data JSON against business rules:
-- All numbers must be >= 0
-- Period format must be YYYY, YYYY-Q#, or YYYY-MM
-- Scope2 items must have site_id
-- Company country must be 2-letter code
-Return {"ok": true} or {"ok": false, "errors": [...]}`,
-  },
+  // TODO: Add when extract_esg is enabled in /chat
+  // 'extraction': {
+  //   name: 'ESG Data Extractor',
+  //   description: 'System prompt for structured ESG data extraction',
+  //   content: `...`,
+  // },
 }
 
 /**
  * Get a system prompt by type and optionally provider
+ * Uses in-memory cache (5min TTL) to avoid DB query on every chat request
  */
 export async function getSystemPrompt(
   type: PromptType = 'general',
   provider: ProviderTarget = 'all'
 ): Promise<string> {
+  // Check cache first
+  const cached = getFromCache(type, provider)
+  if (cached) {
+    return cached
+  }
+
   try {
     // Try to find a prompt matching type and provider
     let prompt = await SystemPrompt.findOne({
@@ -88,6 +120,7 @@ export async function getSystemPrompt(
     }
 
     if (prompt) {
+      setCache(type, provider, prompt.content)
       return prompt.content
     }
 
@@ -95,15 +128,18 @@ export async function getSystemPrompt(
     const fallback = DEFAULT_PROMPTS[type]
     if (fallback) {
       console.log(`[PromptService] Using fallback prompt for type: ${type}`)
+      setCache(type, provider, fallback.content)
       return fallback.content
     }
 
     // Ultimate fallback
     console.warn(`[PromptService] No prompt found for type: ${type}, using generic fallback`)
-    return 'You are a helpful assistant.'
+    const generic = 'You are a helpful assistant.'
+    setCache(type, provider, generic)
+    return generic
   } catch (error) {
     console.error('[PromptService] Error fetching prompt:', error)
-    // Return default on error
+    // Return default on error (don't cache errors)
     return DEFAULT_PROMPTS[type]?.content || 'You are a helpful assistant.'
   }
 }

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 
 const { Schema, model, models } = mongoose
 
@@ -79,4 +79,5 @@ const systemPromptSchema = new Schema<ISystemPrompt>(
 systemPromptSchema.index({ key: 1, isActive: 1 })
 systemPromptSchema.index({ type: 1, provider: 1, isActive: 1 })
 
-export const SystemPrompt = models.SystemPrompt || model<ISystemPrompt>('SystemPrompt', systemPromptSchema)
+export const SystemPrompt: Model<ISystemPrompt> =
+  models.SystemPrompt || model<ISystemPrompt>('SystemPrompt', systemPromptSchema)

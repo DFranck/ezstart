@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
+import { clearPromptCache } from '../../services/prompt.service.js'
 
 export const deletePromptRegistry = new OpenAPIRegistry()
 
@@ -40,6 +41,9 @@ docRouter.delete(
       }
 
       await SystemPrompt.deleteOne({ key })
+
+      // Clear cache
+      clearPromptCache()
 
       res.json({
         success: true,

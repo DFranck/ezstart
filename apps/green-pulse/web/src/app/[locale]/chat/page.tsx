@@ -44,11 +44,11 @@ function LiaPageContent(): any {
       headers: {
         'Content-Type': 'application/json',
       },
-      enableStreaming: true,
+      enableStreaming: true, // Auto-detects SSE vs JSON based on Content-Type
       formatRequest: (message: string) => {
         const payload: any = {
           message,
-          stream: true,
+          stream: true, // Request streaming (API decides via Content-Type)
           extract_esg: false,
           // Include userId if authenticated
           ...(isAuthenticated && user?._id && { userId: user._id }),
