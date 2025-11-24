@@ -18,6 +18,7 @@ import {
   ESGPayloadSchema,
   ApiResponseSchema,
 } from '@green-pulse/types'
+import { getSystemPrompt } from '../../services/prompt.service.js'
 
 export const sendMessageRegistry = new OpenAPIRegistry()
 const router: any = Router()
@@ -83,10 +84,9 @@ sendMessageRouter.post(
         }
       }
 
-      // System prompt for ESG context
-      const systemPrompt = extract_esg
-        ? `You are a structured extractor. From the conversation text, output ONLY valid JSON conforming to the ESG schema (company, sites, period, scopes, targets, evidence). Do not include explanations. Fill missing values with null and list them in _missing.`
-        : `You are GreenPulse.AI, an ESG advisor for SMEs in Southeast Asia. Speak clearly and practically. When the user shares data, confirm assumptions, surface missing fields, and prepare normalized JSON for ESG reporting.`
+      // Get system prompt from DB (with fallback)
+      const promptType = extract_esg ? 'extraction' : 'general'
+      const systemPrompt = await getSystemPrompt(promptType, 'all')
 
       // Chat using UnifiedChat from @ezstart/ai-sdk
       const aiResponse = await UnifiedChat.send(message, selectedProvider, {

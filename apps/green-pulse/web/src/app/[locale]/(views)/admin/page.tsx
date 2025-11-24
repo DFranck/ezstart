@@ -5,6 +5,7 @@ import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
 import { Badge, Card, Div, H1, P, Section, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { WaitlistManagement } from './components/WaitlistManagement'
+import { PromptsManagement } from './components/PromptsManagement'
 
 function AdminPageContent() {
   const { user } = useAuthStore()
@@ -16,7 +17,7 @@ function AdminPageContent() {
     <Div size="xs">
       <Section size="xl" className="mt-10">
         <H1>GreenPulse Admin Panel</H1>
-        <P className="text-muted-foreground mt-2">Manage beta access requests for GreenPulse</P>
+        <P className="text-muted-foreground mt-2">Manage beta access and AI system prompts</P>
         <Div className="mt-4 flex gap-2">
           {allRoles.map((role, idx) => (
             <Badge
@@ -29,6 +30,11 @@ function AdminPageContent() {
             </Badge>
           ))}
         </Div>
+      </Section>
+
+      {/* System Prompts Management */}
+      <Section size="xl">
+        <PromptsManagement />
       </Section>
 
       {/* Beta Waitlist Management */}
