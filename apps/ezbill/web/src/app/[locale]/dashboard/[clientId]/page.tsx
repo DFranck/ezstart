@@ -594,7 +594,7 @@ const ClientDashboardPage = (): any => {
             (shareState.document as Quote).documentNumber ||
             ''
           }
-          clientName={client?.name || ''}
+          clientName={client?.clientName || ''}
           documentStatus={
             (shareState.document as Invoice).status ||
             (shareState.document as Quote).status ||

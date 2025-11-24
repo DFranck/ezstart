@@ -40,28 +40,28 @@ export function ShareModal({
   const shareOptions = [
     {
       name: 'Email',
-      icon: 'lucide:Mail',
+      icon: 'lucide:Mail' as const,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50 hover:bg-blue-100',
       href: `mailto:?subject=${documentLabel} ${documentNumber}&body=${encodedMessage}%0A%0A${encodedUrl}`,
     },
     {
       name: 'WhatsApp',
-      icon: 'lucide:MessageCircle',
+      icon: 'lucide:MessageCircle' as const,
       color: 'text-green-600',
       bgColor: 'bg-green-50 hover:bg-green-100',
       href: `https://wa.me/?text=${encodedMessage}%0A${encodedUrl}`,
     },
     {
       name: 'Telegram',
-      icon: 'lucide:Send',
+      icon: 'lucide:Send' as const,
       color: 'text-blue-500',
       bgColor: 'bg-blue-50 hover:bg-blue-100',
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedMessage}`,
     },
     {
       name: 'Copy Link',
-      icon: 'lucide:Copy',
+      icon: 'lucide:Copy' as const,
       color: 'text-gray-600',
       bgColor: 'bg-gray-50 hover:bg-gray-100',
       onClick: () => {
