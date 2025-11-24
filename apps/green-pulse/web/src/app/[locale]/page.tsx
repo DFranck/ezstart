@@ -155,21 +155,37 @@ export default function HomePage(): any {
         <H2 size="h3">{t('transformation.title')}</H2>
         <Div size={'xl'} className="w-full">
           {/* 3-Step Process with AI in center */}
-          {/* Light mode version */}
+          {/* Desktop Light */}
           <Image
             src={'/images/GreenPulse_transformation_Desktop.svg'}
             width={500}
             height={500}
-            alt="Southeast Asia Climate Seal"
-            className="hidden md:block w-full"
+            alt="GreenPulse Transformation Process"
+            className="hidden md:block dark:md:hidden w-full"
           />
-          {/* Dark mode version */}
+          {/* Desktop Dark */}
+          <Image
+            src={'/images/GreenPulse_transformation_Desktop_dark.svg'}
+            width={500}
+            height={500}
+            alt="GreenPulse Transformation Process"
+            className="hidden dark:md:block w-full"
+          />
+          {/* Mobile Light */}
           <Image
             src={'/images/GreenPulse_transformation_Mobile.svg'}
             width={500}
             height={500}
-            alt="Southeast Asia Climate Seal"
-            className="md:hidden"
+            alt="GreenPulse Transformation Process"
+            className="block md:hidden dark:hidden"
+          />
+          {/* Mobile Dark */}
+          <Image
+            src={'/images/GreenPulse_transformation_Mobile_dark.svg'}
+            width={500}
+            height={500}
+            alt="GreenPulse Transformation Process"
+            className="hidden dark:block dark:md:hidden"
           />
         </Div>
         {/* 3 Feature Cards */}
