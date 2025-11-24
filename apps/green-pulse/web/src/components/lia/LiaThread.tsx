@@ -18,6 +18,9 @@ import {
   ThreadSidebar,
   ThreadSidebarToggle,
   ThreadWelcome,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -185,11 +188,13 @@ export function LiaThread({
     () => [
       {
         href: '/dashboard',
-        label: tForms('navigation.workspaces') || 'Workspaces',
-        icon: 'lucide:Briefcase' as const,
+        label: tForms('navigation.dashboard') || 'Dashboard',
+        icon: 'lucide:LayoutDashboard' as const,
+        disabled: true,
+        disabledMessage: tForms('navigation.dashboardDisabled'),
       },
       ...(rbac.hasAnyRole(['admin', 'superadmin'])
-        ? [{ href: '/admin', label: 'Admin', icon: 'lucide:Shield' as const }]
+        ? [{ href: '/admin', label: 'Admin', icon: 'lucide:Shield' as const, disabled: false }]
         : []),
     ],
     [rbac, tForms]
@@ -199,6 +204,26 @@ export function LiaThread({
     <nav className="space-y-1">
       {navItems.map(item => {
         const isActive = pathname === item.href
+
+        if (item.disabled) {
+          return (
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start opacity-50 cursor-not-allowed"
+                  size="sm"
+                  disabled
+                >
+                  <Icon name={item.icon} className="mr-2" size={16} />
+                  {item.label}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">{item.disabledMessage}</TooltipContent>
+            </Tooltip>
+          )
+        }
+
         return (
           <Link key={item.href} href={item.href}>
             <Button
@@ -222,7 +247,7 @@ export function LiaThread({
       sidebarToggle={
         // Only show sidebar toggle if authenticated
         isAuthenticated ? (
-          <ThreadSidebarToggle className="fixed right-4 top-4 z-50 md:hidden " variant="default" />
+          <ThreadSidebarToggle className="fixed right-4 top-4 z-50 lg:hidden" variant="default" />
         ) : undefined
       }
       sidebar={
@@ -230,7 +255,8 @@ export function LiaThread({
         isAuthenticated ? (
           <ThreadSidebar
             header={header}
-            beforeConversations={beforeConv}
+            afterConversations={beforeConv}
+            // beforeConversations={beforeConv}
             conversations={conversations}
             activeConversationId={activeConversationId || undefined}
             onConversationSelect={handleConversationSelect}

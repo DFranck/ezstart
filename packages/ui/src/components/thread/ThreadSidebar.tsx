@@ -87,8 +87,7 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
       )}
 
       {/* Conversations List */}
-      <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto">
-
+      <nav role="navigation" aria-label="Conversation history" className="flex-1 overflow-y-auto min-h-0">
         <div className="p-2 space-y-1">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm">
@@ -124,10 +123,10 @@ export const ThreadSidebar = React.memo(function ThreadSidebar({
             })
           )}
         </div>
-
-        {/* After conversations slot */}
-        {afterConversations && <div className="p-2">{afterConversations}</div>}
       </nav>
+
+      {/* After conversations slot (fixed at bottom, above footer) */}
+      {afterConversations && <div className="p-2 border-t shrink-0">{afterConversations}</div>}
 
       {/* Footer */}
       {footer && <div className="p-4 border-t">{footer}</div>}

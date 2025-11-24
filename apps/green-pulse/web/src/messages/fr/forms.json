@@ -2,7 +2,8 @@
   "navigation": {
     "workspaces": "Espaces de travail",
     "forms": "Formulaires",
-    "dashboard": "Tableau de bord"
+    "dashboard": "Tableau de bord",
+    "dashboardDisabled": "Disponible avec le Plan 2"
   },
   "workspaces": {
     "title": "Espaces de travail",

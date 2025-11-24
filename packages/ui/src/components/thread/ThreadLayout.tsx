@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode, useState, useCallback } from 'react'
+import React, { ReactNode, useCallback, useState } from 'react'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
@@ -55,8 +55,8 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
         className={cn(
           'w-full h-screen flex flex-col',
           theme.background,
-          mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
-          mobileFooterOffset && `md:pb-0 ${mobileFooterOffset}`,
+          mobileHeaderOffset && `lg:pt-0 ${mobileHeaderOffset}`,
+          mobileFooterOffset && `lg:pb-0 ${mobileFooterOffset}`,
           className
         )}
       >
@@ -83,11 +83,11 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
                 : headerOffset.startsWith('top-')
                   ? headerOffset.replace('top-', 'pt-')
                   : '',
-          mobileHeaderOffset && `md:pt-0 ${mobileHeaderOffset}`,
+          mobileHeaderOffset && `lg:pt-0 ${mobileHeaderOffset}`,
           className
         )}
       >
-        {/* Mobile Toggle Button - Default or Custom */}
+        {/* Mobile/Tablet Toggle Button - Default or Custom */}
         {sidebarToggle ? (
           sidebarToggle
         ) : (
@@ -97,9 +97,11 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
             variant="outline"
             aria-expanded={isSidebarOpen}
             aria-controls="thread-sidebar"
-            aria-label={isSidebarOpen ? 'Close conversations sidebar' : 'Open conversations sidebar'}
+            aria-label={
+              isSidebarOpen ? 'Close conversations sidebar' : 'Open conversations sidebar'
+            }
             className={cn(
-              'fixed left-4 z-50 md:hidden',
+              'fixed left-4 z-50 lg:hidden',
               'shadow-lg backdrop-blur-sm bg-background/80',
               headerOffset,
               mobileHeaderOffset && mobileHeaderOffset.replace('pt-', 'top-').replace('mt-', 'top-')
@@ -109,14 +111,14 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
           </Button>
         )}
 
-        {/* Sidebar - Desktop: always visible, Mobile: overlay */}
+        {/* Sidebar - Desktop: always visible, Mobile/Tablet: overlay */}
         <aside
           id="thread-sidebar"
           role="complementary"
           aria-label="Conversations sidebar"
           aria-hidden={!isSidebarOpen}
           className={cn(
-            'fixed md:sticky left-0 z-40',
+            'fixed lg:sticky left-0 z-40',
             'transition-transform duration-300 ease-in-out',
             theme.sidebar?.background || 'bg-background',
             theme.sidebar?.border || 'border-r',
@@ -131,18 +133,18 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
                 : headerOffset === 'top-20'
                   ? 'h-[calc(100vh-5rem)]'
                   : 'h-[calc(100vh-4rem)]', // default to top-16
-            // Mobile: translate based on state
-            'md:translate-x-0',
+            // Mobile/Tablet: translate based on state
+            'lg:translate-x-0',
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
           {sidebar}
         </aside>
 
-        {/* Overlay - Mobile only */}
+        {/* Overlay - Mobile/Tablet only */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
             onClick={toggleSidebar}
             role="button"
             aria-label="Close sidebar"
@@ -160,7 +162,7 @@ const ThreadLayoutInner = React.memo(function ThreadLayoutInner({
                 : headerOffset === 'top-20'
                   ? 'h-[calc(100vh-5rem)]'
                   : 'h-[calc(100vh-4rem)]', // default to top-16
-            'md:ml-0' // No margin on desktop, sidebar is sticky
+            'lg:ml-0' // No margin on desktop, sidebar is sticky
           )}
         >
           {children}

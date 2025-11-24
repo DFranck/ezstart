@@ -2,7 +2,8 @@
   "navigation": {
     "workspaces": "Workspaces",
     "forms": "Forms",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "dashboardDisabled": "Available with Plan 2"
   },
   "workspaces": {
     "title": "Workspaces",

@@ -1,16 +1,16 @@
-'use client';
+'use client'
 
-import { cn } from '../../lib/utils';
-import { Button } from '../button';
-import { Icon } from '../icon';
-import { useThreadLayout } from './ThreadLayoutContext';
+import { cn } from '../../lib/utils'
+import { Button } from '../button'
+import { Icon } from '../icon'
+import { useThreadLayout } from './ThreadLayoutContext'
 
 type ThreadSidebarToggleProps = {
-  className?: string;
-  size?: 'sm' | 'default' | 'lg' | 'icon';
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
-  iconSize?: number;
-};
+  className?: string
+  size?: 'sm' | 'default' | 'lg' | 'icon'
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary'
+  iconSize?: number
+}
 
 /**
  * Reusable sidebar toggle button for Thread components.
@@ -32,14 +32,14 @@ export function ThreadSidebarToggle({
   variant = 'outline',
   iconSize = 20,
 }: ThreadSidebarToggleProps) {
-  const layoutContext = useThreadLayout();
+  const layoutContext = useThreadLayout()
 
   if (!layoutContext) {
-    console.warn('ThreadSidebarToggle must be used within ThreadLayout');
-    return null;
+    console.warn('ThreadSidebarToggle must be used within ThreadLayout')
+    return null
   }
 
-  const { toggleSidebar, isSidebarOpen } = layoutContext;
+  const { toggleSidebar, isSidebarOpen } = layoutContext
 
   return (
     <Button
@@ -49,7 +49,22 @@ export function ThreadSidebarToggle({
       className={cn(className)}
       aria-label={isSidebarOpen ? 'Close conversations' : 'Open conversations'}
     >
-      <Icon name={isSidebarOpen ? 'lucide:X' : 'lucide:Menu'} size={iconSize} />
+      <Icon
+        name="lucide:Menu"
+        size={iconSize}
+        className={cn(
+          'transition-transform duration-300 ease-in-out',
+          isSidebarOpen && 'rotate-90 opacity-0 scale-0'
+        )}
+      />
+      <Icon
+        name="lucide:X"
+        size={iconSize}
+        className={cn(
+          'absolute transition-transform duration-300 ease-in-out',
+          isSidebarOpen ? 'rotate-0 opacity-100 scale-100' : '-rotate-90 opacity-0 scale-0'
+        )}
+      />
     </Button>
-  );
+  )
 }

@@ -73,7 +73,7 @@ export default function HomePage(): any {
                 text: t('hero.typewriterText'),
               },
             ]}
-            className="text-gp-primary text-center"
+            className=" text-center"
             duration={3}
             delay={0.5}
           />
