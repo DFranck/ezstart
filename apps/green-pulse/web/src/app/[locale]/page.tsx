@@ -140,7 +140,7 @@ export default function HomePage(): any {
         width={500}
         height={500}
         alt="Southeast Asia Climate Seal"
-        className="dark:invert dark:brightness-90"
+        className="[filter:sepia(1)_saturate(3)_hue-rotate(180deg)] dark:[filter:sepia(1)_saturate(2)_hue-rotate(340deg)_brightness(1.1)]"
       />
       {/* Data Transformation Section */}
       <Section size="xl">
