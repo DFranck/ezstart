@@ -135,12 +135,21 @@ export default function HomePage(): any {
           </Div>
         </SplitSectionItem>
       </SplitSection>
+      {/* Light mode version */}
       <Image
-        src={'/images/pierced_seal.svg'}
+        src={'/images/pierced_seal_light.svg'}
         width={500}
         height={500}
         alt="Southeast Asia Climate Seal"
-        className="[filter:sepia(1)_saturate(3)_hue-rotate(180deg)] dark:[filter:sepia(1)_saturate(2)_hue-rotate(340deg)_brightness(1.1)]"
+        className="dark:hidden"
+      />
+      {/* Dark mode version */}
+      <Image
+        src={'/images/pierced_seal_dark.svg'}
+        width={500}
+        height={500}
+        alt="Southeast Asia Climate Seal"
+        className="hidden dark:block"
       />
       {/* Data Transformation Section */}
       <Section size="xl">
