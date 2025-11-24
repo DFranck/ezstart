@@ -5,7 +5,6 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  Badge,
   Button,
   Card,
   CardContent,
@@ -154,64 +153,24 @@ export default function HomePage(): any {
       {/* Data Transformation Section */}
       <Section size="xl">
         <H2 size="h3">{t('transformation.title')}</H2>
-        <Div>
+        <Div size={'xl'} className="w-full">
           {/* 3-Step Process with AI in center */}
-          <Div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto ">
-            {/* Step 1: Discuss & Upload */}
-            <Card variant="ghost" className="relative space-y-4">
-              <CardHeader className="flex items-center">
-                <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('transformation.steps.step1.badge')}
-                </Badge>
-                <H3 size="h5" className="ml-2 w-fit">
-                  {t('transformation.steps.step1.title')}
-                </H3>
-              </CardHeader>
-              <CardContent>
-                <Div className="flex justify-around items-center gap-4 bg-muted p-8 rounded-lg">
-                  <Icon name="lucide:FileText" size={30} />
-                  <Icon name="lucide:Mic" size={30} />
-                  <Icon name="lucide:Camera" size={30} />
-                  <Icon name="lucide:Paperclip" size={30} />
-                  <Icon name="lucide:MessageCircle" size={30} />
-                </Div>
-              </CardContent>
-            </Card>
-            {/* Step 2: Let GPA Works (AI Center) */}
-            <Card variant="ghost" className="relative space-y-4">
-              <CardHeader className="flex items-center">
-                <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('transformation.steps.step2.badge')}
-                </Badge>
-                <H3 size="h5" className="ml-2 w-fit">
-                  {t('transformation.steps.step2.title')}
-                </H3>
-              </CardHeader>
-              <CardContent className="flex justify-center items-center">
-                <Div className="bg-gp-primary border-4 border-primary rounded-2xl p-8 w-fit">
-                  <Icon name="lucide:Brain" size={30} />
-                </Div>
-              </CardContent>
-            </Card>
-            {/* Step 3: Get Results */}
-            <Card variant="ghost" className="relative space-y-4">
-              <CardHeader className="flex items-center ">
-                <Badge circle circleSize={'lg'} className="bg-gp-primary">
-                  {t('transformation.steps.step3.badge')}
-                </Badge>
-                <H3 size="h5" className="ml-2 w-fit">
-                  {t('transformation.steps.step3.title')}
-                </H3>
-              </CardHeader>
-              <CardContent>
-                <Div className="flex justify-around items-center gap-4 bg-muted p-8 rounded-lg">
-                  <Icon name="lucide:FileCheck" size={30} />
-                  <Icon name="lucide:BarChart3" size={30} />
-                  <Icon name="lucide:Network" size={30} />
-                </Div>
-              </CardContent>
-            </Card>
-          </Div>
+          {/* Light mode version */}
+          <Image
+            src={'/images/GreenPulse_transformation_Desktop.svg'}
+            width={500}
+            height={500}
+            alt="Southeast Asia Climate Seal"
+            className="hidden md:block w-full"
+          />
+          {/* Dark mode version */}
+          <Image
+            src={'/images/GreenPulse_transformation_Mobile.svg'}
+            width={500}
+            height={500}
+            alt="Southeast Asia Climate Seal"
+            className="md:hidden"
+          />
         </Div>
         {/* 3 Feature Cards */}
         <Div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
