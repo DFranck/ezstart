@@ -321,83 +321,44 @@ export default function HomePage(): any {
           {t('partnership.title')}
         </H2>
 
-        <Div>
+        <Div className="space-y-8">
           <H3 size="h5" className="mb-6 text-center">
             {t('partnership.subtitle')}
           </H3>
-
-          <P className="text-muted-foreground mb-6 leading-relaxed">
-            {t('partnership.description')}
-          </P>
-
-          <Div className="bg-muted/30 rounded-lg p-6 mb-6">
-            <H3 size="h6" className="mb-4">
-              {t('partnership.exchange.title')}
-            </H3>
-            <Div className="space-y-3">
-              {(Array.isArray(t.raw('partnership.exchange.items'))
-                ? t.raw('partnership.exchange.items')
-                : []
-              ).map((_item: string, index: number) => (
-                <Div key={index} className="flex items-start gap-3">
-                  <Icon
-                    name="lucide:CheckCircle2"
-                    className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
-                  />
-                  <P className="text-sm">
-                    {t.rich(`partnership.exchange.items.${index}`, {
-                      strong: chunks => <Strong className="text-gp-primary">{chunks}</Strong>,
-                    })}
-                  </P>
-                </Div>
-              ))}
-            </Div>
+          {/* Responsive Partnership Images */}
+          <Div className="w-full">
+            {/* Mobile image - shown on small screens */}
+            <Image
+              src="/images/Partnership_Mobile.png"
+              alt="GreenPulse Partnership Opportunity"
+              width={640}
+              height={800}
+              className="w-full h-auto md:hidden"
+            />
+            {/* Tablet image - shown on medium screens */}
+            <Image
+              src="/images/Partnership_Tablet.png"
+              alt="GreenPulse Partnership Opportunity"
+              width={1024}
+              height={600}
+              className="w-full h-auto hidden md:block lg:hidden"
+            />
+            {/* Desktop image - shown on large screens */}
+            <Image
+              src="/images/Partnership_Desktop.png"
+              alt="GreenPulse Partnership Opportunity"
+              width={1920}
+              height={800}
+              className="w-full h-auto hidden lg:block"
+            />
           </Div>
-
-          <Div className="mb-6">
-            <H3 size="h6" className="mb-4">
-              {t('partnership.focus.title')}
-            </H3>
-            <Div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(Array.isArray(t.raw('partnership.focus.partners'))
-                ? t.raw('partnership.focus.partners')
-                : []
-              ).map((text: string, index: number) => (
-                <Card key={index} className="p-4 bg-background">
-                  <Div className="flex items-start gap-3">
-                    <Icon
-                      name={
-                        (index === 0
-                          ? 'lucide:Database'
-                          : index === 1
-                            ? 'lucide:Leaf'
-                            : 'lucide:FileText') as KnownIconName
-                      }
-                      className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5"
-                    />
-                    <P className="text-sm">{text}</P>
-                  </Div>
-                </Card>
-              ))}
-            </Div>
-          </Div>
-
           <Div className="text-center">
             <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
               <a href="mailto:partnerships@greenpulse.ai">{t('partnership.cta')}</a>
             </Button>
           </Div>
         </Div>
-        {/* <Div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-16">
-            {[1, 2, 3, 4].map(i => (
-              <Div
-                key={i}
-                className="h-20 bg-muted rounded-lg flex items-center justify-center border border-border"
-              >
-                <P className="text-muted-foreground text-sm">Partner Logo {i}</P>
-              </Div>
-            ))}
-          </Div> */}
+
         <Div>
           <H3 size="h5" className="text-center mb-8 text-muted-foreground">
             {t('press.title')}
@@ -481,10 +442,17 @@ export default function HomePage(): any {
                 answer: string
               }>
             ).map((item, index) => (
-              <AccordionItem key={index} value={`faq-${index}`} className="bg-card border rounded-lg">
+              <AccordionItem
+                key={index}
+                value={`faq-${index}`}
+                className="bg-card border rounded-lg"
+              >
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
                   <Div className="flex items-start gap-3 text-left">
-                    <Icon name="lucide:HelpCircle" className="w-5 h-5 flex-shrink-0 mt-1 text-gp-primary" />
+                    <Icon
+                      name="lucide:HelpCircle"
+                      className="w-5 h-5 flex-shrink-0 mt-1 text-gp-primary"
+                    />
                     <Span className="font-medium">{item.question}</Span>
                   </Div>
                 </AccordionTrigger>
@@ -496,31 +464,7 @@ export default function HomePage(): any {
           </Accordion>
         </Div>
       </Section>
-      {/* Example Interaction Section */}
-      <Section size={'xl'} className="max-w-full t">
-        <H3>{t('example.title')}</H3>
-        <Card variant={'ghost'} className="p-0 space-y-6">
-          <Div className="shadow-sm bg-muted/50 p-6 rounded-xl border-l-4 border-primary">
-            <Div className="flex items-start space-x-3 ">
-              <Icon name="lucide:User" className="w-6 h-6  mt-1" />
-              <Div>
-                <P className="font-semibold  mb-2">{t('example.user')}</P>
-                <P className="">{t('example.userMessage')}</P>
-              </Div>
-            </Div>
-          </Div>
 
-          <Div className="bg-muted p-6 rounded-xl border-l-4 border-accent-foreground">
-            <Div className="flex items-start space-x-3">
-              <Icon name="lucide:Bot" className="w-6 h-6 text-accent-foreground mt-1" />
-              <Div>
-                <P className="font-semibold text-accent-foreground mb-2">{t('example.ai')}</P>
-                <P className="">{t('example.aiMessage')}</P>
-              </Div>
-            </Div>
-          </Div>
-        </Card>
-      </Section>
       {/* Packages Section */}
       <Section size="full">
         <Div className="container mx-auto">
