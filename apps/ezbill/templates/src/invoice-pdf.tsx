@@ -408,7 +408,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
 
     return (
       <View>
-        <Text style={{ fontWeight: 500, marginBottom: 3 }}>{title.trim()}</Text>
+        <Text style={{ fontWeight: 500, marginBottom: 3 }}>{title?.trim() ?? ''}</Text>
         {bullets.map((bullet, idx) => (
           <Text key={idx} style={{ fontSize: 8, lineHeight: 1.4, marginLeft: 8, marginBottom: 1 }}>
             • {bullet.trim()}
