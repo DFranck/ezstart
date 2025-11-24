@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
       <Div className="mb-8">
         <H1>Admin Dashboard</H1>
         <P className="text-muted-foreground mt-2">
-          Welcome back, {user?.displayName || user?.email}
+          Welcome back, {user?.firstName || user?.username || user?.email}
         </P>
         <Div className="mt-4 flex gap-2 flex-wrap">
           {allRoles.map((role, idx) => (

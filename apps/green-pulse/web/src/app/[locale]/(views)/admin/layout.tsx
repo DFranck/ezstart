@@ -1,18 +1,8 @@
 'use client'
 
-import { AccessDenied, LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
-import {
-  Button,
-  Card,
-  Div,
-  H1,
-  Icon,
-  P,
-  Section,
-  Spinner,
-} from '@ezstart/ui/components'
-import { cn } from '@ezstart/ui/utils'
+import { Button, Card, Div, Icon, Section, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -34,6 +24,7 @@ const ADMIN_NAV_ITEMS = [
     label: 'Beta Waitlist',
     icon: 'lucide:UserPlus' as const,
   },
+  { href: '/chat', label: 'Chat', icon: 'lucide:Bot' as const },
 ]
 
 function AdminSidebar() {
@@ -43,7 +34,11 @@ function AdminSidebar() {
     if (exact) {
       return pathname === href || pathname === `/en${href}` || pathname === `/fr${href}`
     }
-    return pathname.startsWith(href) || pathname.startsWith(`/en${href}`) || pathname.startsWith(`/fr${href}`)
+    return (
+      pathname.startsWith(href) ||
+      pathname.startsWith(`/en${href}`) ||
+      pathname.startsWith(`/fr${href}`)
+    )
   }
 
   return (
@@ -73,17 +68,18 @@ function AdminMobileNav() {
     if (exact) {
       return pathname === href || pathname === `/en${href}` || pathname === `/fr${href}`
     }
-    return pathname.startsWith(href) || pathname.startsWith(`/en${href}`) || pathname.startsWith(`/fr${href}`)
+    return (
+      pathname.startsWith(href) ||
+      pathname.startsWith(`/en${href}`) ||
+      pathname.startsWith(`/fr${href}`)
+    )
   }
 
   return (
     <Div className="md:hidden border-b p-2 flex gap-2 overflow-x-auto">
       {ADMIN_NAV_ITEMS.map(item => (
         <Link key={item.href} href={item.href}>
-          <Button
-            variant={isActive(item.href, item.exact) ? 'secondary' : 'outline'}
-            size="sm"
-          >
+          <Button variant={isActive(item.href, item.exact) ? 'secondary' : 'outline'} size="sm">
             <Icon name={item.icon} className="mr-1" size={14} />
             {item.label}
           </Button>
@@ -95,7 +91,7 @@ function AdminMobileNav() {
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
-    <Div className="flex min-h-[calc(100vh-4rem)]">
+    <Div className="flex w-full min-h-[calc(100vh-4rem)] mt-16">
       <AdminSidebar />
       <Div className="flex-1">
         <AdminMobileNav />

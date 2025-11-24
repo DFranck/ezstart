@@ -92,8 +92,13 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        // Handle streaming response
-        if (enableStreaming && response.body) {
+        // Auto-detect SSE vs JSON based on Content-Type
+        const contentType = response.headers.get('Content-Type') || '';
+        const isSSE = contentType.includes('text/event-stream');
+        const shouldStream = enableStreaming && isSSE && response.body;
+
+        // Handle streaming response (SSE only)
+        if (shouldStream) {
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let fullText = '';
