@@ -135,7 +135,13 @@ export default function HomePage(): any {
           </Div>
         </SplitSectionItem>
       </SplitSection>
-      <Image src={'/images/pierced_seal.svg'} width={500} height={500} alt="" />
+      <Image
+        src={'/images/pierced_seal.svg'}
+        width={500}
+        height={500}
+        alt="Southeast Asia Climate Seal"
+        className="dark:invert dark:brightness-90"
+      />
       {/* Data Transformation Section */}
       <Section size="xl">
         <H2 size="h3">{t('transformation.title')}</H2>
@@ -321,7 +327,7 @@ export default function HomePage(): any {
           {t('partnership.title')}
         </H2>
 
-        <Div className="space-y-8">
+        <Div className="space-y-8 w-full" size={'xl'}>
           <H3 size="h5" className="mb-6 text-center">
             {t('partnership.subtitle')}
           </H3>
