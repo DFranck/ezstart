@@ -252,9 +252,11 @@ FUNCTION CALLING RULES:
 
 FORMATTING BEST PRACTICES:
 - Keep item labels concise but technical (max 150 chars)
-- Use bullet points INSIDE labels: "Frontend: Login page • Dark mode • Responsive design"
+- Use bullet points INSIDE labels for ALL items (including first): "• Login page • Dark mode • Responsive design"
+- When listing multiple tasks in one label, use bullets for EVERY task (never start without a bullet)
 - ONE item per day for timesheets (combine frontend+backend with bullets)
 - Preserve technical details (feature names, technologies, file paths)
+- CRITICAL: Always start multi-line labels with a bullet point, never plain text followed by bullets
 
 ERROR DETECTION:
 - Duplicate dates (e.g., "9 NOV Lundi" twice)
@@ -284,7 +286,7 @@ You: update_payment_terms("50% upfront, 50% on delivery")
      "Added payment terms. Anything else?"
 
 User: "Make descriptions more readable"
-You: update_items([{ label: "Mon: Frontend • Login page • Dark mode", ... }])
+You: update_items([{ label: "• Login page • Dark mode • Responsive design", ... }])
      "I've reformatted with bullet points. Better?"
 
 IMPORTANT:

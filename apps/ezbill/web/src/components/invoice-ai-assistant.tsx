@@ -125,11 +125,14 @@ Examples:
         const { action, message: aiMessage, suggestions } = response.data
 
         // Add assistant response with suggestions
+        // Format suggestions as bullet points
+        const formattedSuggestions = suggestions
+          ? `\n\n${suggestions.map(s => `• ${s}`).join('\n')}`
+          : ''
+
         const assistantMessage: Message = {
           role: 'assistant',
-          content: suggestions
-            ? `${aiMessage}\n\n${suggestions.map(s => `• ${s}`).join('\n')}`
-            : aiMessage,
+          content: `${aiMessage}${formattedSuggestions}`,
         }
 
         setMessages(prev => [...prev, assistantMessage])
