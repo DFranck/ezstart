@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   signature: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: 20,
     right: 20,
     flexDirection: 'row',
