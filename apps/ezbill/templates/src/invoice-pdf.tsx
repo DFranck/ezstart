@@ -500,7 +500,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
           </View>
 
           {data.items.map((item, index) => (
-            <View key={index} style={styles.tableRow}>
+            <View key={index} style={styles.tableRow} wrap={false}>
               <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
               <Text style={styles.tableColQuantity}>{item.quantity}</Text>
               <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
@@ -510,7 +510,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
         </View>
 
         {/* Totals */}
-        <View style={styles.totalsSection}>
+        <View style={styles.totalsSection} wrap={false}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal:</Text>
             <Text style={styles.totalValue}>{formatCurrency(data.subtotal)}</Text>
@@ -530,7 +530,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
+        <View style={styles.footer} wrap={false}>
           {/* Compact Layout: Payment + Notes/Terms */}
           <View style={styles.footerGrid}>
             {/* Payment Methods Section - Support multiple methods */}
