@@ -141,13 +141,13 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 15,
     fontFamily: 'Roboto',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   headerLeft: {
     flex: 1,
@@ -172,10 +172,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#1a202c',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
@@ -183,39 +183,39 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#2d3748',
-    marginBottom: 8,
-    marginTop: 20,
+    marginBottom: 6,
+    marginTop: 0,
   },
   text: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#4a5568',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   billToSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   billToBox: {
     flex: 1,
     marginRight: 20,
   },
   table: {
-    marginTop: 15,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 12,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#f7fafc',
-    padding: 10,
+    padding: 8,
     borderBottom: '1px solid #e2e8f0',
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 8,
     borderBottom: '1px solid #f7fafc',
   },
   tableColDescription: {
@@ -500,7 +500,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
           </View>
 
           {data.items.map((item, index) => (
-            <View key={index} style={styles.tableRow} wrap={false}>
+            <View key={index} style={styles.tableRow}>
               <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
               <Text style={styles.tableColQuantity}>{item.quantity}</Text>
               <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
@@ -530,7 +530,7 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
         </View>
 
         {/* Footer */}
-        <View style={styles.footer} wrap={false}>
+        <View style={styles.footer}>
           {/* Compact Layout: Payment + Notes/Terms */}
           <View style={styles.footerGrid}>
             {/* Payment Methods Section - Support multiple methods */}
