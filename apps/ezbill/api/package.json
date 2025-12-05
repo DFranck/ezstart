@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "migrate:receipts": "tsx src/scripts/generate-missing-receipts.ts"
   },
   "dependencies": {
     "@ezbill/types": "workspace:*",

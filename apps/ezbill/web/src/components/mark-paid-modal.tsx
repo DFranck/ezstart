@@ -55,6 +55,9 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
         });
         if (!markPaidRes.ok) throw new Error(parseApiError(markPaidRes.data));
 
+        // Log the response to help debug
+        console.log('📋 Mark paid response:', markPaidRes.data);
+
         onSave();
         onClose();
       },

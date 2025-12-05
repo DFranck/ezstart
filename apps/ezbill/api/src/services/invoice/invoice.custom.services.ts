@@ -43,9 +43,21 @@ export async function markInvoiceAsPaidService(
     return null;
   }
 
-  // Don't create receipt if already paid (to prevent duplicate receipts)
-  if (invoice.status === 'paid') {
-    return { invoice: toApiObject<Invoice>(invoice) };
+  // Check if receipt already exists for this invoice
+  const { getReceiptModel } = await import('../../models/billing/receipt');
+  const ReceiptModel = await getReceiptModel();
+  const existingReceipt = await ReceiptModel.findOne({
+    invoiceId: invoice._id.toString(),
+    deletedAt: null
+  });
+
+  // Don't create receipt if already paid AND receipt exists (to prevent duplicate receipts)
+  if (invoice.status === 'paid' && existingReceipt) {
+    console.log(`⏭️  Invoice ${invoice.documentNumber} already paid with receipt ${existingReceipt.documentNumber}`);
+    return {
+      invoice: toApiObject<Invoice>(invoice),
+      receipt: toApiObject<Receipt>(existingReceipt)
+    };
   }
 
   // Update invoice status to paid and set paidAt date
@@ -64,7 +76,6 @@ export async function markInvoiceAsPaidService(
   try {
     console.log(`🔄 Creating receipt for invoice ${updatedInvoice._id} for user ${updatedInvoice.userId}`);
 
-    const { getReceiptModel } = await import('../../models/billing/receipt');
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
     const receiptDocumentNumber = await generateNextNumber('receipt', updatedInvoice.userId);
@@ -93,7 +104,7 @@ export async function markInvoiceAsPaidService(
       total: receiptData.total
     });
 
-    const ReceiptModel = await getReceiptModel();
+    // Reuse the ReceiptModel from above
     const receiptDoc = new ReceiptModel(receiptData);
     const savedReceipt = await receiptDoc.save();
 
