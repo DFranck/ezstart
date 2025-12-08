@@ -345,6 +345,64 @@ export default function HomePage(): any {
         </Div>
       </Section>
 
+      {/* Use Cases Section */}
+      <Section size={'xl'} id="use-cases">
+        <Div className="container mx-auto">
+          <H2 size="h3" className="text-center mb-12">
+            {t('useCases.title')}
+          </H2>
+
+          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {(
+              t.raw('useCases.cases') as Array<{
+                icon: string
+                title: string
+                challenge: string
+                solution: string
+                result: string
+                badges: string[]
+              }>
+            ).map((useCase, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <CardHeader>
+                  <Div className="text-5xl mb-4">{useCase.icon}</Div>
+                  <H3 size="h5" className="text-gp-primary mb-4">
+                    {useCase.title}
+                  </H3>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Div>
+                    <Strong className="text-sm">Challenge:</Strong>
+                    <P className="text-sm text-muted-foreground mt-1">{useCase.challenge}</P>
+                  </Div>
+                  <Div>
+                    <Strong className="text-sm">Solution:</Strong>
+                    <P className="text-sm text-muted-foreground mt-1">{useCase.solution}</P>
+                  </Div>
+                  <Div>
+                    <Strong className="text-sm">Result:</Strong>
+                    <P className="text-sm text-muted-foreground mt-1">{useCase.result}</P>
+                  </Div>
+                  <Div className="flex flex-wrap gap-2 pt-2">
+                    {useCase.badges.map((badge, badgeIndex) => (
+                      <Span
+                        key={badgeIndex}
+                        className="bg-gp-primary/10 text-gp-primary px-3 py-1 rounded-full text-xs font-medium"
+                      >
+                        {badge}
+                      </Span>
+                    ))}
+                  </Div>
+                </CardContent>
+              </Card>
+            ))}
+          </Div>
+        </Div>
+      </Section>
+
       {/* Team Credibility Section */}
       <Section size={'xl'} layout={'grid'}>
         <Div className="px-6 py-12 md:px-12">

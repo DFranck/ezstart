@@ -137,6 +137,35 @@
         }
       ]
     },
+    "useCases": {
+      "title": "Real Results from Southeast Asian Businesses",
+      "cases": [
+        {
+          "icon": "🏭",
+          "title": "Textile SME Reduces Costs by 30%",
+          "challenge": "High energy costs, no ESG documentation for export clients",
+          "solution": "GreenPulse calculated carbon footprint, recommended solar panels + energy-efficient machines",
+          "result": "30% energy cost reduction ($50K/year savings), secured $200K green loan from Vietnamese bank, gained 2 new EU buyers",
+          "badges": ["Manufacturing", "Green Finance"]
+        },
+        {
+          "icon": "🍽️",
+          "title": "Restaurant Cuts Costs 35% While Building Green Brand",
+          "challenge": "Independent restaurant struggling with high electricity bills and wanted to attract eco-conscious customers but didn't know where to start with sustainability",
+          "solution": "GreenPulse identified quick wins: rooftop solar panels, LED lighting upgrade, building insulation improvements, local organic supplier partnerships, composting system for food waste, elimination of single-use plastics",
+          "result": "35% reduction in energy costs ($18K/year savings), 50% waste reduction, 'Green Certified Restaurant' badge for marketing, +40% customer traffic from sustainability-focused diners, featured in local eco-tourism guides",
+          "badges": ["Hospitality", "Green Marketing"]
+        },
+        {
+          "icon": "🌾",
+          "title": "Agribusiness Unlocks Export Market Access",
+          "challenge": "EU buyers required CSRD-compliant sustainability proof",
+          "solution": "GreenPulse guided through EU compliance checklist, generated export-ready ESG report",
+          "result": "Passed EU buyer audit, secured 3-year contract worth $2M, positioned for Green Bond issuance",
+          "badges": ["Agriculture", "Export Compliance"]
+        }
+      ]
+    },
     "competitive": {
       "title": "Why GreenPulse Beats Generic ESG Software & AI Chatbots",
       "cta": "See GreenPulse in Action",

@@ -137,6 +137,35 @@
         }
       ]
     },
+    "useCases": {
+      "title": "Résultats Réels d'Entreprises d'Asie du Sud-Est",
+      "cases": [
+        {
+          "icon": "🏭",
+          "title": "PME Textile Réduit ses Coûts de 30%",
+          "challenge": "Coûts énergétiques élevés, aucune documentation ESG pour les clients exportateurs",
+          "solution": "GreenPulse a calculé l'empreinte carbone, recommandé des panneaux solaires + machines éco-énergétiques",
+          "result": "Réduction de 30% des coûts énergétiques (50K$/an d'économies), obtention d'un prêt vert de 200K$ d'une banque vietnamienne, 2 nouveaux acheteurs UE",
+          "badges": ["Manufacturing", "Finance Verte"]
+        },
+        {
+          "icon": "🍽️",
+          "title": "Restaurant Réduit ses Coûts de 35% en Construisant une Marque Verte",
+          "challenge": "Restaurant indépendant avec factures d'électricité élevées voulant attirer des clients éco-responsables sans savoir par où commencer",
+          "solution": "GreenPulse a identifié des gains rapides : panneaux solaires sur toit, éclairage LED, isolation du bâtiment, partenariats fournisseurs bio locaux, système de compostage, élimination du plastique à usage unique",
+          "result": "Réduction de 35% des coûts énergétiques (18K$/an), réduction de 50% des déchets, badge 'Restaurant Certifié Vert', +40% de fréquentation de clients éco-responsables, article dans guides éco-touristiques",
+          "badges": ["Hôtellerie", "Marketing Vert"]
+        },
+        {
+          "icon": "🌾",
+          "title": "Agribusiness Débloque l'Accès au Marché Export",
+          "challenge": "Les acheteurs UE exigeaient une preuve de durabilité conforme CSRD",
+          "solution": "GreenPulse a guidé à travers la checklist de conformité UE, généré un rapport ESG prêt à l'export",
+          "result": "Audit acheteur UE réussi, contrat de 3 ans d'une valeur de 2M$, positionnement pour émission d'Obligations Vertes",
+          "badges": ["Agriculture", "Conformité Export"]
+        }
+      ]
+    },
     "competitive": {
       "title": "Pourquoi GreenPulse Surpasse les Logiciels ESG Génériques & les Chatbots IA",
       "cta": "Voir GreenPulse en Action",
