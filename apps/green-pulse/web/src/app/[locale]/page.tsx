@@ -442,47 +442,47 @@ export default function HomePage(): any {
           />
         </Div>
       </Section>
-      {/* Social Proof Section */}
-      <Section size={'xl'}>
-        <H2 size="h4" className="text-center mb-4">
-          {t('partnership.title')}
-        </H2>
-
-        <Div className="space-y-8 w-full" size={'xl'}>
-          <H3 size="h5" className="mb-6 text-center">
+      {/* Partnership Section */}
+      <Section size={'xl'} id="partnership" className="bg-muted/30">
+        <Div className="container mx-auto">
+          <H2 size="h3" className="text-center mb-4">
+            {t('partnership.title')}
+          </H2>
+          <H3 size="h5" className="text-center mb-12 text-muted-foreground">
             {t('partnership.subtitle')}
           </H3>
-          {/* Responsive Partnership Images */}
-          <Div className="w-full">
-            {/* Mobile image - shown on small screens */}
-            <Image
-              src="/images/Partnership_Mobile.png"
-              alt="GreenPulse Partnership Opportunity"
-              width={640}
-              height={800}
-              className="w-full h-auto md:hidden"
-            />
-            {/* Tablet image - shown on medium screens */}
-            <Image
-              src="/images/Partnership_Tablet.png"
-              alt="GreenPulse Partnership Opportunity"
-              width={1024}
-              height={600}
-              className="w-full h-auto hidden md:block lg:hidden"
-            />
-            {/* Desktop image - shown on large screens */}
-            <Image
-              src="/images/Partnership_Desktop.png"
-              alt="GreenPulse Partnership Opportunity"
-              width={1920}
-              height={800}
-              className="w-full h-auto hidden lg:block"
-            />
+
+          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-8">
+            {(
+              t.raw('partnership.values') as Array<{
+                icon: string
+                title: string
+                items: string[]
+              }>
+            ).map((value, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <Div className="text-5xl mb-4">{value.icon}</Div>
+                  <H3 size="h5" className="text-gp-primary">
+                    {value.title}
+                  </H3>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                    {value.items.map((item, itemIndex) => (
+                      <li key={itemIndex}>{item}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
           </Div>
-          <Div className="text-center">
+
+          <Div className="text-center space-y-4">
             <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-              <a href="mailto:partnerships@greenpulse.ai">{t('partnership.cta')}</a>
+              <a href={`mailto:${t('partnership.ctaEmail')}`}>{t('partnership.cta')}</a>
             </Button>
+            <P className="text-sm text-muted-foreground italic">{t('partnership.note')}</P>
           </Div>
         </Div>
 

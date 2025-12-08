@@ -219,26 +219,41 @@
       ]
     },
     "partnership": {
-      "title": "Opportunité de partenariat",
-      "subtitle": "Pour les fournisseurs de plateformes ESG et agences de notation",
-      "description": "GreenPulse connecte les PME avec des défis de durabilité aux bonnes solutions. Nous gérons l'acquisition de clients et l'engagement initial—vous fournissez l'infrastructure de données et les capacités de reporting qui alimentent leur parcours de conformité.",
-      "exchange": {
-        "title": "L'échange:",
-        "items": [
-          "<strong>Vous obtenez:</strong> Des clients pré-qualifiés via notre réseau PME",
-          "<strong>Nous obtenons:</strong> L'accès à vos systèmes de données et cadres de reporting",
-          "<strong>Les PME obtiennent:</strong> Une gestion de la durabilité transparente, de la demande à la conformité"
-        ]
-      },
-      "focus": {
-        "title": "Focus actuel: Recherche de partenaires pour:",
-        "partners": [
-          "Plateformes de collecte de données ESG",
-          "Outils de comptabilité carbone",
-          "Cadres de reporting réglementaire (EU CSRD, Vietnam TCFD, etc.)"
-        ]
-      },
-      "cta": "Construisons ensemble →"
+      "title": "Opportunités de Partenariat",
+      "subtitle": "Pour Fonds d'Impact, Banques & Institutions Financières",
+      "description": "",
+      "values": [
+        {
+          "icon": "🎯",
+          "title": "Optimisez la Due Diligence de Votre Portefeuille",
+          "items": [
+            "Analyse ESG multi-critères (SDG, GRI, SFDR) avec notation de risque instantanée",
+            "Filtrage automatisé des projets économise 40% du temps de due diligence",
+            "Tableau de bord de surveillance de la santé ESG du portefeuille en temps réel"
+          ]
+        },
+        {
+          "icon": "📊",
+          "title": "Solutions ESG en Marque Blanche",
+          "items": [
+            "Plateforme personnalisée pour vos clients PME (ex: \"Green [VotreBanque] propulsé par GreenPulse\")",
+            "Intégration transparente avec vos flux de demande de prêt",
+            "Évaluation d'éligibilité aux prêts verts alignée sur les exigences de la banque centrale"
+          ]
+        },
+        {
+          "icon": "🚀",
+          "title": "Support d'Incubation de Projets",
+          "items": [
+            "Agent IA pour formalisation des livrables et développement de feuilles de route ESG",
+            "Suivi automatisé de la conformité pour vos sociétés en portefeuille",
+            "Rapports d'impact standardisés pour communications LP"
+          ]
+        }
+      ],
+      "cta": "Planifier une Discussion Partenariat",
+      "ctaEmail": "partnerships@greenpulse.ai?subject=Demande de Partenariat B2B2B",
+      "note": "Pilotes actuels: Banques leaders d'Asie du Sud-Est, fonds d'impact internationaux, accélérateurs climate tech"
     },
     "press": {
       "title": "Ils parlent de nous",

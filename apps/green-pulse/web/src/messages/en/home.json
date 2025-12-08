@@ -219,26 +219,41 @@
       ]
     },
     "partnership": {
-      "title": "Partnership Opportunity",
-      "subtitle": "For ESG Platform Providers & Rating Agencies",
-      "description": "GreenPulse connects SMEs with sustainability challenges to the right solutions. We handle customer acquisition and initial engagement—you provide the data infrastructure and reporting capabilities that power their compliance journey.",
-      "exchange": {
-        "title": "The Exchange:",
-        "items": [
-          "<strong>You get:</strong> Pre-qualified customers through our SME network",
-          "<strong>We get:</strong> Access to your data systems and reporting frameworks",
-          "<strong>SMEs get:</strong> Seamless sustainability management from inquiry to compliance"
-        ]
-      },
-      "focus": {
-        "title": "Current Focus: Seeking partners for:",
-        "partners": [
-          "ESG data collection platforms",
-          "Carbon accounting tools",
-          "Regulatory reporting frameworks (EU CSRD, Vietnam TCFD, etc.)"
-        ]
-      },
-      "cta": "Let's build together →"
+      "title": "Partnership Opportunities",
+      "subtitle": "For Impact Funds, Banks & Financial Institutions",
+      "description": "",
+      "values": [
+        {
+          "icon": "🎯",
+          "title": "Optimize Due Diligence for Your Portfolio",
+          "items": [
+            "Multi-criteria ESG analysis (SDG, GRI, SFDR) with instant risk scoring",
+            "Automated project filtering saves 40% due diligence time",
+            "Real-time portfolio ESG health monitoring dashboard"
+          ]
+        },
+        {
+          "icon": "📊",
+          "title": "White-Label ESG Solutions",
+          "items": [
+            "Branded platform for your SME clients (e.g., \"Green [YourBank] powered by GreenPulse\")",
+            "Seamless integration with your loan application workflows",
+            "Green loan eligibility assessment aligned with central bank requirements"
+          ]
+        },
+        {
+          "icon": "🚀",
+          "title": "Project Incubation Support",
+          "items": [
+            "AI agent for deliverable formalization and ESG roadmap development",
+            "Automated compliance tracking for your portfolio companies",
+            "Standardized impact reporting for LP communications"
+          ]
+        }
+      ],
+      "cta": "Schedule Partnership Discussion",
+      "ctaEmail": "partnerships@greenpulse.ai?subject=B2B2B Partnership Inquiry",
+      "note": "Current pilots: Leading Southeast Asian banks, international impact funds, climate tech accelerators"
     },
     "press": {
       "title": "They Talk About Us",
