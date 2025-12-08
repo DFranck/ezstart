@@ -211,13 +211,30 @@
       ]
     },
     "team": {
-      "title": "Créé par des experts en durabilité",
-      "description": "GreenPulse.AI est créé par des professionnels de la durabilité qui ont passé des années sur le terrain—naviguant les cadres de conformité, gérant les attentes des parties prenantes et transformant les données brutes en stratégies actionnables.",
-      "credentials": [
-        "Plus de 20 ans d'expérience combinée en conseil ESG et durabilité d'entreprise",
-        "Praticiens certifiés du protocole GES et spécialistes du cadre ISSB",
-        "Travaillé avec des entreprises Fortune 500 et des investisseurs d'impact dans plus de 15 secteurs"
-      ]
+      "title": "Créé par des Experts qui ont Vécu les Défis ESG",
+      "description": "GreenPulse.AI est construit par des personnes qui ont passé des années à aider les entreprises à naviguer la conformité ESG—et ont constaté de première main à quel point c'est inaccessible pour les PME.",
+      "members": [
+        {
+          "name": "Amber Seradni",
+          "role": "CEO & Co-Fondatrice",
+          "bio": "12+ ans en stratégie de durabilité et conseil ESG. Ancienne VP Durabilité dans des entreprises internationales, praticienne certifiée du protocole GES. A construit des programmes ESG pour des entreprises Fortune 500 et a constaté comment les honoraires de consultants à 10K$+ excluaient 98% des entreprises qui en avaient le plus besoin. A fondé GreenPulse pour démocratiser l'accès.",
+          "expertise": ["Stratégie ESG", "Cadres GRI/SFDR/CSRD", "Mesure d'Impact"]
+        },
+        {
+          "name": "Franck Leclair",
+          "role": "CTO & Co-Fondateur",
+          "bio": "15+ ans à construire des systèmes IA/ML à grande échelle. Ancien Tech Lead dans des entreprises SaaS d'entreprise. Expert en NLP, IA conversationnelle et extraction de données. Passionné par l'utilisation de la technologie pour résoudre des problèmes réels—pas seulement construire des fonctionnalités.",
+          "expertise": ["Architecture IA/ML", "NLP & Extraction de Données", "Scalabilité de Plateforme"]
+        }
+      ],
+      "advisors": {
+        "title": "Soutenus par des Leaders d'Impact",
+        "list": [
+          "Consultants ESG des Big 4 (Deloitte, PwC) conseillant sur les cadres de conformité",
+          "Investisseurs d'impact gérant 500M$+ AUM en Asie du Sud-Est fournissant des insights marché",
+          "Spécialistes de la finance verte de banques régionales guidant l'adéquation produit-marché"
+        ]
+      }
     },
     "partnership": {
       "title": "Opportunités de Partenariat",

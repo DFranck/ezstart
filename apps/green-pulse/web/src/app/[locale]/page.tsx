@@ -403,43 +403,69 @@ export default function HomePage(): any {
         </Div>
       </Section>
 
-      {/* Team Credibility Section */}
-      <Section size={'xl'} layout={'grid'}>
-        <Div className="px-6 py-12 md:px-12">
-          <H2 size="h3" className="mb-6">
+      {/* Team Section */}
+      <Section size={'xl'}>
+        <Div className="container mx-auto">
+          <H2 size="h3" className="text-center mb-6">
             {t('team.title')}
           </H2>
-          <P className="text-lg text-muted-foreground mb-6 leading-relaxed">
+          <P className="text-lg text-muted-foreground mb-12 text-center max-w-3xl mx-auto">
             {t('team.description')}
           </P>
-          <Div className="space-y-4">
-            {(Array.isArray(t.raw('team.credentials')) ? t.raw('team.credentials') : []).map(
-              (text: string, index: number) => (
-                <Div key={index} className="flex items-start gap-3">
-                  <Icon
-                    name={
-                      (index === 0
-                        ? 'lucide:Award'
-                        : index === 1
-                          ? 'lucide:GraduationCap'
-                          : 'lucide:Building2') as KnownIconName
-                    }
-                    className="w-6 h-6  mt-1 flex-shrink-0"
-                  />
-                  <P className="text-base">{text}</P>
-                </Div>
-              )
-            )}
+
+          {/* Team Members */}
+          <Div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            {(
+              t.raw('team.members') as Array<{
+                name: string
+                role: string
+                bio: string
+                expertise: string[]
+              }>
+            ).map((member, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <H3 size="h5" className="text-gp-primary">
+                    {member.name}
+                  </H3>
+                  <P className="text-sm text-muted-foreground">{member.role}</P>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <P className="text-sm leading-relaxed">{member.bio}</P>
+                  <Div>
+                    <Strong className="text-xs uppercase text-muted-foreground">
+                      Expertise:
+                    </Strong>
+                    <Div className="flex flex-wrap gap-2 mt-2">
+                      {member.expertise.map((skill, skillIndex) => (
+                        <Span
+                          key={skillIndex}
+                          className="bg-gp-primary/10 text-gp-primary px-2 py-1 rounded text-xs"
+                        >
+                          {skill}
+                        </Span>
+                      ))}
+                    </Div>
+                  </Div>
+                </CardContent>
+              </Card>
+            ))}
           </Div>
-        </Div>
-        <Div className="relative w-full h-full min-h-[400px]">
-          <Image
-            src="/images/team-experts.webp"
-            alt="GreenPulse team of ESG experts and sustainability professionals"
-            fill
-            className="object-cover rounded-r-xl"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+
+          {/* Advisors */}
+          <Div className="max-w-4xl mx-auto">
+            <H3 size="h5" className="text-center mb-6 text-gp-primary">
+              {t('team.advisors.title')}
+            </H3>
+            <ul className="space-y-3">
+              {(t.raw('team.advisors.list') as string[]).map((advisor, index) => (
+                <li key={index} className="flex items-start gap-3">
+                  <Icon name="lucide:CheckCircle" className="w-5 h-5 text-gp-primary mt-1 flex-shrink-0" />
+                  <P className="text-sm text-muted-foreground">{advisor}</P>
+                </li>
+              ))}
+            </ul>
+          </Div>
         </Div>
       </Section>
       {/* Partnership Section */}

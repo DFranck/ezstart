@@ -211,13 +211,30 @@
       ]
     },
     "team": {
-      "title": "Built by Sustainability Experts",
-      "description": "GreenPulse.AI is created by sustainability professionals who've spent years in the trenches—navigating compliance frameworks, managing stakeholder expectations, and transforming raw data into actionable strategies.",
-      "credentials": [
-        "20+ years combined experience in ESG consulting and corporate sustainability",
-        "Certified GHG Protocol practitioners and ISSB framework specialists",
-        "Worked with Fortune 500 companies and impact investors across 15+ industries"
-      ]
+      "title": "Built by Experts Who Lived the ESG Struggle",
+      "description": "GreenPulse.AI is built by people who've spent years helping businesses navigate ESG compliance—and experienced firsthand how inaccessible it is for SMEs.",
+      "members": [
+        {
+          "name": "Amber Seradni",
+          "role": "CEO & Co-Founder",
+          "bio": "12+ years in sustainability strategy and ESG consulting. Former VP Sustainability at international firms, certified GHG Protocol practitioner. Built ESG programs for Fortune 500 companies and witnessed how $10K+ consultant fees locked out 98% of businesses that needed help most. Founded GreenPulse to democratize access.",
+          "expertise": ["ESG Strategy", "GRI/SFDR/CSRD Frameworks", "Impact Measurement"]
+        },
+        {
+          "name": "Franck Leclair",
+          "role": "CTO & Co-Founder",
+          "bio": "15+ years building AI/ML systems at scale. Former Tech Lead at enterprise SaaS companies. Expert in NLP, conversational AI, and data extraction. Passionate about using technology to solve real-world problems—not just build features.",
+          "expertise": ["AI/ML Architecture", "NLP & Data Extraction", "Platform Scalability"]
+        }
+      ],
+      "advisors": {
+        "title": "Backed by Impact Leaders",
+        "list": [
+          "ESG consultants from Big 4 firms (Deloitte, PwC) advising on compliance frameworks",
+          "Impact investors managing $500M+ AUM in Southeast Asia providing market insights",
+          "Green finance specialists from regional banks guiding product-market fit"
+        ]
+      }
     },
     "partnership": {
       "title": "Partnership Opportunities",
