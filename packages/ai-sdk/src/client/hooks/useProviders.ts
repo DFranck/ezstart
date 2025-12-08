@@ -15,21 +15,40 @@ export function useProviders(appName: AppName = 'green-pulse') {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    // Skip fetch if we already have providers (prevents unnecessary requests)
+    if (providers.length > 0) {
+      return
+    }
+
     async function fetchProviders() {
       setLoading(true)
+      setError(null)
       try {
-        const response = await callApi('/providers', { appName })
-        setProviders(response.data || [])
+        const response = await callApi('/providers', { appName, logLevel: 'errors' })
+
+        if (response.ok && response.data) {
+          setProviders(response.data || [])
+        } else {
+          throw new Error('Failed to fetch providers')
+        }
       } catch (err) {
-        setError(err as Error)
-        console.error('Failed to fetch providers:', err)
+        const error = err as Error
+        setError(error)
+
+        // Only log error once (not on every render)
+        console.error('⚠️ Failed to fetch AI providers:', error.message)
+
+        // Provide helpful message for rate limiting
+        if (error.message?.includes('Too many requests') || error.message?.includes('RATE_LIMIT')) {
+          console.warn('Rate limit reached. Providers will retry on next page load.')
+        }
       } finally {
         setLoading(false)
       }
     }
 
     fetchProviders()
-  }, [appName, setProviders])
+  }, [appName, providers.length, setProviders])
 
   return { providers, loading, error, selectedProvider, setSelectedProvider }
 }
