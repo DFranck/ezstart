@@ -1,0 +1,67 @@
+# GreenPulse.AI - About
+
+## What We Do
+GreenPulse.AI is an AI-powered ESG compliance platform built specifically for Southeast Asian SMEs. We transform sustainability data into bankable green finance opportunities.
+
+## Our Mission
+Democratize ESG compliance for the 98% of Southeast Asian SMEs who have zero access to sustainability knowledge. By 2025, Vietnam's ETS will regulate 50% of emissions—900+ Vietnamese SMEs will need ESG support. We're building the AI agent that makes this accessible, affordable, and actionable.
+
+## Target Market
+- **Primary**: SMEs in Southeast Asia (Vietnam, Thailand, Indonesia, Philippines)
+- **Secondary**: Impact Funds managing ESG portfolios
+- **Tertiary**: Banks offering green finance products
+
+## Key Features
+1. Smart Data Extraction: Voice, photo, and document AI extraction
+2. Instant ESG Scoring: Real-time compliance against GRI, SFDR, CSRD frameworks
+3. Automated Reporting: Audit-ready ESG reports for green loans and export requirements
+4. Green Finance Readiness: Assessment and preparation for sustainable financing
+
+## Business Model (B2B2B)
+- Free tier for ESG exploration
+- Premium package for growth-stage SMEs (coming soon)
+- Golden package for audit-ready compliance (coming soon)
+- White-label solutions for banks and impact funds
+
+## Founders
+- **Amber Seradni**: CEO, 12+ years in ESG consulting, certified GHG Protocol practitioner
+- **Franck Leclair**: CTO, 15+ years AI/ML systems, NLP & data extraction expert
+
+## Traction
+- 70% MVP complete
+- 5 beta partners (top Vietnamese banks, research institutes)
+- 50+ startups in pipeline
+- Featured in VietStock, recognized by regional accelerators
+
+## Differentiators
+vs ESG Software: Conversational AI + voice/photo data extraction (not manual entry)
+vs AI Chatbots: International frameworks native (GRI/SFDR/SDG verified, no hallucinations)
+vs Consultants: $0 free tier vs $10K+ consultant fees
+
+## Values
+- Impact over extraction: Long-term value creation for SMEs
+- Collaboration over competition: Partner with ESG platforms, banks, funds
+- Transparency: With team, partners, and clients
+- Accessibility: Democratize ESG knowledge for businesses that need it most
+
+## Contact
+- Website: https://www.ai-greenpulse.com
+- Email: aseradni@nexora-venture.com
+- Partnerships: partnerships@greenpulse.ai
+- Careers: careers@greenpulse.ai
+
+## Use Cases
+1. Textile SME: 30% energy cost reduction + $200K green loan + 2 EU buyers
+2. Restaurant: 35% cost reduction + green certification + 40% customer increase
+3. Agribusiness: EU buyer audit passed + $2M contract + Green Bond positioning
+
+## Geographic Focus
+Southeast Asia (Vietnam primary market), expanding to Thailand, Indonesia, Philippines
+
+## Industries Served
+Manufacturing, hospitality, agriculture, retail, professional services
+
+## Frameworks Supported
+GRI (Global Reporting Initiative), SFDR (EU Sustainable Finance), CSRD (Corporate Sustainability Reporting Directive), SDG (UN Sustainable Development Goals), GHG Protocol, Vietnam ETS, Thailand green banking requirements
+
+Last Updated: December 8, 2024
