@@ -3,6 +3,7 @@
 import { callApi, parseApiError } from '@/utils/api'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 export type ConversationListItem = {
   id: string
@@ -210,6 +211,23 @@ export function useConversations() {
     },
   })
 
+  // Memoize callbacks to prevent infinite re-renders
+  const loadConversations = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['conversations'] })
+  }, [queryClient])
+
+  const refreshConversation = useCallback(
+    (id: string) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', id] })
+    },
+    [queryClient]
+  )
+
+  const renameConversation = useCallback(
+    (id: string, newTitle: string) => renameConversationMutation.mutateAsync({ id, newTitle }),
+    [renameConversationMutation]
+  )
+
   return {
     // Data
     conversations,
@@ -221,15 +239,13 @@ export function useConversations() {
 
     // Mutations (unwrap for cleaner API)
     createConversation: createConversationMutation.mutateAsync,
-    renameConversation: (id: string, newTitle: string) =>
-      renameConversationMutation.mutateAsync({ id, newTitle }),
+    renameConversation,
     softDeleteConversation: deleteConversationMutation.mutateAsync,
     hardDeleteConversation: hardDeleteConversationMutation.mutateAsync,
     restoreConversation: restoreConversationMutation.mutateAsync,
 
-    // Manual refetch (rarely needed with React Query)
-    loadConversations: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
-    refreshConversation: (id: string) =>
-      queryClient.invalidateQueries({ queryKey: ['conversation', id] }),
+    // Manual refetch (rarely needed with React Query) - now memoized
+    loadConversations,
+    refreshConversation,
   }
 }
