@@ -218,7 +218,9 @@ export function AuthProvider({
         clearInterval(intervalId)
       }
     }
-  }, [store.accessToken, store.getMode, client, store])
+    // Only re-run if accessToken or mode changes (not on every store update)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.accessToken, client])
 
   return <AuthContext.Provider value={{ client }}>{children}</AuthContext.Provider>
 }
