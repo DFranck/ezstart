@@ -41,7 +41,7 @@
       "premium": {
         "title": "Package Premium",
         "subtitle": "Pour une croissance stimulée par l'ESG",
-        "badge": "Populaire",
+        "badge": "Bientôt Disponible",
         "description": "Je veux utiliser des actions durables et vertes pour stimuler mon activité grâce à un marketing vert sur mesure, éviter le greenwashing et avoir des KPI solides pour mes clients.",
         "features": {
           "chat": "Plateforme de chat IA",
@@ -54,6 +54,7 @@
       "golden": {
         "title": "Package Golden",
         "subtitle": "Pour la conformité ESG officielle",
+        "badge": "Bientôt Disponible",
         "description": "J'ai besoin d'un rapport/dossier/audit ESG solide et officiel pour la certification ISO / l'exportation internationale / l'accès à la finance verte.",
         "features": {
           "all": "Toutes les fonctionnalités Premium",

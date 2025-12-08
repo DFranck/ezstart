@@ -41,7 +41,7 @@
       "premium": {
         "title": "Premium Package",
         "subtitle": "For ESG-driven Growth",
-        "badge": "Popular",
+        "badge": "Coming Soon",
         "description": "I want to use sustainable and green actions to boost my business through tailored green marketing, avoid greenwashing and have solid KPIs for my customers.",
         "features": {
           "chat": "AI chat platform",
@@ -54,6 +54,7 @@
       "golden": {
         "title": "Golden Package",
         "subtitle": "For Official ESG Compliance",
+        "badge": "Coming Soon",
         "description": "I need a solid and official ESG report/file/audit for ISO certification / international export / green finance access.",
         "features": {
           "all": "All Premium features",
