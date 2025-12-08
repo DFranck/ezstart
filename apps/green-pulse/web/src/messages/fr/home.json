@@ -1,14 +1,15 @@
 {
   "home": {
     "hero": {
-      "title": "GreenPulse",
-      "subtitle": "Votre nouvel agent environnemental",
-      "typewriterText": "Réduire les Coûts • Développer le Marketing Vert • Accéder aux Financements • Croître Durablement",
-      "description": "Un accompagnement basé sur l'IA pour aider les PME à réduire leurs coûts, développer un marketing vert solide et accéder à la finance verte.",
-      "cta": "Soyez le premier informé de notre lancement et bénéficiez d'une version d'essai gratuite",
+      "title": "GreenPulse.AI - Conformité ESG Propulsée par l'IA pour les PME d'Asie du Sud-Est",
+      "subtitle": "Un Agent Durable pour 1 Million d'Entreprises",
+      "typewriterText": "Transformez la croissance durable en opportunités de finance verte bancables",
+      "description": "Réduisez les coûts de 30% • Débloquez les prêts verts • Respectez les normes d'exportation • Croissance durable • Obtenez des KPI pour le marketing vert, SANS écoblanchiment",
+      "cta": "Commencer Gratuitement",
+      "ctaSecondary": "Explorer les Solutions B2B2B →",
       "emailPlaceholder": "Votre adresse e-mail",
       "notifyMe": "Prévenez-moi",
-      "getStarted": "Commencer"
+      "getStarted": "Commencer Gratuitement"
     },
     "value": {
       "intro": "Avec GreenPulse.AI, pas besoin d'être un expert environnemental ou d'en embaucher un. Grâce à une simple conversation avec votre assistant personnalisé, vous recevrez des conseils étape par étape pour :",
@@ -52,7 +53,7 @@
       },
       "golden": {
         "title": "Package Golden",
-        "subtitle": "Pour une certification ESG officielle",
+        "subtitle": "Pour la conformité ESG officielle",
         "description": "J'ai besoin d'un rapport/dossier/audit ESG solide et officiel pour la certification ISO / l'exportation internationale / l'accès à la finance verte.",
         "features": {
           "all": "Toutes les fonctionnalités Premium",
@@ -74,10 +75,10 @@
     "subtitle": "Votre nouvel agent vert",
     "heroFeatures": [
       "Extraction intelligente de données",
-      "Assistant ESG",
-      "Piloté par l'IA",
-      "Reporting automatisé",
-      "Stratégie sur mesure"
+      "Notation ESG instantanée",
+      "Rapports de conformité automatisés",
+      "Préparation finance verte",
+      "Stratégie de croissance sur mesure"
     ],
     "challenge": {
       "title": "Le monde fait face à des <strong>conditions climatiques extrêmes</strong> en raison du changement climatique. Les entreprises sont poussées à aller au-delà du Business as Usual et à viser une croissance durable.",
@@ -119,20 +120,63 @@
       ]
     },
     "problem": {
-      "title": "Gardez-le <strong>Simple, Rapide & Conforme</strong>",
-      "subtitle": "Vous n'êtes pas seul. <strong>78% des responsables durabilité</strong> et <strong>PME</strong> se sentent dépassés par la collecte de données, les exigences de conformité et les attentes des parties prenantes.",
+      "title": "La Conformité ESG ne Devrait pas Freiner Votre Croissance",
+      "subtitle": "Vous n'êtes pas seul. <strong>98% des PME en Asie du Sud-Est</strong> n'ont aucun accès aux connaissances ESG, tandis que les acheteurs mondiaux exigent des preuves de durabilité d'ici 2025.",
       "problems": [
         {
-          "title": "Heures perdues en travail manuel",
-          "description": "La saisie de données, les emails aux fournisseurs et la compilation de rapports consomment <strong>60% de votre semaine</strong>, laissant peu de temps pour les initiatives stratégiques."
+          "title": "⏰ Ressources Limitées",
+          "description": "Votre équipe manque de temps et d'expertise pour naviguer les cadres <strong>GRI, SFDR, CSRD</strong> tout en gérant les opérations quotidiennes."
         },
         {
-          "title": "Anxiété de conformité",
-          "description": "Se tenir au courant des cadres <strong>GRI, SFDR, CSRD et ISSB</strong> ressemble à un travail à temps plein. Une mise à jour manquée pourrait faire dérailler la confiance des investisseurs."
+          "title": "💰 Barrières de Financement",
+          "description": "Les banques exigent une documentation ESG que vous n'avez pas. Sans preuve de conformité, <strong>les prêts verts restent hors de portée</strong>."
         },
         {
-          "title": "Contraintes de ressources",
-          "description": "On attend de votre équipe qu'elle fournisse des <strong>programmes ESG de niveau entreprise</strong>, mais les budgets et les effectifs restent gelés."
+          "title": "🌍 Préparation à l'Export",
+          "description": "Les réglementations UE (<strong>CSRD</strong>) exigent désormais la durabilité de la chaîne d'approvisionnement. Non-conformité = opportunités d'exportation perdues."
+        }
+      ]
+    },
+    "competitive": {
+      "title": "Pourquoi GreenPulse Surpasse les Logiciels ESG Génériques & les Chatbots IA",
+      "cta": "Voir GreenPulse en Action",
+      "ctaSubtitle": "Conçu pour les PME d'Asie du Sud-Est qui ont besoin de résultats, pas de complexité.",
+      "headers": {
+        "feature": "Fonctionnalité",
+        "greenpulse": "GreenPulse.AI",
+        "software": "Logiciel ESG",
+        "ai": "Plateformes IA"
+      },
+      "rows": [
+        {
+          "feature": "Type d'Interface",
+          "greenpulse": "✅ Hybride (Tableau de bord + IA conversationnelle)",
+          "software": "❌ Interface de projet statique",
+          "ai": "❌ Conversationnel uniquement"
+        },
+        {
+          "feature": "Expertise ESG",
+          "greenpulse": "✅ Cadres internationaux natifs (GRI, SFDR, SDG)",
+          "software": "✅ Listes de contrôle de conformité manuelles",
+          "ai": "❌ Générique, risque d'hallucination"
+        },
+        {
+          "feature": "Collecte de Données",
+          "greenpulse": "✅ Extraction IA voix, photo, doc tout-en-un",
+          "software": "❌ Saisie manuelle ou semi-automatisée",
+          "ai": "✅ Si abonné à des plateformes séparées"
+        },
+        {
+          "feature": "Suivi de Projet",
+          "greenpulse": "✅ Mise à jour auto + tableau de bord intelligent",
+          "software": "✅ Gestion de projet mais mises à jour manuelles",
+          "ai": "❌ Aucune visibilité"
+        },
+        {
+          "feature": "Intégration ERP/CRM",
+          "greenpulse": "✅ Synchronisation en un clic",
+          "software": "❌ Silos autonomes",
+          "ai": "✅ Limitée, lourd en développement"
         }
       ]
     },

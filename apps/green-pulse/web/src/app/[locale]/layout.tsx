@@ -18,11 +18,22 @@ const k2d = K2D({
 })
 
 export const metadata = createMetadata({
-  appName: 'GreenPulse',
+  appName: 'GreenPulse.AI',
   description:
-    'AI-powered sustainable development assistant - Track and improve your environmental impact',
+    'AI-powered ESG compliance platform for Southeast Asian SMEs. Reduce costs by 30%, access green finance, and meet export standards with automated GRI, SFDR, CSRD reporting.',
   domain: 'https://www.ai-greenpulse.com',
-  keywords: ['sustainability', 'environment', 'AI', 'green', 'climate'],
+  keywords: [
+    'ESG compliance',
+    'SME sustainability',
+    'green finance',
+    'Southeast Asia',
+    'carbon tracking',
+    'sustainable business',
+    'AI ESG platform',
+    'GRI reporting',
+    'CSRD',
+    'Vietnam green banking',
+  ],
   themeColor: '#10b981',
   ogImage: 'https://www.ai-greenpulse.com/og-image.svg',
   icons: {
@@ -39,11 +50,11 @@ export const metadata = createMetadata({
 export const viewport = createViewport('#10b981')
 
 const jsonLd = createJsonLd({
-  appName: 'GreenPulse',
+  appName: 'GreenPulse.AI',
   description:
-    'AI-powered sustainable development assistant - Track and improve your environmental impact',
+    'AI-powered ESG compliance platform for Southeast Asian SMEs. Automated sustainability reporting, carbon tracking, and green finance readiness.',
   url: 'https://www.ai-greenpulse.com',
-  applicationCategory: 'UtilitiesApplication',
+  applicationCategory: 'BusinessApplication',
 })
 
 interface RootLayoutProps {

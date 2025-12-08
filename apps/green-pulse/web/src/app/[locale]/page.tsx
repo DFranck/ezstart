@@ -52,42 +52,53 @@ export default function HomePage(): any {
         </Div>
         <H1 className="sr-only">{t('hero.title')}</H1>
         <Div layout={'center'} className="gap-6">
-          {/* Subtitle: Your New Green Agent (from slide) */}
-          <H2 size={'h3'}>{t('subtitle')}</H2>
+          {/* Subtitle: One Sustainable Agent for 1 Million Businesses */}
+          <H2 size={'h3'}>{t('hero.subtitle')}</H2>
 
-          {/* Feature tags (from slide) */}
-          <Div layout={'row'} className="hidden lg:flex ">
+          {/* Tagline / Value Proposition */}
+          <P className="text-lg text-center max-w-3xl">
+            {t('hero.typewriterText')}
+          </P>
+
+          {/* Feature tags */}
+          <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
             {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
               (feature: string, index: number) => (
-                <Button key={index} className="rounded-full">
+                <Button key={index} className="rounded-full" variant="secondary" size="sm">
                   {feature}
                 </Button>
               )
             )}
           </Div>
 
-          {/* Typewriter effect (from v2) */}
-          <TypewriterEffectSmooth
-            words={[
-              {
-                text: t('hero.typewriterText'),
-              },
-            ]}
-            className=" text-center"
-            duration={3}
-            delay={0.5}
-          />
+          {/* Value Proposition */}
+          <P className="text-base text-center text-muted-foreground max-w-4xl">
+            {t('hero.description')}
+          </P>
         </Div>
-        {/* CTA Button */}
-        <Button
-          asChild
-          size="lg"
-          className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
-        >
-          <Link href="/chat" target="_blank" rel="noopener noreferrer">
-            {t('hero.getStarted')}
-          </Link>
-        </Button>
+
+        {/* CTA Buttons */}
+        <Div layout={'row'} className="gap-4">
+          <Button
+            asChild
+            size="lg"
+            className="bg-gp-primary hover:bg-gp-primary/80 text-lg px-8 py-6"
+          >
+            <Link href="/chat" target="_blank" rel="noopener noreferrer">
+              {t('hero.getStarted')}
+            </Link>
+          </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="text-lg px-8 py-6"
+          >
+            <Link href="#partnership">
+              {t('hero.ctaSecondary')}
+            </Link>
+          </Button>
+        </Div>
       </Section>
       {/* Challenge Context Section - Using SplitSection with diagonal */}
       <SplitSection
@@ -266,6 +277,74 @@ export default function HomePage(): any {
           </Div>
         </Div>
       </Section>
+
+      {/* Competitive Advantage Section */}
+      <Section size={'xl'} id="competitive-advantage">
+        <Div className="container mx-auto">
+          <H2 size="h3" className="text-center mb-12">
+            {t('competitive.title')}
+          </H2>
+
+          {/* Comparison Table */}
+          <Div className="overflow-x-auto mb-8">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="p-4 text-left border-b-2 border-border">
+                    {t('competitive.headers.feature')}
+                  </th>
+                  <th className="p-4 text-left border-b-2 border-gp-primary bg-gp-primary/10">
+                    <Strong className="text-gp-primary">{t('competitive.headers.greenpulse')}</Strong>
+                  </th>
+                  <th className="p-4 text-left border-b-2 border-border">
+                    {t('competitive.headers.software')}
+                  </th>
+                  <th className="p-4 text-left border-b-2 border-border">
+                    {t('competitive.headers.ai')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(Array.isArray(t.raw('competitive.rows')) ? t.raw('competitive.rows') : []).map(
+                  (
+                    row: {
+                      feature: string
+                      greenpulse: string
+                      software: string
+                      ai: string
+                    },
+                    index: number
+                  ) => (
+                    <tr key={index} className="border-b border-border hover:bg-muted/50">
+                      <td className="p-4 font-medium text-muted-foreground">{row.feature}</td>
+                      <td className="p-4 bg-gp-primary/5 font-semibold text-gp-primary">
+                        {row.greenpulse}
+                      </td>
+                      <td className="p-4">{row.software}</td>
+                      <td className="p-4">{row.ai}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </Div>
+
+          {/* CTA */}
+          <Div className="text-center">
+            <P className="text-lg mb-6">{t('competitive.ctaSubtitle')}</P>
+            <Button
+              asChild
+              size="lg"
+              className="bg-gp-primary hover:bg-gp-primary/80"
+            >
+              <Link href="/chat" target="_blank" rel="noopener noreferrer">
+                {t('competitive.cta')}
+              </Link>
+            </Button>
+          </Div>
+        </Div>
+      </Section>
+
       {/* Team Credibility Section */}
       <Section size={'xl'} layout={'grid'}>
         <Div className="px-6 py-12 md:px-12">

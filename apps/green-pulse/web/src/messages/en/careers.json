@@ -1,0 +1,190 @@
+{
+  "careers": {
+    "meta": {
+      "title": "Careers - Join GreenPulse.AI",
+      "description": "Join GreenPulse.AI in democratizing ESG compliance for Southeast Asian SMEs. Current opening: Business Development & Operations Support."
+    },
+    "hero": {
+      "title": "Join Us in Building the Future of Sustainable Business",
+      "subtitle": "GreenPulse.AI is on a mission to make ESG compliance accessible to 1 million SMEs across Southeast Asia. We're a small, impact-driven team based in Ho Chi Minh City, working at the intersection of AI, sustainability, and green finance.",
+      "description": "If you're passionate about climate action, want to work in a fast-moving startup environment, and believe technology can democratize access to green finance - we'd love to hear from you."
+    },
+    "openings": {
+      "title": "Current Opportunities",
+      "badge": "New Opening"
+    },
+    "bdRole": {
+      "title": "Business Development & Operations Support",
+      "location": "Remote or Ho Chi Minh City, Vietnam",
+      "type": "Flexible contractor arrangement",
+      "mission": "Impact-driven mission",
+      "summary": "Help us scale GreenPulse's presence in Southeast Asia. Handle tender responses, represent us at events, and build strategic partnerships.",
+      "tags": ["Business Development", "Project Coordination", "Networking", "No Tech Background Required"],
+      "sections": {
+        "about": {
+          "title": "About the Role",
+          "content": "As we grow GreenPulse.AI's footprint across Southeast Asia, we're looking for someone to join as **Business Development & Operations Support** - not a technical co-founder, but a mission-driven partner who can help us navigate the business landscape, respond to opportunities, and build meaningful connections.\n\nYou'll work directly with our founding team (Amber, CEO with 12+ years in sustainability strategy, and Franck, CTO with AI/ML expertise) to accelerate our growth without needing deep technical or ESG expertise - we'll provide the training."
+        },
+        "responsibilities": {
+          "title": "What You'll Do",
+          "items": [
+            {
+              "title": "Documentation & Tender Management (40%)",
+              "tasks": [
+                "Draft and coordinate responses to tenders, RFPs, and grant applications",
+                "Create professional business documents (proposals, partnership decks, case studies)",
+                "Maintain CRM and track partnership pipeline",
+                "Support administrative operations as we scale"
+              ]
+            },
+            {
+              "title": "Representation & Networking (30%)",
+              "tasks": [
+                "Represent GreenPulse at industry events (green finance forums, sustainability conferences, startup meetups)",
+                "Build relationships with key stakeholders: banks, impact funds, SME associations, government agencies",
+                "Act as a spokesperson for the company in local ecosystem"
+              ]
+            },
+            {
+              "title": "Market Intelligence & Opportunity Identification (20%)",
+              "tasks": [
+                "Monitor competitor landscape and ESG/green finance regulatory developments in Southeast Asia",
+                "Identify partnership opportunities (banks, ESG platforms, accelerators, funds)",
+                "Track tender databases and funding opportunities"
+              ]
+            },
+            {
+              "title": "Strategic Support (10%)",
+              "tasks": [
+                "Support CEO with business development strategy",
+                "Coordinate pilot programs with beta partners",
+                "Help refine positioning and messaging based on market feedback"
+              ]
+            }
+          ]
+        },
+        "requirements": {
+          "title": "Who You Are",
+          "mustHave": {
+            "title": "Must-Have:",
+            "items": [
+              "**Strong communicator:** Excellent writing skills in English (Vietnamese is a plus). Can craft compelling proposals and represent ideas clearly.",
+              "**Organized & proactive:** Comfortable managing multiple projects simultaneously, meeting deadlines, and working independently.",
+              "**People person:** Genuinely enjoy networking, building relationships, and representing a mission you believe in.",
+              "**Mission-driven:** You're motivated by climate impact and making sustainability accessible to businesses that need it most.",
+              "**Curious learner:** You don't need to know ESG frameworks or AI tech, but you're excited to learn about green finance, sustainability, and our sector."
+            ]
+          },
+          "idealBackground": {
+            "title": "Ideal Background:",
+            "items": [
+              "**2-3 years experience** in business development, project coordination, international development, communications, or consulting",
+              "**OR fresh graduate** from business school / sciences po / international relations with strong academic track record and genuine interest in impact",
+              "Experience working in startup environments or mission-driven organizations is a plus",
+              "Comfortable with ambiguity and building processes from scratch"
+            ]
+          },
+          "notRequired": {
+            "title": "NOT Required:",
+            "items": [
+              "Technical skills (coding, AI, data science)",
+              "Deep ESG or sustainability technical expertise",
+              "Previous experience in fintech or climate tech"
+            ]
+          }
+        },
+        "offer": {
+          "title": "What We Offer",
+          "compensation": {
+            "title": "Compensation & Structure",
+            "items": [
+              "**Flexible contractor arrangement initially** (we're a seed-stage startup, so transparency matters)",
+              "Potential for long-term collaboration and equity participation based on fit and results",
+              "Remote-friendly with regular in-person collaboration in HCMC"
+            ]
+          },
+          "growth": {
+            "title": "Growth & Impact",
+            "items": [
+              "**Direct impact:** Your work will help SMEs access green finance, reduce costs, and build sustainable businesses",
+              "**Ownership:** You'll shape how GreenPulse grows in Southeast Asia - this isn't a corporate role with rigid processes",
+              "**Learning:** Work closely with founders, gain exposure to green finance, impact investing, AI applications, and startup building",
+              "**Network:** Connect with leading banks, impact funds, accelerators, and sustainability leaders across the region"
+            ]
+          },
+          "culture": {
+            "title": "Team Culture",
+            "items": [
+              "**Mission-first:** We're building this to solve a real problem, not just for exits",
+              "**Transparency:** Open communication about challenges, strategy, and progress",
+              "**Flexibility:** We respect boundaries, energy levels, and work-life balance (Amber is 5 months pregnant - we walk the talk)",
+              "**Diplomatic approach:** We value relationship-building over aggressive sales tactics"
+            ]
+          }
+        },
+        "apply": {
+          "title": "How to Apply",
+          "instructions": "Send an email to **careers@greenpulse.ai** with:",
+          "requirements": [
+            "**Subject line:** \"BD & Operations - [Your Name]\"",
+            "**Short cover letter** (max 300 words) explaining:",
+            "  - Why you're interested in GreenPulse's mission",
+            "  - What relevant experience you bring",
+            "  - One example of a project you coordinated or a relationship you built",
+            "**Your CV/resume**",
+            "**Optional:** One writing sample (business proposal, article, blog post - something that shows your communication skills)"
+          ],
+          "note": "We review applications on a rolling basis. First-round interviews are conversational - we want to understand your motivations and see if there's mutual fit.",
+          "cta": "Apply Now"
+        }
+      }
+    },
+    "mission": {
+      "title": "Why GreenPulse.AI?",
+      "ourMission": {
+        "title": "Our Mission",
+        "content": "We're democratizing ESG compliance for the 98% of Southeast Asian SMEs who have zero access to sustainability knowledge. By 2025, Vietnam's ETS will regulate 50% of emissions - 900+ Vietnamese SMEs will need ESG support. We're building the AI agent that makes this accessible."
+      },
+      "traction": {
+        "title": "Our Traction",
+        "items": [
+          "70% MVP complete",
+          "5 beta partners (including top Vietnamese banks, research institutes)",
+          "50+ startups in pipeline",
+          "Featured in VietStock, recognized by regional accelerators"
+        ]
+      },
+      "values": {
+        "title": "Our Values",
+        "items": [
+          "**Impact over extraction:** We're not building this for a quick flip - we're here to create lasting value for SMEs",
+          "**Collaboration over competition:** We partner with ESG platforms, banks, funds - not compete",
+          "**Transparency:** With team, partners, and clients",
+          "**Respect for energy:** Manifestor approach - we initiate opportunities but don't force closings"
+        ]
+      }
+    },
+    "future": {
+      "title": "Future Opportunities",
+      "content": "We're a small team now, but as we grow, we anticipate roles in:",
+      "roles": [
+        "**Customer Success & SME Support** (helping clients maximize value from GreenPulse)",
+        "**Partnerships Manager** (dedicated to bank/fund relationships)",
+        "**Marketing & Content** (thought leadership, case studies, SEO)",
+        "**ESG Analyst** (for Golden Package client support)"
+      ],
+      "cta": "If you're interested in any of these areas, feel free to reach out with a brief intro - we're always happy to connect with mission-aligned people."
+    },
+    "contact": {
+      "title": "Contact",
+      "general": "General inquiries:",
+      "partnership": "Partnership opportunities:",
+      "moreInfo": "More about us:",
+      "email": "aseradni@nexora-venture.com"
+    },
+    "footer": {
+      "eoe": "**GreenPulse.AI** is an equal opportunity employer. We celebrate diversity and are committed to creating an inclusive environment for all team members.",
+      "updated": "Page last updated: December 8, 2024"
+    }
+  }
+}

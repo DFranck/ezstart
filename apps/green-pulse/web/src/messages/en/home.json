@@ -1,14 +1,15 @@
 {
   "home": {
     "hero": {
-      "title": "GreenPulse",
-      "subtitle": "Your new green agent",
-      "typewriterText": "Reduce Costs • Develop Green Marketing • Access Finance • Grow Sustainably",
-      "description": "AI-powered support to help SMEs reduce costs, develop solid green marketing, and access green finance.",
-      "cta": "Be the first to know about our launch and get a free trial",
+      "title": "GreenPulse.AI - AI-Powered ESG Compliance for Southeast Asian SMEs",
+      "subtitle": "One Sustainable Agent for 1 Million Businesses",
+      "typewriterText": "Transform sustainability growth into bankable green finance opportunities",
+      "description": "Reduce costs by 30% • Unlock green loans • Meet export standards • Scale sustainably • Get KPIs for green marketing, NO greenwashing",
+      "cta": "Get Started Free",
+      "ctaSecondary": "Explore B2B2B Solutions →",
       "emailPlaceholder": "Your email address",
       "notifyMe": "Notify me",
-      "getStarted": "Get Started"
+      "getStarted": "Get Started Free"
     },
     "value": {
       "intro": "With GreenPulse.AI, no need to be an environmental expert or hire one. Through a simple conversation with your personalized assistant, you'll receive step-by-step advice to:",
@@ -52,7 +53,7 @@
       },
       "golden": {
         "title": "Golden Package",
-        "subtitle": "For Official ESG Certification",
+        "subtitle": "For Official ESG Compliance",
         "description": "I need a solid and official ESG report/file/audit for ISO certification / international export / green finance access.",
         "features": {
           "all": "All Premium features",
@@ -74,10 +75,10 @@
     "subtitle": "Your New Green Agent",
     "heroFeatures": [
       "Smart Data Extraction",
-      "ESG Assistant",
-      "AI-Driven",
-      "Automated Reporting",
-      "Tailored Strategy"
+      "Instant ESG Scoring",
+      "Automated Compliance Reports",
+      "Green Finance Readiness",
+      "Tailored Growth Strategy"
     ],
     "challenge": {
       "title": "The world is facing <strong>extreme weather</strong> due to climate change, Companies are pushed to move beyond Business as Usual and to aim to sustainable growth.",
@@ -88,7 +89,7 @@
       ]
     },
     "transformation": {
-      "title": "GreenPulse.AI easily transform complex Data into impact strategies",
+      "title": "GreenPulse.AI easily transforms complex Data into impact strategies",
       "steps": {
         "step1": {
           "badge": "1",
@@ -119,20 +120,63 @@
       ]
     },
     "problem": {
-      "title": "Keep It <strong>Simple, Fast & Compliant</strong>",
-      "subtitle": "You're not alone. <strong>78% of sustainability managers</strong> and <strong>SMEs</strong> report feeling overwhelmed by data collection, compliance requirements, and stakeholder expectations.",
+      "title": "ESG Compliance Shouldn't Stop Your Growth",
+      "subtitle": "You're not alone. <strong>98% of SMEs in Southeast Asia</strong> have zero access to ESG knowledge, while global buyers demand sustainability proof by 2025.",
       "problems": [
         {
-          "title": "Hours Lost to Manual Work",
-          "description": "Data entry, supplier emails, and report compilation consume <strong>60% of your week</strong> leaving little time for strategic initiatives."
+          "title": "⏰ Limited Resources",
+          "description": "Your team lacks time and expertise to navigate <strong>GRI, SFDR, CSRD</strong> frameworks while managing daily operations."
         },
         {
-          "title": "Compliance Anxiety",
-          "description": "Keeping up with <strong>GRI, SFDR, CSRD, and ISSB</strong> frameworks feels like a full-time job. One missed update could derail investor confidence."
+          "title": "💰 Financing Barriers",
+          "description": "Banks require ESG documentation you don't have. Without compliance proof, <strong>green loans remain out of reach</strong>."
         },
         {
-          "title": "Resource Constraints",
-          "description": "Your team is expected to deliver <strong>enterprise-grade ESG programs</strong>, but budgets and headcount remain frozen."
+          "title": "🌍 Export Readiness",
+          "description": "EU regulations (<strong>CSRD</strong>) now mandate supply chain sustainability. Non-compliance = lost export opportunities."
+        }
+      ]
+    },
+    "competitive": {
+      "title": "Why GreenPulse Beats Generic ESG Software & AI Chatbots",
+      "cta": "See GreenPulse in Action",
+      "ctaSubtitle": "Built for Southeast Asian SMEs who need results, not complexity.",
+      "headers": {
+        "feature": "Feature",
+        "greenpulse": "GreenPulse.AI",
+        "software": "ESG Software",
+        "ai": "AI Platforms"
+      },
+      "rows": [
+        {
+          "feature": "Interface Type",
+          "greenpulse": "✅ Hybrid (Dashboard + Conversational AI)",
+          "software": "❌ Static project interface",
+          "ai": "❌ Conversational only"
+        },
+        {
+          "feature": "ESG Expertise",
+          "greenpulse": "✅ International frameworks native (GRI, SFDR, SDG)",
+          "software": "✅ Manual compliance checklists",
+          "ai": "❌ Generic, hallucination risk"
+        },
+        {
+          "feature": "Data Collection",
+          "greenpulse": "✅ Voice, photo, doc AI extraction all-in-1",
+          "software": "❌ Manual entry or semi-automated",
+          "ai": "✅ If subscribed to separate platforms"
+        },
+        {
+          "feature": "Project Tracking",
+          "greenpulse": "✅ Auto-update + smart dashboard",
+          "software": "✅ Project management but manual updates",
+          "ai": "❌ No visibility"
+        },
+        {
+          "feature": "ERP/CRM Integration",
+          "greenpulse": "✅ One-click sync",
+          "software": "❌ Standalone silos",
+          "ai": "✅ Limited, developer-heavy"
         }
       ]
     },
