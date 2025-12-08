@@ -9,6 +9,12 @@ import { getMessages } from 'next-intl/server'
 import { Gugi, K2D } from 'next/font/google'
 import Script from 'next/script'
 import ClientLayout from './client-layout'
+import {
+  faqSchema,
+  organizationSchema,
+  softwareApplicationSchema,
+  websiteSchema,
+} from './schemas'
 
 const gugi = Gugi({ weight: '400', subsets: ['latin'], variable: '--font-gugi' })
 const k2d = K2D({
@@ -74,9 +80,29 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
       </head>
       <body className="font-k2d">
         <Script
-          id="json-ld"
+          id="json-ld-app"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <Script
+          id="json-ld-organization"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <Script
+          id="json-ld-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <Script
+          id="json-ld-software"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+        />
+        <Script
+          id="json-ld-faq"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
         <ErrorBoundary title="Something went wrong in GreenPulse">
           <Providers
