@@ -179,8 +179,11 @@ export function AuthProvider({
 
       if (mode === 'localStorage' && store.accessToken) {
         // localStorage mode: verify token from store
+        console.log('🔍 [AuthSDK] Verifying token from localStorage...')
         const isValid = await client.verifyToken(store.accessToken)
+        console.log(`🔍 [AuthSDK] Token validation result: ${isValid ? '✅ Valid' : '❌ Invalid'}`)
         if (!isValid) {
+          console.log('🔒 [AuthSDK] Token invalid, logging out')
           store.logout()
         }
       } else if (mode === 'httpOnly') {
