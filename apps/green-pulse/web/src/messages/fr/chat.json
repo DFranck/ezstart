@@ -1,23 +1,21 @@
 {
-  "chat": {
-    "sidebar": {
-      "myPlan": "Mon forfait :",
-      "myTools": "Mes outils :",
-      "settings": "Paramètres",
-      "newChat": "Nouvelle discussion",
-      "emptyState": "Démarrez une nouvelle conversation pour obtenir des informations de LIA",
-      "tools": {
-        "dashboards": "Tableaux de bord",
-        "uploadFiles": "Télécharger des fichiers",
-        "documents": "Documents",
-        "myProjects": "Mes projets",
-        "compliances": "Conformités"
-      }
-    },
-    "plans": {
-      "free": "Utilisation Gratuite",
-      "premium": "Forfait Premium",
-      "golden": "Forfait Golden"
+  "sidebar": {
+    "myPlan": "Mon forfait :",
+    "myTools": "Mes outils :",
+    "settings": "Paramètres",
+    "newChat": "Nouvelle discussion",
+    "emptyState": "Démarrez une nouvelle conversation pour obtenir des informations de LIA",
+    "tools": {
+      "dashboards": "Tableaux de bord",
+      "uploadFiles": "Télécharger des fichiers",
+      "documents": "Documents",
+      "myProjects": "Mes projets",
+      "compliances": "Conformités"
     }
+  },
+  "plans": {
+    "free": "Utilisation Gratuite",
+    "premium": "Forfait Premium",
+    "golden": "Forfait Golden"
   }
 }
