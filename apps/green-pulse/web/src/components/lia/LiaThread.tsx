@@ -186,15 +186,16 @@ export function LiaThread({
   // Navigation items
   const navItems = useMemo(
     () => [
-      {
-        href: '/dashboard',
-        label: tForms('navigation.dashboard') || 'Dashboard',
-        icon: 'lucide:LayoutDashboard' as const,
-        disabled: true,
-        disabledMessage: tForms('navigation.dashboardDisabled'),
-      },
       ...(rbac.hasAnyRole(['admin', 'superadmin'])
-        ? [{ href: '/admin', label: 'Admin', icon: 'lucide:Shield' as const, disabled: false }]
+        ? [
+            {
+              href: '/admin',
+              label: 'Admin',
+              icon: 'lucide:Shield' as const,
+              disabled: false,
+              disabledMessage: undefined,
+            },
+          ]
         : []),
     ],
     [rbac, tForms]
