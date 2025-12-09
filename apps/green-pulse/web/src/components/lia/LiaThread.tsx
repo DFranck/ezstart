@@ -39,9 +39,9 @@ import { useThreadContext } from './ThreadProvider'
 
 // Mock AI models for UI display (all requests still use the same AI backend)
 const MOCK_AI_MODELS = [
-  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', enabled: true },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'Google', enabled: true },
   { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', enabled: false },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic', enabled: false },
+  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', enabled: false },
   { id: 'llama-3-70b', name: 'Llama 3 70B (Hébergé)', provider: 'Local', enabled: false },
 ] as const
 
