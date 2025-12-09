@@ -221,16 +221,15 @@
           "expertise": ["ESG Strategy", "GRI/SFDR/CSRD Frameworks", "Impact Measurement"]
         },
         {
-          "name": "Franck Leclair",
+          "name": "Franck Dufournet",
           "role": "CTO & Co-Founder",
-          "bio": "15+ years building AI/ML systems at scale. Former Tech Lead at enterprise SaaS companies. Expert in NLP, conversational AI, and data extraction. Passionate about using technology to solve real-world problems—not just build features.",
+          "bio": "2+ years building AI/ML systems at scale. Former Tech Lead at enterprise SaaS companies. Expert in NLP, conversational AI, and data extraction. Passionate about using technology to solve real-world problems—not just build features.",
           "expertise": ["AI/ML Architecture", "NLP & Data Extraction", "Platform Scalability"]
         }
       ],
       "advisors": {
         "title": "Backed by Impact Leaders",
         "list": [
-          "ESG consultants from Big 4 firms (Deloitte, PwC) advising on compliance frameworks",
           "Impact investors managing $500M+ AUM in Southeast Asia providing market insights",
           "Green finance specialists from regional banks guiding product-market fit"
         ]
@@ -242,7 +241,7 @@
       "description": "",
       "values": [
         {
-          "icon": "🎯",
+          "icon": "",
           "title": "Optimize Due Diligence for Your Portfolio",
           "items": [
             "Multi-criteria ESG analysis (SDG, GRI, SFDR) with instant risk scoring",
@@ -251,7 +250,7 @@
           ]
         },
         {
-          "icon": "📊",
+          "icon": "",
           "title": "White-Label ESG Solutions",
           "items": [
             "Branded platform for your SME clients (e.g., \"Green [YourBank] powered by GreenPulse\")",
@@ -260,7 +259,7 @@
           ]
         },
         {
-          "icon": "🚀",
+          "icon": "",
           "title": "Project Incubation Support",
           "items": [
             "AI agent for deliverable formalization and ESG roadmap development",
@@ -291,7 +290,7 @@
         },
         {
           "question": "Is my data secure? Do you share it with third parties?",
-          "answer": "Your data is encrypted end-to-end and stored in SOC 2 Type II compliant infrastructure. We never share your data with third parties or use it to train AI models. All processing happens within your secure tenant, and you maintain full ownership of your sustainability data."
+          "answer": "**FREE PLAN:** Your conversations use third-party AI providers (OpenAI, Anthropic). Data is transmitted to their servers (US-based) for processing. These providers may use conversation data for model improvement unless opted-out. **PREMIUM & GOLDEN PLANS:** We offer locally-hosted AI models (Llama 3) deployed in Southeast Asia. Your data never leaves our infrastructure—ensuring full data sovereignty, zero third-party sharing, and compliance with local data residency requirements. All data is encrypted in transit (HTTPS) and at rest (AES-256)."
         },
         {
           "question": "Doesn't AI generate emissions? How do you manage this?",

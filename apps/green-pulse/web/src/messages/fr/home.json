@@ -291,7 +291,7 @@
         },
         {
           "question": "Mes données sont-elles sécurisées? Les partagez-vous avec des tiers?",
-          "answer": "Vos données sont chiffrées de bout en bout et stockées dans une infrastructure conforme SOC 2 Type II. Nous ne partageons jamais vos données avec des tiers ni ne les utilisons pour entraîner des modèles IA. Tout le traitement se fait au sein de votre locataire sécurisé, et vous conservez la pleine propriété de vos données de durabilité."
+          "answer": "**FORFAIT GRATUIT :** Vos conversations utilisent des fournisseurs d'IA tiers (OpenAI, Anthropic). Les données sont transmises à leurs serveurs (basés aux États-Unis) pour traitement. Ces fournisseurs peuvent utiliser les données de conversation pour l'amélioration des modèles sauf opt-out. **FORFAITS PREMIUM & GOLDEN :** Nous proposons des modèles d'IA hébergés localement (Llama 3) déployés en Asie du Sud-Est. Vos données ne quittent jamais notre infrastructure—garantissant une souveraineté totale des données, aucun partage avec des tiers, et conformité aux exigences locales de résidence des données. Toutes les données sont chiffrées en transit (HTTPS) et au repos (AES-256)."
         },
         {
           "question": "L'IA ne génère-t-elle pas des émissions? Comment gérez-vous cela?",
