@@ -21,21 +21,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zustand": "^4.5.5",
-    "@ezstart/ui": "workspace:*",
     "@ezstart/config": "workspace:*",
-    "zod": "^3.23.8"
+    "@ezstart/ui": "workspace:*",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
     "@types/node": "^20",
     "@types/react": "^19.1.12",
-    "@ezstart/typescript-config": "workspace:*",
-    "next": "^15.5.2",
+    "next": "^15.5.7",
     "react": "^19.1.1",
     "typescript": "^5.7.3"
   },
   "peerDependencies": {
-    "react": "^18",
-    "next": "^15"
+    "next": "^15",
+    "react": "^18"
   }
 }
