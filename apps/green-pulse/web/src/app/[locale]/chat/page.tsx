@@ -6,7 +6,7 @@ import { useConversations } from '@/hooks/useConversations'
 import { useProviders } from '@ezstart/ai-sdk/client'
 import { LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
 import { getApiUrl } from '@ezstart/config'
-import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
+import { InsufficientPermissions } from '@ezstart/rbac'
 import {
   Button,
   Card,
@@ -353,12 +353,12 @@ export default function LiaPage() {
         </Section>
       }
     >
-      <RequireRole
+      {/* <RequireRole
         roles={['client', 'beta-tester', 'manager', 'admin', 'superadmin']}
         fallbackComponent={<BetaAccessRequest />}
-      >
-        <LiaPageContent />
-      </RequireRole>
+      > */}
+      <LiaPageContent />
+      {/* </RequireRole> */}
     </RequireAuth>
   )
 }
