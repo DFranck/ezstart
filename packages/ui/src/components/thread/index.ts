@@ -1,5 +1,6 @@
 export { Thread } from './Thread';
 export { ThreadComposer } from './ThreadComposer';
+export { ThreadHeader } from './ThreadHeader';
 export { ThreadLayout } from './ThreadLayout';
 export { ThreadMessage } from './ThreadMessage';
 export { ThreadMessages } from './ThreadMessages';
