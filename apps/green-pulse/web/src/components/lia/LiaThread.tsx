@@ -200,6 +200,43 @@ export function LiaThread({
     [rbac, tForms]
   )
 
+  // Tools navigation items
+  const toolsItems = useMemo(
+    () => [
+      {
+        href: '/dashboard',
+        label: 'Dashboards',
+        icon: 'lucide:LayoutDashboard' as const,
+        disabled: true,
+      },
+      {
+        href: '/upload',
+        label: 'Upload files',
+        icon: 'lucide:Upload' as const,
+        disabled: true,
+      },
+      {
+        href: '/documents',
+        label: 'Documents',
+        icon: 'lucide:FileText' as const,
+        disabled: true,
+      },
+      {
+        href: '/projects',
+        label: 'My projects',
+        icon: 'lucide:FolderKanban' as const,
+        disabled: true,
+      },
+      {
+        href: '/compliances',
+        label: 'Compliances',
+        icon: 'lucide:Shield' as const,
+        disabled: true,
+      },
+    ],
+    []
+  )
+
   const beforeConv = (
     <nav className="space-y-1">
       {navItems.map(item => {
@@ -240,6 +277,72 @@ export function LiaThread({
     </nav>
   )
 
+  // Footer with My Plan, My Tools, and User Info
+  const footer = (
+    <Div className="space-y-3">
+      {/* My plan section */}
+      <Div className="space-y-1">
+        <Div className="flex items-center gap-2 px-2 py-1">
+          <Icon name="lucide:Briefcase" size={16} className="text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">My plan:</span>
+        </Div>
+        <Div className="px-2">
+          <span className="text-sm font-semibold">Business</span>
+        </Div>
+      </Div>
+
+      {/* My tools section */}
+      <Div className="space-y-1">
+        <Div className="flex items-center gap-2 px-2 py-1">
+          <Icon name="lucide:Settings" size={16} className="text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">My tools:</span>
+        </Div>
+        <nav className="space-y-0.5">
+          {toolsItems.map(item => (
+            <Button
+              key={item.href}
+              variant="ghost"
+              className="w-full justify-start opacity-50 cursor-not-allowed h-8 px-2"
+              size="sm"
+              disabled
+            >
+              <Icon name={item.icon} className="mr-2" size={14} />
+              <span className="text-xs">{item.label}</span>
+            </Button>
+          ))}
+        </nav>
+      </Div>
+
+      {/* User info section */}
+      <Div className="border-t pt-3 space-y-2">
+        <Button variant="ghost" className="w-full justify-start h-auto py-2 px-2">
+          <Div className="flex items-center gap-2 w-full">
+            <Div className="w-8 h-8 rounded-full bg-gp-primary/10 flex items-center justify-center flex-shrink-0">
+              <Icon name="lucide:User" size={16} className="text-gp-primary" />
+            </Div>
+            <Div className="flex-1 min-w-0 text-left">
+              <Div className="text-sm font-medium truncate">
+                {user?.firstName || user?.email || 'User'}
+              </Div>
+              {user?.email && (
+                <Div className="text-xs text-muted-foreground truncate">{user.email}</Div>
+              )}
+            </Div>
+          </Div>
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start opacity-50 cursor-not-allowed h-8 px-2"
+          size="sm"
+          disabled
+        >
+          <Icon name="lucide:Settings" className="mr-2" size={14} />
+          <span className="text-xs">Settings</span>
+        </Button>
+      </Div>
+    </Div>
+  )
+
   return (
     <ThreadLayout
       colorScheme="custom"
@@ -256,7 +359,7 @@ export function LiaThread({
           <ThreadSidebar
             header={header}
             afterConversations={beforeConv}
-            // beforeConversations={beforeConv}
+            footer={footer}
             conversations={conversations}
             activeConversationId={activeConversationId || undefined}
             onConversationSelect={handleConversationSelect}
