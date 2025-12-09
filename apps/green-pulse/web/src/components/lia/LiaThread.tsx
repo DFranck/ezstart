@@ -401,20 +401,20 @@ export function LiaThread({
               </SelectTrigger>
               <SelectContent>
                 {providers.map(provider => {
-                  const isActive = provider.id === selectedProvider
-                  const isDisabled = !isActive
+                  // Show all providers as selectable, but mark non-enabled ones as "Coming soon"
+                  const isComingSoon = !provider.enabled
                   const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
 
                   return (
                     <SelectItem
                       key={provider.id}
                       value={provider.id}
-                      disabled={isDisabled}
+                      disabled={isComingSoon}
                     >
                       <Div className="flex flex-col">
                         <span className="font-medium">
                           {provider.name}
-                          {isDisabled && ` (${comingSoonText})`}
+                          {isComingSoon && ` (${comingSoonText})`}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {provider.type}
