@@ -288,17 +288,26 @@ export function LiaThread({
     </nav>
   )
 
-  // Footer with My Plan and Premium Features Upgrade
+  // Footer with My Plan, My Tools, and User Info
   const footer = (
     <Div className="space-y-3">
-      {/* Plan name - prominent display */}
-      <Div className="px-2 py-1">
-        <span className="text-sm font-semibold">{tChat('plans.free')}</span>
+      {/* My plan section */}
+      <Div className="space-y-1">
+        <Div className="flex items-center gap-2 px-2 py-1">
+          <Icon name="lucide:Briefcase" size={16} className="text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">
+            {tChat('sidebar.myPlan')}
+          </span>
+        </Div>
+        <Div className="px-2">
+          <span className="text-sm font-semibold">{tChat('plans.free')}</span>
+        </Div>
       </Div>
 
-      {/* Upgrade prompt section */}
+      {/* My tools section */}
       <Div className="space-y-1">
-        <Div className="px-2 py-1">
+        <Div className="flex items-center gap-2 px-2 py-1">
+          <Icon name="lucide:Settings" size={16} className="text-muted-foreground" />
           <span className="text-xs font-medium text-muted-foreground">
             {tChat('sidebar.upgradePrompt')}
           </span>
