@@ -51,6 +51,7 @@ export function LiaThread({
   const rbac = useRBAC(user, 'green-pulse')
   const pathname = usePathname()
   const tForms = useTranslations('forms')
+  const tChat = useTranslations('chat')
 
   const {
     messages,
@@ -206,36 +207,36 @@ export function LiaThread({
     () => [
       {
         href: '/dashboard',
-        label: 'Dashboards',
+        label: tChat('sidebar.tools.dashboards'),
         icon: 'lucide:LayoutDashboard' as const,
         disabled: true,
       },
       {
         href: '/upload',
-        label: 'Upload files',
+        label: tChat('sidebar.tools.uploadFiles'),
         icon: 'lucide:Upload' as const,
         disabled: true,
       },
       {
         href: '/documents',
-        label: 'Documents',
+        label: tChat('sidebar.tools.documents'),
         icon: 'lucide:FileText' as const,
         disabled: true,
       },
       {
         href: '/projects',
-        label: 'My projects',
+        label: tChat('sidebar.tools.myProjects'),
         icon: 'lucide:FolderKanban' as const,
         disabled: true,
       },
       {
         href: '/compliances',
-        label: 'Compliances',
+        label: tChat('sidebar.tools.compliances'),
         icon: 'lucide:Shield' as const,
         disabled: true,
       },
     ],
-    []
+    [tChat]
   )
 
   const beforeConv = (
@@ -285,10 +286,12 @@ export function LiaThread({
       <Div className="space-y-1">
         <Div className="flex items-center gap-2 px-2 py-1">
           <Icon name="lucide:Briefcase" size={16} className="text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">My plan:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {tChat('sidebar.myPlan')}
+          </span>
         </Div>
         <Div className="px-2">
-          <span className="text-sm font-semibold">Business</span>
+          <span className="text-sm font-semibold">{tChat('plans.free')}</span>
         </Div>
       </Div>
 
@@ -296,7 +299,9 @@ export function LiaThread({
       <Div className="space-y-1">
         <Div className="flex items-center gap-2 px-2 py-1">
           <Icon name="lucide:Settings" size={16} className="text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">My tools:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {tChat('sidebar.myTools')}
+          </span>
         </Div>
         <nav className="space-y-0.5">
           {toolsItems.map(item => (
@@ -338,7 +343,7 @@ export function LiaThread({
           disabled
         >
           <Icon name="lucide:Settings" className="mr-2" size={14} />
-          <span className="text-xs">Settings</span>
+          <span className="text-xs">{tChat('sidebar.settings')}</span>
         </Button>
       </Div>
     </Div>
@@ -367,8 +372,8 @@ export function LiaThread({
             onNewConversation={handleNewConversation}
             onRename={handleRename}
             onDelete={handleDelete}
-            newConversationLabel="New Chat"
-            emptyState="Start a new conversation to get insights from LIA"
+            newConversationLabel={tChat('sidebar.newChat')}
+            emptyState={tChat('sidebar.emptyState')}
           />
         ) : undefined
       }

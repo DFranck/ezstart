@@ -1,0 +1,23 @@
+{
+  "chat": {
+    "sidebar": {
+      "myPlan": "My plan:",
+      "myTools": "My tools:",
+      "settings": "Settings",
+      "newChat": "New Chat",
+      "emptyState": "Start a new conversation to get insights from LIA",
+      "tools": {
+        "dashboards": "Dashboards",
+        "uploadFiles": "Upload files",
+        "documents": "Documents",
+        "myProjects": "My projects",
+        "compliances": "Compliances"
+      }
+    },
+    "plans": {
+      "free": "Free Use",
+      "premium": "Premium Package",
+      "golden": "Golden Package"
+    }
+  }
+}
