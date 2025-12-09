@@ -30,20 +30,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useThreadContext } from './ThreadProvider'
-
-// Mock AI models list
-const AI_MODELS = [
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic' },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', provider: 'Anthropic' },
-  { id: 'local-llama', name: 'Llama 3 (Hébergé - Confidentialité)', provider: 'Local' },
-] as const
 
 type LiaThreadProps = {
   activeConversationId: string | null
@@ -66,11 +58,9 @@ export function LiaThread({
   const { isAuthenticated, user } = useAuthStore()
   const rbac = useRBAC(user, 'green-pulse')
   const pathname = usePathname()
+  const locale = useLocale()
   const tForms = useTranslations('forms')
   const tChat = useTranslations('chat')
-
-  // AI Model selection state
-  const [selectedModel, setSelectedModel] = useState<string>(AI_MODELS[0].id)
 
   const {
     messages,
@@ -400,21 +390,43 @@ export function LiaThread({
       {/* Thread Header with AI Model selector and Theme switcher */}
       <ThreadHeader
         left={
-          <Select value={selectedModel} onValueChange={setSelectedModel}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Sélectionner un modèle" />
-            </SelectTrigger>
-            <SelectContent>
-              {AI_MODELS.map(model => (
-                <SelectItem key={model.id} value={model.id}>
-                  <Div className="flex flex-col">
-                    <span className="font-medium">{model.name}</span>
-                    <span className="text-xs text-muted-foreground">{model.provider}</span>
-                  </Div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          providers.length > 0 && selectedProvider && onProviderChange ? (
+            <Select value={selectedProvider} onValueChange={onProviderChange}>
+              <SelectTrigger className="w-[280px]">
+                <SelectValue
+                  placeholder={
+                    locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {providers.map(provider => {
+                  const isActive = provider.id === selectedProvider
+                  const isDisabled = !isActive
+                  const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
+
+                  return (
+                    <SelectItem
+                      key={provider.id}
+                      value={provider.id}
+                      disabled={isDisabled}
+                    >
+                      <Div className="flex flex-col">
+                        <span className="font-medium">
+                          {provider.name}
+                          {isDisabled && ` (${comingSoonText})`}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {provider.type}
+                          {provider.model && ` - ${provider.model}`}
+                        </span>
+                      </Div>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+          ) : null
         }
         right={
           <>
