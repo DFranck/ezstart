@@ -34,8 +34,16 @@ import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useThreadContext } from './ThreadProvider'
+
+// Mock AI models for UI display (all requests still use the same AI backend)
+const MOCK_AI_MODELS = [
+  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', enabled: true },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', enabled: false },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic', enabled: false },
+  { id: 'llama-3-70b', name: 'Llama 3 70B (Hébergé)', provider: 'Local', enabled: false },
+] as const
 
 type LiaThreadProps = {
   activeConversationId: string | null
@@ -61,6 +69,9 @@ export function LiaThread({
   const locale = useLocale()
   const tForms = useTranslations('forms')
   const tChat = useTranslations('chat')
+
+  // Mock AI model selection (UI only - all requests use same backend)
+  const [selectedMockModel, setSelectedMockModel] = useState<string>(MOCK_AI_MODELS[0].id)
 
   const {
     messages,
@@ -390,11 +401,7 @@ export function LiaThread({
       {/* Thread Header with AI Model selector and Theme switcher */}
       <ThreadHeader
         left={
-          <Select
-            value={selectedProvider || undefined}
-            onValueChange={onProviderChange}
-            disabled={providers.length === 0 || !onProviderChange}
-          >
+          <Select value={selectedMockModel} onValueChange={setSelectedMockModel}>
             <SelectTrigger className="w-[280px]">
               <SelectValue
                 placeholder={
@@ -403,36 +410,22 @@ export function LiaThread({
               />
             </SelectTrigger>
             <SelectContent>
-              {providers.length > 0 ? (
-                providers.map(provider => {
-                  // Show all providers as selectable, but mark non-enabled ones as "Coming soon"
-                  const isComingSoon = !provider.enabled
-                  const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
+              {MOCK_AI_MODELS.map(model => {
+                const isComingSoon = !model.enabled
+                const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
 
-                  return (
-                    <SelectItem
-                      key={provider.id}
-                      value={provider.id}
-                      disabled={isComingSoon}
-                    >
-                      <Div className="flex flex-col">
-                        <span className="font-medium">
-                          {provider.name}
-                          {isComingSoon && ` (${comingSoonText})`}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {provider.type}
-                          {provider.model && ` - ${provider.model}`}
-                        </span>
-                      </Div>
-                    </SelectItem>
-                  )
-                })
-              ) : (
-                <SelectItem value="loading" disabled>
-                  {locale === 'fr' ? 'Chargement...' : 'Loading...'}
-                </SelectItem>
-              )}
+                return (
+                  <SelectItem key={model.id} value={model.id} disabled={isComingSoon}>
+                    <Div className="flex flex-col">
+                      <span className="font-medium">
+                        {model.name}
+                        {isComingSoon && ` (${comingSoonText})`}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{model.provider}</span>
+                    </Div>
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         }
