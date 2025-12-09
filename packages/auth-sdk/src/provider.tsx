@@ -1,5 +1,5 @@
 'use client'
-import { createContext, ReactNode, useContext, useEffect } from 'react'
+import { createContext, ReactNode, useContext, useEffect, useMemo } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
 import { useAuthStore, type AuthMode } from './store.js'
 import { getCurrentEnvironment, isEzstartDomain } from '@ezstart/config'
@@ -122,8 +122,8 @@ export function AuthProvider({
     authMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
   }
 
-  // Create client lazily to avoid SSR issues
-  const getClient = () => {
+  // Create client lazily to avoid SSR issues (memoized to prevent infinite loops)
+  const client = useMemo(() => {
     const redirectUri =
       typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'
 
@@ -131,9 +131,7 @@ export function AuthProvider({
       appName,
       redirectUri,
     })
-  }
-
-  const client = getClient()
+  }, [appName])
 
   // Auto-detect and set mode on mount
   useEffect(() => {
