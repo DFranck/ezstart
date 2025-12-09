@@ -21,7 +21,6 @@ import {
   SplitSection,
   SplitSectionItem,
   Strong,
-  TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -56,9 +55,7 @@ export default function HomePage(): any {
           <H2 size={'h3'}>{t('hero.subtitle')}</H2>
 
           {/* Tagline / Value Proposition */}
-          <P className="text-lg text-center max-w-3xl">
-            {t('hero.typewriterText')}
-          </P>
+          <P className="text-lg text-center max-w-3xl">{t('hero.typewriterText')}</P>
 
           {/* Feature tags */}
           <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
@@ -88,15 +85,8 @@ export default function HomePage(): any {
               {t('hero.getStarted')}
             </Link>
           </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="text-lg px-8 py-6"
-          >
-            <Link href="#partnership">
-              {t('hero.ctaSecondary')}
-            </Link>
+          <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6">
+            <Link href="#partnership">{t('hero.ctaSecondary')}</Link>
           </Button>
         </Div>
       </Section>
@@ -145,6 +135,9 @@ export default function HomePage(): any {
           </Div>
         </SplitSectionItem>
       </SplitSection>
+      <H2 size="h3" className="text-center my-12">
+        Southeast Asia's Climate Crisis Challenges
+      </H2>
       {/* Light mode version */}
       <Image
         src={'/images/pierced_seal_light.svg'}
@@ -294,7 +287,9 @@ export default function HomePage(): any {
                     {t('competitive.headers.feature')}
                   </th>
                   <th className="p-4 text-left border-b-2 border-gp-primary bg-gp-primary/10">
-                    <Strong className="text-gp-primary">{t('competitive.headers.greenpulse')}</Strong>
+                    <Strong className="text-gp-primary">
+                      {t('competitive.headers.greenpulse')}
+                    </Strong>
                   </th>
                   <th className="p-4 text-left border-b-2 border-border">
                     {t('competitive.headers.software')}
@@ -332,11 +327,7 @@ export default function HomePage(): any {
           {/* CTA */}
           <Div className="text-center">
             <P className="text-lg mb-6">{t('competitive.ctaSubtitle')}</P>
-            <Button
-              asChild
-              size="lg"
-              className="bg-gp-primary hover:bg-gp-primary/80"
-            >
+            <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
               <Link href="/chat" target="_blank" rel="noopener noreferrer">
                 {t('competitive.cta')}
               </Link>
@@ -433,9 +424,7 @@ export default function HomePage(): any {
                 <CardContent className="space-y-4">
                   <P className="text-sm leading-relaxed">{member.bio}</P>
                   <Div>
-                    <Strong className="text-xs uppercase text-muted-foreground">
-                      Expertise:
-                    </Strong>
+                    <Strong className="text-xs uppercase text-muted-foreground">Expertise:</Strong>
                     <Div className="flex flex-wrap gap-2 mt-2">
                       {member.expertise.map((skill, skillIndex) => (
                         <Span
@@ -460,7 +449,10 @@ export default function HomePage(): any {
             <ul className="space-y-3">
               {(t.raw('team.advisors.list') as string[]).map((advisor, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <Icon name="lucide:CheckCircle" className="w-5 h-5 text-gp-primary mt-1 flex-shrink-0" />
+                  <Icon
+                    name="lucide:CheckCircle"
+                    className="w-5 h-5 text-gp-primary mt-1 flex-shrink-0"
+                  />
                   <P className="text-sm text-muted-foreground">{advisor}</P>
                 </li>
               ))}
@@ -506,7 +498,7 @@ export default function HomePage(): any {
 
           <Div className="text-center space-y-4">
             <Button asChild size="lg" className="bg-gp-primary hover:bg-gp-primary/80">
-              <a href={`mailto:${t('partnership.ctaEmail')}`}>{t('partnership.cta')}</a>
+              <a href={`mailto:aseradni@nexora-venture.com`}>{t('partnership.cta')}</a>
             </Button>
             <P className="text-sm text-muted-foreground italic">{t('partnership.note')}</P>
           </Div>
