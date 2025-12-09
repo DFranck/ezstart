@@ -390,17 +390,21 @@ export function LiaThread({
       {/* Thread Header with AI Model selector and Theme switcher */}
       <ThreadHeader
         left={
-          providers.length > 0 && selectedProvider && onProviderChange ? (
-            <Select value={selectedProvider} onValueChange={onProviderChange}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue
-                  placeholder={
-                    locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {providers.map(provider => {
+          <Select
+            value={selectedProvider || undefined}
+            onValueChange={onProviderChange}
+            disabled={providers.length === 0 || !onProviderChange}
+          >
+            <SelectTrigger className="w-[280px]">
+              <SelectValue
+                placeholder={
+                  locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {providers.length > 0 ? (
+                providers.map(provider => {
                   // Show all providers as selectable, but mark non-enabled ones as "Coming soon"
                   const isComingSoon = !provider.enabled
                   const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
@@ -423,10 +427,14 @@ export function LiaThread({
                       </Div>
                     </SelectItem>
                   )
-                })}
-              </SelectContent>
-            </Select>
-          ) : null
+                })
+              ) : (
+                <SelectItem value="loading" disabled>
+                  {locale === 'fr' ? 'Chargement...' : 'Loading...'}
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         }
         right={
           <>
