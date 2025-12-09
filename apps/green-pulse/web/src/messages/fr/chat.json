@@ -2,6 +2,7 @@
   "sidebar": {
     "myPlan": "Mon forfait :",
     "myTools": "Mes outils :",
+    "upgradePrompt": "Passer à Premium pour accéder aux fonctionnalités avancées :",
     "settings": "Paramètres",
     "newChat": "Nouvelle discussion",
     "emptyState": "Démarrez une nouvelle conversation pour obtenir des informations de LIA",
@@ -14,7 +15,7 @@
     }
   },
   "plans": {
-    "free": "Utilisation Gratuite",
+    "free": "Self-Awareness (Forfait gratuit)",
     "premium": "Forfait Premium",
     "golden": "Forfait Golden"
   }
