@@ -1,10 +1,12 @@
 'use client'
 
+import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { greenPulseThreadTheme } from '@/config/thread-theme'
 import { useConversations } from '@/hooks/useConversations'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
 import { useAuthStore } from '@ezstart/auth-sdk'
+import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
 import {
   Button,
@@ -28,7 +30,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@ezstart/ui/components'
-import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -415,7 +416,12 @@ export function LiaThread({
             </SelectContent>
           </Select>
         }
-        right={<ThemeSwitcher />}
+        right={
+          <>
+            <LocaleSwitcher />
+            <ThemeSwitcher />
+          </>
+        }
       />
 
       <Thread messages={messages} streamingText={streamingText}>
