@@ -75,7 +75,7 @@ export default function HomePage(): any {
         </Div>
 
         {/* CTA Buttons */}
-        <Div layout={'row'} className="gap-4">
+        <Div layout={'grid'} className="gap-4">
           <Button
             asChild
             size="lg"
