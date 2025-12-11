@@ -211,30 +211,31 @@
         }
       ]
     },
-    "team": {
-      "title": "Built by Experts Who Lived the ESG Struggle",
-      "description": "GreenPulse.AI is built by people who've spent years helping businesses navigate ESG compliance—and experienced firsthand how inaccessible it is for SMEs.",
-      "members": [
+    "credibility": {
+      "title": "Trusted by Industry Leaders & Backed by Expertise",
+      "cards": [
         {
-          "name": "Amber Seradni",
-          "role": "CEO & Co-Founder",
-          "bio": "12+ years in sustainability strategy and ESG consulting. Former VP Sustainability at international firms, certified GHG Protocol practitioner. Built ESG programs for Fortune 500 companies and witnessed how $10K+ consultant fees locked out 98% of businesses that needed help most. Founded GreenPulse to democratize access.",
-          "expertise": ["ESG Strategy", "GRI/SFDR/CSRD Frameworks", "Impact Measurement"]
+          "icon": "🎓",
+          "title": "Academic Research Partnership",
+          "description": "Collaborating with a leading Southeast Asian university research institute for market intelligence, regulatory framework analysis, and ESG best practices validation."
         },
         {
-          "name": "Franck Dufournet",
-          "role": "CTO & Co-Founder",
-          "bio": "2+ years building AI/ML systems at scale. Former Tech Lead at enterprise SaaS companies. Expert in NLP, conversational AI, and data extraction. Passionate about using technology to solve real-world problems—not just build features.",
-          "expertise": ["AI/ML Architecture", "NLP & Data Extraction", "Platform Scalability"]
+          "icon": "💼",
+          "title": "Impact Investor Network",
+          "description": "Supported by impact investors managing $500M+ AUM in Southeast Asia, providing strategic guidance on green finance deployment and portfolio ESG requirements."
+        },
+        {
+          "icon": "🏦",
+          "title": "Regional Banking Insights",
+          "description": "Working with green finance specialists from leading Southeast Asian banks to ensure our platform meets real-world lending requirements and regulatory standards."
+        },
+        {
+          "icon": "⚙️",
+          "title": "Enterprise-Grade ESG Technology",
+          "description": "Powered by proven ESG SaaS solutions and advanced AI frameworks. We integrate best-in-class compliance tools directly into an accessible, conversational interface—bringing $50K+ enterprise software to every SME."
         }
       ],
-      "advisors": {
-        "title": "Backed by Impact Leaders",
-        "list": [
-          "Impact investors managing $500M+ AUM in Southeast Asia providing market insights",
-          "Green finance specialists from regional banks guiding product-market fit"
-        ]
-      }
+      "teamNote": "Our founding team combines: 12+ years in sustainability strategy and ESG consulting, deep expertise in AI/ML engineering, and firsthand experience with the accessibility gap facing SMEs in Southeast Asia."
     },
     "partnership": {
       "title": "Partnership Opportunities",

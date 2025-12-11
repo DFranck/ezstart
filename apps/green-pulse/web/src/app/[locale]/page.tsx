@@ -399,69 +399,46 @@ export default function HomePage(): any {
         </Div>
       </Section>
 
-      {/* Team Section */}
+      {/* Credibility Section */}
       <Section size={'xl'}>
         <Div className="container mx-auto">
-          <H2 size="h3" className="text-center mb-6">
-            {t('team.title')}
+          <H2 size="h3" className="text-center mb-12">
+            {t('credibility.title')}
           </H2>
-          <P className="text-lg text-muted-foreground mb-12 text-center max-w-3xl mx-auto">
-            {t('team.description')}
-          </P>
 
-          {/* Team Members */}
-          <Div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+          {/* Credibility Cards */}
+          <Div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-8">
             {(
-              t.raw('team.members') as Array<{
-                name: string
-                role: string
-                bio: string
-                expertise: string[]
+              t.raw('credibility.cards') as Array<{
+                icon: string
+                title: string
+                description: string
               }>
-            ).map((member, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+            ).map((card, index) => (
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
                 <CardHeader>
-                  <H3 size="h5" className="text-gp-primary">
-                    {member.name}
+                  <Div className="text-4xl mb-3">{card.icon}</Div>
+                  <H3 size="h6" className="text-gp-primary">
+                    {card.title}
                   </H3>
-                  <P className="text-sm text-muted-foreground">{member.role}</P>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <P className="text-sm leading-relaxed">{member.bio}</P>
-                  <Div>
-                    <Strong className="text-xs uppercase text-muted-foreground">Expertise:</Strong>
-                    <Div className="flex flex-wrap gap-2 mt-2">
-                      {member.expertise.map((skill, skillIndex) => (
-                        <Span
-                          key={skillIndex}
-                          className="bg-gp-primary/10 text-gp-primary px-2 py-1 rounded text-xs"
-                        >
-                          {skill}
-                        </Span>
-                      ))}
-                    </Div>
-                  </Div>
+                <CardContent>
+                  <P className="text-sm text-muted-foreground leading-relaxed">
+                    {card.description}
+                  </P>
                 </CardContent>
               </Card>
             ))}
           </Div>
 
-          {/* Advisors */}
-          <Div className="max-w-4xl mx-auto">
-            <H3 size="h5" className="text-center mb-6 text-gp-primary">
-              {t('team.advisors.title')}
-            </H3>
-            <ul className="space-y-3">
-              {(t.raw('team.advisors.list') as string[]).map((advisor, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Icon
-                    name="lucide:CheckCircle"
-                    className="w-5 h-5 text-gp-primary mt-1 flex-shrink-0"
-                  />
-                  <P className="text-sm text-muted-foreground">{advisor}</P>
-                </li>
-              ))}
-            </ul>
+          {/* Team Note */}
+          <Div className="max-w-4xl mx-auto mt-12 p-6 bg-muted/30 border-l-4 border-gp-primary rounded-lg">
+            <P className="text-sm leading-relaxed">
+              <Strong>{t('credibility.teamNote')}</Strong>
+            </P>
           </Div>
         </Div>
       </Section>

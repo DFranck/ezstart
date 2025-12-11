@@ -211,31 +211,31 @@
         }
       ]
     },
-    "team": {
-      "title": "Créé par des Experts qui ont Vécu les Défis ESG",
-      "description": "GreenPulse.AI est construit par des personnes qui ont passé des années à aider les entreprises à naviguer la conformité ESG—et ont constaté de première main à quel point c'est inaccessible pour les PME.",
-      "members": [
+    "credibility": {
+      "title": "Reconnu par les Leaders de l'Industrie et Soutenu par l'Expertise",
+      "cards": [
         {
-          "name": "Amber Seradni",
-          "role": "CEO & Co-Fondatrice",
-          "bio": "12+ ans en stratégie de durabilité et conseil ESG. Ancienne VP Durabilité dans des entreprises internationales, praticienne certifiée du protocole GES. A construit des programmes ESG pour des entreprises Fortune 500 et a constaté comment les honoraires de consultants à 10K$+ excluaient 98% des entreprises qui en avaient le plus besoin. A fondé GreenPulse pour démocratiser l'accès.",
-          "expertise": ["Stratégie ESG", "Cadres GRI/SFDR/CSRD", "Mesure d'Impact"]
+          "icon": "🎓",
+          "title": "Partenariat de Recherche Académique",
+          "description": "Collaboration avec un institut de recherche universitaire leader en Asie du Sud-Est pour l'intelligence de marché, l'analyse des cadres réglementaires et la validation des meilleures pratiques ESG."
         },
         {
-          "name": "Franck Leclair",
-          "role": "CTO & Co-Fondateur",
-          "bio": "15+ ans à construire des systèmes IA/ML à grande échelle. Ancien Tech Lead dans des entreprises SaaS d'entreprise. Expert en NLP, IA conversationnelle et extraction de données. Passionné par l'utilisation de la technologie pour résoudre des problèmes réels—pas seulement construire des fonctionnalités.",
-          "expertise": ["Architecture IA/ML", "NLP & Extraction de Données", "Scalabilité de Plateforme"]
+          "icon": "💼",
+          "title": "Réseau d'Investisseurs d'Impact",
+          "description": "Soutenu par des investisseurs d'impact gérant plus de 500M$ d'actifs en Asie du Sud-Est, fournissant des conseils stratégiques sur le déploiement de la finance verte et les exigences ESG des portefeuilles."
+        },
+        {
+          "icon": "🏦",
+          "title": "Perspectives Bancaires Régionales",
+          "description": "Collaboration avec des spécialistes de la finance verte de grandes banques d'Asie du Sud-Est pour garantir que notre plateforme répond aux exigences réelles de prêt et aux normes réglementaires."
+        },
+        {
+          "icon": "⚙️",
+          "title": "Technologie ESG de Niveau Entreprise",
+          "description": "Propulsé par des solutions SaaS ESG éprouvées et des frameworks IA avancés. Nous intégrons les meilleurs outils de conformité directement dans une interface conversationnelle accessible—apportant des logiciels d'entreprise à 50K$+ à chaque PME."
         }
       ],
-      "advisors": {
-        "title": "Soutenus par des Leaders d'Impact",
-        "list": [
-          "Consultants ESG des Big 4 (Deloitte, PwC) conseillant sur les cadres de conformité",
-          "Investisseurs d'impact gérant 500M$+ AUM en Asie du Sud-Est fournissant des insights marché",
-          "Spécialistes de la finance verte de banques régionales guidant l'adéquation produit-marché"
-        ]
-      }
+      "teamNote": "Notre équipe fondatrice combine : 12+ ans en stratégie de durabilité et conseil ESG, une expertise approfondie en ingénierie IA/ML, et une expérience directe du fossé d'accessibilité auquel sont confrontées les PME en Asie du Sud-Est."
     },
     "partnership": {
       "title": "Opportunités de Partenariat",
