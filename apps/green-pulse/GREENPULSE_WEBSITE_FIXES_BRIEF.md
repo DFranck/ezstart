@@ -864,7 +864,7 @@ Not redundant with Partnership section because:
 />
 <img
   src="/images/Partnership_Desktop.png"
-  alt="B2B2B partnership opportunities with GreenPulse for banks and impact funds"
+  alt="partnership opportunities with GreenPulse for banks and impact funds"
 />
 ```
 

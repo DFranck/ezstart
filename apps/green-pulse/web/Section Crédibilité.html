@@ -1,0 +1,251 @@
+<section id="credibility" class="credibility-section">
+  <h2>Trusted by Industry Leaders & Backed by Expertise</h2>
+  
+  <div class="credibility-grid">
+    
+    <!-- Academic Partnership -->
+    <div class="credibility-card">
+      <div class="credibility-icon">🎓</div>
+      <h3>Academic Research Partnership</h3>
+      <p>Collaborating with a leading Southeast Asian university research institute for market intelligence, regulatory framework analysis, and ESG best practices validation.</p>
+    </div>
+    
+    <!-- Industry Backing -->
+    <div class="credibility-card">
+      <div class="credibility-icon">💼</div>
+      <h3>Impact Investor Network</h3>
+      <p>Supported by impact investors managing $500M+ AUM in Southeast Asia, providing strategic guidance on green finance deployment and portfolio ESG requirements.</p>
+    </div>
+    
+    <!-- Banking Partnership -->
+    <div class="credibility-card">
+      <div class="credibility-icon">🏦</div>
+      <h3>Regional Banking Insights</h3>
+      <p>Working with green finance specialists from leading Southeast Asian banks to ensure our platform meets real-world lending requirements and regulatory standards.</p>
+    </div>
+    
+    <!-- Tech Integration -->
+    <div class="credibility-card">
+      <div class="credibility-icon">⚙️</div>
+      <h3>Enterprise-Grade ESG Technology</h3>
+      <p>Powered by proven ESG SaaS solutions and advanced AI frameworks. We integrate best-in-class compliance tools directly into an accessible, conversational interface—bringing $50K+ enterprise software to every SME.</p>
+    </div>
+    
+  </div>
+  
+  <div class="team-brief">
+    <p><strong>Our founding team combines:</strong> 12+ years in sustainability strategy and ESG consulting, deep expertise in AI/ML engineering, and firsthand experience with the accessibility gap facing SMEs in Southeast Asia.</p>
+  </div>
+  
+</section>
+
+
+
+
+
+
+/* ============================================
+ CSS
+   ============================================ */
+
+:root {
+  --primary-green: #4caf50;
+  --dark-green: #1b5e20;
+  --light-green-bg: #e8f5e9;
+  --lighter-green-bg: #f1f8e9;
+
+  /* Couleurs chaudes du site */
+  --warm-accent: oklch(0.666 0.179 58.318); /* Amber chaud */
+  --warm-text: oklch(0.6 0.18 85); /* Brun chaleureux */
+  --warm-highlight: rgba(230, 126, 34, 0.1); /* Orange subtil */
+}
+
+.advantage-section {
+  padding: 4rem 2rem;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+}
+
+.advantage-section h2 {
+  text-align: center;
+  color: var(--dark-green);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  /* Ajout accent chaud subtil */
+  text-shadow: 0 2px 4px rgba(230, 126, 34, 0.08);
+}
+
+.advantage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.advantage-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ajout d'un subtle gradient chaud en background */
+.advantage-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-green) 0%,
+    var(--warm-accent) 50%,
+    var(--primary-green) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.advantage-card:hover::before {
+  opacity: 1;
+}
+
+.advantage-card:hover {
+  border-color: var(--warm-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 24px rgba(230, 126, 34, 0.15);
+  background: linear-gradient(135deg, #ffffff 0%, var(--warm-highlight) 100%);
+}
+
+/* Highlight card - Enterprise Tools */
+.advantage-card.highlight {
+  background: linear-gradient(
+    135deg,
+    var(--light-green-bg) 0%,
+    var(--lighter-green-bg) 50%,
+    #fff8e1 100%
+  ); /* Ajout teinte chaude */
+  border: 2px solid var(--warm-accent);
+  box-shadow: 0 4px 16px rgba(230, 126, 34, 0.12);
+  position: relative;
+}
+
+/* Badge "Featured" pour highlight card */
+.advantage-card.highlight::after {
+  content: 'Key Differentiator';
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--warm-accent);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+}
+
+.advantage-card h3 {
+  color: var(--dark-green);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Accent chaud sur les emojis au hover */
+.advantage-card:hover h3 {
+  color: var(--warm-text);
+}
+
+.advantage-card p {
+  color: #424242;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Team note en bas */
+.advantage-note {
+  margin-top: 3rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--light-green-bg) 0%,
+    var(--lighter-green-bg) 50%,
+    #fff8e1 100%
+  ); /* Gradient chaud */
+  border-left: 4px solid var(--warm-accent); /* Bordure chaude */
+  border-radius: 12px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 12px rgba(230, 126, 34, 0.08);
+}
+
+.advantage-note strong {
+  color: var(--warm-text); /* Texte fort en brun chaleureux */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .advantage-section h2 {
+    font-size: 2rem;
+  }
+
+  .advantage-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .advantage-card.highlight::after {
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+}
+
+/* Animation au scroll (optionnel) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advantage-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.advantage-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.advantage-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.advantage-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.advantage-card:nth-child(4) {
+  animation-delay: 0.4s;
+}

@@ -223,9 +223,7 @@ export const TypewriterEffectSmooth = ({
 
   return (
     <div ref={ref} className={cn('', className)}>
-      <div className="text-sm sm:text-base md:text-xl lg:text-2xl xl:text-3xl font-bold inline">
-        {renderWords()}
-      </div>
+      <div className="font-bold inline">{renderWords()}</div>
     </div>
   )
 }

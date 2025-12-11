@@ -6,7 +6,7 @@
       "typewriterText": "Transform sustainability growth into bankable green finance opportunities",
       "description": "Reduce costs by 30% • Unlock green loans • Meet export standards • Scale sustainably • Get KPIs for green marketing, NO greenwashing",
       "cta": "Get Started Free",
-      "ctaSecondary": "Explore B2B2B Solutions →",
+      "ctaSecondary": "Explore partnership Solutions",
       "emailPlaceholder": "Your email address",
       "notifyMe": "Notify me",
       "getStarted": "Get Started Free"
@@ -155,7 +155,12 @@
           "challenge": "High electricity bills, difficulty attracting eco-conscious customers without clear sustainability strategy",
           "solution": "Quick wins identification (LED lighting, building insulation, solar potential assessment), local supplier partnerships guidance, waste management optimization, elimination of single-use plastics",
           "result": "25-40% energy cost reduction based on implemented measures, 40-60% waste reduction, enhanced brand positioning for eco-tourism and conscious consumers, potential 'Green Certified' recognition",
-          "badges": ["Farm-to-table", "Green Marketing", "Zero-waste kitchen", "Sustainable gastronomy"]
+          "badges": [
+            "Farm-to-table",
+            "Green Marketing",
+            "Zero-waste kitchen",
+            "Sustainable gastronomy"
+          ]
         },
         {
           "icon": "🌾",
@@ -163,7 +168,12 @@
           "challenge": "EU / USA and even Chinese buyers requiring strong compliant sustainability documentation",
           "solution": "EU compliance checklist guidance, export-ready ESG report generation, gap analysis and action plan",
           "result": "Successful international buyer audits, maintained or expanded export contracts, improved positioning for green bond financing, competitive advantage in health-conscious and sustainability-driven supply chains",
-          "badges": ["Regenerative agriculture", "Export Compliance", "Green Finance", "Climate-resilient agriculture"]
+          "badges": [
+            "Regenerative agriculture",
+            "Export Compliance",
+            "Green Finance",
+            "Climate-resilient agriculture"
+          ]
         }
       ],
       "disclaimer": "*Results vary based on initial conditions, sector, and implemented measures. GreenPulse provides strong strategies and tools; actual outcomes depend on client actions and investments."
@@ -271,7 +281,7 @@
         }
       ],
       "cta": "Schedule Partnership Discussion",
-      "ctaEmail": "partnerships@greenpulse.ai?subject=B2B2B Partnership Inquiry",
+      "ctaEmail": "partnerships@greenpulse.ai?subject=Partnership Inquiry",
       "note": "Current pilots: Leading Southeast Asian banks, international impact funds, climate tech accelerators"
     },
     "press": {

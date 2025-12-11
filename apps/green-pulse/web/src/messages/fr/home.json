@@ -6,7 +6,7 @@
       "typewriterText": "Transformez la croissance durable en opportunités de finance verte bancables",
       "description": "Réduisez les coûts de 30% • Débloquez les prêts verts • Respectez les normes d'exportation • Croissance durable • Obtenez des KPI pour le marketing vert, SANS écoblanchiment",
       "cta": "Commencer Gratuitement",
-      "ctaSecondary": "Explorer les Solutions B2B2B →",
+      "ctaSecondary": "Explorer les Solutions de partenariat",
       "emailPlaceholder": "Votre adresse e-mail",
       "notifyMe": "Prévenez-moi",
       "getStarted": "Commencer Gratuitement"
@@ -155,7 +155,12 @@
           "challenge": "Factures d'électricité élevées, difficulté à attirer les clients éco-responsables sans stratégie de durabilité claire",
           "solution": "Identification de gains rapides (éclairage LED, isolation du bâtiment, évaluation du potentiel solaire), accompagnement vers des partenariats avec fournisseurs locaux, optimisation de la gestion des déchets, élimination du plastique à usage unique",
           "result": "Réduction des coûts énergétiques de 25-40% selon les mesures mises en œuvre, réduction des déchets de 40-60%, positionnement de marque amélioré pour l'éco-tourisme et les consommateurs conscients, reconnaissance potentielle 'Certifié Vert'",
-          "badges": ["Producteur-au-consommateur", "Marketing Vert", "Cuisine zéro-déchet", "Gastronomie durable"]
+          "badges": [
+            "Producteur-au-consommateur",
+            "Marketing Vert",
+            "Cuisine zéro-déchet",
+            "Gastronomie durable"
+          ]
         },
         {
           "icon": "🌾",
@@ -163,7 +168,12 @@
           "challenge": "Acheteurs UE / USA et même chinois exigeant une documentation de durabilité conforme et solide",
           "solution": "Accompagnement sur la checklist de conformité UE, génération de rapports ESG prêts à l'export, analyse des écarts et plan d'action",
           "result": "Audits réussis auprès d'acheteurs internationaux, maintien ou expansion des contrats d'exportation, meilleur positionnement pour le financement par obligations vertes, avantage concurrentiel dans les chaînes d'approvisionnement axées sur la santé et la durabilité",
-          "badges": ["Agriculture régénérative", "Conformité Export", "Finance Verte", "Agriculture résiliente au climat"]
+          "badges": [
+            "Agriculture régénérative",
+            "Conformité Export",
+            "Finance Verte",
+            "Agriculture résiliente au climat"
+          ]
         }
       ],
       "disclaimer": "*Les résultats varient selon les conditions initiales, le secteur et les mesures mises en œuvre. GreenPulse fournit des stratégies et des outils solides ; les résultats réels dépendent des actions et des investissements du client."
@@ -271,7 +281,7 @@
         }
       ],
       "cta": "Planifier une Discussion Partenariat",
-      "ctaEmail": "partnerships@greenpulse.ai?subject=Demande de Partenariat B2B2B",
+      "ctaEmail": "partnerships@greenpulse.ai?subject=Demande de Partenariat",
       "note": "Pilotes actuels: Banques leaders d'Asie du Sud-Est, fonds d'impact internationaux, accélérateurs climate tech"
     },
     "press": {

@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -58,7 +59,7 @@ export default function HomePage(): any {
           {/* Tagline / Value Proposition with Typewriter Effect */}
           <TypewriterEffectSmooth
             words={[{ text: t('hero.typewriterText') }]}
-            className="text-lg text-center max-w-3xl"
+            className="text-lg font-light text-center max-w-3xl"
             cursorClassName="bg-gp-primary"
             duration={3}
             delay={0.5}
@@ -68,9 +69,12 @@ export default function HomePage(): any {
           <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
             {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
               (feature: string, index: number) => (
-                <Button key={index} className="rounded-full" variant="secondary" size="sm">
+                <Badge
+                  key={index}
+                  className="rounded-full bg-gp-accent text-gp-accent-foreground px-4 py-1 text-sm font-medium"
+                >
                   {feature}
-                </Button>
+                </Badge>
               )
             )}
           </Div>
@@ -92,8 +96,15 @@ export default function HomePage(): any {
               {t('hero.getStarted')}
             </Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6">
-            <Link href="#partnership">{t('hero.ctaSecondary')}</Link>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="border-gp-accent border-2 text-lg px-8 py-6"
+          >
+            <Link href="#partnership">
+              {t('hero.ctaSecondary')} <Span className="text-gp-accent">→</Span>
+            </Link>
           </Button>
         </Div>
       </Section>
@@ -424,7 +435,7 @@ export default function HomePage(): any {
             ).map((card, index) => (
               <Card
                 key={index}
-                className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                className="border-t-4 border-t-gp-accent hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
                 <CardHeader>
                   <Div className="text-4xl mb-3">{card.icon}</Div>

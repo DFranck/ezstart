@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credibility Section - GreenPulse</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+    }
+
+    :root {
+      --primary-green: #4caf50;
+      --dark-green: #1b5e20;
+      --light-green-bg: #e8f5e9;
+      --lighter-green-bg: #f1f8e9;
+      --warm-accent: oklch(0.666 0.179 58.318);
+      --warm-text: oklch(0.6 0.18 85);
+      --warm-highlight: rgba(230, 126, 34, 0.1);
+    }
+
+    .credibility-section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 16px;
+    }
+
+    .credibility-section h2 {
+      text-align: center;
+      color: var(--dark-green);
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      text-shadow: 0 2px 4px rgba(230, 126, 34, 0.08);
+    }
+
+    .credibility-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .credibility-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .credibility-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(
+        90deg,
+        var(--primary-green) 0%,
+        var(--warm-accent) 50%,
+        var(--primary-green) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .credibility-card:hover::before {
+      opacity: 1;
+    }
+
+    .credibility-card:hover {
+      border-color: var(--warm-accent);
+      transform: translateY(-4px);
+      box-shadow: 0 6px 24px rgba(230, 126, 34, 0.15);
+      background: linear-gradient(135deg, #ffffff 0%, var(--warm-highlight) 100%);
+    }
+
+    .credibility-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .credibility-card h3 {
+      color: var(--dark-green);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .credibility-card:hover h3 {
+      color: var(--warm-text);
+    }
+
+    .credibility-card p {
+      color: #424242;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    .team-brief {
+      margin-top: 3rem;
+      padding: 1.5rem 2rem;
+      background: linear-gradient(
+        135deg,
+        var(--light-green-bg) 0%,
+        var(--lighter-green-bg) 50%,
+        #fff8e1 100%
+      );
+      border-left: 4px solid var(--warm-accent);
+      border-radius: 12px;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 12px rgba(230, 126, 34, 0.08);
+    }
+
+    .team-brief strong {
+      color: var(--warm-text);
+    }
+
+    @media (max-width: 768px) {
+      .credibility-section h2 {
+        font-size: 2rem;
+      }
+
+      .credibility-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .credibility-card {
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .credibility-card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .credibility-card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .credibility-card:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .credibility-card:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+  </style>
+</head>
+<body>
+
+  <section id="credibility" class="credibility-section">
+    <h2>Trusted by Industry Leaders & Backed by Expertise</h2>
+
+    <div class="credibility-grid">
+
+      <!-- Academic Partnership -->
+      <div class="credibility-card">
+        <div class="credibility-icon">🎓</div>
+        <h3>Academic Research Partnership</h3>
+        <p>Collaborating with a leading Southeast Asian university research institute for market intelligence, regulatory framework analysis, and ESG best practices validation.</p>
+      </div>
+
+      <!-- Industry Backing -->
+      <div class="credibility-card">
+        <div class="credibility-icon">💼</div>
+        <h3>Impact Investor Network</h3>
+        <p>Supported by impact investors managing $500M+ AUM in Southeast Asia, providing strategic guidance on green finance deployment and portfolio ESG requirements.</p>
+      </div>
+
+      <!-- Banking Partnership -->
+      <div class="credibility-card">
+        <div class="credibility-icon">🏦</div>
+        <h3>Regional Banking Insights</h3>
+        <p>Working with green finance specialists from leading Southeast Asian banks to ensure our platform meets real-world lending requirements and regulatory standards.</p>
+      </div>
+
+      <!-- Tech Integration -->
+      <div class="credibility-card">
+        <div class="credibility-icon">⚙️</div>
+        <h3>Enterprise-Grade ESG Technology</h3>
+        <p>Powered by proven ESG SaaS solutions and advanced AI frameworks. We integrate best-in-class compliance tools directly into an accessible, conversational interface—bringing $50K+ enterprise software to every SME.</p>
+      </div>
+
+    </div>
+
+    <div class="team-brief">
+      <p><strong>Our founding team combines:</strong> 12+ years in sustainability strategy and ESG consulting, deep expertise in AI/ML engineering, and firsthand experience with the accessibility gap facing SMEs in Southeast Asia.</p>
+    </div>
+
+  </section>
+
+</body>
+</html>
