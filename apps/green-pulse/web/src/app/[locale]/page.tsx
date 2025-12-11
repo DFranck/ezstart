@@ -21,6 +21,7 @@ import {
   SplitSection,
   SplitSectionItem,
   Strong,
+  TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -54,8 +55,14 @@ export default function HomePage(): any {
           {/* Subtitle: One Sustainable Agent for 1 Million Businesses */}
           <H2 size={'h3'}>{t('hero.subtitle')}</H2>
 
-          {/* Tagline / Value Proposition */}
-          <P className="text-lg text-center max-w-3xl">{t('hero.typewriterText')}</P>
+          {/* Tagline / Value Proposition with Typewriter Effect */}
+          <TypewriterEffectSmooth
+            words={[{ text: t('hero.typewriterText') }]}
+            className="text-lg text-center max-w-3xl"
+            cursorClassName="bg-gp-primary"
+            duration={3}
+            delay={0.5}
+          />
 
           {/* Feature tags */}
           <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
