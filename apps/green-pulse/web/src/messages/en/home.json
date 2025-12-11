@@ -139,33 +139,34 @@
       ]
     },
     "useCases": {
-      "title": "Real Results from Southeast Asian Businesses",
+      "title": "How GreenPulse.AI can help more than 900K SMEs?",
       "cases": [
         {
           "icon": "🏭",
-          "title": "Textile SME Reduces Costs by 30%",
-          "challenge": "High energy costs, no ESG documentation for export clients",
-          "solution": "GreenPulse calculated carbon footprint, recommended solar panels + energy-efficient machines",
-          "result": "30% energy cost reduction ($50K/year savings), secured $200K green loan from Vietnamese bank, gained 2 new EU buyers",
-          "badges": ["Manufacturing", "Green Finance"]
+          "title": "Manufacturing SME: Cost reduction through energy efficiency",
+          "challenge": "High energy costs, lack of ESG documentation for international buyers",
+          "solution": "Carbon footprint calculation, identification of energy-saving opportunities (solar panels, efficient machinery), green loan eligibility assessment",
+          "result": "20-35% energy cost reduction depending on initial investments, improved access to green financing, provide compliance and auditable report for internationals buyers",
+          "badges": ["Manufacturing", "Energy Efficiency"]
         },
         {
           "icon": "🍽️",
-          "title": "Restaurant Cuts Costs 35% While Building Green Brand",
-          "challenge": "Independent restaurant struggling with high electricity bills and wanted to attract eco-conscious customers but didn't know where to start with sustainability",
-          "solution": "GreenPulse identified quick wins: rooftop solar panels, LED lighting upgrade, building insulation improvements, local organic supplier partnerships, composting system for food waste, elimination of single-use plastics",
-          "result": "35% reduction in energy costs ($18K/year savings), 50% waste reduction, 'Green Certified Restaurant' badge for marketing, +40% customer traffic from sustainability-focused diners, featured in local eco-tourism guides",
-          "badges": ["Hospitality", "Green Marketing"]
+          "title": "Restaurant: Reduce costs while building green appeal",
+          "challenge": "High electricity bills, difficulty attracting eco-conscious customers without clear sustainability strategy",
+          "solution": "Quick wins identification (LED lighting, building insulation, solar potential assessment), local supplier partnerships guidance, waste management optimization, elimination of single-use plastics",
+          "result": "25-40% energy cost reduction based on implemented measures, 40-60% waste reduction, enhanced brand positioning for eco-tourism and conscious consumers, potential 'Green Certified' recognition",
+          "badges": ["Farm-to-table", "Green Marketing", "Zero-waste kitchen", "Sustainable gastronomy"]
         },
         {
           "icon": "🌾",
-          "title": "Agribusiness Unlocks Export Market Access",
-          "challenge": "EU buyers required CSRD-compliant sustainability proof",
-          "solution": "GreenPulse guided through EU compliance checklist, generated export-ready ESG report",
-          "result": "Passed EU buyer audit, secured 3-year contract worth $2M, positioned for Green Bond issuance",
-          "badges": ["Agriculture", "Export Compliance"]
+          "title": "Agribusiness: Regenerative farming for finance & export access",
+          "challenge": "EU / USA and even Chinese buyers requiring strong compliant sustainability documentation",
+          "solution": "EU compliance checklist guidance, export-ready ESG report generation, gap analysis and action plan",
+          "result": "Successful international buyer audits, maintained or expanded export contracts, improved positioning for green bond financing, competitive advantage in health-conscious and sustainability-driven supply chains",
+          "badges": ["Regenerative agriculture", "Export Compliance", "Green Finance", "Climate-resilient agriculture"]
         }
-      ]
+      ],
+      "disclaimer": "*Results vary based on initial conditions, sector, and implemented measures. GreenPulse provides strong strategies and tools; actual outcomes depend on client actions and investments."
     },
     "competitive": {
       "title": "Why GreenPulse Beats Generic ESG Software & AI Chatbots",

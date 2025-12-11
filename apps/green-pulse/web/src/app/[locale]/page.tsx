@@ -391,6 +391,11 @@ export default function HomePage(): any {
               </Card>
             ))}
           </Div>
+
+          {/* Disclaimer */}
+          <P className="text-center text-sm text-muted-foreground mt-8 italic max-w-4xl mx-auto">
+            {t('useCases.disclaimer')}
+          </P>
         </Div>
       </Section>
 

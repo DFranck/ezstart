@@ -139,33 +139,34 @@
       ]
     },
     "useCases": {
-      "title": "Résultats Réels d'Entreprises d'Asie du Sud-Est",
+      "title": "Comment GreenPulse.AI peut aider plus de 900K PME ?",
       "cases": [
         {
           "icon": "🏭",
-          "title": "PME Textile Réduit ses Coûts de 30%",
-          "challenge": "Coûts énergétiques élevés, aucune documentation ESG pour les clients exportateurs",
-          "solution": "GreenPulse a calculé l'empreinte carbone, recommandé des panneaux solaires + machines éco-énergétiques",
-          "result": "Réduction de 30% des coûts énergétiques (50K$/an d'économies), obtention d'un prêt vert de 200K$ d'une banque vietnamienne, 2 nouveaux acheteurs UE",
-          "badges": ["Manufacturing", "Finance Verte"]
+          "title": "PME Manufacturière : Réduction des coûts grâce à l'efficacité énergétique",
+          "challenge": "Coûts énergétiques élevés, manque de documentation ESG pour les acheteurs internationaux",
+          "solution": "Calcul de l'empreinte carbone, identification d'opportunités d'économies d'énergie (panneaux solaires, machines efficaces), évaluation d'éligibilité aux prêts verts",
+          "result": "Réduction des coûts énergétiques de 20-35% selon les investissements initiaux, amélioration de l'accès au financement vert, fourniture de rapports de conformité auditables pour les acheteurs internationaux",
+          "badges": ["Manufacturing", "Efficacité Énergétique"]
         },
         {
           "icon": "🍽️",
-          "title": "Restaurant Réduit ses Coûts de 35% en Construisant une Marque Verte",
-          "challenge": "Restaurant indépendant avec factures d'électricité élevées voulant attirer des clients éco-responsables sans savoir par où commencer",
-          "solution": "GreenPulse a identifié des gains rapides : panneaux solaires sur toit, éclairage LED, isolation du bâtiment, partenariats fournisseurs bio locaux, système de compostage, élimination du plastique à usage unique",
-          "result": "Réduction de 35% des coûts énergétiques (18K$/an), réduction de 50% des déchets, badge 'Restaurant Certifié Vert', +40% de fréquentation de clients éco-responsables, article dans guides éco-touristiques",
-          "badges": ["Hôtellerie", "Marketing Vert"]
+          "title": "Restaurant : Réduire les coûts tout en construisant une image verte",
+          "challenge": "Factures d'électricité élevées, difficulté à attirer les clients éco-responsables sans stratégie de durabilité claire",
+          "solution": "Identification de gains rapides (éclairage LED, isolation du bâtiment, évaluation du potentiel solaire), accompagnement vers des partenariats avec fournisseurs locaux, optimisation de la gestion des déchets, élimination du plastique à usage unique",
+          "result": "Réduction des coûts énergétiques de 25-40% selon les mesures mises en œuvre, réduction des déchets de 40-60%, positionnement de marque amélioré pour l'éco-tourisme et les consommateurs conscients, reconnaissance potentielle 'Certifié Vert'",
+          "badges": ["Producteur-au-consommateur", "Marketing Vert", "Cuisine zéro-déchet", "Gastronomie durable"]
         },
         {
           "icon": "🌾",
-          "title": "Agribusiness Débloque l'Accès au Marché Export",
-          "challenge": "Les acheteurs UE exigeaient une preuve de durabilité conforme CSRD",
-          "solution": "GreenPulse a guidé à travers la checklist de conformité UE, généré un rapport ESG prêt à l'export",
-          "result": "Audit acheteur UE réussi, contrat de 3 ans d'une valeur de 2M$, positionnement pour émission d'Obligations Vertes",
-          "badges": ["Agriculture", "Conformité Export"]
+          "title": "Agribusiness : Agriculture régénérative pour l'accès au financement et à l'export",
+          "challenge": "Acheteurs UE / USA et même chinois exigeant une documentation de durabilité conforme et solide",
+          "solution": "Accompagnement sur la checklist de conformité UE, génération de rapports ESG prêts à l'export, analyse des écarts et plan d'action",
+          "result": "Audits réussis auprès d'acheteurs internationaux, maintien ou expansion des contrats d'exportation, meilleur positionnement pour le financement par obligations vertes, avantage concurrentiel dans les chaînes d'approvisionnement axées sur la santé et la durabilité",
+          "badges": ["Agriculture régénérative", "Conformité Export", "Finance Verte", "Agriculture résiliente au climat"]
         }
-      ]
+      ],
+      "disclaimer": "*Les résultats varient selon les conditions initiales, le secteur et les mesures mises en œuvre. GreenPulse fournit des stratégies et des outils solides ; les résultats réels dépendent des actions et des investissements du client."
     },
     "competitive": {
       "title": "Pourquoi GreenPulse Surpasse les Logiciels ESG Génériques & les Chatbots IA",
