@@ -44,6 +44,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         isChatPage
           ? []
           : [
+              { href: '/careers', label: t('navigation.careers'), icon: 'lucide:Users' as const },
               ...(rbac.hasAnyRole(['admin', 'superadmin'])
                 ? [
                     {

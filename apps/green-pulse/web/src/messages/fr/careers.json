@@ -1,0 +1,190 @@
+{
+  "careers": {
+    "meta": {
+      "title": "Carrières - Rejoignez GreenPulse.AI",
+      "description": "Rejoignez GreenPulse.AI dans la démocratisation de la conformité ESG pour les PME d'Asie du Sud-Est. Poste actuel : Support Business Development & Opérations."
+    },
+    "hero": {
+      "title": "Rejoignez-nous pour Construire l'Avenir de l'Entreprise Durable",
+      "subtitle": "GreenPulse.AI a pour mission de rendre la conformité ESG accessible à 1 million de PME à travers l'Asie du Sud-Est. Nous sommes une petite équipe axée sur l'impact, basée à Ho Chi Minh-Ville, travaillant à l'intersection de l'IA, de la durabilité et de la finance verte.",
+      "description": "Si vous êtes passionné par l'action climatique, souhaitez travailler dans un environnement de startup dynamique et croyez que la technologie peut démocratiser l'accès à la finance verte - nous aimerions vous entendre."
+    },
+    "openings": {
+      "title": "Opportunités Actuelles",
+      "badge": "Nouveau Poste"
+    },
+    "bdRole": {
+      "title": "Support Business Development & Opérations",
+      "location": "Télétravail ou Ho Chi Minh-Ville, Vietnam",
+      "type": "Arrangement contractuel flexible",
+      "mission": "Mission axée sur l'impact",
+      "summary": "Aidez-nous à développer la présence de GreenPulse en Asie du Sud-Est. Gérez les réponses aux appels d'offres, représentez-nous lors d'événements et établissez des partenariats stratégiques.",
+      "tags": ["Business Development", "Coordination de Projets", "Networking", "Pas de Background Technique Requis"],
+      "sections": {
+        "about": {
+          "title": "À Propos du Poste",
+          "content": "Alors que nous développons l'empreinte de GreenPulse.AI à travers l'Asie du Sud-Est, nous recherchons quelqu'un pour rejoindre l'équipe en tant que **Support Business Development & Opérations** - pas un co-fondateur technique, mais un partenaire motivé par la mission qui peut nous aider à naviguer dans le paysage commercial, répondre aux opportunités et établir des connexions significatives.\n\nVous travaillerez directement avec notre équipe fondatrice (Amber, PDG avec 12+ ans d'expérience en stratégie de durabilité, et Franck, CTO avec expertise IA/ML) pour accélérer notre croissance sans avoir besoin d'expertise technique ou ESG approfondie - nous fournirons la formation."
+        },
+        "responsibilities": {
+          "title": "Vos Responsabilités",
+          "items": [
+            {
+              "title": "Documentation & Gestion des Appels d'Offres (40%)",
+              "tasks": [
+                "Rédiger et coordonner les réponses aux appels d'offres, RFP et demandes de subventions",
+                "Créer des documents commerciaux professionnels (propositions, présentations partenaires, études de cas)",
+                "Maintenir le CRM et suivre le pipeline de partenariats",
+                "Soutenir les opérations administratives lors de notre développement"
+              ]
+            },
+            {
+              "title": "Représentation & Networking (30%)",
+              "tasks": [
+                "Représenter GreenPulse lors d'événements sectoriels (forums finance verte, conférences durabilité, meetups startups)",
+                "Établir des relations avec les parties prenantes clés : banques, fonds d'impact, associations PME, agences gouvernementales",
+                "Agir en tant que porte-parole de l'entreprise dans l'écosystème local"
+              ]
+            },
+            {
+              "title": "Veille Marché & Identification d'Opportunités (20%)",
+              "tasks": [
+                "Surveiller le paysage concurrentiel et les développements réglementaires ESG/finance verte en Asie du Sud-Est",
+                "Identifier les opportunités de partenariat (banques, plateformes ESG, accélérateurs, fonds)",
+                "Suivre les bases de données d'appels d'offres et opportunités de financement"
+              ]
+            },
+            {
+              "title": "Support Stratégique (10%)",
+              "tasks": [
+                "Soutenir la PDG dans la stratégie de développement commercial",
+                "Coordonner les programmes pilotes avec les partenaires beta",
+                "Aider à affiner le positionnement et la messagerie en fonction des retours du marché"
+              ]
+            }
+          ]
+        },
+        "requirements": {
+          "title": "Qui Vous Êtes",
+          "mustHave": {
+            "title": "Indispensable :",
+            "items": [
+              "**Excellent communicant :** Excellentes compétences rédactionnelles en anglais (le vietnamien est un plus). Capable de rédiger des propositions convaincantes et représenter des idées clairement.",
+              "**Organisé & proactif :** À l'aise avec la gestion de plusieurs projets simultanément, le respect des délais et le travail en autonomie.",
+              "**Personne relationnelle :** Vous aimez vraiment le networking, établir des relations et représenter une mission en laquelle vous croyez.",
+              "**Motivé par la mission :** Vous êtes motivé par l'impact climatique et rendre la durabilité accessible aux entreprises qui en ont le plus besoin.",
+              "**Apprenant curieux :** Vous n'avez pas besoin de connaître les cadres ESG ou la technologie IA, mais vous êtes enthousiaste à l'idée d'apprendre sur la finance verte, la durabilité et notre secteur."
+            ]
+          },
+          "idealBackground": {
+            "title": "Profil Idéal :",
+            "items": [
+              "**2-3 ans d'expérience** en business development, coordination de projets, développement international, communication ou consulting",
+              "**OU jeune diplômé** d'école de commerce / sciences po / relations internationales avec un excellent parcours académique et un intérêt authentique pour l'impact",
+              "Expérience de travail dans des environnements startup ou organisations axées sur la mission est un plus",
+              "À l'aise avec l'ambiguïté et la construction de processus from scratch"
+            ]
+          },
+          "notRequired": {
+            "title": "NON Requis :",
+            "items": [
+              "Compétences techniques (programmation, IA, data science)",
+              "Expertise technique approfondie en ESG ou durabilité",
+              "Expérience préalable en fintech ou climate tech"
+            ]
+          }
+        },
+        "offer": {
+          "title": "Ce Que Nous Offrons",
+          "compensation": {
+            "title": "Rémunération & Structure",
+            "items": [
+              "**Arrangement contractuel flexible initialement** (nous sommes une startup en phase seed, donc la transparence compte)",
+              "Potentiel de collaboration à long terme et participation en équité selon l'adéquation et les résultats",
+              "Télétravail possible avec collaboration régulière en personne à HCMC"
+            ]
+          },
+          "growth": {
+            "title": "Croissance & Impact",
+            "items": [
+              "**Impact direct :** Votre travail aidera les PME à accéder à la finance verte, réduire les coûts et construire des entreprises durables",
+              "**Ownership :** Vous façonnerez comment GreenPulse se développe en Asie du Sud-Est - ce n'est pas un rôle corporate avec des processus rigides",
+              "**Apprentissage :** Travaillez en étroite collaboration avec les fondateurs, gagnez en exposition à la finance verte, l'investissement d'impact, les applications IA et la création de startup",
+              "**Réseau :** Connectez-vous avec les principales banques, fonds d'impact, accélérateurs et leaders de la durabilité à travers la région"
+            ]
+          },
+          "culture": {
+            "title": "Culture d'Équipe",
+            "items": [
+              "**Mission d'abord :** Nous construisons cela pour résoudre un vrai problème, pas seulement pour des exits",
+              "**Transparence :** Communication ouverte sur les défis, la stratégie et les progrès",
+              "**Flexibilité :** Nous respectons les limites, les niveaux d'énergie et l'équilibre vie professionnelle/personnelle (Amber est enceinte de 5 mois - nous appliquons ce que nous prêchons)",
+              "**Approche diplomatique :** Nous valorisons la construction de relations plutôt que les tactiques de vente agressives"
+            ]
+          }
+        },
+        "apply": {
+          "title": "Comment Postuler",
+          "instructions": "Envoyez un email à **careers@greenpulse.ai** avec :",
+          "requirements": [
+            "**Objet :** \"BD & Operations - [Votre Nom]\"",
+            "**Courte lettre de motivation** (max 300 mots) expliquant :",
+            "  - Pourquoi vous êtes intéressé par la mission de GreenPulse",
+            "  - Quelle expérience pertinente vous apportez",
+            "  - Un exemple de projet que vous avez coordonné ou une relation que vous avez établie",
+            "**Votre CV**",
+            "**Optionnel :** Un exemple de rédaction (proposition commerciale, article, blog post - quelque chose qui montre vos compétences en communication)"
+          ],
+          "note": "Nous examinons les candidatures au fur et à mesure. Les entretiens de premier tour sont conversationnels - nous voulons comprendre vos motivations et voir s'il y a une adéquation mutuelle.",
+          "cta": "Postuler Maintenant"
+        }
+      }
+    },
+    "mission": {
+      "title": "Pourquoi GreenPulse.AI ?",
+      "ourMission": {
+        "title": "Notre Mission",
+        "content": "Nous démocratisons la conformité ESG pour les 98% de PME d'Asie du Sud-Est qui n'ont aucun accès aux connaissances en durabilité. D'ici 2025, l'ETS du Vietnam réglementera 50% des émissions - 900+ PME vietnamiennes auront besoin de support ESG. Nous construisons l'agent IA qui rend cela accessible."
+      },
+      "traction": {
+        "title": "Notre Traction",
+        "items": [
+          "MVP complété à 70%",
+          "5 partenaires beta (incluant des banques vietnamiennes de premier plan, instituts de recherche)",
+          "50+ startups dans le pipeline",
+          "Mis en avant dans VietStock, reconnu par des accélérateurs régionaux"
+        ]
+      },
+      "values": {
+        "title": "Nos Valeurs",
+        "items": [
+          "**Impact plutôt qu'extraction :** Nous ne construisons pas cela pour une sortie rapide - nous sommes là pour créer une valeur durable pour les PME",
+          "**Collaboration plutôt que compétition :** Nous nous associons avec des plateformes ESG, banques, fonds - nous ne sommes pas en compétition",
+          "**Transparence :** Avec l'équipe, les partenaires et les clients",
+          "**Respect de l'énergie :** Approche Manifestor - nous initions des opportunités mais ne forçons pas les clôtures"
+        ]
+      }
+    },
+    "future": {
+      "title": "Opportunités Futures",
+      "content": "Nous sommes une petite équipe maintenant, mais en grandissant, nous anticipons des rôles en :",
+      "roles": [
+        "**Customer Success & Support PME** (aider les clients à maximiser la valeur de GreenPulse)",
+        "**Partnerships Manager** (dédié aux relations banques/fonds)",
+        "**Marketing & Contenu** (thought leadership, études de cas, SEO)",
+        "**Analyste ESG** (pour le support clients Package Golden)"
+      ],
+      "cta": "Si vous êtes intéressé par l'un de ces domaines, n'hésitez pas à nous contacter avec une brève présentation - nous sommes toujours heureux de nous connecter avec des personnes alignées sur notre mission."
+    },
+    "contact": {
+      "title": "Contact",
+      "general": "Demandes générales :",
+      "partnership": "Opportunités de partenariat :",
+      "moreInfo": "En savoir plus sur nous :",
+      "email": "aseradni@nexora-venture.com"
+    },
+    "footer": {
+      "eoe": "**GreenPulse.AI** est un employeur offrant l'égalité des chances. Nous célébrons la diversité et nous nous engageons à créer un environnement inclusif pour tous les membres de l'équipe.",
+      "updated": "Page mise à jour le : 8 décembre 2024"
+    }
+  }
+}

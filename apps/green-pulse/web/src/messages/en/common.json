@@ -17,6 +17,7 @@
     }
   },
   "navigation": {
-    "admin": "Admin"
+    "admin": "Admin",
+    "careers": "Careers"
   }
 }

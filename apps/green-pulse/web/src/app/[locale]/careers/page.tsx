@@ -24,7 +24,7 @@ export default function CareersPage() {
   return (
     <>
       {/* Hero Section */}
-      <Section size="xl">
+      <Section size="xl" className="mt-20">
         <Div className="container mx-auto text-center max-w-4xl">
           <H1 size="h2" className="mb-6">
             {t('hero.title')}
@@ -42,7 +42,7 @@ export default function CareersPage() {
           </H2>
 
           {/* Job Opening Card */}
-          <Card className="max-w-5xl mx-auto border-l-4 border-gp-primary hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="" variant={'ghost'}>
             <CardHeader>
               <Div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                 <Div>
@@ -153,17 +153,17 @@ export default function CareersPage() {
                       {t('bdRole.sections.requirements.idealBackground.title')}
                     </H3>
                     <ul className="list-disc list-inside space-y-2">
-                      {(t.raw('bdRole.sections.requirements.idealBackground.items') as string[]).map(
-                        (item, index) => (
-                          <li key={index} className="leading-relaxed">
-                            <Span
-                              dangerouslySetInnerHTML={{
-                                __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                              }}
-                            />
-                          </li>
-                        )
-                      )}
+                      {(
+                        t.raw('bdRole.sections.requirements.idealBackground.items') as string[]
+                      ).map((item, index) => (
+                        <li key={index} className="leading-relaxed">
+                          <Span
+                            dangerouslySetInnerHTML={{
+                              __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                            }}
+                          />
+                        </li>
+                      ))}
                     </ul>
                   </Div>
 
