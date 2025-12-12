@@ -46,7 +46,7 @@
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
     "@types/react": "^19.1.12",
-    "next": "^15.5.7",
+    "next": "^15.5.8",
     "react": "^19.1.1",
     "typescript": "^5.7.2"
   }
