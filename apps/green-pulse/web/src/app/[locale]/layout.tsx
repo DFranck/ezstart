@@ -41,7 +41,7 @@ export const metadata = createMetadata({
     'Vietnam green banking',
   ],
   themeColor: '#10b981',
-  ogImage: 'https://www.ai-greenpulse.com/og-image.svg',
+  ogImage: 'https://www.ai-greenpulse.com/logo.png',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
