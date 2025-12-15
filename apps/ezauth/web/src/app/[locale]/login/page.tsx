@@ -44,9 +44,9 @@ function LoginContent() {
         <ThemeSwitcher />
       </div>
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
+        <CardTitle className="text-xl md:text-2xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Sign in to access <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
+          Sign in to access <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
         </CardDescription>
         {theme.showEzstartMessage && (
           <P variant={'description'} size={'xs'} className="hidden md:block">
