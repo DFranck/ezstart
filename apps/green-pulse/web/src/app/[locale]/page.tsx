@@ -26,7 +26,7 @@ import {
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 
 export default function HomePage(): any {
   const t = useTranslations('home')
@@ -519,9 +519,8 @@ export default function HomePage(): any {
                 items: string[]
               }>
             ).map((value, index) => (
-              <>
+              <Fragment key={index}>
                 <Card
-                  key={index}
                   className={`
                     hover:shadow-lg transition-all duration-300 hover:scale-105 w-full md:w-auto
                     ${index === 0 ? 'bg-gp-primary/5 border-gp-primary/20' : ''}
@@ -561,7 +560,7 @@ export default function HomePage(): any {
                     +
                   </Div>
                 )}
-              </>
+              </Fragment>
             ))}
           </Div>
 
