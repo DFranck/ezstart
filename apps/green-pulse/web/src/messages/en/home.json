@@ -31,12 +31,21 @@
     "packages": {
       "title": "Our Offers",
       "free": {
-        "title": "Free Use",
-        "subtitle": "For ESG Explorers",
-        "description": "I want to discuss energy savings, simple ESG actions, discover/explore what I can do and improve in my business from a sustainable perspective.",
+        "title": "Self-Awareness",
+        "subtitle": "For self-awareness & curious CEOs",
+        "price": "$0",
+        "period": "/forever",
+        "description": "Start your sustainability journey with AI guidance. Discover simple actions to reduce costs, understand your carbon footprint, and explore new opportunities. No commitment required.",
         "features": {
-          "chat": "AI chat platform"
-        }
+          "chat": "Conversational AI ESG assistant (GreenPulse Agent)",
+          "footprint": "Simple carbon footprint awareness",
+          "wins": "Quick wins identification (energy, waste, costs)",
+          "tips": "Educational sustainability tips",
+          "marketing": "Explore green marketing opportunities",
+          "instant": "⚡ Instant access—no credit card needed"
+        },
+        "cta": "Start Exploring Free",
+        "note": "💡 Perfect for quick & simple actions for conscious-growth"
       },
       "premium": {
         "title": "Premium Package",

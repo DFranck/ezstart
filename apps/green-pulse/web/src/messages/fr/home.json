@@ -31,12 +31,21 @@
     "packages": {
       "title": "Nos Offres",
       "free": {
-        "title": "Version Gratuite",
-        "subtitle": "Pour les explorateurs de l'ESG",
-        "description": "Je veux discuter d'économies d'énergie, d'actions ESG simples, je découvre/explore ce que je peux faire et améliorer dans mon entreprise d'un point de vue durable.",
+        "title": "Conscience",
+        "subtitle": "Pour la prise de conscience & les PDG curieux",
+        "price": "0$",
+        "period": "/à vie",
+        "description": "Commencez votre parcours de durabilité avec l'aide de l'IA. Découvrez des actions simples pour réduire les coûts, comprendre votre empreinte carbone et explorer de nouvelles opportunités. Aucun engagement requis.",
         "features": {
-          "chat": "Plateforme de chat IA"
-        }
+          "chat": "Assistant IA ESG conversationnel (Agent GreenPulse)",
+          "footprint": "Prise de conscience de l'empreinte carbone simple",
+          "wins": "Identification de gains rapides (énergie, déchets, coûts)",
+          "tips": "Conseils éducatifs sur la durabilité",
+          "marketing": "Explorer les opportunités de marketing vert",
+          "instant": "⚡ Accès instantané—aucune carte de crédit nécessaire"
+        },
+        "cta": "Commencer l'exploration gratuite",
+        "note": "💡 Parfait pour des actions rapides & simples pour une croissance consciente"
       },
       "premium": {
         "title": "Package Premium",
