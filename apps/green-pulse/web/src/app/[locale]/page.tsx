@@ -72,8 +72,8 @@ export default function HomePage(): any {
             {t('hero.subtitle')
               .split(' ')
               .map((word, index) => (
-                <Span
-                  key={index}
+                <span
+                  key={`word-${index}-${word}`}
                   className="inline-block"
                   style={{
                     animation: showSubtitle ? `fadeInWord 0.4s ease-out ${index * 0.15}s forwards` : 'none',
@@ -82,7 +82,7 @@ export default function HomePage(): any {
                 >
                   {word}
                   {index < t('hero.subtitle').split(' ').length - 1 ? '\u00A0' : ''}
-                </Span>
+                </span>
               ))}
           </H2>
           <style jsx>{`
