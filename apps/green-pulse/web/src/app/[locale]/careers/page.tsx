@@ -23,14 +23,14 @@ export default function CareersPage() {
 
   return (
     <>
-      {/* Hero Section */}
-      <Section size="xl" className="mt-20">
+      {/* Hero Section - Overview Style */}
+      <Section size="xl" className="mt-20 bg-gradient-to-b from-gp-primary/5 to-transparent">
         <Div className="container mx-auto text-center max-w-4xl">
-          <H1 size="h2" className="mb-6">
+          <H1 size="h2" className="mb-6 text-gp-primary">
             {t('hero.title')}
           </H1>
-          <P className="text-xl text-muted-foreground mb-6">{t('hero.subtitle')}</P>
-          <P className="text-lg">{t('hero.description')}</P>
+          <P className="text-xl text-foreground font-medium mb-4">{t('hero.subtitle')}</P>
+          <P className="text-lg text-muted-foreground max-w-3xl mx-auto">{t('hero.description')}</P>
         </Div>
       </Section>
 
@@ -321,24 +321,27 @@ export default function CareersPage() {
       </Section>
 
       {/* Future Opportunities */}
-      <Section size="xl">
+      <Section size="xl" className="bg-gradient-to-b from-muted/20 to-transparent">
         <Div className="container mx-auto max-w-4xl">
-          <H2 size="h3" className="mb-6">
+          <H2 size="h3" className="mb-6 italic text-center">
             {t('future.title')}
           </H2>
-          <P className="mb-4">{t('future.content')}</P>
-          <ul className="list-disc list-inside space-y-2 mb-6">
-            {(t.raw('future.roles') as string[]).map((role, index) => (
-              <li key={index} className="leading-relaxed">
-                <Span
-                  dangerouslySetInnerHTML={{
-                    __html: role.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
-          <P className="text-muted-foreground">{t('future.cta')}</P>
+          <Div className="bg-card p-8 rounded-lg border shadow-sm">
+            <P className="mb-6 text-base leading-relaxed">{t('future.content')}</P>
+            <ul className="space-y-3 mb-6">
+              {(t.raw('future.roles') as string[]).map((role, index) => (
+                <li key={index} className="flex items-start gap-3 leading-relaxed">
+                  <Icon name="lucide:Sparkles" size={18} className="text-gp-primary flex-shrink-0 mt-0.5" />
+                  <Span
+                    dangerouslySetInnerHTML={{
+                      __html: role.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+            <P className="text-muted-foreground text-sm italic border-t pt-4">{t('future.cta')}</P>
+          </Div>
         </Div>
       </Section>
 
