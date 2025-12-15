@@ -315,10 +315,12 @@ export function LiaThread({
         </Div>
       </Div>
 
-      {/* My tools section */}
+      {/* Separator line */}
+      <Div className="border-t border-border mx-2"></Div>
+
+      {/* My tools section - Upgrade */}
       <Div className="space-y-1">
-        <Div className="flex items-center gap-2 px-2 py-1">
-          <Icon name="lucide:Settings" size={16} className="text-muted-foreground" />
+        <Div className="px-2 py-1">
           <span className="text-xs font-medium text-muted-foreground">
             {tChat('sidebar.upgradePrompt')}
           </span>
@@ -412,14 +414,12 @@ export function LiaThread({
             <SelectContent>
               {MOCK_AI_MODELS.map(model => {
                 const isComingSoon = !model.enabled
-                const comingSoonText = locale === 'fr' ? 'Bientôt disponible' : 'Coming soon'
 
                 return (
                   <SelectItem key={model.id} value={model.id} disabled={isComingSoon}>
                     <Div className="flex flex-col">
                       <span className="font-medium">
                         {model.name}
-                        {isComingSoon && ` (${comingSoonText})`}
                       </span>
                       <span className="text-xs text-muted-foreground">{model.provider}</span>
                     </Div>
