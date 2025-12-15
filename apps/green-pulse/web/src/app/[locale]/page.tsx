@@ -26,9 +26,19 @@ import {
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 export default function HomePage(): any {
   const t = useTranslations('home')
+  const [showSubtitle, setShowSubtitle] = useState(false)
+
+  useEffect(() => {
+    // Start animation after 500ms delay
+    const timer = setTimeout(() => {
+      setShowSubtitle(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <>
@@ -52,8 +62,41 @@ export default function HomePage(): any {
         </Div>
         <H1 className="sr-only">{t('hero.title')}</H1>
         <Div layout={'center'} className="gap-6">
-          {/* Subtitle: One Sustainable Agent for 1 Million Businesses */}
-          <H2 size={'h3'}>{t('hero.subtitle')}</H2>
+          {/* Subtitle: One Sustainable Agent for 1 Million Businesses - Animated */}
+          <H2
+            size={'h3'}
+            className={`transition-all duration-1000 ${
+              showSubtitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            {t('hero.subtitle')
+              .split(' ')
+              .map((word, index) => (
+                <Span
+                  key={index}
+                  className="inline-block"
+                  style={{
+                    animation: showSubtitle ? `fadeInWord 0.4s ease-out ${index * 0.15}s forwards` : 'none',
+                    opacity: showSubtitle ? 1 : 0,
+                  }}
+                >
+                  {word}
+                  {index < t('hero.subtitle').split(' ').length - 1 ? '\u00A0' : ''}
+                </Span>
+              ))}
+          </H2>
+          <style jsx>{`
+            @keyframes fadeInWord {
+              from {
+                opacity: 0;
+                transform: translateY(10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
 
           {/* Feature tags */}
           <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
