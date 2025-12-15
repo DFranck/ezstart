@@ -22,7 +22,6 @@ import {
   SplitSection,
   SplitSectionItem,
   Strong,
-  TypewriterEffectSmooth,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -56,15 +55,6 @@ export default function HomePage(): any {
           {/* Subtitle: One Sustainable Agent for 1 Million Businesses */}
           <H2 size={'h3'}>{t('hero.subtitle')}</H2>
 
-          {/* Tagline / Value Proposition with Typewriter Effect */}
-          <TypewriterEffectSmooth
-            words={[{ text: t('hero.typewriterText') }]}
-            className="text-lg font-light text-center max-w-3xl"
-            cursorClassName="bg-gp-primary"
-            duration={3}
-            delay={0.5}
-          />
-
           {/* Feature tags */}
           <Div layout={'row'} className="hidden lg:flex flex-wrap justify-center gap-2">
             {(Array.isArray(t.raw('heroFeatures')) ? t.raw('heroFeatures') : []).map(
@@ -80,7 +70,7 @@ export default function HomePage(): any {
           </Div>
 
           {/* Value Proposition */}
-          <P className="text-base text-center text-muted-foreground max-w-4xl">
+          <P className="text-base text-center text-foreground font-medium max-w-4xl">
             {t('hero.description')}
           </P>
         </Div>
@@ -100,10 +90,10 @@ export default function HomePage(): any {
             asChild
             size="lg"
             variant="outline"
-            className="border-gp-accent border-2 text-lg px-8 py-6"
+            className="bg-gray-100 hover:bg-gray-200 border-black border text-black font-bold text-xl px-8 py-6"
           >
             <Link href="#partnership">
-              {t('hero.ctaSecondary')} <Span className="text-gp-accent">→</Span>
+              {t('hero.ctaSecondary')} <Span className="ml-1">→</Span>
             </Link>
           </Button>
         </Div>
