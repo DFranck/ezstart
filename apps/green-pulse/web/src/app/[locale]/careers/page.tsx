@@ -251,35 +251,20 @@ export default function CareersPage() {
                 </Div>
               </Div>
 
-              {/* How to Apply */}
-              <Div className="bg-gp-primary/5 p-6 rounded-lg border-l-4 border-gp-primary">
-                <H3 size="h5" className="mb-4 text-gp-primary">
-                  {t('bdRole.sections.apply.title')}
-                </H3>
-                <P className="mb-4">{t('bdRole.sections.apply.instructions')}</P>
-                <ol className="list-decimal list-inside space-y-2 mb-6">
-                  {(t.raw('bdRole.sections.apply.requirements') as string[]).map((req, index) => (
-                    <li key={index} className="leading-relaxed">
-                      <Span
-                        dangerouslySetInnerHTML={{
-                          __html: req.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ol>
-                <P className="text-sm text-muted-foreground mb-6">
-                  {t('bdRole.sections.apply.note')}
-                </P>
+              {/* Apply CTA - Simplified */}
+              <Div className="text-center pt-8 border-t">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-gp-primary hover:bg-gp-primary/80 w-full md:w-auto"
+                  className="bg-gp-primary hover:bg-gp-primary/80 text-white font-bold"
                 >
-                  <a href="mailto:careers@greenpulse.ai?subject=BD%20%26%20Operations%20-%20Application">
+                  <a href="mailto:aseradni@nexora-venture.com?subject=BD%20%26%20Operations%20-%20Application">
                     {t('bdRole.sections.apply.cta')}
                   </a>
                 </Button>
+                <P className="text-sm text-muted-foreground mt-4">
+                  Send your CV and a brief description to: <Strong>aseradni@nexora-venture.com</Strong>
+                </P>
               </Div>
             </CardContent>
           </Card>
@@ -354,38 +339,6 @@ export default function CareersPage() {
             ))}
           </ul>
           <P className="text-muted-foreground">{t('future.cta')}</P>
-        </Div>
-      </Section>
-
-      {/* Contact */}
-      <Section size="xl" className="bg-muted/30">
-        <Div className="container mx-auto max-w-4xl text-center">
-          <H2 size="h3" className="mb-8">
-            {t('contact.title')}
-          </H2>
-          <Div className="space-y-4">
-            <P>
-              <Strong>{t('contact.general')}</Strong>
-              <br />
-              <Button asChild variant="link" className="text-gp-primary">
-                <a href={`mailto:${t('contact.email')}`}>{t('contact.email')}</a>
-              </Button>
-            </P>
-            <P>
-              <Strong>{t('contact.partnership')}</Strong>
-              <br />
-              <Button asChild variant="link" className="text-gp-primary">
-                <a href={`mailto:${t('contact.email')}`}>{t('contact.email')}</a>
-              </Button>
-            </P>
-            <P>
-              <Strong>{t('contact.moreInfo')}</Strong>
-              <br />
-              <Button asChild variant="link" className="text-gp-primary">
-                <Link href="/">www.ai-greenpulse.com</Link>
-              </Button>
-            </P>
-          </Div>
         </Div>
       </Section>
 
