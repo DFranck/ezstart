@@ -206,7 +206,7 @@ export default function HomePage(): any {
         className="hidden dark:block"
       />
       {/* Data Transformation Section */}
-      <Section size="xl">
+      <Section size="xl" id="how-it-works">
         <H2 size="h3">{t('transformation.title')}</H2>
         <Div size={'xl'} className="w-full">
           {/* 3-Step Process with AI in center */}
@@ -644,7 +644,7 @@ export default function HomePage(): any {
       </Section>
 
       {/* Packages Section */}
-      <Section size="full">
+      <Section size="full" id="pricing">
         <Div className="container mx-auto">
           <H3 className="text-4xl font-bold text-center ">{t('packages.title')}</H3>
 

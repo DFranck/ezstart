@@ -18,6 +18,10 @@
   },
   "navigation": {
     "admin": "Admin",
-    "careers": "Carrières"
+    "careers": "Carrières",
+    "howItWorks": "Comment ça marche",
+    "useCases": "Cas d'usage",
+    "pricing": "Tarifs",
+    "partnership": "Partenariat"
   }
 }

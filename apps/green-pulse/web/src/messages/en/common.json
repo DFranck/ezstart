@@ -18,6 +18,10 @@
   },
   "navigation": {
     "admin": "Admin",
-    "careers": "Careers"
+    "careers": "Careers",
+    "howItWorks": "How It Works",
+    "useCases": "Use Cases",
+    "pricing": "Pricing",
+    "partnership": "Partnership"
   }
 }
