@@ -5,11 +5,41 @@ const { Schema, model, models } = mongoose
 export type PromptType = 'general' | 'extraction' | 'validation' | 'vision' | 'custom'
 export type ProviderTarget = 'all' | 'gemini' | 'openai' | 'anthropic'
 
+/**
+ * Configuration for AI generation (provider-agnostic)
+ * These settings are applied once, not repeated in conversation history
+ */
+export interface PromptConfig {
+  // Generation parameters
+  temperature?: number // 0-1, controls randomness
+  maxTokens?: number // Max output length
+  topP?: number // Nucleus sampling (0-1)
+  topK?: number // Top-K sampling (for Gemini)
+
+  // Behavioral rules (applied without being in context)
+  rules?: string[] // e.g., "Always respond in user's language", "Use professional tone"
+
+  // Constraints
+  constraints?: {
+    maxResponseLength?: number // Characters limit
+    allowedTopics?: string[] // Allowed discussion topics
+    forbiddenTopics?: string[] // Topics to avoid
+    requiredFormat?: string // e.g., "JSON", "Markdown", "Plain text"
+  }
+
+  // Safety & moderation
+  safety?: {
+    blockThreshold?: 'none' | 'low' | 'medium' | 'high' // Gemini safety
+    filterLevel?: number // Generic filter level 0-10
+  }
+}
+
 export interface ISystemPrompt {
   key: string
   name: string
   description?: string
-  content: string
+  content: string // The actual system prompt (personality, role)
+  config?: PromptConfig // Configuration (rules, constraints, generation params)
   type: PromptType
   provider: ProviderTarget
   isActive: boolean
@@ -43,6 +73,10 @@ const systemPromptSchema = new Schema<ISystemPrompt>(
       type: String,
       required: true,
       maxlength: 10000,
+    },
+    config: {
+      type: Schema.Types.Mixed, // Flexible JSON object
+      default: {},
     },
     type: {
       type: String,

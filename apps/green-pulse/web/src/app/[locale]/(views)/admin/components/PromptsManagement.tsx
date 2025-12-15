@@ -26,9 +26,14 @@ import {
   SelectValue,
   TextArea,
   Switch,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@ezstart/ui/components'
 import { runWithFeedback, toast } from '@ezstart/ui/utils'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { PromptConfigEditor, type PromptConfig } from './PromptConfigEditor'
 
 type SystemPrompt = {
   _id: string
@@ -36,6 +41,7 @@ type SystemPrompt = {
   name: string
   description?: string
   content: string
+  config?: PromptConfig
   type: 'general' | 'extraction' | 'validation' | 'vision' | 'custom'
   provider: 'all' | 'gemini' | 'openai' | 'anthropic'
   isActive: boolean
@@ -90,6 +96,7 @@ export function PromptsManagement() {
     name: '',
     description: '',
     content: '',
+    config: {} as PromptConfig,
     type: 'general' as SystemPrompt['type'],
     provider: 'all' as SystemPrompt['provider'],
     isActive: true,
@@ -168,6 +175,7 @@ export function PromptsManagement() {
       name: '',
       description: '',
       content: '',
+      config: {},
       type: 'general',
       provider: 'all',
       isActive: true,
@@ -182,6 +190,7 @@ export function PromptsManagement() {
       name: prompt.name,
       description: prompt.description || '',
       content: prompt.content,
+      config: prompt.config || {},
       type: prompt.type,
       provider: prompt.provider,
       isActive: prompt.isActive,
@@ -387,111 +396,131 @@ export function PromptsManagement() {
             </DialogTitle>
           </DialogHeader>
 
-          <Div className="space-y-4 py-4">
-            <Div className="grid grid-cols-2 gap-4">
+          <Tabs defaultValue="prompt" className="py-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="prompt">
+                <Icon name="lucide:MessageSquare" className="mr-2" size={16} />
+                Prompt Content
+              </TabsTrigger>
+              <TabsTrigger value="config">
+                <Icon name="lucide:Settings" className="mr-2" size={16} />
+                Configuration
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="prompt" className="space-y-4">
+              <Div className="grid grid-cols-2 gap-4">
+                <Div>
+                  <Label htmlFor="key">Key (unique identifier)</Label>
+                  <Input
+                    id="key"
+                    value={formData.key}
+                    onChange={e => setFormData({ ...formData, key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
+                    placeholder="e.g., general-esg-advisor"
+                    disabled={!!editingPrompt}
+                  />
+                </Div>
+                <Div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., ESG Advisor"
+                  />
+                </Div>
+              </Div>
+
               <Div>
-                <Label htmlFor="key">Key (unique identifier)</Label>
+                <Label htmlFor="description">Description (optional)</Label>
                 <Input
-                  id="key"
-                  value={formData.key}
-                  onChange={e => setFormData({ ...formData, key: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
-                  placeholder="e.g., general-esg-advisor"
-                  disabled={!!editingPrompt}
+                  id="description"
+                  value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of this prompt"
                 />
               </Div>
-              <Div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., ESG Advisor"
-                />
-              </Div>
-            </Div>
 
-            <Div>
-              <Label htmlFor="description">Description (optional)</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of this prompt"
+              <Div className="grid grid-cols-2 gap-4">
+                <Div>
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value: SystemPrompt['type']) => setFormData({ ...formData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_PROMPT_TYPES.map(t => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Div>
+                <Div>
+                  <Label htmlFor="provider">Provider</Label>
+                  <Select
+                    value={formData.provider}
+                    onValueChange={(value: SystemPrompt['provider']) => setFormData({ ...formData, provider: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROVIDERS.map(p => (
+                        <SelectItem key={p.value} value={p.value}>
+                          {p.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Div>
+              </Div>
+
+              <Div>
+                <Label htmlFor="content">System Prompt (personality, role)</Label>
+                <TextArea
+                  id="content"
+                  value={formData.content}
+                  onChange={e => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Enter the system prompt (e.g., 'You are GreenPulse.AI, an ESG advisor...')"
+                  className="min-h-[200px] font-mono text-sm"
+                />
+                <P className="text-xs text-muted-foreground mt-1">
+                  {formData.content.length}/10000 characters - Repeated in every message
+                </P>
+              </Div>
+
+              <Div className="flex items-center gap-6">
+                <Div className="flex items-center gap-2">
+                  <Switch
+                    id="isActive"
+                    checked={formData.isActive}
+                    onCheckedChange={checked => setFormData({ ...formData, isActive: checked })}
+                  />
+                  <Label htmlFor="isActive">Active</Label>
+                </Div>
+                <Div className="flex items-center gap-2">
+                  <Switch
+                    id="isDefault"
+                    checked={formData.isDefault}
+                    onCheckedChange={checked => setFormData({ ...formData, isDefault: checked })}
+                  />
+                  <Label htmlFor="isDefault">Set as default for this type</Label>
+                </Div>
+              </Div>
+            </TabsContent>
+
+            <TabsContent value="config">
+              <PromptConfigEditor
+                config={formData.config}
+                onChange={config => setFormData({ ...formData, config })}
               />
-            </Div>
-
-            <Div className="grid grid-cols-2 gap-4">
-              <Div>
-                <Label htmlFor="type">Type</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value: SystemPrompt['type']) => setFormData({ ...formData, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_PROMPT_TYPES.map(t => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Div>
-              <Div>
-                <Label htmlFor="provider">Provider</Label>
-                <Select
-                  value={formData.provider}
-                  onValueChange={(value: SystemPrompt['provider']) => setFormData({ ...formData, provider: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVIDERS.map(p => (
-                      <SelectItem key={p.value} value={p.value}>
-                        {p.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Div>
-            </Div>
-
-            <Div>
-              <Label htmlFor="content">Prompt Content</Label>
-              <TextArea
-                id="content"
-                value={formData.content}
-                onChange={e => setFormData({ ...formData, content: e.target.value })}
-                placeholder="Enter the system prompt..."
-                className="min-h-[200px] font-mono text-sm"
-              />
-              <P className="text-xs text-muted-foreground mt-1">
-                {formData.content.length}/10000 characters
-              </P>
-            </Div>
-
-            <Div className="flex items-center gap-6">
-              <Div className="flex items-center gap-2">
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={checked => setFormData({ ...formData, isActive: checked })}
-                />
-                <Label htmlFor="isActive">Active</Label>
-              </Div>
-              <Div className="flex items-center gap-2">
-                <Switch
-                  id="isDefault"
-                  checked={formData.isDefault}
-                  onCheckedChange={checked => setFormData({ ...formData, isDefault: checked })}
-                />
-                <Label htmlFor="isDefault">Set as default for this type</Label>
-              </Div>
-            </Div>
-          </Div>
+            </TabsContent>
+          </Tabs>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
