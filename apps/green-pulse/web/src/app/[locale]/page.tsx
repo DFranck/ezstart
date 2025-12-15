@@ -394,7 +394,8 @@ export default function HomePage(): any {
             {t('useCases.title')}
           </H2>
 
-          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {/* Horizontal Cards - Stacked Vertically */}
+          <Div className="flex flex-col gap-6 max-w-6xl mx-auto">
             {(
               t.raw('useCases.cases') as Array<{
                 icon: string
@@ -409,36 +410,43 @@ export default function HomePage(): any {
                 key={index}
                 className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <CardHeader>
-                  <Div className="text-5xl mb-4">{useCase.icon}</Div>
-                  <H3 size="h5" className="text-gp-primary mb-4">
-                    {useCase.title}
-                  </H3>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Div>
-                    <Strong className="text-sm">Challenge:</Strong>
-                    <P className="text-sm text-muted-foreground mt-1">{useCase.challenge}</P>
+                <Div className="flex flex-col md:flex-row gap-6 p-6">
+                  {/* Left: Icon */}
+                  <Div className="flex-shrink-0 text-center md:text-left">
+                    <Div className="text-6xl md:text-7xl">{useCase.icon}</Div>
                   </Div>
-                  <Div>
-                    <Strong className="text-sm">Solution:</Strong>
-                    <P className="text-sm text-muted-foreground mt-1">{useCase.solution}</P>
+
+                  {/* Center: Content */}
+                  <Div className="flex-1 space-y-4">
+                    <H3 size="h5" className="text-gp-primary">
+                      {useCase.title}
+                    </H3>
+                    <Div>
+                      <Strong className="text-sm">Challenge:</Strong>
+                      <P className="text-sm text-muted-foreground mt-1">{useCase.challenge}</P>
+                    </Div>
+                    <Div>
+                      <Strong className="text-sm">Solution:</Strong>
+                      <P className="text-sm text-muted-foreground mt-1">{useCase.solution}</P>
+                    </Div>
+                    <Div>
+                      <Strong className="text-sm">Result:</Strong>
+                      <P className="text-sm text-muted-foreground mt-1">{useCase.result}</P>
+                    </Div>
                   </Div>
-                  <Div>
-                    <Strong className="text-sm">Result:</Strong>
-                    <P className="text-sm text-muted-foreground mt-1">{useCase.result}</P>
-                  </Div>
-                  <Div className="flex flex-wrap gap-2 pt-2">
+
+                  {/* Right: Badges */}
+                  <Div className="flex-shrink-0 flex flex-wrap md:flex-col gap-2 md:justify-end md:items-end">
                     {useCase.badges.map((badge, badgeIndex) => (
                       <Span
                         key={badgeIndex}
-                        className="bg-gp-primary/10 text-gp-primary px-3 py-1 rounded-full text-xs font-medium"
+                        className="bg-gp-primary/10 text-gp-primary px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
                       >
                         {badge}
                       </Span>
                     ))}
                   </Div>
-                </CardContent>
+                </Div>
               </Card>
             ))}
           </Div>
