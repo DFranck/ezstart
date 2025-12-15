@@ -75,11 +75,11 @@
     },
     "subtitle": "Your New Green Agent",
     "heroFeatures": [
-      "Smart Data Extraction",
-      "Instant ESG Scoring",
-      "Automated Compliance Reports",
-      "Green Finance Readiness",
-      "Tailored Growth Strategy"
+      "Smart data extraction",
+      "Instant ESG scoring",
+      "Automated compliance reports",
+      "Green finance readiness",
+      "Tailored growth strategy"
     ],
     "challenge": {
       "title": "The world is facing <strong>extreme weather</strong> due to climate change, Companies are pushed to move beyond Business as Usual and to aim to sustainable growth.",
@@ -143,7 +143,7 @@
       "cases": [
         {
           "icon": "🏭",
-          "title": "Manufacturing SME: Cost reduction through energy efficiency",
+          "title": "Manufacturing SME: cost reduction through energy efficiency",
           "challenge": "High energy costs, lack of ESG documentation for international buyers",
           "solution": "Carbon footprint calculation, identification of energy-saving opportunities (solar panels, efficient machinery), green loan eligibility assessment",
           "result": "20-35% energy cost reduction depending on initial investments, improved access to green financing, provide compliance and auditable report for internationals buyers",
@@ -151,7 +151,7 @@
         },
         {
           "icon": "🍽️",
-          "title": "Restaurant: Reduce costs while building green appeal",
+          "title": "Restaurant: reduce costs while building green appeal",
           "challenge": "High electricity bills, difficulty attracting eco-conscious customers without clear sustainability strategy",
           "solution": "Quick wins identification (LED lighting, building insulation, solar potential assessment), local supplier partnerships guidance, waste management optimization, elimination of single-use plastics",
           "result": "25-40% energy cost reduction based on implemented measures, 40-60% waste reduction, enhanced brand positioning for eco-tourism and conscious consumers, potential 'Green Certified' recognition",
@@ -164,7 +164,7 @@
         },
         {
           "icon": "🌾",
-          "title": "Agribusiness: Regenerative farming for finance & export access",
+          "title": "Agribusiness: regenerative farming for finance & export access",
           "challenge": "EU / USA and even Chinese buyers requiring strong compliant sustainability documentation",
           "solution": "EU compliance checklist guidance, export-ready ESG report generation, gap analysis and action plan",
           "result": "Successful international buyer audits, maintained or expanded export contracts, improved positioning for green bond financing, competitive advantage in health-conscious and sustainability-driven supply chains",
