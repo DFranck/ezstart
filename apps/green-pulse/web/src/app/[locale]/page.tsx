@@ -511,7 +511,7 @@ export default function HomePage(): any {
             {t('partnership.subtitle')}
           </H3>
 
-          <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-8">
+          <Div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 max-w-6xl mx-auto mb-8">
             {(
               t.raw('partnership.values') as Array<{
                 icon: string
@@ -519,21 +519,49 @@ export default function HomePage(): any {
                 items: string[]
               }>
             ).map((value, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <Div className="text-5xl mb-4">{value.icon}</Div>
-                  <H3 size="h5" className="text-gp-primary">
-                    {value.title}
-                  </H3>
-                </CardHeader>
-                <CardContent>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                    {value.items.map((item, itemIndex) => (
-                      <li key={itemIndex}>{item}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              <>
+                <Card
+                  key={index}
+                  className={`
+                    hover:shadow-lg transition-all duration-300 hover:scale-105 w-full md:w-auto
+                    ${index === 0 ? 'bg-gp-primary/5 border-gp-primary/20' : ''}
+                    ${index === 1 ? 'bg-gp-primary/10 border-gp-primary/40' : ''}
+                    ${index === 2 ? 'bg-gp-primary/15 border-gp-primary/60 border-2' : ''}
+                  `}
+                >
+                  <CardHeader>
+                    <Div className="flex items-center justify-between mb-4">
+                      <Div className="text-5xl">{value.icon}</Div>
+                      <Div
+                        className={`
+                          text-2xl font-bold rounded-full w-10 h-10 flex items-center justify-center
+                          ${index === 0 ? 'bg-gp-primary/10 text-gp-primary' : ''}
+                          ${index === 1 ? 'bg-gp-primary/20 text-gp-primary' : ''}
+                          ${index === 2 ? 'bg-gp-primary/30 text-gp-primary' : ''}
+                        `}
+                      >
+                        {index + 1}
+                      </Div>
+                    </Div>
+                    <H3 size="h5" className="text-gp-primary">
+                      {value.title}
+                    </H3>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                      {value.items.map((item, itemIndex) => (
+                        <li key={itemIndex}>{item}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+                {/* Plus symbol between cards (not after last card) */}
+                {index < 2 && (
+                  <Div className="flex-shrink-0 text-4xl md:text-5xl font-bold text-gp-primary my-4 md:my-0">
+                    +
+                  </Div>
+                )}
+              </>
             ))}
           </Div>
 
