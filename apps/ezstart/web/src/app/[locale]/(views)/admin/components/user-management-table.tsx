@@ -26,7 +26,7 @@ interface UserManagementTableProps {
 }
 
 export function UserManagementTable({ users, currentUser, onEditUser, rbac }: UserManagementTableProps) {
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (role: string, isGlobal = true) => {
     const variants: Record<string, any> = {
       superadmin: 'destructive',
       admin: 'default',
@@ -34,7 +34,33 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
       'beta-tester': 'outline',
       client: 'outline',
     }
-    return <Badge variant={variants[role] || 'outline'}>{role}</Badge>
+    return (
+      <Badge variant={variants[role] || 'outline'}>
+        {role}
+        {!isGlobal && <Span className="ml-1 text-[10px] opacity-70">✦</Span>}
+      </Badge>
+    )
+  }
+
+  // Helper to get all roles (global + app-specific)
+  const getAllRoles = (user: AuthUser) => {
+    const roles: Array<{ role: string; isGlobal: boolean; app?: string }> = []
+
+    // Add global roles
+    if (user.roles && user.roles.length > 0) {
+      user.roles.forEach((role) => roles.push({ role, isGlobal: true }))
+    }
+
+    // Add app-specific roles with app name
+    if (user.appRoles) {
+      Object.entries(user.appRoles).forEach(([app, appRoles]) => {
+        if (Array.isArray(appRoles)) {
+          appRoles.forEach((role) => roles.push({ role: `${role}`, isGlobal: false, app }))
+        }
+      })
+    }
+
+    return roles
   }
 
   return (
@@ -85,13 +111,17 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
               <Div>
                 <P className="text-xs font-semibold text-muted-foreground mb-1">Roles</P>
                 <Div className="flex flex-wrap gap-1">
-                  {user.roles && user.roles.length > 0 ? (
-                    user.roles.map((role) => (
-                      <Span key={role}>{getRoleBadge(role)}</Span>
+                  {(() => {
+                    const allRoles = getAllRoles(user)
+                    if (allRoles.length === 0) {
+                      return <Badge variant="outline">No roles</Badge>
+                    }
+                    return allRoles.map((roleInfo, idx) => (
+                      <Span key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`} title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}>
+                        {getRoleBadge(roleInfo.role, roleInfo.isGlobal)}
+                      </Span>
                     ))
-                  ) : (
-                    <Badge variant="outline">No roles</Badge>
-                  )}
+                  })()}
                 </Div>
               </Div>
 
@@ -184,13 +214,17 @@ export function UserManagementTable({ users, currentUser, onEditUser, rbac }: Us
                 </TableCell>
                 <TableCell>
                   <Div className="flex flex-wrap gap-1">
-                    {user.roles && user.roles.length > 0 ? (
-                      user.roles.map((role) => (
-                        <Span key={role}>{getRoleBadge(role)}</Span>
+                    {(() => {
+                      const allRoles = getAllRoles(user)
+                      if (allRoles.length === 0) {
+                        return <Badge variant="outline">No roles</Badge>
+                      }
+                      return allRoles.map((roleInfo, idx) => (
+                        <Span key={`${roleInfo.role}-${roleInfo.app || 'global'}-${idx}`} title={roleInfo.app ? `App: ${roleInfo.app}` : 'Global role'}>
+                          {getRoleBadge(roleInfo.role, roleInfo.isGlobal)}
+                        </Span>
                       ))
-                    ) : (
-                      <Badge variant="outline">No roles</Badge>
-                    )}
+                    })()}
                   </Div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
