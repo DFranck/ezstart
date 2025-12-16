@@ -524,25 +524,26 @@ export default function HomePage(): any {
               <Fragment key={index}>
                 <Card
                   className={`
-                    hover:shadow-lg transition-all duration-300 hover:scale-105 w-full md:w-auto
-                    ${index === 0 ? 'bg-gp-primary/5 border-gp-primary/20' : ''}
-                    ${index === 1 ? 'bg-gp-primary/10 border-gp-primary/40' : ''}
-                    ${index === 2 ? 'bg-gp-primary/15 border-gp-primary/60 border-2' : ''}
+                    transition-all duration-300 hover:scale-105 w-full md:w-auto
+                    ${index === 0 ? 'bg-gp-primary/5 border-gp-primary/30 border shadow-sm' : ''}
+                    ${index === 1 ? 'bg-gp-primary/15 border-gp-primary/50 border-2 shadow-md scale-[1.02]' : ''}
+                    ${index === 2 ? 'bg-gp-primary/25 border-gp-primary/70 border-[3px] shadow-lg scale-[1.04] ring-2 ring-gp-primary/20' : ''}
+                    hover:shadow-xl
                   `}
                 >
                   <CardHeader>
                     <Div className="flex items-center gap-3 mb-4">
                       <Div
                         className={`
-                          text-2xl font-bold rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0
-                          ${index === 0 ? 'bg-gp-primary/10 text-gp-primary' : ''}
-                          ${index === 1 ? 'bg-gp-primary/20 text-gp-primary' : ''}
-                          ${index === 2 ? 'bg-gp-primary/30 text-gp-primary' : ''}
+                          font-bold rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0
+                          ${index === 0 ? 'text-xl bg-gp-primary/20 text-gp-primary' : ''}
+                          ${index === 1 ? 'text-2xl bg-gp-primary/30 text-gp-primary' : ''}
+                          ${index === 2 ? 'text-2xl bg-gp-primary text-white shadow-md' : ''}
                         `}
                       >
                         {index + 1}
                       </Div>
-                      <H3 size="h5" className="text-gp-primary">
+                      <H3 size="h5" className={`${index === 2 ? 'text-gp-primary font-bold' : 'text-gp-primary'}`}>
                         {value.title}
                       </H3>
                     </Div>
