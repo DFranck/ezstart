@@ -2,7 +2,7 @@
   "home": {
     "hero": {
       "title": "GreenPulse.AI - AI-Powered ESG Compliance for Southeast Asian SMEs",
-      "subtitle": "One Sustainable Agent for 1 Million Businesses",
+      "subtitle": "One sustainable agent for 1 million businesses",
       "typewriterText": "Transform sustainability growth into bankable green finance opportunities",
       "description": "Reduce costs by 30% • Unlock green loans • Meet export standards • Scale sustainably • Get KPIs for green marketing, NO greenwashing",
       "cta": "Get Started Free",
@@ -103,15 +103,15 @@
       "steps": {
         "step1": {
           "badge": "1",
-          "title": "DISCUSS & UPLOAD"
+          "title": "Discuss & upload"
         },
         "step2": {
           "badge": "2",
-          "title": "LET GPA WORKS FOR YOU"
+          "title": "Let GPA work for you"
         },
         "step3": {
           "badge": "3",
-          "title": "GET YOUR STRATEGY & KPIs"
+          "title": "Get your strategy & KPIs"
         }
       },
       "features": [

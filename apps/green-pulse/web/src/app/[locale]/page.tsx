@@ -440,7 +440,7 @@ export default function HomePage(): any {
                     {useCase.badges.map((badge, badgeIndex) => (
                       <Span
                         key={badgeIndex}
-                        className="bg-gp-primary/10 text-gp-primary px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+                        className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap"
                       >
                         {badge}
                       </Span>
