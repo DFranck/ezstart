@@ -18,5 +18,11 @@
     "free": "Self-Awareness (Free plan)",
     "premium": "Premium Package",
     "golden": "Golden Package"
+  },
+  "errors": {
+    "sendFailed": "Failed to send message. Please try again.",
+    "serviceOverloaded": "AI service temporarily overloaded. Please try again in a few moments.",
+    "quotaExceeded": "AI service quota exceeded. Please try again later.",
+    "configError": "AI service configuration error. Please contact support."
   }
 }

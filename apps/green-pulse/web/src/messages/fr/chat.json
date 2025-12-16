@@ -18,5 +18,11 @@
     "free": "Self-Awareness (Forfait gratuit)",
     "premium": "Forfait Premium",
     "golden": "Forfait Golden"
+  },
+  "errors": {
+    "sendFailed": "Échec de l'envoi du message. Veuillez réessayer.",
+    "serviceOverloaded": "Service IA temporairement surchargé. Veuillez réessayer dans quelques instants.",
+    "quotaExceeded": "Quota du service IA dépassé. Veuillez réessayer plus tard.",
+    "configError": "Erreur de configuration du service IA. Veuillez contacter le support."
   }
 }

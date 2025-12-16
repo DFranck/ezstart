@@ -157,9 +157,32 @@ sendMessageRouter.post(
       })
     } catch (error) {
       console.error('Chat error:', error)
-      res.status(500).json({
+
+      // Detect specific error types for better user feedback
+      let statusCode = 500
+      let errorMessage = 'Failed to process chat message'
+
+      if (error instanceof Error) {
+        // Check if it's a 503 Service Unavailable (AI provider overload)
+        if (error.message.includes('503') || error.message.includes('overloaded')) {
+          statusCode = 503
+          errorMessage = 'AI service temporarily overloaded. Please try again in a few moments.'
+        }
+        // Check if it's a quota/rate limit error
+        else if (error.message.includes('quota') || error.message.includes('rate limit')) {
+          statusCode = 429
+          errorMessage = 'AI service quota exceeded. Please try again later.'
+        }
+        // Check if it's an API key error
+        else if (error.message.includes('API key') || error.message.includes('authentication')) {
+          statusCode = 500
+          errorMessage = 'AI service configuration error. Please contact support.'
+        }
+      }
+
+      res.status(statusCode).json({
         success: false,
-        error: 'Failed to process chat message',
+        error: errorMessage,
         timestamp: new Date().toISOString(),
       })
     }

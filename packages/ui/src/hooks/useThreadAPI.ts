@@ -89,7 +89,17 @@ export function useThreadAPI(config: ThreadAPIConfig): UseThreadAPIReturn {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          // Try to extract error message from response body
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch {
+            // If JSON parsing fails, use status text
+          }
+          throw new Error(errorMessage);
         }
 
         // Auto-detect SSE vs JSON based on Content-Type

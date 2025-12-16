@@ -26,6 +26,8 @@ import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
 function LiaPageContent(): any {
+  const t = useTranslations('chat')
+
   // Get user from Zustand store (localStorage 'ezauth-storage')
   const { user, isAuthenticated } = useAuthStore()
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -88,8 +90,19 @@ function LiaPageContent(): any {
       },
       onError: (error: Error) => {
         console.error('LIA Chat Error:', error)
-        // Show error toast to user
-        toast.error(error.message || 'Failed to send message. Please try again.')
+
+        // Map error messages to translated versions
+        let translatedError = t('errors.sendFailed')
+        if (error.message.includes('overloaded')) {
+          translatedError = t('errors.serviceOverloaded')
+        } else if (error.message.includes('quota')) {
+          translatedError = t('errors.quotaExceeded')
+        } else if (error.message.includes('configuration')) {
+          translatedError = t('errors.configError')
+        }
+
+        // Show translated error toast to user
+        toast.error(translatedError)
       },
     }),
     [
@@ -99,6 +112,7 @@ function LiaPageContent(): any {
       onConversationCreated,
       selectedProvider,
       refreshConversation,
+      t,
     ]
   ) // Re-create when auth state, activeConversationId, selectedProvider, or refreshConversation changes
 
