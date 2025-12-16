@@ -525,9 +525,9 @@ export default function HomePage(): any {
                 <Card
                   className={`
                     transition-all duration-300 hover:scale-105 w-full md:w-auto
-                    ${index === 0 ? 'bg-gp-primary/5 border-gp-primary/30 border shadow-sm' : ''}
-                    ${index === 1 ? 'bg-gp-primary/15 border-gp-primary/50 border-2 shadow-md scale-[1.02]' : ''}
-                    ${index === 2 ? 'bg-gp-primary/25 border-gp-primary/70 border-[3px] shadow-lg scale-[1.04] ring-2 ring-gp-primary/20' : ''}
+                    ${index === 0 ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 border shadow-sm' : ''}
+                    ${index === 1 ? 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700 border-2 shadow-md scale-[1.02]' : ''}
+                    ${index === 2 ? 'bg-green-200 dark:bg-green-800/40 border-green-400 dark:border-green-600 border-[3px] shadow-lg scale-[1.04] ring-2 ring-green-300/50' : ''}
                     hover:shadow-xl
                   `}
                 >
@@ -536,9 +536,9 @@ export default function HomePage(): any {
                       <Div
                         className={`
                           font-bold rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0
-                          ${index === 0 ? 'text-xl bg-gp-primary/20 text-gp-primary' : ''}
-                          ${index === 1 ? 'text-2xl bg-gp-primary/30 text-gp-primary' : ''}
-                          ${index === 2 ? 'text-2xl bg-gp-primary text-white shadow-md' : ''}
+                          ${index === 0 ? 'text-xl bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-200' : ''}
+                          ${index === 1 ? 'text-2xl bg-green-300 dark:bg-green-700 text-green-800 dark:text-green-100' : ''}
+                          ${index === 2 ? 'text-2xl bg-green-600 dark:bg-green-500 text-white shadow-md' : ''}
                         `}
                       >
                         {index + 1}
