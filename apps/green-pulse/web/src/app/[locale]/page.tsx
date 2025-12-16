@@ -479,10 +479,12 @@ export default function HomePage(): any {
                 className="border-t-4 border-t-gp-accent hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
                 <CardHeader>
-                  <Div className="text-4xl mb-3">{card.icon}</Div>
-                  <H3 size="h6" className="text-gp-primary">
-                    {card.title}
-                  </H3>
+                  <Div className="flex items-center gap-3 mb-3">
+                    <Div className="text-4xl flex-shrink-0">{card.icon}</Div>
+                    <H3 size="h6" className="text-gp-primary">
+                      {card.title}
+                    </H3>
+                  </Div>
                 </CardHeader>
                 <CardContent>
                   <P className="text-sm text-muted-foreground leading-relaxed">
@@ -529,11 +531,10 @@ export default function HomePage(): any {
                   `}
                 >
                   <CardHeader>
-                    <Div className="flex items-center justify-between mb-4">
-                      <Div className="text-5xl">{value.icon}</Div>
+                    <Div className="flex items-center gap-3 mb-4">
                       <Div
                         className={`
-                          text-2xl font-bold rounded-full w-10 h-10 flex items-center justify-center
+                          text-2xl font-bold rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0
                           ${index === 0 ? 'bg-gp-primary/10 text-gp-primary' : ''}
                           ${index === 1 ? 'bg-gp-primary/20 text-gp-primary' : ''}
                           ${index === 2 ? 'bg-gp-primary/30 text-gp-primary' : ''}
@@ -541,10 +542,10 @@ export default function HomePage(): any {
                       >
                         {index + 1}
                       </Div>
+                      <H3 size="h5" className="text-gp-primary">
+                        {value.title}
+                      </H3>
                     </Div>
-                    <H3 size="h5" className="text-gp-primary">
-                      {value.title}
-                    </H3>
                   </CardHeader>
                   <CardContent>
                     <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
