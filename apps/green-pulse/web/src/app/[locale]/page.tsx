@@ -672,57 +672,35 @@ export default function HomePage(): any {
 
           <Div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {/* Free Package - Self-Awareness */}
-            <Card className="p-8 border-2 border-gp-primary/30 bg-gradient-to-br from-gp-primary/5 via-gp-accent/5 to-gp-primary/10 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-              {/* Badge */}
-              <Div className="absolute top-4 right-4">
-                <Span className="bg-gradient-to-r from-gp-primary to-gp-accent text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-md">
-                  Always Free
-                </Span>
-              </Div>
-
-              <Div className="text-center mb-6">
-                <H3 className="text-3xl font-bold mb-2 text-gp-primary">{t('packages.free.title')}</H3>
-                <P className="text-base font-medium text-gp-primary/80">
+            <Card className="p-8 border-2 border-border hover:shadow-lg transition-all duration-300">
+              <Div className="mb-6">
+                <H3 className="text-2xl font-bold mb-2 text-foreground">{t('packages.free.title')}</H3>
+                <P className="text-sm text-muted-foreground">
                   {t('packages.free.subtitle')}
                 </P>
               </Div>
 
-              {/* Price */}
-              <Div className="text-center mb-6 p-4 bg-white/60 rounded-xl">
-                <Span className="text-5xl font-extrabold text-gp-primary">{t('packages.free.price')}</Span>
-                <Span className="text-lg font-semibold text-gp-accent ml-2">{t('packages.free.period')}</Span>
-              </Div>
-
               {/* Description */}
-              <Div className="bg-white/70 p-4 rounded-lg mb-6">
-                <P className="text-foreground text-sm leading-relaxed">
-                  {t('packages.free.description')}
-                </P>
-              </Div>
+              <P className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                {t('packages.free.description')}
+              </P>
 
               {/* Features */}
               <Div className="space-y-3 mb-6">
                 {Object.entries(t.raw('packages.free.features') as Record<string, string>).map(([key, feature]) => (
-                  <Div key={key} className={`flex items-start space-x-3 pb-3 ${key !== 'instant' ? 'border-b border-gp-primary/20' : ''}`}>
+                  <Div key={key} className="flex items-start space-x-3">
                     <Icon name="lucide:Check" className="w-5 h-5 text-gp-primary flex-shrink-0 mt-0.5" />
-                    <P className={`text-sm ${key === 'instant' ? 'text-gp-accent font-semibold' : 'text-foreground'}`}>{feature}</P>
+                    <P className={`text-sm ${key === 'instant' ? 'font-semibold' : ''}`}>{feature}</P>
                   </Div>
                 ))}
               </Div>
 
               {/* CTA */}
-              <Button asChild className="w-full bg-gradient-to-r from-gp-primary to-gp-accent hover:from-gp-accent hover:to-gp-primary text-white font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <Link href="/chat" target="_blank" rel="noopener noreferrer">
+              <Button asChild className="w-full bg-gp-primary hover:bg-gp-primary/90 text-white">
+                <Link href="/chat">
                   {t('packages.free.cta')}
                 </Link>
               </Button>
-
-              {/* Note */}
-              <Div className="mt-4 p-3 bg-white/80 rounded-lg">
-                <P className="text-sm text-gp-primary font-medium italic text-center">
-                  {t('packages.free.note')}
-                </P>
-              </Div>
             </Card>
 
             {/* Premium Package */}
@@ -741,7 +719,7 @@ export default function HomePage(): any {
                 {t('packages.premium.description')}
               </P>
 
-              <Div className="space-y-3">
+              <Div className="space-y-3 mb-6">
                 {[
                   { icon: 'lucide:MessageCircle', text: t('packages.premium.features.chat') },
                   { icon: 'lucide:BarChart3', text: t('packages.premium.features.tools') },
@@ -755,6 +733,13 @@ export default function HomePage(): any {
                   </Div>
                 ))}
               </Div>
+
+              {/* CTA */}
+              <Button asChild className="w-full" variant="outline">
+                <a href="mailto:aseradni@nexora-venture.com?subject=Premium%20Package%20Inquiry">
+                  Contact Us
+                </a>
+              </Button>
             </Card>
 
             {/* Golden Package */}
@@ -773,7 +758,7 @@ export default function HomePage(): any {
                 {t('packages.golden.description')}
               </P>
 
-              <Div className="space-y-3">
+              <Div className="space-y-3 mb-6">
                 {[
                   { icon: 'lucide:Star', text: t('packages.golden.features.all') },
                   {
@@ -788,6 +773,13 @@ export default function HomePage(): any {
                   </Div>
                 ))}
               </Div>
+
+              {/* CTA */}
+              <Button asChild className="w-full" variant="outline">
+                <a href="mailto:aseradni@nexora-venture.com?subject=Golden%20Package%20Inquiry">
+                  Contact Us
+                </a>
+              </Button>
             </Card>
           </Div>
         </Div>
