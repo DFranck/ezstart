@@ -23,7 +23,7 @@
     "src/with-bundle-analyzer.js"
   ],
   "peerDependencies": {
-    "next": "^15.0.0"
+    "next": "^15.5.9"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
