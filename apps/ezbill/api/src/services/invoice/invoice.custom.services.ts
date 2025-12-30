@@ -79,13 +79,35 @@ export async function markInvoiceAsPaidService(
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
     const receiptDocumentNumber = await generateNextNumber('receipt', updatedInvoice.userId);
+
+    // For flat-rate invoices, create a single line item from description
+    const receiptItems = updatedInvoice.billingType === 'flat-rate'
+      ? [{
+          label: updatedInvoice.description || 'Service',
+          quantity: 1,
+          price: updatedInvoice.flatRateAmount || updatedInvoice.subtotal
+        }]
+      : updatedInvoice.items;
+
+    // Prepare receipt data - handle missing exchangeRate by creating default 1:1 rate
+    const receiptExchangeRate = updatedInvoice.exchangeRate || {
+      from: updatedInvoice.currency,
+      to: updatedInvoice.currency,
+      rate: 1,
+      source: 'default',
+      fetchedAt: new Date().toISOString()
+    };
+
     const receiptData = {
       userId: updatedInvoice.userId,
       companyId: options?.companyId || updatedInvoice.companyId,
       clientId: updatedInvoice.clientId,
-      items: updatedInvoice.items,
+      billingType: updatedInvoice.billingType,
+      items: receiptItems,
+      description: updatedInvoice.description,
+      flatRateAmount: updatedInvoice.flatRateAmount,
       currency: updatedInvoice.currency,
-      exchangeRate: updatedInvoice.exchangeRate,
+      exchangeRate: receiptExchangeRate,
       notes: options?.notes || `Receipt for invoice ${updatedInvoice.documentNumber}`,
       status: 'issued',
       invoiceId: updatedInvoice._id.toString(),

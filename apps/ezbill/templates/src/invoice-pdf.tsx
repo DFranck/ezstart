@@ -65,11 +65,16 @@ interface PDFInvoiceData {
   subtotal: number
   taxAmount: number
   total: number
+  billingType: 'itemized' | 'flat-rate'
+  // For itemized invoices
   items: Array<{
     label: string
     quantity: number
     price: number
   }>
+  // For flat-rate invoices
+  description?: string
+  flatRateAmount?: number
   client: {
     clientName: string
     email?: string
@@ -240,6 +245,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#2d3748',
     textAlign: 'right',
+  },
+  // Flat-rate specific styles
+  flatRateSection: {
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  flatRateHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#f7fafc',
+    padding: 8,
+    borderBottom: '1px solid #e2e8f0',
+  },
+  flatRateRow: {
+    flexDirection: 'row',
+    padding: 8,
+    borderBottom: '1px solid #f7fafc',
+  },
+  flatRateDescription: {
+    flex: 3,
+    fontSize: 12,
+    color: '#2d3748',
+  },
+  flatRateAmount: {
+    flex: 1,
+    fontSize: 12,
+    color: '#2d3748',
+    textAlign: 'right',
+    fontWeight: 'bold',
   },
   totalsSection: {
     marginLeft: 'auto',
@@ -490,24 +523,41 @@ export function InvoicePDF({ data }: InvoicePDFProps) {
           )}
         </View>
 
-        {/* Items Table */}
-        <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableColDescription}>Description</Text>
-            <Text style={styles.tableColQuantity}>Qty</Text>
-            <Text style={styles.tableColPrice}>Unit Price</Text>
-            <Text style={styles.tableColTotal}>Total</Text>
-          </View>
-
-          {data.items.map((item, index) => (
-            <View key={index} style={styles.tableRow} wrap={false}>
-              <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
-              <Text style={styles.tableColQuantity}>{item.quantity}</Text>
-              <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
-              <Text style={styles.tableColTotal}>{formatCurrency(item.quantity * item.price)}</Text>
+        {/* Items Section - Conditional rendering based on billingType */}
+        {data.billingType === 'flat-rate' ? (
+          // Flat-rate layout: Simple description and amount
+          <View style={styles.flatRateSection}>
+            <View style={styles.flatRateHeader}>
+              <Text style={styles.tableColDescription}>Description</Text>
+              <Text style={styles.tableColTotal}>Total</Text>
             </View>
-          ))}
-        </View>
+            <View style={styles.flatRateRow} wrap={false}>
+              <View style={styles.flatRateDescription}>
+                {formatDescription(data.description || '')}
+              </View>
+              <Text style={styles.flatRateAmount}>{formatCurrency(data.flatRateAmount || 0)}</Text>
+            </View>
+          </View>
+        ) : (
+          // Itemized layout: Table with Qty and Unit Price
+          <View style={styles.table}>
+            <View style={styles.tableHeader}>
+              <Text style={styles.tableColDescription}>Description</Text>
+              <Text style={styles.tableColQuantity}>Qty</Text>
+              <Text style={styles.tableColPrice}>Unit Price</Text>
+              <Text style={styles.tableColTotal}>Total</Text>
+            </View>
+
+            {data.items.map((item, index) => (
+              <View key={index} style={styles.tableRow} wrap={false}>
+                <View style={styles.tableColDescription}>{formatDescription(item.label)}</View>
+                <Text style={styles.tableColQuantity}>{item.quantity}</Text>
+                <Text style={styles.tableColPrice}>{formatCurrency(item.price)}</Text>
+                <Text style={styles.tableColTotal}>{formatCurrency(item.quantity * item.price)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Totals */}
         <View style={styles.totalsSection} wrap={false}>

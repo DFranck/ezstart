@@ -14,11 +14,16 @@ export interface PDFReceiptData {
   subtotal: number
   taxAmount: number
   total: number
+  billingType: 'itemized' | 'flat-rate'
+  // For itemized receipts
   items: Array<{
     label: string
     quantity: number
     price: number
   }>
+  // For flat-rate receipts
+  description?: string
+  flatRateAmount?: number
   client: {
     clientName: string
     email?: string
@@ -219,9 +224,35 @@ interface ReceiptPDFProps {
   data: PDFReceiptData
 }
 
-export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
+export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => {
+  // Format description with bullet points on separate lines
+  const formatDescription = (label: string) => {
+    // Split by bullet point • (keeping the bullet)
+    const parts = label.split('•').filter(p => p.trim())
+
+    // If no bullets, return as-is
+    if (parts.length <= 1) {
+      return <Text>{label}</Text>
+    }
+
+    // First part is the title (date), rest are bullet points
+    const [title, ...bullets] = parts
+
+    return (
+      <>
+        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{title?.trim() || ''}</Text>
+        {bullets.map((bullet, i) => (
+          <Text key={i} style={{ marginLeft: 8, marginTop: 2 }}>
+            • {bullet.trim()}
+          </Text>
+        ))}
+      </>
+    )
+  }
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -328,46 +359,71 @@ export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => (
         </View>
       </View>
 
-      {/* Items Table */}
-      <View style={styles.table}>
-        {/* Table Header */}
-        <View style={styles.tableRow}>
-          <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>Description</Text>
+      {/* Items Section - Conditional rendering based on billingType */}
+      {data.billingType === 'flat-rate' ? (
+        // Flat-rate layout: Simple description and amount
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={[styles.tableColHeader, { width: '75%' }]}>
+              <Text style={styles.tableCellHeader}>Description</Text>
+            </View>
+            <View style={[styles.tableColHeader, { width: '25%' }]}>
+              <Text style={styles.tableCellHeader}>Total</Text>
+            </View>
           </View>
-          <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>Quantity</Text>
-          </View>
-          <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>Unit Price</Text>
-          </View>
-          <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>Total</Text>
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCol, { width: '75%' }]}>
+              {formatDescription(data.description || '')}
+            </View>
+            <View style={[styles.tableCol, { width: '25%' }]}>
+              <Text style={styles.tableCell}>
+                {(data.flatRateAmount || 0).toFixed(2)} {data.currency}
+              </Text>
+            </View>
           </View>
         </View>
-
-        {/* Table Rows */}
-        {data.items.map((item, index) => (
-          <View style={styles.tableRow} key={index}>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{item.label}</Text>
+      ) : (
+        // Itemized layout: Table with Qty and Unit Price
+        <View style={styles.table}>
+          {/* Table Header */}
+          <View style={styles.tableRow}>
+            <View style={styles.tableColHeader}>
+              <Text style={styles.tableCellHeader}>Description</Text>
             </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{item.quantity}</Text>
+            <View style={styles.tableColHeader}>
+              <Text style={styles.tableCellHeader}>Quantity</Text>
             </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>
-                {item.price.toFixed(2)} {data.currency}
-              </Text>
+            <View style={styles.tableColHeader}>
+              <Text style={styles.tableCellHeader}>Unit Price</Text>
             </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>
-                {(item.quantity * item.price).toFixed(2)} {data.currency}
-              </Text>
+            <View style={styles.tableColHeader}>
+              <Text style={styles.tableCellHeader}>Total</Text>
             </View>
           </View>
-        ))}
-      </View>
+
+          {/* Table Rows */}
+          {data.items.map((item, index) => (
+            <View style={styles.tableRow} key={index}>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>{item.label}</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>{item.quantity}</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>
+                  {item.price.toFixed(2)} {data.currency}
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCell}>
+                  {(item.quantity * item.price).toFixed(2)} {data.currency}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Totals Section */}
       <View style={styles.totalsSection}>
@@ -408,4 +464,5 @@ export const ReceiptPDF: React.FC<ReceiptPDFProps> = ({ data }) => (
       </Text>
     </Page>
   </Document>
-)
+  )
+}

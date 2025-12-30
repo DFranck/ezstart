@@ -17,11 +17,14 @@ export function convertToInvoicePDFData(
     subtotal: invoice.subtotal,
     taxAmount: invoice.taxAmount,
     total: invoice.total,
+    billingType: invoice.billingType || 'itemized',
     items: invoice.items.map(item => ({
       label: item.label,
       quantity: item.quantity,
       price: item.price,
     })),
+    description: invoice.description,
+    flatRateAmount: invoice.flatRateAmount,
     client: {
       clientName: client.clientName,
       email: client.email,
@@ -118,11 +121,14 @@ export function convertToReceiptPDFData(
     subtotal: receipt.subtotal,
     taxAmount: receipt.taxAmount,
     total: receipt.total,
+    billingType: receipt.billingType || 'itemized',
     items: receipt.items.map(item => ({
       label: item.label,
       quantity: item.quantity,
       price: item.price,
     })),
+    description: receipt.description,
+    flatRateAmount: receipt.flatRateAmount,
     client: {
       clientName: client.clientName,
       email: client.email,

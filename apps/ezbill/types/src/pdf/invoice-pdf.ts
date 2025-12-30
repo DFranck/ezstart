@@ -11,11 +11,16 @@ export interface PDFInvoiceData {
   subtotal: number
   taxAmount: number
   total: number
+  billingType: 'itemized' | 'flat-rate'
+  // For itemized invoices
   items: Array<{
     label: string
     quantity: number
     price: number
   }>
+  // For flat-rate invoices
+  description?: string
+  flatRateAmount?: number
   client: {
     clientName: string
     email?: string
