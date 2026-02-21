@@ -58,6 +58,7 @@ type Props = {
   bearingFromNorth: number
   visualizationMode?: 'wheel' | 'grid'
   transformations?: Transformations
+  isPremium?: boolean
 }
 
 export function BaguaPreviewModal({
@@ -68,6 +69,7 @@ export function BaguaPreviewModal({
   bearingFromNorth,
   visualizationMode = 'wheel',
   transformations,
+  isPremium = false,
 }: Props) {
   const t = useTranslations()
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -913,8 +915,8 @@ export function BaguaPreviewModal({
                             : sector.tips?.[0] || sector.enhancers?.[0]}
                         </div>
                       )}
-                      {/* Etoile volante */}
-                      {sector.star && (
+                      {/* Etoile volante — Premium only */}
+                      {isPremium && sector.star && (
                         <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
                           <div
                             className="text-[9px] leading-tight flex items-center"
@@ -1100,8 +1102,8 @@ export function BaguaPreviewModal({
                         </div>
                       )}
 
-                      {/* Etoile volante */}
-                      {sector.star && (
+                      {/* Etoile volante — Premium only */}
+                      {isPremium && sector.star && (
                         <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
                           <div
                             className="text-[9px] leading-tight flex items-center"

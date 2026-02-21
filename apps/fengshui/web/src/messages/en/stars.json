@@ -1,69 +1,69 @@
 {
-  "year": 2025,
+  "year": 2026,
   "locale": "en-US",
   "stars": {
     "N": {
-      "star": "Violence",
+      "star": "#6 Wu Qu - Celestial (career, mentors, authority)",
       "element": "Metal",
-      "status": "bad",
-      "color": "text-red-500",
-      "remedies": ["Wood Element", "Water Element"]
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Six-rod metal wind chime", "Earth and metal elements", "Keep area calm and focused", "Bright and dynamic zone", "Caution: Sui Po + 3 Killings also in North"]
     },
     "NE": {
-      "star": "Misfortune",
-      "element": "Earth",
-      "status": "bad",
-      "color": "text-red-500",
-      "remedies": ["Salt cure", "Metal coins"]
+      "star": "#4 Wen Qu - Academic (studies, creativity)",
+      "element": "Wood",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Green leafy plants, bamboo", "Study desk placement in this sector", "Keep area bright, clean, uplifting", "Water feature only if no young son present", "Keep quiet and orderly"]
     },
     "E": {
-      "star": "Multiplicative",
+      "star": "#8 Zuo Fu - Wealth (income, investment, savings)",
+      "element": "Earth",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Red-colored accents to activate Fire element", "Fire as bridge between Wood palace & Earth star", "Crystals, ceramics, yellow/ochre colors", "Wealth bowl + 5 Emperors coins", "Fan or air conditioning (activate movement)"]
+    },
+    "SE": {
+      "star": "#9 You Bi - Multiplicative (prosperity, marriage, fertility)",
       "element": "Fire",
       "status": "good",
       "color": "text-green-500",
-      "remedies": ["Candles"]
-    },
-    "SE": {
-      "star": "Success, fame, prosperity",
-      "element": "Water",
-      "status": "good",
-      "color": "text-green-500",
-      "remedies": ["Pair of fish"]
+      "remedies": ["Red objects priority (red Buddha, red mystic knot)", "Wood elements (wooden objects, green decorations)", "Warm light lamp or crystal chandelier", "Candles, electric devices ON 6-8h", "Best area of 2026 — activate in priority"]
     },
     "S": {
-      "star": "6 Celestial (wealth, power, success)",
-      "element": "Metal",
-      "status": "good",
-      "color": "text-green-500",
-      "remedies": ["Metal chimes", "Frog", "Quartz"]
+      "star": "#5 Lian Zhen - Misfortune 'Yellow Five' (DANGER)",
+      "element": "Earth",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Heavy metal objects mandatory (≥10 kg)", "Six-rod metal wind chime", "Salt cure with Chinese coins (all year)", "Wu Lou gourd in copper", "NO renovations, noise, fire, plants, red colors"]
     },
     "SO": {
-      "star": "Future prosperity",
-      "element": "Earth",
-      "status": "good",
-      "color": "text-green-500",
-      "remedies": []
+      "star": "#7 Po Jun - Loss (theft, fraud, betrayal)",
+      "element": "Metal",
+      "status": "bad",
+      "color": "text-red-500",
+      "remedies": ["Slow-moving water feature (fountain or aquarium)", "Blue or black objects", "Black obsidian sphere", "Salt cure possible", "Secure entrances, no additional Metal"]
     },
     "O": {
-      "star": "Education & harmony",
-      "element": "",
-      "status": "good",
-      "color": "text-green-500",
-      "remedies": ["Moving water"]
-    },
-    "NO": {
-      "star": "Quarrels",
+      "star": "#3 Lu Cun - Quarrels (conflicts, lawsuits)",
       "element": "Wood",
       "status": "bad",
       "color": "text-red-500",
-      "remedies": ["Fire", "Metal", "Earth", "Precious stones"]
+      "remedies": ["Red/pink colors (Fire exhausts Wood)", "Red Buddha, red Fu Dogs, red mystic knot", "Fire-dragon turtle on red mat", "Limit conversations in this sector", "No green plants (strengthens Wood)"]
     },
-    "C": {
-      "star": "Illness",
-      "element": "",
+    "NO": {
+      "star": "#2 Ju Men - Illness (health, fatigue)",
+      "element": "Earth",
       "status": "bad",
       "color": "text-red-500",
-      "remedies": ["Buddha", "Knotted Chinese coins"]
+      "remedies": ["Metal elements (to exhaust Earth)", "Wu Lou copper gourd", "Metal chimes, Emperors coins", "White and golden colors, dry and clean zone", "Pregnant women and elderly: keep away from this sector"]
+    },
+    "C": {
+      "star": "#1 Tan Lang - Future Luck (love, career, relationships)",
+      "element": "Water",
+      "status": "good",
+      "color": "text-green-500",
+      "remedies": ["Keep clean, bright and clear", "Fish representations (in pairs)", "Rose quartz for singles", "Clear aquarium or blue crystal ball", "Do not clutter the center"]
     }
   }
 }

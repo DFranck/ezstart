@@ -8,6 +8,7 @@ import { ClientLayout as BaseClientLayout, H1, LocaleSwitcher, P } from '@ezstar
 import { cn } from '@ezstart/ui/lib'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
+import Image from 'next/image'
 import { ReactNode } from 'react'
 
 type ClientLayoutProps = {
@@ -32,7 +33,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
   return (
     <BaseClientLayout
       className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
-      appName="Feng Shui Bagua"
+      appName="Feng Shui"
       creator={
         <div className="flex items-center gap-2">
           <span>Made with ❤️ by </span>
@@ -48,13 +49,13 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
       headerLeftContent={
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-2xl">🏮</span>
+            <Image src="/logo.png" alt="Feng Shui" width={100} height={100} className="object-contain" />
             <div>
               <H1 size={'h5'} className={`text-start w-fit font-bold ${GRADIENT_TEXT}`}>
-                Feng Shui Bagua
+                Feng Shui {new Date().getFullYear()}
               </H1>
               <P className="text-xs text-muted-foreground -mt-1 line-clamp-1">
-                {t('hero.subtitle')}
+                {t('hero.subtitle', { year: new Date().getFullYear() })}
               </P>
             </div>
           </Link>

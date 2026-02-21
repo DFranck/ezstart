@@ -1,69 +1,69 @@
 {
-  "year": 2025,
+  "year": 2026,
   "locale": "fr-FR",
   "stars": {
     "N": {
-      "star": "Violence",
+      "star": "6 Céleste (mentors, carrière, chance)",
       "element": "Métal",
-      "status": "mauvaise",
-      "color": "text-red-500",
-      "remedies": ["Élément Bois", "Élément Eau"]
+      "status": "bonne",
+      "color": "text-green-500",
+      "remedies": ["Carillon métal 6 tiges", "Éléments Terre et Métal", "Crapaud à 3 pattes en cuivre", "Pi Xiu en cuivre (tête vers extérieur)", "Zone lumineuse et dynamique"]
     },
     "NE": {
-      "star": "Malchance",
-      "element": "Terre",
-      "status": "mauvaise",
-      "color": "text-red-500",
-      "remedies": ["Cure de sel", "Pièces en métal"]
+      "star": "4 Académique (études, créativité)",
+      "element": "Bois",
+      "status": "bonne",
+      "color": "text-green-500",
+      "remedies": ["Plantes vertes, bambous", "Bureau d'études dans ce secteur", "Pagode Wen Chang 9 niveaux en cuivre", "4 tiges de bambou lucky", "Garder silencieux et ordonné"]
     },
     "E": {
-      "star": "Multiplicative",
+      "star": "8 Richesse (revenus, investissement)",
+      "element": "Terre",
+      "status": "bonne",
+      "color": "text-green-500",
+      "remedies": ["Éléments Terre et Feu", "Cristaux, céramiques, couleurs jaune/ocre", "Bougies ou lampes (Feu comme pont Bois→Terre)", "Bol de richesse + pièces 5 Empereurs", "Ventilateur ou climatisation (activer le mouvement)"]
+    },
+    "SE": {
+      "star": "9 Multiplicative (prospérité, mariage, fertilité)",
       "element": "Feu",
       "status": "bonne",
       "color": "text-green-500",
-      "remedies": ["Bougies"]
-    },
-    "SE": {
-      "star": "Réussite, renommée, prospérité",
-      "element": "Eau",
-      "status": "bonne",
-      "color": "text-green-500",
-      "remedies": ["Paire de poissons"]
+      "remedies": ["Objets rouges en priorité (Bouddha rouge, nœud mystique rouge)", "Éléments Bois (objets en bois, décorations vertes)", "Lampe à lumière chaude ou lustre en cristal", "9 roses rouges ou statue de Yue Lao (mariage)", "Cristal violet (nobles relations)"]
     },
     "S": {
-      "star": "6 Céleste (richesse, pouvoir, succès)",
-      "element": "Métal",
-      "status": "bonne",
-      "color": "text-green-500",
-      "remedies": ["Carillon métal", "Grenouille", "Quartz"]
+      "star": "5 Malchance « 5 Jaune » (DANGER)",
+      "element": "Terre",
+      "status": "mauvaise",
+      "color": "text-red-500",
+      "remedies": ["MÉTAL LOURD impératif (≥10 kg)", "Carillon métal 6 tiges", "Cure de sel aux pièces chinoises (toute l'année)", "Gourde Wu Lou en cuivre", "AUCUN travaux, bruit, agitation, feu, plantes, rouge"]
     },
     "SO": {
-      "star": "Prospérité future",
-      "element": "Terre",
-      "status": "bonne",
-      "color": "text-green-500",
-      "remedies": []
+      "star": "7 Perte (vol, fraude, trahison)",
+      "element": "Métal",
+      "status": "mauvaise",
+      "color": "text-red-500",
+      "remedies": ["Élément Eau (fontaine à mouvement lent)", "Objets bleus ou noirs", "Boule d'obsidienne noire", "Cure de sel possible", "Sécuriser les entrées, pas de Métal supplémentaire"]
     },
     "O": {
-      "star": "Éducation & harmonie",
-      "element": "",
-      "status": "bonne",
-      "color": "text-green-500",
-      "remedies": ["Eau en mouvement"]
-    },
-    "NO": {
-      "star": "Querelles",
+      "star": "3 Querelles (disputes, procès)",
       "element": "Bois",
       "status": "mauvaise",
       "color": "text-red-500",
-      "remedies": ["Feu", "Métal", "Terre", "Pierres précieuses"]
+      "remedies": ["Couleur rouge/rose (épuiser le Bois par le Feu)", "Bouddha rouge, Fu Dogs rouges, nœud mystique rouge", "Dragon-tortue sur tapis rouge", "Limiter les conversations dans ce secteur", "Pas de plantes vertes (renforce le Bois)"]
     },
-    "C": {
-      "star": "Maladie",
-      "element": "",
+    "NO": {
+      "star": "2 Maladie (santé, fatigue)",
+      "element": "Terre",
       "status": "mauvaise",
       "color": "text-red-500",
-      "remedies": ["Bouddha", "Pièces chinoises nouées"]
+      "remedies": ["Éléments Métal (épuiser la Terre)", "Gourde Wu Lou en cuivre", "Carillon métal, pièces des Empereurs", "Couleurs blanches et dorées, zone sèche et propre", "Femmes enceintes et personnes âgées : éloigner de ce secteur"]
+    },
+    "C": {
+      "star": "1 Chance future (amour, carrière, relations)",
+      "element": "Eau",
+      "status": "bonne",
+      "color": "text-green-500",
+      "remedies": ["Garder propre, lumineux et dégagé", "Représentations de poissons (par paire)", "Quartz rose pour célibataires", "Aquarium limpide ou boule cristal bleu", "Ne pas encombrer le centre"]
     }
   }
 }

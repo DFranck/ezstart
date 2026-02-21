@@ -15,12 +15,12 @@ import ClientLayout from './client-layout'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = createMetadata({
-  appName: 'Feng Shui Bagua',
-  description: "Application web pour l'analyse Feng Shui avec import de plans et roue d'orientation interactive",
+  appName: 'Feng Shui 2026 ~ Guide Complet Année du Cheval de Feu Yang',
+  description: "Analyse Feng Shui 2026 gratuite : étoiles volantes Xuan Kong, remèdes personnalisés secteur par secteur et PDF haute résolution. Année du Cheval de Feu Yang (Bing Wu) ~ optimisez chaque zone de votre habitat pour améliorer santé, prospérité et relations.",
   domain: 'https://ezfengshui.vercel.app',
-  keywords: ['feng shui', 'bagua', 'orientation', 'plans', 'analyse'],
-  themeColor: '#10b981',
-  ogImage: 'https://ezfengshui.vercel.app/og-image.svg',
+  keywords: ['feng shui 2026', 'étoile volante 2026', 'flying stars 2026', 'analyse feng shui', 'feng shui maison 2026', 'feng shui gratuit', 'remèdes feng shui', 'cures feng shui 2026', 'année du cheval de feu', 'feng shui période 9', 'xuan kong 2026', 'fei xing 2026', 'feng shui enhancers', 'yang fire horse feng shui'],
+  themeColor: '#D4A017',
+  ogImage: 'https://ezfengshui.vercel.app/logo.png',
   icons: {
     icon: '/icons/icon-192x192.png',
     shortcut: '/icons/icon-96x96.png',
@@ -28,11 +28,11 @@ export const metadata = createMetadata({
   },
 })
 
-export const viewport = createViewport('#10b981')
+export const viewport = createViewport('#D4A017')
 
 const jsonLd = createJsonLd({
-  appName: 'Feng Shui Bagua',
-  description: "Application web pour l'analyse Feng Shui avec import de plans et roue d'orientation interactive",
+  appName: 'Feng Shui 2026 ~ Guide Complet Année du Cheval de Feu Yang',
+  description: "Analyse Feng Shui 2026 gratuite : étoiles volantes Xuan Kong, remèdes personnalisés secteur par secteur et PDF haute résolution. Année du Cheval de Feu Yang ~ optimisez chaque zone de votre habitat.",
   url: 'https://ezfengshui.vercel.app',
   applicationCategory: 'LifestyleApplication',
 })

@@ -1,11 +1,11 @@
 {
-  "name": "Feng Shui Bagua - Application Interactive",
+  "name": "Feng Shui 2026 ~ Guide Complet Année du Cheval de Feu Yang",
   "short_name": "Feng Shui",
-  "description": "Application web pour l'analyse Feng Shui avec import de plans et roue d'orientation interactive",
+  "description": "Analyse Feng Shui 2026 gratuite : étoiles volantes Xuan Kong, remèdes personnalisés secteur par secteur. Année du Cheval de Feu Yang.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#10b981",
+  "theme_color": "#D4A017",
   "background_color": "#ffffff",
   "scope": "/",
   "icons": [

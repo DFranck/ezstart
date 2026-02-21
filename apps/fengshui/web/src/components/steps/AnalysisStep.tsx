@@ -2,10 +2,12 @@
 'use client'
 
 import { loadBaguaConfigFromMessages } from '@/config/loadBaguaConfig'
+import { usePremium } from '@/hooks/usePremium'
 import { THEME_COLORS } from '@/lib/theme-colors'
 import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
+import { useAuth } from '@ezstart/auth-sdk'
 import {
   Button,
   Card,
@@ -23,6 +25,7 @@ import { useLocale, useMessages, useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
 import BaguaOrientationsGrid from '../BaguaOrientationsGrid'
 import { BaguaPreviewModal } from '../BaguaPreviewModal'
+import PricingModal from '../PricingModal'
 import BaguaGrid from './BaguaGrid'
 import BaguaWheel from './BaguaWheel'
 
@@ -36,6 +39,9 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [visualizationMode, setVisualizationMode] = useState<'wheel' | 'grid'>('wheel')
   const [expandedSectors, setExpandedSectors] = useState<Set<Direction>>(new Set())
+  const [isPricingOpen, setIsPricingOpen] = useState(false)
+  const { isPremium } = usePremium()
+  const { isAuthenticated, login } = useAuth()
 
   // Refs pour scroll vers les secteurs
   const sectorRefs = useRef<Record<Direction, React.RefObject<HTMLDivElement | null>>>({} as any)
@@ -289,6 +295,10 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                   onExpandAll={handleExpandAll}
                   onCollapseAll={handleCollapseAll}
                   sectorRefs={sectorRefs.current}
+                  isPremium={isPremium}
+                  isAuthenticated={isAuthenticated}
+                  onOpenPricing={() => setIsPricingOpen(true)}
+                  onLogin={login}
                 />
               </div>
             </div>
@@ -303,8 +313,16 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                 bearingFromNorth={bearingFromNorth}
                 visualizationMode={visualizationMode}
                 transformations={uploadData.transformations}
+                isPremium={isPremium}
               />
             )}
+
+            {/* Pricing Modal */}
+            <PricingModal
+              isOpen={isPricingOpen}
+              onClose={() => setIsPricingOpen(false)}
+              year={cfg?.year || new Date().getFullYear()}
+            />
           </div>
         )
       }}

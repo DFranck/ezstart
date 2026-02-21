@@ -1,13 +1,17 @@
-/* FengShui Theme Variables */
+/* FengShui Theme Variables - Gold & Red palette */
 
 :root {
-  --fengshui-primary: oklch(0.637 0.237 264.052);
-  --fengshui-secondary: oklch(51.714% 0.19553 262.827);
+  --fengshui-primary: oklch(0.78 0.16 80);
+  --fengshui-secondary: oklch(0.52 0.20 28);
+  --fengshui-primary-dark: oklch(0.70 0.14 80);
+  --fengshui-secondary-dark: oklch(0.45 0.18 28);
 }
 
 .dark {
-  --fengshui-primary: oklch(0.637 0.237 264.052);
-  --fengshui-secondary: oklch(52.223% 0.1119 246.835);
+  --fengshui-primary: oklch(0.72 0.14 80);
+  --fengshui-secondary: oklch(0.48 0.18 28);
+  --fengshui-primary-dark: oklch(0.65 0.12 80);
+  --fengshui-secondary-dark: oklch(0.42 0.16 28);
 }
 
 @theme inline {

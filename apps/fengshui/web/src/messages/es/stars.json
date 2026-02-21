@@ -1,69 +1,69 @@
 {
-  "year": 2025,
+  "year": 2026,
   "locale": "es-ES",
   "stars": {
     "N": {
-      "star": "Violencia",
+      "star": "6 Celestial (mentores, carrera, suerte)",
       "element": "Metal",
-      "status": "mala",
-      "color": "text-red-500",
-      "remedies": ["Elemento Madera", "Elemento Agua"]
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Carrillón de metal 6 varillas", "Elementos Tierra y Metal", "Sapo de 3 patas en cobre", "Pi Xiu en cobre (cabeza hacia afuera)", "Zona luminosa y dinámica"]
     },
     "NE": {
-      "star": "Mala suerte",
-      "element": "Tierra",
-      "status": "mala",
-      "color": "text-red-500",
-      "remedies": ["Cura de sal", "Monedas de metal"]
+      "star": "4 Académica (estudios, creatividad)",
+      "element": "Madera",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Plantas verdes, bambú", "Escritorio de estudio en este sector", "Pagoda Wen Chang 9 niveles en cobre", "4 tallos de bambú de la suerte", "Mantener silencioso y ordenado"]
     },
     "E": {
-      "star": "Multiplicativa",
+      "star": "8 Riqueza (ingresos, inversión)",
+      "element": "Tierra",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Elementos Tierra y Fuego", "Cristales, cerámicas, colores amarillo/ocre", "Velas o lámparas (Fuego como puente Madera→Tierra)", "Cuenco de riqueza + monedas 5 Emperadores", "Ventilador o aire acondicionado (activar movimiento)"]
+    },
+    "SE": {
+      "star": "9 Multiplicativa (prosperidad, matrimonio, fertilidad)",
       "element": "Fuego",
       "status": "buena",
       "color": "text-green-500",
-      "remedies": ["Velas"]
-    },
-    "SE": {
-      "star": "Éxito, fama, prosperidad",
-      "element": "Agua",
-      "status": "buena",
-      "color": "text-green-500",
-      "remedies": ["Par de peces"]
+      "remedies": ["Objetos rojos prioritarios (Buda rojo, nudo místico rojo)", "Elementos Madera (objetos de madera, decoraciones verdes)", "Lámpara de luz cálida o candelabro de cristal", "9 rosas rojas o estatua de Yue Lao (matrimonio)", "Cristal violeta (relaciones nobles)"]
     },
     "S": {
-      "star": "6 Celestial (riqueza, poder, éxito)",
-      "element": "Metal",
-      "status": "buena",
-      "color": "text-green-500",
-      "remedies": ["Campanillas de metal", "Rana", "Cuarzo"]
+      "star": "5 Infortunio « 5 Amarillo » (PELIGRO)",
+      "element": "Tierra",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["METAL PESADO imperativo (≥10 kg)", "Carrillón de metal 6 varillas", "Cura de sal con monedas chinas (todo el año)", "Calabaza Wu Lou en cobre", "NINGUNA obra, ruido, agitación, fuego, plantas, rojo"]
     },
     "SO": {
-      "star": "Prosperidad futura",
-      "element": "Tierra",
-      "status": "buena",
-      "color": "text-green-500",
-      "remedies": []
+      "star": "7 Pérdida (robo, fraude, traición)",
+      "element": "Metal",
+      "status": "mala",
+      "color": "text-red-500",
+      "remedies": ["Elemento Agua (fuente de movimiento lento)", "Objetos azules o negros", "Esfera de obsidiana negra", "Cura de sal posible", "Asegurar entradas, no Metal adicional"]
     },
     "O": {
-      "star": "Educación y armonía",
-      "element": "",
-      "status": "buena",
-      "color": "text-green-500",
-      "remedies": ["Agua en movimiento"]
-    },
-    "NO": {
-      "star": "Disputas",
+      "star": "3 Disputas (conflictos, pleitos)",
       "element": "Madera",
       "status": "mala",
       "color": "text-red-500",
-      "remedies": ["Fuego", "Metal", "Tierra", "Piedras preciosas"]
+      "remedies": ["Color rojo/rosa (agotar la Madera con Fuego)", "Buda rojo, Fu Dogs rojos, nudo místico rojo", "Dragón-tortuga sobre alfombra roja", "Limitar conversaciones en este sector", "No plantas verdes (refuerza la Madera)"]
     },
-    "C": {
-      "star": "Enfermedad",
-      "element": "",
+    "NO": {
+      "star": "2 Enfermedad (salud, fatiga)",
+      "element": "Tierra",
       "status": "mala",
       "color": "text-red-500",
-      "remedies": ["Buda", "Monedas chinas anudadas"]
+      "remedies": ["Elementos Metal (agotar la Tierra)", "Calabaza Wu Lou en cobre", "Carrillón de metal, monedas de los Emperadores", "Colores blancos y dorados, zona seca y limpia", "Mujeres embarazadas y ancianos: alejar de este sector"]
+    },
+    "C": {
+      "star": "1 Suerte futura (amor, carrera, relaciones)",
+      "element": "Agua",
+      "status": "buena",
+      "color": "text-green-500",
+      "remedies": ["Mantener limpio, luminoso y despejado", "Representaciones de peces (en parejas)", "Cuarzo rosa para solteros", "Acuario limpio o bola de cristal azul", "No abarrotar el centro"]
     }
   }
 }

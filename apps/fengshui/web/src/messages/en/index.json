@@ -12,7 +12,7 @@
     "analyze": "Analyze",
     "donate": "Support",
     "configuration": "Configuration",
-    "freeLabel": "100% Free",
+    "freeLabel": "Free Analysis",
     "darkLightMode": "Dark/Light Mode Support",
     "highResPdf": "High Resolution PDF",
     "login": "Login",
@@ -23,7 +23,7 @@
     "pageDescription": "Help us keep this app free and improve it with new features",
     "recentSupporters": "Recent Supporters",
     "noDonations": "No donations yet. Be the first to support!",
-    "thankYou": "❤️ Thank you to all our supporters! Your contributions help us maintain and improve Feng Shui Bagua for everyone.",
+    "thankYou": "❤️ Thank you to all our supporters! Your contributions help us maintain and improve Feng Shui for everyone.",
     "title": "Support {projectName}",
     "description": "Your support helps us keep this project running and improving.",
     "amountLabel": "Amount",
@@ -57,35 +57,42 @@
     "about": "About"
   },
   "hero": {
-    "title": "Feng Shui Bagua",
-    "subtitle": "Harmonize your space according to the 5 elements and 8 trigrams",
+    "title": "Feng Shui {year}",
+    "subtitle": "Flying Stars & Personalized Remedies ~ Year of the Yang Fire Horse",
     "description": "Complete analysis with {year} flying stars, personalized remedies and high resolution PDF. Discover how to optimize each sector of your habitat to improve health, prosperity and relationships.",
     "cta": "Analyze My Space",
     "learnMore": "How it works"
   },
+  "banner": {
+    "title": "Feng Shui {year} ~ Cures & Enhancers",
+    "subtitle": "Year of the Yang Fire Horse ~ Bing Wu 丙午",
+    "tagline": "Traditional and Authentic Feng Shui",
+    "description": "Protect yourself from negative energy and enhance positive energy for an outstanding {year}"
+  },
   "features": {
-    "title": "Generate your Feng Shui plan in just minutes for free",
-    "subtitle": "Thanks to your Feng Shui orientation analysis tool, analyzing Feng Shui sectors of living spaces is now accessible to everyone in just a few clicks",
+    "title": "Your Feng Shui analysis in 4 steps",
+    "subtitle": "Feng Shui sector analysis of living spaces is now accessible to everyone in just a few clicks",
     "step1": {
-      "title": "1. Upload your plan",
-      "description": "Import an image or PDF of your space (JPG, PNG, PDF)"
+      "title": "Upload your plan",
+      "description": "Import an image or PDF of your floor plan"
     },
     "step2": {
-      "title": "2. Orient precisely",
-      "description": "Align your plan with magnetic North for exact analysis"
+      "title": "Orient to North",
+      "description": "Align your plan with magnetic North using the compass"
     },
     "step3": {
-      "title": "3. Discover your Bagua",
-      "description": "Complete {year} analysis with flying stars and remedies"
+      "title": "Feng Shui Analysis",
+      "description": "Flying stars {year}, sectors and personalized remedies"
     },
     "step4": {
-      "title": "4. Generate your PDF",
-      "description": "Detailed high resolution report adapted to your theme"
+      "title": "PDF Report",
+      "description": "Download your detailed high resolution analysis"
     }
   },
   "sectors": {
-    "title": "The 9 Bagua Sectors",
+    "title": "The 9 Feng Shui Sectors",
     "subtitle": "Each sector corresponds to a direction, an element and an aspect of your life. The {year} analysis includes flying stars for precise recommendations.",
+    "origins": "Feng Shui is an ancient Chinese art of harmonizing energy (Chi) in living spaces. Based on the observation of natural cycles, it uses the 5 elements ~ Wood, Fire, Earth, Metal, Water ~ and 8 cardinal directions to optimize energy flow in your home. The compass school (Xuan Kong) and flying star system (Fei Xing) determine favorable and unfavorable zones in each space, year after year.",
     "career": {
       "name": "Career and Life Mission",
       "description": "Your professional and spiritual path"
@@ -146,7 +153,11 @@
     "subtitle": "Start Analysis Now",
     "shortLabel": "Analyze",
     "flyingStars": "Flying Stars {year}",
-    "supportTool": "Support Feng Shui Tool"
+    "supportTool": "Support Feng Shui Tool",
+    "advantage1": "Save hundreds vs a Feng Shui consultant",
+    "advantage2": "Personalized AI guidance room by room",
+    "advantage3": "Instant professional analysis",
+    "badge": "A real Feng Shui working tool"
   },
   "steps": {
     "upload": {
@@ -158,7 +169,7 @@
     },
     "orientation": {
       "title": "Cardinal Points",
-      "description": "Bagua alignment"
+      "description": "Feng Shui alignment"
     },
     "analysis": {
       "title": "Results",
@@ -207,7 +218,7 @@
     "description": "The compass school is used here to create an energetic map of the place and know the flying stars diagram to harmonize energies according to locations. Thus, the expertise in this matter provides room-by-room recommendations, which will guide the choice of colors, shapes, materials but also furniture (yin or yang) or decorative objects (symbolic).",
     "pdfPreview": "Download PDF",
     "wheel": "Compass",
-    "grid": "Bagua",
+    "grid": "Grid",
     "expandSector": "Expand sector",
     "collapseSector": "Collapse sector",
     "downloadPdf": "Download PDF",
@@ -216,8 +227,8 @@
     "errorPdf": "Error generating PDF"
   },
   "pdfModal": {
-    "title": "Feng Shui Bagua Analysis",
-    "previewTitle": "Preview of your Bagua wheel",
+    "title": "Feng Shui Analysis",
+    "previewTitle": "Preview of your Feng Shui wheel",
     "generatingPdf": "PDF Generation...",
     "clickToGenerate": "Click \"Generate PDF\" to create the report",
     "generatePdf": "Generate PDF",
@@ -226,23 +237,92 @@
     "capturingAnalysis": "High resolution capture of your Feng Shui analysis",
     "twoPages": "2 pages: Wheel + Grid & Detailed Sectors",
     "downloadPdf": "Download PDF",
-    "planBagua": "Bagua Plan",
+    "planBagua": "Feng Shui Plan",
     "detailedSectors": "Detailed Sectors"
   },
   "bagua": {
-    "orientations": "Bagua Orientations",
+    "orientations": "Feng Shui Orientations",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
-    "loading": "Loading Bagua configuration...",
+    "loading": "Loading configuration...",
     "naturalActivators": "Natural activators",
     "favorableMaterials": "Favorable materials",
     "fiveElementsCycles": "5 Elements cycles",
     "nourishedBy": "Nourished by",
     "controlledBy": "Controlled by",
     "weakenedBy": "Weakened by",
-    "flyingStar2025": "Flying Star 2025",
-    "specificRemedies2025": "Specific remedies 2025",
+    "flyingStar": "Flying Star {year}",
+    "specificRemedies": "Specific remedies {year}",
     "good": "good",
     "bad": "bad"
+  },
+  "welcome": {
+    "title": "Welcome to Feng Shui Analyzer!",
+    "description": "Traditional and Authentic Feng Shui ~ Professional analysis of your living space",
+    "ctaText": "Start Your Analysis",
+    "feature1": {
+      "title": "Upload Your Floor Plan",
+      "description": "Prepare your home floor plan, upload it and adjust the size with the cropping tool"
+    },
+    "feature2": {
+      "title": "Orient with Compass",
+      "description": "Open the compass on your phone to identify North and place it precisely on your plan"
+    },
+    "feature3": {
+      "title": "Choose Your Analysis",
+      "description": "Free Feng Shui analysis or complete premium analysis with flying stars, remedies and detailed orientations"
+    },
+    "feature4": {
+      "title": "Download & Consult",
+      "description": "Download your analysis as PDF and read through your Feng Shui recommendations. Advanced option: room-by-room AI Feng Shui guidance"
+    }
+  },
+  "premium": {
+    "unlock": "Unlock Flying Stars {year}",
+    "lockedTitle": "Premium Content",
+    "lockedDescription": "Flying stars and personalized remedies are reserved for premium members.",
+    "teaser": "Flying star detected in this sector",
+    "oneTime": "One-time purchase",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "bestValue": "Best value",
+    "popular": "Popular",
+    "includes": "Includes:",
+    "feature1": "9 detailed flying stars {year}",
+    "feature2": "Personalized remedies per sector",
+    "feature3": "Complete PDF with flying stars",
+    "feature4": "Automatic yearly updates",
+    "alreadyPremium": "You are premium!",
+    "loginRequired": "Log in to access premium content",
+    "loginFirst": "Log in",
+    "buyNow": "Buy now",
+    "subscribe": "Subscribe",
+    "pricingTitle": "Unlock the complete analysis",
+    "pricingSubtitle": "Access {year} flying stars, personalized remedies and complete PDF",
+    "freeTitle": "Feng Shui Analysis",
+    "freePrice": "Free",
+    "freeFeature1": "9 detailed Feng Shui sectors",
+    "freeFeature2": "Elements and favorable materials",
+    "freeFeature3": "5 elements cycles",
+    "freeFeature4": "Basic PDF",
+    "premiumTitle": "Flying Stars {year}",
+    "premiumFeature1": "All free content",
+    "premiumFeature2": "9 flying stars with status",
+    "premiumFeature3": "5 detailed remedies per sector",
+    "premiumFeature4": "Complete high resolution PDF"
+  },
+  "lunarPopup": {
+    "title": "Lunar New Year of the Yang Fire Horse",
+    "subtitle": "Flying Stars {year} ~ Discover What Awaits You",
+    "dangerTitle": "Star #5 ~ Five Yellow (DANGER)",
+    "dangerLocation": "SOUTH Sector",
+    "dangerText": "The most feared star in Feng Shui. Left uncorrected, the Five Yellow can trigger financial losses, serious illness and a chain of misfortune. NEVER leave this sector without a cure in {year}.",
+    "luckyTitle": "Star #9 ~ Multiplying Star (PROSPERITY)",
+    "luckyLocation": "SOUTHEAST Sector",
+    "luckyText": "The queen star of Period 9! Activate it to multiply prosperity, fertility and marriage opportunities. In {year}, it amplifies everything it touches ~ this is THE sector to boost.",
+    "cta": "Analyze my home now",
+    "dismiss": "Maybe later"
   }
 }

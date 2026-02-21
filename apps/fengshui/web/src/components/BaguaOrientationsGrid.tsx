@@ -6,6 +6,7 @@ import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { Button, Card, CardContent, CardFooter, CardHeader, Icon, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { RefObject, forwardRef, useState } from 'react'
+import PremiumGate from './PremiumGate'
 
 type Props = {
   config?: YearBaguaConfig
@@ -14,6 +15,10 @@ type Props = {
   onExpandAll?: () => void
   onCollapseAll?: () => void
   sectorRefs?: Record<Direction, RefObject<HTMLDivElement | null>>
+  isPremium?: boolean
+  isAuthenticated?: boolean
+  onOpenPricing?: () => void
+  onLogin?: () => void
 }
 
 export default function BaguaOrientationsGrid({
@@ -23,6 +28,10 @@ export default function BaguaOrientationsGrid({
   onExpandAll,
   onCollapseAll,
   sectorRefs,
+  isPremium = false,
+  isAuthenticated = false,
+  onOpenPricing,
+  onLogin,
 }: Props) {
   const t = useTranslations()
   const [internalExpandedSectors, setInternalExpandedSectors] = useState<Set<Direction>>(new Set())
@@ -113,6 +122,11 @@ export default function BaguaOrientationsGrid({
               accent={accent}
               isExpanded={isExpanded}
               onToggle={() => toggleSector(dir)}
+              year={config.year || new Date().getFullYear()}
+              isPremium={isPremium}
+              isAuthenticated={isAuthenticated}
+              onOpenPricing={onOpenPricing}
+              onLogin={onLogin}
               ref={sectorRefs?.[dir]}
             />
           )
@@ -128,10 +142,15 @@ type SectorCardProps = {
   accent: string
   isExpanded: boolean
   onToggle: () => void
+  year: number
+  isPremium: boolean
+  isAuthenticated: boolean
+  onOpenPricing?: () => void
+  onLogin?: () => void
 }
 
 const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCard(
-  { direction, sector, accent, isExpanded, onToggle },
+  { direction, sector, accent, isExpanded, onToggle, year, isPremium, isAuthenticated, onOpenPricing, onLogin },
   ref
 ) {
   const t = useTranslations()
@@ -286,54 +305,63 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                 </div>
               </div>
             </CardContent>
-            {/* Étoiles Volantes - Informations temporaires */}
+            {/* Étoiles Volantes - Contenu Premium */}
             {sector.star && (
               <CardFooter size="xs">
-                <div
-                  className="p-4 rounded-lg border-2 w-full"
-                  style={{
-                    borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
-                    backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Icon
-                      name={sector.star.status === 'bonne' ? 'lucide:Star' : 'lucide:AlertTriangle'}
-                      className="w-5 h-5"
-                      style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
-                    />
-                    <h4
-                      className="font-bold"
-                      style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
-                    >
-                      {t('bagua.flyingStar2025')} ({t(`bagua.${sector.star.status}`)})
-                    </h4>
-                  </div>
+                {isPremium ? (
+                  <div
+                    className="p-4 rounded-lg border-2 w-full"
+                    style={{
+                      borderColor: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626',
+                      backgroundColor: sector.star.status === 'bonne' ? '#dcfce7' : '#fef2f2',
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Icon
+                        name={sector.star.status === 'bonne' ? 'lucide:Star' : 'lucide:AlertTriangle'}
+                        className="w-5 h-5"
+                        style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
+                      />
+                      <h4
+                        className="font-bold"
+                        style={{ color: sector.star.status === 'bonne' ? '#16a34a' : '#dc2626' }}
+                      >
+                        {t('bagua.flyingStar', { year })} ({t(`bagua.${sector.star.status}`)})
+                      </h4>
+                    </div>
 
-                  <div className="mb-3">
-                    <h5 className="font-semibold text-gray-800 mb-1">⭐ {sector.star.star}</h5>
-                    {sector.star.element && (
-                      <p className="text-sm text-gray-600">Élément : {sector.star.element}</p>
+                    <div className="mb-3">
+                      <h5 className="font-semibold text-gray-800 mb-1">⭐ {sector.star.star}</h5>
+                      {sector.star.element && (
+                        <p className="text-sm text-gray-600">Élément : {sector.star.element}</p>
+                      )}
+                    </div>
+
+                    {sector.star.remedies.length > 0 && (
+                      <div>
+                        <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
+                          <Icon name="lucide:Shield" className="w-4 h-4" />
+                          {t('bagua.specificRemedies', { year })}
+                        </h5>
+                        <ul className="space-y-1">
+                          {sector.star.remedies.map((remedy: string, idx: number) => (
+                            <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mt-2 flex-shrink-0" />
+                              {remedy}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
-
-                  {sector.star.remedies.length > 0 && (
-                    <div>
-                      <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-1">
-                        <Icon name="lucide:Shield" className="w-4 h-4" />
-                        {t('bagua.specificRemedies2025')}
-                      </h5>
-                      <ul className="space-y-1">
-                        {sector.star.remedies.map((remedy: string, idx: number) => (
-                          <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-500 mt-2 flex-shrink-0" />
-                            {remedy}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                ) : (
+                  <PremiumGate
+                    year={year}
+                    isAuthenticated={isAuthenticated}
+                    onUnlock={() => onOpenPricing?.()}
+                    onLogin={() => onLogin?.()}
+                  />
+                )}
               </CardFooter>
             )}
           </Card>

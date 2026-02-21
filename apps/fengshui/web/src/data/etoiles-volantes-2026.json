@@ -1,0 +1,270 @@
+{
+  "year": 2026,
+  "chineseYear": "丙午年 — Année du Cheval de Feu",
+  "period": 9,
+  "sources": {
+    "douban": {
+      "name": "Douban 豆瓣",
+      "author": "无量子 (Wuliangzi)",
+      "url": "https://www.douban.com/note/877489794/",
+      "approach": "Tradition chinoise classique"
+    },
+    "fengshuibalanz": {
+      "name": "FengShuiBalanz",
+      "author": "Oliver, Certified FS Consultant",
+      "url": "https://www.fengshuibalanz.com/feng-shui/flying-star-xuan-kong/",
+      "approach": "Classical Xuan Kong avancé"
+    },
+    "ruedufengshui": {
+      "name": "RueDuFengShui",
+      "author": "Su Minpeak (苏民峰)",
+      "url": "https://ruedufengshui.com/le-feng-shui/etoiles-volantes-2026/",
+      "approach": "Pratique avec remèdes, tradition HK"
+    }
+  },
+  "stars": {
+    "SE": {
+      "number": 9,
+      "names": {
+        "zh": "九紫右弼星 (大吉星)",
+        "en": "You Bi Xing #9 Purple Star",
+        "fr": "Étoile 9 Multiplicative (Yin Feu)"
+      },
+      "palace": { "zh": "东南 巽宫", "en": "SE Palace Xun (Wood)", "fr": "Sud-Est Prospérité (Bois)" },
+      "element": "Feu",
+      "nature": "TRÈS FAVORABLE",
+      "grade": "A+",
+      "influence": {
+        "zh": "当旺大吉星 de la Période 9. Événements heureux, mariage, fertilité, relations sociales harmonieuses.",
+        "en": "Current Prosperity Star — most powerful in Period 9. Wealth, success, health, recognition. Wood palace nourishes Fire star = ideal synergy.",
+        "fr": "Reine de la Période 9. Le Bois du SE nourrit le Feu de l'étoile 9. Amplifie les étoiles mensuelles positives."
+      },
+      "remedies": {
+        "douban": ["Lampe à lumière chaude / lustre en cristal", "9 roses rouges ou statue de Yue Lao → mariage", "Qilin Song Zi → fertilité", "Cristal violet → nobles relations"],
+        "fengshuibalanz": ["Add Wood element: green leafy life plants", "Add Fire element: red/purple/pink colors, electric devices ON 6-8h", "Candles"],
+        "ruedufengshui": ["Objets rouges en priorité (Bouddha rouge, nœud mystique rouge)", "Éléments Bois (objets en bois, décorations vertes)", "1 verre d'eau pour catalyser la richesse"]
+      },
+      "avoidances": ["Plantes épineuses (cactus)", "Éléments Métal, Eau", "Désordre"],
+      "bestMonths": ["Mai", "Juillet", "Septembre", "Octobre"],
+      "worstMonths": ["Février", "Avril", "Juin", "Novembre", "Janvier"]
+    },
+    "E": {
+      "number": 8,
+      "names": {
+        "zh": "八白左辅星 (吉星)",
+        "en": "Zuo Fu Xing #8 White Star",
+        "fr": "Étoile 8 de la Richesse (Yang Terre)"
+      },
+      "palace": { "zh": "正东 震宫", "en": "EAST Palace Zhen (Wood)", "fr": "Est Santé/Famille (Bois)" },
+      "element": "Terre",
+      "nature": "FAVORABLE",
+      "grade": "B+",
+      "influence": {
+        "zh": "正财星 — Revenus directs, salaires, promotion, investissement immobilier.",
+        "en": "Past Wealth Star (Period 8), still powerful for 10+ years. Family happiness, harmony. CLASH: Wood palace pressures Earth star.",
+        "fr": "Richesse directe. Encore très active malgré Période 9. Le Bois de l'Est entre en tension avec la Terre."
+      },
+      "remedies": {
+        "douban": ["Climatisation / ventilateur → activer le mouvement", "Bol de richesse + pièces 5 Empereurs", "Cristal jaune", "Coffre-fort dans ce secteur"],
+        "fengshuibalanz": ["Red-colored accents to activate Fire element (bridge between Wood palace & Earth star)"],
+        "ruedufengshui": ["Éléments Terre et Feu", "Cristaux, céramiques, couleurs jaune/ocre", "Bougies ou lampes", "1 verre d'eau pour catalyser la richesse"]
+      },
+      "avoidances": ["Aquarium / fontaine (Eau détruit Terre)", "Objets lourds empilés", "Trop de Bois"],
+      "bestMonths": ["Février", "Avril", "Août", "Octobre", "Novembre", "Janvier"],
+      "worstMonths": ["Mars", "Mai", "Juillet", "Décembre"]
+    },
+    "C": {
+      "number": 1,
+      "names": {
+        "zh": "一白贪狼星 (吉星)",
+        "en": "Tan Lang Xing #1 White Star",
+        "fr": "Étoile 1 Chance future (Yang Eau)"
+      },
+      "palace": { "zh": "中宫", "en": "CENTRAL Palace (Earth)", "fr": "Centre Cœur du foyer" },
+      "element": "Eau",
+      "nature": "FAVORABLE",
+      "grade": "B",
+      "influence": {
+        "zh": "Noyau énergétique de l'année. Fleurs de pêcher, relations, carrière, finances indirectes.",
+        "en": "Future Wealth Star (Period 1). Theme of 2026: wisdom, spirituality, flow, adaptability.",
+        "fr": "Étoile porte-bonheur pour les relations sociales, la carrière et les fleurs de pêcher."
+      },
+      "remedies": {
+        "douban": ["Garder propre et lumineux", "Aquarium limpide / boule cristal bleu", "Quartz rose → célibataires", "Sceau du dragon de jade → carrière"],
+        "fengshuibalanz": ["Keep center quiet and undisturbed", "No active remedy possible for geometric center", "Clear of obstructions"],
+        "ruedufengshui": ["Activer par l'élément Eau", "Représentations de poissons (par paire)", "Quartz rose pour célibataires", "1 verre d'eau + 1 boîte à musique → relations"]
+      },
+      "avoidances": ["Travaux / percussion au centre", "Mariés : limiter les objets桃花 pour éviter romance excessive", "Feu, Terre, Bois au centre"],
+      "bestMonths": ["Février", "Avril", "Septembre", "Octobre", "Novembre", "Janvier"],
+      "worstMonths": []
+    },
+    "N": {
+      "number": 6,
+      "names": {
+        "zh": "六白武曲星 (吉星)",
+        "en": "Wu Qu Xing #6 White Star",
+        "fr": "Étoile 6 Céleste (Yang Métal)"
+      },
+      "palace": { "zh": "正北 坎宫", "en": "NORTH Palace Kan (Water)", "fr": "Nord Carrière (Eau)" },
+      "element": "Métal",
+      "nature": "FAVORABLE",
+      "grade": "B",
+      "influence": {
+        "zh": "Finances indirectes, nobles / mentors, énergie du cheval 驿马. Profitable pour investissements, bonus.",
+        "en": "Career, leadership, authority, noble support. Water palace supports Metal. BUT: Sui Po + 3 Killings also in North.",
+        "fr": "Étoile céleste des mentors et de la chance inattendue. Favorise la carrière, les promotions."
+      },
+      "remedies": {
+        "douban": ["Crapaud à 3 pattes en cuivre", "Pi Xiu en cuivre (tête vers extérieur)", "Maquette d'avion → activer énergie驿马"],
+        "fengshuibalanz": ["Six-rod metal wind chime (protection against Sha energies)", "Earth and metal elements", "Keep area calm, focused"],
+        "ruedufengshui": ["Éléments Métal pour renforcer l'étoile", "Carillon métal 6 tiges (aussi contre San Sha)", "1 verre d'eau + 8 cailloux blancs"]
+      },
+      "avoidances": ["Meubles en bois (Bois coupe Métal)", "Encombrement", "Les 3 Massacres occupent aussi le Nord → protection essentielle"],
+      "bestMonths": ["Mai", "Septembre"],
+      "worstMonths": ["Mars", "Avril", "Août", "Octobre", "Décembre", "Janvier"]
+    },
+    "NE": {
+      "number": 4,
+      "names": {
+        "zh": "四绿文曲星 (吉星)",
+        "en": "Wen Qu Xing #4 Green Star",
+        "fr": "Étoile 4 Académique (Yin Bois)"
+      },
+      "palace": { "zh": "东北 艮宫", "en": "NE Palace Gen (Earth)", "fr": "Nord-Est Connaissances (Terre)" },
+      "element": "Bois",
+      "nature": "NEUTRE à FAVORABLE",
+      "grade": "C+",
+      "influence": {
+        "zh": "Étoile académique 文昌星. Études, examens, créativité, compétences.",
+        "en": "Academic star. Writers, actors, painters, advertisers benefit. Earth palace resists Wood → slower progress.",
+        "fr": "Étoile de l'éducation et de la créativité. Relations amoureuses harmonieuses possibles."
+      },
+      "remedies": {
+        "douban": ["Bureau orienté NE (éviter dos à la porte)", "Pagode Wen Chang 9 niveaux en cuivre", "Instruments d'écriture", "4 tiges de bambou lucky"],
+        "fengshuibalanz": ["Nourish with Wood: plants, fresh flowers", "Keep area bright, clean, uplifting", "Water feature ONLY if no young son present"],
+        "ruedufengshui": ["Éléments Bois : plantes vertes, bambous", "Bureau d'études dans ce secteur", "Couleurs vertes"]
+      },
+      "avoidances": ["TV / PC / écrans", "Encombrement", "Métal (coupe le Bois)"],
+      "bestMonths": ["Mars", "Avril", "Septembre", "Décembre", "Janvier"],
+      "worstMonths": ["Février", "Mai", "Juin", "Juillet", "Août", "Octobre", "Novembre"]
+    },
+    "NO": {
+      "number": 2,
+      "names": {
+        "zh": "二黑病符星 (凶星)",
+        "en": "Ju Men Xing #2 Black Star",
+        "fr": "Étoile 2 Maladie (Yin Terre)"
+      },
+      "palace": { "zh": "西北 乾宫", "en": "NW Palace Qian (Metal)", "fr": "Nord-Ouest Bienfaiteurs (Métal)" },
+      "element": "Terre",
+      "nature": "DÉFAVORABLE",
+      "grade": "C",
+      "influence": {
+        "zh": "Étoile de la maladie. Maladies chroniques, problèmes de rate/estomac/peau. Impact sur les aînés.",
+        "en": "Illness Star — TRANSITIONING to positive in Period 9. Nurturing, responsibility possible. BUT still fragile — digestive issues.",
+        "fr": "Petite étoile de maladie. Maladies chroniques, fatigue, problèmes digestifs. Touche le patriarche."
+      },
+      "remedies": {
+        "douban": ["Gourde Wu Lou en cuivre", "Sachet d'armoise", "Sansevière à bord doré", "Zone ventilée et lumineuse"],
+        "fengshuibalanz": ["For females: add Metal element", "For single men only: add Fire element (red colors)", "Keep NW tidy and clutter-free"],
+        "ruedufengshui": ["Éléments Métal pour épuiser la Terre", "Gourde Wu Lou en cuivre", "Carillon métal, pièces des Empereurs", "Couleurs blanches et dorées"]
+      },
+      "avoidances": ["Encombrement et humidité / obscurité", "Jaune et rouge", "Femmes enceintes et personnes âgées : éloigner"],
+      "bestMonths": ["Février", "Mars", "Mai", "Septembre", "Novembre", "Décembre"],
+      "worstMonths": ["Juin"]
+    },
+    "O": {
+      "number": 3,
+      "names": {
+        "zh": "三碧禄存星 (凶星)",
+        "en": "Lu Cun Xing #3 Jade Star",
+        "fr": "Étoile 3 Querelles (Yang Bois)"
+      },
+      "palace": { "zh": "正西 兑宫", "en": "WEST Palace Dui (Metal)", "fr": "Ouest Projets/Enfants (Métal)" },
+      "element": "Bois",
+      "nature": "DÉFAVORABLE",
+      "grade": "D",
+      "influence": {
+        "zh": "Étoile des conflits. Disputes, procès, médisance, petits voleurs.",
+        "en": "Conflict & misunderstanding star. Legal problems, false accusations, betrayal. Metal palace chops Wood → all negative traits surface.",
+        "fr": "Étoile des disputes, querelles et conflits. Risque de procès, accusations, tensions."
+      },
+      "remedies": {
+        "douban": ["Stratégie 以静制动 — calmer par l'immobilité", "Dragon-tortue sur tapis rouge", "Qilin de Feu contre les procès", "Clochettes en cuivre"],
+        "fengshuibalanz": ["Fire element: red, purple, pink colors", "Visible red color displays", "Lighting to neutralize clash"],
+        "ruedufengshui": ["Couleur rouge/rose pour épuiser le Bois par le Feu", "Bouddha rouge, Fu Dogs rouges", "Nœud Mystique rouge", "Objets roses pour calmer les disputes"]
+      },
+      "avoidances": ["Plantes vertes (renforce Bois)", "Objets métalliques (active les disputes)", "Bruit et conversations animées"],
+      "bestMonths": [],
+      "worstMonths": ["Mai", "Juillet"]
+    },
+    "SO": {
+      "number": 7,
+      "names": {
+        "zh": "七赤破军星 (凶星)",
+        "en": "Po Jun Xing #7 Red Star",
+        "fr": "Étoile 7 Perte (Yin Métal)"
+      },
+      "palace": { "zh": "西南 坤宫", "en": "SW Palace Kun (Earth)", "fr": "Sud-Ouest Relations (Terre)" },
+      "element": "Métal",
+      "nature": "DÉFAVORABLE",
+      "grade": "D-",
+      "influence": {
+        "zh": "Étoile de la perte. Vol, perte financière, ami escroc, investissement raté.",
+        "en": "2nd worst energy. 'Modern robbery star'. Physical robbery, home invasion, online fraud. Earth SW produces Metal → boosts negative effects.",
+        "fr": "Étoile des pertes, vols et tromperies. La Terre du SW produit le Métal → renforce le côté négatif."
+      },
+      "remedies": {
+        "douban": ["Boule d'obsidienne noire", "Objets bleus (属水)", "Gourde aux 5 céréales", "Zone calme et stable"],
+        "fengshuibalanz": ["Slow-moving water feature (fountain or aquarium in SW)", "Small amount of additional Water"],
+        "ruedufengshui": ["Élément Eau pour épuiser le Métal", "Fontaine à mouvement lent", "Objets bleus ou noirs", "Cure de sel possible"]
+      },
+      "avoidances": ["Objets métalliques / dorés", "Encombrement", "Travaux / rénovations"],
+      "bestMonths": [],
+      "worstMonths": ["Février", "Avril", "Juillet", "Septembre", "Novembre", "Janvier"]
+    },
+    "S": {
+      "number": 5,
+      "names": {
+        "zh": "五黄廉贞星 (大凶星)",
+        "en": "Lian Zhen Xing #5 Yellow Star",
+        "fr": "Étoile 5 Malchance « 5 Jaune » (Yang Terre)"
+      },
+      "palace": { "zh": "正南 离宫", "en": "SOUTH Palace Li (Fire)", "fr": "Sud Réputation (Feu)" },
+      "element": "Terre",
+      "nature": "TRÈS DÉFAVORABLE",
+      "grade": "F",
+      "influence": {
+        "zh": "流年最凶之星 — La pire étoile de l'année. Catastrophes, maladies graves, sang, faillite. Le Feu du Sud nourrit la Terre. DANGER MAXIMAL.",
+        "en": "WORST STAR. Bankruptcy, lawsuits, jail, death, severe health issues. Fire palace FUELS Earth → extreme amplification. Tai Sui also in South = double whammy.",
+        "fr": "Étoile la plus néfaste du Feng Shui. Depuis Période 9 : influence NETTEMENT AMPLIFIÉE. Le Feu du Sud nourrit la Terre."
+      },
+      "remedies": {
+        "douban": ["Mode 静 absolu — immobilité totale", "Gourde Wu Lou en cuivre puissante", "Pi Xiu en obsidienne", "Nœud chinois rouge", "Minimiser toute présence"],
+        "fengshuibalanz": ["Heavy metal objects ≥ 10kg (mandatory)", "Six-rod metal wind chime", "NO salt cure alone (too weak)", "As much real heavy metal as possible"],
+        "ruedufengshui": ["MÉTAL LOURD impératif", "Carillon métal 6 tiges", "Cure de sel aux pièces chinoises (toute l'année)", "Gourde Wu Lou en cuivre", "Ne JAMAIS activer ce secteur"]
+      },
+      "avoidances": ["INTERDIT ABSOLU : feu, bougies, lampes chaudes", "INTERDIT : bruit, agitation, travaux, percussion", "INTERDIT : rouge, plantes, objets pointus", "Protéger personnes âgées et enfants"],
+      "bestMonths": [],
+      "worstMonths": ["Septembre"],
+      "specialWarnings": ["Tai Sui + Étoile 5 au Sud = danger extrême", "Priorité n°1 de l'année : ne JAMAIS activer ce secteur"]
+    }
+  },
+  "comparatif": {
+    "convergences": [
+      "Étoile au centre : unanime étoile 1 Blanche",
+      "Meilleur secteur : unanime SE (Étoile 9, Reine de la Période 9)",
+      "Pire secteur : unanime Sud (Étoile 5 + Tai Sui)",
+      "Étoile 3 Ouest : toutes les sources utilisent le Feu/rouge pour épuiser le Bois",
+      "Étoile 7 Sud-Ouest : toutes utilisent l'Eau pour épuiser le Métal",
+      "San Sha / 3 Massacres : unanime au Nord",
+      "Tai Sui : unanime au Sud"
+    ],
+    "divergences": [
+      "Remède étoile 5 : FengShuiBalanz juge la cure de sel insuffisante seule. Douban ajoute le nœud rouge (Feu).",
+      "Étoile 2 (NW) : FengShuiBalanz est le plus optimiste (transition positive en Période 9).",
+      "Étoile 8 (Est) : Douban insiste sur le dynamisme, Balanz sur le Feu, Su Minpeak sur l'Eau.",
+      "Centre (étoile 1) : FengShuiBalanz dit que le centre géométrique ne peut être remédié. Douban et RDF l'activent."
+    ]
+  }
+}

@@ -69,31 +69,31 @@ export default function AnalyzePage(): any {
     <>
       <WelcomeModal
         appName="FengShui"
-        title="Welcome to FengShui Analyzer! 🧭"
-        description="Traditional Feng Shui wisdom meets modern AI technology"
+        title={t('welcome.title')}
+        description={t('welcome.description')}
         features={[
           {
-            icon: "lucide:Upload",
-            title: "Upload Your Floor Plan",
-            description: "Upload any floor plan image and crop it to focus on the area you want to analyze"
+            icon: 'lucide:Upload',
+            title: t('welcome.feature1.title'),
+            description: t('welcome.feature1.description'),
           },
           {
-            icon: "lucide:Compass",
-            title: "Set Cardinal Direction",
-            description: "Use our interactive compass to precisely define your home's orientation"
+            icon: 'lucide:Compass',
+            title: t('welcome.feature2.title'),
+            description: t('welcome.feature2.description'),
           },
           {
-            icon: "lucide:Sparkles",
-            title: "AI-Powered Bagua Analysis",
-            description: "Get instant Feng Shui insights with our AI analyzing energy flow and balance"
+            icon: 'lucide:Sparkles',
+            title: t('welcome.feature3.title'),
+            description: t('welcome.feature3.description'),
           },
           {
-            icon: "lucide:FileText",
-            title: "Detailed PDF Report",
-            description: "Download a comprehensive report with recommendations for each life area"
-          }
+            icon: 'lucide:FileText',
+            title: t('welcome.feature4.title'),
+            description: t('welcome.feature4.description'),
+          },
         ]}
-        ctaText="Start Your Analysis"
+        ctaText={t('welcome.ctaText')}
       />
 
       <Stepper

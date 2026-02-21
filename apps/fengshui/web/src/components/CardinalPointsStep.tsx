@@ -150,7 +150,7 @@ export function BaguaDocument({ config, planImage, bearingFromNorth }: BaguaPdfP
         <View style={styles.header}>
           <Text style={styles.title}>🏮 Analyse Feng Shui Bagua</Text>
           <Text style={styles.subtitle}>
-            Configuration {config.year || '2025'} — Orientation {Math.round(bearingFromNorth)}°
+            Configuration {config.year || new Date().getFullYear()} — Orientation {Math.round(bearingFromNorth)}°
           </Text>
         </View>
 
@@ -282,7 +282,7 @@ export default function BaguaPdfPreview({
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `bagua-${config.year || '2025'}-${Math.round(bearingFromNorth)}.pdf`
+      a.download = `bagua-${config.year || new Date().getFullYear()}-${Math.round(bearingFromNorth)}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } finally {

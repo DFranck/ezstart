@@ -12,7 +12,7 @@
     "analyze": "Analyser",
     "donate": "Soutenir",
     "configuration": "Configuration",
-    "freeLabel": "100% Gratuit",
+    "freeLabel": "Analyse Gratuite",
     "darkLightMode": "Support Dark/Light Mode",
     "highResPdf": "PDF Haute Résolution",
     "login": "Connexion",
@@ -23,7 +23,7 @@
     "pageDescription": "Aidez-nous à garder cette application gratuite et à l'améliorer avec de nouvelles fonctionnalités",
     "recentSupporters": "Derniers donateurs",
     "noDonations": "Aucun don pour le moment. Soyez le premier à nous soutenir !",
-    "thankYou": "❤️ Merci à tous nos donateurs ! Vos contributions nous aident à maintenir et améliorer Feng Shui Bagua pour tous.",
+    "thankYou": "❤️ Merci à tous nos donateurs ! Vos contributions nous aident à maintenir et améliorer Feng Shui pour tous.",
     "title": "Soutenir {projectName}",
     "description": "Votre soutien nous aide à maintenir ce projet gratuit et à l'améliorer.",
     "amountLabel": "Montant",
@@ -57,35 +57,42 @@
     "about": "À propos"
   },
   "hero": {
-    "title": "Feng Shui Bagua",
-    "subtitle": "Harmonisez votre espace selon les 5 éléments et les 8 trigrammes",
+    "title": "Feng Shui {year}",
+    "subtitle": "Étoiles Volantes & Remèdes Personnalisés ~ Année du Cheval de Feu Yang",
     "description": "Analyse complète avec étoiles volantes {year}, remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque secteur de votre habitat pour améliorer santé, prospérité et relations.",
     "cta": "Analyser Mon Espace",
     "learnMore": "Comment ça marche"
   },
+  "banner": {
+    "title": "Feng Shui {year} ~ Cures & Activateurs",
+    "subtitle": "Année du Cheval de Feu Yang ~ Bing Wu 丙午",
+    "tagline": "Feng Shui Traditionnel et Authentique",
+    "description": "Protégez-vous des énergies négatives et activez les énergies positives pour une année {year} exceptionnelle"
+  },
   "features": {
-    "title": "Générez votre plan Feng Shui en quelques minutes gratuitement",
-    "subtitle": "Grâce à votre outil d'analyse des orientations Feng Shui, l'analyse des secteurs Feng Shui des habitats est désormais accessible à toutes et tous en quelques clics",
+    "title": "Votre analyse Feng Shui en 4 étapes",
+    "subtitle": "L'analyse des secteurs Feng Shui de votre habitat est désormais accessible à tous en quelques clics",
     "step1": {
-      "title": "1. Téléchargez votre plan",
-      "description": "Importez une image ou PDF de votre espace (JPG, PNG, PDF)"
+      "title": "Importez votre plan",
+      "description": "Téléchargez une image ou PDF du plan de votre espace"
     },
     "step2": {
-      "title": "2. Orientez précisément",
-      "description": "Alignez votre plan avec le Nord magnétique pour une analyse exacte"
+      "title": "Orientez au Nord",
+      "description": "Alignez votre plan avec le Nord magnétique via la boussole"
     },
     "step3": {
-      "title": "3. Découvrez votre Bagua",
-      "description": "Analyse complète {year} avec étoiles volantes et remèdes"
+      "title": "Analyse Feng Shui",
+      "description": "Étoiles volantes {year}, secteurs et remèdes personnalisés"
     },
     "step4": {
-      "title": "4. Générez votre PDF",
-      "description": "Rapport détaillé haute résolution adapté à votre theme"
+      "title": "Rapport PDF",
+      "description": "Téléchargez votre analyse détaillée haute résolution"
     }
   },
   "sectors": {
-    "title": "Les 9 Secteurs du Bagua",
+    "title": "Les 9 Secteurs Feng Shui",
     "subtitle": "Chaque secteur correspond à une direction, un élément et un aspect de votre vie. L'analyse {year} inclut les étoiles volantes pour des recommandations précises.",
+    "origins": "Le Feng Shui est un art millénaire chinois d'harmonisation de l'énergie (Chi) dans les espaces de vie. Fondé sur l'observation des cycles naturels, il utilise les 5 éléments ~ Bois, Feu, Terre, Métal, Eau ~ et les 8 directions cardinales pour optimiser la circulation de l'énergie dans votre habitat. L'école de la boussole (Xuan Kong) et le système des étoiles volantes (Fei Xing) permettent de déterminer les zones favorables et défavorables de chaque espace, année après année.",
     "career": {
       "name": "Carrière et Mission de Vie",
       "description": "Votre chemin professionnel et spirituel"
@@ -146,7 +153,11 @@
     "subtitle": "Commencer l'Analyse Maintenant",
     "shortLabel": "Analyser",
     "flyingStars": "Étoiles Volantes {year}",
-    "supportTool": "Soutenir l'outil Feng Shui"
+    "supportTool": "Soutenir l'outil Feng Shui",
+    "advantage1": "Économisez des centaines d'euros vs un consultant",
+    "advantage2": "Accompagnement IA personnalisé pièce par pièce",
+    "advantage3": "Analyse professionnelle instantanée",
+    "badge": "Un vrai outil de travail Feng Shui"
   },
   "steps": {
     "upload": {
@@ -158,7 +169,7 @@
     },
     "orientation": {
       "title": "Points Cardinaux",
-      "description": "Alignement du Bagua"
+      "description": "Alignement Feng Shui"
     },
     "analysis": {
       "title": "Résultats",
@@ -207,7 +218,7 @@
     "description": "L'école de la boussole est utilisée ici pour créer une carte énergétique du lieu et connaître le diagramme des étoiles volantes pour harmoniser les énergies selon les lieux. Ainsi, l'expertise en la matière à des préconisations pièce par pièce, qui orienteront le choix des couleurs, des formes, des matières mais aussi des meubles (yin ou yang) ou des objets déco (symbolique).",
     "pdfPreview": "Télécharger le PDF",
     "wheel": "Boussole",
-    "grid": "Bagua",
+    "grid": "Grille",
     "expandSector": "Développer le secteur",
     "collapseSector": "Réduire le secteur",
     "downloadPdf": "Télécharger PDF",
@@ -216,8 +227,8 @@
     "errorPdf": "Erreur lors de la génération du PDF"
   },
   "pdfModal": {
-    "title": "Analyse Feng Shui Bagua",
-    "previewTitle": "Aperçu de votre roue Bagua",
+    "title": "Analyse Feng Shui",
+    "previewTitle": "Aperçu de votre roue Feng Shui",
     "generatingPdf": "Génération PDF...",
     "clickToGenerate": "Cliquez \"Générer PDF\" pour créer le rapport",
     "generatePdf": "Générer PDF",
@@ -226,25 +237,94 @@
     "capturingAnalysis": "Capture haute résolution de votre analyse Feng Shui",
     "twoPages": "2 pages: Roue + Grille & Secteurs détaillés",
     "downloadPdf": "Télécharger PDF",
-    "planBagua": "Plan Bagua",
+    "planBagua": "Plan Feng Shui",
     "detailedSectors": "Secteurs Détaillés"
   },
   "bagua": {
-    "orientations": "Orientations Bagua",
+    "orientations": "Orientations Feng Shui",
     "expandAll": "Tout ouvrir",
     "collapseAll": "Tout fermer",
-    "loading": "Chargement de la configuration Bagua...",
+    "loading": "Chargement de la configuration...",
     "naturalActivators": "Activateurs naturels",
     "favorableMaterials": "Matières favorables",
     "fiveElementsCycles": "Cycles des 5 éléments",
     "nourishedBy": "Nourri par",
     "controlledBy": "Contrôlé par",
     "weakenedBy": "Affaibli par",
-    "flyingStar2025": "Étoile Volante 2025",
-    "specificRemedies2025": "Remèdes spécifiques 2025",
+    "flyingStar": "Étoile Volante {year}",
+    "specificRemedies": "Remèdes spécifiques {year}",
     "good": "bonne",
     "bonne": "bonne",
     "mauvaise": "mauvaise",
     "bad": "mauvaise"
+  },
+  "welcome": {
+    "title": "Bienvenue sur l'Analyseur Feng Shui !",
+    "description": "Feng Shui Traditionnel et Authentique ~ Analyse professionnelle de votre habitat",
+    "ctaText": "Commencer l'Analyse",
+    "feature1": {
+      "title": "Importez votre plan",
+      "description": "Préparez le plan de votre logement, uploadez-le et ajustez la taille avec l'outil de recadrage"
+    },
+    "feature2": {
+      "title": "Orientez avec la boussole",
+      "description": "Ouvrez la boussole de votre téléphone pour identifier le Nord et placez-le précisément sur votre plan"
+    },
+    "feature3": {
+      "title": "Choisissez votre analyse",
+      "description": "Analyse Feng Shui gratuite ou analyse complète premium avec étoiles volantes, remèdes et orientations détaillées"
+    },
+    "feature4": {
+      "title": "Téléchargez et consultez",
+      "description": "Téléchargez votre analyse en PDF et procédez à la lecture pour votre logement. Option avancée : accompagnement pièce par pièce par notre Agent IA Feng Shui"
+    }
+  },
+  "premium": {
+    "unlock": "Débloquer les Étoiles Volantes {year}",
+    "lockedTitle": "Contenu Premium",
+    "lockedDescription": "Les étoiles volantes et remèdes personnalisés sont réservés aux membres premium.",
+    "teaser": "Étoile volante détectée dans ce secteur",
+    "oneTime": "Achat unique",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "bestValue": "Meilleur rapport",
+    "popular": "Populaire",
+    "includes": "Inclus :",
+    "feature1": "9 étoiles volantes {year} détaillées",
+    "feature2": "Remèdes personnalisés par secteur",
+    "feature3": "PDF complet avec étoiles volantes",
+    "feature4": "Mises à jour annuelles automatiques",
+    "alreadyPremium": "Vous êtes premium !",
+    "loginRequired": "Connectez-vous pour accéder au contenu premium",
+    "loginFirst": "Se connecter",
+    "buyNow": "Acheter maintenant",
+    "subscribe": "S'abonner",
+    "pricingTitle": "Débloquez l'analyse complète",
+    "pricingSubtitle": "Accédez aux étoiles volantes {year}, remèdes personnalisés et PDF complet",
+    "freeTitle": "Analyse Feng Shui",
+    "freePrice": "Gratuit",
+    "freeFeature1": "9 secteurs Feng Shui détaillés",
+    "freeFeature2": "Éléments et matières favorables",
+    "freeFeature3": "Cycles des 5 éléments",
+    "freeFeature4": "PDF basique",
+    "premiumTitle": "Étoiles Volantes {year}",
+    "premiumFeature1": "Tout le contenu gratuit",
+    "premiumFeature2": "9 étoiles volantes avec statut",
+    "premiumFeature3": "5 remèdes détaillés par secteur",
+    "premiumFeature4": "PDF complet haute résolution"
+  },
+  "lunarPopup": {
+    "title": "Nouvel An Lunaire du Cheval de Feu Yang",
+    "subtitle": "Étoiles Volantes {year} ~ Découvrez ce qui vous attend",
+    "dangerTitle": "Étoile n°5 ~ Cinq Jaune (DANGER)",
+    "dangerLocation": "Secteur SUD",
+    "dangerText": "La plus redoutée du Feng Shui. Si elle n'est pas corrigée, l'étoile 5 Jaune peut provoquer pertes financières, maladies graves et malchance en série. Ne laissez JAMAIS ce secteur sans remède en {year}.",
+    "luckyTitle": "Étoile n°9 ~ Multiplicative (PROSPÉRITÉ)",
+    "luckyLocation": "Secteur SUD-EST",
+    "luckyText": "L'étoile reine de la Période 9 ! Activez-la pour multiplier prospérité, fertilité et opportunités de mariage. En {year}, elle démultiplie tout ce qu'elle touche ~ c'est LE secteur à booster.",
+    "cta": "Analyser mon habitat maintenant",
+    "dismiss": "Plus tard"
   }
 }
