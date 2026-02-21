@@ -242,7 +242,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                   </div>
                 </div>
                 {sector.summary && (
-                  <P className="text-xs sm:text-sm text-muted-foreground mt-1 whitespace-normal line-clamp-2">
+                  <P className="text-xs sm:text-sm text-muted-foreground mt-1 whitespace-normal line-clamp-3">
                     {sector.summary}
                   </P>
                 )}

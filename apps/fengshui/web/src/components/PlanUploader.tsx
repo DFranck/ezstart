@@ -209,7 +209,7 @@ export function PlanUploader({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.webp'],
+      'image/*': ['.jpeg', '.jpg', '.png', '.bmp', '.webp'],
       'application/pdf': ['.pdf'],
     },
     multiple: false,
@@ -418,8 +418,8 @@ export function PlanUploader({
 
                 {/* Width (slider + number) */}
                 <div className="flex items-center gap-3">
-                  <label htmlFor="crop-width" className="text-sm  w-24">
-                    {t('uploader.width')}
+                  <label htmlFor="crop-width" className="text-sm w-24 flex items-center gap-1">
+                    <Icon name="lucide:MoveHorizontal" className="w-5 h-5" />
                   </label>
                   <input
                     type="range"
@@ -461,8 +461,8 @@ export function PlanUploader({
 
                 {/* Height (slider + number) */}
                 <div className="flex items-center gap-3">
-                  <label htmlFor="crop-height" className="text-sm  w-24">
-                    {t('uploader.height')}
+                  <label htmlFor="crop-height" className="text-sm w-24 flex items-center gap-1">
+                    <Icon name="lucide:MoveVertical" className="w-5 h-5" />
                   </label>
                   <input
                     type="range"
@@ -505,7 +505,11 @@ export function PlanUploader({
 
               {/* Actions */}
               <div className="flex gap-3">
-                <Button onClick={handleApply} className="flex-1" type="button">
+                <Button
+                  onClick={handleApply}
+                  className="flex-1 bg-gradient-to-r from-fengshui-primary to-fengshui-secondary hover:from-fengshui-primary-dark hover:to-fengshui-secondary-dark text-white shadow-lg hover:shadow-xl transition-all text-base font-semibold py-3"
+                  type="button"
+                >
                   <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                   {t('uploader.apply')}
                 </Button>

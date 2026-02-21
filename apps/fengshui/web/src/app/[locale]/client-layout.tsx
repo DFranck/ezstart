@@ -34,16 +34,9 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
     <BaseClientLayout
       className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
+      headerPosition="static"
       creator={
-        <div className="flex items-center gap-2">
-          <span>Made with ❤️ by </span>
-          <Link target="_blank" href="https://www.linkedin.com/in/ambre-seradni-26489491/">
-            @Ambre
-          </Link>
-          <Link target="_blank" href="https://ezstart-web.vercel.app/fr">
-            @Franck
-          </Link>
-        </div>
+        <span>Made with ❤️ for a peaceful living place and life serenity</span>
       }
       currentPath={pathname}
       headerLeftContent={

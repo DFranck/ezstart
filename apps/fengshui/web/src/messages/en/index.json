@@ -9,6 +9,7 @@
     "close": "Close",
     "upload": "Upload",
     "download": "Download",
+    "downloadPlan": "Download your plan",
     "analyze": "Analyze",
     "donate": "Support",
     "configuration": "Configuration",
@@ -60,6 +61,7 @@
     "title": "Feng Shui {year}",
     "subtitle": "Flying Stars & Personalized Remedies ~ Year of the Yang Fire Horse",
     "description": "Complete analysis with {year} flying stars, personalized remedies and high resolution PDF. Discover how to optimize each sector of your habitat to improve health, prosperity and relationships.",
+    "usp": "The first online tool that analyzes your personal floor plan ~ Upload, orient, analyze in 3 clicks.",
     "cta": "Analyze My Space",
     "learnMore": "How it works"
   },
@@ -162,7 +164,7 @@
   "steps": {
     "upload": {
       "title": "Step 1 · Import your plan",
-      "description": "Add your home or office floor plan.",
+      "description": "Import a photo or image of your hand-drawn or computer plan. Note: room measurements and proportions must be accurate for a relevant and authentic Feng Shui analysis.",
       "instructions": "Drag and drop your plan or click to browse",
       "fileRequired": "Upload a plan first",
       "cropRequired": "Validate the crop first with the ✓ button"
@@ -186,7 +188,7 @@
     "dragDrop": "Drag & drop your plan",
     "dropHere": "Drop your plan here",
     "clickToSelect": "…or click to select a file",
-    "acceptedFormats": "Accepted: JPG, PNG, GIF, PDF",
+    "acceptedFormats": "Accepted: JPG, PNG, PDF",
     "edit": "Edit",
     "apply": "Apply",
     "cancel": "Cancel",

@@ -151,11 +151,11 @@ export default function AnalyzePage(): any {
             next: {
               label:
                 context.currentStep === context.steps.length - 1
-                  ? t('common.finish')
+                  ? t('common.downloadPlan')
                   : t('common.next'),
               icon:
                 context.currentStep === context.steps.length - 1
-                  ? 'lucide:Check'
+                  ? 'lucide:Download'
                   : 'lucide:ArrowRight',
               variant: 'ezstart',
               disabled: isUploadStep && !canProceedFromStep1,

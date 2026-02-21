@@ -272,6 +272,19 @@ export default function HomePage(): any {
             {t('banner.subtitle', { year: currentYear })}
           </P>
 
+          {/* USP - Unique Selling Proposition */}
+          <div
+            className="max-w-xl mx-auto my-6 px-6 py-4 rounded-2xl border-2 text-center"
+            style={{
+              borderColor: 'rgba(212, 160, 23, 0.4)',
+              backgroundColor: 'rgba(212, 160, 23, 0.06)',
+            }}
+          >
+            <P className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
+              {t('hero.usp')}
+            </P>
+          </div>
+
           <P size={'sm'} className="max-w-2xl mx-auto">
             {t('hero.description', { year: currentYear })}
           </P>

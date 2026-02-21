@@ -9,6 +9,7 @@
     "close": "Fermer",
     "upload": "Télécharger",
     "download": "Télécharger",
+    "downloadPlan": "Télécharger votre plan",
     "analyze": "Analyser",
     "donate": "Soutenir",
     "configuration": "Configuration",
@@ -60,6 +61,7 @@
     "title": "Feng Shui {year}",
     "subtitle": "Étoiles Volantes & Remèdes Personnalisés ~ Année du Cheval de Feu Yang",
     "description": "Analyse complète avec étoiles volantes {year}, remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque secteur de votre habitat pour améliorer santé, prospérité et relations.",
+    "usp": "Le premier outil en ligne qui analyse votre plan personnalisé ~ Uploadez, orientez, analysez en 3 clics.",
     "cta": "Analyser Mon Espace",
     "learnMore": "Comment ça marche"
   },
@@ -162,7 +164,7 @@
   "steps": {
     "upload": {
       "title": "Étape 1 · Import de votre plan",
-      "description": "Ajoutez le plan de votre habitation ou bureau.",
+      "description": "Importer une photo ou image de votre plan dessiné à la main ou sur ordinateur. Attention : les mesures et proportions des pièces doivent être correctes pour une analyse Feng Shui pertinente et authentique.",
       "instructions": "Glissez-déposez votre plan ou cliquez pour parcourir",
       "fileRequired": "Uploadez d'abord un plan",
       "cropRequired": "Validez d'abord le crop avec le bouton ✓"
@@ -186,7 +188,7 @@
     "dragDrop": "Glissez-déposez votre plan",
     "dropHere": "Déposez votre plan ici",
     "clickToSelect": "…ou cliquez pour sélectionner un fichier",
-    "acceptedFormats": "Accepté : JPG, PNG, GIF, PDF",
+    "acceptedFormats": "Accepté : JPG, PNG, PDF",
     "edit": "Modifier",
     "apply": "Appliquer",
     "cancel": "Annuler",

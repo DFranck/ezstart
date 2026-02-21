@@ -9,6 +9,7 @@
     "close": "Cerrar",
     "upload": "Subir",
     "download": "Descargar",
+    "downloadPlan": "Descargar tu plano",
     "analyze": "Analizar",
     "donate": "Apoyar",
     "configuration": "Configuración",
@@ -60,6 +61,7 @@
     "title": "Feng Shui {year}",
     "subtitle": "Estrellas Voladoras y Remedios Personalizados ~ Año del Caballo de Fuego Yang",
     "description": "Análisis completo con estrellas voladoras {year}, remedios personalizados y PDF de alta resolución. Descubre cómo optimizar cada sector de tu hábitat para mejorar salud, prosperidad y relaciones.",
+    "usp": "La primera herramienta en línea que analiza tu plano personalizado ~ Sube, orienta, analiza en 3 clics.",
     "cta": "Analizar Mi Espacio",
     "learnMore": "Cómo funciona"
   },
@@ -162,7 +164,7 @@
   "steps": {
     "upload": {
       "title": "Paso 1 · Importa tu plano",
-      "description": "Añade el plano de tu apartamento o casa.",
+      "description": "Importa una foto o imagen de tu plano dibujado a mano o en ordenador. Atención: las medidas y proporciones de las habitaciones deben ser correctas para un análisis Feng Shui pertinente y auténtico.",
       "instructions": "Arrastra y suelta tu plano o haz clic para navegar",
       "fileRequired": "Sube primero un plano",
       "cropRequired": "Valida primero el recorte con el botón ✓"
@@ -186,7 +188,7 @@
     "dragDrop": "Arrastra y suelta tu plano",
     "dropHere": "Suelta tu plano aquí",
     "clickToSelect": "…o haz clic para seleccionar un archivo",
-    "acceptedFormats": "Aceptado: JPG, PNG, GIF, PDF",
+    "acceptedFormats": "Aceptado: JPG, PNG, PDF",
     "edit": "Editar",
     "apply": "Aplicar",
     "cancel": "Cancelar",
