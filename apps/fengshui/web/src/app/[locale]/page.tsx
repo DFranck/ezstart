@@ -67,80 +67,47 @@ export default function HomePage(): any {
     },
   ]
 
-  // Vraies données des 9 secteurs avec leurs couleurs réelles
-  const sectors = [
+  // Objectifs et bienfaits du Feng Shui
+  const benefits = [
     {
-      direction: t('directions.N'),
-      name: t('sectors.career.name'),
-      element: t('elements.water'),
-      colors: ['#0D47A1', '#1565C0', '#2196F3', '#000000'],
-      shape: 'lucide:Waves',
-      description: t('sectors.career.description'),
+      key: 'health',
+      icon: 'lucide:Heart',
+      color: '#D32F2F',
     },
     {
-      direction: t('directions.NE'),
-      name: t('sectors.knowledge.name'),
-      element: t('elements.earth'),
-      colors: ['#BCA16A', '#F57C00', '#FFB300'],
-      shape: 'lucide:Square',
-      description: t('sectors.knowledge.description'),
+      key: 'wealth',
+      icon: 'lucide:TrendingUp',
+      color: '#2E7D32',
     },
     {
-      direction: t('directions.E'),
-      name: t('sectors.family.name'),
-      element: t('elements.wood'),
-      colors: ['#2E7D32', '#388E3C', '#4CAF50', '#40E0D0'],
-      shape: 'lucide:RectangleHorizontal',
-      description: t('sectors.family.description'),
+      key: 'career',
+      icon: 'lucide:Briefcase',
+      color: '#0D47A1',
     },
     {
-      direction: t('directions.SE'),
-      name: t('sectors.wealth.name'),
-      element: t('elements.wood'),
-      colors: ['#2E7D32', '#43A047', '#40E0D0'],
-      shape: 'lucide:RectangleHorizontal',
-      description: t('sectors.wealth.description'),
+      key: 'relationships',
+      icon: 'lucide:Users',
+      color: '#E91E63',
     },
     {
-      direction: t('directions.S'),
-      name: t('sectors.fame.name'),
-      element: t('elements.fire'),
-      colors: ['#D32F2F', '#F44336', '#FF5722'],
-      shape: 'lucide:Triangle',
-      description: t('sectors.fame.description'),
+      key: 'fame',
+      icon: 'lucide:Award',
+      color: '#D4A017',
     },
     {
-      direction: t('directions.SO'),
-      name: t('sectors.relationships.name'),
-      element: t('elements.earth'),
-      colors: ['#BCA16A', '#FFA726', '#FFCC80', '#A1887F'],
-      shape: 'lucide:Square',
-      description: t('sectors.relationships.description'),
+      key: 'serenity',
+      icon: 'lucide:Leaf',
+      color: '#00897B',
     },
-    {
-      direction: t('directions.O'),
-      name: t('sectors.creativity.name'),
-      element: t('elements.metal'),
-      colors: ['#B0BEC5', '#CFD8DC', '#ECEFF1', '#FFD700'],
-      shape: 'lucide:Circle',
-      description: t('sectors.creativity.description'),
-    },
-    {
-      direction: t('directions.NO'),
-      name: t('sectors.mentors.name'),
-      element: t('elements.metal'),
-      colors: ['#B0BEC5', '#CFD8DC', '#ECEFF1', '#FFD700'],
-      shape: 'lucide:Circle',
-      description: t('sectors.mentors.description'),
-    },
-    {
-      direction: t('directions.Center'),
-      name: t('sectors.health.name'),
-      element: t('elements.earth'),
-      colors: ['#FBC02D', '#FFEB3B', '#FFA000'],
-      shape: 'lucide:Square',
-      description: t('sectors.health.description'),
-    },
+  ]
+
+  // Lignes du tableau comparatif
+  const comparisonRows = [
+    { key: 'row1', free: true, premium: false },
+    { key: 'row2', free: true, premium: false },
+    { key: 'row3', free: false, premium: true },
+    { key: 'row4', free: false, premium: true },
+    { key: 'row5', free: false, premium: true, isNew: true },
   ]
 
   // 5 éléments pour le visuel
@@ -364,101 +331,72 @@ export default function HomePage(): any {
         </div>
       </div>
 
-      {/* Origines Feng Shui + 5 éléments */}
+      {/* Objectifs & Bienfaits */}
       <Section
         size={'full'}
         className="bg-muted/30"
       >
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <H2 className="text-4xl font-bold mb-4 text-foreground">{t('sectors.title')}</H2>
+          <div className="text-center mb-12">
+            <H2 className="text-4xl font-bold mb-4 text-foreground">{t('benefits.title')}</H2>
             <P className="text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              {t('sectors.origins')}
+              {t('benefits.subtitle')}
             </P>
           </div>
 
-          {/* 5 éléments en cercle/ligne */}
-          <div className="flex flex-wrap justify-center gap-6 mb-12">
-            {fiveElements.map((el, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-2">
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center shadow-md border-2 border-white"
-                  style={{ backgroundColor: el.color }}
-                >
-                  <Icon name={el.icon as KnownIconName} className="w-8 h-8 text-white" />
-                </div>
-                <span className="text-sm font-semibold text-foreground">{el.name}</span>
-                {/* Flèche cycle productif (sauf dernier) */}
-                {idx < fiveElements.length - 1 && (
-                  <Icon
-                    name="lucide:ArrowRight"
-                    className="hidden sm:block absolute w-4 h-4 text-muted-foreground/40"
-                    style={{ display: 'none' }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <P className="text-center text-sm text-muted-foreground max-w-3xl mx-auto mb-8">
-            {t('sectors.subtitle', { year: currentYear })}
-          </P>
-
-          {/* 9 secteurs grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-            {sectors.map((sector, idx) => (
+          {/* 6 objectifs/bienfaits grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
+            {benefits.map((benefit) => (
               <Card
-                key={idx}
-                className="group hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+                key={benefit.key}
+                className="group hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden border-t-4"
+                style={{ borderTopColor: benefit.color }}
               >
-                <div
-                  className="absolute top-0 left-0 right-0 h-2"
-                  style={{
-                    background: `linear-gradient(90deg, ${sector.colors.join(', ')})`,
-                  }}
-                />
-                <CardContent className="p-6 pt-8">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center shadow-md"
-                        style={{
-                          background: `linear-gradient(135deg, ${sector.colors[0]}, ${sector.colors[1]})`,
-                        }}
-                      >
-                        <Icon name={sector.shape as KnownIconName} className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-muted-foreground">
-                            {sector.direction}
-                          </span>
-                          <span
-                            className="text-xs px-2 py-0.5 rounded-full font-medium"
-                            style={{
-                              backgroundColor: `${sector.colors[0]}20`,
-                              color: sector.colors[0],
-                            }}
-                          >
-                            {sector.element}
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-base text-foreground leading-tight mt-1">
-                          {sector.name}
-                        </h3>
-                      </div>
-                    </div>
+                <CardContent className="p-6 text-center">
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md"
+                    style={{ backgroundColor: `${benefit.color}15` }}
+                  >
+                    <Icon
+                      name={benefit.icon as KnownIconName}
+                      className="w-7 h-7"
+                      style={{ color: benefit.color }}
+                    />
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {sector.description}
-                  </p>
+                  <h3 className="font-bold text-base text-foreground mb-2">
+                    {t(`benefits.${benefit.key}.title`)}
+                  </h3>
+                  <P className="text-sm text-muted-foreground leading-relaxed">
+                    {t(`benefits.${benefit.key}.description`)}
+                  </P>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {/* Origines Feng Shui + 5 éléments */}
+          <div className="text-center mb-8">
+            <P className="text-sm text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              {t('sectors.origins')}
+            </P>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-6 mb-12">
+            {fiveElements.map((el, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-md border-2 border-white"
+                  style={{ backgroundColor: el.color }}
+                >
+                  <Icon name={el.icon as KnownIconName} className="w-7 h-7 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">{el.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <Link href="/analyze" className="mt-8 inline-block">
+        <Link href="/analyze" className="mt-4 inline-block">
           <Button
             size="lg"
             className={`${GRADIENT_BG} text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105`}
@@ -469,6 +407,78 @@ export default function HomePage(): any {
           </Button>
         </Link>
       </Section>
+
+      {/* Tableau comparatif */}
+      <div className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <H2 className="text-4xl font-bold mb-4 text-foreground">{t('comparison.title')}</H2>
+          <P className="text-base text-muted-foreground max-w-2xl mx-auto">
+            {t('comparison.subtitle')}
+          </P>
+        </div>
+
+        <div className="max-w-4xl mx-auto overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="text-left p-4 text-sm font-semibold text-muted-foreground border-b border-border" />
+                <th className="p-4 text-center border-b border-border">
+                  <div className="flex flex-col items-center gap-1">
+                    <Icon name="lucide:Sparkles" className="w-6 h-6" style={{ color: '#D4A017' }} />
+                    <span className="text-sm font-bold text-foreground">{t('comparison.ourTool')}</span>
+                  </div>
+                </th>
+                <th className="p-4 text-center border-b border-border">
+                  <div className="flex flex-col items-center gap-1">
+                    <Icon name="lucide:User" className="w-6 h-6 text-muted-foreground" />
+                    <span className="text-sm font-bold text-muted-foreground">{t('comparison.consultant')}</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map((row) => (
+                <tr key={row.key} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                  <td className="p-4 text-sm text-foreground font-medium">
+                    <div className="flex items-center gap-2">
+                      {t(`comparison.${row.key}.label`, { year: currentYear })}
+                      {row.isNew && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-bold text-white" style={{ backgroundColor: '#D4A017' }}>
+                          {t('comparison.new')}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-4 text-center">
+                    {row.free ? (
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-green-600">
+                        <Icon name="lucide:Check" className="w-5 h-5" />
+                        {t('comparison.free')}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: '#D4A017' }}>
+                        <Icon name="lucide:Star" className="w-4 h-4" />
+                        {t('comparison.premium')}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-4 text-center text-sm text-muted-foreground font-medium">
+                    {t(`comparison.${row.key}.consultant`)}
+                  </td>
+                </tr>
+              ))}
+              {/* Ligne total */}
+              <tr className="bg-muted/50 font-bold">
+                <td className="p-4 text-sm text-foreground">{t('comparison.total.label')}</td>
+                <td className="p-4 text-center">
+                  <span className="text-sm font-bold text-green-600">{t('comparison.total.ours')}</span>
+                </td>
+                <td className="p-4 text-center text-sm text-red-500 font-bold">{t('comparison.total.consultant')}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* CTA Section - Avantages marketing */}
       <div className="container mx-auto px-4 py-20">

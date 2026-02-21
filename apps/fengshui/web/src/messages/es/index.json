@@ -60,7 +60,7 @@
   "hero": {
     "title": "Feng Shui {year}",
     "subtitle": "Estrellas Voladoras y Remedios Personalizados ~ Año del Caballo de Fuego Yang",
-    "description": "Análisis completo con estrellas voladoras {year}, remedios personalizados y PDF de alta resolución. Descubre cómo optimizar cada sector de tu hábitat para mejorar salud, prosperidad y relaciones.",
+    "description": "Análisis completo con estrellas voladoras {year}, remedios personalizados y PDF de alta resolución. Descubre cómo hacer de cada sector de tu hogar un aliado para tu salud, prosperidad y armonía relacional.",
     "usp": "La primera herramienta en línea que analiza tu plano personalizado ~ Sube, orienta, analiza en 3 clics.",
     "cta": "Analizar Mi Espacio",
     "learnMore": "Cómo funciona"
@@ -94,7 +94,7 @@
   "sectors": {
     "title": "Los 9 Sectores Feng Shui",
     "subtitle": "Cada sector corresponde a una dirección, un elemento y un aspecto de tu vida. El análisis {year} incluye estrellas voladoras para recomendaciones precisas.",
-    "origins": "El Feng Shui es un arte milenario chino de armonización de la energía (Chi) en los espacios de vida. Basado en la observación de los ciclos naturales, utiliza los 5 elementos ~ Madera, Fuego, Tierra, Metal, Agua ~ y las 8 direcciones cardinales para optimizar el flujo de energía en tu hogar. La escuela de la brújula (Xuan Kong) y el sistema de estrellas voladoras (Fei Xing) determinan las zonas favorables y desfavorables de cada espacio, año tras año.",
+    "origins": "El Feng Shui es un arte milenario chino de armonización de la energía (Chi) en los espacios de vida. Basado en la observación de los ciclos naturales, utiliza los 5 elementos ~ Madera, Fuego, Tierra, Metal, Agua ~ y las 8 direcciones cardinales para armonizar el flujo de energía en tu hogar. La escuela de la brújula (Xuan Kong) y el sistema de estrellas voladoras (Fei Xing) determinan las zonas favorables y desfavorables de cada espacio, año tras año.",
     "career": {
       "name": "Carrera y Misión de Vida",
       "description": "Tu camino profesional y espiritual"
@@ -150,8 +150,71 @@
     "NO": "NO",
     "Center": "Centro"
   },
+  "benefits": {
+    "title": "Haz de tu hogar un aliado",
+    "subtitle": "El Feng Shui te ayuda a crear un espacio de vida en armonía con las energías naturales, apoyando cada aspecto de tu día a día.",
+    "health": {
+      "title": "Salud & Vitalidad",
+      "description": "Favorece un entorno que apoye tu bienestar físico y mental cada día"
+    },
+    "wealth": {
+      "title": "Prosperidad & Abundancia",
+      "description": "Activa los sectores favorables para atraer la abundancia y apoyar tus proyectos financieros"
+    },
+    "career": {
+      "title": "Carrera & Éxito",
+      "description": "Armoniza tu espacio de trabajo para favorecer las oportunidades y el crecimiento profesional"
+    },
+    "relationships": {
+      "title": "Relaciones & Armonía",
+      "description": "Crea una atmósfera propicia para relaciones armoniosas, en pareja y en familia"
+    },
+    "fame": {
+      "title": "Reconocimiento & Reputación",
+      "description": "Refuerza tu imagen e influencia personal con un entorno alineado"
+    },
+    "serenity": {
+      "title": "Serenidad & Equilibrio",
+      "description": "Transforma tu interior en un refugio de paz, propicio para la meditación y la renovación"
+    }
+  },
+  "comparison": {
+    "title": "¿Por qué elegir nuestra herramienta?",
+    "subtitle": "Una verdadera herramienta de trabajo Feng Shui, accesible para todos",
+    "ourTool": "Nuestra Herramienta",
+    "consultant": "Consultor Feng Shui",
+    "free": "Gratis",
+    "premium": "Premium",
+    "included": "Incluido",
+    "new": "NUEVO",
+    "row1": {
+      "label": "Expertise Feng Shui sobre tu plano",
+      "consultant": "150€/h"
+    },
+    "row2": {
+      "label": "Plano personalizado tipo brújula Bagua",
+      "consultant": "180€ - 800€"
+    },
+    "row3": {
+      "label": "Consejos boost sectores y activadores",
+      "consultant": "180€ - 2 250€"
+    },
+    "row4": {
+      "label": "Estrellas voladoras {year} y curas detalladas",
+      "consultant": "380€ - 2 500€"
+    },
+    "row5": {
+      "label": "Acompañamiento IA habitación por habitación",
+      "consultant": "No disponible"
+    },
+    "total": {
+      "label": "Presupuesto total",
+      "ours": "Gratis a Premium",
+      "consultant": "890€ - 5 550€+"
+    }
+  },
   "cta": {
-    "title": "Transforma tu espacio vital",
+    "title": "Transforma tu espacio vital en 10min",
     "subtitle": "Comenzar Análisis Ahora",
     "shortLabel": "Analizar",
     "flyingStars": "Estrellas Voladoras {year}",

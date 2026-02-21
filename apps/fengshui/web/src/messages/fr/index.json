@@ -60,7 +60,7 @@
   "hero": {
     "title": "Feng Shui {year}",
     "subtitle": "Étoiles Volantes & Remèdes Personnalisés ~ Année du Cheval de Feu Yang",
-    "description": "Analyse complète avec étoiles volantes {year}, remèdes personnalisés et PDF haute résolution. Découvrez comment optimiser chaque secteur de votre habitat pour améliorer santé, prospérité et relations.",
+    "description": "Analyse complète avec étoiles volantes {year}, remèdes personnalisés et PDF haute résolution. Découvrez comment faire de chaque secteur de votre habitat un allié pour votre santé, prospérité et harmonie relationnelle.",
     "usp": "Le premier outil en ligne qui analyse votre plan personnalisé ~ Uploadez, orientez, analysez en 3 clics.",
     "cta": "Analyser Mon Espace",
     "learnMore": "Comment ça marche"
@@ -94,7 +94,7 @@
   "sectors": {
     "title": "Les 9 Secteurs Feng Shui",
     "subtitle": "Chaque secteur correspond à une direction, un élément et un aspect de votre vie. L'analyse {year} inclut les étoiles volantes pour des recommandations précises.",
-    "origins": "Le Feng Shui est un art millénaire chinois d'harmonisation de l'énergie (Chi) dans les espaces de vie. Fondé sur l'observation des cycles naturels, il utilise les 5 éléments ~ Bois, Feu, Terre, Métal, Eau ~ et les 8 directions cardinales pour optimiser la circulation de l'énergie dans votre habitat. L'école de la boussole (Xuan Kong) et le système des étoiles volantes (Fei Xing) permettent de déterminer les zones favorables et défavorables de chaque espace, année après année.",
+    "origins": "Le Feng Shui est un art millénaire chinois d'harmonisation de l'énergie (Chi) dans les espaces de vie. Fondé sur l'observation des cycles naturels, il utilise les 5 éléments ~ Bois, Feu, Terre, Métal, Eau ~ et les 8 directions cardinales pour harmoniser la circulation de l'énergie dans votre habitat. L'école de la boussole (Xuan Kong) et le système des étoiles volantes (Fei Xing) permettent de déterminer les zones favorables et défavorables de chaque espace, année après année.",
     "career": {
       "name": "Carrière et Mission de Vie",
       "description": "Votre chemin professionnel et spirituel"
@@ -150,8 +150,71 @@
     "NO": "NO",
     "Center": "Centre"
   },
+  "benefits": {
+    "title": "Faites de votre habitat un allié",
+    "subtitle": "Le Feng Shui vous aide à créer un cadre de vie en harmonie avec les énergies naturelles, pour soutenir chaque aspect de votre quotidien.",
+    "health": {
+      "title": "Santé & Vitalité",
+      "description": "Favorisez un environnement qui soutient votre bien-être physique et mental au quotidien"
+    },
+    "wealth": {
+      "title": "Prospérité & Abondance",
+      "description": "Activez les secteurs favorables pour attirer l'abondance et soutenir vos projets financiers"
+    },
+    "career": {
+      "title": "Carrière & Réussite",
+      "description": "Harmonisez votre espace de travail pour favoriser les opportunités et l'évolution professionnelle"
+    },
+    "relationships": {
+      "title": "Relations & Harmonie",
+      "description": "Créez une atmosphère propice aux relations harmonieuses, en couple comme en famille"
+    },
+    "fame": {
+      "title": "Reconnaissance & Réputation",
+      "description": "Renforcez votre image et votre rayonnement personnel grâce à un environnement aligné"
+    },
+    "serenity": {
+      "title": "Sérénité & Équilibre",
+      "description": "Transformez votre intérieur en refuge de paix, propice à la méditation et au ressourcement"
+    }
+  },
+  "comparison": {
+    "title": "Pourquoi choisir notre outil ?",
+    "subtitle": "Un vrai outil de travail Feng Shui, accessible à tous",
+    "ourTool": "Notre Outil",
+    "consultant": "Consultant Feng Shui",
+    "free": "Gratuit",
+    "premium": "Premium",
+    "included": "Inclus",
+    "new": "NOUVEAU",
+    "row1": {
+      "label": "Expertise Feng Shui sur votre plan",
+      "consultant": "150€/h"
+    },
+    "row2": {
+      "label": "Plan personnalisé type boussole Bagua",
+      "consultant": "180€ - 800€"
+    },
+    "row3": {
+      "label": "Conseils boost secteurs & activateurs",
+      "consultant": "180€ - 2 250€"
+    },
+    "row4": {
+      "label": "Étoiles volantes {year} & cures détaillées",
+      "consultant": "380€ - 2 500€"
+    },
+    "row5": {
+      "label": "Accompagnement IA pièce par pièce",
+      "consultant": "Non disponible"
+    },
+    "total": {
+      "label": "Budget total",
+      "ours": "Gratuit à Premium",
+      "consultant": "890€ - 5 550€+"
+    }
+  },
   "cta": {
-    "title": "Transformez votre espace de vie",
+    "title": "Transformez votre espace de vie en 10min",
     "subtitle": "Commencer l'Analyse Maintenant",
     "shortLabel": "Analyser",
     "flyingStars": "Étoiles Volantes {year}",

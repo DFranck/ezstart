@@ -60,7 +60,7 @@
   "hero": {
     "title": "Feng Shui {year}",
     "subtitle": "Flying Stars & Personalized Remedies ~ Year of the Yang Fire Horse",
-    "description": "Complete analysis with {year} flying stars, personalized remedies and high resolution PDF. Discover how to optimize each sector of your habitat to improve health, prosperity and relationships.",
+    "description": "Complete analysis with {year} flying stars, personalized remedies and high resolution PDF. Discover how to make each sector of your home an ally for your health, prosperity and harmonious relationships.",
     "usp": "The first online tool that analyzes your personal floor plan ~ Upload, orient, analyze in 3 clicks.",
     "cta": "Analyze My Space",
     "learnMore": "How it works"
@@ -94,7 +94,7 @@
   "sectors": {
     "title": "The 9 Feng Shui Sectors",
     "subtitle": "Each sector corresponds to a direction, an element and an aspect of your life. The {year} analysis includes flying stars for precise recommendations.",
-    "origins": "Feng Shui is an ancient Chinese art of harmonizing energy (Chi) in living spaces. Based on the observation of natural cycles, it uses the 5 elements ~ Wood, Fire, Earth, Metal, Water ~ and 8 cardinal directions to optimize energy flow in your home. The compass school (Xuan Kong) and flying star system (Fei Xing) determine favorable and unfavorable zones in each space, year after year.",
+    "origins": "Feng Shui is an ancient Chinese art of harmonizing energy (Chi) in living spaces. Based on the observation of natural cycles, it uses the 5 elements ~ Wood, Fire, Earth, Metal, Water ~ and 8 cardinal directions to harmonize energy flow in your home. The compass school (Xuan Kong) and flying star system (Fei Xing) determine favorable and unfavorable zones in each space, year after year.",
     "career": {
       "name": "Career and Life Mission",
       "description": "Your professional and spiritual path"
@@ -150,8 +150,71 @@
     "NO": "NW",
     "Center": "Center"
   },
+  "benefits": {
+    "title": "Make your home your ally",
+    "subtitle": "Feng Shui helps you create a living space in harmony with natural energies, supporting every aspect of your daily life.",
+    "health": {
+      "title": "Health & Vitality",
+      "description": "Foster an environment that supports your physical and mental well-being every day"
+    },
+    "wealth": {
+      "title": "Prosperity & Abundance",
+      "description": "Activate favorable sectors to attract abundance and support your financial goals"
+    },
+    "career": {
+      "title": "Career & Success",
+      "description": "Harmonize your workspace to foster opportunities and professional growth"
+    },
+    "relationships": {
+      "title": "Relationships & Harmony",
+      "description": "Create an atmosphere conducive to harmonious relationships, as a couple and as a family"
+    },
+    "fame": {
+      "title": "Recognition & Reputation",
+      "description": "Strengthen your image and personal influence through an aligned environment"
+    },
+    "serenity": {
+      "title": "Serenity & Balance",
+      "description": "Transform your interior into a peaceful haven, conducive to meditation and renewal"
+    }
+  },
+  "comparison": {
+    "title": "Why choose our tool?",
+    "subtitle": "A real Feng Shui working tool, accessible to everyone",
+    "ourTool": "Our Tool",
+    "consultant": "Feng Shui Consultant",
+    "free": "Free",
+    "premium": "Premium",
+    "included": "Included",
+    "new": "NEW",
+    "row1": {
+      "label": "Feng Shui expertise on your floor plan",
+      "consultant": "€150/h"
+    },
+    "row2": {
+      "label": "Personalized Bagua compass plan",
+      "consultant": "€180 - €800"
+    },
+    "row3": {
+      "label": "Sector boost tips & activators",
+      "consultant": "€180 - €2,250"
+    },
+    "row4": {
+      "label": "Flying stars {year} & detailed cures",
+      "consultant": "€380 - €2,500"
+    },
+    "row5": {
+      "label": "Room-by-room AI guidance",
+      "consultant": "Not available"
+    },
+    "total": {
+      "label": "Total budget",
+      "ours": "Free to Premium",
+      "consultant": "€890 - €5,550+"
+    }
+  },
   "cta": {
-    "title": "Transform your living space",
+    "title": "Transform your living space in 10min",
     "subtitle": "Start Analysis Now",
     "shortLabel": "Analyze",
     "flyingStars": "Flying Stars {year}",
