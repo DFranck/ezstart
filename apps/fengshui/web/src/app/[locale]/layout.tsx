@@ -57,7 +57,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <ErrorBoundary title="Something went wrong in FengShui">
             <ThemeProvider>
-              <AuthProvider appName="fengshui" useHttpOnlyCookies={true}>
+              <AuthProvider appName="fengshui" authMode="httpOnly">
                 <PayProvider appName="fengshui">
                   <ClientLayout>{children}</ClientLayout>
                 </PayProvider>

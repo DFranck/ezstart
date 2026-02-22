@@ -131,13 +131,15 @@ export const Modal = ({
         onEscapeKeyDown={handleEscapeKeyDown as any}
       >
         {/* Header */}
-        {(propTitle || propDescription) && (
+        {(propTitle || propDescription) ? (
           <DialogHeader>
             <DialogTitle>
               {propTitle ? propTitle : <div className="sr-only">Untitled Modal</div>}
             </DialogTitle>
             {propDescription && <DialogDescription>{propDescription}</DialogDescription>}
           </DialogHeader>
+        ) : (
+          <DialogTitle className="sr-only">Modal</DialogTitle>
         )}
 
         {/* Content */}

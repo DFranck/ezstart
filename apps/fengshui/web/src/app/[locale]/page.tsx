@@ -133,7 +133,7 @@ export default function HomePage(): any {
           <div className="text-center">
             <div className="flex justify-center mb-4">
               <Image
-                src="/*2026.svg"
+                src="/star-2026.svg"
                 alt="Étoiles Volantes 2026"
                 width={280}
                 height={280}

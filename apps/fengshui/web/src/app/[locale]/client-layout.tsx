@@ -34,7 +34,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
     <BaseClientLayout
       className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
-      headerPosition="static"
+      headerPosition="sticky"
       creator={
         <span>Made with ❤️ for a peaceful living place and life serenity</span>
       }
