@@ -75,6 +75,14 @@ export class PayClient {
       throw new Error(result.error || 'Failed to fetch donations')
     }
 
+    // Normalize MongoDB _id to id
+    if (result.payments) {
+      result.payments = result.payments.map((p: any) => ({
+        ...p,
+        id: p.id || p._id,
+      }))
+    }
+
     return result
   }
 
