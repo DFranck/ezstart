@@ -68,7 +68,8 @@
   },
   "pnpm": {
     "overrides": {
-      "zod": "3.23.8"
+      "zod": "3.23.8",
+      "fast-xml-parser": ">=5.3.7"
     }
   },
   "dependencies": {

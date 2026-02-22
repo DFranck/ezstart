@@ -1,3 +1,5 @@
+import { Types } from 'mongoose'
+
 import { InGamePlayerModel } from '../models/InGamePlayer.js'
 import { PlayerModel } from '../models/Player.js'
 
@@ -53,7 +55,7 @@ export async function updatePlayerStatsService(gameResults: GameResult[]) {
 
     bulkOps.push({
       updateOne: {
-        filter: { _id: playerId },
+        filter: { _id: new Types.ObjectId(playerId) },
         update: {
           $inc: {
             gamesPlayed: 1,
