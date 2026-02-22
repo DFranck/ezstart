@@ -186,7 +186,7 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
           <Button
             onClick={onToggle}
             variant="ghost"
-            className="w-full p-3 sm:p-4 text-left hover:bg-muted/50 transition-colors rounded-t-xl sm:rounded-t-2xl h-auto justify-start"
+            className="w-full p-3 sm:p-4 text-left hover:bg-muted/50 transition-colors rounded-t-xl sm:rounded-t-2xl !h-auto whitespace-normal justify-start items-start"
           >
           <div className="flex items-start sm:items-center justify-between gap-2">
             <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -245,6 +245,22 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                   <P className="text-xs sm:text-sm text-muted-foreground mt-1 whitespace-normal line-clamp-3">
                     {sector.summary}
                   </P>
+                )}
+                {!isExpanded && (has.enhancers || sector.matiere) && (
+                  <div className="mt-1.5 space-y-0.5">
+                    {has.enhancers && (
+                      <p className="text-xs text-muted-foreground/70 line-clamp-1 whitespace-normal flex items-center gap-1">
+                        <Icon name="lucide:Sparkles" className="w-3 h-3 flex-shrink-0" />
+                        {sector.enhancers.join(' · ')}
+                      </p>
+                    )}
+                    {sector.matiere && (
+                      <p className="text-xs text-muted-foreground/70 line-clamp-1 whitespace-normal flex items-center gap-1">
+                        <Icon name="lucide:Package" className="w-3 h-3 flex-shrink-0" />
+                        {sector.matiere}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

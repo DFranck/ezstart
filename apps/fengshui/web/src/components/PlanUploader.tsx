@@ -213,6 +213,7 @@ export function PlanUploader({
       'application/pdf': ['.pdf'],
     },
     multiple: false,
+    useFsAccessApi: false,
   })
 
   const removeFile = () => {

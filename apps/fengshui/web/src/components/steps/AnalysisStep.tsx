@@ -227,7 +227,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     {t('analysis.grid')}
                   </Button>
                 </div>
-                <div className="hidden w-full py-4 md:flex items-center justify-center">
+                <div className="w-full py-4 flex lg:hidden items-center justify-center">
                   <div className="w-full  max-w-[600px]">
                     {visualizationMode === 'wheel' ? (
                       <BaguaWheel
@@ -256,8 +256,8 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Colonne gauche : Visualization Bagua */}
-              <div className="lg:col-span-1">
+              {/* Colonne gauche : Visualization Bagua (hidden below lg, shown in Card above) */}
+              <div className="hidden lg:block lg:col-span-1">
                 <div className="sticky top-36">
                   <div ref={containerRef}>
                     {visualizationMode === 'wheel' ? (
