@@ -22,6 +22,8 @@
 - ✅ Lancer autant d'agents que nécessaire en **parallèle**
 - ✅ Claude reste **disponible** pour discuter avec l'utilisateur pendant l'exécution
 - ✅ Claude **vérifie** le travail des agents avant de résumer (respect des DEV-RULES)
+- ✅ Chaque agent **met à jour le README** du package/app qu'il modifie (si README existe)
+- ✅ Chaque agent **vérifie qu'aucun secret** (clé API, token, mot de passe, .env) ne se retrouve dans le code
 - ❌ **JAMAIS** exécuter soi-même : écrire du code, modifier des fichiers, supprimer, déplacer, renommer — **TOUT passe par les agents**
 - ❌ **JAMAIS** lancer du travail sans plan validé par l'utilisateur
 
@@ -32,6 +34,7 @@
 - Mettre à jour BACKLOG.md
 - Discuter avec l'utilisateur
 - Lancer et vérifier le travail des agents
+- Vérifier qu'aucun secret (clés API, tokens, .env, credentials) n'est exposé dans le travail des agents
 
 ### Si les règles ne sont pas respectées :
 
