@@ -823,40 +823,50 @@ registry.registerPath(loginRoute)
 
 ### 1. Architecture Provider
 
-**Setup standard (sans i18n) :**
+**Setup standard (TOUTES les apps utilisent i18n + [locale] routing) :**
 
 ```tsx
-// app/layout.tsx
+// app/[locale]/layout.tsx
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
 import { ThemeProvider } from '@ezstart/next-theme'
 import { AuthProvider } from '@ezstart/auth-sdk'
+import { ErrorBoundary } from '@ezstart/ui/components'
+import { Toaster } from 'sonner'
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function LocaleLayout({ children, params }: { children: ReactNode, params: { locale: string } }) {
+  const messages = await getMessages()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={params.locale} suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          <AuthProvider appName="fengshui">
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages} locale={params.locale}>
+          <ErrorBoundary>
+            <ThemeProvider>
+              <AuthProvider appName="myapp" authMode="httpOnly">
+                {children}
+              </AuthProvider>
+            </ThemeProvider>
+          </ErrorBoundary>
+        </NextIntlClientProvider>
+        <Toaster />
       </body>
     </html>
   )
 }
 ```
 
-**Setup avec i18n (EZStart uniquement) :**
+**Ajout QueryProvider (apps data-heavy uniquement : EZBill, GreenPulse, EZStart) :**
 
 ```tsx
-import { NextIntlClientProvider } from 'next-intl'
-
-<NextIntlClientProvider messages={messages} locale={locale}>
+// Wrapper autour de ThemeProvider + AuthProvider
+<QueryProvider>
   <ThemeProvider>
-    <AuthProvider appName="ezstart">
+    <AuthProvider appName="ezbill" authMode="httpOnly">
       {children}
     </AuthProvider>
   </ThemeProvider>
-</NextIntlClientProvider>
+</QueryProvider>
 ```
 
 ### 2. Configuration Centralisée
@@ -1211,6 +1221,40 @@ export async function getMyModel() {
   return mongoose.models.MyModel || mongoose.model('MyModel', schema)
 }
 ```
+
+---
+
+## 📁 Scripts — Organisation Stricte
+
+### Structure Obligatoire
+
+```
+scripts/
+├── generators/          # Créent du code/des projets (réutilisables)
+│   ├── create-api.js
+│   ├── create-app.js
+│   ├── create-web-app.js
+│   └── generate-specialist-agents.js
+├── tools/               # Utilitaires dev (réutilisables)
+│   ├── kill-ports.ps1
+│   ├── dev-status.ps1
+│   ├── backup-mongodb.sh
+│   ├── convert-images-webp.js
+│   └── optimize-images.js
+└── monitoring/          # Health checks & audits
+    ├── check-all-services.sh
+    └── generate-audit-report.sh
+```
+
+### Règles
+
+- ✅ **TOUJOURS** placer les scripts dans le bon sous-dossier de `scripts/`
+- ✅ **Scripts réutilisables** → `scripts/generators/` ou `scripts/tools/`
+- ✅ **Scripts temporaires/one-shot** → les exécuter et les supprimer immédiatement, JAMAIS les commiter
+- ❌ **JAMAIS** de scripts à la racine du monorepo (sauf configs: eslint, prettier, turbo)
+- ❌ **JAMAIS** de dossier `tmp/` ou `src/` à la racine
+- ❌ **JAMAIS** de fichiers `*.backup` dans le repo
+- ❌ **JAMAIS** de scripts de test one-shot (test-*.js, fix-*.js, etc.) — utiliser les tests Vitest
 
 ---
 

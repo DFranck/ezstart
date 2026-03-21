@@ -1,133 +1,127 @@
 # 🚀 Configuration Claude - @ezstart Monorepo
 
-**Bienvenue dans le monorepo @ezstart !**
+---
 
-Ce fichier contient les informations essentielles pour démarrer rapidement. Pour l'historique complet et les détails techniques, voir [docs/CLAUDE-ARCHIVE.md](./docs/CLAUDE-ARCHIVE.md).
+## 🧠 Mode de Travail — OBLIGATOIRE
+
+**Claude = Architecte / Manager. JAMAIS développeur direct.**
+
+### Workflow strict :
+
+1. **Planifier** — Rédiger un plan détaillé avec les tâches identifiées
+2. **Valider** — Attendre la validation explicite de l'utilisateur avant tout code
+3. **Déléguer** — Lancer des agents en parallèle, chacun FOCUS sur 1 tâche spécifique
+4. **Manager** — Rester disponible pour discuter pendant que les agents travaillent
+5. **Résumer** — Faire un résumé quand les agents finissent
+6. **Itérer** — Lancer d'autres agents si nécessaire pour la suite
+
+### Règles agents :
+
+- ✅ Chaque agent reçoit une tâche **précise et isolée**
+- ✅ Chaque agent reçoit dans son prompt les **règles de [DEV-RULES.md](./DEV-RULES.md)** applicables à sa tâche
+- ✅ Lancer autant d'agents que nécessaire en **parallèle**
+- ✅ Claude reste **disponible** pour discuter avec l'utilisateur pendant l'exécution
+- ✅ Claude **vérifie** le travail des agents avant de résumer (respect des DEV-RULES)
+- ❌ **JAMAIS** exécuter soi-même : écrire du code, modifier des fichiers, supprimer, déplacer, renommer — **TOUT passe par les agents**
+- ❌ **JAMAIS** lancer du travail sans plan validé par l'utilisateur
+
+### Ce que Claude (le manager) fait DIRECTEMENT — et UNIQUEMENT ça :
+
+- Lire des fichiers pour comprendre le contexte
+- Rédiger et proposer des plans
+- Mettre à jour BACKLOG.md
+- Discuter avec l'utilisateur
+- Lancer et vérifier le travail des agents
+
+### Si les règles ne sont pas respectées :
+
+L'utilisateur peut dire : **"relis les règles CLAUDE.md"** → Claude relit et corrige immédiatement son comportement.
+
+### Dev servers :
+
+- ✅ **TOUJOURS** dire à l'utilisateur quel script lancer (`pnpm dev:bill`, `pnpm dev:ga`, etc.)
+- ✅ Préciser quand lancer `pnpm dev:types` en parallèle si nécessaire
+- ❌ **JAMAIS** lancer un dev server sans prévenir l'utilisateur
+- ❌ **JAMAIS** lancer `pnpm dev:all` sauf si l'utilisateur le demande explicitement
+
+### Référence règles de code :
+
+**Toutes les règles de code sont dans [DEV-RULES.md](./DEV-RULES.md)** — NE PAS les dupliquer ici.
+DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .env, packages, git, etc.
+
+### Gestion du BACKLOG.md :
+
+- ✅ **Claude (le manager) est le SEUL** à mettre à jour le BACKLOG.md
+- ✅ Mettre à jour le status (`planned` → `in-progress` → `done`) au bon moment
+- ✅ Cocher les étapes complétées quand les agents finissent
+- ✅ Ajouter des notes si blockers ou changements de direction
+- ❌ **JAMAIS** demander à l'utilisateur de remplir le BACKLOG
+- ❌ **JAMAIS** laisser les agents dédiés modifier le BACKLOG (ils codent, c'est tout)
+- Le BACKLOG doit toujours refléter l'état réel du projet pour que n'importe quelle nouvelle instance Claude puisse reprendre
 
 ---
 
-## 📚 Documentation Essentielle
+## 📚 Documentation
 
-**Navigation :**
-
-- 🚀 **[docs/00-START-HERE.md](./docs/00-START-HERE.md)** - ⭐⭐⭐ Guide navigation complet
-- 📐 **[DEV-RULES.md](./DEV-RULES.md)** - ⭐ Règles de développement obligatoires
-- 📊 [docs/README.md](./docs/README.md) - Dashboard des audits (Score: 84.8/100)
-- 🚀 [DEPLOY.md](./DEPLOY.md) - Guide de déploiement (Railway/Vercel/Oracle)
-
-**Pour agents IA :**
-
-- ⚡ [docs/ai-agents/QUICK-REF.md](./docs/ai-agents/QUICK-REF.md) - Référence rapide (5 min)
-- 🤖 [docs/ai-agents/CYCLE.md](./docs/ai-agents/CYCLE.md) - Cycle d'amélioration (15 min)
-- 🎯 [docs/ai-agents/EXAMPLES.md](./docs/ai-agents/EXAMPLES.md) - Exemples concrets (20 min)
-
-**Documentation détaillée :**
-
-- 🗂️ [docs/reference/CLAUDE-ARCHIVE.md](./docs/reference/CLAUDE-ARCHIVE.md) - Historique complet (4600+ lignes)
-- 🎯 [docs/reference/ROADMAP.md](./docs/reference/ROADMAP.md) - Roadmap vers 100/100
-- 📄 [docs/reference/AUDIT-SUMMARY.md](./docs/reference/AUDIT-SUMMARY.md) - Résumé des audits
-
----
-
-## 🎯 Score Global : 96.6/100 ⭐⭐⭐⭐⭐ EXCELLENT
-
-### Scores par Catégorie
-
-| Catégorie         | Score   | Status       |
-| ----------------- | ------- | ------------ |
-| **API**           | 100/100 | ✅ Excellent |
-| **Monitoring**    | 100/100 | ✅ Excellent |
-| **Tests**         | 100/100 | ✅ Excellent |
-| **TypeCheck**     | 100/100 | ✅ Excellent |
-| **Databases**     | 100/100 | ✅ Excellent |
-| **UX**            | 96/100  | ✅ Excellent |
-| **Architecture**  | 95/100  | ✅ Excellent |
-| **Accessibility** | 95/100  | ✅ Excellent |
-| **Documentation** | 95/100  | ✅ Excellent |
-| **Mobile UX**     | 93/100  | ✅ Excellent |
-| **Performance**   | 82/100  | ✅ Very Good |
-
-**Audits disponibles :** [docs/audits/](./docs/audits/) (18 fichiers - 17 complets + 1 en cours)
-
-**Dernière mise à jour :** 7 Novembre 2025
-- 🏗️ **Architecture:** 95→98/100 (+3 points) 🎉 **Action-Based Routing MONOREPO-WIDE!**
-  - 28 fichiers routes refactorisés → 217+ fichiers actions
-  - Pattern unifié sur **6 APIs** (GreenPulse, EZBill, EZAuth, EZPay, Tower Defense, EZStart)
-  - 155+ routes migrées, 1 fichier = 1 action (CRUD isolé)
-  - Documentation complète: [ROUTING-PATTERN.md](apps/green-pulse/api/docs/ROUTING-PATTERN.md)
-  - Copié dans toutes les APIs pour cohérence
-- 📊 **Monitoring:** 80→100/100 (+20 points) 🎉 **PERFECT SCORE!**
-  - Trending graphs (Recharts) avec 6h/12h/24h/48h/7d time ranges
-  - Plausible Analytics (privacy-first, GDPR compliant)
-  - APM complet avec p50/p95/p99 metrics
-  - Package `@ezstart/monitoring/client` avec PlausibleAnalytics + usePerformance
-- 🎨 **UX:** 87→96/100 (+9 points) 🎉 - Welcome modals + Progress indicators !
-  - WelcomeModal component (3 apps: EZBill, GreenPulse, FengShui)
-  - Progress bars (FengShui file uploads)
-  - First-time user onboarding avec localStorage
-- 📱 **Mobile UX:** 85→93/100 (+8 points) - Toutes les phases terminées !
-  - Design System complet + 17 composants
-  - Safe-area support universel (iPhone notch)
-- 🎯 **12 audits ≥90/100** (71% excellence rate) 🚀
+- 📋 **[BACKLOG.md](./BACKLOG.md)** — Projets en cours — "continue [projet]" pour reprendre
+- 📐 **[DEV-RULES.md](./DEV-RULES.md)** — Règles de développement obligatoires
+- 🚀 **[DEPLOY.md](./DEPLOY.md)** — Guide de déploiement (Railway/Vercel)
+- 📦 [packages/ui/README.md](./packages/ui/README.md) — Composants UI
+- 🗄️ [packages/express-core/MONGODB-ARCHITECTURE.md](./packages/express-core/MONGODB-ARCHITECTURE.md) — MongoDB
+- 🔐 [packages/auth-sdk/HTTPONLY-MIGRATION.md](./packages/auth-sdk/HTTPONLY-MIGRATION.md) — Auth SDK
+- 🎮 [apps/tower-defense/docs/GAMEPLAY.md](./apps/tower-defense/docs/GAMEPLAY.md) — Tower Defense
+- 🌿 [apps/green-pulse/FORMS.md](./apps/green-pulse/FORMS.md) — GreenPulse Forms
+- 🔀 [apps/green-pulse/api/docs/ROUTING-PATTERN.md](./apps/green-pulse/api/docs/ROUTING-PATTERN.md) — Action-based routing reference
 
 ---
 
 ## ⚡ Quick Start
 
-### Démarrage Rapide
-
 ```bash
-# Installer les dépendances
 pnpm install
 
-# Mode Optimisé (RECOMMANDÉ)
-pnpm dev:types  # Terminal 1: TypeScript centralisé
-pnpm dev        # Terminal 2: Tous les serveurs
+# Terminal 1 (TOUJOURS) : TypeScript centralisé
+pnpm dev:types
 
-# Mode Ciblé
-pnpm dev:ez     # EZStart + Monitoring + APIs
+# Terminal 2 : Lancer l'app ciblée
+pnpm dev:ez     # EZStart
 pnpm dev:bill   # EZBill + EZAuth
 pnpm dev:td     # Tower Defense + EZAuth
 pnpm dev:gp     # GreenPulse + EZAuth
-
-# Vérifier l'état
-pnpm dev:status
+pnpm dev:pay    # EZPay
+pnpm dev:fs     # FengShui + EZAuth + EZPay
+pnpm dev:asc    # ASC-TCD
+pnpm dev:all    # TOUT (rarement nécessaire)
 ```
 
-### Ports des Services
+### Ports
 
-| Service           | Type | Port | URL                   |
-| ----------------- | ---- | ---- | --------------------- |
-| **EZStart**       | API  | 5000 | http://localhost:5000 |
-| **EZAuth**        | API  | 5010 | http://localhost:5010 |
-| **EZBill**        | API  | 5020 | http://localhost:5020 |
-| **EZPay**         | API  | 5040 | http://localhost:5040 |
-| **Tower Defense** | API  | 5030 | http://localhost:5030 |
-| **GreenPulse**    | API  | 5070 | http://localhost:5070 |
-| **EZStart**       | Web  | 5005 | http://localhost:5005 |
-| **EZAuth**        | Web  | 5015 | http://localhost:5015 |
-| **EZBill**        | Web  | 5025 | http://localhost:5025 |
-| **EZPay**         | Web  | 5045 | http://localhost:5045 |
-| **Tower Defense** | Web  | 5035 | http://localhost:5035 |
-| **FengShui**      | Web  | 5065 | http://localhost:5065 |
-| **ASC-TCD**       | Web  | 5055 | http://localhost:5055 |
-| **GreenPulse**    | Web  | 5075 | http://localhost:5075 |
+| Service           | API  | Web  |
+| ----------------- | ---- | ---- |
+| **EZStart**       | 5000 | 5005 |
+| **EZAuth**        | 5010 | 5015 |
+| **EZBill**        | 5020 | 5025 |
+| **Tower Defense** | 5030 | 5035 |
+| **EZPay**         | 5040 | 5045 |
+| **ASC-TCD**       | —    | 5055 |
+| **FengShui**      | —    | 5065 |
+| **GreenPulse**    | 5070 | 5075 |
 
 ---
 
-## 📦 Architecture Monorepo
-
-### Structure
+## 📦 Architecture
 
 ```
 @ezstart/
-├── packages/              # Packages partagés
-│   ├── types/            # Types TypeScript
-│   ├── config/           # Configuration centralisée
-│   ├── ui/               # Composants UI
+├── packages/              # Packages partagés (réutilisables entre projets)
+│   ├── types/            # Types TypeScript communs
+│   ├── config/           # URLs, ports, CORS
+│   ├── ui/               # Composants UI (shadcn/Radix)
 │   ├── auth-sdk/         # SDK authentification
 │   ├── pay-sdk/          # SDK paiement
-│   ├── express-core/     # Infrastructure API
+│   ├── ai-sdk/           # SDK IA (OpenAI, Gemini)
+│   ├── express-core/     # Infrastructure API (Express + MongoDB)
+│   ├── monitoring/       # Health checks + analytics
 │   ├── test-utils/       # Infrastructure tests
 │   └── ...
 │
@@ -141,401 +135,21 @@ pnpm dev:status
 │   ├── fengshui/         # Feng Shui Analysis
 │   └── asc-tcd/          # Association Website
 │
-└── docs/                  # Documentation
-    ├── audits/           # 16 audits détaillés
-    └── ...
+└── BACKLOG.md             # Projets en cours
 ```
-
-### Hiérarchie des Packages
-
-**1. `packages/`** - Pour code réutilisable entre projets
-**2. `apps/[project]/[shared]`** - Pour code partagé web/api d'un projet
-**3. `apps/[project]/web|api`** - Pour code spécifique à une couche
-
----
-
-## 🎨 Règles UI/UX
-
-### Composants UI (PRIORITÉ ABSOLUE)
-
-❌ **JAMAIS** utiliser HTML natif (`<div>`, `<button>`, `<input>`, `<h1>`)
-✅ **TOUJOURS** utiliser composants `@ezstart/ui`
-
-```tsx
-// ❌ JAMAIS
-<div className="bg-white rounded-lg">
-  <h2>Title</h2>
-  <button>Click</button>
-</div>
-
-// ✅ TOUJOURS
-<Card variant="floating">
-  <CardHeader>
-    <H2>Title</H2>
-  </CardHeader>
-  <CardContent>
-    <Button>Click</Button>
-  </CardContent>
-</Card>
-```
-
-### Couleurs Sémantiques (OBLIGATOIRE)
-
-❌ **JAMAIS** hardcoder couleurs (`bg-red-50`, `text-gray-600`)
-✅ **TOUJOURS** utiliser classes sémantiques
-
-```tsx
-// ❌ Hardcodé
-className = 'bg-gray-100 text-gray-900'
-
-// ✅ Sémantique
-className = 'bg-card text-foreground'
-```
-
-**Palette sémantique :**
-
-- Background: `bg-background`, `bg-card`, `bg-muted`
-- Text: `text-foreground`, `text-muted-foreground`
-- Primary: `bg-primary`, `text-primary-foreground`
-- Border: `border`
-
-### Animations & Styles Personnalisés (CRITIQUE)
-
-❌ **JAMAIS** ajouter animations/keyframes dans `tailwind.config.ts` local
-✅ **TOUJOURS** créer dans `packages/ui/src/styles/`
-
-**Structure :**
-```
-packages/ui/src/styles/
-├── animations/          # Animations réutilisables
-│   ├── glow-pulse.css  # Animation custom
-│   ├── gradient.css
-│   └── ...
-├── themes/             # Thèmes par projet
-└── globals.css         # Import de toutes les animations
-```
-
-**Exemple :**
-```css
-/* packages/ui/src/styles/animations/glow-pulse.css */
-@keyframes glow-pulse {
-  0%, 100% { filter: drop-shadow(...); }
-  50% { filter: drop-shadow(...); }
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 2s infinite;
-}
-```
-
-**Puis importer dans `globals.css` :**
-```css
-@import './animations/glow-pulse.css';
-```
-
-### Architecture UI en 3 Layers (IMPORTANT)
-
-Le package `@ezstart/ui` suit une **architecture en 3 couches** pour flexibilité maximale:
-
-```
-Layer 3: Business Components
-├─ PasswordInput (Input + validation)
-├─ BackButton (Button + navigation)
-└─ LocaleSwitcher (Dropdown + i18n)
-         ↓ composent
-Layer 2: High-Level Components
-├─ Modal (Dialog avec defaults)
-├─ Dropdown (Select simplifié)
-└─ Hero (Section + media)
-         ↓ utilisent
-Layer 1: Primitives & Base
-├─ Dialog, Select (Radix wrappers)
-└─ Button, Input, Card...
-```
-
-**Quand utiliser chaque layer:**
-
-- **Layer 1:** Cas complexes avec layouts customs
-- **Layer 2:** 90% des cas standards
-- **Layer 3:** Patterns métier spécifiques
-
-**Pourquoi ne PAS merger les composants:**
-
-- ✅ PasswordInput = composition d'Input (pattern correct)
-- ✅ Modal ≠ Dialog (niveaux d'abstraction différents)
-- ✅ Suit les standards industrie (shadcn/ui, Radix UI)
-
-**Documentation complète:** [packages/ui/README.md](./packages/ui/README.md)
-
----
-
-## 🏗️ Configuration Centralisée
-
-### TypeScript
-
-Tous les projets utilisent `@ezstart/typescript-config`
-
-**Variantes disponibles :**
-
-- `base.json` - Configuration de base
-- `api.json` - APIs Express
-- `nextjs.json` - Apps Next.js
-- `react-library.json` - Packages React
-- `types.json` - Packages types
-
-### ESLint & Tailwind
-
-- **ESLint:** `@ezstart/eslint-config`
-- **Tailwind:** `@ezstart/tailwind-config`
-- **URLs/CORS:** `@ezstart/config`
-
----
-
-## 🗄️ MongoDB - Connexion Centralisée
-
-### Pattern Standard
-
-```typescript
-import { connectToMongo, startServer, createApp } from '@ezstart/express-core'
-
-const app = createApp({ apiApp: 'ezauth' })
-
-connectToMongo('database-name')
-  .then(() => startServer(app, { routes, registries, serviceName, port }))
-  .catch(err => {
-    console.error('❌ Failed to start API', err)
-    process.exit(1)
-  })
-```
-
-### Models avec Factory Functions
-
-```typescript
-import { connectToMongo } from '@ezstart/express-core'
-import { Schema } from 'mongoose'
-
-const userSchema = new Schema({...}, { bufferCommands: false })
-
-export async function getUserModel() {
-  const mongoose = await connectToMongo('database-name')
-  return mongoose.models.User || mongoose.model('User', userSchema)
-}
-```
-
-**Documentation complète :** [packages/express-core/MONGODB-ARCHITECTURE.md](./packages/express-core/MONGODB-ARCHITECTURE.md)
-
----
-
-## 🧪 Tests
-
-### Running Tests
-
-```bash
-# Tous les tests
-pnpm test
-
-# API spécifique
-pnpm --filter api-ezauth test
-
-# Avec coverage
-pnpm test -- --coverage
-```
-
-### Protection Database (CRITIQUE)
-
-Tous les APIs utilisent `createVitestConfig({ dbName })`
-
-```typescript
-// apps/[api]/vitest.config.ts
-import { createVitestConfig } from '@ezstart/test-utils'
-
-export default createVitestConfig({
-  dbName: 'ezauth', // Database name pour isolation
-})
-```
-
-**Triple protection :**
-
-1. ✅ `NODE_ENV=test` forcé
-2. ✅ `MONGO_URL` fallback localhost (JAMAIS production)
-3. ✅ `.env.test` optionnel chargé automatiquement
-
-**Documentation complète :** [docs/TESTING.md](./docs/TESTING.md)
 
 ---
 
 ## 🚀 Déploiement
 
-### Plateformes
+**APIs → Railway** | **Web → Vercel**
 
-**Oracle Cloud Free Tier (TOUTES les APIs - GRATUIT) :**
+| API | URL |
+|-----|-----|
+| EZAuth | https://ezauth-api.up.railway.app |
+| EZPay | https://ezpay-api.up.railway.app |
+| EZBill | https://ezbill-api.up.railway.app |
+| GreenPulse | https://greenpulse-api.up.railway.app |
+| EZStart | https://ezstart-api.up.railway.app |
 
-- EZAuth API - https://ezauth-api.up.railway.app
-- EZPay API - https://ezpay-api.up.railway.app
-- EZBill API - https://ezbill-api.up.railway.app
-- Tower Defense API -
-- GreenPulse API - https://greenpulse-api.up.railway.app
-- EZStart API - https://ezstart-api.up.railway.app
-
-**Ressources :** 1x VM ARM (4 cores, 24GB RAM, 200GB storage) - GRATUIT À VIE
-
-**Vercel (Web Apps) :**
-
-- EZStart - https://www.ezstart.xyz
-- Toutes les autres apps
-
-### Infrastructure as Code
-
-Fichiers de configuration :
-
-- [docker-compose.yml](./docker-compose.yml) - Orchestration Docker (6 APIs)
-- [nginx/nginx.conf](./nginx/nginx.conf) - Reverse proxy et SSL
-- [.env.oracle.example](./.env.oracle.example) - Template variables Oracle
-- `apps/*/api/Dockerfile` - Dockerfiles multi-stage optimisés
-- `scripts/oracle-*.sh` - Scripts de gestion Oracle Cloud
-- `apps/*/web/vercel.json` - Configuration Vercel
-
-**Anciennes configs (deprecated) :**
-
-- [railway.toml](./railway.toml) - Configuration Railway (ancien)
-- [render.yaml](./render.yaml) - Configuration Render (ancien)
-
-**Documentation complète :**
-
-- [docs/ORACLE-CLOUD-DEPLOY.md](./docs/ORACLE-CLOUD-DEPLOY.md) - Guide Oracle complet
-- [DEPLOY.md](./DEPLOY.md) - Vue d'ensemble déploiement
-- [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
-
----
-
-## 📝 Git Commits - Règles
-
-✅ **TOUJOURS** commiter après modifications importantes
-✅ **TOUJOURS** documenter les changements
-✅ **TOUJOURS** mettre à jour CLAUDE.md si nouvelles pratiques
-✅ **TOUJOURS** mettre à jour README des packages modifiés
-
-❌ **JAMAIS** ajouter ces lignes :
-
-```
-🤖 Generated with [Claude Code](...)
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-### Structure Recommandée
-
-```
-type: brief description
-
-- Detailed changes list
-- Technical modifications
-- Impact/results
-```
-
----
-
-## 🔧 Troubleshooting
-
-### ERR_CONNECTION_REFUSED
-
-**Cause :** Anciens processus Node.js persistent
-**Solution :** Redémarrer VS Code ou `pnpm kill:ports`
-
-### TypeScript Errors
-
-```bash
-pnpm build
-pnpm typecheck
-```
-
-### MongoDB Connection Failed
-
-**Cause :** MONGO_URL incorrecte ou MongoDB pas démarré
-**Solution :** Vérifier `.env.local` ou démarrer MongoDB local
-
----
-
-## 📚 Documentation Complète
-
-### Core Docs
-
-- **[DEV-RULES.md](./DEV-RULES.md)** - Règles de développement
-- **[DEPLOY.md](./DEPLOY.md)** - Guide de déploiement
-- **[docs/README.md](./docs/README.md)** - Dashboard des audits
-- **[docs/CLAUDE-ARCHIVE.md](./docs/CLAUDE-ARCHIVE.md)** - Historique complet (4600+ lignes)
-
-### Guides Techniques
-
-- [docs/TESTING.md](./docs/TESTING.md) - Stratégie de tests
-- [docs/ROADMAP.md](./docs/ROADMAP.md) - Roadmap Phase 3
-- [docs/CI-CD-SETUP.md](./docs/CI-CD-SETUP.md) - Infrastructure as Code
-- [packages/express-core/MONGODB-ARCHITECTURE.md](./packages/express-core/MONGODB-ARCHITECTURE.md) - MongoDB
-
-### Audits Détaillés
-
-**16 audits disponibles :** [docs/audits/](./docs/audits/)
-
-- Security, Performance, Architecture, Code Quality
-- Dependencies, Accessibility, Infrastructure, API
-- SEO, Web Apps, Testing, UX, i18n, Monitoring
-
-### Guides par App
-
-- **Tower Defense:** [apps/tower-defense/docs/GAMEPLAY.md](./apps/tower-defense/docs/GAMEPLAY.md)
-- **GreenPulse:** [apps/green-pulse/FORMS.md](./apps/green-pulse/FORMS.md)
-- **Auth SDK:** [packages/auth-sdk/HTTPONLY-MIGRATION.md](./packages/auth-sdk/HTTPONLY-MIGRATION.md)
-
----
-
-## 🎯 Prochaines Étapes - Phase 3
-
-**Objectif :** Excellence (95 → 100/100)
-
-**Focus sur 5 domaines :**
-
-1. **UX Excellence** (70 → 90) - Loading states, error handling, mobile UX
-2. **Performance** (75 → 90) - Bundle optimization, images WebP/AVIF
-3. **Accessibility** (76 → 95) - ARIA attributes, keyboard navigation
-4. **API & Monitoring** (80 → 95) - OpenAPI complete, rate limiting, alerting
-5. **Monitoring Dashboard** (80 → 95) - Trending graphs, email alerts
-
-**Durée estimée :** 3 semaines (60 heures)
-
-**Documentation complète :** [docs/ROADMAP.md](./docs/ROADMAP.md)
-
----
-
-## 💡 Bonnes Pratiques
-
-### Avant de Créer du Code
-
-1. ✅ Vérifier si existe dans `packages/`
-2. ✅ Vérifier si peut être généralisé
-3. ✅ Créer dans la couche la plus haute possible
-
-### Hiérarchie de Vérification
-
-1. `packages/` - Réutilisable entre projets
-2. `apps/[project]/[shared]` - Partagé web/api du projet
-3. `apps/[project]/web|api` - Spécifique à une couche
-
-### Configuration Centralisée
-
-1. ✅ Toujours utiliser `@ezstart/typescript-config`
-2. ✅ Toujours utiliser `@ezstart/eslint-config`
-3. ✅ Toujours utiliser `@ezstart/tailwind-config`
-4. ✅ Toujours utiliser `@ezstart/config` pour URLs/CORS
-5. ✅ Toujours utiliser `@ezstart/ui` pour composants
-
-### Architecture .env
-
-```
-Chaque projet :
-├── .env.example    ← Template (committé)
-├── .env.local      ← Secrets dev (gitignored)
-└── .env.production ← Secrets prod (gitignored)
-```
-
----
-
-**Pour toute question, consulter [DEV-RULES.md](./DEV-RULES.md) ou [docs/CLAUDE-ARCHIVE.md](./docs/CLAUDE-ARCHIVE.md)**
+**Web** : https://www.ezstart.xyz + sous-domaines Vercel
