@@ -31,14 +31,20 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
 
         console.log(`🔍 Looking for payment with ID: ${session.id}`)
 
-        // Update payment status to completed
+        const updateData: any = {
+          status: 'completed',
+          completedAt: new Date(),
+          paymentMethod: session.payment_method_types?.[0],
+        }
+
+        // Store subscription ID if this was a subscription checkout
+        if (session.mode === 'subscription' && session.subscription) {
+          updateData['metadata.subscriptionId'] = session.subscription as string
+        }
+
         const result = await Payment.updateOne(
           { paymentId: session.id },
-          {
-            status: 'completed',
-            completedAt: new Date(),
-            paymentMethod: session.payment_method_types?.[0],
-          }
+          updateData
         )
 
         if (result.matchedCount === 0) {
@@ -73,15 +79,26 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
 
-        // Update subscription metadata
+        // Map Stripe subscription statuses to our payment statuses
+        const statusMap: Record<string, string> = {
+          active: 'completed',
+          past_due: 'pending',
+          canceled: 'cancelled',
+          unpaid: 'failed',
+          trialing: 'completed',
+          incomplete: 'pending',
+          incomplete_expired: 'failed',
+          paused: 'pending',
+        }
+
+        const mappedStatus = statusMap[subscription.status] || 'pending'
+
         await Payment.updateOne(
           { 'metadata.subscriptionId': subscription.id },
-          {
-            status: subscription.status === 'active' ? 'completed' : 'pending',
-          }
+          { status: mappedStatus }
         )
 
-        console.log(`📅 Subscription updated: ${subscription.id}`)
+        console.log(`📅 Subscription updated: ${subscription.id} → ${mappedStatus}`)
         break
       }
 
@@ -95,6 +112,21 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         )
 
         console.log(`❌ Subscription cancelled: ${subscription.id}`)
+        break
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const subscriptionId = invoice.subscription as string | null
+
+        if (subscriptionId) {
+          await Payment.updateOne(
+            { 'metadata.subscriptionId': subscriptionId },
+            { status: 'failed' }
+          )
+
+          console.log(`💥 Invoice payment failed for subscription: ${subscriptionId}`)
+        }
         break
       }
 

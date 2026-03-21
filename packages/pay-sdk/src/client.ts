@@ -106,12 +106,17 @@ export class PayClient {
   // ===== PURCHASES =====
 
   async createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
+    const returnUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : undefined
+
     const response = await fetch(`${this.config.baseURL}/purchase`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, returnUrl }),
     })
 
     const result = await response.json()
@@ -142,12 +147,17 @@ export class PayClient {
   // ===== SUBSCRIPTIONS =====
 
   async createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
+    const returnUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : undefined
+
     const response = await fetch(`${this.config.baseURL}/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, returnUrl }),
     })
 
     const result = await response.json()
