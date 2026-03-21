@@ -58,13 +58,34 @@ Quand l'utilisateur dit **"init ce workspace"** sur un nouveau projet avec seule
 4. **Valider** — Attendre validation de l'utilisateur avant de créer les fichiers
 5. **Créer** — Lancer des agents pour écrire les fichiers validés
 
-**Principes toujours appliqués** (quel que soit le projet) :
-- Réutilisabilité maximale (packages > shared > specific)
-- Pas de duplication de code ou de docs
-- Naming conventions cohérentes
-- Typecheck obligatoire avant commit
-- Action-based organization quand applicable
-- Scripts organisés (pas de one-shot qui traînent)
+**Socle universel — TOUJOURS appliqué lors d'un init (quel que soit le projet) :**
+
+Code quality :
+- Typecheck/lint obligatoire avant chaque commit
+- Jamais de secrets (clés API, tokens, .env) dans le code
+- Naming conventions cohérentes (PascalCase composants, camelCase fonctions/variables, UPPERCASE constantes, kebab-case dossiers)
+- Anti-over-documentation : documenter le WHY pas le WHAT, pas de README inutiles
+
+Architecture :
+- Réutilisabilité maximale (shared/packages > project-specific > layer-specific)
+- Pas de duplication de code ni de docs
+- Action-based organization quand applicable (1 fichier = 1 responsabilité)
+- Pas de dépendances circulaires
+
+Fichiers & scripts :
+- `.env.example` committé, `.env.local` gitignored
+- Scripts organisés dans des sous-dossiers (jamais de one-shot qui traînent)
+- Jamais de fichiers temporaires (tmp/, backup, src/ fantôme) à la racine
+
+Git :
+- Commits conventionnels : `type: description` (feat, fix, docs, refactor, test, chore)
+- Jamais de "Generated with Claude Code" ou "Co-Authored-By: Claude"
+- README mis à jour quand un package/module est modifié
+
+Communication :
+- Français pour la communication avec l'utilisateur
+- Concis et actionnable
+- Demander avant d'assumer
 
 ### Dev servers :
 
