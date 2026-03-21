@@ -42,7 +42,7 @@ L'utilisateur peut dire : **"relis les règles CLAUDE.md"** → Claude relit et 
 
 ### Init nouveau workspace :
 
-Quand l'utilisateur dit **"init ce workspace"** sur un nouveau projet avec seulement CLAUDE.md :
+Quand l'utilisateur dit **"init"** (nouveau projet avec seulement CLAUDE.md) :
 
 1. **Analyser** — Lancer des agents en parallèle pour scanner tout le workspace :
    - Structure des dossiers et fichiers
