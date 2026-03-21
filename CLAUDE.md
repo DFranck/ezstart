@@ -37,6 +37,32 @@
 
 L'utilisateur peut dire : **"relis les règles CLAUDE.md"** → Claude relit et corrige immédiatement son comportement.
 
+### Init nouveau workspace :
+
+Quand l'utilisateur dit **"init ce workspace"** sur un nouveau projet avec seulement CLAUDE.md :
+
+1. **Analyser** — Lancer des agents en parallèle pour scanner tout le workspace :
+   - Structure des dossiers et fichiers
+   - Stack technique (langages, frameworks, package manager, etc.)
+   - Patterns existants (routing, tests, composants, etc.)
+   - Configuration existante (tsconfig, eslint, CI/CD, deploy, etc.)
+   - Dépendances et architecture
+2. **Résumer** — Présenter à l'utilisateur un résumé de ce qui a été trouvé
+3. **Proposer** — Générer et proposer :
+   - **DEV-RULES.md** adapté au projet (mêmes principes : réutilisabilité, naming, structure, pas de duplication)
+   - **BACKLOG.md** vide avec le template
+   - **.claude/config.json** avec naming conventions adaptées au projet
+4. **Valider** — Attendre validation de l'utilisateur avant de créer les fichiers
+5. **Créer** — Lancer des agents pour écrire les fichiers validés
+
+**Principes toujours appliqués** (quel que soit le projet) :
+- Réutilisabilité maximale (packages > shared > specific)
+- Pas de duplication de code ou de docs
+- Naming conventions cohérentes
+- Typecheck obligatoire avant commit
+- Action-based organization quand applicable
+- Scripts organisés (pas de one-shot qui traînent)
+
 ### Dev servers :
 
 - ✅ **TOUJOURS** dire à l'utilisateur quel script lancer (`pnpm dev:bill`, `pnpm dev:ga`, etc.)
