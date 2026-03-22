@@ -25,13 +25,9 @@ export async function scanImage(
     // 1. Run OCR recognition
     const ocrResult = await recognize(imageBuffer)
 
-    console.log('[scan] OCR text:', ocrResult.text.substring(0, 200))
-
     // 2. Parse with the appropriate game parser
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser
     const parseResult = parser.parse(ocrResult)
-
-    console.log('[scan] Parse result:', JSON.stringify(parseResult).substring(0, 200))
 
     const processingTimeMs = Date.now() - startTime
 

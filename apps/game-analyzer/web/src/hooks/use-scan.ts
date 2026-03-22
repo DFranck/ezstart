@@ -16,12 +16,14 @@ export function useScan() {
       formData.append('image', image)
       formData.append('gameType', gameType)
 
-      const response = await callApi<Scan>('/scan', {
+      const response = await callApi<{ success: boolean; data: Scan }>('/scan', {
         method: 'POST',
         body: formData,
       })
 
-      return response.data
+      // API returns { success, data: { id, gameType, status, result } }
+      // callApi wraps this as response.data, so we need response.data.data to get the Scan
+      return response.data.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scans'] })

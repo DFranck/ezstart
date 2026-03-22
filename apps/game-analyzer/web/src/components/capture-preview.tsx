@@ -66,11 +66,6 @@ export function CapturePreview({
     return () => observer.disconnect()
   }, [])
 
-  // Debug: log container size to verify ROI can render
-  useEffect(() => {
-    console.log('[ROI] containerSize:', containerSize.width, containerSize.height)
-  }, [containerSize])
-
   const statusText = useCallback(() => {
     if (error) return error
     if (isAnalyzing) return t('capture.analyzing')

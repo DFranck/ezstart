@@ -10,8 +10,10 @@ export interface RoiRect {
 }
 
 interface RoiSelectorProps {
-  containerWidth: number
-  containerHeight: number
+  /** @deprecated No longer needed — overlay measures itself via getBoundingClientRect */
+  containerWidth?: number
+  /** @deprecated No longer needed — overlay measures itself via getBoundingClientRect */
+  containerHeight?: number
   onChange: (roi: RoiRect) => void
   initialRoi?: RoiRect
 }
@@ -25,8 +27,6 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 export function RoiSelector({
-  containerWidth,
-  containerHeight,
   onChange,
   initialRoi,
 }: RoiSelectorProps) {
@@ -43,10 +43,6 @@ export function RoiSelector({
   } | null>(null)
 
   const overlayRef = useRef<HTMLDivElement>(null)
-
-  // Stable refs for values used inside event listeners
-  const containerRef = useRef({ width: containerWidth, height: containerHeight })
-  containerRef.current = { width: containerWidth, height: containerHeight }
 
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
@@ -67,12 +63,14 @@ export function RoiSelector({
       const drag = dragRef.current
       if (!drag) return
 
-      const { width, height } = containerRef.current
-      if (width === 0 || height === 0) return
+      // Measure overlay directly instead of relying on props (may be 0 or stale)
+      const overlay = overlayRef.current
+      if (!overlay) return
+      const rect = overlay.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
 
-      const dx = ((clientX - drag.startMouseX) / width) * 100
-      const dy = ((clientY - drag.startMouseY) / height) * 100
-
+      const dx = ((clientX - drag.startMouseX) / rect.width) * 100
+      const dy = ((clientY - drag.startMouseY) / rect.height) * 100
       let newRoi: RoiRect
 
       if (drag.type === 'move') {
@@ -188,23 +186,25 @@ export function RoiSelector({
   const handleStyle = (corner: Corner): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'absolute',
-      width: 12,
-      height: 12,
+      width: 16,
+      height: 16,
       backgroundColor: 'red',
       border: '2px solid darkred',
-      borderRadius: 1,
-      zIndex: 10,
+      borderRadius: 2,
+      zIndex: 60,
+      pointerEvents: 'auto',
+      touchAction: 'none',
     }
 
     switch (corner) {
       case 'nw':
-        return { ...base, top: -6, left: -6, cursor: 'nw-resize' }
+        return { ...base, top: -8, left: -8, cursor: 'nw-resize' }
       case 'ne':
-        return { ...base, top: -6, right: -6, cursor: 'ne-resize' }
+        return { ...base, top: -8, right: -8, cursor: 'ne-resize' }
       case 'sw':
-        return { ...base, bottom: -6, left: -6, cursor: 'sw-resize' }
+        return { ...base, bottom: -8, left: -8, cursor: 'sw-resize' }
       case 'se':
-        return { ...base, bottom: -6, right: -6, cursor: 'se-resize' }
+        return { ...base, bottom: -8, right: -8, cursor: 'se-resize' }
     }
   }
 
@@ -229,11 +229,13 @@ export function RoiSelector({
           width: `${roi.width}%`,
           height: `${roi.height}%`,
           border: '3px solid red',
-          backgroundColor: 'rgba(255, 0, 0, 0.2)',
+          backgroundColor: 'rgba(255, 0, 0, 0.15)',
           cursor: 'move',
           pointerEvents: 'auto',
           boxSizing: 'border-box',
           touchAction: 'none',
+          overflow: 'visible',
+          zIndex: 55,
         }}
         onMouseDown={(e) => handleMouseDown(e, 'move')}
         onTouchStart={(e) => handleTouchStart(e, 'move')}

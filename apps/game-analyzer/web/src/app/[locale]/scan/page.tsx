@@ -84,7 +84,6 @@ export default function ScanPage() {
 
   const handleSignificantChange = useCallback(
     (frame: ImageData) => {
-      console.log('[diff] CHANGE DETECTED, sending to API')
       if (!selectedGame || scanningRef.current) return
 
       scanningRef.current = true
@@ -110,7 +109,6 @@ export default function ScanPage() {
     (frame: ImageData) => {
       // Crop frame to ROI before feeding to diff for better sensitivity
       const cropped = cropImageData(frame, roiRef.current)
-      console.log('[capture] frame received', frame.width, frame.height, '→ cropped to', cropped.width, cropped.height)
       processFrame(cropped)
     },
     [processFrame]
@@ -136,7 +134,9 @@ export default function ScanPage() {
 
   const isAnalyzing = isPending || (!isStable && isCapturing)
 
-  const resultData = scanResult?.result
+  // API response is flat: { success, data, rawText, confidence, ... } — no .result wrapper
+  const resultData = scanResult
+  const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
     <Div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -185,20 +185,31 @@ export default function ScanPage() {
 
                 {resultData && (
                   <>
-                    {resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data ? (
+                    {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                       <>
                         <RuneCard rune={resultData.data} confidence={resultData.confidence} />
                         <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
                       </>
-                    ) : resultData.success && 'manufacturer' in resultData.data ? (
+                    )}
+                    {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                       <GearCard gear={resultData.data} confidence={resultData.confidence} />
-                    ) : null}
+                    )}
 
-                    <ScanResultRaw
-                      rawText={resultData.rawText}
-                      confidence={resultData.confidence}
-                      parsingFailed={!resultData.success}
-                    />
+                    {resultData.rawText && (
+                      <ScanResultRaw
+                        rawText={resultData.rawText}
+                        confidence={resultData.confidence}
+                        parsingFailed={!hasStructuredData}
+                      />
+                    )}
+
+                    {!hasStructuredData && resultData.rawText && (
+                      <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
+                        <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                          {t('scan.parsingImproving', { defaultMessage: 'Structured parsing is being improved. Raw OCR text is shown above.' })}
+                        </P>
+                      </Div>
+                    )}
                   </>
                 )}
 
@@ -231,20 +242,31 @@ export default function ScanPage() {
               {resultData && (
                 <Div className="space-y-4">
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
-                  {resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data ? (
+                  {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                     <>
                       <RuneCard rune={resultData.data} confidence={resultData.confidence} />
                       <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
                     </>
-                  ) : resultData.success && 'manufacturer' in resultData.data ? (
+                  )}
+                  {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                     <GearCard gear={resultData.data} confidence={resultData.confidence} />
-                  ) : null}
+                  )}
 
-                  <ScanResultRaw
-                    rawText={resultData.rawText}
-                    confidence={resultData.confidence}
-                    parsingFailed={!resultData.success}
-                  />
+                  {resultData.rawText && (
+                    <ScanResultRaw
+                      rawText={resultData.rawText}
+                      confidence={resultData.confidence}
+                      parsingFailed={!hasStructuredData}
+                    />
+                  )}
+
+                  {!hasStructuredData && resultData.rawText && (
+                    <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
+                      <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                        {t('scan.parsingImproving', { defaultMessage: 'Structured parsing is being improved. Raw OCR text is shown above.' })}
+                      </P>
+                    </Div>
+                  )}
                 </Div>
               )}
             </Div>
