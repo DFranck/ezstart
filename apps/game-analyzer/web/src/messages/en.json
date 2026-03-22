@@ -1,0 +1,77 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "scan": "Scan",
+    "history": "History"
+  },
+  "actions": {
+    "upload": "Upload",
+    "scan": "Scan",
+    "delete": "Delete",
+    "back": "Back",
+    "viewAll": "View all",
+    "tryAgain": "Try again"
+  },
+  "labels": {
+    "game": "Game",
+    "set": "Set",
+    "slot": "Slot",
+    "level": "Level",
+    "grade": "Grade",
+    "stats": "Stats",
+    "mainStat": "Main stat",
+    "subStats": "Sub stats",
+    "innateStat": "Innate stat",
+    "confidence": "Confidence",
+    "type": "Type",
+    "manufacturer": "Manufacturer",
+    "tier": "Tier",
+    "noScans": "No scans yet",
+    "recentScans": "Recent scans",
+    "processingTime": "Processing time"
+  },
+  "status": {
+    "pending": "Pending",
+    "processing": "Processing...",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "games": {
+    "summoners-war": "Summoners War",
+    "nikke": "Nikke"
+  },
+  "dashboard": {
+    "title": "Game Analyzer",
+    "subtitle": "Scan your runes & gear with AI",
+    "scanButton": "New Scan",
+    "recentScans": "Recent Scans",
+    "viewHistory": "View History"
+  },
+  "scan": {
+    "title": "Scan",
+    "selectGame": "Select a game",
+    "uploadImage": "Upload an image",
+    "dragDrop": "Drag & drop an image here",
+    "orBrowse": "or browse files",
+    "takePhoto": "Take a photo",
+    "chooseFile": "Choose from gallery",
+    "scanning": "Analyzing image...",
+    "result": "Scan Result"
+  },
+  "scanDetail": {
+    "title": "Scan Details",
+    "scannedImage": "Scanned image",
+    "parsedStats": "Parsed Stats",
+    "confidenceScore": "Confidence Score",
+    "deleteConfirm": "Are you sure you want to delete this scan?"
+  },
+  "history": {
+    "title": "Scan History",
+    "filterByGame": "Filter by game",
+    "filterByStatus": "Filter by status",
+    "allGames": "All games",
+    "allStatuses": "All statuses",
+    "empty": "No scans found",
+    "emptyDescription": "Start scanning your runes and gear!"
+  }
+}

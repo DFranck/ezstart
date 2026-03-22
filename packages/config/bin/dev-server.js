@@ -31,6 +31,7 @@ const appNameMap = {
   'web-tower-defense': 'tower-defense',
   'web-asc-tcd': 'asc-tcd',
   'web-green-pulse': 'green-pulse',
+  'web-game-analyzer': 'game-analyzer',
 }
 
 const appName = appNameMap[pkgName]

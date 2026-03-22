@@ -1,0 +1,77 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "scan": "Scanner",
+    "history": "Historique"
+  },
+  "actions": {
+    "upload": "Importer",
+    "scan": "Scanner",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "viewAll": "Voir tout",
+    "tryAgain": "Reessayer"
+  },
+  "labels": {
+    "game": "Jeu",
+    "set": "Set",
+    "slot": "Slot",
+    "level": "Niveau",
+    "grade": "Grade",
+    "stats": "Stats",
+    "mainStat": "Stat principale",
+    "subStats": "Sous-stats",
+    "innateStat": "Stat innee",
+    "confidence": "Confiance",
+    "type": "Type",
+    "manufacturer": "Fabricant",
+    "tier": "Tier",
+    "noScans": "Aucun scan",
+    "recentScans": "Scans recents",
+    "processingTime": "Temps de traitement"
+  },
+  "status": {
+    "pending": "En attente",
+    "processing": "Analyse en cours...",
+    "completed": "Termine",
+    "failed": "Echoue"
+  },
+  "games": {
+    "summoners-war": "Summoners War",
+    "nikke": "Nikke"
+  },
+  "dashboard": {
+    "title": "Game Analyzer",
+    "subtitle": "Scannez vos runes et equipements avec l'IA",
+    "scanButton": "Nouveau Scan",
+    "recentScans": "Scans Recents",
+    "viewHistory": "Voir l'historique"
+  },
+  "scan": {
+    "title": "Scanner",
+    "selectGame": "Selectionnez un jeu",
+    "uploadImage": "Importez une image",
+    "dragDrop": "Glissez-deposez une image ici",
+    "orBrowse": "ou parcourez vos fichiers",
+    "takePhoto": "Prendre une photo",
+    "chooseFile": "Choisir depuis la galerie",
+    "scanning": "Analyse de l'image...",
+    "result": "Resultat du Scan"
+  },
+  "scanDetail": {
+    "title": "Details du Scan",
+    "scannedImage": "Image scannee",
+    "parsedStats": "Stats analysees",
+    "confidenceScore": "Score de confiance",
+    "deleteConfirm": "Etes-vous sur de vouloir supprimer ce scan ?"
+  },
+  "history": {
+    "title": "Historique des Scans",
+    "filterByGame": "Filtrer par jeu",
+    "filterByStatus": "Filtrer par statut",
+    "allGames": "Tous les jeux",
+    "allStatuses": "Tous les statuts",
+    "empty": "Aucun scan trouve",
+    "emptyDescription": "Commencez a scanner vos runes et equipements !"
+  }
+}

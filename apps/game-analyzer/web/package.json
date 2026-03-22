@@ -1,0 +1,46 @@
+{
+  "name": "web-game-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ../../../packages/config/bin/dev-server.js",
+    "dev:port": "next dev -p $PORT",
+    "build": "pnpm --filter @game-analyzer/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ezstart/auth-sdk": "workspace:*",
+    "@ezstart/config": "workspace:*",
+    "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/next-theme": "workspace:*",
+    "@ezstart/ui": "workspace:*",
+    "@game-analyzer/types": "workspace:*",
+    "@tanstack/react-query": "^5.90.3",
+    "next": "^15.5.9",
+    "next-intl": "^4.1.0",
+    "next-themes": "^0.4.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "sonner": "^1.7.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@ezstart/eslint-config": "workspace:*",
+    "@ezstart/next-config": "workspace:*",
+    "@ezstart/seo-config": "workspace:*",
+    "@ezstart/tailwind-config": "workspace:*",
+    "@ezstart/typescript-config": "workspace:*",
+    "@tanstack/react-query-devtools": "^5.90.2",
+    "@types/node": "^22.10.6",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.18.0",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}
