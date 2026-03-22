@@ -12,6 +12,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useCallback, useRef, useState } from 'react'
 import type { GameType, Scan } from '@game-analyzer/types'
+import type { RoiRect } from '@/components/roi-selector'
 import { GameSelector } from '@/components/game-selector'
 import { ScanUploader } from '@/components/scan-uploader'
 import { RuneCard } from '@/components/rune-card'
@@ -22,6 +23,9 @@ import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
 
+/** Default ROI: top-right area where SW displays the rune */
+const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
+
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = imageData.width
@@ -29,6 +33,25 @@ function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
   const ctx = canvas.getContext('2d')
   if (ctx) ctx.putImageData(imageData, 0, 0)
   return canvas
+}
+
+/** Crop an ImageData to the given ROI (percentages 0-100) */
+function cropImageData(imageData: ImageData, roi: RoiRect): ImageData {
+  const srcCanvas = canvasFromImageData(imageData)
+
+  const sx = Math.round((roi.x / 100) * imageData.width)
+  const sy = Math.round((roi.y / 100) * imageData.height)
+  const sw = Math.round((roi.width / 100) * imageData.width)
+  const sh = Math.round((roi.height / 100) * imageData.height)
+
+  const cropCanvas = document.createElement('canvas')
+  cropCanvas.width = sw
+  cropCanvas.height = sh
+  const ctx = cropCanvas.getContext('2d')
+  if (!ctx) return imageData
+
+  ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, sw, sh)
+  return ctx.getImageData(0, 0, sw, sh)
 }
 
 async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
@@ -45,7 +68,15 @@ export default function ScanPage() {
   const t = useTranslations()
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null)
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
+  const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
+
+  // Keep a ref to the latest ROI so callbacks always have the current value
+  const roiRef = useRef<RoiRect>(roi)
+  const handleRoiChange = useCallback((newRoi: RoiRect) => {
+    setRoi(newRoi)
+    roiRef.current = newRoi
+  }, [])
 
   // Track whether an auto-scan is in progress to avoid overlapping requests
   const scanningRef = useRef(false)
@@ -56,7 +87,10 @@ export default function ScanPage() {
 
       scanningRef.current = true
 
-      imageDataToBlob(frame).then((blob) => {
+      // Crop the frame to the ROI before sending to OCR
+      const cropped = cropImageData(frame, roiRef.current)
+
+      imageDataToBlob(cropped).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         reset()
         scan(
@@ -74,7 +108,9 @@ export default function ScanPage() {
 
   const handleFrame = useCallback(
     (frame: ImageData) => {
-      processFrame(frame)
+      // Crop frame to ROI before feeding to diff for better sensitivity
+      const cropped = cropImageData(frame, roiRef.current)
+      processFrame(cropped)
     },
     [processFrame]
   )
@@ -133,6 +169,8 @@ export default function ScanPage() {
                 error={captureError}
                 onStart={startCapture}
                 onStop={stopCapture}
+                roi={roi}
+                onRoiChange={handleRoiChange}
               />
 
               {/* Right: Result */}

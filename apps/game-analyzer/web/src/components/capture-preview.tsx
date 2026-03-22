@@ -2,7 +2,8 @@
 
 import { Button, Card, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { RoiSelector, type RoiRect } from './roi-selector'
 
 interface CapturePreviewProps {
   isCapturing: boolean
@@ -12,6 +13,8 @@ interface CapturePreviewProps {
   error: string | null
   onStart: () => void
   onStop: () => void
+  roi?: RoiRect
+  onRoiChange?: (roi: RoiRect) => void
 }
 
 export function CapturePreview({
@@ -22,9 +25,13 @@ export function CapturePreview({
   error,
   onStart,
   onStop,
+  roi,
+  onRoiChange,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
 
   // Draw current frame to the visible canvas
   useEffect(() => {
@@ -40,6 +47,24 @@ export function CapturePreview({
     if (!ctx) return
     ctx.putImageData(currentFrame, 0, 0)
   }, [currentFrame])
+
+  // Track container size for ROI selector
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        })
+      }
+    })
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
 
   const statusText = useCallback(() => {
     if (error) return error
@@ -69,16 +94,31 @@ export function CapturePreview({
       {/* Preview */}
       <Card className="overflow-hidden bg-muted">
         {isCapturing && currentFrame ? (
-          <canvas
-            ref={canvasRef}
-            className="w-full h-auto"
-          />
+          <Div ref={containerRef} className="relative">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-auto block"
+            />
+            {containerSize.width > 0 && containerSize.height > 0 && onRoiChange && (
+              <RoiSelector
+                containerWidth={containerSize.width}
+                containerHeight={containerSize.height}
+                onChange={onRoiChange}
+                initialRoi={roi}
+              />
+            )}
+          </Div>
         ) : (
           <Div className="aspect-video flex items-center justify-center">
             <P className="text-muted-foreground text-sm">{t('capture.selectWindow')}</P>
           </Div>
         )}
       </Card>
+
+      {/* ROI hint */}
+      {isCapturing && currentFrame && (
+        <P className="text-xs text-muted-foreground">{t('capture.adjustZone')}</P>
+      )}
 
       {/* Status */}
       <Div className="flex items-center gap-2">

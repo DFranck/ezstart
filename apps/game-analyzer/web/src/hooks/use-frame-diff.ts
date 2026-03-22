@@ -3,13 +3,13 @@
 import { useCallback, useRef, useState } from 'react'
 
 interface UseFrameDiffOptions {
-  /** % of sampled pixels that must differ to consider a significant change (default: 15) */
+  /** % of sampled pixels that must differ to consider a significant change (default: 5) */
   threshold?: number
-  /** Minimum per-pixel grayscale difference to count as "changed" (default: 30) */
+  /** Minimum per-pixel grayscale difference to count as "changed" (default: 20) */
   pixelThreshold?: number
   /** Sample 1 pixel every N pixels for performance (default: 4) */
   sampleRate?: number
-  /** Wait this many ms of stability before triggering onChange (default: 300) */
+  /** Wait this many ms of stability before triggering onChange (default: 500) */
   stabilizeMs?: number
   /** Called once the frame has stabilized after a significant change */
   onSignificantChange?: (frame: ImageData) => void
@@ -42,10 +42,10 @@ function computeGrayscale(r: number, g: number, b: number): number {
  */
 export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffReturn {
   const {
-    threshold = 15,
-    pixelThreshold = 30,
+    threshold = 5,
+    pixelThreshold = 20,
     sampleRate = 4,
-    stabilizeMs = 300,
+    stabilizeMs = 500,
     onSignificantChange,
   } = options
 

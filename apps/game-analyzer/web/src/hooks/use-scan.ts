@@ -16,7 +16,7 @@ export function useScan() {
       formData.append('image', image)
       formData.append('gameType', gameType)
 
-      const response = await callApi<Scan>('/scans', {
+      const response = await callApi<Scan>('/scan', {
         method: 'POST',
         body: formData,
       })

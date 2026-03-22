@@ -72,7 +72,8 @@
       "analyzing": "Analyse en cours...",
       "selectWindow": "Selectionnez une fenetre a capturer",
       "waitingForChange": "En attente de changement...",
-      "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur"
+      "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur",
+      "adjustZone": "Ajustez la zone de detection"
     },
     "efficiency": {
       "title": "Efficacite",
