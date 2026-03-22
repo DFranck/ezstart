@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export interface RoiRect {
   x: number      // % of container (0-100)
@@ -44,65 +44,41 @@ export function RoiSelector({
 
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  // Sync initial roi from props
+  // Stable refs for values used inside event listeners
+  const containerRef = useRef({ width: containerWidth, height: containerHeight })
+  containerRef.current = { width: containerWidth, height: containerHeight }
+
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const roiRef = useRef(roi)
+  roiRef.current = roi
+
+  // Sync initial roi from props — but NOT while dragging
   useEffect(() => {
-    if (initialRoi) {
+    if (initialRoi && !dragRef.current) {
       setRoi(initialRoi)
     }
   }, [initialRoi])
 
-  // Notify parent on roi change
-  const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
-
+  // Register mousemove/mouseup/touch listeners once — stable, no re-registering
   useEffect(() => {
-    onChangeRef.current(roi)
-  }, [roi])
-
-  const pxToPercent = useCallback(
-    (pxX: number, pxY: number) => ({
-      x: (pxX / containerWidth) * 100,
-      y: (pxY / containerHeight) * 100,
-    }),
-    [containerWidth, containerHeight],
-  )
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent, type: 'move' | 'resize', corner?: Corner) => {
-      e.preventDefault()
-      e.stopPropagation()
-      dragRef.current = {
-        type,
-        corner,
-        startMouseX: e.clientX,
-        startMouseY: e.clientY,
-        startRoi: { ...roi },
-      }
-    },
-    [roi],
-  )
-
-  useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
+    function handleMove(clientX: number, clientY: number) {
       const drag = dragRef.current
       if (!drag) return
 
-      const dx = e.clientX - drag.startMouseX
-      const dy = e.clientY - drag.startMouseY
-      const delta = pxToPercent(dx, dy)
+      const { width, height } = containerRef.current
+      if (width === 0 || height === 0) return
+
+      const dx = ((clientX - drag.startMouseX) / width) * 100
+      const dy = ((clientY - drag.startMouseY) / height) * 100
+
+      let newRoi: RoiRect
 
       if (drag.type === 'move') {
-        const newX = clamp(
-          drag.startRoi.x + delta.x,
-          0,
-          100 - drag.startRoi.width,
-        )
-        const newY = clamp(
-          drag.startRoi.y + delta.y,
-          0,
-          100 - drag.startRoi.height,
-        )
-        setRoi({ ...drag.startRoi, x: newX, y: newY })
+        const newX = clamp(drag.startRoi.x + dx, 0, 100 - drag.startRoi.width)
+        const newY = clamp(drag.startRoi.y + dy, 0, 100 - drag.startRoi.height)
+        newRoi = { ...drag.startRoi, x: newX, y: newY }
       } else if (drag.type === 'resize' && drag.corner) {
         const s = drag.startRoi
         let newX = s.x
@@ -112,42 +88,102 @@ export function RoiSelector({
 
         switch (drag.corner) {
           case 'se':
-            newW = clamp(s.width + delta.x, MIN_SIZE, 100 - s.x)
-            newH = clamp(s.height + delta.y, MIN_SIZE, 100 - s.y)
+            newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
+            newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
             break
           case 'sw':
-            newW = clamp(s.width - delta.x, MIN_SIZE, s.x + s.width)
+            newW = clamp(s.width - dx, MIN_SIZE, s.x + s.width)
             newX = s.x + s.width - newW
-            newH = clamp(s.height + delta.y, MIN_SIZE, 100 - s.y)
+            newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
             break
           case 'ne':
-            newW = clamp(s.width + delta.x, MIN_SIZE, 100 - s.x)
-            newH = clamp(s.height - delta.y, MIN_SIZE, s.y + s.height)
+            newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
+            newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
             newY = s.y + s.height - newH
             break
           case 'nw':
-            newW = clamp(s.width - delta.x, MIN_SIZE, s.x + s.width)
+            newW = clamp(s.width - dx, MIN_SIZE, s.x + s.width)
             newX = s.x + s.width - newW
-            newH = clamp(s.height - delta.y, MIN_SIZE, s.y + s.height)
+            newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
             newY = s.y + s.height - newH
             break
         }
 
-        setRoi({ x: newX, y: newY, width: newW, height: newH })
+        newRoi = { x: newX, y: newY, width: newW, height: newH }
+      } else {
+        return
+      }
+
+      setRoi(newRoi)
+      roiRef.current = newRoi
+    }
+
+    function handleEnd() {
+      if (dragRef.current) {
+        onChangeRef.current(roiRef.current)
+      }
+      dragRef.current = null
+    }
+
+    function handleMouseMove(e: MouseEvent) {
+      handleMove(e.clientX, e.clientY)
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+      if (e.touches.length === 1) {
+        e.preventDefault()
+        handleMove(e.touches[0].clientX, e.touches[0].clientY)
       }
     }
 
     function handleMouseUp() {
-      dragRef.current = null
+      handleEnd()
+    }
+
+    function handleTouchEnd() {
+      handleEnd()
     }
 
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('touchmove', handleTouchMove, { passive: false })
+    window.addEventListener('touchend', handleTouchEnd)
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [pxToPercent])
+  }, []) // stable — no deps, uses refs only
+
+  function startDrag(
+    clientX: number,
+    clientY: number,
+    type: 'move' | 'resize',
+    corner?: Corner,
+  ) {
+    dragRef.current = {
+      type,
+      corner,
+      startMouseX: clientX,
+      startMouseY: clientY,
+      startRoi: { ...roiRef.current },
+    }
+  }
+
+  function handleMouseDown(e: React.MouseEvent, type: 'move' | 'resize', corner?: Corner) {
+    e.preventDefault()
+    e.stopPropagation()
+    startDrag(e.clientX, e.clientY, type, corner)
+  }
+
+  function handleTouchStart(e: React.TouchEvent, type: 'move' | 'resize', corner?: Corner) {
+    e.stopPropagation()
+    if (e.touches.length === 1) {
+      startDrag(e.touches[0].clientX, e.touches[0].clientY, type, corner)
+    }
+  }
 
   const handleStyle = (corner: Corner): React.CSSProperties => {
     const base: React.CSSProperties = {
@@ -196,8 +232,10 @@ export function RoiSelector({
           cursor: 'move',
           pointerEvents: 'auto',
           boxSizing: 'border-box',
+          touchAction: 'none',
         }}
         onMouseDown={(e) => handleMouseDown(e, 'move')}
+        onTouchStart={(e) => handleTouchStart(e, 'move')}
       >
         {/* Corner handles */}
         {corners.map((corner) => (
@@ -205,6 +243,7 @@ export function RoiSelector({
             key={corner}
             style={handleStyle(corner)}
             onMouseDown={(e) => handleMouseDown(e, 'resize', corner)}
+            onTouchStart={(e) => handleTouchStart(e, 'resize', corner)}
           />
         ))}
       </div>
