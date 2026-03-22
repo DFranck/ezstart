@@ -9,7 +9,6 @@ export * from './ezstart'
 export * from './ezauth'
 export * from './ezpay'
 export * from './ezbill'
-export * from './tower-defense'
 export * from './green-pulse'
 export * from './fengshui'
 export * from './asc-tcd'
@@ -18,7 +17,6 @@ import { ezstartSEO } from './ezstart'
 import { ezauthSEO } from './ezauth'
 import { ezpaySEO } from './ezpay'
 import { ezbillSEO } from './ezbill'
-import { towerDefenseSEO } from './tower-defense'
 import { greenPulseSEO } from './green-pulse'
 import { fengshuiSEO } from './fengshui'
 import { ascTcdSEO } from './asc-tcd'
@@ -28,7 +26,6 @@ export const appSEOConfigs = {
   ezauth: ezauthSEO,
   ezpay: ezpaySEO,
   ezbill: ezbillSEO,
-  'tower-defense': towerDefenseSEO,
   'green-pulse': greenPulseSEO,
   fengshui: fengshuiSEO,
   'asc-tcd': ascTcdSEO,

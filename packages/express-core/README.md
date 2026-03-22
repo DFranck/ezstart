@@ -155,8 +155,8 @@ import { getApiPort } from '@ezstart/express-core'
 const PORT = getApiPort(5010) // Defaults to 5010, or process.env.PORT if defined
 
 // Pattern 50xx:
-// APIs: 50x0 (EZAuth 5010, EZBill 5020, Tower Defense 5030, EZPay 5040, etc.)
-// Web:  50x5 (EZAuth 5015, EZBill 5025, Tower Defense 5035, EZPay 5045, etc.)
+// APIs: 50x0 (EZAuth 5010, EZBill 5020, EZPay 5040, etc.)
+// Web:  50x5 (EZAuth 5015, EZBill 5025, EZPay 5045, etc.)
 ```
 
 #### Express Router (Centralized)
@@ -470,7 +470,6 @@ All @ezstart APIs use this shared infrastructure:
 - ✅ **ezauth/api** - Authentication service (port 5010)
 - ✅ **ezpay/api** - Universal payment system (port 5040)
 - ✅ **ezbill/api** - Billing management API (port 5020)
-- ✅ **tower-defense/api** - Tower Defense game API (port 5030)
 - ✅ **green-pulse/api** - Green Pulse API (port 5070)
 
 ### Standardized Features Across All APIs:
@@ -485,7 +484,7 @@ All @ezstart APIs use this shared infrastructure:
 - ✅ **Rate limiting protection** via `createRateLimiter()` (100 req/15min per IP)
 - ✅ **OpenAPI documentation** via `createRouterWithDoc()`
 - ✅ **Request validation** via `validateParams()` and `validateQuery()`
-- ✅ **Socket.io support** via `createSocketServer()` (tower-defense)
+- ✅ **Socket.io support** via `createSocketServer()`
 
 ## Configuration
 

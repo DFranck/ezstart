@@ -9,7 +9,6 @@
 | **EZAuth API**        | Railway  | https://ezauth-api.up.railway.app/api  | 5010 | ✅ Active |
 | **EZPay API**         | Railway  | https://ezpay-api.up.railway.app/api   | 5040 | 🔄 Config |
 | **EZBill API**        | Railway  | https://ezbill-api.up.railway.app/api  | 5020 | 🔄 Config |
-| **Tower Defense API** | Railway  | https://td-api.up.railway.app/api      | 5030 | 🔄 Config |
 | **GreenPulse API**    | Railway  | https://greenpulse-api.up.railway.app/api | 5070 | 🔄 Config |
 | **EZStart API (Monitoring)** | Railway  | https://ezstart-api.up.railway.app/api | 5000 | 🔄 Config |
 
@@ -30,7 +29,6 @@
 | **EZAuth**        | Vercel   | https://ezauth.vercel.app            | ✅ Active |
 | **EZBill**        | Vercel   | https://ezstart-ezbill.vercel.app    | ✅ Active |
 | **EZPay**         | Vercel   | https://ezstart-ezpay.vercel.app     | ✅ Active |
-| **Tower Defense** | Vercel   | https://tower-defense-web.vercel.app | ✅ Active |
 | **FengShui**      | Vercel   | https://ezfengshui.vercel.app        | ✅ Active |
 | **ASC-TCD**       | Vercel   | https://asc-tcd-web.vercel.app       | ✅ Active |
 
@@ -42,7 +40,7 @@
 
 **Architecture Monorepo Railway :**
 - 1 Projet Railway = "ezstart"
-- 6 Services = 6 APIs (ezauth, ezpay, ezbill, tower-defense, green-pulse, monitoring)
+- 5 Services = 5 APIs (ezauth, ezpay, ezbill, green-pulse, monitoring)
 - Build automatique via [nixpacks.toml](./nixpacks.toml)
 
 **Source Repository (même pour tous) :**
@@ -85,9 +83,6 @@ pnpm --filter api-ezpay start
 
 # EZBill API
 pnpm --filter api-ezbill start
-
-# Tower Defense API
-pnpm --filter api-tower-defense start
 
 # GreenPulse API
 pnpm --filter api-green-pulse start
@@ -166,7 +161,7 @@ GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_CALLBACK_URL=https://ezauth-api.up.railway.app/auth/google/callback
 FRONTEND_URL=https://ezauth.ezstart.xyz
-ALLOWED_ORIGINS=https://ezauth.ezstart.xyz,https://ezbill.ezstart.xyz,https://ezpay.ezstart.xyz,https://www.ezstart.xyz,https://td.ezstart.xyz,https://greenpulse.ezstart.xyz
+ALLOWED_ORIGINS=https://ezauth.ezstart.xyz,https://ezbill.ezstart.xyz,https://ezpay.ezstart.xyz,https://www.ezstart.xyz,https://greenpulse.ezstart.xyz
 ```
 
 ---
@@ -247,42 +242,7 @@ ALLOWED_ORIGINS=https://ezbill.ezstart.xyz,https://www.ezstart.xyz
 
 ---
 
-### 4. Tower Defense API
-
-**Service Settings:**
-
-```
-Service Name: td-api
-Root Directory: /
-Watch Paths:
-  - apps/tower-defense/api/**
-  - packages/express-core/**
-  - packages/config/**
-  - packages/logger/**
-
-Build Command:
-pnpm install --frozen-lockfile --shamefully-hoist && pnpm --filter @ezstart/config --filter @ezstart/logger --filter @ezstart/express-core build && pnpm turbo build --filter=api-tower-defense
-
-Start Command:
-pnpm --filter api-tower-defense start
-
-Healthcheck Path: /health
-Port: 8080
-```
-
-**Environment Variables:**
-
-```env
-NODE_ENV=production
-MONGO_URL=mongodb+srv://user:password@cluster.mongodb.net/tower-defense?retryWrites=true&w=majority
-JWT_SECRET=production-jwt-secret-td
-EZAUTH_API_URL=https://ezauth-api.up.railway.app
-ALLOWED_ORIGINS=https://td.ezstart.xyz,https://www.ezstart.xyz
-```
-
----
-
-### 5. GreenPulse API
+### 4. GreenPulse API
 
 **Service Settings:**
 
@@ -320,7 +280,7 @@ ALLOWED_ORIGINS=https://greenpulse.ezstart.xyz,https://www.ezstart.xyz
 
 ---
 
-### 6. EZStart API (Monitoring)
+### 5. EZStart API (Monitoring)
 
 **Service Settings:**
 
@@ -437,10 +397,6 @@ Pour EZPay Web:
 2. NEXT_PUBLIC_WEB_URL = https://ezstart-ezpay.vercel.app
 3. NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = pk_live_...
 
-Pour Tower Defense Web:
-1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
-2. NEXT_PUBLIC_API_URL = https://td-api.up.railway.app/api
-
 Pour GreenPulse Web:
 1. NEXT_PUBLIC_EZAUTH_API_URL = https://ezauth-api.up.railway.app/api/auth
 2. NEXT_PUBLIC_API_URL = https://greenpulse-api.up.railway.app/api
@@ -503,7 +459,7 @@ Vercel (Free Plan: 2 cores, 8GB RAM) exécute `turbo build` qui compile **tous l
 
 ```
 • Running build in 28 packages (TOUS compilés)
-• APIs (ezauth, ezpay, tower-defense, ezbill, green-pulse)
+• APIs (ezauth, ezpay, ezbill, green-pulse)
 • Packages (ui, auth-sdk, pay-sdk, types, express-core, etc.)
 • Out of Memory après 25 minutes
 ```
@@ -590,7 +546,7 @@ nixPkgs = ['nodejs_20', 'pnpm']  # ← Seulement Node.js, pas de libs graphiques
 ### Plan Hobby : $5/mois pour TOUTES les APIs
 
 **Ressources incluses :**
-- ✅ **Unlimited services** - 6 APIs sans frais supplémentaires
+- ✅ **Unlimited services** - 5 APIs sans frais supplémentaires
 - ✅ **8GB RAM / 8 vCPU** par service (largement suffisant)
 - ✅ **100GB bandwidth** inclus
 - ✅ **Pas de cold start** - Toujours actif
@@ -608,7 +564,7 @@ Dashboard Railway → Project Settings → Usage
 **Estimation Consommation :**
 
 ```
-6 APIs (EZAuth, EZPay, EZBill, TD, GreenPulse, Monitoring)
+5 APIs (EZAuth, EZPay, EZBill, GreenPulse, Monitoring)
 Usage moyen : ~$3-4/mois (reste $1-2 de marge)
 ```
 

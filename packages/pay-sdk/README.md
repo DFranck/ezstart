@@ -41,7 +41,7 @@ pnpm add @ezstart/pay-sdk
 import { createPayClient } from '@ezstart/pay-sdk'
 
 export const payClient = createPayClient({
-  appName: 'your-app-name', // 'tower-defense', 'fengshui', etc.
+  appName: 'your-app-name', // 'fengshui', 'green-pulse', etc.
 })
 ```
 
@@ -113,8 +113,8 @@ import { DonateButton } from '@ezstart/pay-sdk'
 import { DonateModal } from '@ezstart/pay-sdk'
 
 <DonateModal
-  projectId="tower-defense"
-  projectName="Tower Defense"
+  projectId="green-pulse"
+  projectName="GreenPulse"
   amounts={[5, 10, 25, 50, 100]}  // Montants prédéfinis
   userId={user?._id}               // EZAuth user ID (optional)
   userEmail={user?.email}          // Pre-fill email (optional)
@@ -127,7 +127,7 @@ import { DonateModal } from '@ezstart/pay-sdk'
 import { DonationWall } from '@ezstart/pay-sdk'
 
 <DonationWall
-  projectId="tower-defense"  // Filter par projet (optional)
+  projectId="green-pulse"  // Filter par projet (optional)
   limit={12}                 // Nombre de donations à afficher
 />
 ```
@@ -270,7 +270,6 @@ const client = createPayClient({
 ## 🔗 Applications Utilisant ce Package
 
 - ✅ **Feng Shui** - Page donations avec modal et wall
-- ⏳ **Tower Defense** - Donations + achats in-app (à venir)
 - ⏳ **EZStart** - Donations (à venir)
 - ⏳ **EZBill** - Integration factures (à venir)
 

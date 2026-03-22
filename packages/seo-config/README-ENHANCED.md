@@ -296,7 +296,6 @@ const softwareSchema = generateSoftwareSchema('ezstart')
 | `ezauth`         | EZAuth            | SSO Authentication  | ⭐⭐ High     |
 | `ezpay`          | EZPay             | Payment System      | ⭐⭐ High     |
 | `ezbill`         | EZBill            | Invoicing System    | ⭐⭐ High     |
-| `tower-defense`  | Tower Defense     | Multiplayer Game    | ⭐ Medium    |
 | `green-pulse`    | GreenPulse        | AI Form Builder     | ⭐ Medium    |
 | `fengshui`       | FengShui Analyzer | Feng Shui Analysis  | ⭐ Medium    |
 | `asc-tcd`        | ASC-TCD           | Association Website | Low          |

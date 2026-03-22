@@ -9,9 +9,9 @@ EZPay est le système de paiement centralisé pour tous les projets du monorepo 
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Donations** | Dons avec testimonials publics | Support Tower Defense |
-| **Purchases** | Achats in-app | Gems, powerups, items |
-| **Subscriptions** | Abonnements récurrents | Premium Tower Defense |
+| **Donations** | Dons avec testimonials publics | Support GreenPulse |
+| **Purchases** | Achats in-app | Reports, features premium |
+| **Subscriptions** | Abonnements récurrents | Premium GreenPulse |
 | **Invoices** | Facturation clients | Intégration EZBill |
 
 ## 📦 Architecture
@@ -42,7 +42,7 @@ apps/ezpay/web/           ← Dashboard (Port 5045)
 import { createPayClient, PayProvider } from '@ezstart/pay-sdk'
 
 const payClient = createPayClient({
-  appName: 'tower-defense'
+  appName: 'green-pulse'
 })
 
 // 2. Provider
@@ -53,8 +53,8 @@ const payClient = createPayClient({
 // 3. Composants
 import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 
-<DonateModal projectId="tower-defense" projectName="Tower Defense" />
-<DonationWall projectId="tower-defense" limit={9} />
+<DonateModal projectId="green-pulse" projectName="GreenPulse" />
+<DonationWall projectId="green-pulse" limit={9} />
 ```
 
 ## 🔧 Développement

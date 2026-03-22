@@ -130,10 +130,10 @@ describe('AuthUser Model', () => {
         email: 'test@example.com',
         username: 'testuser',
         passwordHash: 'hashedpassword123',
-        apps: ['ezbill', 'tower-defense'],
+        apps: ['ezbill', 'green-pulse'],
       })
 
-      expect(user.apps).toEqual(['ezbill', 'tower-defense'])
+      expect(user.apps).toEqual(['ezbill', 'green-pulse'])
     })
 
     it('should reject invalid app enum values', async () => {
@@ -279,13 +279,13 @@ describe('AuthUser Model', () => {
       })
 
       user.apps.push('ezbill')
-      user.apps.push('tower-defense')
+      user.apps.push('green-pulse')
       await user.save()
 
       const updated = await AuthUserModel.findById(user._id)
       expect(updated?.apps).toHaveLength(2)
       expect(updated?.apps).toContain('ezbill')
-      expect(updated?.apps).toContain('tower-defense')
+      expect(updated?.apps).toContain('green-pulse')
     })
 
     it('should delete user', async () => {
@@ -344,7 +344,7 @@ describe('AuthUser Model', () => {
         lastName: 'Doe',
         avatar: 'https://example.com/avatar.png',
         isVerified: true,
-        apps: ['ezbill', 'tower-defense'],
+        apps: ['ezbill', 'green-pulse'],
       })
 
       const authUser = user.toAuthUser()
@@ -357,7 +357,7 @@ describe('AuthUser Model', () => {
         lastName: 'Doe',
         avatar: 'https://example.com/avatar.png',
         isVerified: true,
-        apps: ['ezbill', 'tower-defense'],
+        apps: ['ezbill', 'green-pulse'],
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       })

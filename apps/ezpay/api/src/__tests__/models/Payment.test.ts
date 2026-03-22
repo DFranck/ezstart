@@ -30,15 +30,15 @@ describe('Payment Model', () => {
   describe('Schema Validation', () => {
     it('should create a valid payment with required fields', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
       })
 
-      expect(payment.projectId).toBe('tower-defense')
-      expect(payment.projectName).toBe('Tower Defense')
+      expect(payment.projectId).toBe('ezbill')
+      expect(payment.projectName).toBe('EZBill')
       expect(payment.type).toBe('donation')
       expect(payment.amount).toBe(10.00)
       expect(payment.currency).toBe('USD') // Default value
@@ -50,7 +50,7 @@ describe('Payment Model', () => {
     it('should require projectId field', async () => {
       await expect(
         PaymentModel.create({
-          projectName: 'Tower Defense',
+          projectName: 'EZBill',
           type: 'donation',
           amount: 10.00,
           paymentId: 'cs_test_123',
@@ -61,7 +61,7 @@ describe('Payment Model', () => {
     it('should require projectName field', async () => {
       await expect(
         PaymentModel.create({
-          projectId: 'tower-defense',
+          projectId: 'ezbill',
           type: 'donation',
           amount: 10.00,
           paymentId: 'cs_test_123',
@@ -72,8 +72,8 @@ describe('Payment Model', () => {
     it('should require type field', async () => {
       await expect(
         PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           amount: 10.00,
           paymentId: 'cs_test_123',
         })
@@ -83,8 +83,8 @@ describe('Payment Model', () => {
     it('should require amount field', async () => {
       await expect(
         PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           type: 'donation',
           paymentId: 'cs_test_123',
         })
@@ -96,8 +96,8 @@ describe('Payment Model', () => {
 
       for (const type of validTypes) {
         const payment = await PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           type: type as any,
           amount: 10.00,
           paymentId: `cs_test_${type}`,
@@ -110,8 +110,8 @@ describe('Payment Model', () => {
     it('should reject invalid payment type', async () => {
       await expect(
         PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           type: 'invalid-type',
           amount: 10.00,
           paymentId: 'cs_test_123',
@@ -124,8 +124,8 @@ describe('Payment Model', () => {
 
       for (const provider of validProviders) {
         const payment = await PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           type: 'donation',
           amount: 10.00,
           provider: provider as any,
@@ -141,8 +141,8 @@ describe('Payment Model', () => {
 
       for (const status of validStatuses) {
         const payment = await PaymentModel.create({
-          projectId: 'tower-defense',
-          projectName: 'Tower Defense',
+          projectId: 'ezbill',
+          projectName: 'EZBill',
           type: 'donation',
           amount: 10.00,
           status: status as any,
@@ -157,8 +157,8 @@ describe('Payment Model', () => {
   describe('Donation Metadata', () => {
     it('should store donation with message and isPublic', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 25.00,
         paymentId: 'cs_test_123',
@@ -174,8 +174,8 @@ describe('Payment Model', () => {
 
     it('should allow anonymous donations', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 50.00,
         paymentId: 'cs_test_123',
@@ -191,8 +191,8 @@ describe('Payment Model', () => {
   describe('Purchase Metadata', () => {
     it('should store purchase with product details', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'purchase',
         amount: 4.99,
         paymentId: 'cs_test_123',
@@ -210,8 +210,8 @@ describe('Payment Model', () => {
 
     it('should support multiple quantity purchases', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'purchase',
         amount: 19.96,
         paymentId: 'cs_test_123',
@@ -230,8 +230,8 @@ describe('Payment Model', () => {
   describe('Subscription Metadata', () => {
     it('should store subscription with plan details', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'subscription',
         amount: 9.99,
         paymentId: 'cs_test_123',
@@ -251,8 +251,8 @@ describe('Payment Model', () => {
 
     it('should support yearly subscriptions', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'subscription',
         amount: 99.99,
         paymentId: 'cs_test_123',
@@ -291,8 +291,8 @@ describe('Payment Model', () => {
   describe('Customer Information', () => {
     it('should link payment to EZAuth user', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -308,8 +308,8 @@ describe('Payment Model', () => {
 
     it('should allow guest payments without userId', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -325,8 +325,8 @@ describe('Payment Model', () => {
   describe('Payment Status', () => {
     it('should update payment status to completed', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -344,8 +344,8 @@ describe('Payment Model', () => {
 
     it('should update payment status to failed', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -360,8 +360,8 @@ describe('Payment Model', () => {
 
     it('should update payment status to refunded', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -380,8 +380,8 @@ describe('Payment Model', () => {
   describe('Unique Constraints', () => {
     it('should enforce unique paymentId', async () => {
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_unique',
@@ -402,16 +402,16 @@ describe('Payment Model', () => {
   describe('Queries', () => {
     it('should find payments by projectId', async () => {
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_1',
       })
 
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'purchase',
         amount: 4.99,
         paymentId: 'cs_test_2',
@@ -425,7 +425,7 @@ describe('Payment Model', () => {
         paymentId: 'cs_test_3',
       })
 
-      const tdPayments = await PaymentModel.find({ projectId: 'tower-defense' })
+      const tdPayments = await PaymentModel.find({ projectId: 'ezbill' })
       expect(tdPayments).toHaveLength(2)
     })
 
@@ -433,8 +433,8 @@ describe('Payment Model', () => {
       const userId = '507f1f77bcf86cd799439011'
 
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         userId,
@@ -456,8 +456,8 @@ describe('Payment Model', () => {
 
     it('should find payments by type and status', async () => {
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         status: 'completed',
@@ -465,8 +465,8 @@ describe('Payment Model', () => {
       })
 
       await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 20.00,
         status: 'pending',
@@ -486,8 +486,8 @@ describe('Payment Model', () => {
   describe('Timestamps', () => {
     it('should auto-generate createdAt and updatedAt', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',
@@ -499,8 +499,8 @@ describe('Payment Model', () => {
 
     it('should update updatedAt on modification', async () => {
       const payment = await PaymentModel.create({
-        projectId: 'tower-defense',
-        projectName: 'Tower Defense',
+        projectId: 'ezbill',
+        projectName: 'EZBill',
         type: 'donation',
         amount: 10.00,
         paymentId: 'cs_test_123',

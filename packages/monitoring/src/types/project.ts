@@ -10,7 +10,6 @@ export type ProjectId =
   | 'ezauth'
   | 'ezbill'
   | 'ezpay'
-  | 'tower-defense'
   | 'fengshui'
   | 'asc-tcd'
   | 'green-pulse'

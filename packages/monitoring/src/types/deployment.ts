@@ -70,14 +70,6 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
     envVarsCount: 4,
     healthCheckUrl: '/api/health',
   },
-  'tower-defense-api': {
-    name: 'Tower Defense API',
-    platform: 'railway',
-    url: 'https://tower-defense-api.up.railway.app',
-    repositoryPath: 'apps/tower-defense/api',
-    envVarsCount: 4,
-    healthCheckUrl: '/api/health',
-  },
   'green-pulse-api': {
     name: 'GreenPulse API',
     platform: 'railway',
@@ -114,13 +106,6 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
     url: 'https://ezpay.ezstart.xyz',
     repositoryPath: 'apps/ezpay/web',
     envVarsCount: 3,
-  },
-  'tower-defense-web': {
-    name: 'Tower Defense',
-    platform: 'vercel',
-    url: 'https://tower-defense.ezstart.xyz',
-    repositoryPath: 'apps/tower-defense/web',
-    envVarsCount: 2,
   },
   'fengshui-web': {
     name: 'FengShui',

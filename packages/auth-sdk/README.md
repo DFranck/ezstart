@@ -362,7 +362,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - ✅ **ezstart/web** - Main application (with i18n)
 - ✅ **ezauth/web** - Auth service UI
 - ✅ **ezbill/web** - Billing management
-- ✅ **tower-defense/web** - Tower Defense game
 - ✅ **fengshui/web** - Feng Shui application
 - ✅ **asc-tcd/web** - ASC-TCD application
 

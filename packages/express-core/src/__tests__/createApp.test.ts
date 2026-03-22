@@ -178,7 +178,7 @@ describe('@ezstart/express-core - createApp', () => {
     })
 
     it('should handle all supported app names', () => {
-      const apps = ['ezauth', 'ezpay', 'ezbill', 'tower-defense', 'green-pulse', 'monitoring']
+      const apps = ['ezauth', 'ezpay', 'ezbill', 'green-pulse', 'monitoring']
 
       apps.forEach(appName => {
         expect(() => {

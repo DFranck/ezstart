@@ -67,15 +67,6 @@ export const appThemes: Record<string, AppTheme> = {
     icon: 'lucide:CreditCard',
     showEzstartMessage: true,
   },
-  'tower-defense': {
-    name: 'Tower Defense',
-    tagline: 'Strategic Tower Defense Game',
-    logo: '/logos/tower-defense.svg',
-    primaryColor: 'text-td-primary',
-    bgAccent: 'bg-td-primary/10',
-    icon: 'lucide:Shield',
-    showEzstartMessage: true,
-  },
   fengshui: {
     name: 'FengShui',
     tagline: 'AI-Powered Feng Shui Analysis',

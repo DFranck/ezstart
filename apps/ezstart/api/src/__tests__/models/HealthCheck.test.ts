@@ -252,7 +252,7 @@ describe('HealthCheck Model', () => {
   describe('Queries', () => {
     beforeEach(async () => {
       // Create test data
-      const services = ['ezauth-api', 'ezbill-api', 'tower-defense-api']
+      const services = ['ezauth-api', 'ezbill-api', 'green-pulse-api']
       const statuses: Array<'healthy' | 'unhealthy'> = ['healthy', 'unhealthy']
 
       for (const service of services) {
@@ -460,7 +460,7 @@ describe('HealthCheck Model', () => {
     })
 
     it('should support monitoring multiple services simultaneously', async () => {
-      const services = ['ezauth-api', 'ezbill-api', 'tower-defense-api']
+      const services = ['ezauth-api', 'ezbill-api', 'green-pulse-api']
 
       for (const service of services) {
         await HealthCheckModel.create({

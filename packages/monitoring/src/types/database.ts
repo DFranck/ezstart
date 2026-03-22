@@ -78,14 +78,6 @@ export const DATABASE_CONFIGS: DatabaseConfig[] = [
     collections: ['payments', 'subscriptions', 'donations'],
   },
   {
-    name: 'Tower Defense MongoDB',
-    type: 'mongodb',
-    host: 'cluster0.mongodb.net',
-    port: 27017,
-    database: 'tower-defense',
-    collections: ['games', 'players', 'entity_types'],
-  },
-  {
     name: 'GreenPulse MongoDB',
     type: 'mongodb',
     host: 'cluster0.mongodb.net',

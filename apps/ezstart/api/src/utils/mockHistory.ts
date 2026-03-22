@@ -55,7 +55,6 @@ export function getMockServiceHistory(serviceId: string, hours: number = 24) {
     'ezauth-api': { uptime: 99.9, avgResponse: 25 },
     'ezpay-api': { uptime: 99.8, avgResponse: 30 },
     'ezbill-api': { uptime: 99.5, avgResponse: 40 },
-    'tower-defense-api': { uptime: 98.5, avgResponse: 50 },
     'green-pulse-api': { uptime: 99.0, avgResponse: 35 },
 
     // Web apps - high uptime, slower response (SSR)
@@ -63,7 +62,6 @@ export function getMockServiceHistory(serviceId: string, hours: number = 24) {
     'ezauth-web': { uptime: 99.0, avgResponse: 1200 },
     'ezbill-web': { uptime: 98.8, avgResponse: 1500 },
     'ezpay-web': { uptime: 99.2, avgResponse: 900 },
-    'tower-defense-web': { uptime: 98.0, avgResponse: 2000 },
     'fengshui-web': { uptime: 97.5, avgResponse: 1800 },
     'asc-tcd-web': { uptime: 98.5, avgResponse: 1600 },
     'green-pulse-web': { uptime: 99.0, avgResponse: 1400 },

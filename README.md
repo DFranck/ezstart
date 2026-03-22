@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Monorepo](https://img.shields.io/badge/Monorepo-pnpm%20workspaces-orange)](https://pnpm.io/)
 [![Health Score](https://img.shields.io/badge/Health-85%2F100-brightgreen)](#-health--quality-score)
-[![Apps](https://img.shields.io/badge/Apps-8%20web%20%2B%205%20API-blueviolet)](#-applications)
+[![Apps](https://img.shields.io/badge/Apps-7%20web%20%2B%205%20API-blueviolet)](#-applications)
 
 ---
 
@@ -39,7 +39,6 @@ pnpm dev
 # Or start specific apps
 pnpm dev:ez      # EZStart + Monitoring + All APIs
 pnpm dev:bill    # EZBill + EZAuth
-pnpm dev:td      # Tower Defense + EZAuth
 pnpm dev:fs      # FengShui + EZAuth + EZPay
 
 # Check service status
@@ -54,7 +53,6 @@ pnpm dev:status
 | **EZAuth** | http://localhost:5015 | http://localhost:5010 |
 | **EZBill** | http://localhost:5025 | http://localhost:5020 |
 | **EZPay** | http://localhost:5045 | http://localhost:5040 |
-| **Tower Defense** | http://localhost:5035 | http://localhost:5030 |
 | **FengShui** | http://localhost:5065 | - |
 | **ASC-TCD** | http://localhost:5055 | - |
 | **GreenPulse** | http://localhost:5075 | http://localhost:5070 |
@@ -63,7 +61,7 @@ pnpm dev:status
 
 ## 🎯 Applications
 
-### Web Applications (8)
+### Web Applications (7)
 
 #### 🏠 EZStart
 **Main Hub & Dashboard** - Central platform for accessing all EZStart applications.
@@ -89,12 +87,6 @@ pnpm dev:status
 - **Features**: Donations, purchases, subscriptions
 - **Status**: ✅ Production ready
 
-#### 🎮 Tower Defense
-**Multiplayer Strategy Game** - Competitive tower defense with RNG mechanics.
-- **Tech**: Socket.IO, Canvas rendering, real-time multiplayer
-- **Features**: PvP battles, shop system, leaderboards
-- **Status**: ✅ Production ready
-
 #### 🧭 FengShui Bagua
 **Feng Shui Analysis** - Interactive Feng Shui compass with floor plan import.
 - **Tech**: Next.js, Canvas, i18n
@@ -118,7 +110,6 @@ pnpm dev:status
 - **EZAuth API** (5010) - Authentication service
 - **EZBill API** (5020) - Billing backend
 - **EZPay API** (5040) - Payment processing
-- **Tower Defense API** (5030) - Game server with Socket.IO
 - **GreenPulse API** (5070) - AI sustainability backend
 - **EZStart API** (5000) - Health checks and metrics
 
@@ -130,12 +121,11 @@ pnpm dev:status
 
 ```
 @ezstart/
-├── apps/                    # Applications (8 web + 5 API)
+├── apps/                    # Applications (7 web + 5 API)
 │   ├── ezstart/web         # Main hub (Next.js)
 │   ├── ezauth/             # Authentication (Next.js + API)
 │   ├── ezbill/             # Billing (Next.js + API)
 │   ├── ezpay/              # Payments (Next.js + API)
-│   ├── tower-defense/      # Game (Next.js + Socket.IO API)
 │   ├── fengshui/web        # Feng Shui (Next.js)
 │   ├── asc-tcd/web         # Sports association (Next.js)
 │   ├── green-pulse/        # Sustainability (Next.js + API)
@@ -193,8 +183,8 @@ pnpm --filter ezbill-web build
 ### Port Management
 
 All services use the **50xx** pattern:
-- **APIs**: 5000, 5010, 5020, 5030, 5040, 5070 (ending in 0)
-- **Web Apps**: 5015, 5025, 5035, 5045, 5050, 5055, 5065, 5075 (ending in 5)
+- **APIs**: 5000, 5010, 5020, 5040, 5070 (ending in 0)
+- **Web Apps**: 5015, 5025, 5045, 5050, 5055, 5065, 5075 (ending in 5)
 
 Auto-detected from `@ezstart/config` - no manual configuration needed!
 
@@ -247,7 +237,6 @@ Browse [packages/](./packages/) - Each package has a comprehensive README with:
 | EZBill | ezstart-ezbill.vercel.app | Vercel |
 | EZPay | ezstart-ezpay.vercel.app | Vercel |
 | EZPay API | ezpay-api.up.railway.app | Railway |
-| Tower Defense | tower-defense-web.vercel.app | Vercel |
 | FengShui | ezfengshui.vercel.app | Vercel |
 | ASC-TCD | asc-tcd-web.vercel.app | Vercel |
 | GreenPulse | green-pulse-web.vercel.app | Vercel |
@@ -276,7 +265,7 @@ Browse [packages/](./packages/) - Each package has a comprehensive README with:
 
 ## 📊 Stats
 
-- **8 Web Applications** (Next.js 15, React 19)
+- **7 Web Applications** (Next.js 15, React 19)
 - **5 API Services** (Express + Socket.IO)
 - **16 Shared Packages** (100% TypeScript)
 - **18/18 TypeCheck Coverage** (100%)

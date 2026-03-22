@@ -71,8 +71,8 @@ console.log(ezauthApi.productionUrl) // https://ezauth-api.up.railway.app/api/he
 ```
 
 Available services:
-- **APIs**: `ezauth-api`, `ezpay-api`, `ezbill-api`, `tower-defense-api`, `green-pulse-api`
-- **Web Apps**: `ezstart-web`, `ezauth-web`, `ezbill-web`, `ezpay-web`, `tower-defense-web`, `fengshui-web`, `asc-tcd-web`, `green-pulse-web`
+- **APIs**: `ezauth-api`, `ezpay-api`, `ezbill-api`, `green-pulse-api`
+- **Web Apps**: `ezstart-web`, `ezauth-web`, `ezbill-web`, `ezpay-web`, `fengshui-web`, `asc-tcd-web`, `green-pulse-web`
 
 ### Audit Tracking
 

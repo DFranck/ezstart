@@ -25,7 +25,7 @@ const authCodeSchema = new Schema<AuthCodeDocument>({
   app: {
     type: String,
     required: true,
-    enum: ['ezbill', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'],
+    enum: ['ezbill', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd'],
   },
   redirectUri: {
     type: String,

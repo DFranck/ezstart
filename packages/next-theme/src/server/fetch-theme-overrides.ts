@@ -15,7 +15,7 @@ export interface ThemeOverrides {
  * Returns empty object if API call fails (graceful fallback to CSS defaults)
  */
 export async function fetchThemeOverrides(
-  appName: 'green-pulse' | 'ezbill' | 'ezauth' | 'ezpay' | 'ezstart' | 'tower-defense' | 'fengshui'
+  appName: 'green-pulse' | 'ezbill' | 'ezauth' | 'ezpay' | 'ezstart' | 'fengshui'
 ): Promise<ThemeOverrides> {
   try {
     const apiUrl = getApiUrl(appName)

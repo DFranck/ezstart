@@ -308,7 +308,6 @@ curl http://localhost:5000/api/my-resource
 - EZAuth API
 - EZPay API
 - EZBill API
-- Tower Defense API
 - GreenPulse API
 
 ## Bonnes Pratiques

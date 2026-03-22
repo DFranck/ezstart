@@ -88,7 +88,6 @@ await authClient.getCurrentUser(accessToken?)
 | App | Status | Date | Notes |
 |-----|--------|------|-------|
 | EZBill | ⏳ TODO | - | 30 min |
-| Tower Defense | ⏳ TODO | - | 30 min |
 | FengShui | ⏳ TODO | - | 45 min |
 | ASC-TCD | ⏳ TODO | - | 30 min |
 | GreenPulse | ⏳ TODO | - | 1h |
@@ -284,7 +283,6 @@ fetch(url, {
 ## 🎯 Prochaines Étapes
 
 1. Migrer EZBill (proof of concept)
-2. Migrer Tower Defense
-3. Migrer autres apps
+2. Migrer autres apps
 4. Supprimer mode localStorage (breaking change majeur)
 5. Documentation utilisateur final

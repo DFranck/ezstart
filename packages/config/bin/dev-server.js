@@ -28,7 +28,6 @@ const appNameMap = {
   'web-ezbill': 'ezbill',
   'web-ezpay': 'ezpay',
   'web-fengshui': 'fengshui',
-  'web-tower-defense': 'tower-defense',
   'web-asc-tcd': 'asc-tcd',
   'web-green-pulse': 'green-pulse',
   'web-game-analyzer': 'game-analyzer',

@@ -142,17 +142,12 @@ logger.error({ error, paymentId }, 'Payment failed')
 
 ### Packages
 - `@ezstart/express-core` - HTTP server logs, MongoDB connection
-- `@tower-defense/api` - Game events, player actions
 
 ### APIs
 - `apps/ezauth/api` - Authentication logs
 - `apps/ezpay/api` - Payment processing logs
 - `apps/ezbill/api` - Invoice operations logs
-- `apps/tower-defense/api` - Game state logs
 - `apps/green-pulse/api` - AI conversation logs
-
-### Web Apps
-- `apps/tower-defense/web` - Client-side game logs
 
 ## Performance
 

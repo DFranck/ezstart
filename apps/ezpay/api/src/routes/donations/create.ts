@@ -56,7 +56,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
     } = req.body
 
     // Use custom returnUrl or fallback to project's web URL based on projectId
-    // This allows EZPay to redirect back to the originating app (EZBill, Tower Defense, etc.)
+    // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
     // Create Stripe checkout session

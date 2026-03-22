@@ -28,7 +28,6 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
     case 'ezpay':
       // EZPay is called by apps that need payments
       origins.push(...getAllWebUrls('ezpay'))
-      origins.push(...getAllWebUrls('tower-defense')) // Donations
       origins.push(...getAllWebUrls('ezbill')) // Invoice payments
       origins.push(...getAllWebUrls('fengshui')) // Feng Shui consultations
       break
@@ -36,11 +35,6 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
     case 'ezbill':
       // EZBill API called only by EZBill web
       origins.push(...getAllWebUrls('ezbill'))
-      break
-
-    case 'tower-defense':
-      // Tower Defense API called only by Tower Defense web
-      origins.push(...getAllWebUrls('tower-defense'))
       break
 
     case 'green-pulse':

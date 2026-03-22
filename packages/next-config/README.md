@@ -213,7 +213,6 @@ All @ezstart web applications use this centralized configuration:
 - ✅ **ezbill/web** - Billing management (port 4100)  
 - ✅ **ezstart/web** - Main application (port 4000)
 - ✅ **fengshui/web** - Feng Shui application (port 4400)
-- ✅ **tower-defense/web** - Tower Defense game (port 4200)
 - ✅ **asc-tcd/web** - ASC-TCD website (port 4300)
 
 ## Migration from Custom Config

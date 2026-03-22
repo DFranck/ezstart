@@ -136,7 +136,7 @@ pnpm add @ezstart/pay-sdk
 import { PayProvider, createPayClient } from '@ezstart/pay-sdk'
 
 const payClient = createPayClient({
-  appName: 'tower-defense'
+  appName: 'green-pulse'
 })
 
 export default function RootLayout({ children }) {
@@ -156,14 +156,14 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 
 // Modal de donation
 <DonateModal
-  projectId="tower-defense"
-  projectName="Tower Defense"
+  projectId="green-pulse"
+  projectName="GreenPulse"
   amounts={[5, 10, 20, 50]}
 />
 
 // Mur de testimonials publics
 <DonationWall
-  projectId="tower-defense"
+  projectId="green-pulse"
   limit={9}
 />
 ```
@@ -173,13 +173,13 @@ import { DonateModal, DonationWall } from '@ezstart/pay-sdk'
 import { BuyButton } from '@ezstart/pay-sdk'
 
 <BuyButton
-  projectId="tower-defense"
-  productId="gems-100"
-  productName="100 Gems"
+  projectId="green-pulse"
+  productId="premium-report"
+  productName="Premium Report"
   amount={4.99}
   onSuccess={(payment) => {
-    // Ajouter les gems au compte utilisateur
-    addGemsToAccount(100)
+    // Unlock premium report
+    unlockReport()
   }}
 />
 ```
@@ -198,7 +198,7 @@ import { SubscribeButton, PricingTable } from '@ezstart/pay-sdk'
 
 // Bouton d'abonnement
 <SubscribeButton
-  projectId="tower-defense"
+  projectId="green-pulse"
   planId="premium-monthly"
   planName="Premium"
   amount={9.99}
@@ -216,17 +216,17 @@ const { createDonation, createPurchase, createSubscription } = usePay()
 
 // Hook spécialisé donations
 const { donations, isLoading, reload } = useDonations({
-  projectId: 'tower-defense',
+  projectId: 'green-pulse',
   limit: 10
 })
 
 // Créer une donation
 await createDonation({
-  projectId: 'tower-defense',
-  projectName: 'Tower Defense',
+  projectId: 'green-pulse',
+  projectName: 'GreenPulse',
   amount: 10,
   customerName: 'John Doe',
-  message: 'Great game!',
+  message: 'Great project!',
   isPublic: true
 })
 ```
@@ -249,7 +249,7 @@ Response:
     subscriptions: { count: 144, total: 3209.99 }
   },
   byProject: {
-    'tower-defense': { count: 234, total: 5678.90 },
+    'green-pulse': { count: 234, total: 5678.90 },
     'ezbill': { count: 189, total: 4567.89 },
     ...
   }
@@ -258,11 +258,11 @@ Response:
 
 **Project Stats :**
 ```typescript
-GET /api/payments/stats?projectId=tower-defense
+GET /api/payments/stats?projectId=green-pulse
 
 Response:
 {
-  projectId: 'tower-defense',
+  projectId: 'green-pulse',
   totalRevenue: 5678.90,
   totalTransactions: 234,
   averageAmount: 24.27,
@@ -401,7 +401,7 @@ function UserDashboard() {
 ```typescript
 // Créer paiement lié à un utilisateur
 await createDonation({
-  projectId: 'tower-defense',
+  projectId: 'green-pulse',
   amount: 10,
   userId: user.id,        // Link avec EZAuth
   customerName: user.name,
@@ -463,7 +463,6 @@ pnpm --filter web-ezpay start
 
 ### Applications Utilisant EZPay
 
-- **Tower Defense** - Donations, purchases, subscriptions
 - **EZBill** - Invoice payments (futur)
 - **GreenPulse** - Donations et subscriptions (futur)
 

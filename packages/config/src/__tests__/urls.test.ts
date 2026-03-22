@@ -10,7 +10,6 @@ describe('@ezstart/config - URLs', () => {
         'ezbill',
         'ezpay',
         'fengshui',
-        'tower-defense',
         'asc-tcd',
         'green-pulse',
         'monitoring',
@@ -23,7 +22,7 @@ describe('@ezstart/config - URLs', () => {
     })
 
     it('should have API URLs for apps with backends', () => {
-      const appsWithAPI = ['ezauth', 'ezbill', 'ezpay', 'tower-defense', 'green-pulse', 'monitoring']
+      const appsWithAPI = ['ezauth', 'ezbill', 'ezpay', 'green-pulse', 'monitoring']
 
       appsWithAPI.forEach(app => {
         expect(URLS[app as AppName].api).toBeDefined()
@@ -142,12 +141,10 @@ describe('@ezstart/config - URLs', () => {
       // APIs should be on ports ending in 0
       expect(getPort('ezauth', 'api')).toBe(5010)
       expect(getPort('ezbill', 'api')).toBe(5020)
-      expect(getPort('tower-defense', 'api')).toBe(5030)
 
       // Web should be on ports ending in 5
       expect(getPort('ezauth', 'web')).toBe(5015)
       expect(getPort('ezbill', 'web')).toBe(5025)
-      expect(getPort('tower-defense', 'web')).toBe(5035)
     })
 
     it('should have unique ports for each service', () => {
@@ -157,7 +154,6 @@ describe('@ezstart/config - URLs', () => {
         'ezauth',
         'ezbill',
         'ezpay',
-        'tower-defense',
         'green-pulse',
       ]
 
@@ -171,9 +167,8 @@ describe('@ezstart/config - URLs', () => {
         }
       })
 
-      // Note: monitoring and ezstart share port 5050, so we have 12 unique ports instead of 13
-      // 6 unique web ports (ezstart/monitoring share 5050) + 6 API ports = 12 total
-      const expectedCount = 12
+      // 5 unique web ports + 5 API ports = 10 total
+      const expectedCount = 10
 
       expect(ports.size).toBe(expectedCount)
     })

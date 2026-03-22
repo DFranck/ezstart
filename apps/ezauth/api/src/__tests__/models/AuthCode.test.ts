@@ -92,7 +92,7 @@ describe('AuthCode Model', () => {
     })
 
     it('should validate app enum values', async () => {
-      const validApps = ['ezbill', 'tower-defense', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd']
+      const validApps = ['ezbill', 'admin', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd']
 
       for (const app of validApps) {
         const authCode = await AuthCodeModel.create({
@@ -173,7 +173,7 @@ describe('AuthCode Model', () => {
         AuthCodeModel.create({
           code: 'abc123def456',
           userId: '507f1f77bcf86cd799439012',
-          app: 'tower-defense',
+          app: 'ezbill',
         })
       ).rejects.toThrow()
     })
@@ -190,7 +190,7 @@ describe('AuthCode Model', () => {
       const code2 = await AuthCodeModel.create({
         code: 'code2',
         userId,
-        app: 'tower-defense',
+        app: 'ezbill',
       })
 
       expect(code1.userId).toBe(userId)
@@ -224,7 +224,7 @@ describe('AuthCode Model', () => {
       await AuthCodeModel.create({
         code: 'code2',
         userId,
-        app: 'tower-defense',
+        app: 'ezbill',
       })
 
       const codes = await AuthCodeModel.find({ userId })
@@ -286,7 +286,7 @@ describe('AuthCode Model', () => {
       await AuthCodeModel.create({
         code: 'code2',
         userId: '507f1f77bcf86cd799439012',
-        app: 'tower-defense',
+        app: 'ezbill',
         isUsed: true,
       })
 
@@ -309,7 +309,7 @@ describe('AuthCode Model', () => {
       await AuthCodeModel.create({
         code: 'code2',
         userId: '507f1f77bcf86cd799439012',
-        app: 'tower-defense',
+        app: 'ezbill',
         expiresAt: pastExpiry,
       })
 

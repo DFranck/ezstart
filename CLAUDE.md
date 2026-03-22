@@ -140,7 +140,6 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 - 📦 [packages/ui/README.md](./packages/ui/README.md) — Composants UI
 - 🗄️ [packages/express-core/MONGODB-ARCHITECTURE.md](./packages/express-core/MONGODB-ARCHITECTURE.md) — MongoDB
 - 🔐 [packages/auth-sdk/HTTPONLY-MIGRATION.md](./packages/auth-sdk/HTTPONLY-MIGRATION.md) — Auth SDK
-- 🎮 [apps/tower-defense/docs/GAMEPLAY.md](./apps/tower-defense/docs/GAMEPLAY.md) — Tower Defense
 - 🌿 [apps/green-pulse/FORMS.md](./apps/green-pulse/FORMS.md) — GreenPulse Forms
 - 🔀 [apps/green-pulse/api/docs/ROUTING-PATTERN.md](./apps/green-pulse/api/docs/ROUTING-PATTERN.md) — Action-based routing reference
 
@@ -154,7 +153,6 @@ pnpm install
 # Lancer l'app ciblée (type watching inclus automatiquement)
 pnpm dev:ez     # EZStart
 pnpm dev:bill   # EZBill + EZAuth
-pnpm dev:td     # Tower Defense + EZAuth
 pnpm dev:gp     # GreenPulse + EZAuth
 pnpm dev:pay    # EZPay
 pnpm dev:fs     # FengShui + EZAuth + EZPay
@@ -172,7 +170,6 @@ pnpm dev:types
 | **EZStart**       | 5000 | 5005 |
 | **EZAuth**        | 5010 | 5015 |
 | **EZBill**        | 5020 | 5025 |
-| **Tower Defense** | 5030 | 5035 |
 | **EZPay**         | 5040 | 5045 |
 | **ASC-TCD**       | —    | 5055 |
 | **FengShui**      | —    | 5065 |
@@ -201,7 +198,6 @@ pnpm dev:types
 │   ├── ezauth/           # SSO Authentication
 │   ├── ezpay/            # Payment System
 │   ├── ezbill/           # Invoicing
-│   ├── tower-defense/    # Game
 │   ├── green-pulse/      # AI Forms
 │   ├── fengshui/         # Feng Shui Analysis
 │   └── asc-tcd/          # Association Website

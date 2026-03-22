@@ -128,7 +128,6 @@ console.log(environment)  // 'local' | 'development' | 'production'
 | **EZBill** | :5025 | :5020 | ezbill.ezstart.xyz | ezbill-api.up.railway.app |
 | **EZPay** | :5045 | :5040 | ezpay.ezstart.xyz | ezpay-api.up.railway.app |
 | **FengShui** | :5065 | - | ezfengshui.ezstart.xyz | - |
-| **Tower Defense** | :5035 | :5030 | tower-defense.ezstart.xyz | tower-defense-api.up.railway.app |
 | **ASC-TCD** | :5055 | - | www.asc-tcd.com | - |
 | **GreenPulse** | :5075 | :5070 | www.ai-greenpulse.com | green-pulse-api.up.railway.app |
 
@@ -153,14 +152,11 @@ Called by **ALL** web apps (SSO) → Allows all web URLs
 ### EZPay API
 Called by apps with payments:
 - EZPay web
-- Tower Defense (donations)
 - EZBill (invoice payments)
+- FengShui (consultations)
 
 ### EZBill API
 Called only by EZBill web
-
-### Tower Defense API
-Called only by Tower Defense web
 
 ### GreenPulse API
 Called only by GreenPulse web

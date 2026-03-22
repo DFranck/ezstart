@@ -160,7 +160,6 @@ interface ClassArray extends Array<ClassValue> {}
 - **EZStart** - 6 components
 - **ASC-TCD** - 10 components
 - **FengShui** - 4 components
-- **Tower Defense** - 2 components
 - **packages/next-theme** - 1 component
 
 **Total:** 37+ usages
@@ -168,9 +167,7 @@ interface ClassArray extends Array<ClassValue> {}
 ### Apps Using `isDebug()` / `isDevEnv()`
 
 - **packages/ui** - 4 internal components
-- **Tower Defense** - useGames hook
-
-**Total:** 6 usages
+**Total:** 5 usages
 
 ---
 

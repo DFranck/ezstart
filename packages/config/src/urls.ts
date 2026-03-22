@@ -18,7 +18,6 @@ export type AppName =
   | 'ezbill'
   | 'ezpay'
   | 'fengshui'
-  | 'tower-defense'
   | 'asc-tcd'
   | 'green-pulse'
   | 'game-analyzer'
@@ -118,18 +117,6 @@ export const URLS: Record<AppName, AppUrls> = {
     },
   },
 
-  'tower-defense': {
-    web: {
-      local: 'http://localhost:5035',
-      development: 'https://tower-defense-two.vercel.app',
-      production: 'https://tower-defense.ezstart.xyz',
-    },
-    api: {
-      local: 'http://localhost:5030',
-      production: '',
-    },
-  },
-
   'asc-tcd': {
     web: {
       local: 'http://localhost:5055',
@@ -216,17 +203,6 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     webPlatform: 'vercel',
   },
 
-  'tower-defense': {
-    name: 'Tower Defense',
-    description: 'Multiplayer tower defense game',
-    emoji: '🗼',
-    logo: '/icons/icon-192x192.png',
-    githubPath: 'apps/tower-defense',
-    webPlatform: 'vercel',
-    apiPlatform: 'railway',
-    isActive: false, // Project paused
-  },
-
   'asc-tcd': {
     name: 'ASC-TCD',
     description: 'Agence Sécurité Conseil TCD',
@@ -286,7 +262,6 @@ export function getCurrentEnvironment(): Environment {
       hostname === 'ezbill.ezstart.xyz' ||
       hostname === 'ezpay.ezstart.xyz' ||
       hostname === 'ezfengshui.ezstart.xyz' ||
-      hostname === 'tower-defense.ezstart.xyz' ||
       hostname === 'www.asc-tcd.com' ||
       hostname === 'game-analyzer.ezstart.xyz'
     ) {

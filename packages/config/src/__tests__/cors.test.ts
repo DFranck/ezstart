@@ -79,7 +79,7 @@ describe('@ezstart/config - CORS', () => {
     it('should handle ezpay with multiple callers', () => {
       const origins = getAllowedOrigins('ezpay')
 
-      // EZPay is called by apps with payments (ezpay, tower-defense, ezbill)
+      // EZPay is called by apps with payments (ezpay, ezbill, fengshui)
       expect(origins.length).toBeGreaterThan(3)
     })
   })

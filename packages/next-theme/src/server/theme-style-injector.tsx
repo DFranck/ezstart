@@ -7,7 +7,7 @@ import { fetchThemeOverrides, generateThemeCSS } from './fetch-theme-overrides'
 
 export interface ThemeStyleInjectorProps {
   /** App name to fetch theme for */
-  appName: 'green-pulse' | 'ezbill' | 'ezauth' | 'ezpay' | 'ezstart' | 'tower-defense' | 'fengshui'
+  appName: 'green-pulse' | 'ezbill' | 'ezauth' | 'ezpay' | 'ezstart' | 'fengshui'
 }
 
 /**

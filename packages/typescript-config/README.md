@@ -216,7 +216,6 @@ All web applications use the Next.js configuration:
 - **ezbill/web** → `nextjs.json`
 - **ezstart/web** → `nextjs.json`
 - **fengshui/web** → `nextjs.json`
-- **tower-defense/web** → `nextjs.json`
 - **asc-tcd/web** → `nextjs.json`
 
 ### ✅ API Services (API Config)
@@ -224,7 +223,6 @@ All API services use the API configuration:
 
 - **ezauth/api** → `api.json`
 - **ezbill/api** → `api.json`
-- **tower-defense/api** → `api.json`
 
 ### ✅ React Packages (React Library Config)
 React component packages use the React library configuration:

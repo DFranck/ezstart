@@ -132,7 +132,6 @@ Ready-to-use theme toggle button component.
 - ✅ **web-ezauth** - Authentication portal
 - ✅ **web-ezbill** - Invoicing app
 - ✅ **web-ezpay** - Payment dashboard
-- ✅ **web-tower-defense** - Game interface
 - ✅ **web-fengshui** - Wellness app
 - ✅ **web-asc-tcd** - Educational portal
 - ✅ **web-green-pulse** - Eco-tracking app
@@ -261,7 +260,6 @@ import {
   ezauthThemeCss,      // EZAuth theme
   ezstartThemeCss,     // EZStart theme
   fengshuiThemeCss,    // FengShui theme
-  towerDefenseThemeCss,// Tower Defense theme
   ascTcdThemeCss,      // ASC-TCD theme
 } from '@ezstart/ui/styles'
 ```

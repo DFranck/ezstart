@@ -29,7 +29,7 @@ export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
 
 export interface AuthMiddlewareConfig {
   /**
-   * App name (e.g., 'ezbill', 'ezpay', 'tower-defense')
+   * App name (e.g., 'ezbill', 'ezpay', 'green-pulse')
    */
   appName: string
 

@@ -177,7 +177,6 @@ All @ezstart web applications use this centralized configuration:
 - ✅ **ezbill/web** - Billing management  
 - ✅ **ezstart/web** - Main application
 - ✅ **fengshui/web** - Feng Shui application
-- ✅ **tower-defense/web** - Tower Defense game
 - ✅ **asc-tcd/web** - ASC-TCD website
 
 ## PostCSS Integration

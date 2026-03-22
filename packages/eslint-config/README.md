@@ -146,13 +146,11 @@ export default [...config, {
 - **ezbill/web** - Billing management
 - **ezstart/web** - Main application  
 - **fengshui/web** - Feng Shui application
-- **tower-defense/web** - Tower Defense game
 - **asc-tcd/web** - ASC-TCD website
 
 ### ✅ API Services (Base Config)
 - **ezauth/api** - Authentication API
 - **ezbill/api** - Billing API
-- **tower-defense/api** - Tower Defense API
 
 ### ✅ React Packages (React Internal Config)
 - **@ezstart/ui** - UI components library

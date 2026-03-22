@@ -37,14 +37,6 @@ describe('@ezstart/express-core - Ports', () => {
       expect(port).toBe(5020)
     })
 
-    it('should return port from @ezstart/config for tower-defense', () => {
-      delete process.env.PORT
-
-      const port = getApiPort('tower-defense')
-
-      expect(port).toBe(5030)
-    })
-
     it('should return port from @ezstart/config for green-pulse', () => {
       delete process.env.PORT
 

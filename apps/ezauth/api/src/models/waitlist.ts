@@ -70,7 +70,7 @@ const waitlistSchema = new Schema<WaitlistDocument>({
     required: true,
     unique: true,
     trim: true,
-    enum: ['green-pulse', 'ezbill', 'tower-defense', 'ezstart', 'fengshui', 'asc-tcd'],
+    enum: ['green-pulse', 'ezbill', 'ezstart', 'fengshui', 'asc-tcd'],
   },
   emails: [waitlistEntrySchema],
 }, {

@@ -117,13 +117,6 @@ export const MONITORED_SERVICES = {
     productionUrl: `${URLS.ezbill.api?.production}/health`,
     port: new URL(URLS.ezbill.api!.local).port,
   },
-  // 'tower-defense-api': {
-  //   name: 'Tower Defense API',
-  //   type: 'api' as ServiceType,
-  //   localUrl: `${URLS['tower-defense'].api?.local}/health`,
-  //   productionUrl: `${URLS['tower-defense'].api?.production}/health`,
-  //   port: new URL(URLS['tower-defense'].api!.local).port,
-  // },
   'green-pulse-api': {
     name: 'GreenPulse API',
     type: 'api' as ServiceType,
@@ -168,13 +161,6 @@ export const MONITORED_SERVICES = {
     productionUrl: URLS.ezpay.web.production,
     port: new URL(URLS.ezpay.web.local).port,
   },
-  // 'tower-defense-web': {
-  //   name: 'Tower Defense',
-  //   type: 'web' as ServiceType,
-  //   localUrl: URLS['tower-defense'].web.local,
-  //   productionUrl: URLS['tower-defense'].web.production,
-  //   port: new URL(URLS['tower-defense'].web.local).port,
-  // },
   'fengshui-web': {
     name: 'FengShui',
     type: 'web' as ServiceType,
@@ -210,7 +196,6 @@ export const SERVICE_PLATFORMS = {
     'ezauth-api',
     'ezpay-api',
     'ezbill-api',
-    // 'tower-defense-api', // Paused
     'green-pulse-api',
   ] as MonitoredServiceId[],
 
@@ -223,7 +208,6 @@ export const SERVICE_PLATFORMS = {
     'ezauth-web',
     'ezbill-web',
     'ezpay-web',
-    // 'tower-defense-web', // Paused
     'fengshui-web',
     'asc-tcd-web',
     'green-pulse-web',

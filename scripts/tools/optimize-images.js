@@ -12,7 +12,6 @@ const TARGET_IMAGES = [
   'apps/asc-tcd/web/public/images/fond-noisy.jpg',
   'apps/ezstart/web/public/images/projects/transplantation-arbres-desktop.png',
   'apps/asc-tcd/web/public/images/bergerac-2023-web.png',
-  'apps/tower-defense/web/public/assets/sprites/seamless/grass.png',
   'apps/ezstart/web/public/images/projects/evento-app.io-desktop.png',
   'apps/ezstart/web/public/images/libraries/ez-tag.png',
   'apps/green-pulse/web/public/logo.png',

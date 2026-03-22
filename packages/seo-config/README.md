@@ -192,7 +192,6 @@ All 8 web apps have SEO configured:
 | **EZBill** | ezbill-web.vercel.app | ✅ | ✅ | ✅ |
 | **EZPay** | ezpay.vercel.app | ✅ | ✅ | ✅ |
 | **FengShui** | fengshui-web.vercel.app | ✅ | ✅ | 🔄 |
-| **Tower Defense** | tower-defense-web.vercel.app | ✅ | ✅ | 🔄 |
 | **ASC-TCD** | asc-tcd-web.vercel.app | ✅ | ✅ | 🔄 |
 | **GreenPulse** | green-pulse-web.vercel.app | ✅ | ✅ | 🔄 |
 

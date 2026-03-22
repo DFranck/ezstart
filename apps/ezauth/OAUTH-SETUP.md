@@ -126,7 +126,7 @@ Si tu vois :
   passwordHash: null,  // ← OAuth-only user
   avatar: "https://lh3.googleusercontent.com/...",
   isVerified: true,
-  apps: ["ezbill", "tower-defense"],
+  apps: ["ezbill", "green-pulse"],
   createdAt: ISODate("..."),
   updatedAt: ISODate("...")
 }

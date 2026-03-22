@@ -29,7 +29,7 @@ interface UserEditModalProps {
 
 const ALL_GLOBAL_ROLES = ['superadmin'] // Only superadmin can be global
 const ALL_APP_ROLES = ['admin', 'manager', 'beta-tester', 'client']
-const ALL_APPS = ['ezbill', 'tower-defense', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd', 'ezpay', 'ezauth']
+const ALL_APPS = ['ezbill', 'ezstart', 'green-pulse', 'fengshui', 'asc-tcd', 'ezpay', 'ezauth']
 
 export function UserEditModal({ user, currentUser, rbac, onClose, onSave }: UserEditModalProps) {
   // State for new role structure

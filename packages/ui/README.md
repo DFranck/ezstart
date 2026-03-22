@@ -3232,7 +3232,6 @@ All @ezstart applications use this comprehensive UI library:
 - ✅ **ezbill/web** - Billing management interface
 - ✅ **ezstart/web** - Main application interface
 - ✅ **fengshui/web** - Feng Shui application interface
-- ✅ **tower-defense/web** - Game interface
 - ✅ **asc-tcd/web** - Corporate website
 
 ## 🏗️ Package Architecture

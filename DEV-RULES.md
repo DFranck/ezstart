@@ -150,12 +150,6 @@ export default defineConfig({
 │   │   ├── config/       # 🎯 PROJECT - Partagé web+api du projet
 │   │   ├── web/          # 🔒 LAYER - Spécifique frontend uniquement
 │   │   └── api/          # 🔒 LAYER - Spécifique backend uniquement
-│   └── tower-defense/
-│       ├── types/        # Entities, game state (partagé)
-│       ├── config/       # Balance, effects (partagé)
-│       ├── utils/        # Calculations (partagé)
-│       ├── web/          # Canvas rendering
-│       └── api/          # Game loop, WebSocket
 ```
 
 ### Exemples Concrets

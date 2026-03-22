@@ -157,7 +157,7 @@ export const ezstartSEO: AppSEOConfig = {
     {
       title: 'Real-World Applications - Learn from Production Code',
       description: 'Multiple complete applications: multiplayer game, AI form builder, Feng Shui analyzer, and more',
-      longDescription: 'The best way to learn is from real, working applications. EZStart includes complete, production-ready applications you can learn from, customize, or use as-is: Tower Defense (multiplayer game with Socket.IO), GreenPulse (AI-powered form builder), FengShui (image analysis tool), and more. These aren\'t toy examples - they\'re fully functional applications with authentication, databases, real-time features, and complex business logic. Study how they\'re built, see best practices in action, and adapt patterns to your own projects. It\'s like having a senior developer\'s entire portfolio to learn from.',
+      longDescription: 'The best way to learn is from real, working applications. EZStart includes complete, production-ready applications you can learn from, customize, or use as-is: GreenPulse (AI-powered form builder), FengShui (image analysis tool), EZBill (invoicing), and more. These aren\'t toy examples - they\'re fully functional applications with authentication, databases, real-time features, and complex business logic. Study how they\'re built, see best practices in action, and adapt patterns to your own projects. It\'s like having a senior developer\'s entire portfolio to learn from.',
       icon: 'lucide:Rocket',
       keywords: ['example applications', 'real-time apps', 'socketio', 'ai integration', 'production code'],
       useCases: [
@@ -506,7 +506,7 @@ export const ezstartSEO: AppSEOConfig = {
     },
     {
       question: 'What\'s included in the monorepo?',
-      answer: '8 complete applications (EZStart hub, EZAuth SSO, EZPay payments, EZBill invoicing, Tower Defense game, GreenPulse AI forms, FengShui analyzer, ASC-TCD association site), 100+ UI components, authentication SDK, payment SDK, testing infrastructure, deployment configs, and comprehensive documentation.',
+      answer: '7 complete applications (EZStart hub, EZAuth SSO, EZPay payments, EZBill invoicing, GreenPulse AI forms, FengShui analyzer, ASC-TCD association site), 100+ UI components, authentication SDK, payment SDK, testing infrastructure, deployment configs, and comprehensive documentation.',
     },
     {
       question: 'Can I deploy EZStart apps separately?',

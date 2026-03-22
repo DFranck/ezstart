@@ -23,7 +23,6 @@ const API_ENDPOINTS_COUNT: Partial<Record<AppName, number>> = {
   ezauth: 8,
   ezbill: 49,
   ezpay: 6,
-  'tower-defense': 7,
   'green-pulse': 2,
 }
 

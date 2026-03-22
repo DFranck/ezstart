@@ -102,7 +102,7 @@ POST   /api/webhooks/paypal
 ```typescript
 {
   // Project
-  projectId: string           // 'tower-defense', 'fengshui', etc.
+  projectId: string           // 'fengshui', 'ezbill', etc.
   projectName: string         // Display name
 
   // Type & Amount
