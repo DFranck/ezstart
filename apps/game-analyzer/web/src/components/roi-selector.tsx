@@ -188,23 +188,23 @@ export function RoiSelector({
   const handleStyle = (corner: Corner): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'absolute',
-      width: 8,
-      height: 8,
-      backgroundColor: 'white',
-      border: '1px solid rgba(59, 130, 246, 0.8)',
+      width: 12,
+      height: 12,
+      backgroundColor: 'red',
+      border: '2px solid darkred',
       borderRadius: 1,
       zIndex: 10,
     }
 
     switch (corner) {
       case 'nw':
-        return { ...base, top: -4, left: -4, cursor: 'nw-resize' }
+        return { ...base, top: -6, left: -6, cursor: 'nw-resize' }
       case 'ne':
-        return { ...base, top: -4, right: -4, cursor: 'ne-resize' }
+        return { ...base, top: -6, right: -6, cursor: 'ne-resize' }
       case 'sw':
-        return { ...base, bottom: -4, left: -4, cursor: 'sw-resize' }
+        return { ...base, bottom: -6, left: -6, cursor: 'sw-resize' }
       case 'se':
-        return { ...base, bottom: -4, right: -4, cursor: 'se-resize' }
+        return { ...base, bottom: -6, right: -6, cursor: 'se-resize' }
     }
   }
 
@@ -216,7 +216,7 @@ export function RoiSelector({
       style={{
         position: 'absolute',
         inset: 0,
-        zIndex: 20,
+        zIndex: 50,
         pointerEvents: 'none',
       }}
     >
@@ -228,8 +228,8 @@ export function RoiSelector({
           top: `${roi.y}%`,
           width: `${roi.width}%`,
           height: `${roi.height}%`,
-          border: '2px dashed rgba(59, 130, 246, 0.8)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          border: '3px solid red',
+          backgroundColor: 'rgba(255, 0, 0, 0.2)',
           cursor: 'move',
           pointerEvents: 'auto',
           boxSizing: 'border-box',

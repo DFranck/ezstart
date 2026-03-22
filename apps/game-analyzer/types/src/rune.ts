@@ -20,6 +20,7 @@ export type RuneSet =
   | 'enhance'
   | 'accuracy'
   | 'tolerance'
+  | 'cruel'
 
 export type RuneSlot = 1 | 2 | 3 | 4 | 5 | 6
 

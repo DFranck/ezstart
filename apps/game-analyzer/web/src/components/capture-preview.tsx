@@ -66,6 +66,11 @@ export function CapturePreview({
     return () => observer.disconnect()
   }, [])
 
+  // Debug: log container size to verify ROI can render
+  useEffect(() => {
+    console.log('[ROI] containerSize:', containerSize.width, containerSize.height)
+  }, [containerSize])
+
   const statusText = useCallback(() => {
     if (error) return error
     if (isAnalyzing) return t('capture.analyzing')
@@ -99,7 +104,7 @@ export function CapturePreview({
               ref={canvasRef}
               className="w-full h-auto block"
             />
-            {containerSize.width > 0 && containerSize.height > 0 && onRoiChange && (
+            {onRoiChange && (
               <RoiSelector
                 containerWidth={containerSize.width}
                 containerHeight={containerSize.height}

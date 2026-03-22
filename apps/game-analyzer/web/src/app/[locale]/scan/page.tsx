@@ -19,6 +19,7 @@ import { RuneCard } from '@/components/rune-card'
 import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
 import { EfficiencyDisplay } from '@/components/efficiency-display'
+import { ScanResultRaw } from '@/components/scan-result-raw'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -184,14 +185,20 @@ export default function ScanPage() {
 
                 {resultData && (
                   <>
-                    {selectedGame === 'summoners-war' && 'set' in resultData.data ? (
+                    {resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data ? (
                       <>
                         <RuneCard rune={resultData.data} confidence={resultData.confidence} />
                         <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
                       </>
-                    ) : 'manufacturer' in resultData.data ? (
+                    ) : resultData.success && 'manufacturer' in resultData.data ? (
                       <GearCard gear={resultData.data} confidence={resultData.confidence} />
                     ) : null}
+
+                    <ScanResultRaw
+                      rawText={resultData.rawText}
+                      confidence={resultData.confidence}
+                      parsingFailed={!resultData.success}
+                    />
                   </>
                 )}
 
@@ -224,14 +231,20 @@ export default function ScanPage() {
               {resultData && (
                 <Div className="space-y-4">
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
-                  {selectedGame === 'summoners-war' && 'set' in resultData.data ? (
+                  {resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data ? (
                     <>
                       <RuneCard rune={resultData.data} confidence={resultData.confidence} />
                       <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
                     </>
-                  ) : 'manufacturer' in resultData.data ? (
+                  ) : resultData.success && 'manufacturer' in resultData.data ? (
                     <GearCard gear={resultData.data} confidence={resultData.confidence} />
                   ) : null}
+
+                  <ScanResultRaw
+                    rawText={resultData.rawText}
+                    confidence={resultData.confidence}
+                    parsingFailed={!resultData.success}
+                  />
                 </Div>
               )}
             </Div>
