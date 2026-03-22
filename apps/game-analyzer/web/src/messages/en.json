@@ -1,4 +1,9 @@
 {
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "loading": "Loading..."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "scan": "Scan",

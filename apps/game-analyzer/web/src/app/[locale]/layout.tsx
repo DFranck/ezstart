@@ -6,6 +6,7 @@ import { ErrorBoundary, Toaster } from '@ezstart/ui/components'
 import '@ezstart/ui/globals.css'
 import { getMessages } from 'next-intl/server'
 import { Inter } from 'next/font/google'
+import ClientLayout from './client-layout'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -57,7 +58,7 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
             timeZone={timeZone}
             enableThemeSelector={true}
           >
-            {children}
+            <ClientLayout>{children}</ClientLayout>
           </Providers>
         </ErrorBoundary>
         <Toaster />

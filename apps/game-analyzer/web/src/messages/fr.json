@@ -1,4 +1,9 @@
 {
+  "auth": {
+    "login": "Connexion",
+    "logout": "Deconnexion",
+    "loading": "Chargement..."
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "scan": "Scanner",
