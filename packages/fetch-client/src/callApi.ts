@@ -141,9 +141,10 @@ export async function callApi<T = any>(
   }
 
   // Determine body type
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
   const isFormUrlEncoded = body instanceof URLSearchParams
   const isStringBody = typeof body === 'string'
-  const isJsonBody = !isFormUrlEncoded && !isStringBody
+  const isJsonBody = !isFormData && !isFormUrlEncoded && !isStringBody
 
   // Log request if enabled
   if (effectiveLogLevel === 'all') {
@@ -172,7 +173,7 @@ export async function callApi<T = any>(
         ...(finalAccessToken ? { Authorization: `Bearer ${finalAccessToken}` } : {}),
         ...headers,
       },
-      body: isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,
       credentials: 'include', // Required for httpOnly cookies in cross-origin requests
       signal,
     })
