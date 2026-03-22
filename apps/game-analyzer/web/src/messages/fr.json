@@ -61,7 +61,27 @@
     "takePhoto": "Prendre une photo",
     "chooseFile": "Choisir depuis la galerie",
     "scanning": "Analyse de l'image...",
-    "result": "Resultat du Scan"
+    "result": "Resultat du Scan",
+    "mode": {
+      "capture": "Capture",
+      "upload": "Upload"
+    },
+    "capture": {
+      "start": "Demarrer la capture",
+      "stop": "Arreter la capture",
+      "analyzing": "Analyse en cours...",
+      "selectWindow": "Selectionnez une fenetre a capturer",
+      "waitingForChange": "En attente de changement...",
+      "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur"
+    },
+    "efficiency": {
+      "title": "Efficacite",
+      "score": "Score",
+      "sell": "A vendre",
+      "keep": "A garder",
+      "great": "Excellente",
+      "godlike": "Parfaite"
+    }
   },
   "scanDetail": {
     "title": "Details du Scan",

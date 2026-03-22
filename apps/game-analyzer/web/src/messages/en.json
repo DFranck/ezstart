@@ -61,7 +61,27 @@
     "takePhoto": "Take a photo",
     "chooseFile": "Choose from gallery",
     "scanning": "Analyzing image...",
-    "result": "Scan Result"
+    "result": "Scan Result",
+    "mode": {
+      "capture": "Capture",
+      "upload": "Upload"
+    },
+    "capture": {
+      "start": "Start capture",
+      "stop": "Stop capture",
+      "analyzing": "Analyzing...",
+      "selectWindow": "Select a window to capture",
+      "waitingForChange": "Waiting for change...",
+      "notSupported": "Screen capture is not supported by your browser"
+    },
+    "efficiency": {
+      "title": "Efficiency",
+      "score": "Score",
+      "sell": "Sell",
+      "keep": "Keep",
+      "great": "Great",
+      "godlike": "Godlike"
+    }
   },
   "scanDetail": {
     "title": "Scan Details",
