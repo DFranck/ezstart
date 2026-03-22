@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx src/index.ts",
     "prebuild": "pnpm --filter @ezstart/types build && pnpm --filter @ezbill/types build",
     "build": "tsc",
     "start": "node dist/index.js",

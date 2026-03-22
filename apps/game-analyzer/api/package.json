@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx src/index.ts",
     "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @game-analyzer/types build",
     "build": "tsc && ls -la dist",
     "start": "ls -la && ls -la dist && node dist/index.js",
@@ -17,7 +17,6 @@
     "@ezstart/logger": "workspace:*",
     "@ezstart/ocr-sdk": "workspace:*",
     "@game-analyzer/types": "workspace:*",
-    "@sentry/node": "^8.0.0",
     "express": "^4.19.2",
     "mongoose": "^8.15.1",
     "multer": "^1.4.5-lts.1",
