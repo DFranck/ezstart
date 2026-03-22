@@ -51,7 +51,7 @@ apps/
 7. [x] Parser Summoners War (runes) — 10 tests
 8. [x] Parser Nikke (gear) — 8 tests
 9. [x] Créer `apps/game-analyzer/web/` — Next.js mobile-first
-10. [ ] Test intégration complète (API + Web ensemble)
+10. [x] Test intégration complète (API + Web ensemble) — API 5/5 tests OK, Web 3 pages OK, typecheck OK, 18 unit tests OK
 11. [ ] Deploy (Railway API + Vercel Web)
 
 ### Notes
