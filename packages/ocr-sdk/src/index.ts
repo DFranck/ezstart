@@ -23,3 +23,12 @@ export { cleanText, extractNumbers, matchPattern, failedResult, successResult } 
 // Game parsers
 export { nikkeParser } from './parsers/index.js'
 export { summonersWarParser } from './parsers/index.js'
+
+// Analyzers
+export {
+  calculateEfficiency,
+  calculatePotentialEfficiency,
+  estimateRolls,
+  getRecommendation,
+} from './analyzers/index.js'
+export type { RuneEfficiencyResult, SubstatDetail } from './analyzers/index.js'
