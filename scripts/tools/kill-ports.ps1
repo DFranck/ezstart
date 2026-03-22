@@ -19,7 +19,7 @@ try {
 } catch {
     Write-Host "Error fetching ports from config: $_" -ForegroundColor Red
     Write-Host "Falling back to hardcoded ports..." -ForegroundColor Yellow
-    $ezstartPorts = @(5010, 5015, 5020, 5025, 5030, 5035, 5045, 5050, 5055, 5065, 5070, 5075, 5080)
+    $ezstartPorts = @(5000, 5005, 5010, 5015, 5020, 5025, 5030, 5035, 5045, 5050, 5055, 5065, 5070, 5075)
 }
 
 Write-Host ""

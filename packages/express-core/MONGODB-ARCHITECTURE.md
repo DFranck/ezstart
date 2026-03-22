@@ -281,7 +281,7 @@ pnpm --filter api-my-app dev
 # Verify logs: "✅ Connected to MongoDB (shared connection)"
 
 # Test CRUD operations
-curl http://localhost:5080/api/my-resource
+curl http://localhost:5000/api/my-resource
 ```
 
 ## APIs Migrées

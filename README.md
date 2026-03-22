@@ -50,7 +50,7 @@ pnpm dev:status
 
 | Service | Web | API |
 |---------|-----|-----|
-| **EZStart** | http://localhost:5050 | - |
+| **EZStart** | http://localhost:5050 | http://localhost:5000 |
 | **EZAuth** | http://localhost:5015 | http://localhost:5010 |
 | **EZBill** | http://localhost:5025 | http://localhost:5020 |
 | **EZPay** | http://localhost:5045 | http://localhost:5040 |
@@ -58,7 +58,6 @@ pnpm dev:status
 | **FengShui** | http://localhost:5065 | - |
 | **ASC-TCD** | http://localhost:5055 | - |
 | **GreenPulse** | http://localhost:5075 | http://localhost:5070 |
-| **Monitoring** | - | http://localhost:5080 |
 
 ---
 
@@ -121,7 +120,7 @@ pnpm dev:status
 - **EZPay API** (5040) - Payment processing
 - **Tower Defense API** (5030) - Game server with Socket.IO
 - **GreenPulse API** (5070) - AI sustainability backend
-- **Monitoring API** (5080) - Health checks and metrics
+- **EZStart API** (5000) - Health checks and metrics
 
 ---
 
@@ -194,7 +193,7 @@ pnpm --filter ezbill-web build
 ### Port Management
 
 All services use the **50xx** pattern:
-- **APIs**: 5010, 5020, 5030, 5040, 5070, 5080 (ending in 0)
+- **APIs**: 5000, 5010, 5020, 5030, 5040, 5070 (ending in 0)
 - **Web Apps**: 5015, 5025, 5035, 5045, 5050, 5055, 5065, 5075 (ending in 5)
 
 Auto-detected from `@ezstart/config` - no manual configuration needed!

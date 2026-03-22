@@ -498,8 +498,8 @@ const domain = getWebUrl('ezpay', 'production')
 |---------|-------|----------|
 | `50X0` | APIs | EZAuth 5010, EZBill 5020, TD 5030, EZPay 5040 |
 | `50X5` | Web Apps | EZAuth 5015, EZBill 5025, TD 5035, EZPay 5045 |
+| `5000` | EZStart API | Port fixe |
 | `5050` | EZStart (hub) | Port fixe |
-| `5080` | Monitoring API | Port fixe |
 
 ### CORS Automatique
 

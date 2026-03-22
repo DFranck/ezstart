@@ -34,7 +34,7 @@ check_url "EZPay API" "http://localhost:5040/api/health"
 check_url "EZBill API" "http://localhost:5020/api/health"
 check_url "Tower Defense API" "http://localhost:5030/api/health"
 check_url "GreenPulse API" "http://localhost:5070/api/health"
-check_url "Monitoring API" "http://localhost:5080/api/health"
+check_url "EZStart API" "http://localhost:5000/api/health"
 
 echo ""
 echo "🌐 Checking Web Apps..."
