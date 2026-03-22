@@ -35,6 +35,27 @@
 - Discuter avec l'utilisateur
 - Lancer et vérifier le travail des agents
 - Vérifier qu'aucun secret (clés API, tokens, .env, credentials) n'est exposé dans le travail des agents
+- **Rédiger la checklist de tests** avant de valider une phase (voir section Tests ci-dessous)
+
+### Tests — workflow obligatoire :
+
+Avant de déclarer une phase/feature terminée, Claude (manager) **rédige une checklist de tests** puis **délègue l'exécution aux agents** :
+
+1. **Tests code** (agents automatisés) :
+   - Typecheck (`tsc --noEmit`)
+   - Unit tests (`vitest run`)
+   - Lint si configuré
+   - Build (`next build`, `tsc`)
+   - Vérification secrets (grep patterns sensibles)
+
+2. **Tests MCP** (tester comme un vrai utilisateur via chrome-devtools) :
+   - Naviguer les pages dans le navigateur
+   - Vérifier que l'UI s'affiche correctement (screenshots)
+   - Tester les flows fonctionnels (cliquer, remplir, soumettre)
+   - Vérifier les endpoints API (requêtes réseau)
+   - Tester les cas d'erreur (mauvais input, 404, etc.)
+
+Claude rédige la checklist → agents exécutent → Claude utilise MCP pour les tests user → consolide et reporte.
 
 ### Si les règles ne sont pas respectées :
 
