@@ -48,6 +48,11 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
       origins.push(...getAllWebUrls('green-pulse'))
       break
 
+    case 'game-analyzer':
+      // Game Analyzer API called only by Game Analyzer web
+      origins.push(...getAllWebUrls('game-analyzer'))
+      break
+
     case 'ezstart':
       // EZStart API (monitoring) is called by ALL web apps
       Object.keys(URLS).forEach((app) => {

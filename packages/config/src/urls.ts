@@ -21,6 +21,7 @@ export type AppName =
   | 'tower-defense'
   | 'asc-tcd'
   | 'green-pulse'
+  | 'game-analyzer'
 
 export interface AppUrls {
   web: {
@@ -148,6 +149,18 @@ export const URLS: Record<AppName, AppUrls> = {
       production: 'https://greenpulse-api.up.railway.app',
     },
   },
+
+  'game-analyzer': {
+    web: {
+      local: 'http://localhost:5085',
+      development: 'https://game-analyzer-web.vercel.app',
+      production: 'https://game-analyzer.ezstart.xyz',
+    },
+    api: {
+      local: 'http://localhost:5080',
+      production: 'https://game-analyzer-api.up.railway.app',
+    },
+  },
 }
 
 /**
@@ -232,6 +245,16 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     webPlatform: 'vercel',
     apiPlatform: 'railway',
   },
+
+  'game-analyzer': {
+    name: 'Game Analyzer',
+    description: 'Game screenshot scanner and stats analyzer (OCR)',
+    emoji: '🎮',
+    logo: '/icons/icon-192x192.png',
+    githubPath: 'apps/game-analyzer',
+    webPlatform: 'vercel',
+    apiPlatform: 'railway',
+  },
 }
 
 /**
@@ -264,7 +287,8 @@ export function getCurrentEnvironment(): Environment {
       hostname === 'ezpay.ezstart.xyz' ||
       hostname === 'ezfengshui.ezstart.xyz' ||
       hostname === 'tower-defense.ezstart.xyz' ||
-      hostname === 'www.asc-tcd.com'
+      hostname === 'www.asc-tcd.com' ||
+      hostname === 'game-analyzer.ezstart.xyz'
     ) {
       return 'production'
     }
