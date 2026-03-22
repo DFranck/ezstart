@@ -75,6 +75,7 @@
       "notSupported": "Screen capture is not supported by your browser",
       "adjustZone": "Adjust detection zone"
     },
+    "parsingImproving": "Stats parsing is being improved",
     "efficiency": {
       "title": "Efficiency",
       "score": "Score",

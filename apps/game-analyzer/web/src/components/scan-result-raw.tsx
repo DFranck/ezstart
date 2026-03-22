@@ -9,7 +9,7 @@ interface ScanResultRawProps {
 }
 
 export function ScanResultRaw({ rawText, confidence, parsingFailed }: ScanResultRawProps) {
-  const confidencePercent = Math.round(confidence * 100)
+  const confidencePercent = Math.round(confidence)
 
   return (
     <Card>

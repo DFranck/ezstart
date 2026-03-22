@@ -75,6 +75,7 @@
       "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur",
       "adjustZone": "Ajustez la zone de detection"
     },
+    "parsingImproving": "Le parsing des stats est en cours d'amélioration",
     "efficiency": {
       "title": "Efficacite",
       "score": "Score",
