@@ -19,3 +19,7 @@ export { recognize } from './engines/index.js'
 
 // Parser utilities
 export { cleanText, extractNumbers, matchPattern, failedResult, successResult } from './parsers/index.js'
+
+// Game parsers
+export { nikkeParser } from './parsers/index.js'
+export { summonersWarParser } from './parsers/index.js'
