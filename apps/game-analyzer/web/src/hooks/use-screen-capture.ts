@@ -30,11 +30,7 @@ export function useScreenCapture(
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const onFrameRef = useRef(onFrame)
-
-  // Keep onFrame ref in sync to avoid stale closures
-  useEffect(() => {
-    onFrameRef.current = onFrame
-  }, [onFrame])
+  onFrameRef.current = onFrame
 
   const cleanup = useCallback(() => {
     if (intervalRef.current) {

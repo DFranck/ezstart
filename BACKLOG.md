@@ -9,7 +9,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ## 🎮 game-analyzer
 
-**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-22
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-23
 
 ### Objectif
 App pour scanner et analyser des screenshots de jeux (Summoners War runes, Nikke Goddess of Victory gear, etc.) via OCR scripté + fallback IA optionnel.
@@ -51,13 +51,22 @@ apps/
 7. [x] Parser Summoners War (runes) — 10 tests
 8. [x] Parser Nikke (gear) — 8 tests
 9. [x] Créer `apps/game-analyzer/web/` — Next.js mobile-first
-10. [x] Test intégration complète (API + Web ensemble) — API 5/5 tests OK, Web 3 pages OK, typecheck OK, 18 unit tests OK
-11. [ ] Deploy (Railway API + Vercel Web)
+10. [x] Client layout avec nav, auth, i18n
+11. [x] Engine efficacité Barion — 15 tests
+12. [x] Screen capture + frame diff + ROI selector
+13. [x] Fix fetch-client FormData, turbo stream mode, dev scripts
+14. [ ] Tester capture + OCR end-to-end avec SW
+15. [ ] Ajouter OpenAPI/Swagger à l'API
+16. [ ] Deploy (Railway API + Vercel Web)
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
 - Prioriser le scanning rapide et stable sur la précision IA
 - Interface doit être mobile-friendly (utilisation depuis téléphone)
+- Capture d'écran via getDisplayMedia + ROI selector pour zone rune
+- Approche inspirée de SWLENS (capture continue + analyse auto)
+- Le ROI selector avait un bug de trembling (fixé: refs stables, onChange au mouseUp seulement)
+- Le fetch-client ne gérait pas FormData (fixé: détection isFormData, pas de JSON.stringify)
 
 ---
 

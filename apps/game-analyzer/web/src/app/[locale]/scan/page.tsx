@@ -83,14 +83,13 @@ export default function ScanPage() {
 
   const handleSignificantChange = useCallback(
     (frame: ImageData) => {
+      console.log('[diff] CHANGE DETECTED, sending to API')
       if (!selectedGame || scanningRef.current) return
 
       scanningRef.current = true
 
-      // Crop the frame to the ROI before sending to OCR
-      const cropped = cropImageData(frame, roiRef.current)
-
-      imageDataToBlob(cropped).then((blob) => {
+      // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
+      imageDataToBlob(frame).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         reset()
         scan(
@@ -110,6 +109,7 @@ export default function ScanPage() {
     (frame: ImageData) => {
       // Crop frame to ROI before feeding to diff for better sensitivity
       const cropped = cropImageData(frame, roiRef.current)
+      console.log('[capture] frame received', frame.width, frame.height, '→ cropped to', cropped.width, cropped.height)
       processFrame(cropped)
     },
     [processFrame]

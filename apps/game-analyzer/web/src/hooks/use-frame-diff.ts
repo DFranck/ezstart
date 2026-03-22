@@ -39,6 +39,10 @@ function computeGrayscale(r: number, g: number, b: number): number {
  *
  * A stabilization debounce ensures the callback only fires once the user has
  * stopped scrolling and the image is no longer changing.
+ *
+ * All intermediate values (diffScore, stability) are tracked via refs to avoid
+ * re-rendering the parent on every frame. Only the stabilized result triggers
+ * a state update.
  */
 export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffReturn {
   const {
@@ -49,9 +53,12 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
     onSignificantChange,
   } = options
 
-  const [diffScore, setDiffScore] = useState(0)
-  const [isStable, setIsStable] = useState(true)
+  // Only lastStableFrame uses state — it changes rarely (after stabilization)
   const [lastStableFrame, setLastStableFrame] = useState<ImageData | null>(null)
+
+  // Track diffScore and isStable via refs to avoid re-renders on every frame
+  const diffScoreRef = useRef(0)
+  const isStableRef = useRef(true)
 
   const prevFrameRef = useRef<ImageData | null>(null)
   const stabilizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -95,13 +102,13 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
       }
 
       const score = sampledCount > 0 ? (changedCount / sampledCount) * 100 : 0
-      setDiffScore(score)
+      diffScoreRef.current = score
 
       const isSignificant = score >= threshold
 
       if (isSignificant) {
-        // Frame is changing — not stable
-        setIsStable(false)
+        // Frame is changing — not stable (ref only, no re-render)
+        isStableRef.current = false
         latestFrameRef.current = frame
 
         // Reset the stabilization timer on every significant change
@@ -111,7 +118,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
 
         stabilizeTimerRef.current = setTimeout(() => {
           // No new significant change occurred during the stabilization window
-          setIsStable(true)
+          isStableRef.current = true
           const stableFrame = latestFrameRef.current
           if (stableFrame) {
             setLastStableFrame(stableFrame)
@@ -124,5 +131,10 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
     [threshold, pixelThreshold, sampleRate, stabilizeMs],
   )
 
-  return { diffScore, isStable, processFrame, lastStableFrame }
+  return {
+    diffScore: diffScoreRef.current,
+    isStable: isStableRef.current,
+    processFrame,
+    lastStableFrame,
+  }
 }

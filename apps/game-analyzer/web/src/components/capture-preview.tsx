@@ -92,9 +92,9 @@ export function CapturePreview({
   return (
     <Div className="space-y-4">
       {/* Preview */}
-      <Card className="overflow-hidden bg-muted">
+      <Card className="bg-muted">
         {isCapturing && currentFrame ? (
-          <Div ref={containerRef} className="relative">
+          <div ref={containerRef} className="relative">
             <canvas
               ref={canvasRef}
               className="w-full h-auto block"
@@ -107,7 +107,7 @@ export function CapturePreview({
                 initialRoi={roi}
               />
             )}
-          </Div>
+          </div>
         ) : (
           <Div className="aspect-video flex items-center justify-center">
             <P className="text-muted-foreground text-sm">{t('capture.selectWindow')}</P>

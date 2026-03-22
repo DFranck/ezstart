@@ -216,6 +216,7 @@ export function RoiSelector({
       style={{
         position: 'absolute',
         inset: 0,
+        zIndex: 20,
         pointerEvents: 'none',
       }}
     >

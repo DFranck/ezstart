@@ -37,11 +37,15 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
 
     const { scanId, result } = await scanImage(req.file.buffer, gameType as GameType)
 
+    console.log('[scan] Returning scanId:', scanId, 'success:', result.success)
+
     res.status(201).json({
       success: true,
       data: {
-        scanId,
-        ...result,
+        id: scanId,
+        gameType,
+        status: result.success ? 'completed' : 'failed',
+        result,
       },
     })
   } catch (error) {
