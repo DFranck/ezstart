@@ -130,10 +130,7 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 ```bash
 pnpm install
 
-# Terminal 1 (TOUJOURS) : TypeScript centralisé
-pnpm dev:types
-
-# Terminal 2 : Lancer l'app ciblée
+# Lancer l'app ciblée (type watching inclus automatiquement)
 pnpm dev:ez     # EZStart
 pnpm dev:bill   # EZBill + EZAuth
 pnpm dev:td     # Tower Defense + EZAuth
@@ -142,6 +139,9 @@ pnpm dev:pay    # EZPay
 pnpm dev:fs     # FengShui + EZAuth + EZPay
 pnpm dev:asc    # ASC-TCD
 pnpm dev:all    # TOUT (rarement nécessaire)
+
+# Optionnel — type watching seul (debug)
+pnpm dev:types
 ```
 
 ### Ports

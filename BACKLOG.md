@@ -9,7 +9,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ## 🎮 game-analyzer
 
-**Status :** `planned` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-22
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-22
 
 ### Objectif
 App pour scanner et analyser des screenshots de jeux (Summoners War runes, Nikke Goddess of Victory gear, etc.) via OCR scripté + fallback IA optionnel.
@@ -41,16 +41,18 @@ apps/
 - Providers standard : NextIntl + ThemeProvider + AuthProvider + ErrorBoundary + Toaster
 - Ports à réserver dans `@ezstart/config` urls.ts
 
-### Étapes à planifier
-1. [ ] Rédiger plan détaillé (tâches par agent)
-2. [ ] Créer `packages/ocr-sdk/` — moteur OCR + types
-3. [ ] Créer `apps/game-analyzer/types/` — types partagés (Rune, Gear, Scan)
-4. [ ] Créer `apps/game-analyzer/api/` — Express + routes action-based
-5. [ ] Créer `apps/game-analyzer/web/` — Interface Next.js mobile-first
-6. [ ] Ajouter ports dans `@ezstart/config`
-7. [ ] Parser Summoners War (runes)
-8. [ ] Parser Nikke (gear)
-9. [ ] Tests + deploy
+### Étapes
+1. [x] Rédiger plan détaillé (tâches par agent)
+2. [x] Nettoyer refs obsolètes port 5080 → 5000
+3. [x] Ajouter ports 5080/5085 dans `@ezstart/config`
+4. [x] Créer `packages/ocr-sdk/` — moteur OCR + types + helpers
+5. [x] Créer `apps/game-analyzer/types/` — Rune, Gear, Scan, Game
+6. [x] Créer `apps/game-analyzer/api/` — Express + routes action-based + multer
+7. [x] Parser Summoners War (runes) — 10 tests
+8. [x] Parser Nikke (gear) — 8 tests
+9. [x] Créer `apps/game-analyzer/web/` — Next.js mobile-first
+10. [ ] Test intégration complète (API + Web ensemble)
+11. [ ] Deploy (Railway API + Vercel Web)
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
