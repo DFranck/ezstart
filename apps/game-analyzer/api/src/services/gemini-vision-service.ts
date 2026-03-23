@@ -2,17 +2,16 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
+/** Models to try in order — each has separate rate limits */
+const MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash']
+
 export async function ocrWithGemini(imageBuffer: Buffer): Promise<string | null> {
   if (!GEMINI_API_KEY) {
     console.warn('[OCR] Gemini API key not configured, skipping fallback')
     return null
   }
 
-  try {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-
-    const prompt = `Read ALL text from this Summoners War rune screenshot.
+  const prompt = `Read ALL text from this Summoners War rune screenshot.
 Return ONLY the text you see, line by line. Include:
 - Rune name and slot number (e.g. "+12 Violent Rune (1)")
 - Quality (Legend/Hero/Rare/Magic/Normal)
@@ -21,19 +20,30 @@ Return ONLY the text you see, line by line. Include:
 - Set bonus (e.g. "4 Set: Extra Turn +22%")
 Do NOT add explanations, just the raw text.`
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          mimeType: 'image/png',
-          data: imageBuffer.toString('base64'),
-        },
-      },
-    ])
-
-    return result.response.text()
-  } catch (error) {
-    console.error('[OCR] Gemini Vision failed:', error)
-    return null
+  const imageData = {
+    inlineData: {
+      mimeType: 'image/png' as const,
+      data: imageBuffer.toString('base64'),
+    },
   }
+
+  for (const modelName of MODELS) {
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
+      const model = genAI.getGenerativeModel({ model: modelName })
+      const result = await model.generateContent([prompt, imageData])
+      console.log(`[OCR] Gemini ${modelName} succeeded`)
+      return result.response.text()
+    } catch (error: any) {
+      if (error?.status === 429) {
+        console.warn(`[OCR] Gemini ${modelName} rate limited, trying next model...`)
+        continue
+      }
+      console.error(`[OCR] Gemini ${modelName} failed:`, error.message)
+      return null
+    }
+  }
+
+  console.warn('[OCR] All Gemini models exhausted')
+  return null
 }

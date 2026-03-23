@@ -15,6 +15,8 @@ export interface ScanResult {
   analysis?: RuneAnalysis
   /** True when fewer substats were detected than expected for the rune's quality/level */
   partial?: boolean
+  /** True when Gemini fallback failed and Tesseract result is weak — stats may be inaccurate */
+  unreliable?: boolean
 }
 
 export interface Scan {

@@ -64,6 +64,13 @@ export async function scanImage(
       }
     }
 
+    // Mark result as unreliable when Gemini fallback was needed but unavailable,
+    // and Tesseract result is weak (partial or fewer than 3 substats)
+    const geminiWasNeeded = needsFallback && gameType === 'summoners-war'
+    const geminiDidNotImprove = ocrResult.confidence < 70 || parseResult.data?.partial === true
+    const tooFewSubstats = (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+    const isUnreliable = geminiWasNeeded && geminiDidNotImprove && tooFewSubstats
+
     const processingTimeMs = Date.now() - startTime
 
     // 3. Analyze rune if parsing succeeded (SW only for now)
@@ -87,6 +94,7 @@ export async function scanImage(
       processingTimeMs,
       analysis,
       ...(partial ? { partial } : {}),
+      ...(isUnreliable ? { unreliable: true } : {}),
     }
 
     // Update scan with result

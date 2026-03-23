@@ -258,6 +258,14 @@ export default function ScanPage() {
 
                 {resultData && (
                   <>
+                    {resultData.unreliable && (
+                      <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
+                        <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                          {t('scan.unreliableResult')}
+                        </P>
+                      </Div>
+                    )}
+
                     {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                       <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                     )}
@@ -319,6 +327,15 @@ export default function ScanPage() {
               {resultData && (
                 <Div className="space-y-4">
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
+
+                  {resultData.unreliable && (
+                    <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
+                      <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                        {t('scan.unreliableResult')}
+                      </P>
+                    </Div>
+                  )}
+
                   {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                     <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                   )}

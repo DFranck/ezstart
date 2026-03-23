@@ -82,6 +82,7 @@
     },
     "preprocessedImage": "Image sent to OCR",
     "parsingImproving": "Stats parsing is being improved",
+    "unreliableResult": "Partial result — some stats may be missing. Rescan for better results.",
     "profile": {
       "label": "Progression profile",
       "early": "Early",

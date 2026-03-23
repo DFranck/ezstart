@@ -11,6 +11,7 @@ const scanResultSchema = new Schema<ScanResult>(
     processingTimeMs: { type: Number, required: true },
     analysis: { type: Schema.Types.Mixed },
     partial: { type: Boolean },
+    unreliable: { type: Boolean },
   },
   { _id: false }
 )

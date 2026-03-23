@@ -82,6 +82,7 @@
     },
     "preprocessedImage": "Image envoyée à l'OCR",
     "parsingImproving": "Le parsing des stats est en cours d'amélioration",
+    "unreliableResult": "Résultat partiel — certaines stats peuvent manquer. Rescannez pour de meilleurs résultats.",
     "profile": {
       "label": "Profil de progression",
       "early": "Debutant",
