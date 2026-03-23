@@ -224,9 +224,6 @@ const STAT_WEIGHTS: Record<StatType, number> = {
   'def': 0.5,
 }
 
-/** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
-const BARION_DIVISOR = 9
-
 // Number of substats at +0 by quality
 const SUBSTATS_BY_QUALITY: Record<RuneQuality, number> = {
   normal: 0,
@@ -243,6 +240,23 @@ const UPGRADES_BY_QUALITY: Record<RuneQuality, number> = {
   rare: 2,
   hero: 3,
   legend: 4,
+}
+
+/**
+ * Total "events" at +12 per quality (Barion divisor).
+ * Each event is either an initial substat value or a powerup (+3/+6/+9/+12).
+ * Legend: 4 initial + 4 powerups = 8
+ * Hero:   3 initial + 4 powerups = 7
+ * Rare:   2 initial + 4 powerups = 6
+ * Magic:  1 initial + 4 powerups = 5
+ * Normal: 0 initial + 4 powerups = 4
+ */
+const TOTAL_EVENTS_AT_12: Record<RuneQuality, number> = {
+  normal: 4,
+  magic: 5,
+  rare: 6,
+  hero: 7,
+  legend: 8,
 }
 
 // --- Core functions ---
@@ -383,25 +397,34 @@ function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
 /**
  * Calculate Barion efficiency.
  * For each substat: ratio = value / max_roll_value
- * efficiency = (sum(ratios) + 1) / 2.8 * 100
+ * efficiency = sum(ratios) / TOTAL_EVENTS_AT_12[quality] * 100
+ *
+ * A perfect Legend 6★ +12 rune = 8/8 = 100%.
+ * Innate stat is NOT counted.
  */
-function barionEfficiency(substats: RuneStat[]): number {
+function barionEfficiency(substats: RuneStat[], quality: RuneQuality): number {
   let rawSum = 0
   for (const sub of substats) {
     const range = ROLL_RANGES[sub.type]
     if (!range || sub.value <= 0) continue
     rawSum += sub.value / range.max
   }
-  return ((rawSum + 1) / BARION_DIVISOR) * 100
+  const divisor = TOTAL_EVENTS_AT_12[quality]
+  if (divisor <= 0) return 0
+  return (rawSum / divisor) * 100
 }
 
 /**
  * Calculate weighted efficiency using stat importance weights.
- * weighted = sum(substat_ratio * weight) / sum(max_possible_ratios * weight) * 100
- * Uses the top-N weights (sorted desc) for the max possible denominator,
- * where N = total roll slots (initial subs + upgrade rolls).
+ * Same Barion structure but each ratio is multiplied by the stat weight.
+ * Normalised so that a perfect Legend rune with top-4 stats = 100%.
+ *
+ * Perfect Legend +12: 4 stats × 2 rolls each = 8 ratios (all 1.0).
+ * Best top-4 weights: spd(2.0) + cr(1.5) + cd(1.5) + atk%(1.0).
+ * Each stat gets 2 max rolls → weightedSum = 2*2.0 + 2*1.5 + 2*1.5 + 2*1.0 = 12.
+ * Divisor for Legend = 12, for other qualities we scale proportionally.
  */
-function weightedEfficiency(substats: RuneStat[]): number {
+function weightedEfficiency(substats: RuneStat[], quality: RuneQuality): number {
   if (substats.length === 0) return 0
 
   let weightedSum = 0
@@ -412,37 +435,27 @@ function weightedEfficiency(substats: RuneStat[]): number {
     weightedSum += ratio * STAT_WEIGHTS[sub.type]
   }
 
-  // Max possible: 8 perfect rolls across the highest-weighted stats
-  // A perfect rune gets ratio=2 per stat (2 rolls each on 4 stats) = 8 total ratios
-  // Best case: all rolls in spd (weight 2.0) → maxWeightedSum = 8 * 2.0
-  // But we normalise against a "balanced best" of 4 stats with 2 rolls each:
-  // Use top-4 weights sorted desc: spd(2.0), cr(1.5), cd(1.5), atk%(1.0) = avg 1.5
-  // maxWeightedSum = 8 * avg_top4_weight = 8 * 1.5 = 12
-  // +1 for main stat baseline (like Barion)
-  // Actually, to stay comparable to Barion scale (0-100), we use:
-  // weighted_eff = (weightedSum + main_weight) / max_weighted_divisor * 100
-  // where max_weighted_divisor makes a perfect rune = 100%
-  // Perfect rune: 4 stats, 2 max rolls each → ratio=2 per stat
-  // Best weights: spd(2.0*2=4) + cr(1.5*2=3) + cd(1.5*2=3) + atk%(1.0*2=2) = 12
-  // Main stat weight = 1.0 (normalised)
-  // Divisor = 12 + 1 = 13 for 100%
-  const MAX_WEIGHTED_DIVISOR = 13
+  // Max weighted divisor scales with total events (like Barion).
+  // For Legend (8 events), the best-case weighted sum = 12.0 (avg weight 1.5 per event).
+  // So: maxWeightedDivisor = TOTAL_EVENTS * 1.5
+  const avgTopWeight = 1.5
+  const maxWeightedDivisor = TOTAL_EVENTS_AT_12[quality] * avgTopWeight
+  if (maxWeightedDivisor <= 0) return 0
 
-  return ((weightedSum + 1) / MAX_WEIGHTED_DIVISOR) * 100
+  return (weightedSum / maxWeightedDivisor) * 100
 }
 
 /**
- * Calculate potential efficiency at +12 (remaining rolls and new subs at max).
- * If the rune is already +12 or higher, potential = current (no rolls left).
+ * Calculate potential efficiency at +12 (remaining events at max).
+ * remaining_events = TOTAL_EVENTS_AT_12[quality] - events_so_far
+ * potential = (current_sum + remaining_events * 1.0) / TOTAL_EVENTS_AT_12[quality] * 100
+ *
+ * If the rune is already +12 or higher, potential = current (no events left).
  */
 export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: RuneQuality): number {
   const quality = qualityOverride ?? detectQuality(rune)
-  const remainingUpgrades = remainingRolls(quality, rune.level)
-
-  // New subs that will be added between current level and +12
-  const currentSubs = getExpectedSubstatCount(quality, rune.level)
-  const maxSubs = getExpectedSubstatCount(quality, 12) // always 4
-  const newSubsRemaining = Math.max(0, maxSubs - currentSubs)
+  const totalEvents = TOTAL_EVENTS_AT_12[quality]
+  if (totalEvents <= 0) return 0
 
   let rawSum = 0
   for (const sub of rune.subStats) {
@@ -451,18 +464,15 @@ export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: R
     rawSum += sub.value / range.max
   }
 
-  // If no rolls and no new subs remaining, potential equals current
-  if (remainingUpgrades <= 0 && newSubsRemaining <= 0) {
-    return ((rawSum + 1) / BARION_DIVISOR) * 100
-  }
+  // Events so far = initial subs + powerups that occurred
+  const powerups = Math.floor(Math.min(rune.level, 12) / 3)
+  const eventsSoFar = SUBSTATS_BY_QUALITY[quality] + powerups
+  const remainingEvents = Math.max(0, totalEvents - eventsSoFar)
 
-  // Each remaining upgrade at max adds 1.0 to rawSum
-  rawSum += remainingUpgrades * 1.0
+  // Each remaining event at max adds 1.0 to rawSum
+  rawSum += remainingEvents * 1.0
 
-  // Each new sub at max initial value adds 1.0 to rawSum
-  rawSum += newSubsRemaining * 1.0
-
-  return ((rawSum + 1) / BARION_DIVISOR) * 100
+  return (rawSum / totalEvents) * 100
 }
 
 /**
@@ -473,10 +483,12 @@ export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: R
 function calculateGrindPotential(
   substats: SubstatAnalysis[],
   baseEfficiency: number,
+  quality: RuneQuality,
 ): GrindPotential {
   const substatsToGrind: GrindPotential['substatsToGrind'] = []
   let grindedRawSum = 0
   let currentRawSum = 0
+  const divisor = TOTAL_EVENTS_AT_12[quality]
 
   for (const sub of substats) {
     const range = ROLL_RANGES[sub.type]
@@ -500,7 +512,7 @@ function calculateGrindPotential(
 
   // Grind bonus in Barion % points
   const grindBonusRaw = grindedRawSum - currentRawSum
-  const grindBonusPercent = (grindBonusRaw / BARION_DIVISOR) * 100
+  const grindBonusPercent = divisor > 0 ? (grindBonusRaw / divisor) * 100 : 0
   const efficiencyAfterGrind = baseEfficiency + grindBonusPercent
 
   return {
@@ -649,23 +661,23 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const substats = rune.subStats.map(analyzeSubstat)
   const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
 
-  const currentEfficiency = barionEfficiency(rune.subStats)
-  const currentWeightedEfficiency = weightedEfficiency(rune.subStats)
+  const currentEfficiency = barionEfficiency(rune.subStats, quality)
+  const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality)
   const potentialEfficiency = calculatePotentialEfficiency(rune, quality)
 
-  // Max efficiency: 8 perfect rolls + 1 main = (8 + 1) / 9 * 100
-  const maxEfficiency = ((8 + 1) / BARION_DIVISOR) * 100
+  // Max efficiency: all events at max = 100%
+  const maxEfficiency = 100
 
   // Grind potential is based on the potential at +12 (you grind after +12)
-  const grindPotential = calculateGrindPotential(substats, potentialEfficiency)
+  const grindPotential = calculateGrindPotential(substats, potentialEfficiency, quality)
 
   // Calculate synergy (include innate stat for archetype matching)
   const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
   // For pre-+12 runes, use potential efficiency for tier (should we keep powering up?)
   // For +12+ runes, use weighted efficiency (current value of the rune)
-  const remaining = remainingRolls(quality, rune.level)
-  const efficiencyForTier = remaining > 0 ? potentialEfficiency : currentWeightedEfficiency
+  const isPreMax = rune.level < 12
+  const efficiencyForTier = isPreMax ? potentialEfficiency : currentWeightedEfficiency
 
   // Tier based on the appropriate efficiency metric
   const tier = getRecommendation(
@@ -701,8 +713,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const roundedGrindedEfficiency = Math.round(grindPotential.efficiencyAfterGrind * 100) / 100
   const grindGainValue = Math.round(Math.max(0, grindPotential.grindGain) * 100) / 100
 
-  // Potential efficiency: at +12 or above, no remaining rolls → potential = weighted (current)
-  const finalPotential = remaining <= 0 ? roundedWeighted : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
+  // Potential efficiency: at +12 or above, no remaining events → potential = current
+  const finalPotential = !isPreMax ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   return {
     currentEfficiency: roundedCurrent,
