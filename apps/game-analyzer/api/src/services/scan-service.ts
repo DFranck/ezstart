@@ -1,5 +1,6 @@
 import { recognize, summonersWarParser, nikkeParser, analyzeRune } from '@ezstart/ocr-sdk'
 import { getScanModel } from '../models/scan.js'
+import { ocrWithGemini } from './gemini-vision-service.js'
 import type { GameType, RuneData, ScanResult } from '@game-analyzer/types'
 
 /**
@@ -34,7 +35,33 @@ export async function scanImage(
 
     // 2. Parse with the appropriate game parser
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser
-    const parseResult = parser.parse(ocrResult)
+    let parseResult = parser.parse(ocrResult)
+
+    // 2b. Gemini Vision fallback if Tesseract result is weak
+    const needsFallback =
+      ocrResult.confidence < 70 ||
+      parseResult.data?.partial === true ||
+      (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+
+    if (needsFallback && gameType === 'summoners-war') {
+      console.log('[scan] Low confidence or missing stats, trying Gemini Vision fallback...')
+      const geminiText = await ocrWithGemini(imageBuffer)
+
+      if (geminiText) {
+        const geminiOcr = { text: geminiText, confidence: 95, regions: [] as { text: string; bbox: { x: number; y: number; width: number; height: number }; confidence: number }[] }
+        const geminiParse = parser.parse(geminiOcr)
+
+        const geminiSubCount = Array.isArray(geminiParse.data?.subStats) ? geminiParse.data.subStats.length : 0
+        const currentSubCount = Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0
+
+        if (geminiSubCount > currentSubCount) {
+          console.log('[scan] Gemini found more stats, using Gemini result')
+          parseResult = geminiParse
+          ocrResult.text = geminiText
+          ocrResult.confidence = 95
+        }
+      }
+    }
 
     const processingTimeMs = Date.now() - startTime
 
