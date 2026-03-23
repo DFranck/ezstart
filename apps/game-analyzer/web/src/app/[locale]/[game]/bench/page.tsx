@@ -125,6 +125,7 @@ export default function BenchPage() {
   const [masks, setMasks] = useState<MaskRect[]>(() => loadMasks(game))
   const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const [presetsSaved, setPresetsSaved] = useState(false)
+  const [zonesLocked, setZonesLocked] = useState(false)
   const { mutate: scan, data: scanResult, isPending } = useScan()
   const { mutate: saveConfig } = useSaveGameConfig(game)
 
@@ -353,6 +354,17 @@ export default function BenchPage() {
       </Div>
 
       <Div className="space-y-6">
+        {/* Lock/unlock toggle for zones and masks */}
+        <Div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZonesLocked(!zonesLocked)}
+          >
+            {zonesLocked ? `🔓 ${t('bench.unlockZones')}` : `🔒 ${t('bench.lockZones')}`}
+          </Button>
+        </Div>
+
         {/* Dual preview: zoom + full window with ROI */}
         <CapturePreview
           isCapturing={isCapturing}
@@ -371,6 +383,7 @@ export default function BenchPage() {
           onMasksChange={handleMasksChange}
           onMaskAdd={handleMaskAdd}
           onMaskRemove={handleMaskRemove}
+          zonesLocked={zonesLocked}
         />
 
         {/* Rescan button */}

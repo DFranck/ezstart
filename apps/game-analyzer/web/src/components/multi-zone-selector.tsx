@@ -37,9 +37,11 @@ interface MultiZoneSelectorProps {
   initialZones?: ZoneConfig[]
   /** When provided, zone percentages are mapped within this ROI inside the full container */
   parentRoi?: RoiRect
+  /** When true, zones are visible but not interactive (no drag/resize) */
+  locked?: boolean
 }
 
-export function MultiZoneSelector({ onChange, initialZones, parentRoi }: MultiZoneSelectorProps) {
+export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = false }: MultiZoneSelectorProps) {
   const t = useTranslations()
   const [zones, setZones] = useState<ZoneConfig[]>(initialZones ?? DEFAULT_ZONES)
 
@@ -282,15 +284,15 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi }: MultiZo
             height: `${displayHeight}%`,
             border: `2px solid ${zone.color}`,
             backgroundColor: `${zone.color}26`, // ~15% opacity
-            cursor: 'move',
-            pointerEvents: 'auto',
+            cursor: locked ? 'default' : 'move',
+            pointerEvents: locked ? 'none' : 'auto',
             boxSizing: 'border-box',
             touchAction: 'none',
             overflow: 'visible',
             zIndex: 55,
           }}
-          onMouseDown={(e) => handleMouseDown(e, zone.name, 'move')}
-          onTouchStart={(e) => handleTouchStart(e, zone.name, 'move')}
+          onMouseDown={locked ? undefined : (e) => handleMouseDown(e, zone.name, 'move')}
+          onTouchStart={locked ? undefined : (e) => handleTouchStart(e, zone.name, 'move')}
         >
           {/* Zone label */}
           <span
@@ -312,8 +314,8 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi }: MultiZo
             {t(zone.label)}
           </span>
 
-          {/* Resize handles (corners + edges) */}
-          {allHandles.map((handle) => (
+          {/* Resize handles (corners + edges) — hidden when locked */}
+          {!locked && allHandles.map((handle) => (
             <div
               key={handle}
               style={getHandleStyle(handle, zone.color)}

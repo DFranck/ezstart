@@ -27,6 +27,10 @@ interface CapturePreviewProps {
   onMaskAdd?: () => void
   onMaskRemove?: (id: string) => void
   showTabs?: boolean
+  /** When true, zones and masks are visible but not interactive */
+  zonesLocked?: boolean
+  /** Background color for mask rectangles (default: red) */
+  maskColor?: string
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -53,6 +57,8 @@ export function CapturePreview({
   onMaskAdd,
   onMaskRemove,
   showTabs = false,
+  zonesLocked = false,
+  maskColor,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -365,6 +371,7 @@ export function CapturePreview({
           <MultiZoneSelector
             onChange={onZonesChange}
             initialZones={zones}
+            locked={zonesLocked}
           />
         )}
         {/* Blackout mask overlay on zoom view */}
@@ -374,6 +381,8 @@ export function CapturePreview({
             onChange={onMasksChange}
             onAdd={onMaskAdd}
             onRemove={onMaskRemove}
+            locked={zonesLocked}
+            maskColor={maskColor}
           />
         )}
         {/* Zoom indicator + buttons */}
@@ -422,6 +431,7 @@ export function CapturePreview({
             onChange={onZonesChange}
             initialZones={zones}
             parentRoi={roi}
+            locked={zonesLocked}
           />
         )}
         {/* Blackout mask overlay on full view — positions are relative to the ROI */}
@@ -432,6 +442,8 @@ export function CapturePreview({
             onAdd={onMaskAdd}
             onRemove={onMaskRemove}
             parentRoi={roi}
+            locked={zonesLocked}
+            maskColor={maskColor}
           />
         )}
       </div>

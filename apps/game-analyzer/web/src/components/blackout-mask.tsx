@@ -18,6 +18,10 @@ interface BlackoutMaskProps {
   onRemove: (id: string) => void
   /** When provided, mask percentages are mapped within this ROI inside the full container */
   parentRoi?: { x: number; y: number; width: number; height: number }
+  /** When true, masks are visible but not interactive (no drag/resize/add/remove) */
+  locked?: boolean
+  /** Background color for mask rectangles (default: 'rgba(255, 0, 0, 1)') */
+  maskColor?: string
 }
 
 type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
@@ -28,7 +32,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi }: BlackoutMaskProps) {
+export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, locked = false, maskColor = 'rgba(255, 0, 0, 1)' }: BlackoutMaskProps) {
   const t = useTranslations('bench')
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -261,66 +265,70 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi }: Bl
               top: `${displayTop}%`,
               width: `${displayWidth}%`,
               height: `${displayHeight}%`,
-              backgroundColor: 'rgba(255, 0, 0, 1.0)',
-              border: '2px dashed rgba(255, 255, 255, 0.8)',
-              cursor: 'move',
-              pointerEvents: 'auto',
+              backgroundColor: maskColor,
+              border: locked ? 'none' : '2px dashed rgba(255, 255, 255, 0.8)',
+              cursor: locked ? 'default' : 'move',
+              pointerEvents: locked ? 'none' : 'auto',
               boxSizing: 'border-box',
               touchAction: 'none',
               overflow: 'visible',
               zIndex: 70,
             }}
-            onMouseDown={(e) => handleMouseDown(e, mask.id, 'move')}
-            onTouchStart={(e) => handleTouchStart(e, mask.id, 'move')}
+            onMouseDown={locked ? undefined : (e) => handleMouseDown(e, mask.id, 'move')}
+            onTouchStart={locked ? undefined : (e) => handleTouchStart(e, mask.id, 'move')}
           >
-            {/* Label */}
-            <span
-              style={{
-                position: 'absolute',
-                top: 2,
-                left: 4,
-                fontSize: 9,
-                color: 'rgba(255, 255, 255, 0.8)',
-                pointerEvents: 'none',
-                userSelect: 'none',
-                lineHeight: 1,
-              }}
-            >
-              Mask {idx + 1}
-            </span>
+            {/* Label — hidden when locked */}
+            {!locked && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  left: 4,
+                  fontSize: 9,
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                  lineHeight: 1,
+                }}
+              >
+                Mask {idx + 1}
+              </span>
+            )}
 
-            {/* Remove button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove(mask.id)
-              }}
-              style={{
-                position: 'absolute',
-                top: -6,
-                right: -6,
-                width: 16,
-                height: 16,
-                borderRadius: '50%',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                border: 'none',
-                fontSize: 10,
-                lineHeight: '16px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                pointerEvents: 'auto',
-                zIndex: 75,
-                padding: 0,
-              }}
-              title={t('removeMask')}
-            >
-              ×
-            </button>
+            {/* Remove button — hidden when locked */}
+            {!locked && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemove(mask.id)
+                }}
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -6,
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  fontSize: 10,
+                  lineHeight: '16px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  pointerEvents: 'auto',
+                  zIndex: 75,
+                  padding: 0,
+                }}
+                title={t('removeMask')}
+              >
+                ×
+              </button>
+            )}
 
-            {/* Resize handles (corners + edges) */}
-            {allHandles.map((handle) => (
+            {/* Resize handles (corners + edges) — hidden when locked */}
+            {!locked && allHandles.map((handle) => (
               <div
                 key={handle}
                 style={getHandleStyle(handle)}
@@ -333,29 +341,31 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi }: Bl
         })}
       </div>
 
-      {/* Add mask button — positioned below the overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 8,
-          left: 8,
-          zIndex: 80,
-          pointerEvents: 'auto',
-        }}
-      >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onAdd()
+      {/* Add mask button — positioned below the overlay, hidden when locked */}
+      {!locked && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            left: 8,
+            zIndex: 80,
+            pointerEvents: 'auto',
           }}
-          className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white text-xs rounded-md px-2 py-1 transition-colors"
-          title={t('addMask')}
         >
-          <span className="text-sm font-bold">+</span>
-          <span>{t('masks')}</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onAdd()
+            }}
+            className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white text-xs rounded-md px-2 py-1 transition-colors"
+            title={t('addMask')}
+          >
+            <span className="text-sm font-bold">+</span>
+            <span>{t('masks')}</span>
+          </button>
+        </div>
+      )}
     </>
   )
 }

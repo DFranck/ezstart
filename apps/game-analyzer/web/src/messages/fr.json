@@ -68,6 +68,8 @@
     "masks": "Zones masquées",
     "addMask": "Ajouter un masque",
     "removeMask": "Supprimer",
+    "lockZones": "Verrouiller les zones",
+    "unlockZones": "Déverrouiller les zones",
     "zones": "Zones de lecture",
     "zone": {
       "setSlot": "Set/Slot",
