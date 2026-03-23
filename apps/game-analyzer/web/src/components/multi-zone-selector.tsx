@@ -44,6 +44,7 @@ interface MultiZoneSelectorProps {
 export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = false }: MultiZoneSelectorProps) {
   const t = useTranslations()
   const [zones, setZones] = useState<ZoneConfig[]>(initialZones ?? DEFAULT_ZONES)
+  const [selectedZone, setSelectedZone] = useState<string | null>(null)
 
   const dragRef = useRef<{
     zoneName: ZoneName
@@ -293,6 +294,7 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
           }}
           onMouseDown={locked ? undefined : (e) => handleMouseDown(e, zone.name, 'move')}
           onTouchStart={locked ? undefined : (e) => handleTouchStart(e, zone.name, 'move')}
+          onClick={() => !locked && setSelectedZone(zone.name === selectedZone ? null : zone.name)}
         >
           {/* Zone label */}
           <span
@@ -323,6 +325,64 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
               onTouchStart={(e) => handleTouchStart(e, zone.name, 'resize', handle)}
             />
           ))}
+
+          {/* Inline position/size editor */}
+          {selectedZone === zone.name && !locked && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              marginTop: 4,
+              background: 'rgba(0,0,0,0.95)',
+              padding: '6px 8px',
+              borderRadius: 6,
+              display: 'flex',
+              gap: 6,
+              zIndex: 200,
+              fontSize: 11,
+              color: 'white',
+              alignItems: 'center',
+              whiteSpace: 'nowrap',
+            }}>
+              <span style={{ fontWeight: 'bold', marginRight: 4 }}>{t(zone.label)}</span>
+              {(['x', 'y', 'width', 'height'] as const).map(prop => (
+                <label key={prop} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {prop[0].toUpperCase()}:
+                  <input
+                    type="number"
+                    value={Math.round(zone.rect[prop])}
+                    onChange={e => {
+                      const newRect = { ...zone.rect, [prop]: Number(e.target.value) }
+                      const updated = zones.map(z => z.name === zone.name ? { ...z, rect: newRect } : z)
+                      setZones(updated)
+                      onChangeRef.current(updated)
+                    }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
+                    style={{ width: 42, background: '#333', color: 'white', border: '1px solid #555', borderRadius: 3, padding: '2px 4px', fontSize: 11 }}
+                    min={0}
+                    max={100}
+                  />
+                </label>
+              ))}
+              {zone.name.startsWith('sub') && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const currentRect = zone.rect
+                    const updated = zones.map(z =>
+                      z.name.startsWith('sub') ? { ...z, rect: { ...z.rect, width: currentRect.width, height: currentRect.height } } : z
+                    )
+                    setZones(updated)
+                    onChangeRef.current(updated)
+                  }}
+                  style={{ background: '#4a5', color: 'white', border: 'none', borderRadius: 3, padding: '2px 6px', fontSize: 10, cursor: 'pointer' }}
+                >
+                  → Tous subs
+                </button>
+              )}
+            </div>
+          )}
         </div>
         )
       })}
