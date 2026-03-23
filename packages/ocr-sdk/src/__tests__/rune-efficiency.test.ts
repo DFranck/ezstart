@@ -950,4 +950,42 @@ describe('rune-efficiency', () => {
       expect(result.synergyBonus).toBe(4) // THREE_WITH_ROLLS, not PERFECT_4
     })
   })
+
+  describe('potential efficiency for pre-+12 runes', () => {
+    it('+0 Hero rune has potential < 80% (not 100%)', () => {
+      const rune = makeRune({
+        level: 0,
+        quality: 'hero',
+        subStats: [
+          { type: 'spd', value: 5 },
+          { type: 'cr', value: 5 },
+          { type: 'hp%', value: 6 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      // A hero rune at +0 with 3 mediocre subs cannot reach 100%
+      expect(result.potentialEfficiency).toBeLessThan(90)
+      expect(result.potentialEfficiency).toBeGreaterThan(0)
+    })
+
+    it('+0 Legend rune with 4 perfect subs reaches high potential but uses Barion formula', () => {
+      const rune = makeRune({
+        level: 0,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 6 },
+          { type: 'cr', value: 6 },
+          { type: 'cd', value: 7 },
+          { type: 'atk%', value: 8 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      // Perfect +0 legend can reach 100% potential (all remaining rolls at max)
+      expect(result.potentialEfficiency).toBeCloseTo(100, 0)
+    })
+  })
 })

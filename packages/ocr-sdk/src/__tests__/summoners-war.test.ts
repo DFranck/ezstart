@@ -847,4 +847,87 @@ describe('summonersWarParser', () => {
       expect(result.errors).toContain('Could not detect rune set')
     })
   })
+
+  describe('slot 2/4/6 main stat detection', () => {
+    it('slot 6 with main stat RES% does NOT have ATK flat as main', () => {
+      const text = [
+        'Will Rune (6)',
+        '+12',
+        'Legend',
+        'Resistance +51%',
+        'SPD +12',
+        'HP +8%',
+        'CRI Rate +11%',
+        'ATK +5%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'will',
+        slot: 6,
+        mainStat: { type: 'res', value: 51 },
+      })
+      // ATK flat should NOT be the main stat
+      expect(result.data.mainStat).not.toMatchObject({ type: 'atk' })
+    })
+
+    it('slot 2 with main stat SPD does NOT have ATK flat as main', () => {
+      const text = [
+        'Swift Rune (2)',
+        '+15',
+        'Legend',
+        'SPD +42',
+        'HP +15%',
+        'ATK +8%',
+        'DEF +20',
+        'Accuracy +6%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'swift',
+        slot: 2,
+        mainStat: { type: 'spd', value: 42 },
+      })
+      expect(result.data.mainStat).not.toMatchObject({ type: 'atk' })
+    })
+
+    it('slot 4 with high CD% detects main stat correctly', () => {
+      const text = [
+        'Rage Rune (4)',
+        '+12',
+        'HP +8%',
+        'CRI Dmg +80%',
+        'ATK +5%',
+        'SPD +6',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      // CD +80% is clearly the main stat (substats max 35%)
+      expect(result.data).toMatchObject({
+        mainStat: { type: 'cd', value: 80 },
+      })
+    })
+  })
+
+  describe('partial flag propagation', () => {
+    it('legend +12 with only 2 substats has partial = true', () => {
+      // Slot 2 with SPD main stat, only 2 substats visible
+      const text = 'Swift Rune (2) +12 Legend SPD +42 HP +8% ATK +5%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[]; partial?: boolean }
+      // Legend rune at +12 should have 4 substats, but only 2 are detected
+      expect(data.subStats.length).toBeLessThan(4)
+      expect(data.partial).toBe(true)
+    })
+  })
 })

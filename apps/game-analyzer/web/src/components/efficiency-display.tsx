@@ -91,10 +91,10 @@ export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayPro
 
         {/* Potential and grind projections */}
         <Div className="space-y-1">
-          {analysis.maxEfficiency !== undefined && (
+          {analysis.potentialEfficiency !== undefined && (
             <Div className="flex items-center justify-between text-sm">
               <P className="text-muted-foreground">{tRune('potential12')}</P>
-              <P className="font-medium">{analysis.maxEfficiency}%</P>
+              <P className="font-medium">{analysis.potentialEfficiency}%</P>
             </Div>
           )}
           {analysis.grindedEfficiency !== undefined && (

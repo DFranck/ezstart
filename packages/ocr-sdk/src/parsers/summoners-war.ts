@@ -606,12 +606,34 @@ function separateMainAndSubs(
     return { mainStat, subStats, innateStat }
   }
 
-  // Slots 2, 4, 6 or unknown slot: first stat is main
+  // Slots 2, 4, 6 or unknown slot: main stat detection
   if (allStats.length === 0) return { mainStat: null, subStats: [] }
 
-  const mainStat = { type: allStats[0]!.type, value: allStats[0]!.value }
+  // For slots 2/4/6 (or unknown), detect main stat by high value:
+  // Main stats at +12/+15 have values that substats can never reach.
+  // - % stats (hp%, atk%, def%, cr, cd, res, acc): main >= 40, substats max ~40
+  // - SPD: main >= 30 (e.g. +39 at +12, +42 at +15), substats max 30
+  // - Flat HP: main >= 1000 (substats max 1875 but main is 1680-2448)
+  let mainStatIndex = 0 // Default: first stat
+
+  const isHighValueMainStat = (s: RuneStat): boolean => {
+    const { type, value } = s
+    if (type === 'spd' && value >= 30) return true
+    if ((type === 'hp%' || type === 'atk%' || type === 'def%' || type === 'cr' || type === 'cd' || type === 'res' || type === 'acc') && value >= 40) return true
+    if (type === 'hp' && value >= 1000) return true
+    if ((type === 'atk' || type === 'def') && value >= 100) return true
+    return false
+  }
+
+  // Look for a high-value stat that's clearly a main stat
+  const highValueIdx = allStats.findIndex(s => isHighValueMainStat(s))
+  if (highValueIdx >= 0) {
+    mainStatIndex = highValueIdx
+  }
+
+  const mainStat = { type: allStats[mainStatIndex]!.type, value: allStats[mainStatIndex]!.value }
   let subStats = allStats
-    .slice(1)
+    .filter((_, idx) => idx !== mainStatIndex)
     .map(({ type, value }) => ({ type, value }))
     .filter(isValidSubstatValue)
 
