@@ -100,6 +100,13 @@ function mergeBenchResults(
     if (!mergedData.innateStat) mergedData.innateStat = d.innateStat
   }
 
+  // Remove innate from merged substats if present (some runs may not have separated it)
+  if (mergedData.innateStat) {
+    const inn = mergedData.innateStat as { type: string; value: number }
+    mergedData.subStats = (mergedData.subStats as Array<{ type: string; value: number }>)
+      .filter(s => !(s.type === inn.type && s.value === inn.value))
+  }
+
   // Confidence: max confidence among results that found the most substats
   const maxSubs = Math.max(...successful.map(r => ((r.parse.data as any).subStats || []).length))
   const bestResults = successful.filter(r => ((r.parse.data as any).subStats || []).length === maxSubs)
@@ -462,7 +469,12 @@ export async function scanImage(
             if (stat) subStats.push(stat)
           }
         }
-        zoneParsed.subStats = subStats
+        // Remove innate from substats if it was also captured in a sub zone (ROI overlap)
+        const innate = zoneParsed.innateStat
+        const filteredSubStats = innate
+          ? subStats.filter(s => !(s.type === innate.type && s.value === innate.value))
+          : subStats
+        zoneParsed.subStats = filteredSubStats
 
         const combinedConfidence = Math.round(zoneConfidenceSum / zoneConfidenceCount)
         const combinedText = Object.entries(zoneMap).map(([k, v]) => `[${k}] ${v.text}`).join('\n')
