@@ -468,11 +468,6 @@ export async function scanImage(
         const combinedText = Object.entries(zoneMap).map(([k, v]) => `[${k}] ${v.text}`).join('\n')
         const zoneOcr: OcrResult = { text: combinedText, confidence: combinedConfidence, regions: [] }
 
-        // Also run full parser on combined text for comparison
-        const fullTexts = Object.values(zoneMap).map(v => v.text).join('\n')
-        const fullZoneOcr: OcrResult = { text: fullTexts, confidence: combinedConfidence, regions: [] }
-        const fullZoneParse = parser.parse(fullZoneOcr)
-
         // Build zone-based parse result
         const zoneParseResult: ParsedResult = {
           success: subStats.length > 0 || !!zoneParsed.mainStat,
@@ -489,22 +484,30 @@ export async function scanImage(
         }
 
         const zoneSubCount = subStats.length
-        const fullZoneSubCount = fullZoneParse.success ? ((fullZoneParse.data as any)?.subStats || []).length : 0
         const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
 
-        console.log(`[scan] Zone individual parse: ${zoneSubCount} subs, full parser on zones: ${fullZoneSubCount}, current: ${currentSubCount}`)
+        console.log(`[scan] Zone individual parse: ${zoneSubCount} subs (innate: ${zoneParsed.innateStat ? 'yes' : 'no'}), current global: ${currentSubCount}`)
 
-        // Pick the best result: zone individual, full parser on zones, or current
-        const candidates = [
-          { ocr: zoneOcr, parse: zoneParseResult, subs: zoneSubCount, conf: combinedConfidence, label: 'zone-individual' },
-          { ocr: fullZoneOcr, parse: fullZoneParse, subs: fullZoneSubCount, conf: combinedConfidence, label: 'zone-fullparser' },
-          { ocr: ocrResult, parse: parseResult, subs: currentSubCount, conf: ocrResult.confidence, label: 'standard' },
-        ].sort((a, b) => b.subs - a.subs || b.conf - a.conf)
+        // Zone-based parsing is PRIORITY when it found meaningful data.
+        // The global parser mixes innate into substats — zones keep them separate.
+        if (zoneParseResult.success) {
+          // Fill missing fields from global parse result (grade, set, etc.)
+          const zoneData = zoneParseResult.data as Record<string, any>
+          const globalData = parseResult.success ? (parseResult.data as Record<string, any>) : null
 
-        const best = candidates[0]!
-        ocrResult = best.ocr
-        parseResult = best.parse
-        console.log(`[scan] Using ${best.label} result (${best.subs} subs, ${best.conf}% conf)`)
+          if (!zoneData.set && globalData?.set) zoneData.set = globalData.set
+          if (!zoneData.slot && globalData?.slot) zoneData.slot = globalData.slot
+          if (zoneData.level == null && globalData?.level != null) zoneData.level = globalData.level
+          if (!zoneData.grade && globalData?.grade) zoneData.grade = globalData.grade
+          if (!zoneData.quality && globalData?.quality) zoneData.quality = globalData.quality
+          if (!zoneData.mainStat && globalData?.mainStat) zoneData.mainStat = globalData.mainStat
+
+          ocrResult = zoneOcr
+          parseResult = zoneParseResult
+          console.log(`[scan] Using zone-individual result (${zoneSubCount} subs, innate separated, ${combinedConfidence}% conf)`)
+        } else {
+          console.log(`[scan] Zone parse failed, falling back to global result (${currentSubCount} subs)`)
+        }
       }
     }
 
