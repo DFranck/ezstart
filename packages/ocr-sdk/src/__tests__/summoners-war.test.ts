@@ -108,6 +108,8 @@ describe('summonersWarParser', () => {
       expect(result.success).toBe(true)
       expect(result.data).toMatchObject({
         set: 'endure',
+        slot: 1,
+        // Slot 1 → hardcoded main stat ATK flat
         mainStat: { type: 'atk', value: 118 },
       })
 
@@ -132,6 +134,7 @@ describe('summonersWarParser', () => {
       expect(result.data).toMatchObject({
         set: 'despair',
         slot: 1,
+        // Slot 1 → hardcoded main stat ATK flat
         mainStat: { type: 'atk', value: 118 },
       })
 
@@ -158,6 +161,7 @@ describe('summonersWarParser', () => {
       expect(['rage', 'cruel']).toContain(result.data.set)
       expect(result.data).toMatchObject({
         slot: 1,
+        // Slot 1 → hardcoded main stat ATK flat
         mainStat: { type: 'atk', value: 118 },
       })
 
@@ -182,6 +186,7 @@ describe('summonersWarParser', () => {
       expect(result.success).toBe(true)
       expect(result.data).toMatchObject({
         set: 'violent',
+        // Slot 1 → hardcoded main stat ATK flat
         mainStat: { type: 'atk', value: 160 },
       })
 
@@ -193,6 +198,276 @@ describe('summonersWarParser', () => {
         expect.arrayContaining([
           expect.objectContaining({ type: 'acc', value: 8 }),
           expect.objectContaining({ type: 'cr', value: 9 }),
+        ]),
+      )
+    })
+  })
+
+  describe('hardcoded main stats for fixed slots', () => {
+    it('slot 1 → main stat is always ATK flat', () => {
+      const text = 'Focus Rune (1) +12 Legend Accuracy +27% HP +194 ATK +13% CRI Rate +12%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'focus',
+        slot: 1,
+        mainStat: { type: 'atk', value: 118 }, // Hardcoded for slot 1 +12
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      // Accuracy should be a substat, NOT main stat
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 27 }),
+          expect.objectContaining({ type: 'atk%', value: 13 }),
+          expect.objectContaining({ type: 'cr', value: 12 }),
+        ]),
+      )
+      // ATK flat should NOT appear in substats (it's the main stat)
+      const atkFlatSubs = data.subStats.filter((s: { type: string }) => s.type === 'atk')
+      expect(atkFlatSubs).toHaveLength(0)
+    })
+
+    it('slot 3 → main stat is always DEF flat', () => {
+      const text = [
+        'Despair Rune (3)',
+        '+12',
+        'Legend',
+        'DEF +118',
+        'SPD +18',
+        'HP +12%',
+        'ATK +8%',
+        'CRI Rate +6%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'despair',
+        slot: 3,
+        mainStat: { type: 'def', value: 118 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      // DEF flat should NOT appear in substats
+      const defFlatSubs = data.subStats.filter((s: { type: string }) => s.type === 'def')
+      expect(defFlatSubs).toHaveLength(0)
+    })
+
+    it('slot 5 → main stat is always HP flat', () => {
+      const text = [
+        'Violent Rune (5)',
+        '+15',
+        'HP +2448',
+        'SPD +20',
+        'CRI Rate +12%',
+        'ATK +8%',
+        'DEF +15%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'violent',
+        slot: 5,
+        mainStat: { type: 'hp', value: 2448 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      // HP flat should NOT appear in substats
+      const hpFlatSubs = data.subStats.filter((s: { type: string }) => s.type === 'hp')
+      expect(hpFlatSubs).toHaveLength(0)
+    })
+
+    it('slot 1 without ATK in text → hardcodes ATK value from level', () => {
+      const text = 'Swift Rune (1) +15 Legend CRI Rate +12% SPD +20 HP +8%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        slot: 1,
+        mainStat: { type: 'atk', value: 160 }, // +15 → 160
+      })
+    })
+  })
+
+  describe('multiline stat detection', () => {
+    it('detects SPD on one line with +value on next line', () => {
+      const text = [
+        'Focus Rune (1)',
+        '+12',
+        'Legend',
+        'SPD 51',        // SPD name on this line, 51 is noise
+        '2 +6',          // +6 is the actual SPD value
+        'Accuracy +27%',
+        'HP +194',
+        'ATK +13%',
+        'CRI Rate +12%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+
+      // SPD +6 should be found via multiline detection
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'spd', value: 6 }),
+        ]),
+      )
+    })
+  })
+
+  describe('fuzzy stat name matching', () => {
+    it('handles "Acturaty" as Accuracy', () => {
+      const text = 'Violent Rune (2) SPD +42 Acturaty +8% HP +12%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 8 }),
+        ]),
+      )
+    })
+
+    it('handles "CRIRate" (no space) via stat patterns', () => {
+      const text = 'Swift Rune (2) SPD +42 CRIRate +12% HP +8%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'cr', value: 12 }),
+        ]),
+      )
+    })
+
+    it('handles "CRIDmg" (no space) via stat patterns', () => {
+      const text = 'Rage Rune (4) CRI Dmg +80% CRIDmg +7% ATK +12%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'cd', value: 7 }),
+        ]),
+      )
+    })
+
+    it('handles "Axes" as ATK', () => {
+      const text = 'Swift Rune (2) SPD +42 Axes +12% HP +8%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'atk%', value: 12 }),
+        ]),
+      )
+    })
+  })
+
+  describe('substat value validation', () => {
+    it('rejects SPD 51 as out of range (max 30)', () => {
+      // If OCR reads SPD +51, it should be rejected
+      const text = 'Violent Rune (2) SPD +42 HP +8% ATK +5%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      // SPD 42 is the main stat (slot 2), not a substat
+      const spdSubs = data.subStats.filter((s: { type: string }) => s.type === 'spd')
+      expect(spdSubs).toHaveLength(0)
+    })
+
+    it('keeps valid substat values and rejects out-of-range ones', () => {
+      const text = 'Will Rune (4) CRI Dmg +80% SPD +5 CRI Rate +45% HP +8%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      // CRI Rate +45% is out of range (max 30) → rejected
+      const crSubs = data.subStats.filter((s: { type: string }) => s.type === 'cr')
+      expect(crSubs).toHaveLength(0)
+      // SPD +5 is valid
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'spd', value: 5 }),
+        ]),
+      )
+    })
+  })
+
+  describe('real noisy OCR — Focus Rune example', () => {
+    it('parses the full noisy Focus Rune OCR text correctly', () => {
+      const text = [
+        '1% +12 Quick Focus Rune (1) v',
+        'yg Axes Legend',
+        'Ce SPD 51',
+        '2 +6',
+        'Accuracy +27%',
+        'HP +194',
+        'ATK +13%',
+        'CRI Rate +12%',
+        '2 set: Acturaty -20%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'focus',
+        slot: 1,
+        level: 12,
+        quality: 'legend',
+        // Slot 1 → main stat is ATK flat (hardcoded)
+        mainStat: { type: 'atk', value: 118 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[] }
+
+      // Accuracy +27% should be a substat (not main stat)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 27 }),
+        ]),
+      )
+
+      // ATK +13% should be a substat (ATK% is valid sub for slot 1)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'atk%', value: 13 }),
+        ]),
+      )
+
+      // CRI Rate +12% should be a substat
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'cr', value: 12 }),
+        ]),
+      )
+
+      // SPD +6 from multiline detection
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'spd', value: 6 }),
         ]),
       )
     })
@@ -289,6 +564,7 @@ describe('summonersWarParser', () => {
         set: 'violent',
         slot: 1,
         level: 15,
+        // Slot 1 → hardcoded ATK flat main stat (118 found in text, used as-is)
         mainStat: { type: 'atk', value: 118 },
       })
     })
@@ -317,7 +593,7 @@ describe('summonersWarParser', () => {
         'Despair Rune (3)',
         '+12',
         'Legend',
-        'DEF +160',
+        'DEF +118',
         'SPD +18',
         'HP +12%',
         'ATK +8%',
@@ -329,7 +605,10 @@ describe('summonersWarParser', () => {
       expect(result.success).toBe(true)
       expect(result.data).toMatchObject({
         set: 'despair',
+        slot: 3,
         grade: 6,
+        // Slot 3 → hardcoded DEF flat main stat
+        mainStat: { type: 'def', value: 118 },
       })
     })
   })

@@ -32,6 +32,57 @@ interface RuneStat {
 
 type RuneQuality = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
 
+// --- Fixed main stats for slots 1, 3, 5 (always the same in SW) ---
+
+const FIXED_MAIN_STATS: Record<number, { type: StatType; values: number[] }> = {
+  1: { type: 'atk', values: [118, 160] },   // ATK flat
+  3: { type: 'def', values: [118, 160] },   // DEF flat
+  5: { type: 'hp', values: [1680, 2448] },  // HP flat
+}
+
+// --- Substat value ranges for 6★ runes (min-max including grinds/rolls) ---
+
+const SUBSTAT_RANGES: Record<StatType, { min: number; max: number }> = {
+  'hp':   { min: 100, max: 1875 },
+  'hp%':  { min: 4, max: 40 },
+  'atk':  { min: 8, max: 100 },
+  'atk%': { min: 4, max: 40 },
+  'def':  { min: 8, max: 100 },
+  'def%': { min: 4, max: 40 },
+  'spd':  { min: 1, max: 30 },
+  'cr':   { min: 3, max: 30 },
+  'cd':   { min: 4, max: 35 },
+  'res':  { min: 4, max: 40 },
+  'acc':  { min: 4, max: 40 },
+}
+
+// --- Fuzzy stat name aliases (handles OCR misreads) ---
+
+const STAT_ALIASES: Record<string, StatType> = {
+  'accuracy': 'acc',
+  'acturaty': 'acc',
+  'accuraty': 'acc',
+  'acc': 'acc',
+  'resistance': 'res',
+  'res': 'res',
+  'cri rate': 'cr',
+  'crirate': 'cr',
+  'crit rate': 'cr',
+  'critrate': 'cr',
+  'cri dmg': 'cd',
+  'cridmg': 'cd',
+  'crit dmg': 'cd',
+  'critdmg': 'cd',
+  'spd': 'spd',
+  'speed': 'spd',
+  'hp': 'hp',
+  'atk': 'atk',
+  'attack': 'atk',
+  'axes': 'atk',
+  'def': 'def',
+  'defense': 'def',
+}
+
 // --- Mappings ---
 
 /** All valid rune sets, sorted longest-first for matching priority */
@@ -45,9 +96,18 @@ const RUNE_SETS: RuneSet[] = [
 /** Stat patterns sorted longest-first to avoid partial matches */
 const STAT_PATTERNS: [RegExp, StatType][] = [
   [/cri(?:tical)?\s*rate/i, 'cr'],
+  [/crit\s*rate/i, 'cr'],
+  [/crirate/i, 'cr'],
   [/cri(?:tical)?\s*dmg/i, 'cd'],
+  [/crit\s*dmg/i, 'cd'],
+  [/cridmg/i, 'cd'],
   [/resistance/i, 'res'],
   [/accuracy/i, 'acc'],
+  [/acturaty/i, 'acc'],
+  [/accuraty/i, 'acc'],
+  [/axes/i, 'atk'],
+  [/attack/i, 'atk'],
+  [/speed/i, 'spd'],
   [/atk/i, 'atk'],
   [/def/i, 'def'],
   [/hp/i, 'hp'],
@@ -76,6 +136,21 @@ function normalizeOcrText(raw: string): string {
     .replace(/\s+/g, ' ')
     .replace(/\b(temporarily|tempo!)\b/gi, '')
     .trim()
+}
+
+/**
+ * Preserve line structure for multiline stat detection.
+ * Returns cleaned lines (trim, remove noise chars, but keep line separation).
+ */
+function toCleanLines(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map(line => line
+      .replace(/[|»©€×]/g, '')
+      .replace(/\b(temporarily|tempo!)\b/gi, '')
+      .trim()
+    )
+    .filter(line => line.length > 0)
 }
 
 /**
@@ -145,6 +220,76 @@ function extractAllStats(text: string): (RuneStat & { _index: number })[] {
   stats.sort((a, b) => a._index - b._index)
 
   return stats
+}
+
+/**
+ * Multiline stat extraction: detect stat names on one line with value on next line.
+ *
+ * OCR sometimes splits like:
+ *   "SPD 51"    (51 is noise — position/slot number)
+ *   "2 +6"      (+6 is the actual value)
+ *
+ * Or:
+ *   "Ce SPD 51"
+ *
+ * Strategy: look for stat name without +VALUE on a line, then check next line for +N.
+ */
+function extractMultilineStats(lines: string[]): RuneStat[] {
+  const multilineStats: RuneStat[] = []
+
+  // All known stat name patterns for detection
+  const statNamePatterns: [RegExp, StatType][] = [
+    [/cri(?:tical)?\s*rate/i, 'cr'],
+    [/crit\s*rate/i, 'cr'],
+    [/crirate/i, 'cr'],
+    [/cri(?:tical)?\s*dmg/i, 'cd'],
+    [/crit\s*dmg/i, 'cd'],
+    [/cridmg/i, 'cd'],
+    [/resistance/i, 'res'],
+    [/accuracy/i, 'acc'],
+    [/acturaty/i, 'acc'],
+    [/accuraty/i, 'acc'],
+    [/axes/i, 'atk'],
+    [/attack/i, 'atk'],
+    [/speed/i, 'spd'],
+    [/\batk\b/i, 'atk'],
+    [/\bdef\b/i, 'def'],
+    [/\bhp\b/i, 'hp'],
+    [/\bspd\b/i, 'spd'],
+  ]
+
+  for (let i = 0; i < lines.length - 1; i++) {
+    const line = lines[i]!
+    const nextLine = lines[i + 1]!
+
+    for (const [namePattern, baseType] of statNamePatterns) {
+      // Check if this line has a stat name but NOT a proper +VALUE on same line
+      const hasStatName = namePattern.test(line)
+      const hasValueOnSameLine = new RegExp(
+        `${namePattern.source}\\s*[+\\-]\\s*\\d+`,
+        'i',
+      ).test(line)
+
+      if (hasStatName && !hasValueOnSameLine) {
+        // Check next line for a +N value
+        const valueMatch = nextLine.match(/[+\-]\s*(\d+)\s*(%?)/)
+        if (valueMatch) {
+          const value = parseInt(valueMatch[1]!, 10)
+          const isPercent = valueMatch[2] === '%'
+
+          let statType: StatType = baseType
+          if (isPercent && (baseType === 'hp' || baseType === 'atk' || baseType === 'def')) {
+            statType = `${baseType}%` as StatType
+          }
+
+          multilineStats.push({ type: statType, value })
+          break // Only match one stat per line
+        }
+      }
+    }
+  }
+
+  return multilineStats
 }
 
 /**
@@ -251,7 +396,7 @@ function parseLevel(text: string, setIndex: number): number | null {
     // Check this isn't a stat value (stats are preceded by stat names)
     const idx = match.index!
     const before = text.substring(Math.max(0, idx - 15), idx).toLowerCase()
-    const isAfterStat = /(?:atk|def|hp|spd|rate|dmg|resistance|accuracy)\s*$/i.test(before)
+    const isAfterStat = /(?:atk|def|hp|spd|rate|dmg|resistance|accuracy|acturaty|accuraty|axes)\s*$/i.test(before)
     if (!isAfterStat && num >= 0 && num <= 15) return num
   }
 
@@ -289,34 +434,78 @@ function parseLevel(text: string, setIndex: number): number | null {
 }
 
 /**
+ * Validate a substat value against known ranges for 6★ runes.
+ * Returns true if the value is within a plausible range.
+ */
+function isValidSubstatValue(stat: RuneStat): boolean {
+  const range = SUBSTAT_RANGES[stat.type]
+  if (!range) return true // Unknown stat type, accept
+  return stat.value >= range.min && stat.value <= range.max
+}
+
+/**
  * Determine main stat vs substats.
  *
  * Strategy:
- * - The main stat is the FIRST stat after the rune name pattern
- * - For slot 1: main stat is always ATK (flat)
- * - Substats are everything after main stat and before "N Set :"
+ * - For slots 1, 3, 5: main stat is hardcoded (ATK flat, DEF flat, HP flat)
+ * - For slots 2, 4, 6: main stat is the FIRST stat after the rune name
+ * - Substats are validated against known ranges
  */
 function separateMainAndSubs(
   allStats: (RuneStat & { _index: number })[],
   slot: RuneSlot | null,
+  level: number | null,
 ): { mainStat: RuneStat | null; subStats: RuneStat[] } {
-  if (allStats.length === 0) return { mainStat: null, subStats: [] }
+  if (allStats.length === 0 && !slot) return { mainStat: null, subStats: [] }
 
-  // For slot 1, main stat must be ATK flat — find it
-  if (slot === 1) {
-    const atkFlatIdx = allStats.findIndex(s => s.type === 'atk' && s.value >= 100)
-    if (atkFlatIdx >= 0) {
-      const mainStat = { type: allStats[atkFlatIdx]!.type, value: allStats[atkFlatIdx]!.value }
-      const subStats = allStats
-        .filter((_, i) => i !== atkFlatIdx)
-        .map(({ type, value }) => ({ type, value }))
-      return { mainStat, subStats }
+  // For slots 1, 3, 5: hardcode the main stat
+  const fixedMain = slot ? FIXED_MAIN_STATS[slot] : undefined
+  if (fixedMain) {
+    // Find the closest matching value for the main stat, or use a default based on level
+    let mainValue: number
+    const matchingStatIdx = allStats.findIndex(
+      s => s.type === fixedMain.type && fixedMain.values.includes(s.value),
+    )
+
+    if (matchingStatIdx >= 0) {
+      mainValue = allStats[matchingStatIdx]!.value
+    } else {
+      // Estimate main stat value from level
+      if (level !== null && level >= 13) {
+        mainValue = fixedMain.values[1]! // +15 value
+      } else {
+        mainValue = fixedMain.values[0]! // +12 value
+      }
     }
+
+    const mainStat: RuneStat = { type: fixedMain.type, value: mainValue }
+
+    // All found stats become substats, except the main stat type (flat only)
+    const subStats = allStats
+      .filter(s => {
+        // Remove the matched main stat occurrence
+        if (matchingStatIdx >= 0 && s._index === allStats[matchingStatIdx]!._index) return false
+        // For slot 1 (ATK flat main), remove any ATK flat from substats (only ATK% is valid)
+        if (fixedMain.type === 'atk' && s.type === 'atk') return false
+        if (fixedMain.type === 'def' && s.type === 'def') return false
+        if (fixedMain.type === 'hp' && s.type === 'hp') return false
+        return true
+      })
+      .map(({ type, value }) => ({ type, value }))
+      .filter(isValidSubstatValue)
+
+    return { mainStat, subStats }
   }
 
-  // Default: first stat is main
+  // Slots 2, 4, 6 or unknown slot: first stat is main
+  if (allStats.length === 0) return { mainStat: null, subStats: [] }
+
   const mainStat = { type: allStats[0]!.type, value: allStats[0]!.value }
-  const subStats = allStats.slice(1).map(({ type, value }) => ({ type, value }))
+  const subStats = allStats
+    .slice(1)
+    .map(({ type, value }) => ({ type, value }))
+    .filter(isValidSubstatValue)
+
   return { mainStat, subStats }
 }
 
@@ -330,6 +519,8 @@ function separateMainAndSubs(
  * - OCR artifacts (random numbers like 153, 6186)
  * - Truncated quality words (Leg, Heo, TI)
  * - Set bonus suffix (4 Set : Stun Rate +25%)
+ * - Multiline stat splits (stat name and value on different lines)
+ * - Fuzzy stat names (Acturaty, CRIRate, Axes, etc.)
  *
  * Tolerance: returns success if set + mainStat are found, even if slot/substats are partial.
  */
@@ -343,6 +534,9 @@ export const summonersWarParser: GameParser = {
     if (!raw || !raw.trim()) {
       return failedResult(['Empty OCR text'])
     }
+
+    // Preserve lines for multiline stat detection
+    const cleanLines = toCleanLines(raw)
 
     // Normalize: single line, clean noise characters
     const normalized = normalizeOcrText(raw)
@@ -386,7 +580,20 @@ export const summonersWarParser: GameParser = {
 
     // --- Parse stats ---
     const allStats = extractAllStats(textWithoutSetBonus)
-    const { mainStat, subStats } = separateMainAndSubs(allStats, slot)
+
+    // Also try multiline stat extraction
+    const multilineStats = extractMultilineStats(cleanLines)
+
+    // Merge multiline stats — add any that aren't already found (by type)
+    const existingTypes = new Set(allStats.map(s => s.type))
+    for (const mlStat of multilineStats) {
+      if (!existingTypes.has(mlStat.type)) {
+        allStats.push({ ...mlStat, _index: Infinity }) // Append at end
+        existingTypes.add(mlStat.type)
+      }
+    }
+
+    const { mainStat, subStats } = separateMainAndSubs(allStats, slot, level)
 
     // --- Parse set piece count ---
     const setPieceCountMatch = normalized.match(/(\d)\s*set\s*:/i)
