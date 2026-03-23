@@ -81,6 +81,10 @@
       "dragToNavigate": "Drag to pan, scroll to zoom"
     },
     "preprocessedImage": "Image sent to OCR",
+    "debugOcr": "OCR Debug",
+    "mergedResult": "Merged result",
+    "sources": "sources",
+    "subsFound": "stats found",
     "parsingImproving": "Stats parsing is being improved",
     "unreliableResult": "Partial result — some stats may be missing. Rescan for better results.",
     "profile": {

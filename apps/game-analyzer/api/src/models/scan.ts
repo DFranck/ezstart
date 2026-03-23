@@ -12,6 +12,21 @@ const scanResultSchema = new Schema<ScanResult>(
     analysis: { type: Schema.Types.Mixed },
     partial: { type: Boolean },
     unreliable: { type: Boolean },
+    ocrSources: [{
+      name: { type: String },
+      confidence: { type: Number },
+      rawText: { type: String },
+      subsFound: { type: Number },
+      success: { type: Boolean },
+    }],
+    benchResults: [{
+      source: { type: String },
+      preset: { type: String },
+      confidence: { type: Number },
+      subsCount: { type: Number },
+      rawText: { type: String },
+      success: { type: Boolean },
+    }],
   },
   { _id: false }
 )

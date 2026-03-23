@@ -20,6 +20,7 @@ import { RuneCard } from '@/components/rune-card'
 import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
 import { ScanResultRaw } from '@/components/scan-result-raw'
+import { OcrDebugPanel } from '@/components/ocr-debug-panel'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
@@ -83,7 +84,7 @@ export default function ScanPage() {
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
   const [profile, setProfile] = usePlayerProfile(selectedGame)
   const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
-  const [preprocessedPreview, setPreprocessedPreview] = useState<string | null>(null)
+  const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
   // Keep a ref to the latest ROI so callbacks always have the current value
@@ -124,10 +125,17 @@ export default function ScanPage() {
       previewCanvas.width = processed.width
       previewCanvas.height = processed.height
       previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
-      setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
+      // previewCanvas dataURL is captured below in ocrPreviews
 
       // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
       const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(frame)]
+
+      // Capture preview dataURLs for the debug panel
+      const rawCanvas = canvasFromImageData(frame)
+      const previews: { name: string; dataUrl: string }[] = [
+        { name: 'Zoom Preprocessed', dataUrl: previewCanvas.toDataURL('image/png') },
+        { name: 'Zoom Raw', dataUrl: rawCanvas.toDataURL('image/png') },
+      ]
 
       // 3rd source: full window frame croppé au ROI à résolution native
       let hasFullBlob = false
@@ -136,7 +144,11 @@ export default function ScanPage() {
         const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
+        const fullCanvas = canvasFromImageData(fullProcessed)
+        previews.push({ name: 'Full Window Crop', dataUrl: fullCanvas.toDataURL('image/png') })
       }
+
+      setOcrPreviews(previews)
 
       Promise.all(blobPromises).then((blobs) => {
         const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
@@ -194,6 +206,13 @@ export default function ScanPage() {
     // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
     const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(cropped)]
 
+    // Capture preview dataURLs for the debug panel
+    const rawCanvas = canvasFromImageData(cropped)
+    const previews: { name: string; dataUrl: string }[] = [
+      { name: 'Zoom Preprocessed', dataUrl: previewCanvas.toDataURL('image/png') },
+      { name: 'Zoom Raw', dataUrl: rawCanvas.toDataURL('image/png') },
+    ]
+
     // 3rd source: full window frame croppé au ROI à résolution native
     let hasFullBlob = false
     if (fullFrameRef.current) {
@@ -201,7 +220,11 @@ export default function ScanPage() {
       const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
       blobPromises.push(imageDataToBlob(fullProcessed))
       hasFullBlob = true
+      const fullCanvas = canvasFromImageData(fullProcessed)
+      previews.push({ name: 'Full Window Crop', dataUrl: fullCanvas.toDataURL('image/png') })
     }
+
+    setOcrPreviews(previews)
 
     Promise.all(blobPromises).then((blobs) => {
       const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
@@ -315,11 +338,13 @@ export default function ScanPage() {
                       />
                     )}
 
-                    {preprocessedPreview && (
-                      <Div className="space-y-1">
-                        <P className="text-xs text-muted-foreground">{t('scan.preprocessedImage')}</P>
-                        <img src={preprocessedPreview} alt="Preprocessed" className="w-full border rounded" />
-                      </Div>
+                    {ocrPreviews.length > 0 && (
+                      <OcrDebugPanel
+                        previews={ocrPreviews}
+                        sources={resultData.ocrSources}
+                        mergedConfidence={resultData.confidence}
+                        mergedSubs={resultData.data && 'subStats' in resultData.data ? (resultData.data as any).subStats?.length || 0 : 0}
+                      />
                     )}
 
                     {!hasStructuredData && resultData.rawText && (
@@ -382,6 +407,15 @@ export default function ScanPage() {
                       rawText={resultData.rawText}
                       confidence={resultData.confidence}
                       parsingFailed={!hasStructuredData}
+                    />
+                  )}
+
+                  {resultData.ocrSources && resultData.ocrSources.length > 0 && (
+                    <OcrDebugPanel
+                      previews={[]}
+                      sources={resultData.ocrSources}
+                      mergedConfidence={resultData.confidence}
+                      mergedSubs={resultData.data && 'subStats' in resultData.data ? (resultData.data as any).subStats?.length || 0 : 0}
                     />
                   )}
 

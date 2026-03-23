@@ -27,6 +27,17 @@ export interface ScanResult {
   unreliable?: boolean
   /** Details of each OCR source before merge */
   ocrSources?: OcrSource[]
+  /** Bench mode results — all source × preset combinations */
+  benchResults?: BenchRunResult[]
+}
+
+export interface BenchRunResult {
+  source: string
+  preset: string
+  confidence: number
+  subsCount: number
+  rawText: string
+  success: boolean
 }
 
 export interface Scan {

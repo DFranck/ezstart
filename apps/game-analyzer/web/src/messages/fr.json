@@ -81,6 +81,10 @@
       "dragToNavigate": "Faites glisser pour deplacer, molette pour zoomer"
     },
     "preprocessedImage": "Image envoyée à l'OCR",
+    "debugOcr": "Debug OCR",
+    "mergedResult": "Résultat fusionné",
+    "sources": "sources",
+    "subsFound": "stats trouvées",
     "parsingImproving": "Le parsing des stats est en cours d'amélioration",
     "unreliableResult": "Résultat partiel — certaines stats peuvent manquer. Rescannez pour de meilleurs résultats.",
     "profile": {
