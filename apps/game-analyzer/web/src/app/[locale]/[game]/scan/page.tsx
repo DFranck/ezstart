@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import type { GameType } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
+import type { MaskRect } from '@/components/blackout-mask'
 import { ScanUploader } from '@/components/scan-uploader'
 import { RuneCard } from '@/components/rune-card'
 import { GearCard } from '@/components/gear-card'
@@ -48,6 +49,36 @@ function loadPresets(gameType: GameType): string[] {
     if (saved) return JSON.parse(saved)
   } catch {}
   return ['upscale-2x']
+}
+
+/** Load saved masks from localStorage (empty array = no masks) */
+function loadMasks(gameType: GameType): MaskRect[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const saved = localStorage.getItem(`game-analyzer-masks-${gameType}`)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return []
+}
+
+/** Black-out mask regions on an ImageData (for OCR — always black) */
+function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData {
+  const canvas = document.createElement('canvas')
+  canvas.width = imageData.width
+  canvas.height = imageData.height
+  const ctx = canvas.getContext('2d')!
+  ctx.putImageData(imageData, 0, 0)
+
+  ctx.fillStyle = 'black'
+  for (const mask of masks) {
+    const x = Math.round((mask.x / 100) * canvas.width)
+    const y = Math.round((mask.y / 100) * canvas.height)
+    const w = Math.round((mask.width / 100) * canvas.width)
+    const h = Math.round((mask.height / 100) * canvas.height)
+    ctx.fillRect(x, y, w, h)
+  }
+
+  return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
@@ -104,6 +135,10 @@ export default function GameScanPage() {
   // Load saved presets from bench — prefer DB, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
 
+  // Load saved masks from bench — prefer DB, fallback localStorage
+  const [masks, setMasks] = useState<MaskRect[]>(() => loadMasks(game))
+  const masksRef = useRef<MaskRect[]>(masks)
+
   // Keep a ref to the latest ROI so callbacks always have the current value
   const roiRef = useRef<RoiRect>(roi)
   // Store the full (non-zoomed) frame for the 3rd OCR source
@@ -120,12 +155,19 @@ export default function GameScanPage() {
     setRoi(savedRoi)
     roiRef.current = savedRoi
     savedPresets.current = loadPresets(game)
+    const savedMasks = loadMasks(game)
+    setMasks(savedMasks)
+    masksRef.current = savedMasks
   }, [game])
 
-  // When DB config loads, override localStorage presets
+  // When DB config loads, override localStorage presets and masks
   useEffect(() => {
     if (gameConfig?.bestPresets && gameConfig.bestPresets.length > 0) {
       savedPresets.current = gameConfig.bestPresets
+    }
+    if (gameConfig?.masks && gameConfig.masks.length > 0) {
+      setMasks(gameConfig.masks)
+      masksRef.current = gameConfig.masks
     }
   }, [gameConfig])
 
@@ -138,16 +180,19 @@ export default function GameScanPage() {
 
       scanningRef.current = true
 
-      const processed = preprocessForOcr(frame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      // Apply blackout masks before preprocessing
+      const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
+      const processed = preprocessForOcr(maskedFrame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
 
       // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
-      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(frame)]
+      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedFrame)]
 
       // 3rd source: full window frame cropped to ROI at native resolution
       let hasFullBlob = false
       if (fullFrameRef.current) {
         const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-        const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
+        const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
       }
@@ -204,16 +249,19 @@ export default function GameScanPage() {
     if (!currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    const processed = preprocessForOcr(cropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+    // Apply blackout masks before preprocessing
+    const maskedCropped = masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
+    const processed = preprocessForOcr(maskedCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
 
     // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
-    const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(cropped)]
+    const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedCropped)]
 
     // 3rd source: full window frame cropped to ROI at native resolution
     let hasFullBlob = false
     if (fullFrameRef.current) {
       const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-      const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
+      const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
       blobPromises.push(imageDataToBlob(fullProcessed))
       hasFullBlob = true
     }
@@ -281,6 +329,12 @@ export default function GameScanPage() {
               roi={roi}
               onRoiChange={handleRoiChange}
               showTabs={false}
+              masks={masks.length > 0 ? masks : undefined}
+              onMasksChange={masks.length > 0 ? () => {} : undefined}
+              onMaskAdd={masks.length > 0 ? () => {} : undefined}
+              onMaskRemove={masks.length > 0 ? () => {} : undefined}
+              zonesLocked
+              maskColor="#2d1f14"
             />
 
             {/* Results */}
