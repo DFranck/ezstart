@@ -1,5 +1,5 @@
 /**
- * PUT /api/config/:gameType — Save game config (presets, zones, masks)
+ * PUT /api/config/:gameType/:layoutName — Save/update a layout
  */
 
 import { Router } from '@ezstart/express-core'
@@ -7,27 +7,30 @@ import { getGameConfigModel } from '../models/game-config.js'
 
 const router: any = Router()
 
-router.put('/:gameType', async (req: any, res: any) => {
+router.put('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
-    const { bestPresets, zones, masks } = req.body
-    const { gameType } = req.params
+    const { bestPresets, zones, masks, roi, displayName } = req.body
+    const { gameType, layoutName } = req.params
 
-    if (!gameType) {
+    if (!gameType || !layoutName) {
       return res.status(400).json({
         success: false,
-        error: 'gameType is required',
+        error: 'gameType and layoutName are required',
       })
     }
 
     const GameConfig = await getGameConfigModel()
 
     const config = await GameConfig.findOneAndUpdate(
-      { gameType },
+      { gameType, layoutName },
       {
         gameType,
+        layoutName,
+        ...(displayName !== undefined && { displayName }),
         ...(bestPresets !== undefined && { bestPresets }),
         ...(zones !== undefined && { zones }),
         ...(masks !== undefined && { masks }),
+        ...(roi !== undefined && { roi }),
         updatedAt: new Date(),
       },
       { upsert: true, new: true, lean: true }

@@ -6,6 +6,11 @@ import {
   H1,
   H2,
   P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -21,43 +26,16 @@ import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
-import { useSaveGameConfig } from '@/hooks/use-game-config'
+import { useGameLayouts, useGameLayout, useSaveGameLayout, useDeleteGameLayout } from '@/hooks/use-game-config'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
-
-function loadRoi(gameType: GameType): RoiRect {
-  if (typeof window === 'undefined') return DEFAULT_ROI
-  try {
-    const saved = localStorage.getItem(`game-analyzer-roi-${gameType}`)
-    if (saved) return JSON.parse(saved)
-  } catch {}
-  return DEFAULT_ROI
-}
-
-function loadZones(gameType: GameType): ZoneConfig[] {
-  if (typeof window === 'undefined') return getDefaultZones()
-  try {
-    const saved = localStorage.getItem(`game-analyzer-zones-${gameType}`)
-    if (saved) return JSON.parse(saved)
-  } catch {}
-  return getDefaultZones()
-}
 
 const DEFAULT_MASKS: MaskRect[] = [
   { id: 'buttons', x: 65, y: 35, width: 30, height: 35 },
   { id: 'score', x: 60, y: 15, width: 35, height: 15 },
   { id: 'sell', x: 65, y: 75, width: 30, height: 20 },
 ]
-
-function loadMasks(gameType: GameType): MaskRect[] {
-  if (typeof window === 'undefined') return DEFAULT_MASKS
-  try {
-    const saved = localStorage.getItem(`game-analyzer-masks-${gameType}`)
-    if (saved) return JSON.parse(saved)
-  } catch {}
-  return DEFAULT_MASKS
-}
 
 function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData {
   const canvas = document.createElement('canvas')
@@ -120,14 +98,20 @@ export default function BenchPage() {
   const params = useParams()
   const game = params.game as GameType
 
-  const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
-  const [zones, setZones] = useState<ZoneConfig[]>(() => loadZones(game))
-  const [masks, setMasks] = useState<MaskRect[]>(() => loadMasks(game))
+  const [currentLayoutName, setCurrentLayoutName] = useState<string>('')
+  const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
+  const [zones, setZones] = useState<ZoneConfig[]>(getDefaultZones())
+  const [masks, setMasks] = useState<MaskRect[]>(DEFAULT_MASKS)
   const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const [presetsSaved, setPresetsSaved] = useState(false)
   const [zonesLocked, setZonesLocked] = useState(false)
   const { mutate: scan, data: scanResult, isPending } = useScan()
-  const { mutate: saveConfig } = useSaveGameConfig(game)
+
+  // Layout hooks
+  const { data: layouts = [], isLoading: layoutsLoading } = useGameLayouts(game)
+  const { data: layoutData } = useGameLayout(game, currentLayoutName)
+  const { mutate: saveLayout } = useSaveGameLayout(game)
+  const { mutate: deleteLayout } = useDeleteGameLayout(game)
 
   const roiRef = useRef<RoiRect>(roi)
   const zonesRef = useRef<ZoneConfig[]>(zones)
@@ -135,23 +119,78 @@ export default function BenchPage() {
   const fullFrameRef = useRef<ImageData | null>(null)
   const scanningRef = useRef(false)
 
+  // Select first layout when layouts load
+  useEffect(() => {
+    if (layouts.length > 0 && !currentLayoutName) {
+      setCurrentLayoutName(layouts[0].layoutName)
+    }
+  }, [layouts, currentLayoutName])
+
+  // Apply layout data when a layout is loaded
+  useEffect(() => {
+    if (!layoutData) return
+
+    if (layoutData.roi) {
+      setRoi(layoutData.roi)
+      roiRef.current = layoutData.roi
+    }
+    if (layoutData.zones) {
+      setZones(layoutData.zones)
+      zonesRef.current = layoutData.zones
+    }
+    if (layoutData.masks) {
+      setMasks(layoutData.masks)
+      masksRef.current = layoutData.masks
+    }
+  }, [layoutData])
+
+  const handleLayoutChange = useCallback((name: string) => {
+    setCurrentLayoutName(name)
+    setPresetsSaved(false)
+  }, [])
+
+  const handleNewLayout = useCallback(() => {
+    const name = prompt(t('bench.layoutName'))
+    if (!name) return
+
+    const layoutName = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    if (!layoutName) return
+
+    // Save new layout with current state
+    saveLayout({
+      layoutName,
+      displayName: name,
+      roi: roiRef.current,
+      zones: zonesRef.current,
+      masks: masksRef.current,
+    })
+
+    setCurrentLayoutName(layoutName)
+  }, [t, saveLayout])
+
+  const handleDeleteLayout = useCallback(() => {
+    if (!currentLayoutName) return
+    const displayName = layouts.find(l => l.layoutName === currentLayoutName)?.displayName ?? currentLayoutName
+    if (!confirm(`${t('bench.deleteLayout')}: ${displayName}?`)) return
+
+    deleteLayout(currentLayoutName)
+    setCurrentLayoutName(layouts.find(l => l.layoutName !== currentLayoutName)?.layoutName ?? '')
+  }, [currentLayoutName, layouts, deleteLayout, t])
+
   const handleRoiChange = useCallback((newRoi: RoiRect) => {
     setRoi(newRoi)
     roiRef.current = newRoi
-    localStorage.setItem(`game-analyzer-roi-${game}`, JSON.stringify(newRoi))
-  }, [game])
+  }, [])
 
   const handleZonesChange = useCallback((newZones: ZoneConfig[]) => {
     setZones(newZones)
     zonesRef.current = newZones
-    localStorage.setItem(`game-analyzer-zones-${game}`, JSON.stringify(newZones))
-  }, [game])
+  }, [])
 
   const handleMasksChange = useCallback((newMasks: MaskRect[]) => {
     setMasks(newMasks)
     masksRef.current = newMasks
-    localStorage.setItem(`game-analyzer-masks-${game}`, JSON.stringify(newMasks))
-  }, [game])
+  }, [])
 
   const handleMaskAdd = useCallback(() => {
     const newMask: MaskRect = {
@@ -169,18 +208,6 @@ export default function BenchPage() {
     const newMasks = masksRef.current.filter(m => m.id !== id)
     handleMasksChange(newMasks)
   }, [handleMasksChange])
-
-  useEffect(() => {
-    const savedRoi = loadRoi(game)
-    setRoi(savedRoi)
-    roiRef.current = savedRoi
-    const savedZones = loadZones(game)
-    setZones(savedZones)
-    zonesRef.current = savedZones
-    const savedMasks = loadMasks(game)
-    setMasks(savedMasks)
-    masksRef.current = savedMasks
-  }, [game])
 
   const runBenchScan = useCallback(
     (frame: ImageData) => {
@@ -306,9 +333,11 @@ export default function BenchPage() {
     runBenchScan(cropped)
   }, [currentFrame, runBenchScan])
 
-  /** Save the top 3 presets + zones + masks to DB and localStorage */
+  /** Save the top 3 presets + zones + masks + ROI to the current layout */
   const handleSavePresets = useCallback(() => {
     if (!scanResult?.benchResults) return
+
+    const layoutName = currentLayoutName || 'default'
 
     // Sort bench results: most substats first, then highest confidence
     const sorted = [...scanResult.benchResults]
@@ -328,18 +357,19 @@ export default function BenchPage() {
 
     if (bestPresets.length === 0) bestPresets.push('upscale-2x')
 
-    // Save to localStorage (fallback)
-    localStorage.setItem(`game-analyzer-best-presets-${game}`, JSON.stringify(bestPresets))
-
-    // Save to DB (presets + zones + masks)
-    saveConfig({
+    // Save to current layout (presets + zones + masks + ROI)
+    const currentDisplay = layouts.find(l => l.layoutName === layoutName)?.displayName
+    saveLayout({
+      layoutName,
+      displayName: currentDisplay ?? layoutName,
       bestPresets,
       zones: zonesRef.current,
       masks: masksRef.current,
+      roi: roiRef.current,
     })
 
     setPresetsSaved(true)
-  }, [scanResult, game, saveConfig])
+  }, [scanResult, currentLayoutName, layouts, saveLayout])
 
   const isAnalyzing = isPending
   const resultData = scanResult
@@ -354,6 +384,33 @@ export default function BenchPage() {
       </Div>
 
       <Div className="space-y-6">
+        {/* Layout selector */}
+        <Div className="flex items-center gap-2">
+          <P className="text-sm font-medium">{t('bench.layout')}:</P>
+          <Select
+            value={currentLayoutName}
+            onValueChange={handleLayoutChange}
+            disabled={layoutsLoading}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder={t('bench.layout')} />
+            </SelectTrigger>
+            <SelectContent>
+              {layouts.map((l) => (
+                <SelectItem key={l.layoutName} value={l.layoutName}>
+                  {l.displayName ?? l.layoutName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="outline" onClick={handleNewLayout}>+</Button>
+          {currentLayoutName && layouts.length > 1 && (
+            <Button size="sm" variant="destructive" onClick={handleDeleteLayout}>
+              {t('bench.deleteLayout')}
+            </Button>
+          )}
+        </Div>
+
         {/* Lock/unlock toggle for zones and masks */}
         <Div className="flex justify-end">
           <Button

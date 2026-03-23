@@ -5,6 +5,11 @@ import {
   Div,
   H1,
   P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tabs,
   TabsContent,
   TabsList,
@@ -26,7 +31,7 @@ import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
-import { useGameConfig } from '@/hooks/use-game-config'
+import { useGameLayouts, useGameLayout } from '@/hooks/use-game-config'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -129,13 +134,15 @@ export default function GameScanPage() {
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
-  // Load config from DB (presets, zones, masks), fallback to localStorage
-  const { data: gameConfig } = useGameConfig(game)
+  // Layout selector
+  const [currentLayoutName, setCurrentLayoutName] = useState<string>('')
+  const { data: layouts = [] } = useGameLayouts(game)
+  const { data: layoutData } = useGameLayout(game, currentLayoutName)
 
-  // Load saved presets from bench — prefer DB, fallback localStorage
+  // Load saved presets from bench — prefer DB layout, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
 
-  // Load saved masks from bench — prefer DB, fallback localStorage
+  // Load saved masks from bench — prefer DB layout, fallback localStorage
   const [masks, setMasks] = useState<MaskRect[]>(() => loadMasks(game))
   const masksRef = useRef<MaskRect[]>(masks)
 
@@ -160,16 +167,29 @@ export default function GameScanPage() {
     masksRef.current = savedMasks
   }, [game])
 
-  // When DB config loads, override localStorage presets and masks
+  // Select first layout when layouts load
   useEffect(() => {
-    if (gameConfig?.bestPresets && gameConfig.bestPresets.length > 0) {
-      savedPresets.current = gameConfig.bestPresets
+    if (layouts.length > 0 && !currentLayoutName) {
+      setCurrentLayoutName(layouts[0].layoutName)
     }
-    if (gameConfig?.masks && gameConfig.masks.length > 0) {
-      setMasks(gameConfig.masks)
-      masksRef.current = gameConfig.masks
+  }, [layouts, currentLayoutName])
+
+  // When a layout is loaded from DB, apply its config
+  useEffect(() => {
+    if (!layoutData) return
+
+    if (layoutData.roi) {
+      setRoi(layoutData.roi)
+      roiRef.current = layoutData.roi
     }
-  }, [gameConfig])
+    if (layoutData.bestPresets && layoutData.bestPresets.length > 0) {
+      savedPresets.current = layoutData.bestPresets
+    }
+    if (layoutData.masks && layoutData.masks.length > 0) {
+      setMasks(layoutData.masks)
+      masksRef.current = layoutData.masks
+    }
+  }, [layoutData])
 
   // Track whether an auto-scan is in progress to avoid overlapping requests
   const scanningRef = useRef(false)
@@ -302,9 +322,29 @@ export default function GameScanPage() {
         <P className="text-sm text-muted-foreground">{t(`games.${game}`)}</P>
       </Div>
 
-      {/* Profile selector */}
-      <Div className="mb-6">
+      {/* Profile selector + Layout selector */}
+      <Div className="mb-6 flex flex-wrap items-center gap-4">
         <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
+        {layouts.length > 0 && (
+          <Div className="flex items-center gap-2">
+            <P className="text-sm font-medium">{t('bench.layout')}:</P>
+            <Select
+              value={currentLayoutName}
+              onValueChange={setCurrentLayoutName}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t('bench.layout')} />
+              </SelectTrigger>
+              <SelectContent>
+                {layouts.map((l) => (
+                  <SelectItem key={l.layoutName} value={l.layoutName}>
+                    {l.displayName ?? l.layoutName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+        )}
       </Div>
 
       {/* Mode Tabs */}
