@@ -29,10 +29,12 @@ export {
   analyzeRune,
   calculateEfficiency,
   calculatePotentialEfficiency,
+  calculateSynergy,
   estimateRolls,
   getRecommendation,
 } from './analyzers/index.js'
 export type {
+  BuildArchetype,
   EfficiencyTier,
   PlayerProfile,
   GrindPotential,
@@ -41,4 +43,5 @@ export type {
   RuneEfficiencyResult,
   SubstatAnalysis,
   SubstatDetail,
+  SynergyResult,
 } from './analyzers/index.js'

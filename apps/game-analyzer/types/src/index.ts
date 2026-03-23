@@ -12,6 +12,8 @@ export {
   MAX_ROLLS_BY_QUALITY,
   EFFICIENCY_THRESHOLDS,
   LEVEL_STRICTNESS,
+  BUILD_ARCHETYPES,
+  SYNERGY_BONUS,
 } from './rune-data'
-export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RuneAnalysis } from './rune-data'
+export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RuneAnalysis, BuildArchetype, SynergyResult } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'

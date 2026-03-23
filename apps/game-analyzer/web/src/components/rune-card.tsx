@@ -2,7 +2,8 @@
 
 import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype } from '@game-analyzer/types'
+import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 
 // ── Set emojis ──
 const SET_EMOJIS: Record<string, string> = {
@@ -235,6 +236,54 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   </Div>
                 </Div>
               )}
+            </Div>
+          </>
+        )}
+
+        {/* ── Synergy section ── */}
+        {analysis?.synergy && analysis.synergy.bestArchetype && (
+          <>
+            <Div className="border-t border-border" />
+            <Div className="space-y-2">
+              <Div className="flex items-center justify-between">
+                <P className="text-sm font-medium">{tRune('synergy')}</P>
+                <Div className="flex items-center gap-2">
+                  <P className="text-sm font-semibold">
+                    {tRune(`archetype.${analysis.synergy.bestArchetype}`)} ({analysis.synergy.matchCount}/4)
+                  </P>
+                  <P className={`text-sm font-bold ${analysis.synergy.synergyBonus > 0 ? 'text-green-500' : analysis.synergy.synergyBonus < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                    {analysis.synergy.synergyBonus > 0 ? `+${analysis.synergy.synergyBonus}%` : `${analysis.synergy.synergyBonus}%`}
+                  </P>
+                </Div>
+              </Div>
+              {/* Show matched/unmatched stats */}
+              {(() => {
+                const bestArch = analysis.synergy.bestArchetype as BuildArchetype
+                const desired = BUILD_ARCHETYPES[bestArch]?.desiredStats ?? []
+                const bestMatch = analysis.synergy.allMatches?.find(m => m.archetype === bestArch)
+                const matchedStats = bestMatch?.matchedStats ?? []
+                return (
+                  <Div className="flex flex-wrap gap-2">
+                    {desired.map(stat => {
+                      const isMatched = matchedStats.includes(stat)
+                      return (
+                        <P key={stat} className={`text-xs font-medium ${isMatched ? 'text-green-500' : 'text-red-500'}`}>
+                          {isMatched ? '\u2713' : '\u2717'} {formatStatLabel(stat)}
+                        </P>
+                      )
+                    })}
+                  </Div>
+                )
+              })()}
+            </Div>
+          </>
+        )}
+        {analysis?.synergy && !analysis.synergy.bestArchetype && analysis.synergy.synergyBonus < 0 && (
+          <>
+            <Div className="border-t border-border" />
+            <Div className="flex items-center justify-between">
+              <P className="text-sm font-medium">{tRune('synergy')}</P>
+              <P className="text-sm text-red-500">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
             </Div>
           </>
         )}

@@ -75,6 +75,15 @@ export interface GrindPotential {
   substatsToGrind: { type: StatType; currentValue: number; afterGrind: number }[]
 }
 
+export interface SynergyResult {
+  bestArchetype: BuildArchetype | null
+  matchCount: number
+  synergyBonus: number
+  allArchetypes: { archetype: BuildArchetype; matchCount: number; matchedStats: StatType[] }[]
+}
+
+export type BuildArchetype = 'speed-dps' | 'bruiser' | 'tank-support' | 'cleave' | 'cc-debuffer'
+
 export interface RuneAnalysis {
   currentEfficiency: number
   /** Alias for currentEfficiency — used by the UI layer */
@@ -98,6 +107,8 @@ export interface RuneAnalysis {
   setBonus: string
   /** Number of pieces for set bonus — used by UI layer */
   setPieces: number
+  /** Build archetype synergy analysis */
+  synergy: SynergyResult
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -165,6 +176,22 @@ const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
   'tolerance': { pieces: 2, bonus: 'Ally RES +10%' },
   'cruel': { pieces: 2, bonus: 'ATK +12%' },
 }
+
+/** Build archetypes for synergy scoring */
+const BUILD_ARCHETYPES: Record<BuildArchetype, { desiredStats: StatType[] }> = {
+  'speed-dps': { desiredStats: ['spd', 'cr', 'cd', 'atk%'] },
+  'bruiser': { desiredStats: ['hp%', 'atk%', 'cr', 'cd'] },
+  'tank-support': { desiredStats: ['hp%', 'def%', 'spd', 'res'] },
+  'cleave': { desiredStats: ['atk%', 'cr', 'cd', 'spd'] },
+  'cc-debuffer': { desiredStats: ['spd', 'acc', 'hp%', 'def%'] },
+}
+
+const SYNERGY_BONUS = {
+  PERFECT: 8,
+  GOOD: 4,
+  NONE: 0,
+  PENALTY: -3,
+} as const
 
 /** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
 const BARION_DIVISOR = 9
@@ -353,6 +380,45 @@ function calculateGrindPotential(
 }
 
 /**
+ * Calculate build archetype synergy for a rune's substats.
+ * Counts how many substats match each archetype's desired stats.
+ */
+export function calculateSynergy(subStats: RuneStat[]): SynergyResult {
+  const subStatTypes = subStats.map(s => s.type)
+  const archetypeKeys = Object.keys(BUILD_ARCHETYPES) as BuildArchetype[]
+
+  const allArchetypes = archetypeKeys.map(archetype => {
+    const desired = BUILD_ARCHETYPES[archetype].desiredStats
+    const matchedStats = subStatTypes.filter(t => desired.includes(t))
+    return { archetype, matchCount: matchedStats.length, matchedStats }
+  })
+
+  // Sort by matchCount descending
+  allArchetypes.sort((a, b) => b.matchCount - a.matchCount)
+
+  const best = allArchetypes[0]
+  const bestMatchCount = best?.matchCount ?? 0
+
+  let synergyBonus: number
+  if (bestMatchCount >= 4) {
+    synergyBonus = SYNERGY_BONUS.PERFECT
+  } else if (bestMatchCount >= 3) {
+    synergyBonus = SYNERGY_BONUS.GOOD
+  } else if (bestMatchCount >= 2) {
+    synergyBonus = SYNERGY_BONUS.NONE
+  } else {
+    synergyBonus = SYNERGY_BONUS.PENALTY
+  }
+
+  return {
+    bestArchetype: bestMatchCount >= 2 ? (best?.archetype ?? null) : null,
+    matchCount: bestMatchCount,
+    synergyBonus,
+    allArchetypes,
+  }
+}
+
+/**
  * Get recommendation based on efficiency, profile thresholds, and level strictness.
  * The grind potential can save a rune (max +5% bonus).
  */
@@ -361,6 +427,7 @@ export function getRecommendation(
   level: number,
   profile: PlayerProfile = 'mid',
   grindPotential?: number,
+  synergyBonus?: number,
 ): EfficiencyTier {
   const thresholds = EFFICIENCY_THRESHOLDS[profile]
 
@@ -370,7 +437,9 @@ export function getRecommendation(
 
   // Grind potential bonus (max +5%)
   const grindBonus = grindPotential ? Math.min(grindPotential * 0.3, 5) : 0
-  const finalEfficiency = efficiency + grindBonus
+  // Synergy bonus (can be negative for penalty)
+  const synBonus = synergyBonus ?? 0
+  const finalEfficiency = efficiency + grindBonus + synBonus
 
   const adjustedThreshold = (threshold: number) => threshold + strictness
 
@@ -405,12 +474,16 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   const grindPotential = calculateGrindPotential(substats, currentEfficiency)
 
+  // Calculate synergy
+  const synergy = calculateSynergy(rune.subStats)
+
   // Tier without level strictness (at +12 baseline)
   const tier = getRecommendation(
     currentEfficiency,
     12,
     profile,
     grindPotential.grindGain,
+    synergy.synergyBonus,
   )
 
   // Tier with level strictness applied
@@ -421,6 +494,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     rune.level,
     profile,
     grindPotential.grindGain,
+    synergy.synergyBonus,
   )
 
   const roundedCurrent = Math.round(currentEfficiency * 100) / 100
@@ -446,5 +520,6 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     totalRolls,
     setBonus,
     setPieces,
+    synergy,
   }
 }

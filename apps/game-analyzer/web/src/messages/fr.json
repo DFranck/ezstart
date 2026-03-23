@@ -108,7 +108,19 @@
     "grindPotential": "Potentiel de grind",
     "legendGrind": "grind legend",
     "setBonus": "Bonus de set",
-    "ocrConfidence": "Confiance OCR"
+    "ocrConfidence": "Confiance OCR",
+    "synergy": "Synergie",
+    "synergyMatch": "{count}/4 stats",
+    "synergyBonus": "+{value}%",
+    "synergyPenalty": "{value}%",
+    "noSynergy": "Stats incoherentes",
+    "archetype": {
+      "speed-dps": "Speed DPS",
+      "bruiser": "Bruiseur",
+      "tank-support": "Tank/Support",
+      "cleave": "Cleave",
+      "cc-debuffer": "CC/Debuffer"
+    }
   },
   "scanDetail": {
     "title": "Details du Scan",

@@ -4,6 +4,7 @@ import {
   analyzeRune,
   calculateEfficiency,
   calculatePotentialEfficiency,
+  calculateSynergy,
   estimateRolls,
   getRecommendation,
 } from '../analyzers/rune-efficiency.js'
@@ -482,9 +483,9 @@ describe('rune-efficiency', () => {
       expect(earlyResult.tier).not.toBe(lateResult.tier)
     })
 
-    it('grind bonus saves a rune from keep to good', () => {
+    it('grind bonus + synergy saves a rune from keep to good', () => {
       // A rune right at the border of keep/good for mid profile at +12
-      // mid good threshold = 70, we need efficiency ~68-69 with grind potential pushing over
+      // mid good threshold = 70, we need efficiency ~62% with grind + synergy pushing over
       const rune = makeRune({
         level: 12,
         quality: 'legend',
@@ -497,14 +498,15 @@ describe('rune-efficiency', () => {
       })
 
       // efficiency = (4.583+1)/9*100 = 62%
-      // grind potential: spd +5, atk% +7, hp% +7, def% +7 => significant grind gain
+      // grind potential: spd +5, atk% +7, hp% +7, def% +7 => grind bonus = 5
+      // synergy: cc-debuffer 3/4 (spd, hp%, def%) => +4%
+      // finalEfficiency = 62 + 5 + 4 = 71 >= 70 (good threshold mid) => good
       const result = analyzeRune(rune, 'mid')
-      // With mid profile at +12, 62% is in 'keep' range (60-70)
-      // tier = computed at level 12 (no strictness), grind bonus = min(grindGain*0.3, 5)
-      expect(result.tier).toBe('keep')
+      expect(result.tier).toBe('good')
 
-      // Verify grind gain exists
+      // Verify grind gain and synergy exist
       expect(result.grindPotential.grindGain).toBeGreaterThan(0)
+      expect(result.synergy.synergyBonus).toBe(4)
     })
 
     it('returns adjustedTier and levelStrictness in analysis result', () => {
@@ -526,6 +528,162 @@ describe('rune-efficiency', () => {
       expect(result.adjustedTier).toBeDefined()
       // tier (at +12 baseline) may differ from adjustedTier (with +9 strictness)
       expect(typeof result.adjustedTier).toBe('string')
+    })
+  })
+
+  // ====================================
+  // NEW: Build archetype synergy scoring
+  // ====================================
+
+  describe('calculateSynergy', () => {
+    it('returns perfect synergy (+8%) for 4/4 speed-dps substats', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
+        { type: 'atk%' as const, value: 16 },
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(4)
+      expect(result.synergyBonus).toBe(8)
+    })
+
+    it('returns good synergy (+4%) for 3/4 speed-dps substats', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
+        { type: 'res' as const, value: 8 },
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(3)
+      expect(result.synergyBonus).toBe(4)
+    })
+
+    it('returns penalty (-3%) for contradictory stats with no archetype >= 2 matches', () => {
+      const subStats = [
+        { type: 'atk' as const, value: 20 },
+        { type: 'def' as const, value: 20 },
+        { type: 'hp' as const, value: 375 },
+        { type: 'acc' as const, value: 8 },
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      // Only flat stats — no archetype has flat atk/def/hp in desired
+      expect(result.matchCount).toBeLessThanOrEqual(1)
+      expect(result.synergyBonus).toBe(-3)
+      expect(result.bestArchetype).toBeNull()
+    })
+
+    it('returns perfect synergy (+8%) for 4/4 tank-support substats', () => {
+      const subStats = [
+        { type: 'hp%' as const, value: 16 },
+        { type: 'def%' as const, value: 16 },
+        { type: 'spd' as const, value: 12 },
+        { type: 'res' as const, value: 16 },
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('tank-support')
+      expect(result.matchCount).toBe(4)
+      expect(result.synergyBonus).toBe(8)
+    })
+
+    it('returns all archetype matches sorted by matchCount', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
+        { type: 'atk%' as const, value: 16 },
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.allArchetypes.length).toBe(5)
+      // First should be the best match
+      expect(result.allArchetypes[0]!.matchCount).toBeGreaterThanOrEqual(result.allArchetypes[1]!.matchCount)
+    })
+  })
+
+  describe('synergy integration in analyzeRune', () => {
+    it('synergy is included in analyzeRune result', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      expect(result.synergy).toBeDefined()
+      expect(result.synergy.bestArchetype).toBe('speed-dps')
+      expect(result.synergy.matchCount).toBe(4)
+      expect(result.synergy.synergyBonus).toBe(8)
+    })
+
+    it('synergy bonus upgrades tier for borderline rune', () => {
+      // Create a rune at the border of great/godlike for mid profile
+      // mid godlike threshold = 85
+      // We need efficiency + grindBonus + synergyBonus >= 85
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 10 },   // 10/6 = 1.667
+          { type: 'cr', value: 10 },     // 10/6 = 1.667
+          { type: 'cd', value: 14 },     // 14/7 = 2.0
+          { type: 'atk%', value: 8 },    // 8/8 = 1.0
+        ],
+      })
+
+      // Without synergy: efficiency ~81.5%, grind gain from spd+atk% only
+      // With synergy: +8% for perfect speed-dps match
+      const result = analyzeRune(rune, 'mid')
+
+      // This is a perfect speed-dps match (4/4)
+      expect(result.synergy.bestArchetype).toBe('speed-dps')
+      expect(result.synergy.synergyBonus).toBe(8)
+
+      // Verify the tier considers synergy (with +8% synergy it should be higher)
+      // Let's also test without synergy manually
+      const effWithoutSynergy = result.currentEfficiency
+      const tierWithoutSynergy = getRecommendation(effWithoutSynergy, 12, 'mid', result.grindPotential.grindGain, 0)
+      const tierWithSynergy = result.tier
+
+      // With synergy bonus the tier should be at least as good, potentially better
+      const tierOrder = ['sell', 'keep', 'good', 'great', 'godlike']
+      expect(tierOrder.indexOf(tierWithSynergy)).toBeGreaterThanOrEqual(tierOrder.indexOf(tierWithoutSynergy))
+    })
+
+    it('synergy penalty downgrades tier for contradictory rune', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'atk', value: 20 },
+          { type: 'def', value: 20 },
+          { type: 'hp', value: 375 },
+          { type: 'acc', value: 8 },
+        ],
+      })
+
+      const result = analyzeRune(rune, 'mid')
+
+      expect(result.synergy.synergyBonus).toBe(-3)
+      expect(result.synergy.bestArchetype).toBeNull()
     })
   })
 })

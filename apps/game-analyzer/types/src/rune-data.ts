@@ -153,6 +153,58 @@ export const MAX_ROLLS_BY_QUALITY: Record<RuneQuality, number> = {
 }
 
 // ============================================
+// BUILD ARCHETYPES & SYNERGY
+// ============================================
+
+export type BuildArchetype = 'speed-dps' | 'bruiser' | 'tank-support' | 'cleave' | 'cc-debuffer'
+
+export const BUILD_ARCHETYPES: Record<BuildArchetype, {
+  name: string
+  desiredStats: StatType[]
+  description: string
+}> = {
+  'speed-dps': {
+    name: 'Speed DPS',
+    desiredStats: ['spd', 'cr', 'cd', 'atk%'],
+    description: 'Lushen, Kaki, etc.',
+  },
+  'bruiser': {
+    name: 'Bruiser',
+    desiredStats: ['hp%', 'atk%', 'cr', 'cd'],
+    description: 'Vigor, Karnal, etc.',
+  },
+  'tank-support': {
+    name: 'Tank/Support',
+    desiredStats: ['hp%', 'def%', 'spd', 'res'],
+    description: 'Fran, Riley, etc.',
+  },
+  'cleave': {
+    name: 'Cleave',
+    desiredStats: ['atk%', 'cr', 'cd', 'spd'],
+    description: 'Poseidon, Zaiross, etc.',
+  },
+  'cc-debuffer': {
+    name: 'CC/Debuffer',
+    desiredStats: ['spd', 'acc', 'hp%', 'def%'],
+    description: 'Tyron, Loren, etc.',
+  },
+}
+
+export const SYNERGY_BONUS = {
+  PERFECT: 8,
+  GOOD: 4,
+  NONE: 0,
+  PENALTY: -3,
+} as const
+
+export interface SynergyResult {
+  bestArchetype: BuildArchetype | null
+  matchCount: number
+  synergyBonus: number
+  allArchetypes: { archetype: BuildArchetype; matchCount: number; matchedStats: StatType[] }[]
+}
+
+// ============================================
 // RUNE ANALYSIS TYPES (computed server-side)
 // ============================================
 
@@ -207,4 +259,11 @@ export interface RuneAnalysis {
   setBonus: string
   /** Number of pieces for set bonus */
   setPieces: number
+  /** Build archetype synergy analysis */
+  synergy?: {
+    bestArchetype: string | null
+    matchCount: number
+    synergyBonus: number
+    allMatches: { archetype: string; matchCount: number; matchedStats: string[] }[]
+  }
 }
