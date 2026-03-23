@@ -374,7 +374,7 @@ export default function GameScanPage() {
               onMaskAdd={masks.length > 0 ? () => {} : undefined}
               onMaskRemove={masks.length > 0 ? () => {} : undefined}
               zonesLocked
-              maskColor="#2d1f14"
+              maskColor="rgba(255, 0, 0, 0.15)"
             />
 
             {/* Results */}

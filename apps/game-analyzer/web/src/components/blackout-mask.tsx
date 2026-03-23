@@ -266,7 +266,7 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
               width: `${displayWidth}%`,
               height: `${displayHeight}%`,
               backgroundColor: maskColor,
-              border: locked ? 'none' : '2px dashed rgba(255, 255, 255, 0.8)',
+              border: locked ? '1px solid rgba(255, 0, 0, 0.3)' : '2px dashed rgba(255, 255, 255, 0.8)',
               cursor: locked ? 'default' : 'move',
               pointerEvents: locked ? 'none' : 'auto',
               boxSizing: 'border-box',

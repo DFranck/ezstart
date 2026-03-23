@@ -283,8 +283,8 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
             top: `${displayTop}%`,
             width: `${displayWidth}%`,
             height: `${displayHeight}%`,
-            border: `2px solid ${zone.color}`,
-            backgroundColor: `${zone.color}26`, // ~15% opacity
+            border: locked ? `1px solid ${zone.color}4D` : `2px solid ${zone.color}`,
+            backgroundColor: locked ? `${zone.color}0D` : `${zone.color}26`,
             cursor: locked ? 'default' : 'move',
             pointerEvents: locked ? 'none' : 'auto',
             boxSizing: 'border-box',
@@ -296,7 +296,8 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
           onTouchStart={locked ? undefined : (e) => handleTouchStart(e, zone.name, 'move')}
           onClick={() => !locked && setSelectedZone(zone.name === selectedZone ? null : zone.name)}
         >
-          {/* Zone label */}
+          {/* Zone label — hidden when locked */}
+          {!locked && (
           <span
             style={{
               position: 'absolute',
@@ -315,6 +316,7 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
           >
             {t(zone.label)}
           </span>
+          )}
 
           {/* Resize handles (corners + edges) — hidden when locked */}
           {!locked && allHandles.map((handle) => (
