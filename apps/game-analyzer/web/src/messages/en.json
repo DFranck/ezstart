@@ -80,6 +80,7 @@
       "zoomOut": "Zoom out",
       "dragToNavigate": "Drag to pan, scroll to zoom"
     },
+    "preprocessedImage": "Image sent to OCR",
     "parsingImproving": "Stats parsing is being improved",
     "profile": {
       "label": "Progression profile",

@@ -1,3 +1,10 @@
+/** Adaptive scale factor based on crop width */
+export function getAdaptiveScale(width: number): number {
+  if (width < 300) return 3
+  if (width < 600) return 2
+  return 1
+}
+
 interface PreprocessOptions {
   /** Upscale factor (default 3) */
   scale?: number

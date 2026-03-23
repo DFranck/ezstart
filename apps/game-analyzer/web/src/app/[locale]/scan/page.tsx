@@ -22,7 +22,7 @@ import { CapturePreview } from '@/components/capture-preview'
 import { EfficiencyDisplay } from '@/components/efficiency-display'
 import { ScanResultRaw } from '@/components/scan-result-raw'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
-import { preprocessForOcr } from '@/utils/image-preprocessing'
+import { preprocessForOcr, getAdaptiveScale } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -84,6 +84,7 @@ export default function ScanPage() {
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
   const [profile, setProfile] = usePlayerProfile(selectedGame)
   const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
+  const [preprocessedPreview, setPreprocessedPreview] = useState<string | null>(null)
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
   // Keep a ref to the latest ROI so callbacks always have the current value
@@ -115,7 +116,14 @@ export default function ScanPage() {
       scanningRef.current = true
 
       // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
-      const processed = preprocessForOcr(frame)
+      const scale = getAdaptiveScale(frame.width)
+      const processed = preprocessForOcr(frame, { scale })
+      // Save a preview of the preprocessed image
+      const previewCanvas = document.createElement('canvas')
+      previewCanvas.width = processed.width
+      previewCanvas.height = processed.height
+      previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
+      setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
       imageDataToBlob(processed).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         scan(
@@ -156,7 +164,14 @@ export default function ScanPage() {
     if (!selectedGame || !currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    const processed = preprocessForOcr(cropped)
+    const scale = getAdaptiveScale(cropped.width)
+    const processed = preprocessForOcr(cropped, { scale })
+    // Save a preview of the preprocessed image
+    const previewCanvas = document.createElement('canvas')
+    previewCanvas.width = processed.width
+    previewCanvas.height = processed.height
+    previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
+    setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
     imageDataToBlob(processed).then((blob) => {
       const file = new File([blob], 'capture.png', { type: 'image/png' })
       scan(
@@ -262,6 +277,13 @@ export default function ScanPage() {
                         confidence={resultData.confidence}
                         parsingFailed={!hasStructuredData}
                       />
+                    )}
+
+                    {preprocessedPreview && (
+                      <Div className="space-y-1">
+                        <P className="text-xs text-muted-foreground">{t('scan.preprocessedImage')}</P>
+                        <img src={preprocessedPreview} alt="Preprocessed" className="w-full border rounded" />
+                      </Div>
                     )}
 
                     {!hasStructuredData && resultData.rawText && (
