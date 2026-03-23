@@ -10,7 +10,7 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GameType, Scan } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import { GameSelector } from '@/components/game-selector'
@@ -26,6 +26,16 @@ import { useFrameDiff } from '@/hooks/use-frame-diff'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
+
+/** Load saved ROI for a given game from localStorage, fallback to DEFAULT_ROI */
+function loadRoi(gameType: GameType): RoiRect {
+  if (typeof window === 'undefined') return DEFAULT_ROI
+  try {
+    const saved = localStorage.getItem(`game-analyzer-roi-${gameType}`)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return DEFAULT_ROI
+}
 
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
@@ -77,7 +87,19 @@ export default function ScanPage() {
   const handleRoiChange = useCallback((newRoi: RoiRect) => {
     setRoi(newRoi)
     roiRef.current = newRoi
-  }, [])
+    if (selectedGame) {
+      localStorage.setItem(`game-analyzer-roi-${selectedGame}`, JSON.stringify(newRoi))
+    }
+  }, [selectedGame])
+
+  // Load saved ROI when selected game changes
+  useEffect(() => {
+    if (selectedGame) {
+      const savedRoi = loadRoi(selectedGame)
+      setRoi(savedRoi)
+      roiRef.current = savedRoi
+    }
+  }, [selectedGame])
 
   // Track whether an auto-scan is in progress to avoid overlapping requests
   const scanningRef = useRef(false)
