@@ -1,121 +1,15 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Div, H1, H2, P } from '@ezstart/ui/components'
-import { useTranslations } from 'next-intl'
-import Image from 'next/image'
-import Link from 'next/link'
-import { use, useState } from 'react'
-import { RuneCard } from '@/components/rune-card'
-import { GearCard } from '@/components/gear-card'
-import { StatDisplay } from '@/components/stat-display'
-import { useScans } from '@/hooks/use-scans'
-import { callApi } from '@/config/api'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-interface ScanDetailPageProps {
-  params: Promise<{ id: string; locale: string }>
-}
+/** Legacy /scan/[id] route — redirects to homepage for game selection */
+export default function LegacyScanDetailPage() {
+  const router = useRouter()
 
-export default function ScanDetailPage({ params }: ScanDetailPageProps) {
-  const { id } = use(params)
-  const t = useTranslations()
-  const { data: scans } = useScans()
-  const [isDeleting, setIsDeleting] = useState(false)
+  useEffect(() => {
+    router.replace('/')
+  }, [router])
 
-  const scan = scans?.find((s) => s.id === id)
-
-  async function handleDelete() {
-    if (!confirm(t('scanDetail.deleteConfirm'))) return
-    setIsDeleting(true)
-    try {
-      await callApi(`/scans/${id}`, { method: 'DELETE' })
-      window.history.back()
-    } catch {
-      setIsDeleting(false)
-    }
-  }
-
-  if (!scan) {
-    return (
-      <Div className="container mx-auto px-4 py-8 max-w-2xl text-center">
-        <P className="text-muted-foreground">{t('labels.noScans')}</P>
-        <Button asChild variant="outline" className="mt-4">
-          <Link href="/">{t('actions.back')}</Link>
-        </Button>
-      </Div>
-    )
-  }
-
-  return (
-    <Div className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
-      {/* Header */}
-      <Div className="flex items-center justify-between">
-        <H1 className="text-2xl font-bold">{t('scanDetail.title')}</H1>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/">{t('actions.back')}</Link>
-        </Button>
-      </Div>
-
-      {/* Scanned Image */}
-      <Card>
-        <CardHeader>
-          <H2 className="text-lg font-medium">{t('scanDetail.scannedImage')}</H2>
-        </CardHeader>
-        <CardContent>
-          <Div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-            <Image
-              src={scan.imageUrl}
-              alt="Scanned image"
-              fill
-              className="object-contain"
-            />
-          </Div>
-        </CardContent>
-      </Card>
-
-      {/* Parsed Stats */}
-      {scan.result && (
-        <>
-          <Card>
-            <CardHeader>
-              <H2 className="text-lg font-medium">{t('scanDetail.parsedStats')}</H2>
-            </CardHeader>
-            <CardContent>
-              {scan.gameType === 'summoners-war' && 'set' in scan.result.data ? (
-                <RuneCard rune={scan.result.data} confidence={scan.result.confidence} />
-              ) : 'manufacturer' in scan.result.data ? (
-                <GearCard gear={scan.result.data} confidence={scan.result.confidence} />
-              ) : null}
-            </CardContent>
-          </Card>
-
-          {/* Confidence */}
-          <Card>
-            <CardHeader>
-              <H2 className="text-lg font-medium">{t('scanDetail.confidenceScore')}</H2>
-            </CardHeader>
-            <CardContent>
-              <StatDisplay
-                label={t('labels.confidence')}
-                value={`${Math.round(scan.result.confidence * 100)}%`}
-              />
-              <StatDisplay
-                label={t('labels.processingTime')}
-                value={`${scan.result.processingTimeMs}ms`}
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
-
-      {/* Delete */}
-      <Button
-        variant="destructive"
-        className="w-full"
-        onClick={handleDelete}
-        disabled={isDeleting}
-      >
-        {t('actions.delete')}
-      </Button>
-    </Div>
-  )
+  return null
 }

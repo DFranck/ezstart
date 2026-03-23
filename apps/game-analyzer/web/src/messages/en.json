@@ -5,8 +5,10 @@
     "loading": "Loading..."
   },
   "nav": {
+    "home": "Home",
     "dashboard": "Dashboard",
     "scan": "Scan",
+    "bench": "Bench",
     "history": "History"
   },
   "actions": {
@@ -44,6 +46,21 @@
   "games": {
     "summoners-war": "Summoners War",
     "nikke": "Nikke"
+  },
+  "home": {
+    "selectGame": "Select a game to get started"
+  },
+  "bench": {
+    "title": "OCR Bench",
+    "launch": "Upload image & run bench",
+    "running": "Running bench...",
+    "results": "Results",
+    "bestPreset": "Best preset",
+    "preset": "Preset",
+    "substats": "Substats",
+    "time": "Time",
+    "status": "Status",
+    "imageSize": "Image size"
   },
   "dashboard": {
     "title": "Game Analyzer",

@@ -1,14 +1,17 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, H1, H2, P, Div } from '@ezstart/ui/components'
+import { Card, CardContent, Div, H1, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ScanCard } from '@/components/scan-card'
-import { useScans } from '@/hooks/use-scans'
+import type { GameType } from '@game-analyzer/types'
 
-export default function DashboardPage() {
+const games: { type: GameType; icon: string }[] = [
+  { type: 'summoners-war', icon: '⚔️' },
+  { type: 'nikke', icon: '🔫' },
+]
+
+export default function HomePage() {
   const t = useTranslations()
-  const { data: scans, isLoading } = useScans({ limit: 5 })
 
   return (
     <Div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -18,43 +21,22 @@ export default function DashboardPage() {
         <P className="text-muted-foreground">{t('dashboard.subtitle')}</P>
       </Div>
 
-      {/* Main CTA */}
-      <Div className="mb-8">
-        <Button asChild size="lg" className="w-full py-6 text-lg">
-          <Link href="/scan">{t('dashboard.scanButton')}</Link>
-        </Button>
+      {/* Game Selection */}
+      <Div className="mb-6">
+        <P className="text-sm font-medium mb-3 text-center">{t('home.selectGame')}</P>
       </Div>
 
-      {/* Recent Scans */}
-      <Div className="space-y-4">
-        <Div className="flex items-center justify-between">
-          <H2 className="text-xl font-semibold">{t('dashboard.recentScans')}</H2>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/history">{t('dashboard.viewHistory')}</Link>
-          </Button>
-        </Div>
-
-        {isLoading ? (
-          <Div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="h-20" />
-              </Card>
-            ))}
-          </Div>
-        ) : scans && scans.length > 0 ? (
-          <Div className="space-y-3">
-            {scans.map((scan) => (
-              <ScanCard key={scan.id} scan={scan} />
-            ))}
-          </Div>
-        ) : (
-          <Card>
-            <CardHeader>
-              <P className="text-center text-muted-foreground">{t('labels.noScans')}</P>
-            </CardHeader>
-          </Card>
-        )}
+      <Div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {games.map((game) => (
+          <Link key={game.type} href={`/${game.type}/scan`}>
+            <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <span className="text-4xl mb-3">{game.icon}</span>
+                <P className="text-lg font-semibold">{t(`games.${game.type}`)}</P>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </Div>
     </Div>
   )

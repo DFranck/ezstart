@@ -28,7 +28,7 @@ export function ScanCard({ scan }: ScanCardProps) {
   })
 
   return (
-    <Link href={`/scan/${scan.id}`}>
+    <Link href={`/${scan.gameType}/scan/${scan.id}`}>
       <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
         <CardContent className="flex items-center justify-between py-4">
           <Div className="flex items-center gap-3">
