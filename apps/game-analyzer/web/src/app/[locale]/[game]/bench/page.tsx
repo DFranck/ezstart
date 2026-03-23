@@ -14,10 +14,6 @@ import type { GameType } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import { CapturePreview } from '@/components/capture-preview'
 import { OcrDebugPanel } from '@/components/ocr-debug-panel'
-import { RuneCard } from '@/components/rune-card'
-import { GearCard } from '@/components/gear-card'
-import { ScanResultRaw } from '@/components/scan-result-raw'
-import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
@@ -77,11 +73,10 @@ export default function BenchPage() {
   const params = useParams()
   const game = params.game as GameType
 
-  const [profile, setProfile] = usePlayerProfile(game)
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
   const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const [presetsSaved, setPresetsSaved] = useState(false)
-  const { mutate: scan, data: scanResult, isPending, reset } = useScan()
+  const { mutate: scan, data: scanResult, isPending } = useScan()
 
   const roiRef = useRef<RoiRect>(roi)
   const fullFrameRef = useRef<ImageData | null>(null)
@@ -142,14 +137,13 @@ export default function BenchPage() {
             imageAlt: altFile,
             imageFull: fullFile,
             gameType: game,
-            profile,
             benchMode: true,
           },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
     },
-    [game, scan, profile]
+    [game, scan]
   )
 
   const handleSignificantChange = useCallback(
@@ -218,7 +212,6 @@ export default function BenchPage() {
 
   const isAnalyzing = isPending
   const resultData = scanResult
-  const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
     <Div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -227,11 +220,6 @@ export default function BenchPage() {
         <P className="text-sm text-muted-foreground">
           {t(`games.${game}`)} — R&D: {t('bench.description', { defaultMessage: 'tests all 8 presets on 3 image sources to find the best OCR configuration' })}
         </P>
-      </Div>
-
-      {/* Profile selector */}
-      <Div className="mb-6">
-        <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
       </Div>
 
       <Div className="space-y-6">
@@ -273,29 +261,17 @@ export default function BenchPage() {
         {/* Results */}
         {resultData && (
           <Div className="space-y-4">
-            {/* Merged result card */}
-            {resultData.unreliable && (
-              <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
-                <P className="text-sm text-yellow-600 dark:text-yellow-400">
-                  {t('scan.unreliableResult')}
-                </P>
-              </Div>
-            )}
-
-            {hasStructuredData && resultData.success && game === 'summoners-war' && 'set' in resultData.data && (
-              <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
-            )}
-            {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
-              <GearCard gear={resultData.data} confidence={resultData.confidence} />
-            )}
-
-            {resultData.rawText && (
-              <ScanResultRaw
-                rawText={resultData.rawText}
-                confidence={resultData.confidence}
-                parsingFailed={!hasStructuredData}
-              />
-            )}
+            {/* Merged result summary */}
+            <Div className="rounded-md bg-muted/50 border px-3 py-2">
+              <P className="text-sm font-medium">
+                {t('labels.confidence')}: {resultData.confidence}%
+                {resultData.rawText && (
+                  <span className="ml-4 text-muted-foreground">
+                    Raw: {resultData.rawText.substring(0, 120)}{resultData.rawText.length > 120 ? '...' : ''}
+                  </span>
+                )}
+              </P>
+            </Div>
 
             {/* Bench results table */}
             {resultData.benchResults && resultData.benchResults.length > 0 && (
@@ -361,7 +337,7 @@ export default function BenchPage() {
                 previews={ocrPreviews}
                 sources={resultData.ocrSources}
                 mergedConfidence={resultData.confidence}
-                mergedSubs={resultData.data && 'subStats' in resultData.data ? (resultData.data as any).subStats?.length || 0 : 0}
+                mergedSubs={resultData.benchResults?.find(r => r.success)?.subsCount ?? 0}
               />
             )}
           </Div>
