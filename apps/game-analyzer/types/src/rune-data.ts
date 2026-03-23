@@ -266,6 +266,6 @@ export interface RuneAnalysis {
     bestArchetype: string | null
     matchCount: number
     synergyBonus: number
-    allMatches: { archetype: string; matchCount: number; matchedStats: string[] }[]
+    allArchetypes: { archetype: string; matchCount: number; matchedStats: string[] }[]
   }
 }

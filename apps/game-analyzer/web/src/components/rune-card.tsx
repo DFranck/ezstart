@@ -260,7 +260,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
               {(() => {
                 const bestArch = analysis.synergy.bestArchetype as BuildArchetype
                 const desired = BUILD_ARCHETYPES[bestArch]?.desiredStats ?? []
-                const bestMatch = analysis.synergy.allMatches?.find(m => m.archetype === bestArch)
+                const bestMatch = analysis.synergy.allArchetypes?.find(m => m.archetype === bestArch)
                 const matchedStats = bestMatch?.matchedStats ?? []
                 return (
                   <Div className="flex flex-wrap gap-2">
