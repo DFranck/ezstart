@@ -74,7 +74,7 @@ describe('rune-efficiency', () => {
       // Perfect: each roll at max
       // SPD: 2 rolls * 6 = 12, CR: 2 rolls * 6 = 12, CD: 2 rolls * 7 = 14, ATK%: 2 rolls * 8 = 16
       // rawSum = 12/6 + 12/6 + 14/7 + 16/8 = 2+2+2+2 = 8
-      // efficiency = (8+1)/2.8*100 = 321.43
+      // efficiency = (8+1)/9*100 = 100%
       const rune = makeRune({
         level: 12,
         quality: 'legend',
@@ -88,9 +88,9 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      expect(result.currentEfficiency).toBeCloseTo(321.43, 0)
+      expect(result.currentEfficiency).toBeCloseTo(100, 0)
       expect(result.efficiency).toBe(result.currentEfficiency)
-      expect(result.maxEfficiency).toBeCloseTo(321.43, 0)
+      expect(result.maxEfficiency).toBeCloseTo(100, 0)
       expect(result.tier).toBe('godlike')
       expect(result.quality).toBe('legend')
       expect(result.totalRolls).toBe(8)
@@ -124,7 +124,7 @@ describe('rune-efficiency', () => {
       // Average rolls: midpoint between min and max
       // SPD: 2 rolls * 5 = 10, CR: 2 rolls * 5 = 10, HP%: 2 rolls * 6.5 ≈ 13, DEF%: 2 rolls * 6.5 ≈ 13
       // rawSum = 10/6 + 10/6 + 13/8 + 13/8 = 1.67+1.67+1.625+1.625 = 6.59
-      // eff = (6.59+1)/2.8*100 = 271%
+      // eff = (6.59+1)/9*100 = 84.3%
       const rune = makeRune({
         level: 12,
         quality: 'legend',
@@ -139,14 +139,14 @@ describe('rune-efficiency', () => {
       const result = analyzeRune(rune)
 
       expect(result.tier).toBe('godlike') // high efficiency
-      expect(result.currentEfficiency).toBeGreaterThan(200)
+      expect(result.currentEfficiency).toBeGreaterThan(80)
     })
   })
 
   describe('analyzeRune — mediocre rune (sell)', () => {
     it('returns sell for a rune with very low efficiency and no grind potential', () => {
       // A rune with no substats at all (e.g. normal quality, all rolls wasted)
-      // rawSum = 0, eff = (0 + 1)/2.8*100 = 35.7%, grind can't help
+      // rawSum = 0, eff = (0 + 1)/9*100 = 11.1%, grind can't help
       const rune = makeRune({
         level: 12,
         quality: 'normal',
@@ -171,9 +171,9 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      // eff = (0.5+0.5+1)/2.8*100 = 71.4% — actually great
-      // Low individual rolls but still decent efficiency
-      expect(result.currentEfficiency).toBeCloseTo(71.43, 0)
+      // eff = (0.5+0.5+1)/9*100 = 22.2%
+      // Low individual rolls and low efficiency
+      expect(result.currentEfficiency).toBeCloseTo(22.22, 0)
     })
   })
 
@@ -324,7 +324,7 @@ describe('rune-efficiency', () => {
       const potential = calculatePotentialEfficiency(rune)
       const current = analyzeRune(rune)
 
-      expect(potential).toBeGreaterThan(current.currentEfficiency + 50)
+      expect(potential).toBeGreaterThan(current.currentEfficiency + 15)
     })
   })
 

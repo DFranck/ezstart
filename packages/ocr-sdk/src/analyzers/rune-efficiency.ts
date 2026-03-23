@@ -150,8 +150,8 @@ const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
   'cruel': { pieces: 2, bonus: 'ATK +12%' },
 }
 
-/** Barion divisor: theoretical max is (8 perfect rolls + 1 main) / 2.8 */
-const BARION_DIVISOR = 2.8
+/** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
+const BARION_DIVISOR = 9
 
 /** Total upgrade rolls at +12 (at +3, +6, +9, +12) */
 const MAX_ROLLS_AT_PLUS_12 = 4
