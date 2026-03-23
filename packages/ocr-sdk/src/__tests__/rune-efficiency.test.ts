@@ -496,41 +496,45 @@ describe('rune-efficiency', () => {
     })
 
     it('rune +6 mid game — tests level strictness malus of +7', () => {
+      // Use low-value subs so potential at +12 isn't too high
       const rune = makeRune({
         level: 6,
         quality: 'legend',
         subStats: [
-          { type: 'spd', value: 10 },
-          { type: 'cr', value: 10 },
-          { type: 'hp%', value: 10 },
-          { type: 'def%', value: 10 },
+          { type: 'res', value: 4 },   // 4/8 = 0.5
+          { type: 'acc', value: 4 },   // 4/8 = 0.5
+          { type: 'hp', value: 135 },  // 135/375 = 0.36
+          { type: 'def', value: 10 },  // 10/20 = 0.5
         ],
       })
 
       const result = analyzeRune(rune, 'mid')
-      // efficiency ~75.9%, grind bonus = 5 => finalEff = 80.9
-      // At +6, strictness = 7 => adjusted thresholds: good=77, great=87, godlike=92
-      // 80.9 >= 77 (adjusted good) but < 87 (adjusted great) => good
-      expect(result.adjustedTier).toBe('good')
+      // Legend +6: getRollCount = 2, remaining = 2 upgrades
+      // rawSum = 0.5+0.5+0.36+0.5 = 1.86
+      // potential = (1.86 + 2 + 1) / 9 * 100 = 54%
+      // grind bonus from hp+def (grindable), synergy bonus likely negative
+      // At +6, strictness = 7 => adjusted keep threshold = 60+7 = 67
+      // 54% + grind + synergy should be < 67 => sell
+      expect(result.adjustedTier).toBe('sell')
       expect(result.levelStrictness).toBe(7)
     })
 
     it('rune +0 late game — tests level strictness malus of +15', () => {
+      // Use a magic rune (1 sub at +0) with low value — very low potential
       const rune = makeRune({
         level: 0,
-        quality: 'legend',
+        quality: 'magic',
         subStats: [
-          { type: 'spd', value: 6 },
-          { type: 'cr', value: 6 },
-          { type: 'cd', value: 7 },
-          { type: 'hp%', value: 8 },
+          { type: 'res', value: 4 },   // 4/8 = 0.5
         ],
       })
 
       const result = analyzeRune(rune, 'late')
-      // efficiency = (6/6 + 6/6 + 7/7 + 8/8 + 1)/9*100 = (4+1)/9*100 = 55.6%
+      // Magic +0: getRollCount = 0, remaining = 1 upgrade, newSubs = 3
+      // rawSum = 0.5
+      // potential = (0.5 + 1 + 3 + 1) / 9 * 100 = 61.1%
       // At +0, strictness = 15
-      // late thresholds: keep=70+15=85, good=80+15=95 => 55.6% < 85 => sell
+      // late thresholds: keep=70+15=85 => 61.1% + grind + synergy < 85 => sell
       expect(result.adjustedTier).toBe('sell')
       expect(result.levelStrictness).toBe(15)
     })

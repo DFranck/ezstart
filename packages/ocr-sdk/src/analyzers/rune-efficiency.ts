@@ -273,23 +273,37 @@ export function estimateRolls(
 }
 
 /**
+ * Get the number of substats the rune should have at a given level for a quality.
+ * SW rules: new subs are added first (at +3, +6, …) until 4 subs, then upgrades.
+ */
+function getExpectedSubstatCount(quality: RuneQuality, level: number): number {
+  const base = SUBSTATS_BY_QUALITY[quality]
+  const powerups = Math.floor(Math.min(level, 12) / 3)
+  // Each powerup adds a new sub until we reach 4, then upgrades start
+  return Math.min(base + powerups, 4)
+}
+
+/**
  * Get the number of upgrade rolls that have occurred at a given level for a quality.
- * SW rules: upgrades happen FIRST (on existing subs), then new subs are added.
- * Only upgrades of existing subs count as rolls.
+ * SW rules: new subs are added first until 4 subs exist, then remaining powerups are upgrades.
  */
 function getRollCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3)
-  return Math.min(powerups, base) // upgrades first, only existing subs get rolled
+  // New subs needed to reach 4
+  const newSubsNeeded = Math.max(0, 4 - base)
+  // Powerups that go to new subs first, then upgrades
+  const newSubsAdded = Math.min(powerups, newSubsNeeded)
+  return Math.max(0, powerups - newSubsAdded)
 }
 
 /**
  * Calculate how many upgrade rolls remain before +12 for a given quality.
  */
 function remainingRolls(quality: RuneQuality, level: number): number {
-  const totalUpgrades = UPGRADES_BY_QUALITY[quality]
+  const rollsAt12 = getRollCount(quality, 12)
   const rollsDone = getRollCount(quality, level)
-  return Math.max(0, totalUpgrades - rollsDone)
+  return Math.max(0, rollsAt12 - rollsDone)
 }
 
 /**
@@ -418,12 +432,17 @@ function weightedEfficiency(substats: RuneStat[]): number {
 }
 
 /**
- * Calculate potential efficiency at +12 (remaining rolls at max).
+ * Calculate potential efficiency at +12 (remaining rolls and new subs at max).
  * If the rune is already +12 or higher, potential = current (no rolls left).
  */
-export function calculatePotentialEfficiency(rune: RuneData): number {
-  const quality = detectQuality(rune)
-  const remaining = remainingRolls(quality, rune.level)
+export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: RuneQuality): number {
+  const quality = qualityOverride ?? detectQuality(rune)
+  const remainingUpgrades = remainingRolls(quality, rune.level)
+
+  // New subs that will be added between current level and +12
+  const currentSubs = getExpectedSubstatCount(quality, rune.level)
+  const maxSubs = getExpectedSubstatCount(quality, 12) // always 4
+  const newSubsRemaining = Math.max(0, maxSubs - currentSubs)
 
   let rawSum = 0
   for (const sub of rune.subStats) {
@@ -432,31 +451,39 @@ export function calculatePotentialEfficiency(rune: RuneData): number {
     rawSum += sub.value / range.max
   }
 
-  // If no rolls remaining, potential equals current
-  if (remaining <= 0) {
+  // If no rolls and no new subs remaining, potential equals current
+  if (remainingUpgrades <= 0 && newSubsRemaining <= 0) {
     return ((rawSum + 1) / BARION_DIVISOR) * 100
   }
 
-  // Each remaining perfect roll adds 1.0 to rawSum
-  // Max rawSum = 4 (initial subs) + total upgrades for this quality
-  const maxRawSum = 4 + UPGRADES_BY_QUALITY[quality]
-  const potentialRawSum = Math.min(rawSum + remaining, maxRawSum)
-  return ((potentialRawSum + 1) / BARION_DIVISOR) * 100
+  // Each remaining upgrade at max adds 1.0 to rawSum
+  rawSum += remainingUpgrades * 1.0
+
+  // Each new sub at max initial value adds 1.0 to rawSum
+  rawSum += newSubsRemaining * 1.0
+
+  return ((rawSum + 1) / BARION_DIVISOR) * 100
 }
 
 /**
  * Calculate grind potential — efficiency gain from legend grinds on all grindable substats.
+ * The grind bonus is computed as the raw sum delta from grinds, expressed in Barion %.
+ * This bonus can be added to any base efficiency (current or potential).
  */
 function calculateGrindPotential(
   substats: SubstatAnalysis[],
-  currentEfficiency: number,
+  baseEfficiency: number,
 ): GrindPotential {
   const substatsToGrind: GrindPotential['substatsToGrind'] = []
   let grindedRawSum = 0
+  let currentRawSum = 0
 
   for (const sub of substats) {
     const range = ROLL_RANGES[sub.type]
     if (!range) continue
+
+    const ratio = sub.value / range.max
+    currentRawSum += ratio
 
     if (sub.isGrindable && sub.grindRange) {
       const afterGrind = sub.value + sub.grindRange.max
@@ -467,17 +494,19 @@ function calculateGrindPotential(
       })
       grindedRawSum += afterGrind / range.max
     } else {
-      grindedRawSum += sub.value / range.max
+      grindedRawSum += ratio
     }
   }
 
-  const efficiencyAfterGrind = ((grindedRawSum + 1) / BARION_DIVISOR) * 100
-  const grindGain = efficiencyAfterGrind - currentEfficiency
+  // Grind bonus in Barion % points
+  const grindBonusRaw = grindedRawSum - currentRawSum
+  const grindBonusPercent = (grindBonusRaw / BARION_DIVISOR) * 100
+  const efficiencyAfterGrind = baseEfficiency + grindBonusPercent
 
   return {
-    currentEfficiency,
+    currentEfficiency: baseEfficiency,
     efficiencyAfterGrind: Math.round(efficiencyAfterGrind * 100) / 100,
-    grindGain: Math.round(grindGain * 100) / 100,
+    grindGain: Math.round(grindBonusPercent * 100) / 100,
     substatsToGrind,
   }
 }
@@ -622,19 +651,25 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   const currentEfficiency = barionEfficiency(rune.subStats)
   const currentWeightedEfficiency = weightedEfficiency(rune.subStats)
-  const potentialEfficiency = calculatePotentialEfficiency(rune)
+  const potentialEfficiency = calculatePotentialEfficiency(rune, quality)
 
-  // Max efficiency: 8 perfect rolls + 1 main = (8 + 1) / 2.8 * 100
+  // Max efficiency: 8 perfect rolls + 1 main = (8 + 1) / 9 * 100
   const maxEfficiency = ((8 + 1) / BARION_DIVISOR) * 100
 
-  const grindPotential = calculateGrindPotential(substats, currentEfficiency)
+  // Grind potential is based on the potential at +12 (you grind after +12)
+  const grindPotential = calculateGrindPotential(substats, potentialEfficiency)
 
   // Calculate synergy (include innate stat for archetype matching)
   const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
-  // Tier based on weightedEfficiency (not raw Barion)
+  // For pre-+12 runes, use potential efficiency for tier (should we keep powering up?)
+  // For +12+ runes, use weighted efficiency (current value of the rune)
+  const remaining = remainingRolls(quality, rune.level)
+  const efficiencyForTier = remaining > 0 ? potentialEfficiency : currentWeightedEfficiency
+
+  // Tier based on the appropriate efficiency metric
   const tier = getRecommendation(
-    currentWeightedEfficiency,
+    efficiencyForTier,
     12,
     profile,
     grindPotential.grindGain,
@@ -645,7 +680,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12)
   const levelStrictness = LEVEL_STRICTNESS[levelKey] ?? 0
   const adjustedTier = getRecommendation(
-    currentWeightedEfficiency,
+    efficiencyForTier,
     rune.level,
     profile,
     grindPotential.grindGain,
@@ -662,12 +697,11 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const setBonus = setInfo?.bonus ?? ''
   const setPieces = setInfo?.pieces ?? 0
 
-  // Grinded efficiency: no cap — grinds add real value, can exceed 100%
+  // Grinded efficiency = potential + grind bonus (no cap — grinds add real value)
   const roundedGrindedEfficiency = Math.round(grindPotential.efficiencyAfterGrind * 100) / 100
-  const grindGainValue = Math.round(Math.max(0, roundedGrindedEfficiency - roundedCurrent) * 100) / 100
+  const grindGainValue = Math.round(Math.max(0, grindPotential.grindGain) * 100) / 100
 
   // Potential efficiency: at +12 or above, no remaining rolls → potential = weighted (current)
-  const remaining = remainingRolls(quality, rune.level)
   const finalPotential = remaining <= 0 ? roundedWeighted : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   return {
