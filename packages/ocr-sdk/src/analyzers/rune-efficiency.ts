@@ -327,6 +327,7 @@ function barionEfficiency(substats: RuneStat[]): number {
 
 /**
  * Calculate potential efficiency at +12 (remaining rolls at max).
+ * If the rune is already +12 or higher, potential = current (no rolls left).
  */
 export function calculatePotentialEfficiency(rune: RuneData): number {
   const remaining = remainingRolls(rune.level)
@@ -336,6 +337,11 @@ export function calculatePotentialEfficiency(rune: RuneData): number {
     const range = ROLL_RANGES[sub.type]
     if (!range || sub.value <= 0) continue
     rawSum += sub.value / range.max
+  }
+
+  // If no rolls remaining, potential equals current
+  if (remaining <= 0) {
+    return ((rawSum + 1) / BARION_DIVISOR) * 100
   }
 
   // Each remaining perfect roll adds 1.0 to rawSum

@@ -152,7 +152,7 @@ describe('summonersWarParser', () => {
       )
     })
 
-    it('parses Cruel Rage rune with Hero quality', () => {
+    it('parses Cruel Rage rune with Hero quality and innate stat', () => {
       const text =
         'a (#412 Cruel Rage Rune (1) ATK +118 Hero CRI Dmg +4% CRI Rate +11% SPD +14 ATK +14% HP +10% 4 Set : CRI Dmg +40%'
 
@@ -166,14 +166,22 @@ describe('summonersWarParser', () => {
         mainStat: { type: 'atk', value: 118 },
       })
 
-      const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+        quality: string
+      }
       expect(data.quality).toBe('hero')
-      expect(data.subStats.length).toBeGreaterThanOrEqual(3)
+      // 5 stats found → first (CD +4) is innate, remaining 4 are substats
+      expect(data.innateStat).toBeDefined()
+      expect(data.innateStat).toMatchObject({ type: 'cd', value: 4 })
+      expect(data.subStats).toHaveLength(4)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ type: 'cd', value: 4 }),
           expect.objectContaining({ type: 'cr', value: 11 }),
           expect.objectContaining({ type: 'spd', value: 14 }),
+          expect.objectContaining({ type: 'atk%', value: 14 }),
+          expect.objectContaining({ type: 'hp%', value: 10 }),
         ]),
       )
     })
@@ -419,7 +427,7 @@ describe('summonersWarParser', () => {
   })
 
   describe('real noisy OCR — Focus Rune example', () => {
-    it('parses the full noisy Focus Rune OCR text correctly (multiline SPD)', () => {
+    it('parses the full noisy Focus Rune OCR text correctly (multiline SPD + innate)', () => {
       const text = [
         '1% +12 Quick Focus Rune (1) v',
         'yg Axes Legend',
@@ -444,22 +452,27 @@ describe('summonersWarParser', () => {
         mainStat: { type: 'atk', value: 118 },
       })
 
-      const data = result.data as { subStats: { type: string; value: number }[] }
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
 
+      // 5 stats found (acc, hp, atk%, cr, spd via multiline) → first is innate
+      // The first stat extracted is HP +194 (acc is the first inline stat)
+      expect(data.innateStat).toBeDefined()
       // SW rule: max 4 substats per rune
-      expect(data.subStats.length).toBeLessThanOrEqual(4)
+      expect(data.subStats).toHaveLength(4)
 
-      // Inline stats take priority (ACC, HP, ATK%, CR found before multiline SPD)
+      // The remaining substats should include atk%, cr
       expect(data.subStats).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ type: 'acc', value: 27 }),
           expect.objectContaining({ type: 'atk%', value: 13 }),
           expect.objectContaining({ type: 'cr', value: 12 }),
         ]),
       )
     })
 
-    it('parses real OCR with SPD +6 on same line as noise (slot 1 hardcode)', () => {
+    it('parses real OCR with SPD +6 as innate stat (slot 1 hardcode)', () => {
       const text = [
         'a 412 Quick Focus Rune (1) v',
         'yg Axes Legend',
@@ -484,17 +497,21 @@ describe('summonersWarParser', () => {
         mainStat: { type: 'atk', value: 118 },
       })
 
-      const data = result.data as { subStats: { type: string; value: number }[] }
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      // 5 stats found → first (SPD +6) is the innate stat
+      expect(data.innateStat).toBeDefined()
+      expect(data.innateStat).toMatchObject({ type: 'spd', value: 6 })
 
       // SW rule: max 4 substats per rune
-      expect(data.subStats.length).toBeLessThanOrEqual(4)
+      expect(data.subStats).toHaveLength(4)
 
-      // SPD +6 should be a substat, NOT main stat
-      expect(data.subStats).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ type: 'spd', value: 6 }),
-        ]),
-      )
+      // SPD +6 should NOT appear in substats (it's the innate)
+      const spdSubs = data.subStats.filter((s: { type: string }) => s.type === 'spd')
+      expect(spdSubs).toHaveLength(0)
 
       // ATK flat should NOT appear in substats (it's the main stat type)
       const atkFlatSubs = data.subStats.filter((s: { type: string }) => s.type === 'atk')
@@ -503,7 +520,9 @@ describe('summonersWarParser', () => {
       // ATK +13% should be a substat
       expect(data.subStats).toEqual(
         expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 27 }),
           expect.objectContaining({ type: 'atk%', value: 13 }),
+          expect.objectContaining({ type: 'cr', value: 12 }),
         ]),
       )
     })
@@ -519,6 +538,73 @@ describe('summonersWarParser', () => {
       expect(result.success).toBe(true)
       const data = result.data as { subStats: { type: string; value: number }[] }
       expect(data.subStats.length).toBeLessThanOrEqual(4)
+    })
+  })
+
+  describe('innate stat detection', () => {
+    it('detects innate stat when 5 stats found on a Legend rune (slot 1)', () => {
+      const text = [
+        'Focus Rune (1)',
+        '+12',
+        'Legend',
+        'SPD +6',
+        'Accuracy +27%',
+        'HP +194',
+        'ATK +13%',
+        'CRI Rate +12%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      // Slot 1 → main stat is ATK flat (hardcoded)
+      expect(data.mainStat).toMatchObject({ type: 'atk', value: 118 })
+
+      // SPD +6 is the innate stat (first stat after main, 5 stats total)
+      expect(data.innateStat).toBeDefined()
+      expect(data.innateStat).toMatchObject({ type: 'spd', value: 6 })
+
+      // Remaining 4 substats should NOT include SPD +6
+      expect(data.subStats).toHaveLength(4)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 27 }),
+          expect.objectContaining({ type: 'atk%', value: 13 }),
+          expect.objectContaining({ type: 'cr', value: 12 }),
+        ]),
+      )
+      const spdSubs = data.subStats.filter(s => s.type === 'spd')
+      expect(spdSubs).toHaveLength(0)
+    })
+
+    it('does not set innate when only 4 substats on Legend rune', () => {
+      const text = [
+        'Violent Rune (6)',
+        '+15',
+        'Legend',
+        'ATK +160',
+        'SPD +23',
+        'CRI Rate +12%',
+        'CRI Dmg +7%',
+        'HP +8%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      expect(data.innateStat).toBeUndefined()
+      expect(data.subStats).toHaveLength(4)
     })
   })
 

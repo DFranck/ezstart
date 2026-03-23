@@ -448,18 +448,21 @@ function isValidSubstatValue(stat: RuneStat): boolean {
 }
 
 /**
- * Determine main stat vs substats.
+ * Determine main stat vs substats, and detect innate stat.
  *
  * Strategy:
  * - For slots 1, 3, 5: main stat is hardcoded (ATK flat, DEF flat, HP flat)
  * - For slots 2, 4, 6: main stat is the FIRST stat after the rune name
  * - Substats are validated against known ranges
+ * - If more than 4 substats remain after main stat extraction and quality is
+ *   legend (or inferred), the first substat is treated as innate stat.
  */
 function separateMainAndSubs(
   allStats: (RuneStat & { _index: number })[],
   slot: RuneSlot | null,
   level: number | null,
-): { mainStat: RuneStat | null; subStats: RuneStat[] } {
+  quality: RuneQuality | null,
+): { mainStat: RuneStat | null; subStats: RuneStat[]; innateStat?: RuneStat } {
   if (allStats.length === 0 && !slot) return { mainStat: null, subStats: [] }
 
   // For slots 1, 3, 5: hardcode the main stat
@@ -485,7 +488,7 @@ function separateMainAndSubs(
     const mainStat: RuneStat = { type: fixedMain.type, value: mainValue }
 
     // All found stats become substats, except the main stat type (flat only)
-    const subStats = allStats
+    let subStats = allStats
       .filter(s => {
         // Remove the matched main stat occurrence
         if (matchingStatIdx >= 0 && s._index === allStats[matchingStatIdx]!._index) return false
@@ -497,22 +500,35 @@ function separateMainAndSubs(
       })
       .map(({ type, value }) => ({ type, value }))
       .filter(isValidSubstatValue)
-      .slice(0, MAX_SUBSTATS)
 
-    return { mainStat, subStats }
+    // Innate stat detection: if we have more than 4 substats and the rune
+    // appears to be legend quality, the first stat is the innate (prefix) stat.
+    let innateStat: RuneStat | undefined
+    if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
+      innateStat = subStats.shift()
+    }
+    subStats = subStats.slice(0, MAX_SUBSTATS)
+
+    return { mainStat, subStats, innateStat }
   }
 
   // Slots 2, 4, 6 or unknown slot: first stat is main
   if (allStats.length === 0) return { mainStat: null, subStats: [] }
 
   const mainStat = { type: allStats[0]!.type, value: allStats[0]!.value }
-  const subStats = allStats
+  let subStats = allStats
     .slice(1)
     .map(({ type, value }) => ({ type, value }))
     .filter(isValidSubstatValue)
-    .slice(0, MAX_SUBSTATS)
 
-  return { mainStat, subStats }
+  // Innate stat detection for non-fixed slots
+  let innateStat: RuneStat | undefined
+  if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
+    innateStat = subStats.shift()
+  }
+  subStats = subStats.slice(0, MAX_SUBSTATS)
+
+  return { mainStat, subStats, innateStat }
 }
 
 /**
@@ -599,7 +615,9 @@ export const summonersWarParser: GameParser = {
       }
     }
 
-    const { mainStat, subStats } = separateMainAndSubs(allStats, slot, level)
+    const { mainStat, subStats, innateStat } = separateMainAndSubs(
+      allStats, slot, level, qualityInfo?.quality ?? null,
+    )
 
     // --- Parse set piece count ---
     const setPieceCountMatch = normalized.match(/(\d)\s*set\s*:/i)
@@ -619,6 +637,7 @@ export const summonersWarParser: GameParser = {
       level: level ?? 0,
       mainStat,
       subStats,
+      ...(innateStat ? { innateStat } : {}),
       ...(qualityInfo ? { quality: qualityInfo.quality } : {}),
       ...(setPieceCount ? { setPieceCount } : {}),
     })

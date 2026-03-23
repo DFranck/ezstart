@@ -287,7 +287,7 @@ describe('rune-efficiency', () => {
       expect(potential).toBeGreaterThan(current.currentEfficiency)
     })
 
-    it('returns same as current for a +12 rune', () => {
+    it('returns same as current for a +12 rune (no remaining rolls)', () => {
       const rune = makeRune({
         level: 12,
         subStats: [
@@ -298,7 +298,24 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      expect(result.potentialEfficiency).toBeCloseTo(result.currentEfficiency, 1)
+      // Bug fix: at +12 there are 0 remaining rolls, so potential must equal current exactly
+      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
+    })
+
+    it('returns same as current for a +15 rune', () => {
+      const rune = makeRune({
+        level: 15,
+        subStats: [
+          { type: 'spd', value: 18 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
     })
 
     it('adds remaining rolls for a +0 rune (4 rolls remaining)', () => {
@@ -372,6 +389,38 @@ describe('rune-efficiency', () => {
       })
 
       expect(analyzeRune(rune).quality).toBe('hero')
+    })
+  })
+
+  describe('innate stat exclusion', () => {
+    it('does not count innateStat in efficiency calculation', () => {
+      const runeWithInnate = {
+        set: 'violent' as const,
+        slot: 1 as const,
+        grade: 6,
+        level: 12,
+        quality: 'legend' as const,
+        mainStat: { type: 'atk' as const, value: 118 },
+        subStats: [
+          { type: 'acc' as const, value: 27 },
+          { type: 'hp%' as const, value: 10 },
+          { type: 'atk%' as const, value: 13 },
+          { type: 'cr' as const, value: 12 },
+        ],
+        innateStat: { type: 'spd' as const, value: 6 },
+      }
+
+      const runeWithoutInnate = {
+        ...runeWithInnate,
+        innateStat: undefined,
+      }
+
+      const resultWith = analyzeRune(runeWithInnate)
+      const resultWithout = analyzeRune(runeWithoutInnate)
+
+      // Innate stat should not affect efficiency — both should be identical
+      expect(resultWith.currentEfficiency).toBe(resultWithout.currentEfficiency)
+      expect(resultWith.potentialEfficiency).toBe(resultWithout.potentialEfficiency)
     })
   })
 
