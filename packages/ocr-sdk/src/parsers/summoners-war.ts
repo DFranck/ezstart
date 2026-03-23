@@ -61,7 +61,7 @@ const SUBSTAT_RANGES: Record<StatType, { min: number; max: number }> = {
   'atk%': { min: 4, max: 40 },
   'def':  { min: 8, max: 100 },
   'def%': { min: 4, max: 40 },
-  'spd':  { min: 1, max: 30 },
+  'spd':  { min: 1, max: 35 },
   'cr':   { min: 3, max: 30 },
   'cd':   { min: 4, max: 35 },
   'res':  { min: 4, max: 40 },
@@ -521,6 +521,10 @@ function recoverOrphanStats(
     const hasKnownStat = STAT_PATTERNS.some(([pattern]) => pattern.test(line))
     if (hasKnownStat) continue
 
+    // Skip lines that are just bare numbers (e.g. "214" = rune efficiency, not a stat)
+    // A valid orphan stat line must have a +/- sign before the number
+    if (/^\d+$/.test(line.trim())) continue
+
     // Look for standalone +N or +N% patterns on lines without stat names
     const valueMatch = line.match(/[+\-]\s*(\d+)\s*(%?)/)
     if (!valueMatch) continue
@@ -823,11 +827,39 @@ export const summonersWarParser: GameParser = {
     // --- Parse level ---
     const level = parseLevel(textWithoutSetBonus, setIndex >= 0 ? setIndex : 0)
 
+    // --- Strip level from text to avoid false stat matches ---
+    // The "+15" level in "+15 Violent Rune" must not be captured as a substat.
+    // Remove the first occurrence of the level pattern (before the set name) from the text.
+    let textForStats = textWithoutSetBonus
+    if (level !== null && setIndex > 0) {
+      const beforeSet = textForStats.substring(0, setIndex)
+      const levelPattern = new RegExp(`\\+\\s*${level}(?!\\d)`)
+      const levelMatch = beforeSet.match(levelPattern)
+      if (levelMatch && levelMatch.index !== undefined) {
+        textForStats =
+          textForStats.substring(0, levelMatch.index) +
+          textForStats.substring(levelMatch.index + levelMatch[0].length)
+      }
+    }
+
     // --- Parse stats ---
-    const allStats = extractAllStats(textWithoutSetBonus)
+    const allStats = extractAllStats(textForStats)
+
+    // Also strip level from cleanLines to avoid false matches in multiline/orphan recovery
+    let cleanLinesForStats = cleanLines
+    if (level !== null) {
+      const levelPattern = new RegExp(`\\+\\s*${level}(?!\\d)`)
+      cleanLinesForStats = cleanLines.map((line, idx) => {
+        // Only strip from lines that look like the rune header (contain set name or slot)
+        if (idx === 0 || /rune/i.test(line) || new RegExp(set, 'i').test(line)) {
+          return line.replace(levelPattern, '').trim()
+        }
+        return line
+      }).filter(line => line.length > 0)
+    }
 
     // Also try multiline stat extraction
-    const multilineStats = extractMultilineStats(cleanLines)
+    const multilineStats = extractMultilineStats(cleanLinesForStats)
 
     // Merge multiline stats — add any that aren't already found (by type)
     const existingTypes = new Set(allStats.map(s => s.type))
@@ -851,10 +883,10 @@ export const summonersWarParser: GameParser = {
       if (mainStat) recoveredTypes.add(mainStat.type)
 
       // Strip set bonus from lines too
-      const setBonusLineIdx = cleanLines.findIndex(l => /\d\s*set\s*:/i.test(l))
+      const setBonusLineIdx = cleanLinesForStats.findIndex(l => /\d\s*set\s*:/i.test(l))
       const linesForRecovery = setBonusLineIdx >= 0
-        ? cleanLines.slice(0, setBonusLineIdx)
-        : cleanLines
+        ? cleanLinesForStats.slice(0, setBonusLineIdx)
+        : cleanLinesForStats
 
       const orphans = recoverOrphanStats(
         linesForRecovery,

@@ -394,7 +394,7 @@ describe('summonersWarParser', () => {
   })
 
   describe('substat value validation', () => {
-    it('rejects SPD 51 as out of range (max 30)', () => {
+    it('rejects SPD 51 as out of range (max 35)', () => {
       // If OCR reads SPD +51, it should be rejected
       const text = 'Violent Rune (2) SPD +42 HP +8% ATK +5%'
 
@@ -1021,6 +1021,87 @@ describe('summonersWarParser', () => {
       expect(crStats).toHaveLength(1)
       // Should keep the highest value (12, not 7)
       expect(crStats[0]!.value).toBe(12)
+    })
+  })
+
+  describe('real OCR — Violent slot 4 CD main, grinded SPD', () => {
+    it('extracts all 4 subs correctly, no false positives from efficiency number or level', () => {
+      const text = [
+        's)         +15 Violent Rune (4)              X',
+        'loli                                  legend',
+        '    CRI Dmg +80%',
+        '',
+        ' 214',
+        'DEF +16%                                  Temporarily',
+        'SPD +32',
+        '',
+        'ATK +12%',
+        '',
+        '4 Set : Get Extra Turn +22%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'violent',
+        slot: 4,
+        level: 15,
+        quality: 'legend',
+        mainStat: { type: 'cd', value: 80 },
+      })
+
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        partial?: boolean
+      }
+
+      // Should have exactly these 3 substats (4th is missing from OCR — HP% not in text)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'def%', value: 16 }),
+          expect.objectContaining({ type: 'spd', value: 32 }),
+          expect.objectContaining({ type: 'atk%', value: 12 }),
+        ]),
+      )
+
+      // HP +214 should NOT be a substat (214 is rune efficiency, not a stat)
+      const hpFlatSubs = data.subStats.filter(s => s.type === 'hp')
+      expect(hpFlatSubs).toHaveLength(0)
+
+      // HP% +15 should NOT be a substat (15 is the rune level, not a stat)
+      const hpPercentSubs = data.subStats.filter(s => s.type === 'hp%' && s.value === 15)
+      expect(hpPercentSubs).toHaveLength(0)
+
+      // SPD +32 should be accepted (grinded value, within valid range)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'spd', value: 32 }),
+        ]),
+      )
+    })
+
+    it('accepts grinded SPD values up to 35', () => {
+      const text = [
+        'Violent Rune (6)',
+        '+15',
+        'Legend',
+        'HP +63%',
+        'SPD +35',
+        'CRI Rate +12%',
+        'CRI Dmg +7%',
+        'ATK +8%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'spd', value: 35 }),
+        ]),
+      )
     })
   })
 
