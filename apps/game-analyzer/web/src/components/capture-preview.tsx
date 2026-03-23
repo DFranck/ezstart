@@ -4,6 +4,7 @@ import { Button, Card, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import type { RoiRect } from './roi-selector'
+import { RoiSelector } from './roi-selector'
 
 interface CapturePreviewProps {
   isCapturing: boolean
@@ -15,6 +16,7 @@ interface CapturePreviewProps {
   onStop: () => void
   roi?: RoiRect
   onRoiChange?: (roi: RoiRect) => void
+  showFullPreview?: boolean
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -34,11 +36,14 @@ export function CapturePreview({
   onStop,
   roi,
   onRoiChange,
+  showFullPreview = true,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fullCanvasRef = useRef<HTMLCanvasElement>(null)
   const srcCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const fullContainerRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const roiRef = useRef<RoiRect>(roi ?? { x: 60, y: 5, width: 35, height: 40 })
   const onRoiChangeRef = useRef(onRoiChange)
@@ -52,23 +57,27 @@ export function CapturePreview({
     if (roi) roiRef.current = roi
   }, [roi])
 
-  // Draw the cropped ROI zone to the visible canvas
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !currentFrame) return
-
-    // Maintain an offscreen source canvas with the full frame
+  // Maintain an offscreen source canvas with the full frame
+  const ensureSrcCanvas = useCallback((frame: ImageData) => {
     if (!srcCanvasRef.current) {
       srcCanvasRef.current = document.createElement('canvas')
     }
     const srcCanvas = srcCanvasRef.current
-    if (srcCanvas.width !== currentFrame.width || srcCanvas.height !== currentFrame.height) {
-      srcCanvas.width = currentFrame.width
-      srcCanvas.height = currentFrame.height
+    if (srcCanvas.width !== frame.width || srcCanvas.height !== frame.height) {
+      srcCanvas.width = frame.width
+      srcCanvas.height = frame.height
     }
     const srcCtx = srcCanvas.getContext('2d')
-    if (!srcCtx) return
-    srcCtx.putImageData(currentFrame, 0, 0)
+    if (srcCtx) srcCtx.putImageData(frame, 0, 0)
+    return srcCanvas
+  }, [])
+
+  // Draw the cropped ROI zone to the zoom canvas
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !currentFrame) return
+
+    const srcCanvas = ensureSrcCanvas(currentFrame)
 
     // Compute source crop from ROI percentages
     const r = roiRef.current
@@ -93,7 +102,32 @@ export function CapturePreview({
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, roi])
+  }, [currentFrame, roi, ensureSrcCanvas])
+
+  // Draw the full frame to the full preview canvas
+  useEffect(() => {
+    if (!showFullPreview) return
+    const canvas = fullCanvasRef.current
+    if (!canvas || !currentFrame) return
+
+    const srcCanvas = ensureSrcCanvas(currentFrame)
+
+    const container = fullContainerRef.current
+    if (!container) return
+    const containerWidth = container.clientWidth
+    const aspectRatio = currentFrame.height > 0 ? currentFrame.width / currentFrame.height : 16 / 9
+    const containerHeight = Math.round(containerWidth / aspectRatio)
+
+    if (canvas.width !== containerWidth || canvas.height !== containerHeight) {
+      canvas.width = containerWidth
+      canvas.height = containerHeight
+    }
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
+  }, [currentFrame, showFullPreview, ensureSrcCanvas])
 
   // Wheel handler for zoom — depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
@@ -299,46 +333,77 @@ export function CapturePreview({
     )
   }
 
+  const showDual = showFullPreview && isCapturing && currentFrame
+
   return (
     <Div className="space-y-4">
-      {/* Preview */}
-      <Card className="bg-muted">
-        {isCapturing && currentFrame ? (
-          <div ref={containerRef} className="relative">
-            <canvas
-              ref={canvasRef}
-              className="w-full h-auto block"
-              style={{ cursor: 'grab', touchAction: 'none' }}
-            />
-            {/* Zoom indicator + buttons */}
-            <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
-              <button
-                type="button"
-                onClick={handleZoomOut}
-                className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-                title={t('capture.zoomOut')}
-              >
-                -
-              </button>
-              <span className="text-white text-xs font-mono min-w-[3rem] text-center">
-                {t('capture.zoom')}: {zoomPercent}%
-              </span>
-              <button
-                type="button"
-                onClick={handleZoomIn}
-                className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-                title={t('capture.zoomIn')}
-              >
-                +
-              </button>
-            </div>
-          </div>
-        ) : (
+      {/* Previews */}
+      {isCapturing && currentFrame ? (
+        <Div className={showDual ? 'grid grid-cols-2 gap-4' : ''}>
+          {/* Zoom preview */}
+          <Div>
+            <P className="text-xs text-muted-foreground mb-1 font-medium">{t('capture.zoomView')}</P>
+            <Card className="bg-muted">
+              <div ref={containerRef} className="relative">
+                <canvas
+                  ref={canvasRef}
+                  className="w-full h-auto block"
+                  style={{ cursor: 'grab', touchAction: 'none' }}
+                />
+                {/* Zoom indicator + buttons */}
+                <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
+                  <button
+                    type="button"
+                    onClick={handleZoomOut}
+                    className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+                    title={t('capture.zoomOut')}
+                  >
+                    -
+                  </button>
+                  <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+                    {t('capture.zoom')}: {zoomPercent}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleZoomIn}
+                    className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+                    title={t('capture.zoomIn')}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </Card>
+          </Div>
+
+          {/* Full preview with ROI overlay */}
+          {showDual && (
+            <Div>
+              <P className="text-xs text-muted-foreground mb-1 font-medium">{t('capture.fullView')}</P>
+              <Card className="bg-muted">
+                <div ref={fullContainerRef} className="relative">
+                  <canvas
+                    ref={fullCanvasRef}
+                    className="w-full h-auto block"
+                  />
+                  {roi && onRoiChange && (
+                    <RoiSelector
+                      onChange={onRoiChange}
+                      initialRoi={roi}
+                    />
+                  )}
+                </div>
+              </Card>
+            </Div>
+          )}
+        </Div>
+      ) : (
+        <Card className="bg-muted">
           <Div className="aspect-video flex items-center justify-center">
             <P className="text-muted-foreground text-sm">{t('capture.selectWindow')}</P>
           </Div>
-        )}
-      </Card>
+        </Card>
+      )}
 
       {/* Navigation hint */}
       {isCapturing && currentFrame && (

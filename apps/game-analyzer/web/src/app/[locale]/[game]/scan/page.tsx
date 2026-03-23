@@ -245,7 +245,7 @@ export default function GameScanPage() {
   const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
-    <Div className="container mx-auto px-4 py-8 max-w-4xl">
+    <Div className="container mx-auto px-4 py-8 max-w-6xl">
       <Div className="mb-8">
         <H1 className="text-2xl font-bold mb-2">{t('scan.title')}</H1>
         <P className="text-sm text-muted-foreground">{t(`games.${game}`)}</P>
@@ -265,8 +265,8 @@ export default function GameScanPage() {
 
         {/* Capture Mode */}
         <TabsContent value="capture">
-          <Div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left: Preview */}
+          <Div className="space-y-6">
+            {/* Previews: zoom + full side by side */}
             <CapturePreview
               isCapturing={isCapturing}
               isAnalyzing={isAnalyzing}
@@ -277,9 +277,10 @@ export default function GameScanPage() {
               onStop={stopCapture}
               roi={roi}
               onRoiChange={handleRoiChange}
+              showFullPreview
             />
 
-            {/* Right: Result */}
+            {/* Results */}
             <Div className="space-y-4">
               {isCapturing && (
                 <Button

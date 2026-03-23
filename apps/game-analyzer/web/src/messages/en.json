@@ -95,7 +95,9 @@
       "zoom": "Zoom",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
-      "dragToNavigate": "Drag to pan, scroll to zoom"
+      "dragToNavigate": "Drag to pan, scroll to zoom",
+      "zoomView": "Zoomed view",
+      "fullView": "Full view"
     },
     "preprocessedImage": "Image sent to OCR",
     "debugOcr": "OCR Debug",
