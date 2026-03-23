@@ -22,6 +22,7 @@ import { CapturePreview } from '@/components/capture-preview'
 import { EfficiencyDisplay } from '@/components/efficiency-display'
 import { ScanResultRaw } from '@/components/scan-result-raw'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
+import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -114,7 +115,8 @@ export default function ScanPage() {
       scanningRef.current = true
 
       // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
-      imageDataToBlob(frame).then((blob) => {
+      const processed = preprocessForOcr(frame)
+      imageDataToBlob(processed).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         scan(
           { image: file, gameType: selectedGame },
@@ -154,7 +156,8 @@ export default function ScanPage() {
     if (!selectedGame || !currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    imageDataToBlob(cropped).then((blob) => {
+    const processed = preprocessForOcr(cropped)
+    imageDataToBlob(processed).then((blob) => {
       const file = new File([blob], 'capture.png', { type: 'image/png' })
       scan(
         { image: file, gameType: selectedGame },
