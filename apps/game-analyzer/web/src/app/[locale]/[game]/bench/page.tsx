@@ -21,6 +21,7 @@ import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
+import { useSaveGameConfig } from '@/hooks/use-game-config'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -125,6 +126,7 @@ export default function BenchPage() {
   const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const [presetsSaved, setPresetsSaved] = useState(false)
   const { mutate: scan, data: scanResult, isPending } = useScan()
+  const { mutate: saveConfig } = useSaveGameConfig(game)
 
   const roiRef = useRef<RoiRect>(roi)
   const zonesRef = useRef<ZoneConfig[]>(zones)
@@ -303,7 +305,7 @@ export default function BenchPage() {
     runBenchScan(cropped)
   }, [currentFrame, runBenchScan])
 
-  /** Save the top 3 presets from bench results to localStorage */
+  /** Save the top 3 presets + zones + masks to DB and localStorage */
   const handleSavePresets = useCallback(() => {
     if (!scanResult?.benchResults) return
 
@@ -325,9 +327,18 @@ export default function BenchPage() {
 
     if (bestPresets.length === 0) bestPresets.push('upscale-2x')
 
+    // Save to localStorage (fallback)
     localStorage.setItem(`game-analyzer-best-presets-${game}`, JSON.stringify(bestPresets))
+
+    // Save to DB (presets + zones + masks)
+    saveConfig({
+      bestPresets,
+      zones: zonesRef.current,
+      masks: masksRef.current,
+    })
+
     setPresetsSaved(true)
-  }, [scanResult, game])
+  }, [scanResult, game, saveConfig])
 
   const isAnalyzing = isPending
   const resultData = scanResult

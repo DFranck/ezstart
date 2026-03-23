@@ -25,6 +25,7 @@ import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
+import { useGameConfig } from '@/hooks/use-game-config'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -97,7 +98,10 @@ export default function GameScanPage() {
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
-  // Load saved presets from bench
+  // Load config from DB (presets, zones, masks), fallback to localStorage
+  const { data: gameConfig } = useGameConfig(game)
+
+  // Load saved presets from bench — prefer DB, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
 
   // Keep a ref to the latest ROI so callbacks always have the current value
@@ -117,6 +121,13 @@ export default function GameScanPage() {
     roiRef.current = savedRoi
     savedPresets.current = loadPresets(game)
   }, [game])
+
+  // When DB config loads, override localStorage presets
+  useEffect(() => {
+    if (gameConfig?.bestPresets && gameConfig.bestPresets.length > 0) {
+      savedPresets.current = gameConfig.bestPresets
+    }
+  }, [gameConfig])
 
   // Track whether an auto-scan is in progress to avoid overlapping requests
   const scanningRef = useRef(false)
