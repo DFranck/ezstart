@@ -32,57 +32,67 @@ const SET_EMOJIS: Record<string, string> = {
   cruel: '\uD83D\uDE08',
 }
 
-// ── Quality badge styles ──
+// ── Quality badge styles (SW colors) ──
 const QUALITY_BG: Record<RuneQuality, string> = {
-  legend: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',
-  hero: 'bg-violet-500/10 border-violet-500/30 text-violet-500',
-  rare: 'bg-blue-500/10 border-blue-500/30 text-blue-500',
-  magic: 'bg-green-500/10 border-green-500/30 text-green-500',
+  legend: 'bg-orange-500/10 border-orange-500/30 text-orange-500',
+  hero: 'bg-violet-600/10 border-violet-600/30 text-violet-600',
+  rare: 'bg-blue-600/10 border-blue-600/30 text-blue-600',
+  magic: 'bg-green-600/10 border-green-600/30 text-green-600',
   normal: 'bg-muted text-muted-foreground',
 }
 
-// ── Stat colors ──
-const STAT_COLORS: Record<StatType, string> = {
-  spd: 'text-blue-400',
-  cr: 'text-red-400',
-  cd: 'text-red-400',
-  atk: 'text-orange-400',
-  'atk%': 'text-orange-400',
-  hp: 'text-green-400',
-  'hp%': 'text-green-400',
-  def: 'text-slate-400',
-  'def%': 'text-slate-400',
-  res: 'text-violet-400',
-  acc: 'text-violet-400',
+// ── Roll quality colors (SW quality system) ──
+type RollQualityTier = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
+
+const ROLL_QUALITY_COLORS: Record<RollQualityTier, string> = {
+  legend: 'text-orange-400',
+  hero: 'text-violet-400',
+  rare: 'text-blue-400',
+  magic: 'text-green-400',
+  normal: 'text-gray-400',
 }
 
-// ── Efficiency tier helpers ──
+function getRollQualityTier(rollQuality: number): RollQualityTier {
+  if (rollQuality >= 90) return 'legend'
+  if (rollQuality >= 75) return 'hero'
+  if (rollQuality >= 50) return 'rare'
+  if (rollQuality >= 25) return 'magic'
+  return 'normal'
+}
+
+function getRollQualityColor(rollQuality: number): string {
+  return ROLL_QUALITY_COLORS[getRollQualityTier(rollQuality)]
+}
+
+function getRollQualityBarColor(rollQuality: number): string {
+  if (rollQuality >= 90) return '[&>div]:bg-orange-400'
+  if (rollQuality >= 75) return '[&>div]:bg-violet-400'
+  if (rollQuality >= 50) return '[&>div]:bg-blue-400'
+  if (rollQuality >= 25) return '[&>div]:bg-green-400'
+  return '[&>div]:bg-gray-400'
+}
+
+// ── Efficiency tier helpers (SW colors) ──
 type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 function getTierColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return 'text-yellow-500'
-    case 'great': return 'text-green-500'
-    case 'good': return 'text-blue-500'
-    case 'keep': return 'text-orange-500'
-    case 'sell': return 'text-red-500'
+    case 'godlike': return 'text-orange-400'
+    case 'great': return 'text-violet-400'
+    case 'good': return 'text-blue-400'
+    case 'keep': return 'text-foreground'
+    case 'sell': return 'text-red-400'
   }
 }
 
 function getProgressColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return '[&>div]:bg-yellow-500'
-    case 'great': return '[&>div]:bg-green-500'
-    case 'good': return '[&>div]:bg-blue-500'
-    case 'keep': return '[&>div]:bg-orange-500'
-    case 'sell': return '[&>div]:bg-red-500'
+    case 'godlike': return '[&>div]:bg-orange-400'
+    case 'great': return '[&>div]:bg-violet-400'
+    case 'good': return '[&>div]:bg-blue-400'
+    case 'keep': return '[&>div]:bg-gray-400'
+    case 'sell': return '[&>div]:bg-red-400'
   }
-}
-
-function getSubstatBarColor(efficiency: number): string {
-  if (efficiency >= 80) return '[&>div]:bg-green-500'
-  if (efficiency >= 50) return '[&>div]:bg-yellow-500'
-  return '[&>div]:bg-red-500'
 }
 
 function formatStatValue(type: StatType, value: number): string {
@@ -149,7 +159,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
             <P className="text-sm font-semibold text-muted-foreground">
               {formatStatLabel(rune.mainStat.type)}
             </P>
-            <P className={`text-sm font-bold ${STAT_COLORS[rune.mainStat.type]}`}>{formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
+            <P className="text-sm font-bold text-foreground">{formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
           </Div>
         </Div>
 
@@ -161,7 +171,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
               <P className="text-sm text-muted-foreground">
                 {formatStatLabel(rune.innateStat.type)}
               </P>
-              <P className={`text-sm font-medium ${STAT_COLORS[rune.innateStat.type]}`}>{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
+              <P className="text-sm font-medium text-foreground">{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
             </Div>
           </Div>
         )}
@@ -182,10 +192,11 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                       {formatStatLabel(stat.type)}
                     </P>
                     <Div className="flex items-center gap-2">
-                      <P className={`font-semibold ${STAT_COLORS[stat.type]}`}>{formatStatValue(stat.type, stat.value)}</P>
+                      <P className={`font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>{formatStatValue(stat.type, stat.value)}</P>
                       {subAnalysis && (
-                        <P className="text-xs text-muted-foreground">
-                          {subAnalysis.efficiency}% ({subAnalysis.rolls} {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})
+                        <P className="text-xs">
+                          <span className={getRollQualityColor(subAnalysis.efficiency)}>{tRune(`rollQuality.${getRollQualityTier(subAnalysis.efficiency)}`)}</span>
+                          <span className="text-muted-foreground"> ({subAnalysis.rolls} {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})</span>
                         </P>
                       )}
                     </Div>
@@ -193,7 +204,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   {subAnalysis && (
                     <Progress
                       value={subAnalysis.efficiency}
-                      className={`h-1.5 ${getSubstatBarColor(subAnalysis.efficiency)}`}
+                      className={`h-1.5 ${getRollQualityBarColor(subAnalysis.efficiency)}`}
                     />
                   )}
                 </Div>

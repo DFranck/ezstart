@@ -156,6 +156,13 @@
       "hero": "Heroique",
       "legend": "Legendaire"
     },
+    "rollQuality": {
+      "legend": "Legend",
+      "hero": "Hero",
+      "rare": "Rare",
+      "magic": "Magic",
+      "normal": "Normal"
+    },
     "roll": "roll",
     "rolls": "rolls",
     "potential12": "Potentiel +12",
