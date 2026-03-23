@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import type { RoiRect } from './roi-selector'
 
-export type ZoneName = 'header' | 'main' | 'innate' | 'substats'
+export type ZoneName = 'setSlot' | 'mainStat' | 'quality' | 'innate' | 'sub1' | 'sub2' | 'sub3' | 'sub4'
 
 export interface ZoneConfig {
   name: ZoneName
@@ -14,13 +14,17 @@ export interface ZoneConfig {
 }
 
 const DEFAULT_ZONES: ZoneConfig[] = [
-  { name: 'header', label: 'bench.zone.header', color: '#3b82f6', rect: { x: 10, y: 0, width: 80, height: 10 } },
-  { name: 'main', label: 'bench.zone.main', color: '#22c55e', rect: { x: 10, y: 10, width: 50, height: 15 } },
-  { name: 'innate', label: 'bench.zone.innate', color: '#a855f7', rect: { x: 5, y: 25, width: 50, height: 10 } },
-  { name: 'substats', label: 'bench.zone.substats', color: '#ef4444', rect: { x: 5, y: 35, width: 55, height: 45 } },
+  { name: 'setSlot', label: 'bench.zone.setSlot', color: '#3b82f6', rect: { x: 15, y: 0, width: 65, height: 8 } },
+  { name: 'mainStat', label: 'bench.zone.mainStat', color: '#22c55e', rect: { x: 10, y: 10, width: 40, height: 10 } },
+  { name: 'quality', label: 'bench.zone.quality', color: '#eab308', rect: { x: 55, y: 10, width: 25, height: 10 } },
+  { name: 'innate', label: 'bench.zone.innate', color: '#a855f7', rect: { x: 5, y: 22, width: 45, height: 8 } },
+  { name: 'sub1', label: 'bench.zone.sub1', color: '#ef4444', rect: { x: 5, y: 32, width: 45, height: 8 } },
+  { name: 'sub2', label: 'bench.zone.sub2', color: '#ef4444', rect: { x: 5, y: 42, width: 45, height: 8 } },
+  { name: 'sub3', label: 'bench.zone.sub3', color: '#ef4444', rect: { x: 5, y: 52, width: 45, height: 8 } },
+  { name: 'sub4', label: 'bench.zone.sub4', color: '#ef4444', rect: { x: 5, y: 62, width: 45, height: 8 } },
 ]
 
-type Corner = 'nw' | 'ne' | 'sw' | 'se'
+type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
 const MIN_SIZE = 5 // minimum 5% width/height
 
@@ -31,16 +35,18 @@ function clamp(value: number, min: number, max: number): number {
 interface MultiZoneSelectorProps {
   onChange: (zones: ZoneConfig[]) => void
   initialZones?: ZoneConfig[]
+  /** When provided, zone percentages are mapped within this ROI inside the full container */
+  parentRoi?: RoiRect
 }
 
-export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorProps) {
+export function MultiZoneSelector({ onChange, initialZones, parentRoi }: MultiZoneSelectorProps) {
   const t = useTranslations()
   const [zones, setZones] = useState<ZoneConfig[]>(initialZones ?? DEFAULT_ZONES)
 
   const dragRef = useRef<{
     zoneName: ZoneName
     type: 'move' | 'resize'
-    corner?: Corner
+    handle?: Handle
     startMouseX: number
     startMouseY: number
     startRect: RoiRect
@@ -51,6 +57,8 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
   onChangeRef.current = onChange
   const zonesRef = useRef(zones)
   zonesRef.current = zones
+  const parentRoiRef = useRef(parentRoi)
+  parentRoiRef.current = parentRoi
 
   // Sync initial zones from props when not dragging
   useEffect(() => {
@@ -70,22 +78,26 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
       const rect = overlay.getBoundingClientRect()
       if (rect.width === 0 || rect.height === 0) return
 
-      const dx = ((clientX - drag.startMouseX) / rect.width) * 100
-      const dy = ((clientY - drag.startMouseY) / rect.height) * 100
+      // Convert pixel delta to % of overlay, then scale to zone coordinate space
+      const pr = parentRoiRef.current
+      const scaleX = pr ? (100 / pr.width) : 1
+      const scaleY = pr ? (100 / pr.height) : 1
+      const dx = ((clientX - drag.startMouseX) / rect.width) * 100 * scaleX
+      const dy = ((clientY - drag.startMouseY) / rect.height) * 100 * scaleY
       let newRect: RoiRect
 
       if (drag.type === 'move') {
         const newX = clamp(drag.startRect.x + dx, 0, 100 - drag.startRect.width)
         const newY = clamp(drag.startRect.y + dy, 0, 100 - drag.startRect.height)
         newRect = { ...drag.startRect, x: newX, y: newY }
-      } else if (drag.type === 'resize' && drag.corner) {
+      } else if (drag.type === 'resize' && drag.handle) {
         const s = drag.startRect
         let newX = s.x
         let newY = s.y
         let newW = s.width
         let newH = s.height
 
-        switch (drag.corner) {
+        switch (drag.handle) {
           case 'se':
             newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
             newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
@@ -105,6 +117,20 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
             newX = s.x + s.width - newW
             newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
             newY = s.y + s.height - newH
+            break
+          case 'n':
+            newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
+            newY = s.y + s.height - newH
+            break
+          case 's':
+            newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
+            break
+          case 'e':
+            newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
+            break
+          case 'w':
+            newW = clamp(s.width - dx, MIN_SIZE, s.x + s.width)
+            newX = s.x + s.width - newW
             break
         }
 
@@ -157,41 +183,41 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
     clientX: number,
     clientY: number,
     type: 'move' | 'resize',
-    corner?: Corner,
+    handle?: Handle,
   ) {
     const zone = zonesRef.current.find(z => z.name === zoneName)
     if (!zone) return
     dragRef.current = {
       zoneName,
       type,
-      corner,
+      handle,
       startMouseX: clientX,
       startMouseY: clientY,
       startRect: { ...zone.rect },
     }
   }
 
-  function handleMouseDown(e: React.MouseEvent, zoneName: ZoneName, type: 'move' | 'resize', corner?: Corner) {
+  function handleMouseDown(e: React.MouseEvent, zoneName: ZoneName, type: 'move' | 'resize', handle?: Handle) {
     e.preventDefault()
     e.stopPropagation()
-    startDrag(zoneName, e.clientX, e.clientY, type, corner)
+    startDrag(zoneName, e.clientX, e.clientY, type, handle)
   }
 
-  function handleTouchStart(e: React.TouchEvent, zoneName: ZoneName, type: 'move' | 'resize', corner?: Corner) {
+  function handleTouchStart(e: React.TouchEvent, zoneName: ZoneName, type: 'move' | 'resize', handle?: Handle) {
     e.stopPropagation()
     const touch = e.touches[0]
     if (e.touches.length === 1 && touch) {
-      startDrag(zoneName, touch.clientX, touch.clientY, type, corner)
+      startDrag(zoneName, touch.clientX, touch.clientY, type, handle)
     }
   }
 
-  const corners: Corner[] = ['nw', 'ne', 'sw', 'se']
+  const corners: Handle[] = ['nw', 'ne', 'sw', 'se']
+  const edges: Handle[] = ['n', 's', 'e', 'w']
+  const allHandles: Handle[] = [...corners, ...edges]
 
-  const handleStyle = (corner: Corner, color: string): React.CSSProperties => {
+  const getHandleStyle = (handle: Handle, color: string): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'absolute',
-      width: 10,
-      height: 10,
       backgroundColor: color,
       border: '1px solid rgba(0,0,0,0.5)',
       borderRadius: 1,
@@ -200,15 +226,23 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
       touchAction: 'none',
     }
 
-    switch (corner) {
+    switch (handle) {
       case 'nw':
-        return { ...base, top: -5, left: -5, cursor: 'nw-resize' }
+        return { ...base, width: 10, height: 10, top: -5, left: -5, cursor: 'nw-resize' }
       case 'ne':
-        return { ...base, top: -5, right: -5, cursor: 'ne-resize' }
+        return { ...base, width: 10, height: 10, top: -5, right: -5, cursor: 'ne-resize' }
       case 'sw':
-        return { ...base, bottom: -5, left: -5, cursor: 'sw-resize' }
+        return { ...base, width: 10, height: 10, bottom: -5, left: -5, cursor: 'sw-resize' }
       case 'se':
-        return { ...base, bottom: -5, right: -5, cursor: 'se-resize' }
+        return { ...base, width: 10, height: 10, bottom: -5, right: -5, cursor: 'se-resize' }
+      case 'n':
+        return { ...base, width: 20, height: 8, top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' }
+      case 's':
+        return { ...base, width: 20, height: 8, bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' }
+      case 'e':
+        return { ...base, width: 8, height: 20, right: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'e-resize' }
+      case 'w':
+        return { ...base, width: 8, height: 20, left: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'w-resize' }
     }
   }
 
@@ -222,15 +256,30 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
         pointerEvents: 'none',
       }}
     >
-      {zones.map(zone => (
+      {zones.map(zone => {
+        // When parentRoi is set, map zone % into the ROI area within the full container
+        const displayLeft = parentRoi
+          ? parentRoi.x + (zone.rect.x / 100) * parentRoi.width
+          : zone.rect.x
+        const displayTop = parentRoi
+          ? parentRoi.y + (zone.rect.y / 100) * parentRoi.height
+          : zone.rect.y
+        const displayWidth = parentRoi
+          ? (zone.rect.width / 100) * parentRoi.width
+          : zone.rect.width
+        const displayHeight = parentRoi
+          ? (zone.rect.height / 100) * parentRoi.height
+          : zone.rect.height
+
+        return (
         <div
           key={zone.name}
           style={{
             position: 'absolute',
-            left: `${zone.rect.x}%`,
-            top: `${zone.rect.y}%`,
-            width: `${zone.rect.width}%`,
-            height: `${zone.rect.height}%`,
+            left: `${displayLeft}%`,
+            top: `${displayTop}%`,
+            width: `${displayWidth}%`,
+            height: `${displayHeight}%`,
             border: `2px solid ${zone.color}`,
             backgroundColor: `${zone.color}26`, // ~15% opacity
             cursor: 'move',
@@ -263,17 +312,18 @@ export function MultiZoneSelector({ onChange, initialZones }: MultiZoneSelectorP
             {t(zone.label)}
           </span>
 
-          {/* Corner handles */}
-          {corners.map((corner) => (
+          {/* Resize handles (corners + edges) */}
+          {allHandles.map((handle) => (
             <div
-              key={corner}
-              style={handleStyle(corner, zone.color)}
-              onMouseDown={(e) => handleMouseDown(e, zone.name, 'resize', corner)}
-              onTouchStart={(e) => handleTouchStart(e, zone.name, 'resize', corner)}
+              key={handle}
+              style={getHandleStyle(handle, zone.color)}
+              onMouseDown={(e) => handleMouseDown(e, zone.name, 'resize', handle)}
+              onTouchStart={(e) => handleTouchStart(e, zone.name, 'resize', handle)}
             />
           ))}
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

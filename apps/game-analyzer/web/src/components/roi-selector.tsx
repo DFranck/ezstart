@@ -18,7 +18,7 @@ interface RoiSelectorProps {
   initialRoi?: RoiRect
 }
 
-type Corner = 'nw' | 'ne' | 'sw' | 'se'
+type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
 const MIN_SIZE = 10 // minimum 10% width/height
 
@@ -36,7 +36,7 @@ export function RoiSelector({
 
   const dragRef = useRef<{
     type: 'move' | 'resize'
-    corner?: Corner
+    handle?: Handle
     startMouseX: number
     startMouseY: number
     startRoi: RoiRect
@@ -77,14 +77,14 @@ export function RoiSelector({
         const newX = clamp(drag.startRoi.x + dx, 0, 100 - drag.startRoi.width)
         const newY = clamp(drag.startRoi.y + dy, 0, 100 - drag.startRoi.height)
         newRoi = { ...drag.startRoi, x: newX, y: newY }
-      } else if (drag.type === 'resize' && drag.corner) {
+      } else if (drag.type === 'resize' && drag.handle) {
         const s = drag.startRoi
         let newX = s.x
         let newY = s.y
         let newW = s.width
         let newH = s.height
 
-        switch (drag.corner) {
+        switch (drag.handle) {
           case 'se':
             newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
             newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
@@ -104,6 +104,20 @@ export function RoiSelector({
             newX = s.x + s.width - newW
             newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
             newY = s.y + s.height - newH
+            break
+          case 'n':
+            newH = clamp(s.height - dy, MIN_SIZE, s.y + s.height)
+            newY = s.y + s.height - newH
+            break
+          case 's':
+            newH = clamp(s.height + dy, MIN_SIZE, 100 - s.y)
+            break
+          case 'e':
+            newW = clamp(s.width + dx, MIN_SIZE, 100 - s.x)
+            break
+          case 'w':
+            newW = clamp(s.width - dx, MIN_SIZE, s.x + s.width)
+            newX = s.x + s.width - newW
             break
         }
 
@@ -159,35 +173,33 @@ export function RoiSelector({
     clientX: number,
     clientY: number,
     type: 'move' | 'resize',
-    corner?: Corner,
+    handle?: Handle,
   ) {
     dragRef.current = {
       type,
-      corner,
+      handle,
       startMouseX: clientX,
       startMouseY: clientY,
       startRoi: { ...roiRef.current },
     }
   }
 
-  function handleMouseDown(e: React.MouseEvent, type: 'move' | 'resize', corner?: Corner) {
+  function handleMouseDown(e: React.MouseEvent, type: 'move' | 'resize', handle?: Handle) {
     e.preventDefault()
     e.stopPropagation()
-    startDrag(e.clientX, e.clientY, type, corner)
+    startDrag(e.clientX, e.clientY, type, handle)
   }
 
-  function handleTouchStart(e: React.TouchEvent, type: 'move' | 'resize', corner?: Corner) {
+  function handleTouchStart(e: React.TouchEvent, type: 'move' | 'resize', handle?: Handle) {
     e.stopPropagation()
     if (e.touches.length === 1) {
-      startDrag(e.touches[0].clientX, e.touches[0].clientY, type, corner)
+      startDrag(e.touches[0].clientX, e.touches[0].clientY, type, handle)
     }
   }
 
-  const handleStyle = (corner: Corner): React.CSSProperties => {
+  const getHandleStyle = (handle: Handle): React.CSSProperties => {
     const base: React.CSSProperties = {
       position: 'absolute',
-      width: 16,
-      height: 16,
       backgroundColor: 'red',
       border: '2px solid darkred',
       borderRadius: 2,
@@ -196,19 +208,29 @@ export function RoiSelector({
       touchAction: 'none',
     }
 
-    switch (corner) {
+    switch (handle) {
       case 'nw':
-        return { ...base, top: -8, left: -8, cursor: 'nw-resize' }
+        return { ...base, width: 16, height: 16, top: -8, left: -8, cursor: 'nw-resize' }
       case 'ne':
-        return { ...base, top: -8, right: -8, cursor: 'ne-resize' }
+        return { ...base, width: 16, height: 16, top: -8, right: -8, cursor: 'ne-resize' }
       case 'sw':
-        return { ...base, bottom: -8, left: -8, cursor: 'sw-resize' }
+        return { ...base, width: 16, height: 16, bottom: -8, left: -8, cursor: 'sw-resize' }
       case 'se':
-        return { ...base, bottom: -8, right: -8, cursor: 'se-resize' }
+        return { ...base, width: 16, height: 16, bottom: -8, right: -8, cursor: 'se-resize' }
+      case 'n':
+        return { ...base, width: 20, height: 8, top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' }
+      case 's':
+        return { ...base, width: 20, height: 8, bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' }
+      case 'e':
+        return { ...base, width: 8, height: 20, right: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'e-resize' }
+      case 'w':
+        return { ...base, width: 8, height: 20, left: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'w-resize' }
     }
   }
 
-  const corners: Corner[] = ['nw', 'ne', 'sw', 'se']
+  const corners: Handle[] = ['nw', 'ne', 'sw', 'se']
+  const edges: Handle[] = ['n', 's', 'e', 'w']
+  const allHandles: Handle[] = [...corners, ...edges]
 
   return (
     <div
@@ -240,13 +262,13 @@ export function RoiSelector({
         onMouseDown={(e) => handleMouseDown(e, 'move')}
         onTouchStart={(e) => handleTouchStart(e, 'move')}
       >
-        {/* Corner handles */}
-        {corners.map((corner) => (
+        {/* Resize handles (corners + edges) */}
+        {allHandles.map((handle) => (
           <div
-            key={corner}
-            style={handleStyle(corner)}
-            onMouseDown={(e) => handleMouseDown(e, 'resize', corner)}
-            onTouchStart={(e) => handleTouchStart(e, 'resize', corner)}
+            key={handle}
+            style={getHandleStyle(handle)}
+            onMouseDown={(e) => handleMouseDown(e, 'resize', handle)}
+            onTouchStart={(e) => handleTouchStart(e, 'resize', handle)}
           />
         ))}
       </div>
