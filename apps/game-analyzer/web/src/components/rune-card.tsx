@@ -93,6 +93,22 @@ function formatStatLabel(type: StatType): string {
   return type.toUpperCase().replace('%', '%')
 }
 
+// ── Archetype emojis ──
+const ARCHETYPE_EMOJIS: Record<string, string> = {
+  'speed-dps': '\u26A1',
+  'bruiser': '\uD83D\uDCAA',
+  'tank-support': '\uD83D\uDEE1\uFE0F',
+  'cleave': '\uD83D\uDC80',
+  'cc-debuffer': '\uD83C\uDFAF',
+}
+
+// ── Synergy badge color by match count ──
+function getSynergyBadgeClass(matchCount: number): string {
+  if (matchCount >= 4) return 'bg-yellow-500/15 border-yellow-500/40 text-yellow-500'
+  if (matchCount >= 3) return 'bg-green-500/15 border-green-500/40 text-green-500'
+  return 'bg-muted border-border text-muted-foreground'
+}
+
 // ── Props ──
 interface RuneCardProps {
   rune: RuneData
@@ -241,53 +257,60 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           </>
         )}
 
-        {/* ── Synergy section ── */}
-        {analysis?.synergy && analysis.synergy.bestArchetype && (
-          <>
-            <Div className="border-t border-border" />
-            <Div className="space-y-2">
-              <Div className="flex items-center justify-between">
+        {/* ── Synergy badges ── */}
+        {analysis?.synergy && (() => {
+          const matchingArchetypes = (analysis.synergy.allArchetypes ?? [])
+            .filter(a => a.matchCount >= 2)
+            .sort((a, b) => b.matchCount - a.matchCount)
+
+          if (matchingArchetypes.length === 0 && analysis.synergy.synergyBonus < 0) {
+            return (
+              <>
+                <Div className="border-t border-border" />
+                <Div className="flex items-center justify-between">
+                  <P className="text-sm font-medium">{tRune('synergy')}</P>
+                  <P className="text-sm text-red-500">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
+                </Div>
+              </>
+            )
+          }
+
+          if (matchingArchetypes.length === 0) return null
+
+          return (
+            <>
+              <Div className="border-t border-border" />
+              <Div className="space-y-2">
                 <P className="text-sm font-medium">{tRune('synergy')}</P>
-                <Div className="flex items-center gap-2">
-                  <P className="text-sm font-semibold">
-                    {tRune(`archetype.${analysis.synergy.bestArchetype}`)} ({analysis.synergy.matchCount}/4)
-                  </P>
-                  <P className={`text-sm font-bold ${analysis.synergy.synergyBonus > 0 ? 'text-green-500' : analysis.synergy.synergyBonus < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                    {analysis.synergy.synergyBonus > 0 ? `+${analysis.synergy.synergyBonus}%` : `${analysis.synergy.synergyBonus}%`}
-                  </P>
+                <Div className="flex flex-wrap gap-2">
+                  {matchingArchetypes.map(arch => {
+                    const archKey = arch.archetype as BuildArchetype
+                    const desired = BUILD_ARCHETYPES[archKey]?.desiredStats ?? []
+                    const matchedStats = arch.matchedStats ?? []
+                    const emoji = ARCHETYPE_EMOJIS[archKey] ?? ''
+                    const bonus = arch.matchCount >= 4 ? '+8%' : arch.matchCount >= 3 ? '+4~8%' : '0%'
+                    const statsDetail = desired
+                      .map(s => `${matchedStats.includes(s) ? '\u2713' : '\u2717'} ${formatStatLabel(s)}`)
+                      .join('  ')
+                    const desc = BUILD_ARCHETYPES[archKey]?.description ?? ''
+                    const tooltipText = `${tRune(`archetype.${archKey}`)} (${arch.matchCount}/4) ${bonus}\n${statsDetail}\n${desc}\n${tRune('synergyTooltip', { count: String(arch.matchCount), bonus })}`
+
+                    return (
+                      <Badge
+                        key={archKey}
+                        variant="outline"
+                        className={`cursor-default text-xs ${getSynergyBadgeClass(arch.matchCount)}`}
+                        title={tooltipText}
+                      >
+                        {emoji} {tRune(`archetype.${archKey}`)} {arch.matchCount}/4
+                      </Badge>
+                    )
+                  })}
                 </Div>
               </Div>
-              {/* Show matched/unmatched stats */}
-              {(() => {
-                const bestArch = analysis.synergy.bestArchetype as BuildArchetype
-                const desired = BUILD_ARCHETYPES[bestArch]?.desiredStats ?? []
-                const bestMatch = analysis.synergy.allArchetypes?.find(m => m.archetype === bestArch)
-                const matchedStats = bestMatch?.matchedStats ?? []
-                return (
-                  <Div className="flex flex-wrap gap-2">
-                    {desired.map(stat => {
-                      const isMatched = matchedStats.includes(stat)
-                      return (
-                        <P key={stat} className={`text-xs font-medium ${isMatched ? 'text-green-500' : 'text-red-500'}`}>
-                          {isMatched ? '\u2713' : '\u2717'} {formatStatLabel(stat)}
-                        </P>
-                      )
-                    })}
-                  </Div>
-                )
-              })()}
-            </Div>
-          </>
-        )}
-        {analysis?.synergy && !analysis.synergy.bestArchetype && analysis.synergy.synergyBonus < 0 && (
-          <>
-            <Div className="border-t border-border" />
-            <Div className="flex items-center justify-between">
-              <P className="text-sm font-medium">{tRune('synergy')}</P>
-              <P className="text-sm text-red-500">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
-            </Div>
-          </>
-        )}
+            </>
+          )
+        })()}
 
         {/* ── Grind potential ── */}
         {analysis && analysis.substats.some(s => s.grindable && s.grindAmount) && (

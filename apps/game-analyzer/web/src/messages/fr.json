@@ -120,6 +120,7 @@
     "synergyBonus": "+{value}%",
     "synergyPenalty": "{value}%",
     "noSynergy": "Stats incoherentes",
+    "synergyTooltip": "{count}/4 stats — {bonus}",
     "archetype": {
       "speed-dps": "Speed DPS",
       "bruiser": "Bruiseur",

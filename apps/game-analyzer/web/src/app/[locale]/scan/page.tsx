@@ -19,7 +19,6 @@ import { ScanUploader } from '@/components/scan-uploader'
 import { RuneCard } from '@/components/rune-card'
 import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
-import { EfficiencyDisplay } from '@/components/efficiency-display'
 import { ScanResultRaw } from '@/components/scan-result-raw'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
@@ -260,12 +259,7 @@ export default function ScanPage() {
                 {resultData && (
                   <>
                     {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
-                      <>
-                        <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
-                        {resultData.analysis && (
-                          <EfficiencyDisplay analysis={resultData.analysis} confidence={resultData.confidence} />
-                        )}
-                      </>
+                      <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                     )}
                     {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                       <GearCard gear={resultData.data} confidence={resultData.confidence} />
@@ -326,12 +320,7 @@ export default function ScanPage() {
                 <Div className="space-y-4">
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
                   {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
-                    <>
-                      <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
-                      {resultData.analysis && (
-                        <EfficiencyDisplay analysis={resultData.analysis} confidence={resultData.confidence} />
-                      )}
-                    </>
+                    <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                   )}
                   {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                     <GearCard gear={resultData.data} confidence={resultData.confidence} />
