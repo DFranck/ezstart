@@ -13,16 +13,16 @@ describe('summonersWarParser', () => {
   })
 
   describe('complete rune parsing', () => {
-    it('parses a standard Violent rune', () => {
+    it('parses a standard Violent rune (slot 6 with HP% main)', () => {
       const text = [
         'Violent Rune (6)',
         '+15',
         '★★★★★★',
-        'ATK +160',
+        'HP +63%',
         'SPD +23',
         'CRI Rate +12%',
         'CRI Dmg +7%',
-        'HP +8%',
+        'ATK +8%',
       ].join('\n')
 
       const result = summonersWarParser.parse(makeOcrResult(text))
@@ -33,12 +33,12 @@ describe('summonersWarParser', () => {
         slot: 6,
         grade: 6,
         level: 15,
-        mainStat: { type: 'atk', value: 160 },
+        mainStat: { type: 'hp%', value: 63 },
         subStats: [
           { type: 'spd', value: 23 },
           { type: 'cr', value: 12 },
           { type: 'cd', value: 7 },
-          { type: 'hp%', value: 8 },
+          { type: 'atk%', value: 8 },
         ],
       })
     })
@@ -588,11 +588,11 @@ describe('summonersWarParser', () => {
         'Violent Rune (6)',
         '+15',
         'Legend',
-        'ATK +160',
+        'HP +63%',
         'SPD +23',
         'CRI Rate +12%',
         'CRI Dmg +7%',
-        'HP +8%',
+        'ATK +8%',
       ].join('\n')
 
       const result = summonersWarParser.parse(makeOcrResult(text))
@@ -804,11 +804,11 @@ describe('summonersWarParser', () => {
         'Violent Rune (6)',
         '+15',
         'Legend',
-        'ATK +160',
+        'HP +63%',
         'SPD +23',
         'CRI Rate +12%',
         'CRI Dmg +7%',
-        'HP +8%',
+        'ATK +8%',
       ].join('\n')
 
       const result = summonersWarParser.parse(makeOcrResult(text))
@@ -913,6 +913,67 @@ describe('summonersWarParser', () => {
       expect(result.data).toMatchObject({
         mainStat: { type: 'cd', value: 80 },
       })
+    })
+  })
+
+  describe('slot 2/4/6 rejects ATK/DEF flat as main stat', () => {
+    it('slot 6 with only ATK flat detected does NOT use it as main stat', () => {
+      // OCR failed to read the real main stat (e.g. RES% +51), only sees ATK +118
+      const text = [
+        'Violent Rune (6)',
+        '+12',
+        'ATK +118',
+        'SPD +12',
+        'HP +8%',
+        'CRI Rate +11%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      // ATK flat is NOT a valid main stat for slot 6
+      // Parser should pick HP% as main (only valid type found) or return null
+      if (result.success && result.data.mainStat) {
+        expect((result.data.mainStat as { type: string }).type).not.toBe('atk')
+        expect((result.data.mainStat as { type: string }).type).not.toBe('def')
+      }
+    })
+
+    it('slot 6 with ACC% +64 correctly detects main stat', () => {
+      const text = [
+        'Focus Rune (6)',
+        '+12',
+        'Accuracy +64%',
+        'SPD +15',
+        'HP +12%',
+        'ATK +8%',
+        'DEF +20',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        slot: 6,
+        mainStat: { type: 'acc', value: 64 },
+      })
+    })
+
+    it('slot 2 with only flat stats does NOT use ATK flat as main', () => {
+      const text = [
+        'Swift Rune (2)',
+        '+12',
+        'ATK +118',
+        'DEF +20',
+        'HP +8%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      // ATK flat and DEF flat are NOT valid main stats for slot 2
+      if (result.success && result.data.mainStat) {
+        expect((result.data.mainStat as { type: string }).type).not.toBe('atk')
+        expect((result.data.mainStat as { type: string }).type).not.toBe('def')
+      }
     })
   })
 

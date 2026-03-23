@@ -38,10 +38,11 @@ export async function scanImage(
     let parseResult = parser.parse(ocrResult)
 
     // 2b. Gemini Vision fallback if Tesseract result is weak
-    const needsFallback =
-      ocrResult.confidence < 70 ||
-      parseResult.data?.partial === true ||
-      (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+    // Trigger fallback when: low confidence, partial parse, or too few substats
+    // partial=true means the parser found fewer substats than expected for the rune's quality/level
+    const isPartial = parseResult.success && parseResult.data?.partial === true
+    const hasFewerSubstats = (Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0) < 3
+    const needsFallback = ocrResult.confidence < 70 || isPartial || hasFewerSubstats
 
     if (needsFallback && gameType === 'summoners-war') {
       console.log('[scan] Low confidence or missing stats, trying Gemini Vision fallback...')

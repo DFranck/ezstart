@@ -44,6 +44,14 @@ const FIXED_MAIN_STATS: Record<number, { type: StatType; values: number[] }> = {
   5: { type: 'hp', values: [1680, 2448] },  // HP flat
 }
 
+// --- Valid main stats for variable slots (2, 4, 6) ---
+
+const VALID_MAIN_STATS: Record<number, StatType[]> = {
+  2: ['spd', 'atk%', 'def%', 'hp%'],
+  4: ['cr', 'cd', 'atk%', 'def%', 'hp%'],
+  6: ['acc', 'res', 'atk%', 'def%', 'hp%'],
+}
+
 // --- Substat value ranges for 6★ runes (min-max including grinds/rolls) ---
 
 const SUBSTAT_RANGES: Record<StatType, { min: number; max: number }> = {
@@ -614,14 +622,18 @@ function separateMainAndSubs(
   // - % stats (hp%, atk%, def%, cr, cd, res, acc): main >= 40, substats max ~40
   // - SPD: main >= 30 (e.g. +39 at +12, +42 at +15), substats max 30
   // - Flat HP: main >= 1000 (substats max 1875 but main is 1680-2448)
-  let mainStatIndex = 0 // Default: first stat
+  let mainStatIndex = -1 // -1 = not found yet
+
+  // Get valid main stat types for this slot (if known)
+  const validMainTypes = slot ? VALID_MAIN_STATS[slot] : undefined
 
   const isHighValueMainStat = (s: RuneStat): boolean => {
     const { type, value } = s
+    // If slot is known, reject stat types that can't be main stats for this slot
+    if (validMainTypes && !validMainTypes.includes(type)) return false
     if (type === 'spd' && value >= 30) return true
     if ((type === 'hp%' || type === 'atk%' || type === 'def%' || type === 'cr' || type === 'cd' || type === 'res' || type === 'acc') && value >= 40) return true
     if (type === 'hp' && value >= 1000) return true
-    if ((type === 'atk' || type === 'def') && value >= 100) return true
     return false
   }
 
@@ -629,6 +641,36 @@ function separateMainAndSubs(
   const highValueIdx = allStats.findIndex(s => isHighValueMainStat(s))
   if (highValueIdx >= 0) {
     mainStatIndex = highValueIdx
+  }
+
+  // If no high-value main stat found, try to find the best candidate
+  if (mainStatIndex < 0) {
+    if (validMainTypes) {
+      // For known slots 2/4/6: find first stat whose type is valid for this slot
+      // Prefer stats with value > 40 (likely main stat), then any valid type
+      const validHighIdx = allStats.findIndex(s =>
+        validMainTypes.includes(s.type) && s.value > 40,
+      )
+      if (validHighIdx >= 0) {
+        mainStatIndex = validHighIdx
+      } else {
+        // Take first stat with a valid type for this slot
+        const validIdx = allStats.findIndex(s => validMainTypes.includes(s.type))
+        if (validIdx >= 0) {
+          mainStatIndex = validIdx
+        }
+      }
+    }
+
+    // Final fallback: first stat (only if slot is unknown)
+    if (mainStatIndex < 0) {
+      if (!slot) {
+        mainStatIndex = 0
+      } else {
+        // Slot is known 2/4/6 but no valid main stat candidate found → return null main
+        return { mainStat: null, subStats: allStats.map(({ type, value }) => ({ type, value })).filter(isValidSubstatValue).slice(0, MAX_SUBSTATS) }
+      }
+    }
   }
 
   const mainStat = { type: allStats[mainStatIndex]!.type, value: allStats[mainStatIndex]!.value }
