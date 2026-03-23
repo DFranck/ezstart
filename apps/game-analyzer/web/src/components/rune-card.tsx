@@ -200,14 +200,15 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
               <Div className="flex items-center justify-between">
                 <P className="text-sm font-medium">{tScan('efficiency.title')}</P>
                 <Div className="flex items-center gap-2">
-                  <P className={`text-lg font-bold ${getTierColor(tier)}`}>{analysis.efficiency}%</P>
+                  <P className={`text-lg font-bold ${getTierColor(tier)}`}>{analysis.weightedEfficiency ?? analysis.efficiency}%</P>
+                  <P className="text-xs text-muted-foreground">({analysis.efficiency}%)</P>
                   <P className={`text-sm font-semibold ${getTierColor(tier)}`}>
                     {tScan(`efficiency.${tier}`)}
                   </P>
                 </Div>
               </Div>
               <Progress
-                value={analysis.efficiency}
+                value={analysis.weightedEfficiency ?? analysis.efficiency}
                 className={`h-2.5 ${getProgressColor(tier)}`}
               />
               {levelStrictness > 0 && (

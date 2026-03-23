@@ -532,26 +532,26 @@ describe('rune-efficiency', () => {
       expect(earlyResult.tier).not.toBe(lateResult.tier)
     })
 
-    it('grind bonus + synergy saves a rune from keep to good', () => {
-      // A rune right at the border of keep/good for mid profile at +12
-      // mid good threshold = 70, we need efficiency ~62% with grind + synergy pushing over
+    it('grind bonus + synergy saves a rune from sell to keep', () => {
+      // A rune with mixed stats — tier is now based on weightedEfficiency
+      // mid keep threshold = 60
       const rune = makeRune({
         level: 12,
         quality: 'legend',
         subStats: [
-          { type: 'spd', value: 8 },   // 8/6 = 1.333
-          { type: 'atk%', value: 10 }, // 10/8 = 1.25
-          { type: 'hp%', value: 8 },   // 8/8 = 1.0
-          { type: 'def%', value: 8 },  // 8/8 = 1.0
+          { type: 'spd', value: 8 },   // 8/6 = 1.333, weight 2.0 → 2.667
+          { type: 'atk%', value: 10 }, // 10/8 = 1.25, weight 1.0 → 1.25
+          { type: 'hp%', value: 8 },   // 8/8 = 1.0, weight 1.0 → 1.0
+          { type: 'def%', value: 8 },  // 8/8 = 1.0, weight 1.0 → 1.0
         ],
       })
 
-      // efficiency = (4.583+1)/9*100 = 62%
+      // weightedEfficiency = (2.667+1.25+1.0+1.0+1)/13*100 = 53.2%
       // grind potential: spd +5, atk% +7, hp% +7, def% +7 => grind bonus = 5
       // synergy: cc-debuffer 3/4 (spd, hp%, def%) + atk% has 1 roll => THREE_NO_ROLL = +8%
-      // finalEfficiency = 62 + 5 + 8 = 75 >= 70 (good threshold mid) => good
+      // finalWeightedEff = 53.2 + 5 + 8 = 66.2 >= 60 (keep threshold mid) => keep
       const result = analyzeRune(rune, 'mid')
-      expect(result.tier).toBe('good')
+      expect(result.tier).toBe('keep')
 
       // Verify grind gain and synergy exist
       expect(result.grindPotential.grindGain).toBeGreaterThan(0)
@@ -778,6 +778,150 @@ describe('rune-efficiency', () => {
 
       expect(result.synergy.synergyBonus).toBe(-3)
       expect(result.synergy.bestArchetype).toBeNull()
+    })
+  })
+
+  // ====================================
+  // NEW: Weighted efficiency
+  // ====================================
+
+  describe('weighted efficiency', () => {
+    it('ACC-heavy rune has lower weighted efficiency than Barion brut', () => {
+      // ACC weight = 0.8x, so weighted should be lower
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'acc', value: 22 },  // ~3 rolls, 22/8 = 2.75, weight 0.8 → 2.2
+          { type: 'res', value: 8 },   // 1 roll, 8/8 = 1.0, weight 0.8 → 0.8
+          { type: 'def', value: 20 },  // 1 roll flat, 20/20 = 1.0, weight 0.5 → 0.5
+          { type: 'hp', value: 375 },  // 1 roll flat, 375/375 = 1.0, weight 0.5 → 0.5
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      // Barion: (2.75+1+1+1+1)/9*100 = 75%
+      // Weighted: (2.2+0.8+0.5+0.5+1)/13*100 = 38.5%
+      expect(result.weightedEfficiency).toBeLessThan(result.efficiency)
+    })
+
+    it('SPD + CR + CD rune has higher weighted efficiency than Barion brut', () => {
+      // SPD weight = 2.0, CR = 1.5, CD = 1.5
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },  // 2 rolls, 12/6 = 2.0, weight 2.0 → 4.0
+          { type: 'cr', value: 12 },   // 2 rolls, 12/6 = 2.0, weight 1.5 → 3.0
+          { type: 'cd', value: 14 },   // 2 rolls, 14/7 = 2.0, weight 1.5 → 3.0
+          { type: 'atk%', value: 16 }, // 2 rolls, 16/8 = 2.0, weight 1.0 → 2.0
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      // Barion: (2+2+2+2+1)/9*100 = 100%
+      // Weighted: (4+3+3+2+1)/13*100 = 100%
+      // Perfect rune: both should be 100%
+      expect(result.weightedEfficiency).toBeCloseTo(100, 0)
+      expect(result.efficiency).toBeCloseTo(100, 0)
+    })
+
+    it('potential +12 equals weighted efficiency for +12 rune', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 10 },
+          { type: 'cr', value: 10 },
+          { type: 'cd', value: 10 },
+          { type: 'acc', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+
+      // potentialEfficiency at +12 must equal currentEfficiency (Barion brut)
+      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
+    })
+  })
+
+  // ====================================
+  // NEW: Innate stat in synergy
+  // ====================================
+
+  describe('synergy with innate stat', () => {
+    it('innate stat counts in archetype matching', () => {
+      // 3 substats match speed-dps, innate SPD adds the 4th match
+      const subStats = [
+        { type: 'cr' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
+        { type: 'atk%' as const, value: 16 },
+        { type: 'res' as const, value: 8 },   // does NOT match speed-dps
+      ]
+      const innateStat = { type: 'spd' as const, value: 6 }
+
+      const result = calculateSynergy(subStats, innateStat)
+
+      // Without innate: 3/4 speed-dps (cr, cd, atk%). With innate spd: 4/4
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(4)
+      expect(result.synergyBonus).toBe(8) // PERFECT_4
+    })
+
+    it('innate stat in analyzeRune affects synergy', () => {
+      const rune = {
+        set: 'violent' as const,
+        slot: 1 as const,
+        grade: 6,
+        level: 12,
+        quality: 'legend' as const,
+        mainStat: { type: 'atk' as const, value: 160 },
+        subStats: [
+          { type: 'cr' as const, value: 12 },
+          { type: 'cd' as const, value: 14 },
+          { type: 'atk%' as const, value: 16 },
+          { type: 'res' as const, value: 8 },
+        ],
+        innateStat: { type: 'spd' as const, value: 6 },
+      }
+
+      const result = analyzeRune(rune)
+
+      // Innate SPD + 3 substats (cr, cd, atk%) = 4/4 speed-dps match
+      expect(result.synergy.bestArchetype).toBe('speed-dps')
+      expect(result.synergy.matchCount).toBe(4)
+      expect(result.synergy.synergyBonus).toBe(8)
+    })
+
+    it('innate does not count in roll evaluation for gem potential', () => {
+      // 2 substats match, innate matches too (3 total),
+      // 2 unmatched substats with high rolls
+      const subStats = [
+        { type: 'cr' as const, value: 12 },     // matches speed-dps
+        { type: 'cd' as const, value: 14 },      // matches speed-dps
+        { type: 'res' as const, value: 20 },     // unmatched, 3 rolls
+        { type: 'acc' as const, value: 16 },     // unmatched, 2 rolls
+      ]
+      const innateStat = { type: 'spd' as const, value: 6 } // matches speed-dps
+
+      const result = calculateSynergy(subStats, innateStat)
+
+      // 3 matched (cr, cd, spd_innate), 2 unmatched subs with high rolls
+      // Since matchCount=3, check the 1 remaining unmatched sub
+      // But actually both res and acc are unmatched subs — wait, let me re-check
+      // speed-dps wants: spd, cr, cd, atk%
+      // matched: cr, cd, spd(innate) = 3
+      // unmatched: res(20), acc(16) — but those are substats, not innate
+      // With matchCount=3 and 2 remaining unmatched subs...
+      // Actually matchCount=3 means THREE case: check unmatchedRolls[0]
+      // The unmatched stats are res(20) and acc(16), innate is NOT in unmatched
+      // unmatchedSubsOnly filters out innate, leaving res and acc
+      // For THREE case, rollsInBad = unmatchedRolls[0] = rolls of res(20) = 3 rolls
+      // 3 > 1 → THREE_WITH_ROLLS = +4
+      expect(result.matchCount).toBe(3)
+      expect(result.synergyBonus).toBe(4) // THREE_WITH_ROLLS, not PERFECT_4
     })
   })
 })

@@ -71,14 +71,15 @@ export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayPro
           <Div className="flex items-center justify-between">
             <P className="text-sm font-medium">{t('efficiency.score')}</P>
             <Div className="flex items-center gap-2">
-              <P className={`text-lg font-bold ${getTierColor(displayTier)}`}>{analysis.efficiency}%</P>
+              <P className={`text-lg font-bold ${getTierColor(displayTier)}`}>{analysis.weightedEfficiency ?? analysis.efficiency}%</P>
+              <P className="text-xs text-muted-foreground">({analysis.efficiency}%)</P>
               <P className={`text-sm font-semibold ${getTierColor(displayTier)}`}>
                 {t(`efficiency.${displayTier}`)}
               </P>
             </Div>
           </Div>
           <Progress
-            value={analysis.efficiency}
+            value={analysis.weightedEfficiency ?? analysis.efficiency}
             className={`h-3 ${getProgressColor(displayTier)}`}
           />
           {levelStrictness > 0 && (

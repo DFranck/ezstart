@@ -88,6 +88,8 @@ export interface RuneAnalysis {
   currentEfficiency: number
   /** Alias for currentEfficiency — used by the UI layer */
   efficiency: number
+  /** Weighted efficiency — stat importance-adjusted score (primary display) */
+  weightedEfficiency: number
   potentialEfficiency: number
   maxEfficiency: number
   /** Efficiency after applying legend grinds — used by UI layer */
@@ -194,6 +196,21 @@ const SYNERGY_BONUS = {
   TWO_WITH_ROLLS: 0,    // 2/4 match + rolls in bad stats → too much loss
   INCOHERENT: -3,       // < 2 match
 } as const
+
+/** Stat weights for weighted efficiency — reflects real SW meta value */
+const STAT_WEIGHTS: Record<StatType, number> = {
+  'spd': 2.0,
+  'cr': 1.5,
+  'cd': 1.5,
+  'atk%': 1.0,
+  'hp%': 1.0,
+  'def%': 1.0,
+  'acc': 0.8,
+  'res': 0.8,
+  'atk': 0.5,
+  'hp': 0.5,
+  'def': 0.5,
+}
 
 /** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
 const BARION_DIVISOR = 9
@@ -326,6 +343,42 @@ function barionEfficiency(substats: RuneStat[]): number {
 }
 
 /**
+ * Calculate weighted efficiency using stat importance weights.
+ * weighted = sum(substat_ratio * weight) / sum(max_possible_ratios * weight) * 100
+ * Uses the top-N weights (sorted desc) for the max possible denominator,
+ * where N = total roll slots (initial subs + upgrade rolls).
+ */
+function weightedEfficiency(substats: RuneStat[]): number {
+  if (substats.length === 0) return 0
+
+  let weightedSum = 0
+  for (const sub of substats) {
+    const range = ROLL_RANGES[sub.type]
+    if (!range || sub.value <= 0) continue
+    const ratio = sub.value / range.max
+    weightedSum += ratio * STAT_WEIGHTS[sub.type]
+  }
+
+  // Max possible: 8 perfect rolls across the highest-weighted stats
+  // A perfect rune gets ratio=2 per stat (2 rolls each on 4 stats) = 8 total ratios
+  // Best case: all rolls in spd (weight 2.0) → maxWeightedSum = 8 * 2.0
+  // But we normalise against a "balanced best" of 4 stats with 2 rolls each:
+  // Use top-4 weights sorted desc: spd(2.0), cr(1.5), cd(1.5), atk%(1.0) = avg 1.5
+  // maxWeightedSum = 8 * avg_top4_weight = 8 * 1.5 = 12
+  // +1 for main stat baseline (like Barion)
+  // Actually, to stay comparable to Barion scale (0-100), we use:
+  // weighted_eff = (weightedSum + main_weight) / max_weighted_divisor * 100
+  // where max_weighted_divisor makes a perfect rune = 100%
+  // Perfect rune: 4 stats, 2 max rolls each → ratio=2 per stat
+  // Best weights: spd(2.0*2=4) + cr(1.5*2=3) + cd(1.5*2=3) + atk%(1.0*2=2) = 12
+  // Main stat weight = 1.0 (normalised)
+  // Divisor = 12 + 1 = 13 for 100%
+  const MAX_WEIGHTED_DIVISOR = 13
+
+  return ((weightedSum + 1) / MAX_WEIGHTED_DIVISOR) * 100
+}
+
+/**
  * Calculate potential efficiency at +12 (remaining rolls at max).
  * If the rune is already +12 or higher, potential = current (no rolls left).
  */
@@ -392,14 +445,23 @@ function calculateGrindPotential(
  * Counts how many substats match each archetype's desired stats,
  * then evaluates rolls in non-matching stats to determine gem potential.
  *
+ * The innate stat is included in archetype matching (it's on the rune)
+ * but excluded from roll-based gem evaluation (innate has 0 upgrade rolls).
+ *
  * @param subStats - The rune's substats
+ * @param innateStat - Optional innate stat (included in matching, not in roll eval)
  * @param rollEstimates - Optional pre-computed roll counts per stat type.
  *                        If not provided, estimateRolls() is used.
  */
 export function calculateSynergy(
   subStats: RuneStat[],
+  innateStat?: RuneStat,
   rollEstimates?: Map<StatType, number>,
 ): SynergyResult {
+  // Combine substats + innate for archetype matching
+  const allStats = [...subStats]
+  if (innateStat) allStats.push(innateStat)
+
   const archetypeKeys = Object.keys(BUILD_ARCHETYPES) as BuildArchetype[]
 
   const allArchetypes = archetypeKeys.map(archetype => {
@@ -407,11 +469,11 @@ export function calculateSynergy(
     const matchedStats: StatType[] = []
     const unmatchedStats: RuneStat[] = []
 
-    for (const sub of subStats) {
-      if (desired.includes(sub.type)) {
-        matchedStats.push(sub.type)
+    for (const stat of allStats) {
+      if (desired.includes(stat.type)) {
+        matchedStats.push(stat.type)
       } else {
-        unmatchedStats.push(sub)
+        unmatchedStats.push(stat)
       }
     }
 
@@ -425,8 +487,11 @@ export function calculateSynergy(
   const bestMatchCount = best?.matchCount ?? 0
   const unmatchedStats = best?.unmatchedStats ?? []
 
-  // Count rolls in unmatched stats
-  const unmatchedRolls = unmatchedStats.map(sub => {
+  // Count rolls in unmatched stats (exclude innate — it has 0 upgrade rolls)
+  const unmatchedSubsOnly = unmatchedStats.filter(sub =>
+    !innateStat || sub.type !== innateStat.type || sub.value !== innateStat.value,
+  )
+  const unmatchedRolls = unmatchedSubsOnly.map(sub => {
     if (rollEstimates) {
       return rollEstimates.get(sub.type) ?? 0
     }
@@ -514,6 +579,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
 
   const currentEfficiency = barionEfficiency(rune.subStats)
+  const currentWeightedEfficiency = weightedEfficiency(rune.subStats)
   const potentialEfficiency = calculatePotentialEfficiency(rune)
 
   // Max efficiency: 8 perfect rolls + 1 main = (8 + 1) / 2.8 * 100
@@ -521,12 +587,12 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   const grindPotential = calculateGrindPotential(substats, currentEfficiency)
 
-  // Calculate synergy
-  const synergy = calculateSynergy(rune.subStats)
+  // Calculate synergy (include innate stat for archetype matching)
+  const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
-  // Tier without level strictness (at +12 baseline)
+  // Tier based on weightedEfficiency (not raw Barion)
   const tier = getRecommendation(
-    currentEfficiency,
+    currentWeightedEfficiency,
     12,
     profile,
     grindPotential.grindGain,
@@ -537,7 +603,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12)
   const levelStrictness = LEVEL_STRICTNESS[levelKey] ?? 0
   const adjustedTier = getRecommendation(
-    currentEfficiency,
+    currentWeightedEfficiency,
     rune.level,
     profile,
     grindPotential.grindGain,
@@ -546,6 +612,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   const cappedEfficiency = Math.min(currentEfficiency, 100)
   const roundedCurrent = Math.round(cappedEfficiency * 100) / 100
+  const cappedWeighted = Math.min(currentWeightedEfficiency, 100)
+  const roundedWeighted = Math.round(cappedWeighted * 100) / 100
 
   // Set bonus info
   const setInfo = SET_INFO[rune.set]
@@ -555,10 +623,15 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const cappedGrindedEfficiency = Math.min(grindPotential.efficiencyAfterGrind, 100)
   const cappedGrindGain = Math.round(Math.max(0, cappedGrindedEfficiency - roundedCurrent) * 100) / 100
 
+  // At +12 or above, potential must equal current (no remaining rolls)
+  const remaining = remainingRolls(rune.level)
+  const finalPotential = remaining <= 0 ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
-    potentialEfficiency: Math.round(Math.min(potentialEfficiency, 100) * 100) / 100,
+    weightedEfficiency: roundedWeighted,
+    potentialEfficiency: finalPotential,
     maxEfficiency: Math.round(maxEfficiency * 100) / 100,
     grindedEfficiency: Math.round(cappedGrindedEfficiency * 100) / 100,
     grindGain: cappedGrindGain,
