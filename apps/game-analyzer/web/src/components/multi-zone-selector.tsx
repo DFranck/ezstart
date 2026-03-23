@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import type { RoiRect } from './roi-selector'
 
-export type ZoneName = 'header' | 'main' | 'substats' | 'setbonus'
+export type ZoneName = 'header' | 'main' | 'innate' | 'substats'
 
 export interface ZoneConfig {
   name: ZoneName
@@ -14,10 +14,10 @@ export interface ZoneConfig {
 }
 
 const DEFAULT_ZONES: ZoneConfig[] = [
-  { name: 'header', label: 'bench.zone.header', color: '#3b82f6', rect: { x: 10, y: 0, width: 80, height: 12 } },
-  { name: 'main', label: 'bench.zone.main', color: '#22c55e', rect: { x: 10, y: 12, width: 60, height: 15 } },
-  { name: 'substats', label: 'bench.zone.substats', color: '#ef4444', rect: { x: 5, y: 30, width: 55, height: 50 } },
-  { name: 'setbonus', label: 'bench.zone.setbonus', color: '#eab308', rect: { x: 5, y: 82, width: 70, height: 15 } },
+  { name: 'header', label: 'bench.zone.header', color: '#3b82f6', rect: { x: 10, y: 0, width: 80, height: 10 } },
+  { name: 'main', label: 'bench.zone.main', color: '#22c55e', rect: { x: 10, y: 10, width: 50, height: 15 } },
+  { name: 'innate', label: 'bench.zone.innate', color: '#a855f7', rect: { x: 5, y: 25, width: 50, height: 10 } },
+  { name: 'substats', label: 'bench.zone.substats', color: '#ef4444', rect: { x: 5, y: 35, width: 55, height: 45 } },
 ]
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'

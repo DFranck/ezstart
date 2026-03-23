@@ -252,7 +252,7 @@ export default function BenchPage() {
             zoneHeader: zoneFiles.header,
             zoneMain: zoneFiles.main,
             zoneSubstats: zoneFiles.substats,
-            zoneSetbonus: zoneFiles.setbonus,
+            zoneInnate: zoneFiles.innate,
           },
           { onSettled: () => { scanningRef.current = false } }
         )

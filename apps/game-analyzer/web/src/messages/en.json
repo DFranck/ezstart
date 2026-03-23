@@ -73,7 +73,7 @@
       "header": "Name/Set/Slot",
       "main": "Main Stat",
       "substats": "Substats",
-      "setbonus": "Set Bonus"
+      "innate": "Innate"
     }
   },
   "dashboard": {

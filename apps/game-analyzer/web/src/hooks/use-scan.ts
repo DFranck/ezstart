@@ -13,14 +13,14 @@ interface ScanInput {
   zoneHeader?: File
   zoneMain?: File
   zoneSubstats?: File
-  zoneSetbonus?: File
+  zoneInnate?: File
 }
 
 export function useScan() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile, benchMode, presets, zoneHeader, zoneMain, zoneSubstats, zoneSetbonus }: ScanInput): Promise<ScanResult> => {
+    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile, benchMode, presets, zoneHeader, zoneMain, zoneSubstats, zoneInnate }: ScanInput): Promise<ScanResult> => {
       const formData = new FormData()
       formData.append('image', image)
       if (imageAlt) formData.append('imageAlt', imageAlt)
@@ -32,7 +32,7 @@ export function useScan() {
       if (zoneHeader) formData.append('zoneHeader', zoneHeader)
       if (zoneMain) formData.append('zoneMain', zoneMain)
       if (zoneSubstats) formData.append('zoneSubstats', zoneSubstats)
-      if (zoneSetbonus) formData.append('zoneSetbonus', zoneSetbonus)
+      if (zoneInnate) formData.append('zoneInnate', zoneInnate)
 
       const response = await callApi<{ success: boolean; data: Scan }>('/scan', {
         method: 'POST',

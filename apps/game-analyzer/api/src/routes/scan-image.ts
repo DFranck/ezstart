@@ -28,7 +28,7 @@ router.post('/', upload.fields([
   { name: 'zoneHeader', maxCount: 1 },
   { name: 'zoneMain', maxCount: 1 },
   { name: 'zoneSubstats', maxCount: 1 },
-  { name: 'zoneSetbonus', maxCount: 1 },
+  { name: 'zoneInnate', maxCount: 1 },
 ]), async (req: any, res: any) => {
   try {
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
@@ -58,13 +58,13 @@ router.post('/', upload.fields([
       const zoneHeader = files?.zoneHeader?.[0]
       const zoneMain = files?.zoneMain?.[0]
       const zoneSubstats = files?.zoneSubstats?.[0]
-      const zoneSetbonus = files?.zoneSetbonus?.[0]
-      if (!zoneHeader && !zoneMain && !zoneSubstats && !zoneSetbonus) return undefined
+      const zoneInnate = files?.zoneInnate?.[0]
+      if (!zoneHeader && !zoneMain && !zoneSubstats && !zoneInnate) return undefined
       const zones: Record<string, Buffer> = {}
       if (zoneHeader) zones.header = zoneHeader.buffer
       if (zoneMain) zones.main = zoneMain.buffer
       if (zoneSubstats) zones.substats = zoneSubstats.buffer
-      if (zoneSetbonus) zones.setbonus = zoneSetbonus.buffer
+      if (zoneInnate) zones.innate = zoneInnate.buffer
       return zones
     })()
 
