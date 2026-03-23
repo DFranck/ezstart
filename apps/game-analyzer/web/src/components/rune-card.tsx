@@ -55,12 +55,13 @@ const STAT_COLORS: Record<StatType, string> = {
 }
 
 // ── Efficiency tier helpers ──
-type Tier = 'sell' | 'keep' | 'great' | 'godlike'
+type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 function getTierColor(tier: Tier): string {
   switch (tier) {
     case 'godlike': return 'text-yellow-500'
     case 'great': return 'text-green-500'
+    case 'good': return 'text-blue-500'
     case 'keep': return 'text-orange-500'
     case 'sell': return 'text-red-500'
   }
@@ -70,6 +71,7 @@ function getProgressColor(tier: Tier): string {
   switch (tier) {
     case 'godlike': return '[&>div]:bg-yellow-500'
     case 'great': return '[&>div]:bg-green-500'
+    case 'good': return '[&>div]:bg-blue-500'
     case 'keep': return '[&>div]:bg-orange-500'
     case 'sell': return '[&>div]:bg-red-500'
   }
@@ -105,7 +107,8 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
   const quality = rune.quality ?? 'normal'
   const gradeStars = Array.from({ length: rune.grade }, () => '\u2605').join('')
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
-  const tier = analysis ? analysis.tier : undefined
+  const tier = analysis ? (analysis.adjustedTier ?? analysis.tier) : undefined
+  const levelStrictness = analysis?.levelStrictness ?? 0
 
   return (
     <Card className="overflow-hidden">
@@ -206,6 +209,11 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                 value={analysis.efficiency}
                 className={`h-2.5 ${getProgressColor(tier)}`}
               />
+              {levelStrictness > 0 && (
+                <P className="text-xs text-muted-foreground">
+                  {tScan('efficiency.levelStrictness', { value: String(levelStrictness) })}
+                </P>
+              )}
 
               {/* Potential at +12 */}
               {analysis.maxEfficiency !== undefined && (

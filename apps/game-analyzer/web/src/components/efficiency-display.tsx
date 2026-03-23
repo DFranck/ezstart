@@ -19,12 +19,13 @@ const STAT_COLORS: Record<StatType, string> = {
   acc: 'text-violet-400',
 }
 
-type Tier = 'sell' | 'keep' | 'great' | 'godlike'
+type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 function getTierColor(tier: Tier): string {
   switch (tier) {
     case 'godlike': return 'text-yellow-500'
     case 'great': return 'text-green-500'
+    case 'good': return 'text-blue-500'
     case 'keep': return 'text-orange-500'
     case 'sell': return 'text-red-500'
   }
@@ -34,6 +35,7 @@ function getProgressColor(tier: Tier): string {
   switch (tier) {
     case 'godlike': return '[&>div]:bg-yellow-500'
     case 'great': return '[&>div]:bg-green-500'
+    case 'good': return '[&>div]:bg-blue-500'
     case 'keep': return '[&>div]:bg-orange-500'
     case 'sell': return '[&>div]:bg-red-500'
   }
@@ -55,7 +57,8 @@ export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayPro
   const tLabels = useTranslations('labels')
   const tRune = useTranslations('rune')
 
-  const { tier } = analysis
+  const displayTier = analysis.adjustedTier ?? analysis.tier
+  const levelStrictness = analysis.levelStrictness ?? 0
 
   return (
     <Card>
@@ -68,16 +71,21 @@ export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayPro
           <Div className="flex items-center justify-between">
             <P className="text-sm font-medium">{t('efficiency.score')}</P>
             <Div className="flex items-center gap-2">
-              <P className={`text-lg font-bold ${getTierColor(tier)}`}>{analysis.efficiency}%</P>
-              <P className={`text-sm font-semibold ${getTierColor(tier)}`}>
-                {t(`efficiency.${tier}`)}
+              <P className={`text-lg font-bold ${getTierColor(displayTier)}`}>{analysis.efficiency}%</P>
+              <P className={`text-sm font-semibold ${getTierColor(displayTier)}`}>
+                {t(`efficiency.${displayTier}`)}
               </P>
             </Div>
           </Div>
           <Progress
             value={analysis.efficiency}
-            className={`h-3 ${getProgressColor(tier)}`}
+            className={`h-3 ${getProgressColor(displayTier)}`}
           />
+          {levelStrictness > 0 && (
+            <P className="text-xs text-muted-foreground">
+              {t('efficiency.levelStrictness', { value: String(levelStrictness) })}
+            </P>
+          )}
         </Div>
 
         {/* Potential and grind projections */}

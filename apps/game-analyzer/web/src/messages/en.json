@@ -76,13 +76,21 @@
       "adjustZone": "Adjust detection zone"
     },
     "parsingImproving": "Stats parsing is being improved",
+    "profile": {
+      "label": "Progression profile",
+      "early": "Early",
+      "mid": "Mid",
+      "late": "Endgame"
+    },
     "efficiency": {
       "title": "Efficiency",
       "score": "Score",
       "sell": "Sell",
       "keep": "Keep",
+      "good": "Good",
       "great": "Great",
-      "godlike": "Godlike"
+      "godlike": "Godlike",
+      "levelStrictness": "Strictness adjustment: +{value}%"
     }
   },
   "rune": {

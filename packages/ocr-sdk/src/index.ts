@@ -34,6 +34,7 @@ export {
 } from './analyzers/index.js'
 export type {
   EfficiencyTier,
+  PlayerProfile,
   GrindPotential,
   Recommendation,
   RuneAnalysis,

@@ -35,7 +35,7 @@ export async function scanImage(
     let analysis: ScanResult['analysis'] = undefined
     if (parseResult.success && gameType === 'summoners-war' && parseResult.data && 'set' in parseResult.data) {
       try {
-        analysis = analyzeRune(parseResult.data as unknown as RuneData) as unknown as ScanResult['analysis']
+        analysis = analyzeRune(parseResult.data as unknown as RuneData, 'mid') as unknown as ScanResult['analysis']
       } catch (e) {
         // Don't fail the scan if analysis fails
         console.error('[scan] Analysis failed:', e)

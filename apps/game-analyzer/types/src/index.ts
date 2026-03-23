@@ -10,6 +10,8 @@ export {
   RUNE_SET_INFO,
   SUBSTATS_BY_QUALITY,
   MAX_ROLLS_BY_QUALITY,
+  EFFICIENCY_THRESHOLDS,
+  LEVEL_STRICTNESS,
 } from './rune-data'
-export type { GrindRarity, EfficiencyTier, SubstatAnalysis, RuneAnalysis } from './rune-data'
+export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RuneAnalysis } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'

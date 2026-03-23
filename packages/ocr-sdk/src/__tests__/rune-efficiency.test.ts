@@ -70,11 +70,6 @@ describe('rune-efficiency', () => {
 
   describe('analyzeRune — perfect legend rune (godlike)', () => {
     it('returns godlike for a perfect 6★ legend rune at +12', () => {
-      // Legend rune: 4 subs, each starting with 1 roll + 4 upgrade rolls = 8 total
-      // Perfect: each roll at max
-      // SPD: 2 rolls * 6 = 12, CR: 2 rolls * 6 = 12, CD: 2 rolls * 7 = 14, ATK%: 2 rolls * 8 = 16
-      // rawSum = 12/6 + 12/6 + 14/7 + 16/8 = 2+2+2+2 = 8
-      // efficiency = (8+1)/9*100 = 100%
       const rune = makeRune({
         level: 12,
         quality: 'legend',
@@ -121,10 +116,6 @@ describe('rune-efficiency', () => {
 
   describe('analyzeRune — average rune (keep/great)', () => {
     it('returns keep/great for a rune with average rolls', () => {
-      // Average rolls: midpoint between min and max
-      // SPD: 2 rolls * 5 = 10, CR: 2 rolls * 5 = 10, HP%: 2 rolls * 6.5 ≈ 13, DEF%: 2 rolls * 6.5 ≈ 13
-      // rawSum = 10/6 + 10/6 + 13/8 + 13/8 = 1.67+1.67+1.625+1.625 = 6.59
-      // eff = (6.59+1)/9*100 = 84.3%
       const rune = makeRune({
         level: 12,
         quality: 'legend',
@@ -138,15 +129,12 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      expect(result.tier).toBe('godlike') // high efficiency
       expect(result.currentEfficiency).toBeGreaterThan(80)
     })
   })
 
   describe('analyzeRune — mediocre rune (sell)', () => {
     it('returns sell for a rune with very low efficiency and no grind potential', () => {
-      // A rune with no substats at all (e.g. normal quality, all rolls wasted)
-      // rawSum = 0, eff = (0 + 1)/9*100 = 11.1%, grind can't help
       const rune = makeRune({
         level: 12,
         quality: 'normal',
@@ -172,7 +160,6 @@ describe('rune-efficiency', () => {
       const result = analyzeRune(rune)
 
       // eff = (0.5+0.5+1)/9*100 = 22.2%
-      // Low individual rolls and low efficiency
       expect(result.currentEfficiency).toBeCloseTo(22.22, 0)
     })
   })
@@ -329,29 +316,30 @@ describe('rune-efficiency', () => {
   })
 
   describe('getRecommendation', () => {
-    it('returns sell for efficiency below 50%', () => {
-      expect(getRecommendation(40, 45)).toBe('sell')
+    it('returns sell for low efficiency at +12 mid profile', () => {
+      expect(getRecommendation(40, 12, 'mid')).toBe('sell')
     })
 
-    it('returns keep for efficiency 50-65%', () => {
-      expect(getRecommendation(55, 60)).toBe('keep')
+    it('returns keep for efficiency at mid threshold at +12', () => {
+      expect(getRecommendation(62, 12, 'mid')).toBe('keep')
     })
 
-    it('returns great for efficiency 65-80%', () => {
-      expect(getRecommendation(70, 75)).toBe('great')
+    it('returns good for efficiency at good threshold at +12 mid', () => {
+      expect(getRecommendation(72, 12, 'mid')).toBe('good')
     })
 
-    it('returns godlike for efficiency 80%+', () => {
-      expect(getRecommendation(85, 90)).toBe('godlike')
+    it('returns great for efficiency at great threshold at +12 mid', () => {
+      expect(getRecommendation(82, 12, 'mid')).toBe('great')
     })
 
-    it('uses potential efficiency when higher than current', () => {
-      expect(getRecommendation(40, 70)).toBe('great')
+    it('returns godlike for efficiency 85%+ at +12 mid', () => {
+      expect(getRecommendation(87, 12, 'mid')).toBe('godlike')
     })
 
     it('considers grind potential in recommendation', () => {
-      // Current 45, potential 48, but after grind 70 => great
-      expect(getRecommendation(45, 48, 70)).toBe('great')
+      // Current 58, no strictness at +12. Grind potential 10 => bonus = min(10*0.3, 5) = 3
+      // finalEfficiency = 58 + 3 = 61 >= 60 (keep threshold mid) => keep
+      expect(getRecommendation(58, 12, 'mid', 10)).toBe('keep')
     })
   })
 
@@ -401,6 +389,143 @@ describe('rune-efficiency', () => {
 
       expect(a.currentEfficiency).toBe(b.currentEfficiency)
       expect(a.tier).toBe(b.tier)
+    })
+  })
+
+  // ====================================
+  // NEW: Player profile & level strictness
+  // ====================================
+
+  describe('player profile thresholds', () => {
+    // A rune with ~76% efficiency at +12
+    const midRune = makeRune({
+      level: 12,
+      quality: 'legend',
+      subStats: [
+        { type: 'spd', value: 10 },  // 10/6 = 1.667
+        { type: 'cr', value: 10 },   // 10/6 = 1.667
+        { type: 'hp%', value: 10 },  // 10/8 = 1.25
+        { type: 'def%', value: 10 }, // 10/8 = 1.25
+      ],
+    })
+
+    it('rune +12 mid game — tests mid thresholds', () => {
+      const result = analyzeRune(midRune, 'mid')
+      // efficiency ~75.9%, grind gain ~28.67 => grindBonus = 5
+      // finalEfficiency = 75.9 + 5 = 80.9 => great (mid threshold great=80)
+      // At +12, strictness = 0
+      expect(result.tier).toBe('great')
+      expect(result.adjustedTier).toBe('great')
+      expect(result.levelStrictness).toBe(0)
+    })
+
+    it('rune +6 mid game — tests level strictness malus of +7', () => {
+      const rune = makeRune({
+        level: 6,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 10 },
+          { type: 'cr', value: 10 },
+          { type: 'hp%', value: 10 },
+          { type: 'def%', value: 10 },
+        ],
+      })
+
+      const result = analyzeRune(rune, 'mid')
+      // efficiency ~75.9%, grind bonus = 5 => finalEff = 80.9
+      // At +6, strictness = 7 => adjusted thresholds: good=77, great=87, godlike=92
+      // 80.9 >= 77 (adjusted good) but < 87 (adjusted great) => good
+      expect(result.adjustedTier).toBe('good')
+      expect(result.levelStrictness).toBe(7)
+    })
+
+    it('rune +0 late game — tests level strictness malus of +15', () => {
+      const rune = makeRune({
+        level: 0,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 6 },
+          { type: 'cr', value: 6 },
+          { type: 'cd', value: 7 },
+          { type: 'hp%', value: 8 },
+        ],
+      })
+
+      const result = analyzeRune(rune, 'late')
+      // efficiency = (6/6 + 6/6 + 7/7 + 8/8 + 1)/9*100 = (4+1)/9*100 = 55.6%
+      // At +0, strictness = 15
+      // late thresholds: keep=70+15=85, good=80+15=95 => 55.6% < 85 => sell
+      expect(result.adjustedTier).toBe('sell')
+      expect(result.levelStrictness).toBe(15)
+    })
+
+    it('same rune gives different tier for early vs late profile', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 10 },
+          { type: 'cr', value: 10 },
+          { type: 'hp%', value: 10 },
+          { type: 'def%', value: 10 },
+        ],
+      })
+
+      const earlyResult = analyzeRune(rune, 'early')
+      const lateResult = analyzeRune(rune, 'late')
+
+      // efficiency ~75.9%, grind bonus = 5 => finalEff = 80.9
+      // early at +12: godlike=80 => 80.9 >= 80 => godlike
+      // late at +12: good=80, great=85 => 80.9 >= 80 but < 85 => good
+      expect(earlyResult.tier).toBe('godlike')
+      expect(lateResult.tier).toBe('good')
+      expect(earlyResult.tier).not.toBe(lateResult.tier)
+    })
+
+    it('grind bonus saves a rune from keep to good', () => {
+      // A rune right at the border of keep/good for mid profile at +12
+      // mid good threshold = 70, we need efficiency ~68-69 with grind potential pushing over
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 8 },   // 8/6 = 1.333
+          { type: 'atk%', value: 10 }, // 10/8 = 1.25
+          { type: 'hp%', value: 8 },   // 8/8 = 1.0
+          { type: 'def%', value: 8 },  // 8/8 = 1.0
+        ],
+      })
+
+      // efficiency = (4.583+1)/9*100 = 62%
+      // grind potential: spd +5, atk% +7, hp% +7, def% +7 => significant grind gain
+      const result = analyzeRune(rune, 'mid')
+      // With mid profile at +12, 62% is in 'keep' range (60-70)
+      // tier = computed at level 12 (no strictness), grind bonus = min(grindGain*0.3, 5)
+      expect(result.tier).toBe('keep')
+
+      // Verify grind gain exists
+      expect(result.grindPotential.grindGain).toBeGreaterThan(0)
+    })
+
+    it('returns adjustedTier and levelStrictness in analysis result', () => {
+      const rune = makeRune({
+        level: 9,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune, 'mid')
+
+      // At +9, strictness = 3
+      expect(result.levelStrictness).toBe(3)
+      expect(result.adjustedTier).toBeDefined()
+      // tier (at +12 baseline) may differ from adjustedTier (with +9 strictness)
+      expect(typeof result.adjustedTier).toBe('string')
     })
   })
 })

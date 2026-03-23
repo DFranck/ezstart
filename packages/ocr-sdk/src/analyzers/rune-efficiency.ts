@@ -31,7 +31,19 @@ interface RuneData {
 
 // --- Public types ---
 
-export type EfficiencyTier = 'sell' | 'keep' | 'great' | 'godlike'
+export type EfficiencyTier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
+
+export type PlayerProfile = 'early' | 'mid' | 'late'
+
+const EFFICIENCY_THRESHOLDS: Record<PlayerProfile, Record<EfficiencyTier, number>> = {
+  early: { sell: 0, keep: 50, good: 60, great: 70, godlike: 80 },
+  mid:   { sell: 0, keep: 60, good: 70, great: 80, godlike: 85 },
+  late:  { sell: 0, keep: 70, good: 80, great: 85, godlike: 90 },
+}
+
+const LEVEL_STRICTNESS: Record<number, number> = {
+  0: 15, 3: 10, 6: 7, 9: 3, 12: 0, 15: 0,
+}
 /** @deprecated Use EfficiencyTier instead */
 export type Recommendation = EfficiencyTier
 
@@ -76,6 +88,10 @@ export interface RuneAnalysis {
   substats: SubstatAnalysis[]
   grindPotential: GrindPotential
   tier: EfficiencyTier
+  /** Tier with level strictness applied */
+  adjustedTier: EfficiencyTier
+  /** Level strictness malus applied (0-15) */
+  levelStrictness: number
   quality: RuneQuality
   totalRolls: number
   /** Set bonus description — used by UI layer */
@@ -337,23 +353,31 @@ function calculateGrindPotential(
 }
 
 /**
- * Get recommendation based on efficiency and grind potential.
- * Uses the best of current efficiency and efficiency after grind.
- * < 50% even after grind = sell
- * 50-65% = keep
- * 65-80% = great
- * 80%+ = godlike
+ * Get recommendation based on efficiency, profile thresholds, and level strictness.
+ * The grind potential can save a rune (max +5% bonus).
  */
 export function getRecommendation(
   efficiency: number,
-  potentialEfficiency: number,
+  level: number,
+  profile: PlayerProfile = 'mid',
   grindPotential?: number,
 ): EfficiencyTier {
-  const score = Math.max(efficiency, potentialEfficiency, grindPotential ?? 0)
+  const thresholds = EFFICIENCY_THRESHOLDS[profile]
 
-  if (score >= 80) return 'godlike'
-  if (score >= 65) return 'great'
-  if (score >= 50) return 'keep'
+  // Strictness malus by level — round down to nearest 0,3,6,9,12
+  const levelKey = Math.min(Math.floor(level / 3) * 3, 12)
+  const strictness = LEVEL_STRICTNESS[levelKey] ?? 0
+
+  // Grind potential bonus (max +5%)
+  const grindBonus = grindPotential ? Math.min(grindPotential * 0.3, 5) : 0
+  const finalEfficiency = efficiency + grindBonus
+
+  const adjustedThreshold = (threshold: number) => threshold + strictness
+
+  if (finalEfficiency >= adjustedThreshold(thresholds.godlike)) return 'godlike'
+  if (finalEfficiency >= adjustedThreshold(thresholds.great)) return 'great'
+  if (finalEfficiency >= adjustedThreshold(thresholds.good)) return 'good'
+  if (finalEfficiency >= adjustedThreshold(thresholds.keep)) return 'keep'
   return 'sell'
 }
 
@@ -361,14 +385,14 @@ export function getRecommendation(
  * Legacy function name — kept for backward compatibility.
  * Delegates to analyzeRune.
  */
-export function calculateEfficiency(rune: RuneData): RuneAnalysis {
-  return analyzeRune(rune)
+export function calculateEfficiency(rune: RuneData, profile: PlayerProfile = 'mid'): RuneAnalysis {
+  return analyzeRune(rune, profile)
 }
 
 /**
  * Full rune analysis: efficiency, substats, grind potential, recommendation.
  */
-export function analyzeRune(rune: RuneData): RuneAnalysis {
+export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): RuneAnalysis {
   const quality = detectQuality(rune)
   const substats = rune.subStats.map(analyzeSubstat)
   const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
@@ -381,10 +405,22 @@ export function analyzeRune(rune: RuneData): RuneAnalysis {
 
   const grindPotential = calculateGrindPotential(substats, currentEfficiency)
 
+  // Tier without level strictness (at +12 baseline)
   const tier = getRecommendation(
     currentEfficiency,
-    potentialEfficiency,
-    grindPotential.efficiencyAfterGrind,
+    12,
+    profile,
+    grindPotential.grindGain,
+  )
+
+  // Tier with level strictness applied
+  const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12)
+  const levelStrictness = LEVEL_STRICTNESS[levelKey] ?? 0
+  const adjustedTier = getRecommendation(
+    currentEfficiency,
+    rune.level,
+    profile,
+    grindPotential.grindGain,
   )
 
   const roundedCurrent = Math.round(currentEfficiency * 100) / 100
@@ -404,6 +440,8 @@ export function analyzeRune(rune: RuneData): RuneAnalysis {
     substats,
     grindPotential,
     tier,
+    adjustedTier,
+    levelStrictness,
     quality,
     totalRolls,
     setBonus,

@@ -156,7 +156,20 @@ export const MAX_ROLLS_BY_QUALITY: Record<RuneQuality, number> = {
 // RUNE ANALYSIS TYPES (computed server-side)
 // ============================================
 
-export type EfficiencyTier = 'sell' | 'keep' | 'great' | 'godlike'
+export type EfficiencyTier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
+
+export type PlayerProfile = 'early' | 'mid' | 'late'
+
+export const EFFICIENCY_THRESHOLDS: Record<PlayerProfile, Record<EfficiencyTier, number>> = {
+  early: { sell: 0, keep: 50, good: 60, great: 70, godlike: 80 },
+  mid:   { sell: 0, keep: 60, good: 70, great: 80, godlike: 85 },
+  late:  { sell: 0, keep: 70, good: 80, great: 85, godlike: 90 },
+}
+
+/** Strictness malus by rune level — added to threshold */
+export const LEVEL_STRICTNESS: Record<number, number> = {
+  0: 15, 3: 10, 6: 7, 9: 3, 12: 0, 15: 0,
+}
 
 export interface SubstatAnalysis {
   type: StatType
@@ -186,6 +199,10 @@ export interface RuneAnalysis {
   grindGain?: number
   /** Per-substat analysis */
   substats: SubstatAnalysis[]
+  /** Tier with level strictness applied */
+  adjustedTier: EfficiencyTier
+  /** Level strictness malus applied (0-15) */
+  levelStrictness: number
   /** Set bonus description */
   setBonus: string
   /** Number of pieces for set bonus */

@@ -20,6 +20,7 @@ import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
 import { EfficiencyDisplay } from '@/components/efficiency-display'
 import { ScanResultRaw } from '@/components/scan-result-raw'
+import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -79,6 +80,7 @@ export default function ScanPage() {
   const t = useTranslations()
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null)
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
+  const [profile, setProfile] = usePlayerProfile()
   const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
@@ -170,6 +172,13 @@ export default function ScanPage() {
         <P className="text-sm font-medium mb-3">{t('scan.selectGame')}</P>
         <GameSelector value={selectedGame} onChange={setSelectedGame} />
       </Div>
+
+      {/* Profile selector */}
+      {selectedGame && (
+        <Div className="mb-6">
+          <ProfileSelector value={profile} onChange={setProfile} />
+        </Div>
+      )}
 
       {/* Mode Tabs */}
       {selectedGame && (
