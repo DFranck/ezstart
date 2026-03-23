@@ -125,19 +125,6 @@ export default function ScanPage() {
     [selectedGame, scan]
   )
 
-  const handleRescan = useCallback(() => {
-    if (!selectedGame || !currentFrame || scanningRef.current) return
-    scanningRef.current = true
-    const cropped = cropImageData(currentFrame, roiRef.current)
-    imageDataToBlob(cropped).then((blob) => {
-      const file = new File([blob], 'capture.png', { type: 'image/png' })
-      scan(
-        { image: file, gameType: selectedGame },
-        { onSettled: () => { scanningRef.current = false } }
-      )
-    })
-  }, [selectedGame, currentFrame, scan])
-
   const { diffScore, isStable, processFrame } = useFrameDiff({
     onSignificantChange: handleSignificantChange,
   })
@@ -162,6 +149,19 @@ export default function ScanPage() {
     frameInterval: 500,
     onFrame: handleFrame,
   })
+
+  const handleRescan = useCallback(() => {
+    if (!selectedGame || !currentFrame || scanningRef.current) return
+    scanningRef.current = true
+    const cropped = cropImageData(currentFrame, roiRef.current)
+    imageDataToBlob(cropped).then((blob) => {
+      const file = new File([blob], 'capture.png', { type: 'image/png' })
+      scan(
+        { image: file, gameType: selectedGame },
+        { onSettled: () => { scanningRef.current = false } }
+      )
+    })
+  }, [selectedGame, currentFrame, scan])
 
   function handleImageSelected(file: File) {
     if (!selectedGame) return
