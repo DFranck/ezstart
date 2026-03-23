@@ -32,6 +32,10 @@ interface RuneStat {
 
 type RuneQuality = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
 
+// --- SW game rule: max 4 substats per rune ---
+
+const MAX_SUBSTATS = 4
+
 // --- Fixed main stats for slots 1, 3, 5 (always the same in SW) ---
 
 const FIXED_MAIN_STATS: Record<number, { type: StatType; values: number[] }> = {
@@ -493,6 +497,7 @@ function separateMainAndSubs(
       })
       .map(({ type, value }) => ({ type, value }))
       .filter(isValidSubstatValue)
+      .slice(0, MAX_SUBSTATS)
 
     return { mainStat, subStats }
   }
@@ -505,6 +510,7 @@ function separateMainAndSubs(
     .slice(1)
     .map(({ type, value }) => ({ type, value }))
     .filter(isValidSubstatValue)
+    .slice(0, MAX_SUBSTATS)
 
   return { mainStat, subStats }
 }

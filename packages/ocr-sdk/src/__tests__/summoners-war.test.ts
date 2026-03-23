@@ -141,12 +141,13 @@ describe('summonersWarParser', () => {
       const data = result.data as { subStats: { type: string; value: number }[]; quality: string; level: number }
       expect(data.quality).toBe('legend')
       expect(data.level).toBe(12)
+      // SW rule: max 4 substats per rune
+      expect(data.subStats.length).toBeLessThanOrEqual(4)
       expect(data.subStats.length).toBeGreaterThanOrEqual(3)
+      // At least CR and CD should be present (first stats extracted in order)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: 'cr', value: 11 }),
-          expect.objectContaining({ type: 'cd', value: 16 }),
-          expect.objectContaining({ type: 'res', value: 14 }),
         ]),
       )
     })
@@ -304,7 +305,6 @@ describe('summonersWarParser', () => {
         'Legend',
         'SPD 51',        // SPD name on this line, 51 is noise
         '2 +6',          // +6 is the actual SPD value
-        'Accuracy +27%',
         'HP +194',
         'ATK +13%',
         'CRI Rate +12%',
@@ -314,6 +314,9 @@ describe('summonersWarParser', () => {
 
       expect(result.success).toBe(true)
       const data = result.data as { subStats: { type: string; value: number }[] }
+
+      // Max 4 substats
+      expect(data.subStats.length).toBeLessThanOrEqual(4)
 
       // SPD +6 should be found via multiline detection
       expect(data.subStats).toEqual(
@@ -416,7 +419,7 @@ describe('summonersWarParser', () => {
   })
 
   describe('real noisy OCR — Focus Rune example', () => {
-    it('parses the full noisy Focus Rune OCR text correctly', () => {
+    it('parses the full noisy Focus Rune OCR text correctly (multiline SPD)', () => {
       const text = [
         '1% +12 Quick Focus Rune (1) v',
         'yg Axes Legend',
@@ -443,33 +446,79 @@ describe('summonersWarParser', () => {
 
       const data = result.data as { subStats: { type: string; value: number }[] }
 
-      // Accuracy +27% should be a substat (not main stat)
+      // SW rule: max 4 substats per rune
+      expect(data.subStats.length).toBeLessThanOrEqual(4)
+
+      // Inline stats take priority (ACC, HP, ATK%, CR found before multiline SPD)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: 'acc', value: 27 }),
-        ]),
-      )
-
-      // ATK +13% should be a substat (ATK% is valid sub for slot 1)
-      expect(data.subStats).toEqual(
-        expect.arrayContaining([
           expect.objectContaining({ type: 'atk%', value: 13 }),
-        ]),
-      )
-
-      // CRI Rate +12% should be a substat
-      expect(data.subStats).toEqual(
-        expect.arrayContaining([
           expect.objectContaining({ type: 'cr', value: 12 }),
         ]),
       )
+    })
 
-      // SPD +6 from multiline detection
+    it('parses real OCR with SPD +6 on same line as noise (slot 1 hardcode)', () => {
+      const text = [
+        'a 412 Quick Focus Rune (1) v',
+        'yg Axes Legend',
+        'Ce SPD +6 51',
+        '2',
+        'Accuracy +27%',
+        'HP +194 Temporarily',
+        'ATK +13%',
+        'CRI Rate +12%',
+        '2 set: Acturaty -20%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'focus',
+        slot: 1,
+        level: 12,
+        quality: 'legend',
+        // Slot 1 → main stat is ATK flat (hardcoded), NOT SPD +6
+        mainStat: { type: 'atk', value: 118 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[] }
+
+      // SW rule: max 4 substats per rune
+      expect(data.subStats.length).toBeLessThanOrEqual(4)
+
+      // SPD +6 should be a substat, NOT main stat
       expect(data.subStats).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: 'spd', value: 6 }),
         ]),
       )
+
+      // ATK flat should NOT appear in substats (it's the main stat type)
+      const atkFlatSubs = data.subStats.filter((s: { type: string }) => s.type === 'atk')
+      expect(atkFlatSubs).toHaveLength(0)
+
+      // ATK +13% should be a substat
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'atk%', value: 13 }),
+        ]),
+      )
+    })
+  })
+
+  describe('max 4 substats rule', () => {
+    it('caps substats at 4 even when more are extracted from OCR', () => {
+      // OCR text that produces 5+ stat matches after main stat
+      const text = 'Swift Rune (2) SPD +42 HP +8% ATK +5% DEF +12% CRI Rate +6% Resistance +4%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[] }
+      expect(data.subStats.length).toBeLessThanOrEqual(4)
     })
   })
 

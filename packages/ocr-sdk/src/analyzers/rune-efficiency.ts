@@ -538,20 +538,24 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     synergy.synergyBonus,
   )
 
-  const roundedCurrent = Math.round(currentEfficiency * 100) / 100
+  const cappedEfficiency = Math.min(currentEfficiency, 100)
+  const roundedCurrent = Math.round(cappedEfficiency * 100) / 100
 
   // Set bonus info
   const setInfo = SET_INFO[rune.set]
   const setBonus = setInfo?.bonus ?? ''
   const setPieces = setInfo?.pieces ?? 0
 
+  const cappedGrindedEfficiency = Math.min(grindPotential.efficiencyAfterGrind, 100)
+  const cappedGrindGain = Math.round(Math.max(0, cappedGrindedEfficiency - roundedCurrent) * 100) / 100
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
-    potentialEfficiency: Math.round(potentialEfficiency * 100) / 100,
+    potentialEfficiency: Math.round(Math.min(potentialEfficiency, 100) * 100) / 100,
     maxEfficiency: Math.round(maxEfficiency * 100) / 100,
-    grindedEfficiency: grindPotential.efficiencyAfterGrind,
-    grindGain: grindPotential.grindGain,
+    grindedEfficiency: Math.round(cappedGrindedEfficiency * 100) / 100,
+    grindGain: cappedGrindGain,
     substats,
     grindPotential,
     tier,
