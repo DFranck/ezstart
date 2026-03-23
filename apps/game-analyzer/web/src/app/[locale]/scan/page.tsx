@@ -91,14 +91,13 @@ export default function ScanPage() {
       // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
       imageDataToBlob(frame).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
-        reset()
         scan(
           { image: file, gameType: selectedGame },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
     },
-    [selectedGame, scan, reset]
+    [selectedGame, scan]
   )
 
   const { diffScore, isStable, processFrame } = useFrameDiff({
@@ -132,7 +131,7 @@ export default function ScanPage() {
     scan({ image: file, gameType: selectedGame })
   }
 
-  const isAnalyzing = isPending || (!isStable && isCapturing)
+  const isAnalyzing = isPending
 
   // API response is flat: { success, data, rawText, confidence, ... } — no .result wrapper
   const resultData = scanResult
