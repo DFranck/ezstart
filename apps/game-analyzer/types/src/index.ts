@@ -17,3 +17,4 @@ export {
 } from './rune-data'
 export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RuneAnalysis, BuildArchetype, SynergyResult } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'
+export type { MonsterElement, MonsterArchetype, Monster } from './monster'
