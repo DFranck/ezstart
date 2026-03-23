@@ -247,12 +247,12 @@ export function estimateRolls(
   // Estimate count using max roll value
   const count = Math.max(1, Math.round(value / range.max))
 
-  // Calculate quality: where does the value sit between min*count and max*count?
-  const minTotal = range.min * count
+  // Calculate quality: ratio of actual value vs max possible (SWOP/SWLens formula)
+  // e.g. SPD +10 in 2 rolls → 10 / (6*2) = 83.33%
   const maxTotal = range.max * count
-  const avgQuality = maxTotal === minTotal
+  const avgQuality = maxTotal === 0
     ? 100
-    : Math.min(100, Math.max(0, ((value - minTotal) / (maxTotal - minTotal)) * 100))
+    : Math.min(100, Math.max(0, (value / maxTotal) * 100))
 
   return { count, avgQuality }
 }

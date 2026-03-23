@@ -39,7 +39,7 @@ describe('rune-efficiency', () => {
     it('estimates 1 roll for a min roll value', () => {
       const result = estimateRolls('spd', 4)
       expect(result.count).toBe(1)
-      expect(result.avgQuality).toBe(0)
+      expect(result.avgQuality).toBeCloseTo(66.67, 1) // 4/6 = 66.67%
     })
 
     it('estimates multiple rolls for high values', () => {
@@ -49,11 +49,37 @@ describe('rune-efficiency', () => {
       expect(result.avgQuality).toBe(100)
     })
 
-    it('calculates quality between min and max', () => {
-      // SPD: min=4, max=6. Value 10 with 2 rolls: min=8, max=12
+    it('calculates quality as ratio of max (SWOP formula)', () => {
+      // SPD: max=6. Value 10 with 2 rolls: 10 / (6*2) = 83.33%
       const result = estimateRolls('spd', 10)
       expect(result.count).toBe(2) // round(10/6) = 2
-      expect(result.avgQuality).toBe(50) // (10-8)/(12-8) = 0.5 = 50%
+      expect(result.avgQuality).toBeCloseTo(83.33, 1) // 10/12 = 83.33%
+    })
+
+    it('calculates roll quality for various stats', () => {
+      // CR +12%, 2 rolls → 12 / 12 = 100%
+      expect(estimateRolls('cr', 12).avgQuality).toBeCloseTo(100, 1)
+
+      // ATK% +16%, 2 rolls → 16 / 16 = 100%
+      expect(estimateRolls('atk%', 16).avgQuality).toBeCloseTo(100, 1)
+
+      // RES +7%, 1 roll → 7 / 8 = 87.5%
+      expect(estimateRolls('res', 7).avgQuality).toBeCloseTo(87.5, 1)
+
+      // ATK% +14%, 2 rolls → 14 / 16 = 87.5%
+      expect(estimateRolls('atk%', 14).avgQuality).toBeCloseTo(87.5, 1)
+
+      // CR +9%, 2 rolls → 9 / 12 = 75%
+      expect(estimateRolls('cr', 9).avgQuality).toBeCloseTo(75, 1)
+
+      // CD +19%, 3 rolls → 19 / 21 = 90.48%
+      expect(estimateRolls('cd', 19).avgQuality).toBeCloseTo(90.48, 1)
+
+      // SPD +16, 3 rolls → 16 / 18 = 88.89%
+      expect(estimateRolls('spd', 16).avgQuality).toBeCloseTo(88.89, 1)
+
+      // ACC +12%, 2 rolls → 12 / 16 = 75%
+      expect(estimateRolls('acc', 12).avgQuality).toBeCloseTo(75, 1)
     })
 
     it('returns 0 for zero or negative value', () => {
