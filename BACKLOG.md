@@ -9,7 +9,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ## 🎮 game-analyzer
 
-**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-23
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-24
 
 ### Objectif
 App pour scanner et analyser des screenshots de jeux (Summoners War runes, Nikke Goddess of Victory gear, etc.) via OCR scripté + fallback IA optionnel.
@@ -63,8 +63,24 @@ apps/
 19. [x] Image preprocessing (grayscale + contrast + binarize)
 20. [x] Bouton rescan manuel
 21. [x] Fix efficacité Barion (0-100%, tier display, set bonus)
-22. [ ] Ajouter OpenAPI/Swagger à l'API
-23. [ ] Deploy (Railway API + Vercel Web)
+22. [x] Bench mode — 3 sources × 8 presets × zones individuelles = 24 OCR runs
+23. [x] 8 zones de lecture (setSlot, mainStat, quality, innate, sub1-4)
+24. [x] Masques rouges (bench) / marron (scan) pour cacher les boutons UI
+25. [x] Dual preview (tabs zoom/full) avec lock toggle
+26. [x] Layouts nommés en DB (rune-manager, power-up, etc.)
+27. [x] Import 1001 monstres SWARFARM avec suggestions par archetype
+28. [x] Theme SW CSS variables (OKLCH, roll quality, tiers, elements)
+29. [x] Profil joueur envoyé à l'API
+30. [x] 14 build archetypes avec gem/roll awareness
+31. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
+32. [ ] Couleurs theme : vérifier rendu dark/light mode
+33. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
+34. [ ] Prévenir rescan si même rune (hash image)
+35. [ ] Fallback IA cascade (Gemini free tier)
+36. [ ] Nikke gear analyzer
+37. [ ] Ajouter OpenAPI/Swagger à l'API
+38. [ ] Deploy (Railway API + Vercel Web)
+39. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
@@ -74,7 +90,7 @@ apps/
 - Approche inspirée de SWLENS (capture continue + analyse auto)
 - Pipeline fonctionne end-to-end : capture → crop → OCR → rawText affiché
 - Parser SW robuste : hardcoded main stats, fuzzy matching, multiline support, validation ranges
-- Synergy scoring avec 5 archetypes (Swift Attacker, Violent Bruiser, etc.) + gem/roll awareness
+- Synergy scoring avec 14 archetypes + gem/roll awareness
 - Player profile par jeu (early/mid/late) persisté en localStorage avec level strictness
 - Zoomed ROI preview avec drag + scroll zoom en résolution native
 - Image preprocessing : upscale + contrast + binarize pour meilleure précision OCR
@@ -82,7 +98,10 @@ apps/
 - Formule Barion normalisée 0-100% (current + potential efficiency, keep/sell)
 - tower-defense supprimé du monorepo (-22k lignes)
 - Dev scripts utilisent turbo stream mode (pas de TUI qui efface les logs)
-- 84 tests passent (31 SW parser + 45 rune efficiency + 8 Nikke)
+- 129 tests passent
+- OCR confidence : 90-99% avec zones individuelles + masques
+- Le parsing par zones est prioritaire sur le parsing global
+- Les layouts (zones + masques + ROI + presets) sont sauvegardés en MongoDB par jeu
 
 ---
 
