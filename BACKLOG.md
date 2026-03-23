@@ -56,10 +56,15 @@ apps/
 12. [x] Screen capture + frame diff + ROI selector draggable
 13. [x] Fix fetch-client FormData, turbo stream mode, dev scripts cross-platform
 14. [x] Pipeline end-to-end : capture → crop ROI → OCR Tesseract → affichage rawText
-15. [ ] Améliorer parser SW pour extraire données structurées du texte OCR réel
-16. [ ] Afficher RuneCard + EfficiencyDisplay quand parsing réussit
-17. [ ] Ajouter OpenAPI/Swagger à l'API
-18. [ ] Deploy (Railway API + Vercel Web)
+15. [x] Parser robuste (hardcoded main stats, fuzzy matching, multiline, validation ranges)
+16. [x] Synergy scoring (5 archetypes, gem/roll awareness)
+17. [x] Profile selector par jeu (early/mid/late) avec seuils + level strictness
+18. [x] Zoomed ROI preview (drag + scroll zoom, résolution native)
+19. [x] Image preprocessing (grayscale + contrast + binarize)
+20. [x] Bouton rescan manuel
+21. [x] Fix efficacité Barion (0-100%, tier display, set bonus)
+22. [ ] Ajouter OpenAPI/Swagger à l'API
+23. [ ] Deploy (Railway API + Vercel Web)
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
@@ -68,11 +73,16 @@ apps/
 - Capture d'écran via getDisplayMedia + ROI selector rouge draggable
 - Approche inspirée de SWLENS (capture continue + analyse auto)
 - Pipeline fonctionne end-to-end : capture → crop → OCR → rawText affiché
-- Le parser SW doit être amélioré pour matcher le texte OCR bruité (bruit: caractères parasites, espaces manquants, boutons UI captés)
+- Parser SW robuste : hardcoded main stats, fuzzy matching, multiline support, validation ranges
+- Synergy scoring avec 5 archetypes (Swift Attacker, Violent Bruiser, etc.) + gem/roll awareness
+- Player profile par jeu (early/mid/late) persisté en localStorage avec level strictness
+- Zoomed ROI preview avec drag + scroll zoom en résolution native
+- Image preprocessing : upscale + contrast + binarize pour meilleure précision OCR
 - callApi dans fetch-client fixé pour supporter FormData
-- Formule Barion implémentée (current + potential efficiency, keep/sell)
+- Formule Barion normalisée 0-100% (current + potential efficiency, keep/sell)
 - tower-defense supprimé du monorepo (-22k lignes)
 - Dev scripts utilisent turbo stream mode (pas de TUI qui efface les logs)
+- 84 tests passent (31 SW parser + 45 rune efficiency + 8 Nikke)
 
 ---
 
