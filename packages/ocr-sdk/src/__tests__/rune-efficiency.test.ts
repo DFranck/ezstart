@@ -574,14 +574,14 @@ describe('rune-efficiency', () => {
 
       // weightedEfficiency = (2.667+1.25+1.0+1.0+1)/13*100 = 53.2%
       // grind potential: spd +5, atk% +7, hp% +7, def% +7 => grind bonus = 5
-      // synergy: cc-debuffer 3/4 (spd, hp%, def%) + atk% has 1 roll => THREE_NO_ROLL = +8%
-      // finalWeightedEff = 53.2 + 5 + 8 = 66.2 >= 60 (keep threshold mid) => keep
+      // synergy: cc-debuffer 3/4 (spd, hp%, def%) + atk% has 2 rolls (ceil(10/8)=2) => THREE_WITH_ROLLS = +4%
+      // finalWeightedEff = 53.2 + 5 + 4 = 62.2 >= 60 (keep threshold mid) => keep
       const result = analyzeRune(rune, 'mid')
       expect(result.tier).toBe('keep')
 
       // Verify grind gain and synergy exist
       expect(result.grindPotential.grindGain).toBeGreaterThan(0)
-      expect(result.synergy.synergyBonus).toBe(8)
+      expect(result.synergy.synergyBonus).toBe(4)
     })
 
     it('returns adjustedTier and levelStrictness in analysis result', () => {

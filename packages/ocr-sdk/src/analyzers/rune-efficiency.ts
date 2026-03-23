@@ -244,8 +244,8 @@ export function estimateRolls(
   const range = ROLL_RANGES[statType]
   if (!range || value <= 0) return { count: 0, avgQuality: 0 }
 
-  // Estimate count using max roll value
-  const count = Math.max(1, Math.round(value / range.max))
+  // Estimate count using max roll value — ceil to ensure value fits within count * max
+  const count = Math.max(1, Math.ceil(value / range.max))
 
   // Calculate quality: ratio of actual value vs max possible (SWOP/SWLens formula)
   // e.g. SPD +10 in 2 rolls → 10 / (6*2) = 83.33%
@@ -410,7 +410,8 @@ export function calculatePotentialEfficiency(rune: RuneData): number {
   }
 
   // Each remaining perfect roll adds 1.0 to rawSum
-  const potentialRawSum = rawSum + remaining
+  // But total rawSum can never exceed 8 (max 8 rolls for a legend rune)
+  const potentialRawSum = Math.min(rawSum + remaining, 8)
   return ((potentialRawSum + 1) / BARION_DIVISOR) * 100
 }
 

@@ -555,14 +555,21 @@ function separateMainAndSubs(
   // For slots 1, 3, 5: hardcode the main stat
   const fixedMain = slot ? FIXED_MAIN_STATS[slot] : undefined
   if (fixedMain) {
-    // Find the closest matching value for the main stat, or use a default based on level
+    // Find the closest matching value for the main stat, or use a default based on level.
+    // Use tolerance (±200 for HP, ±20 for ATK/DEF) to handle OCR misreads.
+    const tolerance = fixedMain.type === 'hp' ? 200 : 20
     let mainValue: number
     const matchingStatIdx = allStats.findIndex(
-      s => s.type === fixedMain.type && fixedMain.values.includes(s.value),
+      s => s.type === fixedMain.type && fixedMain.values.some(v => Math.abs(s.value - v) <= tolerance),
     )
 
     if (matchingStatIdx >= 0) {
-      mainValue = allStats[matchingStatIdx]!.value
+      // Use the closest known value (not the OCR-read value which may have errors)
+      const ocrValue = allStats[matchingStatIdx]!.value
+      const closestKnown = fixedMain.values.reduce((best, v) =>
+        Math.abs(v - ocrValue) < Math.abs(best - ocrValue) ? v : best,
+      )
+      mainValue = closestKnown
     } else {
       // Estimate main stat value from level
       if (level !== null && level >= 13) {
@@ -786,7 +793,7 @@ export const summonersWarParser: GameParser = {
     // Success — return what we found
     return successResult({
       set,
-      slot: slot ?? 1, // default to 1 if not detected
+      slot: slot ?? undefined, // don't default — avoids wrong hardcoded main stat
       grade: grade ?? 6,
       level: level ?? 0,
       mainStat,
