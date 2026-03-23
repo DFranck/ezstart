@@ -274,27 +274,27 @@ export function estimateRolls(
 
 /**
  * Get the number of substats the rune should have at a given level for a quality.
- * SW rules: new subs are added first (at +3, +6, …) until 4 subs, then upgrades.
+ * SW rules: upgrades first (existing subs get rolled), new subs added last.
  */
 function getExpectedSubstatCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3)
-  // Each powerup adds a new sub until we reach 4, then upgrades start
-  return Math.min(base + powerups, 4)
+  // Upgrades go into existing subs first
+  const upgrades = Math.min(powerups, base)
+  // Remaining powerups add new subs
+  const newSubs = powerups - upgrades
+  return Math.min(base + newSubs, 4)
 }
 
 /**
  * Get the number of upgrade rolls that have occurred at a given level for a quality.
- * SW rules: new subs are added first until 4 subs exist, then remaining powerups are upgrades.
+ * SW rules: upgrades first (existing subs get rolled), new subs added last.
+ * Only upgrades into existing subs count as rolls.
  */
 function getRollCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3)
-  // New subs needed to reach 4
-  const newSubsNeeded = Math.max(0, 4 - base)
-  // Powerups that go to new subs first, then upgrades
-  const newSubsAdded = Math.min(powerups, newSubsNeeded)
-  return Math.max(0, powerups - newSubsAdded)
+  return Math.min(powerups, base)
 }
 
 /**
