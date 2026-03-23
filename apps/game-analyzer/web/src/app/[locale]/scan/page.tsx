@@ -22,7 +22,7 @@ import { CapturePreview } from '@/components/capture-preview'
 import { EfficiencyDisplay } from '@/components/efficiency-display'
 import { ScanResultRaw } from '@/components/scan-result-raw'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
-import { preprocessForOcr, getAdaptiveScale } from '@/utils/image-preprocessing'
+import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
@@ -116,9 +116,9 @@ export default function ScanPage() {
       scanningRef.current = true
 
       // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
-      const scale = getAdaptiveScale(frame.width)
-      const processed = preprocessForOcr(frame, { scale })
-      // Save a preview of the preprocessed image
+      // Upscale 2x only — best OCR accuracy (79% confidence in testing)
+      const processed = preprocessForOcr(frame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      // Save a preview of the preprocessed image sent to OCR
       const previewCanvas = document.createElement('canvas')
       previewCanvas.width = processed.width
       previewCanvas.height = processed.height
@@ -164,9 +164,9 @@ export default function ScanPage() {
     if (!selectedGame || !currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    const scale = getAdaptiveScale(cropped.width)
-    const processed = preprocessForOcr(cropped, { scale })
-    // Save a preview of the preprocessed image
+    // Upscale 2x only — best OCR accuracy (79% confidence in testing)
+    const processed = preprocessForOcr(cropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+    // Save a preview of the preprocessed image sent to OCR
     const previewCanvas = document.createElement('canvas')
     previewCanvas.width = processed.width
     previewCanvas.height = processed.height
