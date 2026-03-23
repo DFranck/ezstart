@@ -15,10 +15,12 @@ const scanBodySchema = z.object({
   profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
 })
 
-// POST /scan — Upload an image and run OCR
-router.post('/', upload.single('image'), async (req: any, res: any) => {
+// POST /scan — Upload an image (+ optional alt image) and run OCR
+router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAlt', maxCount: 1 }]), async (req: any, res: any) => {
   try {
-    if (!req.file) {
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined
+    const imageFile = files?.image?.[0]
+    if (!imageFile) {
       return res.status(400).json({
         success: false,
         error: 'No image file provided. Use field name "image".',
@@ -35,8 +37,9 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
     }
 
     const { gameType, profile } = validation.data
+    const imageAltFile = files?.imageAlt?.[0]
 
-    const { scanId, result } = await scanImage(req.file.buffer, gameType as GameType, profile)
+    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer)
 
     res.status(201).json({
       success: true,

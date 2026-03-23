@@ -123,10 +123,13 @@ export default function ScanPage() {
       previewCanvas.height = processed.height
       previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
       setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
-      imageDataToBlob(processed).then((blob) => {
-        const file = new File([blob], 'capture.png', { type: 'image/png' })
+
+      // Build both images: preprocessed (main) + raw crop (alt)
+      Promise.all([imageDataToBlob(processed), imageDataToBlob(frame)]).then(([mainBlob, altBlob]) => {
+        const mainFile = new File([mainBlob], 'capture.png', { type: 'image/png' })
+        const altFile = new File([altBlob], 'capture-raw.png', { type: 'image/png' })
         scan(
-          { image: file, gameType: selectedGame, profile },
+          { image: mainFile, imageAlt: altFile, gameType: selectedGame, profile },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
@@ -171,10 +174,13 @@ export default function ScanPage() {
     previewCanvas.height = processed.height
     previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
     setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
-    imageDataToBlob(processed).then((blob) => {
-      const file = new File([blob], 'capture.png', { type: 'image/png' })
+
+    // Build both images: preprocessed (main) + raw crop (alt)
+    Promise.all([imageDataToBlob(processed), imageDataToBlob(cropped)]).then(([mainBlob, altBlob]) => {
+      const mainFile = new File([mainBlob], 'capture.png', { type: 'image/png' })
+      const altFile = new File([altBlob], 'capture-raw.png', { type: 'image/png' })
       scan(
-        { image: file, gameType: selectedGame, profile },
+        { image: mainFile, imageAlt: altFile, gameType: selectedGame, profile },
         { onSettled: () => { scanningRef.current = false } }
       )
     })

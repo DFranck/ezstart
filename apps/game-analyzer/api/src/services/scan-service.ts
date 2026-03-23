@@ -9,7 +9,8 @@ import type { GameType, RuneData, ScanResult } from '@game-analyzer/types'
 export async function scanImage(
   imageBuffer: Buffer,
   gameType: GameType,
-  profile: string = 'mid'
+  profile: string = 'mid',
+  imageAltBuffer?: Buffer
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -31,11 +32,32 @@ export async function scanImage(
           psm: '6',
         }
       : undefined
-    const ocrResult = await recognize(imageBuffer, ocrConfig)
+    let ocrResult = await recognize(imageBuffer, ocrConfig)
 
     // 2. Parse with the appropriate game parser
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser
     let parseResult = parser.parse(ocrResult)
+
+    // 2a. Compare with alt image (raw crop without preprocessing) if provided
+    if (imageAltBuffer) {
+      try {
+        const altOcrResult = await recognize(imageAltBuffer, ocrConfig)
+        const altParseResult = parser.parse(altOcrResult)
+
+        const mainSubCount = Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0
+        const altSubCount = Array.isArray(altParseResult.data?.subStats) ? altParseResult.data.subStats.length : 0
+
+        // Pick alt if it found more substats, or better confidence with successful parse
+        if (altSubCount > mainSubCount ||
+            (altOcrResult.confidence > ocrResult.confidence && altParseResult.success && altSubCount >= mainSubCount)) {
+          console.log(`[scan] Alt image better: ${altSubCount} substats (vs ${mainSubCount}), confidence ${altOcrResult.confidence} (vs ${ocrResult.confidence})`)
+          ocrResult = altOcrResult
+          parseResult = altParseResult
+        }
+      } catch (e) {
+        console.error('[scan] Alt image OCR failed, using main:', e)
+      }
+    }
 
     // 2b. Gemini Vision fallback if Tesseract result is weak
     // Trigger fallback when: low confidence, partial parse, or too few substats
