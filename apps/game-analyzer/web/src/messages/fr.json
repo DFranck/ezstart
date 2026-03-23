@@ -74,7 +74,11 @@
       "waitingForChange": "En attente de changement...",
       "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur",
       "adjustZone": "Ajustez la zone de detection",
-      "rescan": "Re-scanner"
+      "rescan": "Re-scanner",
+      "zoom": "Zoom",
+      "zoomIn": "Zoom +",
+      "zoomOut": "Zoom -",
+      "dragToNavigate": "Faites glisser pour deplacer, molette pour zoomer"
     },
     "parsingImproving": "Le parsing des stats est en cours d'amélioration",
     "profile": {

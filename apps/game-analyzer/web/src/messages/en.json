@@ -74,7 +74,11 @@
       "waitingForChange": "Waiting for change...",
       "notSupported": "Screen capture is not supported by your browser",
       "adjustZone": "Adjust detection zone",
-      "rescan": "Rescan"
+      "rescan": "Rescan",
+      "zoom": "Zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "dragToNavigate": "Drag to pan, scroll to zoom"
     },
     "parsingImproving": "Stats parsing is being improved",
     "profile": {

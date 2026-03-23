@@ -115,7 +115,8 @@ export default function ScanPage() {
       scanningRef.current = true
 
       // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
-      const processed = preprocessForOcr(frame)
+      // Native resolution is sufficient — no upscale, just grayscale+contrast+binarize
+      const processed = preprocessForOcr(frame, { scale: 1 })
       imageDataToBlob(processed).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         scan(
@@ -156,7 +157,8 @@ export default function ScanPage() {
     if (!selectedGame || !currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    const processed = preprocessForOcr(cropped)
+    // Native resolution is sufficient — no upscale, just grayscale+contrast+binarize
+    const processed = preprocessForOcr(cropped, { scale: 1 })
     imageDataToBlob(processed).then((blob) => {
       const file = new File([blob], 'capture.png', { type: 'image/png' })
       scan(
