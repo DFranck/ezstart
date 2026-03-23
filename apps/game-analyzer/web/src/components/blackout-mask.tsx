@@ -237,15 +237,30 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi }: Bl
           pointerEvents: 'none',
         }}
       >
-        {masks.map((mask, idx) => (
+        {masks.map((mask, idx) => {
+          // When parentRoi is set, map mask % into the ROI area within the full container
+          const displayLeft = parentRoi
+            ? parentRoi.x + (mask.x / 100) * parentRoi.width
+            : mask.x
+          const displayTop = parentRoi
+            ? parentRoi.y + (mask.y / 100) * parentRoi.height
+            : mask.y
+          const displayWidth = parentRoi
+            ? (mask.width / 100) * parentRoi.width
+            : mask.width
+          const displayHeight = parentRoi
+            ? (mask.height / 100) * parentRoi.height
+            : mask.height
+
+          return (
           <div
             key={mask.id}
             style={{
               position: 'absolute',
-              left: `${mask.x}%`,
-              top: `${mask.y}%`,
-              width: `${mask.width}%`,
-              height: `${mask.height}%`,
+              left: `${displayLeft}%`,
+              top: `${displayTop}%`,
+              width: `${displayWidth}%`,
+              height: `${displayHeight}%`,
               backgroundColor: 'rgba(255, 0, 0, 1.0)',
               border: '2px dashed rgba(255, 255, 255, 0.8)',
               cursor: 'move',
@@ -314,7 +329,8 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi }: Bl
               />
             ))}
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Add mask button — positioned below the overlay */}

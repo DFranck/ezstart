@@ -70,10 +70,14 @@
     "removeMask": "Remove",
     "zones": "Reading zones",
     "zone": {
-      "header": "Name/Set/Slot",
-      "main": "Main Stat",
-      "substats": "Substats",
-      "innate": "Innate"
+      "setSlot": "Set/Slot",
+      "mainStat": "Main Stat",
+      "quality": "Quality",
+      "innate": "Innate",
+      "sub1": "Sub 1",
+      "sub2": "Sub 2",
+      "sub3": "Sub 3",
+      "sub4": "Sub 4"
     }
   },
   "dashboard": {

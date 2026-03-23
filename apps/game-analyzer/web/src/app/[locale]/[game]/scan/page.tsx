@@ -269,7 +269,7 @@ export default function GameScanPage() {
               onStop={stopCapture}
               roi={roi}
               onRoiChange={handleRoiChange}
-              showFullPreview={false}
+              showTabs={false}
             />
 
             {/* Results */}

@@ -25,10 +25,14 @@ router.post('/', upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'imageAlt', maxCount: 1 },
   { name: 'imageFull', maxCount: 1 },
-  { name: 'zoneHeader', maxCount: 1 },
-  { name: 'zoneMain', maxCount: 1 },
-  { name: 'zoneSubstats', maxCount: 1 },
+  { name: 'zoneSetSlot', maxCount: 1 },
+  { name: 'zoneMainStat', maxCount: 1 },
+  { name: 'zoneQuality', maxCount: 1 },
   { name: 'zoneInnate', maxCount: 1 },
+  { name: 'zoneSub1', maxCount: 1 },
+  { name: 'zoneSub2', maxCount: 1 },
+  { name: 'zoneSub3', maxCount: 1 },
+  { name: 'zoneSub4', maxCount: 1 },
 ]), async (req: any, res: any) => {
   try {
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
@@ -53,19 +57,19 @@ router.post('/', upload.fields([
     const imageAltFile = files?.imageAlt?.[0]
     const imageFullFile = files?.imageFull?.[0]
 
-    // Zone-based images (multi-zone ROI)
+    // Zone-based images (multi-zone ROI — 8 individual zones)
     const zoneBuffers: Record<string, Buffer> | undefined = (() => {
-      const zoneHeader = files?.zoneHeader?.[0]
-      const zoneMain = files?.zoneMain?.[0]
-      const zoneSubstats = files?.zoneSubstats?.[0]
-      const zoneInnate = files?.zoneInnate?.[0]
-      if (!zoneHeader && !zoneMain && !zoneSubstats && !zoneInnate) return undefined
+      const zoneNames = ['SetSlot', 'MainStat', 'Quality', 'Innate', 'Sub1', 'Sub2', 'Sub3', 'Sub4'] as const
       const zones: Record<string, Buffer> = {}
-      if (zoneHeader) zones.header = zoneHeader.buffer
-      if (zoneMain) zones.main = zoneMain.buffer
-      if (zoneSubstats) zones.substats = zoneSubstats.buffer
-      if (zoneInnate) zones.innate = zoneInnate.buffer
-      return zones
+      let hasAny = false
+      for (const name of zoneNames) {
+        const file = files?.[`zone${name}`]?.[0]
+        if (file) {
+          zones[name.charAt(0).toLowerCase() + name.slice(1)] = file.buffer
+          hasAny = true
+        }
+      }
+      return hasAny ? zones : undefined
     })()
 
     const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets, zoneBuffers)

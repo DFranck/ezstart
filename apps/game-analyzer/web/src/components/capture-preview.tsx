@@ -1,8 +1,8 @@
 'use client'
 
-import { Button, Card, Div, P } from '@ezstart/ui/components'
+import { Button, Card, Div, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RoiRect } from './roi-selector'
 import { RoiSelector } from './roi-selector'
 import type { ZoneConfig } from './multi-zone-selector'
@@ -20,13 +20,13 @@ interface CapturePreviewProps {
   onStop: () => void
   roi?: RoiRect
   onRoiChange?: (roi: RoiRect) => void
-  showFullPreview?: boolean
   zones?: ZoneConfig[]
   onZonesChange?: (zones: ZoneConfig[]) => void
   masks?: MaskRect[]
   onMasksChange?: (masks: MaskRect[]) => void
   onMaskAdd?: () => void
   onMaskRemove?: (id: string) => void
+  showTabs?: boolean
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -46,13 +46,13 @@ export function CapturePreview({
   onStop,
   roi,
   onRoiChange,
-  showFullPreview = true,
   zones,
   onZonesChange,
   masks,
   onMasksChange,
   onMaskAdd,
   onMaskRemove,
+  showTabs = false,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -64,6 +64,8 @@ export function CapturePreview({
   const roiRef = useRef<RoiRect>(roi ?? { x: 60, y: 5, width: 35, height: 40 })
   const onRoiChangeRef = useRef(onRoiChange)
   onRoiChangeRef.current = onRoiChange
+
+  const [activeTab, setActiveTab] = useState<string>('zoom')
 
   // Track whether the canvas is visible (mounted in DOM)
   const canvasVisible = isCapturing && !!currentFrame
@@ -122,7 +124,7 @@ export function CapturePreview({
 
   // Draw the full frame to the full preview canvas
   useEffect(() => {
-    if (!showFullPreview) return
+    if (!showTabs) return
     const canvas = fullCanvasRef.current
     if (!canvas || !currentFrame) return
 
@@ -143,7 +145,7 @@ export function CapturePreview({
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, showFullPreview, ensureSrcCanvas])
+  }, [currentFrame, showTabs, ensureSrcCanvas, activeTab])
 
   // Wheel handler for zoom — depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
@@ -349,86 +351,113 @@ export function CapturePreview({
     )
   }
 
-  const showDual = showFullPreview && isCapturing && currentFrame
+  // Zoom canvas with overlays (shared between both views)
+  const zoomCanvas = (
+    <Card className="bg-muted">
+      <div ref={containerRef} className="relative">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-auto block"
+          style={{ cursor: 'grab', touchAction: 'none' }}
+        />
+        {/* Multi-zone overlay on zoom view */}
+        {zones && onZonesChange && (
+          <MultiZoneSelector
+            onChange={onZonesChange}
+            initialZones={zones}
+          />
+        )}
+        {/* Blackout mask overlay on zoom view */}
+        {masks && onMasksChange && onMaskAdd && onMaskRemove && (
+          <BlackoutMask
+            masks={masks}
+            onChange={onMasksChange}
+            onAdd={onMaskAdd}
+            onRemove={onMaskRemove}
+          />
+        )}
+        {/* Zoom indicator + buttons */}
+        <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+            title={t('capture.zoomOut')}
+          >
+            -
+          </button>
+          <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+            {t('capture.zoom')}: {zoomPercent}%
+          </span>
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+            title={t('capture.zoomIn')}
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </Card>
+  )
+
+  // Full canvas with ROI selector + zones + masks
+  const fullCanvas = (
+    <Card className="bg-muted">
+      <div ref={fullContainerRef} className="relative">
+        <canvas
+          ref={fullCanvasRef}
+          className="w-full h-auto block"
+        />
+        {roi && onRoiChange && (
+          <RoiSelector
+            onChange={onRoiChange}
+            initialRoi={roi}
+          />
+        )}
+        {/* Multi-zone overlay on full view — positions are relative to the ROI */}
+        {zones && onZonesChange && roi && (
+          <MultiZoneSelector
+            onChange={onZonesChange}
+            initialZones={zones}
+            parentRoi={roi}
+          />
+        )}
+        {/* Blackout mask overlay on full view — positions are relative to the ROI */}
+        {masks && onMasksChange && onMaskAdd && onMaskRemove && roi && (
+          <BlackoutMask
+            masks={masks}
+            onChange={onMasksChange}
+            onAdd={onMaskAdd}
+            onRemove={onMaskRemove}
+            parentRoi={roi}
+          />
+        )}
+      </div>
+    </Card>
+  )
 
   return (
     <Div className="space-y-4">
       {/* Previews */}
       {isCapturing && currentFrame ? (
-        <Div className={showDual ? 'grid grid-cols-2 gap-4' : ''}>
-          {/* Zoom preview */}
-          <Div>
-            <P className="text-xs text-muted-foreground mb-1 font-medium">{t('capture.zoomView')}</P>
-            <Card className="bg-muted">
-              <div ref={containerRef} className="relative">
-                <canvas
-                  ref={canvasRef}
-                  className="w-full h-auto block"
-                  style={{ cursor: 'grab', touchAction: 'none' }}
-                />
-                {/* Multi-zone overlay on zoom view */}
-                {zones && onZonesChange && (
-                  <MultiZoneSelector
-                    onChange={onZonesChange}
-                    initialZones={zones}
-                  />
-                )}
-                {/* Blackout mask overlay on zoom view */}
-                {masks && onMasksChange && onMaskAdd && onMaskRemove && (
-                  <BlackoutMask
-                    masks={masks}
-                    onChange={onMasksChange}
-                    onAdd={onMaskAdd}
-                    onRemove={onMaskRemove}
-                  />
-                )}
-                {/* Zoom indicator + buttons */}
-                <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
-                  <button
-                    type="button"
-                    onClick={handleZoomOut}
-                    className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-                    title={t('capture.zoomOut')}
-                  >
-                    -
-                  </button>
-                  <span className="text-white text-xs font-mono min-w-[3rem] text-center">
-                    {t('capture.zoom')}: {zoomPercent}%
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleZoomIn}
-                    className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-                    title={t('capture.zoomIn')}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </Card>
-          </Div>
-
-          {/* Full preview with ROI overlay */}
-          {showDual && (
-            <Div>
-              <P className="text-xs text-muted-foreground mb-1 font-medium">{t('capture.fullView')}</P>
-              <Card className="bg-muted">
-                <div ref={fullContainerRef} className="relative">
-                  <canvas
-                    ref={fullCanvasRef}
-                    className="w-full h-auto block"
-                  />
-                  {roi && onRoiChange && (
-                    <RoiSelector
-                      onChange={onRoiChange}
-                      initialRoi={roi}
-                    />
-                  )}
-                </div>
-              </Card>
-            </Div>
-          )}
-        </Div>
+        showTabs ? (
+          <Tabs defaultValue="zoom" onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="zoom">{t('capture.zoomView')}</TabsTrigger>
+              <TabsTrigger value="full">{t('capture.fullView')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="zoom">
+              {zoomCanvas}
+            </TabsContent>
+            <TabsContent value="full">
+              {fullCanvas}
+            </TabsContent>
+          </Tabs>
+        ) : (
+          zoomCanvas
+        )
       ) : (
         <Card className="bg-muted">
           <Div className="aspect-video flex items-center justify-center">

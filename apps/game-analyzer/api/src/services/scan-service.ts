@@ -7,6 +7,17 @@ import type { GameType, RuneData, ScanResult, OcrSource, BenchRunResult } from '
 type OcrResult = { text: string; confidence: number; regions: { text: string; bbox: { x: number; y: number; width: number; height: number }; confidence: number }[] }
 type ParsedResult = { success: boolean; data?: any; errors?: string[] }
 
+// --- Parse a single stat line like "HP +15%" or "ATK +120" ---
+function parseStatLine(text: string): { type: string; value: number } | null {
+  // Match patterns: "HP +15%", "CRI Rate +6%", "ATK +20", "DEF +18", "SPD +5"
+  const match = text.match(/([A-Za-z\s%]+?)\s*\+\s*(\d+)(%?)/)
+  if (!match) return null
+  return {
+    type: match[1]!.trim(),
+    value: parseInt(match[2]!, 10),
+  }
+}
+
 // --- Bench presets (server-side preprocessing with sharp) ---
 
 const BENCH_PRESETS = [
@@ -358,16 +369,16 @@ export async function scanImage(
       }
     }
 
-    // --- Zone-based OCR: process each zone individually and merge ---
+    // --- Zone-based OCR: 8 individual zones for precise extraction ---
     if (zoneBuffers && Object.keys(zoneBuffers).length > 0) {
-      console.log(`[scan] Zone-based OCR: ${Object.keys(zoneBuffers).join(', ')}`)
+      console.log(`[scan] Zone-based OCR (8 zones): ${Object.keys(zoneBuffers).join(', ')}`)
 
       const zoneResults = await Promise.all(
         Object.entries(zoneBuffers).map(async ([zoneName, buffer]) => {
           try {
             const processed = await preprocessImage(buffer, { scale: 2 })
             const ocr = await recognize(processed, ocrConfig)
-            return { zoneName, ocr, text: ocr.text, confidence: ocr.confidence }
+            return { zoneName, ocr, text: ocr.text.trim(), confidence: ocr.confidence }
           } catch (e) {
             console.error(`[scan] Zone ${zoneName} OCR failed:`, e)
             return { zoneName, ocr: null, text: '', confidence: 0 }
@@ -375,14 +386,14 @@ export async function scanImage(
         })
       )
 
-      // Build combined text from zone results for the parser
-      const zoneTexts: string[] = []
+      // Build a map of zone results
+      const zoneMap: Record<string, { text: string; confidence: number }> = {}
       let zoneConfidenceSum = 0
       let zoneConfidenceCount = 0
 
       for (const zr of zoneResults) {
         if (zr.ocr) {
-          zoneTexts.push(zr.text)
+          zoneMap[zr.zoneName] = { text: zr.text, confidence: zr.confidence }
           zoneConfidenceSum += zr.confidence
           zoneConfidenceCount++
           ocrSources.push({
@@ -395,42 +406,105 @@ export async function scanImage(
         }
       }
 
-      if (zoneTexts.length > 0) {
-        const combinedText = zoneTexts.join('\n')
-        const combinedConfidence = zoneConfidenceCount > 0
-          ? Math.round(zoneConfidenceSum / zoneConfidenceCount)
-          : 0
-        const zoneOcr: OcrResult = { text: combinedText, confidence: combinedConfidence, regions: [] }
-        const zoneParse = parser.parse(zoneOcr)
+      if (zoneConfidenceCount > 0) {
+        // Parse individual zones directly instead of relying on the full parser
+        const zoneParsed: Record<string, any> = {}
 
-        const zoneSubCount = zoneParse.success ? ((zoneParse.data as any)?.subStats || []).length : 0
-        const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
-
-        console.log(`[scan] Zone OCR: ${zoneSubCount} subs (current: ${currentSubCount}), confidence: ${combinedConfidence}%`)
-
-        // Use zone result if it found more substats or higher confidence
-        if (zoneSubCount > currentSubCount || (zoneSubCount === currentSubCount && combinedConfidence > ocrResult.confidence)) {
-          ocrResult = zoneOcr
-          parseResult = zoneParse
-          console.log('[scan] Using zone-based OCR result (better than standard)')
+        // setSlot → extract set name, slot number, level
+        if (zoneMap.setSlot) {
+          const text = zoneMap.setSlot.text
+          // Match patterns like "Violent Rune (2)" or "Swift (4) +12"
+          const setMatch = text.match(/([A-Za-z]+(?:\s+[A-Za-z]+)?)\s*(?:Rune)?\s*\((\d)\)/i)
+          if (setMatch) {
+            zoneParsed.set = setMatch[1]!.trim()
+            zoneParsed.slot = parseInt(setMatch[2]!, 10)
+          }
+          const levelMatch = text.match(/\+(\d+)/)
+          if (levelMatch) zoneParsed.level = parseInt(levelMatch[1]!, 10)
         }
 
-        // Also try merging zone + standard results
-        if (currentSubCount > 0 && zoneSubCount > 0) {
-          const merged = mergeBenchResults([
-            { ocr: ocrResult, parse: parseResult },
-            { ocr: zoneOcr, parse: zoneParse },
-          ])
-          const mergedSubCount = merged.parseResult.success
-            ? ((merged.parseResult.data as any)?.subStats || []).length
-            : 0
-
-          if (mergedSubCount >= Math.max(currentSubCount, zoneSubCount)) {
-            ocrResult = merged.ocrResult
-            parseResult = merged.parseResult
-            console.log('[scan] Using merged zone + standard result')
+        // mainStat → extract main stat type and value
+        if (zoneMap.mainStat) {
+          const text = zoneMap.mainStat.text
+          // Match patterns like "CRI Dmg +80%" or "ATK +160" or "SPD +42"
+          const statMatch = text.match(/([A-Za-z\s%]+?)\s*\+\s*(\d+%?)/)
+          if (statMatch) {
+            zoneParsed.mainStat = {
+              type: statMatch[1]!.trim(),
+              value: statMatch[2]!.includes('%') ? parseInt(statMatch[2]!, 10) : parseInt(statMatch[2]!, 10),
+            }
           }
         }
+
+        // quality → match Legend/Hero/Rare/Magic/Normal
+        if (zoneMap.quality) {
+          const text = zoneMap.quality.text.toLowerCase()
+          const qualities = ['legend', 'hero', 'rare', 'magic', 'normal']
+          for (const q of qualities) {
+            if (text.includes(q)) {
+              zoneParsed.quality = q
+              break
+            }
+          }
+        }
+
+        // innate → single stat line
+        if (zoneMap.innate) {
+          const stat = parseStatLine(zoneMap.innate.text)
+          if (stat) zoneParsed.innateStat = stat
+        }
+
+        // sub1-4 → each is a single stat line
+        const subStats: Array<{ type: string; value: number }> = []
+        for (const subName of ['sub1', 'sub2', 'sub3', 'sub4']) {
+          if (zoneMap[subName]) {
+            const stat = parseStatLine(zoneMap[subName]!.text)
+            if (stat) subStats.push(stat)
+          }
+        }
+        zoneParsed.subStats = subStats
+
+        const combinedConfidence = Math.round(zoneConfidenceSum / zoneConfidenceCount)
+        const combinedText = Object.entries(zoneMap).map(([k, v]) => `[${k}] ${v.text}`).join('\n')
+        const zoneOcr: OcrResult = { text: combinedText, confidence: combinedConfidence, regions: [] }
+
+        // Also run full parser on combined text for comparison
+        const fullTexts = Object.values(zoneMap).map(v => v.text).join('\n')
+        const fullZoneOcr: OcrResult = { text: fullTexts, confidence: combinedConfidence, regions: [] }
+        const fullZoneParse = parser.parse(fullZoneOcr)
+
+        // Build zone-based parse result
+        const zoneParseResult: ParsedResult = {
+          success: subStats.length > 0 || !!zoneParsed.mainStat,
+          data: {
+            set: zoneParsed.set || null,
+            slot: zoneParsed.slot || null,
+            level: zoneParsed.level ?? null,
+            grade: null,
+            quality: zoneParsed.quality || null,
+            mainStat: zoneParsed.mainStat || null,
+            innateStat: zoneParsed.innateStat || null,
+            subStats: zoneParsed.subStats,
+          },
+        }
+
+        const zoneSubCount = subStats.length
+        const fullZoneSubCount = fullZoneParse.success ? ((fullZoneParse.data as any)?.subStats || []).length : 0
+        const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
+
+        console.log(`[scan] Zone individual parse: ${zoneSubCount} subs, full parser on zones: ${fullZoneSubCount}, current: ${currentSubCount}`)
+
+        // Pick the best result: zone individual, full parser on zones, or current
+        const candidates = [
+          { ocr: zoneOcr, parse: zoneParseResult, subs: zoneSubCount, conf: combinedConfidence, label: 'zone-individual' },
+          { ocr: fullZoneOcr, parse: fullZoneParse, subs: fullZoneSubCount, conf: combinedConfidence, label: 'zone-fullparser' },
+          { ocr: ocrResult, parse: parseResult, subs: currentSubCount, conf: ocrResult.confidence, label: 'standard' },
+        ].sort((a, b) => b.subs - a.subs || b.conf - a.conf)
+
+        const best = candidates[0]!
+        ocrResult = best.ocr
+        parseResult = best.parse
+        console.log(`[scan] Using ${best.label} result (${best.subs} subs, ${best.conf}% conf)`)
       }
     }
 

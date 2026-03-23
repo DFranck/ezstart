@@ -249,10 +249,14 @@ export default function BenchPage() {
             imageFull: fullFile,
             gameType: game,
             benchMode: true,
-            zoneHeader: zoneFiles.header,
-            zoneMain: zoneFiles.main,
-            zoneSubstats: zoneFiles.substats,
+            zoneSetSlot: zoneFiles.setSlot,
+            zoneMainStat: zoneFiles.mainStat,
+            zoneQuality: zoneFiles.quality,
             zoneInnate: zoneFiles.innate,
+            zoneSub1: zoneFiles.sub1,
+            zoneSub2: zoneFiles.sub2,
+            zoneSub3: zoneFiles.sub3,
+            zoneSub4: zoneFiles.sub4,
           },
           { onSettled: () => { scanningRef.current = false } }
         )
@@ -349,7 +353,7 @@ export default function BenchPage() {
           onStop={stopCapture}
           roi={roi}
           onRoiChange={handleRoiChange}
-          showFullPreview
+          showTabs
           zones={zones}
           onZonesChange={handleZonesChange}
           masks={masks}
