@@ -676,19 +676,20 @@ function separateMainAndSubs(
   // If no high-value main stat found, try to find the best candidate
   if (mainStatIndex < 0) {
     if (validMainTypes) {
-      // For known slots 2/4/6: find first stat whose type is valid for this slot
-      // Prefer stats with value > 40 (likely main stat), then any valid type
-      const validHighIdx = allStats.findIndex(s =>
-        validMainTypes.includes(s.type) && s.value > 40,
-      )
-      if (validHighIdx >= 0) {
-        mainStatIndex = validHighIdx
-      } else {
-        // Take first stat with a valid type for this slot
-        const validIdx = allStats.findIndex(s => validMainTypes.includes(s.type))
-        if (validIdx >= 0) {
-          mainStatIndex = validIdx
+      // For known slots 2/4/6: find the stat with the highest value among valid types.
+      // Main stats always have higher values than substats of the same type, even at low levels
+      // (e.g. slot 4 CD +35% at +6 vs substat CD max ~7% per roll).
+      let bestIdx = -1
+      let bestValue = -1
+      for (let i = 0; i < allStats.length; i++) {
+        const s = allStats[i]!
+        if (validMainTypes.includes(s.type) && s.value > bestValue) {
+          bestValue = s.value
+          bestIdx = i
         }
+      }
+      if (bestIdx >= 0) {
+        mainStatIndex = bestIdx
       }
     }
 

@@ -1105,6 +1105,61 @@ describe('summonersWarParser', () => {
     })
   })
 
+  describe('slot 4 CD main stat at low level', () => {
+    it('detects CD +35% as main stat on slot 4 +6 (not innate)', () => {
+      const text = [
+        'Shield Rune (4)',
+        '+6',
+        '★★★★★★',
+        'CRI Dmg +35%',
+        'HP +7%',
+        'ATK +5%',
+        'DEF +12',
+        'SPD +4',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+      expect(data.mainStat).toEqual({ type: 'cd', value: 35 })
+      expect(data.subStats).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'cd' }),
+        ]),
+      )
+      // CD should NOT be innate
+      if (data.innateStat) {
+        expect(data.innateStat.type).not.toBe('cd')
+      }
+    })
+
+    it('detects CR +25% as main stat on slot 4 +6 (not innate)', () => {
+      const text = [
+        'Violent Rune (4)',
+        '+6',
+        '★★★★★★',
+        'CRI Rate +25%',
+        'HP +8%',
+        'ATK +6%',
+        'DEF +15',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+      }
+      expect(data.mainStat).toEqual({ type: 'cr', value: 25 })
+    })
+  })
+
   describe('partial flag propagation', () => {
     it('legend +12 with only 2 substats has partial = true', () => {
       // Slot 2 with SPD main stat, only 2 substats visible
