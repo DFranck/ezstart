@@ -216,7 +216,7 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove }: BlackoutMaskP
               top: `${mask.y}%`,
               width: `${mask.width}%`,
               height: `${mask.height}%`,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backgroundColor: 'rgba(255, 0, 0, 1.0)',
               border: '2px dashed rgba(255, 255, 255, 0.8)',
               cursor: 'move',
               pointerEvents: 'auto',
