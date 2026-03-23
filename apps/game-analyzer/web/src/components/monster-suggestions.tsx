@@ -1,8 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { Div, P, Skeleton } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useMonstersByBuild } from '@/hooks/use-monsters'
+
+const MAX_VISIBLE = 12
 
 const ELEMENT_COLORS: Record<string, string> = {
   fire: '#ef4444',
@@ -19,6 +22,7 @@ interface MonsterSuggestionsProps {
 export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
   const tRune = useTranslations('rune')
   const { data: monsters, isLoading } = useMonstersByBuild(archetypes)
+  const [expanded, setExpanded] = useState(false)
 
   if (isLoading) {
     return (
@@ -35,11 +39,14 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
 
   if (!monsters?.length) return null
 
+  const visibleMonsters = expanded ? monsters : monsters.slice(0, MAX_VISIBLE)
+  const hiddenCount = monsters.length - MAX_VISIBLE
+
   return (
     <Div className="space-y-2">
       <P className="text-sm font-medium">{tRune('suggestedMonsters')}</P>
-      <Div className="flex flex-wrap gap-2">
-        {monsters.map(monster => (
+      <Div className="flex flex-wrap gap-2 items-center">
+        {visibleMonsters.map(monster => (
           <Div
             key={monster.id}
             className="relative group"
@@ -61,6 +68,14 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
             </Div>
           </Div>
         ))}
+        {!expanded && hiddenCount > 0 && (
+          <button
+            onClick={() => setExpanded(true)}
+            className="text-xs text-muted-foreground self-center hover:underline"
+          >
+            +{hiddenCount} more
+          </button>
+        )}
       </Div>
     </Div>
   )
