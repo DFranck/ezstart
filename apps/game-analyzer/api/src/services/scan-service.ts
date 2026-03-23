@@ -22,8 +22,14 @@ export async function scanImage(
   const startTime = Date.now()
 
   try {
-    // 1. Run OCR recognition
-    const ocrResult = await recognize(imageBuffer)
+    // 1. Run OCR recognition with game-specific config
+    const ocrConfig = gameType === 'summoners-war'
+      ? {
+          whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-%():. *',
+          psm: '6',
+        }
+      : undefined
+    const ocrResult = await recognize(imageBuffer, ocrConfig)
 
     // 2. Parse with the appropriate game parser
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser

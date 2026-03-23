@@ -40,6 +40,10 @@ export interface OcrEngineConfig {
   language?: string
   /** Apply preprocessing to improve recognition */
   preprocessImage?: boolean
+  /** Character whitelist — only these characters will be recognized */
+  whitelist?: string
+  /** Page Segmentation Mode (e.g. '6' = single uniform block, '4' = single column) */
+  psm?: string
 }
 
 /**
