@@ -440,7 +440,12 @@ export function ClientLayout({
       )}
 
       {/* Main content */}
-      <Main id="main-content" className={cn()}>
+      <Main
+        id="main-content"
+        className={cn(
+          showHeader && (headerPosition === 'fixed' || headerPosition === 'absolute') && 'pt-16'
+        )}
+      >
         {children}
       </Main>
 
