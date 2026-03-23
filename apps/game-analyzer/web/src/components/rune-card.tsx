@@ -124,32 +124,32 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
   return (
     <Card className="overflow-hidden">
       {/* ── Header ── */}
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2 px-3 pt-3">
         <Div className="flex items-center justify-between">
           <Div className="flex items-center gap-2">
-            <P className="text-xl">{setEmoji}</P>
-            <H3 className="text-lg font-semibold capitalize">{rune.set}</H3>
+            <P className="text-base">{setEmoji}</P>
+            <H3 className="text-base font-semibold capitalize">{rune.set}</H3>
           </Div>
-          <Badge variant="outline">Slot {rune.slot}</Badge>
+          <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
         </Div>
-        <Div className="flex items-center gap-3">
-          <P className="text-yellow-500 text-lg tracking-tight">{gradeStars}</P>
-          <Badge variant="secondary">+{rune.level}</Badge>
-          <Badge className={`border ${QUALITY_BG[quality]}`}>
+        <Div className="flex items-center gap-2">
+          <P className="text-yellow-500 text-sm tracking-tight">{gradeStars}</P>
+          <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
+          <Badge className={`border text-xs ${QUALITY_BG[quality]}`}>
             {tRune(`quality.${quality}`)}
           </Badge>
         </Div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-3 pb-3">
         {/* ── Main stat ── */}
         <Div>
           <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('mainStat')}</P>
           <Div className="flex items-center justify-between">
-            <P className={`text-sm font-semibold ${STAT_COLORS[rune.mainStat.type]}`}>
+            <P className="text-sm font-semibold text-muted-foreground">
               {formatStatLabel(rune.mainStat.type)}
             </P>
-            <P className="text-sm font-bold">{formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
+            <P className={`text-sm font-bold ${STAT_COLORS[rune.mainStat.type]}`}>{formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
           </Div>
         </Div>
 
@@ -158,10 +158,10 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           <Div>
             <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('innateStat')}</P>
             <Div className="flex items-center justify-between">
-              <P className={`text-sm ${STAT_COLORS[rune.innateStat.type]}`}>
+              <P className="text-sm text-muted-foreground">
                 {formatStatLabel(rune.innateStat.type)}
               </P>
-              <P className="text-sm font-medium">{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
+              <P className={`text-sm font-medium ${STAT_COLORS[rune.innateStat.type]}`}>{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
             </Div>
           </Div>
         )}
@@ -178,11 +178,11 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
               return (
                 <Div key={i} className="space-y-1">
                   <Div className="flex items-center justify-between text-sm">
-                    <P className={`font-medium ${STAT_COLORS[stat.type]}`}>
+                    <P className="font-medium text-muted-foreground">
                       {formatStatLabel(stat.type)}
                     </P>
                     <Div className="flex items-center gap-2">
-                      <P className="font-medium">{formatStatValue(stat.type, stat.value)}</P>
+                      <P className={`font-semibold ${STAT_COLORS[stat.type]}`}>{formatStatValue(stat.type, stat.value)}</P>
                       {subAnalysis && (
                         <P className="text-xs text-muted-foreground">
                           {subAnalysis.efficiency}% ({subAnalysis.rolls} {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})
@@ -293,7 +293,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                       <Badge
                         key={archKey}
                         variant="outline"
-                        className={`cursor-default text-xs ${getSynergyBadgeClass(arch.matchCount)}`}
+                        className={`cursor-default text-[11px] px-1.5 py-0 ${getSynergyBadgeClass(arch.matchCount)}`}
                         title={tooltipText}
                       >
                         {emoji} {tRune(`archetype.${archKey}`)} {arch.matchCount}/4
@@ -331,7 +331,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   .filter(s => s.grindable && s.grindAmount && s.grindAmount > 0)
                   .map((sub, i) => (
                     <Div key={i} className="flex items-center justify-between text-sm">
-                      <P className={`${STAT_COLORS[sub.type]}`}>{formatStatLabel(sub.type)}</P>
+                      <P className="text-muted-foreground">{formatStatLabel(sub.type)}</P>
                       <P className="text-muted-foreground">
                         {formatStatValue(sub.type, sub.value)} {'\u2192'} {formatStatValue(sub.type, sub.grindedValue!)}
                         <span className="text-xs ml-1">({tRune('legendGrind')} +{sub.grindAmount})</span>

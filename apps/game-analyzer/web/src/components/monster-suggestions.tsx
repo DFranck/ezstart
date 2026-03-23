@@ -30,7 +30,7 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
         <Skeleton className="h-4 w-40" />
         <Div className="flex gap-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-10 rounded-full" />
+            <Skeleton key={i} className="h-8 w-8 rounded-full" />
           ))}
         </Div>
       </Div>
@@ -55,7 +55,7 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
             <img
               src={monster.imageUrl}
               alt={monster.name}
-              className="w-10 h-10 rounded-full border-2"
+              className="w-8 h-8 rounded-full border-2"
               style={{ borderColor: ELEMENT_COLORS[monster.element] }}
             />
             {/* Star badge */}

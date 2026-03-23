@@ -316,71 +316,69 @@ export default function GameScanPage() {
   const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
-    <Div className="container mx-auto px-4 py-8 max-w-6xl">
-      <Div className="mb-8">
-        <H1 className="text-2xl font-bold mb-2">{t('scan.title')}</H1>
-        <P className="text-sm text-muted-foreground">{t(`games.${game}`)}</P>
-      </Div>
-
-      {/* Profile selector + Layout selector */}
-      <Div className="mb-6 flex flex-wrap items-center gap-4">
-        <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
-        {layouts.length > 0 && (
-          <Div className="flex items-center gap-2">
-            <P className="text-sm font-medium">{t('bench.layout')}:</P>
-            <Select
-              value={currentLayoutName}
-              onValueChange={setCurrentLayoutName}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('bench.layout')} />
-              </SelectTrigger>
-              <SelectContent>
-                {layouts.map((l) => (
-                  <SelectItem key={l.layoutName} value={l.layoutName}>
-                    {l.displayName ?? l.layoutName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Div>
-        )}
+    <Div className="container mx-auto px-4 py-6 max-w-6xl">
+      <Div className="mb-4">
+        <H1 className="text-xl font-bold">{t('scan.title')}</H1>
       </Div>
 
       {/* Mode Tabs */}
       <Tabs value={mode} onValueChange={(v) => setMode(v as 'capture' | 'upload')}>
-        <TabsList className="mb-6">
+        <TabsList className="mb-4">
           <TabsTrigger value="capture">{t('scan.mode.capture')}</TabsTrigger>
           <TabsTrigger value="upload">{t('scan.mode.upload')}</TabsTrigger>
         </TabsList>
 
         {/* Capture Mode */}
         <TabsContent value="capture">
-          <Div className="space-y-6">
-            {/* Zoom preview only (no full preview in prod) */}
-            <CapturePreview
-              isCapturing={isCapturing}
-              isAnalyzing={isAnalyzing}
-              isSupported={isSupported}
-              currentFrame={currentFrame}
-              error={captureError}
-              onStart={startCapture}
-              onStop={stopCapture}
-              roi={roi}
-              onRoiChange={handleRoiChange}
-              showTabs={false}
-              masks={masks.length > 0 ? masks : undefined}
-              onMasksChange={masks.length > 0 ? () => {} : undefined}
-              onMaskAdd={masks.length > 0 ? () => {} : undefined}
-              onMaskRemove={masks.length > 0 ? () => {} : undefined}
-              zones={layoutData?.zones}
-              onZonesChange={() => {}}
-              zonesLocked
-              maskColor="rgba(255, 0, 0, 0.15)"
-            />
-
-            {/* Results */}
+          <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Capture + Controls */}
             <Div className="space-y-4">
+              {/* Profile selector + Layout selector */}
+              <Div className="flex flex-wrap items-center gap-4">
+                <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
+                {layouts.length > 0 && (
+                  <Div className="flex items-center gap-2">
+                    <P className="text-sm font-medium">{t('bench.layout')}:</P>
+                    <Select
+                      value={currentLayoutName}
+                      onValueChange={setCurrentLayoutName}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={t('bench.layout')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {layouts.map((l) => (
+                          <SelectItem key={l.layoutName} value={l.layoutName}>
+                            {l.displayName ?? l.layoutName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Div>
+                )}
+              </Div>
+
+              <CapturePreview
+                isCapturing={isCapturing}
+                isAnalyzing={isAnalyzing}
+                isSupported={isSupported}
+                currentFrame={currentFrame}
+                error={captureError}
+                onStart={startCapture}
+                onStop={stopCapture}
+                roi={roi}
+                onRoiChange={handleRoiChange}
+                showTabs={false}
+                masks={masks.length > 0 ? masks : undefined}
+                onMasksChange={masks.length > 0 ? () => {} : undefined}
+                onMaskAdd={masks.length > 0 ? () => {} : undefined}
+                onMaskRemove={masks.length > 0 ? () => {} : undefined}
+                zones={layoutData?.zones}
+                onZonesChange={() => {}}
+                zonesLocked
+                maskColor="rgba(255, 0, 0, 0.15)"
+              />
+
               {isCapturing && (
                 <Button
                   variant="outline"
@@ -392,7 +390,10 @@ export default function GameScanPage() {
                   {t('scan.capture.rescan')}
                 </Button>
               )}
+            </Div>
 
+            {/* Right: Results */}
+            <Div className="space-y-4">
               {isPending && (
                 <Div className="text-center py-8">
                   <Div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
