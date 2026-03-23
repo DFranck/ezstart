@@ -140,10 +140,16 @@ export function useScreenCapture(
     }
   }, [cleanup, extractFrame, frameInterval])
 
-  const isSupported =
-    typeof navigator !== 'undefined' &&
-    typeof navigator.mediaDevices !== 'undefined' &&
-    typeof navigator.mediaDevices.getDisplayMedia === 'function'
+  const [isSupported, setIsSupported] = useState(false)
+
+  // Check support after mount to avoid SSR hydration mismatch
+  useEffect(() => {
+    setIsSupported(
+      typeof navigator !== 'undefined' &&
+      typeof navigator.mediaDevices !== 'undefined' &&
+      typeof navigator.mediaDevices.getDisplayMedia === 'function'
+    )
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {

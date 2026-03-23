@@ -218,7 +218,7 @@ export default function BenchPage() {
       <Div className="mb-8">
         <H1 className="text-2xl font-bold mb-2">{t('bench.title')}</H1>
         <P className="text-sm text-muted-foreground">
-          {t(`games.${game}`)} — R&D: {t('bench.description', { defaultMessage: 'tests all 8 presets on 3 image sources to find the best OCR configuration' })}
+          {t(`games.${game}`)} — R&D: {t('bench.description')}
         </P>
       </Div>
 
@@ -281,7 +281,7 @@ export default function BenchPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">{t('bench.source', { defaultMessage: 'Source' })}</th>
+                        <th className="text-left py-2 px-3 font-medium">{t('bench.source')}</th>
                         <th className="text-left py-2 px-3 font-medium">{t('bench.preset')}</th>
                         <th className="text-right py-2 px-3 font-medium">{t('labels.confidence')}</th>
                         <th className="text-right py-2 px-3 font-medium">{t('bench.substats')}</th>
@@ -324,8 +324,8 @@ export default function BenchPage() {
                   disabled={presetsSaved}
                 >
                   {presetsSaved
-                    ? t('bench.presetsSaved', { defaultMessage: 'Presets saved for production scan' })
-                    : t('bench.savePresets', { defaultMessage: 'Save best presets for production scan' })
+                    ? t('bench.presetsSaved')
+                    : t('bench.savePresets')
                   }
                 </Button>
               </Div>

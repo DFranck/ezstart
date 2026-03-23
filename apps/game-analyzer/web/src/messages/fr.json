@@ -60,7 +60,11 @@
     "substats": "Sous-stats",
     "time": "Temps",
     "status": "Statut",
-    "imageSize": "Taille de l'image"
+    "imageSize": "Taille de l'image",
+    "description": "Teste les 8 presets sur 3 sources d'image pour trouver la meilleure configuration OCR",
+    "source": "Source",
+    "savePresets": "Sauvegarder les meilleurs presets pour le scan production",
+    "presetsSaved": "Presets sauvegardes pour le scan production"
   },
   "dashboard": {
     "title": "Game Analyzer",
