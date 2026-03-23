@@ -245,7 +245,22 @@ function extractAllStats(text: string): (RuneStat & { _index: number })[] {
   // Sort by position in original text
   stats.sort((a, b) => a._index - b._index)
 
-  return stats
+  // Deduplicate overlapping matches: multiple STAT_PATTERNS can match the same
+  // text region (e.g. "CRI DMG +35%" matches both /cri(?:tical)?\s*dmg/ and
+  // /crit\s*dmg/). Keep only the first match per position range.
+  const deduped: (RuneStat & { _index: number })[] = []
+  for (const stat of stats) {
+    const overlaps = deduped.some(
+      existing => existing.type === stat.type
+        && existing.value === stat.value
+        && Math.abs(existing._index - stat._index) < 10,
+    )
+    if (!overlaps) {
+      deduped.push(stat)
+    }
+  }
+
+  return deduped
 }
 
 /**
@@ -637,7 +652,12 @@ function separateMainAndSubs(
     // appears to be legend quality, the first stat is the innate (prefix) stat.
     let innateStat: RuneStat | undefined
     if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
-      innateStat = subStats.shift()
+      const candidate = subStats[0]
+      // Safety: if the candidate has same type and value as main stat, it's a
+      // duplicate from OCR — not a real innate stat.
+      if (candidate && !(candidate.type === mainStat.type && candidate.value === mainStat.value)) {
+        innateStat = subStats.shift()
+      }
     }
     subStats = subStats.slice(0, MAX_SUBSTATS)
 
@@ -716,7 +736,12 @@ function separateMainAndSubs(
   // Innate stat detection for non-fixed slots
   let innateStat: RuneStat | undefined
   if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
-    innateStat = subStats.shift()
+    const candidate = subStats[0]
+    // Safety: if the candidate has same type and value as main stat, it's a
+    // duplicate from OCR — not a real innate stat.
+    if (candidate && !(candidate.type === mainStat.type && candidate.value === mainStat.value)) {
+      innateStat = subStats.shift()
+    }
   }
   subStats = subStats.slice(0, MAX_SUBSTATS)
 
