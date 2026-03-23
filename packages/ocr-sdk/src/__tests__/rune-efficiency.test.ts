@@ -631,31 +631,31 @@ describe('rune-efficiency', () => {
     })
 
     it('returns +4% for 2/4 match when unmatched stats have 0-1 roll each', () => {
+      // Use stats that only match 2/4 for any archetype (atk flat + def flat are never desired)
       const subStats = [
-        { type: 'spd' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
         { type: 'cr' as const, value: 12 },
-        { type: 'res' as const, value: 4 },   // 1 roll (round(4/8)=1)
-        { type: 'acc' as const, value: 4 },    // 1 roll (round(4/8)=1)
+        { type: 'atk' as const, value: 10 },   // 1 roll — flat atk not in any archetype
+        { type: 'def' as const, value: 10 },    // 1 roll — flat def not in any archetype
       ]
 
       const result = calculateSynergy(subStats)
 
-      expect(result.bestArchetype).toBe('speed-dps')
       expect(result.matchCount).toBe(2)
       expect(result.synergyBonus).toBe(4)
     })
 
     it('returns 0% for 2/4 match when unmatched stats have rolls', () => {
+      // Use stats that only match 2/4 for any archetype (flat atk + flat def are never desired)
       const subStats = [
-        { type: 'spd' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
         { type: 'cr' as const, value: 12 },
-        { type: 'res' as const, value: 20 },  // 3 rolls (round(20/8)=3)
-        { type: 'acc' as const, value: 16 },   // 2 rolls (round(16/8)=2)
+        { type: 'atk' as const, value: 40 },  // 2 rolls (round(40/20)=2) — flat atk not desired
+        { type: 'def' as const, value: 40 },   // 2 rolls (round(40/20)=2) — flat def not desired
       ]
 
       const result = calculateSynergy(subStats)
 
-      expect(result.bestArchetype).toBe('speed-dps')
       expect(result.matchCount).toBe(2)
       expect(result.synergyBonus).toBe(0)
     })
@@ -701,7 +701,7 @@ describe('rune-efficiency', () => {
 
       const result = calculateSynergy(subStats)
 
-      expect(result.allArchetypes.length).toBe(5)
+      expect(result.allArchetypes.length).toBe(14)
       // First should be the best match
       expect(result.allArchetypes[0]!.matchCount).toBeGreaterThanOrEqual(result.allArchetypes[1]!.matchCount)
     })

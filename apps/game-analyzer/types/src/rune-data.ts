@@ -156,37 +156,100 @@ export const MAX_ROLLS_BY_QUALITY: Record<RuneQuality, number> = {
 // BUILD ARCHETYPES & SYNERGY
 // ============================================
 
-export type BuildArchetype = 'speed-dps' | 'bruiser' | 'tank-support' | 'cleave' | 'cc-debuffer'
+export type BuildArchetype =
+  | 'speed-dps' | 'bruiser' | 'cleave' | 'cc-debuffer' | 'tank-support'
+  | 'bomber' | 'strip-cleanse' | 'healer' | 'one-shot-nuker'
+  | 'vampire-bruiser' | 'revenge-proc' | 'speed-leader' | 'raid-support' | 'def-nuker'
 
 export const BUILD_ARCHETYPES: Record<BuildArchetype, {
   name: string
+  emoji: string
   desiredStats: StatType[]
   description: string
 }> = {
   'speed-dps': {
     name: 'Speed DPS',
+    emoji: '⚡',
     desiredStats: ['spd', 'cr', 'cd', 'atk%'],
-    description: 'Lushen, Kaki, etc.',
+    description: 'Lushen, Kaki, Alicia',
   },
   'bruiser': {
     name: 'Bruiser',
-    desiredStats: ['hp%', 'atk%', 'cr', 'cd'],
-    description: 'Vigor, Karnal, etc.',
-  },
-  'tank-support': {
-    name: 'Tank/Support',
-    desiredStats: ['hp%', 'def%', 'spd', 'res'],
-    description: 'Fran, Riley, etc.',
+    emoji: '💪',
+    desiredStats: ['hp%', 'cr', 'cd', 'spd'],
+    description: 'Vigor, Karnal, Mo Long',
   },
   'cleave': {
     name: 'Cleave',
+    emoji: '💀',
     desiredStats: ['atk%', 'cr', 'cd', 'spd'],
-    description: 'Poseidon, Zaiross, etc.',
+    description: 'Poseidon, Zaiross, Julie',
   },
   'cc-debuffer': {
     name: 'CC/Debuffer',
+    emoji: '🎯',
     desiredStats: ['spd', 'acc', 'hp%', 'def%'],
-    description: 'Tyron, Loren, etc.',
+    description: 'Tyron, Loren, Spectra',
+  },
+  'tank-support': {
+    name: 'Tank/Support',
+    emoji: '🛡️',
+    desiredStats: ['hp%', 'def%', 'spd', 'res'],
+    description: 'Fran, Riley, Lulu',
+  },
+  'bomber': {
+    name: 'Bomber',
+    emoji: '💣',
+    desiredStats: ['atk%', 'spd', 'acc', 'hp%'],
+    description: 'Seara, Malaka, Liebli',
+  },
+  'strip-cleanse': {
+    name: 'Strip/Cleanse',
+    emoji: '✨',
+    desiredStats: ['spd', 'hp%', 'acc', 'res'],
+    description: 'Juno, Praha, Velajuel',
+  },
+  'healer': {
+    name: 'Healer',
+    emoji: '💚',
+    desiredStats: ['spd', 'hp%', 'def%', 'acc'],
+    description: 'Fran, Ariel, Chasun',
+  },
+  'one-shot-nuker': {
+    name: 'One-Shot',
+    emoji: '🔫',
+    desiredStats: ['atk%', 'cr', 'cd', 'spd'],
+    description: 'Copper, Bulldozer, Kahli',
+  },
+  'def-nuker': {
+    name: 'DEF Nuker',
+    emoji: '🏰',
+    desiredStats: ['def%', 'cr', 'cd', 'spd'],
+    description: 'Copper, Bulldozer, Feng Yan',
+  },
+  'vampire-bruiser': {
+    name: 'Vamp Bruiser',
+    emoji: '🧛',
+    desiredStats: ['atk%', 'cr', 'cd', 'hp%'],
+    description: 'Laika, Rakan',
+  },
+  'revenge-proc': {
+    name: 'Revenge',
+    emoji: '🔄',
+    desiredStats: ['hp%', 'def%', 'cr', 'cd'],
+    description: 'Miho, Rina',
+  },
+  'speed-leader': {
+    name: 'Speed Lead',
+    emoji: '🏃',
+    desiredStats: ['spd', 'hp%', 'def%', 'res'],
+    description: 'Bernard, Kabilla, Orion',
+  },
+  'raid-support': {
+    name: 'Raid',
+    emoji: '⚔️',
+    desiredStats: ['spd', 'hp%', 'def%', 'res'],
+    description: 'Colleen, Fran (R5)',
   },
 }
 

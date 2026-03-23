@@ -82,7 +82,10 @@ export interface SynergyResult {
   allArchetypes: { archetype: BuildArchetype; matchCount: number; matchedStats: StatType[] }[]
 }
 
-export type BuildArchetype = 'speed-dps' | 'bruiser' | 'tank-support' | 'cleave' | 'cc-debuffer'
+export type BuildArchetype =
+  | 'speed-dps' | 'bruiser' | 'cleave' | 'cc-debuffer' | 'tank-support'
+  | 'bomber' | 'strip-cleanse' | 'healer' | 'one-shot-nuker'
+  | 'vampire-bruiser' | 'revenge-proc' | 'speed-leader' | 'raid-support' | 'def-nuker'
 
 export interface RuneAnalysis {
   currentEfficiency: number
@@ -182,10 +185,19 @@ const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
 /** Build archetypes for synergy scoring */
 const BUILD_ARCHETYPES: Record<BuildArchetype, { desiredStats: StatType[] }> = {
   'speed-dps': { desiredStats: ['spd', 'cr', 'cd', 'atk%'] },
-  'bruiser': { desiredStats: ['hp%', 'atk%', 'cr', 'cd'] },
-  'tank-support': { desiredStats: ['hp%', 'def%', 'spd', 'res'] },
+  'bruiser': { desiredStats: ['hp%', 'cr', 'cd', 'spd'] },
   'cleave': { desiredStats: ['atk%', 'cr', 'cd', 'spd'] },
   'cc-debuffer': { desiredStats: ['spd', 'acc', 'hp%', 'def%'] },
+  'tank-support': { desiredStats: ['hp%', 'def%', 'spd', 'res'] },
+  'bomber': { desiredStats: ['atk%', 'spd', 'acc', 'hp%'] },
+  'strip-cleanse': { desiredStats: ['spd', 'hp%', 'acc', 'res'] },
+  'healer': { desiredStats: ['spd', 'hp%', 'def%', 'acc'] },
+  'one-shot-nuker': { desiredStats: ['atk%', 'cr', 'cd', 'spd'] },
+  'def-nuker': { desiredStats: ['def%', 'cr', 'cd', 'spd'] },
+  'vampire-bruiser': { desiredStats: ['atk%', 'cr', 'cd', 'hp%'] },
+  'revenge-proc': { desiredStats: ['hp%', 'def%', 'cr', 'cd'] },
+  'speed-leader': { desiredStats: ['spd', 'hp%', 'def%', 'res'] },
+  'raid-support': { desiredStats: ['spd', 'hp%', 'def%', 'res'] },
 }
 
 const SYNERGY_BONUS = {

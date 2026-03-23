@@ -124,9 +124,18 @@
     "archetype": {
       "speed-dps": "Speed DPS",
       "bruiser": "Bruiseur",
-      "tank-support": "Tank/Support",
       "cleave": "Cleave",
-      "cc-debuffer": "CC/Debuffer"
+      "cc-debuffer": "CC/Debuffer",
+      "tank-support": "Tank/Support",
+      "bomber": "Bomber",
+      "strip-cleanse": "Strip/Cleanse",
+      "healer": "Healer",
+      "one-shot-nuker": "One-Shot",
+      "def-nuker": "DEF Nuker",
+      "vampire-bruiser": "Vamp Bruiser",
+      "revenge-proc": "Revenge",
+      "speed-leader": "Speed Lead",
+      "raid-support": "Raid"
     }
   },
   "scanDetail": {

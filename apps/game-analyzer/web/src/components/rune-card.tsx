@@ -93,14 +93,7 @@ function formatStatLabel(type: StatType): string {
   return type.toUpperCase().replace('%', '%')
 }
 
-// ── Archetype emojis ──
-const ARCHETYPE_EMOJIS: Record<string, string> = {
-  'speed-dps': '\u26A1',
-  'bruiser': '\uD83D\uDCAA',
-  'tank-support': '\uD83D\uDEE1\uFE0F',
-  'cleave': '\uD83D\uDC80',
-  'cc-debuffer': '\uD83C\uDFAF',
-}
+// ── Archetype emojis — sourced from BUILD_ARCHETYPES ──
 
 // ── Synergy badge color by match count ──
 function getSynergyBadgeClass(matchCount: number): string {
@@ -287,7 +280,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                     const archKey = arch.archetype as BuildArchetype
                     const desired = BUILD_ARCHETYPES[archKey]?.desiredStats ?? []
                     const matchedStats = arch.matchedStats ?? []
-                    const emoji = ARCHETYPE_EMOJIS[archKey] ?? ''
+                    const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
                     const bonus = arch.matchCount >= 4 ? '+8%' : arch.matchCount >= 3 ? '+4~8%' : '0%'
                     const statsDetail = desired
                       .map(s => `${matchedStats.includes(s) ? '\u2713' : '\u2717'} ${formatStatLabel(s)}`)
