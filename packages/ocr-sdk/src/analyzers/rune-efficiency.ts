@@ -227,8 +227,23 @@ const STAT_WEIGHTS: Record<StatType, number> = {
 /** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
 const BARION_DIVISOR = 9
 
-/** Total upgrade rolls at +12 (at +3, +6, +9, +12) */
-const MAX_ROLLS_AT_PLUS_12 = 4
+// Number of substats at +0 by quality
+const SUBSTATS_BY_QUALITY: Record<RuneQuality, number> = {
+  normal: 0,
+  magic: 1,
+  rare: 2,
+  hero: 3,
+  legend: 4,
+}
+
+// Number of upgrade rolls at +12 by quality
+const UPGRADES_BY_QUALITY: Record<RuneQuality, number> = {
+  normal: 0,
+  magic: 1,
+  rare: 2,
+  hero: 3,
+  legend: 4,
+}
 
 // --- Core functions ---
 
@@ -258,11 +273,23 @@ export function estimateRolls(
 }
 
 /**
- * Calculate how many upgrade rolls remain before +12.
+ * Get the number of upgrade rolls that have occurred at a given level for a quality.
+ * An upgrade roll only happens when the rune already has 4 substats.
  */
-function remainingRolls(level: number): number {
-  const rollsOccurred = Math.floor(Math.min(level, 12) / 3)
-  return MAX_ROLLS_AT_PLUS_12 - rollsOccurred
+function getRollCount(quality: RuneQuality, level: number): number {
+  const base = SUBSTATS_BY_QUALITY[quality]
+  const powerups = Math.floor(Math.min(level, 12) / 3)
+  const newSubs = Math.min(powerups, 4 - base)
+  return powerups - newSubs
+}
+
+/**
+ * Calculate how many upgrade rolls remain before +12 for a given quality.
+ */
+function remainingRolls(quality: RuneQuality, level: number): number {
+  const totalUpgrades = UPGRADES_BY_QUALITY[quality]
+  const rollsDone = getRollCount(quality, level)
+  return Math.max(0, totalUpgrades - rollsDone)
 }
 
 /**
@@ -395,7 +422,8 @@ function weightedEfficiency(substats: RuneStat[]): number {
  * If the rune is already +12 or higher, potential = current (no rolls left).
  */
 export function calculatePotentialEfficiency(rune: RuneData): number {
-  const remaining = remainingRolls(rune.level)
+  const quality = detectQuality(rune)
+  const remaining = remainingRolls(quality, rune.level)
 
   let rawSum = 0
   for (const sub of rune.subStats) {
@@ -410,8 +438,9 @@ export function calculatePotentialEfficiency(rune: RuneData): number {
   }
 
   // Each remaining perfect roll adds 1.0 to rawSum
-  // But total rawSum can never exceed 8 (max 8 rolls for a legend rune)
-  const potentialRawSum = Math.min(rawSum + remaining, 8)
+  // Max rawSum = 4 (initial subs) + total upgrades for this quality
+  const maxRawSum = 4 + UPGRADES_BY_QUALITY[quality]
+  const potentialRawSum = Math.min(rawSum + remaining, maxRawSum)
   return ((potentialRawSum + 1) / BARION_DIVISOR) * 100
 }
 
@@ -638,7 +667,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const grindGainValue = Math.round(Math.max(0, roundedGrindedEfficiency - roundedCurrent) * 100) / 100
 
   // Potential efficiency: at +12 or above, no remaining rolls → potential = weighted (current)
-  const remaining = remainingRolls(rune.level)
+  const remaining = remainingRolls(quality, rune.level)
   const finalPotential = remaining <= 0 ? roundedWeighted : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   return {

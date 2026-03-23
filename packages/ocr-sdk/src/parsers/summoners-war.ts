@@ -751,33 +751,29 @@ function separateMainAndSubs(
 /**
  * Determine expected substat count based on quality and level.
  *
- * SW rules:
- * - Legend: 4 substats from the start
- * - Hero: 3 at base, 4 at +12
- * - Rare: 2 at base, 3 at +6, 4 at +12
- * - Magic: 1 at base, 2 at +3, 3 at +6, 4 at +9/+12
- * - Normal: 0 at base, gains one every 3 levels
- *
- * For simplicity, if level >= 12, expect 4 substats for any quality.
+ * SW rules — at each +3, if < 4 subs a new one is added, otherwise an existing one is upgraded:
+ * | Quality | +0   | +3      | +6      | +9      | +12     |
+ * |---------|------|---------|---------|---------|---------|
+ * | Normal  | 0    | 1 (new) | 2 (new) | 3 (new) | 4 (new) |
+ * | Magic   | 1    | 2 (new) | 3 (new) | 4 (new) | 4 (up)  |
+ * | Rare    | 2    | 3 (new) | 4 (new) | 4 (up)  | 4 (up)  |
+ * | Hero    | 3    | 4 (new) | 4 (up)  | 4 (up)  | 4 (up)  |
+ * | Legend  | 4    | 4 (up)  | 4 (up)  | 4 (up)  | 4 (up)  |
  */
 function getExpectedSubstatCount(quality: RuneQuality | null, level: number | null): number {
   const lvl = level ?? 0
+  const powerups = Math.floor(Math.min(lvl, 12) / 3) // 0,1,2,3,4 powerups
 
-  if (quality === 'legend') return 4
-  if (quality === 'hero') return lvl >= 12 ? 4 : 3
-  if (quality === 'rare') {
-    if (lvl >= 12) return 4
-    if (lvl >= 6) return 3
-    return 2
-  }
-  if (quality === 'magic') {
-    if (lvl >= 9) return 4
-    if (lvl >= 6) return 3
-    if (lvl >= 3) return 2
-    return 1
+  if (quality) {
+    const baseMap: Record<RuneQuality, number> = {
+      normal: 0, magic: 1, rare: 2, hero: 3, legend: 4,
+    }
+    const base = baseMap[quality]
+    const newSubs = Math.min(powerups, 4 - base)
+    return Math.min(base + newSubs, 4)
   }
 
-  // Unknown quality: use level to infer
+  // Unknown quality: use level to infer (assume worst case = normal)
   if (lvl >= 12) return 4
   if (lvl >= 9) return 3
   if (lvl >= 6) return 2

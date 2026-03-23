@@ -143,13 +143,33 @@ export const SUBSTATS_BY_QUALITY: Record<RuneQuality, number> = {
   legend: 4,
 }
 
-// Max number of rolls at +12 by quality
-export const MAX_ROLLS_BY_QUALITY: Record<RuneQuality, number> = {
-  normal: 4,
-  magic: 4,
-  rare: 4,
-  hero: 4,
+// Nombre total d'upgrades (rolls) à +12 par qualité
+// C'est le nombre de fois qu'une substat est rollée/augmentée
+export const UPGRADES_BY_QUALITY: Record<RuneQuality, number> = {
+  normal: 0,
+  magic: 1,
+  rare: 2,
+  hero: 3,
   legend: 4,
+}
+
+/** @deprecated Use UPGRADES_BY_QUALITY instead */
+export const MAX_ROLLS_BY_QUALITY = UPGRADES_BY_QUALITY
+
+// Nombre de substats attendu à un level donné pour une qualité donnée
+export function getExpectedSubstatCount(quality: RuneQuality, level: number): number {
+  const base = SUBSTATS_BY_QUALITY[quality]
+  const powerups = Math.floor(Math.min(level, 12) / 3) // 0,1,2,3,4 powerups
+  const newSubs = Math.min(powerups, 4 - base) // nouvelles subs ajoutées
+  return Math.min(base + newSubs, 4)
+}
+
+// Nombre de rolls/upgrades à un level donné
+export function getRollCount(quality: RuneQuality, level: number): number {
+  const base = SUBSTATS_BY_QUALITY[quality]
+  const powerups = Math.floor(Math.min(level, 12) / 3)
+  const newSubs = Math.min(powerups, 4 - base)
+  return powerups - newSubs // powerups utilisés pour upgrade au lieu de new sub
 }
 
 // ============================================
