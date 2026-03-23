@@ -82,7 +82,7 @@ export default function ScanPage() {
   const t = useTranslations()
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null)
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
-  const [profile, setProfile] = usePlayerProfile()
+  const [profile, setProfile] = usePlayerProfile(selectedGame)
   const [roi, setRoi] = useState<RoiRect>(DEFAULT_ROI)
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
 
@@ -195,7 +195,7 @@ export default function ScanPage() {
       {/* Profile selector */}
       {selectedGame && (
         <Div className="mb-6">
-          <ProfileSelector value={profile} onChange={setProfile} />
+          <ProfileSelector value={profile} onChange={setProfile} gameType={selectedGame} />
         </Div>
       )}
 
