@@ -254,7 +254,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
         {/* ── Synergy badges ── */}
         {analysis?.synergy && (() => {
           const matchingArchetypes = (analysis.synergy.allArchetypes ?? [])
-            .filter(a => a.matchCount >= 2)
+            .filter(a => a.matchCount >= 3)
             .sort((a, b) => b.matchCount - a.matchCount)
 
           if (matchingArchetypes.length === 0 && analysis.synergy.synergyBonus < 0) {
@@ -309,7 +309,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
         {/* ── Monster suggestions ── */}
         {analysis?.synergy && (() => {
           const suggestedArchetypes = (analysis.synergy.allArchetypes ?? [])
-            .filter(a => a.matchCount >= 2)
+            .filter(a => a.matchCount >= 3)
             .map(a => a.archetype)
           if (suggestedArchetypes.length === 0) return null
           return (

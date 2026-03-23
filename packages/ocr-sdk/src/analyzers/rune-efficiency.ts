@@ -632,12 +632,13 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const setBonus = setInfo?.bonus ?? ''
   const setPieces = setInfo?.pieces ?? 0
 
-  const cappedGrindedEfficiency = Math.min(grindPotential.efficiencyAfterGrind, 100)
-  const cappedGrindGain = Math.round(Math.max(0, cappedGrindedEfficiency - roundedCurrent) * 100) / 100
+  // Grinded efficiency: no cap — grinds add real value, can exceed 100%
+  const roundedGrindedEfficiency = Math.round(grindPotential.efficiencyAfterGrind * 100) / 100
+  const grindGainValue = Math.round(Math.max(0, roundedGrindedEfficiency - roundedCurrent) * 100) / 100
 
-  // At +12 or above, potential must equal current (no remaining rolls)
+  // Potential efficiency: at +12 or above, no remaining rolls → potential = weighted (current)
   const remaining = remainingRolls(rune.level)
-  const finalPotential = remaining <= 0 ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
+  const finalPotential = remaining <= 0 ? roundedWeighted : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   return {
     currentEfficiency: roundedCurrent,
@@ -645,8 +646,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     weightedEfficiency: roundedWeighted,
     potentialEfficiency: finalPotential,
     maxEfficiency: Math.round(maxEfficiency * 100) / 100,
-    grindedEfficiency: Math.round(cappedGrindedEfficiency * 100) / 100,
-    grindGain: cappedGrindGain,
+    grindedEfficiency: roundedGrindedEfficiency,
+    grindGain: grindGainValue,
     substats,
     grindPotential,
     tier,

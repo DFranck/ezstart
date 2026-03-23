@@ -298,8 +298,8 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      // Bug fix: at +12 there are 0 remaining rolls, so potential must equal current exactly
-      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
+      // At +12 there are 0 remaining rolls, so potential must equal weighted efficiency
+      expect(result.potentialEfficiency).toBe(result.weightedEfficiency)
     })
 
     it('returns same as current for a +15 rune', () => {
@@ -315,7 +315,7 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
+      expect(result.potentialEfficiency).toBe(result.weightedEfficiency)
     })
 
     it('adds remaining rolls for a +0 rune (4 rolls remaining)', () => {
@@ -842,8 +842,8 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      // potentialEfficiency at +12 must equal currentEfficiency (Barion brut)
-      expect(result.potentialEfficiency).toBe(result.currentEfficiency)
+      // potentialEfficiency at +12 must equal weighted efficiency (no remaining rolls)
+      expect(result.potentialEfficiency).toBe(result.weightedEfficiency)
     })
   })
 
