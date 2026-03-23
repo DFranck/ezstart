@@ -5,16 +5,18 @@ import { callApi } from '@/config/api'
 interface ScanInput {
   image: File
   gameType: GameType
+  profile?: string
 }
 
 export function useScan() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ image, gameType }: ScanInput): Promise<ScanResult> => {
+    mutationFn: async ({ image, gameType, profile }: ScanInput): Promise<ScanResult> => {
       const formData = new FormData()
       formData.append('image', image)
       formData.append('gameType', gameType)
+      if (profile) formData.append('profile', profile)
 
       const response = await callApi<{ success: boolean; data: Scan }>('/scan', {
         method: 'POST',

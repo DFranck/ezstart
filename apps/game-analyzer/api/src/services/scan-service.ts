@@ -7,7 +7,8 @@ import type { GameType, RuneData, ScanResult } from '@game-analyzer/types'
  */
 export async function scanImage(
   imageBuffer: Buffer,
-  gameType: GameType
+  gameType: GameType,
+  profile: string = 'mid'
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -41,7 +42,7 @@ export async function scanImage(
     let analysis: ScanResult['analysis'] = undefined
     if (parseResult.success && gameType === 'summoners-war' && parseResult.data && 'set' in parseResult.data) {
       try {
-        analysis = analyzeRune(parseResult.data as unknown as RuneData, 'mid') as unknown as ScanResult['analysis']
+        analysis = analyzeRune(parseResult.data as unknown as RuneData, profile as any) as unknown as ScanResult['analysis']
       } catch (e) {
         // Don't fail the scan if analysis fails
         console.error('[scan] Analysis failed:', e)

@@ -126,12 +126,12 @@ export default function ScanPage() {
       imageDataToBlob(processed).then((blob) => {
         const file = new File([blob], 'capture.png', { type: 'image/png' })
         scan(
-          { image: file, gameType: selectedGame },
+          { image: file, gameType: selectedGame, profile },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
     },
-    [selectedGame, scan]
+    [selectedGame, scan, profile]
   )
 
   const { diffScore, isStable, processFrame } = useFrameDiff({
@@ -174,16 +174,16 @@ export default function ScanPage() {
     imageDataToBlob(processed).then((blob) => {
       const file = new File([blob], 'capture.png', { type: 'image/png' })
       scan(
-        { image: file, gameType: selectedGame },
+        { image: file, gameType: selectedGame, profile },
         { onSettled: () => { scanningRef.current = false } }
       )
     })
-  }, [selectedGame, currentFrame, scan])
+  }, [selectedGame, currentFrame, scan, profile])
 
   function handleImageSelected(file: File) {
     if (!selectedGame) return
     reset()
-    scan({ image: file, gameType: selectedGame })
+    scan({ image: file, gameType: selectedGame, profile })
   }
 
   const isAnalyzing = isPending
@@ -259,7 +259,7 @@ export default function ScanPage() {
                 {resultData && (
                   <>
                     {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
-                      <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} profile={profile} />
+                      <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                     )}
                     {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                       <GearCard gear={resultData.data} confidence={resultData.confidence} />
@@ -320,7 +320,7 @@ export default function ScanPage() {
                 <Div className="space-y-4">
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
                   {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
-                    <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} profile={profile} />
+                    <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
                   )}
                   {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                     <GearCard gear={resultData.data} confidence={resultData.confidence} />

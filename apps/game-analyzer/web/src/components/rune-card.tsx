@@ -2,8 +2,8 @@
 
 import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, PlayerProfile, EfficiencyTier } from '@game-analyzer/types'
-import { BUILD_ARCHETYPES, EFFICIENCY_THRESHOLDS, LEVEL_STRICTNESS } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype } from '@game-analyzer/types'
+import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { MonsterSuggestions } from './monster-suggestions'
 
 // ── Set emojis ──
@@ -103,28 +103,14 @@ function getSynergyBadgeClass(matchCount: number): string {
   return 'bg-muted border-border text-muted-foreground'
 }
 
-// ── Local tier recalculation based on player profile ──
-function getLocalTier(weightedEfficiency: number, level: number, profile: PlayerProfile): EfficiencyTier {
-  const thresholds = EFFICIENCY_THRESHOLDS[profile]
-  const levelKey = Math.min(Math.floor(level / 3) * 3, 12) as keyof typeof LEVEL_STRICTNESS
-  const strictness = LEVEL_STRICTNESS[levelKey] ?? 0
-
-  if (weightedEfficiency >= thresholds.godlike + strictness) return 'godlike'
-  if (weightedEfficiency >= thresholds.great + strictness) return 'great'
-  if (weightedEfficiency >= thresholds.good + strictness) return 'good'
-  if (weightedEfficiency >= thresholds.keep + strictness) return 'keep'
-  return 'sell'
-}
-
 // ── Props ──
 interface RuneCardProps {
   rune: RuneData
   analysis?: RuneAnalysis
   confidence?: number
-  profile?: PlayerProfile
 }
 
-export function RuneCard({ rune, analysis, confidence, profile }: RuneCardProps) {
+export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
   const t = useTranslations('labels')
   const tScan = useTranslations('scan')
   const tRune = useTranslations('rune')
@@ -132,11 +118,7 @@ export function RuneCard({ rune, analysis, confidence, profile }: RuneCardProps)
   const quality = rune.quality ?? 'normal'
   const gradeStars = Array.from({ length: rune.grade }, () => '\u2605').join('')
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
-  const tier = analysis
-    ? (profile
-        ? getLocalTier(analysis.weightedEfficiency ?? analysis.efficiency, rune.level, profile)
-        : (analysis.adjustedTier ?? analysis.tier))
-    : undefined
+  const tier = analysis ? (analysis.adjustedTier ?? analysis.tier) : undefined
   const levelStrictness = analysis?.levelStrictness ?? 0
 
   return (

@@ -12,6 +12,7 @@ const router: any = Router()
 
 const scanBodySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),
+  profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
 })
 
 // POST /scan — Upload an image and run OCR
@@ -33,9 +34,9 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
       })
     }
 
-    const { gameType } = validation.data
+    const { gameType, profile } = validation.data
 
-    const { scanId, result } = await scanImage(req.file.buffer, gameType as GameType)
+    const { scanId, result } = await scanImage(req.file.buffer, gameType as GameType, profile)
 
     res.status(201).json({
       success: true,
