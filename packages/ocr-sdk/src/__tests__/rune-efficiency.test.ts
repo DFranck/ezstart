@@ -499,14 +499,14 @@ describe('rune-efficiency', () => {
 
       // efficiency = (4.583+1)/9*100 = 62%
       // grind potential: spd +5, atk% +7, hp% +7, def% +7 => grind bonus = 5
-      // synergy: cc-debuffer 3/4 (spd, hp%, def%) => +4%
-      // finalEfficiency = 62 + 5 + 4 = 71 >= 70 (good threshold mid) => good
+      // synergy: cc-debuffer 3/4 (spd, hp%, def%) + atk% has 1 roll => THREE_NO_ROLL = +8%
+      // finalEfficiency = 62 + 5 + 8 = 75 >= 70 (good threshold mid) => good
       const result = analyzeRune(rune, 'mid')
       expect(result.tier).toBe('good')
 
       // Verify grind gain and synergy exist
       expect(result.grindPotential.grindGain).toBeGreaterThan(0)
-      expect(result.synergy.synergyBonus).toBe(4)
+      expect(result.synergy.synergyBonus).toBe(8)
     })
 
     it('returns adjustedTier and levelStrictness in analysis result', () => {
@@ -551,12 +551,27 @@ describe('rune-efficiency', () => {
       expect(result.synergyBonus).toBe(8)
     })
 
-    it('returns good synergy (+4%) for 3/4 speed-dps substats', () => {
+    it('returns +8% for 3/4 speed-dps when 4th has 0-1 roll (gem without loss)', () => {
       const subStats = [
         { type: 'spd' as const, value: 12 },
         { type: 'cr' as const, value: 12 },
         { type: 'cd' as const, value: 14 },
-        { type: 'res' as const, value: 8 },
+        { type: 'res' as const, value: 8 },  // 1 roll (round(8/8)=1) => gem without loss
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(3)
+      expect(result.synergyBonus).toBe(8)
+    })
+
+    it('returns +4% for 3/4 speed-dps when 4th has 2+ rolls (gem with loss)', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'cd' as const, value: 14 },
+        { type: 'res' as const, value: 20 },  // 3 rolls (round(20/8)=3) => gem with loss
       ]
 
       const result = calculateSynergy(subStats)
@@ -564,6 +579,36 @@ describe('rune-efficiency', () => {
       expect(result.bestArchetype).toBe('speed-dps')
       expect(result.matchCount).toBe(3)
       expect(result.synergyBonus).toBe(4)
+    })
+
+    it('returns +4% for 2/4 match when unmatched stats have 0-1 roll each', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'res' as const, value: 4 },   // 1 roll (round(4/8)=1)
+        { type: 'acc' as const, value: 4 },    // 1 roll (round(4/8)=1)
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(2)
+      expect(result.synergyBonus).toBe(4)
+    })
+
+    it('returns 0% for 2/4 match when unmatched stats have rolls', () => {
+      const subStats = [
+        { type: 'spd' as const, value: 12 },
+        { type: 'cr' as const, value: 12 },
+        { type: 'res' as const, value: 20 },  // 3 rolls (round(20/8)=3)
+        { type: 'acc' as const, value: 16 },   // 2 rolls (round(16/8)=2)
+      ]
+
+      const result = calculateSynergy(subStats)
+
+      expect(result.bestArchetype).toBe('speed-dps')
+      expect(result.matchCount).toBe(2)
+      expect(result.synergyBonus).toBe(0)
     })
 
     it('returns penalty (-3%) for contradictory stats with no archetype >= 2 matches', () => {

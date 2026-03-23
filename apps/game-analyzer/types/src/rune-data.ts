@@ -191,10 +191,12 @@ export const BUILD_ARCHETYPES: Record<BuildArchetype, {
 }
 
 export const SYNERGY_BONUS = {
-  PERFECT: 8,
-  GOOD: 4,
-  NONE: 0,
-  PENALTY: -3,
+  PERFECT_4: 8,         // 4/4 substats match
+  THREE_NO_ROLL: 8,     // 3/4 match + 4th has 0-1 roll → gem without loss = like 4/4
+  THREE_WITH_ROLLS: 4,  // 3/4 match + 4th has 2+ rolls → gem possible but loss
+  TWO_NO_ROLLS: 4,      // 2/4 match + 2 others have 0-1 roll → gem possible
+  TWO_WITH_ROLLS: 0,    // 2/4 match + rolls in bad stats → too much loss
+  INCOHERENT: -3,       // < 2 match
 } as const
 
 export interface SynergyResult {

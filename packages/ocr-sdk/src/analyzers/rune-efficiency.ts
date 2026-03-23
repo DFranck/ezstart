@@ -187,10 +187,12 @@ const BUILD_ARCHETYPES: Record<BuildArchetype, { desiredStats: StatType[] }> = {
 }
 
 const SYNERGY_BONUS = {
-  PERFECT: 8,
-  GOOD: 4,
-  NONE: 0,
-  PENALTY: -3,
+  PERFECT_4: 8,         // 4/4 substats match
+  THREE_NO_ROLL: 8,     // 3/4 match + 4th has 0-1 roll → gem without loss = like 4/4
+  THREE_WITH_ROLLS: 4,  // 3/4 match + 4th has 2+ rolls → gem possible but loss
+  TWO_NO_ROLLS: 4,      // 2/4 match + 2 others have 0-1 roll → gem possible
+  TWO_WITH_ROLLS: 0,    // 2/4 match + rolls in bad stats → too much loss
+  INCOHERENT: -3,       // < 2 match
 } as const
 
 /** Barion divisor: normalise so a perfect legend rune = 100% → (8 + 1) = 9 */
@@ -381,16 +383,33 @@ function calculateGrindPotential(
 
 /**
  * Calculate build archetype synergy for a rune's substats.
- * Counts how many substats match each archetype's desired stats.
+ * Counts how many substats match each archetype's desired stats,
+ * then evaluates rolls in non-matching stats to determine gem potential.
+ *
+ * @param subStats - The rune's substats
+ * @param rollEstimates - Optional pre-computed roll counts per stat type.
+ *                        If not provided, estimateRolls() is used.
  */
-export function calculateSynergy(subStats: RuneStat[]): SynergyResult {
-  const subStatTypes = subStats.map(s => s.type)
+export function calculateSynergy(
+  subStats: RuneStat[],
+  rollEstimates?: Map<StatType, number>,
+): SynergyResult {
   const archetypeKeys = Object.keys(BUILD_ARCHETYPES) as BuildArchetype[]
 
   const allArchetypes = archetypeKeys.map(archetype => {
     const desired = BUILD_ARCHETYPES[archetype].desiredStats
-    const matchedStats = subStatTypes.filter(t => desired.includes(t))
-    return { archetype, matchCount: matchedStats.length, matchedStats }
+    const matchedStats: StatType[] = []
+    const unmatchedStats: RuneStat[] = []
+
+    for (const sub of subStats) {
+      if (desired.includes(sub.type)) {
+        matchedStats.push(sub.type)
+      } else {
+        unmatchedStats.push(sub)
+      }
+    }
+
+    return { archetype, matchCount: matchedStats.length, matchedStats, unmatchedStats }
   })
 
   // Sort by matchCount descending
@@ -398,23 +417,45 @@ export function calculateSynergy(subStats: RuneStat[]): SynergyResult {
 
   const best = allArchetypes[0]
   const bestMatchCount = best?.matchCount ?? 0
+  const unmatchedStats = best?.unmatchedStats ?? []
+
+  // Count rolls in unmatched stats
+  const unmatchedRolls = unmatchedStats.map(sub => {
+    if (rollEstimates) {
+      return rollEstimates.get(sub.type) ?? 0
+    }
+    return estimateRolls(sub.type, sub.value).count
+  })
 
   let synergyBonus: number
   if (bestMatchCount >= 4) {
-    synergyBonus = SYNERGY_BONUS.PERFECT
-  } else if (bestMatchCount >= 3) {
-    synergyBonus = SYNERGY_BONUS.GOOD
-  } else if (bestMatchCount >= 2) {
-    synergyBonus = SYNERGY_BONUS.NONE
+    synergyBonus = SYNERGY_BONUS.PERFECT_4
+  } else if (bestMatchCount === 3) {
+    // 1 unmatched stat — check its rolls
+    const rollsInBad = unmatchedRolls[0] ?? 0
+    synergyBonus = rollsInBad <= 1
+      ? SYNERGY_BONUS.THREE_NO_ROLL
+      : SYNERGY_BONUS.THREE_WITH_ROLLS
+  } else if (bestMatchCount === 2) {
+    // 2 unmatched stats — check if all have low rolls
+    const allLowRolls = unmatchedRolls.every(r => r <= 1)
+    synergyBonus = allLowRolls
+      ? SYNERGY_BONUS.TWO_NO_ROLLS
+      : SYNERGY_BONUS.TWO_WITH_ROLLS
   } else {
-    synergyBonus = SYNERGY_BONUS.PENALTY
+    synergyBonus = SYNERGY_BONUS.INCOHERENT
   }
+
+  // Strip unmatchedStats from allArchetypes for the public API
+  const publicArchetypes = allArchetypes.map(({ archetype, matchCount, matchedStats }) => ({
+    archetype, matchCount, matchedStats,
+  }))
 
   return {
     bestArchetype: bestMatchCount >= 2 ? (best?.archetype ?? null) : null,
     matchCount: bestMatchCount,
     synergyBonus,
-    allArchetypes,
+    allArchetypes: publicArchetypes,
   }
 }
 
