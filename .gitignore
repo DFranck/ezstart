@@ -57,3 +57,6 @@ next-env.d.ts
 test-*.log
 typecheck-*.log
 test-*.json
+
+# OCR bench test images
+test-images/
