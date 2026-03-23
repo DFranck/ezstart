@@ -5,6 +5,7 @@ import { callApi } from '@/config/api'
 interface ScanInput {
   image: File
   imageAlt?: File
+  imageFull?: File
   gameType: GameType
   profile?: string
 }
@@ -13,10 +14,11 @@ export function useScan() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ image, imageAlt, gameType, profile }: ScanInput): Promise<ScanResult> => {
+    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile }: ScanInput): Promise<ScanResult> => {
       const formData = new FormData()
       formData.append('image', image)
       if (imageAlt) formData.append('imageAlt', imageAlt)
+      if (imageFull) formData.append('imageFull', imageFull)
       formData.append('gameType', gameType)
       if (profile) formData.append('profile', profile)
 

@@ -15,8 +15,8 @@ const scanBodySchema = z.object({
   profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
 })
 
-// POST /scan — Upload an image (+ optional alt image) and run OCR
-router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAlt', maxCount: 1 }]), async (req: any, res: any) => {
+// POST /scan — Upload an image (+ optional alt/full images) and run OCR
+router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAlt', maxCount: 1 }, { name: 'imageFull', maxCount: 1 }]), async (req: any, res: any) => {
   try {
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
     const imageFile = files?.image?.[0]
@@ -38,8 +38,9 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAl
 
     const { gameType, profile } = validation.data
     const imageAltFile = files?.imageAlt?.[0]
+    const imageFullFile = files?.imageFull?.[0]
 
-    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer)
+    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer)
 
     res.status(201).json({
       success: true,

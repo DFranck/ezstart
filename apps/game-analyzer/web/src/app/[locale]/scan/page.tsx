@@ -88,6 +88,8 @@ export default function ScanPage() {
 
   // Keep a ref to the latest ROI so callbacks always have the current value
   const roiRef = useRef<RoiRect>(roi)
+  // Store the full (non-zoomed) frame for the 3rd OCR source
+  const fullFrameRef = useRef<ImageData | null>(null)
   const handleRoiChange = useCallback((newRoi: RoiRect) => {
     setRoi(newRoi)
     roiRef.current = newRoi
@@ -124,12 +126,24 @@ export default function ScanPage() {
       previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
       setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
 
-      // Build both images: preprocessed (main) + raw crop (alt)
-      Promise.all([imageDataToBlob(processed), imageDataToBlob(frame)]).then(([mainBlob, altBlob]) => {
-        const mainFile = new File([mainBlob], 'capture.png', { type: 'image/png' })
-        const altFile = new File([altBlob], 'capture-raw.png', { type: 'image/png' })
+      // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
+      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(frame)]
+
+      // 3rd source: full window frame croppé au ROI à résolution native
+      let hasFullBlob = false
+      if (fullFrameRef.current) {
+        const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
+        const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        blobPromises.push(imageDataToBlob(fullProcessed))
+        hasFullBlob = true
+      }
+
+      Promise.all(blobPromises).then((blobs) => {
+        const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
+        const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
+        const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
         scan(
-          { image: mainFile, imageAlt: altFile, gameType: selectedGame, profile },
+          { image: mainFile, imageAlt: altFile, imageFull: fullFile, gameType: selectedGame, profile },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
@@ -143,6 +157,8 @@ export default function ScanPage() {
 
   const handleFrame = useCallback(
     (frame: ImageData) => {
+      // Save the full frame before cropping (for full-window OCR source)
+      fullFrameRef.current = frame
       // Crop frame to ROI before feeding to diff for better sensitivity
       const cropped = cropImageData(frame, roiRef.current)
       processFrame(cropped)
@@ -175,12 +191,24 @@ export default function ScanPage() {
     previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
     setPreprocessedPreview(previewCanvas.toDataURL('image/png'))
 
-    // Build both images: preprocessed (main) + raw crop (alt)
-    Promise.all([imageDataToBlob(processed), imageDataToBlob(cropped)]).then(([mainBlob, altBlob]) => {
-      const mainFile = new File([mainBlob], 'capture.png', { type: 'image/png' })
-      const altFile = new File([altBlob], 'capture-raw.png', { type: 'image/png' })
+    // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
+    const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(cropped)]
+
+    // 3rd source: full window frame croppé au ROI à résolution native
+    let hasFullBlob = false
+    if (fullFrameRef.current) {
+      const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
+      const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      blobPromises.push(imageDataToBlob(fullProcessed))
+      hasFullBlob = true
+    }
+
+    Promise.all(blobPromises).then((blobs) => {
+      const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
+      const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
+      const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
       scan(
-        { image: mainFile, imageAlt: altFile, gameType: selectedGame, profile },
+        { image: mainFile, imageAlt: altFile, imageFull: fullFile, gameType: selectedGame, profile },
         { onSettled: () => { scanningRef.current = false } }
       )
     })

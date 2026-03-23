@@ -5,6 +5,14 @@ import type { RuneAnalysis } from './rune-data'
 
 export type ScanStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
+export interface OcrSource {
+  name: string
+  confidence: number
+  rawText: string
+  subsFound: number
+  success: boolean
+}
+
 export interface ScanResult {
   success: boolean
   data: RuneData | GearData
@@ -17,6 +25,8 @@ export interface ScanResult {
   partial?: boolean
   /** True when Gemini fallback failed and Tesseract result is weak — stats may be inaccurate */
   unreliable?: boolean
+  /** Details of each OCR source before merge */
+  ocrSources?: OcrSource[]
 }
 
 export interface Scan {

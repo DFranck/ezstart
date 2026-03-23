@@ -6,69 +6,83 @@ import type { GameType, RuneData, ScanResult } from '@game-analyzer/types'
 type OcrResult = { text: string; confidence: number; regions: { text: string; bbox: { x: number; y: number; width: number; height: number }; confidence: number }[] }
 type ParsedResult = { success: boolean; data?: any; errors?: string[] }
 
-function mergeOcrResults(
-  mainOcr: OcrResult, mainParse: ParsedResult,
-  altOcr: OcrResult, altParse: ParsedResult
+function mergeMultipleResults(
+  results: Array<{ ocr: OcrResult; parse: ParsedResult }>
 ): { ocrResult: OcrResult; parseResult: ParsedResult } {
+  // Filter to only successful parses
+  const successful = results.filter(r => r.parse.success)
 
-  const mainData = mainParse.data as any
-  const altData = altParse.data as any
-
-  if (!mainParse.success && !altParse.success) {
-    return { ocrResult: mainOcr, parseResult: mainParse }
+  if (successful.length === 0) {
+    // All failed — return the first (main) result
+    return { ocrResult: results[0].ocr, parseResult: results[0].parse }
   }
-  if (!mainParse.success) return { ocrResult: altOcr, parseResult: altParse }
-  if (!altParse.success) return { ocrResult: mainOcr, parseResult: mainParse }
+  if (successful.length === 1) {
+    return { ocrResult: successful[0].ocr, parseResult: successful[0].parse }
+  }
 
-  // Merge substats — union des deux, dédupliqué par type
-  const mainSubs = mainData.subStats || []
-  const altSubs = altData.subStats || []
-  const mergedSubs = [...mainSubs]
+  // Start with the first successful result's substats as base
+  const baseData = successful[0].parse.data as any
+  const mergedSubs = [...(baseData.subStats || [])]
 
-  for (const altSub of altSubs) {
-    const existing = mergedSubs.find((s: any) => s.type === altSub.type)
-    if (!existing) {
-      // Stat trouvée seulement par alt → l'ajouter
-      mergedSubs.push(altSub)
-    } else if (existing.value !== altSub.value) {
-      // Même stat, valeurs différentes → garder la plus haute (erreurs OCR tendent vers le bas)
-      existing.value = Math.max(existing.value, altSub.value)
+  // Merge substats from all other successful results
+  for (let i = 1; i < successful.length; i++) {
+    const otherSubs = (successful[i].parse.data as any).subStats || []
+    for (const sub of otherSubs) {
+      const existing = mergedSubs.find((s: any) => s.type === sub.type)
+      if (!existing) {
+        mergedSubs.push(sub)
+      } else if (existing.value !== sub.value) {
+        existing.value = Math.max(existing.value, sub.value)
+      }
     }
   }
 
   // Cap à 4 substats max
   mergedSubs.splice(4)
 
-  // Merge les autres champs — prendre la valeur non-null du meilleur
-  const mergedData = {
-    set: mainData.set || altData.set,
-    slot: mainData.slot || altData.slot,
-    level: mainData.level ?? altData.level,
-    grade: mainData.grade || altData.grade,
-    quality: mainData.quality || altData.quality,
-    mainStat: mainData.mainStat || altData.mainStat,
-    innateStat: mainData.innateStat || altData.innateStat,
+  // Merge les autres champs — prendre la première valeur non-null
+  const mergedData: Record<string, any> = {
+    set: null, slot: null, level: null, grade: null,
+    quality: null, mainStat: null, innateStat: null,
     subStats: mergedSubs,
   }
+  for (const r of successful) {
+    const d = r.parse.data as any
+    if (!mergedData.set) mergedData.set = d.set
+    if (!mergedData.slot) mergedData.slot = d.slot
+    if (mergedData.level == null) mergedData.level = d.level
+    if (!mergedData.grade) mergedData.grade = d.grade
+    if (!mergedData.quality) mergedData.quality = d.quality
+    if (!mergedData.mainStat) mergedData.mainStat = d.mainStat
+    if (!mergedData.innateStat) mergedData.innateStat = d.innateStat
+  }
 
-  // Calcul de la merged confidence
-  const confirmedCount = mainSubs.filter((ms: any) =>
-    altSubs.some((as: any) => as.type === ms.type && as.value === ms.value)
-  ).length
-  const mergedConfidence = Math.round(
-    (mainOcr.confidence + altOcr.confidence) / 2 + confirmedCount * 3
-  )
+  // Confidence: average of all + bonus for confirmed substats across sources
+  const allSubArrays = successful.map(r => (r.parse.data as any).subStats || [])
+  const baseSubs = allSubArrays[0] || []
+  let confirmedCount = 0
+  for (const ms of baseSubs) {
+    const confirmations = allSubArrays.slice(1).filter(subs =>
+      subs.some((s: any) => s.type === ms.type && s.value === ms.value)
+    ).length
+    confirmedCount += confirmations
+  }
+  const avgConfidence = results.reduce((sum, r) => sum + r.ocr.confidence, 0) / results.length
+  const mergedConfidence = Math.round(avgConfidence + confirmedCount * 3)
 
-  // Combiner le rawText
-  const mergedRawText = mainOcr.confidence >= altOcr.confidence ? mainOcr.text : altOcr.text
+  // rawText from the highest confidence source
+  const bestSource = results.reduce((best, r) => r.ocr.confidence > best.ocr.confidence ? r : best)
+  const mergedOcr: OcrResult = { text: bestSource.ocr.text, confidence: Math.min(mergedConfidence, 99), regions: [] }
 
-  const mergedOcr: OcrResult = { text: mergedRawText, confidence: Math.min(mergedConfidence, 99), regions: [] }
+  // Partial flag
+  const partial = mergedSubs.length < 4 && (mergedData.level || 0) >= 12
 
-  // Partial flag — si le merge a moins de 4 subs pour une rune +12
-  const expectedSubs = 4
-  const partial = mergedSubs.length < expectedSubs && (mergedData.level || 0) >= 12
-
-  console.log(`[scan] Merge: main ${mainSubs.length} subs (${mainOcr.confidence}%) + alt ${altSubs.length} subs (${altOcr.confidence}%) = ${mergedSubs.length} subs (${mergedConfidence}%)`)
+  const logParts = results.map((r, i) => {
+    const label = i === 0 ? 'main' : i === 1 ? 'alt' : 'full'
+    const subs = r.parse.success ? ((r.parse.data as any).subStats || []).length : 0
+    return `${label} ${subs} subs (${r.ocr.confidence}%)`
+  })
+  console.log(`[scan] Merge: ${logParts.join(' + ')} = ${mergedSubs.length} subs (${mergedConfidence}%)`)
 
   return {
     ocrResult: mergedOcr,
@@ -87,7 +101,8 @@ export async function scanImage(
   imageBuffer: Buffer,
   gameType: GameType,
   profile: string = 'mid',
-  imageAltBuffer?: Buffer
+  imageAltBuffer?: Buffer,
+  imageFullBuffer?: Buffer
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -115,17 +130,38 @@ export async function scanImage(
     const parser = gameType === 'summoners-war' ? summonersWarParser : nikkeParser
     let parseResult = parser.parse(ocrResult)
 
-    // 2a. Merge with alt image (raw crop without preprocessing) if provided
-    if (imageAltBuffer) {
-      try {
-        const altOcrResult = await recognize(imageAltBuffer, ocrConfig)
-        const altParseResult = parser.parse(altOcrResult)
+    // 2a. Merge with additional OCR sources (alt = raw crop, full = full window crop)
+    const extraBuffers: { label: string; buffer: Buffer }[] = []
+    if (imageAltBuffer) extraBuffers.push({ label: 'alt', buffer: imageAltBuffer })
+    if (imageFullBuffer) extraBuffers.push({ label: 'full', buffer: imageFullBuffer })
 
-        const merged = mergeOcrResults(ocrResult, parseResult, altOcrResult, altParseResult)
-        ocrResult = merged.ocrResult
-        parseResult = merged.parseResult
+    if (extraBuffers.length > 0) {
+      try {
+        const extraResults = await Promise.all(
+          extraBuffers.map(async ({ label, buffer }) => {
+            try {
+              const ocr = await recognize(buffer, ocrConfig)
+              const parse = parser.parse(ocr)
+              return { ocr, parse }
+            } catch (e) {
+              console.error(`[scan] ${label} image OCR failed:`, e)
+              return null
+            }
+          })
+        )
+
+        const allResults: Array<{ ocr: OcrResult; parse: ParsedResult }> = [
+          { ocr: ocrResult, parse: parseResult },
+          ...extraResults.filter((r): r is NonNullable<typeof r> => r !== null),
+        ]
+
+        if (allResults.length > 1) {
+          const merged = mergeMultipleResults(allResults)
+          ocrResult = merged.ocrResult
+          parseResult = merged.parseResult
+        }
       } catch (e) {
-        console.error('[scan] Alt image OCR failed, using main:', e)
+        console.error('[scan] Extra image OCR failed, using main:', e)
       }
     }
 
