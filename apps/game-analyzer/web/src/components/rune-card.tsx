@@ -34,10 +34,10 @@ const SET_EMOJIS: Record<string, string> = {
 
 // ── Quality badge styles (SW colors) ──
 const QUALITY_BG: Record<RuneQuality, string> = {
-  legend: 'bg-orange-500/10 border-orange-500/30 text-orange-500',
-  hero: 'bg-violet-600/10 border-violet-600/30 text-violet-600',
-  rare: 'bg-blue-600/10 border-blue-600/30 text-blue-600',
-  magic: 'bg-green-600/10 border-green-600/30 text-green-600',
+  legend: 'bg-ga-roll-legend/10 border-ga-roll-legend/30 text-ga-roll-legend',
+  hero: 'bg-ga-roll-hero/10 border-ga-roll-hero/30 text-ga-roll-hero',
+  rare: 'bg-ga-roll-rare/10 border-ga-roll-rare/30 text-ga-roll-rare',
+  magic: 'bg-ga-roll-magic/10 border-ga-roll-magic/30 text-ga-roll-magic',
   normal: 'bg-muted text-muted-foreground',
 }
 
@@ -45,11 +45,11 @@ const QUALITY_BG: Record<RuneQuality, string> = {
 type RollQualityTier = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
 
 const ROLL_QUALITY_COLORS: Record<RollQualityTier, string> = {
-  legend: 'text-orange-400',
-  hero: 'text-violet-400',
-  rare: 'text-blue-400',
-  magic: 'text-green-400',
-  normal: 'text-gray-400',
+  legend: 'text-ga-roll-legend',
+  hero: 'text-ga-roll-hero',
+  rare: 'text-ga-roll-rare',
+  magic: 'text-ga-roll-magic',
+  normal: 'text-ga-roll-normal',
 }
 
 function getRollQualityTier(rollQuality: number): RollQualityTier {
@@ -65,11 +65,11 @@ function getRollQualityColor(rollQuality: number): string {
 }
 
 function getRollQualityBarColor(rollQuality: number): string {
-  if (rollQuality >= 90) return '[&>div]:bg-orange-400'
-  if (rollQuality >= 75) return '[&>div]:bg-violet-400'
-  if (rollQuality >= 50) return '[&>div]:bg-blue-400'
-  if (rollQuality >= 25) return '[&>div]:bg-green-400'
-  return '[&>div]:bg-gray-400'
+  if (rollQuality >= 90) return '[&>div]:bg-ga-roll-legend'
+  if (rollQuality >= 75) return '[&>div]:bg-ga-roll-hero'
+  if (rollQuality >= 50) return '[&>div]:bg-ga-roll-rare'
+  if (rollQuality >= 25) return '[&>div]:bg-ga-roll-magic'
+  return '[&>div]:bg-ga-roll-normal'
 }
 
 // ── Efficiency tier helpers (SW colors) ──
@@ -77,21 +77,21 @@ type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 function getTierColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return 'text-orange-400'
-    case 'great': return 'text-violet-400'
-    case 'good': return 'text-blue-400'
-    case 'keep': return 'text-foreground'
-    case 'sell': return 'text-red-400'
+    case 'godlike': return 'text-ga-tier-godlike'
+    case 'great': return 'text-ga-tier-great'
+    case 'good': return 'text-ga-tier-good'
+    case 'keep': return 'text-ga-tier-keep'
+    case 'sell': return 'text-ga-tier-sell'
   }
 }
 
 function getProgressColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return '[&>div]:bg-orange-400'
-    case 'great': return '[&>div]:bg-violet-400'
-    case 'good': return '[&>div]:bg-blue-400'
-    case 'keep': return '[&>div]:bg-gray-400'
-    case 'sell': return '[&>div]:bg-red-400'
+    case 'godlike': return '[&>div]:bg-ga-tier-godlike'
+    case 'great': return '[&>div]:bg-ga-tier-great'
+    case 'good': return '[&>div]:bg-ga-tier-good'
+    case 'keep': return '[&>div]:bg-ga-tier-keep'
+    case 'sell': return '[&>div]:bg-ga-tier-sell'
   }
 }
 
