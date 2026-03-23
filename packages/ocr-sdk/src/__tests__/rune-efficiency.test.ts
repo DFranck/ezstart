@@ -89,10 +89,13 @@ describe('rune-efficiency', () => {
       const result = analyzeRune(rune)
 
       expect(result.currentEfficiency).toBeCloseTo(321.43, 0)
+      expect(result.efficiency).toBe(result.currentEfficiency)
       expect(result.maxEfficiency).toBeCloseTo(321.43, 0)
       expect(result.tier).toBe('godlike')
       expect(result.quality).toBe('legend')
       expect(result.totalRolls).toBe(8)
+      expect(result.setBonus).toBe('Extra Turn +22%')
+      expect(result.setPieces).toBe(4)
     })
 
     it('marks all substats as max roll', () => {
@@ -252,9 +255,13 @@ describe('rune-efficiency', () => {
       expect(spd.minValue).toBe(12)  // 3 * 4 = 12
       expect(spd.isMaxRoll).toBe(true)
       expect(spd.rollQuality).toBe(100)
+      expect(spd.efficiency).toBe(100) // alias for rollQuality
       expect(spd.isGrindable).toBe(true)
+      expect(spd.grindable).toBe(true) // alias for isGrindable
       expect(spd.grindRange).toEqual({ min: 4, max: 5 })
       expect(spd.valueAfterMaxGrind).toBe(23) // 18 + 5
+      expect(spd.grindedValue).toBe(23) // alias for valueAfterMaxGrind
+      expect(spd.grindAmount).toBe(5) // legend max grind for spd
     })
 
     it('correctly identifies non-grindable stats', () => {

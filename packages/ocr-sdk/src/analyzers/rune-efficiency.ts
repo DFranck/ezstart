@@ -40,12 +40,20 @@ export interface SubstatAnalysis {
   value: number
   rolls: number
   rollQuality: number
+  /** Alias for rollQuality — used by the UI layer */
+  efficiency: number
   maxValue: number
   minValue: number
   isMaxRoll: boolean
   isGrindable: boolean
+  /** Alias for isGrindable — used by the UI layer */
+  grindable: boolean
   grindRange?: { min: number; max: number }
   valueAfterMaxGrind?: number
+  /** Value after best grind (legend) — alias for UI layer */
+  grindedValue?: number
+  /** Grind amount added (legend max) — used by UI layer */
+  grindAmount?: number
 }
 
 export interface GrindPotential {
@@ -57,13 +65,23 @@ export interface GrindPotential {
 
 export interface RuneAnalysis {
   currentEfficiency: number
+  /** Alias for currentEfficiency — used by the UI layer */
+  efficiency: number
   potentialEfficiency: number
   maxEfficiency: number
+  /** Efficiency after applying legend grinds — used by UI layer */
+  grindedEfficiency: number
+  /** Grind efficiency gain — used by UI layer */
+  grindGain: number
   substats: SubstatAnalysis[]
   grindPotential: GrindPotential
   tier: EfficiencyTier
   quality: RuneQuality
   totalRolls: number
+  /** Set bonus description — used by UI layer */
+  setBonus: string
+  /** Number of pieces for set bonus — used by UI layer */
+  setPieces: number
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -105,6 +123,32 @@ const LEGEND_GRIND_RANGES: Partial<Record<StatType, RollRange>> = {
 
 /** Non-grindable stats */
 const NON_GRINDABLE: Set<StatType> = new Set(['cr', 'cd', 'res', 'acc'])
+
+/** Rune set info: pieces required and bonus description */
+const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
+  'energy': { pieces: 2, bonus: 'HP +15%' },
+  'fatal': { pieces: 4, bonus: 'ATK +35%' },
+  'blade': { pieces: 2, bonus: 'CRI Rate +12%' },
+  'swift': { pieces: 4, bonus: 'SPD +25%' },
+  'focus': { pieces: 2, bonus: 'ACC +20%' },
+  'guard': { pieces: 2, bonus: 'DEF +15%' },
+  'endure': { pieces: 2, bonus: 'RES +20%' },
+  'shield': { pieces: 2, bonus: 'Ally Shield 3 turns (15% HP)' },
+  'revenge': { pieces: 2, bonus: 'Counterattack +15%' },
+  'will': { pieces: 2, bonus: 'Immunity 1 turn' },
+  'nemesis': { pieces: 2, bonus: 'ATB +4% per 7% HP lost' },
+  'vampire': { pieces: 4, bonus: 'Lifedrain +35%' },
+  'destroy': { pieces: 2, bonus: 'Destroy 30% of damage dealt (4% max HP)' },
+  'despair': { pieces: 4, bonus: 'Stun Rate +25%' },
+  'violent': { pieces: 4, bonus: 'Extra Turn +22%' },
+  'rage': { pieces: 4, bonus: 'CRI Dmg +40%' },
+  'fight': { pieces: 2, bonus: 'Ally ATK +8%' },
+  'determination': { pieces: 2, bonus: 'Ally DEF +8%' },
+  'enhance': { pieces: 2, bonus: 'Ally HP +8%' },
+  'accuracy': { pieces: 2, bonus: 'Ally ACC +10%' },
+  'tolerance': { pieces: 2, bonus: 'Ally RES +10%' },
+  'cruel': { pieces: 2, bonus: 'ATK +12%' },
+}
 
 /** Barion divisor: theoretical max is (8 perfect rolls + 1 main) / 2.8 */
 const BARION_DIVISOR = 2.8
@@ -200,18 +244,24 @@ function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
   const isGrindable = !NON_GRINDABLE.has(stat.type)
   const grindRange = LEGEND_GRIND_RANGES[stat.type]
   const valueAfterMaxGrind = grindRange ? stat.value + grindRange.max : undefined
+  const grindAmount = grindRange ? grindRange.max : undefined
+  const roundedQuality = Math.round(avgQuality * 100) / 100
 
   return {
     type: stat.type,
     value: stat.value,
     rolls: count,
-    rollQuality: Math.round(avgQuality * 100) / 100,
+    rollQuality: roundedQuality,
+    efficiency: roundedQuality,
     maxValue,
     minValue,
     isMaxRoll,
     isGrindable,
+    grindable: isGrindable,
     grindRange: grindRange ? { min: grindRange.min, max: grindRange.max } : undefined,
     valueAfterMaxGrind,
+    grindedValue: valueAfterMaxGrind,
+    grindAmount,
   }
 }
 
@@ -337,14 +387,26 @@ export function analyzeRune(rune: RuneData): RuneAnalysis {
     grindPotential.efficiencyAfterGrind,
   )
 
+  const roundedCurrent = Math.round(currentEfficiency * 100) / 100
+
+  // Set bonus info
+  const setInfo = SET_INFO[rune.set]
+  const setBonus = setInfo?.bonus ?? ''
+  const setPieces = setInfo?.pieces ?? 0
+
   return {
-    currentEfficiency: Math.round(currentEfficiency * 100) / 100,
+    currentEfficiency: roundedCurrent,
+    efficiency: roundedCurrent,
     potentialEfficiency: Math.round(potentialEfficiency * 100) / 100,
     maxEfficiency: Math.round(maxEfficiency * 100) / 100,
+    grindedEfficiency: grindPotential.efficiencyAfterGrind,
+    grindGain: grindPotential.grindGain,
     substats,
     grindPotential,
     tier,
     quality,
     totalRolls,
+    setBonus,
+    setPieces,
   }
 }

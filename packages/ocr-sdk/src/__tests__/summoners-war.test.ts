@@ -135,8 +135,9 @@ describe('summonersWarParser', () => {
         mainStat: { type: 'atk', value: 118 },
       })
 
-      const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
+      const data = result.data as { subStats: { type: string; value: number }[]; quality: string; level: number }
       expect(data.quality).toBe('legend')
+      expect(data.level).toBe(12)
       expect(data.subStats.length).toBeGreaterThanOrEqual(3)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
@@ -184,8 +185,9 @@ describe('summonersWarParser', () => {
         mainStat: { type: 'atk', value: 160 },
       })
 
-      const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
+      const data = result.data as { subStats: { type: string; value: number }[]; quality: string; level: number }
       expect(data.quality).toBe('legend')
+      expect(data.level).toBe(15)
       expect(data.subStats.length).toBeGreaterThanOrEqual(2)
       expect(data.subStats).toEqual(
         expect.arrayContaining([

@@ -226,6 +226,11 @@ function parseGrade(text: string): number | null {
 /**
  * Detect rune level from "+N" early in the text (before or near the set name).
  * Avoids confusing stat values (ATK +118) with the level.
+ *
+ * Also handles noisy OCR where the "+" is missing and the level digits are
+ * glued to preceding garbage digits, e.g.:
+ *   "412 Despair Rune" → 4 is noise, 12 is the level
+ *   "115 Intricate Violent Rune" → 1 is noise, 15 is the level
  */
 function parseLevel(text: string, setIndex: number): number | null {
   // Look for "+N" BEFORE the set name — this is the rune level
@@ -255,6 +260,29 @@ function parseLevel(text: string, setIndex: number): number | null {
   if (labelMatch) {
     const num = Number(labelMatch[1])
     if (num >= 0 && num <= 15) return num
+  }
+
+  // Fallback: extract level from digits glued to noise BEFORE the set name.
+  // OCR often produces "412 Despair Rune" where "4" is garbage and "12" is the level.
+  // Strategy: find the last 1-2 digit number (0-15) at the END of a digit sequence
+  // that appears before the set keyword.
+  if (setIndex > 0) {
+    const beforeSet = text.substring(0, setIndex)
+    // Match a sequence of digits just before optional whitespace + word(s) before set
+    const digitSeqMatch = beforeSet.match(/(\d{1,4})\s*\w*\s*$/)
+    if (digitSeqMatch) {
+      const digits = digitSeqMatch[1]!
+      // Try to extract a valid level (0-15) from the END of the digit sequence
+      // Try 2 digits first, then 1 digit
+      if (digits.length >= 2) {
+        const last2 = Number(digits.slice(-2))
+        if (last2 >= 0 && last2 <= 15) return last2
+      }
+      if (digits.length >= 1) {
+        const last1 = Number(digits.slice(-1))
+        if (last1 >= 0 && last1 <= 15) return last1
+      }
+    }
   }
 
   return null
