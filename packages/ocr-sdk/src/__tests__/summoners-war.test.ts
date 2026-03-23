@@ -748,6 +748,78 @@ describe('summonersWarParser', () => {
     })
   })
 
+  describe('fuzzy OCR stat recovery', () => {
+    it('parses "AK +118" as ATK +118 (truncated stat name)', () => {
+      const text = [
+        '0 E         +12 Violent Rune (1)               X',
+        'Fin AK +118                 legend',
+        'w) 112                                       (5) 147',
+        'ATK +30%                                    emporarily',
+        'HP +445',
+        '',
+        '4 Set : Get Extra Turn +22%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'violent',
+        slot: 1,
+        level: 12,
+        quality: 'legend',
+        mainStat: { type: 'atk', value: 118 },
+      })
+
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+        partial?: boolean
+      }
+      // ATK +30% and HP +445 should be detected as substats
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'atk%', value: 30 }),
+          expect.objectContaining({ type: 'hp', value: 445 }),
+        ]),
+      )
+      expect(data.subStats.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('marks result as partial when fewer substats than expected', () => {
+      // Legend +12 rune should have 4 substats, but only 2 are clearly detected
+      const text = 'Violent Rune (1) +12 Legend ATK +30% HP +445'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[]; partial?: boolean }
+      // With only 2 substats on a Legend +12 rune, should be marked partial
+      if (data.subStats.length < 4) {
+        expect(data.partial).toBe(true)
+      }
+    })
+
+    it('does not mark as partial when all expected substats are found', () => {
+      const text = [
+        'Violent Rune (6)',
+        '+15',
+        'Legend',
+        'ATK +160',
+        'SPD +23',
+        'CRI Rate +12%',
+        'CRI Dmg +7%',
+        'HP +8%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { subStats: { type: string; value: number }[]; partial?: boolean }
+      expect(data.subStats).toHaveLength(4)
+      expect(data.partial).toBeUndefined()
+    })
+  })
+
   describe('failure cases', () => {
     it('fails on empty text', () => {
       const result = summonersWarParser.parse(makeOcrResult(''))

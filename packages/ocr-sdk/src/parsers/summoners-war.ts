@@ -67,22 +67,31 @@ const STAT_ALIASES: Record<string, StatType> = {
   'acturaty': 'acc',
   'accuraty': 'acc',
   'acc': 'acc',
+  'acu': 'acc',
   'resistance': 'res',
   'res': 'res',
+  'ress': 'res',
   'cri rate': 'cr',
   'crirate': 'cr',
   'crit rate': 'cr',
   'critrate': 'cr',
+  'cri': 'cr',
+  'rate': 'cr',
+  'rat': 'cr',
   'cri dmg': 'cd',
   'cridmg': 'cd',
   'crit dmg': 'cd',
   'critdmg': 'cd',
+  'dmg': 'cd',
+  'dag': 'cd',
   'spd': 'spd',
   'speed': 'spd',
+  'sp': 'spd',
   'hp': 'hp',
   'atk': 'atk',
   'attack': 'atk',
   'axes': 'atk',
+  'ak': 'atk',
   'def': 'def',
   'defense': 'def',
 }
@@ -111,11 +120,16 @@ const STAT_PATTERNS: [RegExp, StatType][] = [
   [/accuraty/i, 'acc'],
   [/axes/i, 'atk'],
   [/attack/i, 'atk'],
+  [/defense/i, 'def'],
   [/speed/i, 'spd'],
   [/atk/i, 'atk'],
+  [/\bak\b/i, 'atk'],
   [/def/i, 'def'],
   [/hp/i, 'hp'],
   [/spd/i, 'spd'],
+  [/\bsp\b/i, 'spd'],
+  [/\bress?\b/i, 'res'],
+  [/\bacu\b/i, 'acc'],
 ]
 
 /** Quality keywords — includes common OCR misreads */
@@ -255,11 +269,16 @@ function extractMultilineStats(lines: string[]): RuneStat[] {
     [/accuraty/i, 'acc'],
     [/axes/i, 'atk'],
     [/attack/i, 'atk'],
+    [/defense/i, 'def'],
     [/speed/i, 'spd'],
     [/\batk\b/i, 'atk'],
+    [/\bak\b/i, 'atk'],
     [/\bdef\b/i, 'def'],
     [/\bhp\b/i, 'hp'],
     [/\bspd\b/i, 'spd'],
+    [/\bsp\b/i, 'spd'],
+    [/\bress?\b/i, 'res'],
+    [/\bacu\b/i, 'acc'],
   ]
 
   for (let i = 0; i < lines.length - 1; i++) {
@@ -400,7 +419,7 @@ function parseLevel(text: string, setIndex: number): number | null {
     // Check this isn't a stat value (stats are preceded by stat names)
     const idx = match.index!
     const before = text.substring(Math.max(0, idx - 15), idx).toLowerCase()
-    const isAfterStat = /(?:atk|def|hp|spd|rate|dmg|resistance|accuracy|acturaty|accuraty|axes)\s*$/i.test(before)
+    const isAfterStat = /(?:atk|ak|def|hp|spd|sp|rate|rat|dmg|dag|resistance|ress?|accuracy|acturaty|accuraty|acu|axes|cri)\s*$/i.test(before)
     if (!isAfterStat && num >= 0 && num <= 15) return num
   }
 
@@ -445,6 +464,74 @@ function isValidSubstatValue(stat: RuneStat): boolean {
   const range = SUBSTAT_RANGES[stat.type]
   if (!range) return true // Unknown stat type, accept
   return stat.value >= range.min && stat.value <= range.max
+}
+
+/**
+ * Recover orphan numbers from OCR lines that might be stat values.
+ *
+ * When we have fewer than expected substats, look for lines with standalone
+ * numbers (e.g. "w) 112", "(5) 147") that might be HP flat or other stat values.
+ * Also look for patterns like "+N" or "+N%" on lines without a recognized stat name.
+ */
+function recoverOrphanStats(
+  lines: string[],
+  existingTypes: Set<StatType>,
+  currentStatCount: number,
+  maxNeeded: number,
+): RuneStat[] {
+  if (currentStatCount >= maxNeeded) return []
+
+  const orphans: RuneStat[] = []
+
+  for (const line of lines) {
+    if (currentStatCount + orphans.length >= maxNeeded) break
+
+    // Skip lines that already have a recognized stat pattern
+    const hasKnownStat = STAT_PATTERNS.some(([pattern]) => pattern.test(line))
+    if (hasKnownStat) continue
+
+    // Look for standalone +N or +N% patterns on lines without stat names
+    const valueMatch = line.match(/[+\-]\s*(\d+)\s*(%?)/)
+    if (!valueMatch) continue
+
+    const value = parseInt(valueMatch[1]!, 10)
+    const isPercent = valueMatch[2] === '%'
+
+    if (value <= 0) continue
+
+    // Try to guess what stat this could be based on value range
+    const candidates: RuneStat[] = []
+
+    if (isPercent) {
+      // Percent stats: hp%, atk%, def%, res, acc (4-40 range)
+      if (value >= 4 && value <= 40) {
+        // Can't determine which percent stat — skip (too ambiguous)
+        continue
+      }
+    } else {
+      // Flat stats: check ranges
+      if (value >= 100 && value <= 1875 && !existingTypes.has('hp')) {
+        candidates.push({ type: 'hp', value })
+      }
+      if (value >= 8 && value <= 100 && !existingTypes.has('atk')) {
+        candidates.push({ type: 'atk', value })
+      }
+      if (value >= 8 && value <= 100 && !existingTypes.has('def')) {
+        candidates.push({ type: 'def', value })
+      }
+      if (value >= 1 && value <= 30 && !existingTypes.has('spd')) {
+        candidates.push({ type: 'spd', value })
+      }
+    }
+
+    // Only use if unambiguous (exactly one candidate)
+    if (candidates.length === 1) {
+      orphans.push(candidates[0]!)
+      existingTypes.add(candidates[0]!.type)
+    }
+  }
+
+  return orphans
 }
 
 /**
@@ -529,6 +616,42 @@ function separateMainAndSubs(
   subStats = subStats.slice(0, MAX_SUBSTATS)
 
   return { mainStat, subStats, innateStat }
+}
+
+/**
+ * Determine expected substat count based on quality and level.
+ *
+ * SW rules:
+ * - Legend: 4 substats from the start
+ * - Hero: 3 at base, 4 at +12
+ * - Rare: 2 at base, 3 at +6, 4 at +12
+ * - Magic: 1 at base, 2 at +3, 3 at +6, 4 at +9/+12
+ * - Normal: 0 at base, gains one every 3 levels
+ *
+ * For simplicity, if level >= 12, expect 4 substats for any quality.
+ */
+function getExpectedSubstatCount(quality: RuneQuality | null, level: number | null): number {
+  const lvl = level ?? 0
+
+  if (quality === 'legend') return 4
+  if (quality === 'hero') return lvl >= 12 ? 4 : 3
+  if (quality === 'rare') {
+    if (lvl >= 12) return 4
+    if (lvl >= 6) return 3
+    return 2
+  }
+  if (quality === 'magic') {
+    if (lvl >= 9) return 4
+    if (lvl >= 6) return 3
+    if (lvl >= 3) return 2
+    return 1
+  }
+
+  // Unknown quality: use level to infer
+  if (lvl >= 12) return 4
+  if (lvl >= 9) return 3
+  if (lvl >= 6) return 2
+  return 0
 }
 
 /**
@@ -619,6 +742,33 @@ export const summonersWarParser: GameParser = {
       allStats, slot, level, qualityInfo?.quality ?? null,
     )
 
+    // --- Orphan number recovery ---
+    // If we have fewer substats than expected, try to recover from orphan numbers
+    const expectedCount = getExpectedSubstatCount(qualityInfo?.quality ?? null, level)
+    if (subStats.length < expectedCount) {
+      const recoveredTypes = new Set(subStats.map(s => s.type))
+      if (innateStat) recoveredTypes.add(innateStat.type)
+      if (mainStat) recoveredTypes.add(mainStat.type)
+
+      // Strip set bonus from lines too
+      const setBonusLineIdx = cleanLines.findIndex(l => /\d\s*set\s*:/i.test(l))
+      const linesForRecovery = setBonusLineIdx >= 0
+        ? cleanLines.slice(0, setBonusLineIdx)
+        : cleanLines
+
+      const orphans = recoverOrphanStats(
+        linesForRecovery,
+        recoveredTypes,
+        subStats.length,
+        expectedCount,
+      )
+      for (const orphan of orphans) {
+        if (subStats.length < MAX_SUBSTATS) {
+          subStats.push(orphan)
+        }
+      }
+    }
+
     // --- Parse set piece count ---
     const setPieceCountMatch = normalized.match(/(\d)\s*set\s*:/i)
     const setPieceCount = setPieceCountMatch ? Number(setPieceCountMatch[1]) : null
@@ -628,6 +778,10 @@ export const summonersWarParser: GameParser = {
       errors.push('Could not detect main stat')
       return failedResult(errors)
     }
+
+    // --- Partial detection flag ---
+    // Mark as partial if we have fewer substats than expected for the rune's quality/level
+    const partial = subStats.length < expectedCount
 
     // Success — return what we found
     return successResult({
@@ -640,6 +794,7 @@ export const summonersWarParser: GameParser = {
       ...(innateStat ? { innateStat } : {}),
       ...(qualityInfo ? { quality: qualityInfo.quality } : {}),
       ...(setPieceCount ? { setPieceCount } : {}),
+      ...(partial ? { partial } : {}),
     })
   },
 }

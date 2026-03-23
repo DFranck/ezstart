@@ -50,6 +50,7 @@ export async function scanImage(
     }
 
     // 4. Build result
+    const partial = parseResult.data?.partial === true
     const result: ScanResult = {
       success: parseResult.success,
       data: parseResult.data as unknown as ScanResult['data'],
@@ -57,6 +58,7 @@ export async function scanImage(
       confidence: ocrResult.confidence,
       processingTimeMs,
       analysis,
+      ...(partial ? { partial } : {}),
     }
 
     // Update scan with result

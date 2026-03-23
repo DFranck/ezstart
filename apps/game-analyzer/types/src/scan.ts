@@ -13,6 +13,8 @@ export interface ScanResult {
   processingTimeMs: number
   /** Rune analysis data (only for Summoners War runes) */
   analysis?: RuneAnalysis
+  /** True when fewer substats were detected than expected for the rune's quality/level */
+  partial?: boolean
 }
 
 export interface Scan {
