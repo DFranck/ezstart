@@ -274,13 +274,13 @@ export function estimateRolls(
 
 /**
  * Get the number of upgrade rolls that have occurred at a given level for a quality.
- * An upgrade roll only happens when the rune already has 4 substats.
+ * SW rules: upgrades happen FIRST (on existing subs), then new subs are added.
+ * Only upgrades of existing subs count as rolls.
  */
 function getRollCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3)
-  const newSubs = Math.min(powerups, 4 - base)
-  return powerups - newSubs
+  return Math.min(powerups, base) // upgrades first, only existing subs get rolled
 }
 
 /**

@@ -157,19 +157,21 @@ export const UPGRADES_BY_QUALITY: Record<RuneQuality, number> = {
 export const MAX_ROLLS_BY_QUALITY = UPGRADES_BY_QUALITY
 
 // Nombre de substats attendu à un level donné pour une qualité donnée
+// SW rules: upgrades d'abord (autant que de subs existantes), puis nouvelles subs
 export function getExpectedSubstatCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3) // 0,1,2,3,4 powerups
-  const newSubs = Math.min(powerups, 4 - base) // nouvelles subs ajoutées
+  const upgrades = Math.min(powerups, base) // upgrade les existantes d'abord
+  const newSubs = powerups - upgrades // le reste = nouvelles subs
   return Math.min(base + newSubs, 4)
 }
 
 // Nombre de rolls/upgrades à un level donné
+// Seules les upgrades de subs existantes comptent comme rolls
 export function getRollCount(quality: RuneQuality, level: number): number {
   const base = SUBSTATS_BY_QUALITY[quality]
   const powerups = Math.floor(Math.min(level, 12) / 3)
-  const newSubs = Math.min(powerups, 4 - base)
-  return powerups - newSubs // powerups utilisés pour upgrade au lieu de new sub
+  return Math.min(powerups, base) // seules les upgrades comptent comme rolls
 }
 
 // ============================================

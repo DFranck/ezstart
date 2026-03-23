@@ -751,13 +751,13 @@ function separateMainAndSubs(
 /**
  * Determine expected substat count based on quality and level.
  *
- * SW rules — at each +3, if < 4 subs a new one is added, otherwise an existing one is upgraded:
+ * SW rules — upgrades FIRST (existing subs), then new subs added last:
  * | Quality | +0   | +3      | +6      | +9      | +12     |
  * |---------|------|---------|---------|---------|---------|
  * | Normal  | 0    | 1 (new) | 2 (new) | 3 (new) | 4 (new) |
- * | Magic   | 1    | 2 (new) | 3 (new) | 4 (new) | 4 (up)  |
- * | Rare    | 2    | 3 (new) | 4 (new) | 4 (up)  | 4 (up)  |
- * | Hero    | 3    | 4 (new) | 4 (up)  | 4 (up)  | 4 (up)  |
+ * | Magic   | 1    | 1 (up)  | 2 (new) | 3 (new) | 4 (new) |
+ * | Rare    | 2    | 2 (up)  | 2 (up)  | 3 (new) | 4 (new) |
+ * | Hero    | 3    | 3 (up)  | 3 (up)  | 3 (up)  | 4 (new) |
  * | Legend  | 4    | 4 (up)  | 4 (up)  | 4 (up)  | 4 (up)  |
  */
 function getExpectedSubstatCount(quality: RuneQuality | null, level: number | null): number {
@@ -769,7 +769,8 @@ function getExpectedSubstatCount(quality: RuneQuality | null, level: number | nu
       normal: 0, magic: 1, rare: 2, hero: 3, legend: 4,
     }
     const base = baseMap[quality]
-    const newSubs = Math.min(powerups, 4 - base)
+    const upgrades = Math.min(powerups, base) // upgrade existing subs first
+    const newSubs = powerups - upgrades // remaining powerups add new subs
     return Math.min(base + newSubs, 4)
   }
 
