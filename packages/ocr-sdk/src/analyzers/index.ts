@@ -11,6 +11,7 @@ export {
 } from './rune-efficiency.js'
 
 export type {
+  EfficiencyTier,
   GrindPotential,
   Recommendation,
   RuneAnalysis,

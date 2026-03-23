@@ -33,6 +33,7 @@ export {
   getRecommendation,
 } from './analyzers/index.js'
 export type {
+  EfficiencyTier,
   GrindPotential,
   Recommendation,
   RuneAnalysis,

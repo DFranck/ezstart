@@ -31,7 +31,9 @@ interface RuneData {
 
 // --- Public types ---
 
-export type Recommendation = 'sell' | 'keep' | 'great' | 'godlike'
+export type EfficiencyTier = 'sell' | 'keep' | 'great' | 'godlike'
+/** @deprecated Use EfficiencyTier instead */
+export type Recommendation = EfficiencyTier
 
 export interface SubstatAnalysis {
   type: StatType
@@ -59,7 +61,7 @@ export interface RuneAnalysis {
   maxEfficiency: number
   substats: SubstatAnalysis[]
   grindPotential: GrindPotential
-  recommendation: Recommendation
+  tier: EfficiencyTier
   quality: RuneQuality
   totalRolls: number
 }
@@ -296,7 +298,7 @@ export function getRecommendation(
   efficiency: number,
   potentialEfficiency: number,
   grindPotential?: number,
-): Recommendation {
+): EfficiencyTier {
   const score = Math.max(efficiency, potentialEfficiency, grindPotential ?? 0)
 
   if (score >= 80) return 'godlike'
@@ -329,7 +331,7 @@ export function analyzeRune(rune: RuneData): RuneAnalysis {
 
   const grindPotential = calculateGrindPotential(substats, currentEfficiency)
 
-  const recommendation = getRecommendation(
+  const tier = getRecommendation(
     currentEfficiency,
     potentialEfficiency,
     grindPotential.efficiencyAfterGrind,
@@ -341,7 +343,7 @@ export function analyzeRune(rune: RuneData): RuneAnalysis {
     maxEfficiency: Math.round(maxEfficiency * 100) / 100,
     substats,
     grindPotential,
-    recommendation,
+    tier,
     quality,
     totalRolls,
   }

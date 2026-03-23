@@ -90,7 +90,7 @@ describe('rune-efficiency', () => {
 
       expect(result.currentEfficiency).toBeCloseTo(321.43, 0)
       expect(result.maxEfficiency).toBeCloseTo(321.43, 0)
-      expect(result.recommendation).toBe('godlike')
+      expect(result.tier).toBe('godlike')
       expect(result.quality).toBe('legend')
       expect(result.totalRolls).toBe(8)
     })
@@ -135,7 +135,7 @@ describe('rune-efficiency', () => {
 
       const result = analyzeRune(rune)
 
-      expect(result.recommendation).toBe('godlike') // high efficiency
+      expect(result.tier).toBe('godlike') // high efficiency
       expect(result.currentEfficiency).toBeGreaterThan(200)
     })
   })
@@ -153,7 +153,7 @@ describe('rune-efficiency', () => {
       const result = analyzeRune(rune)
 
       expect(result.currentEfficiency).toBeLessThan(50)
-      expect(result.recommendation).toBe('sell')
+      expect(result.tier).toBe('sell')
       expect(result.grindPotential.grindGain).toBe(0)
     })
 
@@ -393,7 +393,7 @@ describe('rune-efficiency', () => {
       const b = analyzeRune(rune)
 
       expect(a.currentEfficiency).toBe(b.currentEfficiency)
-      expect(a.recommendation).toBe(b.recommendation)
+      expect(a.tier).toBe(b.tier)
     })
   })
 })
