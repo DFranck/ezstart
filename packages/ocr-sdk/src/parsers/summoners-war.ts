@@ -465,6 +465,29 @@ function parseLevel(text: string, setIndex: number): number | null {
 }
 
 /**
+ * Deduplicate stats by type — in SW, a rune cannot have the same substat twice.
+ * When the same type appears multiple times (regex matching the same text twice),
+ * keep the one with the highest value (most likely the correct parse).
+ */
+function deduplicateStats(stats: RuneStat[]): RuneStat[] {
+  const bestByType = new Map<StatType, RuneStat>()
+  for (const stat of stats) {
+    const existing = bestByType.get(stat.type)
+    if (!existing || stat.value > existing.value) {
+      bestByType.set(stat.type, stat)
+    }
+  }
+  // Preserve original order (first occurrence of each type)
+  const seenTypes = new Set<StatType>()
+  return stats.filter(s => {
+    if (seenTypes.has(s.type)) return false
+    seenTypes.add(s.type)
+    // Replace with best value
+    return true
+  }).map(s => bestByType.get(s.type)!)
+}
+
+/**
  * Validate a substat value against known ranges for 6★ runes.
  * Returns true if the value is within a plausible range.
  */
@@ -603,6 +626,9 @@ function separateMainAndSubs(
       .map(({ type, value }) => ({ type, value }))
       .filter(isValidSubstatValue)
 
+    // Deduplicate: same stat type cannot appear twice on a rune
+    subStats = deduplicateStats(subStats)
+
     // Innate stat detection: if we have more than 4 substats and the rune
     // appears to be legend quality, the first stat is the innate (prefix) stat.
     let innateStat: RuneStat | undefined
@@ -678,6 +704,9 @@ function separateMainAndSubs(
     .filter((_, idx) => idx !== mainStatIndex)
     .map(({ type, value }) => ({ type, value }))
     .filter(isValidSubstatValue)
+
+  // Deduplicate: same stat type cannot appear twice on a rune
+  subStats = deduplicateStats(subStats)
 
   // Innate stat detection for non-fixed slots
   let innateStat: RuneStat | undefined

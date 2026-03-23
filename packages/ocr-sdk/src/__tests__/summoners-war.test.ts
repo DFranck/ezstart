@@ -977,6 +977,53 @@ describe('summonersWarParser', () => {
     })
   })
 
+  describe('substat deduplication', () => {
+    it('deduplicates same stat type — keeps only one CRI Rate', () => {
+      // OCR text where "CRI Rate +7%" matches multiple regex patterns,
+      // producing duplicate CR entries
+      const text = [
+        'Violent Rune (1)',
+        '+12',
+        'Legend',
+        'SPD +6',
+        'CRI Rate +7%',
+        'HP +8%',
+        'ATK +12%',
+        'DEF +10%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+      }
+
+      // CR should appear at most once in substats
+      const crStats = data.subStats.filter(s => s.type === 'cr')
+      expect(crStats.length).toBeLessThanOrEqual(1)
+    })
+
+    it('deduplicates keeping the highest value when same type appears twice', () => {
+      // Simulate noisy OCR where "CRI Rate" gets detected twice with different values
+      // by having the stat name appear in two different forms
+      const text = 'Swift Rune (2) SPD +42 CRI Rate +7% CRI Rate +12% HP +8%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        subStats: { type: string; value: number }[]
+      }
+
+      // CR should appear exactly once
+      const crStats = data.subStats.filter(s => s.type === 'cr')
+      expect(crStats).toHaveLength(1)
+      // Should keep the highest value (12, not 7)
+      expect(crStats[0]!.value).toBe(12)
+    })
+  })
+
   describe('partial flag propagation', () => {
     it('legend +12 with only 2 substats has partial = true', () => {
       // Slot 2 with SPD main stat, only 2 substats visible
