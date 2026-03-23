@@ -26,9 +26,17 @@ export { summonersWarParser } from './parsers/index.js'
 
 // Analyzers
 export {
+  analyzeRune,
   calculateEfficiency,
   calculatePotentialEfficiency,
   estimateRolls,
   getRecommendation,
 } from './analyzers/index.js'
-export type { RuneEfficiencyResult, SubstatDetail } from './analyzers/index.js'
+export type {
+  GrindPotential,
+  Recommendation,
+  RuneAnalysis,
+  RuneEfficiencyResult,
+  SubstatAnalysis,
+  SubstatDetail,
+} from './analyzers/index.js'

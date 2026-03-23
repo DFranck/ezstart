@@ -3,10 +3,13 @@
  *
  * Parses OCR text from Summoners War rune screenshots into structured RuneData.
  * Handles noisy single-line OCR output with leading garbage, missing spaces, etc.
+ *
+ * Design principle: TOLERANT to noise — better to extract partially than nothing.
+ * If we find set + main stat, return success even if some substats are missing.
  */
 
 import type { OcrResult, ParsedResult } from '../types.js'
-import { cleanText, failedResult, successResult, type GameParser } from './base-parser.js'
+import { failedResult, successResult, type GameParser } from './base-parser.js'
 
 // --- Types (mirrors @game-analyzer/types/rune) ---
 
@@ -31,14 +34,15 @@ type RuneQuality = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
 
 // --- Mappings ---
 
+/** All valid rune sets, sorted longest-first for matching priority */
 const RUNE_SETS: RuneSet[] = [
-  'violent', 'swift', 'rage', 'fatal', 'despair', 'blade', 'focus',
-  'guard', 'energy', 'endure', 'shield', 'revenge', 'will', 'nemesis',
-  'vampire', 'destroy', 'fight', 'determination', 'enhance', 'accuracy',
-  'tolerance', 'cruel',
+  'determination', 'tolerance', 'accuracy', 'vampire', 'violent', 'destroy',
+  'despair', 'revenge', 'enhance', 'nemesis', 'endure', 'energy', 'shield',
+  'fatal', 'swift', 'focus', 'guard', 'blade', 'fight', 'cruel', 'rage',
+  'will',
 ]
 
-/** Stat patterns sorted longest-first. Each entry: [label regex, stat type] */
+/** Stat patterns sorted longest-first to avoid partial matches */
 const STAT_PATTERNS: [RegExp, StatType][] = [
   [/cri(?:tical)?\s*rate/i, 'cr'],
   [/cri(?:tical)?\s*dmg/i, 'cd'],
@@ -50,81 +54,112 @@ const STAT_PATTERNS: [RegExp, StatType][] = [
   [/spd/i, 'spd'],
 ]
 
-/** Quality keywords mapped to substats count and grade */
-const QUALITY_MAP: Record<string, { quality: RuneQuality; grade: number }> = {
-  'legend': { quality: 'legend', grade: 6 },
-  'leger': { quality: 'legend', grade: 6 },
-  'leg': { quality: 'legend', grade: 6 },
-  'hero': { quality: 'hero', grade: 5 },
-  'heo': { quality: 'hero', grade: 5 },
-  'rare': { quality: 'rare', grade: 4 },
-  'magic': { quality: 'magic', grade: 3 },
-  'normal': { quality: 'normal', grade: 2 },
-}
+/** Quality keywords — includes common OCR misreads */
+const QUALITY_KEYWORDS: { pattern: RegExp; quality: RuneQuality; grade: number }[] = [
+  { pattern: /\blegend(?:ary)?\b/i, quality: 'legend', grade: 6 },
+  { pattern: /\bleger\b/i, quality: 'legend', grade: 6 },
+  { pattern: /\bleg\b/i, quality: 'legend', grade: 6 },
+  { pattern: /\bhero(?:ic)?\b/i, quality: 'hero', grade: 5 },
+  { pattern: /\bheo\b/i, quality: 'hero', grade: 5 },
+  { pattern: /\brare\b/i, quality: 'rare', grade: 4 },
+  { pattern: /\bmagic\b/i, quality: 'magic', grade: 3 },
+  { pattern: /\bnormal\b/i, quality: 'normal', grade: 2 },
+]
 
 /**
- * Normalize OCR text: collapse whitespace, strip UI noise, lowercase
+ * Normalize OCR text: collapse newlines/whitespace, strip common UI noise
  */
 function normalizeOcrText(raw: string): string {
   return raw
     .replace(/\r?\n/g, ' ')
-    .replace(/[|]/g, '')
+    .replace(/[|»©€×]/g, '')
     .replace(/\s+/g, ' ')
     .replace(/\b(temporarily|tempo!)\b/gi, '')
     .trim()
 }
 
 /**
- * Extract all stat occurrences from the text.
- * Handles both "STAT +VALUE%" and "STAT+VALUE%" (no space).
- * Returns stats in order of appearance.
+ * Strip text before the set+rune pattern to remove leading garbage.
+ * Real OCR often starts with: "AEE», #2 115 Intricate Violent Rune (1) ..."
+ * We want everything from the set name onward.
  */
-function extractAllStats(text: string): RuneStat[] {
-  const stats: RuneStat[] = []
-  const normalized = text
+function stripLeadingGarbage(text: string): { cleaned: string; setName: RuneSet } | null {
+  const lower = text.toLowerCase()
+
+  for (const set of RUNE_SETS) {
+    // Look for "SET Rune" pattern (with optional adjective before set)
+    const runePattern = new RegExp(`(?:\\w+\\s+)?${set}\\s+rune`, 'i')
+    const match = lower.match(runePattern)
+    if (match && match.index !== undefined) {
+      return {
+        cleaned: text.substring(match.index),
+        setName: set,
+      }
+    }
+  }
+
+  // Fallback: just find set name anywhere
+  for (const set of RUNE_SETS) {
+    const idx = lower.indexOf(set)
+    if (idx >= 0) {
+      return {
+        cleaned: text.substring(idx),
+        setName: set,
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Extract all stat occurrences from the text.
+ * Returns stats in order of appearance with their position index.
+ */
+function extractAllStats(text: string): (RuneStat & { _index: number })[] {
+  const stats: (RuneStat & { _index: number })[] = []
 
   for (const [pattern, baseType] of STAT_PATTERNS) {
-    // Build a regex that finds the stat label followed by an optional sign and number
-    // Handles: "ATK +118", "ATK+118", "HP +16%", "HP+16%", "CRI Rate +11%"
     const fullRegex = new RegExp(
-      `${pattern.source}\\s*[+\\-]?\\s*(\\d+(?:[.,]\\d+)?)\\s*(%?)`,
+      `(${pattern.source})\\s*[+\\-]\\s*(\\d+(?:[.,]\\d+)?)\\s*(%?)`,
       'gi',
     )
 
     let match: RegExpExecArray | null
-    while ((match = fullRegex.exec(normalized)) !== null) {
-      const value = parseFloat(match[1]!.replace(',', '.'))
-      const isPercent = match[2] === '%'
+    while ((match = fullRegex.exec(text)) !== null) {
+      const valueStr = match[match.length - 2]!
+      const percentStr = match[match.length - 1]!
+      const value = parseFloat(valueStr.replace(',', '.'))
+      const isPercent = percentStr === '%'
 
       let statType: StatType = baseType
       if (isPercent && (baseType === 'hp' || baseType === 'atk' || baseType === 'def')) {
         statType = `${baseType}%` as StatType
       }
 
-      stats.push({ type: statType, value, _index: match.index } as RuneStat & { _index: number })
+      stats.push({ type: statType, value, _index: match.index })
     }
   }
 
-  // Sort by position in the original text to preserve order
-  stats.sort((a, b) => ((a as unknown as { _index: number })._index) - ((b as unknown as { _index: number })._index))
+  // Sort by position in original text
+  stats.sort((a, b) => a._index - b._index)
 
-  // Remove the _index helper
-  return stats.map(({ type, value }) => ({ type, value }))
+  return stats
 }
 
 /**
- * Detect rune set from text. Looks for "SET Rune" or just the set name.
+ * Detect rune set from text. Prefers "SET Rune" pattern.
  */
 function parseSet(text: string): RuneSet | null {
   const lower = text.toLowerCase()
 
-  // Prefer "SET Rune" pattern for accuracy
+  // Prefer "SET Rune" pattern
   for (const set of RUNE_SETS) {
     const runePattern = new RegExp(`${set}\\s+rune`, 'i')
     if (runePattern.test(lower)) return set
   }
 
-  // Fallback: just find a set name in the text
+  // Fallback: set name anywhere
   for (const set of RUNE_SETS) {
     if (lower.includes(set)) return set
   }
@@ -133,18 +168,14 @@ function parseSet(text: string): RuneSet | null {
 
 /**
  * Detect rune slot from "Rune (N)" pattern.
- * Must be careful: OCR noise can contain other parenthesized numbers.
- * We look specifically for "Rune (N)" or "rune(N)" patterns.
  */
 function parseSlot(text: string): RuneSlot | null {
-  // "Rune (N)" or "Rune(N)" — the most reliable pattern
   const runeSlotMatch = text.match(/rune\s*\((\d)\)/i)
   if (runeSlotMatch) {
     const num = Number(runeSlotMatch[1])
     if (num >= 1 && num <= 6) return num as RuneSlot
   }
 
-  // "Slot N"
   const slotMatch = text.match(/slot\s*(\d)/i)
   if (slotMatch) {
     const num = Number(slotMatch[1])
@@ -156,32 +187,33 @@ function parseSlot(text: string): RuneSlot | null {
 
 /**
  * Detect quality (Legend/Hero/Rare/Magic/Normal).
- * Returns the grade number or null.
+ * Searches in text AFTER the rune name and main stat area.
+ * Also handles quality appearing between stats in noisy OCR.
  */
 function parseQuality(text: string): { quality: RuneQuality; grade: number } | null {
-  const lower = text.toLowerCase()
-  // Sort keys longest first to avoid partial matches
-  const keys = Object.keys(QUALITY_MAP).sort((a, b) => b.length - a.length)
-  for (const key of keys) {
-    // Use word boundary to avoid matching "legend" inside other words, but be flexible
-    const pattern = new RegExp(`\\b${key}\\b`, 'i')
-    if (pattern.test(lower)) return QUALITY_MAP[key]!
+  // Search the whole text with word boundaries
+  for (const { pattern, quality, grade } of QUALITY_KEYWORDS) {
+    if (pattern.test(text)) return { quality, grade }
   }
+
+  // OCR sometimes truncates — look for "(Legend" as "(Legen" or just "TI" artifacts
+  // Also check without word boundaries for edge cases like "(Legend"
+  const legendLike = /legend/i
+  if (legendLike.test(text)) return { quality: 'legend', grade: 6 }
+
   return null
 }
 
 /**
- * Detect rune grade from stars or "N*" patterns.
+ * Detect rune grade from star characters or "N*" patterns.
  */
 function parseGrade(text: string): number | null {
-  // Count star characters
   const starChars = text.match(/[★⭐✦✧*]{2,}/g)
   if (starChars) {
     const longest = starChars.reduce((a, b) => (a.length > b.length ? a : b))
     if (longest.length >= 1 && longest.length <= 6) return longest.length
   }
 
-  // "N*" or "N star"
   const numStarMatch = text.match(/(\d)\s*\*/)
   if (numStarMatch) {
     const num = Number(numStarMatch[1])
@@ -192,16 +224,11 @@ function parseGrade(text: string): number | null {
 }
 
 /**
- * Detect rune level from "+N" at the start of the rune info
- * (before the set name or right after the noise prefix).
- * Must avoid confusing stat values like "ATK +118" with level.
+ * Detect rune level from "+N" early in the text (before or near the set name).
+ * Avoids confusing stat values (ATK +118) with the level.
  */
-function parseLevel(text: string): number | null {
-  // Look for a standalone +N that is clearly the rune level (1-15)
-  // The level appears before the set name or early in the text
-  const setIndex = text.search(/\b(?:violent|swift|rage|fatal|despair|blade|focus|guard|energy|endure|shield|revenge|will|nemesis|vampire|destroy|fight|determination|enhance|accuracy|tolerance|cruel)\b/i)
-
-  // Check for "+N" before the set name (typical for "Strong" prefix lines)
+function parseLevel(text: string, setIndex: number): number | null {
+  // Look for "+N" BEFORE the set name — this is the rune level
   if (setIndex > 0) {
     const beforeSet = text.substring(0, setIndex)
     const levelMatch = beforeSet.match(/\+\s*(\d{1,2})\b/)
@@ -211,11 +238,16 @@ function parseLevel(text: string): number | null {
     }
   }
 
-  // Look for standalone "+N" on its own line or surrounded by spaces
-  const standaloneMatch = text.match(/(?:^|\s)\+\s*(\d{1,2})(?:\s|$)/)
-  if (standaloneMatch) {
-    const num = Number(standaloneMatch[1])
-    if (num >= 0 && num <= 15) return num
+  // Look for standalone "+N" (surrounded by spaces or at start)
+  // But only values 0-15 that aren't part of a stat
+  const standaloneMatches = [...text.matchAll(/(?:^|\s)\+(\d{1,2})(?:\s|$)/g)]
+  for (const match of standaloneMatches) {
+    const num = Number(match[1])
+    // Check this isn't a stat value (stats are preceded by stat names)
+    const idx = match.index!
+    const before = text.substring(Math.max(0, idx - 15), idx).toLowerCase()
+    const isAfterStat = /(?:atk|def|hp|spd|rate|dmg|resistance|accuracy)\s*$/i.test(before)
+    if (!isAfterStat && num >= 0 && num <= 15) return num
   }
 
   // "Level N"
@@ -229,22 +261,49 @@ function parseLevel(text: string): number | null {
 }
 
 /**
- * Extract set bonus info like "4 Set :" or "2 Set :"
+ * Determine main stat vs substats.
+ *
+ * Strategy:
+ * - The main stat is the FIRST stat after the rune name pattern
+ * - For slot 1: main stat is always ATK (flat)
+ * - Substats are everything after main stat and before "N Set :"
  */
-function parseSetPieceCount(text: string): number | null {
-  const match = text.match(/(\d)\s*set\s*:/i)
-  if (match) return Number(match[1])
-  return null
+function separateMainAndSubs(
+  allStats: (RuneStat & { _index: number })[],
+  slot: RuneSlot | null,
+): { mainStat: RuneStat | null; subStats: RuneStat[] } {
+  if (allStats.length === 0) return { mainStat: null, subStats: [] }
+
+  // For slot 1, main stat must be ATK flat — find it
+  if (slot === 1) {
+    const atkFlatIdx = allStats.findIndex(s => s.type === 'atk' && s.value >= 100)
+    if (atkFlatIdx >= 0) {
+      const mainStat = { type: allStats[atkFlatIdx]!.type, value: allStats[atkFlatIdx]!.value }
+      const subStats = allStats
+        .filter((_, i) => i !== atkFlatIdx)
+        .map(({ type, value }) => ({ type, value }))
+      return { mainStat, subStats }
+    }
+  }
+
+  // Default: first stat is main
+  const mainStat = { type: allStats[0]!.type, value: allStats[0]!.value }
+  const subStats = allStats.slice(1).map(({ type, value }) => ({ type, value }))
+  return { mainStat, subStats }
 }
 
 /**
  * Summoners War rune parser implementation.
  *
  * Designed to handle noisy single-line OCR text with:
- * - Leading garbage (#1 412, a (#412, etc.)
+ * - Leading garbage (#1 412, a (#412, AEE», etc.)
  * - Missing spaces (HP+16%)
  * - UI button text (Temporarily, Tempo!)
+ * - OCR artifacts (random numbers like 153, 6186)
+ * - Truncated quality words (Leg, Heo, TI)
  * - Set bonus suffix (4 Set : Stun Rate +25%)
+ *
+ * Tolerance: returns success if set + mainStat are found, even if slot/substats are partial.
  */
 export const summonersWarParser: GameParser = {
   gameName: 'summoners-war',
@@ -257,7 +316,7 @@ export const summonersWarParser: GameParser = {
       return failedResult(['Empty OCR text'])
     }
 
-    // Normalize: single line, clean noise
+    // Normalize: single line, clean noise characters
     const normalized = normalizeOcrText(raw)
 
     // Strip set bonus suffix ("4 Set : ..." or "2 Set : ...") to avoid false stat matches
@@ -267,44 +326,57 @@ export const summonersWarParser: GameParser = {
       : normalized
 
     // --- Parse set ---
-    const set = parseSet(textWithoutSetBonus)
+    const setResult = stripLeadingGarbage(textWithoutSetBonus)
+    const set = setResult?.setName ?? parseSet(textWithoutSetBonus)
+
+    if (!set) {
+      return failedResult(['Could not detect rune set'])
+    }
+
+    // Find set position for level parsing
+    const setIndex = textWithoutSetBonus.toLowerCase().indexOf(set)
 
     // --- Parse slot ---
     const slot = parseSlot(textWithoutSetBonus)
 
+    // --- Parse quality ---
+    // Look for quality in the text after the rune name
+    const runeNameEnd = textWithoutSetBonus.toLowerCase().indexOf('rune')
+    const qualitySearchArea = runeNameEnd >= 0
+      ? textWithoutSetBonus.substring(runeNameEnd)
+      : textWithoutSetBonus
+    const qualityInfo = parseQuality(qualitySearchArea)
+
     // --- Parse grade: try stars first, then quality keyword ---
     let grade = parseGrade(textWithoutSetBonus)
-    const qualityInfo = parseQuality(textWithoutSetBonus)
     if (!grade && qualityInfo) {
       grade = qualityInfo.grade
     }
 
     // --- Parse level ---
-    const level = parseLevel(textWithoutSetBonus)
+    const level = parseLevel(textWithoutSetBonus, setIndex >= 0 ? setIndex : 0)
 
     // --- Parse stats ---
     const allStats = extractAllStats(textWithoutSetBonus)
-    const mainStat = allStats.length > 0 ? allStats[0]! : null
-    const subStats = allStats.slice(1)
+    const { mainStat, subStats } = separateMainAndSubs(allStats, slot)
 
     // --- Parse set piece count ---
-    const setPieceCount = parseSetPieceCount(normalized)
+    const setPieceCountMatch = normalized.match(/(\d)\s*set\s*:/i)
+    const setPieceCount = setPieceCountMatch ? Number(setPieceCountMatch[1]) : null
 
-    // --- Validate required fields ---
-    if (!set) errors.push('Could not detect rune set')
-    if (!slot) errors.push('Could not detect rune slot')
-    if (!mainStat) errors.push('Could not detect main stat')
-
-    if (errors.length > 0) {
+    // --- Tolerant validation: need set + mainStat minimum ---
+    if (!mainStat) {
+      errors.push('Could not detect main stat')
       return failedResult(errors)
     }
 
+    // Success — return what we found
     return successResult({
-      set: set!,
-      slot: slot!,
+      set,
+      slot: slot ?? 1, // default to 1 if not detected
       grade: grade ?? 6,
       level: level ?? 0,
-      mainStat: mainStat!,
+      mainStat,
       subStats,
       ...(qualityInfo ? { quality: qualityInfo.quality } : {}),
       ...(setPieceCount ? { setPieceCount } : {}),

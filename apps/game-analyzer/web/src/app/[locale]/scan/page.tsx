@@ -187,8 +187,10 @@ export default function ScanPage() {
                   <>
                     {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                       <>
-                        <RuneCard rune={resultData.data} confidence={resultData.confidence} />
-                        <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
+                        <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
+                        {resultData.analysis && (
+                          <EfficiencyDisplay analysis={resultData.analysis} confidence={resultData.confidence} />
+                        )}
                       </>
                     )}
                     {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
@@ -244,8 +246,10 @@ export default function ScanPage() {
                   <H1 className="text-xl font-semibold">{t('scan.result')}</H1>
                   {hasStructuredData && resultData.success && selectedGame === 'summoners-war' && 'set' in resultData.data && (
                     <>
-                      <RuneCard rune={resultData.data} confidence={resultData.confidence} />
-                      <EfficiencyDisplay rune={resultData.data} confidence={resultData.confidence} />
+                      <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
+                      {resultData.analysis && (
+                        <EfficiencyDisplay analysis={resultData.analysis} confidence={resultData.confidence} />
+                      )}
                     </>
                   )}
                   {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (

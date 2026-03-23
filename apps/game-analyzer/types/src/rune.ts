@@ -42,11 +42,14 @@ export interface RuneStat {
   value: number
 }
 
+export type RuneQuality = 'normal' | 'magic' | 'rare' | 'hero' | 'legend'
+
 export interface RuneData {
   set: RuneSet
   slot: RuneSlot
   grade: number
   level: number
+  quality?: RuneQuality
   mainStat: RuneStat
   subStats: RuneStat[]
   innateStat?: RuneStat

@@ -1,6 +1,7 @@
 import type { GameType } from './game'
 import type { RuneData } from './rune'
 import type { GearData } from './gear'
+import type { RuneAnalysis } from './rune-data'
 
 export type ScanStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
@@ -10,6 +11,8 @@ export interface ScanResult {
   rawText: string
   confidence: number
   processingTimeMs: number
+  /** Rune analysis data (only for Summoners War runes) */
+  analysis?: RuneAnalysis
 }
 
 export interface Scan {

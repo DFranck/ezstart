@@ -85,6 +85,23 @@
       "godlike": "Parfaite"
     }
   },
+  "rune": {
+    "quality": {
+      "normal": "Normal",
+      "magic": "Magique",
+      "rare": "Rare",
+      "hero": "Heroique",
+      "legend": "Legendaire"
+    },
+    "roll": "roll",
+    "rolls": "rolls",
+    "potential12": "Potentiel +12",
+    "afterGrind": "Apres grind",
+    "grindPotential": "Potentiel de grind",
+    "legendGrind": "grind legend",
+    "setBonus": "Bonus de set",
+    "ocrConfidence": "Confiance OCR"
+  },
   "scanDetail": {
     "title": "Details du Scan",
     "scannedImage": "Image scannee",

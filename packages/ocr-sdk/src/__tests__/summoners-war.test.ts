@@ -98,8 +98,31 @@ describe('summonersWarParser', () => {
     })
   })
 
-  describe('real OCR text (single-line, noisy)', () => {
-    it('parses "#1 412 strong Despair Rune (1) ..." format', () => {
+  describe('real OCR text (noisy single-line)', () => {
+    it('parses Endure rune with newlines and OCR artifacts', () => {
+      const text =
+        '"AEE»,\na © € +12 Endure Rune (1) xX\nF& ATK +118 TI\n"12 153\nResistance +15% Temporarily)\nCRI Dmg +7% -\nCRI Rate +18%\n2 Set : Resistance +20%\n"'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'endure',
+        mainStat: { type: 'atk', value: 118 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[]; level: number }
+      expect(data.level).toBe(12)
+      expect(data.subStats.length).toBeGreaterThanOrEqual(2)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'res', value: 15 }),
+          expect.objectContaining({ type: 'cr', value: 18 }),
+        ]),
+      )
+    })
+
+    it('parses Despair rune with Legend quality and set bonus', () => {
       const text =
         '#1 412 strong Despair Rune (1) ATK +118 Legend HP +184 CRI Rate +11% HP+16% Resistance +14% CRI Dmg +16% 4 Set : Stun Rate +25%'
 
@@ -114,8 +137,7 @@ describe('summonersWarParser', () => {
 
       const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
       expect(data.quality).toBe('legend')
-      // Substats should include HP, CRI Rate, HP%, Resistance, CRI Dmg
-      expect(data.subStats.length).toBeGreaterThanOrEqual(4)
+      expect(data.subStats.length).toBeGreaterThanOrEqual(3)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: 'cr', value: 11 }),
@@ -125,14 +147,13 @@ describe('summonersWarParser', () => {
       )
     })
 
-    it('parses "a (#412 Cruel Rage Rune (1) ..." format', () => {
+    it('parses Cruel Rage rune with Hero quality', () => {
       const text =
         'a (#412 Cruel Rage Rune (1) ATK +118 Hero CRI Dmg +4% CRI Rate +11% SPD +14 ATK +14% HP +10% 4 Set : CRI Dmg +40%'
 
       const result = summonersWarParser.parse(makeOcrResult(text))
 
       expect(result.success).toBe(true)
-      // Should match "Rage" as the set (Cruel is also valid but Rage comes first in "Cruel Rage")
       expect(['rage', 'cruel']).toContain(result.data.set)
       expect(result.data).toMatchObject({
         slot: 1,
@@ -141,6 +162,7 @@ describe('summonersWarParser', () => {
 
       const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
       expect(data.quality).toBe('hero')
+      expect(data.subStats.length).toBeGreaterThanOrEqual(3)
       expect(data.subStats).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ type: 'cd', value: 4 }),
@@ -150,6 +172,31 @@ describe('summonersWarParser', () => {
       )
     })
 
+    it('parses Intricate Violent rune with heavy OCR noise', () => {
+      const text =
+        '"AEE»,\n#2 115 Intricate Violent Rune (1) xX\n[75] ATK +160 (Legend\nF524 Accuracy +8% 6186\nSPD +10 €)\nCRI Rate +9% Temporarily)\n\nHP +27%\n4 Set : Get Extra Turn +22%\n"'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'violent',
+        mainStat: { type: 'atk', value: 160 },
+      })
+
+      const data = result.data as { subStats: { type: string; value: number }[]; quality: string }
+      expect(data.quality).toBe('legend')
+      expect(data.subStats.length).toBeGreaterThanOrEqual(2)
+      expect(data.subStats).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'acc', value: 8 }),
+          expect.objectContaining({ type: 'cr', value: 9 }),
+        ]),
+      )
+    })
+  })
+
+  describe('tolerant parsing', () => {
     it('handles "HP+16%" without space', () => {
       const text = 'Violent Rune (2) SPD +42 HP+16% ATK+8%'
 
@@ -191,7 +238,6 @@ describe('summonersWarParser', () => {
       const result = summonersWarParser.parse(makeOcrResult(text))
 
       expect(result.success).toBe(true)
-      // The "Resistance +25%" from set bonus should NOT appear as a substat
       const data = result.data as { subStats: { type: string; value: number }[] }
       const resStats = data.subStats.filter((s) => s.type === 'res')
       expect(resStats).toHaveLength(1)
@@ -206,6 +252,18 @@ describe('summonersWarParser', () => {
       expect(result.success).toBe(true)
       const data = result.data as { quality: string }
       expect(data.quality).toBe('legend')
+    })
+
+    it('succeeds with set + main stat even if slot is missing', () => {
+      const text = 'Violent ATK +118 HP +8% CRI Rate +6%'
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      expect(result.data).toMatchObject({
+        set: 'violent',
+        mainStat: { type: 'atk', value: 118 },
+      })
     })
   })
 

@@ -2,98 +2,60 @@
 
 import { Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData } from '@game-analyzer/types'
+import type { RuneAnalysis, StatType } from '@game-analyzer/types'
 
-interface EfficiencyDisplayProps {
-  rune: RuneData
-  confidence?: number
-}
-
-/** Max possible roll per stat type (6-star rune) */
-const MAX_ROLLS: Record<string, number> = {
-  hp: 375,
-  'hp%': 8,
-  atk: 20,
-  'atk%': 8,
-  def: 20,
-  'def%': 8,
-  spd: 6,
-  cr: 6,
-  cd: 7,
-  res: 8,
-  acc: 8,
-}
-
-interface SubstatEfficiency {
-  type: string
-  value: number
-  maxPossible: number
-  percent: number
-}
-
-function computeSubstatEfficiency(rune: RuneData): SubstatEfficiency[] {
-  return rune.subStats.map((stat) => {
-    const maxRoll = MAX_ROLLS[stat.type] ?? 8
-    // For a +12 rune, there are up to 4 rolls into substats
-    // Each substat's efficiency = value / (maxRoll * number_of_possible_rolls)
-    // Simplified: we use value / (maxRoll * 4) as rough efficiency
-    const maxPossible = maxRoll * 4
-    const percent = Math.min(100, Math.round((stat.value / maxPossible) * 100))
-    return { type: stat.type, value: stat.value, maxPossible, percent }
-  })
-}
-
-function computeOverallEfficiency(rune: RuneData): number {
-  if (rune.subStats.length === 0) return 0
-
-  const efficiencies = computeSubstatEfficiency(rune)
-  const total = efficiencies.reduce((sum, s) => sum + s.percent, 0)
-  // Overall = average substat efficiency, weighted by number of substats vs 4 max
-  return Math.round(total / 4)
+// ── Stat colors (same as rune-card) ──
+const STAT_COLORS: Record<StatType, string> = {
+  spd: 'text-blue-400',
+  cr: 'text-red-400',
+  cd: 'text-red-400',
+  atk: 'text-orange-400',
+  'atk%': 'text-orange-400',
+  hp: 'text-green-400',
+  'hp%': 'text-green-400',
+  def: 'text-slate-400',
+  'def%': 'text-slate-400',
+  res: 'text-violet-400',
+  acc: 'text-violet-400',
 }
 
 type Tier = 'sell' | 'keep' | 'great' | 'godlike'
 
-function getEfficiencyTier(score: number): Tier {
-  if (score >= 80) return 'godlike'
-  if (score >= 65) return 'great'
-  if (score >= 50) return 'keep'
-  return 'sell'
-}
-
 function getTierColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike':
-      return 'text-yellow-500'
-    case 'great':
-      return 'text-green-500'
-    case 'keep':
-      return 'text-orange-500'
-    case 'sell':
-      return 'text-red-500'
+    case 'godlike': return 'text-yellow-500'
+    case 'great': return 'text-green-500'
+    case 'keep': return 'text-orange-500'
+    case 'sell': return 'text-red-500'
   }
 }
 
 function getProgressColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike':
-      return '[&>div]:bg-yellow-500'
-    case 'great':
-      return '[&>div]:bg-green-500'
-    case 'keep':
-      return '[&>div]:bg-orange-500'
-    case 'sell':
-      return '[&>div]:bg-red-500'
+    case 'godlike': return '[&>div]:bg-yellow-500'
+    case 'great': return '[&>div]:bg-green-500'
+    case 'keep': return '[&>div]:bg-orange-500'
+    case 'sell': return '[&>div]:bg-red-500'
   }
 }
 
-export function EfficiencyDisplay({ rune, confidence }: EfficiencyDisplayProps) {
+function getSubstatBarColor(efficiency: number): string {
+  if (efficiency >= 80) return '[&>div]:bg-green-500'
+  if (efficiency >= 50) return '[&>div]:bg-yellow-500'
+  return '[&>div]:bg-red-500'
+}
+
+interface EfficiencyDisplayProps {
+  analysis: RuneAnalysis
+  confidence?: number
+}
+
+export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayProps) {
   const t = useTranslations('scan')
   const tLabels = useTranslations('labels')
+  const tRune = useTranslations('rune')
 
-  const overallScore = computeOverallEfficiency(rune)
-  const tier = getEfficiencyTier(overallScore)
-  const substatEfficiencies = computeSubstatEfficiency(rune)
+  const { tier } = analysis
 
   return (
     <Card>
@@ -105,27 +67,57 @@ export function EfficiencyDisplay({ rune, confidence }: EfficiencyDisplayProps) 
         <Div className="space-y-2">
           <Div className="flex items-center justify-between">
             <P className="text-sm font-medium">{t('efficiency.score')}</P>
-            <P className={`text-lg font-bold ${getTierColor(tier)}`}>{overallScore}%</P>
+            <Div className="flex items-center gap-2">
+              <P className={`text-lg font-bold ${getTierColor(tier)}`}>{analysis.efficiency}%</P>
+              <P className={`text-sm font-semibold ${getTierColor(tier)}`}>
+                {t(`efficiency.${tier}`)}
+              </P>
+            </Div>
           </Div>
           <Progress
-            value={overallScore}
+            value={analysis.efficiency}
             className={`h-3 ${getProgressColor(tier)}`}
           />
-          <P className={`text-sm font-semibold ${getTierColor(tier)}`}>
-            {t(`efficiency.${tier}`)}
-          </P>
+        </Div>
+
+        {/* Potential and grind projections */}
+        <Div className="space-y-1">
+          {analysis.maxEfficiency !== undefined && (
+            <Div className="flex items-center justify-between text-sm">
+              <P className="text-muted-foreground">{tRune('potential12')}</P>
+              <P className="font-medium">{analysis.maxEfficiency}%</P>
+            </Div>
+          )}
+          {analysis.grindedEfficiency !== undefined && (
+            <Div className="flex items-center justify-between text-sm">
+              <P className="text-muted-foreground">{tRune('afterGrind')}</P>
+              <Div className="flex items-center gap-1">
+                <P className="font-medium">{analysis.grindedEfficiency}%</P>
+                {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
+                  <P className="text-green-500 text-xs">(+{analysis.grindGain}%)</P>
+                )}
+              </Div>
+            </Div>
+          )}
         </Div>
 
         {/* Per-substat efficiency */}
         <Div className="space-y-2">
           <P className="text-xs font-medium text-muted-foreground uppercase">{tLabels('subStats')}</P>
-          {substatEfficiencies.map((stat, i) => (
+          {analysis.substats.map((stat, i) => (
             <Div key={i} className="space-y-1">
               <Div className="flex items-center justify-between text-sm">
-                <P className="text-muted-foreground uppercase">{stat.type}</P>
-                <P className="font-medium">+{stat.value} ({stat.percent}%)</P>
+                <P className={`font-medium ${STAT_COLORS[stat.type]}`}>
+                  {stat.type.toUpperCase().replace('%', '%')}
+                </P>
+                <Div className="flex items-center gap-2">
+                  <P className="font-medium">+{stat.value}</P>
+                  <P className="text-xs text-muted-foreground">
+                    {stat.efficiency}% ({stat.rolls} {stat.rolls > 1 ? tRune('rolls') : tRune('roll')})
+                  </P>
+                </Div>
               </Div>
-              <Progress value={stat.percent} className="h-1.5" />
+              <Progress value={stat.efficiency} className={`h-1.5 ${getSubstatBarColor(stat.efficiency)}`} />
             </Div>
           ))}
         </Div>
@@ -135,7 +127,7 @@ export function EfficiencyDisplay({ rune, confidence }: EfficiencyDisplayProps) 
           <Div className="pt-2 border-t">
             <Div className="flex items-center justify-between text-sm">
               <P className="text-muted-foreground">{tLabels('confidence')}</P>
-              <P className="font-medium">{Math.round(confidence * 100)}%</P>
+              <P className="font-medium">{Math.round(confidence)}%</P>
             </Div>
           </Div>
         )}

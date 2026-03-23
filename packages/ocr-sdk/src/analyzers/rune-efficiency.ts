@@ -1,8 +1,8 @@
 /**
  * Summoners War Rune Efficiency Calculator (Barion Formula)
  *
- * Calculates rune efficiency based on the community-standard Barion formula.
- * Efficiency represents how close a rune's substats are to their theoretical maximum.
+ * Calculates rune efficiency based on the community-standard Barion formula
+ * with accurate 6★ roll ranges, grind potential, and detailed substat analysis.
  */
 
 // --- Types (mirrors @game-analyzer/types/rune) ---
@@ -10,6 +10,8 @@
 type StatType =
   | 'hp' | 'hp%' | 'atk' | 'atk%' | 'def' | 'def%'
   | 'spd' | 'cr' | 'cd' | 'res' | 'acc'
+
+type RuneQuality = 'normal' | 'magic' | 'rare' | 'hero' | 'legend'
 
 interface RuneStat {
   type: StatType
@@ -21,6 +23,7 @@ interface RuneData {
   slot: number
   grade: number
   level: number
+  quality?: RuneQuality
   mainStat: RuneStat
   subStats: RuneStat[]
   innateStat?: RuneStat
@@ -28,64 +31,114 @@ interface RuneData {
 
 // --- Public types ---
 
-export interface SubstatDetail {
+export type Recommendation = 'sell' | 'keep' | 'great' | 'godlike'
+
+export interface SubstatAnalysis {
   type: StatType
   value: number
-  maxPossible: number
-  efficiency: number
-  estimatedRolls: number
+  rolls: number
+  rollQuality: number
+  maxValue: number
+  minValue: number
+  isMaxRoll: boolean
+  isGrindable: boolean
+  grindRange?: { min: number; max: number }
+  valueAfterMaxGrind?: number
 }
 
-export interface RuneEfficiencyResult {
+export interface GrindPotential {
+  currentEfficiency: number
+  efficiencyAfterGrind: number
+  grindGain: number
+  substatsToGrind: { type: StatType; currentValue: number; afterGrind: number }[]
+}
+
+export interface RuneAnalysis {
   currentEfficiency: number
   potentialEfficiency: number
   maxEfficiency: number
-  substatDetails: SubstatDetail[]
-  recommendation: 'sell' | 'keep' | 'great' | 'godlike'
+  substats: SubstatAnalysis[]
+  grindPotential: GrindPotential
+  recommendation: Recommendation
+  quality: RuneQuality
+  totalRolls: number
 }
+
+// Keep legacy exports for backward compat with index.ts
+export type SubstatDetail = SubstatAnalysis
+export type RuneEfficiencyResult = RuneAnalysis
 
 // --- Constants ---
 
-/** Maximum single roll value per stat type for a 6* rune */
-const MAX_ROLL_VALUES: Record<StatType, number> = {
-  'hp': 375,
-  'hp%': 8,
-  'atk': 20,
-  'atk%': 8,
-  'def': 20,
-  'def%': 8,
-  'spd': 6,
-  'cr': 6,
-  'cd': 7,
-  'res': 8,
-  'acc': 8,
+interface RollRange {
+  min: number
+  max: number
 }
 
-/** Total rolls at +12 for substats (one at each +3 interval: +3, +6, +9, +12) */
-const MAX_ROLLS_AT_PLUS_12 = 4
+/** Roll ranges per stat type for 6★ runes */
+const ROLL_RANGES: Record<StatType, RollRange> = {
+  'hp':   { min: 135, max: 375 },
+  'hp%':  { min: 5,   max: 8 },
+  'atk':  { min: 10,  max: 20 },
+  'atk%': { min: 5,   max: 8 },
+  'def':  { min: 10,  max: 20 },
+  'def%': { min: 5,   max: 8 },
+  'spd':  { min: 4,   max: 6 },
+  'cr':   { min: 4,   max: 6 },
+  'cd':   { min: 4,   max: 7 },
+  'res':  { min: 4,   max: 8 },
+  'acc':  { min: 4,   max: 8 },
+}
 
-/** Barion divisor: 1 (main) + 4 substats * max_single_efficiency(0.225 avg) * 8 max rolls theoretical = 2.8 */
+/** Legend grind ranges (flat and %) — only grindable stats */
+const LEGEND_GRIND_RANGES: Partial<Record<StatType, RollRange>> = {
+  'hp':   { min: 550, max: 580 },
+  'hp%':  { min: 6,   max: 7 },
+  'atk':  { min: 28,  max: 30 },
+  'atk%': { min: 6,   max: 7 },
+  'def':  { min: 28,  max: 30 },
+  'def%': { min: 6,   max: 7 },
+  'spd':  { min: 4,   max: 5 },
+}
+
+/** Non-grindable stats */
+const NON_GRINDABLE: Set<StatType> = new Set(['cr', 'cd', 'res', 'acc'])
+
+/** Barion divisor: theoretical max is (8 perfect rolls + 1 main) / 2.8 */
 const BARION_DIVISOR = 2.8
+
+/** Total upgrade rolls at +12 (at +3, +6, +9, +12) */
+const MAX_ROLLS_AT_PLUS_12 = 4
 
 // --- Core functions ---
 
 /**
- * Estimate how many times a substat has been rolled based on its value.
- * Minimum 1 roll (the initial roll when the substat appeared).
+ * Estimate the number of rolls and average quality for a substat.
+ * count: value / max_roll rounded to nearest, min 1
+ * avgQuality: 0% = all rolls at min, 100% = all rolls at max
  */
-export function estimateRolls(statType: StatType, value: number): number {
-  const maxRoll = MAX_ROLL_VALUES[statType]
-  if (!maxRoll || value <= 0) return 0
+export function estimateRolls(
+  statType: StatType,
+  value: number,
+): { count: number; avgQuality: number } {
+  const range = ROLL_RANGES[statType]
+  if (!range || value <= 0) return { count: 0, avgQuality: 0 }
 
-  // Each roll adds between ~75% and 100% of maxRoll on average
-  // A simple estimate: round(value / maxRoll), minimum 1
-  const estimated = Math.max(1, Math.round(value / maxRoll))
-  return estimated
+  // Estimate count using max roll value
+  const count = Math.max(1, Math.round(value / range.max))
+
+  // Calculate quality: where does the value sit between min*count and max*count?
+  const minTotal = range.min * count
+  const maxTotal = range.max * count
+  const avgQuality = maxTotal === minTotal
+    ? 100
+    : Math.min(100, Math.max(0, ((value - minTotal) / (maxTotal - minTotal)) * 100))
+
+  return { count, avgQuality }
 }
 
 /**
  * Calculate how many upgrade rolls remain before +12.
- * Rune gets a substat roll at +3, +6, +9, +12.
  */
 function remainingRolls(level: number): number {
   const rollsOccurred = Math.floor(Math.min(level, 12) / 3)
@@ -93,73 +146,158 @@ function remainingRolls(level: number): number {
 }
 
 /**
- * Calculate the efficiency contribution of a single substat.
- * efficiency = value / (maxRoll * estimatedRolls)
+ * Detect rune quality from the number of substats at a given level.
  */
-function substatEfficiency(statType: StatType, value: number): number {
-  const maxRoll = MAX_ROLL_VALUES[statType]
-  if (!maxRoll || value <= 0) return 0
+function detectQuality(rune: RuneData): RuneQuality {
+  if (rune.quality) return rune.quality
 
-  const rolls = estimateRolls(statType, value)
-  return value / (maxRoll * rolls)
+  const subCount = rune.subStats.length
+  const rollsDone = Math.floor(Math.min(rune.level, 12) / 3)
+
+  // Initial substats = current count - rolls that added new subs
+  // Legend: 4 initial, Hero: 3, Rare: 2, Magic: 1, Normal: 0
+  const initialSubs = subCount - Math.max(0, rollsDone - Math.max(0, subCount - rollsDone))
+
+  // Simpler heuristic: at +0, subCount = initial subs
+  // At higher levels, subs may have been added (if < 4 initial)
+  if (rune.level === 0) {
+    if (subCount >= 4) return 'legend'
+    if (subCount === 3) return 'hero'
+    if (subCount === 2) return 'rare'
+    if (subCount === 1) return 'magic'
+    return 'normal'
+  }
+
+  // For leveled runes, estimate based on total subs vs rolls
+  // A legend rune at +12 still has 4 subs (all rolls go into existing)
+  // A hero rune gets its 4th sub at +3, then 3 more upgrade rolls
+  if (subCount >= 4) {
+    // Could be legend (4 initial) or hero (3 initial + 1 added at +3)
+    // Heuristic: if level >= 3 and we can't tell, assume legend
+    if (rune.level < 3) return 'legend'
+    // Cannot reliably distinguish at higher levels without more info
+    return 'legend'
+  }
+  if (subCount === 3) return 'hero'
+  if (subCount === 2) return 'rare'
+  if (subCount === 1) return 'magic'
+  return 'normal'
 }
 
 /**
- * Calculate potential efficiency if remaining rolls go to max.
- * Adds the best-case remaining rolls to the current efficiency sum.
+ * Analyze a single substat in detail.
+ */
+function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
+  const range = ROLL_RANGES[stat.type]
+  const { count, avgQuality } = estimateRolls(stat.type, stat.value)
+
+  const maxValue = range.max * count
+  const minValue = range.min * count
+  const isMaxRoll = stat.value >= maxValue
+
+  const isGrindable = !NON_GRINDABLE.has(stat.type)
+  const grindRange = LEGEND_GRIND_RANGES[stat.type]
+  const valueAfterMaxGrind = grindRange ? stat.value + grindRange.max : undefined
+
+  return {
+    type: stat.type,
+    value: stat.value,
+    rolls: count,
+    rollQuality: Math.round(avgQuality * 100) / 100,
+    maxValue,
+    minValue,
+    isMaxRoll,
+    isGrindable,
+    grindRange: grindRange ? { min: grindRange.min, max: grindRange.max } : undefined,
+    valueAfterMaxGrind,
+  }
+}
+
+/**
+ * Calculate Barion efficiency.
+ * For each substat: ratio = value / max_roll_value
+ * efficiency = (sum(ratios) + 1) / 2.8 * 100
+ */
+function barionEfficiency(substats: RuneStat[]): number {
+  let rawSum = 0
+  for (const sub of substats) {
+    const range = ROLL_RANGES[sub.type]
+    if (!range || sub.value <= 0) continue
+    rawSum += sub.value / range.max
+  }
+  return ((rawSum + 1) / BARION_DIVISOR) * 100
+}
+
+/**
+ * Calculate potential efficiency at +12 (remaining rolls at max).
  */
 export function calculatePotentialEfficiency(rune: RuneData): number {
   const remaining = remainingRolls(rune.level)
 
-  // Current substat efficiency sum
-  let efficiencySum = 0
-  for (const sub of rune.subStats) {
-    const maxRoll = MAX_ROLL_VALUES[sub.type]
-    if (!maxRoll) continue
-    const rolls = estimateRolls(sub.type, sub.value)
-    efficiencySum += sub.value / (maxRoll * rolls)
-  }
-
-  // Each remaining roll at maximum adds 1.0 to the efficiency sum
-  // (value = maxRoll, so maxRoll / maxRoll = 1.0 per roll)
-  // But we normalize per roll, so each perfect roll adds 1/rolls contribution
-  // Actually in Barion formula, each substat contributes value / (maxRoll * rolls)
-  // For potential, we add remaining perfect rolls: remaining * (maxRoll / maxRoll) = remaining * 1
-  // But this must be divided by the NEW total rolls for that substat
-  // Simpler approach: add remaining * 1 to the raw efficiency sum (each max roll = 1.0 contribution)
-
-  // Re-derive: Barion formula sums (value / (maxRoll * rolls)) per substat
-  // This simplifies to: for each roll, how efficient was it? Average across all rolls.
-  // A perfect roll contributes exactly 1/rolls to the substat efficiency.
-  // For potential, assume remaining rolls are perfect and go to existing substats.
-  // Best case: remaining rolls each contribute 1.0 to the per-substat efficiency
-  // But since we average per substat, we need to recalculate.
-
-  // Simpler standard approach: sum(value / maxRoll) for all substats, ignoring roll count
   let rawSum = 0
   for (const sub of rune.subStats) {
-    const maxRoll = MAX_ROLL_VALUES[sub.type]
-    if (!maxRoll) continue
-    rawSum += sub.value / maxRoll
+    const range = ROLL_RANGES[sub.type]
+    if (!range || sub.value <= 0) continue
+    rawSum += sub.value / range.max
   }
 
-  // Add remaining rolls at max value (each contributes 1.0 to rawSum)
+  // Each remaining perfect roll adds 1.0 to rawSum
   const potentialRawSum = rawSum + remaining
-
-  // Barion formula: (sum + 1) / 2.8 * 100
   return ((potentialRawSum + 1) / BARION_DIVISOR) * 100
 }
 
 /**
- * Get a recommendation based on efficiency thresholds.
- * Uses the higher of current and potential efficiency for the decision.
+ * Calculate grind potential — efficiency gain from legend grinds on all grindable substats.
+ */
+function calculateGrindPotential(
+  substats: SubstatAnalysis[],
+  currentEfficiency: number,
+): GrindPotential {
+  const substatsToGrind: GrindPotential['substatsToGrind'] = []
+  let grindedRawSum = 0
+
+  for (const sub of substats) {
+    const range = ROLL_RANGES[sub.type]
+    if (!range) continue
+
+    if (sub.isGrindable && sub.grindRange) {
+      const afterGrind = sub.value + sub.grindRange.max
+      substatsToGrind.push({
+        type: sub.type,
+        currentValue: sub.value,
+        afterGrind,
+      })
+      grindedRawSum += afterGrind / range.max
+    } else {
+      grindedRawSum += sub.value / range.max
+    }
+  }
+
+  const efficiencyAfterGrind = ((grindedRawSum + 1) / BARION_DIVISOR) * 100
+  const grindGain = efficiencyAfterGrind - currentEfficiency
+
+  return {
+    currentEfficiency,
+    efficiencyAfterGrind: Math.round(efficiencyAfterGrind * 100) / 100,
+    grindGain: Math.round(grindGain * 100) / 100,
+    substatsToGrind,
+  }
+}
+
+/**
+ * Get recommendation based on efficiency and grind potential.
+ * Uses the best of current efficiency and efficiency after grind.
+ * < 50% even after grind = sell
+ * 50-65% = keep
+ * 65-80% = great
+ * 80%+ = godlike
  */
 export function getRecommendation(
   efficiency: number,
   potentialEfficiency: number,
-): 'sell' | 'keep' | 'great' | 'godlike' {
-  // Use potential for runes not yet +12, current for maxed runes
-  const score = Math.max(efficiency, potentialEfficiency)
+  grindPotential?: number,
+): Recommendation {
+  const score = Math.max(efficiency, potentialEfficiency, grindPotential ?? 0)
 
   if (score >= 80) return 'godlike'
   if (score >= 65) return 'great'
@@ -168,58 +306,43 @@ export function getRecommendation(
 }
 
 /**
- * Calculate full rune efficiency using the Barion formula.
- *
- * For each substat: rawContribution = value / maxRollValue
- * Current efficiency = (sum(rawContributions) + 1) / 2.8 * 100
- * The +1 represents the main stat (always counted as perfect).
+ * Legacy function name — kept for backward compatibility.
+ * Delegates to analyzeRune.
  */
-export function calculateEfficiency(rune: RuneData): RuneEfficiencyResult {
-  const substatDetails: SubstatDetail[] = []
-  let rawSum = 0
+export function calculateEfficiency(rune: RuneData): RuneAnalysis {
+  return analyzeRune(rune)
+}
 
-  for (const sub of rune.subStats) {
-    const maxRoll = MAX_ROLL_VALUES[sub.type]
-    if (!maxRoll) continue
+/**
+ * Full rune analysis: efficiency, substats, grind potential, recommendation.
+ */
+export function analyzeRune(rune: RuneData): RuneAnalysis {
+  const quality = detectQuality(rune)
+  const substats = rune.subStats.map(analyzeSubstat)
+  const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
 
-    const rolls = estimateRolls(sub.type, sub.value)
-    const maxPossible = maxRoll * rolls
-    const eff = (sub.value / maxPossible) * 100
-
-    rawSum += sub.value / maxRoll
-
-    substatDetails.push({
-      type: sub.type,
-      value: sub.value,
-      maxPossible,
-      efficiency: Math.round(eff * 100) / 100,
-      estimatedRolls: rolls,
-    })
-  }
-
-  // Barion formula
-  const currentEfficiency = ((rawSum + 1) / BARION_DIVISOR) * 100
+  const currentEfficiency = barionEfficiency(rune.subStats)
   const potentialEfficiency = calculatePotentialEfficiency(rune)
 
-  // Max efficiency: 4 substats * 4 rolls each at max = 16 max roll contributions + 1 main
-  // But legend rune starts with 4 subs, so at +12 each sub has had some rolls
-  // Theoretical max: rawSum = number_of_total_rolls (each = 1.0 if perfect)
-  // A 6* legend rune: 4 initial subs + 4 upgrade rolls = 8 total sub rolls
-  // maxRawSum = 8, maxEfficiency = (8 + 1) / 2.8 * 100
-  const maxRawSum = 8
-  const maxEfficiency = ((maxRawSum + 1) / BARION_DIVISOR) * 100
+  // Max efficiency: 8 perfect rolls + 1 main = (8 + 1) / 2.8 * 100
+  const maxEfficiency = ((8 + 1) / BARION_DIVISOR) * 100
 
-  const roundedCurrent = Math.round(currentEfficiency * 100) / 100
-  const roundedPotential = Math.round(potentialEfficiency * 100) / 100
-  const roundedMax = Math.round(maxEfficiency * 100) / 100
+  const grindPotential = calculateGrindPotential(substats, currentEfficiency)
 
-  const recommendation = getRecommendation(roundedCurrent, roundedPotential)
+  const recommendation = getRecommendation(
+    currentEfficiency,
+    potentialEfficiency,
+    grindPotential.efficiencyAfterGrind,
+  )
 
   return {
-    currentEfficiency: roundedCurrent,
-    potentialEfficiency: roundedPotential,
-    maxEfficiency: roundedMax,
-    substatDetails,
+    currentEfficiency: Math.round(currentEfficiency * 100) / 100,
+    potentialEfficiency: Math.round(potentialEfficiency * 100) / 100,
+    maxEfficiency: Math.round(maxEfficiency * 100) / 100,
+    substats,
+    grindPotential,
     recommendation,
+    quality,
+    totalRolls,
   }
 }

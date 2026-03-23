@@ -3,6 +3,7 @@
  */
 
 export {
+  analyzeRune,
   calculateEfficiency,
   calculatePotentialEfficiency,
   estimateRolls,
@@ -10,6 +11,10 @@ export {
 } from './rune-efficiency.js'
 
 export type {
+  GrindPotential,
+  Recommendation,
+  RuneAnalysis,
   RuneEfficiencyResult,
+  SubstatAnalysis,
   SubstatDetail,
 } from './rune-efficiency.js'
