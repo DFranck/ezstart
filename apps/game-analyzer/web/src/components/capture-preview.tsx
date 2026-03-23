@@ -5,6 +5,10 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import type { RoiRect } from './roi-selector'
 import { RoiSelector } from './roi-selector'
+import type { ZoneConfig } from './multi-zone-selector'
+import { MultiZoneSelector } from './multi-zone-selector'
+import type { MaskRect } from './blackout-mask'
+import { BlackoutMask } from './blackout-mask'
 
 interface CapturePreviewProps {
   isCapturing: boolean
@@ -17,6 +21,12 @@ interface CapturePreviewProps {
   roi?: RoiRect
   onRoiChange?: (roi: RoiRect) => void
   showFullPreview?: boolean
+  zones?: ZoneConfig[]
+  onZonesChange?: (zones: ZoneConfig[]) => void
+  masks?: MaskRect[]
+  onMasksChange?: (masks: MaskRect[]) => void
+  onMaskAdd?: () => void
+  onMaskRemove?: (id: string) => void
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -37,6 +47,12 @@ export function CapturePreview({
   roi,
   onRoiChange,
   showFullPreview = true,
+  zones,
+  onZonesChange,
+  masks,
+  onMasksChange,
+  onMaskAdd,
+  onMaskRemove,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -350,6 +366,22 @@ export function CapturePreview({
                   className="w-full h-auto block"
                   style={{ cursor: 'grab', touchAction: 'none' }}
                 />
+                {/* Multi-zone overlay on zoom view */}
+                {zones && onZonesChange && (
+                  <MultiZoneSelector
+                    onChange={onZonesChange}
+                    initialZones={zones}
+                  />
+                )}
+                {/* Blackout mask overlay on zoom view */}
+                {masks && onMasksChange && onMaskAdd && onMaskRemove && (
+                  <BlackoutMask
+                    masks={masks}
+                    onChange={onMasksChange}
+                    onAdd={onMaskAdd}
+                    onRemove={onMaskRemove}
+                  />
+                )}
                 {/* Zoom indicator + buttons */}
                 <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
                   <button

@@ -129,7 +129,8 @@ export async function scanImage(
   imageAltBuffer?: Buffer,
   imageFullBuffer?: Buffer,
   benchMode: boolean = false,
-  presets?: string[]
+  presets?: string[],
+  zoneBuffers?: Record<string, Buffer>
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -353,6 +354,82 @@ export async function scanImage(
           }
         } catch (e) {
           console.error('[scan] Extra image OCR failed, using main:', e)
+        }
+      }
+    }
+
+    // --- Zone-based OCR: process each zone individually and merge ---
+    if (zoneBuffers && Object.keys(zoneBuffers).length > 0) {
+      console.log(`[scan] Zone-based OCR: ${Object.keys(zoneBuffers).join(', ')}`)
+
+      const zoneResults = await Promise.all(
+        Object.entries(zoneBuffers).map(async ([zoneName, buffer]) => {
+          try {
+            const processed = await preprocessImage(buffer, { scale: 2 })
+            const ocr = await recognize(processed, ocrConfig)
+            return { zoneName, ocr, text: ocr.text, confidence: ocr.confidence }
+          } catch (e) {
+            console.error(`[scan] Zone ${zoneName} OCR failed:`, e)
+            return { zoneName, ocr: null, text: '', confidence: 0 }
+          }
+        })
+      )
+
+      // Build combined text from zone results for the parser
+      const zoneTexts: string[] = []
+      let zoneConfidenceSum = 0
+      let zoneConfidenceCount = 0
+
+      for (const zr of zoneResults) {
+        if (zr.ocr) {
+          zoneTexts.push(zr.text)
+          zoneConfidenceSum += zr.confidence
+          zoneConfidenceCount++
+          ocrSources.push({
+            name: `zone-${zr.zoneName}`,
+            confidence: Math.round(zr.confidence),
+            rawText: zr.text,
+            subsFound: 0,
+            success: true,
+          })
+        }
+      }
+
+      if (zoneTexts.length > 0) {
+        const combinedText = zoneTexts.join('\n')
+        const combinedConfidence = zoneConfidenceCount > 0
+          ? Math.round(zoneConfidenceSum / zoneConfidenceCount)
+          : 0
+        const zoneOcr: OcrResult = { text: combinedText, confidence: combinedConfidence, regions: [] }
+        const zoneParse = parser.parse(zoneOcr)
+
+        const zoneSubCount = zoneParse.success ? ((zoneParse.data as any)?.subStats || []).length : 0
+        const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
+
+        console.log(`[scan] Zone OCR: ${zoneSubCount} subs (current: ${currentSubCount}), confidence: ${combinedConfidence}%`)
+
+        // Use zone result if it found more substats or higher confidence
+        if (zoneSubCount > currentSubCount || (zoneSubCount === currentSubCount && combinedConfidence > ocrResult.confidence)) {
+          ocrResult = zoneOcr
+          parseResult = zoneParse
+          console.log('[scan] Using zone-based OCR result (better than standard)')
+        }
+
+        // Also try merging zone + standard results
+        if (currentSubCount > 0 && zoneSubCount > 0) {
+          const merged = mergeBenchResults([
+            { ocr: ocrResult, parse: parseResult },
+            { ocr: zoneOcr, parse: zoneParse },
+          ])
+          const mergedSubCount = merged.parseResult.success
+            ? ((merged.parseResult.data as any)?.subStats || []).length
+            : 0
+
+          if (mergedSubCount >= Math.max(currentSubCount, zoneSubCount)) {
+            ocrResult = merged.ocrResult
+            parseResult = merged.parseResult
+            console.log('[scan] Using merged zone + standard result')
+          }
         }
       }
     }

@@ -12,6 +12,9 @@ import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GameType } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
+import type { MaskRect } from '@/components/blackout-mask'
+import type { ZoneConfig } from '@/components/multi-zone-selector'
+import { getDefaultZones } from '@/components/multi-zone-selector'
 import { CapturePreview } from '@/components/capture-preview'
 import { OcrDebugPanel } from '@/components/ocr-debug-panel'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
@@ -29,6 +32,49 @@ function loadRoi(gameType: GameType): RoiRect {
     if (saved) return JSON.parse(saved)
   } catch {}
   return DEFAULT_ROI
+}
+
+function loadZones(gameType: GameType): ZoneConfig[] {
+  if (typeof window === 'undefined') return getDefaultZones()
+  try {
+    const saved = localStorage.getItem(`game-analyzer-zones-${gameType}`)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return getDefaultZones()
+}
+
+const DEFAULT_MASKS: MaskRect[] = [
+  { id: 'buttons', x: 65, y: 35, width: 30, height: 35 },
+  { id: 'score', x: 60, y: 15, width: 35, height: 15 },
+  { id: 'sell', x: 65, y: 75, width: 30, height: 20 },
+]
+
+function loadMasks(gameType: GameType): MaskRect[] {
+  if (typeof window === 'undefined') return DEFAULT_MASKS
+  try {
+    const saved = localStorage.getItem(`game-analyzer-masks-${gameType}`)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return DEFAULT_MASKS
+}
+
+function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData {
+  const canvas = document.createElement('canvas')
+  canvas.width = imageData.width
+  canvas.height = imageData.height
+  const ctx = canvas.getContext('2d')!
+  ctx.putImageData(imageData, 0, 0)
+
+  ctx.fillStyle = 'black'
+  for (const mask of masks) {
+    const x = Math.round((mask.x / 100) * canvas.width)
+    const y = Math.round((mask.y / 100) * canvas.height)
+    const w = Math.round((mask.width / 100) * canvas.width)
+    const h = Math.round((mask.height / 100) * canvas.height)
+    ctx.fillRect(x, y, w, h)
+  }
+
+  return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
@@ -74,11 +120,15 @@ export default function BenchPage() {
   const game = params.game as GameType
 
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
+  const [zones, setZones] = useState<ZoneConfig[]>(() => loadZones(game))
+  const [masks, setMasks] = useState<MaskRect[]>(() => loadMasks(game))
   const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const [presetsSaved, setPresetsSaved] = useState(false)
   const { mutate: scan, data: scanResult, isPending } = useScan()
 
   const roiRef = useRef<RoiRect>(roi)
+  const zonesRef = useRef<ZoneConfig[]>(zones)
+  const masksRef = useRef<MaskRect[]>(masks)
   const fullFrameRef = useRef<ImageData | null>(null)
   const scanningRef = useRef(false)
 
@@ -88,10 +138,45 @@ export default function BenchPage() {
     localStorage.setItem(`game-analyzer-roi-${game}`, JSON.stringify(newRoi))
   }, [game])
 
+  const handleZonesChange = useCallback((newZones: ZoneConfig[]) => {
+    setZones(newZones)
+    zonesRef.current = newZones
+    localStorage.setItem(`game-analyzer-zones-${game}`, JSON.stringify(newZones))
+  }, [game])
+
+  const handleMasksChange = useCallback((newMasks: MaskRect[]) => {
+    setMasks(newMasks)
+    masksRef.current = newMasks
+    localStorage.setItem(`game-analyzer-masks-${game}`, JSON.stringify(newMasks))
+  }, [game])
+
+  const handleMaskAdd = useCallback(() => {
+    const newMask: MaskRect = {
+      id: `mask-${Date.now()}`,
+      x: 35,
+      y: 35,
+      width: 20,
+      height: 15,
+    }
+    const newMasks = [...masksRef.current, newMask]
+    handleMasksChange(newMasks)
+  }, [handleMasksChange])
+
+  const handleMaskRemove = useCallback((id: string) => {
+    const newMasks = masksRef.current.filter(m => m.id !== id)
+    handleMasksChange(newMasks)
+  }, [handleMasksChange])
+
   useEffect(() => {
     const savedRoi = loadRoi(game)
     setRoi(savedRoi)
     roiRef.current = savedRoi
+    const savedZones = loadZones(game)
+    setZones(savedZones)
+    zonesRef.current = savedZones
+    const savedMasks = loadMasks(game)
+    setMasks(savedMasks)
+    masksRef.current = savedMasks
   }, [game])
 
   const runBenchScan = useCallback(
@@ -99,16 +184,19 @@ export default function BenchPage() {
       if (scanningRef.current) return
       scanningRef.current = true
 
-      const processed = preprocessForOcr(frame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      // Apply blackout masks before preprocessing
+      const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
+
+      const processed = preprocessForOcr(maskedFrame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
 
       const previewCanvas = document.createElement('canvas')
       previewCanvas.width = processed.width
       previewCanvas.height = processed.height
       previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
 
-      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(frame)]
+      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedFrame)]
 
-      const rawCanvas = canvasFromImageData(frame)
+      const rawCanvas = canvasFromImageData(maskedFrame)
       const previews: { name: string; dataUrl: string }[] = [
         { name: 'Zoom Preprocessed', dataUrl: previewCanvas.toDataURL('image/png') },
         { name: 'Zoom Raw', dataUrl: rawCanvas.toDataURL('image/png') },
@@ -117,20 +205,43 @@ export default function BenchPage() {
       let hasFullBlob = false
       if (fullFrameRef.current) {
         const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-        const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
+        const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
         const fullCanvas = canvasFromImageData(fullProcessed)
         previews.push({ name: 'Full Window Crop', dataUrl: fullCanvas.toDataURL('image/png') })
       }
 
-      setOcrPreviews(previews)
+      // Crop zone images from the zoom frame
+      const currentZones = zonesRef.current
+      const zoneBlobPromises = currentZones.map(async (zone) => {
+        const zoneCropped = cropImageData(maskedFrame, zone.rect)
+        const zoneProcessed = preprocessForOcr(zoneCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const blob = await imageDataToBlob(zoneProcessed)
+
+        // Add zone preview
+        const zoneCanvas = canvasFromImageData(zoneProcessed)
+        previews.push({ name: `Zone: ${zone.name}`, dataUrl: zoneCanvas.toDataURL('image/png') })
+
+        return { name: zone.name, blob }
+      })
+
       setPresetsSaved(false)
 
-      Promise.all(blobPromises).then((blobs) => {
+      Promise.all([Promise.all(blobPromises), Promise.all(zoneBlobPromises)]).then(([blobs, zoneBlobs]) => {
+        setOcrPreviews(previews)
+
         const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
         const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
         const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
+
+        // Build zone files
+        const zoneFiles: Record<string, File> = {}
+        for (const zb of zoneBlobs) {
+          zoneFiles[zb.name] = new File([zb.blob], `zone-${zb.name}.png`, { type: 'image/png' })
+        }
+
         scan(
           {
             image: mainFile,
@@ -138,6 +249,10 @@ export default function BenchPage() {
             imageFull: fullFile,
             gameType: game,
             benchMode: true,
+            zoneHeader: zoneFiles.header,
+            zoneMain: zoneFiles.main,
+            zoneSubstats: zoneFiles.substats,
+            zoneSetbonus: zoneFiles.setbonus,
           },
           { onSettled: () => { scanningRef.current = false } }
         )
@@ -235,6 +350,12 @@ export default function BenchPage() {
           roi={roi}
           onRoiChange={handleRoiChange}
           showFullPreview
+          zones={zones}
+          onZonesChange={handleZonesChange}
+          masks={masks}
+          onMasksChange={handleMasksChange}
+          onMaskAdd={handleMaskAdd}
+          onMaskRemove={handleMaskRemove}
         />
 
         {/* Rescan button */}

@@ -21,7 +21,15 @@ const scanBodySchema = z.object({
 })
 
 // POST /scan — Upload an image (+ optional alt/full images) and run OCR
-router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAlt', maxCount: 1 }, { name: 'imageFull', maxCount: 1 }]), async (req: any, res: any) => {
+router.post('/', upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'imageAlt', maxCount: 1 },
+  { name: 'imageFull', maxCount: 1 },
+  { name: 'zoneHeader', maxCount: 1 },
+  { name: 'zoneMain', maxCount: 1 },
+  { name: 'zoneSubstats', maxCount: 1 },
+  { name: 'zoneSetbonus', maxCount: 1 },
+]), async (req: any, res: any) => {
   try {
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
     const imageFile = files?.image?.[0]
@@ -45,7 +53,22 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAl
     const imageAltFile = files?.imageAlt?.[0]
     const imageFullFile = files?.imageFull?.[0]
 
-    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets)
+    // Zone-based images (multi-zone ROI)
+    const zoneBuffers: Record<string, Buffer> | undefined = (() => {
+      const zoneHeader = files?.zoneHeader?.[0]
+      const zoneMain = files?.zoneMain?.[0]
+      const zoneSubstats = files?.zoneSubstats?.[0]
+      const zoneSetbonus = files?.zoneSetbonus?.[0]
+      if (!zoneHeader && !zoneMain && !zoneSubstats && !zoneSetbonus) return undefined
+      const zones: Record<string, Buffer> = {}
+      if (zoneHeader) zones.header = zoneHeader.buffer
+      if (zoneMain) zones.main = zoneMain.buffer
+      if (zoneSubstats) zones.substats = zoneSubstats.buffer
+      if (zoneSetbonus) zones.setbonus = zoneSetbonus.buffer
+      return zones
+    })()
+
+    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets, zoneBuffers)
 
     res.status(201).json({
       success: true,

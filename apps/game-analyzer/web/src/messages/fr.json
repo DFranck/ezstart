@@ -64,7 +64,17 @@
     "description": "Teste les 8 presets sur 3 sources d'image pour trouver la meilleure configuration OCR",
     "source": "Source",
     "savePresets": "Sauvegarder les meilleurs presets pour le scan production",
-    "presetsSaved": "Presets sauvegardes pour le scan production"
+    "presetsSaved": "Presets sauvegardes pour le scan production",
+    "masks": "Zones masquées",
+    "addMask": "Ajouter un masque",
+    "removeMask": "Supprimer",
+    "zones": "Zones de lecture",
+    "zone": {
+      "header": "Nom/Set/Slot",
+      "main": "Stat principale",
+      "substats": "Sous-stats",
+      "setbonus": "Bonus de set"
+    }
   },
   "dashboard": {
     "title": "Game Analyzer",
