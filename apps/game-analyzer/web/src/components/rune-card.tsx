@@ -4,6 +4,7 @@ import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezs
 import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
+import { MonsterSuggestions } from './monster-suggestions'
 
 // ── Set emojis ──
 const SET_EMOJIS: Record<string, string> = {
@@ -301,6 +302,20 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   })}
                 </Div>
               </Div>
+            </>
+          )
+        })()}
+
+        {/* ── Monster suggestions ── */}
+        {analysis?.synergy && (() => {
+          const suggestedArchetypes = (analysis.synergy.allArchetypes ?? [])
+            .filter(a => a.matchCount >= 2)
+            .map(a => a.archetype)
+          if (suggestedArchetypes.length === 0) return null
+          return (
+            <>
+              <Div className="border-t border-border" />
+              <MonsterSuggestions archetypes={suggestedArchetypes} />
             </>
           )
         })()}

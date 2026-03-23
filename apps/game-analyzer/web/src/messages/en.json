@@ -136,7 +136,8 @@
       "revenge-proc": "Revenge",
       "speed-leader": "Speed Lead",
       "raid-support": "Raid"
-    }
+    },
+    "suggestedMonsters": "Suggested monsters"
   },
   "scanDetail": {
     "title": "Scan Details",
