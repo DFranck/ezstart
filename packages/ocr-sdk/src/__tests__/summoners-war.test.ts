@@ -608,6 +608,115 @@ describe('summonersWarParser', () => {
     })
   })
 
+  describe('innate detection based on quality+level substat count', () => {
+    it('Hero +6 with 4 stats → innate + 3 subs', () => {
+      const text = [
+        'Violent Rune (1)',
+        '+6',
+        'Hero',
+        'RES +6%',
+        'SPD +12',
+        'HP +8%',
+        'ATK +5%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      // Slot 1 → main stat is ATK flat (hardcoded)
+      expect(data.mainStat).toMatchObject({ type: 'atk' })
+      // Hero +6 → expected 3 subs. 4 found → first is innate
+      expect(data.innateStat).toBeDefined()
+      expect(data.innateStat).toMatchObject({ type: 'res', value: 6 })
+      expect(data.subStats).toHaveLength(3)
+    })
+
+    it('Hero +12 with 5 stats → innate + 4 subs', () => {
+      const text = [
+        'Swift Rune (1)',
+        '+12',
+        'Hero',
+        'Accuracy +4%',
+        'SPD +18',
+        'HP +8%',
+        'ATK +12%',
+        'DEF +10%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      expect(data.mainStat).toMatchObject({ type: 'atk' })
+      // Hero +12 → expected 4 subs. 5 found → first is innate
+      expect(data.innateStat).toBeDefined()
+      expect(data.innateStat).toMatchObject({ type: 'acc', value: 4 })
+      expect(data.subStats).toHaveLength(4)
+    })
+
+    it('Legend +12 with 4 stats → no innate', () => {
+      const text = [
+        'Violent Rune (1)',
+        '+12',
+        'Legend',
+        'SPD +18',
+        'HP +8%',
+        'ATK +12%',
+        'CRI Rate +10%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      expect(data.mainStat).toMatchObject({ type: 'atk' })
+      // Legend +12 → expected 4 subs. 4 found → no innate
+      expect(data.innateStat).toBeUndefined()
+      expect(data.subStats).toHaveLength(4)
+    })
+
+    it('Hero +6 with 3 stats → no innate', () => {
+      const text = [
+        'Blade Rune (1)',
+        '+6',
+        'Hero',
+        'SPD +10',
+        'HP +8%',
+        'CRI Rate +6%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as {
+        mainStat: { type: string; value: number }
+        subStats: { type: string; value: number }[]
+        innateStat?: { type: string; value: number }
+      }
+
+      expect(data.mainStat).toMatchObject({ type: 'atk' })
+      // Hero +6 → expected 3 subs. 3 found → no innate
+      expect(data.innateStat).toBeUndefined()
+      expect(data.subStats).toHaveLength(3)
+    })
+  })
+
   describe('tolerant parsing', () => {
     it('handles "HP+16%" without space', () => {
       const text = 'Violent Rune (2) SPD +42 HP+16% ATK+8%'

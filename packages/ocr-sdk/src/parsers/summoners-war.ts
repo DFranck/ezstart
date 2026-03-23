@@ -648,10 +648,12 @@ function separateMainAndSubs(
     // Deduplicate: same stat type cannot appear twice on a rune
     subStats = deduplicateStats(subStats)
 
-    // Innate stat detection: if we have more than 4 substats and the rune
-    // appears to be legend quality, the first stat is the innate (prefix) stat.
+    // Innate stat detection: if we have more substats than what quality+level allows,
+    // the first substat is the innate (prefix) stat.
+    // When quality is known, use the precise expected count; otherwise fall back to MAX_SUBSTATS.
     let innateStat: RuneStat | undefined
-    if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
+    const expectedSubs = quality ? getExpectedSubstatCount(quality, level) : MAX_SUBSTATS
+    if (subStats.length > expectedSubs && subStats.length > 0) {
       const candidate = subStats[0]
       // Safety: if the candidate has same type and value as main stat, it's a
       // duplicate from OCR — not a real innate stat.
@@ -659,7 +661,7 @@ function separateMainAndSubs(
         innateStat = subStats.shift()
       }
     }
-    subStats = subStats.slice(0, MAX_SUBSTATS)
+    subStats = subStats.slice(0, expectedSubs)
 
     return { mainStat, subStats, innateStat }
   }
@@ -733,9 +735,12 @@ function separateMainAndSubs(
   // Deduplicate: same stat type cannot appear twice on a rune
   subStats = deduplicateStats(subStats)
 
-  // Innate stat detection for non-fixed slots
+  // Innate stat detection for non-fixed slots: if we have more substats than
+  // what quality+level allows, the first substat is the innate (prefix) stat.
+  // When quality is known, use the precise expected count; otherwise fall back to MAX_SUBSTATS.
   let innateStat: RuneStat | undefined
-  if (subStats.length > MAX_SUBSTATS && (quality === 'legend' || subStats.length >= 5)) {
+  const expectedSubs = quality ? getExpectedSubstatCount(quality, level) : MAX_SUBSTATS
+  if (subStats.length > expectedSubs && subStats.length > 0) {
     const candidate = subStats[0]
     // Safety: if the candidate has same type and value as main stat, it's a
     // duplicate from OCR — not a real innate stat.
@@ -743,7 +748,7 @@ function separateMainAndSubs(
       innateStat = subStats.shift()
     }
   }
-  subStats = subStats.slice(0, MAX_SUBSTATS)
+  subStats = subStats.slice(0, expectedSubs)
 
   return { mainStat, subStats, innateStat }
 }
