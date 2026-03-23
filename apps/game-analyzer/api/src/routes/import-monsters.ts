@@ -126,11 +126,26 @@ router.get('/for-rune', async (req: any, res: any) => {
     const archetypes = archetypesParam.split(',').map((a: string) => a.trim())
     const MonsterModel = await getMonsterModel()
 
-    const monsters = await MonsterModel.find({
-      buildArchetypes: { $in: archetypes },
-    })
-      .sort({ naturalStars: -1, name: 1 })
-      .lean()
+    // Prioritize nat4+, obtainable, and monsters matching multiple archetypes
+    const monsters = await MonsterModel.aggregate([
+      {
+        $match: {
+          buildArchetypes: { $in: archetypes },
+          naturalStars: { $gte: 4 },
+          obtainable: true,
+        },
+      },
+      {
+        $addFields: {
+          matchCount: {
+            $size: { $setIntersection: ['$buildArchetypes', archetypes] },
+          },
+        },
+      },
+      { $sort: { matchCount: -1, naturalStars: -1, name: 1 } },
+      { $limit: 15 },
+      { $project: { matchCount: 0 } },
+    ])
 
     res.json({
       success: true,

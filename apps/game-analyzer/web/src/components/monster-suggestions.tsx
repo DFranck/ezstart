@@ -39,7 +39,7 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
     <Div className="space-y-2">
       <P className="text-sm font-medium">{tRune('suggestedMonsters')}</P>
       <Div className="flex flex-wrap gap-2">
-        {monsters.slice(0, 12).map(monster => (
+        {monsters.map(monster => (
           <Div
             key={monster.id}
             className="relative group"
@@ -51,17 +51,16 @@ export function MonsterSuggestions({ archetypes }: MonsterSuggestionsProps) {
               className="w-10 h-10 rounded-full border-2"
               style={{ borderColor: ELEMENT_COLORS[monster.element] }}
             />
+            {/* Star badge */}
+            <Div className="absolute -bottom-1 -right-1 bg-background border border-border rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold leading-none">
+              {monster.naturalStars}
+            </Div>
             {/* Tooltip on hover */}
             <Div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-popover text-popover-foreground text-xs rounded px-2 py-1 whitespace-nowrap z-50">
               {monster.name} ({monster.naturalStars}\u2605)
             </Div>
           </Div>
         ))}
-        {monsters.length > 12 && (
-          <P className="text-xs text-muted-foreground self-center">
-            +{monsters.length - 12} more
-          </P>
-        )}
       </Div>
     </Div>
   )
