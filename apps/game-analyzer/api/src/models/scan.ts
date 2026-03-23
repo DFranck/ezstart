@@ -9,6 +9,7 @@ const scanResultSchema = new Schema<ScanResult>(
     rawText: { type: String, required: true },
     confidence: { type: Number, required: true },
     processingTimeMs: { type: Number, required: true },
+    analysis: { type: Schema.Types.Mixed },
   },
   { _id: false }
 )

@@ -1,6 +1,6 @@
-import { recognize, summonersWarParser, nikkeParser } from '@ezstart/ocr-sdk'
+import { recognize, summonersWarParser, nikkeParser, analyzeRune } from '@ezstart/ocr-sdk'
 import { getScanModel } from '../models/scan.js'
-import type { GameType, ScanResult } from '@game-analyzer/types'
+import type { GameType, RuneData, ScanResult } from '@game-analyzer/types'
 
 /**
  * Process an image through OCR, parse game-specific data, and store the result
@@ -31,13 +31,25 @@ export async function scanImage(
 
     const processingTimeMs = Date.now() - startTime
 
-    // 3. Build result
+    // 3. Analyze rune if parsing succeeded (SW only for now)
+    let analysis: ScanResult['analysis'] = undefined
+    if (parseResult.success && gameType === 'summoners-war' && parseResult.data && 'set' in parseResult.data) {
+      try {
+        analysis = analyzeRune(parseResult.data as unknown as RuneData) as unknown as ScanResult['analysis']
+      } catch (e) {
+        // Don't fail the scan if analysis fails
+        console.error('[scan] Analysis failed:', e)
+      }
+    }
+
+    // 4. Build result
     const result: ScanResult = {
       success: parseResult.success,
       data: parseResult.data as unknown as ScanResult['data'],
       rawText: ocrResult.text,
       confidence: ocrResult.confidence,
       processingTimeMs,
+      analysis,
     }
 
     // Update scan with result
