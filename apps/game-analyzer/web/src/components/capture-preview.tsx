@@ -2,7 +2,7 @@
 
 import { Button, Card, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import type { RoiRect } from './roi-selector'
 
 interface CapturePreviewProps {
@@ -41,6 +41,11 @@ export function CapturePreview({
   const containerRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const roiRef = useRef<RoiRect>(roi ?? { x: 60, y: 5, width: 35, height: 40 })
+  const onRoiChangeRef = useRef(onRoiChange)
+  onRoiChangeRef.current = onRoiChange
+
+  // Track whether the canvas is visible (mounted in DOM)
+  const canvasVisible = isCapturing && !!currentFrame
 
   // Keep roiRef in sync with prop
   useEffect(() => {
@@ -90,14 +95,15 @@ export function CapturePreview({
     ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
   }, [currentFrame, roi])
 
-  // Wheel handler for zoom
+  // Wheel handler for zoom — depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || !canvasVisible) return
 
     function handleWheel(e: WheelEvent) {
       e.preventDefault()
-      if (!onRoiChange) return
+      const cb = onRoiChangeRef.current
+      if (!cb) return
 
       const r = roiRef.current
       const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9
@@ -113,17 +119,17 @@ export function CapturePreview({
 
       const newRoi = { x: newX, y: newY, width: newWidth, height: newHeight }
       roiRef.current = newRoi
-      onRoiChange(newRoi)
+      cb(newRoi)
     }
 
     canvas.addEventListener('wheel', handleWheel, { passive: false })
     return () => canvas.removeEventListener('wheel', handleWheel)
-  }, [onRoiChange])
+  }, [canvasVisible])
 
-  // Drag handlers for pan
+  // Drag handlers for pan — depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !onRoiChange) return
+    if (!canvas || !canvasVisible) return
 
     function handleMouseDown(e: MouseEvent) {
       e.preventDefault()
@@ -133,6 +139,8 @@ export function CapturePreview({
 
     function handleMouseMove(e: MouseEvent) {
       if (!isDraggingRef.current) return
+      const cb = onRoiChangeRef.current
+      if (!cb) return
       const r = roiRef.current
       const canvasWidth = canvas!.clientWidth
       const canvasHeight = canvas!.clientHeight
@@ -148,7 +156,7 @@ export function CapturePreview({
         y: clamp(r.y - dy, 0, 100 - r.height),
       }
       roiRef.current = newRoi
-      onRoiChange!(newRoi)
+      cb(newRoi)
     }
 
     function handleMouseUp() {
@@ -182,6 +190,8 @@ export function CapturePreview({
       if (!isDraggingRef.current || e.touches.length !== 1) return
       e.preventDefault()
 
+      const cb = onRoiChangeRef.current
+      if (!cb) return
       const touch = e.touches[0]
       if (!touch) return
       const movementX = touch.clientX - lastTouchX
@@ -203,7 +213,7 @@ export function CapturePreview({
         y: clamp(r.y - dy, 0, 100 - r.height),
       }
       roiRef.current = newRoi
-      onRoiChange!(newRoi)
+      cb(newRoi)
     }
 
     function handleTouchEnd() {
@@ -224,7 +234,7 @@ export function CapturePreview({
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [onRoiChange])
+  }, [canvasVisible])
 
   // Zoom button handlers
   const handleZoomIn = useCallback(() => {
@@ -298,7 +308,7 @@ export function CapturePreview({
             <canvas
               ref={canvasRef}
               className="w-full h-auto block"
-              style={{ cursor: 'grab' }}
+              style={{ cursor: 'grab', touchAction: 'none' }}
             />
             {/* Zoom indicator + buttons */}
             <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
