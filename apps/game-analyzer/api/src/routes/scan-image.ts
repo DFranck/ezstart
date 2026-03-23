@@ -13,6 +13,11 @@ const router: any = Router()
 const scanBodySchema = z.object({
   gameType: z.enum(['summoners-war', 'nikke']),
   profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
+  benchMode: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional().default(false),
+  presets: z.preprocess(
+    (v) => (typeof v === 'string' ? JSON.parse(v) : v),
+    z.array(z.string()).optional()
+  ),
 })
 
 // POST /scan — Upload an image (+ optional alt/full images) and run OCR
@@ -36,11 +41,11 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'imageAl
       })
     }
 
-    const { gameType, profile } = validation.data
+    const { gameType, profile, benchMode, presets } = validation.data
     const imageAltFile = files?.imageAlt?.[0]
     const imageFullFile = files?.imageFull?.[0]
 
-    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer)
+    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets)
 
     res.status(201).json({
       success: true,

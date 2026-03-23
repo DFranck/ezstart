@@ -20,7 +20,6 @@ import { RuneCard } from '@/components/rune-card'
 import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
 import { ScanResultRaw } from '@/components/scan-result-raw'
-import { OcrDebugPanel } from '@/components/ocr-debug-panel'
 import { ProfileSelector, usePlayerProfile } from '@/components/profile-selector'
 import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
@@ -38,6 +37,16 @@ function loadRoi(gameType: GameType): RoiRect {
     if (saved) return JSON.parse(saved)
   } catch {}
   return DEFAULT_ROI
+}
+
+/** Load saved best presets from localStorage */
+function loadPresets(gameType: GameType): string[] {
+  if (typeof window === 'undefined') return ['upscale-2x']
+  try {
+    const saved = localStorage.getItem(`game-analyzer-best-presets-${gameType}`)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return ['upscale-2x']
 }
 
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
@@ -86,8 +95,10 @@ export default function GameScanPage() {
   const [mode, setMode] = useState<'capture' | 'upload'>('capture')
   const [profile, setProfile] = usePlayerProfile(game)
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
-  const [ocrPreviews, setOcrPreviews] = useState<{ name: string; dataUrl: string }[]>([])
   const { mutate: scan, data: scanResult, isPending, reset } = useScan()
+
+  // Load saved presets from bench
+  const savedPresets = useRef<string[]>(loadPresets(game))
 
   // Keep a ref to the latest ROI so callbacks always have the current value
   const roiRef = useRef<RoiRect>(roi)
@@ -104,6 +115,7 @@ export default function GameScanPage() {
     const savedRoi = loadRoi(game)
     setRoi(savedRoi)
     roiRef.current = savedRoi
+    savedPresets.current = loadPresets(game)
   }, [game])
 
   // Track whether an auto-scan is in progress to avoid overlapping requests
@@ -115,24 +127,10 @@ export default function GameScanPage() {
 
       scanningRef.current = true
 
-      // Frame is already cropped to ROI by handleFrame before being fed to useFrameDiff
-      // Upscale 2x only — best OCR accuracy (79% confidence in testing)
       const processed = preprocessForOcr(frame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
-      // Save a preview of the preprocessed image sent to OCR
-      const previewCanvas = document.createElement('canvas')
-      previewCanvas.width = processed.width
-      previewCanvas.height = processed.height
-      previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
 
       // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
       const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(frame)]
-
-      // Capture preview dataURLs for the debug panel
-      const rawCanvas = canvasFromImageData(frame)
-      const previews: { name: string; dataUrl: string }[] = [
-        { name: 'Zoom Preprocessed', dataUrl: previewCanvas.toDataURL('image/png') },
-        { name: 'Zoom Raw', dataUrl: rawCanvas.toDataURL('image/png') },
-      ]
 
       // 3rd source: full window frame cropped to ROI at native resolution
       let hasFullBlob = false
@@ -141,18 +139,22 @@ export default function GameScanPage() {
         const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
-        const fullCanvas = canvasFromImageData(fullProcessed)
-        previews.push({ name: 'Full Window Crop', dataUrl: fullCanvas.toDataURL('image/png') })
       }
-
-      setOcrPreviews(previews)
 
       Promise.all(blobPromises).then((blobs) => {
         const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
         const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
         const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
         scan(
-          { image: mainFile, imageAlt: altFile, imageFull: fullFile, gameType: game, profile },
+          {
+            image: mainFile,
+            imageAlt: altFile,
+            imageFull: fullFile,
+            gameType: game,
+            profile,
+            benchMode: false,
+            presets: savedPresets.current,
+          },
           { onSettled: () => { scanningRef.current = false } }
         )
       })
@@ -191,23 +193,10 @@ export default function GameScanPage() {
     if (!currentFrame || scanningRef.current) return
     scanningRef.current = true
     const cropped = cropImageData(currentFrame, roiRef.current)
-    // Upscale 2x only — best OCR accuracy (79% confidence in testing)
     const processed = preprocessForOcr(cropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
-    // Save a preview of the preprocessed image sent to OCR
-    const previewCanvas = document.createElement('canvas')
-    previewCanvas.width = processed.width
-    previewCanvas.height = processed.height
-    previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
 
     // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
     const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(cropped)]
-
-    // Capture preview dataURLs for the debug panel
-    const rawCanvas = canvasFromImageData(cropped)
-    const previews: { name: string; dataUrl: string }[] = [
-      { name: 'Zoom Preprocessed', dataUrl: previewCanvas.toDataURL('image/png') },
-      { name: 'Zoom Raw', dataUrl: rawCanvas.toDataURL('image/png') },
-    ]
 
     // 3rd source: full window frame cropped to ROI at native resolution
     let hasFullBlob = false
@@ -216,18 +205,22 @@ export default function GameScanPage() {
       const fullProcessed = preprocessForOcr(fullCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
       blobPromises.push(imageDataToBlob(fullProcessed))
       hasFullBlob = true
-      const fullCanvas = canvasFromImageData(fullProcessed)
-      previews.push({ name: 'Full Window Crop', dataUrl: fullCanvas.toDataURL('image/png') })
     }
-
-    setOcrPreviews(previews)
 
     Promise.all(blobPromises).then((blobs) => {
       const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
       const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
       const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
       scan(
-        { image: mainFile, imageAlt: altFile, imageFull: fullFile, gameType: game, profile },
+        {
+          image: mainFile,
+          imageAlt: altFile,
+          imageFull: fullFile,
+          gameType: game,
+          profile,
+          benchMode: false,
+          presets: savedPresets.current,
+        },
         { onSettled: () => { scanningRef.current = false } }
       )
     })
@@ -235,12 +228,11 @@ export default function GameScanPage() {
 
   function handleImageSelected(file: File) {
     reset()
-    scan({ image: file, gameType: game, profile })
+    scan({ image: file, gameType: game, profile, benchMode: false, presets: savedPresets.current })
   }
 
   const isAnalyzing = isPending
 
-  // API response is flat: { success, data, rawText, confidence, ... } — no .result wrapper
   const resultData = scanResult
   const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
@@ -266,7 +258,7 @@ export default function GameScanPage() {
         {/* Capture Mode */}
         <TabsContent value="capture">
           <Div className="space-y-6">
-            {/* Previews: zoom + full side by side */}
+            {/* Zoom preview only (no full preview in prod) */}
             <CapturePreview
               isCapturing={isCapturing}
               isAnalyzing={isAnalyzing}
@@ -277,7 +269,7 @@ export default function GameScanPage() {
               onStop={stopCapture}
               roi={roi}
               onRoiChange={handleRoiChange}
-              showFullPreview
+              showFullPreview={false}
             />
 
             {/* Results */}
@@ -323,15 +315,6 @@ export default function GameScanPage() {
                       rawText={resultData.rawText}
                       confidence={resultData.confidence}
                       parsingFailed={!hasStructuredData}
-                    />
-                  )}
-
-                  {ocrPreviews.length > 0 && (
-                    <OcrDebugPanel
-                      previews={ocrPreviews}
-                      sources={resultData.ocrSources}
-                      mergedConfidence={resultData.confidence}
-                      mergedSubs={resultData.data && 'subStats' in resultData.data ? (resultData.data as any).subStats?.length || 0 : 0}
                     />
                   )}
 
@@ -395,15 +378,6 @@ export default function GameScanPage() {
                     rawText={resultData.rawText}
                     confidence={resultData.confidence}
                     parsingFailed={!hasStructuredData}
-                  />
-                )}
-
-                {resultData.ocrSources && resultData.ocrSources.length > 0 && (
-                  <OcrDebugPanel
-                    previews={[]}
-                    sources={resultData.ocrSources}
-                    mergedConfidence={resultData.confidence}
-                    mergedSubs={resultData.data && 'subStats' in resultData.data ? (resultData.data as any).subStats?.length || 0 : 0}
                   />
                 )}
 

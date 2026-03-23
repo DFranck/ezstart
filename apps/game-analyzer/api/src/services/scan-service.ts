@@ -128,7 +128,8 @@ export async function scanImage(
   profile: string = 'mid',
   imageAltBuffer?: Buffer,
   imageFullBuffer?: Buffer,
-  benchMode: boolean = true
+  benchMode: boolean = false,
+  presets?: string[]
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -157,12 +158,17 @@ export async function scanImage(
     const ocrSources: OcrSource[] = []
 
     if (benchMode) {
-      // --- BENCH MODE: 3 sources x 8 presets ---
+      // --- BENCH MODE: 3 sources x N presets ---
       const images: Array<{ name: string; buffer: Buffer }> = [
         { name: 'zoom-preprocessed', buffer: imageBuffer },
       ]
       if (imageAltBuffer) images.push({ name: 'zoom-raw', buffer: imageAltBuffer })
       if (imageFullBuffer) images.push({ name: 'full-crop', buffer: imageFullBuffer })
+
+      // Filter presets if specific ones requested (prod scan with saved presets)
+      const activePresets = presets && presets.length > 0
+        ? BENCH_PRESETS.filter(p => presets.includes(p.name))
+        : BENCH_PRESETS
 
       const allRuns: Array<{
         source: string
@@ -176,7 +182,7 @@ export async function scanImage(
       // Run all image x preset combinations in parallel
       await Promise.all(
         images.flatMap(img =>
-          BENCH_PRESETS.map(async preset => {
+          activePresets.map(async preset => {
             try {
               const hasPreprocessing = Object.keys(preset.options).length > 0
               const processed = hasPreprocessing
@@ -246,8 +252,57 @@ export async function scanImage(
         ocrResult = { text: '', confidence: 0, regions: [] }
         parseResult = { success: false, errors: ['All OCR runs failed'] }
       }
+    } else if (presets && presets.length > 0) {
+      // --- PROD MODE with saved presets: test only specified presets ---
+      const images: Array<{ name: string; buffer: Buffer }> = [
+        { name: 'zoom-preprocessed', buffer: imageBuffer },
+      ]
+      if (imageAltBuffer) images.push({ name: 'zoom-raw', buffer: imageAltBuffer })
+      if (imageFullBuffer) images.push({ name: 'full-crop', buffer: imageFullBuffer })
+
+      const activePresets = BENCH_PRESETS.filter(p => presets.includes(p.name))
+      if (activePresets.length === 0) activePresets.push(BENCH_PRESETS[1]) // fallback to upscale-2x
+
+      const allRuns: Array<{ ocr: OcrResult; parse: ParsedResult }> = []
+
+      await Promise.all(
+        images.flatMap(img =>
+          activePresets.map(async preset => {
+            try {
+              const hasPreprocessing = Object.keys(preset.options).length > 0
+              const processed = hasPreprocessing
+                ? await preprocessImage(img.buffer, preset.options)
+                : img.buffer
+              const ocr = await recognize(processed, ocrConfig)
+              const parse = parser.parse(ocr)
+              allRuns.push({ ocr, parse })
+              ocrSources.push({
+                name: `${img.name}+${preset.name}`,
+                confidence: Math.round(ocr.confidence),
+                rawText: ocr.text,
+                subsFound: parse.success ? ((parse.data as any)?.subStats || []).length : 0,
+                success: parse.success,
+              })
+            } catch (_e) {
+              // Skip failed combinations
+            }
+          })
+        )
+      )
+
+      if (allRuns.length > 1) {
+        const merged = mergeBenchResults(allRuns)
+        ocrResult = merged.ocrResult
+        parseResult = merged.parseResult
+      } else if (allRuns.length === 1) {
+        ocrResult = allRuns[0]!.ocr
+        parseResult = allRuns[0]!.parse
+      } else {
+        ocrResult = { text: '', confidence: 0, regions: [] }
+        parseResult = { success: false, errors: ['All OCR runs failed'] }
+      }
     } else {
-      // --- STANDARD MODE (no bench) ---
+      // --- STANDARD MODE (no bench, no presets) ---
       ocrResult = await recognize(imageBuffer, ocrConfig)
       parseResult = parser.parse(ocrResult)
 
