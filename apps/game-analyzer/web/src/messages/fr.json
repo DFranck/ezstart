@@ -73,7 +73,8 @@
       "selectWindow": "Selectionnez une fenetre a capturer",
       "waitingForChange": "En attente de changement...",
       "notSupported": "La capture d'ecran n'est pas supportee par votre navigateur",
-      "adjustZone": "Ajustez la zone de detection"
+      "adjustZone": "Ajustez la zone de detection",
+      "rescan": "Re-scanner"
     },
     "parsingImproving": "Le parsing des stats est en cours d'amélioration",
     "profile": {

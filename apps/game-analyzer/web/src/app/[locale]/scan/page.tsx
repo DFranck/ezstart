@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Button,
   Div,
   H1,
   P,
@@ -124,6 +125,19 @@ export default function ScanPage() {
     [selectedGame, scan]
   )
 
+  const handleRescan = useCallback(() => {
+    if (!selectedGame || !currentFrame || scanningRef.current) return
+    scanningRef.current = true
+    const cropped = cropImageData(currentFrame, roiRef.current)
+    imageDataToBlob(cropped).then((blob) => {
+      const file = new File([blob], 'capture.png', { type: 'image/png' })
+      scan(
+        { image: file, gameType: selectedGame },
+        { onSettled: () => { scanningRef.current = false } }
+      )
+    })
+  }, [selectedGame, currentFrame, scan])
+
   const { diffScore, isStable, processFrame } = useFrameDiff({
     onSignificantChange: handleSignificantChange,
   })
@@ -206,6 +220,18 @@ export default function ScanPage() {
 
               {/* Right: Result */}
               <Div className="space-y-4">
+                {isCapturing && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isPending || !currentFrame}
+                    onClick={handleRescan}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+                    {t('scan.capture.rescan')}
+                  </Button>
+                )}
+
                 {isPending && (
                   <Div className="text-center py-8">
                     <Div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />

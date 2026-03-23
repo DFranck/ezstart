@@ -73,7 +73,8 @@
       "selectWindow": "Select a window to capture",
       "waitingForChange": "Waiting for change...",
       "notSupported": "Screen capture is not supported by your browser",
-      "adjustZone": "Adjust detection zone"
+      "adjustZone": "Adjust detection zone",
+      "rescan": "Rescan"
     },
     "parsingImproving": "Stats parsing is being improved",
     "profile": {
