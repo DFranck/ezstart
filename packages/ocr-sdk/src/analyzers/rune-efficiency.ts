@@ -473,7 +473,17 @@ export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: R
   const potentialSum = rawSum + remainingEvents * 1.0
   const result = (potentialSum / totalEvents) * 100
 
-  console.log('[potential] sum:', rawSum, 'eventsSoFar:', eventsSoFar, 'remaining:', remainingEvents, 'total:', totalEvents, 'potential:', result)
+  console.log('[POTENTIAL DEBUG]', {
+    quality,
+    level: rune.level,
+    subStats: rune.subStats,
+    rawSum,
+    eventsSoFar,
+    remainingEvents,
+    totalEvents,
+    potentialRawSum: rawSum + remainingEvents,
+    result: ((rawSum + remainingEvents) / totalEvents) * 100,
+  })
 
   return result
 }

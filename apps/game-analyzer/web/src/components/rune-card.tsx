@@ -239,10 +239,10 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
               )}
 
               {/* Potential at +12 */}
-              {analysis.maxEfficiency !== undefined && (
+              {analysis.potentialEfficiency !== undefined && (
                 <Div className="flex items-center justify-between text-sm">
                   <P className="text-muted-foreground">{tRune('potential12')}</P>
-                  <P className="font-medium">{analysis.maxEfficiency}%</P>
+                  <P className="font-medium">{analysis.potentialEfficiency}%</P>
                 </Div>
               )}
 
