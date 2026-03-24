@@ -387,6 +387,7 @@ export default function GameScanPage() {
             onZonesChange={() => {}}
             zonesLocked={!showSettings}
             maskColor="rgba(255, 0, 0, 0.15)"
+            compact={!showSettings && isCapturing}
           />
 
           {isCapturing && (

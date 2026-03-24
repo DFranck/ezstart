@@ -48,6 +48,8 @@ interface CapturePreviewProps {
   maskColor?: string
   /** When true, scroll zoom and zoom buttons are disabled */
   disableZoom?: boolean
+  /** When true, shows a compact mini-preview (120px height, no zoom buttons, no resize handle) */
+  compact?: boolean
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -90,6 +92,7 @@ export function CapturePreview({
   zonesLocked = false,
   maskColor,
   disableZoom = false,
+  compact = false,
 }: CapturePreviewProps) {
   // Resolve mode: explicit prop takes priority, fallback to showTabs compat
   const mode = modeProp ?? (showTabs ? 'both' : 'zoom')
@@ -105,8 +108,10 @@ export function CapturePreview({
   const onRoiChangeRef = useRef(onRoiChange)
   onRoiChangeRef.current = onRoiChange
 
+  const COMPACT_HEIGHT = 120
   const [activeTab, setActiveTab] = useState<string>('zoom')
   const [previewHeight, setPreviewHeight] = useState<number>(loadPreviewHeight)
+  const effectiveHeight = compact ? COMPACT_HEIGHT : previewHeight
   const [viewPort, setViewPort] = useState<ViewPort>(DEFAULT_VIEWPORT)
   const viewPortRef = useRef<ViewPort>(DEFAULT_VIEWPORT)
   const isFullPanningRef = useRef(false)
@@ -157,16 +162,16 @@ export function CapturePreview({
     if (!container) return
     const containerWidth = container.clientWidth
 
-    if (canvas.width !== containerWidth || canvas.height !== previewHeight) {
+    if (canvas.width !== containerWidth || canvas.height !== effectiveHeight) {
       canvas.width = containerWidth
-      canvas.height = previewHeight
+      canvas.height = effectiveHeight
     }
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, roi, previewHeight, ensureSrcCanvas, mode])
+  }, [currentFrame, roi, effectiveHeight, ensureSrcCanvas, mode])
 
   // Draw the full frame to the full preview canvas (for 'full' and 'both' modes)
   useEffect(() => {
@@ -180,16 +185,16 @@ export function CapturePreview({
     if (!container) return
     const containerWidth = container.clientWidth
 
-    if (canvas.width !== containerWidth || canvas.height !== previewHeight) {
+    if (canvas.width !== containerWidth || canvas.height !== effectiveHeight) {
       canvas.width = containerWidth
-      canvas.height = previewHeight
+      canvas.height = effectiveHeight
     }
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, mode, previewHeight, ensureSrcCanvas, activeTab])
+  }, [currentFrame, mode, effectiveHeight, ensureSrcCanvas, activeTab])
 
   // Wheel handler for zoom — only with Ctrl held, depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
@@ -639,11 +644,11 @@ export function CapturePreview({
   // Zoom canvas with overlays (shared between both views)
   const zoomCanvas = (
     <Card className="bg-muted">
-      <div ref={containerRef} className="relative overflow-hidden" style={{ height: previewHeight }}>
+      <div ref={containerRef} className="relative overflow-hidden" style={{ height: effectiveHeight }}>
         <canvas
           ref={canvasRef}
           className="w-full block"
-          style={{ cursor: 'grab', touchAction: 'none', height: previewHeight }}
+          style={{ cursor: 'grab', touchAction: 'none', height: effectiveHeight }}
         />
         {/* Multi-zone overlay on zoom view */}
         {zones && onZonesChange && (
@@ -664,8 +669,8 @@ export function CapturePreview({
             maskColor={maskColor}
           />
         )}
-        {/* Zoom indicator + buttons — hidden when zoom is disabled */}
-        {!disableZoom && (
+        {/* Zoom indicator + buttons — hidden when zoom is disabled or compact */}
+        {!disableZoom && !compact && (
           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
             <button
               type="button"
@@ -688,15 +693,17 @@ export function CapturePreview({
             </button>
           </div>
         )}
-        {/* Resize handle — bottom-right corner */}
-        <div
-          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
-          onMouseDown={startPreviewResize}
-          style={{
-            background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
-            borderRadius: '0 0 8px 0',
-          }}
-        />
+        {/* Resize handle — bottom-right corner, hidden in compact mode */}
+        {!compact && (
+          <div
+            className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
+            onMouseDown={startPreviewResize}
+            style={{
+              background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
+              borderRadius: '0 0 8px 0',
+            }}
+          />
+        )}
       </div>
     </Card>
   )
@@ -713,7 +720,7 @@ export function CapturePreview({
         ref={fullContainerRef}
         className="relative overflow-hidden"
         style={{
-          height: previewHeight,
+          height: effectiveHeight,
           cursor: isFullZoomed ? 'grab' : undefined,
         }}
       >
@@ -732,7 +739,7 @@ export function CapturePreview({
           <canvas
             ref={fullCanvasRef}
             className="w-full block"
-            style={{ height: previewHeight, pointerEvents: 'none' }}
+            style={{ height: effectiveHeight, pointerEvents: 'none' }}
           />
           {roi && onRoiChange && (
             <RoiSelector
@@ -763,8 +770,8 @@ export function CapturePreview({
             />
           )}
         </div>
-        {/* Zoom controls for full view */}
-        {!disableZoom && (
+        {/* Zoom controls for full view — hidden in compact mode */}
+        {!disableZoom && !compact && (
           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1 z-40">
             <button
               type="button"
@@ -797,15 +804,17 @@ export function CapturePreview({
             )}
           </div>
         )}
-        {/* Resize handle — bottom-right corner */}
-        <div
-          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
-          onMouseDown={startPreviewResize}
-          style={{
-            background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
-            borderRadius: '0 0 8px 0',
-          }}
-        />
+        {/* Resize handle — bottom-right corner, hidden in compact mode */}
+        {!compact && (
+          <div
+            className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
+            onMouseDown={startPreviewResize}
+            style={{
+              background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
+              borderRadius: '0 0 8px 0',
+            }}
+          />
+        )}
       </div>
     </Card>
   )
@@ -841,8 +850,8 @@ export function CapturePreview({
         </Card>
       )}
 
-      {/* Navigation hint — for zoom mode and full mode when viewport is zoomed */}
-      {isCapturing && currentFrame && (mode !== 'full' || isFullZoomed) && (
+      {/* Navigation hint — for zoom mode and full mode when viewport is zoomed, hidden in compact */}
+      {!compact && isCapturing && currentFrame && (mode !== 'full' || isFullZoomed) && (
         <P className="text-xs text-muted-foreground">
           {mode === 'full' || (mode === 'both' && activeTab === 'full')
             ? (disableZoom ? t('capture.fullPanHintOnly') : t('capture.fullPanHint'))
