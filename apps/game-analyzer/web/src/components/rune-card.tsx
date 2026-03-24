@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
@@ -138,16 +138,16 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
         <Div className="flex items-center justify-between">
           <Div className="flex items-center gap-2">
             <P className="text-base">{setEmoji}</P>
-            <H3 className="text-base font-semibold capitalize">{rune.set}</H3>
+            <H3 className="text-base font-bold capitalize">{rune.set}</H3>
+            <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
           </Div>
-          <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
-        </Div>
-        <Div className="flex items-center gap-2">
-          <P className="text-yellow-500 text-sm tracking-tight">{gradeStars}</P>
-          <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
           <Badge className={`border text-xs ${QUALITY_BG[quality]}`}>
             {tRune(`quality.${quality}`)}
           </Badge>
+        </Div>
+        <Div className="flex items-center gap-2">
+          <P className="text-yellow-500 text-xs tracking-tighter leading-none">{gradeStars}</P>
+          <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
         </Div>
       </CardHeader>
 
@@ -331,23 +331,20 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           )
         })()}
 
-        {/* ── Grind potential ── */}
+        {/* ── Grind potential (compact) ── */}
         {analysis && analysis.substats.some(s => s.grindable && s.grindAmount) && (
           <>
             <Div className="border-t border-border" />
             <Div>
-              <P className="text-xs font-medium text-muted-foreground uppercase mb-2">{tRune('grindPotential')}</P>
-              <Div className="space-y-1">
+              <P className="text-xs font-medium text-muted-foreground uppercase mb-1.5">{tRune('grindPotential')}</P>
+              <Div className="flex flex-wrap gap-x-4 gap-y-0.5">
                 {analysis.substats
                   .filter(s => s.grindable && s.grindAmount && s.grindAmount > 0)
                   .map((sub, i) => (
-                    <Div key={i} className="flex items-center justify-between text-sm">
-                      <P className="text-muted-foreground">{formatStatLabel(sub.type)}</P>
-                      <P className="text-muted-foreground">
-                        {formatStatValue(sub.type, sub.value)} {'\u2192'} {formatStatValue(sub.type, sub.grindedValue!)}
-                        <span className="text-xs ml-1">({tRune('legendGrind')} +{sub.grindAmount})</span>
-                      </P>
-                    </Div>
+                    <P key={i} className="text-xs text-muted-foreground">
+                      <span className="font-medium">{formatStatLabel(sub.type)}</span>{' '}
+                      {formatStatValue(sub.type, sub.value)}{'\u2192'}{formatStatValue(sub.type, sub.grindedValue!)}
+                    </P>
                   ))}
               </Div>
             </Div>
@@ -367,22 +364,27 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           </>
         )}
 
-        {/* ── OCR Confidence ── */}
+        {/* ── OCR Confidence (inline tooltip) ── */}
         {confidence !== undefined && (
-          <>
-            <Div className="border-t border-border" />
-            <Div className="flex items-center justify-between text-sm">
-              <P className="text-muted-foreground">{tRune('ocrConfidence')}</P>
-              <Div className="flex items-center gap-1.5">
-                <Div
-                  className={`h-2 w-2 rounded-full ${
-                    confidence >= 80 ? 'bg-green-500' : confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
-                />
-                <P className="text-xs font-medium">{Math.round(confidence)}%</P>
-              </Div>
-            </Div>
-          </>
+          <Div className="flex justify-end pt-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Div className="flex items-center gap-1 cursor-default">
+                    <Div
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        confidence >= 80 ? 'bg-green-500' : confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                    />
+                    <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
+                  </Div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <P className="text-xs">{tRune('ocrConfidence')}: {Math.round(confidence)}%</P>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Div>
         )}
       </CardContent>
     </Card>

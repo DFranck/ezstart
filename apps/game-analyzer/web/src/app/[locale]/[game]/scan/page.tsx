@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Badge,
   Button,
   Div,
   H1,
@@ -10,6 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Skeleton,
   Tabs,
   TabsContent,
   TabsList,
@@ -139,6 +141,12 @@ export default function GameScanPage() {
   const { data: layouts = [] } = useGameLayouts(game)
   const { data: layoutData } = useGameLayout(game, currentLayoutName)
 
+  // Settings collapsible — hidden by default when a layout is selected
+  const [showSettings, setShowSettings] = useState(!layoutData)
+
+  // Session scan counter
+  const [scanCount, setScanCount] = useState(0)
+
   // Load saved presets from bench — prefer DB layout, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
 
@@ -174,9 +182,11 @@ export default function GameScanPage() {
     }
   }, [layouts, currentLayoutName])
 
-  // When a layout is loaded from DB, apply its config
+  // When a layout is loaded from DB, apply its config and collapse settings
   useEffect(() => {
     if (!layoutData) return
+
+    setShowSettings(false)
 
     if (layoutData.roi) {
       setRoi(layoutData.roi)
@@ -199,6 +209,7 @@ export default function GameScanPage() {
       if (scanningRef.current) return
 
       scanningRef.current = true
+      setScanCount(prev => prev + 1)
 
       // Apply blackout masks before preprocessing
       const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
@@ -265,9 +276,15 @@ export default function GameScanPage() {
     onFrame: handleFrame,
   })
 
+  // Auto-collapse settings when capture starts
+  useEffect(() => {
+    if (isCapturing) setShowSettings(false)
+  }, [isCapturing])
+
   const handleRescan = useCallback(() => {
     if (!currentFrame || scanningRef.current) return
     scanningRef.current = true
+    setScanCount(prev => prev + 1)
     const cropped = cropImageData(currentFrame, roiRef.current)
     // Apply blackout masks before preprocessing
     const maskedCropped = masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
@@ -317,9 +334,46 @@ export default function GameScanPage() {
 
   return (
     <Div className="container mx-auto px-4 py-6 max-w-6xl">
-      <Div className="mb-4">
-        <H1 className="text-xl font-bold">{t('scan.title')}</H1>
+      {/* Header with settings toggle */}
+      <Div className="flex items-center justify-between mb-4">
+        <H1 className="text-lg font-bold">{t('scan.title')}</H1>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowSettings(!showSettings)}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          {showSettings ? t('scan.hideSettings') : t('scan.settings')}
+        </Button>
       </Div>
+
+      {/* Collapsible settings */}
+      {showSettings && (
+        <Div className="space-y-3 p-3 rounded-lg border border-border bg-muted/30 mb-4">
+          <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
+          {layouts.length > 0 && (
+            <Div className="flex items-center gap-2">
+              <P className="text-sm font-medium">{t('bench.layout')}:</P>
+              <Select
+                value={currentLayoutName}
+                onValueChange={setCurrentLayoutName}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t('bench.layout')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {layouts.map((l) => (
+                    <SelectItem key={l.layoutName} value={l.layoutName}>
+                      {l.displayName ?? l.layoutName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Div>
+          )}
+        </Div>
+      )}
 
       {/* Mode Tabs */}
       <Tabs value={mode} onValueChange={(v) => setMode(v as 'capture' | 'upload')}>
@@ -333,31 +387,6 @@ export default function GameScanPage() {
           <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: Capture + Controls */}
             <Div className="space-y-4">
-              {/* Profile selector + Layout selector */}
-              <Div className="flex flex-wrap items-center gap-4">
-                <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
-                {layouts.length > 0 && (
-                  <Div className="flex items-center gap-2">
-                    <P className="text-sm font-medium">{t('bench.layout')}:</P>
-                    <Select
-                      value={currentLayoutName}
-                      onValueChange={setCurrentLayoutName}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={t('bench.layout')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {layouts.map((l) => (
-                          <SelectItem key={l.layoutName} value={l.layoutName}>
-                            {l.displayName ?? l.layoutName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Div>
-                )}
-              </Div>
-
               <CapturePreview
                 isCapturing={isCapturing}
                 isAnalyzing={isAnalyzing}
@@ -390,21 +419,52 @@ export default function GameScanPage() {
                   {t('scan.capture.rescan')}
                 </Button>
               )}
+
+              {/* Status bar */}
+              {isCapturing && (
+                <Div className="flex items-center gap-2 flex-wrap">
+                  {currentLayoutName && (
+                    <Badge variant="outline" className="text-xs">
+                      {t('scan.statusBar.layout')}: {currentLayoutName}
+                    </Badge>
+                  )}
+                  {resultData?.confidence !== undefined && (
+                    <Badge variant="outline" className="text-xs">
+                      <Div
+                        className={`h-1.5 w-1.5 rounded-full mr-1 ${
+                          resultData.confidence >= 80 ? 'bg-green-500' : resultData.confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                      />
+                      {t('scan.statusBar.lastConfidence')}: {Math.round(resultData.confidence)}%
+                    </Badge>
+                  )}
+                  {scanCount > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      {scanCount} {t('scan.statusBar.scans')}
+                    </Badge>
+                  )}
+                </Div>
+              )}
             </Div>
 
             {/* Right: Results */}
             <Div className="space-y-4">
               {isPending && (
-                <Div className="text-center py-8">
-                  <Div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-                  <P className="text-muted-foreground">{t('scan.scanning')}</P>
+                <Div className="space-y-3">
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-10 w-full" />
                 </Div>
               )}
 
               {resultData && (
-                <>
+                <Div className={isPending ? 'opacity-50 pointer-events-none' : 'animate-in fade-in-0 slide-in-from-bottom-2 duration-300'}>
                   {resultData.unreliable && (
-                    <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
+                    <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 mb-3">
                       <P className="text-sm text-yellow-600 dark:text-yellow-400">
                         {t('scan.unreliableResult')}
                       </P>
@@ -423,6 +483,7 @@ export default function GameScanPage() {
                       rawText={resultData.rawText}
                       confidence={resultData.confidence}
                       parsingFailed={!hasStructuredData}
+                      defaultCollapsed={hasStructuredData}
                     />
                   )}
 
@@ -433,7 +494,7 @@ export default function GameScanPage() {
                       </P>
                     </Div>
                   )}
-                </>
+                </Div>
               )}
 
               {!resultData && !isPending && isCapturing && (
@@ -455,9 +516,12 @@ export default function GameScanPage() {
 
             {/* Loading state */}
             {isPending && (
-              <Div className="text-center py-8">
-                <Div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-                <P className="text-muted-foreground">{t('scan.scanning')}</P>
+              <Div className="space-y-3">
+                <Skeleton className="h-6 w-1/3" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-10 w-full" />
               </Div>
             )}
 
@@ -486,6 +550,7 @@ export default function GameScanPage() {
                     rawText={resultData.rawText}
                     confidence={resultData.confidence}
                     parsingFailed={!hasStructuredData}
+                    defaultCollapsed={hasStructuredData}
                   />
                 )}
 

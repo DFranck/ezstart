@@ -48,7 +48,11 @@
     "nikke": "Nikke"
   },
   "home": {
-    "selectGame": "Select a game to get started"
+    "selectGame": "Select a game to get started",
+    "gameDescription": {
+      "summoners-war": "Scan runes, analyze efficiency & grind potential",
+      "nikke": "Scan gear stats & manufacturer details"
+    }
   },
   "bench": {
     "title": "OCR Bench",
@@ -124,6 +128,16 @@
       "zoomView": "Zoomed view",
       "fullView": "Full view"
     },
+    "settings": "Settings",
+    "hideSettings": "Hide",
+    "capturePlaceholder": "Click the button below to capture your game window",
+    "statusBar": {
+      "layout": "Layout",
+      "lastConfidence": "Confidence",
+      "scans": "scans"
+    },
+    "showRawOcr": "Show raw OCR text",
+    "hideRawOcr": "Hide raw OCR text",
     "preprocessedImage": "Image sent to OCR",
     "debugOcr": "OCR Debug",
     "mergedResult": "Merged result",

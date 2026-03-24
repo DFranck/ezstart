@@ -471,9 +471,10 @@ export function CapturePreview({
           zoomCanvas
         )
       ) : (
-        <Card className="bg-muted">
-          <Div className="aspect-video flex items-center justify-center">
-            <P className="text-muted-foreground text-sm">{t('capture.selectWindow')}</P>
+        <Card className="bg-muted border-dashed border-2 border-border">
+          <Div className="aspect-video flex flex-col items-center justify-center gap-3 px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/40"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" x2="3" y1="12" y2="12" /></svg>
+            <P className="text-muted-foreground text-sm text-center">{t('capture.selectWindow')}</P>
           </Div>
         </Card>
       )}
@@ -483,24 +484,39 @@ export function CapturePreview({
         <P className="text-xs text-muted-foreground">{t('capture.dragToNavigate')}</P>
       )}
 
-      {/* Status */}
-      <Div className="flex items-center gap-2">
-        {isCapturing && (
-          <Div
-            className={`h-2 w-2 rounded-full ${isAnalyzing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}
-          />
-        )}
-        <P className={`text-sm ${statusColor}`}>{statusText()}</P>
-      </Div>
-
-      {/* Controls */}
-      <Button
-        className="w-full"
-        variant={isCapturing ? 'destructive' : 'default'}
-        onClick={isCapturing ? onStop : onStart}
-      >
-        {isCapturing ? t('capture.stop') : t('capture.start')}
-      </Button>
+      {/* Status + Controls */}
+      {isCapturing ? (
+        <Div className="flex items-center justify-between">
+          <Div className="flex items-center gap-2">
+            <Div
+              className={`h-2 w-2 rounded-full ${isAnalyzing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}
+            />
+            <P className={`text-sm ${statusColor}`}>{statusText()}</P>
+          </Div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onStop}
+            className="text-xs"
+          >
+            {t('capture.stop')}
+          </Button>
+        </Div>
+      ) : (
+        <>
+          {error && (
+            <P className={`text-sm ${statusColor}`}>{statusText()}</P>
+          )}
+          <Button
+            className="w-full h-12 text-base font-semibold"
+            variant="default"
+            onClick={onStart}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg>
+            {t('capture.start')}
+          </Button>
+        </>
+      )}
     </Div>
   )
 }
