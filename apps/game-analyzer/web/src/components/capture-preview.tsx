@@ -373,7 +373,8 @@ export function CapturePreview({
     return () => container.removeEventListener('wheel', handleWheel)
   }, [canvasVisible, disableZoom, mode, activeTab])
 
-  // Full-view viewport pan (drag on canvas, but not on ROI handles)
+  // Full-view viewport pan — middle click (button 1) OR left click outside overlays
+  // Middle click always pans, left click pans only when NOT on an overlay (ROI/zones/masks)
   useEffect(() => {
     const container = fullContainerRef.current
     if (!container || !canvasVisible) return
@@ -381,13 +382,27 @@ export function CapturePreview({
     if (mode === 'both' && activeTab !== 'full') return
 
     function handleMouseDown(e: MouseEvent) {
-      // Only start pan if clicking on the canvas itself or the container, not on overlays
-      const target = e.target as HTMLElement
-      if (target.tagName === 'CANVAS' || target === container) {
+      // Middle click (button 1) = always pan
+      if (e.button === 1) {
         e.preventDefault()
         isFullPanningRef.current = true
         container!.style.cursor = 'grabbing'
+        return
       }
+      // Left click (button 0) = pan only if clicking on background (canvas or container)
+      if (e.button === 0) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'CANVAS' || target === container) {
+          e.preventDefault()
+          isFullPanningRef.current = true
+          container!.style.cursor = 'grabbing'
+        }
+      }
+    }
+
+    // Prevent default context menu on middle click
+    function handleAuxClick(e: MouseEvent) {
+      if (e.button === 1) e.preventDefault()
     }
 
     function handleMouseMove(e: MouseEvent) {
@@ -417,32 +432,34 @@ export function CapturePreview({
       }
     }
 
-    // Touch support for full-view pan
+    // Touch support for full-view pan — two-finger pan to avoid conflict with ROI drag
     let lastTouchX = 0
     let lastTouchY = 0
 
     function handleTouchStart(e: TouchEvent) {
-      const target = e.target as HTMLElement
-      if ((target.tagName === 'CANVAS' || target === container) && e.touches.length === 1) {
+      // Two-finger touch = pan (one finger reserved for ROI/zones)
+      if (e.touches.length === 2) {
         isFullPanningRef.current = true
-        const touch = e.touches[0]!
-        lastTouchX = touch.clientX
-        lastTouchY = touch.clientY
+        const midX = (e.touches[0]!.clientX + e.touches[1]!.clientX) / 2
+        const midY = (e.touches[0]!.clientY + e.touches[1]!.clientY) / 2
+        lastTouchX = midX
+        lastTouchY = midY
       }
     }
 
     function handleTouchMove(e: TouchEvent) {
-      if (!isFullPanningRef.current || e.touches.length !== 1) return
+      if (!isFullPanningRef.current || e.touches.length !== 2) return
       e.preventDefault()
 
       const vp = viewPortRef.current
       if (vp.width >= 100 && vp.height >= 100) return
 
-      const touch = e.touches[0]!
-      const movementX = touch.clientX - lastTouchX
-      const movementY = touch.clientY - lastTouchY
-      lastTouchX = touch.clientX
-      lastTouchY = touch.clientY
+      const midX = (e.touches[0]!.clientX + e.touches[1]!.clientX) / 2
+      const midY = (e.touches[0]!.clientY + e.touches[1]!.clientY) / 2
+      const movementX = midX - lastTouchX
+      const movementY = midY - lastTouchY
+      lastTouchX = midX
+      lastTouchY = midY
 
       const rect = container!.getBoundingClientRect()
       if (rect.width === 0 || rect.height === 0) return
@@ -464,6 +481,7 @@ export function CapturePreview({
     }
 
     container.addEventListener('mousedown', handleMouseDown)
+    container.addEventListener('auxclick', handleAuxClick)
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
     container.addEventListener('touchstart', handleTouchStart)
@@ -472,6 +490,7 @@ export function CapturePreview({
 
     return () => {
       container.removeEventListener('mousedown', handleMouseDown)
+      container.removeEventListener('auxclick', handleAuxClick)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
       container.removeEventListener('touchstart', handleTouchStart)
@@ -825,7 +844,9 @@ export function CapturePreview({
       {/* Navigation hint — for zoom mode and full mode when viewport is zoomed */}
       {isCapturing && currentFrame && (mode !== 'full' || isFullZoomed) && (
         <P className="text-xs text-muted-foreground">
-          {disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate')}
+          {mode === 'full' || (mode === 'both' && activeTab === 'full')
+            ? (disableZoom ? t('capture.fullPanHintOnly') : t('capture.fullPanHint'))
+            : (disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate'))}
         </P>
       )}
 

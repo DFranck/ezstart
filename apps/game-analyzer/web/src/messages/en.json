@@ -126,6 +126,8 @@
       "zoomOut": "Zoom out",
       "dragToNavigate": "Drag to pan, Ctrl+scroll to zoom",
       "dragToNavigateOnly": "Drag to pan",
+      "fullPanHint": "Middle-click to pan, Ctrl+scroll to zoom",
+      "fullPanHintOnly": "Middle-click to pan",
       "zoomView": "Zoomed view",
       "fullView": "Full view",
       "resetZoom": "Reset zoom"

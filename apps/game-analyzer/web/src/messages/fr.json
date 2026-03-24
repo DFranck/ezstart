@@ -126,6 +126,8 @@
       "zoomOut": "Zoom -",
       "dragToNavigate": "Faites glisser pour deplacer, Ctrl+molette pour zoomer",
       "dragToNavigateOnly": "Faites glisser pour deplacer",
+      "fullPanHint": "Clic molette pour deplacer, Ctrl+molette pour zoomer",
+      "fullPanHintOnly": "Clic molette pour deplacer",
       "zoomView": "Vue zoomée",
       "fullView": "Vue complète",
       "resetZoom": "Reset zoom"
