@@ -9,7 +9,8 @@
     "dashboard": "Tableau de bord",
     "scan": "Scanner",
     "bench": "Bench",
-    "history": "Historique"
+    "history": "Historique",
+    "data": "Données"
   },
   "actions": {
     "upload": "Importer",

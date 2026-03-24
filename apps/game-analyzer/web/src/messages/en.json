@@ -9,7 +9,8 @@
     "dashboard": "Dashboard",
     "scan": "Scan",
     "bench": "Bench",
-    "history": "History"
+    "history": "History",
+    "data": "Data"
   },
   "actions": {
     "upload": "Upload",
