@@ -127,7 +127,8 @@
       "dragToNavigate": "Drag to pan, Ctrl+scroll to zoom",
       "dragToNavigateOnly": "Drag to pan",
       "zoomView": "Zoomed view",
-      "fullView": "Full view"
+      "fullView": "Full view",
+      "resetZoom": "Reset zoom"
     },
     "settings": "Settings",
     "hideSettings": "Hide",

@@ -53,6 +53,18 @@ interface CapturePreviewProps {
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
 const MAX_ZOOM = 100  // maximum ROI size = 100% of source
 
+const MIN_VP_SIZE = 10  // minimum viewport size = 10% (zoom 10x)
+const MAX_VP_SIZE = 100 // maximum viewport size = 100% (no zoom)
+
+interface ViewPort {
+  x: number      // % of source window (0-100)
+  y: number
+  width: number  // % visible (100 = all, 50 = zoom 2x, 25 = zoom 4x)
+  height: number
+}
+
+const DEFAULT_VIEWPORT: ViewPort = { x: 0, y: 0, width: 100, height: 100 }
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
@@ -95,6 +107,9 @@ export function CapturePreview({
 
   const [activeTab, setActiveTab] = useState<string>('zoom')
   const [previewHeight, setPreviewHeight] = useState<number>(loadPreviewHeight)
+  const [viewPort, setViewPort] = useState<ViewPort>(DEFAULT_VIEWPORT)
+  const viewPortRef = useRef<ViewPort>(DEFAULT_VIEWPORT)
+  const isFullPanningRef = useRef(false)
   const isResizingRef = useRef(false)
   const resizeStartYRef = useRef(0)
   const resizeStartHeightRef = useRef(0)
@@ -318,6 +333,195 @@ export function CapturePreview({
     }
   }, [canvasVisible, mode])
 
+  // Full-view viewport zoom (Ctrl+scroll)
+  useEffect(() => {
+    const container = fullContainerRef.current
+    if (!container || !canvasVisible || disableZoom) return
+    // Only enable when full view is active
+    if (mode === 'zoom') return
+    if (mode === 'both' && activeTab !== 'full') return
+
+    function handleWheel(e: WheelEvent) {
+      if (!e.ctrlKey) return
+      e.preventDefault()
+
+      const vp = viewPortRef.current
+      const zoomFactor = e.deltaY > 0 ? 1.15 : 0.87
+
+      const newWidth = clamp(vp.width * zoomFactor, MIN_VP_SIZE, MAX_VP_SIZE)
+      const newHeight = clamp(vp.height * zoomFactor, MIN_VP_SIZE, MAX_VP_SIZE)
+
+      // Zoom towards mouse position
+      const rect = container!.getBoundingClientRect()
+      const mouseXRatio = (e.clientX - rect.left) / rect.width
+      const mouseYRatio = (e.clientY - rect.top) / rect.height
+
+      // The point under the mouse in source %
+      const pointX = vp.x + mouseXRatio * vp.width
+      const pointY = vp.y + mouseYRatio * vp.height
+
+      // Keep that point under the mouse after zoom
+      const newX = clamp(pointX - mouseXRatio * newWidth, 0, 100 - newWidth)
+      const newY = clamp(pointY - mouseYRatio * newHeight, 0, 100 - newHeight)
+
+      const newVP = { x: newX, y: newY, width: newWidth, height: newHeight }
+      viewPortRef.current = newVP
+      setViewPort(newVP)
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    return () => container.removeEventListener('wheel', handleWheel)
+  }, [canvasVisible, disableZoom, mode, activeTab])
+
+  // Full-view viewport pan (drag on canvas, but not on ROI handles)
+  useEffect(() => {
+    const container = fullContainerRef.current
+    if (!container || !canvasVisible) return
+    if (mode === 'zoom') return
+    if (mode === 'both' && activeTab !== 'full') return
+
+    function handleMouseDown(e: MouseEvent) {
+      // Only start pan if clicking on the canvas itself or the container, not on overlays
+      const target = e.target as HTMLElement
+      if (target.tagName === 'CANVAS' || target === container) {
+        e.preventDefault()
+        isFullPanningRef.current = true
+        container!.style.cursor = 'grabbing'
+      }
+    }
+
+    function handleMouseMove(e: MouseEvent) {
+      if (!isFullPanningRef.current) return
+      const vp = viewPortRef.current
+      if (vp.width >= 100 && vp.height >= 100) return // no pan when fully zoomed out
+
+      const rect = container!.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+
+      const dx = (e.movementX / rect.width) * vp.width
+      const dy = (e.movementY / rect.height) * vp.height
+
+      const newVP = {
+        ...vp,
+        x: clamp(vp.x - dx, 0, 100 - vp.width),
+        y: clamp(vp.y - dy, 0, 100 - vp.height),
+      }
+      viewPortRef.current = newVP
+      setViewPort(newVP)
+    }
+
+    function handleMouseUp() {
+      if (isFullPanningRef.current) {
+        isFullPanningRef.current = false
+        container!.style.cursor = viewPortRef.current.width < 100 ? 'grab' : ''
+      }
+    }
+
+    // Touch support for full-view pan
+    let lastTouchX = 0
+    let lastTouchY = 0
+
+    function handleTouchStart(e: TouchEvent) {
+      const target = e.target as HTMLElement
+      if ((target.tagName === 'CANVAS' || target === container) && e.touches.length === 1) {
+        isFullPanningRef.current = true
+        const touch = e.touches[0]!
+        lastTouchX = touch.clientX
+        lastTouchY = touch.clientY
+      }
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+      if (!isFullPanningRef.current || e.touches.length !== 1) return
+      e.preventDefault()
+
+      const vp = viewPortRef.current
+      if (vp.width >= 100 && vp.height >= 100) return
+
+      const touch = e.touches[0]!
+      const movementX = touch.clientX - lastTouchX
+      const movementY = touch.clientY - lastTouchY
+      lastTouchX = touch.clientX
+      lastTouchY = touch.clientY
+
+      const rect = container!.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+
+      const dx = (movementX / rect.width) * vp.width
+      const dy = (movementY / rect.height) * vp.height
+
+      const newVP = {
+        ...vp,
+        x: clamp(vp.x - dx, 0, 100 - vp.width),
+        y: clamp(vp.y - dy, 0, 100 - vp.height),
+      }
+      viewPortRef.current = newVP
+      setViewPort(newVP)
+    }
+
+    function handleTouchEnd() {
+      isFullPanningRef.current = false
+    }
+
+    container.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    container.addEventListener('touchstart', handleTouchStart)
+    container.addEventListener('touchmove', handleTouchMove, { passive: false })
+    container.addEventListener('touchend', handleTouchEnd)
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      container.removeEventListener('touchstart', handleTouchStart)
+      container.removeEventListener('touchmove', handleTouchMove)
+      container.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [canvasVisible, mode, activeTab])
+
+  // Full-view zoom buttons
+  const handleFullZoomIn = useCallback(() => {
+    if (disableZoom) return
+    const vp = viewPortRef.current
+    const factor = 0.8
+    const newWidth = clamp(vp.width * factor, MIN_VP_SIZE, MAX_VP_SIZE)
+    const newHeight = clamp(vp.height * factor, MIN_VP_SIZE, MAX_VP_SIZE)
+    const centerX = vp.x + vp.width / 2
+    const centerY = vp.y + vp.height / 2
+    const newVP = {
+      x: clamp(centerX - newWidth / 2, 0, 100 - newWidth),
+      y: clamp(centerY - newHeight / 2, 0, 100 - newHeight),
+      width: newWidth,
+      height: newHeight,
+    }
+    viewPortRef.current = newVP
+    setViewPort(newVP)
+  }, [disableZoom])
+
+  const handleFullZoomOut = useCallback(() => {
+    if (disableZoom) return
+    const vp = viewPortRef.current
+    const factor = 1.25
+    const newWidth = clamp(vp.width * factor, MIN_VP_SIZE, MAX_VP_SIZE)
+    const newHeight = clamp(vp.height * factor, MIN_VP_SIZE, MAX_VP_SIZE)
+    const centerX = vp.x + vp.width / 2
+    const centerY = vp.y + vp.height / 2
+    const newVP = {
+      x: clamp(centerX - newWidth / 2, 0, 100 - newWidth),
+      y: clamp(centerY - newHeight / 2, 0, 100 - newHeight),
+      width: newWidth,
+      height: newHeight,
+    }
+    viewPortRef.current = newVP
+    setViewPort(newVP)
+  }, [disableZoom])
+
+  const handleFullZoomReset = useCallback(() => {
+    viewPortRef.current = DEFAULT_VIEWPORT
+    setViewPort(DEFAULT_VIEWPORT)
+  }, [])
+
   // Preview resize handlers
   const startPreviewResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -402,6 +606,8 @@ export function CapturePreview({
 
   // Compute zoom percentage (100% = full window, smaller = more zoomed in)
   const zoomPercent = roi ? Math.round(roi.width) : 100
+  const fullZoomPercent = Math.round(100 / viewPort.width * 100)
+  const isFullZoomed = viewPort.width < 100
 
   if (!isSupported) {
     return (
@@ -476,42 +682,101 @@ export function CapturePreview({
     </Card>
   )
 
-  // Full canvas with ROI selector + zones + masks
+  // CSS transform scale/translate for full-view viewport zoom
+  const vpScale = 100 / viewPort.width
+  const vpTranslateX = -viewPort.x
+  const vpTranslateY = -viewPort.y
+
+  // Full canvas with ROI selector + zones + masks + viewport zoom
   const fullCanvas = (
     <Card className="bg-muted">
-      <div ref={fullContainerRef} className="relative overflow-hidden" style={{ height: previewHeight }}>
-        <canvas
-          ref={fullCanvasRef}
-          className="w-full block"
-          style={{ height: previewHeight }}
-        />
-        {roi && onRoiChange && (
-          <RoiSelector
-            onChange={onRoiChange}
-            initialRoi={roi}
-            locked={zonesLocked}
+      <div
+        ref={fullContainerRef}
+        className="relative overflow-hidden"
+        style={{
+          height: previewHeight,
+          cursor: isFullZoomed ? 'grab' : undefined,
+        }}
+      >
+        {/* Scaled inner container — CSS transform handles the viewport zoom */}
+        <div
+          style={{
+            transform: `scale(${vpScale}) translate(${vpTranslateX}%, ${vpTranslateY}%)`,
+            transformOrigin: 'top left',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        >
+          <canvas
+            ref={fullCanvasRef}
+            className="w-full block"
+            style={{ height: previewHeight, pointerEvents: 'none' }}
           />
-        )}
-        {/* Multi-zone overlay on full view — positions are relative to the ROI */}
-        {zones && onZonesChange && roi && (
-          <MultiZoneSelector
-            onChange={onZonesChange}
-            initialZones={zones}
-            parentRoi={roi}
-            locked={zonesLocked}
-          />
-        )}
-        {/* Blackout mask overlay on full view — positions are relative to the ROI */}
-        {masks && onMasksChange && onMaskAdd && onMaskRemove && roi && (
-          <BlackoutMask
-            masks={masks}
-            onChange={onMasksChange}
-            onAdd={onMaskAdd}
-            onRemove={onMaskRemove}
-            parentRoi={roi}
-            locked={zonesLocked}
-            maskColor={maskColor}
-          />
+          {roi && onRoiChange && (
+            <RoiSelector
+              onChange={onRoiChange}
+              initialRoi={roi}
+              locked={zonesLocked}
+            />
+          )}
+          {/* Multi-zone overlay on full view — positions are relative to the ROI */}
+          {zones && onZonesChange && roi && (
+            <MultiZoneSelector
+              onChange={onZonesChange}
+              initialZones={zones}
+              parentRoi={roi}
+              locked={zonesLocked}
+            />
+          )}
+          {/* Blackout mask overlay on full view — positions are relative to the ROI */}
+          {masks && onMasksChange && onMaskAdd && onMaskRemove && roi && (
+            <BlackoutMask
+              masks={masks}
+              onChange={onMasksChange}
+              onAdd={onMaskAdd}
+              onRemove={onMaskRemove}
+              parentRoi={roi}
+              locked={zonesLocked}
+              maskColor={maskColor}
+            />
+          )}
+        </div>
+        {/* Zoom controls for full view */}
+        {!disableZoom && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1 z-40">
+            <button
+              type="button"
+              onClick={handleFullZoomOut}
+              className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+              title={t('capture.zoomOut')}
+            >
+              -
+            </button>
+            <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+              {fullZoomPercent}%
+            </span>
+            <button
+              type="button"
+              onClick={handleFullZoomIn}
+              className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+              title={t('capture.zoomIn')}
+            >
+              +
+            </button>
+            {isFullZoomed && (
+              <button
+                type="button"
+                onClick={handleFullZoomReset}
+                className="text-white text-xs px-1.5 py-0.5 hover:bg-white/20 rounded ml-1"
+                title={t('capture.resetZoom')}
+              >
+                1:1
+              </button>
+            )}
+          </div>
         )}
         {/* Resize handle — bottom-right corner */}
         <div
@@ -557,8 +822,8 @@ export function CapturePreview({
         </Card>
       )}
 
-      {/* Navigation hint — only for zoom mode where drag/scroll navigation applies */}
-      {isCapturing && currentFrame && mode !== 'full' && (
+      {/* Navigation hint — for zoom mode and full mode when viewport is zoomed */}
+      {isCapturing && currentFrame && (mode !== 'full' || isFullZoomed) && (
         <P className="text-xs text-muted-foreground">
           {disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate')}
         </P>

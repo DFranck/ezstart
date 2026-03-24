@@ -127,7 +127,8 @@
       "dragToNavigate": "Faites glisser pour deplacer, Ctrl+molette pour zoomer",
       "dragToNavigateOnly": "Faites glisser pour deplacer",
       "zoomView": "Vue zoomée",
-      "fullView": "Vue complète"
+      "fullView": "Vue complète",
+      "resetZoom": "Reset zoom"
     },
     "settings": "Parametres",
     "hideSettings": "Masquer",
