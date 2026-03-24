@@ -21,3 +21,18 @@ export {
 export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RuneAnalysis, BuildArchetype, SynergyResult } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'
 export type { MonsterElement, MonsterArchetype, Monster } from './monster'
+export type {
+  ArtifactCategory,
+  ArtifactType,
+  ArtifactAttribute,
+  ArtifactMainStat,
+  ArtifactQuality,
+  ArtifactSubstatType,
+  ArtifactStat,
+  ArtifactData,
+} from './artifact'
+export {
+  ARTIFACT_MAIN_STAT_MAX,
+  ARTIFACT_SUBSTAT_NAMES,
+  ARTIFACT_SUBSTATS_BY_QUALITY,
+} from './artifact-data'
