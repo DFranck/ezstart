@@ -8,3 +8,4 @@ export { cleanText, extractNumbers, matchPattern, failedResult, successResult } 
 // Game parsers
 export { nikkeParser } from './nikke.js'
 export { summonersWarParser } from './summoners-war.js'
+export { summonersWarArtifactParser } from './summoners-war-artifact.js'
