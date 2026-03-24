@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <defs>
+    <linearGradient id="sw-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0a2e"/>
+      <stop offset="100%" style="stop-color:#2d1b4e"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="200" rx="12" fill="url(#sw-bg)"/>
+  <text x="200" y="90" font-family="sans-serif" font-size="28" font-weight="bold" fill="#d4a853" text-anchor="middle">&#x2694;&#xFE0F; Summoners War</text>
+  <text x="200" y="130" font-family="sans-serif" font-size="14" fill="#a0a0a0" text-anchor="middle">Rune Scanner &amp; Analyzer</text>
+</svg>
