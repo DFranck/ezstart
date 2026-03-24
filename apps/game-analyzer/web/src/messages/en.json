@@ -124,7 +124,8 @@
       "zoom": "Zoom",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
-      "dragToNavigate": "Drag to pan, scroll to zoom",
+      "dragToNavigate": "Drag to pan, Ctrl+scroll to zoom",
+      "dragToNavigateOnly": "Drag to pan",
       "zoomView": "Zoomed view",
       "fullView": "Full view"
     },

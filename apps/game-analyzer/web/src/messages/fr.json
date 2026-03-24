@@ -124,7 +124,8 @@
       "zoom": "Zoom",
       "zoomIn": "Zoom +",
       "zoomOut": "Zoom -",
-      "dragToNavigate": "Faites glisser pour deplacer, molette pour zoomer",
+      "dragToNavigate": "Faites glisser pour deplacer, Ctrl+molette pour zoomer",
+      "dragToNavigateOnly": "Faites glisser pour deplacer",
       "zoomView": "Vue zoomée",
       "fullView": "Vue complète"
     },

@@ -31,6 +31,8 @@ interface CapturePreviewProps {
   zonesLocked?: boolean
   /** Background color for mask rectangles (default: red) */
   maskColor?: string
+  /** When true, scroll zoom and zoom buttons are disabled */
+  disableZoom?: boolean
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -59,6 +61,7 @@ export function CapturePreview({
   showTabs = false,
   zonesLocked = false,
   maskColor,
+  disableZoom = false,
 }: CapturePreviewProps) {
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -153,12 +156,13 @@ export function CapturePreview({
     ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
   }, [currentFrame, showTabs, ensureSrcCanvas, activeTab])
 
-  // Wheel handler for zoom — depends on canvasVisible so it re-registers when canvas appears
+  // Wheel handler for zoom — only with Ctrl held, depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !canvasVisible) return
+    if (!canvas || !canvasVisible || disableZoom) return
 
     function handleWheel(e: WheelEvent) {
+      if (!e.ctrlKey) return // scroll normal = ignore, Ctrl+scroll = zoom
       e.preventDefault()
       const cb = onRoiChangeRef.current
       if (!cb) return
@@ -182,7 +186,7 @@ export function CapturePreview({
 
     canvas.addEventListener('wheel', handleWheel, { passive: false })
     return () => canvas.removeEventListener('wheel', handleWheel)
-  }, [canvasVisible])
+  }, [canvasVisible, disableZoom])
 
   // Drag handlers for pan — depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
@@ -296,7 +300,7 @@ export function CapturePreview({
 
   // Zoom button handlers
   const handleZoomIn = useCallback(() => {
-    if (!onRoiChange) return
+    if (!onRoiChange || disableZoom) return
     const r = roiRef.current
     const factor = 0.85
     const newWidth = clamp(r.width * factor, MIN_ZOOM, MAX_ZOOM)
@@ -311,10 +315,10 @@ export function CapturePreview({
     }
     roiRef.current = newRoi
     onRoiChange(newRoi)
-  }, [onRoiChange])
+  }, [onRoiChange, disableZoom])
 
   const handleZoomOut = useCallback(() => {
-    if (!onRoiChange) return
+    if (!onRoiChange || disableZoom) return
     const r = roiRef.current
     const factor = 1.18
     const newWidth = clamp(r.width * factor, MIN_ZOOM, MAX_ZOOM)
@@ -329,7 +333,7 @@ export function CapturePreview({
     }
     roiRef.current = newRoi
     onRoiChange(newRoi)
-  }, [onRoiChange])
+  }, [onRoiChange, disableZoom])
 
   const statusText = useCallback(() => {
     if (error) return error
@@ -385,28 +389,30 @@ export function CapturePreview({
             maskColor={maskColor}
           />
         )}
-        {/* Zoom indicator + buttons */}
-        <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
-          <button
-            type="button"
-            onClick={handleZoomOut}
-            className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-            title={t('capture.zoomOut')}
-          >
-            -
-          </button>
-          <span className="text-white text-xs font-mono min-w-[3rem] text-center">
-            {t('capture.zoom')}: {zoomPercent}%
-          </span>
-          <button
-            type="button"
-            onClick={handleZoomIn}
-            className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
-            title={t('capture.zoomIn')}
-          >
-            +
-          </button>
-        </div>
+        {/* Zoom indicator + buttons — hidden when zoom is disabled */}
+        {!disableZoom && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+              title={t('capture.zoomOut')}
+            >
+              -
+            </button>
+            <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+              {t('capture.zoom')}: {zoomPercent}%
+            </span>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              className="text-white text-xs font-bold px-1.5 py-0.5 hover:bg-white/20 rounded"
+              title={t('capture.zoomIn')}
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
     </Card>
   )
@@ -481,7 +487,9 @@ export function CapturePreview({
 
       {/* Navigation hint */}
       {isCapturing && currentFrame && (
-        <P className="text-xs text-muted-foreground">{t('capture.dragToNavigate')}</P>
+        <P className="text-xs text-muted-foreground">
+          {disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate')}
+        </P>
       )}
 
       {/* Status + Controls */}

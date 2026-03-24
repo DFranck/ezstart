@@ -470,9 +470,12 @@ export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: R
   const remainingEvents = Math.max(0, totalEvents - eventsSoFar)
 
   // Each remaining event at max adds 1.0 to rawSum
-  rawSum += remainingEvents * 1.0
+  const potentialSum = rawSum + remainingEvents * 1.0
+  const result = (potentialSum / totalEvents) * 100
 
-  return (rawSum / totalEvents) * 100
+  console.log('[potential] sum:', rawSum, 'eventsSoFar:', eventsSoFar, 'remaining:', remainingEvents, 'total:', totalEvents, 'potential:', result)
+
+  return result
 }
 
 /**

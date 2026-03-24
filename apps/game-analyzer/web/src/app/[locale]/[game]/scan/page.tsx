@@ -406,6 +406,7 @@ export default function GameScanPage() {
                 onZonesChange={() => {}}
                 zonesLocked
                 maskColor="rgba(255, 0, 0, 0.15)"
+                disableZoom
               />
 
               {isCapturing && (
