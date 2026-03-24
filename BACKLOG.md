@@ -72,15 +72,21 @@ apps/
 28. [x] Theme SW CSS variables (OKLCH, roll quality, tiers, elements)
 29. [x] Profil joueur envoyé à l'API
 30. [x] 14 build archetypes avec gem/roll awareness
-31. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
-32. [ ] Couleurs theme : vérifier rendu dark/light mode
-33. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
-34. [ ] Prévenir rescan si même rune (hash image)
-35. [ ] Fallback IA cascade (Gemini free tier)
-36. [ ] Nikke gear analyzer
-37. [ ] Ajouter OpenAPI/Swagger à l'API
-38. [ ] Deploy (Railway API + Vercel Web)
-39. [ ] Overlay/PiP pour afficher résultats sur le jeu
+31. [x] Artifact types + parser (33 substats, 10 tests)
+32. [x] Mode unifié zoom+ROI (full window + zoom + drag ROI)
+33. [x] Upload mode supprimé — capture only
+34. [x] UX pass : settings collapsibles, compact RuneCard, gaming homepage
+35. [x] Game banners SVG + rune set icons SWARFARM
+36. [x] Interactions séparées : left=ROI, middle=pan, Ctrl+scroll=zoom
+37. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
+38. [ ] Couleurs theme : vérifier rendu dark/light mode
+39. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
+40. [ ] Prévenir rescan si même rune (hash image)
+41. [ ] Fallback IA cascade (Gemini free tier)
+42. [ ] Nikke gear analyzer
+43. [ ] Ajouter OpenAPI/Swagger à l'API
+44. [ ] Deploy (Railway API + Vercel Web)
+45. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
