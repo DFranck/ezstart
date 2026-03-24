@@ -82,6 +82,15 @@ export interface SynergyResult {
   allArchetypes: { archetype: BuildArchetype; matchCount: number; matchedStats: StatType[] }[]
 }
 
+export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
+
+export interface ProgressiveAdvice {
+  action: ProgressiveAction
+  reason: string
+  nextCheckAt: number
+  sellProbability: number
+}
+
 export type BuildArchetype =
   | 'speed-dps' | 'bruiser' | 'cleave' | 'cc-debuffer' | 'tank-support'
   | 'bomber' | 'strip-cleanse' | 'healer' | 'one-shot-nuker'
@@ -114,6 +123,8 @@ export interface RuneAnalysis {
   setPieces: number
   /** Build archetype synergy analysis */
   synergy: SynergyResult
+  /** Progressive upgrade/sell advice based on current level and rolls */
+  progressiveAdvice?: ProgressiveAdvice
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -209,7 +220,7 @@ const SYNERGY_BONUS = {
   INCOHERENT: -3,       // < 2 match
 } as const
 
-/** Stat weights for weighted efficiency — reflects real SW meta value */
+/** Stat weights for weighted efficiency — reflects real SW meta value (fallback) */
 const STAT_WEIGHTS: Record<StatType, number> = {
   'spd': 2.0,
   'cr': 1.5,
@@ -223,6 +234,36 @@ const STAT_WEIGHTS: Record<StatType, number> = {
   'hp': 0.5,
   'def': 0.5,
 }
+
+/** Archetype-specific stat priority weights (1.0 = max priority, 0.05 = useless) */
+const STAT_PRIORITY_WEIGHTS: Record<BuildArchetype, Record<StatType, number>> = {
+  'speed-dps':      { spd: 1.0, cr: 0.9, cd: 0.85, 'atk%': 0.8, 'hp%': 0.4, 'def%': 0.3, acc: 0.3, res: 0.2, atk: 0.3, def: 0.1, hp: 0.1 },
+  'bruiser':        { 'hp%': 1.0, cr: 0.85, cd: 0.8, spd: 0.75, 'def%': 0.6, 'atk%': 0.5, res: 0.3, acc: 0.2, hp: 0.2, atk: 0.1, def: 0.1 },
+  'tank-support':   { 'hp%': 1.0, 'def%': 0.9, spd: 0.8, res: 0.7, acc: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.3, def: 0.2, atk: 0.05 },
+  'cleave':         { 'atk%': 1.0, cr: 0.95, cd: 0.9, spd: 0.7, 'hp%': 0.3, 'def%': 0.2, acc: 0.3, res: 0.1, atk: 0.2, def: 0.05, hp: 0.05 },
+  'cc-debuffer':    { spd: 1.0, acc: 0.9, 'hp%': 0.7, 'def%': 0.6, res: 0.3, cr: 0.2, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'bomber':         { 'atk%': 1.0, spd: 0.9, acc: 0.8, 'hp%': 0.5, 'def%': 0.3, cr: 0.2, cd: 0.1, res: 0.2, atk: 0.2, hp: 0.1, def: 0.05 },
+  'strip-cleanse':  { spd: 1.0, 'hp%': 0.85, acc: 0.8, res: 0.7, 'def%': 0.5, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'healer':         { spd: 1.0, 'hp%': 0.9, 'def%': 0.7, acc: 0.5, res: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.3, hp: 0.2, def: 0.1, atk: 0.05 },
+  'one-shot-nuker': { 'atk%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.2, 'def%': 0.1, acc: 0.1, res: 0.05, atk: 0.3, def: 0.05, hp: 0.05 },
+  'def-nuker':      { 'def%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.3, 'atk%': 0.1, acc: 0.1, res: 0.1, def: 0.3, atk: 0.05, hp: 0.1 },
+  'vampire-bruiser': { 'atk%': 0.9, cr: 0.85, cd: 0.8, 'hp%': 0.8, spd: 0.5, 'def%': 0.3, acc: 0.1, res: 0.1, atk: 0.2, def: 0.05, hp: 0.1 },
+  'revenge-proc':   { 'hp%': 0.9, 'def%': 0.85, cr: 0.7, cd: 0.6, spd: 0.3, res: 0.4, acc: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
+  'speed-leader':   { spd: 1.0, 'hp%': 0.8, 'def%': 0.6, res: 0.5, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'raid-support':   { spd: 0.9, 'hp%': 0.9, 'def%': 0.8, res: 0.8, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
+}
+
+/** Progressive sell thresholds by level — if weighted eff < threshold → sell */
+const PROGRESSIVE_SELL_THRESHOLDS: Record<PlayerProfile, Record<number, number>> = {
+  early: { 0: 30, 3: 35, 6: 40, 9: 45, 12: 50 },
+  mid:   { 0: 40, 3: 45, 6: 50, 9: 55, 12: 60 },
+  late:  { 0: 50, 3: 55, 6: 60, 9: 65, 12: 70 },
+}
+
+/** Dead stat combinations — auto-sell if both present */
+const DEAD_STAT_COMBOS: StatType[][] = [
+  ['acc', 'res'],
+]
 
 // Number of substats at +0 by quality
 const SUBSTATS_BY_QUALITY: Record<RuneQuality, number> = {
@@ -416,6 +457,9 @@ function barionEfficiency(substats: RuneStat[], quality: RuneQuality): number {
 
 /**
  * Calculate weighted efficiency using stat importance weights.
+ * When a bestArchetype is provided, uses archetype-specific priority weights
+ * for more accurate scoring. Falls back to generic STAT_WEIGHTS otherwise.
+ *
  * Same Barion structure but each ratio is multiplied by the stat weight.
  * Normalised so that a perfect Legend rune with top-4 stats = 100%.
  *
@@ -424,21 +468,32 @@ function barionEfficiency(substats: RuneStat[], quality: RuneQuality): number {
  * Each stat gets 2 max rolls → weightedSum = 2*2.0 + 2*1.5 + 2*1.5 + 2*1.0 = 12.
  * Divisor for Legend = 12, for other qualities we scale proportionally.
  */
-function weightedEfficiency(substats: RuneStat[], quality: RuneQuality): number {
+function weightedEfficiency(substats: RuneStat[], quality: RuneQuality, bestArchetype?: BuildArchetype | null): number {
   if (substats.length === 0) return 0
+
+  // Use archetype-specific weights if available, otherwise fallback
+  const weights = bestArchetype ? STAT_PRIORITY_WEIGHTS[bestArchetype] : STAT_WEIGHTS
 
   let weightedSum = 0
   for (const sub of substats) {
     const range = ROLL_RANGES[sub.type]
     if (!range || sub.value <= 0) continue
     const ratio = sub.value / range.max
-    weightedSum += ratio * STAT_WEIGHTS[sub.type]
+    weightedSum += ratio * (weights[sub.type] ?? 0.5)
   }
 
-  // Max weighted divisor scales with total events (like Barion).
-  // For Legend (8 events), the best-case weighted sum = 12.0 (avg weight 1.5 per event).
-  // So: maxWeightedDivisor = TOTAL_EVENTS * 1.5
-  const avgTopWeight = 1.5
+  // Max weighted divisor: for archetype weights, the max weight is 1.0 (not 2.0),
+  // so we compute the top-4 average weight for proper normalisation.
+  let avgTopWeight: number
+  if (bestArchetype) {
+    const archetypeWeights = Object.values(STAT_PRIORITY_WEIGHTS[bestArchetype])
+    const sorted = [...archetypeWeights].sort((a, b) => b - a)
+    const top4 = sorted.slice(0, 4)
+    avgTopWeight = top4.reduce((s, w) => s + w, 0) / top4.length
+  } else {
+    avgTopWeight = 1.5
+  }
+
   const maxWeightedDivisor = TOTAL_EVENTS_AT_12[quality] * avgTopWeight
   if (maxWeightedDivisor <= 0) return 0
 
@@ -659,6 +714,113 @@ export function getRecommendation(
 }
 
 /**
+ * Check if the rune has a dead stat combination (e.g. ACC + RES together).
+ */
+function hasDeadStatCombo(substats: RuneStat[]): boolean {
+  const statTypes = new Set(substats.map(s => s.type))
+  for (const combo of DEAD_STAT_COMBOS) {
+    if (combo.every(s => statTypes.has(s))) return true
+  }
+  return false
+}
+
+/**
+ * Calculate progressive upgrade/sell advice based on current level, rolls,
+ * archetype fit, dead stats, and player profile thresholds.
+ */
+function calculateProgressiveAdvice(
+  rune: RuneData,
+  quality: RuneQuality,
+  currentWeightedEff: number,
+  synergy: SynergyResult,
+  profile: PlayerProfile,
+): ProgressiveAdvice | undefined {
+  const level = rune.level
+  const levelKey = Math.min(Math.floor(level / 3) * 3, 12)
+
+  // Dead stat combo = instant sell
+  if (hasDeadStatCombo(rune.subStats)) {
+    return {
+      action: 'sell',
+      reason: 'Dead stat combo detected (ACC + RES) — no monster needs both',
+      nextCheckAt: 0,
+      sellProbability: 95,
+    }
+  }
+
+  const thresholds = PROGRESSIVE_SELL_THRESHOLDS[profile]
+  const threshold = thresholds[levelKey] ?? thresholds[12] ?? 50
+
+  // At +12 or +15 — final decision
+  if (level >= 12) {
+    if (currentWeightedEff < threshold) {
+      return {
+        action: 'sell',
+        reason: `Weighted efficiency ${Math.round(currentWeightedEff)}% below ${profile} threshold ${threshold}%`,
+        nextCheckAt: 0,
+        sellProbability: 90,
+      }
+    }
+
+    // Check if grindable
+    const hasGrindable = rune.subStats.some(s => !NON_GRINDABLE.has(s.type))
+    if (hasGrindable && currentWeightedEff >= threshold) {
+      return {
+        action: 'grind',
+        reason: `Good rune at +12 — grind to maximize value (${Math.round(currentWeightedEff)}%)`,
+        nextCheckAt: 0,
+        sellProbability: 0,
+      }
+    }
+
+    return {
+      action: 'keep',
+      reason: `Solid rune at +12 — ${Math.round(currentWeightedEff)}% weighted efficiency`,
+      nextCheckAt: 0,
+      sellProbability: 0,
+    }
+  }
+
+  // Pre-+12: check against progressive threshold
+  if (currentWeightedEff < threshold) {
+    return {
+      action: 'sell',
+      reason: `Roll +${levelKey} below ${profile} threshold (${Math.round(currentWeightedEff)}% < ${threshold}%)`,
+      nextCheckAt: 0,
+      sellProbability: 80,
+    }
+  }
+
+  // Calculate sell probability based on remaining rolls and current quality
+  const nextLevel = Math.min(levelKey + 3, 12)
+  const remaining = remainingRolls(quality, level)
+  const nextThreshold = thresholds[nextLevel] ?? thresholds[12] ?? 60
+  const gap = nextThreshold - currentWeightedEff
+
+  // Probability estimate: how likely future rolls will fail to meet threshold
+  // Higher gap + fewer remaining rolls = higher sell probability
+  let sellProbability = 0
+  if (gap > 0 && remaining > 0) {
+    // Each remaining roll can add ~8-12% weighted eff at best
+    const maxGainPerRoll = 12
+    const maxPotentialGain = remaining * maxGainPerRoll
+    sellProbability = Math.min(90, Math.max(10, Math.round((gap / maxPotentialGain) * 100)))
+  }
+
+  // Synergy penalty increases sell probability
+  if (synergy.synergyBonus < 0) {
+    sellProbability = Math.min(95, sellProbability + 20)
+  }
+
+  return {
+    action: 'upgrade',
+    reason: `On track — upgrade to +${nextLevel} and re-evaluate (${Math.round(currentWeightedEff)}% vs ${nextThreshold}% needed)`,
+    nextCheckAt: nextLevel,
+    sellProbability,
+  }
+}
+
+/**
  * Legacy function name — kept for backward compatibility.
  * Delegates to analyzeRune.
  */
@@ -675,7 +837,12 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
 
   const currentEfficiency = barionEfficiency(rune.subStats, quality)
-  const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality)
+
+  // Calculate synergy first — we need bestArchetype for weighted efficiency
+  const synergy = calculateSynergy(rune.subStats, rune.innateStat)
+
+  // Use archetype-specific weights when a best archetype is found
+  const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality, synergy.bestArchetype)
   const potentialEfficiency = calculatePotentialEfficiency(rune, quality)
 
   // Max efficiency: all events at max = 100%
@@ -683,9 +850,6 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   // Grind potential is based on the potential at +12 (you grind after +12)
   const grindPotential = calculateGrindPotential(substats, potentialEfficiency, quality)
-
-  // Calculate synergy (include innate stat for archetype matching)
-  const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
   // For pre-+12 runes, use potential efficiency for tier (should we keep powering up?)
   // For +12+ runes, use weighted efficiency (current value of the rune)
@@ -729,6 +893,9 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Potential efficiency: at +12 or above, no remaining events → potential = current
   const finalPotential = !isPreMax ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
+  // Progressive advice — actionable sell/upgrade/keep/grind recommendation
+  const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedWeighted, synergy, profile)
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
@@ -747,5 +914,6 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     setBonus,
     setPieces,
     synergy,
+    progressiveAdvice,
   }
 }

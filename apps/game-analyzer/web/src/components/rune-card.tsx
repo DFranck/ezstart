@@ -2,7 +2,7 @@
 
 import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { MonsterSuggestions } from './monster-suggestions'
 
@@ -105,6 +105,21 @@ function formatStatLabel(type: StatType): string {
 }
 
 // ── Archetype emojis — sourced from BUILD_ARCHETYPES ──
+
+// ── Progressive advice colors ──
+const ADVICE_COLORS: Record<ProgressiveAction, string> = {
+  sell: 'border-red-500/50 bg-red-500/10 text-red-400',
+  upgrade: 'border-blue-500/50 bg-blue-500/10 text-blue-400',
+  keep: 'border-green-500/50 bg-green-500/10 text-green-400',
+  grind: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
+}
+
+const ADVICE_LABELS: Record<ProgressiveAction, string> = {
+  sell: 'SELL',
+  upgrade: 'UPGRADE',
+  keep: 'KEEP',
+  grind: 'GRIND',
+}
 
 // ── Synergy badge color by match count ──
 function getSynergyBadgeClass(matchCount: number): string {
@@ -261,6 +276,30 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
             </Div>
           </>
         )}
+
+        {/* ── Progressive Advice ── */}
+        {analysis?.progressiveAdvice && (() => {
+          const advice = analysis.progressiveAdvice
+          return (
+            <>
+              <Div className="border-t border-border" />
+              <Div className={`p-3 rounded-lg border-2 ${ADVICE_COLORS[advice.action]}`}>
+                <Div className="flex items-center justify-between mb-1">
+                  <P className="font-bold text-lg">{ADVICE_LABELS[advice.action]}</P>
+                  {advice.sellProbability > 0 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {advice.sellProbability}% sell risk
+                    </Badge>
+                  )}
+                </Div>
+                <P className="text-sm opacity-90">{advice.reason}</P>
+                {advice.nextCheckAt > 0 && (
+                  <P className="text-xs opacity-70 mt-1">Next check: +{advice.nextCheckAt}</P>
+                )}
+              </Div>
+            </>
+          )
+        })()}
 
         {/* ── Synergy badges ── */}
         {analysis?.synergy && (() => {

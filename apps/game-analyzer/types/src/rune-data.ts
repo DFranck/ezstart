@@ -284,6 +284,45 @@ export const SYNERGY_BONUS = {
   INCOHERENT: -3,       // < 2 match
 } as const
 
+// ============================================
+// STAT PRIORITY WEIGHTS PER ARCHETYPE
+// ============================================
+// Weight per stat per archetype (1.0 = max priority, 0.05 = useless)
+export const STAT_PRIORITY_WEIGHTS: Record<BuildArchetype, Record<StatType, number>> = {
+  'speed-dps':      { spd: 1.0, cr: 0.9, cd: 0.85, 'atk%': 0.8, 'hp%': 0.4, 'def%': 0.3, acc: 0.3, res: 0.2, atk: 0.3, def: 0.1, hp: 0.1 },
+  'bruiser':        { 'hp%': 1.0, cr: 0.85, cd: 0.8, spd: 0.75, 'def%': 0.6, 'atk%': 0.5, res: 0.3, acc: 0.2, hp: 0.2, atk: 0.1, def: 0.1 },
+  'tank-support':   { 'hp%': 1.0, 'def%': 0.9, spd: 0.8, res: 0.7, acc: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.3, def: 0.2, atk: 0.05 },
+  'cleave':         { 'atk%': 1.0, cr: 0.95, cd: 0.9, spd: 0.7, 'hp%': 0.3, 'def%': 0.2, acc: 0.3, res: 0.1, atk: 0.2, def: 0.05, hp: 0.05 },
+  'cc-debuffer':    { spd: 1.0, acc: 0.9, 'hp%': 0.7, 'def%': 0.6, res: 0.3, cr: 0.2, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'bomber':         { 'atk%': 1.0, spd: 0.9, acc: 0.8, 'hp%': 0.5, 'def%': 0.3, cr: 0.2, cd: 0.1, res: 0.2, atk: 0.2, hp: 0.1, def: 0.05 },
+  'strip-cleanse':  { spd: 1.0, 'hp%': 0.85, acc: 0.8, res: 0.7, 'def%': 0.5, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'healer':         { spd: 1.0, 'hp%': 0.9, 'def%': 0.7, acc: 0.5, res: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.3, hp: 0.2, def: 0.1, atk: 0.05 },
+  'one-shot-nuker': { 'atk%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.2, 'def%': 0.1, acc: 0.1, res: 0.05, atk: 0.3, def: 0.05, hp: 0.05 },
+  'def-nuker':      { 'def%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.3, 'atk%': 0.1, acc: 0.1, res: 0.1, def: 0.3, atk: 0.05, hp: 0.1 },
+  'vampire-bruiser': { 'atk%': 0.9, cr: 0.85, cd: 0.8, 'hp%': 0.8, spd: 0.5, 'def%': 0.3, acc: 0.1, res: 0.1, atk: 0.2, def: 0.05, hp: 0.1 },
+  'revenge-proc':   { 'hp%': 0.9, 'def%': 0.85, cr: 0.7, cd: 0.6, spd: 0.3, res: 0.4, acc: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
+  'speed-leader':   { spd: 1.0, 'hp%': 0.8, 'def%': 0.6, res: 0.5, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
+  'raid-support':   { spd: 0.9, 'hp%': 0.9, 'def%': 0.8, res: 0.8, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
+}
+
+// ============================================
+// PROGRESSIVE SELL THRESHOLDS
+// ============================================
+// If weighted efficiency < threshold at this level → sell
+export const PROGRESSIVE_SELL_THRESHOLDS: Record<PlayerProfile, Record<number, number>> = {
+  early: { 0: 30, 3: 35, 6: 40, 9: 45, 12: 50 },
+  mid:   { 0: 40, 3: 45, 6: 50, 9: 55, 12: 60 },
+  late:  { 0: 50, 3: 55, 6: 60, 9: 65, 12: 70 },
+}
+
+// ============================================
+// DEAD STAT COMBINATIONS
+// ============================================
+// These stat combos together = auto-sell (never on same monster)
+export const DEAD_STAT_COMBOS: StatType[][] = [
+  ['acc', 'res'],  // ACC + RES together = never on the same monster
+]
+
 export interface SynergyResult {
   bestArchetype: BuildArchetype | null
   matchCount: number
@@ -325,6 +364,15 @@ export interface SubstatAnalysis {
   grindAmount?: number
 }
 
+export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
+
+export interface ProgressiveAdvice {
+  action: ProgressiveAction
+  reason: string
+  nextCheckAt: number
+  sellProbability: number
+}
+
 export interface RuneAnalysis {
   /** Overall efficiency score (0-100) — Barion raw */
   efficiency: number
@@ -355,4 +403,6 @@ export interface RuneAnalysis {
     synergyBonus: number
     allArchetypes: { archetype: string; matchCount: number; matchedStats: string[] }[]
   }
+  /** Progressive upgrade/sell advice based on current level and rolls */
+  progressiveAdvice?: ProgressiveAdvice
 }

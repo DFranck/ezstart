@@ -16,6 +16,8 @@ export type {
   EfficiencyTier,
   PlayerProfile,
   GrindPotential,
+  ProgressiveAction,
+  ProgressiveAdvice,
   Recommendation,
   RuneAnalysis,
   RuneEfficiencyResult,
