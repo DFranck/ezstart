@@ -38,8 +38,11 @@ interface CapturePreviewProps {
   onMasksChange?: (masks: MaskRect[]) => void
   onMaskAdd?: () => void
   onMaskRemove?: (id: string) => void
+  /** Display mode: 'zoom' = cropped ROI, 'full' = full window + ROI overlay, 'both' = tabs with both views */
+  mode?: 'zoom' | 'full' | 'both'
+  /** @deprecated Use mode instead */
   showTabs?: boolean
-  /** When true, zones and masks are visible but not interactive */
+  /** When true, zones/masks/ROI are visible but not interactive */
   zonesLocked?: boolean
   /** Background color for mask rectangles (default: red) */
   maskColor?: string
@@ -70,11 +73,15 @@ export function CapturePreview({
   onMasksChange,
   onMaskAdd,
   onMaskRemove,
+  mode: modeProp,
   showTabs = false,
   zonesLocked = false,
   maskColor,
   disableZoom = false,
 }: CapturePreviewProps) {
+  // Resolve mode: explicit prop takes priority, fallback to showTabs compat
+  const mode = modeProp ?? (showTabs ? 'both' : 'zoom')
+
   const t = useTranslations('scan')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fullCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -115,8 +122,9 @@ export function CapturePreview({
     return srcCanvas
   }, [])
 
-  // Draw the cropped ROI zone to the zoom canvas
+  // Draw the cropped ROI zone to the zoom canvas (only for 'zoom' and 'both' modes)
   useEffect(() => {
+    if (mode === 'full') return
     const canvas = canvasRef.current
     if (!canvas || !currentFrame) return
 
@@ -143,11 +151,11 @@ export function CapturePreview({
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, roi, previewHeight, ensureSrcCanvas])
+  }, [currentFrame, roi, previewHeight, ensureSrcCanvas, mode])
 
-  // Draw the full frame to the full preview canvas
+  // Draw the full frame to the full preview canvas (for 'full' and 'both' modes)
   useEffect(() => {
-    if (!showTabs) return
+    if (mode === 'zoom') return
     const canvas = fullCanvasRef.current
     if (!canvas || !currentFrame) return
 
@@ -166,12 +174,12 @@ export function CapturePreview({
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, showTabs, previewHeight, ensureSrcCanvas, activeTab])
+  }, [currentFrame, mode, previewHeight, ensureSrcCanvas, activeTab])
 
   // Wheel handler for zoom — only with Ctrl held, depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !canvasVisible || disableZoom) return
+    if (!canvas || !canvasVisible || disableZoom || mode === 'full') return
 
     function handleWheel(e: WheelEvent) {
       if (!e.ctrlKey) return // scroll normal = ignore, Ctrl+scroll = zoom
@@ -198,12 +206,12 @@ export function CapturePreview({
 
     canvas.addEventListener('wheel', handleWheel, { passive: false })
     return () => canvas.removeEventListener('wheel', handleWheel)
-  }, [canvasVisible, disableZoom])
+  }, [canvasVisible, disableZoom, mode])
 
-  // Drag handlers for pan — depends on canvasVisible so it re-registers when canvas appears
+  // Drag handlers for pan — depends on canvasVisible so it re-registers when canvas appears (zoom canvas only)
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !canvasVisible) return
+    if (!canvas || !canvasVisible || mode === 'full') return
 
     function handleMouseDown(e: MouseEvent) {
       e.preventDefault()
@@ -308,7 +316,7 @@ export function CapturePreview({
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [canvasVisible])
+  }, [canvasVisible, mode])
 
   // Preview resize handlers
   const startPreviewResize = useCallback((e: React.MouseEvent) => {
@@ -481,6 +489,7 @@ export function CapturePreview({
           <RoiSelector
             onChange={onRoiChange}
             initialRoi={roi}
+            locked={zonesLocked}
           />
         )}
         {/* Multi-zone overlay on full view — positions are relative to the ROI */}
@@ -521,7 +530,7 @@ export function CapturePreview({
     <Div className="space-y-4">
       {/* Previews */}
       {isCapturing && currentFrame ? (
-        showTabs ? (
+        mode === 'both' ? (
           <Tabs defaultValue="zoom" onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="zoom">{t('capture.zoomView')}</TabsTrigger>
@@ -534,6 +543,8 @@ export function CapturePreview({
               {fullCanvas}
             </TabsContent>
           </Tabs>
+        ) : mode === 'full' ? (
+          fullCanvas
         ) : (
           zoomCanvas
         )
@@ -546,8 +557,8 @@ export function CapturePreview({
         </Card>
       )}
 
-      {/* Navigation hint */}
-      {isCapturing && currentFrame && (
+      {/* Navigation hint — only for zoom mode where drag/scroll navigation applies */}
+      {isCapturing && currentFrame && mode !== 'full' && (
         <P className="text-xs text-muted-foreground">
           {disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate')}
         </P>

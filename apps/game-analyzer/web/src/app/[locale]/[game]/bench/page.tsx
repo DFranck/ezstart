@@ -433,7 +433,7 @@ export default function BenchPage() {
           onStop={stopCapture}
           roi={roi}
           onRoiChange={handleRoiChange}
-          showTabs
+          mode="both"
           zones={zones}
           onZonesChange={handleZonesChange}
           masks={masks}

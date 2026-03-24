@@ -16,6 +16,8 @@ interface RoiSelectorProps {
   containerHeight?: number
   onChange: (roi: RoiRect) => void
   initialRoi?: RoiRect
+  /** When true, ROI is visible but not interactive (no drag/resize) */
+  locked?: boolean
 }
 
 type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
@@ -29,6 +31,7 @@ function clamp(value: number, min: number, max: number): number {
 export function RoiSelector({
   onChange,
   initialRoi,
+  locked = false,
 }: RoiSelectorProps) {
   const [roi, setRoi] = useState<RoiRect>(
     initialRoi ?? { x: 60, y: 5, width: 35, height: 40 }
@@ -250,20 +253,20 @@ export function RoiSelector({
           top: `${roi.y}%`,
           width: `${roi.width}%`,
           height: `${roi.height}%`,
-          border: '3px solid red',
-          backgroundColor: 'rgba(255, 0, 0, 0.15)',
-          cursor: 'move',
-          pointerEvents: 'auto',
+          border: locked ? '2px solid rgba(255, 0, 0, 0.5)' : '3px solid red',
+          backgroundColor: locked ? 'rgba(255, 0, 0, 0.05)' : 'rgba(255, 0, 0, 0.15)',
+          cursor: locked ? 'default' : 'move',
+          pointerEvents: locked ? 'none' : 'auto',
           boxSizing: 'border-box',
           touchAction: 'none',
           overflow: 'visible',
           zIndex: 55,
         }}
-        onMouseDown={(e) => handleMouseDown(e, 'move')}
-        onTouchStart={(e) => handleTouchStart(e, 'move')}
+        onMouseDown={locked ? undefined : (e) => handleMouseDown(e, 'move')}
+        onTouchStart={locked ? undefined : (e) => handleTouchStart(e, 'move')}
       >
-        {/* Resize handles (corners + edges) */}
-        {allHandles.map((handle) => (
+        {/* Resize handles (corners + edges) — hidden when locked */}
+        {!locked && allHandles.map((handle) => (
           <div
             key={handle}
             style={getHandleStyle(handle)}
