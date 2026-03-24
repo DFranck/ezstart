@@ -10,6 +10,18 @@ import { MultiZoneSelector } from './multi-zone-selector'
 import type { MaskRect } from './blackout-mask'
 import { BlackoutMask } from './blackout-mask'
 
+const PREVIEW_HEIGHT_KEY = 'game-analyzer-preview-height'
+const DEFAULT_PREVIEW_HEIGHT = 400
+
+function loadPreviewHeight(): number {
+  if (typeof window === 'undefined') return DEFAULT_PREVIEW_HEIGHT
+  try {
+    const saved = localStorage.getItem(PREVIEW_HEIGHT_KEY)
+    if (saved) return Math.max(150, Math.min(1200, Number(saved)))
+  } catch {}
+  return DEFAULT_PREVIEW_HEIGHT
+}
+
 interface CapturePreviewProps {
   isCapturing: boolean
   isAnalyzing: boolean
@@ -75,6 +87,10 @@ export function CapturePreview({
   onRoiChangeRef.current = onRoiChange
 
   const [activeTab, setActiveTab] = useState<string>('zoom')
+  const [previewHeight, setPreviewHeight] = useState<number>(loadPreviewHeight)
+  const isResizingRef = useRef(false)
+  const resizeStartYRef = useRef(0)
+  const resizeStartHeightRef = useRef(0)
 
   // Track whether the canvas is visible (mounted in DOM)
   const canvasVisible = isCapturing && !!currentFrame
@@ -113,23 +129,21 @@ export function CapturePreview({
     const sw = (r.width / 100) * currentFrame.width
     const sh = (r.height / 100) * currentFrame.height
 
-    // Size preview canvas to container
+    // Size preview canvas to container width, user-defined height
     const container = containerRef.current
     if (!container) return
     const containerWidth = container.clientWidth
-    const aspectRatio = sh > 0 ? sw / sh : 16 / 9
-    const containerHeight = Math.round(containerWidth / aspectRatio)
 
-    if (canvas.width !== containerWidth || canvas.height !== containerHeight) {
+    if (canvas.width !== containerWidth || canvas.height !== previewHeight) {
       canvas.width = containerWidth
-      canvas.height = containerHeight
+      canvas.height = previewHeight
     }
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, roi, ensureSrcCanvas])
+  }, [currentFrame, roi, previewHeight, ensureSrcCanvas])
 
   // Draw the full frame to the full preview canvas
   useEffect(() => {
@@ -142,19 +156,17 @@ export function CapturePreview({
     const container = fullContainerRef.current
     if (!container) return
     const containerWidth = container.clientWidth
-    const aspectRatio = currentFrame.height > 0 ? currentFrame.width / currentFrame.height : 16 / 9
-    const containerHeight = Math.round(containerWidth / aspectRatio)
 
-    if (canvas.width !== containerWidth || canvas.height !== containerHeight) {
+    if (canvas.width !== containerWidth || canvas.height !== previewHeight) {
       canvas.width = containerWidth
-      canvas.height = containerHeight
+      canvas.height = previewHeight
     }
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height)
-  }, [currentFrame, showTabs, ensureSrcCanvas, activeTab])
+  }, [currentFrame, showTabs, previewHeight, ensureSrcCanvas, activeTab])
 
   // Wheel handler for zoom — only with Ctrl held, depends on canvasVisible so it re-registers when canvas appears
   useEffect(() => {
@@ -298,6 +310,36 @@ export function CapturePreview({
     }
   }, [canvasVisible])
 
+  // Preview resize handlers
+  const startPreviewResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    isResizingRef.current = true
+    resizeStartYRef.current = e.clientY
+    resizeStartHeightRef.current = previewHeight
+
+    function handleMouseMove(ev: MouseEvent) {
+      if (!isResizingRef.current) return
+      const delta = ev.clientY - resizeStartYRef.current
+      const newHeight = Math.max(150, Math.min(1200, resizeStartHeightRef.current + delta))
+      setPreviewHeight(newHeight)
+    }
+
+    function handleMouseUp() {
+      if (!isResizingRef.current) return
+      isResizingRef.current = false
+      setPreviewHeight(prev => {
+        localStorage.setItem(PREVIEW_HEIGHT_KEY, String(prev))
+        return prev
+      })
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+  }, [previewHeight])
+
   // Zoom button handlers
   const handleZoomIn = useCallback(() => {
     if (!onRoiChange || disableZoom) return
@@ -364,11 +406,11 @@ export function CapturePreview({
   // Zoom canvas with overlays (shared between both views)
   const zoomCanvas = (
     <Card className="bg-muted">
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef} className="relative overflow-hidden" style={{ height: previewHeight }}>
         <canvas
           ref={canvasRef}
-          className="w-full h-auto block"
-          style={{ cursor: 'grab', touchAction: 'none' }}
+          className="w-full block"
+          style={{ cursor: 'grab', touchAction: 'none', height: previewHeight }}
         />
         {/* Multi-zone overlay on zoom view */}
         {zones && onZonesChange && (
@@ -413,6 +455,15 @@ export function CapturePreview({
             </button>
           </div>
         )}
+        {/* Resize handle — bottom-right corner */}
+        <div
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
+          onMouseDown={startPreviewResize}
+          style={{
+            background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
+            borderRadius: '0 0 8px 0',
+          }}
+        />
       </div>
     </Card>
   )
@@ -420,10 +471,11 @@ export function CapturePreview({
   // Full canvas with ROI selector + zones + masks
   const fullCanvas = (
     <Card className="bg-muted">
-      <div ref={fullContainerRef} className="relative">
+      <div ref={fullContainerRef} className="relative overflow-hidden" style={{ height: previewHeight }}>
         <canvas
           ref={fullCanvasRef}
-          className="w-full h-auto block"
+          className="w-full block"
+          style={{ height: previewHeight }}
         />
         {roi && onRoiChange && (
           <RoiSelector
@@ -452,6 +504,15 @@ export function CapturePreview({
             maskColor={maskColor}
           />
         )}
+        {/* Resize handle — bottom-right corner */}
+        <div
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
+          onMouseDown={startPreviewResize}
+          style={{
+            background: 'linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)',
+            borderRadius: '0 0 8px 0',
+          }}
+        />
       </div>
     </Card>
   )
