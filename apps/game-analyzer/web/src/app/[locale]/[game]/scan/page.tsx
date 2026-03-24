@@ -14,7 +14,7 @@ import {
   Skeleton,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import type { GameType } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
@@ -140,6 +140,34 @@ export default function GameScanPage() {
 
   // Session scan counter
   const [scanCount, setScanCount] = useState(0)
+
+  // Flash overlay on scan result — visual feedback by tier
+  const [flashColor, setFlashColor] = useState<string | null>(null)
+  const [flashOpacity, setFlashOpacity] = useState(0)
+  const [flashDuration, setFlashDuration] = useState(1000)
+
+  const flashConfig: Record<string, { color: string; intensity: number; duration: number }> = useMemo(() => ({
+    godlike: { color: 'rgba(255, 180, 0, ALPHA)', intensity: 0.6, duration: 1500 },
+    great:   { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.5, duration: 1200 },
+    good:    { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+    keep:    { color: 'rgba(200, 200, 200, ALPHA)', intensity: 0.2, duration: 800 },
+    sell:    { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
+  }), [])
+
+  useEffect(() => {
+    if (!scanResult?.analysis) return
+
+    const tier = scanResult.analysis.adjustedTier || scanResult.analysis.tier
+    const config = flashConfig[tier] || flashConfig.sell
+    const color = config.color.replace('ALPHA', String(config.intensity))
+
+    setFlashColor(color)
+    setFlashDuration(config.duration)
+    setFlashOpacity(1)
+
+    const timer = setTimeout(() => setFlashOpacity(0), 50)
+    return () => clearTimeout(timer)
+  }, [scanResult, flashConfig])
 
   // Load saved presets from bench — prefer DB layout, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
@@ -323,6 +351,18 @@ export default function GameScanPage() {
 
   return (
     <Div className="container mx-auto px-4 py-6 max-w-6xl">
+      {/* Flash overlay — full-screen color flash on scan result */}
+      {flashColor && (
+        <div
+          className="fixed inset-0 pointer-events-none z-50"
+          style={{
+            backgroundColor: flashColor,
+            opacity: flashOpacity,
+            transition: `opacity ${flashDuration}ms ease-out`,
+          }}
+        />
+      )}
+
       {/* Header with settings toggle */}
       <Div className="flex items-center justify-between mb-4">
         <H1 className="text-lg font-bold">{t('scan.title')}</H1>
