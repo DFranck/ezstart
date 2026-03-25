@@ -75,13 +75,34 @@ function mergeBenchResults(
     mergedSubs.push({ type: statType, value: bestValue })
   }
 
-  // Cap at 4 substats max — sort by vote count (most confirmed first)
-  mergedSubs.sort((a, b) => {
-    const aVotes = statVotes.get(a.type)?.get(a.value) || 0
-    const bVotes = statVotes.get(b.type)?.get(b.value) || 0
-    return bVotes - aVotes
+  // Cap at 4 substats max — keep the most confirmed, then restore OCR order
+  if (mergedSubs.length > 4) {
+    // Tag each stat with its vote count, pick top 4, then restore original order
+    const withVotes = mergedSubs.map((s, i) => ({
+      ...s,
+      votes: statVotes.get(s.type)?.get(s.value) || 0,
+      originalIndex: i,
+    }))
+    withVotes.sort((a, b) => b.votes - a.votes)
+    const top4 = withVotes.slice(0, 4)
+    top4.sort((a, b) => a.originalIndex - b.originalIndex)
+    mergedSubs.length = 0
+    for (const t of top4) mergedSubs.push({ type: t.type, value: t.value })
+  }
+
+  // Restore OCR order: use the best successful result as reference for substat ordering
+  const bestRef = successful.reduce((best, r) => {
+    const bestSubs = ((best.parse.data as any).subStats || []).length
+    const rSubs = ((r.parse.data as any).subStats || []).length
+    return rSubs > bestSubs || (rSubs === bestSubs && r.ocr.confidence > best.ocr.confidence) ? r : best
   })
-  mergedSubs.splice(4)
+  const refOrder = ((bestRef.parse.data as any).subStats || []).map((s: any) => s.type)
+  mergedSubs.sort((a, b) => {
+    const ai = refOrder.indexOf(a.type)
+    const bi = refOrder.indexOf(b.type)
+    // Stats not in reference go to the end
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+  })
 
   // Merge other fields — take first non-null value
   const mergedData: Record<string, any> = {
