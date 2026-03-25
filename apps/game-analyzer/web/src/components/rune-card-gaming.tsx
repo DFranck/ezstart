@@ -180,7 +180,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
               </P>
             )}
             <P className={`text-xs mt-1 opacity-80 ${ADVICE_GAMING[advice.action].text}`}>
-              {tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}
+              {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
             </P>
             {advice.nextCheckAt > 0 && (
               <P className="text-xs text-muted-foreground mt-0.5">

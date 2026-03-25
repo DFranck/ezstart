@@ -150,7 +150,7 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                 <P className="font-bold text-lg">{ADVICE_LABELS[advice.action]}</P>
               </Div>
               <P className="text-sm opacity-90">
-                {tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}
+                {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
               </P>
               {advice.sellProbability > 0 && advice.action !== 'sell' && (
                 <P className="text-sm mt-1">

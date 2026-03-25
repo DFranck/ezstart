@@ -132,7 +132,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <P className="text-xs font-medium">{tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}</P>
+                    <P className="text-xs font-medium">{advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}</P>
                     {advice.sellProbability > 0 && (
                       <P className="text-xs text-muted-foreground">{tRune('sellRisk', { percent: String(advice.sellProbability) })}</P>
                     )}
