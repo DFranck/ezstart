@@ -175,6 +175,48 @@ export function getRollCount(quality: RuneQuality, level: number): number {
 }
 
 // ============================================
+// SET → ARCHETYPE AFFINITY (coherent archetypes per set)
+// ============================================
+// Used to prioritize archetype recommendations that match the rune's set bonus
+export const SET_ARCHETYPE_AFFINITY: Partial<Record<RuneSet, BuildArchetype[]>> = {
+  // DPS sets
+  fatal: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
+  rage: ['speed-dps', 'cleave', 'one-shot-nuker'],
+  blade: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
+
+  // Speed/Proc sets
+  violent: ['speed-dps', 'bruiser', 'cc-debuffer', 'healer', 'strip-cleanse'],
+  swift: ['speed-dps', 'speed-leader', 'cc-debuffer', 'strip-cleanse', 'bomber'],
+
+  // Tank/Support sets
+  energy: ['tank-support', 'bruiser', 'healer', 'raid-support'],
+  guard: ['tank-support', 'def-nuker', 'raid-support'],
+  endure: ['tank-support', 'raid-support', 'strip-cleanse'],
+  shield: ['tank-support', 'bruiser'],
+  will: ['tank-support', 'bruiser', 'speed-dps', 'strip-cleanse'],
+
+  // CC sets
+  despair: ['cc-debuffer', 'bruiser', 'tank-support'],
+
+  // Counter sets
+  revenge: ['bruiser', 'revenge-proc', 'tank-support'],
+  nemesis: ['bruiser', 'tank-support'],
+  destroy: ['bruiser', 'tank-support'],
+
+  // Debuff sets
+  focus: ['cc-debuffer', 'bomber', 'strip-cleanse'],
+  accuracy: ['cc-debuffer', 'bomber', 'strip-cleanse'],
+  tolerance: ['tank-support', 'raid-support'],
+
+  // Misc
+  vampire: ['vampire-bruiser', 'bruiser'],
+  fight: ['speed-dps', 'cleave'],
+  determination: ['tank-support', 'def-nuker'],
+  enhance: ['tank-support', 'bruiser'],
+  cruel: ['speed-dps', 'cleave', 'one-shot-nuker'],
+}
+
+// ============================================
 // BUILD ARCHETYPES & SYNERGY
 // ============================================
 

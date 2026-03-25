@@ -228,6 +228,39 @@ const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
   'cruel': { pieces: 2, bonus: 'ATK +12%' },
 }
 
+/** Set → archetype affinity: coherent archetypes per set bonus */
+const SET_ARCHETYPE_AFFINITY: Record<string, BuildArchetype[]> = {
+  // DPS sets
+  fatal: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
+  rage: ['speed-dps', 'cleave', 'one-shot-nuker'],
+  blade: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
+  // Speed/Proc sets
+  violent: ['speed-dps', 'bruiser', 'cc-debuffer', 'healer', 'strip-cleanse'],
+  swift: ['speed-dps', 'speed-leader', 'cc-debuffer', 'strip-cleanse', 'bomber'],
+  // Tank/Support sets
+  energy: ['tank-support', 'bruiser', 'healer', 'raid-support'],
+  guard: ['tank-support', 'def-nuker', 'raid-support'],
+  endure: ['tank-support', 'raid-support', 'strip-cleanse'],
+  shield: ['tank-support', 'bruiser'],
+  will: ['tank-support', 'bruiser', 'speed-dps', 'strip-cleanse'],
+  // CC sets
+  despair: ['cc-debuffer', 'bruiser', 'tank-support'],
+  // Counter sets
+  revenge: ['bruiser', 'revenge-proc', 'tank-support'],
+  nemesis: ['bruiser', 'tank-support'],
+  destroy: ['bruiser', 'tank-support'],
+  // Debuff sets
+  focus: ['cc-debuffer', 'bomber', 'strip-cleanse'],
+  accuracy: ['cc-debuffer', 'bomber', 'strip-cleanse'],
+  tolerance: ['tank-support', 'raid-support'],
+  // Misc
+  vampire: ['vampire-bruiser', 'bruiser'],
+  fight: ['speed-dps', 'cleave'],
+  determination: ['tank-support', 'def-nuker'],
+  enhance: ['tank-support', 'bruiser'],
+  cruel: ['speed-dps', 'cleave', 'one-shot-nuker'],
+}
+
 /** Build archetypes for synergy scoring */
 const BUILD_ARCHETYPES: Record<BuildArchetype, { desiredStats: StatType[] }> = {
   'speed-dps': { desiredStats: ['spd', 'cr', 'cd', 'atk%'] },
@@ -1081,10 +1114,18 @@ function calculateArchetypeOptimizations(
     })
   }
 
-  // Sort: 4/4 first, then by postOptimScore descending
-  optimizations.sort((a, b) =>
-    b.matchCount - a.matchCount || b.postOptimScore - a.postOptimScore,
-  )
+  // Sort: set affinity first, then matchCount, then postOptimScore
+  const setAffinity = SET_ARCHETYPE_AFFINITY[rune.set] || []
+  optimizations.sort((a, b) => {
+    const aSetBonus = setAffinity.includes(a.archetype as BuildArchetype) ? 1 : 0
+    const bSetBonus = setAffinity.includes(b.archetype as BuildArchetype) ? 1 : 0
+    // 1. Set coherence
+    if (aSetBonus !== bSetBonus) return bSetBonus - aSetBonus
+    // 2. Match count (4/4 before 3/4)
+    if (a.matchCount !== b.matchCount) return b.matchCount - a.matchCount
+    // 3. Post-optim score
+    return (b.postOptimScore || 0) - (a.postOptimScore || 0)
+  })
 
   return optimizations
 }
