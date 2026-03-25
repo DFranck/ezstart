@@ -732,6 +732,7 @@ function calculateProgressiveAdvice(
   rune: RuneData,
   quality: RuneQuality,
   currentWeightedEff: number,
+  potentialEff: number,
   synergy: SynergyResult,
   profile: PlayerProfile,
 ): ProgressiveAdvice | undefined {
@@ -750,8 +751,13 @@ function calculateProgressiveAdvice(
 
   const thresholds = PROGRESSIVE_SELL_THRESHOLDS[profile]
   const threshold = thresholds[levelKey] ?? thresholds[12] ?? 50
+  const finalThreshold = thresholds[12] ?? 50
 
-  // At +12 or +15 — final decision
+  // Synergy bonus: strong archetype match (3/4 or 4/4) boosts potential evaluation
+  const synergyBoost = synergy.matchCount >= 4 ? 5 : synergy.matchCount >= 3 ? 3 : 0
+  const adjustedPotential = potentialEff + synergyBoost
+
+  // At +12 or +15 — final decision (no more potential, only current matters)
   if (level >= 12) {
     if (currentWeightedEff < threshold) {
       return {
@@ -781,31 +787,44 @@ function calculateProgressiveAdvice(
     }
   }
 
-  // Pre-+12: check against progressive threshold
-  if (currentWeightedEff < threshold) {
+  // Pre-+12: potential exceeds final threshold → worth upgrading even if current is low
+  if (adjustedPotential >= finalThreshold) {
+    if (currentWeightedEff >= threshold) {
+      // Current OK + high potential → keep upgrading
+      const nextLevel = Math.min(levelKey + 3, 12)
+      return {
+        action: 'upgrade',
+        reason: `On track — upgrade to +${nextLevel} (${Math.round(currentWeightedEff)}% current, ${Math.round(adjustedPotential)}% potential)`,
+        nextCheckAt: nextLevel,
+        sellProbability: 15,
+      }
+    }
+    // Current below threshold but potential is promising → upgrade anyway
+    const nextLevel = Math.min(levelKey + 3, 12)
     return {
-      action: 'sell',
-      reason: `Roll +${levelKey} below ${profile} threshold (${Math.round(currentWeightedEff)}% < ${threshold}%)`,
-      nextCheckAt: 0,
-      sellProbability: 80,
+      action: 'upgrade',
+      reason: `Current ${Math.round(currentWeightedEff)}% below +${levelKey} threshold but potential ${Math.round(adjustedPotential)}% is promising — worth upgrading`,
+      nextCheckAt: nextLevel,
+      sellProbability: 35,
     }
   }
 
-  // Calculate sell probability based on remaining rolls and current quality
-  const nextLevel = Math.min(levelKey + 3, 12)
-  const remaining = remainingRolls(quality, level)
-  const nextThreshold = thresholds[nextLevel] ?? thresholds[12] ?? 60
-  const gap = nextThreshold - currentWeightedEff
-
-  // Probability estimate: how likely future rolls will fail to meet threshold
-  // Higher gap + fewer remaining rolls = higher sell probability
-  let sellProbability = 0
-  if (gap > 0 && remaining > 0) {
-    // Each remaining roll can add ~8-12% weighted eff at best
-    const maxGainPerRoll = 12
-    const maxPotentialGain = remaining * maxGainPerRoll
-    sellProbability = Math.min(90, Math.max(10, Math.round((gap / maxPotentialGain) * 100)))
+  // Potential also below final threshold → sell
+  if (currentWeightedEff < threshold) {
+    return {
+      action: 'sell',
+      reason: `Below threshold and potential ${Math.round(adjustedPotential)}% too low for ${profile} (need ${finalThreshold}%)`,
+      nextCheckAt: 0,
+      sellProbability: 85,
+    }
   }
+
+  // Current OK but potential mediocre — upgrade cautiously
+  const nextLevel = Math.min(levelKey + 3, 12)
+  const nextThreshold = thresholds[nextLevel] ?? thresholds[12] ?? 60
+
+  // Sell probability: based on gap between potential and final threshold
+  let sellProbability = Math.min(70, Math.max(20, Math.round((1 - adjustedPotential / finalThreshold) * 100)))
 
   // Synergy penalty increases sell probability
   if (synergy.synergyBonus < 0) {
@@ -894,7 +913,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const finalPotential = !isPreMax ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   // Progressive advice — actionable sell/upgrade/keep/grind recommendation
-  const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedWeighted, synergy, profile)
+  const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedWeighted, finalPotential, synergy, profile)
 
   return {
     currentEfficiency: roundedCurrent,
