@@ -118,6 +118,8 @@ export interface ArchetypeOptimization {
   grindTargets: StatType[]
   postOptimScore: number
   isPerfect: boolean
+  /** Number of rolls lost when gemming (the gemmed stat's rolls are replaced by 1 gem roll) */
+  rollsLost: number
 }
 
 export interface RuneAnalysis {
@@ -1015,6 +1017,13 @@ export function getRollQualityTier(
   }
 }
 
+/** Legend gem max values per stat type (different from roll max values) */
+const LEGEND_GEM_VALUES: Record<StatType, number> = {
+  'hp': 580, 'hp%': 11, 'atk': 30, 'atk%': 11,
+  'def': 30, 'def%': 11, 'spd': 8, 'cr': 8,
+  'cd': 9, 'acc': 11, 'res': 11,
+}
+
 /** Grindable stat types */
 const GRINDABLE_STATS: StatType[] = ['hp', 'hp%', 'atk', 'atk%', 'def', 'def%', 'spd']
 
@@ -1078,31 +1087,54 @@ function calculateArchetypeOptimizations(
       .map(s => s.type)
 
     // Calculate post-optimization efficiency score
-    // Simulate: gem the worst stat with the best legend gem value, grind all grindable
-    let simulatedSubs: RuneStat[]
-    if (gemTarget) {
-      // Replace the gemmed stat with a legend gem value for the replacement stat
-      const gemRange = ROLL_RANGES[gemTarget.replace]
-      const legendGemValue = gemRange ? gemRange.max : 0 // Use max roll as gem value approximation
-      simulatedSubs = rune.subStats.map(s =>
-        s.type === gemTarget!.remove ? { type: gemTarget!.replace, value: legendGemValue } : s,
-      )
-    } else {
-      simulatedSubs = [...rune.subStats]
+    // Uses ratio-based approach: sum(value / maxRoll) for each substat
+    // When gemming: subtract removed stat's ratio, add gem's ratio (legend gem value / maxRoll)
+    let rollsLost = 0
+
+    // 1. Calculate current ratio sum
+    let currentRatioSum = 0
+    for (const sub of rune.subStats) {
+      const range = ROLL_RANGES[sub.type]
+      if (!range || sub.value <= 0) continue
+      currentRatioSum += sub.value / range.max
     }
 
-    // Apply legend grinds to grindable stats
-    simulatedSubs = simulatedSubs.map(s => {
-      const grindRange = LEGEND_GRIND_RANGES[s.type]
-      if (grindRange) {
-        return { ...s, value: s.value + grindRange.max }
-      }
-      return s
-    })
+    // 2. If gemming, adjust ratio sum: remove old stat ratio, add gem ratio
+    if (gemTarget) {
+      const removedStat = rune.subStats.find(s => s.type === gemTarget!.remove)
+      if (removedStat) {
+        const removedRange = ROLL_RANGES[removedStat.type]
+        const removedRatio = removedRange ? removedStat.value / removedRange.max : 0
+        const { count: removedRolls } = estimateRolls(removedStat.type, removedStat.value)
+        rollsLost = removedRolls
 
-    const postOptimScore = Math.round(
-      Math.min(barionEfficiency(simulatedSubs, quality), 100) * 100,
-    ) / 100
+        const gemValue = LEGEND_GEM_VALUES[gemTarget.replace]
+        const gemRange = ROLL_RANGES[gemTarget.replace]
+        const addedRatio = gemRange ? gemValue / gemRange.max : 0
+
+        currentRatioSum = currentRatioSum - removedRatio + addedRatio
+      }
+    }
+
+    // 3. Add legend grind bonuses (only for grindable stats still on the rune)
+    let grindBonus = 0
+    const postGemTypes = gemTarget
+      ? rune.subStats.map(s => s.type === gemTarget!.remove ? gemTarget!.replace : s.type)
+      : rune.subStats.map(s => s.type)
+
+    for (const statType of postGemTypes) {
+      const grindRange = LEGEND_GRIND_RANGES[statType]
+      const range = ROLL_RANGES[statType]
+      if (grindRange && range) {
+        grindBonus += grindRange.max / range.max
+      }
+    }
+
+    // 4. Post-optim = (ratioSum + grindBonus) / totalEvents * 100
+    const totalEvents = TOTAL_EVENTS_AT_12[quality]
+    const postOptimScore = totalEvents > 0
+      ? Math.round(Math.min(((currentRatioSum + grindBonus) / totalEvents) * 100, 100) * 100) / 100
+      : 0
 
     optimizations.push({
       archetype,
@@ -1111,6 +1143,7 @@ function calculateArchetypeOptimizations(
       grindTargets,
       postOptimScore,
       isPerfect,
+      rollsLost,
     })
   }
 

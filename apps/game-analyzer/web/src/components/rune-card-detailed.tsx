@@ -221,6 +221,9 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                           <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
                             <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
                             {'\u2192'}{formatStatLabel(bestGem.gemTarget!.replace)} ({emoji} {bestGem.postOptimScore?.toFixed(0)}%)
+                            {bestGem.rollsLost > 0 && (
+                              <span className="text-destructive ml-0.5">-{bestGem.rollsLost}r</span>
+                            )}
                           </Badge>
                         )
                       })()}
@@ -342,6 +345,9 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                             <img src={GEM_ICONS.legend} alt="gem" className="w-4 h-4" />
                             <P className="text-xs text-muted-foreground">
                               {tRune('gemSwap', { remove: formatStatLabel(opt.gemTarget.remove), replace: formatStatLabel(opt.gemTarget.replace) })}
+                              {opt.rollsLost > 0 && (
+                                <span className="text-destructive ml-1">({tRune('rollsLost', { count: String(opt.rollsLost) })})</span>
+                              )}
                             </P>
                           </Div>
                         )}

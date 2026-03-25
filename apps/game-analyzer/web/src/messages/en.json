@@ -218,6 +218,7 @@
     "optimization": "Optimization",
     "perfectBuild": "Perfect",
     "gemSwap": "{remove} \u2192 {replace}",
+    "rollsLost": "-{count} rolls lost",
     "grindLabel": "Grind",
     "postOptim": "Post-optim: {score}%",
     "suggestedMonsters": "Suggested monsters",

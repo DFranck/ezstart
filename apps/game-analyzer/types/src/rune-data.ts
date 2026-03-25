@@ -432,6 +432,8 @@ export interface ArchetypeOptimization {
   postOptimScore: number
   /** True if no gem is needed (all substats are desired) */
   isPerfect: boolean
+  /** Number of rolls lost when gemming (the gemmed stat's rolls are replaced by 1 gem roll) */
+  rollsLost: number
 }
 
 export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
