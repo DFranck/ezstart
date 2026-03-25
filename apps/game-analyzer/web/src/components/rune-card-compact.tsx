@@ -177,10 +177,21 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                   <P className={`text-xs font-semibold shrink-0 ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
                     {formatStatValue(stat.type, stat.value)}
                   </P>
-                  {subAnalysis?.isGemTarget && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
-                      {tRune('gemable')}
-                    </Badge>
+                  {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (
+                    <>
+                      {analysis.archetypeOptimizations
+                        .filter(opt => opt.gemTarget?.remove === stat.type)
+                        .map(opt => {
+                          const archKey = opt.archetype as BuildArchetype
+                          const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
+                          return (
+                            <Badge key={opt.archetype} variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
+                              <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
+                              {'\u2192'}{formatStatLabel(opt.gemTarget!.replace)} ({emoji})
+                            </Badge>
+                          )
+                        })}
+                    </>
                   )}
                 </Div>
                 {breakdown && breakdown.length > 0 && (

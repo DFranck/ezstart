@@ -226,10 +226,21 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                   <Div className="flex items-center gap-1.5">
                     <P className="text-xs">{STAT_ICONS[stat.type] ?? ''}</P>
                     <P className="font-medium text-muted-foreground text-xs">{formatStatLabel(stat.type)}</P>
-                    {subAnalysis?.isGemTarget && (
-                      <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
-                        {tRune('gemable')}
-                      </Badge>
+                    {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (
+                      <>
+                        {analysis.archetypeOptimizations
+                          .filter(opt => opt.gemTarget?.remove === stat.type)
+                          .map(opt => {
+                            const archKey = opt.archetype as BuildArchetype
+                            const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
+                            return (
+                              <Badge key={opt.archetype} variant="outline" className="text-[8px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
+                                <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
+                                {'\u2192'}{formatStatLabel(opt.gemTarget!.replace)} ({emoji})
+                              </Badge>
+                            )
+                          })}
+                      </>
                     )}
                   </Div>
                   <Div className="flex items-center gap-2">
