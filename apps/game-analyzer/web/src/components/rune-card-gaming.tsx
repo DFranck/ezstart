@@ -226,7 +226,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                     <P className="text-xs">{STAT_ICONS[stat.type] ?? ''}</P>
                     <P className="font-medium text-muted-foreground text-xs">{formatStatLabel(stat.type)}</P>
                     {subAnalysis?.isGemTarget && (
-                      <Badge variant="outline" className="text-[8px] px-1 py-0 border-yellow-500/40 bg-yellow-500/10 text-yellow-500">
+                      <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
                         {tRune('gemable')}
                       </Badge>
                     )}
@@ -314,7 +314,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                   <P className="text-sm font-bold">
                     {analysis.grindedEfficiency}%
                     {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                      <span className="text-green-500 text-xs ml-1">(+{analysis.grindGain}%)</span>
+                      <span className="text-success-foreground text-xs ml-1">(+{analysis.grindGain}%)</span>
                     )}
                   </P>
                 </Div>
@@ -332,7 +332,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
           if (matchingArchetypes.length === 0 && analysis.synergy.synergyBonus < 0) {
             return (
               <Div className="text-center">
-                <P className="text-sm text-red-500">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
+                <P className="text-sm text-destructive-foreground">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
               </Div>
             )
           }
@@ -385,7 +385,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                 <TooltipTrigger asChild>
                   <Div className="flex items-center gap-1 cursor-default">
                     <Div className={`h-1.5 w-1.5 rounded-full ${
-                      confidence >= 80 ? 'bg-green-500' : confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      confidence >= 80 ? 'bg-success' : confidence >= 50 ? 'bg-warning' : 'bg-destructive'
                     }`} />
                     <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
                   </Div>

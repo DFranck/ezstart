@@ -511,9 +511,9 @@ export default function BenchPage() {
                           <td className="text-right py-2 px-3">{r.subsCount}</td>
                           <td className="text-center py-2 px-3">
                             {r.success ? (
-                              <span className="text-green-600 dark:text-green-400">OK</span>
+                              <span className="text-success-foreground">OK</span>
                             ) : (
-                              <span className="text-red-600 dark:text-red-400">FAIL</span>
+                              <span className="text-destructive-foreground">FAIL</span>
                             )}
                           </td>
                         </tr>

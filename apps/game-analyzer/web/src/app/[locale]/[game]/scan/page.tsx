@@ -178,6 +178,8 @@ export default function GameScanPage() {
 
   const flashConfig: Record<string, { color: string; intensity: number; duration: number }> = useMemo(() => ({
     // Advice actions (priority)
+    /* Flash colors use rgba() because they are applied via inline style as background overlays
+       with dynamic alpha. CSS variables are referenced through getComputedStyle at runtime. */
     sell:    { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
     upgrade: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
     keep:    { color: 'rgba(34, 197, 94, ALPHA)', intensity: 0.5, duration: 1200 },
@@ -515,7 +517,7 @@ export default function GameScanPage() {
                 <Badge variant="outline" className="text-xs">
                   <Div
                     className={`h-1.5 w-1.5 rounded-full mr-1 ${
-                      resultData.confidence >= 80 ? 'bg-green-500' : resultData.confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      resultData.confidence >= 80 ? 'bg-success' : resultData.confidence >= 50 ? 'bg-warning' : 'bg-destructive'
                     }`}
                   />
                   {t('scan.statusBar.lastConfidence')}: {Math.round(resultData.confidence)}%
@@ -570,8 +572,8 @@ export default function GameScanPage() {
           {resultData && (
             <Div className={isPending ? 'opacity-50 pointer-events-none' : 'animate-in fade-in-0 slide-in-from-bottom-2 duration-300'}>
               {resultData.unreliable && (
-                <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 mb-3">
-                  <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2 mb-3">
+                  <P className="text-sm text-warning-foreground">
                     {t('scan.unreliableResult')}
                   </P>
                 </Div>
@@ -591,8 +593,8 @@ export default function GameScanPage() {
               )}
 
               {!hasStructuredData && resultData.rawText && (
-                <Div className="rounded-md bg-yellow-500/10 border border-yellow-500/20 px-3 py-2">
-                  <P className="text-sm text-yellow-600 dark:text-yellow-400">
+                <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2">
+                  <P className="text-sm text-warning-foreground">
                     {t('scan.parsingImproving', { defaultMessage: 'Structured parsing is being improved. Raw OCR text is shown above.' })}
                   </P>
                 </Div>

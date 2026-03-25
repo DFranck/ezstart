@@ -8,11 +8,11 @@ import { useMonstersByBuild } from '@/hooks/use-monsters'
 const MAX_VISIBLE = 12
 
 const ELEMENT_COLORS: Record<string, string> = {
-  fire: '#ef4444',
-  water: '#3b82f6',
-  wind: '#22c55e',
-  light: '#eab308',
-  dark: '#8b5cf6',
+  fire: 'var(--ga-element-fire)',
+  water: 'var(--ga-element-water)',
+  wind: 'var(--ga-element-wind)',
+  light: 'var(--ga-element-light)',
+  dark: 'var(--ga-element-dark)',
 }
 
 interface MonsterSuggestionsProps {

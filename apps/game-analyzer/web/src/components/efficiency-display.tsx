@@ -6,45 +6,45 @@ import type { RuneAnalysis, StatType } from '@game-analyzer/types'
 
 // ── Stat colors (same as rune-card) ──
 const STAT_COLORS: Record<StatType, string> = {
-  spd: 'text-blue-400',
-  cr: 'text-red-400',
-  cd: 'text-red-400',
-  atk: 'text-orange-400',
-  'atk%': 'text-orange-400',
-  hp: 'text-green-400',
-  'hp%': 'text-green-400',
-  def: 'text-slate-400',
-  'def%': 'text-slate-400',
-  res: 'text-violet-400',
-  acc: 'text-violet-400',
+  spd: 'text-ga-stat-spd',
+  cr: 'text-ga-stat-crit',
+  cd: 'text-ga-stat-crit',
+  atk: 'text-ga-stat-atk',
+  'atk%': 'text-ga-stat-atk',
+  hp: 'text-ga-stat-hp',
+  'hp%': 'text-ga-stat-hp',
+  def: 'text-ga-stat-def',
+  'def%': 'text-ga-stat-def',
+  res: 'text-ga-stat-acc',
+  acc: 'text-ga-stat-acc',
 }
 
 type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 function getTierColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return 'text-yellow-500'
-    case 'great': return 'text-green-500'
-    case 'good': return 'text-blue-500'
-    case 'keep': return 'text-orange-500'
-    case 'sell': return 'text-red-500'
+    case 'godlike': return 'text-ga-tier-godlike'
+    case 'great': return 'text-ga-tier-great'
+    case 'good': return 'text-ga-tier-good'
+    case 'keep': return 'text-ga-tier-keep'
+    case 'sell': return 'text-ga-tier-sell'
   }
 }
 
 function getProgressColor(tier: Tier): string {
   switch (tier) {
-    case 'godlike': return '[&>div]:bg-yellow-500'
-    case 'great': return '[&>div]:bg-green-500'
-    case 'good': return '[&>div]:bg-blue-500'
-    case 'keep': return '[&>div]:bg-orange-500'
-    case 'sell': return '[&>div]:bg-red-500'
+    case 'godlike': return '[&>div]:bg-ga-tier-godlike'
+    case 'great': return '[&>div]:bg-ga-tier-great'
+    case 'good': return '[&>div]:bg-ga-tier-good'
+    case 'keep': return '[&>div]:bg-ga-tier-keep'
+    case 'sell': return '[&>div]:bg-ga-tier-sell'
   }
 }
 
 function getSubstatBarColor(efficiency: number): string {
-  if (efficiency >= 80) return '[&>div]:bg-green-500'
-  if (efficiency >= 50) return '[&>div]:bg-yellow-500'
-  return '[&>div]:bg-red-500'
+  if (efficiency >= 80) return '[&>div]:bg-success'
+  if (efficiency >= 50) return '[&>div]:bg-warning'
+  return '[&>div]:bg-destructive'
 }
 
 interface EfficiencyDisplayProps {
@@ -103,7 +103,7 @@ export function EfficiencyDisplay({ analysis, confidence }: EfficiencyDisplayPro
               <Div className="flex items-center gap-1">
                 <P className="font-medium">{analysis.grindedEfficiency}%</P>
                 {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                  <P className="text-green-500 text-xs">(+{analysis.grindGain}%)</P>
+                  <P className="text-success-foreground text-xs">(+{analysis.grindGain}%)</P>
                 )}
               </Div>
             </Div>

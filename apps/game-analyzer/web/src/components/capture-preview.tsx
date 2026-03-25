@@ -621,11 +621,11 @@ export function CapturePreview({
   }, [error, isAnalyzing, isCapturing, t])
 
   const statusColor = isAnalyzing
-    ? 'text-yellow-500'
+    ? 'text-warning-foreground'
     : isCapturing
-      ? 'text-green-500'
+      ? 'text-success-foreground'
       : error
-        ? 'text-red-500'
+        ? 'text-destructive-foreground'
         : 'text-muted-foreground'
 
   // Compute zoom percentage (100% = full window, smaller = more zoomed in)
@@ -864,7 +864,7 @@ export function CapturePreview({
         <Div className="flex items-center justify-between">
           <Div className="flex items-center gap-2">
             <Div
-              className={`h-2 w-2 rounded-full ${isAnalyzing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}
+              className={`h-2 w-2 rounded-full ${isAnalyzing ? 'bg-warning animate-pulse' : 'bg-success'}`}
             />
             <P className={`text-sm ${statusColor}`}>{statusText()}</P>
           </Div>

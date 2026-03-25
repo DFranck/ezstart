@@ -43,10 +43,10 @@ export function ScanResultRaw({ rawText, confidence, parsingFailed, defaultColla
             <Div
               className={`h-2 w-2 rounded-full ${
                 confidencePercent >= 80
-                  ? 'bg-green-500'
+                  ? 'bg-success'
                   : confidencePercent >= 50
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
+                    ? 'bg-warning'
+                    : 'bg-destructive'
               }`}
             />
             <P className="text-xs text-muted-foreground">

@@ -71,11 +71,11 @@ const ARCHETYPES: Archetype[] = [
 ]
 
 const RANK_COLORS: Record<number, string> = {
-  1: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40',
-  2: 'bg-purple-500/20 text-purple-400 border-purple-500/40',
-  3: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
-  4: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
-  5: 'bg-gray-500/20 text-gray-400 border-gray-500/40',
+  1: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/40',
+  2: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/40',
+  3: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  4: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/40',
+  5: 'bg-ga-roll-normal/20 text-ga-roll-normal border-ga-roll-normal/40',
 }
 
 function RankBadge({ stat, rank }: StatPriority) {
@@ -232,11 +232,11 @@ interface RollQualityTier {
 }
 
 const ROLL_QUALITY_TIERS: RollQualityTier[] = [
-  { tier: 'Legend', symbol: '★', range: '>= 90%', color: 'text-yellow-400', description: 'Near-perfect rolls. Each roll averaged 90%+ of the maximum possible value.' },
-  { tier: 'Hero', symbol: '●', range: '>= 75%', color: 'text-purple-400', description: 'Great rolls. Very usable rune, worth gemming and grinding.' },
-  { tier: 'Rare', symbol: '◆', range: '>= 50%', color: 'text-blue-400', description: 'Average rolls. Usable for mid-game, might sell late-game.' },
-  { tier: 'Magic', symbol: '○', range: '>= 25%', color: 'text-emerald-400', description: 'Below average. Usually sell unless the substats are perfect for the build.' },
-  { tier: 'Normal', symbol: '·', range: '< 25%', color: 'text-gray-400', description: 'Minimum or near-minimum rolls. Sell.' },
+  { tier: 'Legend', symbol: '★', range: '>= 90%', color: 'text-ga-roll-legend', description: 'Near-perfect rolls. Each roll averaged 90%+ of the maximum possible value.' },
+  { tier: 'Hero', symbol: '●', range: '>= 75%', color: 'text-ga-roll-hero', description: 'Great rolls. Very usable rune, worth gemming and grinding.' },
+  { tier: 'Rare', symbol: '◆', range: '>= 50%', color: 'text-ga-roll-rare', description: 'Average rolls. Usable for mid-game, might sell late-game.' },
+  { tier: 'Magic', symbol: '○', range: '>= 25%', color: 'text-ga-roll-magic', description: 'Below average. Usually sell unless the substats are perfect for the build.' },
+  { tier: 'Normal', symbol: '·', range: '< 25%', color: 'text-ga-roll-normal', description: 'Minimum or near-minimum rolls. Sell.' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -251,11 +251,11 @@ interface SellStep {
 }
 
 const SELL_GUIDE: SellStep[] = [
-  { level: '+0', action: 'Check base subs & potential', details: 'The scanner evaluates POTENTIAL, not just current value. If the rune has 3-4 desired stats for an archetype, it gets an UPGRADE advice even with low current efficiency. Auto-sell if: flat main on 2/4/6, dead stat combos (ACC+RES together), or less than 2 useful subs for any archetype.', color: 'border-red-500/30 bg-red-500/5' },
-  { level: '+3', action: 'First roll — potential check', details: 'If potential weighted efficiency >= threshold for your profile, keep upgrading. The system considers what the rune COULD become with good rolls and a gem, not just the current state. Early: >= 35, Mid: >= 45, Late: >= 55.', color: 'border-orange-500/30 bg-orange-500/5' },
-  { level: '+6', action: 'Second roll — narrowing down', details: 'Potential narrows as rolls happen. If 2 rolls went into bad stats, even good base subs can\'t save it. Thresholds: Early: >= 40, Mid: >= 50, Late: >= 60. The system factors in gem potential (replacing worst sub).', color: 'border-yellow-500/30 bg-yellow-500/5' },
-  { level: '+9', action: 'Third roll — last chance', details: 'Must have solid weighted efficiency. The scanner checks post-gem potential: if gemming the worst stat would push above threshold, advice is still UPGRADE. Thresholds: Early: >= 45, Mid: >= 55, Late: >= 65.', color: 'border-blue-500/30 bg-blue-500/5' },
-  { level: '+12', action: 'Final verdict — grind or sell', details: 'Calculate final roll quality and weighted efficiency. If above threshold (Early: >= 50, Mid: >= 60, Late: >= 70), keep and grind. Otherwise sell. Mana is a resource too.', color: 'border-purple-500/30 bg-purple-500/5' },
+  { level: '+0', action: 'Check base subs & potential', details: 'The scanner evaluates POTENTIAL, not just current value. If the rune has 3-4 desired stats for an archetype, it gets an UPGRADE advice even with low current efficiency. Auto-sell if: flat main on 2/4/6, dead stat combos (ACC+RES together), or less than 2 useful subs for any archetype.', color: 'border-ga-tier-sell/30 bg-ga-tier-sell/5' },
+  { level: '+3', action: 'First roll — potential check', details: 'If potential weighted efficiency >= threshold for your profile, keep upgrading. The system considers what the rune COULD become with good rolls and a gem, not just the current state. Early: >= 35, Mid: >= 45, Late: >= 55.', color: 'border-ga-roll-legend/30 bg-ga-roll-legend/5' },
+  { level: '+6', action: 'Second roll — narrowing down', details: 'Potential narrows as rolls happen. If 2 rolls went into bad stats, even good base subs can\'t save it. Thresholds: Early: >= 40, Mid: >= 50, Late: >= 60. The system factors in gem potential (replacing worst sub).', color: 'border-warning/30 bg-warning/5' },
+  { level: '+9', action: 'Third roll — last chance', details: 'Must have solid weighted efficiency. The scanner checks post-gem potential: if gemming the worst stat would push above threshold, advice is still UPGRADE. Thresholds: Early: >= 45, Mid: >= 55, Late: >= 65.', color: 'border-ga-roll-rare/30 bg-ga-roll-rare/5' },
+  { level: '+12', action: 'Final verdict — grind or sell', details: 'Calculate final roll quality and weighted efficiency. If above threshold (Early: >= 50, Mid: >= 60, Late: >= 70), keep and grind. Otherwise sell. Mana is a resource too.', color: 'border-ga-roll-hero/30 bg-ga-roll-hero/5' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -271,11 +271,11 @@ interface RollSymbol {
 }
 
 const ROLL_SYMBOLS: RollSymbol[] = [
-  { symbol: '★', tier: 'Legend', range: '95-100% of max', color: 'text-yellow-400', example: 'SPD roll of 6 (max 6) = ★' },
-  { symbol: '●', tier: 'Hero', range: '75-94% of max', color: 'text-purple-400', example: 'CD roll of 6 (max 7) = 86% ●' },
-  { symbol: '◆', tier: 'Rare', range: '50-74% of max', color: 'text-blue-400', example: 'ATK% roll of 6 (max 8) = 75% ◆' },
-  { symbol: '○', tier: 'Magic', range: '25-49% of max', color: 'text-emerald-400', example: 'HP% roll of 5 (max 8) = 38% ○' },
-  { symbol: '·', tier: 'Normal', range: '0-24% of max', color: 'text-gray-400', example: 'SPD roll of 4 (max 6) = 0% ·' },
+  { symbol: '★', tier: 'Legend', range: '95-100% of max', color: 'text-ga-roll-legend', example: 'SPD roll of 6 (max 6) = ★' },
+  { symbol: '●', tier: 'Hero', range: '75-94% of max', color: 'text-ga-roll-hero', example: 'CD roll of 6 (max 7) = 86% ●' },
+  { symbol: '◆', tier: 'Rare', range: '50-74% of max', color: 'text-ga-roll-rare', example: 'ATK% roll of 6 (max 8) = 75% ◆' },
+  { symbol: '○', tier: 'Magic', range: '25-49% of max', color: 'text-ga-roll-magic', example: 'HP% roll of 5 (max 8) = 38% ○' },
+  { symbol: '·', tier: 'Normal', range: '0-24% of max', color: 'text-ga-roll-normal', example: 'SPD roll of 4 (max 6) = 0% ·' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -360,11 +360,11 @@ const SOURCES: Source[] = [
 // ---------------------------------------------------------------------------
 
 function weightColor(w: number): string {
-  if (w >= 0.9) return 'text-yellow-400 font-bold'
-  if (w >= 0.7) return 'text-purple-400 font-semibold'
-  if (w >= 0.5) return 'text-blue-400'
-  if (w >= 0.3) return 'text-emerald-400'
-  return 'text-gray-500'
+  if (w >= 0.9) return 'text-ga-roll-legend font-bold'
+  if (w >= 0.7) return 'text-ga-roll-hero font-semibold'
+  if (w >= 0.5) return 'text-ga-roll-rare'
+  if (w >= 0.3) return 'text-ga-roll-magic'
+  return 'text-ga-roll-normal'
 }
 
 export default function GameDataPage() {
@@ -544,11 +544,11 @@ export default function GameDataPage() {
                           <Div className="flex items-center gap-2">
                             <Div className="flex-1 h-3 bg-muted rounded-full overflow-hidden relative">
                               <Div
-                                className="absolute inset-y-0 left-0 bg-blue-500/60 rounded-full"
+                                className="absolute inset-y-0 left-0 bg-ga-roll-rare/60 rounded-full"
                                 style={{ width: `${fillPct}%` }}
                               />
                               <Div
-                                className="absolute inset-y-0 bg-blue-500 rounded-full"
+                                className="absolute inset-y-0 bg-ga-roll-rare rounded-full"
                                 style={{ left: `${fillPct}%`, width: `${pct - (100 - fillPct)}%` }}
                               />
                             </Div>
@@ -759,7 +759,7 @@ export default function GameDataPage() {
                       </TableHeader>
                       <TableBody>
                         <TableRow>
-                          <TableCell className="font-medium text-emerald-400">Early</TableCell>
+                          <TableCell className="font-medium text-ga-roll-magic">Early</TableCell>
                           <TableCell className="text-center tabular-nums">30</TableCell>
                           <TableCell className="text-center tabular-nums">35</TableCell>
                           <TableCell className="text-center tabular-nums">40</TableCell>
@@ -767,7 +767,7 @@ export default function GameDataPage() {
                           <TableCell className="text-center tabular-nums">50</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium text-blue-400">Mid</TableCell>
+                          <TableCell className="font-medium text-ga-roll-rare">Mid</TableCell>
                           <TableCell className="text-center tabular-nums">40</TableCell>
                           <TableCell className="text-center tabular-nums">45</TableCell>
                           <TableCell className="text-center tabular-nums">50</TableCell>
@@ -775,7 +775,7 @@ export default function GameDataPage() {
                           <TableCell className="text-center tabular-nums">60</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium text-purple-400">Late</TableCell>
+                          <TableCell className="font-medium text-ga-roll-hero">Late</TableCell>
                           <TableCell className="text-center tabular-nums">50</TableCell>
                           <TableCell className="text-center tabular-nums">55</TableCell>
                           <TableCell className="text-center tabular-nums">60</TableCell>
@@ -789,7 +789,7 @@ export default function GameDataPage() {
               </Card>
 
               {/* Dead stat combos */}
-              <Card size="sm" className="border-red-500/20 bg-red-500/5">
+              <Card size="sm" className="border-destructive/20 bg-destructive/5">
                 <CardContent className="pt-3">
                   <P className="font-medium text-sm mb-1">Auto-sell: Dead Stat Combos</P>
                   <P className="text-xs text-muted-foreground">
@@ -852,7 +852,7 @@ export default function GameDataPage() {
                 </Table>
               </Div>
 
-              <Card size="sm" className="border-blue-500/20 bg-blue-500/5">
+              <Card size="sm" className="border-ga-roll-rare/20 bg-ga-roll-rare/5">
                 <CardContent className="pt-3">
                   <P className="font-medium text-sm mb-1">How to read a roll breakdown</P>
                   <P className="text-xs text-muted-foreground">
@@ -916,7 +916,7 @@ export default function GameDataPage() {
               </Div>
 
               <P className="text-xs text-muted-foreground italic">
-                Color coding: <span className="text-yellow-400 font-bold">1.0-0.9</span> top priority, <span className="text-purple-400 font-semibold">0.7-0.89</span> high, <span className="text-blue-400">0.5-0.69</span> medium, <span className="text-emerald-400">0.3-0.49</span> low, <span className="text-gray-500">below 0.3</span> useless.
+                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high, <span className="text-ga-roll-rare">0.5-0.69</span> medium, <span className="text-ga-roll-magic">0.3-0.49</span> low, <span className="text-ga-roll-normal">below 0.3</span> useless.
               </P>
             </Div>
           </AccordionContent>
@@ -959,12 +959,12 @@ export default function GameDataPage() {
                             <span className="font-medium text-xs">{r.archetype}</span>
                           </Div>
                         </TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs border-red-500/40 text-red-400">{r.gemTarget}</Badge></TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs border-emerald-500/40 text-emerald-400">{r.gemReplace}</Badge></TableCell>
+                        <TableCell><Badge variant="outline" className="text-xs border-destructive/40 text-destructive-foreground">{r.gemTarget}</Badge></TableCell>
+                        <TableCell><Badge variant="outline" className="text-xs border-success/40 text-success-foreground">{r.gemReplace}</Badge></TableCell>
                         <TableCell>
                           <Div className="flex flex-wrap gap-1">
                             {r.grindStats.map((s) => (
-                              <Badge key={s} variant="outline" className="text-xs border-blue-500/40 text-blue-400">{s}</Badge>
+                              <Badge key={s} variant="outline" className="text-xs border-ga-roll-rare/40 text-ga-roll-rare">{s}</Badge>
                             ))}
                           </Div>
                         </TableCell>

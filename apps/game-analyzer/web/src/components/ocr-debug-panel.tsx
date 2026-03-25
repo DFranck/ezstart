@@ -26,10 +26,10 @@ function SourceDetails({ source }: { source: OcrSource }) {
         <Div
           className={`h-2 w-2 rounded-full ${
             source.confidence >= 80
-              ? 'bg-green-500'
+              ? 'bg-success'
               : source.confidence >= 50
-                ? 'bg-yellow-500'
-                : 'bg-red-500'
+                ? 'bg-warning'
+                : 'bg-destructive'
           }`}
         />
         <P className="text-xs text-muted-foreground">

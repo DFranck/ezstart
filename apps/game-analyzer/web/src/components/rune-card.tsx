@@ -75,10 +75,10 @@ function formatStatLabel(type: StatType): string {
 
 // ── Progressive advice colors ──
 const ADVICE_COLORS: Record<ProgressiveAction, string> = {
-  sell: 'border-red-500/50 bg-red-500/10 text-red-400',
-  upgrade: 'border-blue-500/50 bg-blue-500/10 text-blue-400',
-  keep: 'border-green-500/50 bg-green-500/10 text-green-400',
-  grind: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
+  sell: 'border-destructive/50 bg-destructive/10 text-destructive-foreground',
+  upgrade: 'border-ga-roll-rare/50 bg-ga-roll-rare/10 text-ga-roll-rare',
+  keep: 'border-success/50 bg-success/10 text-success-foreground',
+  grind: 'border-ga-roll-hero/50 bg-ga-roll-hero/10 text-ga-roll-hero',
 }
 
 const ADVICE_LABELS: Record<ProgressiveAction, string> = {
@@ -113,8 +113,8 @@ function formatRollValue(type: StatType, value: number): string {
 
 // ── Synergy badge color by match count ──
 function getSynergyBadgeClass(matchCount: number): string {
-  if (matchCount >= 4) return 'bg-yellow-500/15 border-yellow-500/40 text-yellow-500'
-  if (matchCount >= 3) return 'bg-green-500/15 border-green-500/40 text-green-500'
+  if (matchCount >= 4) return 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend'
+  if (matchCount >= 3) return 'bg-success/15 border-success/40 text-success-foreground'
   return 'bg-muted border-border text-muted-foreground'
 }
 
@@ -149,7 +149,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           </Badge>
         </Div>
         <Div className="flex items-center gap-2">
-          <P className="text-yellow-500 text-xs tracking-tighter leading-none">{gradeStars}</P>
+          <P className="text-ga-roll-legend text-xs tracking-tighter leading-none">{gradeStars}</P>
           <Badge variant="secondary" className="text-xs">+{rune.level}</Badge>
         </Div>
       </CardHeader>
@@ -197,7 +197,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                         {formatStatLabel(stat.type)}
                       </P>
                       {subAnalysis?.isGemTarget && (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 border-yellow-500/40 bg-yellow-500/10 text-yellow-500">
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
                           {tRune('gemable')}
                         </Badge>
                       )}
@@ -278,7 +278,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   <Div className="flex items-center gap-1">
                     <P className="font-medium">{analysis.grindedEfficiency}%</P>
                     {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                      <P className="text-green-500 text-xs">(+{analysis.grindGain}%)</P>
+                      <P className="text-success-foreground text-xs">(+{analysis.grindGain}%)</P>
                     )}
                   </Div>
                 </Div>
@@ -323,7 +323,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                 <Div className="border-t border-border" />
                 <Div className="flex items-center justify-between">
                   <P className="text-sm font-medium">{tRune('synergy')}</P>
-                  <P className="text-sm text-red-500">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
+                  <P className="text-sm text-destructive-foreground">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
                 </Div>
               </>
             )
@@ -422,7 +422,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   <Div className="flex items-center gap-1 cursor-default">
                     <Div
                       className={`h-1.5 w-1.5 rounded-full ${
-                        confidence >= 80 ? 'bg-green-500' : confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                        confidence >= 80 ? 'bg-success' : confidence >= 50 ? 'bg-warning' : 'bg-destructive'
                       }`}
                     />
                     <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
