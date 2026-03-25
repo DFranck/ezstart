@@ -9,7 +9,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ## 🎮 game-analyzer
 
-**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-24
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-25
 
 ### Objectif
 App pour scanner et analyser des screenshots de jeux (Summoners War runes, Nikke Goddess of Victory gear, etc.) via OCR scripté + fallback IA optionnel.
@@ -78,11 +78,22 @@ apps/
 34. [x] UX pass : settings collapsibles, compact RuneCard, gaming homepage
 35. [x] Game banners SVG + rune set icons SWARFARM
 36. [x] Interactions séparées : left=ROI, middle=pan, Ctrl+scroll=zoom
-37. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
-38. [ ] Couleurs theme : vérifier rendu dark/light mode
-39. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
-40. [ ] Prévenir rescan si même rune (hash image)
-41. [ ] Fallback IA cascade (Gemini free tier)
+37. [x] 3 rune card templates (compact/detailed/gaming) avec sélecteur
+38. [x] Skeletons permanents pour tous les templates
+39. [x] Roll breakdown par substat avec badges qualité SW
+40. [x] Roll Quality séparé (current vs post-gem)
+41. [x] Gem/grind recommendations par archetype avec icônes
+42. [x] Set affinity — archetypes priorisés par cohérence du set
+43. [x] Flash background basé sur le conseil (sell=rouge, upgrade=bleu, keep=vert)
+44. [x] Cache image hash — pas de rescan dupliqué
+45. [x] Conseil progressif considère le potentiel
+46. [x] Toutes couleurs via CSS variables (theme GA + globals)
+47. [x] Advice simplifié — "↑ UPGRADE — 65% to keep"
+48. [x] Page /data avec 11 sections de référence + tooltips
+49. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
+50. [ ] Couleurs theme : vérifier rendu dark/light mode
+51. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
+52. [ ] Fallback IA cascade (Gemini free tier)
 42. [ ] Nikke gear analyzer
 43. [ ] Ajouter OpenAPI/Swagger à l'API
 44. [ ] Deploy (Railway API + Vercel Web)
