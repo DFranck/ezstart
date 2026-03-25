@@ -16,7 +16,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType, ScanResult } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
 import { RuneCard } from '@/components/rune-card'
@@ -83,6 +83,19 @@ function applyBlackoutMasks(imageData: ImageData, masks: MaskRect[]): ImageData 
   return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 
+/** Compute a fast hash from an ImageData by sampling ~1000 pixels */
+function quickHash(imageData: ImageData): string {
+  const data = imageData.data
+  const step = Math.max(1, Math.floor(data.length / 1000))
+  let hash = 0
+  for (let i = 0; i < data.length; i += step * 4) {
+    hash = ((hash << 5) - hash + data[i]! + data[i + 1]! + data[i + 2]!) | 0
+  }
+  return hash.toString(36)
+}
+
+const MAX_SCAN_CACHE = 50
+
 function canvasFromImageData(imageData: ImageData): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = imageData.width
@@ -141,6 +154,11 @@ export default function GameScanPage() {
   // Session scan counter
   const [scanCount, setScanCount] = useState(0)
 
+  // Image hash cache — avoid duplicate API calls for identical frames
+  const scanCacheRef = useRef<Map<string, ScanResult>>(new Map())
+  const lastHashRef = useRef<string | null>(null)
+  const [cachedResult, setCachedResult] = useState<ScanResult | null>(null)
+
   // Flash overlay on scan result — visual feedback by tier
   const [flashColor, setFlashColor] = useState<string | null>(null)
   const [flashOpacity, setFlashOpacity] = useState(0)
@@ -155,9 +173,10 @@ export default function GameScanPage() {
   }), [])
 
   useEffect(() => {
-    if (!scanResult?.analysis) return
+    const result = cachedResult || scanResult
+    if (!result?.analysis) return
 
-    const tier = scanResult.analysis.adjustedTier || scanResult.analysis.tier
+    const tier = result.analysis.adjustedTier || result.analysis.tier
     const config = flashConfig[tier] || flashConfig.sell
     const color = config.color.replace('ALPHA', String(config.intensity))
 
@@ -167,7 +186,19 @@ export default function GameScanPage() {
 
     const timer = setTimeout(() => setFlashOpacity(0), 50)
     return () => clearTimeout(timer)
-  }, [scanResult, flashConfig])
+  }, [scanResult, cachedResult, flashConfig])
+
+  // Populate image hash cache when API scan completes
+  useEffect(() => {
+    if (scanResult && lastHashRef.current) {
+      setCachedResult(null)
+      scanCacheRef.current.set(lastHashRef.current, scanResult)
+      if (scanCacheRef.current.size > MAX_SCAN_CACHE) {
+        const firstKey = scanCacheRef.current.keys().next().value
+        if (firstKey) scanCacheRef.current.delete(firstKey)
+      }
+    }
+  }, [scanResult])
 
   // Load saved presets from bench — prefer DB layout, fallback localStorage
   const savedPresets = useRef<string[]>(loadPresets(game))
@@ -229,6 +260,16 @@ export default function GameScanPage() {
   const handleSignificantChange = useCallback(
     (frame: ImageData) => {
       if (scanningRef.current) return
+
+      // Check image hash cache before sending to API
+      const hash = quickHash(frame)
+      const cached = scanCacheRef.current.get(hash)
+      if (cached) {
+        console.log('[scan] Cache hit — skipping OCR')
+        setCachedResult(cached)
+        return
+      }
+      lastHashRef.current = hash
 
       scanningRef.current = true
       setScanCount(prev => prev + 1)
@@ -305,8 +346,10 @@ export default function GameScanPage() {
 
   const handleRescan = useCallback(() => {
     if (!currentFrame || scanningRef.current) return
+    setCachedResult(null)
     scanningRef.current = true
     setScanCount(prev => prev + 1)
+    lastHashRef.current = quickHash(cropImageData(currentFrame, roiRef.current))
     const cropped = cropImageData(currentFrame, roiRef.current)
     // Apply blackout masks before preprocessing
     const maskedCropped = masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
@@ -346,7 +389,8 @@ export default function GameScanPage() {
 
   const isAnalyzing = isPending
 
-  const resultData = scanResult
+  const resultData = cachedResult || scanResult
+  const isCachedDisplay = !!cachedResult
   const hasStructuredData = resultData?.data && Object.keys(resultData.data).length > 0
 
   return (
@@ -458,6 +502,11 @@ export default function GameScanPage() {
                     }`}
                   />
                   {t('scan.statusBar.lastConfidence')}: {Math.round(resultData.confidence)}%
+                </Badge>
+              )}
+              {isCachedDisplay && (
+                <Badge variant="secondary" className="text-xs">
+                  Cached
                 </Badge>
               )}
               {scanCount > 0 && (
