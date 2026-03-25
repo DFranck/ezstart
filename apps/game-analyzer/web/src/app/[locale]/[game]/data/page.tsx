@@ -339,7 +339,42 @@ const GEM_GRIND_RECS: GemGrindRec[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Section 12 — Sources
+// Section 12 — Set Archetype Affinity
+// ---------------------------------------------------------------------------
+
+interface SetAffinityRow {
+  set: string
+  emoji: string
+  archetypes: string[]
+}
+
+const SET_AFFINITY_DATA: SetAffinityRow[] = [
+  { set: 'Fatal', emoji: '⚔️', archetypes: ['Speed DPS', 'Cleave', 'One-Shot', 'Vamp Bruiser'] },
+  { set: 'Rage', emoji: '🔥', archetypes: ['Speed DPS', 'Cleave', 'One-Shot'] },
+  { set: 'Blade', emoji: '🗡️', archetypes: ['Speed DPS', 'Cleave', 'One-Shot', 'Vamp Bruiser'] },
+  { set: 'Violent', emoji: '💥', archetypes: ['Speed DPS', 'Bruiser', 'CC/Debuffer', 'Healer', 'Strip/Cleanse'] },
+  { set: 'Swift', emoji: '💨', archetypes: ['Speed DPS', 'Speed Lead', 'CC/Debuffer', 'Strip/Cleanse', 'Bomber'] },
+  { set: 'Energy', emoji: '💚', archetypes: ['Tank/Support', 'Bruiser', 'Healer', 'Raid'] },
+  { set: 'Guard', emoji: '🛡️', archetypes: ['Tank/Support', 'DEF Nuker', 'Raid'] },
+  { set: 'Endure', emoji: '🔒', archetypes: ['Tank/Support', 'Raid', 'Strip/Cleanse'] },
+  { set: 'Shield', emoji: '🛡️💎', archetypes: ['Tank/Support', 'Bruiser'] },
+  { set: 'Will', emoji: '🛡️✨', archetypes: ['Tank/Support', 'Bruiser', 'Speed DPS', 'Strip/Cleanse'] },
+  { set: 'Despair', emoji: '😵', archetypes: ['CC/Debuffer', 'Bruiser', 'Tank/Support'] },
+  { set: 'Revenge', emoji: '🔄', archetypes: ['Bruiser', 'Revenge', 'Tank/Support'] },
+  { set: 'Nemesis', emoji: '⚡', archetypes: ['Bruiser', 'Tank/Support'] },
+  { set: 'Destroy', emoji: '💀', archetypes: ['Bruiser', 'Tank/Support'] },
+  { set: 'Focus', emoji: '🎯', archetypes: ['CC/Debuffer', 'Bomber', 'Strip/Cleanse'] },
+  { set: 'Accuracy', emoji: '🎯✨', archetypes: ['CC/Debuffer', 'Bomber', 'Strip/Cleanse'] },
+  { set: 'Tolerance', emoji: '🧘', archetypes: ['Tank/Support', 'Raid'] },
+  { set: 'Vampire', emoji: '🧛', archetypes: ['Vamp Bruiser', 'Bruiser'] },
+  { set: 'Fight', emoji: '👊', archetypes: ['Speed DPS', 'Cleave'] },
+  { set: 'Determination', emoji: '🏰', archetypes: ['Tank/Support', 'DEF Nuker'] },
+  { set: 'Enhance', emoji: '✨', archetypes: ['Tank/Support', 'Bruiser'] },
+  { set: 'Cruel', emoji: '⚔️💀', archetypes: ['Speed DPS', 'Cleave', 'One-Shot'] },
+]
+
+// ---------------------------------------------------------------------------
+// Section 13 — Sources
 // ---------------------------------------------------------------------------
 
 interface Source {
@@ -722,6 +757,62 @@ export default function GameDataPage() {
                   </P>
                 </CardContent>
               </Card>
+
+              <Card size="sm" className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="The standard Summoners War efficiency formula used by all optimizers. Named after the player Barion who popularized it.">Barion Efficiency</TT> (Raw Efficiency)
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    The raw efficiency formula: <span className="font-mono">sum(substat_value / max_roll_value) / TOTAL_EVENTS * 100</span>. For each substat, the ratio is <span className="font-mono">current_value / (max_single_roll * number_of_rolls_into_that_stat)</span>. TOTAL_EVENTS = 8 for a 6-star rune at +12 (initial 4 subs + 4 power-up rolls). This gives a 0-100 score where 100 means every roll was max.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    Example: a +12 rune with SPD 18 (3 rolls max = 18), CR 12 (2 rolls max = 12), HP% 8 (1 roll max = 8), DEF% 13 (2 rolls max = 16). Ratios: 18/18 + 12/12 + 8/8 + 13/16 = 1 + 1 + 1 + 0.81 = 3.81. Efficiency = 3.81/8 * 100 = <strong>47.6%</strong>.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <Card size="sm" className="border-ga-roll-hero/20 bg-ga-roll-hero/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="Projects what Barion efficiency the rune would reach at +12 if all remaining rolls go into the max value.">Potential +12</TT>
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    For runes not yet at +12, the scanner calculates what the efficiency WOULD be if all remaining power-up rolls landed at max value. Formula: <span className="font-mono">current_efficiency + (remaining_rolls * max_single_roll_ratio / TOTAL_EVENTS * 100)</span>. A +6 rune has 2 rolls left, so potential adds up to 2 max-roll ratios.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    Example: a +6 rune with current efficiency 25% has 2 remaining rolls. Best case each roll = 1.0 ratio, so potential = 25 + (2 * 1.0/8 * 100) = 25 + 25 = <strong>50%</strong>. This is used by the progressive advice to decide if the rune is worth upgrading further.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <Card size="sm" className="border-ga-roll-legend/20 bg-ga-roll-legend/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="Efficiency score after applying maximum legend grindstones to all grindable substats. Shows the rune's ceiling after optimization.">After Grind</TT> Efficiency
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    After calculating potential +12, the scanner adds the value of legend grindstones to all grindable substats (HP, HP%, ATK, ATK%, DEF, DEF%, SPD). Formula: <span className="font-mono">potential_efficiency + sum(legend_grind_max / max_roll_value) / TOTAL_EVENTS * 100</span> for each grindable stat present.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    Example: a rune at potential 50% with SPD (grind +5) and HP% (grind +10%). Grind gain = (5/6 + 10/8) / 8 * 100 = (0.83 + 1.25) / 8 * 100 = <strong>+26%</strong>. After Grind = 50 + 26 = <strong>76%</strong>. This is the rune&apos;s realistic ceiling.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <Card size="sm" className="border-ga-roll-rare/20 bg-ga-roll-rare/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="The final weighted efficiency after applying the best gem (replacing worst sub) and all grinds. Accounts for lost rolls in the replaced stat.">Post-Optim Score</TT>
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    The post-optimization score is the weighted efficiency after applying both the best enchanted gem AND all legend grinds. Unlike raw After Grind, this uses <strong>weighted</strong> efficiency (stat importance matters) and accounts for the fact that gemming replaces a substat — including any rolls that went into the replaced stat (lost rolls).
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    Example: a Violent rune for a Bruiser with RES 12% (3 rolls). Gemming RES → HP% removes 3 bad rolls but adds a legend gem value (7-11% HP%). The post-optim score recalculates weighted efficiency with the new substat, re-applies grinds, and gives the <strong>true final score</strong> used to rank runes.
+                  </P>
+                </CardContent>
+              </Card>
             </Div>
           </AccordionContent>
         </AccordionItem>
@@ -933,6 +1024,23 @@ export default function GameDataPage() {
                 For each archetype, the scanner identifies the worst substat (lowest weight) as the <TT tip="The substat with the lowest priority weight for the best matching archetype. This is the stat that should be replaced by an enchanted gem.">gem target</TT>. Grindable stats that match the archetype should always be grinded.
               </P>
 
+              <Card size="sm" className="border-warning/20 bg-warning/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="The priority order used by the scanner to decide which substat to replace with an enchanted gem.">Gem Target Logic</TT> — Priority Order
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    The scanner picks the gem target using this priority: <strong>1) Dead stats</strong> (ACC on a DPS, RES on a bomber) → <strong>2) Flat stats</strong> (ATK flat, DEF flat, HP flat — almost always worse than %) → <strong>3) Lowest weight stat</strong> for the archetype. The gem replacement is the highest-weight stat not already on the rune.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    <strong>Never gem out:</strong> SPD, CR, or CD — these are universally valuable and the scanner will never recommend replacing them, even if the archetype weight is low. The only exception is Tank/Support archetypes where CR/CD have 0.1 weight, but even then flat stats are prioritized first.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    Example: a Speed DPS rune with SPD 24, CR 15%, CD 12%, RES 10%. The scanner targets RES (dead stat for DPS, weight 0.2) and suggests gemming in ATK% (weight 0.8, highest missing useful stat).
+                  </P>
+                </CardContent>
+              </Card>
+
               <Div className="overflow-x-auto">
                 <Table variant="striped" size="compact">
                   <TableHeader>
@@ -978,10 +1086,63 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 12: Sources ---- */}
+        {/* ---- Section 12: Set Archetype Affinity ---- */}
+        <AccordionItem value="set-affinity">
+          <AccordionTrigger className="text-base font-semibold">
+            12. <TT tip="Which rune sets naturally pair with which build archetypes. The scanner uses this to prioritize archetype recommendations that match the rune's set.">Set Archetype Affinity</TT>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Div className="space-y-4">
+              <P className="text-xs text-muted-foreground">
+                The scanner uses set affinity to boost archetype scores when the rune&apos;s set naturally fits the archetype. A Violent rune on a Bruiser gets a higher score than the same substats on a Fatal rune, because Violent procs synergize with bruiser playstyle.
+              </P>
+
+              <Div className="overflow-x-auto">
+                <Table variant="striped" size="compact">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[120px]">Set</TableHead>
+                      <TableHead className="min-w-[300px]">Best Archetypes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {SET_AFFINITY_DATA.map((row) => (
+                      <TableRow key={row.set}>
+                        <TableCell>
+                          <Div className="flex items-center gap-1.5">
+                            <span>{row.emoji}</span>
+                            <span className="font-medium text-xs">{row.set}</span>
+                          </Div>
+                        </TableCell>
+                        <TableCell>
+                          <Div className="flex flex-wrap gap-1">
+                            {row.archetypes.map((a) => (
+                              <Badge key={a} variant="outline" className="text-xs">{a}</Badge>
+                            ))}
+                          </Div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Div>
+
+              <Card size="sm" className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">How affinity affects scoring</P>
+                  <P className="text-xs text-muted-foreground">
+                    When ranking archetypes for a rune, the scanner sorts by: <strong>1) Weighted efficiency</strong> (stat match) then <strong>2) Set affinity</strong> (set match). Two archetypes with similar weighted efficiency will be ranked by whether the set fits. Example: a Violent rune with HP%/CR/CD/SPD could fit Bruiser or Speed DPS — Violent has affinity with Bruiser, so Bruiser gets priority.
+                  </P>
+                </CardContent>
+              </Card>
+            </Div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ---- Section 13: Sources ---- */}
         <AccordionItem value="sources">
           <AccordionTrigger className="text-base font-semibold">
-            12. Sources
+            13. Sources
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-2">
