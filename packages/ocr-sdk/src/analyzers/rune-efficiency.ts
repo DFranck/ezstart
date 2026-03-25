@@ -110,11 +110,14 @@ export interface RuneAnalysis {
   grindGain: number
   substats: SubstatAnalysis[]
   grindPotential: GrindPotential
+  /** @deprecated Use rollQualityTier + progressiveAdvice instead */
   tier: EfficiencyTier
-  /** Tier with level strictness applied */
+  /** @deprecated Use rollQualityTier + progressiveAdvice instead */
   adjustedTier: EfficiencyTier
   /** Level strictness malus applied (0-15) */
   levelStrictness: number
+  /** Roll quality tier based on raw Barion efficiency (Legend/Hero/Rare/Magic/Normal) */
+  rollQualityTier: RuneQuality
   quality: RuneQuality
   totalRolls: number
   /** Set bonus description — used by UI layer */
@@ -840,6 +843,26 @@ function calculateProgressiveAdvice(
 }
 
 /**
+ * Determine the roll quality tier based on raw Barion efficiency.
+ * Independent of stat weights — purely measures how well the rune rolled.
+ *
+ * Thresholds approximate the efficiency of a rune where all rolls
+ * hit at the max of each quality tier:
+ * - Legend: >= 85% (all rolls near max)
+ * - Hero: >= 70% (rolls at hero-quality max)
+ * - Rare: >= 50% (rolls at rare-quality max)
+ * - Magic: >= 30% (rolls at magic-quality max)
+ * - Normal: < 30%
+ */
+export function getRollQualityTier(barionEfficiency: number): RuneQuality {
+  if (barionEfficiency >= 85) return 'legend'
+  if (barionEfficiency >= 70) return 'hero'
+  if (barionEfficiency >= 50) return 'rare'
+  if (barionEfficiency >= 30) return 'magic'
+  return 'normal'
+}
+
+/**
  * Legacy function name — kept for backward compatibility.
  * Delegates to analyzeRune.
  */
@@ -915,6 +938,9 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Progressive advice — actionable sell/upgrade/keep/grind recommendation
   const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedWeighted, finalPotential, synergy, profile)
 
+  // Roll quality tier — based on raw Barion efficiency only
+  const rollQualityTier = getRollQualityTier(roundedCurrent)
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
@@ -928,6 +954,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     tier,
     adjustedTier,
     levelStrictness,
+    rollQualityTier,
     quality,
     totalRolls,
     setBonus,

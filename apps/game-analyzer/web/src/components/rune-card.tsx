@@ -72,27 +72,19 @@ function getRollQualityBarColor(rollQuality: number): string {
   return '[&>div]:bg-ga-roll-normal'
 }
 
-// ── Efficiency tier helpers (SW colors) ──
-type Tier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
-
-function getTierColor(tier: Tier): string {
+// ── Roll quality tier colors (bar) — SW quality system ──
+function getRollQualityTierBarColor(tier: RuneQuality): string {
   switch (tier) {
-    case 'godlike': return 'text-ga-tier-godlike'
-    case 'great': return 'text-ga-tier-great'
-    case 'good': return 'text-ga-tier-good'
-    case 'keep': return 'text-ga-tier-keep'
-    case 'sell': return 'text-ga-tier-sell'
+    case 'legend': return '[&>div]:bg-ga-roll-legend'
+    case 'hero': return '[&>div]:bg-ga-roll-hero'
+    case 'rare': return '[&>div]:bg-ga-roll-rare'
+    case 'magic': return '[&>div]:bg-ga-roll-magic'
+    case 'normal': return '[&>div]:bg-ga-roll-normal'
   }
 }
 
-function getProgressColor(tier: Tier): string {
-  switch (tier) {
-    case 'godlike': return '[&>div]:bg-ga-tier-godlike'
-    case 'great': return '[&>div]:bg-ga-tier-great'
-    case 'good': return '[&>div]:bg-ga-tier-good'
-    case 'keep': return '[&>div]:bg-ga-tier-keep'
-    case 'sell': return '[&>div]:bg-ga-tier-sell'
-  }
+function getRollQualityTierTextColor(tier: RuneQuality): string {
+  return ROLL_QUALITY_COLORS[tier] ?? ROLL_QUALITY_COLORS.normal
 }
 
 function formatStatValue(type: StatType, value: number): string {
@@ -137,14 +129,12 @@ interface RuneCardProps {
 
 export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
   const t = useTranslations('labels')
-  const tScan = useTranslations('scan')
   const tRune = useTranslations('rune')
 
   const quality = rune.quality ?? 'normal'
   const gradeStars = Array.from({ length: rune.grade }, () => '\u2605').join('')
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
-  const tier = analysis ? (analysis.adjustedTier ?? analysis.tier) : undefined
-  const levelStrictness = analysis?.levelStrictness ?? 0
+  const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
 
   return (
     <Card className="overflow-hidden">
@@ -228,30 +218,26 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           </Div>
         </Div>
 
-        {/* ── Efficiency section ── */}
-        {analysis && tier && (
+        {/* ── Roll Quality ── */}
+        {analysis && (
           <>
             <Div className="border-t border-border" />
             <Div className="space-y-2">
               <Div className="flex items-center justify-between">
-                <P className="text-sm font-medium">{tScan('efficiency.title')}</P>
+                <P className="text-sm font-medium">{tRune('rollQualityTitle')}</P>
                 <Div className="flex items-center gap-2">
-                  <P className={`text-lg font-bold ${getTierColor(tier)}`}>{analysis.weightedEfficiency ?? analysis.efficiency}%</P>
-                  <P className="text-xs text-muted-foreground">({analysis.efficiency}%)</P>
-                  <P className={`text-sm font-semibold ${getTierColor(tier)}`}>
-                    {tScan(`efficiency.${tier}`)}
+                  <P className={`text-lg font-bold ${getRollQualityTierTextColor(rollQualityTier)}`}>
+                    {tRune(`rollQuality.${rollQualityTier}`)}
+                  </P>
+                  <P className={`text-sm ${getRollQualityTierTextColor(rollQualityTier)}`}>
+                    ({analysis.efficiency}%)
                   </P>
                 </Div>
               </Div>
               <Progress
-                value={analysis.weightedEfficiency ?? analysis.efficiency}
-                className={`h-2.5 ${getProgressColor(tier)}`}
+                value={analysis.efficiency}
+                className={`h-2.5 ${getRollQualityTierBarColor(rollQualityTier)}`}
               />
-              {levelStrictness > 0 && (
-                <P className="text-xs text-muted-foreground">
-                  {tScan('efficiency.levelStrictness', { value: String(levelStrictness) })}
-                </P>
-              )}
 
               {/* Potential at +12 */}
               {analysis.potentialEfficiency !== undefined && (
@@ -277,7 +263,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
           </>
         )}
 
-        {/* ── Progressive Advice ── */}
+        {/* ── Progressive Advice (Conseil) ── */}
         {analysis?.progressiveAdvice && (() => {
           const advice = analysis.progressiveAdvice
           return (

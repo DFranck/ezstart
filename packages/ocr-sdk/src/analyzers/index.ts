@@ -9,6 +9,7 @@ export {
   calculateSynergy,
   estimateRolls,
   getRecommendation,
+  getRollQualityTier,
 } from './rune-efficiency.js'
 
 export type {

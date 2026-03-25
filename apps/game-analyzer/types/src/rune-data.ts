@@ -378,20 +378,24 @@ export interface RuneAnalysis {
   efficiency: number
   /** Weighted efficiency — stat importance-adjusted score (primary display, used for tier) */
   weightedEfficiency: number
-  /** Tier label based on weightedEfficiency */
+  /** @deprecated Use rollQualityTier + progressiveAdvice instead */
   tier: EfficiencyTier
   /** Projected efficiency at +12 if not yet +12 — undefined if already +12 */
   maxEfficiency?: number
+  /** Potential efficiency at +12 (Barion raw) */
+  potentialEfficiency?: number
   /** Efficiency after applying legend grinds to all grindable substats */
   grindedEfficiency?: number
   /** Grind efficiency gain */
   grindGain?: number
   /** Per-substat analysis */
   substats: SubstatAnalysis[]
-  /** Tier with level strictness applied */
+  /** @deprecated Use rollQualityTier + progressiveAdvice instead */
   adjustedTier: EfficiencyTier
   /** Level strictness malus applied (0-15) */
   levelStrictness: number
+  /** Roll quality tier based on raw Barion efficiency (Legend/Hero/Rare/Magic/Normal) */
+  rollQualityTier: RuneQuality
   /** Set bonus description */
   setBonus: string
   /** Number of pieces for set bonus */
