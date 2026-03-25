@@ -135,6 +135,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
   const quality = rune.quality ?? 'normal'
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
+  const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
   const advice = analysis?.progressiveAdvice
 
   return (
@@ -275,15 +276,28 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
             <Div className="text-center space-y-1">
               <P className="text-xs text-muted-foreground uppercase tracking-wider">{tRune('rollQualityTitle')}</P>
               <P className={`text-3xl font-black ${ROLL_QUALITY_COLORS[rollQualityTier]} drop-shadow-[0_0_10px_currentColor]`}>
-                {analysis.efficiency}%
+                {analysis.rollQualityPercent}%
               </P>
-              <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityTier]}`}>
-                {tRune(`rollQuality.${rollQualityTier}`)}
-              </P>
+              <Div className="flex items-center justify-center gap-2">
+                <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityTier]}`}>
+                  {tRune(`rollQuality.${rollQualityTier}`)}
+                </P>
+                {rollQualityPostGem !== rollQualityTier && (
+                  <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>
+                    {'\u2192'} {tRune(`rollQuality.${rollQualityPostGem}`)}
+                  </P>
+                )}
+              </Div>
             </Div>
 
             {/* Efficiency grid */}
             <Div className="grid grid-cols-2 gap-2">
+              {rollQualityPostGem !== rollQualityTier && (
+                <Div className="bg-muted/20 rounded-lg p-2 text-center">
+                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('afterGem')}</P>
+                  <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>{analysis.rollQualityPostGemPercent}%</P>
+                </Div>
+              )}
               {analysis.potentialEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center">
                   <P className="text-[10px] text-muted-foreground uppercase">{tRune('potential12')}</P>

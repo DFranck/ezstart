@@ -125,8 +125,14 @@ export interface RuneAnalysis {
   adjustedTier: EfficiencyTier
   /** Level strictness malus applied (0-15) */
   levelStrictness: number
-  /** Roll quality tier based on raw Barion efficiency (Legend/Hero/Rare/Magic/Normal) */
+  /** Roll quality tier based on actual roll quality (Legend/Hero/Rare/Magic/Normal) */
   rollQualityTier: RuneQuality
+  /** Roll quality tier after gemming the worst substat */
+  rollQualityPostGem: RuneQuality
+  /** Exact roll quality percentage (current) */
+  rollQualityPercent: number
+  /** Exact roll quality percentage (post-gem) */
+  rollQualityPostGemPercent: number
   quality: RuneQuality
   totalRolls: number
   /** Set bonus description — used by UI layer */
@@ -881,23 +887,67 @@ function calculateProgressiveAdvice(
 }
 
 /**
- * Determine the roll quality tier based on raw Barion efficiency.
- * Independent of stat weights — purely measures how well the rune rolled.
- *
- * Thresholds approximate the efficiency of a rune where all rolls
- * hit at the max of each quality tier:
- * - Legend: >= 85% (all rolls near max)
- * - Hero: >= 70% (rolls at hero-quality max)
- * - Rare: >= 50% (rolls at rare-quality max)
- * - Magic: >= 30% (rolls at magic-quality max)
- * - Normal: < 30%
+ * Convert a roll quality percentage to a tier label.
+ * Based on how well the actual rolls landed relative to max:
+ * - Legend: >= 90% (near-perfect rolls)
+ * - Hero:  >= 75% (hero-quality rolls)
+ * - Rare:  >= 50% (decent rolls)
+ * - Magic: >= 25% (low rolls)
+ * - Normal: < 25%
  */
-export function getRollQualityTier(barionEfficiency: number): RuneQuality {
-  if (barionEfficiency >= 85) return 'legend'
-  if (barionEfficiency >= 70) return 'hero'
-  if (barionEfficiency >= 50) return 'rare'
-  if (barionEfficiency >= 30) return 'magic'
+function tierFromPercent(pct: number): RuneQuality {
+  if (pct >= 90) return 'legend'
+  if (pct >= 75) return 'hero'
+  if (pct >= 50) return 'rare'
+  if (pct >= 25) return 'magic'
   return 'normal'
+}
+
+/**
+ * Calculate roll quality based on ACTUAL rolls that have occurred.
+ * Unlike Barion efficiency (which divides by total events at +12),
+ * this only evaluates the rolls that already happened.
+ *
+ * Returns both current tier and post-gem tier (excluding worst substat).
+ */
+export function getRollQualityTier(
+  substats: SubstatAnalysis[],
+): { current: RuneQuality; postGem: RuneQuality; currentPercent: number; postGemPercent: number } {
+  if (substats.length === 0) {
+    return { current: 'normal', postGem: 'normal', currentPercent: 0, postGemPercent: 0 }
+  }
+
+  let totalRatio = 0
+  let worstRatio = Infinity
+
+  for (const sub of substats) {
+    const range = ROLL_RANGES[sub.type]
+    if (!range || sub.rolls <= 0) continue
+    const ratio = sub.value / (range.max * sub.rolls)
+    totalRatio += ratio
+
+    if (ratio < worstRatio) {
+      worstRatio = ratio
+    }
+  }
+
+  const count = substats.length
+  const currentAvg = (totalRatio / count) * 100
+  const currentPercent = Math.round(currentAvg * 10) / 10
+
+  // Post-gem: remove worst substat from average (it would be gemmed)
+  let postGemPercent = currentPercent
+  if (count > 1 && worstRatio < Infinity) {
+    const postGemAvg = ((totalRatio - worstRatio) / (count - 1)) * 100
+    postGemPercent = Math.round(postGemAvg * 10) / 10
+  }
+
+  return {
+    current: tierFromPercent(currentPercent),
+    postGem: tierFromPercent(postGemPercent),
+    currentPercent,
+    postGemPercent,
+  }
 }
 
 /**
@@ -994,8 +1044,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Progressive advice — actionable sell/upgrade/keep/grind recommendation
   const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedWeighted, finalPotential, synergy, profile)
 
-  // Roll quality tier — based on raw Barion efficiency only
-  const rollQualityTier = getRollQualityTier(roundedCurrent)
+  // Roll quality tier — based on actual roll quality per substat
+  const rollQuality = getRollQualityTier(substats)
 
   return {
     currentEfficiency: roundedCurrent,
@@ -1010,7 +1060,10 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     tier,
     adjustedTier,
     levelStrictness,
-    rollQualityTier,
+    rollQualityTier: rollQuality.current,
+    rollQualityPostGem: rollQuality.postGem,
+    rollQualityPercent: rollQuality.currentPercent,
+    rollQualityPostGemPercent: rollQuality.postGemPercent,
     quality,
     totalRolls,
     setBonus,

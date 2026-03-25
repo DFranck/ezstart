@@ -151,6 +151,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
   const gradeStars = Array.from({ length: rune.grade }, () => '\u2605').join('')
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
+  const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
 
   return (
     <Card className="overflow-hidden">
@@ -264,14 +265,29 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                     {tRune(`rollQuality.${rollQualityTier}`)}
                   </P>
                   <P className={`text-sm ${getRollQualityTierTextColor(rollQualityTier)}`}>
-                    ({analysis.efficiency}%)
+                    ({analysis.rollQualityPercent}%)
                   </P>
+                  {rollQualityPostGem !== rollQualityTier && (
+                    <P className={`text-sm ${getRollQualityTierTextColor(rollQualityPostGem)}`}>
+                      {'\u2192'} {tRune(`rollQuality.${rollQualityPostGem}`)}
+                    </P>
+                  )}
                 </Div>
               </Div>
               <Progress
-                value={analysis.efficiency}
+                value={analysis.rollQualityPercent}
                 className={`h-2.5 ${getRollQualityTierBarColor(rollQualityTier)}`}
               />
+
+              {/* After gem */}
+              {rollQualityPostGem !== rollQualityTier && (
+                <Div className="flex items-center justify-between text-sm">
+                  <P className="text-muted-foreground">{tRune('afterGem')}</P>
+                  <P className={`font-medium ${getRollQualityTierTextColor(rollQualityPostGem)}`}>
+                    {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
+                  </P>
+                </Div>
+              )}
 
               {/* Potential at +12 */}
               {analysis.potentialEfficiency !== undefined && (

@@ -92,6 +92,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
   const quality = rune.quality ?? 'normal'
   const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
+  const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
   const advice = analysis?.progressiveAdvice
 
   return (
@@ -117,7 +118,12 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           <Div className="flex items-center gap-2">
             {analysis && (
               <P className={`text-xs font-semibold ${QUALITY_COLORS[rollQualityTier]}`}>
-                {tRune(`rollQuality.${rollQualityTier}`)} ({analysis.efficiency}%)
+                {tRune(`rollQuality.${rollQualityTier}`)} ({analysis.rollQualityPercent}%)
+                {rollQualityPostGem !== rollQualityTier && (
+                  <span className={QUALITY_COLORS[rollQualityPostGem]}>
+                    {' \u2192 '}{tRune(`rollQuality.${rollQualityPostGem}`)}
+                  </span>
+                )}
               </P>
             )}
             {advice && (

@@ -403,8 +403,14 @@ export interface RuneAnalysis {
   adjustedTier: EfficiencyTier
   /** Level strictness malus applied (0-15) */
   levelStrictness: number
-  /** Roll quality tier based on raw Barion efficiency (Legend/Hero/Rare/Magic/Normal) */
+  /** Roll quality tier based on actual roll quality (Legend/Hero/Rare/Magic/Normal) */
   rollQualityTier: RuneQuality
+  /** Roll quality tier after gemming the worst substat */
+  rollQualityPostGem: RuneQuality
+  /** Exact roll quality percentage (current) */
+  rollQualityPercent: number
+  /** Exact roll quality percentage (post-gem) */
+  rollQualityPostGemPercent: number
   /** Set bonus description */
   setBonus: string
   /** Number of pieces for set bonus */
