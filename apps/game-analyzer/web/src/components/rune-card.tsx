@@ -88,6 +88,13 @@ const ADVICE_LABELS: Record<ProgressiveAction, string> = {
   grind: 'GRIND',
 }
 
+const ADVICE_ICONS: Record<ProgressiveAction, string> = {
+  upgrade: '\u2191',
+  keep: '\u2713',
+  grind: '\u2699',
+  sell: '\u2715',
+}
+
 const ROLL_TIER_BG: Record<RuneQuality, string> = {
   legend: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/30',
   hero: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/30',
@@ -287,22 +294,15 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
             <>
               <Div className="border-t border-border" />
               <Div className={`p-3 rounded-lg border-2 ${ADVICE_COLORS[advice.action]}`}>
-                <Div className="flex items-center justify-between mb-1">
-                  <P className="font-bold text-lg">{ADVICE_LABELS[advice.action]}</P>
-                </Div>
-                <P className="text-sm opacity-90">
+                <P className="font-bold text-lg">
+                  {ADVICE_ICONS[advice.action]} {ADVICE_LABELS[advice.action]}
+                  {advice.action === 'sell'
+                    ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
+                    : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
+                </P>
+                <P className="text-xs text-muted-foreground mt-1">
                   {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
                 </P>
-                {advice.sellProbability > 0 && advice.action !== 'sell' && (
-                  <P className="text-sm mt-1">
-                    {tRune('keepChance', { percent: String(100 - advice.sellProbability) })}
-                  </P>
-                )}
-                {advice.sellProbability > 0 && (
-                  <P className="text-xs text-muted-foreground mt-0.5">
-                    {tRune('sellRisk', { percent: String(advice.sellProbability) })}
-                  </P>
-                )}
                 {advice.nextCheckAt > 0 && (
                   <P className="text-xs opacity-70 mt-1">{tRune('nextCheck', { level: String(advice.nextCheckAt) })}</P>
                 )}

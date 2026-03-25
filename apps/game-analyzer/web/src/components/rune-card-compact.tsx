@@ -15,17 +15,24 @@ const QUALITY_COLORS: Record<RuneQuality, string> = {
 }
 
 const ADVICE_COLORS: Record<ProgressiveAction, string> = {
-  sell: 'text-red-400',
-  upgrade: 'text-blue-400',
-  keep: 'text-green-400',
-  grind: 'text-purple-400',
+  sell: 'text-destructive-foreground',
+  upgrade: 'text-ga-roll-rare',
+  keep: 'text-success-foreground',
+  grind: 'text-ga-roll-hero',
 }
 
 const ADVICE_BG: Record<ProgressiveAction, string> = {
-  sell: 'bg-red-500/10 border-red-500/30',
-  upgrade: 'bg-blue-500/10 border-blue-500/30',
-  keep: 'bg-green-500/10 border-green-500/30',
-  grind: 'bg-purple-500/10 border-purple-500/30',
+  sell: 'bg-destructive/10 border-destructive/30',
+  upgrade: 'bg-ga-roll-rare/10 border-ga-roll-rare/30',
+  keep: 'bg-success/10 border-success/30',
+  grind: 'bg-ga-roll-hero/10 border-ga-roll-hero/30',
+}
+
+const ADVICE_ICONS: Record<ProgressiveAction, string> = {
+  upgrade: '\u2191',
+  keep: '\u2713',
+  grind: '\u2699',
+  sell: '\u2715',
 }
 
 type RollQualityTier = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
@@ -127,15 +134,14 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Badge className={`border text-[10px] px-1.5 py-0 font-bold ${ADVICE_BG[advice.action]} ${ADVICE_COLORS[advice.action]}`}>
-                      {advice.action.toUpperCase()}
-                      {advice.sellProbability > 0 && ` (${100 - advice.sellProbability}%)`}
+                      {ADVICE_ICONS[advice.action]} {advice.action.toUpperCase()}
+                      {advice.action === 'sell'
+                        ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
+                        : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <P className="text-xs font-medium">{advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}</P>
-                    {advice.sellProbability > 0 && (
-                      <P className="text-xs text-muted-foreground">{tRune('sellRisk', { percent: String(advice.sellProbability) })}</P>
-                    )}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -171,7 +177,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                     {formatStatValue(stat.type, stat.value)}
                   </P>
                   {subAnalysis?.isGemTarget && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-yellow-500/40 bg-yellow-500/10 text-yellow-500 shrink-0">
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
                       {tRune('gemable')}
                     </Badge>
                   )}
@@ -202,7 +208,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
               <P>
                 <span className="font-medium">{tRune('afterGrind')}:</span> {analysis.grindedEfficiency}%
                 {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                  <span className="text-green-500"> (+{analysis.grindGain}%)</span>
+                  <span className="text-success-foreground"> (+{analysis.grindGain}%)</span>
                 )}
               </P>
             )}
@@ -227,8 +233,8 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                     key={archKey}
                     variant="outline"
                     className={`text-[10px] px-1 py-0 cursor-default ${
-                      arch.matchCount >= 4 ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-500' :
-                      'bg-green-500/15 border-green-500/40 text-green-500'
+                      arch.matchCount >= 4 ? 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend' :
+                      'bg-success/15 border-success/40 text-success-foreground'
                     }`}
                   >
                     {emoji} {tRune(`archetype.${archKey}`)} {arch.matchCount}/4
@@ -247,7 +253,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                 <TooltipTrigger asChild>
                   <Div className="flex items-center gap-1 cursor-default">
                     <Div className={`h-1.5 w-1.5 rounded-full ${
-                      confidence >= 80 ? 'bg-green-500' : confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      confidence >= 80 ? 'bg-success' : confidence >= 50 ? 'bg-warning' : 'bg-destructive'
                     }`} />
                     <P className="text-[10px] text-muted-foreground">{Math.round(confidence)}%</P>
                   </Div>

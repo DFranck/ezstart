@@ -68,27 +68,36 @@ const STAT_ICONS: Record<string, string> = {
 }
 
 // ── Advice styles for gaming ──
+/* Advice gradients use hardcoded dark shades because CSS variables can't be used
+   inside Tailwind gradient stops with opacity modifiers. The text/glow use theme vars. */
 const ADVICE_GAMING: Record<ProgressiveAction, { bg: string; text: string; glow: string }> = {
   sell: {
-    bg: 'bg-gradient-to-r from-red-900/40 to-red-800/20',
-    text: 'text-red-400',
-    glow: 'shadow-[0_0_20px_rgba(239,68,68,0.4)]',
+    bg: 'bg-gradient-to-r from-destructive/40 to-destructive/20',
+    text: 'text-destructive-foreground',
+    glow: 'shadow-[0_0_20px_color-mix(in_oklch,var(--destructive)_40%,transparent)]',
   },
   upgrade: {
-    bg: 'bg-gradient-to-r from-blue-900/40 to-blue-800/20',
-    text: 'text-blue-400',
-    glow: 'shadow-[0_0_20px_rgba(59,130,246,0.4)]',
+    bg: 'bg-gradient-to-r from-ga-roll-rare/40 to-ga-roll-rare/20',
+    text: 'text-ga-roll-rare',
+    glow: 'shadow-[0_0_20px_color-mix(in_oklch,var(--ga-roll-rare)_40%,transparent)]',
   },
   keep: {
-    bg: 'bg-gradient-to-r from-green-900/40 to-green-800/20',
-    text: 'text-green-400',
-    glow: 'shadow-[0_0_20px_rgba(34,197,94,0.4)]',
+    bg: 'bg-gradient-to-r from-success/40 to-success/20',
+    text: 'text-success-foreground',
+    glow: 'shadow-[0_0_20px_color-mix(in_oklch,var(--success)_40%,transparent)]',
   },
   grind: {
-    bg: 'bg-gradient-to-r from-purple-900/40 to-purple-800/20',
-    text: 'text-purple-400',
-    glow: 'shadow-[0_0_20px_rgba(139,92,246,0.4)]',
+    bg: 'bg-gradient-to-r from-ga-roll-hero/40 to-ga-roll-hero/20',
+    text: 'text-ga-roll-hero',
+    glow: 'shadow-[0_0_20px_color-mix(in_oklch,var(--ga-roll-hero)_40%,transparent)]',
   },
+}
+
+const ADVICE_ICONS: Record<ProgressiveAction, string> = {
+  upgrade: '\u2191',
+  keep: '\u2713',
+  grind: '\u2699',
+  sell: '\u2715',
 }
 
 const ROLL_TIER_BG: Record<RuneQuality, string> = {
@@ -108,8 +117,8 @@ function formatRollValue(type: StatType, value: number): string {
 }
 
 function getSynergyBadgeClass(matchCount: number): string {
-  if (matchCount >= 4) return 'bg-yellow-500/15 border-yellow-500/40 text-yellow-500'
-  if (matchCount >= 3) return 'bg-green-500/15 border-green-500/40 text-green-500'
+  if (matchCount >= 4) return 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend'
+  if (matchCount >= 3) return 'bg-success/15 border-success/40 text-success-foreground'
   return 'bg-muted border-border text-muted-foreground'
 }
 
@@ -143,7 +152,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
           </P>
           <Div className="flex items-center justify-center gap-1">
             {Array.from({ length: rune.grade }).map((_, i) => (
-              <P key={i} className="text-yellow-400 text-sm animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
+              <P key={i} className="text-ga-roll-legend text-sm animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
                 {'\u2605'}
               </P>
             ))}
@@ -167,19 +176,12 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
         {advice && (
           <Div className={`rounded-lg p-3 text-center ${ADVICE_GAMING[advice.action].bg} ${ADVICE_GAMING[advice.action].glow}`}>
             <P className={`text-2xl font-black tracking-widest ${ADVICE_GAMING[advice.action].text}`}>
-              {advice.action.toUpperCase()}
+              {ADVICE_ICONS[advice.action]} {advice.action.toUpperCase()}
+              {advice.action === 'sell'
+                ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
+                : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
             </P>
-            {advice.sellProbability > 0 && advice.action !== 'sell' && (
-              <P className={`text-sm mt-1 ${ADVICE_GAMING[advice.action].text}`}>
-                {tRune('keepChance', { percent: String(100 - advice.sellProbability) })}
-              </P>
-            )}
-            {advice.sellProbability > 0 && (
-              <P className="text-xs text-muted-foreground mt-0.5">
-                {tRune('sellRisk', { percent: String(advice.sellProbability) })}
-              </P>
-            )}
-            <P className={`text-xs mt-1 opacity-80 ${ADVICE_GAMING[advice.action].text}`}>
+            <P className="text-xs text-muted-foreground mt-1">
               {advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}
             </P>
             {advice.nextCheckAt > 0 && (
