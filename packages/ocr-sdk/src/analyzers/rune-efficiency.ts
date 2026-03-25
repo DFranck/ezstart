@@ -988,21 +988,63 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Calculate synergy first — we need bestArchetype for weighted efficiency
   const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
-  // Mark the worst substat for the best archetype as gem target
+  // Mark the gem target — prioritize dead stats, then flats, then lowest-weight non-protected stat
   if (synergy.bestArchetype && substats.length > 0) {
     const weights = STAT_PRIORITY_WEIGHTS[synergy.bestArchetype]
-    let worstIdx = -1
-    let worstWeight = Infinity
-    for (let i = 0; i < substats.length; i++) {
-      const sub = substats[i]!
-      const w = weights[sub.type] ?? 0
-      if (w < worstWeight) {
-        worstWeight = w
-        worstIdx = i
+    const DEAD_STATS: StatType[] = ['acc', 'res']
+    const FLAT_STATS: StatType[] = ['hp', 'atk', 'def']
+    const PROTECTED_STATS: StatType[] = ['spd', 'cr', 'cd']
+
+    let gemIdx = -1
+
+    // 1. Dead stat combo (ACC + RES both present) → gem the one with fewer rolls
+    const deadIndices = substats
+      .map((s, i) => ({ idx: i, sub: s }))
+      .filter(({ sub }) => DEAD_STATS.includes(sub.type))
+    if (deadIndices.length >= 2) {
+      deadIndices.sort((a, b) => a.sub.rolls - b.sub.rolls)
+      gemIdx = deadIndices[0]!.idx
+    }
+
+    // 2. Flat stats (hp, atk, def) → always gem candidates before % stats
+    if (gemIdx < 0) {
+      const flatIndices = substats
+        .map((s, i) => ({ idx: i, sub: s }))
+        .filter(({ sub }) => FLAT_STATS.includes(sub.type))
+      if (flatIndices.length > 0) {
+        // Pick the flat with lowest weight in the archetype
+        flatIndices.sort((a, b) => (weights[a.sub.type] ?? 0) - (weights[b.sub.type] ?? 0))
+        gemIdx = flatIndices[0]!.idx
       }
     }
-    if (worstIdx >= 0 && worstWeight < 0.5) {
-      substats[worstIdx]!.isGemTarget = true
+
+    // 3. Lowest-weight stat that is NOT universally good (SPD/CR/CD)
+    if (gemIdx < 0) {
+      const candidates = substats
+        .map((s, i) => ({ idx: i, sub: s }))
+        .filter(({ sub }) => !PROTECTED_STATS.includes(sub.type))
+        .sort((a, b) => (weights[a.sub.type] ?? 0) - (weights[b.sub.type] ?? 0))
+      if (candidates.length > 0) {
+        gemIdx = candidates[0]!.idx
+      }
+    }
+
+    // 4. Fallback: lowest-weight stat (even protected)
+    if (gemIdx < 0) {
+      let worstWeight = Infinity
+      let fallbackIdx = -1
+      for (let i = 0; i < substats.length; i++) {
+        const w = weights[substats[i]!.type] ?? 0
+        if (w < worstWeight) {
+          worstWeight = w
+          fallbackIdx = i
+        }
+      }
+      gemIdx = fallbackIdx
+    }
+
+    if (gemIdx >= 0) {
+      substats[gemIdx]!.isGemTarget = true
     }
   }
 
