@@ -2,7 +2,7 @@
 
 import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 
 // ── Shared constants ──
@@ -62,6 +62,22 @@ function formatStatLabel(type: StatType): string {
 
 function getRollDots(rolls: number): string {
   return '\u25CF'.repeat(rolls)
+}
+
+const ROLL_TIER_BG: Record<RuneQuality, string> = {
+  legend: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/30',
+  hero: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/30',
+  rare: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/30',
+  magic: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/30',
+  normal: 'bg-muted text-muted-foreground border-border',
+}
+
+function isPercentStat(type: StatType): boolean {
+  return ['hp%', 'atk%', 'def%', 'cr', 'cd', 'res', 'acc'].includes(type)
+}
+
+function formatRollValue(type: StatType, value: number): string {
+  return isPercentStat(type) ? `${value}%` : `${value}`
 }
 
 interface RuneCardCompactProps {
@@ -128,23 +144,33 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
         {/* ── Separator ── */}
         <Div className="border-t border-border" />
 
-        {/* ── Row 3: Substats in a horizontal grid ── */}
-        <Div className="grid grid-cols-2 gap-x-4 gap-y-1">
+        {/* ── Row 3: Substats with roll breakdown ── */}
+        <Div className="space-y-1">
           {rune.subStats.map((stat, i) => {
             const subAnalysis = analysis?.substats.find(s => s.type === stat.type)
+            const breakdown = subAnalysis?.rollBreakdown
             return (
-              <Div key={i} className="flex items-center justify-between">
-                <P className="text-xs text-muted-foreground">{formatStatLabel(stat.type)}</P>
-                <Div className="flex items-center gap-1">
-                  <P className={`text-xs font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
+              <Div key={i} className="flex items-center justify-between gap-2">
+                <Div className="flex items-center gap-1 min-w-0">
+                  <P className="text-xs text-muted-foreground shrink-0">{formatStatLabel(stat.type)}</P>
+                  <P className={`text-xs font-semibold shrink-0 ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
                     {formatStatValue(stat.type, stat.value)}
                   </P>
-                  {subAnalysis && subAnalysis.rolls > 0 && (
-                    <P className={`text-[9px] leading-none ${getRollQualityColor(subAnalysis.efficiency)}`}>
-                      {getRollDots(subAnalysis.rolls)}
-                    </P>
+                  {subAnalysis?.isGemTarget && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-yellow-500/40 bg-yellow-500/10 text-yellow-500 shrink-0">
+                      {tRune('gemable')}
+                    </Badge>
                   )}
                 </Div>
+                {breakdown && breakdown.length > 0 && (
+                  <Div className="flex items-center gap-0.5 shrink-0">
+                    {breakdown.map((roll, j) => (
+                      <Badge key={j} variant="outline" className={`text-[9px] px-1 py-0 leading-tight border ${ROLL_TIER_BG[roll.tier]}`}>
+                        {formatRollValue(stat.type, roll.value)}
+                      </Badge>
+                    ))}
+                  </Div>
+                )}
               </Div>
             )
           })}

@@ -349,6 +349,11 @@ export const LEVEL_STRICTNESS: Record<number, number> = {
   0: 15, 3: 10, 6: 7, 9: 3, 12: 0, 15: 0,
 }
 
+export interface RollBreakdown {
+  value: number
+  tier: RuneQuality
+}
+
 export interface SubstatAnalysis {
   type: StatType
   value: number
@@ -362,6 +367,10 @@ export interface SubstatAnalysis {
   grindedValue?: number
   /** Grind amount added (legend max) */
   grindAmount?: number
+  /** Per-roll breakdown with quality tier for each roll */
+  rollBreakdown?: RollBreakdown[]
+  /** Whether this substat is the worst for the best archetype (gem target) */
+  isGemTarget?: boolean
 }
 
 export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'

@@ -2,7 +2,7 @@
 
 import { Badge, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { MonsterSuggestions } from './monster-suggestions'
 
@@ -100,6 +100,22 @@ const ADVICE_GAMING: Record<ProgressiveAction, { bg: string; text: string; glow:
   },
 }
 
+const ROLL_TIER_BG: Record<RuneQuality, string> = {
+  legend: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/30',
+  hero: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/30',
+  rare: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/30',
+  magic: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/30',
+  normal: 'bg-muted text-muted-foreground border-border',
+}
+
+function isPercentStat(type: StatType): boolean {
+  return ['hp%', 'atk%', 'def%', 'cr', 'cd', 'res', 'acc'].includes(type)
+}
+
+function formatRollValue(type: StatType, value: number): string {
+  return isPercentStat(type) ? `${value}%` : `${value}`
+}
+
 function getSynergyBadgeClass(matchCount: number): string {
   if (matchCount >= 4) return 'bg-yellow-500/15 border-yellow-500/40 text-yellow-500'
   if (matchCount >= 3) return 'bg-green-500/15 border-green-500/40 text-green-500'
@@ -195,12 +211,18 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
           {rune.subStats.map((stat, i) => {
             const subAnalysis = analysis?.substats.find(s => s.type === stat.type)
             const efficiency = subAnalysis?.efficiency ?? 0
+            const breakdown = subAnalysis?.rollBreakdown
             return (
               <Div key={i} className="space-y-0.5">
                 <Div className="flex items-center justify-between text-sm">
                   <Div className="flex items-center gap-1.5">
                     <P className="text-xs">{STAT_ICONS[stat.type] ?? ''}</P>
                     <P className="font-medium text-muted-foreground text-xs">{formatStatLabel(stat.type)}</P>
+                    {subAnalysis?.isGemTarget && (
+                      <Badge variant="outline" className="text-[8px] px-1 py-0 border-yellow-500/40 bg-yellow-500/10 text-yellow-500">
+                        {tRune('gemable')}
+                      </Badge>
+                    )}
                   </Div>
                   <Div className="flex items-center gap-2">
                     <P className={`font-bold text-sm ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
@@ -213,6 +235,16 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                     )}
                   </Div>
                 </Div>
+                {/* Roll breakdown badges */}
+                {breakdown && breakdown.length > 0 && (
+                  <Div className="flex items-center gap-1 pl-5">
+                    {breakdown.map((roll, j) => (
+                      <Badge key={j} variant="outline" className={`text-[9px] px-1 py-0 border ${ROLL_TIER_BG[roll.tier]}`}>
+                        {formatRollValue(stat.type, roll.value)}
+                      </Badge>
+                    ))}
+                  </Div>
+                )}
                 {/* HP-style bar */}
                 <Div className="h-2 rounded-full bg-muted/50 overflow-hidden border border-border/50">
                   <Div

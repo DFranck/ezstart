@@ -20,6 +20,7 @@ export type {
   ProgressiveAction,
   ProgressiveAdvice,
   Recommendation,
+  RollBreakdown,
   RuneAnalysis,
   RuneEfficiencyResult,
   SubstatAnalysis,

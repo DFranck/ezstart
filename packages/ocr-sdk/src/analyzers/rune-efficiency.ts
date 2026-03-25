@@ -47,6 +47,11 @@ const LEVEL_STRICTNESS: Record<number, number> = {
 /** @deprecated Use EfficiencyTier instead */
 export type Recommendation = EfficiencyTier
 
+export interface RollBreakdown {
+  value: number
+  tier: RuneQuality
+}
+
 export interface SubstatAnalysis {
   type: StatType
   value: number
@@ -66,6 +71,10 @@ export interface SubstatAnalysis {
   grindedValue?: number
   /** Grind amount added (legend max) — used by UI layer */
   grindAmount?: number
+  /** Per-roll breakdown with quality tier for each roll */
+  rollBreakdown: RollBreakdown[]
+  /** Whether this substat is the worst for the best archetype (gem target) */
+  isGemTarget: boolean
 }
 
 export interface GrindPotential {
@@ -404,6 +413,31 @@ function detectQuality(rune: RuneData): RuneQuality {
 }
 
 /**
+ * Compute the per-roll breakdown for a substat.
+ * Uses average value per roll to qualify each roll's tier.
+ */
+function getRollBreakdown(statType: StatType, value: number, rollCount: number): RollBreakdown[] {
+  const range = ROLL_RANGES[statType]
+  if (!range || rollCount <= 0) return []
+
+  const avgPerRoll = value / rollCount
+  const quality = avgPerRoll / range.max // 0 to 1
+
+  let tier: RuneQuality
+  if (quality >= 0.95) tier = 'legend'
+  else if (quality >= 0.75) tier = 'hero'
+  else if (quality >= 0.50) tier = 'rare'
+  else if (quality >= 0.25) tier = 'magic'
+  else tier = 'normal'
+
+  const rolls: RollBreakdown[] = []
+  for (let i = 0; i < rollCount; i++) {
+    rolls.push({ value: Math.round(avgPerRoll * 10) / 10, tier })
+  }
+  return rolls
+}
+
+/**
  * Analyze a single substat in detail.
  */
 function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
@@ -420,6 +454,8 @@ function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
   const grindAmount = grindRange ? grindRange.max : undefined
   const roundedQuality = Math.round(avgQuality * 100) / 100
 
+  const rollBreakdown = getRollBreakdown(stat.type, stat.value, count)
+
   return {
     type: stat.type,
     value: stat.value,
@@ -435,6 +471,8 @@ function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
     valueAfterMaxGrind,
     grindedValue: valueAfterMaxGrind,
     grindAmount,
+    rollBreakdown,
+    isGemTarget: false, // Set later in analyzeRune based on archetype
   }
 }
 
@@ -882,6 +920,24 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
 
   // Calculate synergy first — we need bestArchetype for weighted efficiency
   const synergy = calculateSynergy(rune.subStats, rune.innateStat)
+
+  // Mark the worst substat for the best archetype as gem target
+  if (synergy.bestArchetype && substats.length > 0) {
+    const weights = STAT_PRIORITY_WEIGHTS[synergy.bestArchetype]
+    let worstIdx = -1
+    let worstWeight = Infinity
+    for (let i = 0; i < substats.length; i++) {
+      const sub = substats[i]!
+      const w = weights[sub.type] ?? 0
+      if (w < worstWeight) {
+        worstWeight = w
+        worstIdx = i
+      }
+    }
+    if (worstIdx >= 0 && worstWeight < 0.5) {
+      substats[worstIdx]!.isGemTarget = true
+    }
+  }
 
   // Use archetype-specific weights when a best archetype is found
   const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality, synergy.bestArchetype)
