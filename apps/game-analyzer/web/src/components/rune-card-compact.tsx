@@ -4,6 +4,7 @@ import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvi
 import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
+import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
 
 const QUALITY_COLORS: Record<RuneQuality, string> = {
@@ -215,35 +216,45 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           </Div>
         )}
 
-        {/* ── Row 5: Synergy badges (compact) ── */}
-        {analysis?.synergy && (() => {
-          const matchingArchetypes = (analysis.synergy.allArchetypes ?? [])
-            .filter(a => a.matchCount >= 3)
-            .sort((a, b) => b.matchCount - a.matchCount)
-
-          if (matchingArchetypes.length === 0) return null
-
-          return (
-            <Div className="flex flex-wrap gap-1">
-              {matchingArchetypes.map(arch => {
-                const archKey = arch.archetype as BuildArchetype
-                const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
-                return (
+        {/* ── Row 5: Archetype optimizations (compact) ── */}
+        {analysis?.archetypeOptimizations && analysis.archetypeOptimizations.length > 0 && (
+          <Div className="space-y-1">
+            {analysis.archetypeOptimizations.map(opt => {
+              const archKey = opt.archetype as BuildArchetype
+              const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
+              return (
+                <Div key={opt.archetype} className="flex items-center gap-1.5 text-xs flex-wrap">
                   <Badge
-                    key={archKey}
                     variant="outline"
-                    className={`text-[10px] px-1 py-0 cursor-default ${
-                      arch.matchCount >= 4 ? 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend' :
+                    className={`text-[10px] px-1 py-0 cursor-default shrink-0 ${
+                      opt.matchCount >= 4 ? 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend' :
                       'bg-success/15 border-success/40 text-success-foreground'
                     }`}
                   >
-                    {emoji} {tRune(`archetype.${archKey}`)} {arch.matchCount}/4
+                    {emoji} {tRune(`archetype.${archKey}`)} {opt.matchCount}/4
                   </Badge>
-                )
-              })}
-            </Div>
-          )
-        })()}
+                  {opt.isPerfect ? (
+                    <P className="text-success-foreground text-[10px]">{'\u2713'} {tRune('perfectBuild')}</P>
+                  ) : opt.gemTarget && (
+                    <Div className="flex items-center gap-1">
+                      <img src={GEM_ICONS.legend} alt="gem" className="w-3.5 h-3.5" />
+                      <P className="text-[10px] text-muted-foreground">
+                        {tRune('gemSwap', { remove: formatStatLabel(opt.gemTarget.remove), replace: formatStatLabel(opt.gemTarget.replace) })}
+                      </P>
+                    </Div>
+                  )}
+                  {opt.grindTargets.length > 0 && (
+                    <Div className="flex items-center gap-1">
+                      <img src={GRIND_ICONS.legend} alt="grind" className="w-3.5 h-3.5" />
+                      <P className="text-[10px] text-muted-foreground">{opt.grindTargets.map(s => formatStatLabel(s)).join(', ')}</P>
+                    </Div>
+                  )}
+                  <P className="text-[10px] text-muted-foreground">{tRune('postOptim', { score: String(opt.postOptimScore) })}</P>
+                </Div>
+              )
+            })}
+          </Div>
+        )}
 
         {/* ── OCR Confidence ── */}
         {confidence !== undefined && (

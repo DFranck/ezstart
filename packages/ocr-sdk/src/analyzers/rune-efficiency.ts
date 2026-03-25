@@ -107,6 +107,19 @@ export type BuildArchetype =
   | 'bomber' | 'strip-cleanse' | 'healer' | 'one-shot-nuker'
   | 'vampire-bruiser' | 'revenge-proc' | 'speed-leader' | 'raid-support' | 'def-nuker'
 
+export interface ArchetypeOptimization {
+  archetype: BuildArchetype
+  matchCount: number
+  gemTarget?: {
+    remove: StatType
+    replace: StatType
+    reason: string
+  }
+  grindTargets: StatType[]
+  postOptimScore: number
+  isPerfect: boolean
+}
+
 export interface RuneAnalysis {
   currentEfficiency: number
   /** Alias for currentEfficiency — used by the UI layer */
@@ -145,6 +158,8 @@ export interface RuneAnalysis {
   synergy: SynergyResult
   /** Progressive upgrade/sell advice based on current level and rolls */
   progressiveAdvice?: ProgressiveAdvice
+  /** Per-archetype gem/grind optimization recommendations */
+  archetypeOptimizations?: ArchetypeOptimization[]
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -967,6 +982,113 @@ export function getRollQualityTier(
   }
 }
 
+/** Grindable stat types */
+const GRINDABLE_STATS: StatType[] = ['hp', 'hp%', 'atk', 'atk%', 'def', 'def%', 'spd']
+
+/**
+ * Calculate per-archetype gem/grind optimization recommendations.
+ * For each archetype matching 3/4 or 4/4 substats, determines:
+ * - Which stat to gem (remove) and what to replace it with
+ * - Which stats to grind (grindable stats useful for this build)
+ * - Post-optimization efficiency score
+ */
+function calculateArchetypeOptimizations(
+  rune: RuneData,
+  synergy: SynergyResult,
+  quality: RuneQuality,
+): ArchetypeOptimization[] {
+  const optimizations: ArchetypeOptimization[] = []
+
+  const matchingArchetypes = synergy.allArchetypes.filter(a => a.matchCount >= 3)
+
+  for (const match of matchingArchetypes) {
+    const archetype = match.archetype
+    const weights = STAT_PRIORITY_WEIGHTS[archetype]
+    const desired = BUILD_ARCHETYPES[archetype].desiredStats
+
+    // Sort substats by weight for this archetype (ascending = worst first)
+    const sortedByWeight = [...rune.subStats].sort(
+      (a, b) => (weights[a.type] ?? 0) - (weights[b.type] ?? 0),
+    )
+
+    const worstStat = sortedByWeight[0]
+    if (!worstStat) continue
+
+    const worstWeight = weights[worstStat.type] ?? 0
+
+    let gemTarget: ArchetypeOptimization['gemTarget'] | undefined
+    let isPerfect = true
+
+    if (worstWeight < 0.5 && match.matchCount < 4) {
+      // The worst stat has low value for this archetype and not 4/4 match -> gem it
+      isPerfect = false
+
+      // Find the best missing desired stat to replace with
+      const existingTypes = new Set(rune.subStats.map(s => s.type))
+      const missingDesired = desired.filter(s => !existingTypes.has(s))
+
+      // If all desired stats are present, pick the highest-weight stat not on the rune
+      const replaceStat = missingDesired[0] ?? desired[0]
+
+      if (replaceStat) {
+        gemTarget = {
+          remove: worstStat.type,
+          replace: replaceStat,
+          reason: `Low value for ${archetype}`,
+        }
+      }
+    }
+
+    // Grind targets = grindable substats with decent weight for this archetype
+    const grindTargets = rune.subStats
+      .filter(s => GRINDABLE_STATS.includes(s.type) && (weights[s.type] ?? 0) >= 0.5)
+      .map(s => s.type)
+
+    // Calculate post-optimization efficiency score
+    // Simulate: gem the worst stat with the best legend gem value, grind all grindable
+    let simulatedSubs: RuneStat[]
+    if (gemTarget) {
+      // Replace the gemmed stat with a legend gem value for the replacement stat
+      const gemRange = ROLL_RANGES[gemTarget.replace]
+      const legendGemValue = gemRange ? gemRange.max : 0 // Use max roll as gem value approximation
+      simulatedSubs = rune.subStats.map(s =>
+        s.type === gemTarget!.remove ? { type: gemTarget!.replace, value: legendGemValue } : s,
+      )
+    } else {
+      simulatedSubs = [...rune.subStats]
+    }
+
+    // Apply legend grinds to grindable stats
+    simulatedSubs = simulatedSubs.map(s => {
+      const grindRange = LEGEND_GRIND_RANGES[s.type]
+      if (grindRange) {
+        return { ...s, value: s.value + grindRange.max }
+      }
+      return s
+    })
+
+    const postOptimScore = Math.round(
+      Math.min(barionEfficiency(simulatedSubs, quality), 100) * 100,
+    ) / 100
+
+    optimizations.push({
+      archetype,
+      matchCount: match.matchCount,
+      gemTarget,
+      grindTargets,
+      postOptimScore,
+      isPerfect,
+    })
+  }
+
+  // Sort: 4/4 first, then by postOptimScore descending
+  optimizations.sort((a, b) =>
+    b.matchCount - a.matchCount || b.postOptimScore - a.postOptimScore,
+  )
+
+  return optimizations
+}
+
 /**
  * Legacy function name — kept for backward compatibility.
  * Delegates to analyzeRune.
@@ -1106,6 +1228,9 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Roll quality tier — based on actual roll quality per substat
   const rollQuality = getRollQualityTier(substats)
 
+  // Per-archetype gem/grind optimization recommendations
+  const archetypeOptimizations = calculateArchetypeOptimizations(rune, synergy, quality)
+
   return {
     currentEfficiency: roundedCurrent,
     efficiency: roundedCurrent,
@@ -1129,5 +1254,6 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     setPieces,
     synergy,
     progressiveAdvice,
+    archetypeOptimizations: archetypeOptimizations.length > 0 ? archetypeOptimizations : undefined,
   }
 }

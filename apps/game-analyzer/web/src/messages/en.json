@@ -215,6 +215,11 @@
       "raid-support": "Raid"
     },
     "gemable": "Gem",
+    "optimization": "Optimization",
+    "perfectBuild": "Perfect",
+    "gemSwap": "{remove} \u2192 {replace}",
+    "grindLabel": "Grind",
+    "postOptim": "Post-optim: {score}%",
     "suggestedMonsters": "Suggested monsters",
     "currentRolls": "Current",
     "afterGemRolls": "After gem",

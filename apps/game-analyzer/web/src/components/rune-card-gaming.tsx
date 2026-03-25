@@ -4,6 +4,7 @@ import { Badge, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
+import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
 import { MonsterSuggestions } from './monster-suggestions'
 import { SetIconLarge } from './rune-card-utils'
 
@@ -323,43 +324,51 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
           </>
         )}
 
-        {/* ── Synergy badges ── */}
-        {analysis?.synergy && (() => {
-          const matchingArchetypes = (analysis.synergy.allArchetypes ?? [])
-            .filter(a => a.matchCount >= 3)
-            .sort((a, b) => b.matchCount - a.matchCount)
-
-          if (matchingArchetypes.length === 0 && analysis.synergy.synergyBonus < 0) {
-            return (
-              <Div className="text-center">
-                <P className="text-sm text-destructive-foreground">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
-              </Div>
-            )
-          }
-
-          if (matchingArchetypes.length === 0) return null
-
-          return (
+        {/* ── Archetype optimizations ── */}
+        {analysis?.archetypeOptimizations && analysis.archetypeOptimizations.length > 0 && (
+          <Div className="space-y-2">
+            <P className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">{tRune('optimization')}</P>
             <Div className="space-y-2">
-              <P className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">{tRune('synergy')}</P>
-              <Div className="flex flex-wrap gap-2 justify-center">
-                {matchingArchetypes.map(arch => {
-                  const archKey = arch.archetype as BuildArchetype
-                  const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
-                  return (
+              {analysis.archetypeOptimizations.map(opt => {
+                const archKey = opt.archetype as BuildArchetype
+                const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
+                return (
+                  <Div key={opt.archetype} className="flex items-center gap-2 justify-center flex-wrap">
                     <Badge
-                      key={archKey}
                       variant="outline"
-                      className={`cursor-default text-xs px-2 py-0.5 ${getSynergyBadgeClass(arch.matchCount)}`}
+                      className={`cursor-default text-xs px-2 py-0.5 ${getSynergyBadgeClass(opt.matchCount)}`}
                     >
-                      {emoji} {tRune(`archetype.${archKey}`)} {arch.matchCount}/4
+                      {emoji} {tRune(`archetype.${archKey}`)} {opt.matchCount}/4
                     </Badge>
-                  )
-                })}
-              </Div>
+                    {opt.isPerfect ? (
+                      <P className="text-success-foreground text-xs">{'\u2713'} {tRune('perfectBuild')}</P>
+                    ) : opt.gemTarget && (
+                      <Div className="flex items-center gap-1">
+                        <img src={GEM_ICONS.legend} alt="gem" className="w-4 h-4" />
+                        <P className="text-xs text-muted-foreground">
+                          {tRune('gemSwap', { remove: formatStatLabel(opt.gemTarget.remove), replace: formatStatLabel(opt.gemTarget.replace) })}
+                        </P>
+                      </Div>
+                    )}
+                    {opt.grindTargets.length > 0 && (
+                      <Div className="flex items-center gap-1">
+                        <img src={GRIND_ICONS.legend} alt="grind" className="w-4 h-4" />
+                        <P className="text-xs text-muted-foreground">{opt.grindTargets.map(s => formatStatLabel(s)).join(', ')}</P>
+                      </Div>
+                    )}
+                    <P className="text-[10px] text-muted-foreground">{tRune('postOptim', { score: String(opt.postOptimScore) })}</P>
+                  </Div>
+                )
+              })}
             </Div>
-          )
-        })()}
+          </Div>
+        )}
+        {/* ── No synergy warning ── */}
+        {analysis?.synergy && !analysis.archetypeOptimizations?.length && analysis.synergy.synergyBonus < 0 && (
+          <Div className="text-center">
+            <P className="text-sm text-destructive-foreground">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
+          </Div>
+        )}
 
         {/* ── Monster suggestions ── */}
         {analysis?.synergy && (() => {

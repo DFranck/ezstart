@@ -373,6 +373,25 @@ export interface SubstatAnalysis {
   isGemTarget?: boolean
 }
 
+export interface ArchetypeOptimization {
+  /** Archetype key (e.g. 'speed-dps', 'bruiser') */
+  archetype: string
+  /** Number of substats matching the archetype's desired stats (3 or 4) */
+  matchCount: number
+  /** Gem recommendation: which stat to remove and replace */
+  gemTarget?: {
+    remove: StatType
+    replace: StatType
+    reason: string
+  }
+  /** Stats worth grinding for this archetype */
+  grindTargets: StatType[]
+  /** Estimated efficiency after optimal gem + grind */
+  postOptimScore: number
+  /** True if no gem is needed (all substats are desired) */
+  isPerfect: boolean
+}
+
 export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
 
 export interface ProgressiveAdvice {
@@ -426,4 +445,6 @@ export interface RuneAnalysis {
   }
   /** Progressive upgrade/sell advice based on current level and rolls */
   progressiveAdvice?: ProgressiveAdvice
+  /** Per-archetype gem/grind optimization recommendations */
+  archetypeOptimizations?: ArchetypeOptimization[]
 }
