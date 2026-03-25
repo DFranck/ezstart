@@ -197,22 +197,19 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                       <P className="font-medium text-muted-foreground">
                         {formatStatLabel(stat.type)}
                       </P>
-                      {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (
-                        <>
-                          {analysis.archetypeOptimizations
-                            .filter(opt => opt.gemTarget?.remove === stat.type)
-                            .map(opt => {
-                              const archKey = opt.archetype as BuildArchetype
-                              const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
-                              return (
-                                <Badge key={opt.archetype} variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
-                                  <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
-                                  {'\u2192'}{formatStatLabel(opt.gemTarget!.replace)} ({emoji})
-                                </Badge>
-                              )
-                            })}
-                        </>
-                      )}
+                      {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (() => {
+                        const bestGem = analysis.archetypeOptimizations
+                          .filter(opt => opt.gemTarget?.remove === stat.type)
+                          .sort((a, b) => (b.postOptimScore || 0) - (a.postOptimScore || 0))[0]
+                        if (!bestGem) return null
+                        const emoji = BUILD_ARCHETYPES[bestGem.archetype as BuildArchetype]?.emoji ?? ''
+                        return (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
+                            <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
+                            {'\u2192'}{formatStatLabel(bestGem.gemTarget!.replace)} ({emoji} {bestGem.postOptimScore?.toFixed(0)}%)
+                          </Badge>
+                        )
+                      })()}
                     </Div>
                     <Div className="flex items-center gap-2">
                       <P className={`font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>{formatStatValue(stat.type, stat.value)}</P>
