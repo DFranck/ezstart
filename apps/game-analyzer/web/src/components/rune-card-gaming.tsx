@@ -5,16 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { MonsterSuggestions } from './monster-suggestions'
-
-// ── Set emojis ──
-const SET_EMOJIS: Record<string, string> = {
-  violent: '\u2694\uFE0F', swift: '\uD83D\uDCA8', rage: '\uD83D\uDD25', fatal: '\uD83D\uDDE1\uFE0F',
-  despair: '\uD83D\uDE35', blade: '\uD83D\uDD2A', focus: '\uD83C\uDFAF', guard: '\uD83D\uDEE1\uFE0F',
-  energy: '\uD83D\uDC9A', endure: '\uD83E\uDDF1', shield: '\uD83D\uDD30', revenge: '\u21A9\uFE0F',
-  will: '\u2728', nemesis: '\u26A1', vampire: '\uD83E\uDDDB', destroy: '\uD83D\uDCA5',
-  fight: '\u2694\uFE0F', determination: '\uD83D\uDCAA', enhance: '\uD83D\uDC9B', accuracy: '\uD83C\uDFAF',
-  tolerance: '\uD83D\uDE4F', cruel: '\uD83D\uDE08',
-}
+import { SetIconLarge } from './rune-card-utils'
 
 // ── Quality border glow colors ──
 const QUALITY_BORDER: Record<RuneQuality, string> = {
@@ -133,7 +124,6 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
   const tRune = useTranslations('rune')
 
   const quality = rune.quality ?? 'normal'
-  const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
   const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
   const advice = analysis?.progressiveAdvice
@@ -147,7 +137,7 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
       <Div className="relative p-4 space-y-3">
         {/* ── Header: Set name + Stars ── */}
         <Div className="text-center space-y-1">
-          <P className="text-2xl">{setEmoji}</P>
+          <SetIconLarge set={rune.set} className="w-8 h-8" />
           <P className={`text-lg font-black uppercase tracking-wider ${QUALITY_GLOW[quality]}`}>
             {rune.set}
           </P>
@@ -179,10 +169,24 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
             <P className={`text-2xl font-black tracking-widest ${ADVICE_GAMING[advice.action].text}`}>
               {advice.action.toUpperCase()}
             </P>
-            {advice.sellProbability > 0 && (
-              <P className="text-xs text-muted-foreground mt-0.5">{advice.sellProbability}% sell risk</P>
+            {advice.sellProbability > 0 && advice.action !== 'sell' && (
+              <P className={`text-sm mt-1 ${ADVICE_GAMING[advice.action].text}`}>
+                {tRune('keepChance', { percent: String(100 - advice.sellProbability) })}
+              </P>
             )}
-            <P className={`text-xs mt-1 opacity-80 ${ADVICE_GAMING[advice.action].text}`}>{advice.reason}</P>
+            {advice.sellProbability > 0 && (
+              <P className="text-xs text-muted-foreground mt-0.5">
+                {tRune('sellRisk', { percent: String(advice.sellProbability) })}
+              </P>
+            )}
+            <P className={`text-xs mt-1 opacity-80 ${ADVICE_GAMING[advice.action].text}`}>
+              {tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}
+            </P>
+            {advice.nextCheckAt > 0 && (
+              <P className="text-xs text-muted-foreground mt-0.5">
+                {tRune('nextCheck', { level: String(advice.nextCheckAt) })}
+              </P>
+            )}
           </Div>
         )}
 
@@ -275,29 +279,27 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
 
             <Div className="text-center space-y-1">
               <P className="text-xs text-muted-foreground uppercase tracking-wider">{tRune('rollQualityTitle')}</P>
-              <P className={`text-3xl font-black ${ROLL_QUALITY_COLORS[rollQualityTier]} drop-shadow-[0_0_10px_currentColor]`}>
-                {analysis.rollQualityPercent}%
-              </P>
-              <Div className="flex items-center justify-center gap-2">
+              <Div className="space-y-1">
+                <P className="text-[10px] text-muted-foreground uppercase">{tRune('currentRolls')}</P>
+                <P className={`text-3xl font-black ${ROLL_QUALITY_COLORS[rollQualityTier]} drop-shadow-[0_0_10px_currentColor]`}>
+                  {analysis.rollQualityPercent}%
+                </P>
                 <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityTier]}`}>
                   {tRune(`rollQuality.${rollQualityTier}`)}
                 </P>
-                {rollQualityPostGem !== rollQualityTier && (
-                  <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>
-                    {'\u2192'} {tRune(`rollQuality.${rollQualityPostGem}`)}
-                  </P>
-                )}
               </Div>
+              {rollQualityPostGem !== rollQualityTier && (
+                <Div className="space-y-0.5 mt-1">
+                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('afterGemRolls')}</P>
+                  <P className={`text-lg font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>
+                    {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
+                  </P>
+                </Div>
+              )}
             </Div>
 
             {/* Efficiency grid */}
             <Div className="grid grid-cols-2 gap-2">
-              {rollQualityPostGem !== rollQualityTier && (
-                <Div className="bg-muted/20 rounded-lg p-2 text-center">
-                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('afterGem')}</P>
-                  <P className={`text-sm font-bold ${ROLL_QUALITY_COLORS[rollQualityPostGem]}`}>{analysis.rollQualityPostGemPercent}%</P>
-                </Div>
-              )}
               {analysis.potentialEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center">
                   <P className="text-[10px] text-muted-foreground uppercase">{tRune('potential12')}</P>

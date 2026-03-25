@@ -215,7 +215,22 @@
       "raid-support": "Raid"
     },
     "gemable": "Gem",
-    "suggestedMonsters": "Suggested monsters"
+    "suggestedMonsters": "Suggested monsters",
+    "currentRolls": "Current",
+    "afterGemRolls": "After gem",
+    "keepChance": "{percent}% chance to keep this rune",
+    "sellRisk": "{percent}% risk of selling in the end",
+    "nextCheck": "Next check: +{level}",
+    "adviceReason": {
+      "deadStatCombo": "ACC + RES together — no monster uses both",
+      "belowThresholdFinal": "Efficiency {current}% below {profile} threshold ({threshold}%)",
+      "grindToMaximize": "Good rune at +12 — grind to maximize ({current}%)",
+      "solidRune": "Solid rune at +12 — {current}% weighted efficiency",
+      "onTrackUpgrade": "On track at {current}% — potential {potential}% worth continuing",
+      "belowButPromising": "Below +{level} threshold at {current}% but {potential}% potential — worth continuing",
+      "potentialTooLow": "Potential {potential}% too low for {profile} (need {threshold}%)",
+      "upgradeAndReeval": "On track at {current}% — upgrade to +{nextLevel} and re-evaluate ({threshold}% needed)"
+    }
   },
   "scanDetail": {
     "title": "Scan Details",

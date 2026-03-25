@@ -96,6 +96,8 @@ export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
 export interface ProgressiveAdvice {
   action: ProgressiveAction
   reason: string
+  reasonKey: string
+  reasonParams?: Record<string, string>
   nextCheckAt: number
   sellProbability: number
 }
@@ -791,6 +793,7 @@ function calculateProgressiveAdvice(
     return {
       action: 'sell',
       reason: 'Dead stat combo detected (ACC + RES) — no monster needs both',
+      reasonKey: 'deadStatCombo',
       nextCheckAt: 0,
       sellProbability: 95,
     }
@@ -810,6 +813,8 @@ function calculateProgressiveAdvice(
       return {
         action: 'sell',
         reason: `Weighted efficiency ${Math.round(currentWeightedEff)}% below ${profile} threshold ${threshold}%`,
+        reasonKey: 'belowThresholdFinal',
+        reasonParams: { current: String(Math.round(currentWeightedEff)), profile, threshold: String(threshold) },
         nextCheckAt: 0,
         sellProbability: 90,
       }
@@ -821,6 +826,8 @@ function calculateProgressiveAdvice(
       return {
         action: 'grind',
         reason: `Good rune at +12 — grind to maximize value (${Math.round(currentWeightedEff)}%)`,
+        reasonKey: 'grindToMaximize',
+        reasonParams: { current: String(Math.round(currentWeightedEff)) },
         nextCheckAt: 0,
         sellProbability: 0,
       }
@@ -829,6 +836,8 @@ function calculateProgressiveAdvice(
     return {
       action: 'keep',
       reason: `Solid rune at +12 — ${Math.round(currentWeightedEff)}% weighted efficiency`,
+      reasonKey: 'solidRune',
+      reasonParams: { current: String(Math.round(currentWeightedEff)) },
       nextCheckAt: 0,
       sellProbability: 0,
     }
@@ -842,6 +851,8 @@ function calculateProgressiveAdvice(
       return {
         action: 'upgrade',
         reason: `On track — upgrade to +${nextLevel} (${Math.round(currentWeightedEff)}% current, ${Math.round(adjustedPotential)}% potential)`,
+        reasonKey: 'onTrackUpgrade',
+        reasonParams: { nextLevel: String(nextLevel), current: String(Math.round(currentWeightedEff)), potential: String(Math.round(adjustedPotential)) },
         nextCheckAt: nextLevel,
         sellProbability: 15,
       }
@@ -851,6 +862,8 @@ function calculateProgressiveAdvice(
     return {
       action: 'upgrade',
       reason: `Current ${Math.round(currentWeightedEff)}% below +${levelKey} threshold but potential ${Math.round(adjustedPotential)}% is promising — worth upgrading`,
+      reasonKey: 'belowButPromising',
+      reasonParams: { current: String(Math.round(currentWeightedEff)), level: String(levelKey), potential: String(Math.round(adjustedPotential)) },
       nextCheckAt: nextLevel,
       sellProbability: 35,
     }
@@ -861,6 +874,8 @@ function calculateProgressiveAdvice(
     return {
       action: 'sell',
       reason: `Below threshold and potential ${Math.round(adjustedPotential)}% too low for ${profile} (need ${finalThreshold}%)`,
+      reasonKey: 'potentialTooLow',
+      reasonParams: { potential: String(Math.round(adjustedPotential)), profile, threshold: String(finalThreshold) },
       nextCheckAt: 0,
       sellProbability: 85,
     }
@@ -881,6 +896,8 @@ function calculateProgressiveAdvice(
   return {
     action: 'upgrade',
     reason: `On track — upgrade to +${nextLevel} and re-evaluate (${Math.round(currentWeightedEff)}% vs ${nextThreshold}% needed)`,
+    reasonKey: 'upgradeAndReeval',
+    reasonParams: { nextLevel: String(nextLevel), current: String(Math.round(currentWeightedEff)), threshold: String(nextThreshold) },
     nextCheckAt: nextLevel,
     sellProbability,
   }

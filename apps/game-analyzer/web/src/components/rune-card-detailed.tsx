@@ -5,16 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { MonsterSuggestions } from './monster-suggestions'
-
-// ── Set emojis ──
-const SET_EMOJIS: Record<string, string> = {
-  violent: '\u2694\uFE0F', swift: '\uD83D\uDCA8', rage: '\uD83D\uDD25', fatal: '\uD83D\uDDE1\uFE0F',
-  despair: '\uD83D\uDE35', blade: '\uD83D\uDD2A', focus: '\uD83C\uDFAF', guard: '\uD83D\uDEE1\uFE0F',
-  energy: '\uD83D\uDC9A', endure: '\uD83E\uDDF1', shield: '\uD83D\uDD30', revenge: '\u21A9\uFE0F',
-  will: '\u2728', nemesis: '\u26A1', vampire: '\uD83E\uDDDB', destroy: '\uD83D\uDCA5',
-  fight: '\u2694\uFE0F', determination: '\uD83D\uDCAA', enhance: '\uD83D\uDC9B', accuracy: '\uD83C\uDFAF',
-  tolerance: '\uD83D\uDE4F', cruel: '\uD83D\uDE08',
-}
+import { SetIcon } from './rune-card-utils'
 
 // ── Quality badge styles ──
 const QUALITY_BG: Record<RuneQuality, string> = {
@@ -126,7 +117,6 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
 
   const quality = rune.quality ?? 'normal'
   const gradeStars = Array.from({ length: rune.grade }, () => '\u2605').join('')
-  const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
   const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
 
@@ -136,7 +126,7 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
       <CardHeader className="pb-2 px-3 pt-3">
         <Div className="flex items-center justify-between">
           <Div className="flex items-center gap-2">
-            <P className="text-base">{setEmoji}</P>
+            <SetIcon set={rune.set} className="w-6 h-6" />
             <H3 className="text-base font-bold capitalize">{rune.set}</H3>
             <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
           </Div>
@@ -158,15 +148,22 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
             <Div className={`p-3 rounded-lg border-2 ${ADVICE_COLORS[advice.action]}`}>
               <Div className="flex items-center justify-between mb-1">
                 <P className="font-bold text-lg">{ADVICE_LABELS[advice.action]}</P>
-                {advice.sellProbability > 0 && (
-                  <Badge variant="outline" className="text-[10px]">
-                    {advice.sellProbability}% sell risk
-                  </Badge>
-                )}
               </Div>
-              <P className="text-sm opacity-90">{advice.reason}</P>
+              <P className="text-sm opacity-90">
+                {tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}
+              </P>
+              {advice.sellProbability > 0 && advice.action !== 'sell' && (
+                <P className="text-sm mt-1">
+                  {tRune('keepChance', { percent: String(100 - advice.sellProbability) })}
+                </P>
+              )}
+              {advice.sellProbability > 0 && (
+                <P className="text-xs text-muted-foreground mt-0.5">
+                  {tRune('sellRisk', { percent: String(advice.sellProbability) })}
+                </P>
+              )}
               {advice.nextCheckAt > 0 && (
-                <P className="text-xs opacity-70 mt-1">Next check: +{advice.nextCheckAt}</P>
+                <P className="text-xs opacity-70 mt-1">{tRune('nextCheck', { level: String(advice.nextCheckAt) })}</P>
               )}
             </Div>
           )
@@ -262,37 +259,32 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
           <>
             <Div className="border-t border-border" />
             <Div className="space-y-2">
-              <Div className="flex items-center justify-between">
-                <P className="text-sm font-medium">{tRune('rollQualityTitle')}</P>
-                <Div className="flex items-center gap-2">
-                  <P className={`text-lg font-bold ${getRollQualityTierTextColor(rollQualityTier)}`}>
-                    {tRune(`rollQuality.${rollQualityTier}`)}
-                  </P>
-                  <P className={`text-sm ${getRollQualityTierTextColor(rollQualityTier)}`}>
-                    ({analysis.rollQualityPercent}%)
-                  </P>
-                  {rollQualityPostGem !== rollQualityTier && (
-                    <P className={`text-sm ${getRollQualityTierTextColor(rollQualityPostGem)}`}>
-                      {'\u2192'} {tRune(`rollQuality.${rollQualityPostGem}`)}
-                    </P>
-                  )}
+              <P className="text-sm font-medium">{tRune('rollQualityTitle')}</P>
+              <Div className="space-y-1.5">
+                <Div className="flex items-center justify-between text-sm">
+                  <P className="text-muted-foreground">{tRune('currentRolls')}</P>
+                  <Div className="flex items-center gap-2">
+                    <Badge className={`border text-xs ${ROLL_TIER_BG[rollQualityTier]}`}>
+                      {tRune(`rollQuality.${rollQualityTier}`)} ({analysis.rollQualityPercent}%)
+                    </Badge>
+                  </Div>
                 </Div>
+                <Progress
+                  value={analysis.rollQualityPercent}
+                  className={`h-2.5 ${getRollQualityTierBarColor(rollQualityTier)}`}
+                />
+                {rollQualityPostGem !== rollQualityTier && (
+                  <Div className="flex items-center justify-between text-sm">
+                    <P className="text-muted-foreground">{tRune('afterGemRolls')}</P>
+                    <Badge className={`border text-xs ${ROLL_TIER_BG[rollQualityPostGem]}`}>
+                      {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
+                    </Badge>
+                  </Div>
+                )}
               </Div>
-              <Progress
-                value={analysis.rollQualityPercent}
-                className={`h-2.5 ${getRollQualityTierBarColor(rollQualityTier)}`}
-              />
 
               {/* Efficiency details grid */}
               <Div className="grid grid-cols-2 gap-2 text-sm">
-                {rollQualityPostGem !== rollQualityTier && (
-                  <Div className="flex items-center justify-between">
-                    <P className="text-muted-foreground">{tRune('afterGem')}</P>
-                    <P className={`font-medium ${getRollQualityTierTextColor(rollQualityPostGem)}`}>
-                      {tRune(`rollQuality.${rollQualityPostGem}`)} ({analysis.rollQualityPostGemPercent}%)
-                    </P>
-                  </Div>
-                )}
                 {analysis.potentialEfficiency !== undefined && (
                   <Div className="flex items-center justify-between">
                     <P className="text-muted-foreground">{tRune('potential12')}</P>

@@ -215,7 +215,22 @@
       "raid-support": "Raid"
     },
     "gemable": "Gem",
-    "suggestedMonsters": "Monstres recommandes"
+    "suggestedMonsters": "Monstres recommandes",
+    "currentRolls": "Actuel",
+    "afterGemRolls": "Apres gem",
+    "keepChance": "{percent}% de chance de garder cette rune",
+    "sellRisk": "{percent}% de risque de sell au final",
+    "nextCheck": "Prochain check : +{level}",
+    "adviceReason": {
+      "deadStatCombo": "ACC + RES ensemble — aucun monstre n'utilise les deux",
+      "belowThresholdFinal": "Efficiency {current}% sous le seuil {profile} ({threshold}%)",
+      "grindToMaximize": "Bonne rune a +12 — grind pour maximiser ({current}%)",
+      "solidRune": "Rune solide a +12 — {current}% d'efficiency ponderee",
+      "onTrackUpgrade": "En bonne voie a {current}% — potentiel de {potential}%, ca vaut le coup de continuer",
+      "belowButPromising": "Efficiency actuelle sous le seuil a +{level} ({current}%) mais potentiel de {potential}% — ca vaut le coup",
+      "potentialTooLow": "Potentiel de {potential}% trop bas pour {profile} (besoin de {threshold}%)",
+      "upgradeAndReeval": "En bonne voie a {current}% — upgrader a +{nextLevel} et re-evaluer ({threshold}% requis)"
+    }
   },
   "scanDetail": {
     "title": "Details du Scan",

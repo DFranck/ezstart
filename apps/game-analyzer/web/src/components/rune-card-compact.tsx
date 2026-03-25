@@ -4,16 +4,7 @@ import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvi
 import { useTranslations } from 'next-intl'
 import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
-
-// ── Shared constants ──
-const SET_EMOJIS: Record<string, string> = {
-  violent: '\u2694\uFE0F', swift: '\uD83D\uDCA8', rage: '\uD83D\uDD25', fatal: '\uD83D\uDDE1\uFE0F',
-  despair: '\uD83D\uDE35', blade: '\uD83D\uDD2A', focus: '\uD83C\uDFAF', guard: '\uD83D\uDEE1\uFE0F',
-  energy: '\uD83D\uDC9A', endure: '\uD83E\uDDF1', shield: '\uD83D\uDD30', revenge: '\u21A9\uFE0F',
-  will: '\u2728', nemesis: '\u26A1', vampire: '\uD83E\uDDDB', destroy: '\uD83D\uDCA5',
-  fight: '\u2694\uFE0F', determination: '\uD83D\uDCAA', enhance: '\uD83D\uDC9B', accuracy: '\uD83C\uDFAF',
-  tolerance: '\uD83D\uDE4F', cruel: '\uD83D\uDE08',
-}
+import { SetIcon } from './rune-card-utils'
 
 const QUALITY_COLORS: Record<RuneQuality, string> = {
   legend: 'text-ga-roll-legend',
@@ -90,7 +81,6 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
   const tRune = useTranslations('rune')
 
   const quality = rune.quality ?? 'normal'
-  const setEmoji = SET_EMOJIS[rune.set] ?? ''
   const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
   const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
   const advice = analysis?.progressiveAdvice
@@ -101,7 +91,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
         {/* ── Row 1: Set, Slot, Level, Quality | Roll Quality + Advice ── */}
         <Div className="flex items-center justify-between">
           <Div className="flex items-center gap-1.5">
-            <P className="text-sm">{setEmoji}</P>
+            <SetIcon set={rune.set} className="w-5 h-5" />
             <P className="text-sm font-bold capitalize">{rune.set}</P>
             <P className="text-xs text-muted-foreground">({rune.slot})</P>
             <Badge variant="secondary" className="text-[10px] px-1 py-0">+{rune.level}</Badge>
@@ -117,20 +107,38 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           </Div>
           <Div className="flex items-center gap-2">
             {analysis && (
-              <P className={`text-xs font-semibold ${QUALITY_COLORS[rollQualityTier]}`}>
-                {tRune(`rollQuality.${rollQualityTier}`)} ({analysis.rollQualityPercent}%)
+              <P className="text-xs font-semibold">
+                <span className="text-muted-foreground">{tRune('currentRolls')}: </span>
+                <span className={QUALITY_COLORS[rollQualityTier]}>
+                  {tRune(`rollQuality.${rollQualityTier}`)} {analysis.rollQualityPercent}%
+                </span>
                 {rollQualityPostGem !== rollQualityTier && (
-                  <span className={QUALITY_COLORS[rollQualityPostGem]}>
-                    {' \u2192 '}{tRune(`rollQuality.${rollQualityPostGem}`)}
-                  </span>
+                  <>
+                    <span className="text-muted-foreground"> | {tRune('afterGemRolls')}: </span>
+                    <span className={QUALITY_COLORS[rollQualityPostGem]}>
+                      {tRune(`rollQuality.${rollQualityPostGem}`)} {analysis.rollQualityPostGemPercent}%
+                    </span>
+                  </>
                 )}
               </P>
             )}
             {advice && (
-              <Badge className={`border text-[10px] px-1.5 py-0 font-bold ${ADVICE_BG[advice.action]} ${ADVICE_COLORS[advice.action]}`}>
-                {advice.action.toUpperCase()}
-                {advice.sellProbability > 0 && ` ${advice.sellProbability}%`}
-              </Badge>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className={`border text-[10px] px-1.5 py-0 font-bold ${ADVICE_BG[advice.action]} ${ADVICE_COLORS[advice.action]}`}>
+                      {advice.action.toUpperCase()}
+                      {advice.sellProbability > 0 && ` (${100 - advice.sellProbability}%)`}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <P className="text-xs font-medium">{tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {})}</P>
+                    {advice.sellProbability > 0 && (
+                      <P className="text-xs text-muted-foreground">{tRune('sellRisk', { percent: String(advice.sellProbability) })}</P>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </Div>
         </Div>

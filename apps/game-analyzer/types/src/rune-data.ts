@@ -378,6 +378,8 @@ export type ProgressiveAction = 'sell' | 'upgrade' | 'keep' | 'grind'
 export interface ProgressiveAdvice {
   action: ProgressiveAction
   reason: string
+  reasonKey: string
+  reasonParams?: Record<string, string>
   nextCheckAt: number
   sellProbability: number
 }
