@@ -11,7 +11,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Skeleton,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -538,15 +537,33 @@ export default function GameScanPage() {
 
         {/* Right: Results */}
         <Div className="space-y-4">
-          {isPending && (
-            <Div className="space-y-3">
-              <Skeleton className="h-6 w-1/3" />
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-10 w-full" />
+          {/* Template selector — always visible for SW */}
+          {game === 'summoners-war' && (
+            <Div className="flex gap-1.5">
+              {(['compact', 'detailed', 'gaming'] as const).map(tmpl => (
+                <Button
+                  key={tmpl}
+                  variant={runeTemplate === tmpl ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs capitalize"
+                  onClick={() => handleTemplateChange(tmpl)}
+                >
+                  {tmpl}
+                </Button>
+              ))}
+            </Div>
+          )}
+
+          {/* Rune card — skeleton when no result, real content when available */}
+          {game === 'summoners-war' && (
+            <Div className={resultData && hasStructuredData && resultData.success && 'set' in resultData.data ? 'animate-in fade-in-0 duration-300' : ''}>
+              <RuneCardWithTemplate
+                rune={hasStructuredData && resultData?.success && 'set' in resultData.data ? resultData.data : undefined}
+                analysis={resultData?.analysis}
+                confidence={resultData?.confidence}
+                template={runeTemplate}
+                isLoading={isPending}
+              />
             </Div>
           )}
 
@@ -560,24 +577,6 @@ export default function GameScanPage() {
                 </Div>
               )}
 
-              {hasStructuredData && resultData.success && game === 'summoners-war' && 'set' in resultData.data && (
-                <>
-                  <Div className="flex gap-1.5 mb-3">
-                    {(['compact', 'detailed', 'gaming'] as const).map(tmpl => (
-                      <Button
-                        key={tmpl}
-                        variant={runeTemplate === tmpl ? 'default' : 'outline'}
-                        size="sm"
-                        className="text-xs capitalize"
-                        onClick={() => handleTemplateChange(tmpl)}
-                      >
-                        {tmpl}
-                      </Button>
-                    ))}
-                  </Div>
-                  <RuneCardWithTemplate rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} template={runeTemplate} />
-                </>
-              )}
               {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                 <GearCard gear={resultData.data} confidence={resultData.confidence} />
               )}
@@ -601,7 +600,7 @@ export default function GameScanPage() {
             </Div>
           )}
 
-          {!resultData && !isPending && isCapturing && (
+          {!resultData && !isPending && isCapturing && game !== 'summoners-war' && (
             <Div className="text-center py-8">
               <P className="text-muted-foreground text-sm">{t('scan.capture.waitingForChange')}</P>
             </Div>
