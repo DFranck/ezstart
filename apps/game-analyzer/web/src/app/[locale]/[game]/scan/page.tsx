@@ -165,19 +165,24 @@ export default function GameScanPage() {
   const [flashDuration, setFlashDuration] = useState(1000)
 
   const flashConfig: Record<string, { color: string; intensity: number; duration: number }> = useMemo(() => ({
+    // Advice actions (priority)
+    sell:    { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
+    upgrade: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+    keep:    { color: 'rgba(34, 197, 94, ALPHA)', intensity: 0.5, duration: 1200 },
+    grind:   { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+    // Tier fallback (when no advice)
     godlike: { color: 'rgba(255, 180, 0, ALPHA)', intensity: 0.6, duration: 1500 },
     great:   { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.5, duration: 1200 },
     good:    { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
-    keep:    { color: 'rgba(200, 200, 200, ALPHA)', intensity: 0.2, duration: 800 },
-    sell:    { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
   }), [])
 
   useEffect(() => {
     const result = cachedResult || scanResult
     if (!result?.analysis) return
 
-    const tier = result.analysis.adjustedTier || result.analysis.tier
-    const config = flashConfig[tier] || flashConfig.sell
+    const advice = result.analysis?.progressiveAdvice?.action
+    const flashKey = advice || result.analysis.adjustedTier || result.analysis.tier
+    const config = flashConfig[flashKey] || flashConfig.sell
     const color = config.color.replace('ALPHA', String(config.intensity))
 
     setFlashColor(color)
