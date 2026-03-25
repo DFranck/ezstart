@@ -19,7 +19,8 @@ import { useParams } from 'next/navigation'
 import type { GameType, ScanResult } from '@game-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
-import { RuneCard } from '@/components/rune-card'
+import { RuneCardWithTemplate } from '@/components/rune-card-templates'
+import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
 import { CapturePreview } from '@/components/capture-preview'
 import { ScanResultRaw } from '@/components/scan-result-raw'
@@ -140,6 +141,18 @@ export default function GameScanPage() {
   const game = params.game as GameType
 
   const [profile, setProfile] = usePlayerProfile(game)
+  const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
+    if (typeof window === 'undefined') return 'compact'
+    try {
+      const saved = localStorage.getItem('game-analyzer-template')
+      if (saved === 'compact' || saved === 'detailed' || saved === 'gaming') return saved
+    } catch {}
+    return 'compact'
+  })
+  const handleTemplateChange = useCallback((t: RuneCardTemplate) => {
+    setRuneTemplate(t)
+    localStorage.setItem('game-analyzer-template', t)
+  }, [])
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
   const { mutate: scan, data: scanResult, isPending } = useScan()
 
@@ -548,7 +561,22 @@ export default function GameScanPage() {
               )}
 
               {hasStructuredData && resultData.success && game === 'summoners-war' && 'set' in resultData.data && (
-                <RuneCard rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} />
+                <>
+                  <Div className="flex gap-1.5 mb-3">
+                    {(['compact', 'detailed', 'gaming'] as const).map(tmpl => (
+                      <Button
+                        key={tmpl}
+                        variant={runeTemplate === tmpl ? 'default' : 'outline'}
+                        size="sm"
+                        className="text-xs capitalize"
+                        onClick={() => handleTemplateChange(tmpl)}
+                      >
+                        {tmpl}
+                      </Button>
+                    ))}
+                  </Div>
+                  <RuneCardWithTemplate rune={resultData.data} analysis={resultData.analysis} confidence={resultData.confidence} template={runeTemplate} />
+                </>
               )}
               {hasStructuredData && resultData.success && 'manufacturer' in resultData.data && (
                 <GearCard gear={resultData.data} confidence={resultData.confidence} />

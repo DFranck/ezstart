@@ -7,7 +7,8 @@ import Link from 'next/link'
 import { use, useState } from 'react'
 import { useParams } from 'next/navigation'
 import type { GameType } from '@game-analyzer/types'
-import { RuneCard } from '@/components/rune-card'
+import { RuneCardWithTemplate } from '@/components/rune-card-templates'
+import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
 import { StatDisplay } from '@/components/stat-display'
 import { useScans } from '@/hooks/use-scans'
@@ -24,6 +25,14 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   const t = useTranslations()
   const { data: scans } = useScans()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [runeTemplate] = useState<RuneCardTemplate>(() => {
+    if (typeof window === 'undefined') return 'compact'
+    try {
+      const saved = localStorage.getItem('game-analyzer-template')
+      if (saved === 'compact' || saved === 'detailed' || saved === 'gaming') return saved
+    } catch {}
+    return 'compact'
+  })
 
   const scan = scans?.find((s) => s.id === id)
 
@@ -85,7 +94,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
             </CardHeader>
             <CardContent>
               {scan.gameType === 'summoners-war' && 'set' in scan.result.data ? (
-                <RuneCard rune={scan.result.data} confidence={scan.result.confidence} />
+                <RuneCardWithTemplate rune={scan.result.data} confidence={scan.result.confidence} template={runeTemplate} />
               ) : 'manufacturer' in scan.result.data ? (
                 <GearCard gear={scan.result.data} confidence={scan.result.confidence} />
               ) : null}
