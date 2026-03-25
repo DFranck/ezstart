@@ -20,8 +20,10 @@ export {
   STAT_PRIORITY_WEIGHTS,
   PROGRESSIVE_SELL_THRESHOLDS,
   DEAD_STAT_COMBOS,
+  SET_STAT_TIERS,
+  TIER_WEIGHTS,
 } from './rune-data'
-export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RollBreakdown, RuneAnalysis, BuildArchetype, SynergyResult, ProgressiveAdvice, ProgressiveAction, ArchetypeOptimization } from './rune-data'
+export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RollBreakdown, RuneAnalysis, BuildArchetype, SynergyResult, ProgressiveAdvice, ProgressiveAction, ArchetypeOptimization, StatTier } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'
 export type { MonsterElement, MonsterArchetype, Monster } from './monster'
 export type {

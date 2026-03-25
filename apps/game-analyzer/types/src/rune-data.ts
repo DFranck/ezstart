@@ -491,4 +491,45 @@ export interface RuneAnalysis {
   progressiveAdvice?: ProgressiveAdvice
   /** Per-archetype gem/grind optimization recommendations */
   archetypeOptimizations?: ArchetypeOptimization[]
+  /** Set-weighted efficiency — efficiency adjusted by stat tier for this set */
+  setWeightedEfficiency?: number
+  /** Tier of each substat for this set (S/A/B/C/D) */
+  subStatTiers?: Record<string, StatTier>
+}
+
+// ============================================
+// SET STAT TIER LISTS
+// ============================================
+// Tier list de stats par set — S=1.0, A=0.8, B=0.5, C=0.2, D=0.0
+export type StatTier = 'S' | 'A' | 'B' | 'C' | 'D'
+
+export const SET_STAT_TIERS: Record<string, Record<StatType, StatTier>> = {
+  violent: { spd: 'S', cr: 'S', cd: 'A', 'atk%': 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  swift: { spd: 'S', 'atk%': 'A', cr: 'A', 'hp%': 'A', 'def%': 'A', cd: 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  rage: { cd: 'S', 'atk%': 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  fatal: { 'atk%': 'S', cd: 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  blade: { cr: 'S', cd: 'S', 'atk%': 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  despair: { spd: 'S', 'atk%': 'A', 'hp%': 'A', cd: 'B', cr: 'B', 'def%': 'B', acc: 'C', res: 'D', hp: 'C', atk: 'C', def: 'C' },
+  focus: { acc: 'S', spd: 'S', 'hp%': 'A', 'def%': 'A', res: 'A', 'atk%': 'B', cr: 'B', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
+  will: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'B', 'atk%': 'C', cd: 'C', cr: 'C', hp: 'C', atk: 'C', def: 'C' },
+  nemesis: { spd: 'S', 'hp%': 'S', 'def%': 'A', res: 'A', acc: 'B', 'atk%': 'B', cd: 'C', cr: 'C', hp: 'C', atk: 'C', def: 'C' },
+  revenge: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', 'atk%': 'A', cr: 'A', cd: 'B', acc: 'B', hp: 'B', atk: 'C', def: 'C' },
+  vampire: { 'atk%': 'S', 'hp%': 'S', cr: 'S', cd: 'A', spd: 'A', 'def%': 'A', acc: 'B', res: 'B', hp: 'C', atk: 'C', def: 'C' },
+  energy: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
+  guard: { 'def%': 'S', 'hp%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
+  endure: { res: 'S', 'hp%': 'S', 'def%': 'S', spd: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
+  shield: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
+  destroy: { spd: 'S', acc: 'S', 'hp%': 'A', 'def%': 'A', 'atk%': 'A', cr: 'B', cd: 'B', res: 'B', hp: 'C', atk: 'C', def: 'C' },
+  cruel: { 'atk%': 'S', cd: 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
+  accuracy: { acc: 'S', spd: 'S', 'hp%': 'A', 'def%': 'A', res: 'A', 'atk%': 'B', cr: 'B', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
+  tolerance: { res: 'S', 'hp%': 'S', 'def%': 'A', spd: 'A', acc: 'A', 'atk%': 'B', cr: 'C', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
+}
+
+// Tier to weight multiplier
+export const TIER_WEIGHTS: Record<StatTier, number> = {
+  S: 1.0,
+  A: 0.8,
+  B: 0.5,
+  C: 0.2,
+  D: 0.0,
 }

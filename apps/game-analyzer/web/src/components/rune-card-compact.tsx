@@ -2,7 +2,7 @@
 
 import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
@@ -34,6 +34,14 @@ const ADVICE_ICONS: Record<ProgressiveAction, string> = {
   keep: '\u2713',
   grind: '\u2699',
   sell: '\u2715',
+}
+
+const STAT_TIER_COLORS: Record<StatTier, string> = {
+  S: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/40',
+  A: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/40',
+  B: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  C: 'bg-muted/30 text-muted-foreground border-border/40',
+  D: 'bg-destructive/10 text-destructive border-destructive/30',
 }
 
 type RollQualityTier = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
@@ -174,6 +182,11 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
               <Div key={i} className="flex items-center justify-between gap-2">
                 <Div className="flex items-center gap-1 min-w-0">
                   <P className="text-xs text-muted-foreground shrink-0">{formatStatLabel(stat.type)}</P>
+                  {analysis?.subStatTiers?.[stat.type] && (
+                    <Badge variant="outline" className={`text-[7px] px-0.5 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}>
+                      {analysis.subStatTiers[stat.type]}
+                    </Badge>
+                  )}
                   <P className={`text-xs font-semibold shrink-0 ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
                     {formatStatValue(stat.type, stat.value)}
                   </P>

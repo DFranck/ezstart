@@ -2,7 +2,7 @@
 
 import { Badge, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
 import { BUILD_ARCHETYPES } from '@game-analyzer/types'
 import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
 import { MonsterSuggestions } from './monster-suggestions'
@@ -107,6 +107,14 @@ const ROLL_TIER_BG: Record<RuneQuality, string> = {
   rare: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/30',
   magic: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/30',
   normal: 'bg-muted text-muted-foreground border-border',
+}
+
+const STAT_TIER_COLORS: Record<StatTier, string> = {
+  S: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/40',
+  A: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/40',
+  B: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  C: 'bg-muted/30 text-muted-foreground border-border/40',
+  D: 'bg-destructive/10 text-destructive border-destructive/30',
 }
 
 function isPercentStat(type: StatType): boolean {
@@ -226,6 +234,11 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                   <Div className="flex items-center gap-1.5">
                     <P className="text-xs">{STAT_ICONS[stat.type] ?? ''}</P>
                     <P className="font-medium text-muted-foreground text-xs">{formatStatLabel(stat.type)}</P>
+                    {analysis?.subStatTiers?.[stat.type] && (
+                      <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${STAT_TIER_COLORS[analysis.subStatTiers[stat.type] as StatTier]}`}>
+                        {analysis.subStatTiers[stat.type]}
+                      </Badge>
+                    )}
                     {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (() => {
                       const bestGem = analysis.archetypeOptimizations
                         .filter(opt => opt.gemTarget?.remove === stat.type)
@@ -314,6 +327,12 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
 
             {/* Efficiency grid */}
             <Div className="grid grid-cols-2 gap-2">
+              {analysis.setWeightedEfficiency !== undefined && (
+                <Div className="bg-muted/20 rounded-lg p-2 text-center border border-ga-roll-legend/20">
+                  <P className="text-[10px] text-muted-foreground uppercase">{tRune('setEfficiency')}</P>
+                  <P className="text-sm font-bold text-ga-roll-legend">{analysis.setWeightedEfficiency}%</P>
+                </Div>
+              )}
               {analysis.potentialEfficiency !== undefined && (
                 <Div className="bg-muted/20 rounded-lg p-2 text-center">
                   <P className="text-[10px] text-muted-foreground uppercase">{tRune('potential12')}</P>
