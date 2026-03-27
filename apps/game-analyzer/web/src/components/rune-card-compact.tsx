@@ -2,9 +2,9 @@
 
 import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
-import { BUILD_ARCHETYPES } from '@game-analyzer/types'
-import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, StatTier } from '@game-analyzer/types'
+import { SET_STAT_TIERS, SET_STRENGTH_THRESHOLD_BONUS, SUBSTAT_ROLL_RANGES, ANCIENT_SUBSTAT_BASE_RANGES } from '@game-analyzer/types'
+import { GEM_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
 
 const QUALITY_COLORS: Record<RuneQuality, string> = {
@@ -67,8 +67,18 @@ function formatStatLabel(type: StatType): string {
   return type.toUpperCase().replace('%', '%')
 }
 
-function getRollDots(rolls: number): string {
-  return '\u25CF'.repeat(rolls)
+// ── Innate tier badge — S/A en innate = malus (stat gâchée, non grindable), D = stat morte ──
+const INNATE_TIER_MALUS: Record<StatTier, string> = {
+  S: 'bg-destructive/15 text-destructive border-destructive/40',
+  A: 'bg-destructive/15 text-destructive border-destructive/40',
+  B: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  C: 'bg-muted/30 text-muted-foreground border-border/40',
+  D: 'bg-destructive/10 text-destructive border-destructive/30',
+}
+
+/** Récupère le tier d'une stat pour un set donné */
+function getStatTier(set: string, stat: string): StatTier {
+  return SET_STAT_TIERS[set]?.[stat as StatType] ?? 'C'
 }
 
 const ROLL_TIER_BG: Record<RuneQuality, string> = {
@@ -97,8 +107,6 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
   const tRune = useTranslations('rune')
 
   const quality = rune.quality ?? 'normal'
-  const rollQualityTier = analysis?.rollQualityTier ?? 'normal'
-  const rollQualityPostGem = analysis?.rollQualityPostGem ?? 'normal'
   const advice = analysis?.progressiveAdvice
 
   return (
@@ -120,42 +128,26 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
             }`}>
               {tRune(`quality.${quality}`)}
             </Badge>
-          </Div>
-          <Div className="flex items-center gap-2">
-            {analysis && (
-              <P className="text-xs font-semibold">
-                <span className="text-muted-foreground">{tRune('currentRolls')}: </span>
-                <span className={QUALITY_COLORS[rollQualityTier]}>
-                  {tRune(`rollQuality.${rollQualityTier}`)} {analysis.rollQualityPercent}%
-                </span>
-                {rollQualityPostGem !== rollQualityTier && (
-                  <>
-                    <span className="text-muted-foreground"> | {tRune('afterGemRolls')}: </span>
-                    <span className={QUALITY_COLORS[rollQualityPostGem]}>
-                      {tRune(`rollQuality.${rollQualityPostGem}`)} {analysis.rollQualityPostGemPercent}%
-                    </span>
-                  </>
-                )}
-              </P>
-            )}
-            {advice && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge className={`border text-[10px] px-1.5 py-0 font-bold ${ADVICE_BG[advice.action]} ${ADVICE_COLORS[advice.action]}`}>
-                      {ADVICE_ICONS[advice.action]} {advice.action.toUpperCase()}
-                      {advice.action === 'sell'
-                        ? (advice.sellProbability > 0 ? ` \u2014 ${tRune('sellRisk', { percent: String(advice.sellProbability) })}` : '')
-                        : (advice.sellProbability > 0 ? ` \u2014 ${tRune('keepChance', { percent: String(100 - advice.sellProbability) })}` : '')}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <P className="text-xs font-medium">{advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}</P>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            {rune.isAncient && (
+              <Badge className="border text-[10px] px-1 py-0 bg-amber-500/20 text-amber-400 border-amber-500/40">
+                Ancient
+              </Badge>
             )}
           </Div>
+          {advice && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className={`border text-[10px] px-1.5 py-0 font-bold ${ADVICE_BG[advice.action]} ${ADVICE_COLORS[advice.action]}`}>
+                    {ADVICE_ICONS[advice.action]} {advice.action.toUpperCase()}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <P className="text-xs font-medium">{advice.reasonKey ? tRune(`adviceReason.${advice.reasonKey}`, advice.reasonParams ?? {}) : advice.reason}</P>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </Div>
 
         {/* ── Row 2: Main stat ── */}
@@ -163,11 +155,20 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           <P className="text-sm font-bold text-foreground">
             {formatStatLabel(rune.mainStat.type)} {formatStatValue(rune.mainStat.type, rune.mainStat.value)}
           </P>
-          {rune.innateStat && (
-            <P className="text-xs text-muted-foreground">
-              ({formatStatLabel(rune.innateStat.type)} {formatStatValue(rune.innateStat.type, rune.innateStat.value)})
-            </P>
-          )}
+          {rune.innateStat && (() => {
+            const innateTier = getStatTier(rune.set, rune.innateStat.type)
+            const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
+            return (
+              <Div className="flex items-center gap-1">
+                <P className="text-xs text-muted-foreground">
+                  ({formatStatLabel(rune.innateStat.type)} {formatStatValue(rune.innateStat.type, rune.innateStat.value)})
+                </P>
+                <Badge variant="outline" className={`text-[7px] px-0.5 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}>
+                  {isInnateMalus && '\u26A0\uFE0F'}{innateTier}
+                </Badge>
+              </Div>
+            )
+          })()}
         </Div>
 
         {/* ── Separator ── */}
@@ -188,34 +189,42 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                     </Badge>
                   )}
                   <P className={`text-xs font-semibold shrink-0 ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>
-                    {formatStatValue(stat.type, stat.value)}
+                    {subAnalysis?.maxValue
+                      ? `${formatStatValue(stat.type, stat.value)}/${isPercentStat(stat.type) ? subAnalysis.maxValue + '%' : subAnalysis.maxValue}`
+                      : formatStatValue(stat.type, stat.value)
+                    }
                   </P>
-                  {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (() => {
-                    const bestGem = analysis.archetypeOptimizations
-                      .filter(opt => opt.gemTarget?.remove === stat.type)
-                      .sort((a, b) => (b.postOptimScore || 0) - (a.postOptimScore || 0))[0]
-                    if (!bestGem) return null
-                    const emoji = BUILD_ARCHETYPES[bestGem.archetype as BuildArchetype]?.emoji ?? ''
-                    return (
-                      <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
-                        <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
-                        {'\u2192'}{formatStatLabel(bestGem.gemTarget!.replace)} ({emoji} {bestGem.postOptimScore?.toFixed(0)}%)
-                        {bestGem.rollsLost > 0 && (
-                          <span className="text-destructive ml-0.5">-{bestGem.rollsLost}r</span>
-                        )}
-                      </Badge>
-                    )
-                  })()}
+                  {subAnalysis && (
+                    <P className="text-[10px] text-muted-foreground shrink-0">
+                      {Math.round(subAnalysis.efficiency)}%
+                    </P>
+                  )}
+                  {subAnalysis?.isGemTarget && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
+                      <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
+                      gem target
+                    </Badge>
+                  )}
                 </Div>
-                {breakdown && breakdown.length > 0 && (
-                  <Div className="flex items-center gap-0.5 shrink-0">
-                    {breakdown.map((roll, j) => (
-                      <Badge key={j} variant="outline" className={`text-[9px] px-1 py-0 leading-tight border ${ROLL_TIER_BG[roll.tier]}`}>
-                        {formatRollValue(stat.type, roll.value)}
-                      </Badge>
-                    ))}
-                  </Div>
-                )}
+                {subAnalysis && breakdown && breakdown.length > 1 && (() => {
+                  // Show only powerup rolls (exclude base) — each individual roll as a badge
+                  const suffix = isPercentStat(stat.type) ? '%' : ''
+                  const rollMax = SUBSTAT_ROLL_RANGES[stat.type]?.max ?? 0
+                  const powerupRolls = breakdown.slice(1)
+                  return (
+                    <Div className="flex items-center gap-0.5 shrink-0">
+                      {powerupRolls.map((roll, j) => {
+                        const q = rollMax ? (roll.value / rollMax) * 100 : 0
+                        const tier: RuneQuality = q >= 90 ? 'legend' : q >= 75 ? 'hero' : q >= 50 ? 'rare' : q >= 25 ? 'magic' : 'normal'
+                        return (
+                          <Badge key={j} variant="outline" className={`text-[9px] px-1 py-0 leading-tight border ${ROLL_TIER_BG[tier]}`}>
+                            {roll.value}/{rollMax}{suffix}
+                          </Badge>
+                        )
+                      })}
+                    </Div>
+                  )
+                })()}
               </Div>
             )
           })}
@@ -240,48 +249,108 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           </Div>
         )}
 
-        {/* ── Row 5: Archetype optimizations (compact) ── */}
-        {analysis?.archetypeOptimizations && analysis.archetypeOptimizations.length > 0 && (
-          <Div className="space-y-1">
-            {analysis.archetypeOptimizations.map(opt => {
-              const archKey = opt.archetype as BuildArchetype
-              const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
-              return (
-                <Div key={opt.archetype} className="flex items-center gap-1.5 text-xs flex-wrap">
-                  <Badge
-                    variant="outline"
-                    className={`text-[10px] px-1 py-0 cursor-default shrink-0 ${
-                      opt.matchCount >= 4 ? 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend' :
-                      'bg-success/15 border-success/40 text-success-foreground'
-                    }`}
-                  >
-                    {emoji} {tRune(`archetype.${archKey}`)} {opt.matchCount}/4
-                  </Badge>
-                  {opt.isPerfect ? (
-                    <P className="text-success-foreground text-[10px]">{'\u2713'} {tRune('perfectBuild')}</P>
-                  ) : opt.gemTarget && (
-                    <Div className="flex items-center gap-1">
-                      <img src={GEM_ICONS.legend} alt="gem" className="w-3.5 h-3.5" />
-                      <P className="text-[10px] text-muted-foreground">
-                        {tRune('gemSwap', { remove: formatStatLabel(opt.gemTarget.remove), replace: formatStatLabel(opt.gemTarget.replace) })}
-                        {opt.rollsLost > 0 && (
-                          <span className="text-destructive ml-1">({tRune('rollsLost', { count: String(opt.rollsLost) })})</span>
-                        )}
-                      </P>
-                    </Div>
-                  )}
-                  {opt.grindTargets.length > 0 && (
-                    <Div className="flex items-center gap-1">
-                      <img src={GRIND_ICONS.legend} alt="grind" className="w-3.5 h-3.5" />
-                      <P className="text-[10px] text-muted-foreground">{opt.grindTargets.map(s => formatStatLabel(s)).join(', ')}</P>
-                    </Div>
-                  )}
-                  <P className="text-[10px] text-muted-foreground">{tRune('postOptim', { score: String(opt.postOptimScore) })}</P>
-                </Div>
-              )
-            })}
+        {/* ── Score Breakdown ── */}
+        {analysis && (
+          <Div className="border-t border-border pt-1.5 space-y-0.5 text-[10px] leading-tight">
+            {rune.isAncient && (
+              <P className="text-amber-400">
+                Ancient rune (ranges +1)
+              </P>
+            )}
+            {analysis.setWeightedEfficiency !== undefined && (
+              <P className="text-muted-foreground">
+                Set Eff: {analysis.setWeightedEfficiency}%
+              </P>
+            )}
+            {analysis.qualityPenalty !== undefined && analysis.qualityPenalty !== 0 && (
+              <P className="text-destructive">
+                {tRune(`quality.${quality}`)} quality: {analysis.qualityPenalty}
+              </P>
+            )}
+            {analysis.innateScore !== undefined && analysis.innateScore !== 0 && (
+              <P className={analysis.innateScore < 0 ? 'text-destructive' : 'text-success-foreground'}>
+                Innate {rune.innateStat ? formatStatLabel(rune.innateStat.type) : ''}{analysis.innateTier ? ` [${analysis.innateTier}]` : ''}: {analysis.innateScore > 0 ? '+' : ''}{analysis.innateScore}
+              </P>
+            )}
+            {analysis.mismatchPenalty !== undefined && analysis.mismatchPenalty !== 0 && (
+              <P className="text-destructive">
+                Stats mismatch: {analysis.mismatchPenalty}
+              </P>
+            )}
+            {analysis.lowRollPenalty !== undefined && analysis.lowRollPenalty !== 0 && (
+              <P className="text-destructive">
+                Low-roll penalty: {analysis.lowRollPenalty}
+              </P>
+            )}
+            {analysis.nonGrindablePenalty !== undefined && analysis.nonGrindablePenalty !== 0 && (
+              <P className="text-destructive">
+                Non-grindable penalty: {analysis.nonGrindablePenalty}
+              </P>
+            )}
+            {analysis.setStrength && analysis.setStrength !== 'S' && (
+              <P className="text-success-foreground">
+                Set {rune.set} ({analysis.setStrength}): +{SET_STRENGTH_THRESHOLD_BONUS[analysis.setStrength] ?? 0}% seuils
+              </P>
+            )}
+            {/* ── Score total ── */}
+            {(() => {
+              const base = analysis.setWeightedEfficiency ?? 0
+              const qualityPen = analysis.qualityPenalty ?? 0
+              const innate = analysis.innateScore ?? 0
+              const mismatchPen = analysis.mismatchPenalty ?? 0
+              const lowRoll = analysis.lowRollPenalty ?? 0
+              const nonGrind = analysis.nonGrindablePenalty ?? 0
+              const total = Math.round((base + qualityPen + innate + mismatchPen + lowRoll + nonGrind) * 100) / 100
+              const hasPenalties = qualityPen !== 0 || innate !== 0 || mismatchPen !== 0 || lowRoll !== 0 || nonGrind !== 0
+              return hasPenalties ? (
+                <>
+                  <Div className="border-t border-dashed border-border my-0.5" />
+                  <P className="text-muted-foreground font-medium">
+                    Score: {total}
+                  </P>
+                </>
+              ) : null
+            })()}
+            {advice && (
+              <P className={`font-bold ${ADVICE_COLORS[advice.action]}`}>
+                → {advice.action.toUpperCase()}
+              </P>
+            )}
           </Div>
         )}
+
+        {/* ── Gem Breakdown ── */}
+        {analysis && (() => {
+          const gemSub = analysis.substats.find(s => s.isGemTarget)
+          if (!gemSub) return null
+          const suffix = isPercentStat(gemSub.type as StatType) ? '%' : ''
+          return (
+            <Div className="border-t border-border pt-1.5 space-y-0.5">
+              <P className="text-[10px] font-medium text-warning-foreground">
+                Gem target: {formatStatLabel(gemSub.type as StatType)} → ?
+              </P>
+              <Div className="text-[10px] text-muted-foreground space-y-0.5">
+                {rune.subStats.map((s, i) => {
+                  const sa = analysis.substats[i]
+                  if (!sa) return null
+                  const isTarget = sa.isGemTarget
+                  const powerups = Math.max(0, sa.rolls - 1)
+                  const tier = analysis.subStatTiers?.[s.type] as StatTier | undefined
+                  return (
+                    <P key={i} className={isTarget ? 'text-warning-foreground font-medium' : ''}>
+                      {isTarget ? '→ ' : '  '}{formatStatLabel(s.type as StatType)}
+                      {tier ? ` [${tier}]` : ''}
+                      {` ${s.value}${suffix}`}
+                      {powerups > 0 ? ` (${powerups} rolls)` : ' (base)'}
+                      {sa.grindable ? ' ⚙' : ''}
+                      {isTarget ? ' ← gem' : ''}
+                    </P>
+                  )
+                })}
+              </Div>
+            </Div>
+          )
+        })()}
 
         {/* ── OCR Confidence ── */}
         {confidence !== undefined && (

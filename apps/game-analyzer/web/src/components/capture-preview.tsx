@@ -50,6 +50,8 @@ interface CapturePreviewProps {
   disableZoom?: boolean
   /** When true, shows a compact mini-preview (120px height, no zoom buttons, no resize handle) */
   compact?: boolean
+  /** Extra buttons rendered next to the start button */
+  extraButtons?: React.ReactNode
 }
 
 const MIN_ZOOM = 5   // minimum ROI size = 5% of source
@@ -93,6 +95,7 @@ export function CapturePreview({
   maskColor,
   disableZoom = false,
   compact = false,
+  extraButtons,
 }: CapturePreviewProps) {
   // Resolve mode: explicit prop takes priority, fallback to showTabs compat
   const mode = modeProp ?? (showTabs ? 'both' : 'zoom')
@@ -882,14 +885,17 @@ export function CapturePreview({
           {error && (
             <P className={`text-sm ${statusColor}`}>{statusText()}</P>
           )}
-          <Button
-            className="w-full h-12 text-base font-semibold"
-            variant="default"
-            onClick={onStart}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg>
-            {t('capture.start')}
-          </Button>
+          <Div className="flex items-center gap-2">
+            <Button
+              className="flex-1 h-12 text-base font-semibold"
+              variant="default"
+              onClick={onStart}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg>
+              {t('capture.start')}
+            </Button>
+            {extraButtons}
+          </Div>
         </>
       )}
     </Div>

@@ -36,6 +36,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         { href: `/${game}/bench`, label: t('nav.bench'), icon: 'lucide:FlaskConical' as const },
         { href: `/${game}/history`, label: t('nav.history'), icon: 'lucide:Clock' as const },
         { href: `/${game}/data`, label: t('nav.data'), icon: 'lucide:Database' as const },
+        { href: `/${game}/sources`, label: t('nav.sources'), icon: 'lucide:BookOpen' as const },
       ]
     : [
         { href: '/', label: t('nav.home'), icon: 'lucide:Home' as const },

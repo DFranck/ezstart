@@ -8,23 +8,27 @@ import {
   estimateRolls,
   getRecommendation,
 } from '../analyzers/rune-efficiency.js'
+import type { RuneData, StatType, RuneQuality, RuneStat, RuneSet } from '@game-analyzer/types'
 
 // Helper to build a RuneData object
 function makeRune(overrides: {
   level?: number
   grade?: number
-  quality?: 'normal' | 'magic' | 'rare' | 'hero' | 'legend'
-  mainStat?: { type: string; value: number }
-  subStats: { type: string; value: number }[]
-}) {
+  quality?: RuneQuality
+  mainStat?: RuneStat
+  subStats: RuneStat[]
+  innateStat?: RuneStat
+  set?: string
+}): RuneData {
   return {
-    set: 'violent' as const,
-    slot: 1 as const,
+    set: (overrides.set ?? 'violent') as RuneSet,
+    slot: 1,
     grade: overrides.grade ?? 6,
     level: overrides.level ?? 12,
     quality: overrides.quality,
-    mainStat: overrides.mainStat ?? { type: 'atk' as const, value: 160 },
+    mainStat: overrides.mainStat ?? { type: 'atk' as StatType, value: 160 },
     subStats: overrides.subStats,
+    innateStat: overrides.innateStat,
   }
 }
 
@@ -488,8 +492,7 @@ describe('rune-efficiency', () => {
 
     it('rune +12 mid game — tests mid thresholds', () => {
       const result = analyzeRune(midRune, 'mid')
-      // weightedEfficiency ~69.44%, grindBonus = 5, synergy = +4
-      // finalEfficiency = 69.44 + 5 + 4 = 78.44 => good (mid threshold good=70, great=80)
+      // weightedEfficiency uses generic STAT_WEIGHTS (no archetype), grindBonus capped at 5, no synergy
       // At +12, strictness = 0
       expect(result.tier).toBe('good')
       expect(result.adjustedTier).toBe('good')
@@ -558,36 +561,35 @@ describe('rune-efficiency', () => {
       const earlyResult = analyzeRune(rune, 'early')
       const lateResult = analyzeRune(rune, 'late')
 
-      // weightedEff ~69.44%, grindBonus = 5, synergy = +4 => finalEff = 78.44
-      // early at +12: good=60, great=70, godlike=80 => 78.44 >= 70 but < 80 => great
-      // late at +12: keep=70, good=80 => 78.44 >= 70 but < 80 => keep
+      // weightedEff uses generic STAT_WEIGHTS, no synergy boost
+      // early at +12: great threshold lower, late at +12: keep threshold higher
       expect(earlyResult.tier).toBe('great')
       expect(lateResult.tier).toBe('keep')
       expect(earlyResult.tier).not.toBe(lateResult.tier)
     })
 
-    it('grind bonus + synergy saves a rune from sell to keep', () => {
-      // A rune with mixed stats — tier is now based on weightedEfficiency
-      // mid keep threshold = 60
+    it('grind bonus helps a rune reach keep tier (synergy no longer influences tier)', () => {
+      // Weighted efficiency uses generic STAT_WEIGHTS (no archetype):
+      // spd: 2.0, atk%: 1.0, hp%: 1.0, def%: 1.0
+      // avgTopWeight = (2.0+1.5+1.5+1.0)/4 = 1.5, maxDivisor = 8*1.5 = 12
+      // weighted sum: 12/6*2.0 + 10/8*1.0 + 8/8*1.0 + 8/8*1.0 = 4+1.25+1+1 = 7.25
+      // weightedEff = 7.25/12*100 = 60.42%
+      // mid keep threshold = 60. With grindBonus >= 60 → keep
       const rune = makeRune({
         level: 12,
         quality: 'legend',
         subStats: [
-          { type: 'spd', value: 10 },  // 10/6 = 1.667, weight 2.0 → 3.333
+          { type: 'spd', value: 12 },  // 12/6 = 2.0, weight 2.0 → 4.0
           { type: 'atk%', value: 10 }, // 10/8 = 1.25, weight 1.0 → 1.25
           { type: 'hp%', value: 8 },   // 8/8 = 1.0, weight 1.0 → 1.0
           { type: 'def%', value: 8 },  // 8/8 = 1.0, weight 1.0 → 1.0
         ],
       })
 
-      // weightedEfficiency = (3.333+1.25+1.0+1.0) / 12 * 100 = 54.86%
-      // grind potential: spd +5, atk% +7, hp% +7, def% +7 => grindBonus = 5
-      // synergy: cc-debuffer 3/4 (spd, hp%, def%) + atk% has 2 rolls → THREE_WITH_ROLLS = +4%
-      // finalWeightedEff = 54.86 + 5 + 4 = 63.86 >= 60 (keep threshold mid) => keep
       const result = analyzeRune(rune, 'mid')
       expect(result.tier).toBe('keep')
 
-      // Verify grind gain and synergy exist
+      // Verify grind gain exists and synergy is still computed (but not used for tier)
       expect(result.grindPotential.grindGain).toBeGreaterThan(0)
       expect(result.synergy.synergyBonus).toBe(4)
     })
@@ -995,6 +997,210 @@ describe('rune-efficiency', () => {
 
       // Perfect +0 legend can reach 100% potential (all remaining rolls at max)
       expect(result.potentialEfficiency).toBeCloseTo(100, 0)
+    })
+  })
+
+  describe('innateScore', () => {
+    it('returns no innateScore when no innate stat', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.innateScore).toBeUndefined()
+      expect(result.innateTier).toBeUndefined()
+    })
+
+    it('returns heavy malus for S-tier innate (SPD on Violent)', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'hp%', value: 16 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+        innateStat: { type: 'spd', value: 5 },
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.innateScore).toBe(-20)
+      expect(result.innateTier).toBe('S')
+    })
+
+    it('returns malus for A-tier innate (CD on Violent)', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'hp%', value: 16 },
+          { type: 'atk%', value: 16 },
+        ],
+        innateStat: { type: 'cd', value: 5 },
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.innateScore).toBe(-12)
+      expect(result.innateTier).toBe('A')
+    })
+
+    it('returns neutral for B-tier innate (DEF% on Violent)', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+        innateStat: { type: 'def%', value: 7 },
+      })
+
+      const result = analyzeRune(rune)
+      // B-tier innate = 0 score, so innateScore is undefined (filtered out when 0)
+      expect(result.innateScore).toBeUndefined()
+      expect(result.innateTier).toBe('B')
+    })
+
+    it('returns bonus for C-tier innate (RES on Violent)', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+        innateStat: { type: 'res', value: 6 },
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.innateScore).toBe(5)
+      expect(result.innateTier).toBe('C')
+    })
+
+    it('uses violent fallback for unknown set', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        set: 'unknownset',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+        innateStat: { type: 'spd', value: 5 },
+      })
+
+      const result = analyzeRune(rune)
+      // SPD is S-tier on violent (fallback)
+      expect(result.innateScore).toBe(-20)
+      expect(result.innateTier).toBe('S')
+    })
+
+    it('innateScore influences progressive advice sell probability', () => {
+      // Two identical runes: one with bad innate, one without
+      const baseSubStats: RuneStat[] = [
+        { type: 'hp%', value: 10 },
+        { type: 'def%', value: 10 },
+        { type: 'acc', value: 8 },
+        { type: 'atk%', value: 10 },
+      ]
+
+      const runeNoInnate = makeRune({
+        level: 6,
+        quality: 'legend',
+        subStats: baseSubStats,
+      })
+
+      const runeWithBadInnate = makeRune({
+        level: 6,
+        quality: 'legend',
+        subStats: baseSubStats,
+        innateStat: { type: 'spd', value: 5 }, // S-tier wasted in innate
+      })
+
+      const resultNoInnate = analyzeRune(runeNoInnate)
+      const resultBadInnate = analyzeRune(runeWithBadInnate)
+
+      // Bad innate should increase sell probability
+      if (resultNoInnate.progressiveAdvice && resultBadInnate.progressiveAdvice) {
+        expect(resultBadInnate.progressiveAdvice.sellProbability)
+          .toBeGreaterThanOrEqual(resultNoInnate.progressiveAdvice.sellProbability)
+      }
+    })
+  })
+
+  describe('setWeightedEfficiency', () => {
+    it('returns setWeightedEfficiency and subStatTiers', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.setWeightedEfficiency).toBeDefined()
+      expect(result.setWeightedEfficiency).toBeGreaterThan(0)
+      expect(result.subStatTiers).toBeDefined()
+      expect(result.subStatTiers!['spd']).toBe('S')  // SPD is S-tier on violent
+      expect(result.subStatTiers!['cr']).toBe('S')    // CR is S-tier on violent
+    })
+
+    it('works with different sets', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        set: 'swift',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.setWeightedEfficiency).toBeGreaterThan(0)
+      expect(result.subStatTiers!['spd']).toBe('S')  // SPD is S-tier on swift
+      expect(result.subStatTiers!['cd']).toBe('B')    // CD is B-tier on swift
+    })
+
+    it('falls back to violent for unknown set', () => {
+      const rune = makeRune({
+        level: 12,
+        quality: 'legend',
+        set: 'unknownset',
+        subStats: [
+          { type: 'spd', value: 12 },
+          { type: 'cr', value: 12 },
+          { type: 'cd', value: 14 },
+          { type: 'atk%', value: 16 },
+        ],
+      })
+
+      const result = analyzeRune(rune)
+      expect(result.setWeightedEfficiency).toBeGreaterThan(0)
+      // Violent tiers should apply
+      expect(result.subStatTiers!['spd']).toBe('S')
     })
   })
 })

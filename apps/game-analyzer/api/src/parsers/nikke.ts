@@ -4,8 +4,8 @@
  * Parses OCR text from gear screenshots into structured GearData
  */
 
-import type { OcrResult } from '../types.js'
-import { cleanText, extractNumbers, matchPattern, failedResult, successResult, type GameParser } from './base-parser.js'
+import type { OcrResult, GameParser } from '@ezstart/ocr-sdk'
+import { cleanText, extractNumbers, matchPattern, failedResult, successResult } from '@ezstart/ocr-sdk'
 
 // --- Mappings ---
 

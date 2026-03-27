@@ -53,4 +53,5 @@ export interface RuneData {
   mainStat: RuneStat
   subStats: RuneStat[]
   innateStat?: RuneStat
+  isAncient?: boolean
 }

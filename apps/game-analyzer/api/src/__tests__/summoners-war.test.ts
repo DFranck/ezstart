@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { OcrResult } from '../../src/types.js'
+import type { OcrResult } from '@ezstart/ocr-sdk'
 import { summonersWarParser } from '../parsers/summoners-war.js'
 
 function makeOcrResult(text: string): OcrResult {

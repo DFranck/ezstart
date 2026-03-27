@@ -24,7 +24,7 @@ export function SetIcon({ set, className = 'w-5 h-5' }: { set: string; className
 
   return (
     <img
-      src={`/images/games/runes/${set}.png`}
+      src={`/images/games/summoners-war/runes/${set}.png`}
       alt={set}
       className={`${className} inline-block`}
       onError={() => setImgError(true)}
@@ -43,7 +43,7 @@ export function SetIconLarge({ set, className = 'w-8 h-8' }: { set: string; clas
 
   return (
     <img
-      src={`/images/games/runes/${set}.png`}
+      src={`/images/games/summoners-war/runes/${set}.png`}
       alt={set}
       className={`${className} inline-block`}
       onError={() => setImgError(true)}

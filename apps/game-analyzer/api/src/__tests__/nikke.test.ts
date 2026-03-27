@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { nikkeParser } from '../parsers/nikke.js'
-import type { OcrResult } from '../types.js'
+import type { OcrResult } from '@ezstart/ocr-sdk'
 
 function makeOcrResult(text: string): OcrResult {
   return { text, confidence: 0.9, regions: [] }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div, H1, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
+import { Button, Div, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -25,7 +25,6 @@ export default function GameHistoryPage() {
       {/* Header */}
       <Div className="flex items-center justify-between mb-6">
         <Div>
-          <H1 className="text-2xl font-bold">{t('history.title')}</H1>
           <P className="text-sm text-muted-foreground">{t(`games.${game}`)}</P>
         </Div>
         <Button asChild variant="ghost" size="sm">

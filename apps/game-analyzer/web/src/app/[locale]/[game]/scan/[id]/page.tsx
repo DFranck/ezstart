@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Div, H1, H2, P } from '@ezstart/ui/components'
+import { Button, Card, CardContent, CardHeader, Div, H2, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -61,8 +61,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   return (
     <Div className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
       {/* Header */}
-      <Div className="flex items-center justify-between">
-        <H1 className="text-2xl font-bold">{t('scanDetail.title')}</H1>
+      <Div className="flex items-center justify-end">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/${game}/history`}>{t('actions.back')}</Link>
         </Button>

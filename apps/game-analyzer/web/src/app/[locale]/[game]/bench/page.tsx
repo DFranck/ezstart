@@ -3,7 +3,7 @@
 import {
   Button,
   Div,
-  H1,
+
   H2,
   P,
   Select,
@@ -377,7 +377,6 @@ export default function BenchPage() {
   return (
     <Div className="container mx-auto px-4 py-8 max-w-6xl">
       <Div className="mb-8">
-        <H1 className="text-2xl font-bold mb-2">{t('bench.title')}</H1>
         <P className="text-sm text-muted-foreground">
           {t(`games.${game}`)} — R&D: {t('bench.description')}
         </P>

@@ -3,6 +3,9 @@ export type { ScanStatus, ScanResult, Scan, OcrSource, BenchRunResult } from './
 export type { RuneSet, RuneSlot, StatType, RuneStat, RuneData, RuneQuality } from './rune'
 export {
   SUBSTAT_ROLL_RANGES,
+  ANCIENT_SUBSTAT_BASE_RANGES,
+  ANCIENT_LEGEND_GRIND_RANGES,
+  ANCIENT_LEGEND_GEM_VALUES,
   MAIN_STAT_MAX,
   GRIND_RANGES,
   GRINDABLE_STATS,
@@ -22,6 +25,9 @@ export {
   DEAD_STAT_COMBOS,
   SET_STAT_TIERS,
   TIER_WEIGHTS,
+  SET_STRENGTH,
+  SET_STRENGTH_THRESHOLD_BONUS,
+  SET_ARCHETYPE_AFFINITY,
 } from './rune-data'
 export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RollBreakdown, RuneAnalysis, BuildArchetype, SynergyResult, ProgressiveAdvice, ProgressiveAction, ArchetypeOptimization, StatTier } from './rune-data'
 export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'

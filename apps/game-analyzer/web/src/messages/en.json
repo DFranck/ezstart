@@ -10,7 +10,8 @@
     "scan": "Scan",
     "bench": "Bench",
     "history": "History",
-    "data": "Data"
+    "data": "Data",
+    "sources": "Sources"
   },
   "actions": {
     "upload": "Upload",

@@ -2,10 +2,9 @@
 
 import { Badge, Card, CardContent, CardHeader, Div, H3, P, Progress, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, BuildArchetype, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
-import { BUILD_ARCHETYPES } from '@game-analyzer/types'
-import { GEM_ICONS, GRIND_ICONS } from '../config/game-assets'
-import { MonsterSuggestions } from './monster-suggestions'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
+import { SET_STAT_TIERS } from '@game-analyzer/types'
+import { GEM_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
 
 // ── Quality badge styles ──
@@ -115,10 +114,18 @@ function formatRollValue(type: StatType, value: number): string {
   return isPercentStat(type) ? `${value}%` : `${value}`
 }
 
-function getSynergyBadgeClass(matchCount: number): string {
-  if (matchCount >= 4) return 'bg-ga-roll-legend/15 border-ga-roll-legend/40 text-ga-roll-legend'
-  if (matchCount >= 3) return 'bg-success/15 border-success/40 text-success-foreground'
-  return 'bg-muted border-border text-muted-foreground'
+// ── Innate tier badge — S/A en innate = malus (stat gâchée, non grindable), D = stat morte ──
+const INNATE_TIER_MALUS: Record<StatTier, string> = {
+  S: 'bg-destructive/15 text-destructive border-destructive/40',
+  A: 'bg-destructive/15 text-destructive border-destructive/40',
+  B: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  C: 'bg-muted/30 text-muted-foreground border-border/40',
+  D: 'bg-destructive/10 text-destructive border-destructive/30',
+}
+
+/** Récupère le tier d'une stat pour un set donné */
+function getStatTier(set: string, stat: string): StatTier {
+  return SET_STAT_TIERS[set]?.[stat as StatType] ?? 'C'
 }
 
 interface RuneCardDetailedProps {
@@ -146,9 +153,16 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
             <H3 className="text-base font-bold capitalize">{rune.set}</H3>
             <Badge variant="outline" className="text-xs">Slot {rune.slot}</Badge>
           </Div>
-          <Badge className={`border text-xs ${QUALITY_BG[quality]}`}>
-            {tRune(`quality.${quality}`)}
-          </Badge>
+          <Div className="flex items-center gap-1.5">
+            <Badge className={`border text-xs ${QUALITY_BG[quality]}`}>
+              {tRune(`quality.${quality}`)}
+            </Badge>
+            {rune.isAncient && (
+              <Badge className="border text-xs bg-amber-500/20 text-amber-400 border-amber-500/40">
+                Ancient
+              </Badge>
+            )}
+          </Div>
         </Div>
         <Div className="flex items-center gap-2">
           <P className="text-ga-roll-legend text-xs tracking-tighter leading-none">{gradeStars}</P>
@@ -190,17 +204,26 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
         </Div>
 
         {/* ── Innate stat ── */}
-        {rune.innateStat && (
-          <Div>
-            <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('innateStat')}</P>
-            <Div className="flex items-center justify-between">
-              <P className="text-sm text-muted-foreground">
-                {formatStatLabel(rune.innateStat.type)}
-              </P>
-              <P className="text-sm font-medium text-foreground">{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
+        {rune.innateStat && (() => {
+          const innateTier = getStatTier(rune.set, rune.innateStat.type)
+          const isInnateMalus = innateTier === 'S' || innateTier === 'A' || innateTier === 'D'
+          return (
+            <Div>
+              <P className="text-xs font-medium text-muted-foreground uppercase mb-1">{t('innateStat')}</P>
+              <Div className="flex items-center justify-between">
+                <Div className="flex items-center gap-1.5">
+                  <P className="text-sm text-muted-foreground">
+                    {formatStatLabel(rune.innateStat.type)}
+                  </P>
+                  <Badge variant="outline" className={`text-[8px] px-1 py-0 font-bold ${INNATE_TIER_MALUS[innateTier]}`}>
+                    {isInnateMalus && '\u26A0\uFE0F'}{innateTier}
+                  </Badge>
+                </Div>
+                <P className="text-sm font-medium text-foreground">{formatStatValue(rune.innateStat.type, rune.innateStat.value)}</P>
+              </Div>
             </Div>
-          </Div>
-        )}
+          )
+        })()}
 
         {/* ── Separator ── */}
         <Div className="border-t border-border" />
@@ -224,22 +247,12 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                           {analysis.subStatTiers[stat.type]}
                         </Badge>
                       )}
-                      {subAnalysis?.isGemTarget && analysis?.archetypeOptimizations && (() => {
-                        const bestGem = analysis.archetypeOptimizations
-                          .filter(opt => opt.gemTarget?.remove === stat.type)
-                          .sort((a, b) => (b.postOptimScore || 0) - (a.postOptimScore || 0))[0]
-                        if (!bestGem) return null
-                        const emoji = BUILD_ARCHETYPES[bestGem.archetype as BuildArchetype]?.emoji ?? ''
-                        return (
-                          <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
-                            <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
-                            {'\u2192'}{formatStatLabel(bestGem.gemTarget!.replace)} ({emoji} {bestGem.postOptimScore?.toFixed(0)}%)
-                            {bestGem.rollsLost > 0 && (
-                              <span className="text-destructive ml-0.5">-{bestGem.rollsLost}r</span>
-                            )}
-                          </Badge>
-                        )
-                      })()}
+                      {subAnalysis?.isGemTarget && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground">
+                          <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
+                          gem target
+                        </Badge>
+                      )}
                     </Div>
                     <Div className="flex items-center gap-2">
                       <P className={`font-semibold ${subAnalysis ? getRollQualityColor(subAnalysis.efficiency) : 'text-foreground'}`}>{formatStatValue(stat.type, stat.value)}</P>
@@ -331,78 +344,6 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
             </Div>
           </>
         )}
-
-        {/* ── Archetype optimizations ── */}
-        {analysis?.archetypeOptimizations && analysis.archetypeOptimizations.length > 0 && (
-          <>
-            <Div className="border-t border-border" />
-            <Div className="space-y-2">
-              <P className="text-sm font-medium">{tRune('optimization')}</P>
-              <Div className="space-y-2">
-                {analysis.archetypeOptimizations.map(opt => {
-                  const archKey = opt.archetype as BuildArchetype
-                  const emoji = BUILD_ARCHETYPES[archKey]?.emoji ?? ''
-                  return (
-                    <Div key={opt.archetype} className="space-y-1">
-                      <Div className="flex items-center gap-2 flex-wrap">
-                        <Badge
-                          variant="outline"
-                          className={`cursor-default text-[11px] px-1.5 py-0 ${getSynergyBadgeClass(opt.matchCount)}`}
-                        >
-                          {emoji} {tRune(`archetype.${archKey}`)} {opt.matchCount}/4
-                        </Badge>
-                        {opt.isPerfect ? (
-                          <P className="text-success-foreground text-xs">{'\u2713'} {tRune('perfectBuild')}</P>
-                        ) : opt.gemTarget && (
-                          <Div className="flex items-center gap-1">
-                            <img src={GEM_ICONS.legend} alt="gem" className="w-4 h-4" />
-                            <P className="text-xs text-muted-foreground">
-                              {tRune('gemSwap', { remove: formatStatLabel(opt.gemTarget.remove), replace: formatStatLabel(opt.gemTarget.replace) })}
-                              {opt.rollsLost > 0 && (
-                                <span className="text-destructive ml-1">({tRune('rollsLost', { count: String(opt.rollsLost) })})</span>
-                              )}
-                            </P>
-                          </Div>
-                        )}
-                        {opt.grindTargets.length > 0 && (
-                          <Div className="flex items-center gap-1">
-                            <img src={GRIND_ICONS.legend} alt="grind" className="w-4 h-4" />
-                            <P className="text-xs text-muted-foreground">{tRune('grindLabel')}: {opt.grindTargets.map(s => formatStatLabel(s)).join(', ')}</P>
-                          </Div>
-                        )}
-                      </Div>
-                      <P className="text-[11px] text-muted-foreground pl-1">{tRune('postOptim', { score: String(opt.postOptimScore) })}</P>
-                    </Div>
-                  )
-                })}
-              </Div>
-            </Div>
-          </>
-        )}
-        {/* ── No synergy warning ── */}
-        {analysis?.synergy && !analysis.archetypeOptimizations?.length && analysis.synergy.synergyBonus < 0 && (
-          <>
-            <Div className="border-t border-border" />
-            <Div className="flex items-center justify-between">
-              <P className="text-sm font-medium">{tRune('synergy')}</P>
-              <P className="text-sm text-destructive-foreground">{tRune('noSynergy')} ({analysis.synergy.synergyBonus}%)</P>
-            </Div>
-          </>
-        )}
-
-        {/* ── Monster suggestions ── */}
-        {analysis?.synergy && (() => {
-          const suggestedArchetypes = (analysis.synergy.allArchetypes ?? [])
-            .filter(a => a.matchCount >= 3)
-            .map(a => a.archetype)
-          if (suggestedArchetypes.length === 0) return null
-          return (
-            <>
-              <Div className="border-t border-border" />
-              <MonsterSuggestions archetypes={suggestedArchetypes} />
-            </>
-          )
-        })()}
 
         {/* ── Set bonus ── */}
         {analysis && (

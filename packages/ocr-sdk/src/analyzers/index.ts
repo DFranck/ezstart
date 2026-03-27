@@ -1,29 +1,3 @@
 /**
- * Analyzers — game data analysis tools
+ * Analyzers — game-specific analyzers have been moved to their respective apps
  */
-
-export {
-  analyzeRune,
-  calculateEfficiency,
-  calculatePotentialEfficiency,
-  calculateSynergy,
-  estimateRolls,
-  getRecommendation,
-  getRollQualityTier,
-} from './rune-efficiency.js'
-
-export type {
-  BuildArchetype,
-  EfficiencyTier,
-  PlayerProfile,
-  GrindPotential,
-  ProgressiveAction,
-  ProgressiveAdvice,
-  Recommendation,
-  RollBreakdown,
-  RuneAnalysis,
-  RuneEfficiencyResult,
-  SubstatAnalysis,
-  SubstatDetail,
-  SynergyResult,
-} from './rune-efficiency.js'

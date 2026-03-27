@@ -1,4 +1,7 @@
-import { recognize, summonersWarParser, nikkeParser, analyzeRune } from '@ezstart/ocr-sdk'
+import { recognize } from '@ezstart/ocr-sdk'
+import { summonersWarParser } from '../parsers/summoners-war.js'
+import { nikkeParser } from '../parsers/nikke.js'
+import { analyzeRune } from '../analyzers/rune-efficiency.js'
 import { getScanModel } from '../models/scan.js'
 import { ocrWithGemini } from './gemini-vision-service.js'
 import { preprocessImage } from './image-preprocessing.js'
@@ -119,6 +122,7 @@ function mergeBenchResults(
     if (!mergedData.quality) mergedData.quality = d.quality
     if (!mergedData.mainStat) mergedData.mainStat = d.mainStat
     if (!mergedData.innateStat) mergedData.innateStat = d.innateStat
+    if (d.isAncient) mergedData.isAncient = true
   }
 
   // Remove innate from merged substats if present (some runs may not have separated it)

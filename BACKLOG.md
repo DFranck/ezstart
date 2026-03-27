@@ -9,7 +9,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ## 🎮 game-analyzer
 
-**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-25
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-26
 
 ### Objectif
 App pour scanner et analyser des screenshots de jeux (Summoners War runes, Nikke Goddess of Victory gear, etc.) via OCR scripté + fallback IA optionnel.
@@ -90,14 +90,43 @@ apps/
 46. [x] Toutes couleurs via CSS variables (theme GA + globals)
 47. [x] Advice simplifié — "↑ UPGRADE — 65% to keep"
 48. [x] Page /data avec 11 sections de référence + tooltips
-49. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
-50. [ ] Couleurs theme : vérifier rendu dark/light mode
-51. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
-52. [ ] Fallback IA cascade (Gemini free tier)
-42. [ ] Nikke gear analyzer
-43. [ ] Ajouter OpenAPI/Swagger à l'API
-44. [ ] Deploy (Railway API + Vercel Web)
-45. [ ] Overlay/PiP pour afficher résultats sur le jeu
+49. [x] SET_STAT_TIERS per set + setWeightedEfficiency dans le scoring
+50. [x] Innate scoring (S=-20, A=-12, B=0, C=+5, D=-5)
+51. [x] Low-roll penalty S/A tier + non-grindable penalty
+52. [x] SET_STRENGTH (consensus communautaire S/A/B/C/D)
+53. [x] Gem logic 100% set-based (plus archetype-based)
+54. [x] Archetypes retirés du scoring principal (info secondaire)
+55. [x] Rune card compact : badge simplifié + breakdown score +/-
+56. [x] Page /data mergée 14→10 sections, sprites rune sets, tableau unifié
+57. [x] Page /sources créée (APIs, wikis, outils, GitHub)
+58. [x] Home : images de fond par jeu + logos PNG (plus d'emojis)
+59. [x] Banner décoratif avec H1 overlay sur les pages jeu
+60. [x] UX scan : bouton paramètres à côté de capture, settings en dessous
+61. [x] Scripts dev:x clean .next automatiquement (rimraf)
+62. [x] Architecture multi-game : images/[game]/, config/games/[game].ts
+63. [x] Theme CSS splité : common + summoners-war + nikke
+64. [x] Assets Nikke : 12 icons (manufacturers, gear types, rarities)
+65. [x] Halo lumineux sur logos de jeu (drop-shadow)
+66. [x] Banner margin dynamique (ResizeObserver sur header)
+67. [x] Charts package UI — Recharts + DataTable installés, /data refactoré avec radar chart + DataTables
+68. [x] DataTable package UI — @tanstack/react-table + sort/filter/pagination, utilisé dans /data
+69. [x] Refacto OCR SDK — parsers/analyzers dans game-analyzer/api, SDK 100% agnostique
+70. [x] Ancient runes — détection "A" OCR, ranges in-game vérifiés (HP% 6-10), base vs roll séparé, badge Ancient
+71. [x] Hot reload API — tsx watch < NUL (fix Windows/turbo PTY bug)
+72. [x] Scoring fixes — quality/mismatch penalty, potential set-weighted, seuils resserrés, low-roll avg-based
+73. [x] UI card compact — value/max total, powerup rolls individuels, breakdown score, gem breakdown
+74. [x] Gem logic v2 — rolls protègent massivement (+0.4/powerup), gem la stat avec least rolls + low tier
+75. [ ] Gem/Grind sprites — sprite gem (leg/hero/rare selon profil) + set overlay sur gem target, sprite grind + tooltip "+X to Y" sur stats grindables
+76. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
+77. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
+78. [ ] Couleurs theme : vérifier rendu dark/light mode
+79. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
+80. [ ] Fallback IA cascade (Gemini free tier)
+81. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
+82. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
+83. [ ] Ajouter OpenAPI/Swagger à l'API
+84. [ ] Deploy (Railway API + Vercel Web)
+85. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
@@ -115,7 +144,7 @@ apps/
 - Formule Barion normalisée 0-100% (current + potential efficiency, keep/sell)
 - tower-defense supprimé du monorepo (-22k lignes)
 - Dev scripts utilisent turbo stream mode (pas de TUI qui efface les logs)
-- 129 tests passent
+- 149 tests passent
 - OCR confidence : 90-99% avec zones individuelles + masques
 - Le parsing par zones est prioritaire sur le parsing global
 - Les layouts (zones + masques + ROI + presets) sont sauvegardés en MongoDB par jeu

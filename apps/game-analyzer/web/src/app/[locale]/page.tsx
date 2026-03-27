@@ -1,13 +1,15 @@
 'use client'
 
-import { Card, CardContent, Div, H1, P } from '@ezstart/ui/components'
+import { Div, H1, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { GameType } from '@game-analyzer/types'
+import { GAME_CONFIG } from '@/config/games'
 
-const games: { type: GameType; icon: string; banner: string }[] = [
-  { type: 'summoners-war', icon: '\u2694\uFE0F', banner: '/images/games/summoners-war-banner.svg' },
-  { type: 'nikke', icon: '\uD83D\uDD2B', banner: '/images/games/nikke-banner.svg' },
+const games: { type: GameType }[] = [
+  { type: 'summoners-war' },
+  { type: 'nikke' },
 ]
 
 export default function HomePage() {
@@ -31,15 +33,34 @@ export default function HomePage() {
       <Div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {games.map((game) => (
           <Link key={game.type} href={`/${game.type}/scan`}>
-            <Card className="group hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 cursor-pointer h-full border-2 border-transparent hover:scale-[1.02] overflow-hidden">
-              <img src={game.banner} alt={t(`games.${game.type}`)} className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-200" />
-              <CardContent className="flex flex-col items-center justify-center py-6 px-6">
-                <P className="text-xl font-bold mb-2">{t(`games.${game.type}`)}</P>
-                <P className="text-sm text-muted-foreground text-center">
+            <div className="group relative overflow-hidden rounded-lg border-2 border-transparent hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer h-full min-h-[220px]">
+              {/* Background image */}
+              <Image
+                src={GAME_CONFIG[game.type]!.bg}
+                alt={t(`games.${game.type}`)}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                sizes="(max-width: 640px) 100vw, 50vw"
+                priority
+              />
+              {/* Dark overlay */}
+              <div className="absolute inset-0 bg-background/60 group-hover:bg-background/50 transition-colors duration-300" />
+              {/* Text content */}
+              <div className="relative z-10 flex flex-col items-center justify-center h-full min-h-[220px] py-8 px-6 text-center">
+                <Image
+                  src={GAME_CONFIG[game.type]!.logo}
+                  alt={t(`games.${game.type}`)}
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: 'auto', height: 'auto' }}
+                  className="max-w-[200px] max-h-[80px] object-contain mb-3 [filter:drop-shadow(0_0_6px_rgba(255,255,255,0.8))_drop-shadow(0_0_16px_rgba(255,255,255,0.3))]"
+                />
+                <P className="text-sm text-muted-foreground">
                   {t(`home.gameDescription.${game.type}`)}
                 </P>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </Link>
         ))}
       </Div>

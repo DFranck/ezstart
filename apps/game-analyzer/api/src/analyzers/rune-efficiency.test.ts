@@ -8,6 +8,7 @@ function makeRune(opts: {
   level?: number
   slot?: number
   set?: string
+  isAncient?: boolean
 }) {
   return {
     set: opts.set ?? 'violent',
@@ -17,6 +18,7 @@ function makeRune(opts: {
     quality: opts.quality as any,
     mainStat: { type: 'atk' as const, value: 160 },
     subStats: opts.subStats as any[],
+    ...(opts.isAncient ? { isAncient: true } : {}),
   }
 }
 
@@ -206,5 +208,97 @@ describe('Barion Efficiency — corrected formulas', () => {
     })
     const result = calculateEfficiency(rune)
     expect(result.currentEfficiency).toBe(100)
+  })
+})
+
+describe('Ancient rune support', () => {
+  it('ancient rune with same values as normal has lower efficiency (higher base max)', () => {
+    // Normal: base max=8, roll max=8 → 2 events each → maxPossible per sub = 8+8 = 16
+    // Ancient: base max=9, roll max=8 → 2 events each → maxPossible per sub = 9+8 = 17
+    // Same values → ancient ratio is lower since maxPossible is higher
+    const subStats = [
+      { type: 'hp%', value: 16 },
+      { type: 'atk%', value: 16 },
+      { type: 'def%', value: 16 },
+      { type: 'spd', value: 12 },
+    ]
+
+    const normalRune = makeRune({ quality: 'legend', level: 12, subStats })
+    const ancientRune = makeRune({ quality: 'legend', level: 12, subStats, isAncient: true })
+
+    const normalResult = calculateEfficiency(normalRune)
+    const ancientResult = calculateEfficiency(ancientRune)
+
+    // Normal: perfect → 100%. Ancient: same values but higher maxPossible → < 100%
+    expect(normalResult.currentEfficiency).toBe(100)
+    expect(ancientResult.currentEfficiency).toBeLessThan(normalResult.currentEfficiency)
+  })
+
+  it('ancient rune with max ancient values → 100%', () => {
+    // Ancient base ranges (verified in-game 2026-03-27):
+    // hp%: baseMax=10, rollMax=8 → max = 10+8 = 18
+    // atk%: baseMax=10, rollMax=8 → max = 10+8 = 18
+    // def%: baseMax=10, rollMax=8 → max = 10+8 = 18
+    // spd: baseMax=7, rollMax=6 → max = 7+6 = 13
+    const rune = makeRune({
+      quality: 'legend',
+      level: 12,
+      isAncient: true,
+      subStats: [
+        { type: 'hp%', value: 18 },  // 10+8 = 18, ratio = 1.0
+        { type: 'atk%', value: 18 }, // 10+8 = 18, ratio = 1.0
+        { type: 'def%', value: 18 }, // 10+8 = 18, ratio = 1.0
+        { type: 'spd', value: 13 },  // 7+6 = 13, ratio = 1.0
+      ],
+    })
+    const result = calculateEfficiency(rune)
+    expect(result.currentEfficiency).toBe(100)
+  })
+
+  it('isAncient flag propagates — ancient rune uses ancient grind ranges', () => {
+    const rune = makeRune({
+      quality: 'legend',
+      level: 12,
+      isAncient: true,
+      subStats: [
+        { type: 'hp%', value: 16 },
+        { type: 'atk%', value: 16 },
+        { type: 'spd', value: 12 },
+        { type: 'cr', value: 12 },
+      ],
+    })
+    const result = calculateEfficiency(rune)
+
+    // Ancient grind max for spd = 6 (vs 5 for normal)
+    const spdSub = result.substats.find(s => s.type === 'spd')
+    expect(spdSub).toBeDefined()
+    // Ancient legend grind max for SPD = 6
+    expect(spdSub!.grindAmount).toBe(6)
+    expect(spdSub!.grindedValue).toBe(12 + 6) // 18
+  })
+
+  it('estimateRolls uses ancient base ranges when flagged', () => {
+    // SPD: normal baseMax=6, rollMax=6 | ancient baseMax=7, rollMax=6
+    // Value 13 → normal: 6 + 6 = 12 < 13, need 3 events: 6+6+6=18 >= 13 → count=3
+    //            ancient: 7 + 6 = 13 >= 13 → count=2
+    const normalRolls = estimateRolls('spd', 13)
+    const ancientRolls = estimateRolls('spd', 13, true)
+
+    expect(normalRolls.count).toBe(3)
+    expect(ancientRolls.count).toBe(2)
+  })
+
+  it('ancient roll ranges are identical to normal (only base differs)', () => {
+    // SPD +12 on normal: base=6, roll=6 → 2 events, quality = 12/12 = 100%
+    // SPD +12 on ancient: base=7, roll=6 → 1 base(7) is not enough, need 2 events: 7+6=13 > 12 → count=2
+    //   quality = 12/13 = 92.3%
+    const normalRolls = estimateRolls('spd', 12)
+    const ancientRolls = estimateRolls('spd', 12, true)
+
+    expect(normalRolls.count).toBe(2)
+    expect(normalRolls.avgQuality).toBe(100) // 12 / (6+6) = 100%
+
+    expect(ancientRolls.count).toBe(2)
+    expect(ancientRolls.avgQuality).toBeCloseTo(92.31, 1) // 12 / (7+6) = 92.3%
   })
 })

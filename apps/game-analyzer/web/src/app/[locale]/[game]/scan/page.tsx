@@ -4,7 +4,7 @@ import {
   Badge,
   Button,
   Div,
-  H1,
+
   P,
   Select,
   SelectContent,
@@ -426,47 +426,6 @@ export default function GameScanPage() {
         />
       )}
 
-      {/* Header with settings toggle */}
-      <Div className="flex items-center justify-between mb-4">
-        <H1 className="text-lg font-bold">{t('scan.title')}</H1>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowSettings(!showSettings)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-          {showSettings ? t('scan.hideSettings') : t('scan.settings')}
-        </Button>
-      </Div>
-
-      {/* Collapsible settings */}
-      {showSettings && (
-        <Div className="space-y-3 p-3 rounded-lg border border-border bg-muted/30 mb-4">
-          <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
-          {layouts.length > 0 && (
-            <Div className="flex items-center gap-2">
-              <P className="text-sm font-medium">{t('bench.layout')}:</P>
-              <Select
-                value={currentLayoutName}
-                onValueChange={setCurrentLayoutName}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={t('bench.layout')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {layouts.map((l) => (
-                    <SelectItem key={l.layoutName} value={l.layoutName}>
-                      {l.displayName ?? l.layoutName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Div>
-          )}
-        </Div>
-      )}
-
       {/* Capture */}
       <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Capture + Controls */}
@@ -491,7 +450,44 @@ export default function GameScanPage() {
             zonesLocked={!showSettings}
             maskColor="rgba(255, 0, 0, 0.15)"
             compact={!showSettings && isCapturing}
+            extraButtons={
+              <Button
+                variant="outline"
+                onClick={() => setShowSettings(!showSettings)}
+                className="h-12 px-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                {showSettings ? t('scan.hideSettings') : t('scan.settings')}
+              </Button>
+            }
           />
+
+          {/* Collapsible settings — below capture preview */}
+          {showSettings && (
+            <Div className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+              <ProfileSelector value={profile} onChange={setProfile} gameType={game} />
+              {layouts.length > 0 && (
+                <Div className="flex items-center gap-2">
+                  <P className="text-sm font-medium">{t('bench.layout')}:</P>
+                  <Select
+                    value={currentLayoutName}
+                    onValueChange={setCurrentLayoutName}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder={t('bench.layout')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {layouts.map((l) => (
+                        <SelectItem key={l.layoutName} value={l.layoutName}>
+                          {l.displayName ?? l.layoutName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Div>
+              )}
+            </Div>
+          )}
 
           {isCapturing && (
             <Button

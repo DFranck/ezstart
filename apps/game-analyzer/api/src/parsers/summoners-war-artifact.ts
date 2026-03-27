@@ -9,8 +9,8 @@
  * Design principle: TOLERANT to noise — better to extract partially than nothing.
  */
 
-import type { OcrResult, ParsedResult } from '../types.js'
-import { failedResult, successResult, type GameParser } from './base-parser.js'
+import type { OcrResult, ParsedResult, GameParser } from '@ezstart/ocr-sdk'
+import { failedResult, successResult } from '@ezstart/ocr-sdk'
 
 // --- Types ---
 

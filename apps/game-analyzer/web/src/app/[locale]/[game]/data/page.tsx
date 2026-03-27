@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import {
   Accordion,
   AccordionContent,
@@ -10,9 +12,24 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  DataTable,
+  DataTableColumnHeader,
+  type ColumnDef,
+  type SortingState,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
   Div,
-  H1,
   P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Span,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +40,27 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@ezstart/ui/components'
+
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+} from 'recharts'
+
+import {
+  SET_STAT_TIERS,
+  TIER_WEIGHTS,
+  SET_STRENGTH,
+  SET_ARCHETYPE_AFFINITY,
+  BUILD_ARCHETYPES,
+  STAT_PRIORITY_WEIGHTS,
+  RUNE_SET_INFO,
+} from '@game-analyzer/types'
+import type { StatTier, BuildArchetype } from '@game-analyzer/types'
+
+import { RUNE_SET_ICONS } from '@/config/game-assets'
 
 // ---------------------------------------------------------------------------
 // Tooltip helper — wraps a term with a tooltip explanation
@@ -42,7 +80,277 @@ function TT({ children, tip }: { children: React.ReactNode; tip: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Section 1 — Stat Priority par Build Archetype
+// Shared constants & helpers
+// ---------------------------------------------------------------------------
+
+const RANK_COLORS: Record<number, string> = {
+  1: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/40',
+  2: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/40',
+  3: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
+  4: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/40',
+  5: 'bg-ga-roll-normal/20 text-ga-roll-normal border-ga-roll-normal/40',
+}
+
+function RankBadge({ stat, rank }: { stat: string; rank: number }) {
+  return (
+    <Badge variant="outline" className={`text-xs border ${RANK_COLORS[rank] ?? RANK_COLORS[5]}`}>
+      {stat}
+    </Badge>
+  )
+}
+
+const TIER_COLOR: Record<StatTier, string> = {
+  S: 'text-ga-tier-s font-bold',
+  A: 'text-ga-tier-a font-semibold',
+  B: 'text-ga-tier-b',
+  C: 'text-ga-tier-c',
+  D: 'text-ga-tier-d',
+}
+
+const TIER_ORDER: Record<string, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 }
+
+const TIER_STATS = ['spd', 'cr', 'cd', 'atk%', 'hp%', 'def%', 'acc', 'res', 'hp', 'atk', 'def'] as const
+const TIER_STAT_LABELS: Record<string, string> = {
+  spd: 'SPD', cr: 'CR', cd: 'CD', 'atk%': 'ATK%', 'hp%': 'HP%', 'def%': 'DEF%',
+  acc: 'ACC', res: 'RES', hp: 'HP', atk: 'ATK', def: 'DEF',
+}
+
+// Radar chart only shows % and rate stats (not flat hp/atk/def)
+const RADAR_STATS = ['spd', 'cr', 'cd', 'atk%', 'hp%', 'def%', 'acc', 'res'] as const
+
+const ALL_STATS = ['SPD', 'CR', 'CD', 'ATK%', 'HP%', 'DEF%', 'ACC', 'RES', 'ATK', 'DEF', 'HP']
+
+function weightColor(w: number): string {
+  if (w >= 0.9) return 'text-ga-roll-legend font-bold'
+  if (w >= 0.7) return 'text-ga-roll-hero font-semibold'
+  if (w >= 0.5) return 'text-ga-roll-rare'
+  if (w >= 0.3) return 'text-ga-roll-magic'
+  return 'text-ga-roll-normal'
+}
+
+// ---------------------------------------------------------------------------
+// Section 1 — Rune Sets (merged: sets + set stat tiers + set archetype affinity)
+// ---------------------------------------------------------------------------
+
+const SET_KEYS = Object.keys(SET_STAT_TIERS)
+
+interface RuneSetRow {
+  setKey: string
+  strength: StatTier | undefined
+  pieces: number | undefined
+  bonus: string | undefined
+  icon: string | undefined
+  archetypes: string[]
+  tiers: Record<string, StatTier>
+}
+
+const RUNE_SET_DATA: RuneSetRow[] = SET_KEYS.map((setKey) => {
+  const tiers = SET_STAT_TIERS[setKey]!
+  const info = RUNE_SET_INFO[setKey as keyof typeof RUNE_SET_INFO]
+  const strength = SET_STRENGTH[setKey]
+  const affinity = SET_ARCHETYPE_AFFINITY[setKey as keyof typeof SET_ARCHETYPE_AFFINITY]
+  const icon = RUNE_SET_ICONS[setKey]
+  return {
+    setKey,
+    strength,
+    pieces: info?.pieces,
+    bonus: info?.bonus,
+    icon,
+    archetypes: (affinity ?? []) as string[],
+    tiers: tiers as Record<string, StatTier>,
+  }
+})
+
+function tierSortFn(a: string | undefined, b: string | undefined): number {
+  return (TIER_ORDER[b ?? ''] ?? 0) - (TIER_ORDER[a ?? ''] ?? 0)
+}
+
+const runeSetColumns: ColumnDef<RuneSetRow, unknown>[] = [
+  {
+    accessorKey: 'setKey',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Set" />,
+    cell: ({ row }) => {
+      const { setKey, icon, pieces, bonus } = row.original
+      return (
+        <Div className="flex items-center gap-1.5">
+          {icon ? (
+            <img src={icon} alt={setKey} width={24} height={24} className="shrink-0" />
+          ) : (
+            <Span className="text-sm">📦</Span>
+          )}
+          <Div className="flex flex-col leading-tight">
+            <Span className="font-medium text-xs capitalize">{setKey}</Span>
+            {(pieces || bonus) && (
+              <Span className="text-[10px] text-muted-foreground">
+                {pieces ? `${pieces}pcs` : ''}{pieces && bonus ? ' — ' : ''}{bonus ?? ''}
+              </Span>
+            )}
+          </Div>
+        </Div>
+      )
+    },
+    filterFn: 'includesString',
+  },
+  {
+    accessorKey: 'strength',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Str" className="justify-center" />,
+    cell: ({ row }) => {
+      const strength = row.original.strength
+      return (
+        <Span className={`text-center text-xs block ${strength ? TIER_COLOR[strength] : ''}`}>
+          {strength ?? '-'}
+        </Span>
+      )
+    },
+    sortingFn: (rowA, rowB) => tierSortFn(rowA.original.strength, rowB.original.strength),
+  },
+  ...TIER_STATS.map((stat): ColumnDef<RuneSetRow, unknown> => ({
+    id: `tier_${stat}`,
+    accessorFn: (row) => row.tiers[stat],
+    header: ({ header }) => <DataTableColumnHeader header={header} title={TIER_STAT_LABELS[stat]!} className="justify-center" />,
+    cell: ({ row }) => {
+      const tier = row.original.tiers[stat] as StatTier | undefined
+      return (
+        <Span className={`text-center tabular-nums text-xs block ${tier ? TIER_COLOR[tier] : ''}`}>
+          {tier ?? '-'}
+        </Span>
+      )
+    },
+    sortingFn: (rowA, rowB) => tierSortFn(rowA.original.tiers[stat], rowB.original.tiers[stat]),
+  })),
+]
+
+const INITIAL_SET_SORTING: SortingState = [{ id: 'strength', desc: false }]
+
+// ---------------------------------------------------------------------------
+// Section 1 — Radar Chart helpers
+// ---------------------------------------------------------------------------
+
+function SetRadarChart() {
+  const [set1, setSet1] = useState<string>(SET_KEYS[0]!)
+  const [set2, setSet2] = useState<string>('none')
+
+  const hasSet2 = set2 !== '' && set2 !== 'none'
+
+  const radarData = useMemo(() => {
+    return RADAR_STATS.map((stat) => {
+      const tiers1 = SET_STAT_TIERS[set1]
+      const tier1 = tiers1?.[stat] as StatTier | undefined
+      const val1 = tier1 ? (TIER_WEIGHTS[tier1] ?? 0) : 0
+
+      let val2 = 0
+      if (hasSet2) {
+        const tiers2 = SET_STAT_TIERS[set2]
+        const tier2 = tiers2?.[stat] as StatTier | undefined
+        val2 = tier2 ? (TIER_WEIGHTS[tier2] ?? 0) : 0
+      }
+
+      return {
+        stat: TIER_STAT_LABELS[stat]!,
+        set1: val1,
+        ...(hasSet2 ? { set2: val2 } : {}),
+      }
+    })
+  }, [set1, set2, hasSet2])
+
+  const chartConfig: ChartConfig = {
+    set1: {
+      label: set1.charAt(0).toUpperCase() + set1.slice(1),
+      color: 'var(--color-ga-stat-spd)',
+    },
+    ...(hasSet2 ? {
+      set2: {
+        label: set2.charAt(0).toUpperCase() + set2.slice(1),
+        color: 'var(--color-ga-stat-crit)',
+      },
+    } : {}),
+  }
+
+  return (
+    <Card size="sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">Set Stat Profile — Radar</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Div className="flex flex-wrap gap-3 mb-4">
+          <Div className="space-y-1">
+            <P className="text-xs text-muted-foreground">Set 1</P>
+            <Select value={set1} onValueChange={setSet1}>
+              <SelectTrigger size="sm" className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SET_KEYS.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    <span className="capitalize">{k}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+          <Div className="space-y-1">
+            <P className="text-xs text-muted-foreground">Set 2 (compare)</P>
+            <Select value={set2} onValueChange={setSet2}>
+              <SelectTrigger size="sm" className="w-[160px]">
+                <SelectValue placeholder="None" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {SET_KEYS.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    <span className="capitalize">{k}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Div>
+        </Div>
+
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[350px]">
+          <RadarChart data={radarData}>
+            <PolarGrid stroke="var(--color-border)" />
+            <PolarAngleAxis
+              dataKey="stat"
+              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
+            />
+            <PolarRadiusAxis
+              domain={[0, 1]}
+              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 9 }}
+              tickCount={6}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Radar
+              name={(chartConfig.set1?.label ?? 'Set 1') as string}
+              dataKey="set1"
+              stroke="var(--color-ga-stat-spd)"
+              fill="var(--color-ga-stat-spd)"
+              fillOpacity={0.25}
+            />
+            {hasSet2 && (
+              <Radar
+                name={chartConfig.set2?.label as string}
+                dataKey="set2"
+                stroke="var(--color-ga-stat-crit)"
+                fill="var(--color-ga-stat-crit)"
+                fillOpacity={0.25}
+              />
+            )}
+            {hasSet2 && (
+              <ChartLegend content={<ChartLegendContent />} />
+            )}
+          </RadarChart>
+        </ChartContainer>
+
+        <P className="text-xs text-muted-foreground mt-2 text-center">
+          Values are tier weights: S=1.0, A=0.8, B=0.5, C=0.2, D=0.0
+        </P>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Section 2 — Build Archetypes (merged: stat priority + stat weights)
 // ---------------------------------------------------------------------------
 
 type StatPriority = { stat: string; rank: number }
@@ -70,59 +378,24 @@ const ARCHETYPES: Archetype[] = [
   { name: 'Pure Tank', description: 'Wall / stall (Rina, Praha)', stats: [{ stat: 'HP%', rank: 1 }, { stat: 'DEF%', rank: 2 }, { stat: 'SPD', rank: 3 }, { stat: 'RES', rank: 4 }] },
 ]
 
-const RANK_COLORS: Record<number, string> = {
-  1: 'bg-ga-roll-legend/20 text-ga-roll-legend border-ga-roll-legend/40',
-  2: 'bg-ga-roll-hero/20 text-ga-roll-hero border-ga-roll-hero/40',
-  3: 'bg-ga-roll-rare/20 text-ga-roll-rare border-ga-roll-rare/40',
-  4: 'bg-ga-roll-magic/20 text-ga-roll-magic border-ga-roll-magic/40',
-  5: 'bg-ga-roll-normal/20 text-ga-roll-normal border-ga-roll-normal/40',
-}
-
-function RankBadge({ stat, rank }: StatPriority) {
-  return (
-    <Badge variant="outline" className={`text-xs border ${RANK_COLORS[rank] ?? RANK_COLORS[5]}`}>
-      {stat}
-    </Badge>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Section 2 — Rune Sets
-// ---------------------------------------------------------------------------
-
-interface RuneSet {
-  name: string
+// Stat priority weights table data (from @game-analyzer/types STAT_PRIORITY_WEIGHTS)
+interface WeightRow {
+  archetype: string
+  key: BuildArchetype
   emoji: string
-  pieces: number
-  bonus: string
   description: string
-  idealSubs: string[]
+  weights: Record<string, number>
 }
 
-const RUNE_SETS: RuneSet[] = [
-  { name: 'Energy', emoji: '💚', pieces: 2, bonus: 'HP +15%', description: 'Basic HP set, good for early game tanks and supports.', idealSubs: ['HP%', 'DEF%', 'SPD', 'RES'] },
-  { name: 'Fatal', emoji: '⚔️', pieces: 4, bonus: 'ATK +35%', description: 'Best early-game attack set for nukers.', idealSubs: ['ATK%', 'CR', 'CD', 'SPD'] },
-  { name: 'Blade', emoji: '🗡️', pieces: 2, bonus: 'CR +12%', description: 'Crit rate offset. Pairs well with any DD set.', idealSubs: ['CR', 'CD', 'ATK%', 'SPD'] },
-  { name: 'Swift', emoji: '💨', pieces: 4, bonus: 'SPD +25%', description: 'Speed is king. Core set for first-turn units.', idealSubs: ['SPD', 'HP%', 'DEF%', 'ACC'] },
-  { name: 'Focus', emoji: '🎯', pieces: 2, bonus: 'ACC +20%', description: 'Accuracy offset for debuffers and CC.', idealSubs: ['ACC', 'SPD', 'HP%', 'DEF%'] },
-  { name: 'Guard', emoji: '🛡️', pieces: 2, bonus: 'DEF +15%', description: 'Defense offset for frontliners and def-scalers.', idealSubs: ['DEF%', 'HP%', 'SPD', 'RES'] },
-  { name: 'Endure', emoji: '🔒', pieces: 2, bonus: 'RES +20%', description: 'Resistance offset for raid and RTA.', idealSubs: ['RES', 'HP%', 'DEF%', 'SPD'] },
-  { name: 'Violent', emoji: '💥', pieces: 4, bonus: '22% extra turn', description: 'The most broken set in the game. Extra turns win fights.', idealSubs: ['SPD', 'HP%', 'CR', 'CD'] },
-  { name: 'Will', emoji: '🛡️✨', pieces: 2, bonus: '1-turn immunity', description: 'Essential for PvP. Prevents turn 1 CC.', idealSubs: ['SPD', 'HP%', 'DEF%', 'ATK%'] },
-  { name: 'Nemesis', emoji: '⚡', pieces: 2, bonus: 'ATB +4% per 7% HP lost', description: 'Counter Lushen / AoE. Cuts in after big hits.', idealSubs: ['HP%', 'SPD', 'DEF%', 'RES'] },
-  { name: 'Despair', emoji: '😵', pieces: 4, bonus: '25% stun on AoE', description: 'AoE stun machine. Great for ToA and CC units.', idealSubs: ['SPD', 'HP%', 'ACC', 'DEF%'] },
-  { name: 'Vampire', emoji: '🧛', pieces: 4, bonus: '35% lifesteal', description: 'Self-sustain for solo/dimension hole content.', idealSubs: ['ATK%', 'CR', 'CD', 'SPD'] },
-  { name: 'Destroy', emoji: '💀', pieces: 2, bonus: '30% damage → reduce max HP', description: 'Anti-sustain. Slowly wears down healers.', idealSubs: ['HP%', 'DEF%', 'SPD', 'CR'] },
-  { name: 'Rage', emoji: '🔥', pieces: 4, bonus: 'CD +40%', description: 'Max damage output. Pair with Blade or Will.', idealSubs: ['CD', 'CR', 'ATK%', 'SPD'] },
-  { name: 'Revenge', emoji: '🔄', pieces: 2, bonus: '15% counterattack', description: 'Great on Verdehile and defense units.', idealSubs: ['SPD', 'HP%', 'CR', 'DEF%'] },
-  { name: 'Shield', emoji: '🛡️💎', pieces: 2, bonus: '3-turn 15% HP shield (party)', description: 'Team protection in cleave and siege.', idealSubs: ['HP%', 'DEF%', 'SPD', 'ATK%'] },
-  { name: 'Tolerance', emoji: '🧘', pieces: 2, bonus: 'RES +10% (party)', description: 'Team resistance for raid and PvP.', idealSubs: ['HP%', 'DEF%', 'SPD', 'RES'] },
-  { name: 'Fight', emoji: '👊', pieces: 2, bonus: 'ATK +8% (party)', description: 'Team damage boost. Stack on supports.', idealSubs: ['HP%', 'DEF%', 'SPD', 'ATK%'] },
-  { name: 'Determination', emoji: '🏰', pieces: 2, bonus: 'DEF +8% (party)', description: 'Team defense for siege and 4* towers.', idealSubs: ['HP%', 'DEF%', 'SPD', 'RES'] },
-  { name: 'Enhance', emoji: '✨', pieces: 2, bonus: 'HP +8% (party)', description: 'Team HP boost. Good on siege supports.', idealSubs: ['HP%', 'DEF%', 'SPD', 'RES'] },
-  { name: 'Accuracy', emoji: '🎯✨', pieces: 2, bonus: 'ACC +10% (party)', description: 'Team accuracy for dungeon/raid comps.', idealSubs: ['SPD', 'HP%', 'ACC', 'DEF%'] },
-  { name: 'Seal', emoji: '🔗', pieces: 2, bonus: '15% activate seal on attack', description: 'Newer set. Prevents passive use.', idealSubs: ['SPD', 'HP%', 'ACC', 'DEF%'] },
-]
+const WEIGHT_ROWS: WeightRow[] = (Object.entries(BUILD_ARCHETYPES) as [BuildArchetype, { name: string; emoji: string; description: string }][]).map(([key, info]) => {
+  const rawWeights = STAT_PRIORITY_WEIGHTS[key]
+  const weights: Record<string, number> = {}
+  for (const s of ALL_STATS) {
+    const lowerKey = s.toLowerCase() as keyof typeof rawWeights
+    weights[s] = rawWeights[lowerKey] ?? 0
+  }
+  return { archetype: info.name, key, emoji: info.emoji, description: info.description, weights }
+})
 
 // ---------------------------------------------------------------------------
 // Section 3 — Slot Stats
@@ -146,28 +419,104 @@ const SLOTS: SlotInfo[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Section 4 — Substat Roll Ranges (6-star)
+// Section 4 — Substat Values (merged: roll ranges + grindstone & gem values)
 // ---------------------------------------------------------------------------
 
-interface RollRange {
+interface SubstatValueRow {
   stat: string
   min: number
   max: number
   unit: string
+  grind: { magic: string; rare: string; hero: string; legend: string }
+  gem: { magic: string; rare: string; hero: string; legend: string }
 }
 
-const ROLL_RANGES: RollRange[] = [
-  { stat: 'HP flat', min: 135, max: 375, unit: '' },
-  { stat: 'HP%', min: 5, max: 8, unit: '%' },
-  { stat: 'ATK flat', min: 10, max: 20, unit: '' },
-  { stat: 'ATK%', min: 5, max: 8, unit: '%' },
-  { stat: 'DEF flat', min: 10, max: 20, unit: '' },
-  { stat: 'DEF%', min: 5, max: 8, unit: '%' },
-  { stat: 'SPD', min: 4, max: 6, unit: '' },
-  { stat: 'CR', min: 4, max: 6, unit: '%' },
-  { stat: 'CD', min: 4, max: 7, unit: '%' },
-  { stat: 'RES', min: 4, max: 8, unit: '%' },
-  { stat: 'ACC', min: 4, max: 8, unit: '%' },
+const SUBSTAT_VALUES: SubstatValueRow[] = [
+  { stat: 'HP flat', min: 135, max: 375, unit: '', grind: { magic: '100-200', rare: '180-250', hero: '230-450', legend: '430-550' }, gem: { magic: '100-200', rare: '180-280', hero: '250-420', legend: '400-580' } },
+  { stat: 'HP%', min: 5, max: 8, unit: '%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
+  { stat: 'ATK flat', min: 10, max: 20, unit: '', grind: { magic: '6-12', rare: '10-18', hero: '12-22', legend: '18-30' }, gem: { magic: '8-12', rare: '10-16', hero: '15-23', legend: '20-30' } },
+  { stat: 'ATK%', min: 5, max: 8, unit: '%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
+  { stat: 'DEF flat', min: 10, max: 20, unit: '', grind: { magic: '6-12', rare: '10-18', hero: '12-22', legend: '18-30' }, gem: { magic: '8-12', rare: '10-16', hero: '15-23', legend: '20-30' } },
+  { stat: 'DEF%', min: 5, max: 8, unit: '%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
+  { stat: 'SPD', min: 4, max: 6, unit: '', grind: { magic: '1-2', rare: '2-3', hero: '3-4', legend: '4-5' }, gem: { magic: '1-3', rare: '2-4', hero: '3-6', legend: '5-8' } },
+  { stat: 'CR', min: 4, max: 6, unit: '%', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-3%', rare: '3-5%', hero: '4-6%', legend: '5-8%' } },
+  { stat: 'CD', min: 4, max: 7, unit: '%', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '3-5%', hero: '4-7%', legend: '5-9%' } },
+  { stat: 'RES', min: 4, max: 8, unit: '%', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
+  { stat: 'ACC', min: 4, max: 8, unit: '%', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
+]
+
+const substatColumns: ColumnDef<SubstatValueRow, unknown>[] = [
+  {
+    accessorKey: 'stat',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Stat" />,
+    cell: ({ row }) => <Span className="font-medium text-xs">{row.original.stat}</Span>,
+  },
+  {
+    accessorKey: 'min',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Min Roll" className="justify-center" />,
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.min}{row.original.unit}</Span>,
+  },
+  {
+    accessorKey: 'max',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Max Roll" className="justify-center" />,
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.max}{row.original.unit}</Span>,
+  },
+  {
+    id: 'grind_magic',
+    accessorFn: (row) => row.grind.magic,
+    header: 'Grind Mag',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.grind.magic}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'grind_rare',
+    accessorFn: (row) => row.grind.rare,
+    header: 'Grind Rare',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.grind.rare}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'grind_hero',
+    accessorFn: (row) => row.grind.hero,
+    header: 'Grind Hero',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.grind.hero}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'grind_legend',
+    accessorFn: (row) => row.grind.legend,
+    header: 'Grind Leg',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.grind.legend}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'gem_magic',
+    accessorFn: (row) => row.gem.magic,
+    header: 'Gem Mag',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.gem.magic}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'gem_rare',
+    accessorFn: (row) => row.gem.rare,
+    header: 'Gem Rare',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.gem.rare}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'gem_hero',
+    accessorFn: (row) => row.gem.hero,
+    header: 'Gem Hero',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.gem.hero}</Span>,
+    enableSorting: false,
+  },
+  {
+    id: 'gem_legend',
+    accessorFn: (row) => row.gem.legend,
+    header: 'Gem Leg',
+    cell: ({ row }) => <Span className="text-center tabular-nums text-xs block">{row.original.gem.legend}</Span>,
+    enableSorting: false,
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -196,31 +545,7 @@ const MAIN_STATS: MainStatTable[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Section 6 — Grindstone & Gem Values (matches rune-data.ts constants)
-// ---------------------------------------------------------------------------
-
-interface GrindGemRange {
-  stat: string
-  grind: { magic: string; rare: string; hero: string; legend: string }
-  gem: { magic: string; rare: string; hero: string; legend: string }
-}
-
-const GRIND_GEM_DATA: GrindGemRange[] = [
-  { stat: 'HP flat', grind: { magic: '100-200', rare: '180-250', hero: '230-450', legend: '430-550' }, gem: { magic: '100-200', rare: '180-280', hero: '250-420', legend: '400-580' } },
-  { stat: 'HP%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
-  { stat: 'ATK flat', grind: { magic: '6-12', rare: '10-18', hero: '12-22', legend: '18-30' }, gem: { magic: '8-12', rare: '10-16', hero: '15-23', legend: '20-30' } },
-  { stat: 'ATK%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
-  { stat: 'DEF flat', grind: { magic: '6-12', rare: '10-18', hero: '12-22', legend: '18-30' }, gem: { magic: '8-12', rare: '10-16', hero: '15-23', legend: '20-30' } },
-  { stat: 'DEF%', grind: { magic: '2-5%', rare: '3-6%', hero: '4-7%', legend: '5-10%' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
-  { stat: 'SPD', grind: { magic: '1-2', rare: '2-3', hero: '3-4', legend: '4-5' }, gem: { magic: '1-3', rare: '2-4', hero: '3-6', legend: '5-8' } },
-  { stat: 'CR', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-3%', rare: '3-5%', hero: '4-6%', legend: '5-8%' } },
-  { stat: 'CD', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '3-5%', hero: '4-7%', legend: '5-9%' } },
-  { stat: 'RES', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
-  { stat: 'ACC', grind: { magic: '-', rare: '-', hero: '-', legend: '-' }, gem: { magic: '2-4%', rare: '4-6%', hero: '5-9%', legend: '7-11%' } },
-]
-
-// ---------------------------------------------------------------------------
-// Section 7 — Roll Quality Tiers (NEW — replaces old Efficiency Thresholds)
+// Section 6 — Roll Quality Tiers
 // ---------------------------------------------------------------------------
 
 interface RollQualityTier {
@@ -239,8 +564,34 @@ const ROLL_QUALITY_TIERS: RollQualityTier[] = [
   { tier: 'Normal', symbol: '·', range: '< 25%', color: 'text-ga-roll-normal', description: 'Minimum or near-minimum rolls. Sell.' },
 ]
 
+const rollQualityColumns: ColumnDef<RollQualityTier, unknown>[] = [
+  {
+    accessorKey: 'symbol',
+    header: 'Symbol',
+    cell: ({ row }) => <Span className={`text-center text-lg block ${row.original.color}`}>{row.original.symbol}</Span>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'tier',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Tier" />,
+    cell: ({ row }) => <Span className={`font-medium ${row.original.color}`}>{row.original.tier}</Span>,
+  },
+  {
+    accessorKey: 'range',
+    header: 'Avg Roll %',
+    cell: ({ row }) => <Badge variant="outline" className="text-xs">{row.original.range}</Badge>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'description',
+    header: 'Meaning',
+    cell: ({ row }) => <Span className="text-xs text-muted-foreground">{row.original.description}</Span>,
+    enableSorting: false,
+  },
+]
+
 // ---------------------------------------------------------------------------
-// Section 8 — Progressive Sell Guide (updated with potential-based logic)
+// Section 7 — Progressive Sell Guide
 // ---------------------------------------------------------------------------
 
 interface SellStep {
@@ -259,7 +610,7 @@ const SELL_GUIDE: SellStep[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Section 9 — Roll Breakdown Symbols
+// Section 8 — Roll Breakdown Symbols
 // ---------------------------------------------------------------------------
 
 interface RollSymbol {
@@ -278,38 +629,34 @@ const ROLL_SYMBOLS: RollSymbol[] = [
   { symbol: '·', tier: 'Normal', range: '0-24% of max', color: 'text-ga-roll-normal', example: 'SPD roll of 4 (max 6) = 0% ·' },
 ]
 
-// ---------------------------------------------------------------------------
-// Section 10 — Stat Priority Weights per Archetype
-// ---------------------------------------------------------------------------
-
-interface WeightRow {
-  archetype: string
-  emoji: string
-  description: string
-  weights: Record<string, number>
-}
-
-const ALL_STATS = ['SPD', 'CR', 'CD', 'ATK%', 'HP%', 'DEF%', 'ACC', 'RES', 'ATK', 'DEF', 'HP']
-
-const WEIGHT_ROWS: WeightRow[] = [
-  { archetype: 'Speed DPS', emoji: '⚡', description: 'Lushen, Kaki, Alicia', weights: { SPD: 1.0, CR: 0.9, CD: 0.85, 'ATK%': 0.8, 'HP%': 0.4, 'DEF%': 0.3, ACC: 0.3, RES: 0.2, ATK: 0.3, DEF: 0.1, HP: 0.1 } },
-  { archetype: 'Bruiser', emoji: '💪', description: 'Vigor, Karnal, Mo Long', weights: { 'HP%': 1.0, CR: 0.85, CD: 0.8, SPD: 0.75, 'DEF%': 0.6, 'ATK%': 0.5, RES: 0.3, ACC: 0.2, HP: 0.2, ATK: 0.1, DEF: 0.1 } },
-  { archetype: 'Tank/Support', emoji: '🛡️', description: 'Fran, Riley, Lulu', weights: { 'HP%': 1.0, 'DEF%': 0.9, SPD: 0.8, RES: 0.7, ACC: 0.4, CR: 0.1, CD: 0.1, 'ATK%': 0.1, HP: 0.3, DEF: 0.2, ATK: 0.05 } },
-  { archetype: 'Cleave', emoji: '💀', description: 'Poseidon, Zaiross, Julie', weights: { 'ATK%': 1.0, CR: 0.95, CD: 0.9, SPD: 0.7, 'HP%': 0.3, 'DEF%': 0.2, ACC: 0.3, RES: 0.1, ATK: 0.2, DEF: 0.05, HP: 0.05 } },
-  { archetype: 'CC/Debuffer', emoji: '🎯', description: 'Tyron, Loren, Spectra', weights: { SPD: 1.0, ACC: 0.9, 'HP%': 0.7, 'DEF%': 0.6, RES: 0.3, CR: 0.2, CD: 0.1, 'ATK%': 0.1, HP: 0.2, DEF: 0.1, ATK: 0.05 } },
-  { archetype: 'Bomber', emoji: '💣', description: 'Seara, Malaka, Liebli', weights: { 'ATK%': 1.0, SPD: 0.9, ACC: 0.8, 'HP%': 0.5, 'DEF%': 0.3, CR: 0.2, CD: 0.1, RES: 0.2, ATK: 0.2, HP: 0.1, DEF: 0.05 } },
-  { archetype: 'Strip/Cleanse', emoji: '✨', description: 'Juno, Praha, Velajuel', weights: { SPD: 1.0, 'HP%': 0.85, ACC: 0.8, RES: 0.7, 'DEF%': 0.5, CR: 0.1, CD: 0.1, 'ATK%': 0.1, HP: 0.2, DEF: 0.1, ATK: 0.05 } },
-  { archetype: 'Healer', emoji: '💚', description: 'Fran, Ariel, Chasun', weights: { SPD: 1.0, 'HP%': 0.9, 'DEF%': 0.7, ACC: 0.5, RES: 0.4, CR: 0.1, CD: 0.1, 'ATK%': 0.3, HP: 0.2, DEF: 0.1, ATK: 0.05 } },
-  { archetype: 'One-Shot', emoji: '🔫', description: 'Copper, Bulldozer, Kahli', weights: { 'ATK%': 1.0, CR: 0.95, CD: 0.95, SPD: 0.5, 'HP%': 0.2, 'DEF%': 0.1, ACC: 0.1, RES: 0.05, ATK: 0.3, DEF: 0.05, HP: 0.05 } },
-  { archetype: 'DEF Nuker', emoji: '🏰', description: 'Copper, Bulldozer, Feng Yan', weights: { 'DEF%': 1.0, CR: 0.95, CD: 0.95, SPD: 0.5, 'HP%': 0.3, 'ATK%': 0.1, ACC: 0.1, RES: 0.1, DEF: 0.3, ATK: 0.05, HP: 0.1 } },
-  { archetype: 'Vamp Bruiser', emoji: '🧛', description: 'Laika, Rakan', weights: { 'ATK%': 0.9, CR: 0.85, CD: 0.8, 'HP%': 0.8, SPD: 0.5, 'DEF%': 0.3, ACC: 0.1, RES: 0.1, ATK: 0.2, DEF: 0.05, HP: 0.1 } },
-  { archetype: 'Revenge', emoji: '🔄', description: 'Miho, Rina', weights: { 'HP%': 0.9, 'DEF%': 0.85, CR: 0.7, CD: 0.6, SPD: 0.3, RES: 0.4, ACC: 0.1, 'ATK%': 0.1, HP: 0.2, DEF: 0.2, ATK: 0.05 } },
-  { archetype: 'Speed Lead', emoji: '🏃', description: 'Bernard, Kabilla, Orion', weights: { SPD: 1.0, 'HP%': 0.8, 'DEF%': 0.6, RES: 0.5, ACC: 0.3, CR: 0.1, CD: 0.1, 'ATK%': 0.1, HP: 0.2, DEF: 0.1, ATK: 0.05 } },
-  { archetype: 'Raid', emoji: '⚔️', description: 'Colleen, Fran (R5)', weights: { SPD: 0.9, 'HP%': 0.9, 'DEF%': 0.8, RES: 0.8, ACC: 0.3, CR: 0.1, CD: 0.1, 'ATK%': 0.1, HP: 0.2, DEF: 0.2, ATK: 0.05 } },
+const rollSymbolColumns: ColumnDef<RollSymbol, unknown>[] = [
+  {
+    accessorKey: 'symbol',
+    header: 'Badge',
+    cell: ({ row }) => <Span className={`text-center text-lg block ${row.original.color}`}>{row.original.symbol}</Span>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'tier',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Tier" />,
+    cell: ({ row }) => <Span className={`font-medium ${row.original.color}`}>{row.original.tier}</Span>,
+  },
+  {
+    accessorKey: 'range',
+    header: 'Range',
+    cell: ({ row }) => <Span className="text-xs">{row.original.range}</Span>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'example',
+    header: 'Example',
+    cell: ({ row }) => <Span className="text-xs text-muted-foreground">{row.original.example}</Span>,
+    enableSorting: false,
+  },
 ]
 
 // ---------------------------------------------------------------------------
-// Section 11 — Gem/Grind Recommendations per Archetype
+// Section 9 — Gem/Grind Recommendations per Archetype
 // ---------------------------------------------------------------------------
 
 interface GemGrindRec {
@@ -338,43 +685,53 @@ const GEM_GRIND_RECS: GemGrindRec[] = [
   { archetype: 'Raid', emoji: '⚔️', gemTarget: 'CR or CD', gemReplace: 'HP% or RES', grindStats: ['HP%', 'DEF%', 'SPD'], example: 'Gem CD → RES, grind HP% + DEF% + SPD' },
 ]
 
-// ---------------------------------------------------------------------------
-// Section 12 — Set Archetype Affinity
-// ---------------------------------------------------------------------------
-
-interface SetAffinityRow {
-  set: string
-  emoji: string
-  archetypes: string[]
-}
-
-const SET_AFFINITY_DATA: SetAffinityRow[] = [
-  { set: 'Fatal', emoji: '⚔️', archetypes: ['Speed DPS', 'Cleave', 'One-Shot', 'Vamp Bruiser'] },
-  { set: 'Rage', emoji: '🔥', archetypes: ['Speed DPS', 'Cleave', 'One-Shot'] },
-  { set: 'Blade', emoji: '🗡️', archetypes: ['Speed DPS', 'Cleave', 'One-Shot', 'Vamp Bruiser'] },
-  { set: 'Violent', emoji: '💥', archetypes: ['Speed DPS', 'Bruiser', 'CC/Debuffer', 'Healer', 'Strip/Cleanse'] },
-  { set: 'Swift', emoji: '💨', archetypes: ['Speed DPS', 'Speed Lead', 'CC/Debuffer', 'Strip/Cleanse', 'Bomber'] },
-  { set: 'Energy', emoji: '💚', archetypes: ['Tank/Support', 'Bruiser', 'Healer', 'Raid'] },
-  { set: 'Guard', emoji: '🛡️', archetypes: ['Tank/Support', 'DEF Nuker', 'Raid'] },
-  { set: 'Endure', emoji: '🔒', archetypes: ['Tank/Support', 'Raid', 'Strip/Cleanse'] },
-  { set: 'Shield', emoji: '🛡️💎', archetypes: ['Tank/Support', 'Bruiser'] },
-  { set: 'Will', emoji: '🛡️✨', archetypes: ['Tank/Support', 'Bruiser', 'Speed DPS', 'Strip/Cleanse'] },
-  { set: 'Despair', emoji: '😵', archetypes: ['CC/Debuffer', 'Bruiser', 'Tank/Support'] },
-  { set: 'Revenge', emoji: '🔄', archetypes: ['Bruiser', 'Revenge', 'Tank/Support'] },
-  { set: 'Nemesis', emoji: '⚡', archetypes: ['Bruiser', 'Tank/Support'] },
-  { set: 'Destroy', emoji: '💀', archetypes: ['Bruiser', 'Tank/Support'] },
-  { set: 'Focus', emoji: '🎯', archetypes: ['CC/Debuffer', 'Bomber', 'Strip/Cleanse'] },
-  { set: 'Accuracy', emoji: '🎯✨', archetypes: ['CC/Debuffer', 'Bomber', 'Strip/Cleanse'] },
-  { set: 'Tolerance', emoji: '🧘', archetypes: ['Tank/Support', 'Raid'] },
-  { set: 'Vampire', emoji: '🧛', archetypes: ['Vamp Bruiser', 'Bruiser'] },
-  { set: 'Fight', emoji: '👊', archetypes: ['Speed DPS', 'Cleave'] },
-  { set: 'Determination', emoji: '🏰', archetypes: ['Tank/Support', 'DEF Nuker'] },
-  { set: 'Enhance', emoji: '✨', archetypes: ['Tank/Support', 'Bruiser'] },
-  { set: 'Cruel', emoji: '⚔️💀', archetypes: ['Speed DPS', 'Cleave', 'One-Shot'] },
+const gemGrindColumns: ColumnDef<GemGrindRec, unknown>[] = [
+  {
+    accessorKey: 'archetype',
+    header: ({ header }) => <DataTableColumnHeader header={header} title="Archetype" />,
+    cell: ({ row }) => (
+      <Div className="flex items-center gap-1.5">
+        <span>{row.original.emoji}</span>
+        <span className="font-medium text-xs">{row.original.archetype}</span>
+      </Div>
+    ),
+    filterFn: 'includesString',
+  },
+  {
+    accessorKey: 'gemTarget',
+    header: 'Gem Target',
+    cell: ({ row }) => <Badge variant="outline" className="text-xs border-destructive/40 text-destructive-foreground">{row.original.gemTarget}</Badge>,
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'gemReplace',
+    header: 'Gem With',
+    cell: ({ row }) => <Badge variant="outline" className="text-xs border-success/40 text-success-foreground">{row.original.gemReplace}</Badge>,
+    enableSorting: false,
+  },
+  {
+    id: 'grindStats',
+    accessorFn: (row) => row.grindStats.join(', '),
+    header: 'Grind Stats',
+    cell: ({ row }) => (
+      <Div className="flex flex-wrap gap-1">
+        {row.original.grindStats.map((s) => (
+          <Badge key={s} variant="outline" className="text-xs border-ga-roll-rare/40 text-ga-roll-rare">{s}</Badge>
+        ))}
+      </Div>
+    ),
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'example',
+    header: 'Example',
+    cell: ({ row }) => <Span className="text-xs text-muted-foreground font-mono">{row.original.example}</Span>,
+    enableSorting: false,
+  },
 ]
 
 // ---------------------------------------------------------------------------
-// Section 13 — Sources
+// Section 10 — Sources
 // ---------------------------------------------------------------------------
 
 interface Source {
@@ -394,116 +751,88 @@ const SOURCES: Source[] = [
 // Component
 // ---------------------------------------------------------------------------
 
-function weightColor(w: number): string {
-  if (w >= 0.9) return 'text-ga-roll-legend font-bold'
-  if (w >= 0.7) return 'text-ga-roll-hero font-semibold'
-  if (w >= 0.5) return 'text-ga-roll-rare'
-  if (w >= 0.3) return 'text-ga-roll-magic'
-  return 'text-ga-roll-normal'
-}
-
 export default function GameDataPage() {
+  const params = useParams()
+  const game = params.game as string
+
+  if (game !== 'summoners-war') {
+    return (
+      <Div className="container mx-auto px-4 py-12 max-w-4xl text-center">
+        <P className="text-2xl font-bold mb-4">Coming Soon</P>
+        <P className="text-muted-foreground">
+          Les données de référence pour {game.replace(/-/g, ' ')} sont en cours de préparation.
+        </P>
+      </Div>
+    )
+  }
+
   return (
     <Div className="container mx-auto px-4 py-6 max-w-6xl">
       {/* Header */}
       <Div className="mb-6">
-        <H1 className="text-lg font-bold">Reference Data</H1>
         <P className="text-muted-foreground text-sm mt-1">
           All Summoners War rune reference tables, efficiency guides, and grindstone values in one place.
         </P>
       </Div>
 
-      <Accordion type="multiple" defaultValue={['archetypes']} className="space-y-2">
-        {/* ---- Section 1: Archetypes ---- */}
-        <AccordionItem value="archetypes">
-          <AccordionTrigger className="text-base font-semibold">
-            1. Stat Priority by Build Archetype
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="overflow-x-auto">
-              <Table variant="striped" size="compact">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[140px]">Archetype</TableHead>
-                    <TableHead className="min-w-[200px]">Description</TableHead>
-                    <TableHead className="min-w-[280px]">Stat Priority</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ARCHETYPES.map((a) => (
-                    <TableRow key={a.name}>
-                      <TableCell className="font-medium">{a.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{a.description}</TableCell>
-                      <TableCell>
-                        <Div className="flex flex-wrap gap-1">
-                          {a.stats.map((s) => (
-                            <RankBadge key={s.stat} stat={s.stat} rank={s.rank} />
-                          ))}
-                        </Div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 2: Rune Sets ---- */}
+      <Accordion type="multiple" defaultValue={['sets']} className="space-y-2">
+        {/* ---- Section 1: Rune Sets (merged sets + stat tiers + archetype affinity) ---- */}
         <AccordionItem value="sets">
           <AccordionTrigger className="text-base font-semibold">
-            2. Rune Sets
+            1. Rune Sets
           </AccordionTrigger>
           <AccordionContent>
-            <Div className="overflow-x-auto">
-              <Table variant="striped" size="compact">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[130px]">Set</TableHead>
-                    <TableHead className="w-[50px] text-center">Pcs</TableHead>
-                    <TableHead className="min-w-[160px]">Bonus</TableHead>
-                    <TableHead className="min-w-[220px]">Ideal Subs</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {RUNE_SETS.map((s) => (
-                    <TableRow key={s.name}>
-                      <TableCell>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Div className="flex items-center gap-1.5 cursor-help">
-                              <span>{s.emoji}</span>
-                              <span className="font-medium">{s.name}</span>
-                            </Div>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-[250px]">
-                            {s.description}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell className="text-center">{s.pieces}</TableCell>
-                      <TableCell className="text-xs">{s.bonus}</TableCell>
-                      <TableCell>
-                        <Div className="flex flex-wrap gap-1">
-                          {s.idealSubs.map((sub, i) => (
-                            <Badge key={sub} variant="outline" className={`text-xs border ${RANK_COLORS[i + 1] ?? RANK_COLORS[5]}`}>
-                              {sub}
-                            </Badge>
-                          ))}
-                        </Div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <Div className="space-y-4">
+              <P className="text-xs text-muted-foreground">
+                Complete overview of every rune set: bonus, <TT tip="S-tier sets have the best bonuses. Weaker sets need godlike substats to be worth keeping.">set strength</TT>, and <TT tip="Tier list of stats per set. S=priority, D=useless. Used to weight efficiency per set.">stat tiers</TT>.
+              </P>
+
+              <Div className="overflow-x-auto">
+                <DataTable
+                  columns={runeSetColumns}
+                  data={RUNE_SET_DATA}
+                  filterColumn="setKey"
+                  filterPlaceholder="Filter by set name..."
+                  pageSize={50}
+                  hidePagination
+                  initialSorting={INITIAL_SET_SORTING}
+                  tableSize="compact"
+                  maxHeight="320px"
+                  stickyHeader
+                />
+              </Div>
+
+              {/* Radar chart */}
+              <SetRadarChart />
+
+              <Card size="sm" className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">Tier Weights</P>
+                  <Div className="flex flex-wrap gap-3 mt-2">
+                    {(Object.entries(TIER_WEIGHTS) as [StatTier, number][]).map(([tier, weight]) => (
+                      <Div key={tier} className="flex items-center gap-1.5">
+                        <Span className={`text-sm ${TIER_COLOR[tier]}`}>{tier}</Span>
+                        <Span className="text-xs text-muted-foreground">= {weight}</Span>
+                      </Div>
+                    ))}
+                  </Div>
+                  <P className="text-xs text-muted-foreground mt-2">
+                    Multiplier applied to each substat&apos;s efficiency based on its tier for this set. A SPD substat tier S on Violent counts at 100%, but RES tier C only counts at 20%.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <P className="text-xs text-muted-foreground italic">
+                Legend: <Span className="text-ga-tier-s font-bold">S</Span> priority, <Span className="text-ga-tier-a font-semibold">A</Span> important, <Span className="text-ga-tier-b">B</Span> useful, <Span className="text-ga-tier-c">C</Span> mediocre, <Span className="text-ga-tier-d">D</Span> useless. Str = Set Strength (how valuable the set bonus itself is).
+              </P>
             </Div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 3: Slot Stats ---- */}
+        {/* ---- Section 2: Slot Stats ---- */}
         <AccordionItem value="slots">
           <AccordionTrigger className="text-base font-semibold">
-            3. Stat Values by Slot
+            2. Stat Values by Slot
           </AccordionTrigger>
           <AccordionContent>
             <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -550,58 +879,35 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 4: Roll Ranges ---- */}
-        <AccordionItem value="rolls">
+        {/* ---- Section 3: Substat Values (merged roll ranges + grind/gem values) ---- */}
+        <AccordionItem value="substat-values">
           <AccordionTrigger className="text-base font-semibold">
-            4. Substat Roll Ranges (6-star)
+            3. Substat Values
           </AccordionTrigger>
           <AccordionContent>
-            <Div className="overflow-x-auto">
-              <Table variant="striped" size="compact">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[100px]">Stat</TableHead>
-                    <TableHead className="w-[70px] text-right">Min</TableHead>
-                    <TableHead className="w-[70px] text-right">Max</TableHead>
-                    <TableHead className="min-w-[200px]">Range</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ROLL_RANGES.map((r) => {
-                    const pct = ((r.max - r.min) / r.max) * 100
-                    const fillPct = (r.min / r.max) * 100
-                    return (
-                      <TableRow key={r.stat}>
-                        <TableCell className="font-medium">{r.stat}</TableCell>
-                        <TableCell className="text-right tabular-nums">{r.min}{r.unit}</TableCell>
-                        <TableCell className="text-right tabular-nums">{r.max}{r.unit}</TableCell>
-                        <TableCell>
-                          <Div className="flex items-center gap-2">
-                            <Div className="flex-1 h-3 bg-muted rounded-full overflow-hidden relative">
-                              <Div
-                                className="absolute inset-y-0 left-0 bg-ga-roll-rare/60 rounded-full"
-                                style={{ width: `${fillPct}%` }}
-                              />
-                              <Div
-                                className="absolute inset-y-0 bg-ga-roll-rare rounded-full"
-                                style={{ left: `${fillPct}%`, width: `${pct - (100 - fillPct)}%` }}
-                              />
-                            </Div>
-                          </Div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+            <Div className="space-y-4">
+              <P className="text-xs text-muted-foreground">
+                Roll ranges (6-star), <TT tip="Grindstones add a flat bonus to a substat. Only grindable: HP, HP%, ATK, ATK%, DEF, DEF%, SPD.">grindstone</TT> values, and <TT tip="Enchanted gems replace one substat entirely with a new value. Unlike grinds, gems can target ANY stat.">enchanted gem</TT> values at a glance. &quot;-&quot; means the stat cannot be grinded.
+              </P>
+
+              <Div className="overflow-x-auto">
+                <DataTable
+                  columns={substatColumns}
+                  data={SUBSTAT_VALUES}
+                  filterColumn="stat"
+                  filterPlaceholder="Filter by stat..."
+                  pageSize={20}
+                  hidePagination
+                />
+              </Div>
             </Div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 5: Main Stat Values ---- */}
+        {/* ---- Section 4: Main Stat Values ---- */}
         <AccordionItem value="main-stats">
           <AccordionTrigger className="text-base font-semibold">
-            5. Main Stat Values (+0 to +15)
+            4. Main Stat Values (+0 to +15)
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
@@ -642,81 +948,10 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 6: Grindstones & Gems ---- */}
-        <AccordionItem value="grinds">
-          <AccordionTrigger className="text-base font-semibold">
-            6. Grindstone & Gem Values
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-4">
-              <Div>
-                <P className="font-medium text-sm mb-2">Grindstones</P>
-                <P className="text-xs text-muted-foreground mb-2">
-                  Only grindable stats: HP, HP%, ATK, ATK%, DEF, DEF%, SPD. CR, CD, RES, ACC cannot be grinded.
-                </P>
-                <Div className="overflow-x-auto">
-                  <Table variant="striped" size="compact">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="min-w-[90px]">Stat</TableHead>
-                        <TableHead className="text-center">Magic</TableHead>
-                        <TableHead className="text-center">Rare</TableHead>
-                        <TableHead className="text-center">Hero</TableHead>
-                        <TableHead className="text-center">Legend</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {GRIND_GEM_DATA.map((g) => (
-                        <TableRow key={g.stat}>
-                          <TableCell className="font-medium">{g.stat}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.grind.magic}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.grind.rare}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.grind.hero}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.grind.legend}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Div>
-              </Div>
-
-              <Div>
-                <P className="font-medium text-sm mb-2">
-                  <TT tip="Enchanted gems replace one substat entirely with a new value. Unlike grinds, gems can target ANY stat including CR, CD, RES, ACC.">Enchanted Gems</TT>
-                </P>
-                <Div className="overflow-x-auto">
-                  <Table variant="striped" size="compact">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="min-w-[90px]">Stat</TableHead>
-                        <TableHead className="text-center">Magic</TableHead>
-                        <TableHead className="text-center">Rare</TableHead>
-                        <TableHead className="text-center">Hero</TableHead>
-                        <TableHead className="text-center">Legend</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {GRIND_GEM_DATA.map((g) => (
-                        <TableRow key={g.stat}>
-                          <TableCell className="font-medium">{g.stat}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.gem.magic}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.gem.rare}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.gem.hero}</TableCell>
-                          <TableCell className="text-center text-xs tabular-nums">{g.gem.legend}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Div>
-              </Div>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 7: Roll Quality Tiers ---- */}
+        {/* ---- Section 5: Roll Quality Tiers ---- */}
         <AccordionItem value="roll-quality">
           <AccordionTrigger className="text-base font-semibold">
-            7. <TT tip="The average quality of each roll compared to the maximum possible value for that stat.">Roll Quality</TT> Tiers
+            5. <TT tip="The average quality of each roll compared to the maximum possible value for that stat.">Roll Quality</TT> Tiers
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
@@ -724,28 +959,12 @@ export default function GameDataPage() {
                 <TT tip="The average quality of each roll compared to the maximum possible value for that stat.">Roll Quality</TT> measures how close each substat roll landed to the maximum possible value. It replaces the old efficiency threshold system with a more intuitive tier system.
               </P>
 
-              <Div className="overflow-x-auto">
-                <Table variant="striped" size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60px]">Symbol</TableHead>
-                      <TableHead className="w-[90px]">Tier</TableHead>
-                      <TableHead className="w-[120px]">Avg Roll %</TableHead>
-                      <TableHead className="min-w-[200px]">Meaning</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {ROLL_QUALITY_TIERS.map((t) => (
-                      <TableRow key={t.tier}>
-                        <TableCell className={`text-center text-lg ${t.color}`}>{t.symbol}</TableCell>
-                        <TableCell className={`font-medium ${t.color}`}>{t.tier}</TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs">{t.range}</Badge></TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{t.description}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
+              <DataTable
+                columns={rollQualityColumns}
+                data={ROLL_QUALITY_TIERS}
+                pageSize={10}
+                hidePagination
+              />
 
               <Card size="sm" className="border-amber-500/20 bg-amber-500/5">
                 <CardContent className="pt-3">
@@ -817,10 +1036,10 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 8: Progressive Sell Guide ---- */}
+        {/* ---- Section 6: Progressive Sell Guide ---- */}
         <AccordionItem value="sell-guide">
           <AccordionTrigger className="text-base font-semibold">
-            8. <TT tip="The advice considers both current quality AND gem/grind potential, not just the current efficiency number.">Progressive Sell Guide</TT>
+            6. <TT tip="The advice considers both current quality AND gem/grind potential, not just the current efficiency number.">Progressive Sell Guide</TT>
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
@@ -909,10 +1128,10 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 9: Roll Breakdown ---- */}
+        {/* ---- Section 7: Roll Breakdown ---- */}
         <AccordionItem value="roll-breakdown">
           <AccordionTrigger className="text-base font-semibold">
-            9. <TT tip="Each individual substat roll is graded from Legend to Normal based on how close it landed to the maximum possible value.">Roll Breakdown</TT> — Reading Roll Badges
+            7. <TT tip="Each individual substat roll is graded from Legend to Normal based on how close it landed to the maximum possible value.">Roll Breakdown</TT> — Reading Roll Badges
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
@@ -920,28 +1139,12 @@ export default function GameDataPage() {
                 Each individual roll into a substat is graded based on how close it landed to the maximum. The badges appear next to each substat in the rune card.
               </P>
 
-              <Div className="overflow-x-auto">
-                <Table variant="striped" size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60px]">Badge</TableHead>
-                      <TableHead className="w-[80px]">Tier</TableHead>
-                      <TableHead className="w-[120px]">Range</TableHead>
-                      <TableHead className="min-w-[200px]">Example</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {ROLL_SYMBOLS.map((r) => (
-                      <TableRow key={r.tier}>
-                        <TableCell className={`text-center text-lg ${r.color}`}>{r.symbol}</TableCell>
-                        <TableCell className={`font-medium ${r.color}`}>{r.tier}</TableCell>
-                        <TableCell className="text-xs">{r.range}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{r.example}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
+              <DataTable
+                columns={rollSymbolColumns}
+                data={ROLL_SYMBOLS}
+                pageSize={10}
+                hidePagination
+              />
 
               <Card size="sm" className="border-ga-roll-rare/20 bg-ga-roll-rare/5">
                 <CardContent className="pt-3">
@@ -958,191 +1161,10 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 10: Stat Priority Weights ---- */}
-        <AccordionItem value="stat-weights">
-          <AccordionTrigger className="text-base font-semibold">
-            10. <TT tip="Numerical weights (0.05 to 1.0) that determine how much each stat contributes to the weighted efficiency score for a given archetype.">Stat Priority Weights</TT> by Archetype
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-4">
-              <P className="text-xs text-muted-foreground">
-                These weights determine the <TT tip="Efficiency score adjusted by stat importance for the best matching archetype. A rune with high rolls into important stats scores higher than one with high rolls into useless stats.">weighted efficiency</TT> score. A weight of 1.0 means the stat is top priority; 0.05 means nearly useless. The scanner auto-detects the best archetype for each rune.
-              </P>
-
-              <Div className="overflow-x-auto">
-                <Table size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[120px] sticky left-0 bg-background z-10">Archetype</TableHead>
-                      {ALL_STATS.map((s) => (
-                        <TableHead key={s} className="text-center w-[52px] text-xs">{s}</TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {WEIGHT_ROWS.map((row) => (
-                      <TableRow key={row.archetype}>
-                        <TableCell className="sticky left-0 bg-background z-10">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Div className="flex items-center gap-1.5 cursor-help">
-                                <span>{row.emoji}</span>
-                                <span className="font-medium text-xs">{row.archetype}</span>
-                              </Div>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-[200px]">
-                              {row.description}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                        {ALL_STATS.map((s) => (
-                          <TableCell key={s} className={`text-center tabular-nums text-xs ${weightColor(row.weights[s] ?? 0)}`}>
-                            {row.weights[s] ?? '-'}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
-
-              <P className="text-xs text-muted-foreground italic">
-                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high, <span className="text-ga-roll-rare">0.5-0.69</span> medium, <span className="text-ga-roll-magic">0.3-0.49</span> low, <span className="text-ga-roll-normal">below 0.3</span> useless.
-              </P>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 11: Gem/Grind Recommendations ---- */}
-        <AccordionItem value="gem-grind-recs">
-          <AccordionTrigger className="text-base font-semibold">
-            11. <TT tip="Which stat to gem (replace the worst substat) and which stats to grind (add flat bonus) for each archetype.">Gem/Grind Recommendations</TT> by Archetype
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-4">
-              <P className="text-xs text-muted-foreground">
-                For each archetype, the scanner identifies the worst substat (lowest weight) as the <TT tip="The substat with the lowest priority weight for the best matching archetype. This is the stat that should be replaced by an enchanted gem.">gem target</TT>. Grindable stats that match the archetype should always be grinded.
-              </P>
-
-              <Card size="sm" className="border-warning/20 bg-warning/5">
-                <CardContent className="pt-3">
-                  <P className="font-medium text-sm mb-1">
-                    <TT tip="The priority order used by the scanner to decide which substat to replace with an enchanted gem.">Gem Target Logic</TT> — Priority Order
-                  </P>
-                  <P className="text-xs text-muted-foreground">
-                    The scanner picks the gem target using this priority: <strong>1) Dead stats</strong> (ACC on a DPS, RES on a bomber) → <strong>2) Flat stats</strong> (ATK flat, DEF flat, HP flat — almost always worse than %) → <strong>3) Lowest weight stat</strong> for the archetype. The gem replacement is the highest-weight stat not already on the rune.
-                  </P>
-                  <P className="text-xs text-muted-foreground mt-1">
-                    <strong>Never gem out:</strong> SPD, CR, or CD — these are universally valuable and the scanner will never recommend replacing them, even if the archetype weight is low. The only exception is Tank/Support archetypes where CR/CD have 0.1 weight, but even then flat stats are prioritized first.
-                  </P>
-                  <P className="text-xs text-muted-foreground mt-1">
-                    Example: a Speed DPS rune with SPD 24, CR 15%, CD 12%, RES 10%. The scanner targets RES (dead stat for DPS, weight 0.2) and suggests gemming in ATK% (weight 0.8, highest missing useful stat).
-                  </P>
-                </CardContent>
-              </Card>
-
-              <Div className="overflow-x-auto">
-                <Table variant="striped" size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[120px]">Archetype</TableHead>
-                      <TableHead className="min-w-[100px]">
-                        <TT tip="The substat with the lowest priority weight for this archetype — replace it with an enchanted gem.">Gem Target</TT>
-                      </TableHead>
-                      <TableHead className="min-w-[100px]">
-                        <TT tip="The stat you should gem IN (replace the bad stat with this one).">Gem With</TT>
-                      </TableHead>
-                      <TableHead className="min-w-[120px]">
-                        <TT tip="Stats that are both grindable (HP, ATK, DEF, SPD) and useful for this archetype.">Grind Stats</TT>
-                      </TableHead>
-                      <TableHead className="min-w-[200px]">Example</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {GEM_GRIND_RECS.map((r) => (
-                      <TableRow key={r.archetype}>
-                        <TableCell>
-                          <Div className="flex items-center gap-1.5">
-                            <span>{r.emoji}</span>
-                            <span className="font-medium text-xs">{r.archetype}</span>
-                          </Div>
-                        </TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs border-destructive/40 text-destructive-foreground">{r.gemTarget}</Badge></TableCell>
-                        <TableCell><Badge variant="outline" className="text-xs border-success/40 text-success-foreground">{r.gemReplace}</Badge></TableCell>
-                        <TableCell>
-                          <Div className="flex flex-wrap gap-1">
-                            {r.grindStats.map((s) => (
-                              <Badge key={s} variant="outline" className="text-xs border-ga-roll-rare/40 text-ga-roll-rare">{s}</Badge>
-                            ))}
-                          </Div>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground font-mono">{r.example}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 12: Set Archetype Affinity ---- */}
-        <AccordionItem value="set-affinity">
-          <AccordionTrigger className="text-base font-semibold">
-            12. <TT tip="Which rune sets naturally pair with which build archetypes. The scanner uses this to prioritize archetype recommendations that match the rune's set.">Set Archetype Affinity</TT>
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-4">
-              <P className="text-xs text-muted-foreground">
-                The scanner uses set affinity to boost archetype scores when the rune&apos;s set naturally fits the archetype. A Violent rune on a Bruiser gets a higher score than the same substats on a Fatal rune, because Violent procs synergize with bruiser playstyle.
-              </P>
-
-              <Div className="overflow-x-auto">
-                <Table variant="striped" size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[120px]">Set</TableHead>
-                      <TableHead className="min-w-[300px]">Best Archetypes</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {SET_AFFINITY_DATA.map((row) => (
-                      <TableRow key={row.set}>
-                        <TableCell>
-                          <Div className="flex items-center gap-1.5">
-                            <span>{row.emoji}</span>
-                            <span className="font-medium text-xs">{row.set}</span>
-                          </Div>
-                        </TableCell>
-                        <TableCell>
-                          <Div className="flex flex-wrap gap-1">
-                            {row.archetypes.map((a) => (
-                              <Badge key={a} variant="outline" className="text-xs">{a}</Badge>
-                            ))}
-                          </Div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
-
-              <Card size="sm" className="border-primary/20 bg-primary/5">
-                <CardContent className="pt-3">
-                  <P className="font-medium text-sm mb-1">How affinity affects scoring</P>
-                  <P className="text-xs text-muted-foreground">
-                    When ranking archetypes for a rune, the scanner sorts by: <strong>1) Weighted efficiency</strong> (stat match) then <strong>2) Set affinity</strong> (set match). Two archetypes with similar weighted efficiency will be ranked by whether the set fits. Example: a Violent rune with HP%/CR/CD/SPD could fit Bruiser or Speed DPS — Violent has affinity with Bruiser, so Bruiser gets priority.
-                  </P>
-                </CardContent>
-              </Card>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 13: Sources ---- */}
+        {/* ---- Section 8: Sources ---- */}
         <AccordionItem value="sources">
           <AccordionTrigger className="text-base font-semibold">
-            13. Sources
+            8. Sources
           </AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-2">
@@ -1169,6 +1191,153 @@ export default function GameDataPage() {
               <P className="text-xs text-muted-foreground mt-3 italic">
                 Data compiled from community sources. Values may vary with game updates.
               </P>
+            </Div>
+          </AccordionContent>
+        </AccordionItem>
+        {/* ──────────────────────────────────────────────────────── */}
+        {/* Advanced / Archetypes — supplementary reference data  */}
+        {/* ──────────────────────────────────────────────────────── */}
+
+        {/* ---- Section 9: Build Archetypes (supplementary) ---- */}
+        <AccordionItem value="archetypes">
+          <AccordionTrigger className="text-base font-semibold">
+            9. Build Archetypes (Advanced)
+          </AccordionTrigger>
+          <AccordionContent>
+            <Div className="space-y-4">
+              <Card size="sm" className="border-muted-foreground/20 bg-muted/10">
+                <CardContent className="pt-3">
+                  <P className="text-xs text-muted-foreground">
+                    These are supplementary — the main analysis is set-based. Archetypes are provided as extra context for advanced users.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <P className="text-xs text-muted-foreground">
+                Stat priorities and <TT tip="Numerical weights (0.05 to 1.0) that determine how much each stat contributes to the weighted efficiency score for a given archetype.">numerical weights</TT> per build archetype.
+              </P>
+
+              {/* Stat Priority quick reference */}
+              <Div className="overflow-x-auto">
+                <Table variant="striped" size="compact">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[140px]">Archetype</TableHead>
+                      <TableHead className="min-w-[200px]">Description</TableHead>
+                      <TableHead className="min-w-[280px]">Stat Priority</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ARCHETYPES.map((a) => (
+                      <TableRow key={a.name}>
+                        <TableCell className="font-medium">{a.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{a.description}</TableCell>
+                        <TableCell>
+                          <Div className="flex flex-wrap gap-1">
+                            {a.stats.map((s) => (
+                              <RankBadge key={s.stat} stat={s.stat} rank={s.rank} />
+                            ))}
+                          </Div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Div>
+
+              {/* Numerical weight table */}
+              <Div>
+                <P className="font-medium text-sm mb-2">
+                  <TT tip="These weights determine the weighted efficiency score. A weight of 1.0 means the stat is top priority; 0.05 means nearly useless.">Stat Priority Weights</TT>
+                </P>
+                <Div className="overflow-x-auto">
+                  <Table size="compact">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px] sticky left-0 bg-background z-10">Archetype</TableHead>
+                        {ALL_STATS.map((s) => (
+                          <TableHead key={s} className="text-center w-[52px] text-xs">{s}</TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {WEIGHT_ROWS.map((row) => (
+                        <TableRow key={row.key}>
+                          <TableCell className="sticky left-0 bg-background z-10">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Div className="flex items-center gap-1.5 cursor-help">
+                                  <span>{row.emoji}</span>
+                                  <span className="font-medium text-xs">{row.archetype}</span>
+                                </Div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-[200px]">
+                                {row.description}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
+                          {ALL_STATS.map((s) => (
+                            <TableCell key={s} className={`text-center tabular-nums text-xs ${weightColor(row.weights[s] ?? 0)}`}>
+                              {row.weights[s] ?? '-'}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Div>
+              </Div>
+
+              <P className="text-xs text-muted-foreground italic">
+                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high, <span className="text-ga-roll-rare">0.5-0.69</span> medium, <span className="text-ga-roll-magic">0.3-0.49</span> low, <span className="text-ga-roll-normal">below 0.3</span> useless.
+              </P>
+            </Div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ---- Section 10: Gem/Grind Recommendations per Archetype (supplementary) ---- */}
+        <AccordionItem value="gem-grind-recs">
+          <AccordionTrigger className="text-base font-semibold">
+            10. <TT tip="Which stat to gem (replace the worst substat) and which stats to grind (add flat bonus) for each archetype.">Gem/Grind Recommendations</TT> by Archetype (Advanced)
+          </AccordionTrigger>
+          <AccordionContent>
+            <Div className="space-y-4">
+              <Card size="sm" className="border-muted-foreground/20 bg-muted/10">
+                <CardContent className="pt-3">
+                  <P className="text-xs text-muted-foreground">
+                    These are supplementary — the main gem target logic is now set-based. Archetype-specific recommendations are provided as extra context.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <P className="text-xs text-muted-foreground">
+                For each archetype, typical gem targets and grind priorities.
+              </P>
+
+              <Card size="sm" className="border-warning/20 bg-warning/5">
+                <CardContent className="pt-3">
+                  <P className="font-medium text-sm mb-1">
+                    <TT tip="The priority order used by the scanner to decide which substat to replace with an enchanted gem.">Gem Target Logic</TT> — Priority Order
+                  </P>
+                  <P className="text-xs text-muted-foreground">
+                    The scanner picks the gem target using this priority: <strong>1) Dead stats</strong> (ACC on a DPS, RES on a bomber) → <strong>2) Flat stats</strong> (ATK flat, DEF flat, HP flat — almost always worse than %) → <strong>3) Lowest weight stat</strong> for the set. The gem replacement is the highest-weight stat not already on the rune.
+                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">
+                    <strong>Never gem out:</strong> SPD, CR, or CD — these are universally valuable and the scanner will never recommend replacing them.
+                  </P>
+                </CardContent>
+              </Card>
+
+              <Div className="overflow-x-auto">
+                <DataTable
+                  columns={gemGrindColumns}
+                  data={GEM_GRIND_RECS}
+                  filterColumn="archetype"
+                  filterPlaceholder="Filter by archetype..."
+                  pageSize={20}
+                  hidePagination
+                />
+              </Div>
             </Div>
           </AccordionContent>
         </AccordionItem>

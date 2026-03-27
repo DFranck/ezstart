@@ -5,29 +5,33 @@
  * with accurate 6★ roll ranges, grind potential, and detailed substat analysis.
  */
 
-// --- Types (mirrors @game-analyzer/types/rune) ---
+import type { StatType, RuneQuality, RuneStat, RuneData } from '@game-analyzer/types'
+import {
+  EFFICIENCY_THRESHOLDS,
+  LEVEL_STRICTNESS,
+  SUBSTAT_ROLL_RANGES,
+  ANCIENT_SUBSTAT_BASE_RANGES,
+  ANCIENT_LEGEND_GRIND_RANGES,
+  ANCIENT_LEGEND_GEM_VALUES,
+  RUNE_SET_INFO,
+  SUBSTATS_BY_QUALITY,
+  UPGRADES_BY_QUALITY,
+  BUILD_ARCHETYPES,
+  SYNERGY_BONUS,
+  STAT_PRIORITY_WEIGHTS,
+  PROGRESSIVE_SELL_THRESHOLDS,
+  DEAD_STAT_COMBOS,
+  SET_STAT_TIERS,
+  TIER_WEIGHTS,
+  SET_STRENGTH,
+  SET_STRENGTH_THRESHOLD_BONUS,
+  SET_ARCHETYPE_AFFINITY,
+  GRINDABLE_STATS,
+  GEM_RANGES,
+} from '@game-analyzer/types'
 
-type StatType =
-  | 'hp' | 'hp%' | 'atk' | 'atk%' | 'def' | 'def%'
-  | 'spd' | 'cr' | 'cd' | 'res' | 'acc'
-
-type RuneQuality = 'normal' | 'magic' | 'rare' | 'hero' | 'legend'
-
-interface RuneStat {
-  type: StatType
-  value: number
-}
-
-interface RuneData {
-  set: string
-  slot: number
-  grade: number
-  level: number
-  quality?: RuneQuality
-  mainStat: RuneStat
-  subStats: RuneStat[]
-  innateStat?: RuneStat
-}
+// Re-export types for consumers
+export type { StatType, RuneQuality, RuneStat, RuneData }
 
 // --- Public types ---
 
@@ -35,15 +39,6 @@ export type EfficiencyTier = 'sell' | 'keep' | 'good' | 'great' | 'godlike'
 
 export type PlayerProfile = 'early' | 'mid' | 'late'
 
-const EFFICIENCY_THRESHOLDS: Record<PlayerProfile, Record<EfficiencyTier, number>> = {
-  early: { sell: 0, keep: 50, good: 60, great: 70, godlike: 80 },
-  mid:   { sell: 0, keep: 60, good: 70, great: 80, godlike: 85 },
-  late:  { sell: 0, keep: 70, good: 80, great: 85, godlike: 90 },
-}
-
-const LEVEL_STRICTNESS: Record<number, number> = {
-  0: 15, 3: 10, 6: 7, 9: 3, 12: 0, 15: 0,
-}
 /** @deprecated Use EfficiencyTier instead */
 export type Recommendation = EfficiencyTier
 
@@ -166,6 +161,20 @@ export interface RuneAnalysis {
   setWeightedEfficiency?: number
   /** Tier of each substat for this set (S/A/B/C/D) */
   subStatTiers?: Record<string, StatTier>
+  /** Innate stat scoring — bonus/malus based on innate tier for this set */
+  innateScore?: number
+  /** Tier of the innate stat for this set */
+  innateTier?: StatTier
+  /** Penalty for S/A tier substats with low rolls */
+  lowRollPenalty?: number
+  /** Penalty for having too many non-grindable substats */
+  nonGrindablePenalty?: number
+  /** Penalty for non-legend quality */
+  qualityPenalty?: number
+  /** Penalty for stat-set mismatch (too many low-tier stats for this set) */
+  mismatchPenalty?: number
+  /** Set strength tier (S/A/B/C) — weaker sets need higher subs to justify */
+  setStrength?: string
 }
 
 // Keep legacy exports for backward compat with index.ts
@@ -179,19 +188,20 @@ interface RollRange {
   max: number
 }
 
-/** Roll ranges per stat type for 6★ runes */
-const ROLL_RANGES: Record<StatType, RollRange> = {
-  'hp':   { min: 135, max: 375 },
-  'hp%':  { min: 5,   max: 8 },
-  'atk':  { min: 10,  max: 20 },
-  'atk%': { min: 5,   max: 8 },
-  'def':  { min: 10,  max: 20 },
-  'def%': { min: 5,   max: 8 },
-  'spd':  { min: 4,   max: 6 },
-  'cr':   { min: 4,   max: 6 },
-  'cd':   { min: 4,   max: 7 },
-  'res':  { min: 4,   max: 8 },
-  'acc':  { min: 4,   max: 8 },
+/** Roll ranges per stat type for 6★ runes — SAME for normal and ancient (alias for SUBSTAT_ROLL_RANGES) */
+const ROLL_RANGES: Record<StatType, RollRange> = SUBSTAT_ROLL_RANGES
+
+/** Base stat ranges for ancient runes (higher than normal when a substat first appears) */
+const ANCIENT_BASE_RANGES: Record<StatType, RollRange> = ANCIENT_SUBSTAT_BASE_RANGES
+
+/** Get the base ranges (initial substat value). Ancient bases are higher. */
+function getBaseRanges(isAncient?: boolean): Record<StatType, RollRange> {
+  return isAncient ? ANCIENT_BASE_RANGES : ROLL_RANGES
+}
+
+/** Get the roll ranges (+3/+6/+9/+12 upgrades). ALWAYS the same for normal and ancient. */
+function getRollRanges(): Record<StatType, RollRange> {
+  return ROLL_RANGES
 }
 
 /** Legend grind ranges (flat and %) — only grindable stats */
@@ -205,94 +215,30 @@ const LEGEND_GRIND_RANGES: Partial<Record<StatType, RollRange>> = {
   'spd':  { min: 4,   max: 5 },
 }
 
+/** Get the correct legend grind ranges based on ancient flag */
+function getLegendGrindRanges(isAncient?: boolean): Partial<Record<StatType, RollRange>> {
+  return isAncient ? ANCIENT_LEGEND_GRIND_RANGES : LEGEND_GRIND_RANGES
+}
+
+/** Get the correct legend gem values based on ancient flag */
+function getLegendGemValues(isAncient?: boolean): Record<StatType, number> {
+  if (isAncient) return ANCIENT_LEGEND_GEM_VALUES
+  return Object.fromEntries(
+    Object.entries(GEM_RANGES.legend).map(([k, v]) => [k, v.max])
+  ) as Record<StatType, number>
+}
+
 /** Non-grindable stats */
 const NON_GRINDABLE: Set<StatType> = new Set(['cr', 'cd', 'res', 'acc'])
 
-/** Rune set info: pieces required and bonus description */
-const SET_INFO: Record<string, { pieces: number; bonus: string }> = {
-  'energy': { pieces: 2, bonus: 'HP +15%' },
-  'fatal': { pieces: 4, bonus: 'ATK +35%' },
-  'blade': { pieces: 2, bonus: 'CRI Rate +12%' },
-  'swift': { pieces: 4, bonus: 'SPD +25%' },
-  'focus': { pieces: 2, bonus: 'ACC +20%' },
-  'guard': { pieces: 2, bonus: 'DEF +15%' },
-  'endure': { pieces: 2, bonus: 'RES +20%' },
-  'shield': { pieces: 2, bonus: 'Ally Shield 3 turns (15% HP)' },
-  'revenge': { pieces: 2, bonus: 'Counterattack +15%' },
-  'will': { pieces: 2, bonus: 'Immunity 1 turn' },
-  'nemesis': { pieces: 2, bonus: 'ATB +4% per 7% HP lost' },
-  'vampire': { pieces: 4, bonus: 'Lifedrain +35%' },
-  'destroy': { pieces: 2, bonus: 'Destroy 30% of damage dealt (4% max HP)' },
-  'despair': { pieces: 4, bonus: 'Stun Rate +25%' },
-  'violent': { pieces: 4, bonus: 'Extra Turn +22%' },
-  'rage': { pieces: 4, bonus: 'CRI Dmg +40%' },
-  'fight': { pieces: 2, bonus: 'Ally ATK +8%' },
-  'determination': { pieces: 2, bonus: 'Ally DEF +8%' },
-  'enhance': { pieces: 2, bonus: 'Ally HP +8%' },
-  'accuracy': { pieces: 2, bonus: 'Ally ACC +10%' },
-  'tolerance': { pieces: 2, bonus: 'Ally RES +10%' },
-  'cruel': { pieces: 2, bonus: 'ATK +12%' },
-}
+/** Rune set info: pieces required and bonus description (alias for RUNE_SET_INFO) */
+const SET_INFO = RUNE_SET_INFO as Record<string, { pieces: number; bonus: string }>
 
-/** Set → archetype affinity: coherent archetypes per set bonus */
-const SET_ARCHETYPE_AFFINITY: Record<string, BuildArchetype[]> = {
-  // DPS sets
-  fatal: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
-  rage: ['speed-dps', 'cleave', 'one-shot-nuker'],
-  blade: ['speed-dps', 'cleave', 'one-shot-nuker', 'vampire-bruiser'],
-  // Speed/Proc sets
-  violent: ['speed-dps', 'bruiser', 'cc-debuffer', 'healer', 'strip-cleanse'],
-  swift: ['speed-dps', 'speed-leader', 'cc-debuffer', 'strip-cleanse', 'bomber'],
-  // Tank/Support sets
-  energy: ['tank-support', 'bruiser', 'healer', 'raid-support'],
-  guard: ['tank-support', 'def-nuker', 'raid-support'],
-  endure: ['tank-support', 'raid-support', 'strip-cleanse'],
-  shield: ['tank-support', 'bruiser'],
-  will: ['tank-support', 'bruiser', 'speed-dps', 'strip-cleanse'],
-  // CC sets
-  despair: ['cc-debuffer', 'bruiser', 'tank-support'],
-  // Counter sets
-  revenge: ['bruiser', 'revenge-proc', 'tank-support'],
-  nemesis: ['bruiser', 'tank-support'],
-  destroy: ['bruiser', 'tank-support'],
-  // Debuff sets
-  focus: ['cc-debuffer', 'bomber', 'strip-cleanse'],
-  accuracy: ['cc-debuffer', 'bomber', 'strip-cleanse'],
-  tolerance: ['tank-support', 'raid-support'],
-  // Misc
-  vampire: ['vampire-bruiser', 'bruiser'],
-  fight: ['speed-dps', 'cleave'],
-  determination: ['tank-support', 'def-nuker'],
-  enhance: ['tank-support', 'bruiser'],
-  cruel: ['speed-dps', 'cleave', 'one-shot-nuker'],
-}
+// SET_ARCHETYPE_AFFINITY imported from @game-analyzer/types
 
-/** Build archetypes for synergy scoring */
-const BUILD_ARCHETYPES: Record<BuildArchetype, { desiredStats: StatType[] }> = {
-  'speed-dps': { desiredStats: ['spd', 'cr', 'cd', 'atk%'] },
-  'bruiser': { desiredStats: ['hp%', 'cr', 'cd', 'spd'] },
-  'cleave': { desiredStats: ['atk%', 'cr', 'cd', 'spd'] },
-  'cc-debuffer': { desiredStats: ['spd', 'acc', 'hp%', 'def%'] },
-  'tank-support': { desiredStats: ['hp%', 'def%', 'spd', 'res'] },
-  'bomber': { desiredStats: ['atk%', 'spd', 'acc', 'hp%'] },
-  'strip-cleanse': { desiredStats: ['spd', 'hp%', 'acc', 'res'] },
-  'healer': { desiredStats: ['spd', 'hp%', 'def%', 'acc'] },
-  'one-shot-nuker': { desiredStats: ['atk%', 'cr', 'cd', 'spd'] },
-  'def-nuker': { desiredStats: ['def%', 'cr', 'cd', 'spd'] },
-  'vampire-bruiser': { desiredStats: ['atk%', 'cr', 'cd', 'hp%'] },
-  'revenge-proc': { desiredStats: ['hp%', 'def%', 'cr', 'cd'] },
-  'speed-leader': { desiredStats: ['spd', 'hp%', 'def%', 'res'] },
-  'raid-support': { desiredStats: ['spd', 'hp%', 'def%', 'res'] },
-}
+// BUILD_ARCHETYPES imported from @game-analyzer/types
 
-const SYNERGY_BONUS = {
-  PERFECT_4: 8,         // 4/4 substats match
-  THREE_NO_ROLL: 8,     // 3/4 match + 4th has 0-1 roll → gem without loss = like 4/4
-  THREE_WITH_ROLLS: 4,  // 3/4 match + 4th has 2+ rolls → gem possible but loss
-  TWO_NO_ROLLS: 4,      // 2/4 match + 2 others have 0-1 roll → gem possible
-  TWO_WITH_ROLLS: 0,    // 2/4 match + rolls in bad stats → too much loss
-  INCOHERENT: -3,       // < 2 match
-} as const
+// SYNERGY_BONUS imported from @game-analyzer/types
 
 /** Stat weights for weighted efficiency — reflects real SW meta value (fallback) */
 const STAT_WEIGHTS: Record<StatType, number> = {
@@ -309,86 +255,18 @@ const STAT_WEIGHTS: Record<StatType, number> = {
   'def': 0.5,
 }
 
-/** Archetype-specific stat priority weights (1.0 = max priority, 0.05 = useless) */
-const STAT_PRIORITY_WEIGHTS: Record<BuildArchetype, Record<StatType, number>> = {
-  'speed-dps':      { spd: 1.0, cr: 0.9, cd: 0.85, 'atk%': 0.8, 'hp%': 0.4, 'def%': 0.3, acc: 0.3, res: 0.2, atk: 0.3, def: 0.1, hp: 0.1 },
-  'bruiser':        { 'hp%': 1.0, cr: 0.85, cd: 0.8, spd: 0.75, 'def%': 0.6, 'atk%': 0.5, res: 0.3, acc: 0.2, hp: 0.2, atk: 0.1, def: 0.1 },
-  'tank-support':   { 'hp%': 1.0, 'def%': 0.9, spd: 0.8, res: 0.7, acc: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.3, def: 0.2, atk: 0.05 },
-  'cleave':         { 'atk%': 1.0, cr: 0.95, cd: 0.9, spd: 0.7, 'hp%': 0.3, 'def%': 0.2, acc: 0.3, res: 0.1, atk: 0.2, def: 0.05, hp: 0.05 },
-  'cc-debuffer':    { spd: 1.0, acc: 0.9, 'hp%': 0.7, 'def%': 0.6, res: 0.3, cr: 0.2, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
-  'bomber':         { 'atk%': 1.0, spd: 0.9, acc: 0.8, 'hp%': 0.5, 'def%': 0.3, cr: 0.2, cd: 0.1, res: 0.2, atk: 0.2, hp: 0.1, def: 0.05 },
-  'strip-cleanse':  { spd: 1.0, 'hp%': 0.85, acc: 0.8, res: 0.7, 'def%': 0.5, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
-  'healer':         { spd: 1.0, 'hp%': 0.9, 'def%': 0.7, acc: 0.5, res: 0.4, cr: 0.1, cd: 0.1, 'atk%': 0.3, hp: 0.2, def: 0.1, atk: 0.05 },
-  'one-shot-nuker': { 'atk%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.2, 'def%': 0.1, acc: 0.1, res: 0.05, atk: 0.3, def: 0.05, hp: 0.05 },
-  'def-nuker':      { 'def%': 1.0, cr: 0.95, cd: 0.95, spd: 0.5, 'hp%': 0.3, 'atk%': 0.1, acc: 0.1, res: 0.1, def: 0.3, atk: 0.05, hp: 0.1 },
-  'vampire-bruiser': { 'atk%': 0.9, cr: 0.85, cd: 0.8, 'hp%': 0.8, spd: 0.5, 'def%': 0.3, acc: 0.1, res: 0.1, atk: 0.2, def: 0.05, hp: 0.1 },
-  'revenge-proc':   { 'hp%': 0.9, 'def%': 0.85, cr: 0.7, cd: 0.6, spd: 0.3, res: 0.4, acc: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
-  'speed-leader':   { spd: 1.0, 'hp%': 0.8, 'def%': 0.6, res: 0.5, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.1, atk: 0.05 },
-  'raid-support':   { spd: 0.9, 'hp%': 0.9, 'def%': 0.8, res: 0.8, acc: 0.3, cr: 0.1, cd: 0.1, 'atk%': 0.1, hp: 0.2, def: 0.2, atk: 0.05 },
-}
+// STAT_PRIORITY_WEIGHTS imported from @game-analyzer/types
 
-/** Progressive sell thresholds by level — if weighted eff < threshold → sell */
-const PROGRESSIVE_SELL_THRESHOLDS: Record<PlayerProfile, Record<number, number>> = {
-  early: { 0: 30, 3: 35, 6: 40, 9: 45, 12: 50 },
-  mid:   { 0: 40, 3: 45, 6: 50, 9: 55, 12: 60 },
-  late:  { 0: 50, 3: 55, 6: 60, 9: 65, 12: 70 },
-}
+// PROGRESSIVE_SELL_THRESHOLDS imported from @game-analyzer/types
 
-/** Dead stat combinations — auto-sell if both present */
-const DEAD_STAT_COMBOS: StatType[][] = [
-  ['acc', 'res'],
-]
+// DEAD_STAT_COMBOS imported from @game-analyzer/types
 
-// ── Set stat tier lists ──
+// SET_STAT_TIERS imported from @game-analyzer/types
 export type StatTier = 'S' | 'A' | 'B' | 'C' | 'D'
 
-const SET_STAT_TIERS: Record<string, Record<StatType, StatTier>> = {
-  violent: { spd: 'S', cr: 'S', cd: 'A', 'atk%': 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  swift: { spd: 'S', 'atk%': 'A', cr: 'A', 'hp%': 'A', 'def%': 'A', cd: 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  rage: { cd: 'S', 'atk%': 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  fatal: { 'atk%': 'S', cd: 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  blade: { cr: 'S', cd: 'S', 'atk%': 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  despair: { spd: 'S', 'atk%': 'A', 'hp%': 'A', cd: 'B', cr: 'B', 'def%': 'B', acc: 'C', res: 'D', hp: 'C', atk: 'C', def: 'C' },
-  focus: { acc: 'S', spd: 'S', 'hp%': 'A', 'def%': 'A', res: 'A', 'atk%': 'B', cr: 'B', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
-  will: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'B', 'atk%': 'C', cd: 'C', cr: 'C', hp: 'C', atk: 'C', def: 'C' },
-  nemesis: { spd: 'S', 'hp%': 'S', 'def%': 'A', res: 'A', acc: 'B', 'atk%': 'B', cd: 'C', cr: 'C', hp: 'C', atk: 'C', def: 'C' },
-  revenge: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', 'atk%': 'A', cr: 'A', cd: 'B', acc: 'B', hp: 'B', atk: 'C', def: 'C' },
-  vampire: { 'atk%': 'S', 'hp%': 'S', cr: 'S', cd: 'A', spd: 'A', 'def%': 'A', acc: 'B', res: 'B', hp: 'C', atk: 'C', def: 'C' },
-  energy: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
-  guard: { 'def%': 'S', 'hp%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
-  endure: { res: 'S', 'hp%': 'S', 'def%': 'S', spd: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
-  shield: { 'hp%': 'S', 'def%': 'S', spd: 'S', res: 'A', acc: 'A', 'atk%': 'B', cr: 'B', cd: 'B', hp: 'C', atk: 'C', def: 'C' },
-  destroy: { spd: 'S', acc: 'S', 'hp%': 'A', 'def%': 'A', 'atk%': 'A', cr: 'B', cd: 'B', res: 'B', hp: 'C', atk: 'C', def: 'C' },
-  cruel: { 'atk%': 'S', cd: 'S', cr: 'S', spd: 'A', 'hp%': 'A', 'def%': 'B', acc: 'B', res: 'C', hp: 'C', atk: 'C', def: 'C' },
-  accuracy: { acc: 'S', spd: 'S', 'hp%': 'A', 'def%': 'A', res: 'A', 'atk%': 'B', cr: 'B', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
-  tolerance: { res: 'S', 'hp%': 'S', 'def%': 'A', spd: 'A', acc: 'A', 'atk%': 'B', cr: 'C', cd: 'C', hp: 'C', atk: 'C', def: 'C' },
-}
+// TIER_WEIGHTS, SET_STRENGTH, SET_STRENGTH_THRESHOLD_BONUS imported from @game-analyzer/types
 
-const TIER_WEIGHTS: Record<StatTier, number> = {
-  S: 1.0,
-  A: 0.8,
-  B: 0.5,
-  C: 0.2,
-  D: 0.0,
-}
-
-// Number of substats at +0 by quality
-const SUBSTATS_BY_QUALITY: Record<RuneQuality, number> = {
-  normal: 0,
-  magic: 1,
-  rare: 2,
-  hero: 3,
-  legend: 4,
-}
-
-// Number of upgrade rolls at +12 by quality
-const UPGRADES_BY_QUALITY: Record<RuneQuality, number> = {
-  normal: 0,
-  magic: 1,
-  rare: 2,
-  hero: 3,
-  legend: 4,
-}
+// SUBSTATS_BY_QUALITY, UPGRADES_BY_QUALITY imported from @game-analyzer/types
 
 /**
  * Total "events" at +12 per quality (Barion divisor).
@@ -411,22 +289,31 @@ const TOTAL_EVENTS_AT_12: Record<RuneQuality, number> = {
 
 /**
  * Estimate the number of rolls and average quality for a substat.
- * count: value / max_roll rounded to nearest, min 1
- * avgQuality: 0% = all rolls at min, 100% = all rolls at max
+ *
+ * A substat's total value = base (initial appearance) + subsequent rolls.
+ * For ancient runes, the base range is higher but roll ranges are identical to normal.
+ *
+ * count: total events for this substat (1 base + N upgrade rolls)
+ * avgQuality: 0% = all events at min, 100% = all events at max
  */
 export function estimateRolls(
   statType: StatType,
   value: number,
+  isAncient?: boolean,
 ): { count: number; avgQuality: number } {
-  const range = ROLL_RANGES[statType]
-  if (!range || value <= 0) return { count: 0, avgQuality: 0 }
+  const baseRange = getBaseRanges(isAncient)[statType]
+  const rollRange = getRollRanges()[statType]
+  if (!baseRange || !rollRange || value <= 0) return { count: 0, avgQuality: 0 }
 
-  // Estimate count using max roll value — ceil to ensure value fits within count * max
-  const count = Math.max(1, Math.ceil(value / range.max))
+  // Estimate count: 1 base + N rolls where baseMax + N * rollMax >= value
+  // Start with count=1 (just the base), add rolls until maxTotal >= value
+  let count = 1
+  while (baseRange.max + (count - 1) * rollRange.max < value) {
+    count++
+  }
 
-  // Calculate quality: ratio of actual value vs max possible (SWOP/SWLens formula)
-  // e.g. SPD +10 in 2 rolls → 10 / (6*2) = 83.33%
-  const maxTotal = range.max * count
+  // Max possible = baseMax + (count-1) * rollMax
+  const maxTotal = baseRange.max + (count - 1) * rollRange.max
   const avgQuality = maxTotal === 0
     ? 100
     : Math.min(100, Math.max(0, (value / maxTotal) * 100))
@@ -509,10 +396,12 @@ function detectQuality(rune: RuneData): RuneQuality {
 
 /**
  * Compute the per-roll breakdown for a substat.
- * Uses average value per roll to qualify each roll's tier.
+ * Uses average value per event to qualify each roll's tier.
+ * The max reference is the roll max (same for normal and ancient) since
+ * most events are rolls; the base being slightly higher on ancient is negligible here.
  */
-function getRollBreakdown(statType: StatType, value: number, rollCount: number): RollBreakdown[] {
-  const range = ROLL_RANGES[statType]
+function getRollBreakdown(statType: StatType, value: number, rollCount: number, _isAncient?: boolean): RollBreakdown[] {
+  const range = getRollRanges()[statType]
   if (!range || rollCount <= 0) return []
 
   const avgPerRoll = value / rollCount
@@ -535,21 +424,24 @@ function getRollBreakdown(statType: StatType, value: number, rollCount: number):
 /**
  * Analyze a single substat in detail.
  */
-function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
-  const range = ROLL_RANGES[stat.type]
-  const { count, avgQuality } = estimateRolls(stat.type, stat.value)
+function analyzeSubstat(stat: RuneStat, isAncient?: boolean): SubstatAnalysis {
+  const baseRange = getBaseRanges(isAncient)[stat.type]
+  const rollRange = getRollRanges()[stat.type]
+  const grindRanges = getLegendGrindRanges(isAncient)
+  const { count, avgQuality } = estimateRolls(stat.type, stat.value, isAncient)
 
-  const maxValue = range.max * count
-  const minValue = range.min * count
+  // maxValue = baseMax + (count-1) * rollMax
+  const maxValue = baseRange.max + (count - 1) * rollRange.max
+  const minValue = baseRange.min + (count - 1) * rollRange.min
   const isMaxRoll = stat.value >= maxValue
 
   const isGrindable = !NON_GRINDABLE.has(stat.type)
-  const grindRange = LEGEND_GRIND_RANGES[stat.type]
+  const grindRange = grindRanges[stat.type]
   const valueAfterMaxGrind = grindRange ? stat.value + grindRange.max : undefined
   const grindAmount = grindRange ? grindRange.max : undefined
   const roundedQuality = Math.round(avgQuality * 100) / 100
 
-  const rollBreakdown = getRollBreakdown(stat.type, stat.value, count)
+  const rollBreakdown = getRollBreakdown(stat.type, stat.value, count, isAncient)
 
   return {
     type: stat.type,
@@ -573,18 +465,25 @@ function analyzeSubstat(stat: RuneStat): SubstatAnalysis {
 
 /**
  * Calculate Barion efficiency.
- * For each substat: ratio = value / max_roll_value
- * efficiency = sum(ratios) / TOTAL_EVENTS_AT_12[quality] * 100
+ * For each substat with `count` events: maxPossible = baseMax + (count-1) * rollMax.
+ * Each perfect event contributes 1.0 to rawSum, so we add `(value / maxPossible) * count`.
+ * efficiency = rawSum / totalEvents * 100.
  *
  * A perfect Legend 6★ +12 rune = 8/8 = 100%.
  * Innate stat is NOT counted.
  */
-function barionEfficiency(substats: RuneStat[], quality: RuneQuality): number {
+function barionEfficiency(substats: RuneStat[], quality: RuneQuality, isAncient?: boolean): number {
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
   let rawSum = 0
   for (const sub of substats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range || sub.value <= 0) continue
-    rawSum += sub.value / range.max
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.value <= 0) continue
+    const { count } = estimateRolls(sub.type, sub.value, isAncient)
+    const maxPossible = baseRange.max + (count - 1) * rollRange.max
+    // Each event at max contributes 1.0, so count events at quality ratio
+    rawSum += maxPossible > 0 ? (sub.value / maxPossible) * count : 0
   }
   const divisor = TOTAL_EVENTS_AT_12[quality]
   if (divisor <= 0) return 0
@@ -604,18 +503,25 @@ function barionEfficiency(substats: RuneStat[], quality: RuneQuality): number {
  * Each stat gets 2 max rolls → weightedSum = 2*2.0 + 2*1.5 + 2*1.5 + 2*1.0 = 12.
  * Divisor for Legend = 12, for other qualities we scale proportionally.
  */
-function weightedEfficiency(substats: RuneStat[], quality: RuneQuality, bestArchetype?: BuildArchetype | null): number {
+function weightedEfficiency(substats: RuneStat[], quality: RuneQuality, bestArchetype?: BuildArchetype | null, isAncient?: boolean): number {
   if (substats.length === 0) return 0
+
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
 
   // Use archetype-specific weights if available, otherwise fallback
   const weights = bestArchetype ? STAT_PRIORITY_WEIGHTS[bestArchetype] : STAT_WEIGHTS
 
   let weightedSum = 0
   for (const sub of substats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range || sub.value <= 0) continue
-    const ratio = sub.value / range.max
-    weightedSum += ratio * (weights[sub.type] ?? 0.5)
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.value <= 0) continue
+    const { count } = estimateRolls(sub.type, sub.value, isAncient)
+    const maxPossible = baseRange.max + (count - 1) * rollRange.max
+    // Each event contributes ratio * 1.0, so multiply by count
+    const eventRatios = maxPossible > 0 ? (sub.value / maxPossible) * count : 0
+    weightedSum += eventRatios * (weights[sub.type] ?? 0.5)
   }
 
   // Max weighted divisor: for archetype weights, the max weight is 1.0 (not 2.0),
@@ -646,16 +552,23 @@ function setWeightedEfficiency(
   subStats: RuneStat[],
   set: string,
   quality: RuneQuality,
+  isAncient?: boolean,
 ): { efficiency: number; tiers: Record<string, StatTier> } {
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
   const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[set] ?? SET_STAT_TIERS.violent!
   const tiers: Record<string, StatTier> = {}
 
   let weightedSum = 0
   for (const sub of subStats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range || sub.value <= 0) continue
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.value <= 0) continue
 
-    const ratio = sub.value / range.max
+    const { count } = estimateRolls(sub.type, sub.value, isAncient)
+    const maxPossible = baseRange.max + (count - 1) * rollRange.max
+    // Each event contributes ratio * 1.0
+    const ratio = maxPossible > 0 ? (sub.value / maxPossible) * count : 0
     const tier: StatTier = setTiers[sub.type] ?? 'C'
     const tierWeight = TIER_WEIGHTS[tier]
     tiers[sub.type] = tier
@@ -668,7 +581,7 @@ function setWeightedEfficiency(
 
   // Quad roll bonus: 3+ rolls in S or A tier stat
   for (const sub of subStats) {
-    const { count } = estimateRolls(sub.type, sub.value)
+    const { count } = estimateRolls(sub.type, sub.value, isAncient)
     const tier: StatTier = setTiers[sub.type] ?? 'C'
     if (count >= 3 && (tier === 'S' || tier === 'A')) {
       weightedSum += 0.5 // quad roll in good stat bonus
@@ -683,6 +596,133 @@ function setWeightedEfficiency(
 }
 
 /**
+ * Calculate innate stat score based on its tier for the rune's set.
+ *
+ * Philosophy: the best innates are stats that are useful (B/C tier) but NOT
+ * the top-priority stats (S/A tier) for the set. S/A stats should be in
+ * substats where they are grindable/rollable.
+ *
+ * - S tier innate = heavy malus (-15) — this stat should be a grindable substat
+ * - A tier innate = malus (-10) — still a stat you'd want grindable
+ * - B tier innate = neutral (0) — useful stat, good innate slot
+ * - C tier innate = small bonus (+5) — frees substat slots for S/A stats
+ * - D tier innate = malus (-5) — dead stat, wasted slot
+ * - No innate = 0
+ */
+function calculateInnateScore(
+  innateStat: RuneStat | undefined,
+  set: string,
+): { score: number; tier: StatTier | undefined } {
+  if (!innateStat) return { score: 0, tier: undefined }
+
+  const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[set] ?? SET_STAT_TIERS.violent!
+  const tier: StatTier = setTiers[innateStat.type] ?? 'C'
+
+  const INNATE_SCORE_BY_TIER: Record<StatTier, number> = {
+    S: -20,
+    A: -12,
+    B: 0,
+    C: 5,
+    D: -5,
+  }
+
+  return { score: INNATE_SCORE_BY_TIER[tier], tier }
+}
+
+/**
+ * Calculate penalty for S/A tier substats with minimum or near-minimum rolls.
+ *
+ * High-priority stats with low rolls are a waste — a SPD +4 is barely useful.
+ * - S-tier stat at min roll → -8
+ * - A-tier stat at min roll → -5
+ * "Min roll" = value <= (rolls * min_roll_value) + 1
+ */
+function calculateLowRollPenalty(
+  subStats: RuneStat[],
+  set: string,
+  isAncient?: boolean,
+): number {
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
+  const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[set] ?? SET_STAT_TIERS.violent!
+  let penalty = 0
+
+  for (const sub of subStats) {
+    const tier = setTiers[sub.type] ?? 'C'
+    if (tier !== 'S' && tier !== 'A') continue
+
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.value <= 0) continue
+
+    const { count } = estimateRolls(sub.type, sub.value, isAncient)
+    if (count <= 0) continue
+
+    // "Low roll" = average value per roll is barely above the minimum
+    const avgPerRoll = sub.value / count
+    if (avgPerRoll <= rollRange.min + 0.5) {
+      penalty += tier === 'S' ? -8 : -5
+    }
+  }
+
+  return penalty
+}
+
+/**
+ * Calculate penalty for having too many non-grindable substats (cr, cd, acc, res).
+ *
+ * Non-grindable stats can't be improved after +12, so a rune full of them
+ * has limited post-upgrade potential:
+ * - 0-1 non-grindable = 0 (normal)
+ * - 2 non-grindable = -5
+ * - 3 non-grindable = -10
+ * - 4 non-grindable = -15 (impossible to grind anything)
+ */
+function calculateNonGrindablePenalty(subStats: RuneStat[]): number {
+  if (subStats.length < 4) return 0
+  const nonGrindableCount = subStats.filter(s => NON_GRINDABLE.has(s.type)).length
+
+  if (nonGrindableCount <= 1) return 0
+  if (nonGrindableCount === 2) return -5
+  if (nonGrindableCount === 3) return -10
+  return -15 // 4 non-grindable
+}
+
+/**
+ * Calculate quality penalty — non-legend runes are inherently less valuable
+ * because they have fewer initial substats / total events.
+ * Legend: 0, Hero: -5, Rare: -10, Magic: -15, Normal: -20
+ */
+function calculateQualityPenalty(quality: RuneQuality): number {
+  const penalties: Record<RuneQuality, number> = {
+    legend: 0,
+    hero: -5,
+    rare: -10,
+    magic: -15,
+    normal: -20,
+  }
+  return penalties[quality] ?? 0
+}
+
+/**
+ * Calculate stat-set mismatch penalty.
+ * Counts how many substats are B-tier or worse for the set.
+ * - 3+ substats <= B-tier → -8
+ * - ALL substats <= B-tier → -12
+ */
+function calculateMismatchPenalty(subStats: RuneStat[], set: string): number {
+  const setTiers = SET_STAT_TIERS[set] ?? SET_STAT_TIERS.violent!
+  let lowTierCount = 0
+  for (const sub of subStats) {
+    const tier = setTiers[sub.type] ?? 'C'
+    if (tier === 'B' || tier === 'C' || tier === 'D') lowTierCount++
+  }
+  if (lowTierCount >= subStats.length && subStats.length > 0) return -12 // ALL stats mismatch
+  if (lowTierCount >= 3) return -8
+  return 0
+}
+
+/**
  * Calculate potential efficiency at +12 (remaining events at max).
  * remaining_events = TOTAL_EVENTS_AT_12[quality] - events_so_far
  * potential = (current_sum + remaining_events * 1.0) / TOTAL_EVENTS_AT_12[quality] * 100
@@ -691,14 +731,19 @@ function setWeightedEfficiency(
  */
 export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: RuneQuality): number {
   const quality = qualityOverride ?? detectQuality(rune)
+  const baseRanges = getBaseRanges(rune.isAncient)
+  const rollRanges = getRollRanges()
   const totalEvents = TOTAL_EVENTS_AT_12[quality]
   if (totalEvents <= 0) return 0
 
   let rawSum = 0
   for (const sub of rune.subStats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range || sub.value <= 0) continue
-    rawSum += sub.value / range.max
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.value <= 0) continue
+    const { count } = estimateRolls(sub.type, sub.value, rune.isAncient)
+    const maxPossible = baseRange.max + (count - 1) * rollRange.max
+    rawSum += maxPossible > 0 ? (sub.value / maxPossible) * count : 0
   }
 
   // Events so far = initial subs + powerups that occurred
@@ -709,18 +754,6 @@ export function calculatePotentialEfficiency(rune: RuneData, qualityOverride?: R
   // Each remaining event at max adds 1.0 to rawSum
   const potentialSum = rawSum + remainingEvents * 1.0
   const result = (potentialSum / totalEvents) * 100
-
-  console.log('[POTENTIAL DEBUG]', {
-    quality,
-    level: rune.level,
-    subStats: rune.subStats,
-    rawSum,
-    eventsSoFar,
-    remainingEvents,
-    totalEvents,
-    potentialRawSum: rawSum + remainingEvents,
-    result: ((rawSum + remainingEvents) / totalEvents) * 100,
-  })
 
   return result
 }
@@ -734,18 +767,24 @@ function calculateGrindPotential(
   substats: SubstatAnalysis[],
   baseEfficiency: number,
   quality: RuneQuality,
+  isAncient?: boolean,
 ): GrindPotential {
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
   const substatsToGrind: GrindPotential['substatsToGrind'] = []
   let grindedRawSum = 0
   let currentRawSum = 0
   const divisor = TOTAL_EVENTS_AT_12[quality]
 
   for (const sub of substats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range) continue
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange) continue
 
-    const ratio = sub.value / range.max
-    currentRawSum += ratio
+    const maxPossible = baseRange.max + (sub.rolls - 1) * rollRange.max
+    // Each event contributes ratio * 1.0
+    const eventRatios = maxPossible > 0 ? (sub.value / maxPossible) * sub.rolls : 0
+    currentRawSum += eventRatios
 
     if (sub.isGrindable && sub.grindRange) {
       const afterGrind = sub.value + sub.grindRange.max
@@ -754,9 +793,9 @@ function calculateGrindPotential(
         currentValue: sub.value,
         afterGrind,
       })
-      grindedRawSum += afterGrind / range.max
+      grindedRawSum += maxPossible > 0 ? (afterGrind / maxPossible) * sub.rolls : 0
     } else {
-      grindedRawSum += ratio
+      grindedRawSum += eventRatios
     }
   }
 
@@ -917,6 +956,8 @@ function calculateProgressiveAdvice(
   potentialEff: number,
   synergy: SynergyResult,
   profile: PlayerProfile,
+  innateScore: number = 0,
+  setStrengthBonus: number = 0,
 ): ProgressiveAdvice | undefined {
   const level = rune.level
   const levelKey = Math.min(Math.floor(level / 3) * 3, 12)
@@ -933,16 +974,20 @@ function calculateProgressiveAdvice(
   }
 
   const thresholds = PROGRESSIVE_SELL_THRESHOLDS[profile]
-  const threshold = thresholds[levelKey] ?? thresholds[12] ?? 50
-  const finalThreshold = thresholds[12] ?? 50
+  // Set strength bonus raises thresholds — weaker sets need better subs to justify
+  const threshold = (thresholds[levelKey] ?? thresholds[12] ?? 50) + setStrengthBonus
+  const finalThreshold = (thresholds[12] ?? 50) + setStrengthBonus
 
-  // Synergy bonus: strong archetype match (3/4 or 4/4) boosts potential evaluation
-  const synergyBoost = synergy.matchCount >= 4 ? 5 : synergy.matchCount >= 3 ? 3 : 0
-  const adjustedPotential = potentialEff + synergyBoost
+  // Innate score adjusts the effective weighted efficiency
+  // A bad innate (S-tier stat wasted in innate slot) penalizes the rune
+  const innateAdjustedEff = currentWeightedEff + innateScore
+
+  // Archetype synergy no longer influences progressive advice — set-based only
+  const adjustedPotential = potentialEff + innateScore
 
   // At +12 or +15 — final decision (no more potential, only current matters)
   if (level >= 12) {
-    if (currentWeightedEff < threshold) {
+    if (innateAdjustedEff < threshold) {
       return {
         action: 'sell',
         reason: `Weighted efficiency ${Math.round(currentWeightedEff)}% below ${profile} threshold ${threshold}%`,
@@ -955,7 +1000,7 @@ function calculateProgressiveAdvice(
 
     // Check if grindable
     const hasGrindable = rune.subStats.some(s => !NON_GRINDABLE.has(s.type))
-    if (hasGrindable && currentWeightedEff >= threshold) {
+    if (hasGrindable && innateAdjustedEff >= threshold) {
       return {
         action: 'grind',
         reason: `Good rune at +12 — grind to maximize value (${Math.round(currentWeightedEff)}%)`,
@@ -978,7 +1023,7 @@ function calculateProgressiveAdvice(
 
   // Pre-+12: potential exceeds final threshold → worth upgrading even if current is low
   if (adjustedPotential >= finalThreshold) {
-    if (currentWeightedEff >= threshold) {
+    if (innateAdjustedEff >= threshold) {
       // Current OK + high potential → keep upgrading
       const nextLevel = Math.min(levelKey + 3, 12)
       return {
@@ -1003,7 +1048,7 @@ function calculateProgressiveAdvice(
   }
 
   // Potential also below final threshold → sell
-  if (currentWeightedEff < threshold) {
+  if (innateAdjustedEff < threshold) {
     return {
       action: 'sell',
       reason: `Below threshold and potential ${Math.round(adjustedPotential)}% too low for ${profile} (need ${finalThreshold}%)`,
@@ -1021,9 +1066,9 @@ function calculateProgressiveAdvice(
   // Sell probability: based on gap between potential and final threshold
   let sellProbability = Math.min(70, Math.max(20, Math.round((1 - adjustedPotential / finalThreshold) * 100)))
 
-  // Synergy penalty increases sell probability
-  if (synergy.synergyBonus < 0) {
-    sellProbability = Math.min(95, sellProbability + 20)
+  // Bad innate (S/A tier wasted) increases sell probability
+  if (innateScore < 0) {
+    sellProbability = Math.min(95, sellProbability + Math.abs(innateScore))
   }
 
   return {
@@ -1062,18 +1107,24 @@ function tierFromPercent(pct: number): RuneQuality {
  */
 export function getRollQualityTier(
   substats: SubstatAnalysis[],
+  isAncient?: boolean,
 ): { current: RuneQuality; postGem: RuneQuality; currentPercent: number; postGemPercent: number } {
   if (substats.length === 0) {
     return { current: 'normal', postGem: 'normal', currentPercent: 0, postGemPercent: 0 }
   }
 
+  const baseRanges = getBaseRanges(isAncient)
+  const rollRanges = getRollRanges()
   let totalRatio = 0
   let worstRatio = Infinity
 
   for (const sub of substats) {
-    const range = ROLL_RANGES[sub.type]
-    if (!range || sub.rolls <= 0) continue
-    const ratio = sub.value / (range.max * sub.rolls)
+    const baseRange = baseRanges[sub.type]
+    const rollRange = rollRanges[sub.type]
+    if (!baseRange || !rollRange || sub.rolls <= 0) continue
+    const maxPossible = baseRange.max + (sub.rolls - 1) * rollRange.max
+    // For roll quality, we want the quality ratio (0-1), not scaled by events
+    const ratio = maxPossible > 0 ? sub.value / maxPossible : 0
     totalRatio += ratio
 
     if (ratio < worstRatio) {
@@ -1100,69 +1151,93 @@ export function getRollQualityTier(
   }
 }
 
-/** Legend gem max values per stat type (different from roll max values) */
-const LEGEND_GEM_VALUES: Record<StatType, number> = {
-  'hp': 580, 'hp%': 11, 'atk': 30, 'atk%': 11,
-  'def': 30, 'def%': 11, 'spd': 8, 'cr': 8,
-  'cd': 9, 'acc': 11, 'res': 11,
+/** Legend gem max values per stat type for normal runes (derived from GEM_RANGES.legend) */
+const LEGEND_GEM_VALUES: Record<StatType, number> = Object.fromEntries(
+  Object.entries(GEM_RANGES.legend).map(([k, v]) => [k, v.max])
+) as Record<StatType, number>
+
+// GRINDABLE_STATS imported from @game-analyzer/types
+
+/** Gem removal score — lower = better candidate to gem away */
+function gemRemoveScore(stat: RuneStat, setTiers: Record<StatType, StatTier>, isAncient?: boolean): number {
+  const tierW = TIER_WEIGHTS[setTiers[stat.type] ?? 'C']
+  const grindable = !NON_GRINDABLE.has(stat.type)
+  const { count } = estimateRolls(stat.type, stat.value, isAncient)
+  // Powerup rolls (count-1) add massive protection — NEVER gem a stat with good rolls
+  const powerupRolls = Math.max(0, count - 1)
+  return tierW + (grindable ? 0.3 : 0) + (powerupRolls * 0.4)
 }
 
-/** Grindable stat types */
-const GRINDABLE_STATS: StatType[] = ['hp', 'hp%', 'atk', 'atk%', 'def', 'def%', 'spd']
+/** Gem replacement score — higher = better stat to gem towards */
+function gemReplaceScore(statType: StatType, setTiers: Record<StatType, StatTier>): number {
+  const tierW = TIER_WEIGHTS[setTiers[statType] ?? 'C']
+  const grindable = !NON_GRINDABLE.has(statType)
+  return tierW + (grindable ? 0.3 : 0)
+}
+
+/** Threshold: only suggest gem if worst stat score < 0.7 (all stats are decent otherwise) */
+const GEM_SCORE_THRESHOLD = 1.2
 
 /**
  * Calculate per-archetype gem/grind optimization recommendations.
- * For each archetype matching 3/4 or 4/4 substats, determines:
- * - Which stat to gem (remove) and what to replace it with
- * - Which stats to grind (grindable stats useful for this build)
- * - Post-optimization efficiency score
+ * Gem target is now set-based (same remove/replace for all archetypes),
+ * but postOptimScore still depends on archetype-specific grind weights.
  */
 function calculateArchetypeOptimizations(
   rune: RuneData,
   synergy: SynergyResult,
   quality: RuneQuality,
+  isAncient?: boolean,
 ): ArchetypeOptimization[] {
   const optimizations: ArchetypeOptimization[] = []
 
   const matchingArchetypes = synergy.allArchetypes.filter(a => a.matchCount >= 3)
+  if (matchingArchetypes.length === 0) return optimizations
+
+  // --- Set-based gem target (same for all archetypes) ---
+  const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[rune.set] ?? SET_STAT_TIERS.violent!
+
+  // Score each substat for removal (lowest score = best candidate to gem away)
+  const scoredSubs = rune.subStats.map(s => ({
+    stat: s,
+    score: gemRemoveScore(s, setTiers, isAncient),
+  })).sort((a, b) => a.score - b.score)
+
+  const worstSub = scoredSubs[0]
+
+  // Compute gem target once (shared across archetypes)
+  let sharedGemTarget: ArchetypeOptimization['gemTarget'] | undefined
+
+  if (worstSub && worstSub.score < GEM_SCORE_THRESHOLD) {
+    // Find best replacement: highest gemReplaceScore among stats not already on the rune
+    const existingTypes = new Set(rune.subStats.map(s => s.type))
+    if (rune.innateStat?.type) existingTypes.add(rune.innateStat.type)
+    if (rune.mainStat?.type) existingTypes.add(rune.mainStat.type)
+
+    const ALL_STAT_TYPES: StatType[] = [
+      'hp', 'hp%', 'atk', 'atk%', 'def', 'def%', 'spd', 'cr', 'cd', 'acc', 'res',
+    ]
+    const candidates = ALL_STAT_TYPES
+      .filter(t => !existingTypes.has(t))
+      .map(t => ({ type: t, score: gemReplaceScore(t, setTiers) }))
+      .sort((a, b) => b.score - a.score)
+
+    const bestReplacement = candidates[0]
+    if (bestReplacement) {
+      sharedGemTarget = {
+        remove: worstSub.stat.type,
+        replace: bestReplacement.type,
+        reason: `Low set synergy (${setTiers[worstSub.stat.type] ?? 'C'}-tier for ${rune.set})`,
+      }
+    }
+  }
 
   for (const match of matchingArchetypes) {
     const archetype = match.archetype
     const weights = STAT_PRIORITY_WEIGHTS[archetype]
-    const desired = BUILD_ARCHETYPES[archetype].desiredStats
 
-    // Sort substats by weight for this archetype (ascending = worst first)
-    const sortedByWeight = [...rune.subStats].sort(
-      (a, b) => (weights[a.type] ?? 0) - (weights[b.type] ?? 0),
-    )
-
-    const worstStat = sortedByWeight[0]
-    if (!worstStat) continue
-
-    const worstWeight = weights[worstStat.type] ?? 0
-
-    let gemTarget: ArchetypeOptimization['gemTarget'] | undefined
-    let isPerfect = true
-
-    if (worstWeight < 0.5 && match.matchCount < 4) {
-      // The worst stat has low value for this archetype and not 4/4 match -> gem it
-      isPerfect = false
-
-      // Find the best missing desired stat to replace with
-      const existingTypes = new Set(rune.subStats.map(s => s.type))
-      const missingDesired = desired.filter(s => !existingTypes.has(s))
-
-      // If all desired stats are present, pick the highest-weight stat not on the rune
-      const replaceStat = missingDesired[0] ?? desired[0]
-
-      if (replaceStat) {
-        gemTarget = {
-          remove: worstStat.type,
-          replace: replaceStat,
-          reason: `Low value for ${archetype}`,
-        }
-      }
-    }
+    const gemTarget = sharedGemTarget
+    const isPerfect = !gemTarget
 
     // Grind targets = grindable substats with decent weight for this archetype
     const grindTargets = rune.subStats
@@ -1170,32 +1245,44 @@ function calculateArchetypeOptimizations(
       .map(s => s.type)
 
     // Calculate post-optimization efficiency score
-    // Uses ratio-based approach: sum(value / maxRoll) for each substat
-    // When gemming: subtract removed stat's ratio, add gem's ratio (legend gem value / maxRoll)
+    // Uses ratio-based approach: sum(value / maxPossible) for each substat
+    // When gemming: subtract removed stat's ratio, add gem's ratio
     let rollsLost = 0
 
     // 1. Calculate current ratio sum
+    const baseRangesForOptim = getBaseRanges(isAncient)
+    const rollRangesForOptim = getRollRanges()
+    const grindRangesForOptim = getLegendGrindRanges(isAncient)
+    const gemValues = getLegendGemValues(isAncient)
     let currentRatioSum = 0
     for (const sub of rune.subStats) {
-      const range = ROLL_RANGES[sub.type]
-      if (!range || sub.value <= 0) continue
-      currentRatioSum += sub.value / range.max
+      const baseRange = baseRangesForOptim[sub.type]
+      const rollRange = rollRangesForOptim[sub.type]
+      if (!baseRange || !rollRange || sub.value <= 0) continue
+      const { count } = estimateRolls(sub.type, sub.value, isAncient)
+      const maxPossible = baseRange.max + (count - 1) * rollRange.max
+      currentRatioSum += maxPossible > 0 ? (sub.value / maxPossible) * count : 0
     }
 
     // 2. If gemming, adjust ratio sum: remove old stat ratio, add gem ratio
     if (gemTarget) {
       const removedStat = rune.subStats.find(s => s.type === gemTarget!.remove)
       if (removedStat) {
-        const removedRange = ROLL_RANGES[removedStat.type]
-        const removedRatio = removedRange ? removedStat.value / removedRange.max : 0
-        const { count: removedRolls } = estimateRolls(removedStat.type, removedStat.value)
+        const removedBaseRange = baseRangesForOptim[removedStat.type]
+        const removedRollRange = rollRangesForOptim[removedStat.type]
+        const { count: removedRolls } = estimateRolls(removedStat.type, removedStat.value, isAncient)
         rollsLost = removedRolls
+        const removedMax = removedBaseRange && removedRollRange
+          ? removedBaseRange.max + (removedRolls - 1) * removedRollRange.max
+          : 0
+        const removedEventRatios = removedMax > 0 ? (removedStat.value / removedMax) * removedRolls : 0
 
-        const gemValue = LEGEND_GEM_VALUES[gemTarget.replace]
-        const gemRange = ROLL_RANGES[gemTarget.replace]
-        const addedRatio = gemRange ? gemValue / gemRange.max : 0
+        // Gem replaces the stat with 1 event (base value only, no rolls)
+        const gemValue = gemValues[gemTarget.replace]
+        const gemBaseRange = baseRangesForOptim[gemTarget.replace]
+        const addedRatio = gemBaseRange && gemBaseRange.max > 0 ? gemValue / gemBaseRange.max : 0
 
-        currentRatioSum = currentRatioSum - removedRatio + addedRatio
+        currentRatioSum = currentRatioSum - removedEventRatios + addedRatio
       }
     }
 
@@ -1206,10 +1293,11 @@ function calculateArchetypeOptimizations(
       : rune.subStats.map(s => s.type)
 
     for (const statType of postGemTypes) {
-      const grindRange = LEGEND_GRIND_RANGES[statType]
-      const range = ROLL_RANGES[statType]
-      if (grindRange && range) {
-        grindBonus += grindRange.max / range.max
+      const grindRange = grindRangesForOptim[statType]
+      const baseRange = baseRangesForOptim[statType]
+      if (grindRange && baseRange) {
+        // Grind bonus as event ratio (grind adds to the existing value, normalize by base max)
+        grindBonus += grindRange.max / baseRange.max
       }
     }
 
@@ -1259,99 +1347,56 @@ export function calculateEfficiency(rune: RuneData, profile: PlayerProfile = 'mi
  */
 export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): RuneAnalysis {
   const quality = detectQuality(rune)
-  const substats = rune.subStats.map(analyzeSubstat)
+  const isAncient = rune.isAncient
+  const substats = rune.subStats.map(s => analyzeSubstat(s, isAncient))
   const totalRolls = substats.reduce((sum, s) => sum + s.rolls, 0)
 
-  const currentEfficiency = barionEfficiency(rune.subStats, quality)
+  const currentEfficiency = barionEfficiency(rune.subStats, quality, isAncient)
 
   // Calculate synergy first — we need bestArchetype for weighted efficiency
   const synergy = calculateSynergy(rune.subStats, rune.innateStat)
 
-  // Mark the gem target — prioritize dead stats, then flats, then lowest-weight non-protected stat
-  if (synergy.bestArchetype && substats.length > 0) {
-    const weights = STAT_PRIORITY_WEIGHTS[synergy.bestArchetype]
-    const DEAD_STATS: StatType[] = ['acc', 'res']
-    const FLAT_STATS: StatType[] = ['hp', 'atk', 'def']
-    const PROTECTED_STATS: StatType[] = ['spd', 'cr', 'cd']
+  // Mark the gem target — set-based scoring (lowest gemRemoveScore = best gem candidate)
+  if (substats.length > 0) {
+    const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[rune.set] ?? SET_STAT_TIERS.violent!
+    const scored = substats
+      .map((s, i) => ({
+        idx: i,
+        score: gemRemoveScore({ type: s.type, value: s.value }, setTiers, isAncient),
+      }))
+      .sort((a, b) => a.score - b.score)
 
-    let gemIdx = -1
-
-    // 1. Dead stat combo (ACC + RES both present) → gem the one with fewer rolls
-    const deadIndices = substats
-      .map((s, i) => ({ idx: i, sub: s }))
-      .filter(({ sub }) => DEAD_STATS.includes(sub.type))
-    if (deadIndices.length >= 2) {
-      deadIndices.sort((a, b) => a.sub.rolls - b.sub.rolls)
-      gemIdx = deadIndices[0]!.idx
-    }
-
-    // 2. Flat stats (hp, atk, def) → always gem candidates before % stats
-    if (gemIdx < 0) {
-      const flatIndices = substats
-        .map((s, i) => ({ idx: i, sub: s }))
-        .filter(({ sub }) => FLAT_STATS.includes(sub.type))
-      if (flatIndices.length > 0) {
-        // Pick the flat with lowest weight in the archetype
-        flatIndices.sort((a, b) => (weights[a.sub.type] ?? 0) - (weights[b.sub.type] ?? 0))
-        gemIdx = flatIndices[0]!.idx
-      }
-    }
-
-    // 3. Lowest-weight stat that is NOT universally good (SPD/CR/CD)
-    if (gemIdx < 0) {
-      const candidates = substats
-        .map((s, i) => ({ idx: i, sub: s }))
-        .filter(({ sub }) => !PROTECTED_STATS.includes(sub.type))
-        .sort((a, b) => (weights[a.sub.type] ?? 0) - (weights[b.sub.type] ?? 0))
-      if (candidates.length > 0) {
-        gemIdx = candidates[0]!.idx
-      }
-    }
-
-    // 4. Fallback: lowest-weight stat (even protected)
-    if (gemIdx < 0) {
-      let worstWeight = Infinity
-      let fallbackIdx = -1
-      for (let i = 0; i < substats.length; i++) {
-        const w = weights[substats[i]!.type] ?? 0
-        if (w < worstWeight) {
-          worstWeight = w
-          fallbackIdx = i
-        }
-      }
-      gemIdx = fallbackIdx
-    }
-
-    if (gemIdx >= 0) {
-      substats[gemIdx]!.isGemTarget = true
+    const worst = scored[0]
+    if (worst && worst.score < GEM_SCORE_THRESHOLD) {
+      substats[worst.idx]!.isGemTarget = true
     }
   }
 
-  // Use archetype-specific weights when a best archetype is found
-  const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality, synergy.bestArchetype)
+  // Weighted efficiency is now set-based only — no archetype influence
+  const currentWeightedEfficiency = weightedEfficiency(rune.subStats, quality, undefined, isAncient)
   const potentialEfficiency = calculatePotentialEfficiency(rune, quality)
 
   // Max efficiency: all events at max = 100%
   const maxEfficiency = 100
 
   // Grind potential is based on the potential at +12 (you grind after +12)
-  const grindPotential = calculateGrindPotential(substats, potentialEfficiency, quality)
+  const grindPotential = calculateGrindPotential(substats, potentialEfficiency, quality, isAncient)
 
   // For pre-+12 runes, use potential efficiency for tier (should we keep powering up?)
   // For +12+ runes, use weighted efficiency (current value of the rune)
   const isPreMax = rune.level < 12
   const efficiencyForTier = isPreMax ? potentialEfficiency : currentWeightedEfficiency
 
-  // Tier based on the appropriate efficiency metric
+  // Tier based on the appropriate efficiency metric — no archetype synergy bonus
   const tier = getRecommendation(
     efficiencyForTier,
     12,
     profile,
     grindPotential.grindGain,
-    synergy.synergyBonus,
+    0,
   )
 
-  // Tier with level strictness applied
+  // Tier with level strictness applied — no archetype synergy bonus
   const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12)
   const levelStrictness = LEVEL_STRICTNESS[levelKey] ?? 0
   const adjustedTier = getRecommendation(
@@ -1359,7 +1404,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     rune.level,
     profile,
     grindPotential.grindGain,
-    synergy.synergyBonus,
+    0,
   )
 
   const cappedEfficiency = Math.min(currentEfficiency, 100)
@@ -1380,17 +1425,41 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const finalPotential = !isPreMax ? roundedCurrent : Math.round(Math.min(potentialEfficiency, 100) * 100) / 100
 
   // Set-weighted efficiency — uses set tier lists for more accurate per-set scoring
-  const setWeighted = setWeightedEfficiency(rune.subStats, rune.set, quality)
+  const setWeighted = setWeightedEfficiency(rune.subStats, rune.set, quality, isAncient)
   const roundedSetWeighted = setWeighted.efficiency
 
-  // Progressive advice — use set-weighted efficiency for more precise per-set scoring
-  const progressiveAdvice = calculateProgressiveAdvice(rune, quality, roundedSetWeighted, finalPotential, synergy, profile)
+  // Innate scoring — bonus/malus based on innate stat tier for this set
+  const innate = calculateInnateScore(rune.innateStat, rune.set)
+
+  // Additional penalties
+  const lowRollPenalty = calculateLowRollPenalty(rune.subStats, rune.set, isAncient)
+  const nonGrindablePenalty = calculateNonGrindablePenalty(rune.subStats)
+  const qualityPenalty = calculateQualityPenalty(quality)
+  const mismatchPenalty = calculateMismatchPenalty(rune.subStats, rune.set)
+
+  // Set strength — weaker sets need stricter thresholds
+  const setStrength = SET_STRENGTH[rune.set] ?? 'B'
+  const setStrengthBonus = SET_STRENGTH_THRESHOLD_BONUS[setStrength] ?? 0
+
+  // Adjusted efficiency includes all penalties
+  // (innateScore is handled separately inside calculateProgressiveAdvice)
+  const adjustedSetWeighted = roundedSetWeighted + lowRollPenalty + nonGrindablePenalty + qualityPenalty + mismatchPenalty
+
+  // Scale potential by the ratio of setWeighted vs Barion current
+  // This approximates what the set-weighted potential would be
+  const setWeightRatio = roundedSetWeighted > 0 && roundedCurrent > 0
+    ? roundedSetWeighted / roundedCurrent
+    : 0.5
+  const adjustedPotential = finalPotential * Math.min(setWeightRatio, 1.0)
+
+  // Progressive advice — use penalty-adjusted efficiency and set-weighted potential
+  const progressiveAdvice = calculateProgressiveAdvice(rune, quality, adjustedSetWeighted, adjustedPotential, synergy, profile, innate.score, setStrengthBonus)
 
   // Roll quality tier — based on actual roll quality per substat
-  const rollQuality = getRollQualityTier(substats)
+  const rollQuality = getRollQualityTier(substats, isAncient)
 
   // Per-archetype gem/grind optimization recommendations
-  const archetypeOptimizations = calculateArchetypeOptimizations(rune, synergy, quality)
+  const archetypeOptimizations = calculateArchetypeOptimizations(rune, synergy, quality, isAncient)
 
   return {
     currentEfficiency: roundedCurrent,
@@ -1418,5 +1487,13 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     archetypeOptimizations: archetypeOptimizations.length > 0 ? archetypeOptimizations : undefined,
     setWeightedEfficiency: roundedSetWeighted,
     subStatTiers: setWeighted.tiers,
+    innateScore: innate.score !== 0 ? innate.score : undefined,
+    innateTier: innate.tier,
+    lowRollPenalty: lowRollPenalty !== 0 ? lowRollPenalty : undefined,
+    nonGrindablePenalty: nonGrindablePenalty !== 0 ? nonGrindablePenalty : undefined,
+    qualityPenalty: qualityPenalty !== 0 ? qualityPenalty : undefined,
+    mismatchPenalty: mismatchPenalty !== 0 ? mismatchPenalty : undefined,
+    setStrength,
+    ...(isAncient ? { isAncient } : {}),
   }
 }

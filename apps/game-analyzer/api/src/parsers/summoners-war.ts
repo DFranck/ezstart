@@ -8,8 +8,8 @@
  * If we find set + main stat, return success even if some substats are missing.
  */
 
-import type { OcrResult, ParsedResult } from '../types.js'
-import { failedResult, successResult, type GameParser } from './base-parser.js'
+import type { OcrResult, ParsedResult, GameParser } from '@ezstart/ocr-sdk'
+import { failedResult, successResult } from '@ezstart/ocr-sdk'
 
 // --- Types (mirrors @game-analyzer/types/rune) ---
 
@@ -846,6 +846,12 @@ export const summonersWarParser: GameParser = {
       : textWithoutSetBonus
     const qualityInfo = parseQuality(qualitySearchArea)
 
+    // --- Detect ancient rune ---
+    // Ancient runes have "A" before the quality word: "A Hero", "A Legend"
+    // Or the word "ancient" somewhere in the text
+    const isAncient = /\bA\s+(?:Legend|Hero|Rare|Magic|Normal)/i.test(normalized)
+      || /\bancient\b/i.test(normalized)
+
     // --- Parse grade: try stars first, then quality keyword ---
     let grade = parseGrade(textWithoutSetBonus)
     if (!grade && qualityInfo) {
@@ -955,6 +961,7 @@ export const summonersWarParser: GameParser = {
       ...(qualityInfo ? { quality: qualityInfo.quality } : {}),
       ...(setPieceCount ? { setPieceCount } : {}),
       ...(partial ? { partial } : {}),
+      ...(isAncient ? { isAncient } : {}),
     })
   },
 }

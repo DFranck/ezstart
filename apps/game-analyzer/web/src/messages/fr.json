@@ -10,7 +10,8 @@
     "scan": "Scanner",
     "bench": "Bench",
     "history": "Historique",
-    "data": "Données"
+    "data": "Données",
+    "sources": "Sources"
   },
   "actions": {
     "upload": "Importer",

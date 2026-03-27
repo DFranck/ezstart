@@ -105,6 +105,19 @@ export default defineConfig({
 
 **OBJECTIF :** Maximiser le partage de code, minimiser la duplication, créer des composants agnostiques.
 
+### Agnosticité des Packages (CRITIQUE)
+
+**Les packages dans `/packages/` DOIVENT être 100% agnostiques — JAMAIS de logique métier spécifique à un projet.**
+
+- ✅ `packages/ocr-sdk` : capture, preprocessing, Tesseract wrapper, zones, masks → **réutilisable par n'importe quelle app**
+- ❌ `packages/ocr-sdk` : parser Summoners War, rune efficiency, SET_STAT_TIERS → **spécifique game-analyzer, va dans `apps/game-analyzer/`**
+- ✅ `packages/ui` : DataTable, Chart, Button → **composants génériques**
+- ❌ `packages/ui` : RuneCard, GearCard → **spécifique game-analyzer**
+
+**Règle** : Si un autre projet pourrait consommer le package tel quel SANS modification, c'est bien un package. Si le code mentionne des concepts métier d'un projet spécifique (rune, invoice, user role, etc.), il va dans l'app.
+
+**Conséquence** : Les packages exposent des **interfaces génériques** (`Parser`, `Analyzer`, `Engine`) que chaque app implémente avec sa logique métier.
+
 ### Hiérarchie des Packages (CRITIQUE)
 
 **Avant de créer QUOI QUE CE SOIT, suivre cet ordre STRICT :**
