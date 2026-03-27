@@ -747,6 +747,8 @@ const SOURCES: Source[] = [
   { name: 'Summoners War Subreddit', url: 'https://reddit.com/r/summonerswar', description: 'Community discussions, tier lists, and meta analysis.' },
 ]
 
+// (no dynamic section system — sections are hardcoded in the JSX below)
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -776,11 +778,10 @@ export default function GameDataPage() {
       </Div>
 
       <Accordion type="multiple" defaultValue={['sets']} className="space-y-2">
-        {/* ---- Section 1: Rune Sets (merged sets + stat tiers + archetype affinity) ---- */}
+
+        {/* ---- 1. Rune Sets ---- */}
         <AccordionItem value="sets">
-          <AccordionTrigger className="text-base font-semibold">
-            1. Rune Sets
-          </AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">1. Rune Sets</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
               <P className="text-xs text-muted-foreground">
@@ -802,7 +803,6 @@ export default function GameDataPage() {
                 />
               </Div>
 
-              {/* Radar chart */}
               <SetRadarChart />
 
               <Card size="sm" className="border-primary/20 bg-primary/5">
@@ -829,61 +829,9 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 2: Slot Stats ---- */}
-        <AccordionItem value="slots">
-          <AccordionTrigger className="text-base font-semibold">
-            2. Stat Values by Slot
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {SLOTS.map((s) => (
-                <Card key={s.slot} size="sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center justify-between">
-                      <span>Slot {s.slot}</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="outline" className="text-xs cursor-help">?</Badge>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[250px]">
-                          {s.tip}
-                        </TooltipContent>
-                      </Tooltip>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Div>
-                      <P className="text-xs text-muted-foreground mb-1">Main stat</P>
-                      {s.mainFixed ? (
-                        <Badge variant="secondary" className="text-xs">{s.mainFixed} (fixed)</Badge>
-                      ) : (
-                        <Div className="flex flex-wrap gap-1">
-                          {s.mainOptions.map((opt) => (
-                            <Badge key={opt} variant="outline" className="text-xs">{opt}</Badge>
-                          ))}
-                        </Div>
-                      )}
-                    </Div>
-                    <Div>
-                      <P className="text-xs text-muted-foreground mb-1">Priority subs</P>
-                      <Div className="flex flex-wrap gap-1">
-                        {s.priority.map((stat, i) => (
-                          <RankBadge key={stat} stat={stat} rank={i + 1} />
-                        ))}
-                      </Div>
-                    </Div>
-                  </CardContent>
-                </Card>
-              ))}
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 3: Substat Values (merged roll ranges + grind/gem values) ---- */}
+        {/* ---- 2. Substat Values ---- */}
         <AccordionItem value="substat-values">
-          <AccordionTrigger className="text-base font-semibold">
-            3. Substat Values
-          </AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">2. Substat Values</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
               <P className="text-xs text-muted-foreground">
@@ -904,55 +852,102 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 4: Main Stat Values ---- */}
-        <AccordionItem value="main-stats">
-          <AccordionTrigger className="text-base font-semibold">
-            4. Main Stat Values (+0 to +15)
-          </AccordionTrigger>
+        {/* ---- 3. Build Archetypes (Advanced) ---- */}
+        <AccordionItem value="archetypes">
+          <AccordionTrigger className="text-base font-semibold">3. Build Archetypes (Advanced)</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
-              {MAIN_STATS.map((ms) => (
-                <Div key={ms.stat}>
-                  <P className="font-medium text-sm mb-2">
-                    {ms.stat} <span className="text-muted-foreground text-xs">(Slots {ms.slots.join(', ')})</span>
+              <Card size="sm" className="border-muted-foreground/20 bg-muted/10">
+                <CardContent className="pt-3">
+                  <P className="text-xs text-muted-foreground">
+                    These are supplementary — the main analysis is set-based. Archetypes are provided as extra context for advanced users.
                   </P>
-                  <Div className="overflow-x-auto">
-                    <Table size="compact">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[60px]">Grade</TableHead>
-                          {Array.from({ length: 16 }, (_, i) => (
-                            <TableHead key={i} className="text-center w-[46px] text-xs">+{i}</TableHead>
+                </CardContent>
+              </Card>
+
+              <P className="text-xs text-muted-foreground">
+                Stat priorities and <TT tip="Numerical weights (0.05 to 1.0) that determine how much each stat contributes to the weighted efficiency score for a given archetype.">numerical weights</TT> per build archetype.
+              </P>
+
+              <Div className="overflow-x-auto">
+                <Table variant="striped" size="compact">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[140px]">Archetype</TableHead>
+                      <TableHead className="min-w-[200px]">Description</TableHead>
+                      <TableHead className="min-w-[280px]">Stat Priority</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ARCHETYPES.map((a) => (
+                      <TableRow key={a.name}>
+                        <TableCell className="font-medium">{a.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{a.description}</TableCell>
+                        <TableCell>
+                          <Div className="flex flex-wrap gap-1">
+                            {a.stats.map((s) => (
+                              <RankBadge key={s.stat} stat={s.stat} rank={s.rank} />
+                            ))}
+                          </Div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Div>
+
+              <Div>
+                <P className="font-medium text-sm mb-2">
+                  <TT tip="These weights determine the weighted efficiency score. A weight of 1.0 means the stat is top priority; 0.05 means nearly useless.">Stat Priority Weights</TT>
+                </P>
+                <Div className="overflow-x-auto">
+                  <Table size="compact">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px] sticky left-0 bg-background z-10">Archetype</TableHead>
+                        {ALL_STATS.map((s) => (
+                          <TableHead key={s} className="text-center w-[52px] text-xs">{s}</TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {WEIGHT_ROWS.map((row) => (
+                        <TableRow key={row.key}>
+                          <TableCell className="sticky left-0 bg-background z-10">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Div className="flex items-center gap-1.5 cursor-help">
+                                  <span>{row.emoji}</span>
+                                  <span className="font-medium text-xs">{row.archetype}</span>
+                                </Div>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-[200px]">
+                                {row.description}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
+                          {ALL_STATS.map((s) => (
+                            <TableCell key={s} className={`text-center tabular-nums text-xs ${weightColor(row.weights[s] ?? 0)}`}>
+                              {row.weights[s] ?? '-'}
+                            </TableCell>
                           ))}
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell className="font-medium text-xs">6-star</TableCell>
-                          {ms.values6.map((v, i) => (
-                            <TableCell key={i} className="text-center tabular-nums text-xs">{v}</TableCell>
-                          ))}
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium text-xs text-muted-foreground">5-star</TableCell>
-                          {ms.values5.map((v, i) => (
-                            <TableCell key={i} className="text-center tabular-nums text-xs text-muted-foreground">{v}</TableCell>
-                          ))}
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </Div>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </Div>
-              ))}
+              </Div>
+
+              <P className="text-xs text-muted-foreground italic">
+                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high, <span className="text-ga-roll-rare">0.5-0.69</span> medium, <span className="text-ga-roll-magic">0.3-0.49</span> low, <span className="text-ga-roll-normal">below 0.3</span> useless.
+              </P>
             </Div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 5: Roll Quality Tiers ---- */}
+        {/* ---- 4. Roll Quality Tiers ---- */}
         <AccordionItem value="roll-quality">
-          <AccordionTrigger className="text-base font-semibold">
-            5. <TT tip="The average quality of each roll compared to the maximum possible value for that stat.">Roll Quality</TT> Tiers
-          </AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">4. <TT tip="The average quality of each roll compared to the maximum possible value for that stat.">Roll Quality</TT> Tiers</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
               <P className="text-xs text-muted-foreground">
@@ -1036,18 +1031,15 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 6: Progressive Sell Guide ---- */}
+        {/* ---- 5. Progressive Sell Guide ---- */}
         <AccordionItem value="sell-guide">
-          <AccordionTrigger className="text-base font-semibold">
-            6. <TT tip="The advice considers both current quality AND gem/grind potential, not just the current efficiency number.">Progressive Sell Guide</TT>
-          </AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">5. <TT tip="The advice considers both current quality AND gem/grind potential, not just the current efficiency number.">Progressive Sell Guide</TT></AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
               <P className="text-xs text-muted-foreground mb-2">
                 The progressive system evaluates runes at each power-up milestone. Unlike static thresholds, it considers what the rune COULD become (potential) — not just its current state. If the potential weighted efficiency after gemming exceeds the threshold, the advice is UPGRADE even if current efficiency looks low.
               </P>
 
-              {/* Threshold table per profile */}
               <Card size="sm">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">
@@ -1098,7 +1090,6 @@ export default function GameDataPage() {
                 </CardContent>
               </Card>
 
-              {/* Dead stat combos */}
               <Card size="sm" className="border-destructive/20 bg-destructive/5">
                 <CardContent className="pt-3">
                   <P className="font-medium text-sm mb-1">Auto-sell: Dead Stat Combos</P>
@@ -1108,7 +1099,6 @@ export default function GameDataPage() {
                 </CardContent>
               </Card>
 
-              {/* Step-by-step guide */}
               <Div className="space-y-3">
                 {SELL_GUIDE.map((step) => (
                   <Card key={step.level} size="xs" className={`border ${step.color}`}>
@@ -1128,178 +1118,138 @@ export default function GameDataPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 7: Roll Breakdown ---- */}
-        <AccordionItem value="roll-breakdown">
-          <AccordionTrigger className="text-base font-semibold">
-            7. <TT tip="Each individual substat roll is graded from Legend to Normal based on how close it landed to the maximum possible value.">Roll Breakdown</TT> — Reading Roll Badges
-          </AccordionTrigger>
+        {/* ---- 6. References (merged: Slot Stats + Main Stat Values + Roll Breakdown) ---- */}
+        <AccordionItem value="references">
+          <AccordionTrigger className="text-base font-semibold">6. References</AccordionTrigger>
           <AccordionContent>
-            <Div className="space-y-4">
-              <P className="text-xs text-muted-foreground">
-                Each individual roll into a substat is graded based on how close it landed to the maximum. The badges appear next to each substat in the rune card.
-              </P>
+            <Div className="space-y-6">
 
-              <DataTable
-                columns={rollSymbolColumns}
-                data={ROLL_SYMBOLS}
-                pageSize={10}
-                hidePagination
-              />
-
-              <Card size="sm" className="border-ga-roll-rare/20 bg-ga-roll-rare/5">
-                <CardContent className="pt-3">
-                  <P className="font-medium text-sm mb-1">How to read a roll breakdown</P>
-                  <P className="text-xs text-muted-foreground">
-                    Example: <span className="font-mono">SPD +18 (★●◆)</span> means 3 rolls into SPD. First roll was Legend (max), second Hero, third Rare. The overall quality for that substat is the average of all individual rolls.
-                  </P>
-                  <P className="text-xs text-muted-foreground mt-1">
-                    Roll quality is calculated as: <span className="font-mono">(value - min) / (max - min)</span> for each roll. A roll of 6 on SPD (range 4-6) = <span className="font-mono">(6-4)/(6-4) = 100%</span> = Legend.
-                  </P>
-                </CardContent>
-              </Card>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ---- Section 8: Sources ---- */}
-        <AccordionItem value="sources">
-          <AccordionTrigger className="text-base font-semibold">
-            8. Sources
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-2">
-              {SOURCES.map((s) => (
-                <Card key={s.name} size="xs">
-                  <CardContent className="pt-3">
-                    <Div className="flex items-start justify-between gap-2">
-                      <Div>
-                        <a
-                          href={s.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-sm text-primary hover:underline"
-                        >
-                          {s.name}
-                        </a>
-                        <P className="text-xs text-muted-foreground mt-0.5">{s.description}</P>
-                      </Div>
-                      <Badge variant="outline" className="text-xs shrink-0">Link</Badge>
-                    </Div>
-                  </CardContent>
-                </Card>
-              ))}
-              <P className="text-xs text-muted-foreground mt-3 italic">
-                Data compiled from community sources. Values may vary with game updates.
-              </P>
-            </Div>
-          </AccordionContent>
-        </AccordionItem>
-        {/* ──────────────────────────────────────────────────────── */}
-        {/* Advanced / Archetypes — supplementary reference data  */}
-        {/* ──────────────────────────────────────────────────────── */}
-
-        {/* ---- Section 9: Build Archetypes (supplementary) ---- */}
-        <AccordionItem value="archetypes">
-          <AccordionTrigger className="text-base font-semibold">
-            9. Build Archetypes (Advanced)
-          </AccordionTrigger>
-          <AccordionContent>
-            <Div className="space-y-4">
-              <Card size="sm" className="border-muted-foreground/20 bg-muted/10">
-                <CardContent className="pt-3">
-                  <P className="text-xs text-muted-foreground">
-                    These are supplementary — the main analysis is set-based. Archetypes are provided as extra context for advanced users.
-                  </P>
-                </CardContent>
-              </Card>
-
-              <P className="text-xs text-muted-foreground">
-                Stat priorities and <TT tip="Numerical weights (0.05 to 1.0) that determine how much each stat contributes to the weighted efficiency score for a given archetype.">numerical weights</TT> per build archetype.
-              </P>
-
-              {/* Stat Priority quick reference */}
-              <Div className="overflow-x-auto">
-                <Table variant="striped" size="compact">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[140px]">Archetype</TableHead>
-                      <TableHead className="min-w-[200px]">Description</TableHead>
-                      <TableHead className="min-w-[280px]">Stat Priority</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {ARCHETYPES.map((a) => (
-                      <TableRow key={a.name}>
-                        <TableCell className="font-medium">{a.name}</TableCell>
-                        <TableCell className="text-muted-foreground text-xs">{a.description}</TableCell>
-                        <TableCell>
+              {/* Sub-section: Stat Values by Slot */}
+              <Div>
+                <P className="font-bold text-sm mb-3">Stat Values by Slot</P>
+                <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {SLOTS.map((s) => (
+                    <Card key={s.slot} size="sm">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center justify-between">
+                          <span>Slot {s.slot}</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="outline" className="text-xs cursor-help">?</Badge>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[250px]">
+                              {s.tip}
+                            </TooltipContent>
+                          </Tooltip>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <Div>
+                          <P className="text-xs text-muted-foreground mb-1">Main stat</P>
+                          {s.mainFixed ? (
+                            <Badge variant="secondary" className="text-xs">{s.mainFixed} (fixed)</Badge>
+                          ) : (
+                            <Div className="flex flex-wrap gap-1">
+                              {s.mainOptions.map((opt) => (
+                                <Badge key={opt} variant="outline" className="text-xs">{opt}</Badge>
+                              ))}
+                            </Div>
+                          )}
+                        </Div>
+                        <Div>
+                          <P className="text-xs text-muted-foreground mb-1">Priority subs</P>
                           <Div className="flex flex-wrap gap-1">
-                            {a.stats.map((s) => (
-                              <RankBadge key={s.stat} stat={s.stat} rank={s.rank} />
+                            {s.priority.map((stat, i) => (
+                              <RankBadge key={stat} stat={stat} rank={i + 1} />
                             ))}
                           </Div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Div>
-
-              {/* Numerical weight table */}
-              <Div>
-                <P className="font-medium text-sm mb-2">
-                  <TT tip="These weights determine the weighted efficiency score. A weight of 1.0 means the stat is top priority; 0.05 means nearly useless.">Stat Priority Weights</TT>
-                </P>
-                <Div className="overflow-x-auto">
-                  <Table size="compact">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="min-w-[120px] sticky left-0 bg-background z-10">Archetype</TableHead>
-                        {ALL_STATS.map((s) => (
-                          <TableHead key={s} className="text-center w-[52px] text-xs">{s}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {WEIGHT_ROWS.map((row) => (
-                        <TableRow key={row.key}>
-                          <TableCell className="sticky left-0 bg-background z-10">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Div className="flex items-center gap-1.5 cursor-help">
-                                  <span>{row.emoji}</span>
-                                  <span className="font-medium text-xs">{row.archetype}</span>
-                                </Div>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-[200px]">
-                                {row.description}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TableCell>
-                          {ALL_STATS.map((s) => (
-                            <TableCell key={s} className={`text-center tabular-nums text-xs ${weightColor(row.weights[s] ?? 0)}`}>
-                              {row.weights[s] ?? '-'}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                        </Div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </Div>
               </Div>
 
-              <P className="text-xs text-muted-foreground italic">
-                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high, <span className="text-ga-roll-rare">0.5-0.69</span> medium, <span className="text-ga-roll-magic">0.3-0.49</span> low, <span className="text-ga-roll-normal">below 0.3</span> useless.
-              </P>
+              <hr className="border-border" />
+
+              {/* Sub-section: Main Stat Values */}
+              <Div>
+                <P className="font-bold text-sm mb-3">Main Stat Values (+0 to +15)</P>
+                <Div className="space-y-4">
+                  {MAIN_STATS.map((ms) => (
+                    <Div key={ms.stat}>
+                      <P className="font-medium text-sm mb-2">
+                        {ms.stat} <span className="text-muted-foreground text-xs">(Slots {ms.slots.join(', ')})</span>
+                      </P>
+                      <Div className="overflow-x-auto">
+                        <Table size="compact">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[60px]">Grade</TableHead>
+                              {Array.from({ length: 16 }, (_, i) => (
+                                <TableHead key={i} className="text-center w-[46px] text-xs">+{i}</TableHead>
+                              ))}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium text-xs">6-star</TableCell>
+                              {ms.values6.map((v, i) => (
+                                <TableCell key={i} className="text-center tabular-nums text-xs">{v}</TableCell>
+                              ))}
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium text-xs text-muted-foreground">5-star</TableCell>
+                              {ms.values5.map((v, i) => (
+                                <TableCell key={i} className="text-center tabular-nums text-xs text-muted-foreground">{v}</TableCell>
+                              ))}
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </Div>
+                    </Div>
+                  ))}
+                </Div>
+              </Div>
+
+              <hr className="border-border" />
+
+              {/* Sub-section: Roll Breakdown Symbols */}
+              <Div>
+                <P className="font-bold text-sm mb-3"><TT tip="Each individual substat roll is graded from Legend to Normal based on how close it landed to the maximum possible value.">Roll Breakdown</TT> Symbols</P>
+                <Div className="space-y-4">
+                  <P className="text-xs text-muted-foreground">
+                    Each individual roll into a substat is graded based on how close it landed to the maximum. The badges appear next to each substat in the rune card.
+                  </P>
+
+                  <DataTable
+                    columns={rollSymbolColumns}
+                    data={ROLL_SYMBOLS}
+                    pageSize={10}
+                    hidePagination
+                  />
+
+                  <Card size="sm" className="border-ga-roll-rare/20 bg-ga-roll-rare/5">
+                    <CardContent className="pt-3">
+                      <P className="font-medium text-sm mb-1">How to read a roll breakdown</P>
+                      <P className="text-xs text-muted-foreground">
+                        Example: <span className="font-mono">SPD +18 (★●◆)</span> means 3 rolls into SPD. First roll was Legend (max), second Hero, third Rare. The overall quality for that substat is the average of all individual rolls.
+                      </P>
+                      <P className="text-xs text-muted-foreground mt-1">
+                        Roll quality is calculated as: <span className="font-mono">(value - min) / (max - min)</span> for each roll. A roll of 6 on SPD (range 4-6) = <span className="font-mono">(6-4)/(6-4) = 100%</span> = Legend.
+                      </P>
+                    </CardContent>
+                  </Card>
+                </Div>
+              </Div>
+
             </Div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* ---- Section 10: Gem/Grind Recommendations per Archetype (supplementary) ---- */}
+        {/* ---- 7. Gem/Grind Recommendations (Advanced) ---- */}
         <AccordionItem value="gem-grind-recs">
-          <AccordionTrigger className="text-base font-semibold">
-            10. <TT tip="Which stat to gem (replace the worst substat) and which stats to grind (add flat bonus) for each archetype.">Gem/Grind Recommendations</TT> by Archetype (Advanced)
-          </AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">7. <TT tip="Which stat to gem (replace the worst substat) and which stats to grind (add flat bonus) for each archetype.">Gem/Grind Recommendations</TT> by Archetype (Advanced)</AccordionTrigger>
           <AccordionContent>
             <Div className="space-y-4">
               <Card size="sm" className="border-muted-foreground/20 bg-muted/10">
@@ -1341,6 +1291,39 @@ export default function GameDataPage() {
             </Div>
           </AccordionContent>
         </AccordionItem>
+
+        {/* ---- 8. Sources ---- */}
+        <AccordionItem value="sources">
+          <AccordionTrigger className="text-base font-semibold">8. Sources</AccordionTrigger>
+          <AccordionContent>
+            <Div className="space-y-2">
+              {SOURCES.map((s) => (
+                <Card key={s.name} size="xs">
+                  <CardContent className="pt-3">
+                    <Div className="flex items-start justify-between gap-2">
+                      <Div>
+                        <a
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-sm text-primary hover:underline"
+                        >
+                          {s.name}
+                        </a>
+                        <P className="text-xs text-muted-foreground mt-0.5">{s.description}</P>
+                      </Div>
+                      <Badge variant="outline" className="text-xs shrink-0">Link</Badge>
+                    </Div>
+                  </CardContent>
+                </Card>
+              ))}
+              <P className="text-xs text-muted-foreground mt-3 italic">
+                Data compiled from community sources. Values may vary with game updates.
+              </P>
+            </Div>
+          </AccordionContent>
+        </AccordionItem>
+
       </Accordion>
     </Div>
   )

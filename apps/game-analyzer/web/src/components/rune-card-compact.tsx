@@ -1,10 +1,14 @@
 'use client'
 
-import { Badge, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
+import { useState } from 'react'
+import { Badge, Button, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, StatTier } from '@game-analyzer/types'
-import { SET_STAT_TIERS, SET_STRENGTH_THRESHOLD_BONUS, SUBSTAT_ROLL_RANGES, ANCIENT_SUBSTAT_BASE_RANGES } from '@game-analyzer/types'
-import { GEM_ICONS } from '../config/game-assets'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, StatTier, PlayerProfile } from '@game-analyzer/types'
+import {
+  SET_STAT_TIERS, SET_STRENGTH_THRESHOLD_BONUS, SUBSTAT_ROLL_RANGES, ANCIENT_SUBSTAT_BASE_RANGES,
+  GRIND_RANGES, GEM_RANGES, TIER_WEIGHTS, PROGRESSIVE_SELL_THRESHOLDS, SET_STRENGTH, GRINDABLE_STATS,
+} from '@game-analyzer/types'
+import { GEM_ICONS, GRIND_ICONS, RUNE_SET_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
 
 const QUALITY_COLORS: Record<RuneQuality, string> = {
@@ -105,6 +109,7 @@ interface RuneCardCompactProps {
 
 export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactProps) {
   const tRune = useTranslations('rune')
+  const [showDebug, setShowDebug] = useState(false)
 
   const quality = rune.quality ?? 'normal'
   const advice = analysis?.progressiveAdvice
@@ -199,12 +204,79 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                       {Math.round(subAnalysis.efficiency)}%
                     </P>
                   )}
-                  {subAnalysis?.isGemTarget && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 bg-warning/10 text-warning-foreground shrink-0">
-                      <img src={GEM_ICONS.legend} alt="gem" className="w-3 h-3 inline" />
-                      gem target
-                    </Badge>
-                  )}
+                  {(() => {
+                    const isGem = subAnalysis?.isGemTarget
+                    const isGrindable = subAnalysis?.grindable
+                    const grindRange = GRIND_RANGES?.legend?.[stat.type]
+                    const gemReplaceStat = analysis?.archetypeOptimizations?.[0]?.gemTarget?.replace
+                    const gemRange = GEM_RANGES?.legend?.[stat.type]
+                    const sfx = isPercentStat(stat.type) ? '%' : ''
+
+                    if (isGem) {
+                      // Gem target: gem sprite + set sprite centered overlay
+                      return (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Div className="relative inline-flex items-center justify-center w-5 h-5 shrink-0 cursor-help">
+                                <img src={GEM_ICONS.legend} alt="gem" className="w-5 h-5" />
+                                {RUNE_SET_ICONS[rune.set] && (
+                                  <img src={RUNE_SET_ICONS[rune.set]} alt={rune.set} className="w-3 h-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]" />
+                                )}
+                              </Div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <P className="text-xs">
+                                Gem {rune.set}: {formatStatLabel(stat.type)} → {gemReplaceStat ? formatStatLabel(gemReplaceStat) : '?'}
+                                {gemRange && ` (${gemRange.min}–${gemRange.max}${sfx})`}
+                              </P>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )
+                    }
+                    if (isGrindable && grindRange) {
+                      // Grindable: grind sprite + set sprite centered overlay
+                      return (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Div className="relative inline-flex items-center justify-center w-[22px] h-[22px] shrink-0 cursor-help">
+                                <img src={GRIND_ICONS.legend} alt="grind" className="w-[22px] h-[22px]" />
+                                {RUNE_SET_ICONS[rune.set] && (
+                                  <img src={RUNE_SET_ICONS[rune.set]} alt={rune.set} className="w-3 h-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]" />
+                                )}
+                              </Div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <P className="text-xs">
+                                Grind: +{grindRange.min}–{grindRange.max} {formatStatLabel(stat.type)}{sfx}
+                              </P>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )
+                    }
+                    // Non-grindable: grind sprite + ban icon overlay (no set sprite)
+                    return (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Div className="relative inline-flex items-center justify-center w-[22px] h-[22px] shrink-0 cursor-help opacity-40">
+                              <img src={GRIND_ICONS.legend} alt="no grind" className="w-5 h-5" />
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-destructive drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                              </svg>
+                            </Div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <P className="text-xs">Non-grindable</P>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )
+                  })()}
                 </Div>
                 {subAnalysis && breakdown && breakdown.length > 1 && (() => {
                   // Show only powerup rolls (exclude base) — each individual roll as a badge
@@ -249,108 +321,263 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           </Div>
         )}
 
-        {/* ── Score Breakdown ── */}
+        {/* ── Debug Panel (expandable) ── */}
         {analysis && (
-          <Div className="border-t border-border pt-1.5 space-y-0.5 text-[10px] leading-tight">
-            {rune.isAncient && (
-              <P className="text-amber-400">
-                Ancient rune (ranges +1)
-              </P>
-            )}
-            {analysis.setWeightedEfficiency !== undefined && (
-              <P className="text-muted-foreground">
-                Set Eff: {analysis.setWeightedEfficiency}%
-              </P>
-            )}
-            {analysis.qualityPenalty !== undefined && analysis.qualityPenalty !== 0 && (
-              <P className="text-destructive">
-                {tRune(`quality.${quality}`)} quality: {analysis.qualityPenalty}
-              </P>
-            )}
-            {analysis.innateScore !== undefined && analysis.innateScore !== 0 && (
-              <P className={analysis.innateScore < 0 ? 'text-destructive' : 'text-success-foreground'}>
-                Innate {rune.innateStat ? formatStatLabel(rune.innateStat.type) : ''}{analysis.innateTier ? ` [${analysis.innateTier}]` : ''}: {analysis.innateScore > 0 ? '+' : ''}{analysis.innateScore}
-              </P>
-            )}
-            {analysis.mismatchPenalty !== undefined && analysis.mismatchPenalty !== 0 && (
-              <P className="text-destructive">
-                Stats mismatch: {analysis.mismatchPenalty}
-              </P>
-            )}
-            {analysis.lowRollPenalty !== undefined && analysis.lowRollPenalty !== 0 && (
-              <P className="text-destructive">
-                Low-roll penalty: {analysis.lowRollPenalty}
-              </P>
-            )}
-            {analysis.nonGrindablePenalty !== undefined && analysis.nonGrindablePenalty !== 0 && (
-              <P className="text-destructive">
-                Non-grindable penalty: {analysis.nonGrindablePenalty}
-              </P>
-            )}
-            {analysis.setStrength && analysis.setStrength !== 'S' && (
-              <P className="text-success-foreground">
-                Set {rune.set} ({analysis.setStrength}): +{SET_STRENGTH_THRESHOLD_BONUS[analysis.setStrength] ?? 0}% seuils
-              </P>
-            )}
-            {/* ── Score total ── */}
-            {(() => {
-              const base = analysis.setWeightedEfficiency ?? 0
+          <Div className="space-y-1">
+            <Button variant="ghost" size="sm" className="text-[9px] text-muted-foreground/50 h-auto py-0.5 px-1" onClick={() => setShowDebug(!showDebug)}>
+              {showDebug ? '\u25BC Hide debug' : '\u25B6 Debug'}
+            </Button>
+            {showDebug && (() => {
+              const breakdown = (analysis as any).setWeightedBreakdown as Array<{
+                type: StatType; value: number; rolls: number; maxPossible: number;
+                ratio: number; tier: StatTier; tierWeight: number; grindBonus: number; contribution: number
+              }> | undefined
+              const maxDivisor = (analysis as any).setWeightedMaxDivisor as number | undefined
+              const setTiers = SET_STAT_TIERS[rune.set]
+              const setStrengthTier = (analysis.setStrength ?? SET_STRENGTH[rune.set] ?? 'C') as string
+              const setBonus = SET_STRENGTH_THRESHOLD_BONUS[setStrengthTier] ?? 0
+
+              // Compute penalties total
               const qualityPen = analysis.qualityPenalty ?? 0
               const innate = analysis.innateScore ?? 0
               const mismatchPen = analysis.mismatchPenalty ?? 0
               const lowRoll = analysis.lowRollPenalty ?? 0
               const nonGrind = analysis.nonGrindablePenalty ?? 0
-              const total = Math.round((base + qualityPen + innate + mismatchPen + lowRoll + nonGrind) * 100) / 100
-              const hasPenalties = qualityPen !== 0 || innate !== 0 || mismatchPen !== 0 || lowRoll !== 0 || nonGrind !== 0
-              return hasPenalties ? (
-                <>
-                  <Div className="border-t border-dashed border-border my-0.5" />
-                  <P className="text-muted-foreground font-medium">
-                    Score: {total}
-                  </P>
-                </>
-              ) : null
+              const penaltiesTotal = qualityPen + innate + mismatchPen + lowRoll + nonGrind
+
+              // Gem analysis from archetypeOptimizations
+              const bestOptim = analysis.archetypeOptimizations?.[0]
+
+              return (
+                <Div className="bg-muted/10 border border-border rounded p-2 space-y-2 font-mono text-[9px] leading-tight">
+
+                  {/* ── Section 1: Rune Info ── */}
+                  <Div className="space-y-0.5">
+                    <P className="font-bold text-[10px] text-foreground">Rune Info</P>
+                    <P className="text-muted-foreground">Set: {rune.set} ({setStrengthTier}-tier, +{setBonus}% seuils)</P>
+                    <P className="text-muted-foreground">Slot: {rune.slot} | Level: +{rune.level} | Quality: {quality} | Ancient: {rune.isAncient ? 'yes' : 'no'}</P>
+                    <P className="text-muted-foreground">Main stat: {formatStatLabel(rune.mainStat.type)} {formatStatValue(rune.mainStat.type, rune.mainStat.value)}</P>
+                    {rune.innateStat && (
+                      <P className="text-muted-foreground">
+                        Innate: {formatStatLabel(rune.innateStat.type)} {formatStatValue(rune.innateStat.type, rune.innateStat.value)} [{analysis.innateTier ?? getStatTier(rune.set, rune.innateStat.type)}-tier] → score: <span className={(analysis.innateScore ?? 0) > 0 ? 'text-success-foreground' : (analysis.innateScore ?? 0) < 0 ? 'text-destructive' : ''}>{analysis.innateScore !== undefined ? (analysis.innateScore > 0 ? '+' : '') + analysis.innateScore : '0'}</span>
+                      </P>
+                    )}
+                    <P className="text-muted-foreground">Substats: {rune.subStats.length}/4</P>
+                  </Div>
+
+                  {/* ── Section 2: Set-Weighted Efficiency Breakdown ── */}
+                  {breakdown && maxDivisor && (
+                    <Div className="space-y-0.5">
+                      <P className="font-bold text-[10px] text-foreground">Set-Weighted Efficiency Breakdown</P>
+                      {breakdown.map((item, idx) => {
+                        const sfx = isPercentStat(item.type) ? '%' : ''
+                        const tierColor = item.tier === 'S' || item.tier === 'A' ? 'text-success-foreground' : item.tier === 'C' || item.tier === 'D' ? 'text-destructive' : 'text-muted-foreground'
+                        const grindColor = item.grindBonus > 1 ? 'text-success-foreground' : 'text-destructive'
+                        const contribColor = item.contribution > 0.8 ? 'text-success-foreground' : item.contribution < 0.3 ? 'text-destructive' : 'text-muted-foreground'
+                        return (
+                          <Div key={idx} className="space-y-0.5 pl-1">
+                            <P className="text-muted-foreground">
+                              {formatStatLabel(item.type)} [<span className={tierColor}>{item.tier}</span>]: value={item.value}{sfx}, rolls={item.rolls}, maxPossible={item.maxPossible}{sfx}
+                            </P>
+                            <P className="text-muted-foreground/60 pl-2">
+                              ratio = ({item.value}/{item.maxPossible}) x {item.rolls} = {item.ratio}
+                            </P>
+                            <P className="text-muted-foreground/60 pl-2">
+                              x tierWeight({item.tier}) = <span className={tierColor}>{item.tierWeight}</span>
+                            </P>
+                            <P className="text-muted-foreground/60 pl-2">
+                              x grindBonus = <span className={grindColor}>{item.grindBonus}</span> {item.grindBonus > 1 ? '(grindable)' : '(non-grindable)'}
+                            </P>
+                            <P className={`pl-2 ${contribColor}`}>
+                              = contribution: {item.contribution}
+                            </P>
+                          </Div>
+                        )
+                      })}
+                      <Div className="border-t border-dashed border-border/30 mt-1 pt-1 pl-1 space-y-0.5">
+                        <P className="text-muted-foreground">
+                          Total weighted sum: {Math.round(breakdown.reduce((s, b) => s + b.contribution, 0) * 100) / 100}
+                        </P>
+                        <P className="text-muted-foreground">
+                          Max divisor: TOTAL_EVENTS[{quality}] x 1.0 x 1.2 = {maxDivisor}
+                        </P>
+                        <P className="text-foreground font-medium">
+                          Set Eff = {Math.round(breakdown.reduce((s, b) => s + b.contribution, 0) * 100) / 100} / {maxDivisor} x 100 = {analysis.setWeightedEfficiency}%
+                        </P>
+                      </Div>
+                    </Div>
+                  )}
+
+                  {/* ── Section 3: Penalties ── */}
+                  <Div className="space-y-0.5">
+                    <P className="font-bold text-[10px] text-foreground">Penalties</P>
+                    <P className="text-muted-foreground">Quality penalty: {quality} = <span className={qualityPen < 0 ? 'text-destructive' : qualityPen > 0 ? 'text-success-foreground' : ''}>{qualityPen}</span></P>
+                    <P className="text-muted-foreground">
+                      Innate score: {rune.innateStat ? `${formatStatLabel(rune.innateStat.type)} [${analysis.innateTier ?? '?'}]` : 'none'} = <span className={innate > 0 ? 'text-success-foreground' : innate < 0 ? 'text-destructive' : ''}>{innate > 0 ? '+' : ''}{innate}</span>
+                    </P>
+                    <P className="text-muted-foreground">Low-roll penalty: <span className={lowRoll < 0 ? 'text-destructive' : ''}>{lowRoll}</span></P>
+                    <P className="text-muted-foreground">Non-grindable penalty: <span className={nonGrind < 0 ? 'text-destructive' : ''}>{nonGrind}</span></P>
+                    <P className="text-muted-foreground">Mismatch penalty: <span className={mismatchPen < 0 ? 'text-destructive' : ''}>{mismatchPen}</span></P>
+                    <P className="text-muted-foreground">Set strength: {rune.set} (<span className={setStrengthTier === 'S' || setStrengthTier === 'A' ? 'text-success-foreground' : setStrengthTier === 'D' ? 'text-destructive' : ''}>{setStrengthTier}</span>) → <span className={setBonus > 0 ? 'text-success-foreground' : ''}>{`+${setBonus}%`}</span> on thresholds</P>
+                    <P className={`text-muted-foreground font-medium`}>Total adjustments: <span className={penaltiesTotal > 0 ? 'text-success-foreground' : penaltiesTotal < 0 ? 'text-destructive' : ''}>{penaltiesTotal > 0 ? '+' : ''}{penaltiesTotal}</span></P>
+                  </Div>
+
+                  {/* ── Section 4: Progressive Advice (all 3 profiles) ── */}
+                  <Div className="space-y-0.5">
+                    <P className="font-bold text-[10px] text-foreground">Progressive Advice (all profiles)</P>
+                    {(() => {
+                      const profiles: PlayerProfile[] = ['early', 'mid', 'late']
+                      const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12) as 0 | 3 | 6 | 9 | 12
+                      const currentEff = analysis.setWeightedEfficiency ?? 0
+                      const potentialEff = analysis.potentialEfficiency ?? currentEff
+                      const effWithPenalties = currentEff + penaltiesTotal
+                      const potentialWithPenalties = potentialEff + penaltiesTotal
+
+                      return (
+                        <Div className="overflow-x-auto">
+                          <table className="w-full text-[9px]">
+                            <thead>
+                              <tr className="text-muted-foreground/60">
+                                <td className="pr-2"></td>
+                                {profiles.map(p => <td key={p} className="text-center px-1 font-medium">{p.toUpperCase()}</td>)}
+                              </tr>
+                            </thead>
+                            <tbody className="text-muted-foreground">
+                              <tr>
+                                <td className="pr-2">Threshold +{levelKey}:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{PROGRESSIVE_SELL_THRESHOLDS[p][levelKey] ?? '?'}</td>)}
+                              </tr>
+                              <tr>
+                                <td className="pr-2">+ set strength:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{(PROGRESSIVE_SELL_THRESHOLDS[p][levelKey] ?? 0) + setBonus}</td>)}
+                              </tr>
+                              <tr>
+                                <td className="pr-2">Current eff:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{currentEff}</td>)}
+                              </tr>
+                              <tr>
+                                <td className="pr-2">+ penalties:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(effWithPenalties * 100) / 100}</td>)}
+                              </tr>
+                              {rune.level < 12 && (
+                                <>
+                                  <tr>
+                                    <td className="pr-2">Potential +12:</td>
+                                    {profiles.map(p => <td key={p} className="text-center px-1">{potentialEff}</td>)}
+                                  </tr>
+                                  <tr>
+                                    <td className="pr-2">+ penalties:</td>
+                                    {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(potentialWithPenalties * 100) / 100}</td>)}
+                                  </tr>
+                                </>
+                              )}
+                              <tr>
+                                <td className="pr-2">vs final thresh:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{(PROGRESSIVE_SELL_THRESHOLDS[p][12] ?? 0) + setBonus}</td>)}
+                              </tr>
+                              <tr className="font-bold">
+                                <td className="pr-2">→ Decision:</td>
+                                {profiles.map(p => {
+                                  const thresh = (PROGRESSIVE_SELL_THRESHOLDS[p][levelKey] ?? 0) + setBonus
+                                  const finalThresh = (PROGRESSIVE_SELL_THRESHOLDS[p][12] ?? 0) + setBonus
+                                  const adjCurrent = effWithPenalties
+                                  const adjPotential = potentialWithPenalties
+                                  let decision: string
+                                  if (rune.level >= 12) {
+                                    decision = adjCurrent >= thresh ? 'KEEP/GRIND' : 'SELL'
+                                  } else if (adjPotential >= finalThresh) {
+                                    decision = 'UPGRADE'
+                                  } else if (adjCurrent < thresh) {
+                                    decision = 'SELL'
+                                  } else {
+                                    decision = 'UPGRADE'
+                                  }
+                                  const color = decision === 'SELL' ? 'text-destructive' : decision === 'UPGRADE' ? 'text-ga-roll-rare' : 'text-success-foreground'
+                                  return <td key={p} className={`text-center px-1 ${color}`}>{decision}</td>
+                                })}
+                              </tr>
+                              <tr>
+                                <td className="pr-2">Sell prob:</td>
+                                {profiles.map(p => {
+                                  const finalThresh = (PROGRESSIVE_SELL_THRESHOLDS[p][12] ?? 0) + setBonus
+                                  const adjPotential = potentialWithPenalties
+                                  const prob = Math.min(95, Math.max(5, Math.round((1 - adjPotential / finalThresh) * 100)))
+                                  return <td key={p} className="text-center px-1">{prob}%</td>
+                                })}
+                              </tr>
+                            </tbody>
+                          </table>
+                        </Div>
+                      )
+                    })()}
+                  </Div>
+
+                  {/* ── Section 5: Gem Analysis ── */}
+                  {bestOptim && (
+                    <Div className="space-y-0.5">
+                      <P className="font-bold text-[10px] text-foreground">Gem Analysis</P>
+                      {bestOptim.gemTarget ? (
+                        <>
+                          <P className="text-muted-foreground">Gem target: {formatStatLabel(bestOptim.gemTarget.remove)}</P>
+                          <P className="text-muted-foreground/60 pl-2">Reason: {bestOptim.gemTarget.reason}</P>
+                          {rune.subStats.map((sub, idx) => {
+                            const tier = getStatTier(rune.set, sub.type)
+                            const tierW = TIER_WEIGHTS[tier] ?? 0
+                            const isGrindable = GRINDABLE_STATS.includes(sub.type)
+                            const grindBonus = isGrindable ? 0.3 : 0
+                            const subAnalysis = analysis.substats.find(s => s.type === sub.type)
+                            const powerupRolls = subAnalysis?.rollBreakdown ? subAnalysis.rollBreakdown.length - 1 : 0
+                            const rollBonus = powerupRolls * 0.4
+                            const total = Math.round((tierW + grindBonus + rollBonus) * 100) / 100
+                            const isTarget = sub.type === bestOptim.gemTarget?.remove
+                            return (
+                              <P key={idx} className={`text-muted-foreground/60 pl-2 ${isTarget ? 'text-destructive font-medium' : ''}`}>
+                                {formatStatLabel(sub.type)}: tier={tier}({tierW}) + {isGrindable ? `grindable(${grindBonus})` : `non-grind(0)`} + {powerupRolls} rolls({rollBonus}) = {total}{isTarget ? ' <-- LOWEST' : ''}
+                              </P>
+                            )
+                          })}
+                          <P className="text-foreground font-medium pl-2">
+                            → Gem {formatStatLabel(bestOptim.gemTarget.remove)} → {formatStatLabel(bestOptim.gemTarget.replace)}
+                          </P>
+                          <P className="text-muted-foreground/60 pl-2">
+                            Rolls lost: {bestOptim.rollsLost} | Post-optim score: {bestOptim.postOptimScore}
+                          </P>
+                        </>
+                      ) : (
+                        <P className="text-success-foreground">No gem needed — all substats match archetype ({bestOptim.archetype})</P>
+                      )}
+                    </Div>
+                  )}
+
+                  {/* ── Section 6: Constants used ── */}
+                  <Div className="space-y-0.5">
+                    <P className="font-bold text-[10px] text-foreground">Constants</P>
+                    {setTiers && (
+                      <Div className="space-y-0.5">
+                        <P className="text-muted-foreground">SET_STAT_TIERS[{rune.set}]:</P>
+                        <P className="text-muted-foreground/60 pl-2">
+                          {Object.entries(setTiers).filter(([, t]) => t !== 'C' && t !== 'D').map(([stat, tier]) => `${formatStatLabel(stat as StatType)}=${tier}`).join(' ')}
+                        </P>
+                      </Div>
+                    )}
+                    <Div className="space-y-0.5">
+                      <P className="text-muted-foreground">TIER_WEIGHTS: {Object.entries(TIER_WEIGHTS).map(([k, v]) => `${k}=${v}`).join(' ')}</P>
+                    </Div>
+                    <Div className="space-y-0.5">
+                      <P className="text-muted-foreground">PROGRESSIVE_SELL_THRESHOLDS:</P>
+                      {(['early', 'mid', 'late'] as PlayerProfile[]).map(p => (
+                        <P key={p} className="text-muted-foreground/60 pl-2">
+                          {p}: {JSON.stringify(PROGRESSIVE_SELL_THRESHOLDS[p])}
+                        </P>
+                      ))}
+                    </Div>
+                  </Div>
+                </Div>
+              )
             })()}
-            {advice && (
-              <P className={`font-bold ${ADVICE_COLORS[advice.action]}`}>
-                → {advice.action.toUpperCase()}
-              </P>
-            )}
           </Div>
         )}
 
-        {/* ── Gem Breakdown ── */}
-        {analysis && (() => {
-          const gemSub = analysis.substats.find(s => s.isGemTarget)
-          if (!gemSub) return null
-          const suffix = isPercentStat(gemSub.type as StatType) ? '%' : ''
-          return (
-            <Div className="border-t border-border pt-1.5 space-y-0.5">
-              <P className="text-[10px] font-medium text-warning-foreground">
-                Gem target: {formatStatLabel(gemSub.type as StatType)} → ?
-              </P>
-              <Div className="text-[10px] text-muted-foreground space-y-0.5">
-                {rune.subStats.map((s, i) => {
-                  const sa = analysis.substats[i]
-                  if (!sa) return null
-                  const isTarget = sa.isGemTarget
-                  const powerups = Math.max(0, sa.rolls - 1)
-                  const tier = analysis.subStatTiers?.[s.type] as StatTier | undefined
-                  return (
-                    <P key={i} className={isTarget ? 'text-warning-foreground font-medium' : ''}>
-                      {isTarget ? '→ ' : '  '}{formatStatLabel(s.type as StatType)}
-                      {tier ? ` [${tier}]` : ''}
-                      {` ${s.value}${suffix}`}
-                      {powerups > 0 ? ` (${powerups} rolls)` : ' (base)'}
-                      {sa.grindable ? ' ⚙' : ''}
-                      {isTarget ? ' ← gem' : ''}
-                    </P>
-                  )
-                })}
-              </Div>
-            </Div>
-          )
-        })()}
 
         {/* ── OCR Confidence ── */}
         {confidence !== undefined && (

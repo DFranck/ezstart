@@ -548,16 +548,29 @@ function weightedEfficiency(substats: RuneStat[], quality: RuneQuality, bestArch
  * Grindable stats get a +20% bonus (they gain more value post-upgrade).
  * Quad-roll bonus: if a stat has 3+ rolls AND is S or A tier for this set → +0.5 bonus.
  */
+interface SetWeightedBreakdownItem {
+  type: string
+  value: number
+  rolls: number
+  maxPossible: number
+  ratio: number
+  tier: StatTier
+  tierWeight: number
+  grindBonus: number
+  contribution: number
+}
+
 function setWeightedEfficiency(
   subStats: RuneStat[],
   set: string,
   quality: RuneQuality,
   isAncient?: boolean,
-): { efficiency: number; tiers: Record<string, StatTier> } {
+): { efficiency: number; tiers: Record<string, StatTier>; breakdown: SetWeightedBreakdownItem[]; maxDivisor: number } {
   const baseRanges = getBaseRanges(isAncient)
   const rollRanges = getRollRanges()
   const setTiers: Record<StatType, StatTier> = SET_STAT_TIERS[set] ?? SET_STAT_TIERS.violent!
   const tiers: Record<string, StatTier> = {}
+  const breakdown: SetWeightedBreakdownItem[] = []
 
   let weightedSum = 0
   for (const sub of subStats) {
@@ -566,17 +579,27 @@ function setWeightedEfficiency(
     if (!baseRange || !rollRange || sub.value <= 0) continue
 
     const { count } = estimateRolls(sub.type, sub.value, isAncient)
-    const maxPossible = baseRange.max + (count - 1) * rollRange.max
-    // Each event contributes ratio * 1.0
-    const ratio = maxPossible > 0 ? (sub.value / maxPossible) * count : 0
+    const maxPoss = baseRange.max + (count - 1) * rollRange.max
+    const ratio = maxPoss > 0 ? (sub.value / maxPoss) * count : 0
     const tier: StatTier = setTiers[sub.type] ?? 'C'
     const tierWeight = TIER_WEIGHTS[tier]
     tiers[sub.type] = tier
 
-    // Grindable stats get +20% bonus (they gain value from grinds)
     const grindBonus = !NON_GRINDABLE.has(sub.type) ? 1.2 : 1.0
+    const contribution = ratio * tierWeight * grindBonus
 
-    weightedSum += ratio * tierWeight * grindBonus
+    weightedSum += contribution
+    breakdown.push({
+      type: sub.type,
+      value: sub.value,
+      rolls: count,
+      maxPossible: maxPoss,
+      ratio: Math.round(ratio * 100) / 100,
+      tier,
+      tierWeight,
+      grindBonus,
+      contribution: Math.round(contribution * 100) / 100,
+    })
   }
 
   // Quad roll bonus: 3+ rolls in S or A tier stat
@@ -584,15 +607,15 @@ function setWeightedEfficiency(
     const { count } = estimateRolls(sub.type, sub.value, isAncient)
     const tier: StatTier = setTiers[sub.type] ?? 'C'
     if (count >= 3 && (tier === 'S' || tier === 'A')) {
-      weightedSum += 0.5 // quad roll in good stat bonus
+      weightedSum += 0.5
     }
   }
 
   // Normalise: max possible = all events at S tier + grindable bonus
-  const maxPossible = TOTAL_EVENTS_AT_12[quality] * 1.0 * 1.2 // all S + grindable
-  const efficiency = maxPossible > 0 ? (weightedSum / maxPossible) * 100 : 0
+  const maxDivisor = TOTAL_EVENTS_AT_12[quality] * 1.0 * 1.2
+  const efficiency = maxDivisor > 0 ? (weightedSum / maxDivisor) * 100 : 0
 
-  return { efficiency: Math.round(Math.min(efficiency, 100) * 100) / 100, tiers }
+  return { efficiency: Math.round(Math.min(efficiency, 100) * 100) / 100, tiers, breakdown, maxDivisor: Math.round(maxDivisor * 100) / 100 }
 }
 
 /**
@@ -1172,7 +1195,10 @@ function gemRemoveScore(stat: RuneStat, setTiers: Record<StatType, StatTier>, is
 function gemReplaceScore(statType: StatType, setTiers: Record<StatType, StatTier>): number {
   const tierW = TIER_WEIGHTS[setTiers[statType] ?? 'C']
   const grindable = !NON_GRINDABLE.has(statType)
-  return tierW + (grindable ? 0.3 : 0)
+  // Flat stats (hp, atk, def) are almost always bad replacements — heavy penalty
+  const FLAT_STATS: StatType[] = ['hp', 'atk', 'def']
+  const flatPenalty = FLAT_STATS.includes(statType) ? -0.5 : 0
+  return tierW + (grindable ? 0.3 : 0) + flatPenalty
 }
 
 /** Threshold: only suggest gem if worst stat score < 0.7 (all stats are decent otherwise) */
@@ -1223,11 +1249,29 @@ function calculateArchetypeOptimizations(
       .sort((a, b) => b.score - a.score)
 
     const bestReplacement = candidates[0]
-    if (bestReplacement) {
+    if (bestReplacement && bestReplacement.score > 0) {
+      // Check if re-gemming the same stat is better (reset base to legend gem value)
+      const currentRemoveScore = gemReplaceScore(worstSub.stat.type, setTiers)
+      if (currentRemoveScore >= bestReplacement.score) {
+        // Re-gem same stat — legend gem value > current base roll
+        sharedGemTarget = {
+          remove: worstSub.stat.type,
+          replace: worstSub.stat.type,
+          reason: `Re-gem ${worstSub.stat.type} for higher legend base value`,
+        }
+      } else {
+        sharedGemTarget = {
+          remove: worstSub.stat.type,
+          replace: bestReplacement.type,
+          reason: `Low set synergy (${setTiers[worstSub.stat.type] ?? 'C'}-tier for ${rune.set})`,
+        }
+      }
+    } else {
+      // No good replacement — re-gem same stat for better base
       sharedGemTarget = {
         remove: worstSub.stat.type,
-        replace: bestReplacement.type,
-        reason: `Low set synergy (${setTiers[worstSub.stat.type] ?? 'C'}-tier for ${rune.set})`,
+        replace: worstSub.stat.type,
+        reason: `Re-gem ${worstSub.stat.type} for higher legend base value`,
       }
     }
   }
@@ -1486,6 +1530,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     progressiveAdvice,
     archetypeOptimizations: archetypeOptimizations.length > 0 ? archetypeOptimizations : undefined,
     setWeightedEfficiency: roundedSetWeighted,
+    setWeightedBreakdown: setWeighted.breakdown,
+    setWeightedMaxDivisor: setWeighted.maxDivisor,
     subStatTiers: setWeighted.tiers,
     innateScore: innate.score !== 0 ? innate.score : undefined,
     innateTier: innate.tier,

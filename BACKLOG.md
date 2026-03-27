@@ -118,15 +118,13 @@ apps/
 74. [x] Gem logic v2 — rolls protègent massivement (+0.4/powerup), gem la stat avec least rolls + low tier
 75. [ ] Gem/Grind sprites — sprite gem (leg/hero/rare selon profil) + set overlay sur gem target, sprite grind + tooltip "+X to Y" sur stats grindables
 76. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
-77. [ ] Calibrer les formules Barion (diviseur par qualité, potential réaliste)
-78. [ ] Couleurs theme : vérifier rendu dark/light mode
-79. [ ] Détection grind (base vs grind via couleur verte dans le jeu)
-80. [ ] Fallback IA cascade (Gemini free tier)
-81. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
-82. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
-83. [ ] Ajouter OpenAPI/Swagger à l'API
-84. [ ] Deploy (Railway API + Vercel Web)
-85. [ ] Overlay/PiP pour afficher résultats sur le jeu
+77. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
+78. [ ] Fallback IA cascade (Gemini free tier)
+79. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
+80. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
+81. [ ] Ajouter OpenAPI/Swagger à l'API game-analyzer
+82. [ ] Deploy (Railway API + Vercel Web)
+83. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
