@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
 
@@ -16,7 +16,7 @@ triggerRouter.post('/', async (req, res) => {
     const isDev = process.env.NODE_ENV !== 'production'
 
     // Return immediately
-    res.json({
+    sendSuccess(res, {
       message: 'Health checks triggered',
       environment: isDev ? 'development' : 'production',
       servicesCount: Object.keys(MONITORED_SERVICES).length,
@@ -90,10 +90,7 @@ triggerRouter.post('/', async (req, res) => {
     })
   } catch (error) {
     logger.error('[Trigger] Error:', error)
-    res.status(500).json({
-      error: 'Failed to trigger health checks',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to trigger health checks')
   }
 })
 

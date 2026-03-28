@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
 
@@ -22,12 +22,7 @@ createFormConfigRouter.post(
     try {
       const validation = FormConfigSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid form configuration',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid form configuration', validation.error.errors)
       }
 
       const FormConfig = await getFormConfigModel()
@@ -35,18 +30,10 @@ createFormConfigRouter.post(
       const newConfig = new FormConfig(validation.data)
       await newConfig.save()
 
-      res.status(201).json({
-        success: true,
-        data: newConfig,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res.status(201), newConfig)
     } catch (error) {
       logger.error('Error creating form config:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create form configuration',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to create form configuration')
     }
   },
   {

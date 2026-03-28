@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
 
@@ -26,25 +26,13 @@ getFormConfigByIdRouter.get(
       const config = await FormConfig.findOne({ id: req.params.id }).lean()
 
       if (!config) {
-        return res.status(404).json({
-          success: false,
-          error: 'Form configuration not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Form configuration not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: config,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, config)
     } catch (error) {
       logger.error('Error fetching form config:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch form configuration',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to fetch form configuration')
     }
   },
   {

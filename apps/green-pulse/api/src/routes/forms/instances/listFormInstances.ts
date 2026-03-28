@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
@@ -35,19 +35,10 @@ listFormInstancesRouter.get(
         FormInstance.countDocuments(query),
       ])
 
-      res.json({
-        success: true,
-        data: instances,
-        meta: { total, limit: Number(limit), offset: Number(offset) },
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, instances, { total, limit: Number(limit), offset: Number(offset) })
     } catch (error) {
       logger.error('Error fetching form instances:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch form instances',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to fetch form instances')
     }
   },
   {

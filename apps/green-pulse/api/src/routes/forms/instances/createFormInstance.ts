@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   FormInstanceSchema,
   CreateFormInstanceRequestSchema,
@@ -26,12 +26,7 @@ createFormInstanceRouter.post(
     try {
       const validation = CreateFormInstanceRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors)
       }
 
       const FormInstance = await getFormInstanceModel()
@@ -50,18 +45,10 @@ createFormInstanceRouter.post(
       })
       await newInstance.save()
 
-      res.status(201).json({
-        success: true,
-        data: newInstance,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res.status(201), newInstance)
     } catch (error) {
       logger.error('Error creating form instance:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create form instance',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to create form instance')
     }
   },
   {

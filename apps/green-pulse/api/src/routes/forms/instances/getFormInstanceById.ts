@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
@@ -26,25 +26,13 @@ getFormInstanceByIdRouter.get(
       const instance = await FormInstance.findById(req.params.id).lean()
 
       if (!instance) {
-        return res.status(404).json({
-          success: false,
-          error: 'Form instance not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Form instance not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: instance,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, instance)
     } catch (error) {
       logger.error('Error fetching form instance:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch form instance',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to fetch form instance')
     }
   },
   {

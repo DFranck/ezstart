@@ -4,7 +4,7 @@
  * Get adaptive state for a specific service
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
 import type { Request, Response } from 'express'
 
@@ -18,21 +18,17 @@ export function setScheduler(schedulerInstance: HealthCheckScheduler) {
 
 const getServiceStateHandler = (req: Request, res: Response) => {
   if (!scheduler) {
-    return res.status(503).json({
-      error: 'Scheduler not initialized',
-    })
+    return sendError(res, 'Scheduler not initialized', 503)
   }
 
   const { serviceId } = req.params
   const state = scheduler.getServiceState(serviceId as any)
 
   if (!state) {
-    return res.status(404).json({
-      error: `Service ${serviceId} not found`,
-    })
+    return sendError(res, `Service ${serviceId} not found`, 404)
   }
 
-  res.json({
+  sendSuccess(res, {
     serviceId,
     currentInterval: `${state.currentInterval / 60000}min`,
     nextCheckAt: state.nextCheckAt.toISOString(),

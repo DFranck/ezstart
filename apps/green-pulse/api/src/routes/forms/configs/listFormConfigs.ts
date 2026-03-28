@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
 
@@ -34,19 +34,10 @@ listFormConfigsRouter.get(
         FormConfig.countDocuments(query),
       ])
 
-      res.json({
-        success: true,
-        data: configs,
-        meta: { total, limit: Number(limit), offset: Number(offset) },
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, configs, { total, limit: Number(limit), offset: Number(offset) })
     } catch (error) {
       logger.error('Error fetching form configs:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to fetch form configurations',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to fetch form configurations')
     }
   },
   {
