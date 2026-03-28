@@ -40,18 +40,18 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 7. [ ] insert-app.js — scaffolding complet avec wiring automatique (ports, tsconfig, scripts, BACKLOG)
 8. [ ] extract-app.js — extraire une app en standalone avec ses dépendances packages
 9. [ ] new-monorepo.js — starter kit template pour créer un nouveau monorepo @ezstart-like
-10. [ ] Workspace validator — script qui vérifie la cohérence tsconfig refs vs apps/packages réels
+10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
 11. [ ] Dynamic dev launcher — remplacer les 10+ scripts dev:x par un launcher dynamique
 12. [ ] callApi React Query integration — tags de cache automatiques dans callApi/fetch-client
-13. [ ] Rename cleanup — supprimer apps/game-analyzer/ résiduel (Windows lock)
-14. [ ] Theme gacha-analyzer — renommer game-analyzer.css → gacha-analyzer.css dans packages/ui
+13. [x] Rename cleanup — apps/game-analyzer supprimé, theme renommé
+14. [x] Theme gacha-analyzer — game-analyzer.css → gacha-analyzer.css dans packages/ui
 
 ### Cross-project items
 15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
 16. [x] Audit code quality — 20 problèmes identifiés, dead files + console.log packages fixés
 17. [x] READMEs à jour — 19 packages + 8 apps READMEs réécrits (minimal <30 lignes)
-18. [ ] Standardiser toutes les réponses API — format unique { success, data, meta } — en cours (audit)
-19. [ ] alert() → toast partout — ezbill fait, audit autres apps en cours
+18. [ ] Standardiser toutes les réponses API — rapport audit fait, fix à implémenter (ezbill pire, ezauth mixte)
+19. [x] alert() → toast partout — ezbill + fengshui + ezstart fixés, 0 alert() restant
 
 ### Sécurité (du rapport audit)
 20. [ ] CRITICAL: EZBill auth — remplacer X-User-Id par JWT réel via EZAuth
