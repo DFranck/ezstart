@@ -8,10 +8,12 @@
  *   pnpm rotate-secrets              # rotate all (dev + prod)
  *   pnpm rotate-secrets -- --dev     # rotate dev only (.env.local)
  *   pnpm rotate-secrets -- --prod    # rotate prod only (.env.production)
- *   pnpm rotate-secrets -- --dry-run # show what would change
+ *   pnpm rotate-secrets -- --dry-run    # show what would change
+ *   pnpm rotate-secrets -- --no-railway # skip Railway push
  */
 
 const crypto = require('crypto')
+const { execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
@@ -20,11 +22,20 @@ const args = process.argv.slice(2)
 const isDryRun = args.includes('--dry-run')
 const devOnly = args.includes('--dev')
 const prodOnly = args.includes('--prod')
+const noRailway = args.includes('--no-railway')
 const doBoth = !devOnly && !prodOnly
 
 // ── Generate secrets ──
 const devJwtSecret = crypto.randomBytes(64).toString('base64url')
 const prodJwtSecret = crypto.randomBytes(64).toString('base64url')
+
+// ── Railway services needing JWT_SECRET ──
+const RAILWAY_SERVICES = [
+  { service: 'ezauth-api', project: 'ezstart-apis' },
+  { service: 'ezbill-api', project: 'ezstart-apis' },
+  { service: 'ezpay-api', project: 'ezstart-apis' },
+  { service: 'greenpulse-api', project: 'TeamProjects' },
+]
 
 // ── Which apps need JWT_SECRET ──
 const JWT_APPS = [
@@ -84,6 +95,49 @@ if (doBoth || prodOnly) {
   console.log('')
 }
 
+// ── Railway push ──
+let railwayUpdated = false
+if ((doBoth || prodOnly) && !noRailway && !isDryRun) {
+  console.log('── RAILWAY (push JWT_SECRET) ──')
+
+  // Check if railway CLI is available
+  let railwayAvailable = false
+  try {
+    execSync('railway version', { stdio: 'pipe' })
+    railwayAvailable = true
+  } catch {
+    console.log('  ⚠  Railway CLI not found. Install: npm i -g @railway/cli')
+    console.log('  ⚠  Skipping automatic push — update manually in the Railway dashboard.')
+  }
+
+  if (railwayAvailable) {
+    const results = []
+    for (const { service, project } of RAILWAY_SERVICES) {
+      try {
+        execSync(
+          `railway variables set JWT_SECRET=${prodJwtSecret} --service ${service} --project ${project}`,
+          { stdio: 'pipe', timeout: 30_000 }
+        )
+        console.log(`  ✅ ${service} (${project}) — updated`)
+        results.push({ service, project, ok: true })
+      } catch (err) {
+        console.log(`  ❌ ${service} (${project}) — failed: ${err.message}`)
+        results.push({ service, project, ok: false })
+      }
+    }
+    railwayUpdated = results.some(r => r.ok)
+  }
+  console.log('')
+} else if ((doBoth || prodOnly) && !noRailway && isDryRun) {
+  console.log('── RAILWAY (dry-run) ──')
+  for (const { service, project } of RAILWAY_SERVICES) {
+    console.log(
+      `  📝 Would run: railway variables set JWT_SECRET=<secret> --service ${service} --project ${project}`
+    )
+  }
+  console.log('')
+}
+
 // ── Summary ──
 console.log('═'.repeat(60))
 console.log('📋 Summary')
@@ -99,18 +153,27 @@ if (doBoth || prodOnly) {
   console.log('')
   console.log('  PROD JWT_SECRET (for Railway):')
   console.log(`  ${prodJwtSecret}`)
-  console.log('')
-  console.log('  ⚡ Update in Railway dashboard:')
-  console.log('  ┌──────────────────────┬────────────────┐')
-  console.log('  │ Service              │ Variable       │')
-  console.log('  ├──────────────────────┼────────────────┤')
-  console.log('  │ ezauth-api           │ JWT_SECRET     │')
-  console.log('  │ ezbill-api           │ JWT_SECRET     │')
-  console.log('  │ gacha-analyzer-api   │ JWT_SECRET     │')
-  console.log('  │ greenpulse-api       │ JWT_SECRET     │')
-  console.log('  │ ezpay-api            │ JWT_SECRET     │')
-  console.log('  └──────────────────────┴────────────────┘')
-  console.log(`  Value: ${prodJwtSecret}`)
+
+  if (railwayUpdated) {
+    console.log('')
+    console.log('  ⚡ Railway services updated automatically via CLI.')
+  } else if (!noRailway && !isDryRun) {
+    console.log('')
+    console.log('  ⚡ Update manually in Railway dashboard:')
+    console.log('  ┌──────────────────────┬────────────────┐')
+    console.log('  │ Service              │ Variable       │')
+    console.log('  ├──────────────────────┼────────────────┤')
+    console.log('  │ ezauth-api           │ JWT_SECRET     │')
+    console.log('  │ ezbill-api           │ JWT_SECRET     │')
+    console.log('  │ gacha-analyzer-api   │ JWT_SECRET     │')
+    console.log('  │ greenpulse-api       │ JWT_SECRET     │')
+    console.log('  │ ezpay-api            │ JWT_SECRET     │')
+    console.log('  └──────────────────────┴────────────────┘')
+    console.log(`  Value: ${prodJwtSecret}`)
+  } else {
+    console.log('')
+    console.log('  ℹ  Railway push skipped (--no-railway or --dry-run).')
+  }
 }
 
 console.log('')
