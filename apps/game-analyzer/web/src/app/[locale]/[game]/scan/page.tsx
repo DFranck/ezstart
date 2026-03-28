@@ -343,6 +343,7 @@ export default function GameScanPage() {
 
   const { processFrame } = useFrameDiff({
     onSignificantChange: handleSignificantChange,
+    masks,
   })
 
   const handleFrame = useCallback(

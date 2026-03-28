@@ -95,12 +95,37 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
       const prevData = prev.data
       const totalPixels = frame.width * frame.height
 
+      // Pre-compute masks in absolute pixel coordinates once per frame
+      const absMasks = masks && masks.length > 0
+        ? masks.map(m => ({
+            x1: Math.floor((m.x / 100) * frame.width),
+            y1: Math.floor((m.y / 100) * frame.height),
+            x2: Math.floor(((m.x + m.width) / 100) * frame.width),
+            y2: Math.floor(((m.y + m.height) / 100) * frame.height),
+          }))
+        : null
+
       let sampledCount = 0
       let changedCount = 0
 
       // Walk through pixels with the configured sample rate
       // Each pixel occupies 4 bytes (RGBA) in the ImageData array
       for (let i = 0; i < totalPixels; i += sampleRate) {
+        // Skip pixels inside masked regions
+        if (absMasks) {
+          const px = i % frame.width
+          const py = Math.floor(i / frame.width)
+          let masked = false
+          for (let m = 0; m < absMasks.length; m++) {
+            const mask = absMasks[m]
+            if (px >= mask.x1 && px <= mask.x2 && py >= mask.y1 && py <= mask.y2) {
+              masked = true
+              break
+            }
+          }
+          if (masked) continue
+        }
+
         const offset = i * 4
         const gray = computeGrayscale(data[offset], data[offset + 1], data[offset + 2])
         const prevGray = computeGrayscale(prevData[offset], prevData[offset + 1], prevData[offset + 2])
@@ -138,7 +163,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
         }, stabilizeMs)
       }
     },
-    [threshold, pixelThreshold, sampleRate, stabilizeMs],
+    [threshold, pixelThreshold, sampleRate, stabilizeMs, masks],
   )
 
   return {
