@@ -42,7 +42,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 9. [x] new-monorepo.js — starter kit avec turbo/pnpm/husky/agents, remplace @ezstart par @[name]
 10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
 11. [x] Dynamic dev launcher — `scripts/tools/dev.js` avec auto-détection dépendances
-12. [ ] callApi React Query integration — tags de cache automatiques dans callApi/fetch-client
+12. [x] callApi React Query integration — queryKey + queryFn helpers dans createCallApi
 13. [x] Rename cleanup — apps/game-analyzer supprimé, theme renommé
 14. [x] Theme gacha-analyzer — game-analyzer.css → gacha-analyzer.css dans packages/ui
 
