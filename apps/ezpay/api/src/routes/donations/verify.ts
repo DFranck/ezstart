@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
@@ -36,24 +36,18 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
     const payment = await Payment.findOne({ paymentId: sessionId })
 
     if (!payment) {
-      return res.status(404).json({
-        success: false,
-        error: 'Payment not found',
-      })
+      return sendError(res, 'Payment not found', 404)
     }
 
     // If already completed, return success
     if (payment.status === 'completed') {
-      return res.json({
-        success: true,
-        payment,
-      })
+      return sendSuccess(res, payment)
     }
 
     // Verify with Stripe API to prevent fraud
     const { stripe } = await import('../../services/stripe.js')
     if (!sessionId) {
-      return res.status(400).json({ success: false, error: 'Missing sessionId' })
+      return sendError(res, 'Missing sessionId', 400)
     }
     const session = await stripe.checkout.sessions.retrieve(sessionId)
 
@@ -66,24 +60,15 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
 
       logger.info(`✅ Payment verified with Stripe and completed: ${sessionId}`)
 
-      res.json({
-        success: true,
-        payment,
-      })
+      sendSuccess(res, payment)
     } else {
       // Payment not confirmed by Stripe
       logger.warn(`⚠️ Payment not confirmed by Stripe: ${sessionId} (status: ${session.status})`)
-      res.status(400).json({
-        success: false,
-        error: 'Payment not confirmed',
-      })
+      sendError(res, 'Payment not confirmed', 400)
     }
   } catch (error) {
     logger.error('Verify payment error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to verify payment',
-    })
+    sendError(res, 'Failed to verify payment')
   }
 }
 

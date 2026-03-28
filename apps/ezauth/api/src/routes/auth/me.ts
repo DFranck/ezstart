@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
@@ -26,10 +26,7 @@ const meController = async (req: any, res: any) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: 'No token provided'
-      })
+      return sendError(res, 'No token provided', 401)
     }
 
     const payload = await AuthService.verifyToken(token)
@@ -41,10 +38,7 @@ const meController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Get user error:', error)
-    res.status(401).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Invalid token'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
   }
 }
 

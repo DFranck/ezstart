@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { CreateReceipt, GetReceiptsQuery, UpdateReceipt } from '@ezbill/types';
 import { logger } from '@ezstart/logger/server';
+import { sendSuccess, sendError } from '@ezstart/express-core';
 import {
   createReceiptService,
   getReceiptByIdService,
@@ -15,22 +16,16 @@ import { AuthRequest } from '../../types/auth.js';
 export async function createSecureReceiptController(req: AuthRequest, res: Response) {
   try {
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const receiptData: CreateReceipt = req.body;
 
     // Ensure userId in body matches authenticated user
     if (receiptData.userId && receiptData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot create receipt for another user'
-      });
+      return sendError(res, 'Cannot create receipt for another user', 403);
     }
 
     // Force userId to match authenticated user
@@ -38,37 +33,28 @@ export async function createSecureReceiptController(req: AuthRequest, res: Respo
 
     const receipt = await createReceiptService(secureReceiptData);
 
-    res.status(201).json(receipt);
+    res.status(201).json({ success: true, data: receipt });
   } catch (error) {
     logger.error('Error in createSecureReceiptController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to create receipt'
-    });
+    sendError(res, 'Failed to create receipt');
   }
 }
 
 export async function getSecureReceiptsController(req: AuthRequest, res: Response) {
   try {
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const query = { ...req.query, userId } as GetReceiptsQuery & { userId: string };
     const receipts = await getReceiptsService(query);
 
-    res.json(receipts);
+    sendSuccess(res, receipts);
   } catch (error) {
     logger.error('Error in getSecureReceiptsController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve receipts'
-    });
+    sendError(res, 'Failed to retrieve receipts');
   }
 }
 
@@ -76,30 +62,21 @@ export async function getSecureReceiptByIdController(req: AuthRequest, res: Resp
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const receipt = await getReceiptByIdService(id);
 
     if (!receipt || receipt.userId !== userId) {
-      return res.status(404).json({
-        error: 'Receipt not found or access denied',
-        message: 'Receipt does not exist or you do not have permission to access it'
-      });
+      return sendError(res, 'Receipt not found or access denied', 404);
     }
 
-    res.json(receipt);
+    sendSuccess(res, receipt);
   } catch (error) {
     logger.error('Error in getSecureReceiptByIdController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve receipt'
-    });
+    sendError(res, 'Failed to retrieve receipt');
   }
 }
 
@@ -107,49 +84,34 @@ export async function updateSecureReceiptController(req: AuthRequest, res: Respo
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const updateData: UpdateReceipt = req.body;
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot change receipt ownership'
-      });
+      return sendError(res, 'Cannot change receipt ownership', 403);
     }
 
     // First verify the receipt belongs to the user
     const existingReceipt = await getReceiptByIdService(id);
     if (!existingReceipt || existingReceipt.userId !== userId) {
-      return res.status(404).json({
-        error: 'Receipt not found or access denied',
-        message: 'Receipt does not exist or you do not have permission to update it'
-      });
+      return sendError(res, 'Receipt not found or access denied', 404);
     }
 
     const receipt = await updateReceiptService(id, updateData);
 
     if (!receipt) {
-      return res.status(404).json({
-        error: 'Receipt not found',
-        message: 'Receipt does not exist'
-      });
+      return sendError(res, 'Receipt not found', 404);
     }
 
-    res.json(receipt);
+    sendSuccess(res, receipt);
   } catch (error) {
     logger.error('Error in updateSecureReceiptController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to update receipt'
-    });
+    sendError(res, 'Failed to update receipt');
   }
 }
 
@@ -157,39 +119,27 @@ export async function softDeleteSecureReceiptController(req: AuthRequest, res: R
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // First verify the receipt belongs to the user
     const existingReceipt = await getReceiptByIdService(id);
     if (!existingReceipt || existingReceipt.userId !== userId) {
-      return res.status(404).json({
-        error: 'Receipt not found or access denied',
-        message: 'Receipt does not exist or you do not have permission to delete it'
-      });
+      return sendError(res, 'Receipt not found or access denied', 404);
     }
 
     const receipt = await softDeleteReceiptService(id);
 
     if (!receipt) {
-      return res.status(404).json({
-        error: 'Receipt not found',
-        message: 'Receipt does not exist'
-      });
+      return sendError(res, 'Receipt not found', 404);
     }
 
-    res.json(receipt); // Return deleted receipt with deletedAt timestamp
+    sendSuccess(res, receipt);
   } catch (error) {
     logger.error('Error in softDeleteSecureReceiptController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to delete receipt'
-    });
+    sendError(res, 'Failed to delete receipt');
   }
 }
 
@@ -197,12 +147,9 @@ export async function restoreSecureReceiptController(req: AuthRequest, res: Resp
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // For restore, we need to check the receipt even if it's deleted
@@ -210,29 +157,20 @@ export async function restoreSecureReceiptController(req: AuthRequest, res: Resp
     const receipt = await restoreReceiptService(id);
 
     if (!receipt) {
-      return res.status(404).json({
-        error: 'Receipt not found',
-        message: 'Receipt does not exist'
-      });
+      return sendError(res, 'Receipt not found', 404);
     }
 
     // Verify ownership after restore
     if (receipt.userId !== userId) {
       // If user doesn't own it, soft delete it again and deny access
       await softDeleteReceiptService(id);
-      return res.status(404).json({
-        error: 'Receipt not found or access denied',
-        message: 'Receipt does not exist or you do not have permission to restore it'
-      });
+      return sendError(res, 'Receipt not found or access denied', 404);
     }
 
-    res.json(receipt);
+    sendSuccess(res, receipt);
   } catch (error) {
     logger.error('Error in restoreSecureReceiptController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to restore receipt'
-    });
+    sendError(res, 'Failed to restore receipt');
   }
 }
 
@@ -240,41 +178,26 @@ export async function hardDeleteSecureReceiptController(req: AuthRequest, res: R
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // First verify the receipt belongs to the user (even if deleted)
     const existingReceipt = await getReceiptByIdService(id);
     if (!existingReceipt || existingReceipt.userId !== userId) {
-      return res.status(404).json({
-        error: 'Receipt not found or access denied',
-        message: 'Receipt does not exist or you do not have permission to delete it'
-      });
+      return sendError(res, 'Receipt not found or access denied', 404);
     }
 
     const receipt = await hardDeleteReceiptService(id);
 
     if (!receipt) {
-      return res.status(404).json({
-        error: 'Receipt not found',
-        message: 'Receipt does not exist'
-      });
+      return sendError(res, 'Receipt not found', 404);
     }
 
-    res.json({
-      message: 'Receipt permanently deleted',
-      receipt
-    });
+    sendSuccess(res, receipt, { message: 'Receipt permanently deleted' });
   } catch (error) {
     logger.error('Error in hardDeleteSecureReceiptController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to permanently delete receipt'
-    });
+    sendError(res, 'Failed to permanently delete receipt');
   }
 }

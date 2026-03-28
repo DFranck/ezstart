@@ -4,6 +4,7 @@ import { PaymentMethodModel } from '../../models/payment-method.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { AuthRequest } from '../../types/auth.js';
 import { logger } from '@ezstart/logger/server';
+import { sendSuccess, sendError } from '@ezstart/express-core';
 
 export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
   try {
@@ -26,18 +27,16 @@ export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
       PaymentMethodModel.countDocuments(filter),
     ]);
 
-    res.json({
-      data: paymentMethods.map(toApiObject),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    sendSuccess(res, paymentMethods.map(toApiObject), {
+      total,
+      limit,
+      offset: skip,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error: any) {
     logger.error('Error fetching payment methods:', error);
-    res.status(500).json({ error: 'Failed to fetch payment methods' });
+    sendError(res, 'Failed to fetch payment methods');
   }
 };
 
@@ -45,65 +44,71 @@ export const getPaymentMethodById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const paymentMethod = await PaymentMethodModel.findOne({ _id: id, userId: req.userId, deletedAt: null });
-    
+
     if (!paymentMethod) {
-      return res.status(404).json({ error: 'Payment method not found or access denied', message: 'Payment method does not exist or you do not have permission to access it' });
+      return sendError(res, 'Payment method not found or access denied', 404);
     }
-    
-    res.json(toApiObject(paymentMethod));
+
+    sendSuccess(res, toApiObject(paymentMethod));
   } catch (error: any) {
     logger.error('Error fetching payment method:', error);
-    res.status(500).json({ error: 'Failed to fetch payment method' });
+    sendError(res, 'Failed to fetch payment method');
   }
 };
 
 export const createPaymentMethod = async (req: AuthRequest, res: Response) => {
   try {
-    const validated = createPaymentMethodSchema.parse({ ...req.body, userId: req.userId });
-    
+    const result = createPaymentMethodSchema.safeParse({ ...req.body, userId: req.userId });
+    if (!result.success) {
+      return sendError(res, result.error.errors[0]?.message || 'Validation failed', 400);
+    }
+
     // If this is set as default, unset other default payment methods
-    if (validated.isDefault) {
+    if (result.data.isDefault) {
       await PaymentMethodModel.updateMany(
         { userId: req.userId, isDefault: true },
         { isDefault: false }
       );
     }
-    
-    const paymentMethod = new PaymentMethodModel(validated);
+
+    const paymentMethod = new PaymentMethodModel(result.data);
     await paymentMethod.save();
-    res.status(201).json(toApiObject(paymentMethod));
+    res.status(201).json({ success: true, data: toApiObject(paymentMethod) });
   } catch (error: any) {
     logger.error('Error creating payment method:', error);
-    res.status(400).json({ error: error.message || 'Failed to create payment method' });
+    sendError(res, error.message || 'Failed to create payment method', 400);
   }
 };
 
 export const updatePaymentMethod = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const validated = updatePaymentMethodSchema.parse({ ...req.body, userId: req.userId });
-    
+    const result = updatePaymentMethodSchema.safeParse({ ...req.body, userId: req.userId });
+    if (!result.success) {
+      return sendError(res, result.error.errors[0]?.message || 'Validation failed', 400);
+    }
+
     // If this is being set as default, unset other default payment methods
-    if (validated.isDefault) {
+    if (result.data.isDefault) {
       await PaymentMethodModel.updateMany(
         { userId: req.userId, isDefault: true, _id: { $ne: id } },
         { isDefault: false }
       );
     }
-    
+
     const paymentMethod = await PaymentMethodModel.findOneAndUpdate(
       { _id: id, userId: req.userId },
-      validated,
+      result.data,
       { new: true }
     );
     if (!paymentMethod) {
-      return res.status(404).json({ error: 'Payment method not found or access denied', message: 'Payment method does not exist or you do not have permission to update it' });
+      return sendError(res, 'Payment method not found or access denied', 404);
     }
-    
-    res.json(toApiObject(paymentMethod));
+
+    sendSuccess(res, toApiObject(paymentMethod));
   } catch (error: any) {
     logger.error('Error updating payment method:', error);
-    res.status(400).json({ error: error.message || 'Failed to update payment method' });
+    sendError(res, error.message || 'Failed to update payment method', 400);
   }
 };
 
@@ -111,16 +116,16 @@ export const deletePaymentMethod = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { permanent } = req.query;
-    
+
     if (permanent === 'true') {
       // Hard delete
       const paymentMethod = await PaymentMethodModel.findOneAndDelete({ _id: id, userId: req.userId });
-      
+
       if (!paymentMethod) {
-        return res.status(404).json({ error: 'Payment method not found or access denied', message: 'Payment method does not exist or you do not have permission to delete it' });
+        return sendError(res, 'Payment method not found or access denied', 404);
       }
-      
-      res.json({ message: 'Payment method permanently deleted' });
+
+      sendSuccess(res, null, { message: 'Payment method permanently deleted' });
     } else {
       // Soft delete
       const paymentMethod = await PaymentMethodModel.findOneAndUpdate(
@@ -128,16 +133,16 @@ export const deletePaymentMethod = async (req: AuthRequest, res: Response) => {
         { deletedAt: new Date().toISOString() },
         { new: true }
       );
-      
+
       if (!paymentMethod) {
-        return res.status(404).json({ error: 'Payment method not found or access denied', message: 'Payment method does not exist or you do not have permission to delete it' });
+        return sendError(res, 'Payment method not found or access denied', 404);
       }
-      
-      res.json(toApiObject(paymentMethod));
+
+      sendSuccess(res, toApiObject(paymentMethod));
     }
   } catch (error: any) {
     logger.error('Error deleting payment method:', error);
-    res.status(500).json({ error: 'Failed to delete payment method' });
+    sendError(res, 'Failed to delete payment method');
   }
 };
 
@@ -149,14 +154,14 @@ export const restorePaymentMethod = async (req: AuthRequest, res: Response) => {
       { deletedAt: null },
       { new: true }
     );
-    
+
     if (!paymentMethod) {
-      return res.status(404).json({ error: 'Payment method not found or access denied', message: 'Payment method does not exist or you do not have permission to restore it' });
+      return sendError(res, 'Payment method not found or access denied', 404);
     }
-    
-    res.json(toApiObject(paymentMethod));
+
+    sendSuccess(res, toApiObject(paymentMethod));
   } catch (error: any) {
     logger.error('Error restoring payment method:', error);
-    res.status(500).json({ error: 'Failed to restore payment method' });
+    sendError(res, 'Failed to restore payment method');
   }
 };

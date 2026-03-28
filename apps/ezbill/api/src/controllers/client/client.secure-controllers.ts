@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { BillingClient } from '@ezbill/types';
 import { logger } from '@ezstart/logger/server';
+import { sendSuccess, sendError } from '@ezstart/express-core';
 import {
   createClientService,
   getClientByIdService,
@@ -19,22 +20,16 @@ import {
 export async function createSecureClientController(req: Request, res: Response) {
   try {
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const clientData: BillingClient = req.body;
 
     // Ensure userId in body matches authenticated user
     if (clientData.userId && clientData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot create client for another user'
-      });
+      return sendError(res, 'Cannot create client for another user', 403);
     }
 
     // Force userId to match authenticated user
@@ -42,13 +37,10 @@ export async function createSecureClientController(req: Request, res: Response) 
 
     const client = await createClientService(secureClientData);
 
-    res.status(201).json(client);
+    res.status(201).json({ success: true, data: client });
   } catch (error) {
     logger.error('Error in createSecureClientController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to create client'
-    });
+    sendError(res, 'Failed to create client');
   }
 }
 
@@ -61,22 +53,16 @@ export async function getSecureClientsController(req: Request, res: Response) {
     const userId = req.userId;
 
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const query = { ...req.query, userId };
     const result = await getClientsPaginatedService(query);
 
-    res.json(result);
+    sendSuccess(res, result);
   } catch (error) {
     logger.error('Error in getSecureClientsController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve clients'
-    });
+    sendError(res, 'Failed to retrieve clients');
   }
 }
 
@@ -88,30 +74,21 @@ export async function getSecureClientByIdController(req: Request, res: Response)
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const client = await getClientByIdService(id, userId);
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found or access denied',
-        message: 'Client does not exist or you do not have permission to access it'
-      });
+      return sendError(res, 'Client not found or access denied', 404);
     }
 
-    res.json(client);
+    sendSuccess(res, client);
   } catch (error) {
     logger.error('Error in getSecureClientByIdController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve client'
-    });
+    sendError(res, 'Failed to retrieve client');
   }
 }
 
@@ -123,39 +100,27 @@ export async function updateSecureClientController(req: Request, res: Response) 
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
     const updateData: Partial<BillingClient> = req.body;
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot change client ownership'
-      });
+      return sendError(res, 'Cannot change client ownership', 403);
     }
 
     const client = await updateClientService(id, updateData, userId);
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found or access denied',
-        message: 'Client does not exist or you do not have permission to update it'
-      });
+      return sendError(res, 'Client not found or access denied', 404);
     }
 
-    res.json(client);
+    sendSuccess(res, client);
   } catch (error) {
     logger.error('Error in updateSecureClientController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to update client'
-    });
+    sendError(res, 'Failed to update client');
   }
 }
 
@@ -168,45 +133,33 @@ export async function softDeleteSecureClientController(req: Request, res: Respon
     const { id } = req.params;
     const { permanent } = req.query;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     if (permanent === 'true') {
       // Hard delete
       const client = await hardDeleteClientService(id, userId);
-      
+
       if (!client) {
-        return res.status(404).json({
-          error: 'Client not found or access denied',
-          message: 'Client does not exist or you do not have permission to delete it'
-        });
+        return sendError(res, 'Client not found or access denied', 404);
       }
-      
-      res.json({ message: 'Client permanently deleted', client });
+
+      sendSuccess(res, client, { message: 'Client permanently deleted' });
     } else {
       // Soft delete
       const client = await softDeleteClientService(id, userId);
 
       if (!client) {
-        return res.status(404).json({
-          error: 'Client not found or access denied',
-          message: 'Client does not exist or you do not have permission to delete it'
-        });
+        return sendError(res, 'Client not found or access denied', 404);
       }
 
-      res.json(client); // Return deleted client with deletedAt timestamp
+      sendSuccess(res, client);
     }
   } catch (error) {
     logger.error('Error in softDeleteSecureClientController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to delete client'
-    });
+    sendError(res, 'Failed to delete client');
   }
 }
 
@@ -218,30 +171,21 @@ export async function restoreSecureClientController(req: Request, res: Response)
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const client = await restoreClientService(id, userId);
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found or access denied',
-        message: 'Client does not exist or you do not have permission to restore it'
-      });
+      return sendError(res, 'Client not found or access denied', 404);
     }
 
-    res.json(client);
+    sendSuccess(res, client);
   } catch (error) {
     logger.error('Error in restoreSecureClientController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to restore client'
-    });
+    sendError(res, 'Failed to restore client');
   }
 }
 
@@ -253,32 +197,20 @@ export async function hardDeleteSecureClientController(req: Request, res: Respon
   try {
     const { id } = req.params;
     const userId = req.userId;
-    
+
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const client = await hardDeleteClientService(id, userId);
 
     if (!client) {
-      return res.status(404).json({
-        error: 'Client not found or access denied',
-        message: 'Client does not exist or you do not have permission to delete it'
-      });
+      return sendError(res, 'Client not found or access denied', 404);
     }
 
-    res.json({
-      message: 'Client permanently deleted',
-      client
-    });
+    sendSuccess(res, client, { message: 'Client permanently deleted' });
   } catch (error) {
     logger.error('Error in hardDeleteSecureClientController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to permanently delete client'
-    });
+    sendError(res, 'Failed to permanently delete client');
   }
 }

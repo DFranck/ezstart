@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -36,7 +36,8 @@ const subscriptionsListResponseSchema = z.object({
 const getSubscriptionsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
-    const { userId, limit = 20, offset = 0 } = req.query
+    const parsed = subscriptionsQuerySchema.safeParse(req.query)
+    const { userId, limit = 20, offset = 0 } = parsed.success ? parsed.data : req.query as any
 
     const query: any = {
       type: 'subscription',
@@ -52,17 +53,10 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
       Payment.countDocuments(query),
     ])
 
-    res.json({
-      success: true,
-      payments: subscriptions,
-      meta: { total, limit: Number(limit), offset: Number(offset) },
-    })
+    sendSuccess(res, subscriptions, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
     logger.error('Get subscriptions error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch subscriptions',
-    })
+    sendError(res, 'Failed to fetch subscriptions')
   }
 }
 

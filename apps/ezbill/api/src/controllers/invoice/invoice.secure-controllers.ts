@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { CreateInvoice, GetInvoicesQuery, UpdateInvoice } from '@ezbill/types';
 import { logger } from '@ezstart/logger/server';
+import { sendSuccess, sendError } from '@ezstart/express-core';
 import {
   createInvoiceService,
   getInvoiceByIdService,
@@ -19,20 +20,14 @@ export async function createSecureInvoiceController(req: AuthRequest, res: Respo
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const invoiceData: CreateInvoice = req.body;
 
     // Ensure userId in body matches authenticated user
     if (invoiceData.userId && invoiceData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot create invoice for another user'
-      });
+      return sendError(res, 'Cannot create invoice for another user', 403);
     }
 
     // Force userId to match authenticated user
@@ -40,13 +35,10 @@ export async function createSecureInvoiceController(req: AuthRequest, res: Respo
 
     const invoice = await createInvoiceService(secureInvoiceData);
 
-    res.status(201).json(invoice);
+    res.status(201).json({ success: true, data: invoice });
   } catch (error) {
     logger.error('Error in createSecureInvoiceController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to create invoice'
-    });
+    sendError(res, 'Failed to create invoice');
   }
 }
 
@@ -55,22 +47,16 @@ export async function getSecureInvoicesController(req: AuthRequest, res: Respons
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const query = { ...req.query, userId } as GetInvoicesQuery & { userId: string };
     const invoices = await getInvoicesService(query);
 
-    res.json(invoices);
+    sendSuccess(res, invoices);
   } catch (error) {
     logger.error('Error in getSecureInvoicesController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve invoices'
-    });
+    sendError(res, 'Failed to retrieve invoices');
   }
 }
 
@@ -80,28 +66,19 @@ export async function getSecureInvoiceByIdController(req: AuthRequest, res: Resp
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const invoice = await getInvoiceByIdService(id);
 
     if (!invoice || invoice.userId !== userId) {
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to access it'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
-    res.json(invoice);
+    sendSuccess(res, invoice);
   } catch (error) {
     logger.error('Error in getSecureInvoiceByIdController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to retrieve invoice'
-    });
+    sendError(res, 'Failed to retrieve invoice');
   }
 }
 
@@ -111,29 +88,20 @@ export async function updateSecureInvoiceController(req: AuthRequest, res: Respo
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     const updateData: UpdateInvoice = req.body;
 
     // Ensure userId in body matches authenticated user (if provided)
     if (updateData.userId && updateData.userId !== userId) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Cannot change invoice ownership'
-      });
+      return sendError(res, 'Cannot change invoice ownership', 403);
     }
 
     // First verify the invoice belongs to the user
     const existingInvoice = await getInvoiceByIdService(id);
     if (!existingInvoice || existingInvoice.userId !== userId) {
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to update it'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
     // Validate that this invoice can be edited
@@ -141,10 +109,7 @@ export async function updateSecureInvoiceController(req: AuthRequest, res: Respo
       validateBillingAction(existingInvoice, 'invoice', 'edit');
     } catch (error) {
       if (error instanceof BillingPermissionError) {
-        return res.status(403).json({
-          error: 'Action forbidden',
-          message: error.message
-        });
+        return sendError(res, error.message, 403);
       }
       throw error;
     }
@@ -152,19 +117,13 @@ export async function updateSecureInvoiceController(req: AuthRequest, res: Respo
     const invoice = await updateInvoiceService(id, updateData);
 
     if (!invoice) {
-      return res.status(404).json({
-        error: 'Invoice not found',
-        message: 'Invoice does not exist'
-      });
+      return sendError(res, 'Invoice not found', 404);
     }
 
-    res.json(invoice);
+    sendSuccess(res, invoice);
   } catch (error) {
     logger.error('Error in updateSecureInvoiceController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to update invoice'
-    });
+    sendError(res, 'Failed to update invoice');
   }
 }
 
@@ -174,19 +133,13 @@ export async function softDeleteSecureInvoiceController(req: AuthRequest, res: R
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // First verify the invoice belongs to the user
     const existingInvoice = await getInvoiceByIdService(id);
     if (!existingInvoice || existingInvoice.userId !== userId) {
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to delete it'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
     // Validate that this invoice can be deleted
@@ -194,10 +147,7 @@ export async function softDeleteSecureInvoiceController(req: AuthRequest, res: R
       validateBillingAction(existingInvoice, 'invoice', 'delete');
     } catch (error) {
       if (error instanceof BillingPermissionError) {
-        return res.status(403).json({
-          error: 'Action forbidden',
-          message: error.message
-        });
+        return sendError(res, error.message, 403);
       }
       throw error;
     }
@@ -205,19 +155,13 @@ export async function softDeleteSecureInvoiceController(req: AuthRequest, res: R
     const invoice = await softDeleteInvoiceService(id);
 
     if (!invoice) {
-      return res.status(404).json({
-        error: 'Invoice not found',
-        message: 'Invoice does not exist'
-      });
+      return sendError(res, 'Invoice not found', 404);
     }
 
-    res.json(invoice); // Return deleted invoice with deletedAt timestamp
+    sendSuccess(res, invoice);
   } catch (error) {
     logger.error('Error in softDeleteSecureInvoiceController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to delete invoice'
-    });
+    sendError(res, 'Failed to delete invoice');
   }
 }
 
@@ -227,10 +171,7 @@ export async function restoreSecureInvoiceController(req: AuthRequest, res: Resp
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // For restore, we need to check the invoice even if it's deleted
@@ -238,29 +179,20 @@ export async function restoreSecureInvoiceController(req: AuthRequest, res: Resp
     const invoice = await restoreInvoiceService(id);
 
     if (!invoice) {
-      return res.status(404).json({
-        error: 'Invoice not found',
-        message: 'Invoice does not exist'
-      });
+      return sendError(res, 'Invoice not found', 404);
     }
 
     // Verify ownership after restore
     if (invoice.userId !== userId) {
       // If user doesn't own it, soft delete it again and deny access
       await softDeleteInvoiceService(id);
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to restore it'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
-    res.json(invoice);
+    sendSuccess(res, invoice);
   } catch (error) {
     logger.error('Error in restoreSecureInvoiceController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to restore invoice'
-    });
+    sendError(res, 'Failed to restore invoice');
   }
 }
 
@@ -270,40 +202,25 @@ export async function hardDeleteSecureInvoiceController(req: AuthRequest, res: R
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // First verify the invoice belongs to the user (even if deleted)
     const existingInvoice = await getInvoiceByIdService(id);
     if (!existingInvoice || existingInvoice.userId !== userId) {
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to delete it'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
     const invoice = await hardDeleteInvoiceService(id);
 
     if (!invoice) {
-      return res.status(404).json({
-        error: 'Invoice not found',
-        message: 'Invoice does not exist'
-      });
+      return sendError(res, 'Invoice not found', 404);
     }
 
-    res.json({
-      message: 'Invoice permanently deleted',
-      invoice
-    });
+    sendSuccess(res, invoice, { message: 'Invoice permanently deleted' });
   } catch (error) {
     logger.error('Error in hardDeleteSecureInvoiceController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to permanently delete invoice'
-    });
+    sendError(res, 'Failed to permanently delete invoice');
   }
 }
 
@@ -313,36 +230,24 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
     const userId = req.userId;
     
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required'
-      });
+      return sendError(res, 'Authentication required', 401);
     }
 
     // First verify the invoice belongs to the user
     const existingInvoice = await getInvoiceByIdService(id);
     if (!existingInvoice || existingInvoice.userId !== userId) {
-      return res.status(404).json({
-        error: 'Invoice not found or access denied',
-        message: 'Invoice does not exist or you do not have permission to mark it as paid'
-      });
+      return sendError(res, 'Invoice not found or access denied', 404);
     }
 
     const result = await markInvoiceAsPaidService(id, req.body);
 
     if (!result) {
-      return res.status(404).json({
-        error: 'Invoice not found',
-        message: 'Invoice does not exist'
-      });
+      return sendError(res, 'Invoice not found', 404);
     }
 
-    res.json(result);
+    sendSuccess(res, result);
   } catch (error) {
     logger.error('Error in markInvoiceAsPaidSecureController:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: 'Failed to mark invoice as paid'
-    });
+    sendError(res, 'Failed to mark invoice as paid');
   }
 }

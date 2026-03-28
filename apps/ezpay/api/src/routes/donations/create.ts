@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createCheckoutSession } from '../../services/stripe.js'
@@ -42,6 +42,11 @@ const paymentResponseSchema = z.object({
 const createDonationHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel();
   try {
+    const validation = createDonationSchema.safeParse(req.body)
+    if (!validation.success) {
+      return sendValidationError(res, 'Invalid donation data', validation.error.errors)
+    }
+
     const {
       projectId,
       projectName,
@@ -54,7 +59,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       donorName,
       donorEmail,
       returnUrl,
-    } = req.body
+    } = validation.data
 
     // Use custom returnUrl or fallback to project's web URL based on projectId
     // This allows EZPay to redirect back to the originating app (EZBill, FengShui, etc.)
@@ -101,17 +106,10 @@ const createDonationHandler = async (req: Request, res: Response) => {
     logger.info(`💳 Donation created - Session ID: ${session.id}`)
     logger.info(`🔗 Checkout URL: ${session.url}`)
 
-    res.json({
-      success: true,
-      payment,
-      checkoutUrl: session.url,
-    })
+    sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
     logger.error('Create donation error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create donation',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to create donation')
   }
 }
 

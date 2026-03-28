@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
@@ -26,12 +26,22 @@ const errorSchema = z.object({
   error: z.string().describe('Error message explaining what went wrong')
 })
 
+// Query validation schema
+const listWaitlistsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(20)
+})
+
 // Get all waitlists (admin endpoint)
 const getAllWaitlistsController = async (req: any, res: any) => {
   try {
+    const parsedQuery = listWaitlistsQuerySchema.safeParse(req.query)
+    if (!parsedQuery.success) {
+      return sendValidationError(res, 'Invalid query parameters', parsedQuery.error.issues)
+    }
+
     const WaitlistModel = await getWaitlistModel()
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string) || 20
+    const { page, limit } = parsedQuery.data
 
     // @ts-expect-error - Mongoose type inference issue
     const [waitlists, total] = await Promise.all([
@@ -57,10 +67,7 @@ const getAllWaitlistsController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Error fetching all waitlists:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch waitlists'
-    })
+    sendError(res, 'Failed to fetch waitlists', 500)
   }
 }
 

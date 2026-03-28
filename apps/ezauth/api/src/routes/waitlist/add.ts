@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
@@ -30,17 +30,15 @@ const errorSchema = z.object({
 // Add email to waitlist for an app
 const addEmailController = async (req: any, res: any) => {
   try {
+    const parsed = addEmailSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid email address', parsed.error.issues)
+    }
+
     const WaitlistModel = await getWaitlistModel()
 
     const { appName } = req.params
-    const { email } = req.body
-
-    if (!email || !email.includes('@')) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid email address'
-      })
-    }
+    const { email } = parsed.data
 
     // Find or create waitlist for this app
     // @ts-expect-error - Mongoose type inference issue
@@ -86,10 +84,7 @@ const addEmailController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Error adding to waitlist:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to add email to waitlist'
-    })
+    sendError(res, 'Failed to add email to waitlist', 500)
   }
 }
 

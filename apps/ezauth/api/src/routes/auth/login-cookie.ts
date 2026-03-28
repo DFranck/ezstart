@@ -1,9 +1,8 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
-  LoginRequest,
   loginRequestSchema,
   userResponseSchema,
   errorResponseSchema
@@ -19,10 +18,13 @@ const loginCookieRateLimiter = createStrictRateLimiter()
 // Login with httpOnly cookie (DUAL-MODE)
 const loginCookieController = async (req: any, res: any) => {
   try {
-    const data = req.body as LoginRequest
+    const parsed = loginRequestSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid login request', parsed.error.issues)
+    }
 
     // Get token directly (skip auth code)
-    const authResult = await AuthService.loginWithToken(data)
+    const authResult = await AuthService.loginWithToken(parsed.data)
 
     // Set httpOnly cookie
     res.cookie('ezauth_token', authResult.access_token, {
@@ -41,10 +43,7 @@ const loginCookieController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Login cookie error:', error)
-    res.status(401).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Login failed'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Login failed', 401)
   }
 }
 

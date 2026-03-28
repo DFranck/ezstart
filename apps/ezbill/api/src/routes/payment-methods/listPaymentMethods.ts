@@ -7,6 +7,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  validateQuery,
 } from '@ezstart/express-core';
 import { paymentMethodSchema } from '@ezbill/types';
 import { z } from 'zod';
@@ -21,6 +22,13 @@ export const listPaymentMethodsRouter = createRouterWithDoc(
   '/payment-methods'
 );
 
+const listPaymentMethodsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().describe('Page number'),
+  limit: z.coerce.number().int().positive().max(100).optional().describe('Items per page'),
+  includeDeleted: z.enum(['true', 'false']).optional().describe('Include soft-deleted payment methods'),
+  deletedOnly: z.enum(['true', 'false']).optional().describe('Only return soft-deleted payment methods'),
+});
+
 const paginatedPaymentMethodsSchema = z.object({
   data: paymentMethodSchema.array().describe('Array of payment methods'),
   pagination: z.object({
@@ -31,9 +39,10 @@ const paginatedPaymentMethodsSchema = z.object({
   }).describe('Pagination metadata'),
 });
 
-listPaymentMethodsRouter.get('/', authMiddleware, getPaymentMethods, {
+listPaymentMethodsRouter.get('/', authMiddleware, validateQuery(listPaymentMethodsQuerySchema), getPaymentMethods, {
   summary: 'List Payment Methods (authenticated)',
   tags: ['Payment Methods'],
+  querySchema: listPaymentMethodsQuerySchema,
   responseSchema: paginatedPaymentMethodsSchema,
 });
 

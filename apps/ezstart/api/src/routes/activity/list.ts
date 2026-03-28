@@ -13,22 +13,26 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { createSentryClient } from '@ezstart/monitoring'
 import type { ActivityLog } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const activityQuerySchema = z.object({
+  type: z.string().optional().describe('Filter by activity type'),
+  severity: z.enum(['critical', 'error', 'warning', 'info', 'success']).optional().describe('Filter by severity'),
+  project: z.string().optional().describe('Filter by project slug'),
+  limit: z.coerce.number().default(50).describe('Max number of logs'),
+  since: z.string().default('7d').describe('Relative time or ISO timestamp'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const listActivityHandler = async (req: Request, res: Response) => {
   try {
-    const {
-      type,
-      severity,
-      project,
-      limit = '50',
-      since = '7d',
-    } = req.query as Record<string, string>
+    const parsed = activityQuerySchema.safeParse(req.query)
+    const { type, severity, project, limit = 50, since = '7d' } = parsed.success ? parsed.data : req.query as any
 
     const allLogs: ActivityLog[] = []
 
@@ -40,7 +44,7 @@ const listActivityHandler = async (req: Request, res: Response) => {
           const issues = await sentryClient.fetchIssues({
             project,
             status: 'unresolved',
-            limit: parseInt(limit, 10),
+            limit: Number(limit),
             since,
           })
           const errorLogs = sentryClient.issuesToActivityLogs(issues)
@@ -65,18 +69,12 @@ const listActivityHandler = async (req: Request, res: Response) => {
     filteredLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 
     // Limit results
-    filteredLogs = filteredLogs.slice(0, parseInt(limit, 10))
+    filteredLogs = filteredLogs.slice(0, Number(limit))
 
-    res.json({
-      total: filteredLogs.length,
-      logs: filteredLogs,
-    })
+    sendSuccess(res, filteredLogs, { total: filteredLogs.length })
   } catch (error) {
     logger.error('[Activity] Error fetching activity logs:', error)
-    res.status(500).json({
-      error: 'Failed to fetch activity logs',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch activity logs')
   }
 }
 

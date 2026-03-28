@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -36,7 +36,8 @@ const donationsListResponseSchema = z.object({
 const getDonationsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel();
   try {
-    const { projectId, limit = 20, offset = 0 } = req.query
+    const parsed = donationsQuerySchema.safeParse(req.query)
+    const { projectId, limit = 20, offset = 0 } = parsed.success ? parsed.data : req.query as any
 
     const query: any = {
       type: 'donation',
@@ -57,17 +58,10 @@ const getDonationsHandler = async (req: Request, res: Response) => {
       Payment.countDocuments(query),
     ])
 
-    res.json({
-      success: true,
-      payments: donations,
-      meta: { total, limit: Number(limit), offset: Number(offset) },
-    })
+    sendSuccess(res, donations, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
     logger.error('Get donations error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch donations',
-    })
+    sendError(res, 'Failed to fetch donations')
   }
 }
 

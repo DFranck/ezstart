@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -51,47 +51,64 @@ const errorSchema = z.object({
   details: z.string().optional().describe('Additional error details')
 })
 
+// Params validation schema
+const updateUserParamsSchema = z.object({
+  id: z.string().min(1, 'User ID is required')
+})
+
 // Controller
 const updateUserController = async (req: any, res: any) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return sendError(res, 'Authentication required', 401)
+    }
+
+    const parsedParams = updateUserParamsSchema.safeParse(req.params)
+    if (!parsedParams.success) {
+      return sendValidationError(res, 'Invalid parameters', parsedParams.error.issues)
+    }
+
+    const parsedBody = updateUserRequestSchema.safeParse(req.body)
+    if (!parsedBody.success) {
+      return sendValidationError(res, 'Invalid request body', parsedBody.error.issues)
     }
 
     const currentUser = req.user
     const isSuperAdmin = currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
 
     if (!isSuperAdmin) {
-      return res.status(403).json({ error: 'Superadmin access required for user management from ezstart' })
+      return sendError(res, 'Superadmin access required for user management from ezstart', 403)
     }
 
     const AuthUser = await getAuthUserModel()
-    const user = await AuthUser.findById(req.params.id)
+    const user = await AuthUser.findById(parsedParams.data.id)
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' })
+      return sendError(res, 'User not found', 404)
     }
 
+    const body = parsedBody.data
+
     // Update globalRoles (only superadmin can do this)
-    if (req.body.globalRoles !== undefined) {
-      user.globalRoles = req.body.globalRoles
+    if (body.globalRoles !== undefined) {
+      user.globalRoles = body.globalRoles
     }
 
     // Update appRoles
-    if (req.body.appRoles !== undefined) {
+    if (body.appRoles !== undefined) {
       // Convert plain object to Map
       const appRolesMap = new Map<string, string[]>()
-      Object.entries(req.body.appRoles).forEach(([app, roles]) => {
+      Object.entries(body.appRoles).forEach(([app, roles]) => {
         appRolesMap.set(app, roles as string[])
       })
       user.appRoles = appRolesMap
     }
 
     // Update other fields
-    const allowedFields = ['roles', 'permissions', 'features', 'apps', 'isVerified', 'organizationId', 'managedBy']
+    const allowedFields = ['roles', 'permissions', 'features', 'apps', 'isVerified', 'organizationId', 'managedBy'] as const
     allowedFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        (user as any)[field] = req.body[field]
+      if ((body as any)[field] !== undefined) {
+        (user as any)[field] = (body as any)[field]
       }
     })
 
@@ -120,10 +137,7 @@ const updateUserController = async (req: any, res: any) => {
     })
   } catch (error: any) {
     logger.error('Error updating user:', error)
-    res.status(500).json({
-      error: 'Failed to update user',
-      details: error.message
-    })
+    sendError(res, 'Failed to update user', 500)
   }
 }
 

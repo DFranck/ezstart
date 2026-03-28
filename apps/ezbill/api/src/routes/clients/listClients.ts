@@ -3,17 +3,13 @@
  * List Clients (authenticated)
  */
 
-/**
- * GET /api/clients
- * List Clients (authenticated)
- */
-
 import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  validateQuery,
 } from '@ezstart/express-core';
-import { clientSchema } from '@ezbill/types';
+import { clientSchema, getClientsQuerySchema } from '@ezbill/types';
 import { z } from 'zod';
 import * as secureControllers from '../../controllers/client/client.secure-controllers.js';
 import { authMiddleware } from '../../middleware/auth.js';
@@ -39,10 +35,12 @@ const paginatedClientsSchema = z.object({
 listClientsRouter.get(
   '/',
   authMiddleware,
+  validateQuery(getClientsQuerySchema),
   secureControllers.getSecureClientsController,
   {
     summary: 'List Clients (authenticated)',
     tags: ['Clients'],
+    querySchema: getClientsQuerySchema,
     responseSchema: paginatedClientsSchema,
   }
 );

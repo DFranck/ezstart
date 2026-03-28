@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createCheckoutSession } from '../../services/stripe.js'
@@ -39,6 +39,11 @@ const paymentResponseSchema = z.object({
 const createPurchaseHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
+    const validation = createPurchaseSchema.safeParse(req.body)
+    if (!validation.success) {
+      return sendValidationError(res, 'Invalid purchase data', validation.error.errors)
+    }
+
     const {
       projectId,
       productId,
@@ -48,7 +53,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       userId,
       customerEmail,
       returnUrl,
-    } = req.body
+    } = validation.data
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
@@ -87,17 +92,10 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
 
     logger.info(`💳 Purchase created - Session ID: ${session.id}`)
 
-    res.json({
-      success: true,
-      payment,
-      checkoutUrl: session.url,
-    })
+    sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
     logger.error('Create purchase error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create purchase',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to create purchase')
   }
 }
 

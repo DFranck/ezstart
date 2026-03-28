@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -33,22 +33,13 @@ const getPaymentHandler = async (req: Request, res: Response) => {
     })
 
     if (!payment) {
-      return res.status(404).json({
-        success: false,
-        error: 'Payment not found',
-      })
+      return sendError(res, 'Payment not found', 404)
     }
 
-    res.json({
-      success: true,
-      payment,
-    })
+    sendSuccess(res, payment)
   } catch (error) {
     logger.error('Get payment error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch payment',
-    })
+    sendError(res, 'Failed to fetch payment')
   }
 }
 

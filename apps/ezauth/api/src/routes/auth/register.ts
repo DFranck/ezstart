@@ -1,9 +1,8 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, createVeryStrictRateLimiter } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, createVeryStrictRateLimiter, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
-  RegisterRequest,
   registerRequestSchema,
   authCodeResponseSchema,
   errorResponseSchema
@@ -19,8 +18,12 @@ const registerRateLimiter = createVeryStrictRateLimiter()
 // Register new user
 const registerController = async (req: any, res: any) => {
   try {
-    const data = req.body as RegisterRequest
-    const authCode = await AuthService.register(data)
+    const parsed = registerRequestSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid registration request', parsed.error.issues)
+    }
+
+    const authCode = await AuthService.register(parsed.data)
 
     res.status(201).json({
       success: true,
@@ -30,10 +33,7 @@ const registerController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Register error:', error)
-    res.status(400).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Registration failed'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Registration failed', 400)
   }
 }
 

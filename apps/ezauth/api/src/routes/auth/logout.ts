@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 

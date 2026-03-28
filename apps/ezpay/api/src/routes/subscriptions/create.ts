@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
 import { createSubscriptionSession } from '../../services/stripe.js'
@@ -40,6 +40,11 @@ const paymentResponseSchema = z.object({
 const createSubscriptionHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
+    const validation = createSubscriptionSchema.safeParse(req.body)
+    if (!validation.success) {
+      return sendValidationError(res, 'Invalid subscription data', validation.error.errors)
+    }
+
     const {
       projectId,
       planId,
@@ -50,7 +55,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       userId,
       customerEmail,
       returnUrl,
-    } = req.body
+    } = validation.data
 
     const baseUrl = returnUrl || getWebUrl(projectId as AppName)
 
@@ -91,17 +96,10 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
 
     logger.info(`💳 Subscription created - Session ID: ${session.id}`)
 
-    res.json({
-      success: true,
-      payment,
-      checkoutUrl: session.url,
-    })
+    sendSuccess(res, { payment, checkoutUrl: session.url })
   } catch (error) {
     logger.error('Create subscription error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create subscription',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to create subscription')
   }
 }
 

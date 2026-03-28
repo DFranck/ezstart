@@ -1,9 +1,8 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
-  LoginRequest,
   loginRequestSchema,
   authCodeResponseSchema,
   errorResponseSchema
@@ -19,8 +18,12 @@ const loginRateLimiter = createStrictRateLimiter()
 // Login user
 const loginController = async (req: any, res: any) => {
   try {
-    const data = req.body as LoginRequest
-    const authCode = await AuthService.login(data)
+    const parsed = loginRequestSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid login request', parsed.error.issues)
+    }
+
+    const authCode = await AuthService.login(parsed.data)
 
     res.json({
       success: true,
@@ -30,10 +33,7 @@ const loginController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Login error:', error)
-    res.status(401).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Login failed'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Login failed', 401)
   }
 }
 

@@ -1,9 +1,8 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
-  TokenRequest,
   tokenRequestSchema,
   tokenResponseSchema,
   errorResponseSchema
@@ -16,8 +15,12 @@ const docRouter = createRouterWithDoc(tokenRegistry, router)
 // Exchange code for token
 const tokenController = async (req: any, res: any) => {
   try {
-    const data = req.body as TokenRequest
-    const token = await AuthService.exchangeCodeForToken(data)
+    const parsed = tokenRequestSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid token request', parsed.error.issues)
+    }
+
+    const token = await AuthService.exchangeCodeForToken(parsed.data)
 
     // DUAL-MODE: Set httpOnly cookie for apps using httpOnly mode
     res.cookie('ezauth_token', token.access_token, {
@@ -35,10 +38,7 @@ const tokenController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Token exchange error:', error)
-    res.status(400).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Token exchange failed'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Token exchange failed', 400)
   }
 }
 

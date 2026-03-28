@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import {
@@ -14,25 +14,19 @@ const docRouter = createRouterWithDoc(verifyRegistry, router)
 // Verify token validity
 const verifyController = async (req: any, res: any) => {
   try {
-    const { token, app } = req.body
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        error: 'Token is required'
-      })
+    const parsed = verifyRequestSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return sendValidationError(res, 'Invalid verify request', parsed.error.issues)
     }
 
+    const { token, app } = parsed.data
     const payload = await AuthService.verifyToken(token)
 
     // Check app access if specified
     if (app) {
       const hasAccess = await AuthService.checkAppAccess(payload.userId, app)
       if (!hasAccess) {
-        return res.status(403).json({
-          success: false,
-          error: `No access to app: ${app}`
-        })
+        return sendError(res, `No access to app: ${app}`, 403)
       }
     }
 

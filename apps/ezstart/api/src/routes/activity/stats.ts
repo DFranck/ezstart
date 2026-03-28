@@ -5,15 +5,21 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { createSentryClient } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const statsQuerySchema = z.object({
+  since: z.string().default('7d').describe('Relative time or ISO timestamp'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const getStatsHandler = async (req: Request, res: Response) => {
   try {
-    const { since = '7d' } = req.query as Record<string, string>
+    const parsed = statsQuerySchema.safeParse(req.query)
+    const { since = '7d' } = parsed.success ? parsed.data : req.query as any
 
     const sentryClient = createSentryClient()
     const stats = {
@@ -49,13 +55,10 @@ const getStatsHandler = async (req: Request, res: Response) => {
       }
     }
 
-    res.json(stats)
+    sendSuccess(res, stats)
   } catch (error) {
     logger.error('[Activity] Error fetching activity stats:', error)
-    res.status(500).json({
-      error: 'Failed to fetch activity stats',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch activity stats')
   }
 }
 

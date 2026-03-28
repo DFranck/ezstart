@@ -7,6 +7,7 @@ import {
   Router,
   createRouterWithDoc,
   OpenAPIRegistry,
+  validateQuery,
 } from '@ezstart/express-core';
 import { companySchema } from '@ezbill/types';
 import { z } from 'zod';
@@ -21,6 +22,13 @@ export const listCompaniesRouter = createRouterWithDoc(
   '/companies'
 );
 
+const listCompaniesQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().describe('Page number'),
+  limit: z.coerce.number().int().positive().max(100).optional().describe('Items per page'),
+  includeDeleted: z.enum(['true', 'false']).optional().describe('Include soft-deleted companies'),
+  deletedOnly: z.enum(['true', 'false']).optional().describe('Only return soft-deleted companies'),
+});
+
 const paginatedCompaniesSchema = z.object({
   data: companySchema.array().describe('Array of company objects'),
   pagination: z.object({
@@ -31,9 +39,10 @@ const paginatedCompaniesSchema = z.object({
   }).describe('Pagination metadata'),
 });
 
-listCompaniesRouter.get('/', authMiddleware, getCompanies, {
+listCompaniesRouter.get('/', authMiddleware, validateQuery(listCompaniesQuerySchema), getCompanies, {
   summary: 'List Companies (authenticated)',
   tags: ['Companies'],
+  querySchema: listCompaniesQuerySchema,
   responseSchema: paginatedCompaniesSchema,
 });
 

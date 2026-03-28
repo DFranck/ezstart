@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -41,23 +41,35 @@ const errorSchema = z.object({
   details: z.string().optional().describe('Additional error details')
 })
 
+// Query validation schema
+const listUsersQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(200).optional().default(50),
+  search: z.string().optional(),
+  role: z.string().optional()
+})
+
 // Controller
 const listUsersController = async (req: any, res: any) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return sendError(res, 'Authentication required', 401)
     }
 
     const currentUser = req.user
     const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
-      return res.status(403).json({ error: 'Admin access required' })
+      return sendError(res, 'Admin access required', 403)
+    }
+
+    const parsedQuery = listUsersQuerySchema.safeParse(req.query)
+    if (!parsedQuery.success) {
+      return sendValidationError(res, 'Invalid query parameters', parsedQuery.error.issues)
     }
 
     const AuthUser = await getAuthUserModel()
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string) || 50
+    const { page, limit } = parsedQuery.data
 
     const query: any = {}
 
@@ -96,10 +108,7 @@ const listUsersController = async (req: any, res: any) => {
     })
   } catch (error: any) {
     logger.error('Error listing users:', error)
-    res.status(500).json({
-      error: 'Failed to list users',
-      details: error.message
-    })
+    sendError(res, 'Failed to list users', 500)
   }
 }
 
