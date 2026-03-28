@@ -13,16 +13,6 @@ import { ROLE_HIERARCHY, ROLE_PERMISSIONS, ROLE_FEATURES, type Role, type Permis
  * @param appName - Optional app name for app-specific role checking
  */
 export function hasRole(user: AuthUser | null, role: Role, appName?: string): boolean {
-  console.log('[RBAC] hasRole check:', {
-    hasUser: !!user,
-    roles: user?.roles,
-    globalRoles: user?.globalRoles,
-    appRoles: user?.appRoles,
-    isArray: Array.isArray(user?.roles),
-    checkingRole: role,
-    appName
-  })
-
   if (!user) return false
 
   // Superadmin is always global and has access to everything
@@ -192,13 +182,6 @@ export function canManageUser(currentUser: AuthUser | null, targetUser: AuthUser
  * Get user's highest role level
  */
 export function getHighestRoleLevel(user: AuthUser | null): number {
-  console.log('[RBAC] getHighestRoleLevel:', {
-    hasUser: !!user,
-    roles: user?.roles,
-    rolesType: typeof user?.roles,
-    isArray: Array.isArray(user?.roles),
-    length: (user?.roles as any)?.length
-  })
   if (!user?.roles || !Array.isArray(user.roles) || user.roles.length === 0) return 0
 
   return Math.max(

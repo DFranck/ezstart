@@ -329,26 +329,14 @@ export function ThemeEditor({
                       const prefixedVarName = `${currentTheme}:${variable.name}`
 
                       const handleChange = (_: string, value: string) => {
-                        console.log(
-                          `[handleChange] ${variable.name} = ${value} in ${currentTheme} mode`
-                        )
-
-                        // Update current theme
                         editor.updateVariable(prefixedVarName, value)
 
-                        // Auto-invert for opposite theme if enabled
                         if (autoInvertForOppositeTheme) {
                           const oppositeTheme = currentTheme === 'light' ? 'dark' : 'light'
                           const oppositePrefixedVarName = `${oppositeTheme}:${variable.name}`
                           const invertedValue = invertColor(value)
-                          console.log(
-                            `[handleChange] Auto-invert: ${oppositePrefixedVarName} = ${invertedValue}`
-                          )
                           editor.updateVariable(oppositePrefixedVarName, invertedValue)
                         }
-
-                        // Debug: Log all local changes
-                        console.log('[handleChange] All localChanges:', editor.localChanges)
                       }
 
                       const handleReset = () => {
@@ -392,26 +380,14 @@ export function ThemeEditor({
                       const prefixedVarName = `${currentTheme}:${variable.name}`
 
                       const handleChange = (_: string, value: string) => {
-                        console.log(
-                          `[handleChange APP] ${variable.name} = ${value} in ${currentTheme} mode`
-                        )
-
-                        // Update current theme
                         editor.updateVariable(prefixedVarName, value)
 
-                        // Auto-invert for opposite theme if enabled
                         if (autoInvertForOppositeTheme) {
                           const oppositeTheme = currentTheme === 'light' ? 'dark' : 'light'
                           const oppositePrefixedVarName = `${oppositeTheme}:${variable.name}`
                           const invertedValue = invertColor(value)
-                          console.log(
-                            `[handleChange APP] Auto-invert: ${oppositePrefixedVarName} = ${invertedValue}`
-                          )
                           editor.updateVariable(oppositePrefixedVarName, invertedValue)
                         }
-
-                        // Debug: Log all local changes
-                        console.log('[handleChange APP] All localChanges:', editor.localChanges)
                       }
 
                       const handleReset = () => {

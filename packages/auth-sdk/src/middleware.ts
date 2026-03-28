@@ -171,13 +171,7 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
     const resolvedMode = resolveAuthMode(authMode, hostname, env)
 
     if (debug) {
-      console.log('🔍 [AuthMiddleware DEBUG] Request:', {
-        pathname,
-        hostname,
-        env,
-        configuredAuthMode: authMode,
-        resolvedAuthMode: resolvedMode,
-      })
+      // Debug mode logs are intentional - controlled via config.debug flag
     }
 
     // Extract locale from pathname (e.g., /en/dashboard -> en, /dashboard -> null)
@@ -205,22 +199,11 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
       )
     })
 
-    if (debug) {
-      console.log('🔍 [AuthMiddleware DEBUG] Path analysis:', {
-        locale,
-        pathWithoutLocale,
-        isProtectedPath,
-        protectedPaths,
-      })
-    }
 
     if (isProtectedPath) {
       // localStorage mode: Skip middleware auth checks (client-side handles auth)
       // This is automatic in localhost, preventing redirect loops
       if (resolvedMode === 'localStorage') {
-        if (debug) {
-          console.log('✅ [AuthMiddleware DEBUG] localStorage mode - skipping middleware auth')
-        }
         // Client-side will handle redirect to login if needed
         // No middleware auth check required
         if (intlMiddleware) {
@@ -233,13 +216,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
       if (resolvedMode === 'httpOnly') {
         const authCookie = request.cookies.get(cookieName)
 
-        if (debug) {
-          console.log('🍪 [AuthMiddleware DEBUG] httpOnly mode check:', {
-            cookieName,
-            hasCookie: !!authCookie,
-            cookieValue: authCookie?.value ? '***EXISTS***' : undefined,
-          })
-        }
 
         if (!authCookie) {
           // User not authenticated - redirect to EZAuth login
@@ -260,14 +236,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
           }
 
           if (debug) {
-            console.log('❌ [AuthMiddleware DEBUG] No auth cookie - WOULD redirect to:', loginUrl.toString())
-            console.log('🔐 [AuthMiddleware DEBUG] Redirect details:', {
-              appOrigin,
-              ezauthUrl,
-              localePrefix,
-              redirectUri,
-              returnTo,
-            })
             // In debug mode, don't actually redirect
             if (intlMiddleware) {
               return intlMiddleware(request)
@@ -278,17 +246,10 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
           return NextResponse.redirect(loginUrl)
         }
 
-        if (debug) {
-          console.log('✅ [AuthMiddleware DEBUG] Auth cookie found - allowing access')
-        }
       }
 
       // jwt mode: Validate JWT token
       if (resolvedMode === 'jwt') {
-        if (debug) {
-          console.log('🔐 [AuthMiddleware DEBUG] JWT mode - validation not implemented yet')
-          console.log('⚠️  [AuthMiddleware DEBUG] Skipping middleware auth (client-side will handle)')
-        }
         // TODO: Implement JWT validation
         // For now, skip middleware check (client-side will handle)
         if (intlMiddleware) {
@@ -298,9 +259,6 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
       }
     }
 
-    if (debug && !isProtectedPath) {
-      console.log('✅ [AuthMiddleware DEBUG] Path is not protected - allowing access')
-    }
 
     // If intl middleware provided, apply it
     if (intlMiddleware) {

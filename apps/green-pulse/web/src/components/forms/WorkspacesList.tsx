@@ -11,12 +11,6 @@ export function WorkspacesList() {
   const { user } = useAuthStore()
   const t = useTranslations('forms.workspaces')
 
-  // Debug logs
-  console.log('[WorkspacesList] user:', user?._id)
-  console.log('[WorkspacesList] data:', data)
-  console.log('[WorkspacesList] isLoading:', isLoading)
-  console.log('[WorkspacesList] error:', error)
-
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

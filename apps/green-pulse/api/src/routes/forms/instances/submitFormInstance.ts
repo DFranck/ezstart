@@ -65,17 +65,6 @@ submitFormInstanceRouter.post(
 
       await instance.save()
 
-      // TODO: Send to submission endpoint if configured
-      // const FormConfig = await getFormConfigModel()
-      // const config = await FormConfig.findOne({ id: instance.formConfigId })
-      // if (config?.submitEndpoint) {
-      //   await fetch(config.submitEndpoint, {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(instance.submittedData)
-      //   })
-      // }
-
       res.json({
         success: true,
         data: instance,

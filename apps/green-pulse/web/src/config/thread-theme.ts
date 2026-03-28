@@ -54,36 +54,3 @@ export const greenPulseThreadTheme: Partial<ThreadTheme> = {
   border: 'border-slate-200 dark:border-slate-700',
 }
 
-/**
- * Alternative: If client wants a different green shade
- * Uncomment and modify the color below:
- */
-// export const greenPulseThreadTheme: Partial<ThreadTheme> = {
-//   background: 'bg-[#f6f6f6] dark:bg-slate-950',
-//   message: {
-//     user: {
-//       background: 'bg-[#22c55e]', // Lighter green
-//       text: 'text-white',
-//     },
-//     ai: {
-//       background: 'bg-white dark:bg-slate-800',
-//       text: 'text-slate-900 dark:text-slate-100',
-//     },
-//   },
-//   button: {
-//     primary: 'bg-[#22c55e] hover:bg-[#16a34a]',
-//   },
-//   composer: {
-//     background: 'bg-white dark:bg-slate-900',
-//     border: 'border-slate-200 dark:border-slate-700',
-//     buttonBackground: 'bg-[#22c55e]',
-//     buttonHover: 'hover:bg-[#16a34a]',
-//   },
-//   sidebar: {
-//     background: 'bg-white dark:bg-slate-900',
-//     itemActive: 'bg-[#22c55e]/10',
-//     itemHover: 'hover:bg-slate-100 dark:hover:bg-slate-800',
-//     border: 'border-slate-200 dark:border-slate-700',
-//   },
-//   border: 'border-slate-200 dark:border-slate-700',
-// }

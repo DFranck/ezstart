@@ -50,11 +50,6 @@ function resolveAuthMode(
 
   // Rule 2: httpOnly on ezstart domain (OK)
   if (configuredMode === 'httpOnly' && isEzstartDomain(hostname)) {
-    console.log(
-      `✅ [AuthSDK] httpOnly mode on ezstart domain`,
-      `\n  → Domain: ${hostname}`,
-      `\n  → Cookie: .ezstart.xyz`
-    )
     return 'httpOnly'
   }
 
@@ -81,11 +76,6 @@ function resolveAuthMode(
       )
       return 'localStorage'
     }
-    console.log(
-      `✅ [EZAuth SDK] JWT mode enabled`,
-      `\n  → Domain: ${hostname}`,
-      `\n  → Validation: Local (no API calls)`
-    )
     return 'jwt'
   }
 
@@ -146,13 +136,6 @@ export function AuthProvider({
 
     // Update mode if it changed
     if (currentMode !== resolvedMode) {
-      console.log(
-        `🔄 [AuthSDK] Switching auth mode`,
-        `\n  → From: ${currentMode}`,
-        `\n  → To: ${resolvedMode}`,
-        `\n  → App: ${appName}`
-      )
-
       if (store.isAuthenticated) {
         // Re-authenticate user with new mode
         const user = store.user
@@ -176,12 +159,8 @@ export function AuthProvider({
       const mode = store.getMode()
 
       if (mode === 'localStorage' && store.accessToken) {
-        // localStorage mode: verify token from store
-        console.log('🔍 [AuthSDK] Verifying token from localStorage...')
         const isValid = await client.verifyToken(store.accessToken)
-        console.log(`🔍 [AuthSDK] Token validation result: ${isValid ? '✅ Valid' : '❌ Invalid'}`)
         if (!isValid) {
-          console.log('🔒 [AuthSDK] Token invalid, logging out')
           store.logout()
         }
       } else if (mode === 'httpOnly') {
@@ -198,11 +177,7 @@ export function AuthProvider({
                                error?.message?.toLowerCase().includes('unauthorized')
 
           if (isAuthFailure) {
-            console.log('🔒 [AuthSDK] Session expired, logging out')
             store.logout()
-          } else {
-            // Transient error (network, server down, etc.) - keep session
-            console.warn('⚠️ [AuthSDK] Token verification failed (non-auth error), retrying later:', error)
           }
         }
       }
