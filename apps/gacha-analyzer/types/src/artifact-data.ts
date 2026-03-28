@@ -1,4 +1,4 @@
-import type { ArtifactMainStat, ArtifactQuality, ArtifactSubstatType } from './artifact'
+import type { ArtifactMainStat, ArtifactQuality, ArtifactSubstatType } from './artifact.js'
 
 // ============================================
 // MAIN STAT MAX VALUES AT +15
@@ -51,7 +51,7 @@ export const ARTIFACT_SUBSTAT_NAMES: Record<ArtifactSubstatType, string> = {
   'additional-dmg-by-spd': 'Additional DMG by SPD',
   'recovery-hp': 'Recovery HP+',
   'recovery-ally': 'Ally Recovery+',
-  'shield': 'Shield+',
+  shield: 'Shield+',
 }
 
 // ============================================

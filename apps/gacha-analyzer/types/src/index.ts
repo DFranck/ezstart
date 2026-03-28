@@ -1,6 +1,16 @@
-export type { GameType, GameConfig } from './game'
-export type { ScanStatus, ScanResult, Scan, ScanFeedback, ScanReport, ReportStatus, ReportCategory, OcrSource, BenchRunResult } from './scan'
-export type { RuneSet, RuneSlot, StatType, RuneStat, RuneData, RuneQuality } from './rune'
+export type { GameType, GameConfig } from './game.js'
+export type {
+  ScanStatus,
+  ScanResult,
+  Scan,
+  ScanFeedback,
+  ScanReport,
+  ReportStatus,
+  ReportCategory,
+  OcrSource,
+  BenchRunResult,
+} from './scan.js'
+export type { RuneSet, RuneSlot, StatType, RuneStat, RuneData, RuneQuality } from './rune.js'
 export {
   SUBSTAT_ROLL_RANGES,
   ANCIENT_SUBSTAT_BASE_RANGES,
@@ -28,10 +38,23 @@ export {
   SET_STRENGTH,
   SET_STRENGTH_THRESHOLD_BONUS,
   SET_ARCHETYPE_AFFINITY,
-} from './rune-data'
-export type { GrindRarity, EfficiencyTier, PlayerProfile, SubstatAnalysis, RollBreakdown, RuneAnalysis, BuildArchetype, SynergyResult, ProgressiveAdvice, ProgressiveAction, ArchetypeOptimization, StatTier } from './rune-data'
-export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear'
-export type { MonsterElement, MonsterArchetype, Monster } from './monster'
+} from './rune-data.js'
+export type {
+  GrindRarity,
+  EfficiencyTier,
+  PlayerProfile,
+  SubstatAnalysis,
+  RollBreakdown,
+  RuneAnalysis,
+  BuildArchetype,
+  SynergyResult,
+  ProgressiveAdvice,
+  ProgressiveAction,
+  ArchetypeOptimization,
+  StatTier,
+} from './rune-data.js'
+export type { GearType, Manufacturer, GearStatType, GearStat, GearData } from './gear.js'
+export type { MonsterElement, MonsterArchetype, Monster } from './monster.js'
 export type {
   ArtifactCategory,
   ArtifactType,
@@ -41,9 +64,9 @@ export type {
   ArtifactSubstatType,
   ArtifactStat,
   ArtifactData,
-} from './artifact'
+} from './artifact.js'
 export {
   ARTIFACT_MAIN_STAT_MAX,
   ARTIFACT_SUBSTAT_NAMES,
   ARTIFACT_SUBSTATS_BY_QUALITY,
-} from './artifact-data'
+} from './artifact-data.js'

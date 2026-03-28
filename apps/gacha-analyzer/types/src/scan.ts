@@ -1,7 +1,7 @@
-import type { GameType } from './game'
-import type { RuneData } from './rune'
-import type { GearData } from './gear'
-import type { RuneAnalysis } from './rune-data'
+import type { GameType } from './game.js'
+import type { RuneData } from './rune.js'
+import type { GearData } from './gear.js'
+import type { RuneAnalysis } from './rune-data.js'
 
 export type ScanStatus = 'pending' | 'processing' | 'completed' | 'failed'
 

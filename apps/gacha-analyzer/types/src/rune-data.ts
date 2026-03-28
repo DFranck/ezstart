@@ -1,4 +1,4 @@
-import type { StatType, RuneSet } from './rune'
+import type { StatType, RuneSet } from './rune.js'
 
 // ============================================
 // SUBSTAT ROLL RANGES (6★)
