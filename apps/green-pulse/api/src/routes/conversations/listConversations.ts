@@ -4,7 +4,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import { ConversationListSchema, ApiResponseSchema } from '@green-pulse/types'
 
@@ -28,15 +34,14 @@ listConversationsRouter.get(
         query.deletedAt = null
       }
 
-      // @ts-expect-error - Mongoose find() type inference issue
       const [conversations, total] = await Promise.all([
-        (Conversation.find(query)
+        (Conversation.find as any)(query)
           .sort({ updatedAt: -1 })
           .skip(Number(offset))
           .limit(Number(limit))
           .select('_id title preview createdAt updatedAt')
           .lean()
-          .exec()) as Promise<any[]>,
+          .exec() as Promise<any[]>,
         Conversation.countDocuments(query),
       ])
 
@@ -49,7 +54,11 @@ listConversationsRouter.get(
         unread: false, // TODO: Implement unread logic
       }))
 
-      return sendSuccess(res, { conversations: list }, { total, limit: Number(limit), offset: Number(offset) })
+      return sendSuccess(
+        res,
+        { conversations: list },
+        { total, limit: Number(limit), offset: Number(offset) }
+      )
     } catch (error) {
       logger.error('List conversations error:', error)
       return sendError(res, 'Failed to list conversations')

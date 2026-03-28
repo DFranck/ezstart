@@ -4,7 +4,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
 
@@ -29,9 +35,12 @@ listFormInstancesRouter.get(
       if (formConfigId) query.formConfigId = formConfigId
       if (status) query.status = status
 
-      // @ts-expect-error - Mongoose type inference issue
       const [instances, total] = await Promise.all([
-        FormInstance.find(query).sort({ updatedAt: -1 }).skip(Number(offset)).limit(Number(limit)).lean(),
+        (FormInstance.find as any)(query)
+          .sort({ updatedAt: -1 })
+          .skip(Number(offset))
+          .limit(Number(limit))
+          .lean(),
         FormInstance.countDocuments(query),
       ])
 

@@ -55,11 +55,19 @@ router.get('/', async (req: any, res: any) => {
     const skip = (page - 1) * limit
 
     const [monsters, total] = await Promise.all([
-      MonsterModel.find(filter).sort({ naturalStars: -1, name: 1 }).skip(skip).limit(limit).lean(),
+      (MonsterModel.find as any)(filter)
+        .sort({ naturalStars: -1, name: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       MonsterModel.countDocuments(filter),
     ])
 
-    return sendSuccess(res, { monsters }, { page, limit, total, totalPages: Math.ceil(total / limit) })
+    return sendSuccess(
+      res,
+      { monsters },
+      { page, limit, total, totalPages: Math.ceil(total / limit) }
+    )
   } catch (error) {
     logger.error('[list-monsters] Error:', error)
     return sendError(res, error instanceof Error ? error.message : 'Failed to list monsters')
@@ -72,14 +80,17 @@ router.get('/by-build/:archetype', async (req: any, res: any) => {
     const { archetype } = req.params
     const MonsterModel = await getMonsterModel()
 
-    const monsters = await MonsterModel.find({ buildArchetypes: archetype })
+    const monsters = await (MonsterModel.find as any)({ buildArchetypes: archetype })
       .sort({ naturalStars: -1, name: 1 })
       .lean()
 
     return sendSuccess(res, { archetype, count: monsters.length, monsters })
   } catch (error) {
     logger.error('[monsters-by-build] Error:', error)
-    return sendError(res, error instanceof Error ? error.message : 'Failed to fetch monsters by build')
+    return sendError(
+      res,
+      error instanceof Error ? error.message : 'Failed to fetch monsters by build'
+    )
   }
 })
 
@@ -118,7 +129,10 @@ router.get('/for-rune', async (req: any, res: any) => {
     return sendSuccess(res, { archetypes, count: monsters.length, monsters })
   } catch (error) {
     logger.error('[monsters-for-rune] Error:', error)
-    return sendError(res, error instanceof Error ? error.message : 'Failed to fetch monsters for rune')
+    return sendError(
+      res,
+      error instanceof Error ? error.message : 'Failed to fetch monsters for rune'
+    )
   }
 })
 

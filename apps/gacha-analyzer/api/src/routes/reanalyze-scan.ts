@@ -26,7 +26,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     const { profile } = validation.data
 
     const Scan = await getScanModel()
-    const scan = await Scan.findById(req.params.id)
+    const scan = await (Scan.findById as any)(req.params.id)
 
     if (!scan) {
       return sendError(res, 'Scan not found', 404)
@@ -48,7 +48,10 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     let analysis: ScanResult['analysis'] = undefined
     if (parseResult.success && parseResult.data && 'set' in parseResult.data) {
       try {
-        analysis = analyzeRune(parseResult.data as unknown as RuneData, profile as any) as unknown as ScanResult['analysis']
+        analysis = analyzeRune(
+          parseResult.data as unknown as RuneData,
+          profile as any
+        ) as unknown as ScanResult['analysis']
       } catch (e) {
         logger.error('[reanalyze] Analysis failed:', e)
       }
@@ -65,7 +68,11 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     await scan.save()
 
     // Map _id → id for frontend compatibility
-    const mapped = { ...(scan.toObject() as any), id: (scan as any)._id?.toString(), _id: undefined }
+    const mapped = {
+      ...(scan.toObject() as any),
+      id: (scan as any)._id?.toString(),
+      _id: undefined,
+    }
 
     return sendSuccess(res, mapped)
   } catch (error) {

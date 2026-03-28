@@ -13,10 +13,12 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
     const GameConfig = await getGameConfigModel()
 
-    const config = await GameConfig.findOne({
+    const config = await (GameConfig.findOne as any)({
       gameType: req.params.gameType,
       layoutName: req.params.layoutName,
-    }).lean().exec()
+    })
+      .lean()
+      .exec()
 
     if (!config) {
       return sendSuccess(res, null)
@@ -33,7 +35,7 @@ router.get('/:gameType', async (req: any, res: any) => {
   try {
     const GameConfig = await getGameConfigModel()
 
-    const configs = await GameConfig.find({ gameType: req.params.gameType })
+    const configs = await (GameConfig.find as any)({ gameType: req.params.gameType })
       .sort({ updatedAt: -1 })
       .lean()
       .exec()

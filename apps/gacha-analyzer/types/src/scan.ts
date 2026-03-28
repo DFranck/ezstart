@@ -48,7 +48,12 @@ export interface ScanFeedback {
 
 export type ReportStatus = 'open' | 'in-progress' | 'resolved'
 
-export type ReportCategory = 'wrong-ocr' | 'wrong-advice' | 'wrong-gem' | 'wrong-efficiency' | 'other'
+export type ReportCategory =
+  | 'wrong-ocr'
+  | 'wrong-advice'
+  | 'wrong-gem'
+  | 'wrong-efficiency'
+  | 'other'
 
 export interface ScanReport {
   status: ReportStatus
@@ -69,6 +74,8 @@ export interface Scan {
   result?: ScanResult
   feedback?: ScanFeedback
   reports?: ScanReport[]
+  /** Error message when scan fails */
+  error?: string
   createdAt: Date
   updatedAt: Date
 }

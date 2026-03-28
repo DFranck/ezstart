@@ -139,7 +139,7 @@ export async function importMonsters(): Promise<number> {
 
   // Filter: obtainable, awakened (awaken_level=1), nat 2+
   const filtered = allMonsters.filter(
-    (m) => m.obtainable && m.awaken_level === 1 && m.base_stars >= 2
+    m => m.obtainable && m.awaken_level === 1 && m.base_stars >= 2
   )
 
   const MonsterModel = await getMonsterModel()
@@ -178,7 +178,7 @@ export async function importMonsters(): Promise<number> {
       awakenLevel: m.awaken_level,
     }
 
-    await MonsterModel.findOneAndUpdate({ id: m.id }, monsterData, {
+    await (MonsterModel.findOneAndUpdate as any)({ id: m.id }, monsterData, {
       upsert: true,
       new: true,
     })

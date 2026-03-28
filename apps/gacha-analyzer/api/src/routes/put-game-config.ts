@@ -26,7 +26,12 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
     const paramsValidation = paramsSchema.safeParse(req.params)
     if (!paramsValidation.success) {
-      return sendValidationError(res, 'Invalid route parameters', paramsValidation.error.errors, 400)
+      return sendValidationError(
+        res,
+        'Invalid route parameters',
+        paramsValidation.error.errors,
+        400
+      )
     }
 
     const bodyValidation = bodySchema.safeParse(req.body)
@@ -39,7 +44,7 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
 
     const GameConfig = await getGameConfigModel()
 
-    const config = await GameConfig.findOneAndUpdate(
+    const config = await (GameConfig.findOneAndUpdate as any)(
       { gameType, layoutName },
       {
         gameType,

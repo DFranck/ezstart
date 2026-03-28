@@ -13,7 +13,7 @@ router.get('/:id', async (req: any, res: any) => {
   try {
     const Scan = await getScanModel()
 
-    const scan = await Scan.findById(req.params.id).lean().exec()
+    const scan = await (Scan.findById as any)(req.params.id).lean().exec()
 
     if (!scan) {
       return sendError(res, 'Scan not found', 404)

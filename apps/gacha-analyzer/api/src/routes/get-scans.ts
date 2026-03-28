@@ -32,7 +32,7 @@ router.get('/', async (req: any, res: any) => {
     if (gameType) filter.gameType = gameType
     if (status) filter.status = status
 
-    const scans = await Scan.find(filter)
+    const scans = await (Scan.find as any)(filter)
       .select('-thumbnail')
       .sort({ createdAt: -1 })
       .skip(offset)

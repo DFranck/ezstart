@@ -13,7 +13,7 @@ router.delete('/:id', async (req: any, res: any) => {
   try {
     const Scan = await getScanModel()
 
-    const scan = await Scan.findByIdAndDelete(req.params.id).exec()
+    const scan = await (Scan.findByIdAndDelete as any)(req.params.id).exec()
 
     if (!scan) {
       return sendError(res, 'Scan not found', 404)

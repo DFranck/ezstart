@@ -36,7 +36,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     }
 
     // Verify token
-    const payload = jwt.verify(token, JWT_SECRET) as JWTPayload
+    const payload = jwt.verify(token, JWT_SECRET!) as unknown as JWTPayload
 
     // Get full user from database to ensure fresh data
     const AuthUser = await getAuthUserModel()
@@ -114,7 +114,7 @@ export async function optionalAuthMiddleware(req: Request, res: Response, next: 
     }
 
     // Verify token
-    const payload = jwt.verify(token, JWT_SECRET) as JWTPayload
+    const payload = jwt.verify(token, JWT_SECRET!) as unknown as JWTPayload
 
     // Get full user from database
     const AuthUser = await getAuthUserModel()

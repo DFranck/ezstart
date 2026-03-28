@@ -4,7 +4,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
 
@@ -28,9 +34,12 @@ listFormConfigsRouter.get(
       if (category) query.category = category
       if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] }
 
-      // @ts-expect-error - Mongoose type inference issue
       const [configs, total] = await Promise.all([
-        FormConfig.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)).lean(),
+        (FormConfig.find as any)(query)
+          .sort({ createdAt: -1 })
+          .skip(Number(offset))
+          .limit(Number(limit))
+          .lean(),
         FormConfig.countDocuments(query),
       ])
 

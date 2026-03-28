@@ -18,7 +18,7 @@ router.delete('/:gameType/:layoutName', async (req: any, res: any) => {
 
     const GameConfig = await getGameConfigModel()
 
-    const config = await GameConfig.findOneAndDelete({ gameType, layoutName }).exec()
+    const config = await (GameConfig.findOneAndDelete as any)({ gameType, layoutName }).exec()
 
     if (!config) {
       return sendError(res, 'Layout not found', 404)

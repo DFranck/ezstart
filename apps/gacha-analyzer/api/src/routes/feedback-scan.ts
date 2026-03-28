@@ -25,7 +25,7 @@ router.post('/:id/feedback', async (req: any, res: any) => {
 
     const Scan = await getScanModel()
 
-    const scan = await Scan.findByIdAndUpdate(
+    const scan = await (Scan.findByIdAndUpdate as any)(
       req.params.id,
       { feedback: { opinion, comment, createdAt: new Date() } },
       { new: true }

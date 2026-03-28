@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
@@ -11,25 +17,29 @@ const docRouter = createRouterWithDoc(waitlistListRegistry, router)
 // Schemas for validation and documentation
 const getAllWaitlistsResponseSchema = z.object({
   success: z.boolean().describe('Indicates if the operation was successful'),
-  waitlists: z.record(z.array(z.string())).describe('Object mapping app names to arrays of email addresses'),
+  waitlists: z
+    .record(z.array(z.string()))
+    .describe('Object mapping app names to arrays of email addresses'),
   totalCount: z.number().describe('Total number of emails across all waitlists'),
-  pagination: z.object({
-    page: z.number().describe('Current page number'),
-    limit: z.number().describe('Items per page'),
-    total: z.number().describe('Total number of items'),
-    totalPages: z.number().describe('Total number of pages'),
-  }).describe('Pagination metadata for waitlist documents'),
+  pagination: z
+    .object({
+      page: z.number().describe('Current page number'),
+      limit: z.number().describe('Items per page'),
+      total: z.number().describe('Total number of items'),
+      totalPages: z.number().describe('Total number of pages'),
+    })
+    .describe('Pagination metadata for waitlist documents'),
 })
 
 const errorSchema = z.object({
   success: z.literal(false).describe('Always false for error responses'),
-  error: z.string().describe('Error message explaining what went wrong')
+  error: z.string().describe('Error message explaining what went wrong'),
 })
 
 // Query validation schema
 const listWaitlistsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
-  limit: z.coerce.number().int().positive().max(100).optional().default(20)
+  limit: z.coerce.number().int().positive().max(100).optional().default(20),
 })
 
 // Get all waitlists (admin endpoint)
@@ -43,27 +53,34 @@ const getAllWaitlistsController = async (req: any, res: any) => {
     const WaitlistModel = await getWaitlistModel()
     const { page, limit } = parsedQuery.data
 
-    // @ts-expect-error - Mongoose type inference issue
     const [waitlists, total] = await Promise.all([
-      WaitlistModel.find({}).skip((page - 1) * limit).limit(limit),
-      WaitlistModel.countDocuments({})
+      (WaitlistModel.find as any)({})
+        .skip((page - 1) * limit)
+        .limit(limit),
+      WaitlistModel.countDocuments({}),
     ])
 
-    const result = waitlists.reduce((acc: Record<string, string[]>, waitlist: any) => {
-      acc[waitlist.appName] = waitlist.emails
-      return acc
-    }, {} as Record<string, string[]>)
+    const result = waitlists.reduce(
+      (acc: Record<string, string[]>, waitlist: any) => {
+        acc[waitlist.appName] = waitlist.emails
+        return acc
+      },
+      {} as Record<string, string[]>
+    )
 
     res.json({
       success: true,
       waitlists: result,
-      totalCount: Object.values(result).reduce((sum: number, emails: unknown) => sum + (emails as string[]).length, 0),
+      totalCount: Object.values(result).reduce(
+        (sum: number, emails: unknown) => sum + (emails as string[]).length,
+        0
+      ),
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     })
   } catch (error) {
     logger.error('Error fetching all waitlists:', error)
@@ -76,8 +93,8 @@ docRouter.get('/', getAllWaitlistsController, {
   tags: ['Waitlist'],
   responseSchema: getAllWaitlistsResponseSchema,
   extraResponses: {
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

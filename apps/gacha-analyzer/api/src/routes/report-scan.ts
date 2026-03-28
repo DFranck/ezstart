@@ -8,21 +8,35 @@ import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/ex
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const VALID_CATEGORIES = ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'] as const
+const VALID_CATEGORIES = [
+  'wrong-ocr',
+  'wrong-advice',
+  'wrong-gem',
+  'wrong-efficiency',
+  'other',
+] as const
 const VALID_STATUSES = ['open', 'in-progress', 'resolved'] as const
 
 const createReportSchema = z.object({
   category: z.enum(VALID_CATEGORIES),
-  description: z.string().min(1, 'description is required').transform((v) => v.trim()),
+  description: z
+    .string()
+    .min(1, 'description is required')
+    .transform(v => v.trim()),
 })
 
-const updateReportSchema = z.object({
-  status: z.enum(VALID_STATUSES),
-  resolution: z.string().transform((v) => v.trim()).optional(),
-}).refine(
-  (data) => data.status !== 'resolved' || (data.resolution && data.resolution.length > 0),
-  { message: 'resolution is required when status is resolved', path: ['resolution'] },
-)
+const updateReportSchema = z
+  .object({
+    status: z.enum(VALID_STATUSES),
+    resolution: z
+      .string()
+      .transform(v => v.trim())
+      .optional(),
+  })
+  .refine(data => data.status !== 'resolved' || (data.resolution && data.resolution.length > 0), {
+    message: 'resolution is required when status is resolved',
+    path: ['resolution'],
+  })
 
 const reportIndexSchema = z.object({
   reportIndex: z.coerce.number().int().min(0),
@@ -43,7 +57,7 @@ router.post('/:id/report', async (req: any, res: any) => {
     const Scan = await getScanModel()
     const now = new Date()
 
-    const scan = await Scan.findByIdAndUpdate(
+    const scan = await (Scan.findByIdAndUpdate as any)(
       req.params.id,
       {
         $push: {
@@ -100,7 +114,7 @@ router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
       updateFields[`reports.${reportIndex}.resolution`] = resolution
     }
 
-    const scan = await Scan.findByIdAndUpdate(
+    const scan = await (Scan.findByIdAndUpdate as any)(
       req.params.id,
       { $set: updateFields },
       { new: true }
