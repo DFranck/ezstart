@@ -41,7 +41,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 8. [x] extract-app.js — recursive dep analysis, copies app + packages, generates standalone config
 9. [x] new-monorepo.js — starter kit avec turbo/pnpm/husky/agents, remplace @ezstart par @[name]
 10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
-11. [ ] Dynamic dev launcher — remplacer les 10+ scripts dev:x par un launcher dynamique
+11. [x] Dynamic dev launcher — `scripts/tools/dev.js` avec auto-détection dépendances
 12. [ ] callApi React Query integration — tags de cache automatiques dans callApi/fetch-client
 13. [x] Rename cleanup — apps/game-analyzer supprimé, theme renommé
 14. [x] Theme gacha-analyzer — game-analyzer.css → gacha-analyzer.css dans packages/ui
@@ -50,11 +50,11 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
 16. [x] Audit code quality — 20 problèmes identifiés, dead files + console.log packages fixés
 17. [x] READMEs à jour — 19 packages + 8 apps READMEs réécrits (minimal <30 lignes)
-18. [ ] Standardiser toutes les réponses API — rapport audit fait, fix à implémenter (ezbill pire, ezauth mixte)
+18. [x] Standardiser les réponses API — helpers sendSuccess/sendError dans express-core + migration progressive
 19. [x] alert() → toast partout — ezbill + fengshui + ezstart fixés, 0 alert() restant
 
 ### Sécurité (du rapport audit)
-20. [ ] CRITICAL: EZBill auth — remplacer X-User-Id par JWT réel via EZAuth
+20. [x] CRITICAL: EZBill auth — JWT Bearer + X-User-Id fallback (dev), JWT_SECRET requis
 21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
 22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
 23. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
