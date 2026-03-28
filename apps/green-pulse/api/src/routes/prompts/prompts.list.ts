@@ -9,25 +9,25 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(listPromptsRegistry, router, '/prompts')
 
 const PromptSchema = z.object({
-  _id: z.string(),
-  key: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  content: z.string(),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']),
-  isActive: z.boolean(),
-  isDefault: z.boolean(),
-  variables: z.array(z.string()).optional(),
-  updatedBy: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  _id: z.string().describe('Prompt unique identifier'),
+  key: z.string().describe('Prompt key identifier'),
+  name: z.string().describe('Prompt display name'),
+  description: z.string().optional().describe('Prompt description'),
+  content: z.string().describe('Prompt content template'),
+  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).describe('Prompt category type'),
+  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).describe('Target AI provider'),
+  isActive: z.boolean().describe('Whether prompt is active'),
+  isDefault: z.boolean().describe('Whether this is the default prompt'),
+  variables: z.array(z.string()).optional().describe('Template variable names'),
+  updatedBy: z.string().optional().describe('User who last updated'),
+  createdAt: z.string().describe('Creation date ISO string'),
+  updatedAt: z.string().describe('Last update date ISO string'),
 })
 
 const ListPromptsResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.array(PromptSchema),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  data: z.array(PromptSchema).describe('List of prompt objects'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // GET /api/prompts - List all system prompts
@@ -72,9 +72,9 @@ docRouter.get(
     summary: 'List all system prompts',
     tags: ['Prompts'],
     querySchema: z.object({
-      type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional(),
-      provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional(),
-      active: z.string().optional(),
+      type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional().describe('Filter by prompt type'),
+      provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional().describe('Filter by AI provider'),
+      active: z.string().optional().describe('Filter by active status'),
       limit: z.coerce.number().default(20).optional().describe('Number of prompts to return'),
       offset: z.coerce.number().default(0).optional().describe('Number of prompts to skip'),
     }),

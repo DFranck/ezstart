@@ -9,10 +9,10 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(deleteThemeRegistry, router, '/theme')
 
 const DeleteThemeResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(),
-  error: z.string().optional(),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  message: z.string().optional().describe('Success message'),
+  error: z.string().optional().describe('Error message if failed'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // DELETE /api/theme - Delete theme overrides (reset to default)

@@ -23,7 +23,7 @@ const inviteResponseSchema = z.object({
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
+  success: z.literal(false).describe('Always false for errors'),
   error: z.string().describe('Error message'),
 })
 

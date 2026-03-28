@@ -10,20 +10,20 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(updatePromptRegistry, router, '/prompts')
 
 const UpdatePromptBodySchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).optional(),
-  content: z.string().min(1).max(10000).optional(),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional(),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional(),
-  isActive: z.boolean().optional(),
-  isDefault: z.boolean().optional(),
-  variables: z.array(z.string()).optional(),
+  name: z.string().min(1).max(100).optional().describe('Prompt display name'),
+  description: z.string().max(500).optional().describe('Prompt description'),
+  content: z.string().min(1).max(10000).optional().describe('Prompt content template'),
+  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional().describe('Prompt category type'),
+  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional().describe('Target AI provider'),
+  isActive: z.boolean().optional().describe('Whether prompt is active'),
+  isDefault: z.boolean().optional().describe('Whether this is the default prompt'),
+  variables: z.array(z.string()).optional().describe('Template variable names'),
 })
 
 const UpdatePromptResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any(),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  data: z.any().describe('Updated prompt object'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // PATCH /api/prompts/:key - Update a prompt
@@ -96,7 +96,7 @@ docRouter.patch(
     summary: 'Update a system prompt',
     tags: ['Prompts'],
     paramsSchema: z.object({
-      key: z.string(),
+      key: z.string().describe('Prompt key identifier'),
     }),
     bodySchema: UpdatePromptBodySchema,
     responseSchema: UpdatePromptResponseSchema,

@@ -59,6 +59,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 22. [x] MOVED → apps/ezpay/BACKLOG.md (config app, pas monorepo)
 31. [ ] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
 32. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
+33. [ ] Zod validation sur TOUTES les routes API (ezauth, ezbill, ezpay, ezstart, green-pulse) — gacha-analyzer déjà fait
+34. [ ] OpenAPI descriptions complètes — zéro warning au démarrage
 23. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 24. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 25. [x] HIGH: EZPay — auth middleware sur GET routes sensibles

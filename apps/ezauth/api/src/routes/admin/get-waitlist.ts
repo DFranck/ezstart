@@ -11,7 +11,7 @@ const docRouter = createRouterWithDoc(getWaitlistRegistry, router)
 
 // Schemas
 const waitlistEntrySchema = z.object({
-  _id: z.string().optional(),
+  _id: z.string().optional().describe('Entry unique identifier'),
   email: z.string().describe('Email address'),
   status: z.enum(['pending', 'invited', 'activated', 'rejected']).describe('Current status'),
   accessCode: z.string().nullable().describe('Access code if invited'),
@@ -22,11 +22,11 @@ const waitlistEntrySchema = z.object({
 })
 
 const waitlistStatsSchema = z.object({
-  total: z.number(),
-  pending: z.number(),
-  invited: z.number(),
-  activated: z.number(),
-  rejected: z.number(),
+  total: z.number().describe('Total entries count'),
+  pending: z.number().describe('Pending entries count'),
+  invited: z.number().describe('Invited entries count'),
+  activated: z.number().describe('Activated entries count'),
+  rejected: z.number().describe('Rejected entries count'),
 })
 
 const getWaitlistResponseSchema = z.object({

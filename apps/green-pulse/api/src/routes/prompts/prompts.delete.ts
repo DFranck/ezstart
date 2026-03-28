@@ -10,9 +10,9 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(deletePromptRegistry, router, '/prompts')
 
 const DeletePromptResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  message: z.string().optional().describe('Success message'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // DELETE /api/prompts/:key - Delete a prompt
@@ -64,7 +64,7 @@ docRouter.delete(
     summary: 'Delete a system prompt',
     tags: ['Prompts'],
     paramsSchema: z.object({
-      key: z.string(),
+      key: z.string().describe('Prompt key identifier'),
     }),
     responseSchema: DeletePromptResponseSchema,
   }

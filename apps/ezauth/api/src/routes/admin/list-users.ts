@@ -11,34 +11,34 @@ const docRouter = createRouterWithDoc(listUsersRegistry, router)
 
 // Schemas
 const userSchema = z.object({
-  _id: z.string(),
-  email: z.string(),
-  username: z.string().optional(),
-  roles: z.array(z.string()),
-  permissions: z.array(z.string()),
-  features: z.array(z.string()),
-  apps: z.array(z.string()).optional(),
-  organizationId: z.string().optional(),
-  managedBy: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string()
+  _id: z.string().describe('User unique identifier'),
+  email: z.string().describe('User email address'),
+  username: z.string().optional().describe('Username'),
+  roles: z.array(z.string()).describe('User roles'),
+  permissions: z.array(z.string()).describe('User permissions'),
+  features: z.array(z.string()).describe('Enabled feature flags'),
+  apps: z.array(z.string()).optional().describe('Accessible applications'),
+  organizationId: z.string().optional().describe('Organization ID'),
+  managedBy: z.string().optional().describe('Manager user ID'),
+  createdAt: z.string().describe('Creation date ISO string'),
+  updatedAt: z.string().describe('Last update date ISO string')
 })
 
 const paginationSchema = z.object({
-  page: z.number(),
-  limit: z.number(),
-  total: z.number(),
-  totalPages: z.number()
+  page: z.number().describe('Current page number'),
+  limit: z.number().describe('Items per page'),
+  total: z.number().describe('Total number of items'),
+  totalPages: z.number().describe('Total number of pages')
 })
 
 const listUsersResponseSchema = z.object({
-  users: z.array(userSchema),
-  pagination: paginationSchema
+  users: z.array(userSchema).describe('List of users'),
+  pagination: paginationSchema.describe('Pagination metadata')
 })
 
 const errorSchema = z.object({
-  error: z.string(),
-  details: z.string().optional()
+  error: z.string().describe('Error message'),
+  details: z.string().optional().describe('Additional error details')
 })
 
 // Controller

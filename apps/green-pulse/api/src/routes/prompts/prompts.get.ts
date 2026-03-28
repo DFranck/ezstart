@@ -9,25 +9,25 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(getPromptRegistry, router, '/prompts')
 
 const PromptSchema = z.object({
-  _id: z.string(),
-  key: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  content: z.string(),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']),
-  isActive: z.boolean(),
-  isDefault: z.boolean(),
-  variables: z.array(z.string()).optional(),
-  updatedBy: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  _id: z.string().describe('Prompt unique identifier'),
+  key: z.string().describe('Prompt key identifier'),
+  name: z.string().describe('Prompt display name'),
+  description: z.string().optional().describe('Prompt description'),
+  content: z.string().describe('Prompt content template'),
+  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).describe('Prompt category type'),
+  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).describe('Target AI provider'),
+  isActive: z.boolean().describe('Whether prompt is active'),
+  isDefault: z.boolean().describe('Whether this is the default prompt'),
+  variables: z.array(z.string()).optional().describe('Template variable names'),
+  updatedBy: z.string().optional().describe('User who last updated'),
+  createdAt: z.string().describe('Creation date ISO string'),
+  updatedAt: z.string().describe('Last update date ISO string'),
 })
 
 const GetPromptResponseSchema = z.object({
-  success: z.boolean(),
-  data: PromptSchema.nullable(),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  data: PromptSchema.nullable().describe('Prompt object or null'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // GET /api/prompts/:key - Get a prompt by key
@@ -72,7 +72,7 @@ docRouter.get(
     summary: 'Get a system prompt by key',
     tags: ['Prompts'],
     paramsSchema: z.object({
-      key: z.string(),
+      key: z.string().describe('Prompt key identifier'),
     }),
     responseSchema: GetPromptResponseSchema,
   }

@@ -9,16 +9,17 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(getThemeRegistry, router, '/theme')
 
 const ThemeResponseSchema = z.object({
-  success: z.boolean(),
+  success: z.boolean().describe('Whether the operation succeeded'),
   data: z
     .object({
-      appName: z.string(),
-      overrides: z.record(z.string()),
-      updatedAt: z.string(),
-      updatedBy: z.string().optional(),
+      appName: z.string().describe('Application name'),
+      overrides: z.record(z.string()).describe('CSS variable overrides map'),
+      updatedAt: z.string().describe('Last update ISO timestamp'),
+      updatedBy: z.string().optional().describe('User who last updated'),
     })
-    .nullable(),
-  timestamp: z.string(),
+    .nullable()
+    .describe('Theme data or null'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // GET /api/theme - Get theme overrides

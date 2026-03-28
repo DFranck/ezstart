@@ -14,10 +14,10 @@ const getAllWaitlistsResponseSchema = z.object({
   waitlists: z.record(z.array(z.string())).describe('Object mapping app names to arrays of email addresses'),
   totalCount: z.number().describe('Total number of emails across all waitlists'),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
+    page: z.number().describe('Current page number'),
+    limit: z.number().describe('Items per page'),
+    total: z.number().describe('Total number of items'),
+    totalPages: z.number().describe('Total number of pages'),
   }).describe('Pagination metadata for waitlist documents'),
 })
 

@@ -27,13 +27,13 @@ export const listClientsRouter = createRouterWithDoc(
 );
 
 const paginatedClientsSchema = z.object({
-  data: clientSchema.array(),
+  data: clientSchema.array().describe('Array of client objects'),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
-  }),
+    page: z.number().describe('Current page number'),
+    limit: z.number().describe('Items per page'),
+    total: z.number().describe('Total number of items'),
+    totalPages: z.number().describe('Total number of pages'),
+  }).describe('Pagination metadata'),
 });
 
 listClientsRouter.get(

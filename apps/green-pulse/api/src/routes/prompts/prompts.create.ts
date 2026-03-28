@@ -13,21 +13,22 @@ const CreatePromptBodySchema = z.object({
     .string()
     .min(1)
     .max(50)
-    .regex(/^[a-z0-9-_]+$/, 'Key must be lowercase alphanumeric with dashes/underscores'),
-  name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
-  content: z.string().min(1).max(10000),
-  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).default('general'),
-  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).default('all'),
-  isActive: z.boolean().default(true),
-  isDefault: z.boolean().default(false),
-  variables: z.array(z.string()).optional(),
+    .regex(/^[a-z0-9-_]+$/, 'Key must be lowercase alphanumeric with dashes/underscores')
+    .describe('Unique prompt key identifier'),
+  name: z.string().min(1).max(100).describe('Prompt display name'),
+  description: z.string().max(500).optional().describe('Prompt description'),
+  content: z.string().min(1).max(10000).describe('Prompt content template'),
+  type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).default('general').describe('Prompt category type'),
+  provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).default('all').describe('Target AI provider'),
+  isActive: z.boolean().default(true).describe('Whether prompt is active'),
+  isDefault: z.boolean().default(false).describe('Whether this is the default prompt'),
+  variables: z.array(z.string()).optional().describe('Template variable names'),
 })
 
 const CreatePromptResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any(),
-  timestamp: z.string(),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  data: z.any().describe('Created prompt object'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // POST /api/prompts - Create a new prompt

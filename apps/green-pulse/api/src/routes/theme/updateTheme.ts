@@ -9,20 +9,21 @@ const router: any = Router()
 const docRouter = createRouterWithDoc(updateThemeRegistry, router, '/theme')
 
 const UpdateThemeRequestSchema = z.object({
-  overrides: z.record(z.string()),
+  overrides: z.record(z.string()).describe('CSS variable overrides map'),
 })
 
 const ThemeResponseSchema = z.object({
-  success: z.boolean(),
+  success: z.boolean().describe('Whether the operation succeeded'),
   data: z
     .object({
-      appName: z.string(),
-      overrides: z.record(z.string()),
-      updatedAt: z.string(),
+      appName: z.string().describe('Application name'),
+      overrides: z.record(z.string()).describe('CSS variable overrides map'),
+      updatedAt: z.string().describe('Last update ISO timestamp'),
     })
-    .nullable(),
-  error: z.string().optional(),
-  timestamp: z.string(),
+    .nullable()
+    .describe('Theme data or null'),
+  error: z.string().optional().describe('Error message if failed'),
+  timestamp: z.string().describe('Response ISO timestamp'),
 })
 
 // PUT /api/theme - Update theme overrides

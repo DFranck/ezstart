@@ -12,43 +12,43 @@ const docRouter = createRouterWithDoc(updateUserRegistry, router)
 // Schemas
 const updateUserRequestSchema = z.object({
   // New role structure
-  globalRoles: z.array(z.enum(['superadmin'])).optional(),
-  appRoles: z.record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client']))).optional(),
+  globalRoles: z.array(z.enum(['superadmin'])).optional().describe('Global roles to assign'),
+  appRoles: z.record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client']))).optional().describe('Per-app roles mapping'),
   // Legacy fields
-  roles: z.array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client'])).optional(),
-  permissions: z.array(z.string()).optional(),
-  features: z.array(z.string()).optional(),
-  apps: z.array(z.string()).optional(),
-  isVerified: z.boolean().optional(),
-  organizationId: z.string().optional(),
-  managedBy: z.string().optional()
+  roles: z.array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client'])).optional().describe('Legacy roles array'),
+  permissions: z.array(z.string()).optional().describe('User permissions'),
+  features: z.array(z.string()).optional().describe('Enabled feature flags'),
+  apps: z.array(z.string()).optional().describe('Accessible applications'),
+  isVerified: z.boolean().optional().describe('Email verification status'),
+  organizationId: z.string().optional().describe('Organization ID'),
+  managedBy: z.string().optional().describe('Manager user ID')
 })
 
 const userSchema = z.object({
-  _id: z.string(),
-  email: z.string(),
-  username: z.string().optional(),
-  globalRoles: z.array(z.string()).optional(),
-  appRoles: z.record(z.string(), z.array(z.string())).optional(),
-  roles: z.array(z.string()),
-  permissions: z.array(z.string()),
-  features: z.array(z.string()),
-  apps: z.array(z.string()).optional(),
-  isVerified: z.boolean().optional(),
-  organizationId: z.string().optional(),
-  managedBy: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string()
+  _id: z.string().describe('User unique identifier'),
+  email: z.string().describe('User email address'),
+  username: z.string().optional().describe('Username'),
+  globalRoles: z.array(z.string()).optional().describe('Global roles'),
+  appRoles: z.record(z.string(), z.array(z.string())).optional().describe('Per-app roles mapping'),
+  roles: z.array(z.string()).describe('User roles'),
+  permissions: z.array(z.string()).describe('User permissions'),
+  features: z.array(z.string()).describe('Enabled feature flags'),
+  apps: z.array(z.string()).optional().describe('Accessible applications'),
+  isVerified: z.boolean().optional().describe('Email verification status'),
+  organizationId: z.string().optional().describe('Organization ID'),
+  managedBy: z.string().optional().describe('Manager user ID'),
+  createdAt: z.string().describe('Creation date ISO string'),
+  updatedAt: z.string().describe('Last update date ISO string')
 })
 
 const updateUserResponseSchema = z.object({
-  user: userSchema,
-  message: z.string()
+  user: userSchema.describe('Updated user object'),
+  message: z.string().describe('Success message')
 })
 
 const errorSchema = z.object({
-  error: z.string(),
-  details: z.string().optional()
+  error: z.string().describe('Error message'),
+  details: z.string().optional().describe('Additional error details')
 })
 
 // Controller

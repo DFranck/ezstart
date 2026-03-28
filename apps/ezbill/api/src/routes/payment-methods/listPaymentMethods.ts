@@ -22,13 +22,13 @@ export const listPaymentMethodsRouter = createRouterWithDoc(
 );
 
 const paginatedPaymentMethodsSchema = z.object({
-  data: paymentMethodSchema.array(),
+  data: paymentMethodSchema.array().describe('Array of payment methods'),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
-  }),
+    page: z.number().describe('Current page number'),
+    limit: z.number().describe('Items per page'),
+    total: z.number().describe('Total number of items'),
+    totalPages: z.number().describe('Total number of pages'),
+  }).describe('Pagination metadata'),
 });
 
 listPaymentMethodsRouter.get('/', authMiddleware, getPaymentMethods, {

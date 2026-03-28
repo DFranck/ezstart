@@ -11,38 +11,38 @@ const docRouter = createRouterWithDoc(listWaitlistRegistry, router)
 
 // Schemas
 const waitlistEntrySchema = z.object({
-  email: z.string(),
-  status: z.enum(['pending', 'invited', 'activated', 'rejected']),
-  accessCode: z.string().nullable(),
-  invitedAt: z.string().nullable(),
-  invitedBy: z.string().nullable(),
-  activatedAt: z.string().nullable(),
-  notes: z.string(),
-  addedAt: z.string(),
+  email: z.string().describe('Email address'),
+  status: z.enum(['pending', 'invited', 'activated', 'rejected']).describe('Current waitlist status'),
+  accessCode: z.string().nullable().describe('Access code if invited'),
+  invitedAt: z.string().nullable().describe('Invitation date ISO string'),
+  invitedBy: z.string().nullable().describe('ID of admin who invited'),
+  activatedAt: z.string().nullable().describe('Activation date ISO string'),
+  notes: z.string().describe('Admin notes'),
+  addedAt: z.string().describe('Date added to waitlist'),
 })
 
 const listWaitlistResponseSchema = z.object({
-  success: z.boolean(),
-  appName: z.string(),
-  entries: z.array(waitlistEntrySchema),
+  success: z.boolean().describe('Whether the operation succeeded'),
+  appName: z.string().describe('Application name'),
+  entries: z.array(waitlistEntrySchema).describe('Waitlist entries'),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
-  }),
+    page: z.number().describe('Current page number'),
+    limit: z.number().describe('Items per page'),
+    total: z.number().describe('Total number of entries'),
+    totalPages: z.number().describe('Total number of pages'),
+  }).describe('Pagination metadata'),
   stats: z.object({
-    total: z.number(),
-    pending: z.number(),
-    invited: z.number(),
-    activated: z.number(),
-    rejected: z.number(),
-  }),
+    total: z.number().describe('Total entries count'),
+    pending: z.number().describe('Pending entries count'),
+    invited: z.number().describe('Invited entries count'),
+    activated: z.number().describe('Activated entries count'),
+    rejected: z.number().describe('Rejected entries count'),
+  }).describe('Waitlist statistics'),
 })
 
 const errorSchema = z.object({
-  success: z.literal(false),
-  error: z.string(),
+  success: z.literal(false).describe('Always false for errors'),
+  error: z.string().describe('Error message'),
 })
 
 // List waitlist for an app

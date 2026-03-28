@@ -22,13 +22,13 @@ export const listCompaniesRouter = createRouterWithDoc(
 );
 
 const paginatedCompaniesSchema = z.object({
-  data: companySchema.array(),
+  data: companySchema.array().describe('Array of company objects'),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
-  }),
+    page: z.number().describe('Current page number'),
+    limit: z.number().describe('Items per page'),
+    total: z.number().describe('Total number of items'),
+    totalPages: z.number().describe('Total number of pages'),
+  }).describe('Pagination metadata'),
 });
 
 listCompaniesRouter.get('/', authMiddleware, getCompanies, {
