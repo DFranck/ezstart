@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"

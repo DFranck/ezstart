@@ -28,8 +28,8 @@ function renderTemplate(templatePath, vars) {
  */
 function parseExistingPorts() {
   const content = fs.readFileSync(URLS_FILE, 'utf8')
-  const portMatches = content.match(/localhost:(\d+)/g) || []
-  return portMatches.map(m => parseInt(m.replace('localhost:', ''), 10)).sort((a, b) => a - b)
+  const portMatches = content.match(/localhost:(\d{4,5})/g) || []
+  return [...new Set(portMatches.map(m => parseInt(m.replace('localhost:', ''), 10)))].sort((a, b) => a - b)
 }
 
 /**
@@ -100,22 +100,27 @@ function generateShortcut(appName) {
 function registerInUrls(appName, displayName, description, apiPort, webPort, hasApi, hasWeb) {
   let content = fs.readFileSync(URLS_FILE, 'utf8')
 
-  // 1. Add to AppName type union
-  const appNameTypeRegex = /(export type AppName\s*=[\s\S]*?)('\s*\n)/
-  const match = content.match(appNameTypeRegex)
-  if (match) {
-    // Find the last entry in AppName union and add after it
-    const lastPipeRegex = /(\| '[^']+')(\s*\n\s*\n)/
-    const lastPipeMatch = content.match(lastPipeRegex)
-    if (lastPipeMatch) {
-      content = content.replace(
-        lastPipeMatch[0],
-        `${lastPipeMatch[1]}\n  | '${appName}'${lastPipeMatch[2]}`
-      )
-    }
+  // Check if already registered
+  if (content.includes(`'${appName}'`)) {
+    console.log(`  App "${appName}" already registered in urls.ts, skipping`)
+    return
   }
 
-  // 2. Add to URLS record (before the closing })
+  // 1. Add to AppName type union
+  // Find the last "| 'xxx'" line in the AppName type
+  const lines = content.split('\n')
+  let lastPipeLineIdx = -1
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*\| '/.test(lines[i])) {
+      lastPipeLineIdx = i
+    }
+  }
+  if (lastPipeLineIdx !== -1) {
+    lines.splice(lastPipeLineIdx + 1, 0, `  | '${appName}'`)
+    content = lines.join('\n')
+  }
+
+  // 2. Add to URLS record
   let urlsEntry = `\n  '${appName}': {\n`
   if (hasWeb) {
     urlsEntry += `    web: {\n`
@@ -130,19 +135,25 @@ function registerInUrls(appName, displayName, description, apiPort, webPort, has
     urlsEntry += `      production: 'https://${appName}-api.up.railway.app',\n`
     urlsEntry += `    },\n`
   }
-  urlsEntry += `  },\n`
+  urlsEntry += `  },`
 
-  // Insert before closing brace of URLS
-  const urlsClosingRegex = /(\n\} satisfies|\n\};\s*$|\n\} as)/m
-  const urlsMatch = content.match(urlsClosingRegex)
-  if (urlsMatch) {
-    content = content.replace(urlsMatch[0], urlsEntry + urlsMatch[0])
-  } else {
-    // Fallback: find the last entry in URLS and add after it
-    const lastUrlEntry = content.lastIndexOf('},\n}')
-    if (lastUrlEntry !== -1) {
-      content = content.slice(0, lastUrlEntry + 3) + urlsEntry + content.slice(lastUrlEntry + 3)
+  // Find the closing "}" of the URLS record by locating "export const URLS"
+  // then finding the matching closing brace
+  const urlsStart = content.indexOf('export const URLS')
+  if (urlsStart !== -1) {
+    // Find the first "{" after "URLS"
+    const firstBrace = content.indexOf('{', content.indexOf('{', urlsStart) + 1)
+    // Find the matching closing "}" by counting braces
+    let braceCount = 1
+    let pos = firstBrace + 1
+    while (braceCount > 0 && pos < content.length) {
+      if (content[pos] === '{') braceCount++
+      if (content[pos] === '}') braceCount--
+      pos++
     }
+    // pos is now right after the closing "}" of URLS
+    const closingBracePos = pos - 1
+    content = content.slice(0, closingBracePos) + urlsEntry + '\n' + content.slice(closingBracePos)
   }
 
   // 3. Add to PROJECT_METADATA record
@@ -153,19 +164,20 @@ function registerInUrls(appName, displayName, description, apiPort, webPort, has
   metadataEntry += `    githubPath: 'apps/${appName}',\n`
   if (hasWeb) metadataEntry += `    webPlatform: 'vercel',\n`
   if (hasApi) metadataEntry += `    apiPlatform: 'railway',\n`
-  metadataEntry += `  },\n`
+  metadataEntry += `  },`
 
-  // Find closing of PROJECT_METADATA
-  // Look for the pattern: last entry of PROJECT_METADATA before its closing }
-  const metadataBlockRegex = /export const PROJECT_METADATA[\s\S]*?\n\}\s*\n/
-  const metadataBlock = content.match(metadataBlockRegex)
-  if (metadataBlock) {
-    const block = metadataBlock[0]
-    const lastBrace = block.lastIndexOf('}')
-    const secondLastBrace = block.lastIndexOf('}', lastBrace - 1)
-    // Insert before the final closing brace of the record
-    const insertPos = metadataBlock.index + lastBrace
-    content = content.slice(0, insertPos) + metadataEntry + content.slice(insertPos)
+  const metaStart = content.indexOf('export const PROJECT_METADATA')
+  if (metaStart !== -1) {
+    const firstBrace = content.indexOf('{', content.indexOf('{', metaStart) + 1)
+    let braceCount = 1
+    let pos = firstBrace + 1
+    while (braceCount > 0 && pos < content.length) {
+      if (content[pos] === '{') braceCount++
+      if (content[pos] === '}') braceCount--
+      pos++
+    }
+    const closingBracePos = pos - 1
+    content = content.slice(0, closingBracePos) + metadataEntry + '\n' + content.slice(closingBracePos)
   }
 
   fs.writeFileSync(URLS_FILE, content)

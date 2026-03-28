@@ -3,6 +3,7 @@ import { createContext, ReactNode, useContext, useEffect, useMemo } from 'react'
 import { AuthClient, createAuthClient } from './client.js'
 import { useAuthStore, type AuthMode } from './store.js'
 import { getCurrentEnvironment, isEzstartDomain } from '@ezstart/config'
+import { logger } from '@ezstart/logger'
 
 interface AuthContextValue {
   client: AuthClient
@@ -134,6 +135,13 @@ export function AuthProvider({
     const resolvedMode = resolveAuthMode(authMode, hostname, env, jwtPublicKey)
     const currentMode = store.getMode()
 
+    logger.debug('[AuthProvider] Mode resolved', {
+      configured: authMode,
+      resolved: resolvedMode,
+      current: currentMode,
+      env,
+    })
+
     // Update mode if it changed
     if (currentMode !== resolvedMode) {
       if (store.isAuthenticated) {
@@ -161,6 +169,7 @@ export function AuthProvider({
       if (mode === 'localStorage' && store.accessToken) {
         const isValid = await client.verifyToken(store.accessToken)
         if (!isValid) {
+          logger.debug('[AuthProvider] Token invalid, logging out')
           store.logout()
         }
       } else if (mode === 'httpOnly') {
@@ -177,7 +186,10 @@ export function AuthProvider({
                                error?.message?.toLowerCase().includes('unauthorized')
 
           if (isAuthFailure) {
+            logger.debug('[AuthProvider] httpOnly auth failure (401), logging out')
             store.logout()
+          } else {
+            logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', { error: error?.message })
           }
         }
       }

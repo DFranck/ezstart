@@ -1391,6 +1391,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui

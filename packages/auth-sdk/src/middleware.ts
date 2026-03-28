@@ -24,6 +24,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 import { getWebUrl, getCurrentEnvironment, isEzstartDomain } from '@ezstart/config/urls'
+import { logger } from '@ezstart/logger'
 
 export type AuthMode = 'localStorage' | 'httpOnly' | 'jwt'
 
@@ -170,9 +171,11 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
     // Resolve actual auth mode
     const resolvedMode = resolveAuthMode(authMode, hostname, env)
 
-    if (debug) {
-      // Debug mode logs are intentional - controlled via config.debug flag
-    }
+    logger.debug(`[AuthMiddleware] ${pathname}`, {
+      resolvedMode,
+      env,
+      hostname,
+    })
 
     // Extract locale from pathname (e.g., /en/dashboard -> en, /dashboard -> null)
     let locale: string | null = null
@@ -216,6 +219,10 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
       if (resolvedMode === 'httpOnly') {
         const authCookie = request.cookies.get(cookieName)
 
+        logger.debug(`[AuthMiddleware] httpOnly check`, {
+          path: pathWithoutLocale,
+          hasCookie: !!authCookie,
+        })
 
         if (!authCookie) {
           // User not authenticated - redirect to EZAuth login
@@ -234,6 +241,11 @@ export function createAuthMiddleware(config: AuthMiddlewareConfig) {
           if (returnTo !== '/' && returnTo !== `/${locale}`) {
             loginUrl.searchParams.set('return_to', returnTo) // Preserve original destination
           }
+
+          logger.debug(`[AuthMiddleware] Redirecting to login`, {
+            loginUrl: loginUrl.toString(),
+            returnTo,
+          })
 
           if (debug) {
             // In debug mode, don't actually redirect

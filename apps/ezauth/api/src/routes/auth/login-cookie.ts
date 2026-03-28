@@ -1,4 +1,4 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import {
@@ -11,6 +11,9 @@ import {
 export const loginCookieRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
 const docRouter = createRouterWithDoc(loginCookieRegistry, router)
+
+// Rate limiting for login-cookie endpoint (5 req/min per IP)
+const loginCookieRateLimiter = createStrictRateLimiter()
 
 // Login with httpOnly cookie (DUAL-MODE)
 const loginCookieController = async (req: any, res: any) => {
@@ -44,13 +47,14 @@ const loginCookieController = async (req: any, res: any) => {
   }
 }
 
-docRouter.post('/login-cookie', loginCookieController, {
+docRouter.post('/login-cookie', loginCookieRateLimiter, loginCookieController, {
   summary: 'Login with httpOnly cookie (dual-mode)',
   tags: ['Authentication'],
   bodySchema: loginRequestSchema,
   responseSchema: userResponseSchema,
   extraResponses: {
-    401: { description: 'Login failed', schema: errorResponseSchema }
+    401: { description: 'Login failed', schema: errorResponseSchema },
+    429: { description: 'Too many login attempts', schema: errorResponseSchema }
   }
 })
 

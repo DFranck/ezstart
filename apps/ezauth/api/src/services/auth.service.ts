@@ -188,11 +188,7 @@ export class AuthService {
   static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
     const AuthCodeModel = await getAuthCodeModel()
     const AuthUserModel = await getAuthUserModel()
-    console.log('🔍 Looking for auth code with:', {
-      code: data.code,
-      app: data.app,
-      redirect_uri: data.redirect_uri
-    })
+    logger.debug({ code: data.code, app: data.app, redirect_uri: data.redirect_uri }, 'Looking for auth code')
     
     // Find and validate auth code
     const authCode = await AuthCodeModel.findOne({
@@ -202,25 +198,10 @@ export class AuthService {
       expiresAt: { $gt: new Date() }
     })
 
-    console.log('📄 Found auth code:', authCode ? {
-      id: authCode._id,
-      code: authCode.code,
-      app: authCode.app,
-      redirectUri: authCode.redirectUri,
-      isUsed: authCode.isUsed,
-      expiresAt: authCode.expiresAt
-    } : 'null')
+    logger.debug({ found: !!authCode, app: data.app }, 'Auth code lookup result')
 
     if (!authCode) {
-      // Let's also check what codes exist in DB for debugging
-      const allCodes = await AuthCodeModel.find({ app: data.app }).sort({ createdAt: -1 }).limit(3)
-      console.log('🔍 Recent codes for app:', allCodes.map(c => ({
-        code: c.code,
-        app: c.app,
-        isUsed: c.isUsed,
-        expiresAt: c.expiresAt,
-        createdAt: c.createdAt
-      })))
+      logger.debug({ app: data.app }, 'No valid auth code found')
       throw new Error('Invalid or expired authorization code')
     }
 
