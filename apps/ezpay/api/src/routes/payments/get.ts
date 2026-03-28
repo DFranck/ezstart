@@ -1,5 +1,6 @@
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -54,7 +55,7 @@ const getPaymentHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/payments/:paymentId', getPaymentHandler, {
+docRouter.get('/payments/:paymentId', authMiddleware, getPaymentHandler, {
   summary: 'Get a payment by ID',
   tags: ['Payments'],
   responseSchema: paymentResponseSchema,

@@ -1,5 +1,6 @@
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -73,7 +74,7 @@ const getDonationsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/donations', getDonationsHandler, {
+docRouter.get('/donations', authMiddleware, getDonationsHandler, {
   summary: 'Get public donations (testimonials wall)',
   tags: ['Donations'],
   querySchema: donationsQuerySchema,
