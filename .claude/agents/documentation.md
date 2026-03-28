@@ -10,6 +10,13 @@ README files, API docs, architecture docs. MINIMAL but USEFUL — no bloat.
 - No docstrings on obvious code
 - Only create docs that provide real value
 
+## .env validation (CRITIQUE)
+- [ ] Chaque API a un `.env.example` avec TOUTES les variables nécessaires (placeholders, jamais de vrais secrets)
+- [ ] `.env.local` et `.env.production` ont les MÊMES variables que `.env.example` (pas de variable manquante)
+- [ ] `.env.example` est committé, `.env.local` et `.env.production` sont gitignorés
+- [ ] Aucun vrai secret dans `.env.example` (que des placeholders type `your-xxx-here`)
+- [ ] Si une nouvelle variable est ajoutée au code, elle DOIT être ajoutée à `.env.example`
+
 ## What to document (ONLY these)
 - [ ] README.md per package — what it does, how to install, quick example
 - [ ] README.md per app — what it does, how to run, env vars needed

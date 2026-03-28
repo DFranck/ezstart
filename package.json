@@ -16,6 +16,7 @@
     "dev": "node scripts/tools/dev.js",
     "dev:types": "tsc -b --watch",
     "rotate-secrets": "node scripts/tools/rotate-secrets.js",
+    "validate-env": "node scripts/tools/validate-env.js",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "kill:ports": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tools\\kill-ports.ps1",
