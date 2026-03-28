@@ -39,7 +39,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 6. [x] Fix generators (create-app.js) — path bugs fixés, auto-register ports/tsconfig/scripts
 7. [x] insert-app.js — scaffolding complet avec wiring automatique + templates
 8. [x] extract-app.js — recursive dep analysis, copies app + packages, generates standalone config
-9. [ ] new-monorepo.js — starter kit template pour créer un nouveau monorepo @ezstart-like
+9. [x] new-monorepo.js — starter kit avec turbo/pnpm/husky/agents, remplace @ezstart par @[name]
 10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
 11. [ ] Dynamic dev launcher — remplacer les 10+ scripts dev:x par un launcher dynamique
 12. [ ] callApi React Query integration — tags de cache automatiques dans callApi/fetch-client
@@ -59,7 +59,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
 23. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 24. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
-25. [ ] HIGH: EZPay — ajouter auth sur routes sensibles
+25. [x] HIGH: EZPay — auth middleware sur GET routes sensibles
 26. [x] HIGH: login-cookie rate limiting — createStrictRateLimiter ajouté
 27. [x] HIGH: Debug logging auth codes — remplacé par logger.debug()
 28. [x] MEDIUM: Zod validation sur gacha-analyzer routes (get-scans, feedback, report, reanalyze, config)
