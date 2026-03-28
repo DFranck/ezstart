@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname, useRouter, useParams } from 'next/navigation'
 import React from 'react'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType } from '@gacha-analyzer/types'
 
 const VALID_GAMES: GameType[] = ['summoners-war', 'nikke']
 
@@ -44,13 +44,13 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
 
   return (
     <ClientLayout
-      appName="Game Analyzer"
+      appName="Gacha Analyzer"
       currentPath={pathname}
       navLinks={navLinks}
       headerLeftContent={
         <Link href="/" className="flex items-center gap-2 font-bold text-lg">
           <span>🎮</span>
-          <span>Game Analyzer</span>
+          <span>Gacha Analyzer</span>
         </Link>
       }
       headerRightContent={

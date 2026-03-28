@@ -119,9 +119,9 @@ export default defineConfig({
 **Les packages dans `/packages/` DOIVENT être 100% agnostiques — JAMAIS de logique métier spécifique à un projet.**
 
 - ✅ `packages/ocr-sdk` : capture, preprocessing, Tesseract wrapper, zones, masks → **réutilisable par n'importe quelle app**
-- ❌ `packages/ocr-sdk` : parser Summoners War, rune efficiency, SET_STAT_TIERS → **spécifique game-analyzer, va dans `apps/game-analyzer/`**
+- ❌ `packages/ocr-sdk` : parser Summoners War, rune efficiency, SET_STAT_TIERS → **spécifique gacha-analyzer, va dans `apps/gacha-analyzer/`**
 - ✅ `packages/ui` : DataTable, Chart, Button → **composants génériques**
-- ❌ `packages/ui` : RuneCard, GearCard → **spécifique game-analyzer**
+- ❌ `packages/ui` : RuneCard, GearCard → **spécifique gacha-analyzer**
 
 **Règle** : Si un autre projet pourrait consommer le package tel quel SANS modification, c'est bien un package. Si le code mentionne des concepts métier d'un projet spécifique (rune, invoice, user role, etc.), il va dans l'app.
 

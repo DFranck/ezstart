@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import type { GameType, ScanStatus } from '@game-analyzer/types'
+import type { GameType, ScanStatus } from '@gacha-analyzer/types'
 import { ScanCard } from '@/components/scan-card'
 import { useScans } from '@/hooks/use-scans'
 

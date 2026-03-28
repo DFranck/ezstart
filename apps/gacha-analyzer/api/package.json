@@ -1,11 +1,11 @@
 {
-  "name": "api-game-analyzer",
+  "name": "api-gacha-analyzer",
   "version": "0.0.1",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts < NUL",
-    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @game-analyzer/types build",
+    "prebuild": "pnpm --filter @ezstart/config build && pnpm --filter @ezstart/express-core build && pnpm --filter @gacha-analyzer/types build",
     "build": "tsc && ls -la dist",
     "start": "ls -la && ls -la dist && node dist/index.js",
     "start:prod": "pnpm build && node dist/index.js",
@@ -18,7 +18,7 @@
     "@ezstart/express-core": "workspace:*",
     "@ezstart/logger": "workspace:*",
     "@ezstart/ocr-sdk": "workspace:*",
-    "@game-analyzer/types": "workspace:*",
+    "@gacha-analyzer/types": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "express": "^4.19.2",
     "mongoose": "^8.15.1",

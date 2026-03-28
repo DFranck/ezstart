@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, Div, H3, P, Progress } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneAnalysis, StatType } from '@game-analyzer/types'
+import type { RuneAnalysis, StatType } from '@gacha-analyzer/types'
 
 // ── Stat colors (same as rune-card) ──
 const STAT_COLORS: Record<StatType, string> = {

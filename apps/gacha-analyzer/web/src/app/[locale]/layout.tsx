@@ -14,14 +14,14 @@ const inter = Inter({
 })
 
 export const metadata = createMetadata({
-  appName: 'Game Analyzer',
-  description: 'AI-powered scanner for game equipment. Scan your Summoners War runes and Nikke gear instantly.',
-  domain: 'https://game-analyzer.ezstart.xyz',
+  appName: 'Gacha Analyzer',
+  description: 'AI-powered scanner for gacha game equipment. Scan your Summoners War runes and Nikke gear instantly.',
+  domain: 'https://gacha-analyzer.ezstart.xyz',
   keywords: [
     'summoners war',
     'rune scanner',
     'nikke gear',
-    'game analyzer',
+    'gacha analyzer',
     'AI scanner',
     'rune optimizer',
   ],
@@ -48,10 +48,10 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
   return (
     <html lang={locale} suppressHydrationWarning className={inter.variable}>
       <head>
-        <ThemeStyleInjector appName="game-analyzer" />
+        <ThemeStyleInjector appName="gacha-analyzer" />
       </head>
       <body className="font-sans">
-        <ErrorBoundary title="Something went wrong in Game Analyzer">
+        <ErrorBoundary title="Something went wrong in Gacha Analyzer">
           <Providers
             messages={messages}
             locale={locale}

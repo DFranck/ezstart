@@ -8,7 +8,7 @@ import {
   estimateRolls,
   getRecommendation,
 } from '../analyzers/rune-efficiency.js'
-import type { RuneData, StatType, RuneQuality, RuneStat, RuneSet } from '@game-analyzer/types'
+import type { RuneData, StatType, RuneQuality, RuneStat, RuneSet } from '@gacha-analyzer/types'
 
 // Helper to build a RuneData object
 function makeRune(overrides: {

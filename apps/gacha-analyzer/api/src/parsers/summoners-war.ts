@@ -11,7 +11,7 @@
 import type { OcrResult, ParsedResult, GameParser } from '@ezstart/ocr-sdk'
 import { failedResult, successResult } from '@ezstart/ocr-sdk'
 
-// --- Types (mirrors @game-analyzer/types/rune) ---
+// --- Types (mirrors @gacha-analyzer/types/rune) ---
 
 type RuneSet =
   | 'violent' | 'swift' | 'rage' | 'fatal' | 'despair' | 'blade' | 'focus'

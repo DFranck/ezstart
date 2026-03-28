@@ -2,7 +2,7 @@
 
 import { Badge, Card, CardContent, CardHeader, Div, H3, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { GearData } from '@game-analyzer/types'
+import type { GearData } from '@gacha-analyzer/types'
 import { StatDisplay } from './stat-display'
 
 interface GearCardProps {

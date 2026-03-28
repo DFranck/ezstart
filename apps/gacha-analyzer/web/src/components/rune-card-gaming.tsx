@@ -2,8 +2,8 @@
 
 import { Badge, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, RollBreakdown, StatTier } from '@game-analyzer/types'
-import { SET_STAT_TIERS } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, RollBreakdown, StatTier } from '@gacha-analyzer/types'
+import { SET_STAT_TIERS } from '@gacha-analyzer/types'
 import { GEM_ICONS } from '../config/game-assets'
 import { SetIconLarge } from './rune-card-utils'
 

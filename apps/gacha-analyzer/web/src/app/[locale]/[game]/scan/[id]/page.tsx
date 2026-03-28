@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
-import type { GameType, ReportCategory } from '@game-analyzer/types'
+import type { GameType, ReportCategory } from '@gacha-analyzer/types'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
@@ -36,7 +36,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
     if (typeof window === 'undefined') return 'compact'
     try {
-      const saved = localStorage.getItem('game-analyzer-template')
+      const saved = localStorage.getItem('gacha-analyzer-template')
       if (saved === 'compact' || saved === 'detailed' || saved === 'gaming') return saved
     } catch {}
     return 'compact'
@@ -44,7 +44,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
 
   const handleTemplateChange = useCallback((tmpl: RuneCardTemplate) => {
     setRuneTemplate(tmpl)
-    localStorage.setItem('game-analyzer-template', tmpl)
+    localStorage.setItem('gacha-analyzer-template', tmpl)
   }, [])
 
   async function handleDelete() {

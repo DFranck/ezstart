@@ -5,7 +5,7 @@
  * with accurate 6★ roll ranges, grind potential, and detailed substat analysis.
  */
 
-import type { StatType, RuneQuality, RuneStat, RuneData } from '@game-analyzer/types'
+import type { StatType, RuneQuality, RuneStat, RuneData } from '@gacha-analyzer/types'
 import {
   EFFICIENCY_THRESHOLDS,
   LEVEL_STRICTNESS,
@@ -28,7 +28,7 @@ import {
   SET_ARCHETYPE_AFFINITY,
   GRINDABLE_STATS,
   GEM_RANGES,
-} from '@game-analyzer/types'
+} from '@gacha-analyzer/types'
 
 // Re-export types for consumers
 export type { StatType, RuneQuality, RuneStat, RuneData }
@@ -234,11 +234,11 @@ const NON_GRINDABLE: Set<StatType> = new Set(['cr', 'cd', 'res', 'acc'])
 /** Rune set info: pieces required and bonus description (alias for RUNE_SET_INFO) */
 const SET_INFO = RUNE_SET_INFO as Record<string, { pieces: number; bonus: string }>
 
-// SET_ARCHETYPE_AFFINITY imported from @game-analyzer/types
+// SET_ARCHETYPE_AFFINITY imported from @gacha-analyzer/types
 
-// BUILD_ARCHETYPES imported from @game-analyzer/types
+// BUILD_ARCHETYPES imported from @gacha-analyzer/types
 
-// SYNERGY_BONUS imported from @game-analyzer/types
+// SYNERGY_BONUS imported from @gacha-analyzer/types
 
 /** Stat weights for weighted efficiency — reflects real SW meta value (fallback) */
 const STAT_WEIGHTS: Record<StatType, number> = {
@@ -255,18 +255,18 @@ const STAT_WEIGHTS: Record<StatType, number> = {
   'def': 0.5,
 }
 
-// STAT_PRIORITY_WEIGHTS imported from @game-analyzer/types
+// STAT_PRIORITY_WEIGHTS imported from @gacha-analyzer/types
 
-// PROGRESSIVE_SELL_THRESHOLDS imported from @game-analyzer/types
+// PROGRESSIVE_SELL_THRESHOLDS imported from @gacha-analyzer/types
 
-// DEAD_STAT_COMBOS imported from @game-analyzer/types
+// DEAD_STAT_COMBOS imported from @gacha-analyzer/types
 
-// SET_STAT_TIERS imported from @game-analyzer/types
+// SET_STAT_TIERS imported from @gacha-analyzer/types
 export type StatTier = 'S' | 'A' | 'B' | 'C' | 'D'
 
-// TIER_WEIGHTS, SET_STRENGTH, SET_STRENGTH_THRESHOLD_BONUS imported from @game-analyzer/types
+// TIER_WEIGHTS, SET_STRENGTH, SET_STRENGTH_THRESHOLD_BONUS imported from @gacha-analyzer/types
 
-// SUBSTATS_BY_QUALITY, UPGRADES_BY_QUALITY imported from @game-analyzer/types
+// SUBSTATS_BY_QUALITY, UPGRADES_BY_QUALITY imported from @gacha-analyzer/types
 
 /**
  * Total "events" at +12 per quality (Barion divisor).
@@ -1179,7 +1179,7 @@ const LEGEND_GEM_VALUES: Record<StatType, number> = Object.fromEntries(
   Object.entries(GEM_RANGES.legend).map(([k, v]) => [k, v.max])
 ) as Record<StatType, number>
 
-// GRINDABLE_STATS imported from @game-analyzer/types
+// GRINDABLE_STATS imported from @gacha-analyzer/types
 
 /** Gem removal score — lower = better candidate to gem away */
 function gemRemoveScore(stat: RuneStat, setTiers: Record<StatType, StatTier>, isAncient?: boolean): number {

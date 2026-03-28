@@ -1,6 +1,6 @@
 'use client'
 
-import type { RuneData, RuneAnalysis } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis } from '@gacha-analyzer/types'
 import { RuneCardCompact } from './rune-card-compact'
 import { RuneCardDetailed } from './rune-card-detailed'
 import { RuneCardGaming } from './rune-card-gaming'

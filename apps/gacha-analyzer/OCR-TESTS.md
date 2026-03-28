@@ -1,4 +1,4 @@
-# OCR Test Results — Game Analyzer
+# OCR Test Results — Gacha Analyzer
 
 Tracking OCR accuracy improvements over time.
 

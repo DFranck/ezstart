@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Card, CardContent, Div, P } from '@ezstart/ui/components'
-import type { OcrSource } from '@game-analyzer/types'
+import type { OcrSource } from '@gacha-analyzer/types'
 
 interface OcrDebugPanelProps {
   previews: { name: string; dataUrl: string }[]

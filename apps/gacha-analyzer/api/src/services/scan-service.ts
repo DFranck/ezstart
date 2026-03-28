@@ -5,7 +5,7 @@ import { analyzeRune } from '../analyzers/rune-efficiency.js'
 import { getScanModel } from '../models/scan.js'
 import { ocrWithGemini } from './gemini-vision-service.js'
 import { preprocessImage } from './image-preprocessing.js'
-import type { GameType, RuneData, ScanResult, OcrSource, BenchRunResult } from '@game-analyzer/types'
+import type { GameType, RuneData, ScanResult, OcrSource, BenchRunResult } from '@gacha-analyzer/types'
 
 type OcrResult = { text: string; confidence: number; regions: { text: string; bbox: { x: number; y: number; width: number; height: number }; confidence: number }[] }
 type ParsedResult = { success: boolean; data?: any; errors?: string[] }

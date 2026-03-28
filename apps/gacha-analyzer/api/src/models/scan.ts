@@ -1,6 +1,6 @@
 import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
-import type { Scan, ScanResult } from '@game-analyzer/types'
+import type { Scan, ScanResult } from '@gacha-analyzer/types'
 
 const scanResultSchema = new Schema<ScanResult>(
   {

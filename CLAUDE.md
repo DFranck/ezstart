@@ -157,7 +157,7 @@ pnpm dev:gp     # GreenPulse + EZAuth
 pnpm dev:pay    # EZPay
 pnpm dev:fs     # FengShui + EZAuth + EZPay
 pnpm dev:asc    # ASC-TCD
-pnpm dev:ga     # Game Analyzer + EZAuth
+pnpm dev:ga     # Gacha Analyzer + EZAuth
 pnpm dev:all    # TOUT (rarement nécessaire)
 
 # Optionnel — type watching seul (debug)
@@ -175,7 +175,7 @@ pnpm dev:types
 | **ASC-TCD**       | —    | 5055 |
 | **FengShui**      | —    | 5065 |
 | **GreenPulse**    | 5070 | 5075 |
-| **Game Analyzer** | 5080 | 5085 |
+| **Gacha Analyzer** | 5080 | 5085 |
 
 ---
 
@@ -203,7 +203,7 @@ pnpm dev:types
 │   ├── green-pulse/      # AI Forms
 │   ├── fengshui/         # Feng Shui Analysis
 │   ├── asc-tcd/          # Association Website
-│   └── game-analyzer/    # Game Screenshot Scanner (OCR)
+│   └── gacha-analyzer/    # Gacha Game Screenshot Scanner (OCR)
 │
 └── BACKLOG.md             # Projets en cours
 ```

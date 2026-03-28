@@ -1,5 +1,5 @@
 /**
- * OpenAPI registries for Game Analyzer API
+ * OpenAPI registries for Gacha Analyzer API
  *
  * Centralizes all route documentation in one place.
  * Each registry is passed to startServer() for /docs generation.

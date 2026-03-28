@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState, type ReactNode } from 'react'
 
 /**
- * React Query Provider for Game Analyzer
+ * React Query Provider for Gacha Analyzer
  */
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(

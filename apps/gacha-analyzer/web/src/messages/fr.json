@@ -97,7 +97,7 @@
     }
   },
   "dashboard": {
-    "title": "Game Analyzer",
+    "title": "Gacha Analyzer",
     "subtitle": "Scannez vos runes et equipements avec l'IA",
     "scanButton": "Nouveau Scan",
     "recentScans": "Scans Recents",

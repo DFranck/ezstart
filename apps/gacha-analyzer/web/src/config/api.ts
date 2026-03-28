@@ -4,11 +4,11 @@ export { parseApiError } from '@ezstart/fetch-client'
 export type { ApiResponse, ApiError, HttpMethod } from '@ezstart/fetch-client'
 
 /**
- * Wrapper around callApi that automatically sets appName to 'game-analyzer'
+ * Wrapper around callApi that automatically sets appName to 'gacha-analyzer'
  */
 export async function callApi<T = any>(
   endpoint: string,
   options: Omit<CallApiOptions, 'appName'> = {}
 ) {
-  return baseCallApi<T>(endpoint, { ...options, appName: 'game-analyzer' })
+  return baseCallApi<T>(endpoint, { ...options, appName: 'gacha-analyzer' })
 }

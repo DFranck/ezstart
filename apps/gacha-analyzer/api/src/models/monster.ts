@@ -1,6 +1,6 @@
 import { connectToMongo } from '@ezstart/express-core'
 import { Schema } from 'mongoose'
-import type { Monster } from '@game-analyzer/types'
+import type { Monster } from '@gacha-analyzer/types'
 
 const leaderSkillSchema = new Schema(
   {

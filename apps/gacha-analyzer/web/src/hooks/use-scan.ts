@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { GameType, Scan, ScanResult } from '@game-analyzer/types'
+import type { GameType, Scan, ScanResult } from '@gacha-analyzer/types'
 import { callApi } from '@/config/api'
 
 interface ScanInput {

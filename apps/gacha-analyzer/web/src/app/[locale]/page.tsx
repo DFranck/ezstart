@@ -4,7 +4,7 @@ import { Div, H1, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType } from '@gacha-analyzer/types'
 import { GAME_CONFIG } from '@/config/games'
 
 const games: { type: GameType }[] = [

@@ -15,7 +15,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType } from '@gacha-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
 import type { ZoneConfig } from '@/components/multi-zone-selector'

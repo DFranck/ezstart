@@ -23,7 +23,7 @@ export function Providers({
   return (
     <QueryProvider>
       <AuthProvider
-        appName="game-analyzer"
+        appName="gacha-analyzer"
         authMode="httpOnly"
         jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}
       >
@@ -35,7 +35,7 @@ export function Providers({
           themeSelector={
             enableThemeSelector
               ? {
-                  appName: 'game-analyzer',
+                  appName: 'gacha-analyzer',
                   globalCss: globalThemeCss,
                 }
               : undefined

@@ -3,9 +3,9 @@
 import { Button, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
-import type { PlayerProfile } from '@game-analyzer/types'
+import type { PlayerProfile } from '@gacha-analyzer/types'
 
-const STORAGE_KEY_PREFIX = 'game-analyzer-profile'
+const STORAGE_KEY_PREFIX = 'gacha-analyzer-profile'
 const PROFILES: PlayerProfile[] = ['early', 'mid', 'late']
 
 function storageKey(gameType: string): string {

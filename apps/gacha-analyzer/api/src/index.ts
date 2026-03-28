@@ -13,8 +13,8 @@ import {
 } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
 
-export const app = createApp({ apiApp: 'game-analyzer' })
-const PORT = getApiPort('game-analyzer')
+export const app = createApp({ apiApp: 'gacha-analyzer' })
+const PORT = getApiPort('gacha-analyzer')
 
 // Rate limiting protection (100 req/15min per IP, excludes /api/health)
 app.use(createRateLimiter())
@@ -35,11 +35,11 @@ connectToMongo('game-analyzer')
       routes,
       registries: globalRegistry,
       basePath: '/api',
-      serviceName: 'GameAnalyzer',
+      serviceName: 'GachaAnalyzer',
       port: PORT,
     })
   })
   .catch(err => {
-    console.error('Failed to start Game Analyzer API', err)
+    console.error('Failed to start Gacha Analyzer API', err)
     process.exit(1)
   })

@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { Badge, Button, Card, CardContent, Div, P, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, StatTier, PlayerProfile } from '@game-analyzer/types'
+import type { RuneData, RuneAnalysis, StatType, RuneQuality, ProgressiveAction, StatTier, PlayerProfile } from '@gacha-analyzer/types'
 import {
   SET_STAT_TIERS, SET_STRENGTH_THRESHOLD_BONUS, SUBSTAT_ROLL_RANGES, ANCIENT_SUBSTAT_BASE_RANGES,
   GRIND_RANGES, GEM_RANGES, TIER_WEIGHTS, PROGRESSIVE_SELL_THRESHOLDS, SET_STRENGTH, GRINDABLE_STATS,
-} from '@game-analyzer/types'
+} from '@gacha-analyzer/types'
 import { GEM_ICONS, GRIND_ICONS, RUNE_SET_ICONS } from '../config/game-assets'
 import { SetIcon } from './rune-card-utils'
 

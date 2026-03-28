@@ -1,12 +1,12 @@
 {
-  "name": "web-game-analyzer",
+  "name": "web-gacha-analyzer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node ../../../packages/config/bin/dev-server.js",
     "dev:port": "next dev -p $PORT",
-    "build": "pnpm --filter @game-analyzer/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "build": "pnpm --filter @gacha-analyzer/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -17,7 +17,7 @@
     "@ezstart/fetch-client": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
-    "@game-analyzer/types": "workspace:*",
+    "@gacha-analyzer/types": "workspace:*",
     "@tanstack/react-query": "^5.90.3",
     "next": "^15.5.9",
     "next-intl": "^4.1.0",

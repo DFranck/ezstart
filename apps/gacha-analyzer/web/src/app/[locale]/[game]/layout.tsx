@@ -4,7 +4,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType } from '@gacha-analyzer/types'
 import { GAME_CONFIG } from '@/config/games'
 
 const VALID_GAMES: GameType[] = ['summoners-war', 'nikke']

@@ -6,7 +6,7 @@
  * Package logs (@ezstart/*) -> dim/gray
  *
  * Usage: node scripts/tools/colorize-turbo.js <turbo args...>
- * Example: node scripts/tools/colorize-turbo.js run dev --filter=web-game-analyzer...
+ * Example: node scripts/tools/colorize-turbo.js run dev --filter=web-gacha-analyzer...
  */
 
 const { spawn } = require('child_process')
@@ -30,7 +30,7 @@ function colorize(line) {
   if (/^web-[^:]+:dev:/.test(line)) {
     return `${COLORS.cyan}${line}${COLORS.reset}`
   }
-  // Package logs: @ezstart/xxx:dev: or @game-analyzer/xxx:dev:
+  // Package logs: @ezstart/xxx:dev: or @gacha-analyzer/xxx:dev:
   if (/^@[^:]+:dev:/.test(line)) {
     return `${COLORS.dim}${line}${COLORS.reset}`
   }

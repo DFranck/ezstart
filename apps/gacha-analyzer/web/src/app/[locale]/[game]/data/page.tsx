@@ -57,8 +57,8 @@ import {
   BUILD_ARCHETYPES,
   STAT_PRIORITY_WEIGHTS,
   RUNE_SET_INFO,
-} from '@game-analyzer/types'
-import type { StatTier, BuildArchetype } from '@game-analyzer/types'
+} from '@gacha-analyzer/types'
+import type { StatTier, BuildArchetype } from '@gacha-analyzer/types'
 
 import { RUNE_SET_ICONS } from '@/config/game-assets'
 
@@ -378,7 +378,7 @@ const ARCHETYPES: Archetype[] = [
   { name: 'Pure Tank', description: 'Wall / stall (Rina, Praha)', stats: [{ stat: 'HP%', rank: 1 }, { stat: 'DEF%', rank: 2 }, { stat: 'SPD', rank: 3 }, { stat: 'RES', rank: 4 }] },
 ]
 
-// Stat priority weights table data (from @game-analyzer/types STAT_PRIORITY_WEIGHTS)
+// Stat priority weights table data (from @gacha-analyzer/types STAT_PRIORITY_WEIGHTS)
 interface WeightRow {
   archetype: string
   key: BuildArchetype

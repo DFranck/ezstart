@@ -10,7 +10,7 @@ import { MultiZoneSelector } from './multi-zone-selector'
 import type { MaskRect } from './blackout-mask'
 import { BlackoutMask } from './blackout-mask'
 
-const PREVIEW_HEIGHT_KEY = 'game-analyzer-preview-height'
+const PREVIEW_HEIGHT_KEY = 'gacha-analyzer-preview-height'
 const DEFAULT_PREVIEW_HEIGHT = 400
 
 function loadPreviewHeight(): number {

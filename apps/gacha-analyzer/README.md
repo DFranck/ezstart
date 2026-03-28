@@ -1,14 +1,14 @@
-# Game Analyzer - Game Screenshot Scanner (OCR)
+# Gacha Analyzer - Game Screenshot Scanner (OCR)
 
 Analyse de screenshots de jeux mobiles via OCR pour extraire les stats d'items (runes, gear).
 
 ## Architecture
 
 ```
-apps/game-analyzer/
+apps/gacha-analyzer/
 ├── api/              # Express API (Port 5080)
 ├── web/              # Next.js Frontend (Port 5085)
-└── types/            # Types partagés (@game-analyzer/types)
+└── types/            # Types partagés (@gacha-analyzer/types)
 ```
 
 ## Quick Start

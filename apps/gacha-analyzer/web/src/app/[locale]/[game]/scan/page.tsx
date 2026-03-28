@@ -15,7 +15,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
-import type { GameType, ScanResult } from '@game-analyzer/types'
+import type { GameType, ScanResult } from '@gacha-analyzer/types'
 import type { RoiRect } from '@/components/roi-selector'
 import type { MaskRect } from '@/components/blackout-mask'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
@@ -37,7 +37,7 @@ const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
 function loadRoi(gameType: GameType): RoiRect {
   if (typeof window === 'undefined') return DEFAULT_ROI
   try {
-    const saved = localStorage.getItem(`game-analyzer-roi-${gameType}`)
+    const saved = localStorage.getItem(`gacha-analyzer-roi-${gameType}`)
     if (saved) return JSON.parse(saved)
   } catch {}
   return DEFAULT_ROI
@@ -47,7 +47,7 @@ function loadRoi(gameType: GameType): RoiRect {
 function loadPresets(gameType: GameType): string[] {
   if (typeof window === 'undefined') return ['upscale-2x']
   try {
-    const saved = localStorage.getItem(`game-analyzer-best-presets-${gameType}`)
+    const saved = localStorage.getItem(`gacha-analyzer-best-presets-${gameType}`)
     if (saved) return JSON.parse(saved)
   } catch {}
   return ['upscale-2x']
@@ -57,7 +57,7 @@ function loadPresets(gameType: GameType): string[] {
 function loadMasks(gameType: GameType): MaskRect[] {
   if (typeof window === 'undefined') return []
   try {
-    const saved = localStorage.getItem(`game-analyzer-masks-${gameType}`)
+    const saved = localStorage.getItem(`gacha-analyzer-masks-${gameType}`)
     if (saved) return JSON.parse(saved)
   } catch {}
   return []
@@ -149,14 +149,14 @@ export default function GameScanPage() {
   const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
     if (typeof window === 'undefined') return 'compact'
     try {
-      const saved = localStorage.getItem('game-analyzer-template')
+      const saved = localStorage.getItem('gacha-analyzer-template')
       if (saved === 'compact' || saved === 'detailed' || saved === 'gaming') return saved
     } catch {}
     return 'compact'
   })
   const handleTemplateChange = useCallback((t: RuneCardTemplate) => {
     setRuneTemplate(t)
-    localStorage.setItem('game-analyzer-template', t)
+    localStorage.setItem('gacha-analyzer-template', t)
   }, [])
   const [roi, setRoi] = useState<RoiRect>(() => loadRoi(game))
   const { mutate: scan, data: scanResult, isPending } = useScan()
@@ -239,7 +239,7 @@ export default function GameScanPage() {
   const handleRoiChange = useCallback((newRoi: RoiRect) => {
     setRoi(newRoi)
     roiRef.current = newRoi
-    localStorage.setItem(`game-analyzer-roi-${game}`, JSON.stringify(newRoi))
+    localStorage.setItem(`gacha-analyzer-roi-${game}`, JSON.stringify(newRoi))
   }, [game])
 
   // Load saved ROI when game changes

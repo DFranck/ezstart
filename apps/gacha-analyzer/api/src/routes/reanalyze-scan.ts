@@ -6,7 +6,7 @@ import { Router } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 import { summonersWarParser } from '../parsers/summoners-war.js'
 import { analyzeRune } from '../analyzers/rune-efficiency.js'
-import type { RuneData, ScanResult } from '@game-analyzer/types'
+import type { RuneData, ScanResult } from '@gacha-analyzer/types'
 
 const router: any = Router()
 

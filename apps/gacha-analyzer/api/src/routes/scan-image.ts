@@ -6,7 +6,7 @@ import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { upload } from '../middleware/upload.js'
 import { scanImage } from '../services/scan-service.js'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType } from '@gacha-analyzer/types'
 
 const router: any = Router()
 

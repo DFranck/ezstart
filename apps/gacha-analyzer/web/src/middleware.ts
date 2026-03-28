@@ -5,7 +5,7 @@ import { routing } from './i18n/routing'
 const intlMiddleware = createIntlMiddleware(routing)
 
 export default createAuthMiddleware({
-  appName: 'game-analyzer',
+  appName: 'gacha-analyzer',
   authMode: 'jwt',
   protectedPaths: [],
   locales: routing.locales,

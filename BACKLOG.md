@@ -7,7 +7,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ---
 
-## 🎮 game-analyzer
+## 🎮 gacha-analyzer
 
 **Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-26
 
@@ -27,7 +27,7 @@ packages/
     └── README.md
 
 apps/
-└── game-analyzer/
+└── gacha-analyzer/
     ├── web/                  ← Next.js, tous les providers standard
     ├── api/                  ← Express, @ezstart/express-core
     └── types/                ← Types partagés web+api (Rune, Gear, Scan, etc.)
@@ -46,11 +46,11 @@ apps/
 2. [x] Nettoyer refs obsolètes port 5080 → 5000
 3. [x] Ajouter ports 5080/5085 dans `@ezstart/config`
 4. [x] Créer `packages/ocr-sdk/` — moteur OCR + types + helpers
-5. [x] Créer `apps/game-analyzer/types/` — Rune, Gear, Scan, Game
-6. [x] Créer `apps/game-analyzer/api/` — Express + routes action-based + multer
+5. [x] Créer `apps/gacha-analyzer/types/` — Rune, Gear, Scan, Game
+6. [x] Créer `apps/gacha-analyzer/api/` — Express + routes action-based + multer
 7. [x] Parser Summoners War (runes) — 16 tests
 8. [x] Parser Nikke (gear) — 8 tests
-9. [x] Créer `apps/game-analyzer/web/` — Next.js mobile-first
+9. [x] Créer `apps/gacha-analyzer/web/` — Next.js mobile-first
 10. [x] Client layout avec nav, auth, i18n
 11. [x] Engine efficacité Barion — 15 tests
 12. [x] Screen capture + frame diff + ROI selector draggable
@@ -110,7 +110,7 @@ apps/
 66. [x] Banner margin dynamique (ResizeObserver sur header)
 67. [x] Charts package UI — Recharts + DataTable installés, /data refactoré avec radar chart + DataTables
 68. [x] DataTable package UI — @tanstack/react-table + sort/filter/pagination, utilisé dans /data
-69. [x] Refacto OCR SDK — parsers/analyzers dans game-analyzer/api, SDK 100% agnostique
+69. [x] Refacto OCR SDK — parsers/analyzers dans gacha-analyzer/api, SDK 100% agnostique
 70. [x] Ancient runes — détection "A" OCR, ranges in-game vérifiés (HP% 6-10), base vs roll séparé, badge Ancient
 71. [x] Hot reload API — tsx watch < NUL (fix Windows/turbo PTY bug)
 72. [x] Scoring fixes — quality/mismatch penalty, potential set-weighted, seuils resserrés, low-roll avg-based
