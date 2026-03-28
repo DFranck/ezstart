@@ -7,6 +7,7 @@ import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { getAuthUserModel } from '../models/auth-user.js'
+import { logger } from '@ezstart/logger/server'
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
@@ -84,7 +85,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired' })
     }
-    console.error('Auth middleware error:', error)
+    logger.error('Auth middleware error:', error)
     return res.status(500).json({ error: 'Authentication failed' })
   }
 }

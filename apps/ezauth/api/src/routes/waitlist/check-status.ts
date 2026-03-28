@@ -2,6 +2,7 @@ import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-c
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const checkStatusRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -52,7 +53,7 @@ const checkStatusController = async (req: any, res: any) => {
       appName: waitlist.appName,
     })
   } catch (error) {
-    console.error('Error checking waitlist status:', error)
+    logger.error('Error checking waitlist status:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to check status'

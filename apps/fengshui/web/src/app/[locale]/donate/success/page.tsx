@@ -2,7 +2,7 @@
 
 import { getGradientWithOpacity, GRADIENT_TEXT } from '@/lib/theme-colors'
 import { Button, H1, Icon, P, Section } from '@ezstart/ui/components'
-import { getApiUrl } from '@ezstart/config/urls'
+import { callApi } from '@ezstart/fetch-client'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -16,15 +16,12 @@ export default function DonateSuccessPage(): any {
 
   useEffect(() => {
     if (sessionId && !verified) {
-      // Verify payment with API
-      const apiUrl = getApiUrl('ezpay')
-      fetch(`${apiUrl}/api/verify-payment/${sessionId}`, {
+      callApi(`/verify-payment/${sessionId}`, {
+        appName: 'ezpay',
         method: 'POST',
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            console.log('✅ Payment verified:', data.payment)
+        .then(response => {
+          if (response.ok && response.data?.success) {
             setVerified(true)
           }
         })

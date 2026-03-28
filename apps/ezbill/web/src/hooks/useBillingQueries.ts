@@ -2,7 +2,7 @@
 
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { callApi, parseApiError } from '@/utils/api'
+import { callApi, parseApiError } from '@/config/api'
 
 interface PaginatedResponse<T> {
   data: T[]

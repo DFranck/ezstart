@@ -1,5 +1,5 @@
 'use client'
-import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/config/api'
 import {
   BaseLineItem,
   BillingType,

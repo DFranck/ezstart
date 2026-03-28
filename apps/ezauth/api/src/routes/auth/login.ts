@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { logger } from '@ezstart/logger/server'
 import {
   LoginRequest,
   loginRequestSchema,
@@ -28,7 +29,7 @@ const loginController = async (req: any, res: any) => {
       message: 'Login successful'
     })
   } catch (error) {
-    console.error('Login error:', error)
+    logger.error('Login error:', error)
     res.status(401).json({
       success: false,
       error: error instanceof Error ? error.message : 'Login failed'

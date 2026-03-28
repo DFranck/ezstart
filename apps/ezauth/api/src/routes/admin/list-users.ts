@@ -3,6 +3,7 @@ import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const listUsersRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -94,7 +95,7 @@ const listUsersController = async (req: any, res: any) => {
       }
     })
   } catch (error: any) {
-    console.error('Error listing users:', error)
+    logger.error('Error listing users:', error)
     res.status(500).json({
       error: 'Failed to list users',
       details: error.message

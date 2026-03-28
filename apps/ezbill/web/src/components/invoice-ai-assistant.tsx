@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi } from '@/utils/api'
+import { callApi } from '@/config/api'
 import { Button, Div, Icon, Span, Thread, ThreadMessage, ThreadComposer } from '@ezstart/ui/components'
 import { useState, useEffect } from 'react'
 

@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { logger } from '@ezstart/logger/server'
 import {
   LoginRequest,
   loginRequestSchema,
@@ -39,7 +40,7 @@ const loginCookieController = async (req: any, res: any) => {
       user: authResult.user
     })
   } catch (error) {
-    console.error('Login cookie error:', error)
+    logger.error('Login cookie error:', error)
     res.status(401).json({
       success: false,
       error: error instanceof Error ? error.message : 'Login failed'

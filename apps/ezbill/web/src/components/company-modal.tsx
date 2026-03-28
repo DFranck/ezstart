@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/config/api'
 import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'

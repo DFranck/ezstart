@@ -1,3 +1,4 @@
+import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
 import type { ApiError, ApiResponse, CallApiOptions, LogLevel } from './types'
 
@@ -254,3 +255,22 @@ export async function callApi<T = any>(
     }
   }
 }
+
+/**
+ * Factory that returns a callApi function with appName pre-bound.
+ * Eliminates the need for per-app wrapper boilerplate.
+ *
+ * @example
+ * ```ts
+ * export const callApi = createCallApi('ezbill')
+ * const res = await callApi<User[]>('/users')
+ * ```
+ */
+export function createCallApi(appName: AppName) {
+  return function callApi<T = any>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) {
+    return baseCallApi<T>(endpoint, { ...options, appName })
+  }
+}
+
+// Alias for createCallApi factory usage
+const baseCallApi = callApi

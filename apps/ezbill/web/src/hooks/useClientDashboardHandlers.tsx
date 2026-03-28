@@ -5,7 +5,7 @@ import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-co
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import { useAuth } from '@ezstart/auth-sdk'
-import { callApi } from '@/utils/api'
+import { callApi } from '@/config/api'
 import React from 'react'
 import { toast } from 'sonner'
 

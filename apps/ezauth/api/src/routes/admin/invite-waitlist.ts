@@ -4,6 +4,7 @@ import { getWaitlistModel } from '../../models/waitlist.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const inviteWaitlistRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -82,7 +83,7 @@ const inviteWaitlistController = async (req: any, res: any) => {
 
     if (existingUser) {
       // User exists - auto-grant access immediately
-      console.log(`✅ User exists: ${email} - Auto-granting beta-tester role for ${appName}`)
+      logger.info(`✅ User exists: ${email} - Auto-granting beta-tester role for ${appName}`)
 
       // Add beta-tester role to appRoles if not already present
       if (!existingUser.appRoles) {
@@ -119,7 +120,7 @@ const inviteWaitlistController = async (req: any, res: any) => {
 
       await waitlist.save()
 
-      console.log(`✅ Auto-granted beta-tester role to ${email} for ${appName}`)
+      logger.info(`✅ Auto-granted beta-tester role to ${email} for ${appName}`)
 
       return res.json({
         success: true,
@@ -143,7 +144,7 @@ const inviteWaitlistController = async (req: any, res: any) => {
     await waitlist.save()
 
     // TODO: Send email with access code (implement email service later)
-    console.log(`📧 [TODO] Send beta access email to ${email} with code: ${accessCode}`)
+    logger.info(`📧 [TODO] Send beta access email to ${email} with code: ${accessCode}`)
 
     res.json({
       success: true,
@@ -154,7 +155,7 @@ const inviteWaitlistController = async (req: any, res: any) => {
       message: 'Access code generated - user needs to register with code'
     })
   } catch (error) {
-    console.error('Error inviting from waitlist:', error)
+    logger.error('Error inviting from waitlist:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to invite email'

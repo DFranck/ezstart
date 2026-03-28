@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { callApi, runWithFeedback } from '@/utils/api'
+import { callApi, runWithFeedback } from '@/config/api'
 import { useAuthStore } from '@ezstart/auth-sdk'
 
 export function useFormConfigs() {

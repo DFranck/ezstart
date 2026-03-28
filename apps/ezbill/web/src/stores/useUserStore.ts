@@ -1,4 +1,4 @@
-import { callApi, parseApiError } from '@/utils/api'
+import { callApi, parseApiError } from '@/config/api'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 

@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { logger } from '@ezstart/logger/server'
 import {
   userResponseSchema,
   errorResponseSchema

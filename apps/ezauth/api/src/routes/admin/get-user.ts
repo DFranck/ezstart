@@ -3,6 +3,7 @@ import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const getUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -73,7 +74,7 @@ const getUserController = async (req: any, res: any) => {
       }
     })
   } catch (error: any) {
-    console.error('Error getting user:', error)
+    logger.error('Error getting user:', error)
     res.status(500).json({
       error: 'Failed to get user',
       details: error.message

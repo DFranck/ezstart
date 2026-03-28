@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError } from '@/utils/api'
+import { callApi, parseApiError } from '@/config/api'
 import { useAuthStore } from '@ezstart/auth-sdk'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'

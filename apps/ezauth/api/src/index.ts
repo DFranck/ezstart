@@ -19,6 +19,7 @@ import { getOAuthAccountModel } from './models/oauth-account.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { createCorsConfig } from '@ezstart/config/cors'
+import { logger } from '@ezstart/logger/server'
 
 const PORT = getApiPort('ezauth')
 
@@ -64,7 +65,7 @@ connectToMongo('ezauth')
     await getAuthUserModel()
     await getAuthCodeModel()
     await getOAuthAccountModel()
-    console.log('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount')
+    logger.info('✅ [Models] Initialized: AuthUser, AuthCode, OAuthAccount')
 
     return startServer(app, {
       routes,
@@ -74,6 +75,6 @@ connectToMongo('ezauth')
     })
   })
   .catch((err: any) => {
-    console.error('❌ Failed to start EZAuth API', err)
+    logger.error('❌ Failed to start EZAuth API', err)
     process.exit(1)
   })

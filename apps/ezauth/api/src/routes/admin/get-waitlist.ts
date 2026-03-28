@@ -3,6 +3,7 @@ import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const getWaitlistRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -86,7 +87,7 @@ const getWaitlistController = async (req: any, res: any) => {
       stats,
     })
   } catch (error) {
-    console.error('Error fetching waitlist:', error)
+    logger.error('Error fetching waitlist:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch waitlist'

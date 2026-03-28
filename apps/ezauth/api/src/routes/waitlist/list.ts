@@ -2,6 +2,7 @@ import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-c
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const waitlistListRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -55,7 +56,7 @@ const getAllWaitlistsController = async (req: any, res: any) => {
       }
     })
   } catch (error) {
-    console.error('Error fetching all waitlists:', error)
+    logger.error('Error fetching all waitlists:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch waitlists'

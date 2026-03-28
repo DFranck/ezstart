@@ -2,6 +2,7 @@ import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-c
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const waitlistAddRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -84,7 +85,7 @@ const addEmailController = async (req: any, res: any) => {
       count: waitlist.emails.length
     })
   } catch (error) {
-    console.error('Error adding to waitlist:', error)
+    logger.error('Error adding to waitlist:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to add email to waitlist'

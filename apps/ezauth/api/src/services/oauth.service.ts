@@ -2,6 +2,7 @@ import { getAuthUserModel } from '../models/auth-user.js'
 import { getOAuthAccountModel } from '../models/oauth-account.js'
 import { AuthCodeResponse } from '@ezstart/auth-sdk/server'
 import { AuthService } from './auth.service.js'
+import { logger } from '@ezstart/logger/server'
 
 export interface OAuthProfile {
   provider: 'google' | 'github' | 'facebook' | 'apple'
@@ -37,7 +38,7 @@ export class OAuthService {
 
     if (existingOAuthAccount) {
       // OAuth account exists → Login with existing user
-      console.log(`✅ [OAuth] Existing ${profile.provider} account found for user ${existingOAuthAccount.userId}`)
+      logger.info(`✅ [OAuth] Existing ${profile.provider} account found for user ${existingOAuthAccount.userId}`)
 
       const user = await AuthUserModel.findById(existingOAuthAccount.userId)
       if (!user) {
@@ -59,7 +60,7 @@ export class OAuthService {
 
     if (existingUser) {
       // User exists with same email → Link OAuth account
-      console.log(`🔗 [OAuth] Linking ${profile.provider} account to existing user ${existingUser._id}`)
+      logger.info(`🔗 [OAuth] Linking ${profile.provider} account to existing user ${existingUser._id}`)
 
       const oauthAccount = new OAuthAccountModel({
         userId: existingUser._id,
@@ -91,7 +92,7 @@ export class OAuthService {
     }
 
     // 3. Create new user + OAuth account
-    console.log(`✨ [OAuth] Creating new user from ${profile.provider} account`)
+    logger.info(`✨ [OAuth] Creating new user from ${profile.provider} account`)
 
     // Generate unique username from email or displayName
     const baseUsername = profile.email.split('@')[0] || profile.displayName?.replace(/\s+/g, '').toLowerCase()

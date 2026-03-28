@@ -901,6 +901,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
+      '@ezstart/fetch-client':
+        specifier: workspace:*
+        version: link:../../../packages/fetch-client
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme

@@ -3,6 +3,7 @@ import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
 import { z } from 'zod'
+import { logger } from '@ezstart/logger/server'
 
 export const updateUserRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -118,7 +119,7 @@ const updateUserController = async (req: any, res: any) => {
       message: 'User updated successfully'
     })
   } catch (error: any) {
-    console.error('Error updating user:', error)
+    logger.error('Error updating user:', error)
     res.status(500).json({
       error: 'Failed to update user',
       details: error.message

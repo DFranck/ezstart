@@ -1,6 +1,6 @@
 'use client'
 
-import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
+import { callApi, parseApiError, runWithFeedback } from '@/config/api'
 import { BillingClient, Client } from '@ezbill/types'
 import {
   Button,

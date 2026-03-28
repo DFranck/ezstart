@@ -2,7 +2,7 @@
 
 import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
-import { callApi, parseApiError } from '@/utils/api'
+import { callApi, parseApiError } from '@/config/api'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
