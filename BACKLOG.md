@@ -63,8 +63,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 26. [x] HIGH: login-cookie rate limiting — createStrictRateLimiter ajouté
 27. [x] HIGH: Debug logging auth codes — remplacé par logger.debug()
 28. [ ] MEDIUM: Zod validation sur toutes les routes gacha-analyzer + green-pulse
-29. [ ] Logger — ajouter filtre NODE_ENV dans @ezstart/logger (debug/info seulement en dev)
-30. [ ] Remplacer console.log supprimés par logger.debug() dans les packages
+29. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
+30. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
 
 ---
 
