@@ -116,15 +116,21 @@ apps/
 72. [x] Scoring fixes — quality/mismatch penalty, potential set-weighted, seuils resserrés, low-roll avg-based
 73. [x] UI card compact — value/max total, powerup rolls individuels, breakdown score, gem breakdown
 74. [x] Gem logic v2 — rolls protègent massivement (+0.4/powerup), gem la stat avec least rolls + low tier
-75. [ ] Gem/Grind sprites — sprite gem (leg/hero/rare selon profil) + set overlay sur gem target, sprite grind + tooltip "+X to Y" sur stats grindables
-76. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
-77. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
-78. [ ] Fallback IA cascade (Gemini free tier)
-79. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
-80. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
-81. [ ] Ajouter OpenAPI/Swagger à l'API game-analyzer
-82. [ ] Deploy (Railway API + Vercel Web)
-83. [ ] Overlay/PiP pour afficher résultats sur le jeu
+75. [x] Gem/Grind sprites — gem+set overlay, grind+set, ban icon non-grindable, tooltips ranges
+76. [x] Main stat tier scoring — factor multiplicateur (S=1.0, B=0.8, C=0.6) pour slots 2/4/6
+77. [x] Résumé narratif — "Pourquoi SELL/UPGRADE?" avec ✅/❌ + gem/grind reco, toujours visible
+78. [x] Debug panel expandable — flow complet coloré (gris/vert/rouge), 3 profils côte à côte
+79. [x] History page fix — _id→id mapping, confidence display, scan cards avec set/slot/advice badge
+80. [x] Scan detail fix — memory:// image fallback, confidence ×100 fix
+81. [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code (en cours)
+82. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
+83. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
+84. [ ] Fallback IA cascade (Gemini free tier)
+85. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
+86. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
+87. [ ] Ajouter OpenAPI/Swagger à l'API game-analyzer
+88. [ ] Deploy (Railway API + Vercel Web)
+89. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory

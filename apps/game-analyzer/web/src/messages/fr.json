@@ -19,7 +19,8 @@
     "delete": "Supprimer",
     "back": "Retour",
     "viewAll": "Voir tout",
-    "tryAgain": "Reessayer"
+    "tryAgain": "Reessayer",
+    "reanalyze": "Re-analyser"
   },
   "labels": {
     "game": "Jeu",
@@ -245,7 +246,10 @@
     "scannedImage": "Image scannee",
     "parsedStats": "Stats analysees",
     "confidenceScore": "Score de confiance",
-    "deleteConfirm": "Etes-vous sur de vouloir supprimer ce scan ?"
+    "deleteConfirm": "Etes-vous sur de vouloir supprimer ce scan ?",
+    "reanalyzing": "Re-analyse en cours...",
+    "reanalyzeSuccess": "Re-analyse terminee",
+    "rawOcrText": "Texte OCR brut"
   },
   "history": {
     "title": "Historique des Scans",

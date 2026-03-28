@@ -1,17 +1,17 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Div, H2, P } from '@ezstart/ui/components'
+import { Button, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
-import Image from 'next/image'
 import Link from 'next/link'
-import { use, useState } from 'react'
+import { use, useCallback, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import type { GameType } from '@game-analyzer/types'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
-import { StatDisplay } from '@/components/stat-display'
-import { useScans } from '@/hooks/use-scans'
+import { ScanResultRaw } from '@/components/scan-result-raw'
+import { useScanDetail } from '@/hooks/use-scan-detail'
 import { callApi } from '@/config/api'
 
 interface ScanDetailPageProps {
@@ -23,9 +23,11 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   const routeParams = useParams()
   const game = routeParams.game as GameType
   const t = useTranslations()
-  const { data: scans } = useScans()
+  const queryClient = useQueryClient()
+  const { data: scan, isLoading } = useScanDetail(id)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [runeTemplate] = useState<RuneCardTemplate>(() => {
+  const [isReanalyzing, setIsReanalyzing] = useState(false)
+  const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
     if (typeof window === 'undefined') return 'compact'
     try {
       const saved = localStorage.getItem('game-analyzer-template')
@@ -34,7 +36,10 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
     return 'compact'
   })
 
-  const scan = scans?.find((s) => s.id === id)
+  const handleTemplateChange = useCallback((tmpl: RuneCardTemplate) => {
+    setRuneTemplate(tmpl)
+    localStorage.setItem('game-analyzer-template', tmpl)
+  }, [])
 
   async function handleDelete() {
     if (!confirm(t('scanDetail.deleteConfirm'))) return
@@ -45,6 +50,26 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
     } catch {
       setIsDeleting(false)
     }
+  }
+
+  async function handleReanalyze() {
+    setIsReanalyzing(true)
+    try {
+      await callApi(`/scans/${id}/reanalyze`, { method: 'POST' })
+      await queryClient.invalidateQueries({ queryKey: ['scan', id] })
+    } catch (e) {
+      console.error('[reanalyze] Error:', e)
+    } finally {
+      setIsReanalyzing(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <Div className="container mx-auto px-4 py-8 max-w-2xl">
+        <RuneCardWithTemplate template={runeTemplate} isLoading />
+      </Div>
+    )
   }
 
   if (!scan) {
@@ -58,82 +83,87 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
     )
   }
 
+  const hasRuneData = scan.result && scan.gameType === 'summoners-war' && 'set' in scan.result.data
+  const hasGearData = scan.result && 'manufacturer' in scan.result.data
+  const hasStructuredData = hasRuneData || hasGearData
+
   return (
     <Div className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
-      {/* Header */}
-      <Div className="flex items-center justify-end">
+      {/* Header: Back + Actions */}
+      <Div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${game}/history`}>{t('actions.back')}</Link>
+          <Link href={`/${game}/history`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="m15 18-6-6 6-6"/></svg>
+            {t('actions.back')}
+          </Link>
         </Button>
+
+        <Div className="flex items-center gap-2">
+          {scan.result?.rawText && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReanalyze}
+              disabled={isReanalyzing}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+              {isReanalyzing ? t('scanDetail.reanalyzing') : t('actions.reanalyze')}
+            </Button>
+          )}
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            {t('actions.delete')}
+          </Button>
+        </Div>
       </Div>
 
-      {/* Scanned Image */}
-      <Card>
-        <CardHeader>
-          <H2 className="text-lg font-medium">{t('scanDetail.scannedImage')}</H2>
-        </CardHeader>
-        <CardContent>
-          <Div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-            {scan.imageUrl && !scan.imageUrl.startsWith('memory://') ? (
-              <Image
-                src={scan.imageUrl}
-                alt="Scanned image"
-                fill
-                className="object-contain"
-              />
-            ) : (
-              <Div className="flex items-center justify-center h-full">
-                <P className="text-muted-foreground text-sm">Image non disponible (capture mémoire)</P>
-              </Div>
-            )}
-          </Div>
-        </CardContent>
-      </Card>
-
-      {/* Parsed Stats */}
-      {scan.result && (
-        <>
-          <Card>
-            <CardHeader>
-              <H2 className="text-lg font-medium">{t('scanDetail.parsedStats')}</H2>
-            </CardHeader>
-            <CardContent>
-              {scan.gameType === 'summoners-war' && 'set' in scan.result.data ? (
-                <RuneCardWithTemplate rune={scan.result.data} confidence={scan.result.confidence} template={runeTemplate} />
-              ) : 'manufacturer' in scan.result.data ? (
-                <GearCard gear={scan.result.data} confidence={scan.result.confidence} />
-              ) : null}
-            </CardContent>
-          </Card>
-
-          {/* Confidence */}
-          <Card>
-            <CardHeader>
-              <H2 className="text-lg font-medium">{t('scanDetail.confidenceScore')}</H2>
-            </CardHeader>
-            <CardContent>
-              <StatDisplay
-                label={t('labels.confidence')}
-                value={`${Math.round(scan.result.confidence)}%`}
-              />
-              <StatDisplay
-                label={t('labels.processingTime')}
-                value={`${scan.result.processingTimeMs}ms`}
-              />
-            </CardContent>
-          </Card>
-        </>
+      {/* Rune Card with full template */}
+      {scan.result && hasRuneData && (
+        <RuneCardWithTemplate
+          rune={scan.result.data as any}
+          analysis={scan.result.analysis}
+          confidence={scan.result.confidence}
+          template={runeTemplate}
+        />
       )}
 
-      {/* Delete */}
-      <Button
-        variant="destructive"
-        className="w-full"
-        onClick={handleDelete}
-        disabled={isDeleting}
-      >
-        {t('actions.delete')}
-      </Button>
+      {/* Gear Card (Nikke) */}
+      {scan.result && hasGearData && (
+        <GearCard gear={scan.result.data as any} confidence={scan.result.confidence} />
+      )}
+
+      {/* Template selector */}
+      {game === 'summoners-war' && (
+        <Div className="flex gap-1.5">
+          {(['compact', 'detailed', 'gaming'] as const).map(tmpl => (
+            <Button
+              key={tmpl}
+              variant={runeTemplate === tmpl ? 'default' : 'outline'}
+              size="sm"
+              className="text-xs capitalize"
+              onClick={() => handleTemplateChange(tmpl)}
+            >
+              {tmpl}
+            </Button>
+          ))}
+        </Div>
+      )}
+
+      {/* Raw OCR Text — collapsible */}
+      {scan.result?.rawText && (
+        <ScanResultRaw
+          rawText={scan.result.rawText}
+          confidence={scan.result.confidence}
+          parsingFailed={!hasStructuredData}
+          defaultCollapsed={!!hasStructuredData}
+        />
+      )}
     </Div>
   )
 }
