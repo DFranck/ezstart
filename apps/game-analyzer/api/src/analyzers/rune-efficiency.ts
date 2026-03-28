@@ -1185,10 +1185,16 @@ const LEGEND_GEM_VALUES: Record<StatType, number> = Object.fromEntries(
 function gemRemoveScore(stat: RuneStat, setTiers: Record<StatType, StatTier>, isAncient?: boolean): number {
   const tierW = TIER_WEIGHTS[setTiers[stat.type] ?? 'C']
   const grindable = !NON_GRINDABLE.has(stat.type)
+  const baseRange = getBaseRanges(isAncient)[stat.type]
+  const rollRange = getRollRanges()[stat.type]
   const { count } = estimateRolls(stat.type, stat.value, isAncient)
   // Powerup rolls (count-1) add massive protection — NEVER gem a stat with good rolls
   const powerupRolls = Math.max(0, count - 1)
-  return tierW + (grindable ? 0.3 : 0) + (powerupRolls * 0.4)
+  // High efficiency base stat bonus — max roll base is valuable even without powerups
+  const maxPossible = baseRange && rollRange ? baseRange.max + (count - 1) * rollRange.max : 1
+  const efficiency = maxPossible > 0 ? stat.value / maxPossible : 0
+  const effBonus = efficiency >= 0.9 ? 0.3 : efficiency >= 0.75 ? 0.15 : 0
+  return tierW + (grindable ? 0.3 : 0) + (powerupRolls * 0.4) + effBonus
 }
 
 /** Gem replacement score — higher = better stat to gem towards */
