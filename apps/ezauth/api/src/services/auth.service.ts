@@ -10,12 +10,12 @@ import {
   AuthToken,
   AuthCode,
   AuthCodeResponse,
-  JWTPayload
+  JWTPayload,
 } from '@ezstart/auth-sdk/server'
 import { ROLE_PERMISSIONS, ROLE_FEATURES } from '@ezstart/rbac/server'
 import { logger } from '@ezstart/logger/server'
 
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET!
 if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 const JWT_EXPIRES_IN = '7d'
 
@@ -26,7 +26,7 @@ export class AuthService {
 
     // Check if user already exists
     const existingUser = await AuthUserModel.findOne({
-      $or: [{ email: data.email }, { username: data.username }]
+      $or: [{ email: data.email }, { username: data.username }],
     })
 
     if (existingUser) {
@@ -41,7 +41,7 @@ export class AuthService {
       // Find waitlist entry with this access code
       // @ts-expect-error - Mongoose type inference issue
       const waitlist = await WaitlistModel.findOne({
-        'emails.accessCode': data.accessCode
+        'emails.accessCode': data.accessCode,
       })
 
       if (!waitlist) {
@@ -101,8 +101,8 @@ export class AuthService {
     const user = await AuthUserModel.findOne({
       $or: [
         { email: data.email },
-        { username: data.email } // Allow using email field for username too
-      ]
+        { username: data.email }, // Allow using email field for username too
+      ],
     })
     if (!user) {
       throw new Error('Invalid credentials')
@@ -131,10 +131,7 @@ export class AuthService {
 
     // Find user by email OR username
     const user = await AuthUserModel.findOne({
-      $or: [
-        { email: data.email },
-        { username: data.email }
-      ]
+      $or: [{ email: data.email }, { username: data.email }],
     })
 
     if (!user) {
@@ -171,7 +168,7 @@ export class AuthService {
       globalRoles: user.globalRoles || [],
       appRoles: appRolesObj,
       permissions: user.permissions || [],
-      features: user.features || []
+      features: user.features || [],
     }
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
@@ -188,14 +185,17 @@ export class AuthService {
   static async exchangeCodeForToken(data: TokenRequest): Promise<AuthToken> {
     const AuthCodeModel = await getAuthCodeModel()
     const AuthUserModel = await getAuthUserModel()
-    logger.debug({ code: data.code, app: data.app, redirect_uri: data.redirect_uri }, 'Looking for auth code')
-    
+    logger.debug(
+      { code: data.code, app: data.app, redirect_uri: data.redirect_uri },
+      'Looking for auth code'
+    )
+
     // Find and validate auth code
     const authCode = await AuthCodeModel.findOne({
       code: data.code,
       app: data.app,
       isUsed: false,
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() },
     })
 
     logger.debug({ found: !!authCode, app: data.app }, 'Auth code lookup result')
@@ -233,7 +233,7 @@ export class AuthService {
       globalRoles: user.globalRoles || [],
       appRoles: appRolesObj,
       permissions: user.permissions || [],
-      features: user.features || []
+      features: user.features || [],
     }
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
@@ -267,10 +267,14 @@ export class AuthService {
   }
 
   // Private: Generate auth code
-  private static async generateAuthCode(userId: string, app: string, redirectUri?: string): Promise<AuthCodeResponse> {
+  private static async generateAuthCode(
+    userId: string,
+    app: string,
+    redirectUri?: string
+  ): Promise<AuthCodeResponse> {
     const AuthCodeModel = await getAuthCodeModel()
     const code = crypto.randomBytes(32).toString('hex')
-    
+
     const authCode = new AuthCodeModel({
       code,
       userId,

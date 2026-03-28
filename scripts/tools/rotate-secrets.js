@@ -34,6 +34,7 @@ const RAILWAY_SERVICES = [
   { service: 'ezauth-api', project: 'ezstart-apis' },
   { service: 'ezbill-api', project: 'ezstart-apis' },
   { service: 'ezpay-api', project: 'ezstart-apis' },
+  { service: 'gacha-analyzer-api', project: 'ezstart-apis' },
   { service: 'greenpulse-api', project: 'TeamProjects' },
 ]
 
@@ -103,7 +104,7 @@ if ((doBoth || prodOnly) && !noRailway && !isDryRun) {
   // Check if railway CLI is available
   let railwayAvailable = false
   try {
-    execSync('railway version', { stdio: 'pipe' })
+    execSync('railway --version', { stdio: 'pipe' })
     railwayAvailable = true
   } catch {
     console.log('  ⚠  Railway CLI not found. Install: npm i -g @railway/cli')
@@ -114,10 +115,18 @@ if ((doBoth || prodOnly) && !noRailway && !isDryRun) {
     const results = []
     for (const { service, project } of RAILWAY_SERVICES) {
       try {
-        execSync(
-          `railway variables set JWT_SECRET=${prodJwtSecret} --service ${service} --project ${project}`,
-          { stdio: 'pipe', timeout: 30_000 }
-        )
+        // Link to the correct project/service first
+        execSync(`railway link -p ${project} -s ${service} -e production`, {
+          stdio: 'pipe',
+          timeout: 15_000,
+          cwd: ROOT,
+        })
+        // Then set the variable
+        execSync(`railway variable set JWT_SECRET=${prodJwtSecret}`, {
+          stdio: 'pipe',
+          timeout: 30_000,
+          cwd: ROOT,
+        })
         console.log(`  ✅ ${service} (${project}) — updated`)
         results.push({ service, project, ok: true })
       } catch (err) {
@@ -131,9 +140,8 @@ if ((doBoth || prodOnly) && !noRailway && !isDryRun) {
 } else if ((doBoth || prodOnly) && !noRailway && isDryRun) {
   console.log('── RAILWAY (dry-run) ──')
   for (const { service, project } of RAILWAY_SERVICES) {
-    console.log(
-      `  📝 Would run: railway variables set JWT_SECRET=<secret> --service ${service} --project ${project}`
-    )
+    console.log(`  📝 Would run: railway link -p ${project} -s ${service} -e production`)
+    console.log(`  📝 Would run: railway variable set JWT_SECRET=<secret>`)
   }
   console.log('')
 }
