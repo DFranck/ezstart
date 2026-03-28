@@ -19,7 +19,7 @@ listConversationsRouter.get(
   '/',
   async (req, res) => {
     try {
-      const { userId, includeDeleted } = req.query
+      const { userId, includeDeleted, limit = 20, offset = 0 } = req.query
 
       const query: any = {}
       if (userId) query.userId = userId
@@ -28,11 +28,16 @@ listConversationsRouter.get(
       }
 
       // @ts-expect-error - Mongoose find() type inference issue
-      const conversations = (await Conversation.find(query)
-        .sort({ updatedAt: -1 })
-        .select('_id title preview createdAt updatedAt')
-        .lean()
-        .exec()) as any[]
+      const [conversations, total] = await Promise.all([
+        (Conversation.find(query)
+          .sort({ updatedAt: -1 })
+          .skip(Number(offset))
+          .limit(Number(limit))
+          .select('_id title preview createdAt updatedAt')
+          .lean()
+          .exec()) as Promise<any[]>,
+        Conversation.countDocuments(query),
+      ])
 
       const list = conversations.map(conv => ({
         id: conv._id.toString(),
@@ -46,6 +51,7 @@ listConversationsRouter.get(
       res.json({
         success: true,
         data: { conversations: list },
+        meta: { total, limit: Number(limit), offset: Number(offset) },
         timestamp: new Date().toISOString(),
       })
     } catch (error) {

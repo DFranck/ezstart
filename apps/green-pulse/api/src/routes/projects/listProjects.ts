@@ -29,6 +29,8 @@ docRouter.get('/', async (req, res) => {
 
     const Project = await getProjectModel()
 
+    const { limit = 20, offset = 0 } = req.query
+
     const query: any = {
       $or: [
         { ownerId: userId },
@@ -41,11 +43,15 @@ docRouter.get('/', async (req, res) => {
     }
 
     // @ts-expect-error - Mongoose type inference issue
-    const projects = await Project.find(query).sort({ updatedAt: -1 }).lean()
+    const [projects, total] = await Promise.all([
+      Project.find(query).sort({ updatedAt: -1 }).skip(Number(offset)).limit(Number(limit)).lean(),
+      Project.countDocuments(query),
+    ])
 
     res.json({
       success: true,
       data: projects,
+      meta: { total, limit: Number(limit), offset: Number(offset) },
       timestamp: new Date().toISOString(),
     })
   } catch (error) {

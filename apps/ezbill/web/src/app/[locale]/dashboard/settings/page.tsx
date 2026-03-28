@@ -59,22 +59,29 @@ export default function SettingsPage(): any {
       setLoading(true)
       const userId = getUserId()
       const [clients, companies, quotes, invoices, receipts, paymentMethods] = await Promise.all([
-        callApi('/clients?deletedOnly=true', { userId }),
-        callApi('/companies?deletedOnly=true', { userId }),
-        callApi('/quotes?deletedOnly=true', { userId }),
-        callApi('/invoices?deletedOnly=true', { userId }),
-        callApi('/receipts?deletedOnly=true', { userId }),
-        callApi('/payment-methods?deletedOnly=true', { userId }),
+        callApi('/clients?deletedOnly=true&limit=100', { userId }),
+        callApi('/companies?deletedOnly=true&limit=100', { userId }),
+        callApi('/quotes?deletedOnly=true&limit=100', { userId }),
+        callApi('/invoices?deletedOnly=true&limit=100', { userId }),
+        callApi('/receipts?deletedOnly=true&limit=100', { userId }),
+        callApi('/payment-methods?deletedOnly=true&limit=100', { userId }),
       ])
 
+      // Handle both paginated { data: [...] } and legacy array responses
+      const extractItems = (response: any) => {
+        if (!response.ok || !response.data) return []
+        if (Array.isArray(response.data)) return response.data
+        if (response.data.data && Array.isArray(response.data.data)) return response.data.data
+        return []
+      }
+
       setDeletedItems({
-        clients: clients.ok && Array.isArray(clients.data) ? clients.data : [],
-        companies: companies.ok && Array.isArray(companies.data) ? companies.data : [],
-        quotes: quotes.ok && Array.isArray(quotes.data) ? quotes.data : [],
-        invoices: invoices.ok && Array.isArray(invoices.data) ? invoices.data : [],
-        receipts: receipts.ok && Array.isArray(receipts.data) ? receipts.data : [],
-        paymentMethods:
-          paymentMethods.ok && Array.isArray(paymentMethods.data) ? paymentMethods.data : [],
+        clients: extractItems(clients),
+        companies: extractItems(companies),
+        quotes: extractItems(quotes),
+        invoices: extractItems(invoices),
+        receipts: extractItems(receipts),
+        paymentMethods: extractItems(paymentMethods),
       })
     } catch (error) {
       console.error('Error loading deleted items:', error)

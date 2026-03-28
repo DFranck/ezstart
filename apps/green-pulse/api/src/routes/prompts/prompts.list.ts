@@ -34,14 +34,17 @@ docRouter.get(
   '/',
   async (req, res) => {
     try {
-      const { type, provider, active } = req.query
+      const { type, provider, active, limit = 20, offset = 0 } = req.query
 
       const filter: any = {}
       if (type) filter.type = type
       if (provider) filter.provider = provider
       if (active !== undefined) filter.isActive = active === 'true'
 
-      const prompts = await SystemPrompt.find(filter).sort({ type: 1, key: 1 }).lean().exec()
+      const [prompts, total] = await Promise.all([
+        SystemPrompt.find(filter).sort({ type: 1, key: 1 }).skip(Number(offset)).limit(Number(limit)).lean().exec(),
+        SystemPrompt.countDocuments(filter),
+      ])
 
       res.json({
         success: true,
@@ -51,6 +54,7 @@ docRouter.get(
           createdAt: p.createdAt?.toISOString(),
           updatedAt: p.updatedAt?.toISOString(),
         })),
+        meta: { total, limit: Number(limit), offset: Number(offset) },
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
@@ -70,6 +74,8 @@ docRouter.get(
       type: z.enum(['general', 'extraction', 'validation', 'vision', 'custom']).optional(),
       provider: z.enum(['all', 'gemini', 'openai', 'anthropic']).optional(),
       active: z.string().optional(),
+      limit: z.coerce.number().default(20).optional().describe('Number of prompts to return'),
+      offset: z.coerce.number().default(0).optional().describe('Number of prompts to skip'),
     }),
     responseSchema: ListPromptsResponseSchema,
   }

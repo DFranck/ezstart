@@ -1,6 +1,6 @@
 import { BillingClient, Client, GetClientsQuery } from '@ezbill/types';
 import { getClientModel } from '../../models/client.js';
-import { findWithQuery } from '../../utils/mongoose/find-with-query.js';
+import { findWithQuery, findWithQueryPaginated, PaginatedResult } from '../../utils/mongoose/find-with-query.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
 export async function createClientService(
@@ -35,6 +35,16 @@ export async function getClientsService(
 
   const docs = await findWithQuery(ClientModel, baseQuery);
   return docs.map(toApiObject);
+}
+
+export async function getClientsPaginatedService(
+  query: GetClientsQuery & { includeDeleted?: boolean; deletedOnly?: boolean; userId?: string }
+): Promise<PaginatedResult<Client>> {
+  const ClientModel = await getClientModel();
+  const baseQuery = { ...query };
+  delete baseQuery.includeDeleted;
+
+  return findWithQueryPaginated(ClientModel, baseQuery);
 }
 
 export async function hardDeleteClientService(

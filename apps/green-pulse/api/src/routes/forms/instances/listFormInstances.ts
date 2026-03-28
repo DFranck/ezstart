@@ -21,7 +21,7 @@ listFormInstancesRouter.get(
     try {
       const FormInstance = await getFormInstanceModel()
 
-      const { userId, formConfigId, status } = req.query
+      const { userId, formConfigId, status, limit = 20, offset = 0 } = req.query
 
       const query: any = {}
       if (userId) query.userId = userId
@@ -29,11 +29,15 @@ listFormInstancesRouter.get(
       if (status) query.status = status
 
       // @ts-expect-error - Mongoose type inference issue
-      const instances = await FormInstance.find(query).sort({ updatedAt: -1 }).lean()
+      const [instances, total] = await Promise.all([
+        FormInstance.find(query).sort({ updatedAt: -1 }).skip(Number(offset)).limit(Number(limit)).lean(),
+        FormInstance.countDocuments(query),
+      ])
 
       res.json({
         success: true,
         data: instances,
+        meta: { total, limit: Number(limit), offset: Number(offset) },
         timestamp: new Date().toISOString(),
       })
     } catch (error) {

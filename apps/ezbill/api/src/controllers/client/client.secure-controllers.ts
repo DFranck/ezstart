@@ -4,6 +4,7 @@ import {
   createClientService,
   getClientByIdService,
   getClientsService,
+  getClientsPaginatedService,
   updateClientService,
   softDeleteClientService,
   restoreClientService,
@@ -57,7 +58,7 @@ export async function createSecureClientController(req: Request, res: Response) 
 export async function getSecureClientsController(req: Request, res: Response) {
   try {
     const userId = req.userId;
-    
+
     if (!userId) {
       return res.status(401).json({
         error: 'Unauthorized',
@@ -66,9 +67,9 @@ export async function getSecureClientsController(req: Request, res: Response) {
     }
 
     const query = { ...req.query, userId };
-    const clients = await getClientsService(query);
+    const result = await getClientsPaginatedService(query);
 
-    res.json(clients);
+    res.json(result);
   } catch (error) {
     console.error('Error in getSecureClientsController:', error);
     res.status(500).json({

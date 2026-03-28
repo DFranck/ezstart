@@ -13,13 +13,18 @@ const docRouter = createRouterWithDoc(listDonationsRegistry, router)
 
 const donationsQuerySchema = z.object({
   projectId: z.string().optional().describe('Filter by project ID'),
-  limit: z.coerce.number().default(10).describe('Number of donations to return'),
+  limit: z.coerce.number().default(20).describe('Number of donations to return'),
+  offset: z.coerce.number().default(0).describe('Number of donations to skip'),
 })
 
 const donationsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of public donations'),
-  total: z.number().describe('Total number of donations matching the query'),
+  meta: z.object({
+    total: z.number().describe('Total number of donations matching the query'),
+    limit: z.number().describe('Number of donations returned'),
+    offset: z.number().describe('Number of donations skipped'),
+  }),
 })
 
 // ========================================
@@ -29,7 +34,7 @@ const donationsListResponseSchema = z.object({
 const getDonationsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel();
   try {
-    const { projectId, limit = 10 } = req.query
+    const { projectId, limit = 20, offset = 0 } = req.query
 
     const query: any = {
       type: 'donation',
@@ -41,17 +46,19 @@ const getDonationsHandler = async (req: Request, res: Response) => {
       query.projectId = projectId
     }
 
-    const donations = await Payment.find(query)
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-      .select('-customerEmail -paymentId')
-
-    const total = await Payment.countDocuments(query)
+    const [donations, total] = await Promise.all([
+      Payment.find(query)
+        .sort({ createdAt: -1 })
+        .skip(Number(offset))
+        .limit(Number(limit))
+        .select('-customerEmail -paymentId'),
+      Payment.countDocuments(query),
+    ])
 
     res.json({
       success: true,
       payments: donations,
-      total,
+      meta: { total, limit: Number(limit), offset: Number(offset) },
     })
   } catch (error) {
     console.error('Get donations error:', error)

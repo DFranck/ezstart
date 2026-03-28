@@ -14,13 +14,18 @@ const docRouter = createRouterWithDoc(listPurchasesRegistry, router)
 const purchasesQuerySchema = z.object({
   userId: z.string().optional().describe('Filter by user ID'),
   projectId: z.string().optional().describe('Filter by project ID'),
-  limit: z.coerce.number().default(50).describe('Number of purchases to return'),
+  limit: z.coerce.number().default(20).describe('Number of purchases to return'),
+  offset: z.coerce.number().default(0).describe('Number of purchases to skip'),
 })
 
 const purchasesListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of purchases'),
-  total: z.number().describe('Total number of purchases matching the query'),
+  meta: z.object({
+    total: z.number().describe('Total number of purchases matching the query'),
+    limit: z.number().describe('Number of purchases returned'),
+    offset: z.number().describe('Number of purchases skipped'),
+  }),
 })
 
 // ========================================
@@ -30,7 +35,7 @@ const purchasesListResponseSchema = z.object({
 const getPurchasesHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
-    const { userId, projectId, limit = 50 } = req.query
+    const { userId, projectId, limit = 20, offset = 0 } = req.query
 
     const query: any = {
       type: { $in: ['purchase', 'subscription'] },
@@ -39,16 +44,18 @@ const getPurchasesHandler = async (req: Request, res: Response) => {
     if (userId) query.userId = userId
     if (projectId) query.projectId = projectId
 
-    const purchases = await Payment.find(query)
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-
-    const total = await Payment.countDocuments(query)
+    const [purchases, total] = await Promise.all([
+      Payment.find(query)
+        .sort({ createdAt: -1 })
+        .skip(Number(offset))
+        .limit(Number(limit)),
+      Payment.countDocuments(query),
+    ])
 
     res.json({
       success: true,
       payments: purchases,
-      total,
+      meta: { total, limit: Number(limit), offset: Number(offset) },
     })
   } catch (error) {
     console.error('Get purchases error:', error)

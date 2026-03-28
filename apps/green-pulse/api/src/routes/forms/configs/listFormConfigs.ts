@@ -21,18 +21,22 @@ listFormConfigsRouter.get(
     try {
       const FormConfig = await getFormConfigModel()
 
-      const { category, tags } = req.query
+      const { category, tags, limit = 20, offset = 0 } = req.query
 
       const query: any = {}
       if (category) query.category = category
       if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] }
 
       // @ts-expect-error - Mongoose type inference issue
-      const configs = await FormConfig.find(query).sort({ createdAt: -1 }).lean()
+      const [configs, total] = await Promise.all([
+        FormConfig.find(query).sort({ createdAt: -1 }).skip(Number(offset)).limit(Number(limit)).lean(),
+        FormConfig.countDocuments(query),
+      ])
 
       res.json({
         success: true,
         data: configs,
+        meta: { total, limit: Number(limit), offset: Number(offset) },
         timestamp: new Date().toISOString(),
       })
     } catch (error) {

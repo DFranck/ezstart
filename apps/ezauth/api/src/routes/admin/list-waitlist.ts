@@ -24,6 +24,12 @@ const listWaitlistResponseSchema = z.object({
   success: z.boolean(),
   appName: z.string(),
   entries: z.array(waitlistEntrySchema),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
   stats: z.object({
     total: z.number(),
     pending: z.number(),
@@ -54,6 +60,8 @@ const listWaitlistController = async (req: any, res: any) => {
     const WaitlistModel = await getWaitlistModel()
     const { appName } = req.params
     const { status } = req.query
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 20
 
     // Find waitlist
     // @ts-expect-error - Mongoose type inference issue
@@ -72,7 +80,7 @@ const listWaitlistController = async (req: any, res: any) => {
       entries = entries.filter((entry: any) => entry.status === status)
     }
 
-    // Calculate stats
+    // Calculate stats (on all emails, before pagination)
     const stats = {
       total: waitlist.emails.length,
       pending: waitlist.emails.filter((e: any) => e.status === 'pending').length,
@@ -81,10 +89,21 @@ const listWaitlistController = async (req: any, res: any) => {
       rejected: waitlist.emails.filter((e: any) => e.status === 'rejected').length,
     }
 
+    // Paginate filtered entries
+    const total = entries.length
+    const skip = (page - 1) * limit
+    const paginatedEntries = entries.slice(skip, skip + limit)
+
     res.json({
       success: true,
       appName: waitlist.appName,
-      entries,
+      entries: paginatedEntries,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      },
       stats
     })
   } catch (error) {

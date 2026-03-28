@@ -13,13 +13,18 @@ const docRouter = createRouterWithDoc(listSubscriptionsRegistry, router)
 
 const subscriptionsQuerySchema = z.object({
   userId: z.string().optional().describe('Filter by user ID'),
-  limit: z.coerce.number().default(50).describe('Number of subscriptions to return'),
+  limit: z.coerce.number().default(20).describe('Number of subscriptions to return'),
+  offset: z.coerce.number().default(0).describe('Number of subscriptions to skip'),
 })
 
 const subscriptionsListResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   payments: z.array(z.any()).describe('List of subscriptions'),
-  total: z.number().describe('Total number of subscriptions matching the query'),
+  meta: z.object({
+    total: z.number().describe('Total number of subscriptions matching the query'),
+    limit: z.number().describe('Number of subscriptions returned'),
+    offset: z.number().describe('Number of subscriptions skipped'),
+  }),
 })
 
 // ========================================
@@ -29,7 +34,7 @@ const subscriptionsListResponseSchema = z.object({
 const getSubscriptionsHandler = async (req: Request, res: Response) => {
   const Payment = await getPaymentModel()
   try {
-    const { userId, limit = 50 } = req.query
+    const { userId, limit = 20, offset = 0 } = req.query
 
     const query: any = {
       type: 'subscription',
@@ -37,16 +42,18 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
 
     if (userId) query.userId = userId
 
-    const subscriptions = await Payment.find(query)
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-
-    const total = await Payment.countDocuments(query)
+    const [subscriptions, total] = await Promise.all([
+      Payment.find(query)
+        .sort({ createdAt: -1 })
+        .skip(Number(offset))
+        .limit(Number(limit)),
+      Payment.countDocuments(query),
+    ])
 
     res.json({
       success: true,
       payments: subscriptions,
-      total,
+      meta: { total, limit: Number(limit), offset: Number(offset) },
     })
   } catch (error) {
     console.error('Get subscriptions error:', error)

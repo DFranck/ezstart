@@ -7,20 +7,33 @@ import { AuthRequest } from '../../types/auth.js';
 export const getCompanies = async (req: AuthRequest, res: Response) => {
   try {
     const { includeDeleted, deletedOnly } = req.query;
-    
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+
     let deletedAtFilter = {};
     if (deletedOnly === 'true') {
       deletedAtFilter = { deletedAt: { $ne: null } };
     } else if (includeDeleted !== 'true') {
       deletedAtFilter = { deletedAt: null };
     }
-    
-    const companies = await CompanyModel.find({ 
-      userId: req.userId, 
-      ...deletedAtFilter 
-    }).sort({ createdAt: -1 });
-    
-    res.json(companies.map(toApiObject));
+
+    const filter = { userId: req.userId, ...deletedAtFilter };
+    const skip = (page - 1) * limit;
+
+    const [companies, total] = await Promise.all([
+      CompanyModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      CompanyModel.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: companies.map(toApiObject),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error: any) {
     console.error('Error fetching companies:', error);
     res.status(500).json({ error: 'Failed to fetch companies' });

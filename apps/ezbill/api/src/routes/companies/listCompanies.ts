@@ -9,6 +9,7 @@ import {
   OpenAPIRegistry,
 } from '@ezstart/express-core';
 import { companySchema } from '@ezbill/types';
+import { z } from 'zod';
 import { getCompanies } from '../../controllers/company/index.js';
 import { authMiddleware } from '../../middleware/auth.js';
 
@@ -20,10 +21,20 @@ export const listCompaniesRouter = createRouterWithDoc(
   '/companies'
 );
 
+const paginatedCompaniesSchema = z.object({
+  data: companySchema.array(),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
 listCompaniesRouter.get('/', authMiddleware, getCompanies, {
   summary: 'List Companies (authenticated)',
   tags: ['Companies'],
-  responseSchema: companySchema.array(),
+  responseSchema: paginatedCompaniesSchema,
 });
 
 export default router;

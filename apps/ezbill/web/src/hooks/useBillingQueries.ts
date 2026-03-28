@@ -4,6 +4,16 @@ import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { callApi, parseApiError } from '@/utils/api'
 
+interface PaginatedResponse<T> {
+  data: T[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
 // Query keys
 export const billingKeys = {
   all: ['billing'] as const,
@@ -20,11 +30,10 @@ export function useClients(userId?: string) {
   return useQuery({
     queryKey: billingKeys.clients(),
     queryFn: async () => {
-      const response = await callApi<Client[]>('/clients', { userId: userId! })
+      const response = await callApi<PaginatedResponse<Client>>('/clients', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
-      // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return response.data.data
     },
     enabled: !!userId, // Only run query when userId is available
   })
@@ -76,11 +85,10 @@ export function useCompanies(userId?: string) {
   return useQuery({
     queryKey: billingKeys.companies(),
     queryFn: async () => {
-      const response = await callApi<Company[]>('/companies', { userId: userId! })
+      const response = await callApi<PaginatedResponse<Company>>('/companies', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
-      // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return response.data.data
     },
     enabled: !!userId, // Only run query when userId is available
   })
@@ -90,11 +98,10 @@ export function usePaymentMethods(userId?: string) {
   return useQuery({
     queryKey: billingKeys.paymentMethods(),
     queryFn: async () => {
-      const response = await callApi<PaymentMethod[]>('/payment-methods', { userId: userId! })
+      const response = await callApi<PaginatedResponse<PaymentMethod>>('/payment-methods', { userId: userId! })
       if (!response.ok) throw new Error(parseApiError(response.data))
       if (!response.data) throw new Error('No data returned from API')
-      // Filter out soft-deleted items
-      return response.data.filter((item) => !item.deletedAt)
+      return response.data.data
     },
     enabled: !!userId, // Only run query when userId is available
   })

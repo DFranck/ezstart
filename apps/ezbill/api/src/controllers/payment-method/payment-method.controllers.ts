@@ -7,20 +7,33 @@ import { AuthRequest } from '../../types/auth.js';
 export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
   try {
     const { includeDeleted, deletedOnly } = req.query;
-    
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+
     let deletedAtFilter = {};
     if (deletedOnly === 'true') {
       deletedAtFilter = { deletedAt: { $ne: null } };
     } else if (includeDeleted !== 'true') {
       deletedAtFilter = { deletedAt: null };
     }
-    
-    const paymentMethods = await PaymentMethodModel.find({ 
-      userId: req.userId, 
-      ...deletedAtFilter 
-    }).sort({ createdAt: -1 });
-    
-    res.json(paymentMethods.map(toApiObject));
+
+    const filter = { userId: req.userId, ...deletedAtFilter };
+    const skip = (page - 1) * limit;
+
+    const [paymentMethods, total] = await Promise.all([
+      PaymentMethodModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      PaymentMethodModel.countDocuments(filter),
+    ]);
+
+    res.json({
+      data: paymentMethods.map(toApiObject),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error: any) {
     console.error('Error fetching payment methods:', error);
     res.status(500).json({ error: 'Failed to fetch payment methods' });
