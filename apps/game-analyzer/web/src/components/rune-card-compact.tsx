@@ -411,15 +411,15 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                   {/* ── Section 3: Penalties ── */}
                   <Div className="space-y-0.5">
                     <P className="font-bold text-[10px] text-foreground">Penalties</P>
-                    <P className="text-muted-foreground">Quality penalty: {quality} = <span className={qualityPen < 0 ? 'text-destructive' : qualityPen > 0 ? 'text-success-foreground' : ''}>{qualityPen}</span></P>
-                    <P className="text-muted-foreground">
-                      Innate score: {rune.innateStat ? `${formatStatLabel(rune.innateStat.type)} [${analysis.innateTier ?? '?'}]` : 'none'} = <span className={innate > 0 ? 'text-success-foreground' : innate < 0 ? 'text-destructive' : ''}>{innate > 0 ? '+' : ''}{innate}</span>
+                    <P className={qualityPen < 0 ? 'text-destructive' : 'text-success-foreground'}>Quality: {quality} = <span className="font-bold">{qualityPen === 0 ? '✓ 0' : qualityPen}</span></P>
+                    <P className={innate < 0 ? 'text-destructive' : 'text-success-foreground'}>
+                      Innate: {rune.innateStat ? `${formatStatLabel(rune.innateStat.type)} [${analysis.innateTier ?? '?'}]` : 'none'} = <span className="font-bold">{innate === 0 ? '✓ 0' : (innate > 0 ? '+' : '') + innate}</span>
                     </P>
-                    <P className="text-muted-foreground">Low-roll penalty: <span className={lowRoll < 0 ? 'text-destructive' : ''}>{lowRoll}</span></P>
-                    <P className="text-muted-foreground">Non-grindable penalty: <span className={nonGrind < 0 ? 'text-destructive' : ''}>{nonGrind}</span></P>
-                    <P className="text-muted-foreground">Mismatch penalty: <span className={mismatchPen < 0 ? 'text-destructive' : ''}>{mismatchPen}</span></P>
-                    <P className="text-muted-foreground">Set strength: {rune.set} (<span className={setStrengthTier === 'S' || setStrengthTier === 'A' ? 'text-success-foreground' : setStrengthTier === 'D' ? 'text-destructive' : ''}>{setStrengthTier}</span>) → <span className={setBonus > 0 ? 'text-success-foreground' : ''}>{`+${setBonus}%`}</span> on thresholds</P>
-                    <P className={`text-muted-foreground font-medium`}>Total adjustments: <span className={penaltiesTotal > 0 ? 'text-success-foreground' : penaltiesTotal < 0 ? 'text-destructive' : ''}>{penaltiesTotal > 0 ? '+' : ''}{penaltiesTotal}</span></P>
+                    <P className={lowRoll < 0 ? 'text-destructive' : 'text-success-foreground'}>Low-roll: <span className="font-bold">{lowRoll === 0 ? '✓ 0' : lowRoll}</span></P>
+                    <P className={nonGrind < 0 ? 'text-destructive' : 'text-success-foreground'}>Non-grindable: <span className="font-bold">{nonGrind === 0 ? '✓ 0' : nonGrind}</span></P>
+                    <P className={mismatchPen < 0 ? 'text-destructive' : 'text-success-foreground'}>Mismatch: <span className="font-bold">{mismatchPen === 0 ? '✓ 0' : mismatchPen}</span></P>
+                    <P className={setStrengthTier === 'S' || setStrengthTier === 'A' ? 'text-success-foreground' : setStrengthTier === 'D' || setStrengthTier === 'C' ? 'text-destructive' : 'text-muted-foreground'}>Set: {rune.set} (<span className="font-bold">{setStrengthTier}</span>) → <span className="font-bold">+{setBonus}%</span> seuils</P>
+                    <P className={`font-medium ${penaltiesTotal > 0 ? 'text-success-foreground' : penaltiesTotal < 0 ? 'text-destructive' : 'text-success-foreground'}`}>Total: <span className="font-bold">{penaltiesTotal === 0 ? '✓ 0' : (penaltiesTotal > 0 ? '+' : '') + penaltiesTotal}</span></P>
                   </Div>
 
                   {/* ── Section 4: Progressive Advice (all 3 profiles) ── */}
