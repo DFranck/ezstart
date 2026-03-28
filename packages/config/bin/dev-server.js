@@ -30,7 +30,7 @@ const appNameMap = {
   'web-fengshui': 'fengshui',
   'web-asc-tcd': 'asc-tcd',
   'web-green-pulse': 'green-pulse',
-  'web-game-analyzer': 'game-analyzer',
+  'web-gacha-analyzer': 'gacha-analyzer',
 }
 
 const appName = appNameMap[pkgName]
