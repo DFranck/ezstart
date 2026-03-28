@@ -36,8 +36,8 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 3. [x] Per-app BACKLOGs — chaque app a son BACKLOG.md, root = infra only
 4. [x] Specialized agent roles — `.claude/agents/` avec 8 rôles réutilisables
 5. [x] Pagination globale — toutes les APIs paginées (ezauth, ezbill, ezpay, green-pulse, gacha-analyzer)
-6. [ ] Fix generators (create-app.js) — path bugs, stale refs, auto-register ports/tsconfig/dev scripts
-7. [ ] insert-app.js — scaffolding complet avec wiring automatique (ports, tsconfig, scripts, BACKLOG)
+6. [x] Fix generators (create-app.js) — path bugs fixés, auto-register ports/tsconfig/scripts
+7. [x] insert-app.js — scaffolding complet avec wiring automatique + templates
 8. [ ] extract-app.js — extraire une app en standalone avec ses dépendances packages
 9. [ ] new-monorepo.js — starter kit template pour créer un nouveau monorepo @ezstart-like
 10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
@@ -55,13 +55,13 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 
 ### Sécurité (du rapport audit)
 20. [ ] CRITICAL: EZBill auth — remplacer X-User-Id par JWT réel via EZAuth
-21. [ ] CRITICAL: JWT Secret — supprimer fallback hardcodé, crash si non défini
+21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
 22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
 23. [ ] HIGH: Gacha-analyzer — ajouter auth middleware sur routes destructives
 24. [ ] HIGH: Green-Pulse — implémenter auth JWT (pas X-User-Id)
 25. [ ] HIGH: EZPay — ajouter auth sur routes sensibles
-26. [ ] HIGH: login-cookie rate limiting
-27. [ ] HIGH: Debug logging auth codes — supprimer ou conditionner sur NODE_ENV
+26. [x] HIGH: login-cookie rate limiting — createStrictRateLimiter ajouté
+27. [x] HIGH: Debug logging auth codes — remplacé par logger.debug()
 28. [ ] MEDIUM: Zod validation sur toutes les routes gacha-analyzer + green-pulse
 29. [ ] Logger — ajouter filtre NODE_ENV dans @ezstart/logger (debug/info seulement en dev)
 30. [ ] Remplacer console.log supprimés par logger.debug() dans les packages
