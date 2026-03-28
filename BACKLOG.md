@@ -57,12 +57,12 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 20. [ ] CRITICAL: EZBill auth — remplacer X-User-Id par JWT réel via EZAuth
 21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
 22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
-23. [ ] HIGH: Gacha-analyzer — ajouter auth middleware sur routes destructives
-24. [ ] HIGH: Green-Pulse — implémenter auth JWT (pas X-User-Id)
+23. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
+24. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 25. [ ] HIGH: EZPay — ajouter auth sur routes sensibles
 26. [x] HIGH: login-cookie rate limiting — createStrictRateLimiter ajouté
 27. [x] HIGH: Debug logging auth codes — remplacé par logger.debug()
-28. [ ] MEDIUM: Zod validation sur toutes les routes gacha-analyzer + green-pulse
+28. [x] MEDIUM: Zod validation sur gacha-analyzer routes (get-scans, feedback, report, reanalyze, config)
 29. [x] Logger — filtre NODE_ENV ajouté (debug/info silencieux en prod)
 30. [x] Remplacer console.log par logger.debug() dans auth-sdk (7 logs clés restaurés)
 
