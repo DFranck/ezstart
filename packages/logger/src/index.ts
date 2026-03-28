@@ -4,6 +4,10 @@
  * Use this in web apps (Next.js client components)
  * For server-side logging with Sentry, use '@ezstart/logger/server'
  *
+ * Filtering:
+ * - debug/info: Only log when NODE_ENV !== 'production'
+ * - warn/error: Always log
+ *
  * @example
  * ```typescript
  * // In web apps (client components)
@@ -15,8 +19,13 @@
  * logger.error('Database error', { error, userId })
  * ```
  */
+
+// Safe check for browser environments where `process` may not exist
+const isDev = typeof process !== 'undefined' ? process.env.NODE_ENV !== 'production' : true
+
 export const logger = {
   info: (msgOrObj: string | object, dataOrMsg?: any) => {
+    if (!isDev) return
     if (typeof msgOrObj === 'string') {
       console.log(`[INFO] ${msgOrObj}`, dataOrMsg || '')
     } else {
@@ -38,6 +47,7 @@ export const logger = {
     }
   },
   debug: (msgOrObj: string | object, dataOrMsg?: any) => {
+    if (!isDev) return
     if (typeof msgOrObj === 'string') {
       console.debug(`[DEBUG] ${msgOrObj}`, dataOrMsg || '')
     } else {

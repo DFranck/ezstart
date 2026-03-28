@@ -1,259 +1,476 @@
 #!/usr/bin/env node
 
 /**
- * @ezstart/create-app - Script de génération automatique d'apps
- * 
- * Usage: node create-app.js my-new-app
- * Génère automatiquement une structure d'app complète avec :
- * - web/ (Next.js standardisé)
- * - api/ (Node.js API standardisée) 
- * - types/ (Types partagés web/api)
- * - utils/ (Utils partagés web/api)
+ * @ezstart/create-app - Full app scaffolding
+ *
+ * Usage: node scripts/generators/create-app.js my-new-app
+ *
+ * Creates a complete app with:
+ * - api/  (Express + express-core)
+ * - web/  (Next.js + i18n + PWA)
+ * - types/ (Shared TS types)
+ * - BACKLOG.md + README.md
+ *
+ * Also auto-registers:
+ * - Ports in packages/config/src/urls.ts
+ * - References in root tsconfig.json
+ * - Dev script in root package.json
  */
 
-const fs = require('fs');
-const path = require('path');
+const path = require('path')
+const { execSync } = require('child_process')
+const {
+  ROOT_DIR,
+  APPS_DIR,
+  renderTemplate,
+  findNextPortPair,
+  toPascalCase,
+  generateShortcut,
+  registerInUrls,
+  addTsconfigReferences,
+  addDevScript,
+  appExists,
+  mkdirp,
+  writeFile,
+} = require('./lib/utils')
 
-const appName = process.argv[2];
+// --- Parse args ---
+const appName = process.argv[2]
 
 if (!appName) {
-  console.error('❌ Usage: node create-app.js <app-name>');
-  process.exit(1);
+  console.error('Usage: node scripts/generators/create-app.js <app-name>')
+  console.error('Example: node scripts/generators/create-app.js my-app')
+  process.exit(1)
 }
 
-const appDir = path.join(__dirname, 'apps', appName);
-
-if (fs.existsSync(appDir)) {
-  console.error(`❌ App "${appName}" already exists`);
-  process.exit(1);
+if (!/^[a-z][a-z0-9-]*$/.test(appName)) {
+  console.error('App name must be kebab-case (lowercase letters, numbers, hyphens)')
+  process.exit(1)
 }
 
-console.log(`🚀 Creating app: ${appName}`);
+if (appExists(appName)) {
+  console.error(`App "${appName}" already exists at apps/${appName}/`)
+  process.exit(1)
+}
 
-// Structure de base
-const structure = {
-  [`apps/${appName}`]: 'dir',
-  [`apps/${appName}/web`]: 'dir',
-  [`apps/${appName}/api`]: 'dir', 
-  [`apps/${appName}/types`]: 'dir',
-  [`apps/${appName}/utils`]: 'dir',
-  
-  // Web - Next.js standardisé
-  [`apps/${appName}/web/package.json`]: JSON.stringify({
-    "name": `@${appName}/web`,
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-      "dev": "next dev",
-      "build": "next build",
-      "start": "next start",
-      "lint": "next lint",
-      "lint:fix": "next lint --fix",
-      "typecheck": "tsc --noEmit"
-    },
-    "dependencies": {
-      "next": "15.1.3",
-      "react": "19.0.0",
-      "react-dom": "19.0.0",
-      "@ezstart/ui": "workspace:*",
-      "@ezstart/auth-sdk": "workspace:*"
-    },
-    "devDependencies": {
-      "@types/node": "^20",
-      "@types/react": "^18",
-      "@types/react-dom": "^18",
-      "eslint": "^8",
-      "eslint-config-next": "15.1.3",
-      "postcss": "^8",
-      "tailwindcss": "^3.4.1",
-      "typescript": "^5"
-    }
-  }, null, 2),
-  
-  [`apps/${appName}/web/tailwind.config.js`]: `import baseConfig from '@ezstart/tailwind-config/base.js'
-export default baseConfig`,
+// --- Config ---
+const displayName = toPascalCase(appName)
+const shortcut = generateShortcut(appName)
+const { apiPort, webPort } = findNextPortPair()
+const appDir = path.join(APPS_DIR, appName)
 
-  [`apps/${appName}/web/postcss.config.mjs`]: `export { default } from '@ezstart/ui/postcss.config';`,
-  
-  [`apps/${appName}/web/eslint.config.js`]: `import { nextJsConfig } from "@ezstart/eslint-config/next-js"
-export default nextJsConfig`,
+const vars = {
+  APP_NAME: appName,
+  DISPLAY_NAME: displayName,
+  DESCRIPTION: `${displayName} application`,
+  API_PORT: String(apiPort),
+  WEB_PORT: String(webPort),
+  SHORTCUT: shortcut,
+}
 
-  [`apps/${appName}/web/tsconfig.json`]: JSON.stringify({
-    "extends": "@ezstart/typescript-config/next-js.json"
-  }, null, 2),
+console.log(`\nCreating app: ${appName}`)
+console.log(`  Display name: ${displayName}`)
+console.log(`  API port: ${apiPort}`)
+console.log(`  Web port: ${webPort}`)
+console.log(`  Dev shortcut: pnpm dev:${shortcut}`)
+console.log()
 
-  [`apps/${appName}/web/app/globals.css`]: `@import "@ezstart/ui/globals.css";`,
-  
-  [`apps/${appName}/web/app/layout.tsx`]: `import type { Metadata } from 'next'
-import './globals.css'
+// --- 1. Create API ---
+console.log('Creating api/ ...')
+const apiDir = path.join(appDir, 'api')
+mkdirp(path.join(apiDir, 'src', 'routes'))
+mkdirp(path.join(apiDir, 'src', 'middleware'))
+mkdirp(path.join(apiDir, 'src', 'services'))
+
+writeFile(path.join(apiDir, 'package.json'), renderTemplate('api/package.json', vars))
+writeFile(path.join(apiDir, 'src', 'server.ts'), renderTemplate('api/index.ts', vars))
+
+writeFile(path.join(apiDir, 'tsconfig.json'), JSON.stringify({
+  extends: '@ezstart/typescript-config/api.json',
+  compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
+  include: ['src/**/*'],
+  exclude: ['node_modules', 'dist'],
+}, null, 2))
+
+writeFile(path.join(apiDir, 'eslint.config.js'),
+  `import eslintConfig from '@ezstart/eslint-config/base'\n\nexport default [...eslintConfig]\n`)
+
+const envContent = `# Server
+NODE_ENV=development
+PORT=${apiPort}
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/${appName}
+
+# CORS
+CORS_ORIGIN=http://localhost:${webPort}
+`
+writeFile(path.join(apiDir, '.env.example'), envContent)
+writeFile(path.join(apiDir, '.env.local'), envContent)
+
+// --- 2. Create Web ---
+console.log('Creating web/ ...')
+const webDir = path.join(appDir, 'web')
+mkdirp(path.join(webDir, 'src', 'app', '[locale]'))
+mkdirp(path.join(webDir, 'src', 'components'))
+mkdirp(path.join(webDir, 'src', 'i18n'))
+mkdirp(path.join(webDir, 'src', 'messages', 'en'))
+mkdirp(path.join(webDir, 'src', 'scripts'))
+mkdirp(path.join(webDir, 'src', 'providers'))
+mkdirp(path.join(webDir, 'public'))
+
+writeFile(path.join(webDir, 'package.json'), renderTemplate('web/package.json', vars))
+
+writeFile(path.join(webDir, 'tsconfig.json'), JSON.stringify({
+  extends: '@ezstart/typescript-config/nextjs.json',
+  compilerOptions: {
+    composite: true,
+    incremental: true,
+    plugins: [{ name: 'next' }],
+    paths: { '@/*': ['./src/*'] },
+  },
+  include: ['next-env.d.ts', '**/*.ts', '**/*.tsx', '.next/types/**/*.ts'],
+  exclude: ['node_modules'],
+}, null, 2))
+
+writeFile(path.join(webDir, 'eslint.config.js'),
+  `import eslintConfig from '@ezstart/eslint-config/next-js'\n\nexport default [...eslintConfig]\n`)
+
+writeFile(path.join(webDir, 'tailwind.config.ts'), `import type { Config } from 'tailwindcss'
+import baseConfig from '@ezstart/tailwind-config/base.js'
+
+const config: Config = {
+  presets: [baseConfig],
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    '../../../packages/ui/src/**/*.{ts,tsx}',
+  ],
+}
+
+export default config
+`)
+
+writeFile(path.join(webDir, 'postcss.config.mjs'), `/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: { "@tailwindcss/postcss": {} },
+}
+
+export default config
+`)
+
+writeFile(path.join(webDir, 'next.config.mjs'), `import createNextIntlPlugin from 'next-intl/plugin'
+import withPWA from 'next-pwa'
+
+/** @type {import('next').NextConfig} */
+const baseConfig = {
+  transpilePackages: ['@ezstart/ui', '@ezstart/auth-sdk', '@ezstart/next-theme'],
+}
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
+
+const pwaConfig = withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+})
+
+export default withNextIntl(pwaConfig(baseConfig))
+`)
+
+writeFile(path.join(webDir, 'next-env.d.ts'),
+  `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.\n`)
+
+const webEnvContent = `# Application
+NODE_ENV=development
+PORT=${webPort}
+NEXT_PUBLIC_APP_URL=http://localhost:${webPort}
+
+# API URLs
+NEXT_PUBLIC_API_URL=http://localhost:${apiPort}/api
+`
+writeFile(path.join(webDir, '.env.example'), webEnvContent)
+writeFile(path.join(webDir, '.env.local'), webEnvContent)
+
+// i18n
+writeFile(path.join(webDir, 'src', 'i18n', 'routing.ts'), `import { defineRouting } from 'next-intl/routing'
+
+export const routing = defineRouting({
+  locales: ['en'],
+  defaultLocale: 'en',
+  localeDetection: true,
+})
+
+export type AppLocale = (typeof routing.locales)[number]
+
+export function getTimeZoneFromLocale(locale: string): string {
+  const timeZoneMap: Record<string, string> = {
+    en: 'UTC',
+    fr: 'Europe/Paris',
+  }
+  return timeZoneMap[locale] || 'UTC'
+}
+`)
+
+writeFile(path.join(webDir, 'src', 'i18n', 'request.ts'), `import merge from 'deepmerge'
+import { getRequestConfig } from 'next-intl/server'
+import { routing } from './routing'
+
+function isSupportedLocale(
+  locale: string | undefined
+): locale is (typeof routing.locales)[number] {
+  return locale !== undefined && routing.locales.includes(locale as any)
+}
+
+export default getRequestConfig(async ({ requestLocale }) => {
+  const resolved = await requestLocale
+  const locale = isSupportedLocale(resolved) ? resolved : routing.defaultLocale
+
+  const [common, home] = await Promise.all([
+    import(\`../messages/\${locale}/common.json\`),
+    import(\`../messages/\${locale}/home.json\`),
+  ])
+
+  return {
+    locale,
+    timeZone: 'UTC',
+    messages: merge.all([common.default, home.default]),
+  }
+})
+`)
+
+writeFile(path.join(webDir, 'src', 'i18n', 'navigation.ts'), `import { createNavigation } from 'next-intl/navigation'
+import { routing } from './routing'
+
+export const { Link, useRouter, usePathname, redirect, getPathname } =
+  createNavigation(routing)
+`)
+
+writeFile(path.join(webDir, 'src', 'middleware.ts'), `import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
+
+export default createMiddleware(routing)
+
+export const config = {
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\\\..*).*)'],
+}
+`)
+
+writeFile(path.join(webDir, 'src', 'messages', 'en', 'common.json'), JSON.stringify({
+  common: {
+    appName: displayName,
+    loading: 'Loading...',
+    error: 'An error occurred',
+    retry: 'Try again',
+  },
+}, null, 2))
+
+writeFile(path.join(webDir, 'src', 'messages', 'en', 'home.json'), JSON.stringify({
+  home: {
+    title: `Welcome to ${displayName}`,
+    description: 'This app is pre-configured with all the essentials',
+    getStarted: 'Get Started',
+  },
+}, null, 2))
+
+writeFile(path.join(webDir, 'public', 'manifest.json'), JSON.stringify({
+  name: displayName,
+  short_name: displayName,
+  description: `${displayName} application`,
+  start_url: '/',
+  display: 'standalone',
+  background_color: '#ffffff',
+  theme_color: '#000000',
+  icons: [
+    { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+  ],
+}, null, 2))
+
+writeFile(path.join(webDir, 'src', 'providers', 'providers.tsx'), `'use client'
+
+import { AuthProvider } from '@ezstart/auth-sdk'
+import { ThemeProvider } from '@ezstart/next-theme'
+import { NextIntlClientProvider } from 'next-intl'
+import { ReactNode } from 'react'
+
+interface ProvidersProps {
+  children: ReactNode
+  locale: string
+  messages: any
+  timeZone?: string
+}
+
+export function Providers({ children, locale, messages, timeZone }: ProvidersProps) {
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <AuthProvider appName="${appName}">
+          {children}
+        </AuthProvider>
+      </ThemeProvider>
+    </NextIntlClientProvider>
+  )
+}
+`)
+
+writeFile(path.join(webDir, 'src', 'app', '[locale]', 'layout.tsx'), `import { getTimeZoneFromLocale } from '@/i18n/routing'
+import { Providers } from '@/providers/providers'
+import '@ezstart/ui/globals.css'
+import type { Metadata } from 'next'
+import { getMessages } from 'next-intl/server'
 
 export const metadata: Metadata = {
-  title: '${appName}',
-  description: '${appName} application',
+  title: '${displayName}',
+  description: '${displayName} application',
 }
 
-export default function RootLayout({
-  children,
-}: {
+interface RootLayoutProps {
   children: React.ReactNode
-}) {
+  params: Promise<{ locale: string }>
+}
+
+export default async function RootLayout({
+  children,
+  params,
+}: RootLayoutProps) {
+  const { locale } = await params
+  const messages = await getMessages()
+  const timeZone = getTimeZoneFromLocale(locale)
+
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang={locale} suppressHydrationWarning>
+      <body>
+        <Providers locale={locale} messages={messages} timeZone={timeZone}>
+          {children}
+        </Providers>
+      </body>
     </html>
   )
-}`,
+}
+`)
 
-  [`apps/${appName}/web/app/page.tsx`]: `export default function Home() {
+writeFile(path.join(webDir, 'src', 'app', '[locale]', 'page.tsx'), `'use client'
+
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ezstart/ui/components'
+import { useTranslations } from 'next-intl'
+
+export default function HomePage() {
+  const t = useTranslations('home')
+
   return (
     <main className="container mx-auto p-8">
-      <h1 className="text-4xl font-bold mb-4">${appName}</h1>
-      <p className="text-muted-foreground">Welcome to your new app!</p>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            This app is pre-configured with:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-sm">
+            <li>Internationalization (i18n) with next-intl</li>
+            <li>Progressive Web App (PWA) support</li>
+            <li>@ezstart/ui components library</li>
+            <li>@ezstart/next-theme & auth-sdk providers</li>
+            <li>Centralized TypeScript, ESLint, and Tailwind configs</li>
+          </ul>
+          <div className="pt-4">
+            <Button>{t('getStarted')}</Button>
+          </div>
+        </CardContent>
+      </Card>
     </main>
   )
-}`,
-
-  // API - Node.js standardisé
-  [`apps/${appName}/api/package.json`]: JSON.stringify({
-    "name": `@${appName}/api`,
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-      "dev": "tsx watch server.ts",
-      "build": "tsc",
-      "start": "node dist/server.js",
-      "lint": "eslint .",
-      "lint:fix": "eslint . --fix",
-      "typecheck": "tsc --noEmit"
-    },
-    "dependencies": {
-      "@ezstart/api-core": "workspace:*",
-      "@ezstart/types": "workspace:*",
-      "express": "^4.18.2",
-      "cors": "^2.8.5"
-    },
-    "devDependencies": {
-      "@types/express": "^4.17.17",
-      "@types/cors": "^2.8.13",
-      "@types/node": "^20",
-      "tsx": "^4.0.0",
-      "typescript": "^5"
-    }
-  }, null, 2),
-
-  [`apps/${appName}/api/tsconfig.json`]: JSON.stringify({
-    "extends": "@workspace/typescript-config/api.json"
-  }, null, 2),
-
-  [`apps/${appName}/api/server.ts`]: `import { startServer } from '@ezstart/api-core'
-import express from 'express'
-import cors from 'cors'
-
-const app = express()
-
-app.use(cors())
-app.use(express.json())
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: '${appName}-api' })
-})
-
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from ${appName}!' })
-})
-
-startServer(app, {
-  port: 3000,
-  name: '${appName}'
-})`,
-
-  // Types partagés
-  [`apps/${appName}/types/package.json`]: JSON.stringify({
-    "name": `@${appName}/types`,
-    "version": "0.1.0",
-    "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "scripts": {
-      "build": "tsc",
-      "dev": "tsc --watch",
-      "typecheck": "tsc --noEmit"
-    },
-    "devDependencies": {
-      "@ezstart/types": "workspace:*",
-      "typescript": "^5"
-    }
-  }, null, 2),
-
-  [`apps/${appName}/types/tsconfig.json`]: JSON.stringify({
-    "extends": "@workspace/typescript-config/types.json"
-  }, null, 2),
-
-  [`apps/${appName}/types/src/index.ts`]: `// ${appName} specific types
-export * from './user'`,
-
-  [`apps/${appName}/types/src/user.ts`]: `import { BaseUser } from '@ezstart/types'
-
-export interface ${appName.charAt(0).toUpperCase() + appName.slice(1)}User extends BaseUser {
-  // Add ${appName}-specific user properties here
-}`,
-
-  // Utils partagés
-  [`apps/${appName}/utils/package.json`]: JSON.stringify({
-    "name": `@${appName}/utils`,
-    "version": "0.1.0", 
-    "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "scripts": {
-      "build": "tsc",
-      "dev": "tsc --watch",
-      "typecheck": "tsc --noEmit"
-    },
-    "devDependencies": {
-      "@ezstart/types": "workspace:*",
-      "typescript": "^5"
-    }
-  }, null, 2),
-
-  [`apps/${appName}/utils/tsconfig.json`]: JSON.stringify({
-    "extends": "@workspace/typescript-config/library.json"
-  }, null, 2),
-
-  [`apps/${appName}/utils/src/index.ts`]: `// ${appName} specific utilities
-export * from './helpers'`,
-
-  [`apps/${appName}/utils/src/helpers.ts`]: `// Helper functions for ${appName}
-export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1)
 }
-  
-export function formatAppName(): string {
-  return capitalize('${appName}')
-}`
-};
+`)
 
-// Créer la structure
-for (const [filePath, content] of Object.entries(structure)) {
-  const fullPath = path.join(__dirname, filePath);
-  
-  if (content === 'dir') {
-    fs.mkdirSync(fullPath, { recursive: true });
-    console.log(`📁 Created directory: ${filePath}`);
-  } else {
-    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-    fs.writeFileSync(fullPath, content);
-    console.log(`📄 Created file: ${filePath}`);
+writeFile(path.join(webDir, 'src', 'scripts', 'dev-with-port.js'), `import { spawn } from 'child_process'
+import net from 'net'
+
+async function isPortFree(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+    server.listen(port, () => {
+      server.once('close', () => resolve(true))
+      server.close()
+    })
+    server.on('error', () => resolve(false))
+  })
+}
+
+async function findFreePort(startPort = 4000) {
+  let port = startPort
+  while (!(await isPortFree(port))) {
+    port++
   }
+  return port
 }
 
-console.log(`\n✅ App "${appName}" created successfully!`);
-console.log(`\n🚀 Next steps:`);
-console.log(`   cd apps/${appName}/web && pnpm install && pnpm dev`);
-console.log(`   cd apps/${appName}/api && pnpm install && pnpm dev`);
-console.log(`\n📖 Your app structure:`);
-console.log(`   apps/${appName}/`);
-console.log(`   ├── web/        # Next.js frontend`);
-console.log(`   ├── api/        # Node.js backend`);
-console.log(`   ├── types/      # Shared TypeScript types`);
-console.log(`   └── utils/      # Shared utilities`);
+async function startDev() {
+  const preferredPort = process.env.PORT ? parseInt(process.env.PORT) : ${webPort}
+  const port = await findFreePort(preferredPort)
+  console.log(\`Starting dev server on port \${port}\`)
+
+  const child = spawn('next', ['dev', '-p', port.toString()], {
+    stdio: 'inherit',
+    shell: true,
+  })
+
+  child.on('error', (error) => {
+    console.error('Error starting dev server:', error)
+  })
+}
+
+startDev()
+`)
+
+// --- 3. Create Types ---
+console.log('Creating types/ ...')
+const typesDir = path.join(appDir, 'types')
+mkdirp(path.join(typesDir, 'src'))
+
+writeFile(path.join(typesDir, 'package.json'), renderTemplate('types/package.json', vars))
+
+writeFile(path.join(typesDir, 'tsconfig.json'), JSON.stringify({
+  extends: '@ezstart/typescript-config/library.json',
+  compilerOptions: { composite: true, outDir: 'dist', rootDir: 'src' },
+  include: ['src/**/*'],
+  exclude: ['node_modules', 'dist'],
+}, null, 2))
+
+writeFile(path.join(typesDir, 'src', 'index.ts'), `// ${displayName} shared types\nexport {}\n`)
+
+// --- 4. Create BACKLOG.md & README.md ---
+console.log('Creating BACKLOG.md & README.md ...')
+writeFile(path.join(appDir, 'BACKLOG.md'), renderTemplate('BACKLOG.md', vars))
+writeFile(path.join(appDir, 'README.md'), renderTemplate('README.md', vars))
+
+// --- 5. Register in monorepo ---
+console.log('\nRegistering in monorepo...')
+registerInUrls(appName, displayName, `${displayName} application`, apiPort, webPort, true, true)
+addTsconfigReferences(appName, true, true, true)
+addDevScript(appName, shortcut, [], true, true)
+
+// --- 6. Install ---
+console.log('\nInstalling dependencies...')
+execSync('pnpm install', { stdio: 'inherit', cwd: ROOT_DIR })
+
+// --- Done ---
+console.log(`\nApp "${appName}" created successfully!`)
+console.log(`\nStructure:`)
+console.log(`  apps/${appName}/`)
+console.log(`  ├── api/        Express API (port ${apiPort})`)
+console.log(`  ├── web/        Next.js frontend (port ${webPort})`)
+console.log(`  ├── types/      Shared TypeScript types`)
+console.log(`  ├── BACKLOG.md`)
+console.log(`  └── README.md`)
+console.log(`\nRun: pnpm dev:${shortcut}`)

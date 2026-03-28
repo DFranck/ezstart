@@ -2,6 +2,7 @@
 
 import { Button, Div, Icon } from '@ezstart/ui/components';
 import { useRef } from 'react';
+import { toast } from 'sonner';
 import { CVConfig, CVData } from '../types';
 
 interface CVPreviewProps {
@@ -40,7 +41,7 @@ export function CVPreview({ data, config }: CVPreviewProps) {
       pdf.save(`cv-${data.personalInfo.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
     } catch (error) {
       console.error('PDF generation error:', error);
-      alert('Failed to generate PDF. Please try again.');
+      toast.error('Failed to generate PDF. Please try again.');
     }
   };
 

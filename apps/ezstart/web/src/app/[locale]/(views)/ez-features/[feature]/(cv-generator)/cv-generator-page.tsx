@@ -5,6 +5,7 @@ import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk';
 import { RequireRole, InsufficientPermissions } from '@ezstart/rbac';
 import { useSafeTranslations } from '@/hooks/useSafeIntl';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { CVPreview } from './components/cv-preview';
 import { TemplateSelector } from './components/template-selector';
 import { CVConfig, CVData } from './types';
@@ -62,7 +63,7 @@ function CVGeneratorContent() {
 
   const handleAIGenerate = async () => {
     if (!jobPosting) {
-      alert(t('generator.errors.jobPostingRequired'));
+      toast.error(t('generator.errors.jobPostingRequired'));
       return;
     }
 
@@ -85,7 +86,7 @@ function CVGeneratorContent() {
       setData(generatedData);
     } catch (error) {
       console.error('AI generation error:', error);
-      alert(t('generator.errors.generationFailed'));
+      toast.error(t('generator.errors.generationFailed'));
     } finally {
       setIsGenerating(false);
     }

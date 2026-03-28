@@ -42,9 +42,9 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
       origins.push(...getAllWebUrls('green-pulse'))
       break
 
-    case 'game-analyzer':
-      // Game Analyzer API called only by Game Analyzer web
-      origins.push(...getAllWebUrls('game-analyzer'))
+    case 'gacha-analyzer':
+      // Gacha Analyzer API called only by Gacha Analyzer web
+      origins.push(...getAllWebUrls('gacha-analyzer'))
       break
 
     case 'ezstart':

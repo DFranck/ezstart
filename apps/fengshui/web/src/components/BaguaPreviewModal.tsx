@@ -5,6 +5,7 @@ import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/direction
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import BaguaGrid from './steps/BaguaGrid'
@@ -575,7 +576,7 @@ export function BaguaPreviewModal({
     } catch (error) {
       console.error('Erreur génération PDF détaillée:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
-      alert(`Erreur lors de la génération du PDF: ${errorMessage}`)
+      toast.error(`Erreur lors de la génération du PDF: ${errorMessage}`)
     } finally {
       // Nettoyer les styles injectés et restaurer l'état normal
       const injectedStyle = document.getElementById('hide-scrollbars-during-pdf')
@@ -600,7 +601,7 @@ export function BaguaPreviewModal({
       document.body.removeChild(link)
     } catch (error) {
       console.error('Erreur téléchargement PDF:', error)
-      alert('Erreur lors du téléchargement du PDF')
+      toast.error('Erreur lors du téléchargement du PDF')
     }
   }
 

@@ -8,7 +8,8 @@ import jwt from 'jsonwebtoken'
 import type { JWTPayload } from '@ezstart/auth-sdk/server'
 import { getAuthUserModel } from '../models/auth-user.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
 
 /**
  * Middleware to verify JWT token and attach user to request

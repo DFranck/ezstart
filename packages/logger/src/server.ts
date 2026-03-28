@@ -1,10 +1,16 @@
 import pino from 'pino'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 /**
  * Base Pino logger instance
+ *
+ * In production, default level is 'warn' (only warn + error)
+ * In development, default level is 'debug' (everything)
+ * Override with LOG_LEVEL env var
  */
 const pinoLogger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || (isDev ? 'debug' : 'warn'),
   transport: process.env.NODE_ENV === 'development'
     ? {
         target: 'pino-pretty',

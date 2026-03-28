@@ -227,7 +227,7 @@ export const PROJECT_METADATA: Record<AppName, ProjectMetadata> = {
     description: 'Game screenshot scanner and stats analyzer (OCR)',
     emoji: '🎮',
     logo: '/icons/icon-192x192.png',
-    githubPath: 'apps/game-analyzer',
+    githubPath: 'apps/gacha-analyzer',
     webPlatform: 'vercel',
     apiPlatform: 'railway',
   },

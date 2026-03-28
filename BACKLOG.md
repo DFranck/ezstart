@@ -47,11 +47,24 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 14. [ ] Theme gacha-analyzer — renommer game-analyzer.css → gacha-analyzer.css dans packages/ui
 
 ### Cross-project items
-15. [ ] Audit sécurité complet — en cours (agent security)
-16. [ ] Audit code quality — en cours (agent code-quality)
-17. [ ] READMEs à jour — en cours (agent documentation)
-18. [ ] Standardiser toutes les réponses API — format unique { success, data, meta }
-19. [ ] alert() → toast partout (ezbill fait, vérifier les autres apps)
+15. [x] Audit sécurité complet — 3 CRITICAL, 6 HIGH, 5 MEDIUM, 3 LOW identifiés
+16. [x] Audit code quality — 20 problèmes identifiés, dead files + console.log packages fixés
+17. [x] READMEs à jour — 19 packages + 8 apps READMEs réécrits (minimal <30 lignes)
+18. [ ] Standardiser toutes les réponses API — format unique { success, data, meta } — en cours (audit)
+19. [ ] alert() → toast partout — ezbill fait, audit autres apps en cours
+
+### Sécurité (du rapport audit)
+20. [ ] CRITICAL: EZBill auth — remplacer X-User-Id par JWT réel via EZAuth
+21. [ ] CRITICAL: JWT Secret — supprimer fallback hardcodé, crash si non défini
+22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
+23. [ ] HIGH: Gacha-analyzer — ajouter auth middleware sur routes destructives
+24. [ ] HIGH: Green-Pulse — implémenter auth JWT (pas X-User-Id)
+25. [ ] HIGH: EZPay — ajouter auth sur routes sensibles
+26. [ ] HIGH: login-cookie rate limiting
+27. [ ] HIGH: Debug logging auth codes — supprimer ou conditionner sur NODE_ENV
+28. [ ] MEDIUM: Zod validation sur toutes les routes gacha-analyzer + green-pulse
+29. [ ] Logger — ajouter filtre NODE_ENV dans @ezstart/logger (debug/info seulement en dev)
+30. [ ] Remplacer console.log supprimés par logger.debug() dans les packages
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * Game Analyzer Theme CSS
- * Source: packages/ui/src/styles/themes/game-analyzer/game-analyzer.css
+ * Source: packages/ui/src/styles/themes/gacha-analyzer/gacha-analyzer.css
  *
  * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
  * Run `pnpm generate:themes` to regenerate from CSS source
