@@ -74,12 +74,18 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
         </CardHeader>
         <CardContent>
           <Div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-            <Image
-              src={scan.imageUrl}
-              alt="Scanned image"
-              fill
-              className="object-contain"
-            />
+            {scan.imageUrl && !scan.imageUrl.startsWith('memory://') ? (
+              <Image
+                src={scan.imageUrl}
+                alt="Scanned image"
+                fill
+                className="object-contain"
+              />
+            ) : (
+              <Div className="flex items-center justify-center h-full">
+                <P className="text-muted-foreground text-sm">Image non disponible (capture mémoire)</P>
+              </Div>
+            )}
           </Div>
         </CardContent>
       </Card>

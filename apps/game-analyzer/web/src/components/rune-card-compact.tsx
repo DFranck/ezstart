@@ -373,6 +373,16 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           if (mismatchPen < 0) negatives.push(`Stats hors-profil du set (${mismatchPen})`)
           else positives.push('Stats synergiques avec le set')
 
+          // Main stat tier (slots 2/4/6 only)
+          const mainTier = (analysis as any).mainStatTier as string | undefined
+          const mainFactor = (analysis as any).mainStatFactor as number | undefined
+          if (mainTier && mainFactor !== undefined) {
+            if (mainTier === 'S' || mainTier === 'A')
+              positives.push(`Main stat ${formatStatLabel(rune.mainStat.type)} [${mainTier}] synergique (×${mainFactor})`)
+            else
+              negatives.push(`Main stat ${formatStatLabel(rune.mainStat.type)} [${mainTier}] inadaptée (×${mainFactor})`)
+          }
+
           // Set strength
           if (setStrengthTier === 'S' || setStrengthTier === 'A')
             positives.push(`Set ${rune.set} (${setStrengthTier}-tier, pas de malus seuil)`)

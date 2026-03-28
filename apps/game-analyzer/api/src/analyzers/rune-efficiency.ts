@@ -1475,6 +1475,14 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   // Innate scoring — bonus/malus based on innate stat tier for this set
   const innate = calculateInnateScore(rune.innateStat, rune.set)
 
+  // Main stat tier — slots 2/4/6 have variable main stats, slots 1/3/5 are fixed
+  const FIXED_MAIN_SLOTS = [1, 3, 5]
+  const mainStatTier: StatTier | undefined = !FIXED_MAIN_SLOTS.includes(rune.slot)
+    ? (SET_STAT_TIERS[rune.set] ?? SET_STAT_TIERS.violent!)[rune.mainStat.type] ?? 'C'
+    : undefined
+  const MAIN_STAT_FACTOR: Record<StatTier, number> = { S: 1.0, A: 0.95, B: 0.8, C: 0.6, D: 0.4 }
+  const mainStatFactor = mainStatTier ? MAIN_STAT_FACTOR[mainStatTier] : 1.0
+
   // Additional penalties
   const lowRollPenalty = calculateLowRollPenalty(rune.subStats, rune.set, isAncient)
   const nonGrindablePenalty = calculateNonGrindablePenalty(rune.subStats)
@@ -1485,16 +1493,16 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
   const setStrength = SET_STRENGTH[rune.set] ?? 'B'
   const setStrengthBonus = SET_STRENGTH_THRESHOLD_BONUS[setStrength] ?? 0
 
-  // Adjusted efficiency includes all penalties
+  // Adjusted efficiency: main stat factor scales the base, then penalties are added
   // (innateScore is handled separately inside calculateProgressiveAdvice)
-  const adjustedSetWeighted = roundedSetWeighted + lowRollPenalty + nonGrindablePenalty + qualityPenalty + mismatchPenalty
+  const adjustedSetWeighted = (roundedSetWeighted * mainStatFactor) + lowRollPenalty + nonGrindablePenalty + qualityPenalty + mismatchPenalty
 
   // Scale potential by the ratio of setWeighted vs Barion current
   // This approximates what the set-weighted potential would be
   const setWeightRatio = roundedSetWeighted > 0 && roundedCurrent > 0
     ? roundedSetWeighted / roundedCurrent
     : 0.5
-  const adjustedPotential = finalPotential * Math.min(setWeightRatio, 1.0)
+  const adjustedPotential = finalPotential * Math.min(setWeightRatio, 1.0) * mainStatFactor
 
   // Progressive advice — use penalty-adjusted efficiency and set-weighted potential
   const progressiveAdvice = calculateProgressiveAdvice(rune, quality, adjustedSetWeighted, adjustedPotential, synergy, profile, innate.score, setStrengthBonus)
@@ -1540,6 +1548,8 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     qualityPenalty: qualityPenalty !== 0 ? qualityPenalty : undefined,
     mismatchPenalty: mismatchPenalty !== 0 ? mismatchPenalty : undefined,
     setStrength,
+    mainStatTier,
+    mainStatFactor,
     profile,
     ...(isAncient ? { isAncient } : {}),
   }
