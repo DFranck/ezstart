@@ -9,8 +9,11 @@
   "files": [],
   "references": [
     // Core packages (ordre de dépendance)
+    { "path": "./packages/config" },
     { "path": "./packages/logger" },
     { "path": "./packages/fetch-client" },
+    { "path": "./packages/ocr-sdk" },
+    { "path": "./packages/rbac" },
 
     // Infrastructure packages
     { "path": "./packages/express-core" },
@@ -23,12 +26,14 @@
     { "path": "./apps/ezbill/types" },
     { "path": "./apps/ezbill/templates" },
     { "path": "./apps/green-pulse/types" },
+    { "path": "./apps/gacha-analyzer/types" },
 
     // APIs
     { "path": "./apps/ezauth/api" },
     { "path": "./apps/ezpay/api" },
     { "path": "./apps/ezbill/api" },
     { "path": "./apps/green-pulse/api" },
+    { "path": "./apps/gacha-analyzer/api" },
 
     // Web apps
     { "path": "./apps/ezstart/web" },
@@ -37,6 +42,7 @@
     { "path": "./apps/ezbill/web" },
     { "path": "./apps/asc-tcd/web" },
     { "path": "./apps/fengshui/web" },
-    { "path": "./apps/green-pulse/web" }
+    { "path": "./apps/green-pulse/web" },
+    { "path": "./apps/gacha-analyzer/web" }
   ]
 }
