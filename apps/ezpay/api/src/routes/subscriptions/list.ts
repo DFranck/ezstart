@@ -1,5 +1,6 @@
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
+import { authMiddleware } from '../../middleware/auth.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
 import { z } from 'zod'
 
@@ -68,7 +69,7 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
 // Route with OpenAPI Documentation
 // ========================================
 
-docRouter.get('/subscriptions', getSubscriptionsHandler, {
+docRouter.get('/subscriptions', authMiddleware, getSubscriptionsHandler, {
   summary: 'Get subscriptions for a user',
   tags: ['Subscriptions'],
   querySchema: subscriptionsQuerySchema,
