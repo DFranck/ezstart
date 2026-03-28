@@ -9,17 +9,23 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const endpointsQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
+  limit: z.coerce.number().min(1).max(50).default(10).describe('Number of endpoints to return'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const getEndpointsHandler = async (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params
-    const hours = Math.min(Number(req.query.hours) || 24, 168)
-    const limit = Math.min(Number(req.query.limit) || 10, 50)
+    const parsed = endpointsQuerySchema.safeParse(req.query)
+    const { hours, limit } = parsed.success ? parsed.data : { hours: Math.min(Number(req.query.hours) || 24, 168), limit: Math.min(Number(req.query.limit) || 10, 50) }
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
     const PerformanceMetric = await getPerformanceMetricModel()
@@ -51,7 +57,7 @@ const getEndpointsHandler = async (req: Request, res: Response) => {
       },
     ])
 
-    res.json({
+    sendSuccess(res, {
       serviceId,
       hours,
       slowestEndpoints: endpointStats.map((stat: any) => ({
@@ -64,10 +70,7 @@ const getEndpointsHandler = async (req: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('[Performance] Error fetching endpoint stats:', error)
-    res.status(500).json({
-      error: 'Failed to fetch endpoint statistics',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch endpoint statistics')
   }
 }
 

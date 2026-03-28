@@ -56,7 +56,7 @@ const getServiceHistoryHandler = (req: Request, res: Response) => {
     const config = MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
 
     if (!config) {
-      return res.status(404).json({ error: 'Service not found' })
+      return sendError(res, 'Service not found', 404)
     }
 
     const history = healthChecker.getHistory(config.name, Number(limit))
@@ -64,7 +64,7 @@ const getServiceHistoryHandler = (req: Request, res: Response) => {
     const uptime7d = healthChecker.calculateUptime(config.name, 24 * 7)
     const uptime30d = healthChecker.calculateUptime(config.name, 24 * 30)
 
-    res.json({
+    sendSuccess(res, {
       id: serviceId,
       name: config.name,
       history,
@@ -75,10 +75,7 @@ const getServiceHistoryHandler = (req: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get health check history',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to get health check history')
   }
 }
 

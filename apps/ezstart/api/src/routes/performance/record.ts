@@ -15,23 +15,30 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const recordMetricSchema = z.object({
+  serviceId: z.string().min(1).describe('Service identifier'),
+  metricType: z.string().min(1).describe('Type of metric'),
+  endpoint: z.string().optional().describe('Endpoint path'),
+  duration: z.number().min(0).describe('Duration in ms'),
+  status: z.enum(['success', 'error']).describe('Metric status'),
+  metadata: z.record(z.unknown()).optional().describe('Additional metadata'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const recordMetricHandler = async (req: Request, res: Response) => {
   try {
-    const { serviceId, metricType, endpoint, duration, status, metadata } = req.body
-
-    // Validation
-    if (!serviceId || !metricType || duration === undefined || !status) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        required: ['serviceId', 'metricType', 'duration', 'status'],
-      })
+    const validation = recordMetricSchema.safeParse(req.body)
+    if (!validation.success) {
+      return sendValidationError(res, 'Invalid metric data', validation.error.errors)
     }
+
+    const { serviceId, metricType, endpoint, duration, status, metadata } = validation.data
 
     const PerformanceMetric = await getPerformanceMetricModel()
 
@@ -45,16 +52,10 @@ const recordMetricHandler = async (req: Request, res: Response) => {
       metadata: metadata || {},
     })
 
-    res.status(201).json({
-      success: true,
-      metricId: metric._id,
-    })
+    res.status(201).json({ success: true, data: { metricId: metric._id } })
   } catch (error) {
     logger.error('[Performance] Error recording metric:', error)
-    res.status(500).json({
-      error: 'Failed to record performance metric',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to record performance metric')
   }
 }
 

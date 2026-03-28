@@ -4,7 +4,7 @@
  * Get health check for specific project
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { ProjectHealthChecker } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 
@@ -29,12 +29,9 @@ const getProjectByIdHandler = async (req: Request, res: Response) => {
       }
     )
 
-    res.json(project)
+    sendSuccess(res, project)
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to check project',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to check project')
   }
 }
 

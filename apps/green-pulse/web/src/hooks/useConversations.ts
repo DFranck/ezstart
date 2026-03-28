@@ -47,16 +47,14 @@ export function useConversations() {
       const userId = user?._id
       const endpoint = userId ? `/conversations?userId=${userId}` : '/conversations'
 
-      const response = await callApi<{ success: boolean; data: { conversations: any[] } }>(
-        endpoint
-      )
+      const response = await callApi<{ conversations: any[] }>(endpoint)
 
       if (!response.ok) {
         throw new Error(parseApiError(response.data))
       }
 
-      if (response.data?.data?.conversations) {
-        return response.data.data.conversations.map((conv: any) => ({
+      if (response.data?.conversations) {
+        return response.data.conversations.map((conv: any) => ({
           ...conv,
           createdAt: new Date(conv.createdAt),
           updatedAt: new Date(conv.updatedAt),
@@ -74,10 +72,10 @@ export function useConversations() {
       queryFn: async () => {
         if (!id) return null
 
-        const response = await callApi<{ success: boolean; data: any }>(`/conversations/${id}`)
+        const response = await callApi<any>(`/conversations/${id}`)
 
-        if (response.ok && response.data?.data) {
-          const conversation = response.data.data
+        if (response.ok && response.data) {
+          const conversation = response.data
           return {
             ...conversation,
             createdAt: new Date(conversation.createdAt),
@@ -98,7 +96,7 @@ export function useConversations() {
   // Mutation: Create new conversation
   const createConversationMutation = useMutation({
     mutationFn: async (title: string = 'New Chat') => {
-      const response = await callApi<{ success: boolean; data: any }>('/conversations', {
+      const response = await callApi<any>('/conversations', {
         method: 'POST',
         body: {
           title,
@@ -110,8 +108,8 @@ export function useConversations() {
         throw new Error(parseApiError(response.data))
       }
 
-      if (response.data?.data) {
-        const conversation = response.data.data
+      if (response.data) {
+        const conversation = response.data
         return {
           ...conversation,
           createdAt: new Date(conversation.createdAt),

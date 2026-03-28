@@ -8,16 +8,22 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const serviceHistoryQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const getByServiceHandler = async (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params as { serviceId: string }
-    const hours = Math.min(Number(req.query.hours) || 24, 168) // Max 7 days
+    const parsed = serviceHistoryQuerySchema.safeParse(req.query)
+    const hours = parsed.success ? parsed.data.hours : Math.min(Number(req.query.hours) || 24, 168)
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
     const HealthCheck = await getHealthCheckModel()
@@ -44,7 +50,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
         : null
 
     // Empty data is OK (200), return empty history
-    res.json({
+    sendSuccess(res, {
       serviceId,
       hours,
       totalChecks,
@@ -61,10 +67,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500
     logger.error('[History] Error fetching service history:', error)
-    res.status(500).json({
-      error: 'Failed to fetch history',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch history')
   }
 }
 

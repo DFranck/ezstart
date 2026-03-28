@@ -10,18 +10,28 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getPerformanceMetricModel, type IPerformanceMetric } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const performanceQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
+  metricType: z.string().optional().describe('Filter by metric type'),
+  endpoint: z.string().optional().describe('Filter by endpoint'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const getByServiceHandler = async (req: Request, res: Response) => {
   try {
     const { serviceId } = req.params
-    const hours = Math.min(Number(req.query.hours) || 24, 168)
-    const metricType = req.query.metricType as string | undefined
-    const endpoint = req.query.endpoint as string | undefined
+    const parsed = performanceQuerySchema.safeParse(req.query)
+    const { hours, metricType, endpoint } = parsed.success ? parsed.data : {
+      hours: Math.min(Number(req.query.hours) || 24, 168),
+      metricType: req.query.metricType as string | undefined,
+      endpoint: req.query.endpoint as string | undefined,
+    }
 
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000)
     const PerformanceMetric = await getPerformanceMetricModel()
@@ -71,7 +81,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
     const maxDuration = durations.length > 0 ? Math.max(...durations) : null
     const minDuration = durations.length > 0 ? Math.min(...durations) : null
 
-    res.json({
+    sendSuccess(res, {
       serviceId,
       hours,
       filters: {
@@ -101,10 +111,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('[Performance] Error fetching metrics:', error)
-    res.status(500).json({
-      error: 'Failed to fetch performance metrics',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch performance metrics')
   }
 }
 

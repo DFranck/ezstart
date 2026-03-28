@@ -13,16 +13,22 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+const projectHistoryQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
+})
 
 export const router: ReturnType<typeof Router> = Router()
 
 const getByProjectHandler = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params as { projectId: string }
-    const hours = Math.min(Number(req.query.hours) || 24, 168)
+    const parsed = projectHistoryQuerySchema.safeParse(req.query)
+    const hours = parsed.success ? parsed.data.hours : Math.min(Number(req.query.hours) || 24, 168)
 
     // Map project to service IDs
     const serviceIds = [`${projectId}-api`, `${projectId}-web`]
@@ -73,18 +79,11 @@ const getByProjectHandler = async (req: Request, res: Response) => {
     const validHistories = histories.filter(h => h !== null)
 
     // Empty data is OK (200), return empty array
-    res.json({
-      projectId,
-      hours,
-      services: validHistories,
-    })
+    sendSuccess(res, { projectId, hours, services: validHistories })
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500
     logger.error('[History] Error fetching project history:', error)
-    res.status(500).json({
-      error: 'Failed to fetch project history',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to fetch project history')
   }
 }
 

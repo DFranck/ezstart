@@ -45,14 +45,14 @@ export function useScan() {
       if (zoneSub3) formData.append('zoneSub3', zoneSub3)
       if (zoneSub4) formData.append('zoneSub4', zoneSub4)
 
-      const response = await callApi<{ success: boolean; data: Scan }>('/scan', {
+      const response = await callApi<Scan>('/scan', {
         method: 'POST',
         body: formData,
       })
 
       // API returns { success, data: { _id, gameType, status, result: ScanResult } }
-      // Return result directly so consumers get { success, data, rawText, confidence, analysis }
-      return response.data!.data.result
+      // Auto-unwrapped: response.data is the Scan directly
+      return response.data!.result
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scans'] })

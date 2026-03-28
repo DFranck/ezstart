@@ -8,7 +8,7 @@
  * - Production: Checks production URLs only
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { ProjectHealthChecker } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 
@@ -28,7 +28,7 @@ const listProjectsHandler = async (_: Request, res: Response) => {
       retries,
     })
 
-    res.json({
+    sendSuccess(res, {
       projects,
       environment,
       summary: {
@@ -39,10 +39,7 @@ const listProjectsHandler = async (_: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to check projects',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to check projects')
   }
 }
 

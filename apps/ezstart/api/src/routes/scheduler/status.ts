@@ -4,7 +4,7 @@
  * Get adaptive scheduler status with current intervals for all services
  */
 
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import type { HealthCheckScheduler } from '../../services/healthCheckScheduler.js'
 import type { Request, Response } from 'express'
 
@@ -18,14 +18,11 @@ export function setScheduler(schedulerInstance: HealthCheckScheduler) {
 
 const getStatusHandler = (req: Request, res: Response) => {
   if (!scheduler) {
-    return res.status(503).json({
-      error: 'Scheduler not initialized',
-      isRunning: false,
-    })
+    return sendError(res, 'Scheduler not initialized', 503)
   }
 
   const status = scheduler.getStatus()
-  res.json(status)
+  sendSuccess(res, status)
 }
 
 router.get('/status', getStatusHandler)

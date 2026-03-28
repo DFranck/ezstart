@@ -202,12 +202,11 @@ export async function callApi<T = any>(
 
       if (isStandardResponse) {
         return {
-          ok: (json.success && res.ok) as true,
+          ok: true as const,
           status: res.status,
           url: res.url,
           data: (json.data ?? json) as T,
           meta: json.meta as ApiMeta | undefined,
-          error: json.error as string | undefined,
           raw: json,
         }
       }
