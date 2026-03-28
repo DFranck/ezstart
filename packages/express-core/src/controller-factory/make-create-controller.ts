@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ZodSchema } from 'zod';
+import { sendSuccess, sendError, sendValidationError } from '../helpers/api-response.js';
 
 export function makeCreateController<TInput, TOutput>(
   schema: ZodSchema<TInput>,
@@ -9,16 +10,14 @@ export function makeCreateController<TInput, TOutput>(
   return async (req: Request, res: Response) => {
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
-      return res
-        .status(422)
-        .json({ error: 'Validation error', details: parsed.error.errors });
+      return sendValidationError(res, 'Validation error', parsed.error.errors);
     }
     try {
       const result = await service(parsed.data);
-      res.status(201).json(result);
+      return res.status(201).json({ success: true, data: result });
     } catch (err) {
       console.error(`[${logTag}]`, err);
-      res.status(500).json({ error: `Failed to create ${logTag}` });
+      return sendError(res, `Failed to create ${logTag}`);
     }
   };
 }

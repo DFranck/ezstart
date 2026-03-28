@@ -352,6 +352,9 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.1
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -383,6 +386,9 @@ importers:
       '@types/express-serve-static-core':
         specifier: ^4.19.6
         version: 4.19.7
+      '@types/jsonwebtoken':
+        specifier: ^9.0.9
+        version: 9.0.10
       '@types/node':
         specifier: ^20.7.0
         version: 20.19.26

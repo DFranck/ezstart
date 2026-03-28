@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { sendSuccess, sendError } from '../helpers/api-response.js';
 
 type DeleteControllerOptions = {
   statusCode?: number;
@@ -21,24 +22,24 @@ export function makeDeleteController<T>(
     const id = req.params.id;
 
     if (!id || (validateId && !validateId(id))) {
-      return res.status(400).json({ error: 'Invalid ID' });
+      return sendError(res, 'Invalid ID', 400);
     }
 
     try {
       const deleted = await service(id);
 
       if (!deleted) {
-        return res.status(404).json({ error: `${label} not found` });
+        return sendError(res, `${label} not found`, 404);
       }
 
       if (sendBody) {
-        return res.status(statusCode).json(deleted);
+        return res.status(statusCode).json({ success: true, data: deleted });
       } else {
         return res.status(statusCode).send();
       }
     } catch (err) {
       console.error(`[${label}]`, err);
-      return res.status(500).json({ error: `Failed to delete ${label}` });
+      return sendError(res, `Failed to delete ${label}`);
     }
   };
 }

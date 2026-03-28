@@ -1,16 +1,13 @@
 import { NextFunction, Request, Response } from 'express'
 import { AnyZodObject } from 'zod'
+import { sendValidationError } from '../helpers/api-response.js'
 
 export function validateQuery(schema: AnyZodObject) {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.query)
 
     if (!result.success) {
-      return res.status(422).json({
-        success: false,
-        error: 'Invalid query params',
-        details: result.error.errors,
-      })
+      return sendValidationError(res, 'Invalid query params', result.error.errors)
     }
 
     // @ts-ignore - Augmenting request with validated data

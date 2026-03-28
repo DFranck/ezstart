@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ZodSchema } from 'zod';
+import { sendSuccess, sendError, sendValidationError } from '../helpers/api-response.js';
 
 type UpdateControllerOptions = {
   validateId?: (id: string) => boolean;
@@ -17,23 +18,20 @@ export function makeUpdateController<TInput, TOutput>(
     const id = req.params.id;
 
     if (!id || (validateId && !validateId(id))) {
-      return res.status(400).json({ error: 'Invalid ID' });
+      return sendError(res, 'Invalid ID', 400);
     }
 
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(422).json({
-        error: 'Validation error',
-        details: parsed.error.errors,
-      });
+      return sendValidationError(res, 'Validation error', parsed.error.errors);
     }
 
     try {
       const result = await service(id, parsed.data);
-      return res.json(result);
+      return sendSuccess(res, result);
     } catch (err) {
       console.error(`[${logTag}]`, err);
-      return res.status(500).json({ error: `Failed to update ${logTag}` });
+      return sendError(res, `Failed to update ${logTag}`);
     }
   };
 }

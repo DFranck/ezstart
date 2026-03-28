@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { sendSuccess, sendError } from '../helpers/api-response.js'
 
 export function makeGetListController<Q, T>(service: (query: Q) => Promise<T[]>, logTag: string) {
   return async (req: Request, res: Response) => {
@@ -6,10 +7,10 @@ export function makeGetListController<Q, T>(service: (query: Q) => Promise<T[]>,
     const query = req.validatedQuery as Q
     try {
       const items = await service(query)
-      res.json(items)
+      return sendSuccess(res, items)
     } catch (err) {
       console.error(`[${logTag}]`, err)
-      res.status(500).json({ error: `Failed to fetch ${logTag}` })
+      return sendError(res, `Failed to fetch ${logTag}`)
     }
   }
 }

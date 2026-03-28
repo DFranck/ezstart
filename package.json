@@ -13,6 +13,7 @@
     "build:green-pulse-api": "pnpm build:api && turbo build --filter=api-green-pulse",
     "build:ga-api": "pnpm build:api && turbo build --filter=api-gacha-analyzer",
     "build:ga-web": "turbo build --filter=web-gacha-analyzer",
+    "dev": "node scripts/tools/dev.js",
     "dev:types": "tsc -b --watch",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

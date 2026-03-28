@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { sendSuccess, sendError } from '../helpers/api-response.js';
 
 type RestoreControllerOptions = {
   validateId?: (id: string) => boolean;
@@ -15,20 +16,20 @@ export function makeRestoreController<T>(
     const id = req.params.id;
 
     if (!id || (validateId && !validateId(id))) {
-      return res.status(400).json({ error: 'Invalid ID' });
+      return sendError(res, 'Invalid ID', 400);
     }
 
     try {
       const restored = await service(id);
 
       if (!restored) {
-        return res.status(404).json({ error: `${logTag} not found` });
+        return sendError(res, `${logTag} not found`, 404);
       }
 
-      return res.json(restored);
+      return sendSuccess(res, restored);
     } catch (err) {
       console.error(`[${logTag}]`, err);
-      return res.status(500).json({ error: `Failed to restore ${logTag}` });
+      return sendError(res, `Failed to restore ${logTag}`);
     }
   };
 }
