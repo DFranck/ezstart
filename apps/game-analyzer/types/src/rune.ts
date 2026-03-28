@@ -54,4 +54,6 @@ export interface RuneData {
   subStats: RuneStat[]
   innateStat?: RuneStat
   isAncient?: boolean
+  /** Last power-up roll values extracted from OCR hints like "(6%)" after substat values */
+  rollHints?: Partial<Record<StatType, number>>
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div, P } from '@ezstart/ui/components'
+import { Badge, Button, Div, Input, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
@@ -27,6 +27,8 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   const { data: scan, isLoading } = useScanDetail(id)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isReanalyzing, setIsReanalyzing] = useState(false)
+  const [feedbackComment, setFeedbackComment] = useState('')
+  const [showDisagreeInput, setShowDisagreeInput] = useState(false)
   const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
     if (typeof window === 'undefined') return 'compact'
     try {
@@ -61,6 +63,17 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       console.error('[reanalyze] Error:', e)
     } finally {
       setIsReanalyzing(false)
+    }
+  }
+
+  async function handleFeedback(opinion: 'agree' | 'disagree', comment?: string) {
+    try {
+      await callApi(`/scans/${id}/feedback`, { method: 'POST', body: { opinion, comment } })
+      await queryClient.invalidateQueries({ queryKey: ['scan', id] })
+      setShowDisagreeInput(false)
+      setFeedbackComment('')
+    } catch (e) {
+      console.error('[feedback] Error:', e)
     }
   }
 
@@ -161,6 +174,40 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
               {tmpl}
             </Button>
           ))}
+        </Div>
+      )}
+
+      {/* Feedback */}
+      {scan.result && (
+        <Div className="flex items-center gap-2">
+          {scan.feedback ? (
+            <Div className="flex items-center gap-2">
+              <Badge className={scan.feedback.opinion === 'agree' ? 'bg-success/20 text-success-foreground border-success/40' : 'bg-destructive/20 text-destructive border-destructive/40'}>
+                {scan.feedback.opinion === 'agree' ? `👍 ${t('feedback.agree')}` : `👎 ${t('feedback.disagree')}`}
+              </Badge>
+              {scan.feedback.comment && <P className="text-xs text-muted-foreground">{scan.feedback.comment}</P>}
+            </Div>
+          ) : showDisagreeInput ? (
+            <Div className="flex items-center gap-2 w-full">
+              <Input
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                placeholder={t('feedback.commentPlaceholder')}
+                className="text-sm flex-1"
+              />
+              <Button size="sm" onClick={() => handleFeedback('disagree', feedbackComment)}>
+                {t('feedback.send')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { setShowDisagreeInput(false); setFeedbackComment('') }}>
+                {t('feedback.cancel')}
+              </Button>
+            </Div>
+          ) : (
+            <Div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => handleFeedback('agree')}>👍 {t('feedback.agree')}</Button>
+              <Button variant="outline" size="sm" onClick={() => setShowDisagreeInput(true)}>👎 {t('feedback.disagree')}</Button>
+            </Div>
+          )}
         </Div>
       )}
 

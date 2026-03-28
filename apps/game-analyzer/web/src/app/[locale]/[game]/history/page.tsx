@@ -25,6 +25,7 @@ export default function GameHistoryPage() {
   const [adviceFilter, setAdviceFilter] = useState('all')
   const [setFilter, setSetFilter] = useState('all')
   const [slotFilter, setSlotFilter] = useState('all')
+  const [feedbackFilter, setFeedbackFilter] = useState('all')
 
   const { data: scans, isLoading } = useScans({
     gameType: game,
@@ -41,11 +42,14 @@ export default function GameHistoryPage() {
     if (adviceFilter !== 'all' && advice?.action !== adviceFilter) return false
     if (setFilter !== 'all' && data?.set !== setFilter) return false
     if (slotFilter !== 'all' && data?.slot !== Number(slotFilter)) return false
+    if (feedbackFilter === 'agree' && scan.feedback?.opinion !== 'agree') return false
+    if (feedbackFilter === 'disagree' && scan.feedback?.opinion !== 'disagree') return false
+    if (feedbackFilter === 'none' && scan.feedback) return false
 
     return true
   })
 
-  const isFiltered = statusFilter !== 'all' || levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all'
+  const isFiltered = statusFilter !== 'all' || levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all'
   const totalCount = scans?.length ?? 0
 
   return (
@@ -123,6 +127,18 @@ export default function GameHistoryPage() {
             {[1, 2, 3, 4, 5, 6].map(s => (
               <SelectItem key={s} value={String(s)}>Slot {s}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={feedbackFilter} onValueChange={setFeedbackFilter}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder={t('feedback.title')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('feedback.all')}</SelectItem>
+            <SelectItem value="agree">👍 {t('feedback.agree')}</SelectItem>
+            <SelectItem value="disagree">👎 {t('feedback.disagree')}</SelectItem>
+            <SelectItem value="none">{t('feedback.noFeedback')}</SelectItem>
           </SelectContent>
         </Select>
       </Div>

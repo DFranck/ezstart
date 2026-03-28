@@ -1283,4 +1283,146 @@ describe('summonersWarParser', () => {
       expect(data.partial).toBe(true)
     })
   })
+
+  describe('roll hints extraction', () => {
+    it('extracts roll hint from (6%) pattern', () => {
+      const text = [
+        'Violent Rune (1)',
+        '+12',
+        'Legend',
+        'ATK +118',
+        'HP +8% (a6%)',
+        'DEF +13%',
+        'CRI Rate +12%',
+        'SPD +5',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      expect(data.rollHints).toBeDefined()
+      expect(data.rollHints!['hp%']).toBe(6)
+    })
+
+    it('extracts roll hint from (A6%) OCR variant', () => {
+      const text = [
+        'Will Rune (3)',
+        '+12',
+        'Legend',
+        'DEF +160',
+        'Resistance +13% (A6%)',
+        'HP +8%',
+        'ATK +7%',
+        'CRI Rate +5%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      expect(data.rollHints).toBeDefined()
+      expect(data.rollHints!['res']).toBe(6)
+    })
+
+    it('extracts multiple roll hints from different substats', () => {
+      const text = [
+        'Swift Rune (5)',
+        '+12',
+        'Legend',
+        'HP +2448',
+        'SPD +5 (5)',
+        'ATK +7% (a7%)',
+        'DEF +6%',
+        'CRI Dmg +6% (6%)',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      expect(data.rollHints).toBeDefined()
+      expect(data.rollHints!['spd']).toBe(5)
+      expect(data.rollHints!['atk%']).toBe(7)
+      expect(data.rollHints!['cd']).toBe(6)
+    })
+
+    it('ignores roll hint with value outside valid range', () => {
+      const text = [
+        'Rage Rune (1)',
+        '+12',
+        'Legend',
+        'ATK +118',
+        'DEF +19% (a11%)',
+        'HP +7%',
+        'CRI Rate +6%',
+        'SPD +4',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      // 11% is outside the max roll range for def% (max 8%), so it should be ignored
+      expect(data.rollHints?.['def%']).toBeUndefined()
+    })
+
+    it('ignores garbage OCR in parentheses', () => {
+      const text = [
+        'Fatal Rune (1)',
+        '+12',
+        'Legend',
+        'ATK +118',
+        'HP +8% (avs)',
+        'DEF +6%',
+        'CRI Rate +5%',
+        'SPD +4',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      // "(avs)" has no number, should produce no hint
+      expect(data.rollHints?.['hp%']).toBeUndefined()
+    })
+
+    it('returns no rollHints when no parenthesized hints exist', () => {
+      const text = [
+        'Violent Rune (6)',
+        '+15',
+        'HP +63%',
+        'SPD +23',
+        'CRI Rate +12%',
+        'CRI Dmg +7%',
+        'ATK +8%',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      expect(data.rollHints).toBeUndefined()
+    })
+
+    it('extracts flat HP roll hint', () => {
+      const text = [
+        'Energy Rune (3)',
+        '+12',
+        'Legend',
+        'DEF +160',
+        'HP +550 (a200)',
+        'ATK +7%',
+        'CRI Rate +5%',
+        'SPD +4',
+      ].join('\n')
+
+      const result = summonersWarParser.parse(makeOcrResult(text))
+
+      expect(result.success).toBe(true)
+      const data = result.data as { rollHints?: Record<string, number> }
+      expect(data.rollHints).toBeDefined()
+      expect(data.rollHints!['hp']).toBe(200)
+    })
+  })
 })

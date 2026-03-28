@@ -85,6 +85,11 @@ export function ScanCard({ scan }: ScanCardProps) {
                       {Math.round(scan.result.confidence)}%
                     </P>
                   )}
+                  {scan.feedback && (
+                    <Badge variant="outline" className={`text-[10px] border ${scan.feedback.opinion === 'agree' ? 'bg-success/20 text-success-foreground border-success/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                      {scan.feedback.opinion === 'agree' ? '👍' : '👎'}
+                    </Badge>
+                  )}
                   {advice?.action ? (
                     <Badge variant="outline" className={`text-[10px] border ${ADVICE_COLORS[advice.action] ?? ''}`}>
                       {advice.action.toUpperCase()}

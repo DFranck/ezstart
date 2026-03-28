@@ -251,6 +251,16 @@
     "reanalyzeSuccess": "Re-analyse terminee",
     "rawOcrText": "Texte OCR brut"
   },
+  "feedback": {
+    "title": "Feedback",
+    "agree": "D'accord",
+    "disagree": "Pas d'accord",
+    "all": "Tous les feedbacks",
+    "noFeedback": "Sans feedback",
+    "commentPlaceholder": "Pourquoi n'etes-vous pas d'accord ?",
+    "send": "Envoyer",
+    "cancel": "Annuler"
+  },
   "history": {
     "title": "Historique des Scans",
     "filterByGame": "Filtrer par jeu",

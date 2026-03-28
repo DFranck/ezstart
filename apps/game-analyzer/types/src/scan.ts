@@ -40,6 +40,12 @@ export interface BenchRunResult {
   success: boolean
 }
 
+export interface ScanFeedback {
+  opinion: 'agree' | 'disagree'
+  comment?: string
+  createdAt: Date
+}
+
 export interface Scan {
   id: string
   gameType: GameType
@@ -48,6 +54,7 @@ export interface Scan {
   thumbnail?: string
   status: ScanStatus
   result?: ScanResult
+  feedback?: ScanFeedback
   createdAt: Date
   updatedAt: Date
 }

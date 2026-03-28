@@ -9,10 +9,12 @@ import benchOcrRoutes from './bench-ocr.js'
 import getGameConfigRoutes from './get-game-config.js'
 import putGameConfigRoutes from './put-game-config.js'
 import deleteGameConfigRoutes from './delete-game-config.js'
+import feedbackScanRoutes from './feedback-scan.js'
+import { scansRegistry, monstersRegistry, configRegistry, benchRegistry } from './openapi.js'
 
 const router: any = Router()
 
-export const globalRegistry: any[] = []
+export const globalRegistry = [scansRegistry, monstersRegistry, configRegistry, benchRegistry]
 
 router
   .use('/scan', scanImageRoutes)
@@ -20,6 +22,7 @@ router
   .use('/scans', getScanRoutes)
   .use('/scans', deleteScanRoutes)
   .use('/scans', reanalyzeScanRoutes)
+  .use('/scans', feedbackScanRoutes)
   .use('/monsters', monsterRoutes)
   .use('/bench', benchOcrRoutes)
   .use('/config', getGameConfigRoutes)

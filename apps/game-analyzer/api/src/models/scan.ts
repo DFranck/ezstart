@@ -55,6 +55,11 @@ const scanSchema = new Schema<Scan>(
     result: {
       type: scanResultSchema,
     },
+    feedback: {
+      opinion: { type: String, enum: ['agree', 'disagree'] },
+      comment: { type: String },
+      createdAt: { type: Date },
+    },
     error: {
       type: String,
     },

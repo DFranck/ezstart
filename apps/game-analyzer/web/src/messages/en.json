@@ -251,6 +251,16 @@
     "reanalyzeSuccess": "Re-analysis complete",
     "rawOcrText": "Raw OCR Text"
   },
+  "feedback": {
+    "title": "Feedback",
+    "agree": "Agree",
+    "disagree": "Disagree",
+    "all": "All Feedback",
+    "noFeedback": "No feedback",
+    "commentPlaceholder": "Why do you disagree?",
+    "send": "Send",
+    "cancel": "Cancel"
+  },
   "history": {
     "title": "Scan History",
     "filterByGame": "Filter by game",

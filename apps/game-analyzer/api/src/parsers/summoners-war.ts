@@ -36,6 +36,22 @@ type RuneQuality = 'legend' | 'hero' | 'rare' | 'magic' | 'normal'
 
 const MAX_SUBSTATS = 4
 
+// --- Single roll ranges for validating OCR roll hints (6★) ---
+// A roll hint must fall within these ranges to be considered valid.
+const SINGLE_ROLL_RANGES: Record<StatType, { min: number; max: number }> = {
+  'hp': { min: 135, max: 375 },
+  'hp%': { min: 5, max: 8 },
+  'atk': { min: 10, max: 20 },
+  'atk%': { min: 5, max: 8 },
+  'def': { min: 10, max: 20 },
+  'def%': { min: 5, max: 8 },
+  'spd': { min: 4, max: 6 },
+  'cr': { min: 4, max: 6 },
+  'cd': { min: 4, max: 7 },
+  'res': { min: 4, max: 8 },
+  'acc': { min: 4, max: 8 },
+}
+
 // --- Fixed main stats for slots 1, 3, 5 (always the same in SW) ---
 
 const FIXED_MAIN_STATS: Record<number, { type: StatType; values: number[] }> = {
@@ -585,6 +601,71 @@ function recoverOrphanStats(
 }
 
 /**
+ * Extract roll hints from OCR lines.
+ *
+ * SW displays the last power-up roll in parentheses after the substat value:
+ *   "Resistance +13% (6%)" → last roll on RES was +6%
+ *   "ATK +19 (15)" → last roll on ATK flat was +15
+ *
+ * OCR often adds noise like "a" before the number: "(a6%)", "(A6%)" — we strip it.
+ * The value is validated against single-roll ranges to filter out OCR garbage.
+ */
+function extractRollHints(
+  lines: string[],
+  subStats: RuneStat[],
+): Partial<Record<StatType, number>> {
+  const hints: Partial<Record<StatType, number>> = {}
+
+  // Regex to find a parenthesized roll hint after a stat value
+  // Matches: (6%), (a6%), (A6%), (11%), (15), (a15), etc.
+  const hintRegex = /\((?:[aA])?\s*(\d+(?:\.\d+)?)\s*%?\s*\)/g
+
+  for (const line of lines) {
+    // First, identify which stat this line belongs to
+    let matchedStat: StatType | null = null
+    for (const [pattern, baseType] of STAT_PATTERNS) {
+      const statMatch = new RegExp(
+        `(${pattern.source})\\s*[+\\-]\\s*(\\d+(?:[.,]\\d+)?)\\s*(%?)`,
+        'i',
+      ).exec(line)
+      if (statMatch) {
+        const isPercent = statMatch[statMatch.length - 1] === '%'
+        matchedStat = baseType
+        if (isPercent && (baseType === 'hp' || baseType === 'atk' || baseType === 'def')) {
+          matchedStat = `${baseType}%` as StatType
+        }
+        break
+      }
+    }
+
+    if (!matchedStat) continue
+
+    // Only extract hints for stats that are actually in subStats
+    const isSubstat = subStats.some(s => s.type === matchedStat)
+    if (!isSubstat) continue
+
+    // Find the hint in parentheses
+    hintRegex.lastIndex = 0
+    let hintMatch: RegExpExecArray | null
+    while ((hintMatch = hintRegex.exec(line)) !== null) {
+      const hintValue = parseFloat(hintMatch[1]!)
+
+      // Skip if this looks like the rune slot pattern "(1)" through "(6)"
+      if (hintValue >= 1 && hintValue <= 6 && /rune\s*\(/i.test(line)) continue
+
+      // Validate against single-roll ranges
+      const range = SINGLE_ROLL_RANGES[matchedStat]
+      if (range && hintValue >= range.min && hintValue <= range.max) {
+        hints[matchedStat] = hintValue
+        break // Only take the first valid hint per line
+      }
+    }
+  }
+
+  return hints
+}
+
+/**
  * Determine main stat vs substats, and detect innate stat.
  *
  * Strategy:
@@ -945,6 +1026,10 @@ export const summonersWarParser: GameParser = {
       return failedResult(errors)
     }
 
+    // --- Extract roll hints from OCR parenthesized values ---
+    const rollHints = extractRollHints(cleanLinesForStats, subStats)
+    const hasRollHints = Object.keys(rollHints).length > 0
+
     // --- Partial detection flag ---
     // Mark as partial if we have fewer substats than expected for the rune's quality/level
     const partial = subStats.length < expectedCount
@@ -962,6 +1047,7 @@ export const summonersWarParser: GameParser = {
       ...(setPieceCount ? { setPieceCount } : {}),
       ...(partial ? { partial } : {}),
       ...(isAncient ? { isAncient } : {}),
+      ...(hasRollHints ? { rollHints } : {}),
     })
   },
 }
