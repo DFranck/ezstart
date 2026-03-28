@@ -1,12 +1,12 @@
 'use client'
 
-import { Badge, Button, Div, Input, P } from '@ezstart/ui/components'
+import { Badge, Button, Div, Input, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType, ReportCategory } from '@game-analyzer/types'
 import { RuneCardWithTemplate } from '@/components/rune-card-templates'
 import type { RuneCardTemplate } from '@/components/rune-card-templates'
 import { GearCard } from '@/components/gear-card'
@@ -29,6 +29,10 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
   const [isReanalyzing, setIsReanalyzing] = useState(false)
   const [feedbackComment, setFeedbackComment] = useState('')
   const [showDisagreeInput, setShowDisagreeInput] = useState(false)
+  const [showReportForm, setShowReportForm] = useState(false)
+  const [reportCategory, setReportCategory] = useState<ReportCategory>('wrong-ocr')
+  const [reportDescription, setReportDescription] = useState('')
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false)
   const [runeTemplate, setRuneTemplate] = useState<RuneCardTemplate>(() => {
     if (typeof window === 'undefined') return 'compact'
     try {
@@ -75,6 +79,33 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
     } catch (e) {
       console.error('[feedback] Error:', e)
     }
+  }
+
+  async function handleReport() {
+    if (!reportDescription.trim()) return
+    setIsSubmittingReport(true)
+    try {
+      await callApi(`/scans/${id}/report`, {
+        method: 'POST',
+        body: { category: reportCategory, description: reportDescription },
+      })
+      await queryClient.invalidateQueries({ queryKey: ['scan', id] })
+      setShowReportForm(false)
+      setReportDescription('')
+      setReportCategory('wrong-ocr')
+    } catch (e) {
+      console.error('[report] Error:', e)
+    } finally {
+      setIsSubmittingReport(false)
+    }
+  }
+
+  const REPORT_CATEGORIES: ReportCategory[] = ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other']
+
+  const REPORT_STATUS_STYLES: Record<string, string> = {
+    open: 'bg-destructive/20 text-destructive border-destructive/40',
+    'in-progress': 'bg-warning/20 text-warning-foreground border-warning/40',
+    resolved: 'bg-success/20 text-success-foreground border-success/40',
   }
 
   if (isLoading) {
@@ -207,6 +238,69 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
               <Button variant="outline" size="sm" onClick={() => handleFeedback('agree')}>👍 {t('feedback.agree')}</Button>
               <Button variant="outline" size="sm" onClick={() => setShowDisagreeInput(true)}>👎 {t('feedback.disagree')}</Button>
             </Div>
+          )}
+        </Div>
+      )}
+
+      {/* Reports */}
+      {scan.result && (
+        <Div className="space-y-3">
+          {/* Existing reports */}
+          {scan.reports && scan.reports.length > 0 && (
+            <Div className="space-y-2">
+              <P className="text-sm font-medium">{t('report.title')}</P>
+              {scan.reports.map((report, index) => (
+                <Div key={index} className="rounded-md border border-border p-3 space-y-1.5">
+                  <Div className="flex items-center gap-2">
+                    <Badge className={`border text-[10px] px-1.5 py-0 ${REPORT_STATUS_STYLES[report.status] ?? ''}`}>
+                      {t(`report.status.${report.status}`)}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px]">
+                      {t(`report.categories.${report.category}`)}
+                    </Badge>
+                  </Div>
+                  <P className="text-sm text-muted-foreground">{report.description}</P>
+                  {report.resolution && (
+                    <P className="text-sm text-success-foreground">{t('report.resolution')}: {report.resolution}</P>
+                  )}
+                </Div>
+              ))}
+            </Div>
+          )}
+
+          {/* Report form toggle */}
+          {showReportForm ? (
+            <Div className="space-y-3 rounded-md border border-border p-3">
+              <Select value={reportCategory} onValueChange={(v) => setReportCategory(v as ReportCategory)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('report.category')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPORT_CATEGORIES.map(cat => (
+                    <SelectItem key={cat} value={cat}>{t(`report.categories.${cat}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Textarea
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                placeholder={t('report.descriptionPlaceholder')}
+                className="text-sm"
+                rows={3}
+              />
+              <Div className="flex items-center gap-2">
+                <Button size="sm" onClick={handleReport} disabled={isSubmittingReport || !reportDescription.trim()}>
+                  {t('report.send')}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => { setShowReportForm(false); setReportDescription('') }}>
+                  {t('report.cancel')}
+                </Button>
+              </Div>
+            </Div>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => setShowReportForm(true)}>
+              {t('report.button')}
+            </Button>
           )}
         </Div>
       )}

@@ -46,6 +46,19 @@ export interface ScanFeedback {
   createdAt: Date
 }
 
+export type ReportStatus = 'open' | 'in-progress' | 'resolved'
+
+export type ReportCategory = 'wrong-ocr' | 'wrong-advice' | 'wrong-gem' | 'wrong-efficiency' | 'other'
+
+export interface ScanReport {
+  status: ReportStatus
+  category: ReportCategory
+  description: string
+  resolution?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface Scan {
   id: string
   gameType: GameType
@@ -55,6 +68,7 @@ export interface Scan {
   status: ScanStatus
   result?: ScanResult
   feedback?: ScanFeedback
+  reports?: ScanReport[]
   createdAt: Date
   updatedAt: Date
 }

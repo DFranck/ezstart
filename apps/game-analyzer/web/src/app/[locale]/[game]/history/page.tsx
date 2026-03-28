@@ -26,6 +26,7 @@ export default function GameHistoryPage() {
   const [setFilter, setSetFilter] = useState('all')
   const [slotFilter, setSlotFilter] = useState('all')
   const [feedbackFilter, setFeedbackFilter] = useState('all')
+  const [reportFilter, setReportFilter] = useState('all')
 
   const { data: scans, isLoading } = useScans({
     gameType: game,
@@ -46,10 +47,14 @@ export default function GameHistoryPage() {
     if (feedbackFilter === 'disagree' && scan.feedback?.opinion !== 'disagree') return false
     if (feedbackFilter === 'none' && scan.feedback) return false
 
+    if (reportFilter === 'hasReports' && (!scan.reports || scan.reports.length === 0)) return false
+    if (reportFilter === 'openReports' && (!scan.reports || !scan.reports.some(r => r.status === 'open'))) return false
+    if (reportFilter === 'noReports' && scan.reports && scan.reports.length > 0) return false
+
     return true
   })
 
-  const isFiltered = statusFilter !== 'all' || levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all'
+  const isFiltered = statusFilter !== 'all' || levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all' || reportFilter !== 'all'
   const totalCount = scans?.length ?? 0
 
   return (
@@ -139,6 +144,18 @@ export default function GameHistoryPage() {
             <SelectItem value="agree">👍 {t('feedback.agree')}</SelectItem>
             <SelectItem value="disagree">👎 {t('feedback.disagree')}</SelectItem>
             <SelectItem value="none">{t('feedback.noFeedback')}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={reportFilter} onValueChange={setReportFilter}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder={t('report.title')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('report.filter.all')}</SelectItem>
+            <SelectItem value="hasReports">{t('report.filter.hasReports')}</SelectItem>
+            <SelectItem value="openReports">{t('report.filter.openReports')}</SelectItem>
+            <SelectItem value="noReports">{t('report.filter.noReports')}</SelectItem>
           </SelectContent>
         </Select>
       </Div>

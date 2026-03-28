@@ -261,6 +261,35 @@
     "send": "Send",
     "cancel": "Cancel"
   },
+  "report": {
+    "title": "Reports",
+    "button": "Report a problem",
+    "category": "Category",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the problem...",
+    "send": "Send",
+    "cancel": "Cancel",
+    "resolution": "Resolution",
+    "noReports": "No reports",
+    "categories": {
+      "wrong-ocr": "Wrong OCR",
+      "wrong-advice": "Wrong advice",
+      "wrong-gem": "Wrong gem",
+      "wrong-efficiency": "Wrong efficiency",
+      "other": "Other"
+    },
+    "status": {
+      "open": "Open",
+      "in-progress": "In progress",
+      "resolved": "Resolved"
+    },
+    "filter": {
+      "all": "All Reports",
+      "hasReports": "Has reports",
+      "openReports": "Open reports",
+      "noReports": "No reports"
+    }
+  },
   "history": {
     "title": "Scan History",
     "filterByGame": "Filter by game",

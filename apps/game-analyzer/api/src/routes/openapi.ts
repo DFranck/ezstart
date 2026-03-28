@@ -241,6 +241,87 @@ scansRegistry.registerPath({
   },
 })
 
+// POST /scans/:id/report
+scansRegistry.registerPath({
+  method: 'post',
+  path: '/scans/{id}/report',
+  tags: ['Scans'],
+  summary: 'Report a problem on a scan',
+  description: 'Creates a new bug report on a scan. A scan can have multiple reports.',
+  request: {
+    params: z.object({
+      id: z.string().describe('Scan ID'),
+    }),
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            category: z.enum(['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other']).describe('Report category'),
+            description: z.string().describe('Problem description'),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Report created',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            data: z.any().describe('Updated scan object'),
+          }),
+        },
+      },
+    },
+    400: errorResponse('Invalid category or missing description'),
+    404: errorResponse('Scan not found'),
+    500: errorResponse('Failed to create report'),
+  },
+})
+
+// PATCH /scans/:id/report/:reportIndex
+scansRegistry.registerPath({
+  method: 'patch',
+  path: '/scans/{id}/report/{reportIndex}',
+  tags: ['Scans'],
+  summary: 'Update a report status',
+  description: 'Update report status (open, in-progress, resolved). Resolution comment required when resolving.',
+  request: {
+    params: z.object({
+      id: z.string().describe('Scan ID'),
+      reportIndex: z.string().describe('Report index in the reports array'),
+    }),
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            status: z.enum(['open', 'in-progress', 'resolved']).describe('New status'),
+            resolution: z.string().optional().describe('Resolution comment (required when status is resolved)'),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Report updated',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            data: z.any().describe('Updated scan object'),
+          }),
+        },
+      },
+    },
+    400: errorResponse('Invalid status or missing resolution'),
+    404: errorResponse('Scan not found'),
+    500: errorResponse('Failed to update report'),
+  },
+})
+
 // ---------------------------------------------------------------------------
 // Monsters registry
 // ---------------------------------------------------------------------------

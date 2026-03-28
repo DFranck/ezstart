@@ -1,5 +1,5 @@
 export type { GameType, GameConfig } from './game'
-export type { ScanStatus, ScanResult, Scan, ScanFeedback, OcrSource, BenchRunResult } from './scan'
+export type { ScanStatus, ScanResult, Scan, ScanFeedback, ScanReport, ReportStatus, ReportCategory, OcrSource, BenchRunResult } from './scan'
 export type { RuneSet, RuneSlot, StatType, RuneStat, RuneData, RuneQuality } from './rune'
 export {
   SUBSTAT_ROLL_RANGES,

@@ -60,6 +60,14 @@ const scanSchema = new Schema<Scan>(
       comment: { type: String },
       createdAt: { type: Date },
     },
+    reports: [{
+      status: { type: String, enum: ['open', 'in-progress', 'resolved'], default: 'open' },
+      category: { type: String, enum: ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'], required: true },
+      description: { type: String, required: true },
+      resolution: { type: String },
+      createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now },
+    }],
     error: {
       type: String,
     },

@@ -261,6 +261,35 @@
     "send": "Envoyer",
     "cancel": "Annuler"
   },
+  "report": {
+    "title": "Signalements",
+    "button": "Signaler un probleme",
+    "category": "Categorie",
+    "description": "Description",
+    "descriptionPlaceholder": "Decrivez le probleme...",
+    "send": "Envoyer",
+    "cancel": "Annuler",
+    "resolution": "Resolution",
+    "noReports": "Aucun signalement",
+    "categories": {
+      "wrong-ocr": "OCR incorrect",
+      "wrong-advice": "Mauvais conseil",
+      "wrong-gem": "Gem incorrecte",
+      "wrong-efficiency": "Efficacite fausse",
+      "other": "Autre"
+    },
+    "status": {
+      "open": "Ouvert",
+      "in-progress": "En cours",
+      "resolved": "Resolu"
+    },
+    "filter": {
+      "all": "Tous les signalements",
+      "hasReports": "Avec signalements",
+      "openReports": "Signalements ouverts",
+      "noReports": "Sans signalement"
+    }
+  },
   "history": {
     "title": "Historique des Scans",
     "filterByGame": "Filtrer par jeu",
