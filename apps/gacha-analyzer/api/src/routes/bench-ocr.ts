@@ -6,7 +6,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
@@ -127,19 +127,12 @@ async function saveBenchData(
 router.post('/', upload.single('image'), async (req: any, res: any) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'No image file provided. Use field name "image".',
-      })
+      return sendError(res, 'No image file provided. Use field name "image".', 400)
     }
 
     const validation = benchBodySchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', validation.error.errors, 400)
     }
 
     const { gameType } = validation.data
@@ -164,8 +157,7 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
     const { default: sharp } = await import('sharp')
     const meta = await sharp(imageBuffer).metadata()
 
-    res.json({
-      success: true,
+    return sendSuccess(res, {
       benchId,
       results: results.map(({ preset, confidence, substatsFound, success, processingTimeMs }) => ({
         preset,
@@ -182,10 +174,7 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('[bench-ocr] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Bench failed',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Bench failed')
   }
 })
 

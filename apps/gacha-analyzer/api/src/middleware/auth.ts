@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import { sendError } from '@ezstart/express-core'
 
 // Extend Request interface to include userId
 declare global {

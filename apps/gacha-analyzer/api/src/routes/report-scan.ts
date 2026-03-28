@@ -35,11 +35,7 @@ router.post('/:id/report', async (req: any, res: any) => {
   try {
     const validation = createReportSchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', validation.error.errors, 400)
     }
 
     const { category, description } = validation.data
@@ -64,22 +60,16 @@ router.post('/:id/report', async (req: any, res: any) => {
     ).lean()
 
     if (!scan) {
-      return res.status(404).json({
-        success: false,
-        error: 'Scan not found',
-      })
+      return sendError(res, 'Scan not found', 404)
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
     })
   } catch (error) {
     logger.error('[report-scan] Error creating report:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create report',
-    })
+    return sendError(res, 'Failed to create report')
   }
 })
 
@@ -88,20 +78,12 @@ router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
   try {
     const indexValidation = reportIndexSchema.safeParse(req.params)
     if (!indexValidation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid report index',
-        details: indexValidation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid report index', indexValidation.error.errors, 400)
     }
 
     const bodyValidation = updateReportSchema.safeParse(req.body)
     if (!bodyValidation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: bodyValidation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', bodyValidation.error.errors, 400)
     }
 
     const { reportIndex } = indexValidation.data
@@ -125,22 +107,13 @@ router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
     ).lean()
 
     if (!scan) {
-      return res.status(404).json({
-        success: false,
-        error: 'Scan not found',
-      })
+      return sendError(res, 'Scan not found', 404)
     }
 
-    res.json({
-      success: true,
-      data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
-    })
+    return sendSuccess(res, { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined })
   } catch (error) {
     logger.error('[report-scan] Error updating report:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update report',
-    })
+    return sendError(res, 'Failed to update report')
   }
 })
 
