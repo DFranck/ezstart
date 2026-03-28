@@ -3,6 +3,7 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 import { summonersWarParser } from '../parsers/summoners-war.js'
 import { analyzeRune } from '../analyzers/rune-efficiency.js'
@@ -10,8 +11,23 @@ import type { RuneData, ScanResult } from '@gacha-analyzer/types'
 
 const router: any = Router()
 
+const querySchema = z.object({
+  profile: z.enum(['early', 'mid', 'late']).optional().default('mid'),
+})
+
 router.post('/:id/reanalyze', async (req: any, res: any) => {
   try {
+    const validation = querySchema.safeParse(req.query)
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid query parameters',
+        details: validation.error.errors,
+      })
+    }
+
+    const { profile } = validation.data
+
     const Scan = await getScanModel()
     const scan = await Scan.findById(req.params.id)
 
@@ -22,8 +38,6 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     if (!scan.result?.rawText) {
       return res.status(400).json({ success: false, error: 'Scan has no raw text to re-analyze' })
     }
-
-    const profile = (req.query.profile as string) || 'mid'
     const startTime = Date.now()
 
     // Re-parse the raw text with the current parser

@@ -16,14 +16,7 @@ createWorkspaceRouter.post(
   '/',
   async (req, res) => {
     try {
-      const userId = req.headers['x-user-id'] as string
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          error: 'Unauthorized - x-user-id header required',
-          timestamp: new Date().toISOString(),
-        })
-      }
+      const userId = req.userId!
 
       const validation = CreateWorkspaceRequestSchema.safeParse(req.body)
       if (!validation.success) {

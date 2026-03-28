@@ -4,31 +4,44 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
-const VALID_CATEGORIES = ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other']
-const VALID_STATUSES = ['open', 'in-progress', 'resolved']
+const VALID_CATEGORIES = ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other'] as const
+const VALID_STATUSES = ['open', 'in-progress', 'resolved'] as const
+
+const createReportSchema = z.object({
+  category: z.enum(VALID_CATEGORIES),
+  description: z.string().min(1, 'description is required').transform((v) => v.trim()),
+})
+
+const updateReportSchema = z.object({
+  status: z.enum(VALID_STATUSES),
+  resolution: z.string().transform((v) => v.trim()).optional(),
+}).refine(
+  (data) => data.status !== 'resolved' || (data.resolution && data.resolution.length > 0),
+  { message: 'resolution is required when status is resolved', path: ['resolution'] },
+)
+
+const reportIndexSchema = z.object({
+  reportIndex: z.coerce.number().int().min(0),
+})
 
 const router: any = Router()
 
 // POST /:id/report — Create a new report
 router.post('/:id/report', async (req: any, res: any) => {
   try {
-    const { category, description } = req.body
-
-    if (!category || !VALID_CATEGORIES.includes(category)) {
+    const validation = createReportSchema.safeParse(req.body)
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        error: `category must be one of: ${VALID_CATEGORIES.join(', ')}`,
+        error: 'Invalid request body',
+        details: validation.error.errors,
       })
     }
 
-    if (!description || typeof description !== 'string' || !description.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'description is required',
-      })
-    }
+    const { category, description } = validation.data
 
     const Scan = await getScanModel()
     const now = new Date()
@@ -40,7 +53,7 @@ router.post('/:id/report', async (req: any, res: any) => {
           reports: {
             status: 'open',
             category,
-            description: description.trim(),
+            description,
             createdAt: now,
             updatedAt: now,
           },
@@ -72,29 +85,26 @@ router.post('/:id/report', async (req: any, res: any) => {
 // PATCH /:id/report/:reportIndex — Update report status
 router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
   try {
-    const { status, resolution } = req.body
-    const reportIndex = parseInt(req.params.reportIndex, 10)
-
-    if (isNaN(reportIndex) || reportIndex < 0) {
+    const indexValidation = reportIndexSchema.safeParse(req.params)
+    if (!indexValidation.success) {
       return res.status(400).json({
         success: false,
         error: 'Invalid report index',
+        details: indexValidation.error.errors,
       })
     }
 
-    if (!status || !VALID_STATUSES.includes(status)) {
+    const bodyValidation = updateReportSchema.safeParse(req.body)
+    if (!bodyValidation.success) {
       return res.status(400).json({
         success: false,
-        error: `status must be one of: ${VALID_STATUSES.join(', ')}`,
+        error: 'Invalid request body',
+        details: bodyValidation.error.errors,
       })
     }
 
-    if (status === 'resolved' && (!resolution || typeof resolution !== 'string' || !resolution.trim())) {
-      return res.status(400).json({
-        success: false,
-        error: 'resolution is required when status is resolved',
-      })
-    }
+    const { reportIndex } = indexValidation.data
+    const { status, resolution } = bodyValidation.data
 
     const Scan = await getScanModel()
 
@@ -104,7 +114,7 @@ router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
     }
 
     if (resolution) {
-      updateFields[`reports.${reportIndex}.resolution`] = resolution.trim()
+      updateFields[`reports.${reportIndex}.resolution`] = resolution
     }
 
     const scan = await Scan.findByIdAndUpdate(
