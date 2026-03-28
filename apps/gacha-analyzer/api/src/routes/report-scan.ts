@@ -3,6 +3,7 @@
  * PATCH /api/scans/:id/report/:reportIndex — Update report status
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
@@ -74,7 +75,7 @@ router.post('/:id/report', async (req: any, res: any) => {
       data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
     })
   } catch (error) {
-    console.error('[report-scan] Error creating report:', error)
+    logger.error('[report-scan] Error creating report:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to create report',
@@ -135,7 +136,7 @@ router.patch('/:id/report/:reportIndex', async (req: any, res: any) => {
       data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
     })
   } catch (error) {
-    console.error('[report-scan] Error updating report:', error)
+    logger.error('[report-scan] Error updating report:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to update report',

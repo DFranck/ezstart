@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getThemeOverrideModel } from '../../models/ThemeOverride.js'
@@ -86,7 +87,7 @@ docRouter.put(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error updating theme:', error)
+      logger.error('Error updating theme:', error)
       res.status(500).json({
         success: false,
         data: null,

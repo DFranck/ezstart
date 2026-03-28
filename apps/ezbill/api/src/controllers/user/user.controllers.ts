@@ -2,6 +2,7 @@ import { CreateUser, createUserSchema } from '@ezbill/types';
 import { Request, Response } from 'express';
 import { UserModel } from '../../models/user.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
+import { logger } from '@ezstart/logger/server';
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -18,7 +19,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     res.status(201).json({ user: toApiObject(user) });
   } catch (error: any) {
-    console.error('Error creating user:', error);
+    logger.error('Error creating user:', error);
     res.status(400).json({ error: error.message || 'Failed to create user' });
   }
 };
@@ -38,7 +39,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
 
     res.json({ user: toApiObject(user) });
   } catch (error: any) {
-    console.error('Error getting user:', error);
+    logger.error('Error getting user:', error);
     res.status(400).json({ error: error.message || 'Failed to get user' });
   }
 };

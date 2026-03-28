@@ -2,6 +2,7 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
+import { logger } from '@ezstart/logger/server'
 import {
   connectToMongo,
   createApp,
@@ -49,6 +50,6 @@ connectToMongo('greenpulse')
     })
   })
   .catch(err => {
-    console.error('❌ Failed to start GreenPulse API', err)
+    logger.error('❌ Failed to start GreenPulse API', err)
     process.exit(1)
   })

@@ -3,6 +3,7 @@
  * Webhook for ESG report completion
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { WebhookEventSchema } from '@green-pulse/types'
@@ -17,7 +18,7 @@ export const handleEsgReportRouter = createRouterWithDoc(
 
 // Handle report completion
 async function handleReportCompleted(event: any) {
-  console.log(`✅ Report ${event.job_id} completed successfully`)
+  logger.info(`✅ Report ${event.job_id} completed successfully`)
 
   // Here you would:
   // 1. Update database with report status
@@ -33,7 +34,7 @@ async function handleReportCompleted(event: any) {
   }
 
   // TODO: Save to database
-  console.log('Report data to save:', reportData)
+  logger.info('Report data to save:', reportData)
 
   // TODO: Send email notification
   // await emailService.sendReportCompletionEmail(userId, reportData)
@@ -41,7 +42,7 @@ async function handleReportCompleted(event: any) {
 
 // Handle report failure
 async function handleReportFailed(event: any) {
-  console.log(`❌ Report ${event.job_id} failed: ${event.data.error}`)
+  logger.info(`❌ Report ${event.job_id} failed: ${event.data.error}`)
 
   const reportData = {
     job_id: event.job_id,
@@ -51,7 +52,7 @@ async function handleReportFailed(event: any) {
   }
 
   // TODO: Save to database
-  console.log('Failed report data to save:', reportData)
+  logger.info('Failed report data to save:', reportData)
 
   // TODO: Send failure notification
   // await emailService.sendReportFailureEmail(userId, reportData)
@@ -59,7 +60,7 @@ async function handleReportFailed(event: any) {
 
 // Handle data processing completion
 async function handleDataProcessed(event: any) {
-  console.log(`📊 Data processing ${event.job_id} completed`)
+  logger.info(`📊 Data processing ${event.job_id} completed`)
 
   // TODO: Update dashboard with processed metrics
   const processedData = {
@@ -69,7 +70,7 @@ async function handleDataProcessed(event: any) {
     updated_at: new Date().toISOString(),
   }
 
-  console.log('Processed data:', processedData)
+  logger.info('Processed data:', processedData)
 }
 
 handleEsgReportRouter.post(
@@ -99,7 +100,7 @@ handleEsgReportRouter.post(
       }
 
       const event = validation.data
-      console.log(`📥 Webhook received: ${event.event_type} for job ${event.job_id}`)
+      logger.info(`📥 Webhook received: ${event.event_type} for job ${event.job_id}`)
 
       // Handle different event types
       switch (event.event_type) {
@@ -116,7 +117,7 @@ handleEsgReportRouter.post(
           break
 
         default:
-          console.warn(`Unknown webhook event type: ${event.event_type}`)
+          logger.warn(`Unknown webhook event type: ${event.event_type}`)
       }
 
       res.status(200).json({
@@ -125,7 +126,7 @@ handleEsgReportRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Webhook processing error:', error)
+      logger.error('Webhook processing error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to process webhook',

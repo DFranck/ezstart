@@ -3,6 +3,7 @@
  * Direct ESG extraction from text
  */
 
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -50,7 +51,7 @@ extractEsgDataRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Extraction error:', error)
+      logger.error('Extraction error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to extract ESG data',

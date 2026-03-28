@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { BillingClient } from '@ezbill/types';
+import { logger } from '@ezstart/logger/server';
 import {
   createClientService,
   getClientByIdService,
@@ -43,7 +44,7 @@ export async function createSecureClientController(req: Request, res: Response) 
 
     res.status(201).json(client);
   } catch (error) {
-    console.error('Error in createSecureClientController:', error);
+    logger.error('Error in createSecureClientController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to create client'
@@ -71,7 +72,7 @@ export async function getSecureClientsController(req: Request, res: Response) {
 
     res.json(result);
   } catch (error) {
-    console.error('Error in getSecureClientsController:', error);
+    logger.error('Error in getSecureClientsController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve clients'
@@ -106,7 +107,7 @@ export async function getSecureClientByIdController(req: Request, res: Response)
 
     res.json(client);
   } catch (error) {
-    console.error('Error in getSecureClientByIdController:', error);
+    logger.error('Error in getSecureClientByIdController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve client'
@@ -150,7 +151,7 @@ export async function updateSecureClientController(req: Request, res: Response) 
 
     res.json(client);
   } catch (error) {
-    console.error('Error in updateSecureClientController:', error);
+    logger.error('Error in updateSecureClientController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to update client'
@@ -201,7 +202,7 @@ export async function softDeleteSecureClientController(req: Request, res: Respon
       res.json(client); // Return deleted client with deletedAt timestamp
     }
   } catch (error) {
-    console.error('Error in softDeleteSecureClientController:', error);
+    logger.error('Error in softDeleteSecureClientController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to delete client'
@@ -236,7 +237,7 @@ export async function restoreSecureClientController(req: Request, res: Response)
 
     res.json(client);
   } catch (error) {
-    console.error('Error in restoreSecureClientController:', error);
+    logger.error('Error in restoreSecureClientController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to restore client'
@@ -274,7 +275,7 @@ export async function hardDeleteSecureClientController(req: Request, res: Respon
       client
     });
   } catch (error) {
-    console.error('Error in hardDeleteSecureClientController:', error);
+    logger.error('Error in hardDeleteSecureClientController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to permanently delete client'

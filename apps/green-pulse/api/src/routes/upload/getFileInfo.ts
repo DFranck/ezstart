@@ -3,6 +3,7 @@
  * Get uploaded file info
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import path from 'path'
 import fs from 'fs'
@@ -52,7 +53,7 @@ getFileInfoRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('File info error:', error)
+      logger.error('File info error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to get file info',

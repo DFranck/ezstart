@@ -2,6 +2,7 @@
  * GET /api/scans/:id — Get scan detail
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
@@ -29,7 +30,7 @@ router.get('/:id', async (req: any, res: any) => {
       data: mapped,
     })
   } catch (error) {
-    console.error('[get-scan] Error:', error)
+    logger.error('[get-scan] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch scan',

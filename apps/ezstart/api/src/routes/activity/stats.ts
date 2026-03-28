@@ -4,6 +4,7 @@
  * Get activity statistics (counts by type, severity, project)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { createSentryClient } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
@@ -44,13 +45,13 @@ const getStatsHandler = async (req: Request, res: Response) => {
           stats.bySeverity[log.severity]++
         })
       } catch (error) {
-        console.error('[Activity] Failed to fetch Sentry stats:', error)
+        logger.error('[Activity] Failed to fetch Sentry stats:', error)
       }
     }
 
     res.json(stats)
   } catch (error) {
-    console.error('[Activity] Error fetching activity stats:', error)
+    logger.error('[Activity] Error fetching activity stats:', error)
     res.status(500).json({
       error: 'Failed to fetch activity stats',
       message: error instanceof Error ? error.message : 'Unknown error',

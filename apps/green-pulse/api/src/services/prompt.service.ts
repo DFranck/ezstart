@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { SystemPrompt, PromptType, ProviderTarget } from '../models/SystemPrompt.js'
 
 // ============================================================================
@@ -29,7 +30,7 @@ function setCache(type: PromptType, provider: ProviderTarget, content: string): 
 /** Clear cache - call this when prompts are updated via admin */
 export function clearPromptCache(): void {
   promptCache.clear()
-  console.log('[PromptService] Cache cleared')
+  logger.info('[PromptService] Cache cleared')
 }
 
 // ============================================================================
@@ -127,18 +128,18 @@ export async function getSystemPrompt(
     // Fallback to default prompts
     const fallback = DEFAULT_PROMPTS[type]
     if (fallback) {
-      console.log(`[PromptService] Using fallback prompt for type: ${type}`)
+      logger.info(`[PromptService] Using fallback prompt for type: ${type}`)
       setCache(type, provider, fallback.content)
       return fallback.content
     }
 
     // Ultimate fallback
-    console.warn(`[PromptService] No prompt found for type: ${type}, using generic fallback`)
+    logger.warn(`[PromptService] No prompt found for type: ${type}, using generic fallback`)
     const generic = 'You are a helpful assistant.'
     setCache(type, provider, generic)
     return generic
   } catch (error) {
-    console.error('[PromptService] Error fetching prompt:', error)
+    logger.error('[PromptService] Error fetching prompt:', error)
     // Return default on error (don't cache errors)
     return DEFAULT_PROMPTS[type]?.content || 'You are a helpful assistant.'
   }
@@ -152,7 +153,7 @@ export async function getPromptByKey(key: string): Promise<string | null> {
     const prompt = await SystemPrompt.findOne({ key, isActive: true }).lean().exec()
     return prompt?.content || null
   } catch (error) {
-    console.error('[PromptService] Error fetching prompt by key:', error)
+    logger.error('[PromptService] Error fetching prompt by key:', error)
     return null
   }
 }
@@ -164,11 +165,11 @@ export async function seedDefaultPrompts(): Promise<void> {
   try {
     const count = await SystemPrompt.countDocuments()
     if (count > 0) {
-      console.log(`[PromptService] ${count} prompts already exist, skipping seed`)
+      logger.info(`[PromptService] ${count} prompts already exist, skipping seed`)
       return
     }
 
-    console.log('[PromptService] Seeding default prompts...')
+    logger.info('[PromptService] Seeding default prompts...')
 
     const prompts = Object.entries(DEFAULT_PROMPTS).map(([key, data]) => ({
       key,
@@ -183,8 +184,8 @@ export async function seedDefaultPrompts(): Promise<void> {
     }))
 
     await SystemPrompt.insertMany(prompts)
-    console.log(`[PromptService] Seeded ${prompts.length} default prompts`)
+    logger.info(`[PromptService] Seeded ${prompts.length} default prompts`)
   } catch (error) {
-    console.error('[PromptService] Error seeding prompts:', error)
+    logger.error('[PromptService] Error seeding prompts:', error)
   }
 }

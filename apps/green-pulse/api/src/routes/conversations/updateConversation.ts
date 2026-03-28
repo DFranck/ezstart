@@ -3,6 +3,7 @@
  * Update conversation (rename)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import {
@@ -62,7 +63,7 @@ updateConversationRouter.patch(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Update conversation error:', error)
+      logger.error('Update conversation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to update conversation',

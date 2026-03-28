@@ -3,6 +3,7 @@
  * Generate ESG report
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 
@@ -36,7 +37,7 @@ generateReportRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Report generation error:', error)
+      logger.error('Report generation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to generate report',

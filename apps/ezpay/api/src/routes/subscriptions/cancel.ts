@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { cancelSubscription } from '../../services/stripe.js'
@@ -45,11 +46,11 @@ const cancelSubscriptionHandler = async (req: Request, res: Response) => {
       { status: 'cancelled' }
     )
 
-    console.log(`❌ Subscription cancelled: ${subscriptionId}`)
+    logger.info(`❌ Subscription cancelled: ${subscriptionId}`)
 
     res.json({ success: true })
   } catch (error) {
-    console.error('Cancel subscription error:', error)
+    logger.error('Cancel subscription error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to cancel subscription',

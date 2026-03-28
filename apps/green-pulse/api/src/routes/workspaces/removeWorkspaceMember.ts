@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
   WorkspaceSchema,
@@ -71,7 +72,7 @@ removeWorkspaceMemberRouter.delete(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error removing workspace member:', error)
+      logger.error('Error removing workspace member:', error)
       res.status(500).json({
         success: false,
         error: 'Internal server error',

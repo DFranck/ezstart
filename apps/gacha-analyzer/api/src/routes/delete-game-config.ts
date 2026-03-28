@@ -2,6 +2,7 @@
  * DELETE /api/config/:gameType/:layoutName — Delete a layout
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
@@ -34,7 +35,7 @@ router.delete('/:gameType/:layoutName', async (req: any, res: any) => {
       data: { deleted: true },
     })
   } catch (error) {
-    console.error('[delete-game-config] Error:', error)
+    logger.error('[delete-game-config] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to delete layout',

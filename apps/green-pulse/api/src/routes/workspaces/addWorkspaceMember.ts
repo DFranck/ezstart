@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
   WorkspaceSchema,
@@ -80,7 +81,7 @@ addWorkspaceMemberRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error adding workspace member:', error)
+      logger.error('Error adding workspace member:', error)
       res.status(500).json({
         success: false,
         error: 'Internal server error',

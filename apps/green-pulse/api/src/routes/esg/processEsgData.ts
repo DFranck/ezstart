@@ -3,6 +3,7 @@
  * Complete ESG workflow (project + data + report)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
@@ -40,7 +41,7 @@ processEsgDataRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('ESG processing error:', error)
+      logger.error('ESG processing error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to process ESG data',

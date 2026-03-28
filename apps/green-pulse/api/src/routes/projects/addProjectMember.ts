@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -76,7 +77,7 @@ docRouter.post('/:id/members', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error adding project member:', error)
+    logger.error('Error adding project member:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to add member',

@@ -3,6 +3,7 @@
  * List all conversations (exclude soft deleted)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import { ConversationListSchema, ApiResponseSchema } from '@green-pulse/types'
@@ -55,7 +56,7 @@ listConversationsRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('List conversations error:', error)
+      logger.error('List conversations error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to list conversations',

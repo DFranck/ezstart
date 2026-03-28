@@ -4,6 +4,7 @@
  * Now supports multiple AI providers via @ezstart/ai-sdk
  */
 
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -57,11 +58,11 @@ sendMessageRouter.post(
           })
           await newConversation.save()
           conversation_id = newConversation._id.toString()
-          console.log(
+          logger.info(
             `✅ Auto-created conversation: ${conversation_id} (userId: ${userId || 'anonymous'})`
           )
         } catch (createError) {
-          console.error('Failed to auto-create conversation:', createError)
+          logger.error('Failed to auto-create conversation:', createError)
           // Continue without conversation_id if creation fails
         }
       }
@@ -79,7 +80,7 @@ sendMessageRouter.post(
             }))
           }
         } catch (loadError) {
-          console.error('Failed to load conversation history:', loadError)
+          logger.error('Failed to load conversation history:', loadError)
           // Continue without history if load fails
         }
       }
@@ -136,7 +137,7 @@ sendMessageRouter.post(
             },
           })
         } catch (saveError) {
-          console.error('Failed to save messages to conversation:', saveError)
+          logger.error('Failed to save messages to conversation:', saveError)
           // Don't fail the request, just log the error
         }
       }
@@ -156,7 +157,7 @@ sendMessageRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Chat error:', error)
+      logger.error('Chat error:', error)
 
       // Detect specific error types for better user feedback
       let statusCode = 500

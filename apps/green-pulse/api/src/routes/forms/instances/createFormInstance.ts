@@ -3,6 +3,7 @@
  * Create new form instance
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
   FormInstanceSchema,
@@ -55,7 +56,7 @@ createFormInstanceRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error creating form instance:', error)
+      logger.error('Error creating form instance:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to create form instance',

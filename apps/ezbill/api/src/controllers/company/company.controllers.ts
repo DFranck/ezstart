@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { CompanyModel } from '../../models/company.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { AuthRequest } from '../../types/auth.js';
+import { logger } from '@ezstart/logger/server';
 
 export const getCompanies = async (req: AuthRequest, res: Response) => {
   try {
@@ -35,7 +36,7 @@ export const getCompanies = async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error('Error fetching companies:', error);
+    logger.error('Error fetching companies:', error);
     res.status(500).json({ error: 'Failed to fetch companies' });
   }
 };
@@ -51,7 +52,7 @@ export const getCompanyById = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(company));
   } catch (error: any) {
-    console.error('Error fetching company:', error);
+    logger.error('Error fetching company:', error);
     res.status(500).json({ error: 'Failed to fetch company' });
   }
 };
@@ -62,7 +63,7 @@ export const getCompaniesByUserId = async (req: Request, res: Response) => {
     const companies = await CompanyModel.find({ userId }).sort({ createdAt: -1 });
     res.json({ companies: companies.map(toApiObject) });
   } catch (error: any) {
-    console.error('Error fetching companies:', error);
+    logger.error('Error fetching companies:', error);
     res.status(500).json({ error: 'Failed to fetch companies' });
   }
 };
@@ -74,7 +75,7 @@ export const createCompany = async (req: AuthRequest, res: Response) => {
     await company.save();
     res.status(201).json(toApiObject(company));
   } catch (error: any) {
-    console.error('Error creating company:', error);
+    logger.error('Error creating company:', error);
     res.status(400).json({ error: error.message || 'Failed to create company' });
   }
 };
@@ -95,7 +96,7 @@ export const updateCompany = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(company));
   } catch (error: any) {
-    console.error('Error updating company:', error);
+    logger.error('Error updating company:', error);
     res.status(400).json({ error: error.message || 'Failed to update company' });
   }
 };
@@ -129,7 +130,7 @@ export const deleteCompany = async (req: AuthRequest, res: Response) => {
       res.json(toApiObject(company));
     }
   } catch (error: any) {
-    console.error('Error deleting company:', error);
+    logger.error('Error deleting company:', error);
     res.status(500).json({ error: 'Failed to delete company' });
   }
 };
@@ -149,7 +150,7 @@ export const restoreCompany = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(company));
   } catch (error: any) {
-    console.error('Error restoring company:', error);
+    logger.error('Error restoring company:', error);
     res.status(500).json({ error: 'Failed to restore company' });
   }
 };

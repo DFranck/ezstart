@@ -2,6 +2,7 @@
  * POST /api/scans/:id/reanalyze — Re-analyze an existing scan with current parser/analyzer
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
@@ -53,7 +54,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
       try {
         analysis = analyzeRune(parseResult.data as unknown as RuneData, profile as any) as unknown as ScanResult['analysis']
       } catch (e) {
-        console.error('[reanalyze] Analysis failed:', e)
+        logger.error('[reanalyze] Analysis failed:', e)
       }
     }
 
@@ -72,7 +73,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
 
     res.json({ success: true, data: mapped })
   } catch (error) {
-    console.error('[reanalyze-scan] Error:', error)
+    logger.error('[reanalyze-scan] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to re-analyze scan',

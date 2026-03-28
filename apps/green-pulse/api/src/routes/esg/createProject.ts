@@ -3,6 +3,7 @@
  * Create or update ESG project
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
@@ -37,7 +38,7 @@ createProjectRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Project creation error:', error)
+      logger.error('Project creation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to create ESG project',

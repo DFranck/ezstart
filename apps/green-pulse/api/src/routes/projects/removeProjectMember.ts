@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -40,7 +41,7 @@ docRouter.delete('/:id/members/:userId', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error removing member:', error)
+    logger.error('Error removing member:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to remove member',

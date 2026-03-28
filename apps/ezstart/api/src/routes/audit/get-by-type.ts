@@ -7,6 +7,7 @@
  * Now reads from docs/audits.json instead of .md files
  */
 
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
@@ -116,7 +117,7 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
       nextSteps: auditData.nextSteps || [],
     })
   } catch (error) {
-    console.error('[Audits] Error reading audit by type:', error)
+    logger.error('[Audits] Error reading audit by type:', error)
     res.status(500).json({
       error: 'Failed to get audit',
       message: error instanceof Error ? error.message : 'Unknown error',

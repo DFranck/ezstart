@@ -3,6 +3,7 @@
  * Push activity data to ESG system
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
@@ -47,7 +48,7 @@ pushActivityDataRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Activity data error:', error)
+      logger.error('Activity data error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to push activity data',

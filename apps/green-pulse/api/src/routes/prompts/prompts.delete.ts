@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
@@ -51,7 +52,7 @@ docRouter.delete(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error deleting prompt:', error)
+      logger.error('Error deleting prompt:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to delete prompt',

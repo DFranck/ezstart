@@ -5,6 +5,7 @@
  * GET /api/monsters/for-rune — Monsters matching rune archetypes
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { importMonsters } from '../services/monster-import-service.js'
@@ -21,7 +22,7 @@ router.post('/import', async (_req: any, res: any) => {
       data: { imported: count },
     })
   } catch (error) {
-    console.error('[import-monsters] Error:', error)
+    logger.error('[import-monsters] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to import monsters',
@@ -81,7 +82,7 @@ router.get('/', async (req: any, res: any) => {
       },
     })
   } catch (error) {
-    console.error('[list-monsters] Error:', error)
+    logger.error('[list-monsters] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to list monsters',
@@ -104,7 +105,7 @@ router.get('/by-build/:archetype', async (req: any, res: any) => {
       data: { archetype, count: monsters.length, monsters },
     })
   } catch (error) {
-    console.error('[monsters-by-build] Error:', error)
+    logger.error('[monsters-by-build] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch monsters by build',
@@ -156,7 +157,7 @@ router.get('/for-rune', async (req: any, res: any) => {
       },
     })
   } catch (error) {
-    console.error('[monsters-for-rune] Error:', error)
+    logger.error('[monsters-for-rune] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch monsters for rune',

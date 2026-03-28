@@ -1,9 +1,9 @@
-import console from 'console';
 import cron from 'node-cron';
 import { updateAllExchangeRates } from './update-exchange-rates';
+import { logger } from '@ezstart/logger/server';
 
 cron.schedule('10 3 */3 * *', async () => {
-  console.log('[CRON] Refreshing exchange rates...');
+  logger.info('[CRON] Refreshing exchange rates...');
   await updateAllExchangeRates();
 });
 

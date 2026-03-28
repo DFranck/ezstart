@@ -8,6 +8,7 @@ import {
   removeLineItemSchema,
 } from '@ezbill/types'
 import { Response } from 'express'
+import { logger } from '@ezstart/logger/server'
 import {
   acceptQuoteService,
   addLineItemToQuoteService,
@@ -30,11 +31,11 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
   try {
     const userId = getAuthenticatedUserId(req)
 
-    console.log('🔍 Controller received request body:', JSON.stringify(req.body, null, 2))
+    logger.debug('🔍 Controller received request body:', JSON.stringify(req.body, null, 2))
 
     const quoteData: CreateQuote = req.body
 
-    console.log('🔍 Controller quoteData:', JSON.stringify(quoteData, null, 2))
+    logger.debug('🔍 Controller quoteData:', JSON.stringify(quoteData, null, 2))
 
     // Ensure userId in body matches authenticated user
     if (quoteData.userId && quoteData.userId !== userId) {
@@ -47,13 +48,13 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
     // Force userId to match authenticated user
     const secureQuoteData = { ...quoteData, userId }
 
-    console.log('🔍 Controller secureQuoteData:', JSON.stringify(secureQuoteData, null, 2))
+    logger.debug('🔍 Controller secureQuoteData:', JSON.stringify(secureQuoteData, null, 2))
 
     const quote = await createQuoteService(secureQuoteData)
 
     res.status(201).json(quote)
   } catch (error) {
-    console.error('Error in createSecureQuoteController:', error)
+    logger.error('Error in createSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to create quote',
@@ -77,7 +78,7 @@ export async function getSecureQuotesController(req: AuthRequest, res: Response)
 
     res.json(quotes)
   } catch (error) {
-    console.error('Error in getSecureQuotesController:', error)
+    logger.error('Error in getSecureQuotesController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve quotes',
@@ -108,7 +109,7 @@ export async function getSecureQuoteByIdController(req: AuthRequest, res: Respon
 
     res.json(quote)
   } catch (error) {
-    console.error('Error in getSecureQuoteByIdController:', error)
+    logger.error('Error in getSecureQuoteByIdController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve quote',
@@ -171,7 +172,7 @@ export async function updateSecureQuoteController(req: AuthRequest, res: Respons
 
     res.json(quote)
   } catch (error) {
-    console.error('Error in updateSecureQuoteController:', error)
+    logger.error('Error in updateSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to update quote',
@@ -224,7 +225,7 @@ export async function softDeleteSecureQuoteController(req: AuthRequest, res: Res
 
     res.json(quote) // Return deleted quote with deletedAt timestamp
   } catch (error) {
-    console.error('Error in softDeleteSecureQuoteController:', error)
+    logger.error('Error in softDeleteSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to delete quote',
@@ -267,7 +268,7 @@ export async function restoreSecureQuoteController(req: AuthRequest, res: Respon
 
     res.json(quote)
   } catch (error) {
-    console.error('Error in restoreSecureQuoteController:', error)
+    logger.error('Error in restoreSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to restore quote',
@@ -310,7 +311,7 @@ export async function hardDeleteSecureQuoteController(req: AuthRequest, res: Res
       quote,
     })
   } catch (error) {
-    console.error('Error in hardDeleteSecureQuoteController:', error)
+    logger.error('Error in hardDeleteSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to permanently delete quote',
@@ -365,7 +366,7 @@ export async function assignClientToSecureQuoteController(req: AuthRequest, res:
     const quote = await assignClientToQuoteService(id, parseClient.data.clientId)
     res.json(quote)
   } catch (error) {
-    console.error('Error in assignClientToSecureQuoteController:', error)
+    logger.error('Error in assignClientToSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to assign client to quote',
@@ -417,7 +418,7 @@ export async function addLineItemToSecureQuoteController(req: AuthRequest, res: 
     const quote = await addLineItemToQuoteService(id, parseItem.data)
     res.json(quote)
   } catch (error) {
-    console.error('Error in addLineItemToSecureQuoteController:', error)
+    logger.error('Error in addLineItemToSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to add line item to quote',
@@ -469,7 +470,7 @@ export async function removeLineItemFromSecureQuoteController(req: AuthRequest, 
     const quote = await removeLineItemToQuoteService(id, parseItem.data.itemId)
     res.json(quote)
   } catch (error) {
-    console.error('Error in removeLineItemFromSecureQuoteController:', error)
+    logger.error('Error in removeLineItemFromSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to remove line item from quote',
@@ -513,7 +514,7 @@ export async function acceptSecureQuoteController(req: AuthRequest, res: Respons
     const quote = await acceptQuoteService(id)
     res.json(quote)
   } catch (error) {
-    console.error('Error in acceptSecureQuoteController:', error)
+    logger.error('Error in acceptSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to accept quote',
@@ -557,7 +558,7 @@ export async function rejectSecureQuoteController(req: AuthRequest, res: Respons
     const quote = await rejectQuoteService(id)
     res.json(quote)
   } catch (error) {
-    console.error('Error in rejectSecureQuoteController:', error)
+    logger.error('Error in rejectSecureQuoteController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to reject quote',
@@ -615,7 +616,7 @@ export async function convertQuoteToInvoiceSecureController(req: AuthRequest, re
 
     res.status(201).json(invoice)
   } catch (error: any) {
-    console.error('Error in convertQuoteToInvoiceSecureController:', error)
+    logger.error('Error in convertQuoteToInvoiceSecureController:', error)
     res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Failed to convert quote to invoice',

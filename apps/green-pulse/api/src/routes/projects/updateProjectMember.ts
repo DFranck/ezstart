@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -60,7 +61,7 @@ docRouter.put('/:id/members/:userId', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error updating member role:', error)
+    logger.error('Error updating member role:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to update member role',

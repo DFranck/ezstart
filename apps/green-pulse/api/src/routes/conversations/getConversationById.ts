@@ -3,6 +3,7 @@
  * Get conversation with messages
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import { ConversationSchema, ApiResponseSchema } from '@green-pulse/types'
@@ -53,7 +54,7 @@ getConversationByIdRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Get conversation error:', error)
+      logger.error('Get conversation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to get conversation',

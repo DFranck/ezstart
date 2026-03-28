@@ -1,4 +1,5 @@
 import { AddLineItem, Invoice, Receipt } from '@ezbill/types';
+import { logger } from '@ezstart/logger/server';
 import { getInvoiceModel } from '../../models/billing/invoice.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 
@@ -124,7 +125,7 @@ export async function markInvoiceAsPaidService(
       receipt: toApiObject<Receipt>(savedReceipt),
     };
   } catch (error) {
-    console.error('Failed to create receipt for invoice:', error);
+    logger.error('Failed to create receipt for invoice:', error);
     // Return the invoice even if receipt creation fails
     return { invoice: toApiObject<Invoice>(updatedInvoice) };
   }

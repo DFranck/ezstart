@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
@@ -84,7 +85,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       },
     })
 
-    console.log(`💳 Purchase created - Session ID: ${session.id}`)
+    logger.info(`💳 Purchase created - Session ID: ${session.id}`)
 
     res.json({
       success: true,
@@ -92,7 +93,7 @@ const createPurchaseHandler = async (req: Request, res: Response) => {
       checkoutUrl: session.url,
     })
   } catch (error) {
-    console.error('Create purchase error:', error)
+    logger.error('Create purchase error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create purchase',

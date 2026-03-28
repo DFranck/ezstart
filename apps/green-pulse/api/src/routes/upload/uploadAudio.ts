@@ -3,6 +3,7 @@
  * Upload and transcribe audio
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import fs from 'fs'
 import { transcribeAudio } from '../../services/gemini.service.js'
@@ -52,7 +53,7 @@ uploadAudioRouter.post(
         } catch {}
       }
 
-      console.error('Audio upload error:', error)
+      logger.error('Audio upload error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to process audio file',

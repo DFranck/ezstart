@@ -2,6 +2,7 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
+import { logger } from '@ezstart/logger/server'
 import {
   createApp,
   createRateLimiter,
@@ -72,10 +73,10 @@ connectToMongo('ezstart-monitoring')
         io = createSocketServer(httpServer, {
           corsOrigins: socketCorsOrigins,
           onConnection: (socket) => {
-            console.log(`📡 [Socket.IO] Client connected from monitoring dashboard`)
+            logger.info(`📡 [Socket.IO] Client connected from monitoring dashboard`)
 
             socket.on('disconnect', () => {
-              console.log(`📡 [Socket.IO] Client disconnected`)
+              logger.info(`📡 [Socket.IO] Client disconnected`)
             })
           }
         })
@@ -86,24 +87,24 @@ connectToMongo('ezstart-monitoring')
     })
   })
   .then(() => {
-    console.log('✅ [Scheduler] Starting health check scheduler...')
+    logger.info('✅ [Scheduler] Starting health check scheduler...')
     // Start background health check scheduler ONLY after MongoDB is ready
     healthCheckScheduler.start()
   })
   .catch(err => {
-    console.error('❌ Failed to start Monitoring API', err)
+    logger.error('❌ Failed to start Monitoring API', err)
     process.exit(1)
   })
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('⏰ [Scheduler] SIGTERM received, stopping scheduler...')
+  logger.info('⏰ [Scheduler] SIGTERM received, stopping scheduler...')
   healthCheckScheduler.stop()
   process.exit(0)
 })
 
 process.on('SIGINT', () => {
-  console.log('⏰ [Scheduler] SIGINT received, stopping scheduler...')
+  logger.info('⏰ [Scheduler] SIGINT received, stopping scheduler...')
   healthCheckScheduler.stop()
   process.exit(0)
 })

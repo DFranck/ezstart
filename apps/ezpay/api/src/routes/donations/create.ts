@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
@@ -97,8 +98,8 @@ const createDonationHandler = async (req: Request, res: Response) => {
       },
     })
 
-    console.log(`💳 Donation created - Session ID: ${session.id}`)
-    console.log(`🔗 Checkout URL: ${session.url}`)
+    logger.info(`💳 Donation created - Session ID: ${session.id}`)
+    logger.info(`🔗 Checkout URL: ${session.url}`)
 
     res.json({
       success: true,
@@ -106,7 +107,7 @@ const createDonationHandler = async (req: Request, res: Response) => {
       checkoutUrl: session.url,
     })
   } catch (error) {
-    console.error('Create donation error:', error)
+    logger.error('Create donation error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create donation',

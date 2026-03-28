@@ -2,6 +2,7 @@
  * POST /api/scan — Upload image + OCR scan
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { upload } from '../middleware/upload.js'
@@ -85,7 +86,7 @@ router.post('/', upload.fields([
       },
     })
   } catch (error) {
-    console.error('[scan-image] Error:', error)
+    logger.error('[scan-image] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to process scan',

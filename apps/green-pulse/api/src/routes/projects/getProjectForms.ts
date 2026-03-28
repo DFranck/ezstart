@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -28,7 +29,7 @@ docRouter.get('/:id/forms', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error fetching project forms:', error)
+    logger.error('Error fetching project forms:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch project forms',

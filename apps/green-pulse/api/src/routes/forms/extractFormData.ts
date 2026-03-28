@@ -3,6 +3,7 @@
  * Extract form data from conversation using AI
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
   ExtractFormDataRequestSchema,
@@ -45,7 +46,7 @@ extractFormDataRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error extracting form data:', error)
+      logger.error('Error extracting form data:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to extract form data',

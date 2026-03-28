@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { ESGPayload } from '@green-pulse/types'
 import fs from 'fs'
@@ -98,7 +99,7 @@ export async function chatWithExtraction(
       extractedData: null,
     }
   } catch (error) {
-    console.error('Gemini chat error:', error)
+    logger.error('Gemini chat error:', error)
     throw new Error('Failed to process chat message')
   }
 }
@@ -167,7 +168,7 @@ export async function readImage(imageUrlOrPath: string): Promise<any> {
 
     return JSON.parse(content || '{}')
   } catch (error) {
-    console.error('Vision processing error:', error)
+    logger.error('Vision processing error:', error)
     throw new Error('Failed to process image')
   }
 }
@@ -200,7 +201,7 @@ Return {"ok": true} or {"ok": false, "errors": [...]}`
 
     return JSON.parse(content || '{"ok": false, "errors": ["Validation failed"]}')
   } catch (error) {
-    console.error('Validation error:', error)
+    logger.error('Validation error:', error)
     return { ok: false, errors: ['Validation service error'] }
   }
 }

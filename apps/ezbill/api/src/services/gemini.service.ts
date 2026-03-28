@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { GoogleGenerativeAI, FunctionDeclaration, Tool, SchemaType } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -373,7 +374,7 @@ export async function chatWithInvoiceAssistant(
       conversationState: determineConversationState(action, currentInvoiceData),
     }
   } catch (error) {
-    console.error('Conversational AI error:', error)
+    logger.error('Conversational AI error:', error)
     throw new Error('Failed to process conversation with AI')
   }
 }

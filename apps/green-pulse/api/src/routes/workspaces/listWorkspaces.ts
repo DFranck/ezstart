@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
   WorkspaceSchema,
@@ -70,7 +71,7 @@ listWorkspacesRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error listing workspaces:', error)
+      logger.error('Error listing workspaces:', error)
       res.status(500).json({
         success: false,
         error: 'Internal server error',

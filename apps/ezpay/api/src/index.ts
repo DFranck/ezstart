@@ -1,5 +1,8 @@
 // Updated: 2025-11-15 - App-specific roles support
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
+import './instrument.mjs'
+import { Sentry } from './instrument.mjs'
+import { logger } from '@ezstart/logger/server'
 import {
   connectToMongo,
   createApp,
@@ -9,8 +12,6 @@ import {
   createVersionedRouter,
   addVersionHeader
 } from '@ezstart/express-core'
-import './instrument.mjs'
-import { Sentry } from './instrument.mjs'
 import routes, { registries } from './routes/index.js'
 
 const PORT = getApiPort('ezpay')
@@ -45,6 +46,6 @@ connectToMongo('ezpay')
     })
   )
   .catch(err => {
-    console.error('❌ Failed to start EZPay API', err)
+    logger.error('❌ Failed to start EZPay API', err)
     process.exit(1)
   })

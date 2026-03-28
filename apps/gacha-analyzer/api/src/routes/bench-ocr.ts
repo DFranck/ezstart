@@ -5,6 +5,7 @@
  * saves raw image + results to disk, returns comparison.
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
@@ -180,7 +181,7 @@ router.post('/', upload.single('image'), async (req: any, res: any) => {
       },
     })
   } catch (error) {
-    console.error('[bench-ocr] Error:', error)
+    logger.error('[bench-ocr] Error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Bench failed',

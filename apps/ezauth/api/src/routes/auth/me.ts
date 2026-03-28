@@ -40,7 +40,7 @@ const meController = async (req: any, res: any) => {
       user
     })
   } catch (error) {
-    console.error('Get user error:', error)
+    logger.error('Get user error:', error)
     res.status(401).json({
       success: false,
       error: error instanceof Error ? error.message : 'Invalid token'

@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getWebUrl, type AppName } from '@ezstart/config'
 import { getPaymentModel } from '../../models/Payment.js'
@@ -88,7 +89,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       },
     })
 
-    console.log(`💳 Subscription created - Session ID: ${session.id}`)
+    logger.info(`💳 Subscription created - Session ID: ${session.id}`)
 
     res.json({
       success: true,
@@ -96,7 +97,7 @@ const createSubscriptionHandler = async (req: Request, res: Response) => {
       checkoutUrl: session.url,
     })
   } catch (error) {
-    console.error('Create subscription error:', error)
+    logger.error('Create subscription error:', error)
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create subscription',

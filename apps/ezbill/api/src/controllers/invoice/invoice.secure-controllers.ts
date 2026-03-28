@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CreateInvoice, GetInvoicesQuery, UpdateInvoice } from '@ezbill/types';
+import { logger } from '@ezstart/logger/server';
 import {
   createInvoiceService,
   getInvoiceByIdService,
@@ -41,7 +42,7 @@ export async function createSecureInvoiceController(req: AuthRequest, res: Respo
 
     res.status(201).json(invoice);
   } catch (error) {
-    console.error('Error in createSecureInvoiceController:', error);
+    logger.error('Error in createSecureInvoiceController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to create invoice'
@@ -65,7 +66,7 @@ export async function getSecureInvoicesController(req: AuthRequest, res: Respons
 
     res.json(invoices);
   } catch (error) {
-    console.error('Error in getSecureInvoicesController:', error);
+    logger.error('Error in getSecureInvoicesController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve invoices'
@@ -96,7 +97,7 @@ export async function getSecureInvoiceByIdController(req: AuthRequest, res: Resp
 
     res.json(invoice);
   } catch (error) {
-    console.error('Error in getSecureInvoiceByIdController:', error);
+    logger.error('Error in getSecureInvoiceByIdController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve invoice'
@@ -159,7 +160,7 @@ export async function updateSecureInvoiceController(req: AuthRequest, res: Respo
 
     res.json(invoice);
   } catch (error) {
-    console.error('Error in updateSecureInvoiceController:', error);
+    logger.error('Error in updateSecureInvoiceController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to update invoice'
@@ -212,7 +213,7 @@ export async function softDeleteSecureInvoiceController(req: AuthRequest, res: R
 
     res.json(invoice); // Return deleted invoice with deletedAt timestamp
   } catch (error) {
-    console.error('Error in softDeleteSecureInvoiceController:', error);
+    logger.error('Error in softDeleteSecureInvoiceController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to delete invoice'
@@ -255,7 +256,7 @@ export async function restoreSecureInvoiceController(req: AuthRequest, res: Resp
 
     res.json(invoice);
   } catch (error) {
-    console.error('Error in restoreSecureInvoiceController:', error);
+    logger.error('Error in restoreSecureInvoiceController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to restore invoice'
@@ -298,7 +299,7 @@ export async function hardDeleteSecureInvoiceController(req: AuthRequest, res: R
       invoice
     });
   } catch (error) {
-    console.error('Error in hardDeleteSecureInvoiceController:', error);
+    logger.error('Error in hardDeleteSecureInvoiceController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to permanently delete invoice'
@@ -338,7 +339,7 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
 
     res.json(result);
   } catch (error) {
-    console.error('Error in markInvoiceAsPaidSecureController:', error);
+    logger.error('Error in markInvoiceAsPaidSecureController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to mark invoice as paid'

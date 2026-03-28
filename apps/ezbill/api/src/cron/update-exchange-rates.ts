@@ -1,6 +1,7 @@
 import { Currency, currencyEnum } from '@ezbill/types';
 import { getExchangeRateModel } from '../models/billing/exchange-rate.js';
 import { fetchExchangeRate } from '../utils/fetch-exchange-rate.js';
+import { logger } from '@ezstart/logger/server';
 const pairs: [Currency, Currency][] = currencyEnum.options
   .filter((c) => c !== 'USD')
   .map((c) => [c as Currency, 'USD' as Currency]);
@@ -17,13 +18,13 @@ export async function updateAllExchangeRates() {
         source: 'exchangerate.host',
         fetchedAt: new Date(),
       });
-      console.log(`✔️ Updated: ${from} → ${to} = ${rate}`);
+      logger.info(`✔️ Updated: ${from} → ${to} = ${rate}`);
     } catch (err) {
       if (err instanceof Error) {
-        console.error(`❌ Error updating ${from} → ${to}:`, err.message);
+        logger.error(`❌ Error updating ${from} → ${to}:`, err.message);
         if (err.message.includes('rate limit')) break;
       } else {
-        console.error(`❌ Error updating ${from} → ${to}:`, err);
+        logger.error(`❌ Error updating ${from} → ${to}:`, err);
       }
     }
 

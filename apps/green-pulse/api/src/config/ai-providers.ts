@@ -4,6 +4,7 @@
  * Registers available AI providers from @ezstart/ai-sdk
  */
 
+import { logger } from '@ezstart/logger/server'
 import { providerRegistry } from '@ezstart/ai-sdk'
 
 /**
@@ -11,7 +12,7 @@ import { providerRegistry } from '@ezstart/ai-sdk'
  * Called at app startup
  */
 export function initializeAIProviders() {
-  console.log('[AI SDK] Initializing providers...')
+  logger.info('[AI SDK] Initializing providers...')
 
   // Register Gemini (primary)
   if (process.env.GEMINI_API_KEY) {
@@ -31,9 +32,9 @@ export function initializeAIProviders() {
         jsonMode: true,
       },
     })
-    console.log('✅ [AI SDK] Registered: Gemini 2.5 Flash')
+    logger.info('✅ [AI SDK] Registered: Gemini 2.5 Flash')
   } else {
-    console.warn('⚠️  [AI SDK] Gemini API key not found - provider disabled')
+    logger.warn('⚠️  [AI SDK] Gemini API key not found - provider disabled')
   }
 
   // Register OpenAI (optional)
@@ -54,9 +55,9 @@ export function initializeAIProviders() {
         jsonMode: true,
       },
     })
-    console.log('✅ [AI SDK] Registered: OpenAI GPT-4')
+    logger.info('✅ [AI SDK] Registered: OpenAI GPT-4')
   }
 
   const enabledCount = providerRegistry.listEnabled().length
-  console.log(`[AI SDK] ${enabledCount} provider(s) enabled`)
+  logger.info(`[AI SDK] ${enabledCount} provider(s) enabled`)
 }

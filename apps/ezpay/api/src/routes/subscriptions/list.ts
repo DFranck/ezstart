@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import { authMiddleware } from '../../middleware/auth.js'
@@ -57,7 +58,7 @@ const getSubscriptionsHandler = async (req: Request, res: Response) => {
       meta: { total, limit: Number(limit), offset: Number(offset) },
     })
   } catch (error) {
-    console.error('Get subscriptions error:', error)
+    logger.error('Get subscriptions error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch subscriptions',

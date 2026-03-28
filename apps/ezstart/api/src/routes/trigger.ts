@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import { getHealthCheckModel } from '../models/HealthCheck.js'
@@ -54,13 +55,13 @@ triggerRouter.post('/', async (req, res) => {
             })
           }
 
-          console.log(
+          logger.info(
             `✅ [Trigger] ${serviceId}: ${result.status} (${result.responseTime || 'N/A'}ms)`
           )
 
           return { serviceId, result }
         } catch (error) {
-          console.error(`❌ [Trigger] Error checking ${serviceId}:`, error)
+          logger.error(`❌ [Trigger] Error checking ${serviceId}:`, error)
 
           // Save failed check (only in production)
           if (!isDev) {
@@ -74,7 +75,7 @@ triggerRouter.post('/', async (req, res) => {
                 error: error instanceof Error ? error.message : 'Unknown error',
               })
             } catch (dbError) {
-              console.error(`❌ [Trigger] Failed to save health check to DB:`, dbError)
+              logger.error(`❌ [Trigger] Failed to save health check to DB:`, dbError)
             }
           }
 
@@ -83,12 +84,12 @@ triggerRouter.post('/', async (req, res) => {
       })
     ).then(results => {
       const healthyCount = results.filter(r => r.result?.status === 'healthy').length
-      console.log(
+      logger.info(
         `✅ [Trigger] Completed manual health checks: ${healthyCount}/${results.length} healthy`
       )
     })
   } catch (error) {
-    console.error('[Trigger] Error:', error)
+    logger.error('[Trigger] Error:', error)
     res.status(500).json({
       error: 'Failed to trigger health checks',
       message: error instanceof Error ? error.message : 'Unknown error',

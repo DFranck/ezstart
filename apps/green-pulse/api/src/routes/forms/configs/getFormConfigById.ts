@@ -3,6 +3,7 @@
  * Get form configuration by ID
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
@@ -38,7 +39,7 @@ getFormConfigByIdRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error fetching form config:', error)
+      logger.error('Error fetching form config:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to fetch form configuration',

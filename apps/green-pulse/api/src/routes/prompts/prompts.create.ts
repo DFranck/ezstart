@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
@@ -72,7 +73,7 @@ docRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error('Error creating prompt:', error)
+      logger.error('Error creating prompt:', error)
 
       if (error.name === 'ZodError') {
         return res.status(400).json({

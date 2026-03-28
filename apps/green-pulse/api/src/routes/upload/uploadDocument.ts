@@ -3,6 +3,7 @@
  * Upload document (basic)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import path from 'path'
 import { upload } from './multerConfig.js'
@@ -48,7 +49,7 @@ uploadDocumentRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Document upload error:', error)
+      logger.error('Document upload error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to process document',

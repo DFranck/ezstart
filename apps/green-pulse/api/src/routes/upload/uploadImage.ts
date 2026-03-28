@@ -3,6 +3,7 @@
  * Upload and analyze image
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { readImage } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'
@@ -45,7 +46,7 @@ uploadImageRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Image upload error:', error)
+      logger.error('Image upload error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to process image',

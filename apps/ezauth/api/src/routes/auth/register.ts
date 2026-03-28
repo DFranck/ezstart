@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router, createVeryStrictRateLimiter } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { logger } from '@ezstart/logger/server'
 import {
   RegisterRequest,
   registerRequestSchema,
@@ -28,7 +29,7 @@ const registerController = async (req: any, res: any) => {
       message: 'User registered successfully'
     })
   } catch (error) {
-    console.error('Register error:', error)
+    logger.error('Register error:', error)
     res.status(400).json({
       success: false,
       error: error instanceof Error ? error.message : 'Registration failed'

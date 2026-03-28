@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { recognize } from '@ezstart/ocr-sdk'
 import { summonersWarParser } from '../parsers/summoners-war.js'
 import { nikkeParser } from '../parsers/nikke.js'
@@ -255,9 +256,9 @@ export async function scanImage(
       allRuns.sort((a, b) => b.subsCount - a.subsCount || b.confidence - a.confidence)
 
       // Log bench results
-      console.log(`[bench] ${allRuns.length} OCR runs:`)
+      logger.debug(`[bench] ${allRuns.length} OCR runs:`)
       for (const r of allRuns) {
-        console.log(`  ${r.source} + ${r.preset}: ${r.subsCount} subs, ${r.confidence}% conf`)
+        logger.debug(`  ${r.source} + ${r.preset}: ${r.subsCount} subs, ${r.confidence}% conf`)
       }
 
       // Build benchResults for storage
@@ -381,7 +382,7 @@ export async function scanImage(
                 })
                 return { ocr, parse }
               } catch (e) {
-                console.error(`[scan] ${label} image OCR failed:`, e)
+                logger.error(`[scan] ${label} image OCR failed:`, e)
                 return null
               }
             })
@@ -398,14 +399,14 @@ export async function scanImage(
             parseResult = merged.parseResult
           }
         } catch (e) {
-          console.error('[scan] Extra image OCR failed, using main:', e)
+          logger.error('[scan] Extra image OCR failed, using main:', e)
         }
       }
     }
 
     // --- Zone-based OCR: 8 individual zones for precise extraction ---
     if (zoneBuffers && Object.keys(zoneBuffers).length > 0) {
-      console.log(`[scan] Zone-based OCR (8 zones): ${Object.keys(zoneBuffers).join(', ')}`)
+      logger.info(`[scan] Zone-based OCR (8 zones): ${Object.keys(zoneBuffers).join(', ')}`)
 
       const zoneResults = await Promise.all(
         Object.entries(zoneBuffers).map(async ([zoneName, buffer]) => {
@@ -414,7 +415,7 @@ export async function scanImage(
             const ocr = await recognize(processed, ocrConfig)
             return { zoneName, ocr, text: ocr.text.trim(), confidence: ocr.confidence }
           } catch (e) {
-            console.error(`[scan] Zone ${zoneName} OCR failed:`, e)
+            logger.error(`[scan] Zone ${zoneName} OCR failed:`, e)
             return { zoneName, ocr: null, text: '', confidence: 0 }
           }
         })
@@ -525,7 +526,7 @@ export async function scanImage(
         const zoneSubCount = subStats.length
         const currentSubCount = parseResult.success ? ((parseResult.data as any)?.subStats || []).length : 0
 
-        console.log(`[scan] Zone individual parse: ${zoneSubCount} subs (innate: ${zoneParsed.innateStat ? 'yes' : 'no'}), current global: ${currentSubCount}`)
+        logger.info(`[scan] Zone individual parse: ${zoneSubCount} subs (innate: ${zoneParsed.innateStat ? 'yes' : 'no'}), current global: ${currentSubCount}`)
 
         // Zone-based parsing is PRIORITY when it found meaningful data.
         // The global parser mixes innate into substats — zones keep them separate.
@@ -543,9 +544,9 @@ export async function scanImage(
 
           ocrResult = zoneOcr
           parseResult = zoneParseResult
-          console.log(`[scan] Using zone-individual result (${zoneSubCount} subs, innate separated, ${combinedConfidence}% conf)`)
+          logger.info(`[scan] Using zone-individual result (${zoneSubCount} subs, innate separated, ${combinedConfidence}% conf)`)
         } else {
-          console.log(`[scan] Zone parse failed, falling back to global result (${currentSubCount} subs)`)
+          logger.info(`[scan] Zone parse failed, falling back to global result (${currentSubCount} subs)`)
         }
       }
     }
@@ -556,7 +557,7 @@ export async function scanImage(
     const needsFallback = ocrResult.confidence < 70 || isPartial || hasFewerSubstats
 
     if (needsFallback && gameType === 'summoners-war') {
-      console.log('[scan] Low confidence or missing stats, trying Gemini Vision fallback...')
+      logger.info('[scan] Low confidence or missing stats, trying Gemini Vision fallback...')
       const geminiText = await ocrWithGemini(imageBuffer)
 
       if (geminiText) {
@@ -567,7 +568,7 @@ export async function scanImage(
         const currentSubCount = Array.isArray(parseResult.data?.subStats) ? parseResult.data.subStats.length : 0
 
         if (geminiSubCount > currentSubCount) {
-          console.log('[scan] Gemini found more stats, using Gemini result')
+          logger.info('[scan] Gemini found more stats, using Gemini result')
           parseResult = geminiParse
           ocrResult.text = geminiText
           ocrResult.confidence = 95
@@ -589,7 +590,7 @@ export async function scanImage(
       try {
         analysis = analyzeRune(parseResult.data as unknown as RuneData, profile as any) as unknown as ScanResult['analysis']
       } catch (e) {
-        console.error('[scan] Analysis failed:', e)
+        logger.error('[scan] Analysis failed:', e)
       }
     }
 

@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
@@ -58,7 +59,7 @@ docRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error getting prompt:', error)
+      logger.error('Error getting prompt:', error)
       res.status(500).json({
         success: false,
         data: null,

@@ -1,4 +1,5 @@
 import { getExchangeRateModel } from '../models/billing/exchange-rate.js';
+import { logger } from '@ezstart/logger/server';
 
 export async function getLatestExchangeRate(from: string, to: string) {
   const ExchangeRate = await getExchangeRateModel();
@@ -7,7 +8,7 @@ export async function getLatestExchangeRate(from: string, to: string) {
     .lean();
   if (!doc) return null;
   const { from: f, to: t, rate, source, fetchedAt } = doc;
-  console.log('getLatestExchangeRate', {
+  logger.debug('getLatestExchangeRate', {
     from: f,
     to: t,
     rate,

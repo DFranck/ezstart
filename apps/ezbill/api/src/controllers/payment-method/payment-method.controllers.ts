@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { PaymentMethodModel } from '../../models/payment-method.js';
 import { toApiObject } from '../../utils/mongoose/to-api-object.js';
 import { AuthRequest } from '../../types/auth.js';
+import { logger } from '@ezstart/logger/server';
 
 export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
   try {
@@ -35,7 +36,7 @@ export const getPaymentMethods = async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error('Error fetching payment methods:', error);
+    logger.error('Error fetching payment methods:', error);
     res.status(500).json({ error: 'Failed to fetch payment methods' });
   }
 };
@@ -51,7 +52,7 @@ export const getPaymentMethodById = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(paymentMethod));
   } catch (error: any) {
-    console.error('Error fetching payment method:', error);
+    logger.error('Error fetching payment method:', error);
     res.status(500).json({ error: 'Failed to fetch payment method' });
   }
 };
@@ -72,7 +73,7 @@ export const createPaymentMethod = async (req: AuthRequest, res: Response) => {
     await paymentMethod.save();
     res.status(201).json(toApiObject(paymentMethod));
   } catch (error: any) {
-    console.error('Error creating payment method:', error);
+    logger.error('Error creating payment method:', error);
     res.status(400).json({ error: error.message || 'Failed to create payment method' });
   }
 };
@@ -101,7 +102,7 @@ export const updatePaymentMethod = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(paymentMethod));
   } catch (error: any) {
-    console.error('Error updating payment method:', error);
+    logger.error('Error updating payment method:', error);
     res.status(400).json({ error: error.message || 'Failed to update payment method' });
   }
 };
@@ -135,7 +136,7 @@ export const deletePaymentMethod = async (req: AuthRequest, res: Response) => {
       res.json(toApiObject(paymentMethod));
     }
   } catch (error: any) {
-    console.error('Error deleting payment method:', error);
+    logger.error('Error deleting payment method:', error);
     res.status(500).json({ error: 'Failed to delete payment method' });
   }
 };
@@ -155,7 +156,7 @@ export const restorePaymentMethod = async (req: AuthRequest, res: Response) => {
     
     res.json(toApiObject(paymentMethod));
   } catch (error: any) {
-    console.error('Error restoring payment method:', error);
+    logger.error('Error restoring payment method:', error);
     res.status(500).json({ error: 'Failed to restore payment method' });
   }
 };

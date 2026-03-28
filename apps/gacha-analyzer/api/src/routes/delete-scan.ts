@@ -2,6 +2,7 @@
  * DELETE /api/scans/:id — Delete a scan
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
@@ -26,7 +27,7 @@ router.delete('/:id', async (req: any, res: any) => {
       data: { deleted: true },
     })
   } catch (error) {
-    console.error('[delete-scan] Error:', error)
+    logger.error('[delete-scan] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to delete scan',

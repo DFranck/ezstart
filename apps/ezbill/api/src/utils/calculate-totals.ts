@@ -1,4 +1,5 @@
 import { BaseLineItem, BillingType } from '@ezbill/types';
+import { logger } from '@ezstart/logger/server';
 
 /**
  * Calculate totals for itemized billing (line items)
@@ -6,19 +7,19 @@ import { BaseLineItem, BillingType } from '@ezbill/types';
 export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
   // Validate inputs
   if (!Array.isArray(items)) {
-    console.error('❌ calculateTotals: items is not an array');
+    logger.error('❌ calculateTotals: items is not an array');
     items = [];
   }
 
   if (typeof taxRate !== 'number' || isNaN(taxRate)) {
-    console.error('❌ calculateTotals: invalid taxRate');
+    logger.error('❌ calculateTotals: invalid taxRate');
     taxRate = 0;
   }
 
   const subtotal = items.reduce((acc, item) => {
     // Validate item structure
     if (!item || typeof item !== 'object') {
-      console.error('❌ calculateTotals: Invalid item');
+      logger.error('❌ calculateTotals: Invalid item');
       return acc;
     }
 
@@ -26,14 +27,14 @@ export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
     const price = Number(item.price) || 0;
 
     if (isNaN(quantity) || isNaN(price)) {
-      console.error(`❌ calculateTotals: Invalid quantity or price in item: ${item.label}`);
+      logger.error(`❌ calculateTotals: Invalid quantity or price in item: ${item.label}`);
       return acc;
     }
 
     const itemTotal = quantity * price;
 
     if (isNaN(itemTotal)) {
-      console.error('❌ calculateTotals: Item total is NaN');
+      logger.error('❌ calculateTotals: Item total is NaN');
       return acc;
     }
 
@@ -53,7 +54,7 @@ export function calculateTotals(items: BaseLineItem[], taxRate = 0) {
 
   // Final validation
   if (isNaN(result.subtotal) || isNaN(result.taxAmount) || isNaN(result.total)) {
-    console.error('❌ calculateTotals: Final result contains NaN');
+    logger.error('❌ calculateTotals: Final result contains NaN');
     return { subtotal: 0, taxAmount: 0, total: 0 };
   }
 

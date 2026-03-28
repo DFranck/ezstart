@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import crypto from 'crypto'
 import type { ESGPayload, ESGReportStatus } from '@green-pulse/types'
 
@@ -46,7 +47,7 @@ class ESGService {
 
       return this.accessToken
     } catch (error) {
-      console.error('Failed to get ESG token:', error)
+      logger.error('Failed to get ESG token:', error)
       throw new Error('ESG authentication failed')
     }
   }
@@ -186,15 +187,15 @@ class ESGService {
     try {
       // 1. Create/update project
       const { project_id } = await this.createProject(payload)
-      console.log(`✅ Project created/updated: ${project_id}`)
+      logger.info(`✅ Project created/updated: ${project_id}`)
 
       // 2. Push activity data
       const { data_id } = await this.pushActivityData(project_id, payload)
-      console.log(`✅ Activity data pushed: ${data_id}`)
+      logger.info(`✅ Activity data pushed: ${data_id}`)
 
       // 3. Generate report
       const report = await this.generateReport(project_id)
-      console.log(`✅ Report generation started: ${report.job_id}`)
+      logger.info(`✅ Report generation started: ${report.job_id}`)
 
       return {
         project_id,
@@ -202,7 +203,7 @@ class ESGService {
         job_id: report.job_id,
       }
     } catch (error) {
-      console.error('ESG processing failed:', error)
+      logger.error('ESG processing failed:', error)
       throw error
     }
   }

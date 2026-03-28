@@ -4,6 +4,7 @@
  * Fetch only error logs from Sentry
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { createSentryClient } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
@@ -39,7 +40,7 @@ const getErrorsHandler = async (req: Request, res: Response) => {
       errors: errorLogs,
     })
   } catch (error) {
-    console.error('[Activity] Error fetching Sentry errors:', error)
+    logger.error('[Activity] Error fetching Sentry errors:', error)
     res.status(500).json({
       error: 'Failed to fetch Sentry errors',
       message: error instanceof Error ? error.message : 'Unknown error',

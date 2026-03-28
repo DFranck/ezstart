@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
@@ -7,7 +8,7 @@ const MODELS = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash']
 
 export async function ocrWithGemini(imageBuffer: Buffer): Promise<string | null> {
   if (!GEMINI_API_KEY) {
-    console.warn('[OCR] Gemini API key not configured, skipping fallback')
+    logger.warn('[OCR] Gemini API key not configured, skipping fallback')
     return null
   }
 
@@ -32,18 +33,18 @@ Do NOT add explanations, just the raw text.`
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
       const model = genAI.getGenerativeModel({ model: modelName })
       const result = await model.generateContent([prompt, imageData])
-      console.log(`[OCR] Gemini ${modelName} succeeded`)
+      logger.info(`[OCR] Gemini ${modelName} succeeded`)
       return result.response.text()
     } catch (error: any) {
       if (error?.status === 429) {
-        console.warn(`[OCR] Gemini ${modelName} rate limited, trying next model...`)
+        logger.warn(`[OCR] Gemini ${modelName} rate limited, trying next model...`)
         continue
       }
-      console.error(`[OCR] Gemini ${modelName} failed:`, error.message)
+      logger.error(`[OCR] Gemini ${modelName} failed:`, error.message)
       return null
     }
   }
 
-  console.warn('[OCR] All Gemini models exhausted')
+  logger.warn('[OCR] All Gemini models exhausted')
   return null
 }

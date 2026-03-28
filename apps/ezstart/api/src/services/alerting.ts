@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 
@@ -75,7 +76,7 @@ class AlertingService {
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
         const channel = index === 0 ? 'email' : 'slack'
-        console.error(`[Alerting] Failed to send ${channel} alert:`, result.reason)
+        logger.error(`[Alerting] Failed to send ${channel} alert:`, result.reason)
       }
     })
   }
@@ -89,7 +90,7 @@ class AlertingService {
     }
 
     if (this.config.email.to?.length === 0) {
-      console.warn('[Alerting] No email recipients configured')
+      logger.warn('[Alerting] No email recipients configured')
       return
     }
 
@@ -157,7 +158,7 @@ class AlertingService {
       html,
     })
 
-    console.log(`[Alerting] Email alert sent to ${this.config.email?.to?.length} recipient(s)`)
+    logger.info(`[Alerting] Email alert sent to ${this.config.email?.to?.length} recipient(s)`)
   }
 
   /**
@@ -224,7 +225,7 @@ class AlertingService {
       throw new Error(`Slack webhook returned ${response.status}: ${await response.text()}`)
     }
 
-    console.log('[Alerting] Slack alert sent successfully')
+    logger.info('[Alerting] Slack alert sent successfully')
   }
 
   /**
@@ -252,14 +253,14 @@ class AlertingService {
       await this.sendEmailAlert(testAlert)
       results.email = true
     } catch (error) {
-      console.error('[Alerting] Email test failed:', error)
+      logger.error('[Alerting] Email test failed:', error)
     }
 
     try {
       await this.sendSlackAlert(testAlert)
       results.slack = true
     } catch (error) {
-      console.error('[Alerting] Slack test failed:', error)
+      logger.error('[Alerting] Slack test failed:', error)
     }
 
     return results

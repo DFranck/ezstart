@@ -2,6 +2,7 @@
  * PUT /api/config/:gameType/:layoutName — Save/update a layout
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
@@ -66,7 +67,7 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
       data: config,
     })
   } catch (error) {
-    console.error('[put-game-config] Error:', error)
+    logger.error('[put-game-config] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to save game config',

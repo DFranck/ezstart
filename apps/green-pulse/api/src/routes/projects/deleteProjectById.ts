@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -41,7 +42,7 @@ docRouter.delete('/:id', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error deleting project:', error)
+    logger.error('Error deleting project:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to delete project',

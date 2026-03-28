@@ -3,6 +3,7 @@
  * Conversational AI assistant for invoice/quote creation
  */
 import { Request, Response } from 'express'
+import { logger } from '@ezstart/logger/server'
 import { chatWithInvoiceAssistant } from '../../services/gemini.service.js'
 
 interface ExtractInvoiceRequest {
@@ -40,7 +41,7 @@ export async function extractInvoiceData(req: Request, res: Response) {
       conversationState: response.conversationState,
     })
   } catch (error: any) {
-    console.error('Error in AI conversation:', error)
+    logger.error('Error in AI conversation:', error)
     res.status(500).json({
       error: 'Failed to process AI conversation',
       message: error.message,

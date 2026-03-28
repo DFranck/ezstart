@@ -9,6 +9,7 @@
  * - endpoint: Filter by endpoint (optional)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getPerformanceMetricModel, type IPerformanceMetric } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
@@ -99,7 +100,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
       })),
     })
   } catch (error) {
-    console.error('[Performance] Error fetching metrics:', error)
+    logger.error('[Performance] Error fetching metrics:', error)
     res.status(500).json({
       error: 'Failed to fetch performance metrics',
       message: error instanceof Error ? error.message : 'Unknown error',

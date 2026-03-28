@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CreateReceipt, GetReceiptsQuery, UpdateReceipt } from '@ezbill/types';
+import { logger } from '@ezstart/logger/server';
 import {
   createReceiptService,
   getReceiptByIdService,
@@ -39,7 +40,7 @@ export async function createSecureReceiptController(req: AuthRequest, res: Respo
 
     res.status(201).json(receipt);
   } catch (error) {
-    console.error('Error in createSecureReceiptController:', error);
+    logger.error('Error in createSecureReceiptController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to create receipt'
@@ -63,7 +64,7 @@ export async function getSecureReceiptsController(req: AuthRequest, res: Respons
 
     res.json(receipts);
   } catch (error) {
-    console.error('Error in getSecureReceiptsController:', error);
+    logger.error('Error in getSecureReceiptsController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve receipts'
@@ -94,7 +95,7 @@ export async function getSecureReceiptByIdController(req: AuthRequest, res: Resp
 
     res.json(receipt);
   } catch (error) {
-    console.error('Error in getSecureReceiptByIdController:', error);
+    logger.error('Error in getSecureReceiptByIdController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to retrieve receipt'
@@ -144,7 +145,7 @@ export async function updateSecureReceiptController(req: AuthRequest, res: Respo
 
     res.json(receipt);
   } catch (error) {
-    console.error('Error in updateSecureReceiptController:', error);
+    logger.error('Error in updateSecureReceiptController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to update receipt'
@@ -184,7 +185,7 @@ export async function softDeleteSecureReceiptController(req: AuthRequest, res: R
 
     res.json(receipt); // Return deleted receipt with deletedAt timestamp
   } catch (error) {
-    console.error('Error in softDeleteSecureReceiptController:', error);
+    logger.error('Error in softDeleteSecureReceiptController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to delete receipt'
@@ -227,7 +228,7 @@ export async function restoreSecureReceiptController(req: AuthRequest, res: Resp
 
     res.json(receipt);
   } catch (error) {
-    console.error('Error in restoreSecureReceiptController:', error);
+    logger.error('Error in restoreSecureReceiptController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to restore receipt'
@@ -270,7 +271,7 @@ export async function hardDeleteSecureReceiptController(req: AuthRequest, res: R
       receipt
     });
   } catch (error) {
-    console.error('Error in hardDeleteSecureReceiptController:', error);
+    logger.error('Error in hardDeleteSecureReceiptController:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to permanently delete receipt'

@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import OpenAI from 'openai'
 import fs from 'fs'
 import type { ESGPayload } from '@green-pulse/types'
@@ -51,7 +52,7 @@ export async function chatWithExtraction(message: string, extractEsg: boolean = 
       extractedData: null,
     }
   } catch (error) {
-    console.error('OpenAI chat error:', error)
+    logger.error('OpenAI chat error:', error)
     throw new Error('Failed to process chat message')
   }
 }
@@ -115,7 +116,7 @@ export async function transcribeAudio(filePath: string): Promise<string> {
     })
     return transcription.text
   } catch (error) {
-    console.error('Transcription error:', error)
+    logger.error('Transcription error:', error)
     throw new Error('Failed to transcribe audio')
   }
 }
@@ -161,7 +162,7 @@ export async function readImage(imageUrlOrPath: string): Promise<any> {
 
     return JSON.parse(response.choices[0]?.message?.content || '{}')
   } catch (error) {
-    console.error('Vision processing error:', error)
+    logger.error('Vision processing error:', error)
     throw new Error('Failed to process image')
   }
 }
@@ -194,7 +195,7 @@ Return {"ok": true} or {"ok": false, "errors": [...]}`
 
     return JSON.parse(response.choices[0]?.message?.content || '{"ok": false, "errors": ["Validation failed"]}')
   } catch (error) {
-    console.error('Validation error:', error)
+    logger.error('Validation error:', error)
     return { ok: false, errors: ['Validation service error'] }
   }
 }

@@ -3,6 +3,7 @@
  * Get report generation status
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 
@@ -36,7 +37,7 @@ getReportStatusRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Report status error:', error)
+      logger.error('Report status error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to get report status',

@@ -4,6 +4,7 @@
  * Demonstrates reusable AI SDK integration
  */
 
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -47,11 +48,11 @@ docRouter.post('/', async (req, res) => {
         })
         await newConversation.save()
         conversation_id = newConversation._id.toString()
-        console.log(
+        logger.info(
           `✅ [Chat V2] Auto-created conversation: ${conversation_id} (userId: ${userId || 'anonymous'})`
         )
       } catch (createError) {
-        console.error('[Chat V2] Failed to auto-create conversation:', createError)
+        logger.error('[Chat V2] Failed to auto-create conversation:', createError)
       }
     }
 
@@ -68,7 +69,7 @@ docRouter.post('/', async (req, res) => {
           }))
         }
       } catch (loadError) {
-        console.error('[Chat V2] Failed to load conversation history:', loadError)
+        logger.error('[Chat V2] Failed to load conversation history:', loadError)
       }
     }
 
@@ -102,7 +103,7 @@ docRouter.post('/', async (req, res) => {
       sdk_version: '@ezstart/ai-sdk@1.0.0', // Indicates using new SDK
     })
   } catch (error) {
-    console.error('[Chat V2] Error:', error)
+    logger.error('[Chat V2] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to process chat message',

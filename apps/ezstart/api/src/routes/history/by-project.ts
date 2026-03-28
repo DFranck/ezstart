@@ -12,6 +12,7 @@
  * Otherwise, /history/project/ezauth would match /:serviceId with serviceId="project"
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'
 import type { Request, Response } from 'express'
@@ -79,7 +80,7 @@ const getByProjectHandler = async (req: Request, res: Response) => {
     })
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500
-    console.error('[History] Error fetching project history:', error)
+    logger.error('[History] Error fetching project history:', error)
     res.status(500).json({
       error: 'Failed to fetch project history',
       message: error instanceof Error ? error.message : 'Unknown error',

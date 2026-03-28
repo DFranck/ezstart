@@ -12,6 +12,7 @@
  * - since: Relative time (e.g., '24h', '7d') or ISO timestamp
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { createSentryClient } from '@ezstart/monitoring'
 import type { ActivityLog } from '@ezstart/monitoring'
@@ -45,7 +46,7 @@ const listActivityHandler = async (req: Request, res: Response) => {
           const errorLogs = sentryClient.issuesToActivityLogs(issues)
           allLogs.push(...errorLogs)
         } catch (error) {
-          console.error('[Activity] Failed to fetch Sentry errors:', error)
+          logger.error('[Activity] Failed to fetch Sentry errors:', error)
         }
       }
     }
@@ -71,7 +72,7 @@ const listActivityHandler = async (req: Request, res: Response) => {
       logs: filteredLogs,
     })
   } catch (error) {
-    console.error('[Activity] Error fetching activity logs:', error)
+    logger.error('[Activity] Error fetching activity logs:', error)
     res.status(500).json({
       error: 'Failed to fetch activity logs',
       message: error instanceof Error ? error.message : 'Unknown error',

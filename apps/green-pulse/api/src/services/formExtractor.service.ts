@@ -3,6 +3,7 @@
  * Uses AI (Gemini) to extract form field values from natural conversation
  */
 
+import { logger } from '@ezstart/logger/server'
 import type { FormConfig, FieldDefinition, ExtractFormDataResponse } from '@green-pulse/types'
 import { getFormConfigModel } from '../models/FormConfig.js'
 import { chatWithExtraction } from './gemini.service.js'
@@ -67,7 +68,7 @@ function parseExtractionResponse(
     // Try to extract JSON from AI response
     const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      console.warn('No JSON found in AI response, returning defaults')
+      logger.warn('No JSON found in AI response, returning defaults')
       return {
         extractedFields: {},
         confidence: {},
@@ -88,7 +89,7 @@ function parseExtractionResponse(
       aiResponse: parsed.aiResponse || aiResponse,
     }
   } catch (error) {
-    console.error('Failed to parse AI extraction response:', error)
+    logger.error('Failed to parse AI extraction response:', error)
     return {
       extractedFields: {},
       confidence: {},
@@ -137,10 +138,10 @@ function validateExtractedData(
       // Min/max for numbers
       if (field.type === 'number') {
         if (field.validation.min !== undefined && val < field.validation.min) {
-          console.warn(`Field ${field.id} below minimum: ${val} < ${field.validation.min}`)
+          logger.warn(`Field ${field.id} below minimum: ${val} < ${field.validation.min}`)
         }
         if (field.validation.max !== undefined && val > field.validation.max) {
-          console.warn(`Field ${field.id} above maximum: ${val} > ${field.validation.max}`)
+          logger.warn(`Field ${field.id} above maximum: ${val} > ${field.validation.max}`)
         }
       }
 
@@ -148,7 +149,7 @@ function validateExtractedData(
       if (field.validation.pattern && typeof val === 'string') {
         const regex = new RegExp(field.validation.pattern)
         if (!regex.test(val)) {
-          console.warn(`Field ${field.id} doesn't match pattern: ${field.validation.pattern}`)
+          logger.warn(`Field ${field.id} doesn't match pattern: ${field.validation.pattern}`)
         }
       }
     }
@@ -290,7 +291,7 @@ export async function extractFormData(
       aiResponse: parsed.aiResponse || aiResult.response,
     }
   } catch (error) {
-    console.error('Form extraction error:', error)
+    logger.error('Form extraction error:', error)
     throw error
   }
 }

@@ -3,6 +3,7 @@
  * Get form instance by ID
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
@@ -38,7 +39,7 @@ getFormInstanceByIdRouter.get(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error fetching form instance:', error)
+      logger.error('Error fetching form instance:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to fetch form instance',

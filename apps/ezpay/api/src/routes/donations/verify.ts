@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -63,7 +64,7 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       payment.paymentMethod = session.payment_method_types?.[0]
       await payment.save()
 
-      console.log(`✅ Payment verified with Stripe and completed: ${sessionId}`)
+      logger.info(`✅ Payment verified with Stripe and completed: ${sessionId}`)
 
       res.json({
         success: true,
@@ -71,14 +72,14 @@ const verifyPaymentHandler = async (req: Request, res: Response) => {
       })
     } else {
       // Payment not confirmed by Stripe
-      console.warn(`⚠️ Payment not confirmed by Stripe: ${sessionId} (status: ${session.status})`)
+      logger.warn(`⚠️ Payment not confirmed by Stripe: ${sessionId} (status: ${session.status})`)
       res.status(400).json({
         success: false,
         error: 'Payment not confirmed',
       })
     }
   } catch (error) {
-    console.error('Verify payment error:', error)
+    logger.error('Verify payment error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to verify payment',

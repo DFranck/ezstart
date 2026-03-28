@@ -3,6 +3,7 @@
  * Delete form instance
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { FormInstanceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormInstanceModel } from '../../../models/FormInstance.js'
@@ -38,7 +39,7 @@ deleteFormInstanceRouter.delete(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error deleting form instance:', error)
+      logger.error('Error deleting form instance:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to delete form instance',

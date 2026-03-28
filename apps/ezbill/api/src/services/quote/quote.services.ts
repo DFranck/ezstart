@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server';
 import {
   ConvertQuoteToInvoice,
   CreateQuote,
@@ -15,7 +16,7 @@ import { getLatestExchangeRate } from '../../utils/get-latest-exchange-rate.js';
 
 export async function createQuoteService(data: CreateQuote): Promise<Quote> {
   const QuoteModel = await getQuoteModel();
-  console.log('🔍 createQuoteService input data:', JSON.stringify(data, null, 2));
+  logger.debug('🔍 createQuoteService input data:', JSON.stringify(data, null, 2));
 
   let exchangeRate = await getLatestExchangeRate(data.currency, 'USD');
 
@@ -31,16 +32,16 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
   }
 
   const billingType = data.billingType || 'itemized';
-  console.log('🔍 Billing type:', billingType);
-  console.log('🔍 Items:', JSON.stringify(data.items, null, 2));
-  console.log('🔍 Flat rate amount:', data.flatRateAmount);
-  console.log('🔍 Tax rate:', data.taxRate);
+  logger.debug('🔍 Billing type:', billingType);
+  logger.debug('🔍 Items:', JSON.stringify(data.items, null, 2));
+  logger.debug('🔍 Flat rate amount:', data.flatRateAmount);
+  logger.debug('🔍 Tax rate:', data.taxRate);
 
   const totals = calculateBillingTotals(billingType, data.taxRate ?? 0, {
     items: data.items,
     flatRateAmount: data.flatRateAmount,
   });
-  console.log('🔍 Calculated totals:', totals);
+  logger.debug('🔍 Calculated totals:', totals);
 
   const documentNumber = await generateNextNumber('quote', data.userId);
 
@@ -51,7 +52,7 @@ export async function createQuoteService(data: CreateQuote): Promise<Quote> {
     exchangeRate,
   };
 
-  console.log('🔍 Final quote data to create:', JSON.stringify(quoteData, null, 2));
+  logger.debug('🔍 Final quote data to create:', JSON.stringify(quoteData, null, 2));
 
   const doc = new QuoteModel(quoteData);
   return toApiObject(await doc.save());

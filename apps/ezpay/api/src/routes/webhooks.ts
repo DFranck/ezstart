@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { stripe } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
@@ -20,7 +21,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+    logger.error('Webhook signature verification failed:', err)
     return res.status(400).json({ error: 'Invalid signature' })
   }
 
@@ -29,7 +30,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
 
-        console.log(`🔍 Looking for payment with ID: ${session.id}`)
+        logger.info(`🔍 Looking for payment with ID: ${session.id}`)
 
         const updateData: any = {
           status: 'completed',
@@ -48,9 +49,9 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         )
 
         if (result.matchedCount === 0) {
-          console.error(`❌ Payment not found in DB: ${session.id}`)
+          logger.error(`❌ Payment not found in DB: ${session.id}`)
         } else {
-          console.log(`✅ Payment completed: ${session.id}`)
+          logger.info(`✅ Payment completed: ${session.id}`)
         }
         break
       }
@@ -61,7 +62,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         // Update payment status to cancelled
         await Payment.updateOne({ paymentId: session.id }, { status: 'cancelled' })
 
-        console.log(`⏰ Payment expired: ${session.id}`)
+        logger.info(`⏰ Payment expired: ${session.id}`)
         break
       }
 
@@ -71,7 +72,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         // Update payment status to refunded
         await Payment.updateOne({ paymentId: charge.id }, { status: 'refunded' })
 
-        console.log(`↩️ Payment refunded: ${charge.id}`)
+        logger.info(`↩️ Payment refunded: ${charge.id}`)
         break
       }
 
@@ -98,7 +99,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           { status: mappedStatus }
         )
 
-        console.log(`📅 Subscription updated: ${subscription.id} → ${mappedStatus}`)
+        logger.info(`📅 Subscription updated: ${subscription.id} → ${mappedStatus}`)
         break
       }
 
@@ -111,7 +112,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           { status: 'cancelled' }
         )
 
-        console.log(`❌ Subscription cancelled: ${subscription.id}`)
+        logger.info(`❌ Subscription cancelled: ${subscription.id}`)
         break
       }
 
@@ -125,18 +126,18 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
             { status: 'failed' }
           )
 
-          console.log(`💥 Invoice payment failed for subscription: ${subscriptionId}`)
+          logger.info(`💥 Invoice payment failed for subscription: ${subscriptionId}`)
         }
         break
       }
 
       default:
-        console.log(`ℹ️ Unhandled event type: ${event.type}`)
+        logger.info(`ℹ️ Unhandled event type: ${event.type}`)
     }
 
     res.json({ received: true })
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    logger.error('Webhook processing error:', error)
     res.status(500).json({ error: 'Webhook processing failed' })
   }
 })

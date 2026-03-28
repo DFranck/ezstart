@@ -1,6 +1,7 @@
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
+import { logger } from '@ezstart/logger/server'
 import {
   TokenRequest,
   tokenRequestSchema,
@@ -33,7 +34,7 @@ const tokenController = async (req: any, res: any) => {
       ...token
     })
   } catch (error) {
-    console.error('Token exchange error:', error)
+    logger.error('Token exchange error:', error)
     res.status(400).json({
       success: false,
       error: error instanceof Error ? error.message : 'Token exchange failed'

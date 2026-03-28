@@ -5,6 +5,7 @@
  * Configured for GreenPulse ESG assistance
  */
 
+import { logger } from '@ezstart/logger/server'
 import { AIAgent } from '@ezstart/ai-sdk'
 import type { ESGPayload } from '@green-pulse/types'
 import { Conversation } from '../models/Conversation.js'
@@ -30,13 +31,13 @@ export const liaAgent = new AIAgent({
 
   // Hook: Before sending request
   beforeRequest: async (context) => {
-    console.log(`[LIA] User ${context.userId || 'anonymous'}: ${context.message.substring(0, 100)}`)
+    logger.info(`[LIA] User ${context.userId || 'anonymous'}: ${context.message.substring(0, 100)}`)
     return context
   },
 
   // Hook: After receiving response
   afterResponse: async (context) => {
-    console.log(`[LIA] AI response: ${context.response.substring(0, 100)}...`)
+    logger.info(`[LIA] AI response: ${context.response.substring(0, 100)}...`)
 
     // Save to conversation if conversationId provided
     if (context.conversationId) {
@@ -58,9 +59,9 @@ export const liaAgent = new AIAgent({
             ],
           },
         })
-        console.log(`✅ Saved to conversation: ${context.conversationId}`)
+        logger.info(`✅ Saved to conversation: ${context.conversationId}`)
       } catch (error) {
-        console.error('❌ Failed to save conversation:', error)
+        logger.error('❌ Failed to save conversation:', error)
         // Don't fail the request
       }
     }
@@ -70,9 +71,9 @@ export const liaAgent = new AIAgent({
 
   // Hook: On error
   onError: async (error, context) => {
-    console.error('[LIA] Error:', error.message)
-    console.error('  User:', context.userId || 'anonymous')
-    console.error('  Message:', context.message.substring(0, 100))
+    logger.error('[LIA] Error:', error.message)
+    logger.error('  User:', context.userId || 'anonymous')
+    logger.error('  Message:', context.message.substring(0, 100))
   }
 })
 
@@ -91,9 +92,9 @@ export const esgExtractionAgent = new AIAgent({
     try {
       const extracted = JSON.parse(context.response) as ESGPayload
       context.metadata = { extractedData: extracted }
-      console.log(`[ESG Extraction] Successfully extracted data for ${extracted.company?.name || 'unknown company'}`)
+      logger.info(`[ESG Extraction] Successfully extracted data for ${extracted.company?.name || 'unknown company'}`)
     } catch (error) {
-      console.error('[ESG Extraction] Failed to parse JSON:', error)
+      logger.error('[ESG Extraction] Failed to parse JSON:', error)
       context.metadata = { extractedData: null, error: 'Failed to parse extracted data' }
     }
     return context

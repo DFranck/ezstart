@@ -3,6 +3,7 @@
  * Create new form configuration (admin only)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { FormConfigSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getFormConfigModel } from '../../../models/FormConfig.js'
@@ -40,7 +41,7 @@ createFormConfigRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Error creating form config:', error)
+      logger.error('Error creating form config:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to create form configuration',

@@ -3,6 +3,7 @@
  * Hard delete conversation (permanent)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 
@@ -37,7 +38,7 @@ hardDeleteConversationRouter.delete(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Hard delete conversation error:', error)
+      logger.error('Hard delete conversation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to permanently delete conversation',

@@ -3,6 +3,7 @@
  * Restore soft deleted conversation
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 
@@ -41,7 +42,7 @@ restoreConversationRouter.post(
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error('Restore conversation error:', error)
+      logger.error('Restore conversation error:', error)
       res.status(500).json({
         success: false,
         error: 'Failed to restore conversation',

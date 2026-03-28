@@ -3,6 +3,7 @@
  * GET /api/config/:gameType/:layoutName — Get a specific layout
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
@@ -29,7 +30,7 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
       data: config,
     })
   } catch (error) {
-    console.error('[get-game-config] Error:', error)
+    logger.error('[get-game-config] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch game config',
@@ -51,7 +52,7 @@ router.get('/:gameType', async (req: any, res: any) => {
       data: configs,
     })
   } catch (error) {
-    console.error('[get-game-config] Error:', error)
+    logger.error('[get-game-config] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch game configs',

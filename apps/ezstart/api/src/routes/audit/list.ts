@@ -7,6 +7,7 @@
  * Now reads from docs/audits.json (single JSON file) instead of multiple .md files
  */
 
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
@@ -132,7 +133,7 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
       },
     })
   } catch (error) {
-    console.error('[Audits] Error reading audits.json:', error)
+    logger.error('[Audits] Error reading audits.json:', error)
     res.status(500).json({
       error: 'Failed to get audits',
       message: error instanceof Error ? error.message : 'Unknown error',

@@ -1,6 +1,7 @@
 // Import Sentry FIRST (instrument.mts initializes Sentry before anything else)
 import './instrument.mjs'
 import { Sentry } from './instrument.mjs'
+import { logger } from '@ezstart/logger/server'
 import {
   connectToMongo,
   createApp,
@@ -40,6 +41,6 @@ connectToMongo('game-analyzer')
     })
   })
   .catch(err => {
-    console.error('Failed to start Gacha Analyzer API', err)
+    logger.error('Failed to start Gacha Analyzer API', err)
     process.exit(1)
   })

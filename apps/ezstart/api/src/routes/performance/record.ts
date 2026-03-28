@@ -14,6 +14,7 @@
  * }
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
@@ -49,7 +50,7 @@ const recordMetricHandler = async (req: Request, res: Response) => {
       metricId: metric._id,
     })
   } catch (error) {
-    console.error('[Performance] Error recording metric:', error)
+    logger.error('[Performance] Error recording metric:', error)
     res.status(500).json({
       error: 'Failed to record performance metric',
       message: error instanceof Error ? error.message : 'Unknown error',

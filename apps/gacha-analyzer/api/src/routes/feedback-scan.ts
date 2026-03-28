@@ -2,6 +2,7 @@
  * POST /api/scans/:id/feedback — Submit feedback on a scan
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
@@ -46,7 +47,7 @@ router.post('/:id/feedback', async (req: any, res: any) => {
       data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
     })
   } catch (error) {
-    console.error('[feedback-scan] Error:', error)
+    logger.error('[feedback-scan] Error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to submit feedback',

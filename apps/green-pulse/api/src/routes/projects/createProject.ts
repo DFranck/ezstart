@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -53,7 +54,7 @@ docRouter.post('/', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error creating project:', error)
+    logger.error('Error creating project:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to create project',

@@ -4,6 +4,7 @@
  * Get specific deployment details
  */
 
+import { logger } from '@ezstart/logger/server'
 import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
 import { DEPLOYMENT_CONFIGS } from '@ezstart/monitoring'
 import { exec } from 'child_process'
@@ -55,7 +56,7 @@ const getDeploymentByIdHandler = async (req: Request, res: Response) => {
           }
         })
     } catch (gitError) {
-      console.warn(`Failed to get git history for ${id}:`, gitError)
+      logger.warn(`Failed to get git history for ${id}:`, gitError)
     }
 
     res.json({

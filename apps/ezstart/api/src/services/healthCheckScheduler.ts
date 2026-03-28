@@ -11,6 +11,7 @@
  * - Vercel Web: Can go up to 60min intervals (no sleep)
  */
 
+import { logger } from '@ezstart/logger/server'
 import {
   HealthChecker,
   MONITORED_SERVICES,
@@ -62,7 +63,7 @@ export class HealthCheckScheduler {
    */
   setSocketIO(io: IOServer) {
     this.io = io
-    console.log('📡 [Scheduler] Socket.IO instance attached for real-time updates')
+    logger.info('📡 [Scheduler] Socket.IO instance attached for real-time updates')
   }
 
   /**
@@ -70,22 +71,22 @@ export class HealthCheckScheduler {
    */
   start() {
     if (this.isRunning) {
-      console.log('⏰ [Scheduler] Already running')
+      logger.info('⏰ [Scheduler] Already running')
       return
     }
 
     const isDev = process.env.NODE_ENV !== 'production'
     const envLabel = isDev ? 'development' : 'production'
 
-    console.log(`⏰ [Scheduler] Starting ADAPTIVE health check scheduler in ${envLabel} mode...`)
-    console.log(
+    logger.info(`⏰ [Scheduler] Starting ADAPTIVE health check scheduler in ${envLabel} mode...`)
+    logger.info(
       `⏰ [Scheduler] Monitoring ${Object.keys(MONITORED_SERVICES).length} services with exponential backoff`
     )
-    console.log('⏰ [Scheduler] Config:')
-    console.log(`   - Min interval: ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000} minutes`)
-    console.log(`   - Max interval (Railway/Vercel): ${ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS / 60000} minutes`)
-    console.log(`   - Max interval (Render): ${ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS / 60000} minutes`)
-    console.log(`   - Backoff multiplier: ${ADAPTIVE_CHECK_CONFIG.BACKOFF_MULTIPLIER}x`)
+    logger.info('⏰ [Scheduler] Config:')
+    logger.info(`   - Min interval: ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000} minutes`)
+    logger.info(`   - Max interval (Railway/Vercel): ${ADAPTIVE_CHECK_CONFIG.MAX_INTERVAL_MS / 60000} minutes`)
+    logger.info(`   - Max interval (Render): ${ADAPTIVE_CHECK_CONFIG.RENDER_MAX_INTERVAL_MS / 60000} minutes`)
+    logger.info(`   - Backoff multiplier: ${ADAPTIVE_CHECK_CONFIG.BACKOFF_MULTIPLIER}x`)
 
     this.isRunning = true
 
@@ -93,11 +94,11 @@ export class HealthCheckScheduler {
     const initialDelay = isDev ? 5000 : 30000
     const delayLabel = isDev ? '5 seconds' : '30 seconds'
 
-    console.log(`⏰ [Scheduler] Waiting ${delayLabel} before first health check...`)
+    logger.info(`⏰ [Scheduler] Waiting ${delayLabel} before first health check...`)
 
     setTimeout(() => {
       this.scheduleAllServices()
-      console.log(`✅ [Scheduler] Adaptive health check scheduler started (${envLabel} mode)`)
+      logger.info(`✅ [Scheduler] Adaptive health check scheduler started (${envLabel} mode)`)
     }, initialDelay)
   }
 
@@ -111,7 +112,7 @@ export class HealthCheckScheduler {
       this.scheduleNextCheck(serviceId)
     }
 
-    console.log(`⏰ [Scheduler] Scheduled ${allServiceIds.length} services for adaptive health checks`)
+    logger.info(`⏰ [Scheduler] Scheduled ${allServiceIds.length} services for adaptive health checks`)
   }
 
   /**
@@ -126,7 +127,7 @@ export class HealthCheckScheduler {
 
     const state = this.serviceStates.get(serviceId)
     if (!state) {
-      console.error(`❌ [Scheduler] No state found for service ${serviceId}`)
+      logger.error(`❌ [Scheduler] No state found for service ${serviceId}`)
       return
     }
 
@@ -139,7 +140,7 @@ export class HealthCheckScheduler {
 
     this.scheduledChecks.set(serviceId, timeout)
 
-    console.log(
+    logger.info(
       `⏰ [Scheduler] ${serviceId}: Next check in ${delayMin}min (interval: ${state.currentInterval / 60000}min)`
     )
   }
@@ -184,7 +185,7 @@ export class HealthCheckScheduler {
 
       // Log if interval changed
       if (nextInterval !== state.currentInterval) {
-        console.log(
+        logger.info(
           `📊 [Scheduler] ${serviceId}: Interval ${state.currentInterval / 60000}min → ${nextInterval / 60000}min (status: ${result.status}, successes: ${state.consecutiveSuccesses})`
         )
       }
@@ -212,11 +213,11 @@ export class HealthCheckScheduler {
 
       // Log result
       if (result.status === 'healthy') {
-        console.log(
+        logger.info(
           `✅ [Scheduler] ${serviceId}: ${result.status} (${result.responseTime}ms) - Next in ${nextInterval / 60000}min`
         )
       } else {
-        console.log(
+        logger.info(
           `❌ [Scheduler] ${serviceId}: ${result.status} (${duration}ms) - Reset to ${ADAPTIVE_CHECK_CONFIG.MIN_INTERVAL_MS / 60000}min`
         )
       }
@@ -232,7 +233,7 @@ export class HealthCheckScheduler {
         })
       }
     } catch (error) {
-      console.error(`❌ [Scheduler] Error checking ${serviceId}:`, error)
+      logger.error(`❌ [Scheduler] Error checking ${serviceId}:`, error)
 
       // Reset to minimum interval on error
       state.consecutiveSuccesses = 0
@@ -252,7 +253,7 @@ export class HealthCheckScheduler {
           error: error instanceof Error ? error.message : 'Unknown error',
         })
       } catch (dbError) {
-        console.error(`❌ [Scheduler] Failed to save error to DB:`, dbError)
+        logger.error(`❌ [Scheduler] Failed to save error to DB:`, dbError)
       }
     }
 
@@ -272,7 +273,7 @@ export class HealthCheckScheduler {
     this.scheduledChecks.clear()
     this.isRunning = false
 
-    console.log('⏰ [Scheduler] Adaptive health check scheduler stopped')
+    logger.info('⏰ [Scheduler] Adaptive health check scheduler stopped')
   }
 
   /**

@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import { getPaymentModel } from '../../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -70,7 +71,7 @@ const getDonationStatsHandler = async (req: Request, res: Response) => {
       },
     })
   } catch (error) {
-    console.error('Get donation stats error:', error)
+    logger.error('Get donation stats error:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to fetch donation stats',

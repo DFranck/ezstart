@@ -12,6 +12,7 @@ import {
   addVersionHeader
 } from '@ezstart/express-core'
 import routes, { globalRegistry } from './routes/index.js'
+import { logger } from '@ezstart/logger/server'
 
 export const app = createApp({ apiApp: 'ezbill' })
 const PORT = getApiPort('ezbill')
@@ -39,6 +40,6 @@ connectToMongo('ezbill')
     })
   )
   .catch(err => {
-    console.error('❌ Failed to start EZBill API', err)
+    logger.error('❌ Failed to start EZBill API', err)
     process.exit(1)
   })

@@ -8,6 +8,7 @@
  * - limit: Number of endpoints to return (default: 10)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getPerformanceMetricModel } from '../../models/PerformanceMetric.js'
 import type { Request, Response } from 'express'
@@ -62,7 +63,7 @@ const getEndpointsHandler = async (req: Request, res: Response) => {
       })),
     })
   } catch (error) {
-    console.error('[Performance] Error fetching endpoint stats:', error)
+    logger.error('[Performance] Error fetching endpoint stats:', error)
     res.status(500).json({
       error: 'Failed to fetch endpoint statistics',
       message: error instanceof Error ? error.message : 'Unknown error',

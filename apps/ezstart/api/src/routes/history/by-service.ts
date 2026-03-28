@@ -7,6 +7,7 @@
  * - hours: Number of hours to look back (default: 24, max: 168 = 7 days)
  */
 
+import { logger } from '@ezstart/logger/server'
 import { Router } from '@ezstart/express-core'
 import { getHealthCheckModel } from '../../models/HealthCheck.js'
 import type { Request, Response } from 'express'
@@ -59,7 +60,7 @@ const getByServiceHandler = async (req: Request, res: Response) => {
     })
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500
-    console.error('[History] Error fetching service history:', error)
+    logger.error('[History] Error fetching service history:', error)
     res.status(500).json({
       error: 'Failed to fetch history',
       message: error instanceof Error ? error.message : 'Unknown error',

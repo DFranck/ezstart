@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
@@ -51,7 +52,7 @@ docRouter.put('/:id', async (req, res) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error updating project:', error)
+    logger.error('Error updating project:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to update project',

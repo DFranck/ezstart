@@ -1,10 +1,12 @@
+import { logger } from '@ezstart/logger/server';
+
 export async function fetchExchangeRate(
   from: string,
   to: string
 ): Promise<number> {
   if (from === to) return 1;
   const url = `https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=1&access_key=${process.env.EXCHANGE_RATE_API_KEY}`;
-  console.log('URL:', url); // debug
+  logger.debug('URL:', url);
   const res = await fetch(url);
   const data = await res.json() as any;
 
