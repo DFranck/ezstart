@@ -123,15 +123,17 @@ apps/
 79. [x] History page fix — _id→id mapping, confidence display, scan cards avec set/slot/advice badge
 80. [x] Scan detail fix — memory:// image fallback, confidence ×100 fix
 81. [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code (en cours)
-82. [ ] Scan feedback — agree/disagree + commentaire par scan, filtrable dans history, data pour améliorer le scoring
-83. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
-83. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
-84. [ ] Fallback IA cascade (Gemini free tier)
-85. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
-86. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
-87. [ ] Ajouter OpenAPI/Swagger à l'API game-analyzer
-88. [ ] Deploy (Railway API + Vercel Web)
-89. [ ] Overlay/PiP pour afficher résultats sur le jeu
+82. [x] Scan feedback — agree/disagree + commentaire, filtre history, badge scan card
+83. [x] Estimation rolls — parser (aX%) hints du rawText, 6 tests, rollHints dans RuneData
+84. [x] OpenAPI/Swagger — 15 operations documentées, /docs exposé sur localhost:5080/docs
+85. [x] Screenshots — thumbnail JPEG 50% sauvé en DB, affiché dans scan detail
+86. [x] History enrichie — scan cards avec set/slot/quality/main/subs/eff, 6 filtres client-side
+87. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
+88. [ ] Fallback IA cascade (Gemini free tier)
+89. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
+90. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
+91. [ ] Deploy (Railway API + Vercel Web)
+92. [ ] Overlay/PiP pour afficher résultats sur le jeu
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory
