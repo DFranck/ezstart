@@ -15,6 +15,7 @@
     "build:ga-web": "turbo build --filter=web-gacha-analyzer",
     "dev": "node scripts/tools/dev.js",
     "dev:types": "tsc -b --watch",
+    "rotate-secrets": "node scripts/tools/rotate-secrets.js",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "kill:ports": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tools\\kill-ports.ps1",
