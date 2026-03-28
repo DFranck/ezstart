@@ -128,12 +128,41 @@ apps/
 84. [x] OpenAPI/Swagger — 15 operations documentées, /docs exposé sur localhost:5080/docs
 85. [x] Screenshots — thumbnail JPEG 50% sauvé en DB, affiché dans scan detail
 86. [x] History enrichie — scan cards avec set/slot/quality/main/subs/eff, 6 filtres client-side
-87. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
-88. [ ] Fallback IA cascade (Gemini free tier)
-89. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
-90. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
-91. [ ] Deploy (Railway API + Vercel Web)
-92. [ ] Overlay/PiP pour afficher résultats sur le jeu
+87. [x] Debug panel fix — uses API values (adjustedSetWeighted, adjustedPotential, setWeightRatio)
+88. [x] Frame diff masks — ignores masked zones in comparison (no rescan on sell button change)
+89. [x] Pagination ALL APIs — ezauth, ezbill, ezpay, green-pulse (13 endpoints added)
+90. [x] Bug report system — categories, status flow, report filter, badge
+91. [ ] Fix scan doublons — cache hash pas efficace, même rune scannée 2x
+92. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
+93. [ ] Fallback IA cascade (Gemini free tier)
+94. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)
+95. [ ] Intégration SWSTATS/Lucksack API pour builds populaires
+96. [ ] Deploy (Railway API + Vercel Web)
+97. [ ] Overlay/PiP pour afficher résultats sur le jeu
+
+---
+
+## 💰 ezbill
+
+**Status :** `in-progress` | **Priorité :** haute | **Dernière mise à jour :** 2026-03-28
+
+### Audit 2026-03-28 — 85% production-ready
+
+### Étapes
+1. [ ] CRITIQUE: Replace all alert() with toast (sonner) — ~30 instances
+2. [ ] CRITIQUE: Remove all console.log/console.error from production code
+3. [ ] CRITIQUE: Replace deprecated getUserId() with useAuth().user._id everywhere
+4. [ ] CRITIQUE: Implement Quote PDF or hide the button
+5. [ ] CRITIQUE: Fix `: any` return types on dashboard pages
+6. [ ] Standardize API responses — all endpoints return { data, pagination }
+7. [ ] Add client search/filter on dashboard
+8. [ ] i18n — translate all hardcoded English strings
+9. [ ] Remove legacy files (clients.old.ts, invoices.old.ts, v2 components)
+10. [ ] Add empty states on client detail + settings deleted items
+11. [ ] Mobile UX — test table views, modals on small screens
+12. [ ] Quote expiration dates + reminders
+13. [ ] Partial payments support
+14. [ ] Email sending for invoices
 
 ### Notes
 - L'utilisateur joue à Summoners War et Nikke Goddess of Victory

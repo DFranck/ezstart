@@ -7,6 +7,7 @@ import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill
 import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import { callApi } from '@/utils/api'
 import React from 'react'
+import { toast } from 'sonner'
 
 export function useClientDashboardHandlers() {
   const { clients, companies, paymentMethods, receipts, refetchAll } = useBillingContext()
@@ -27,7 +28,6 @@ export function useClientDashboardHandlers() {
       const blob = await pdf(<InvoicePDF data={pdfData} />).toBlob()
       return URL.createObjectURL(blob)
     } catch (error) {
-      console.error('Error generating invoice PDF URL:', error)
       return null
     }
   }
@@ -46,12 +46,11 @@ export function useClientDashboardHandlers() {
         await refetchAll()
         return true
       } else {
-        alert('Failed to send invoice')
+        toast.error('Failed to send invoice')
         return false
       }
     } catch (error) {
-      console.error('Error sending invoice:', error)
-      alert('Error sending invoice')
+      toast.error('Error sending invoice')
       return false
     }
   }
@@ -71,7 +70,7 @@ export function useClientDashboardHandlers() {
         : undefined
 
       if (!client) {
-        alert('Client not found')
+        toast.error('Client not found')
         return
       }
 
@@ -96,8 +95,7 @@ export function useClientDashboardHandlers() {
       // Cleanup
       URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Error downloading invoice:', error)
-      alert('Error downloading invoice')
+      toast.error('Error downloading invoice')
     }
   }
 
@@ -111,7 +109,7 @@ export function useClientDashboardHandlers() {
         : undefined
 
       if (!client) {
-        alert('Client not found')
+        toast.error('Client not found')
         return
       }
 
@@ -136,15 +134,7 @@ export function useClientDashboardHandlers() {
       // Cleanup
       URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Error downloading receipt:', error)
-      console.error('Receipt data:', receipt)
-      const client = clients.find(c => c._id === receipt.clientId)
-      const company = receipt.companyId
-        ? companies.find(c => c._id === receipt.companyId)
-        : undefined
-      console.error('Client data:', client)
-      console.error('Company data:', company)
-      alert(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error(`Error downloading receipt: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -155,14 +145,13 @@ export function useClientDashboardHandlers() {
       const receipt = receipts.find(r => r.invoiceId === invoice._id)
 
       if (!receipt) {
-        alert('No receipt found for this invoice')
+        toast.error('No receipt found for this invoice')
         return
       }
 
       await handleDownloadReceipt(receipt, e)
     } catch (error) {
-      console.error('Error downloading receipt for invoice:', error)
-      alert('Error downloading receipt')
+      toast.error('Error downloading receipt')
     }
   }
 
@@ -193,10 +182,8 @@ export function useClientDashboardHandlers() {
 
       // TODO: Implement QuotePDF component and converter
       // For now, return null
-      console.warn('Quote PDF generation not implemented yet')
       return null
     } catch (error) {
-      console.error('Error generating quote PDF URL:', error)
       return null
     }
   }
@@ -215,12 +202,11 @@ export function useClientDashboardHandlers() {
         await refetchAll()
         return true
       } else {
-        alert('Failed to send quote')
+        toast.error('Failed to send quote')
         return false
       }
     } catch (error) {
-      console.error('Error sending quote:', error)
-      alert('Error sending quote')
+      toast.error('Error sending quote')
       return false
     }
   }
@@ -245,11 +231,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        alert('Failed to accept quote')
+        toast.error('Failed to accept quote')
       }
     } catch (error) {
-      console.error('Error accepting quote:', error)
-      alert('Error accepting quote')
+      toast.error('Error accepting quote')
     }
   }
 
@@ -268,11 +253,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        alert('Failed to decline quote')
+        toast.error('Failed to decline quote')
       }
     } catch (error) {
-      console.error('Error declining quote:', error)
-      alert('Error declining quote')
+      toast.error('Error declining quote')
     }
   }
 
@@ -286,16 +270,15 @@ export function useClientDashboardHandlers() {
         : undefined
 
       if (!client) {
-        alert('Client not found')
+        toast.error('Client not found')
         return
       }
 
       const fileName = quote.documentNumber || quote._id
       // TODO: Implement quote PDF generation if not exists
-      alert('Quote PDF download not implemented yet')
+      toast.error('Quote PDF download not implemented yet')
     } catch (error) {
-      console.error('Error downloading quote:', error)
-      alert('Error downloading quote')
+      toast.error('Error downloading quote')
     }
   }
 
@@ -311,11 +294,10 @@ export function useClientDashboardHandlers() {
       if (response.ok) {
         await refetchAll()
       } else {
-        alert('Failed to delete quote')
+        toast.error('Failed to delete quote')
       }
     } catch (error) {
-      console.error('Error deleting quote:', error)
-      alert('Error deleting quote')
+      toast.error('Error deleting quote')
     }
   }
 

@@ -8,6 +8,7 @@ import { useInvoicePDF } from '@/hooks/useInvoicePDF'
 import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
 
 /** Discriminated union for preview */
 export type PreviewKind = 'invoice' | 'quote' | 'receipt'
@@ -85,7 +86,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
           const url = URL.createObjectURL(blob)
           setPdfBlob(url)
         } catch (error) {
-          console.error('Erreur génération preview PDF:', error)
+          toast.error('Erreur lors de la génération du preview PDF')
         } finally {
           setIsGeneratingPreview(false)
         }
@@ -119,13 +120,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
 
   const handleGeneratePreview = async () => {
     if (kind !== 'invoice' && kind !== 'receipt') {
-      alert("La génération PDF n'est disponible que pour les factures et reçus")
+      toast.error("La génération PDF n'est disponible que pour les factures et reçus")
       return
     }
 
     const pdfData = generatePDFData()
     if (!pdfData) {
-      alert('Client non trouvé')
+      toast.error('Client non trouvé')
       return
     }
 
@@ -143,8 +144,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
       const url = URL.createObjectURL(blob)
       setPdfBlob(url)
     } catch (error) {
-      console.error('Erreur génération preview PDF:', error)
-      alert('Erreur lors de la génération du preview PDF')
+      toast.error('Erreur lors de la génération du preview PDF')
     } finally {
       setIsGeneratingPreview(false)
     }
@@ -153,7 +153,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
   const handleDownloadPDF = async () => {
     const pdfData = generatePDFData()
     if (!pdfData) {
-      alert('Client non trouvé')
+      toast.error('Client non trouvé')
       return
     }
 
@@ -179,8 +179,7 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
         URL.revokeObjectURL(url)
       }
     } catch (error) {
-      console.error('Erreur téléchargement PDF:', error)
-      alert('Erreur lors du téléchargement du PDF')
+      toast.error('Erreur lors du téléchargement du PDF')
     }
   }
 

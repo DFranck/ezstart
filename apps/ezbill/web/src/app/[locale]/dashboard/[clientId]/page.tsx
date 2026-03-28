@@ -24,6 +24,7 @@ import { Button, Icon, Skeleton, SkeletonCard } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 // Dynamic imports for modals (lazy load on demand) - Performance optimization
 const InvoiceModal = dynamic(() => import('@/components/invoice-modal').then(mod => ({ default: mod.InvoiceModal })), {
@@ -157,7 +158,7 @@ const ClientDashboardPage = (): any => {
     if (pdfUrl) {
       setShareState({ isOpen: true, type: 'invoice', document: invoice, pdfUrl })
     } else {
-      alert('Failed to generate PDF for sharing')
+      toast.error('Failed to generate PDF for sharing')
     }
   }
 
@@ -167,7 +168,7 @@ const ClientDashboardPage = (): any => {
     if (pdfUrl) {
       setShareState({ isOpen: true, type: 'quote', document: quote, pdfUrl })
     } else {
-      alert('Quote PDF generation not implemented yet')
+      toast.error('Quote PDF generation not implemented yet')
     }
   }
 
