@@ -19,7 +19,7 @@ export function useMonstersByBuild(archetypes: string[]) {
       const response = await callApi<{ monsters: Monster[]; count: number }>(
         `/monsters/for-rune?archetypes=${archetypes.join(',')}`
       )
-      return response.data.monsters
+      return response.ok ? response.data.monsters : []
     },
     enabled: archetypes.length > 0,
     staleTime: 1000 * 60 * 60, // 1h — monsters rarely change

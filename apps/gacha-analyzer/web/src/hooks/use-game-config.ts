@@ -22,7 +22,7 @@ export function useGameLayouts(gameType: string) {
     queryKey: ['game-layouts', gameType],
     queryFn: async () => {
       const response = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
-      return response.data ?? []
+      return response.ok ? response.data : []
     },
     staleTime: 1000 * 60 * 60,
   })
@@ -34,7 +34,7 @@ export function useGameLayout(gameType: string, layoutName: string) {
     queryKey: ['game-layout', gameType, layoutName],
     queryFn: async () => {
       const response = await callApi<GameLayoutResponse>(`/config/${gameType}/${layoutName}`)
-      return response.data ?? null
+      return response.ok ? response.data : null
     },
     enabled: !!layoutName,
     staleTime: 1000 * 60 * 60,
@@ -59,7 +59,7 @@ export function useSaveGameLayout(gameType: string) {
         method: 'PUT',
         body: input,
       })
-      return response.data ?? null
+      return response.ok ? response.data : null
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['game-layouts', gameType] })
@@ -104,7 +104,7 @@ export function useGameConfig(gameType: string) {
     queryFn: async () => {
       // Load the first layout as the "default" config for backward compat
       const response = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
-      const layouts = response.data ?? []
+      const layouts = response.ok ? response.data : []
       return layouts.length > 0 ? layouts[0] : null
     },
     staleTime: 1000 * 60 * 60,
@@ -127,7 +127,7 @@ export function useSaveGameConfig(gameType: string) {
         method: 'PUT',
         body: input,
       })
-      return response.data ?? null
+      return response.ok ? response.data : null
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['game-config', gameType] })

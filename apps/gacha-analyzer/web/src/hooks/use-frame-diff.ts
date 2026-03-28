@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 
 interface MaskRegion {
-  x: number       // % of frame (0-100)
+  x: number // % of frame (0-100)
   y: number
   width: number
   height: number
@@ -96,14 +96,15 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
       const totalPixels = frame.width * frame.height
 
       // Pre-compute masks in absolute pixel coordinates once per frame
-      const absMasks = masks && masks.length > 0
-        ? masks.map(m => ({
-            x1: Math.floor((m.x / 100) * frame.width),
-            y1: Math.floor((m.y / 100) * frame.height),
-            x2: Math.floor(((m.x + m.width) / 100) * frame.width),
-            y2: Math.floor(((m.y + m.height) / 100) * frame.height),
-          }))
-        : null
+      const absMasks =
+        masks && masks.length > 0
+          ? masks.map(m => ({
+              x1: Math.floor((m.x / 100) * frame.width),
+              y1: Math.floor((m.y / 100) * frame.height),
+              x2: Math.floor(((m.x + m.width) / 100) * frame.width),
+              y2: Math.floor(((m.y + m.height) / 100) * frame.height),
+            }))
+          : null
 
       let sampledCount = 0
       let changedCount = 0
@@ -118,7 +119,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
           let masked = false
           for (let m = 0; m < absMasks.length; m++) {
             const mask = absMasks[m]
-            if (px >= mask.x1 && px <= mask.x2 && py >= mask.y1 && py <= mask.y2) {
+            if (mask && px >= mask.x1 && px <= mask.x2 && py >= mask.y1 && py <= mask.y2) {
               masked = true
               break
             }
@@ -127,8 +128,12 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
         }
 
         const offset = i * 4
-        const gray = computeGrayscale(data[offset], data[offset + 1], data[offset + 2])
-        const prevGray = computeGrayscale(prevData[offset], prevData[offset + 1], prevData[offset + 2])
+        const gray = computeGrayscale(data[offset]!, data[offset + 1]!, data[offset + 2]!)
+        const prevGray = computeGrayscale(
+          prevData[offset]!,
+          prevData[offset + 1]!,
+          prevData[offset + 2]!
+        )
 
         sampledCount++
         if (Math.abs(gray - prevGray) > pixelThreshold) {
@@ -163,7 +168,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
         }, stabilizeMs)
       }
     },
-    [threshold, pixelThreshold, sampleRate, stabilizeMs, masks],
+    [threshold, pixelThreshold, sampleRate, stabilizeMs, masks]
   )
 
   return {

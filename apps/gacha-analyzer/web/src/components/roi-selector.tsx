@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 export interface RoiRect {
-  x: number      // % of container (0-100)
-  y: number      // % of container (0-100)
-  width: number  // % of container (0-100)
+  x: number // % of container (0-100)
+  y: number // % of container (0-100)
+  width: number // % of container (0-100)
   height: number // % of container (0-100)
 }
 
@@ -28,14 +28,8 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-export function RoiSelector({
-  onChange,
-  initialRoi,
-  locked = false,
-}: RoiSelectorProps) {
-  const [roi, setRoi] = useState<RoiRect>(
-    initialRoi ?? { x: 60, y: 5, width: 35, height: 40 }
-  )
+export function RoiSelector({ onChange, initialRoi, locked = false }: RoiSelectorProps) {
+  const [roi, setRoi] = useState<RoiRect>(initialRoi ?? { x: 60, y: 5, width: 35, height: 40 })
 
   const dragRef = useRef<{
     type: 'move' | 'resize'
@@ -147,7 +141,7 @@ export function RoiSelector({
     function handleTouchMove(e: TouchEvent) {
       if (e.touches.length === 1) {
         e.preventDefault()
-        handleMove(e.touches[0].clientX, e.touches[0].clientY)
+        handleMove(e.touches[0]!.clientX, e.touches[0]!.clientY)
       }
     }
 
@@ -172,12 +166,7 @@ export function RoiSelector({
     }
   }, []) // stable — no deps, uses refs only
 
-  function startDrag(
-    clientX: number,
-    clientY: number,
-    type: 'move' | 'resize',
-    handle?: Handle,
-  ) {
+  function startDrag(clientX: number, clientY: number, type: 'move' | 'resize', handle?: Handle) {
     dragRef.current = {
       type,
       handle,
@@ -196,7 +185,7 @@ export function RoiSelector({
   function handleTouchStart(e: React.TouchEvent, type: 'move' | 'resize', handle?: Handle) {
     e.stopPropagation()
     if (e.touches.length === 1) {
-      startDrag(e.touches[0].clientX, e.touches[0].clientY, type, handle)
+      startDrag(e.touches[0]!.clientX, e.touches[0]!.clientY, type, handle)
     }
   }
 
@@ -221,13 +210,45 @@ export function RoiSelector({
       case 'se':
         return { ...base, width: 16, height: 16, bottom: -8, right: -8, cursor: 'se-resize' }
       case 'n':
-        return { ...base, width: 20, height: 8, top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          top: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 'n-resize',
+        }
       case 's':
-        return { ...base, width: 20, height: 8, bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          bottom: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 's-resize',
+        }
       case 'e':
-        return { ...base, width: 8, height: 20, right: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'e-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          right: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'e-resize',
+        }
       case 'w':
-        return { ...base, width: 8, height: 20, left: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'w-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          left: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'w-resize',
+        }
     }
   }
 
@@ -262,18 +283,19 @@ export function RoiSelector({
           overflow: 'visible',
           zIndex: 55,
         }}
-        onMouseDown={locked ? undefined : (e) => handleMouseDown(e, 'move')}
-        onTouchStart={locked ? undefined : (e) => handleTouchStart(e, 'move')}
+        onMouseDown={locked ? undefined : e => handleMouseDown(e, 'move')}
+        onTouchStart={locked ? undefined : e => handleTouchStart(e, 'move')}
       >
         {/* Resize handles (corners + edges) — hidden when locked */}
-        {!locked && allHandles.map((handle) => (
-          <div
-            key={handle}
-            style={getHandleStyle(handle)}
-            onMouseDown={(e) => handleMouseDown(e, 'resize', handle)}
-            onTouchStart={(e) => handleTouchStart(e, 'resize', handle)}
-          />
-        ))}
+        {!locked &&
+          allHandles.map(handle => (
+            <div
+              key={handle}
+              style={getHandleStyle(handle)}
+              onMouseDown={e => handleMouseDown(e, 'resize', handle)}
+              onTouchStart={e => handleTouchStart(e, 'resize', handle)}
+            />
+          ))}
       </div>
     </div>
   )

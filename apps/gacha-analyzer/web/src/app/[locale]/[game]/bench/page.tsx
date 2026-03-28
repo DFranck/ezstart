@@ -3,7 +3,6 @@
 import {
   Button,
   Div,
-
   H2,
   P,
   Select,
@@ -26,7 +25,12 @@ import { preprocessForOcr } from '@/utils/image-preprocessing'
 import { useScan } from '@/hooks/use-scan'
 import { useScreenCapture } from '@/hooks/use-screen-capture'
 import { useFrameDiff } from '@/hooks/use-frame-diff'
-import { useGameLayouts, useGameLayout, useSaveGameLayout, useDeleteGameLayout } from '@/hooks/use-game-config'
+import {
+  useGameLayouts,
+  useGameLayout,
+  useSaveGameLayout,
+  useDeleteGameLayout,
+} from '@/hooks/use-game-config'
 
 /** Default ROI: top-right area where SW displays the rune */
 const DEFAULT_ROI: RoiRect = { x: 60, y: 5, width: 35, height: 40 }
@@ -85,11 +89,8 @@ function cropImageData(imageData: ImageData, roi: RoiRect): ImageData {
 
 async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
   const canvas = canvasFromImageData(imageData)
-  return new Promise((resolve) => {
-    canvas.toBlob(
-      (blob) => resolve(blob ?? new Blob()),
-      'image/png'
-    )
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob ?? new Blob()), 'image/png')
   })
 }
 
@@ -121,7 +122,7 @@ export default function BenchPage() {
 
   // Select first layout when layouts load
   useEffect(() => {
-    if (layouts.length > 0 && !currentLayoutName) {
+    if (layouts.length > 0 && !currentLayoutName && layouts[0]) {
       setCurrentLayoutName(layouts[0].layoutName)
     }
   }, [layouts, currentLayoutName])
@@ -153,7 +154,10 @@ export default function BenchPage() {
     const name = prompt(t('bench.layoutName'))
     if (!name) return
 
-    const layoutName = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    const layoutName = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
     if (!layoutName) return
 
     // Save new layout with current state
@@ -170,7 +174,8 @@ export default function BenchPage() {
 
   const handleDeleteLayout = useCallback(() => {
     if (!currentLayoutName) return
-    const displayName = layouts.find(l => l.layoutName === currentLayoutName)?.displayName ?? currentLayoutName
+    const displayName =
+      layouts.find(l => l.layoutName === currentLayoutName)?.displayName ?? currentLayoutName
     if (!confirm(`${t('bench.deleteLayout')}: ${displayName}?`)) return
 
     deleteLayout(currentLayoutName)
@@ -204,10 +209,13 @@ export default function BenchPage() {
     handleMasksChange(newMasks)
   }, [handleMasksChange])
 
-  const handleMaskRemove = useCallback((id: string) => {
-    const newMasks = masksRef.current.filter(m => m.id !== id)
-    handleMasksChange(newMasks)
-  }, [handleMasksChange])
+  const handleMaskRemove = useCallback(
+    (id: string) => {
+      const newMasks = masksRef.current.filter(m => m.id !== id)
+      handleMasksChange(newMasks)
+    },
+    [handleMasksChange]
+  )
 
   const runBenchScan = useCallback(
     (frame: ImageData) => {
@@ -215,16 +223,25 @@ export default function BenchPage() {
       scanningRef.current = true
 
       // Apply blackout masks before preprocessing
-      const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
+      const maskedFrame =
+        masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
 
-      const processed = preprocessForOcr(maskedFrame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      const processed = preprocessForOcr(maskedFrame, {
+        scale: 2,
+        contrast: 1.0,
+        binarize: false,
+        grayscale: false,
+      })
 
       const previewCanvas = document.createElement('canvas')
       previewCanvas.width = processed.width
       previewCanvas.height = processed.height
       previewCanvas.getContext('2d')!.putImageData(processed, 0, 0)
 
-      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedFrame)]
+      const blobPromises: Promise<Blob>[] = [
+        imageDataToBlob(processed),
+        imageDataToBlob(maskedFrame),
+      ]
 
       const rawCanvas = canvasFromImageData(maskedFrame)
       const previews: { name: string; dataUrl: string }[] = [
@@ -235,8 +252,16 @@ export default function BenchPage() {
       let hasFullBlob = false
       if (fullFrameRef.current) {
         const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-        const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
-        const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const fullMasked =
+          masksRef.current.length > 0
+            ? applyBlackoutMasks(fullCropped, masksRef.current)
+            : fullCropped
+        const fullProcessed = preprocessForOcr(fullMasked, {
+          scale: 2,
+          contrast: 1.0,
+          binarize: false,
+          grayscale: false,
+        })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
         const fullCanvas = canvasFromImageData(fullProcessed)
@@ -245,9 +270,14 @@ export default function BenchPage() {
 
       // Crop zone images from the zoom frame
       const currentZones = zonesRef.current
-      const zoneBlobPromises = currentZones.map(async (zone) => {
+      const zoneBlobPromises = currentZones.map(async zone => {
         const zoneCropped = cropImageData(maskedFrame, zone.rect)
-        const zoneProcessed = preprocessForOcr(zoneCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const zoneProcessed = preprocessForOcr(zoneCropped, {
+          scale: 2,
+          contrast: 1.0,
+          binarize: false,
+          grayscale: false,
+        })
         const blob = await imageDataToBlob(zoneProcessed)
 
         // Add zone preview
@@ -259,38 +289,46 @@ export default function BenchPage() {
 
       setPresetsSaved(false)
 
-      Promise.all([Promise.all(blobPromises), Promise.all(zoneBlobPromises)]).then(([blobs, zoneBlobs]) => {
-        setOcrPreviews(previews)
+      Promise.all([Promise.all(blobPromises), Promise.all(zoneBlobPromises)]).then(
+        ([blobs, zoneBlobs]) => {
+          setOcrPreviews(previews)
 
-        const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
-        const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
-        const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
+          const mainFile = new File([blobs[0]!], 'capture.png', { type: 'image/png' })
+          const altFile = new File([blobs[1]!], 'capture-raw.png', { type: 'image/png' })
+          const fullFile = hasFullBlob
+            ? new File([blobs[2]!], 'capture-full.png', { type: 'image/png' })
+            : undefined
 
-        // Build zone files
-        const zoneFiles: Record<string, File> = {}
-        for (const zb of zoneBlobs) {
-          zoneFiles[zb.name] = new File([zb.blob], `zone-${zb.name}.png`, { type: 'image/png' })
+          // Build zone files
+          const zoneFiles: Record<string, File> = {}
+          for (const zb of zoneBlobs) {
+            zoneFiles[zb.name] = new File([zb.blob], `zone-${zb.name}.png`, { type: 'image/png' })
+          }
+
+          scan(
+            {
+              image: mainFile,
+              imageAlt: altFile,
+              imageFull: fullFile,
+              gameType: game,
+              benchMode: true,
+              zoneSetSlot: zoneFiles.setSlot,
+              zoneMainStat: zoneFiles.mainStat,
+              zoneQuality: zoneFiles.quality,
+              zoneInnate: zoneFiles.innate,
+              zoneSub1: zoneFiles.sub1,
+              zoneSub2: zoneFiles.sub2,
+              zoneSub3: zoneFiles.sub3,
+              zoneSub4: zoneFiles.sub4,
+            },
+            {
+              onSettled: () => {
+                scanningRef.current = false
+              },
+            }
+          )
         }
-
-        scan(
-          {
-            image: mainFile,
-            imageAlt: altFile,
-            imageFull: fullFile,
-            gameType: game,
-            benchMode: true,
-            zoneSetSlot: zoneFiles.setSlot,
-            zoneMainStat: zoneFiles.mainStat,
-            zoneQuality: zoneFiles.quality,
-            zoneInnate: zoneFiles.innate,
-            zoneSub1: zoneFiles.sub1,
-            zoneSub2: zoneFiles.sub2,
-            zoneSub3: zoneFiles.sub3,
-            zoneSub4: zoneFiles.sub4,
-          },
-          { onSettled: () => { scanningRef.current = false } }
-        )
-      })
+      )
     },
     [game, scan]
   )
@@ -395,14 +433,16 @@ export default function BenchPage() {
               <SelectValue placeholder={t('bench.layout')} />
             </SelectTrigger>
             <SelectContent>
-              {layouts.map((l) => (
+              {layouts.map(l => (
                 <SelectItem key={l.layoutName} value={l.layoutName}>
                   {l.displayName ?? l.layoutName}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button size="sm" variant="outline" onClick={handleNewLayout}>+</Button>
+          <Button size="sm" variant="outline" onClick={handleNewLayout}>
+            +
+          </Button>
           {currentLayoutName && layouts.length > 1 && (
             <Button size="sm" variant="destructive" onClick={handleDeleteLayout}>
               {t('bench.deleteLayout')}
@@ -412,11 +452,7 @@ export default function BenchPage() {
 
         {/* Lock/unlock toggle for zones and masks */}
         <Div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZonesLocked(!zonesLocked)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setZonesLocked(!zonesLocked)}>
             {zonesLocked ? `🔓 ${t('bench.unlockZones')}` : `🔒 ${t('bench.lockZones')}`}
           </Button>
         </Div>
@@ -450,7 +486,23 @@ export default function BenchPage() {
             disabled={isPending || !currentFrame}
             onClick={handleRescan}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2"
+            >
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+              <path d="M16 21h5v-5" />
+            </svg>
             {t('scan.capture.rescan')}
           </Button>
         )}
@@ -472,7 +524,8 @@ export default function BenchPage() {
                 {t('labels.confidence')}: {resultData.confidence}%
                 {resultData.rawText && (
                   <span className="ml-4 text-muted-foreground">
-                    Raw: {resultData.rawText.substring(0, 120)}{resultData.rawText.length > 120 ? '...' : ''}
+                    Raw: {resultData.rawText.substring(0, 120)}
+                    {resultData.rawText.length > 120 ? '...' : ''}
                   </span>
                 )}
               </P>
@@ -488,7 +541,9 @@ export default function BenchPage() {
                       <tr className="border-b">
                         <th className="text-left py-2 px-3 font-medium">{t('bench.source')}</th>
                         <th className="text-left py-2 px-3 font-medium">{t('bench.preset')}</th>
-                        <th className="text-right py-2 px-3 font-medium">{t('labels.confidence')}</th>
+                        <th className="text-right py-2 px-3 font-medium">
+                          {t('labels.confidence')}
+                        </th>
                         <th className="text-right py-2 px-3 font-medium">{t('bench.substats')}</th>
                         <th className="text-center py-2 px-3 font-medium">{t('bench.status')}</th>
                       </tr>
@@ -528,10 +583,7 @@ export default function BenchPage() {
                   onClick={handleSavePresets}
                   disabled={presetsSaved}
                 >
-                  {presetsSaved
-                    ? t('bench.presetsSaved')
-                    : t('bench.savePresets')
-                  }
+                  {presetsSaved ? t('bench.presetsSaved') : t('bench.savePresets')}
                 </Button>
               </Div>
             )}

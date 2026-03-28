@@ -58,7 +58,7 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
   // Extract last path segment to determine the page title
   const segments = pathname.split('/').filter(Boolean)
   const lastSegment = segments[segments.length - 1]
-  const titleKey = PAGE_TITLE_KEYS[lastSegment]
+  const titleKey = lastSegment ? PAGE_TITLE_KEYS[lastSegment] : undefined
   const pageTitle = titleKey ? t(titleKey) : null
 
   return (

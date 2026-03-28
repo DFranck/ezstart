@@ -695,6 +695,8 @@ export interface SubstatAnalysis {
   grindAmount?: number
   /** Per-roll breakdown with quality tier for each roll */
   rollBreakdown?: RollBreakdown[]
+  /** Maximum possible value for this substat given roll count */
+  maxValue?: number
   /** Whether this substat is the worst for the best archetype (gem target) */
   isGemTarget?: boolean
 }

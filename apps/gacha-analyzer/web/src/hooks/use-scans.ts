@@ -32,7 +32,7 @@ export function useScans(options: UseScansOptions = {}): UseScansResult {
       params.set('offset', offset.toString())
 
       const response = await callApi<Scan[]>(`/scans?${params}`)
-      return { scans: response.data ?? [], meta: response.meta }
+      return { scans: response.ok ? response.data : [], meta: response.meta }
     },
   })
 

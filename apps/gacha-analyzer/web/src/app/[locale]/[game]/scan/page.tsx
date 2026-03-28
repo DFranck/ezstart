@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Div,
-
   P,
   Select,
   SelectContent,
@@ -126,11 +125,8 @@ function cropImageData(imageData: ImageData, roi: RoiRect): ImageData {
 
 async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
   const canvas = canvasFromImageData(imageData)
-  return new Promise((resolve) => {
-    canvas.toBlob(
-      (blob) => resolve(blob ?? new Blob()),
-      'image/png'
-    )
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob ?? new Blob()), 'image/png')
   })
 }
 
@@ -182,19 +178,23 @@ export default function GameScanPage() {
   const [flashOpacity, setFlashOpacity] = useState(0)
   const [flashDuration, setFlashDuration] = useState(1000)
 
-  const flashConfig: Record<string, { color: string; intensity: number; duration: number }> = useMemo(() => ({
-    // Advice actions (priority)
-    /* Flash colors use rgba() because they are applied via inline style as background overlays
+  const flashConfig: Record<string, { color: string; intensity: number; duration: number }> =
+    useMemo(
+      () => ({
+        // Advice actions (priority)
+        /* Flash colors use rgba() because they are applied via inline style as background overlays
        with dynamic alpha. CSS variables are referenced through getComputedStyle at runtime. */
-    sell:    { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
-    upgrade: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
-    keep:    { color: 'rgba(34, 197, 94, ALPHA)', intensity: 0.5, duration: 1200 },
-    grind:   { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.4, duration: 1000 },
-    // Tier fallback (when no advice)
-    godlike: { color: 'rgba(255, 180, 0, ALPHA)', intensity: 0.6, duration: 1500 },
-    great:   { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.5, duration: 1200 },
-    good:    { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
-  }), [])
+        sell: { color: 'rgba(239, 68, 68, ALPHA)', intensity: 0.5, duration: 800 },
+        upgrade: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+        keep: { color: 'rgba(34, 197, 94, ALPHA)', intensity: 0.5, duration: 1200 },
+        grind: { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+        // Tier fallback (when no advice)
+        godlike: { color: 'rgba(255, 180, 0, ALPHA)', intensity: 0.6, duration: 1500 },
+        great: { color: 'rgba(139, 92, 246, ALPHA)', intensity: 0.5, duration: 1200 },
+        good: { color: 'rgba(59, 130, 246, ALPHA)', intensity: 0.4, duration: 1000 },
+      }),
+      []
+    )
 
   useEffect(() => {
     const result = cachedResult || scanResult
@@ -202,7 +202,7 @@ export default function GameScanPage() {
 
     const advice = result.analysis?.progressiveAdvice?.action
     const flashKey = advice || result.analysis.adjustedTier || result.analysis.tier
-    const config = flashConfig[flashKey] || flashConfig.sell
+    const config = (flashConfig[flashKey] || flashConfig.sell)!
     const color = config.color.replace('ALPHA', String(config.intensity))
 
     setFlashColor(color)
@@ -236,11 +236,14 @@ export default function GameScanPage() {
   const roiRef = useRef<RoiRect>(roi)
   // Store the full (non-zoomed) frame for the 3rd OCR source
   const fullFrameRef = useRef<ImageData | null>(null)
-  const handleRoiChange = useCallback((newRoi: RoiRect) => {
-    setRoi(newRoi)
-    roiRef.current = newRoi
-    localStorage.setItem(`gacha-analyzer-roi-${game}`, JSON.stringify(newRoi))
-  }, [game])
+  const handleRoiChange = useCallback(
+    (newRoi: RoiRect) => {
+      setRoi(newRoi)
+      roiRef.current = newRoi
+      localStorage.setItem(`gacha-analyzer-roi-${game}`, JSON.stringify(newRoi))
+    },
+    [game]
+  )
 
   // Load saved ROI when game changes
   useEffect(() => {
@@ -255,7 +258,7 @@ export default function GameScanPage() {
 
   // Select first layout when layouts load
   useEffect(() => {
-    if (layouts.length > 0 && !currentLayoutName) {
+    if (layouts.length > 0 && !currentLayoutName && layouts[0]) {
       setCurrentLayoutName(layouts[0].layoutName)
     }
   }, [layouts, currentLayoutName])
@@ -303,26 +306,45 @@ export default function GameScanPage() {
       const thumbnail = imageDataToJpegBase64(frame)
 
       // Apply blackout masks before preprocessing
-      const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
-      const processed = preprocessForOcr(maskedFrame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      const maskedFrame =
+        masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
+      const processed = preprocessForOcr(maskedFrame, {
+        scale: 2,
+        contrast: 1.0,
+        binarize: false,
+        grayscale: false,
+      })
 
       // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
-      const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedFrame)]
+      const blobPromises: Promise<Blob>[] = [
+        imageDataToBlob(processed),
+        imageDataToBlob(maskedFrame),
+      ]
 
       // 3rd source: full window frame cropped to ROI at native resolution
       let hasFullBlob = false
       if (fullFrameRef.current) {
         const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-        const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
-        const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+        const fullMasked =
+          masksRef.current.length > 0
+            ? applyBlackoutMasks(fullCropped, masksRef.current)
+            : fullCropped
+        const fullProcessed = preprocessForOcr(fullMasked, {
+          scale: 2,
+          contrast: 1.0,
+          binarize: false,
+          grayscale: false,
+        })
         blobPromises.push(imageDataToBlob(fullProcessed))
         hasFullBlob = true
       }
 
-      Promise.all(blobPromises).then((blobs) => {
-        const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
-        const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
-        const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
+      Promise.all(blobPromises).then(blobs => {
+        const mainFile = new File([blobs[0]!], 'capture.png', { type: 'image/png' })
+        const altFile = new File([blobs[1]!], 'capture-raw.png', { type: 'image/png' })
+        const fullFile = hasFullBlob
+          ? new File([blobs[2]!], 'capture-full.png', { type: 'image/png' })
+          : undefined
         scan(
           {
             image: mainFile,
@@ -334,7 +356,11 @@ export default function GameScanPage() {
             presets: savedPresets.current,
             thumbnail,
           },
-          { onSettled: () => { scanningRef.current = false } }
+          {
+            onSettled: () => {
+              scanningRef.current = false
+            },
+          }
         )
       })
     },
@@ -386,26 +412,45 @@ export default function GameScanPage() {
     const thumbnail = imageDataToJpegBase64(cropped)
 
     // Apply blackout masks before preprocessing
-    const maskedCropped = masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
-    const processed = preprocessForOcr(maskedCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+    const maskedCropped =
+      masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
+    const processed = preprocessForOcr(maskedCropped, {
+      scale: 2,
+      contrast: 1.0,
+      binarize: false,
+      grayscale: false,
+    })
 
     // Build all images: preprocessed (main) + raw crop (alt) + full window crop (full)
-    const blobPromises: Promise<Blob>[] = [imageDataToBlob(processed), imageDataToBlob(maskedCropped)]
+    const blobPromises: Promise<Blob>[] = [
+      imageDataToBlob(processed),
+      imageDataToBlob(maskedCropped),
+    ]
 
     // 3rd source: full window frame cropped to ROI at native resolution
     let hasFullBlob = false
     if (fullFrameRef.current) {
       const fullCropped = cropImageData(fullFrameRef.current, roiRef.current)
-      const fullMasked = masksRef.current.length > 0 ? applyBlackoutMasks(fullCropped, masksRef.current) : fullCropped
-      const fullProcessed = preprocessForOcr(fullMasked, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
+      const fullMasked =
+        masksRef.current.length > 0
+          ? applyBlackoutMasks(fullCropped, masksRef.current)
+          : fullCropped
+      const fullProcessed = preprocessForOcr(fullMasked, {
+        scale: 2,
+        contrast: 1.0,
+        binarize: false,
+        grayscale: false,
+      })
       blobPromises.push(imageDataToBlob(fullProcessed))
       hasFullBlob = true
     }
 
-    Promise.all(blobPromises).then((blobs) => {
-      const mainFile = new File([blobs[0]], 'capture.png', { type: 'image/png' })
-      const altFile = new File([blobs[1]], 'capture-raw.png', { type: 'image/png' })
-      const fullFile = hasFullBlob ? new File([blobs[2]], 'capture-full.png', { type: 'image/png' }) : undefined
+    Promise.all(blobPromises).then(blobs => {
+      const mainFile = new File([blobs[0]!], 'capture.png', { type: 'image/png' })
+      const altFile = new File([blobs[1]!], 'capture-raw.png', { type: 'image/png' })
+      const fullFile = hasFullBlob
+        ? new File([blobs[2]!], 'capture-full.png', { type: 'image/png' })
+        : undefined
       scan(
         {
           image: mainFile,
@@ -417,7 +462,11 @@ export default function GameScanPage() {
           presets: savedPresets.current,
           thumbnail,
         },
-        { onSettled: () => { scanningRef.current = false } }
+        {
+          onSettled: () => {
+            scanningRef.current = false
+          },
+        }
       )
     })
   }, [currentFrame, scan, game, profile])
@@ -472,7 +521,21 @@ export default function GameScanPage() {
                 onClick={() => setShowSettings(!showSettings)}
                 className="h-12 px-4"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-1.5"
+                >
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
                 {showSettings ? t('scan.hideSettings') : t('scan.settings')}
               </Button>
             }
@@ -485,15 +548,12 @@ export default function GameScanPage() {
               {layouts.length > 0 && (
                 <Div className="flex items-center gap-2">
                   <P className="text-sm font-medium">{t('bench.layout')}:</P>
-                  <Select
-                    value={currentLayoutName}
-                    onValueChange={setCurrentLayoutName}
-                  >
+                  <Select value={currentLayoutName} onValueChange={setCurrentLayoutName}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder={t('bench.layout')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {layouts.map((l) => (
+                      {layouts.map(l => (
                         <SelectItem key={l.layoutName} value={l.layoutName}>
                           {l.displayName ?? l.layoutName}
                         </SelectItem>
@@ -512,7 +572,23 @@ export default function GameScanPage() {
               disabled={isPending || !currentFrame}
               onClick={handleRescan}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2"
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 21h5v-5" />
+              </svg>
               {t('scan.capture.rescan')}
             </Button>
           )}
@@ -529,7 +605,11 @@ export default function GameScanPage() {
                 <Badge variant="outline" className="text-xs">
                   <Div
                     className={`h-1.5 w-1.5 rounded-full mr-1 ${
-                      resultData.confidence >= 80 ? 'bg-success' : resultData.confidence >= 50 ? 'bg-warning' : 'bg-destructive'
+                      resultData.confidence >= 80
+                        ? 'bg-success'
+                        : resultData.confidence >= 50
+                          ? 'bg-warning'
+                          : 'bg-destructive'
                     }`}
                   />
                   {t('scan.statusBar.lastConfidence')}: {Math.round(resultData.confidence)}%
@@ -570,9 +650,19 @@ export default function GameScanPage() {
 
           {/* Rune card — skeleton when no result, real content when available */}
           {game === 'summoners-war' && (
-            <Div className={resultData && hasStructuredData && resultData.success && 'set' in resultData.data ? 'animate-in fade-in-0 duration-300' : ''}>
+            <Div
+              className={
+                resultData && hasStructuredData && resultData.success && 'set' in resultData.data
+                  ? 'animate-in fade-in-0 duration-300'
+                  : ''
+              }
+            >
               <RuneCardWithTemplate
-                rune={hasStructuredData && resultData?.success && 'set' in resultData.data ? resultData.data : undefined}
+                rune={
+                  hasStructuredData && resultData?.success && 'set' in resultData.data
+                    ? resultData.data
+                    : undefined
+                }
                 analysis={resultData?.analysis}
                 confidence={resultData?.confidence}
                 template={runeTemplate}
@@ -582,12 +672,16 @@ export default function GameScanPage() {
           )}
 
           {resultData && (
-            <Div className={isPending ? 'opacity-50 pointer-events-none' : 'animate-in fade-in-0 slide-in-from-bottom-2 duration-300'}>
+            <Div
+              className={
+                isPending
+                  ? 'opacity-50 pointer-events-none'
+                  : 'animate-in fade-in-0 slide-in-from-bottom-2 duration-300'
+              }
+            >
               {resultData.unreliable && (
                 <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2 mb-3">
-                  <P className="text-sm text-warning-foreground">
-                    {t('scan.unreliableResult')}
-                  </P>
+                  <P className="text-sm text-warning-foreground">{t('scan.unreliableResult')}</P>
                 </Div>
               )}
 
@@ -607,7 +701,10 @@ export default function GameScanPage() {
               {!hasStructuredData && resultData.rawText && (
                 <Div className="rounded-md bg-warning/10 border border-warning/20 px-3 py-2">
                   <P className="text-sm text-warning-foreground">
-                    {t('scan.parsingImproving', { defaultMessage: 'Structured parsing is being improved. Raw OCR text is shown above.' })}
+                    {t('scan.parsingImproving', {
+                      defaultMessage:
+                        'Structured parsing is being improved. Raw OCR text is shown above.',
+                    })}
                   </P>
                 </Div>
               )}

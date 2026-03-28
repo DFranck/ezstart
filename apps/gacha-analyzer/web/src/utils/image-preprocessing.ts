@@ -57,7 +57,7 @@ export function preprocessForOcr(imageData: ImageData, options?: PreprocessOptio
   for (let i = 0; i < pixels.length; i += 4) {
     if (shouldGrayscale) {
       // Grayscale using luminance weights
-      let gray = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]
+      let gray = 0.299 * pixels[i]! + 0.587 * pixels[i + 1]! + 0.114 * pixels[i + 2]!
 
       // Contrast: shift around midpoint then scale
       gray = ((gray / 255 - 0.5) * contrastFactor + 0.5) * 255
@@ -74,7 +74,7 @@ export function preprocessForOcr(imageData: ImageData, options?: PreprocessOptio
     } else {
       // Keep RGB, apply contrast to each channel separately
       for (let c = 0; c < 3; c++) {
-        let val = pixels[i + c]
+        let val = pixels[i + c]!
         if (contrastFactor !== 1.0) {
           val = ((val / 255 - 0.5) * contrastFactor + 0.5) * 255
           pixels[i + c] = Math.max(0, Math.min(255, val))
@@ -83,7 +83,7 @@ export function preprocessForOcr(imageData: ImageData, options?: PreprocessOptio
 
       // Binarize without grayscale: compute luminance, threshold to black or white RGB
       if (shouldBinarize) {
-        const luminance = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]
+        const luminance = 0.299 * pixels[i]! + 0.587 * pixels[i + 1]! + 0.114 * pixels[i + 2]!
         const bw = luminance > binarizeThreshold ? 255 : 0
         pixels[i] = bw
         pixels[i + 1] = bw

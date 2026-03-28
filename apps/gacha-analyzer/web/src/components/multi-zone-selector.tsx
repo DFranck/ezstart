@@ -4,7 +4,15 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import type { RoiRect } from './roi-selector'
 
-export type ZoneName = 'setSlot' | 'mainStat' | 'quality' | 'innate' | 'sub1' | 'sub2' | 'sub3' | 'sub4'
+export type ZoneName =
+  | 'setSlot'
+  | 'mainStat'
+  | 'quality'
+  | 'innate'
+  | 'sub1'
+  | 'sub2'
+  | 'sub3'
+  | 'sub4'
 
 export interface ZoneConfig {
   name: ZoneName
@@ -14,14 +22,54 @@ export interface ZoneConfig {
 }
 
 const DEFAULT_ZONES: ZoneConfig[] = [
-  { name: 'setSlot', label: 'bench.zone.setSlot', color: '#3b82f6', rect: { x: 15, y: 0, width: 65, height: 8 } },
-  { name: 'mainStat', label: 'bench.zone.mainStat', color: '#22c55e', rect: { x: 10, y: 10, width: 40, height: 10 } },
-  { name: 'quality', label: 'bench.zone.quality', color: '#eab308', rect: { x: 55, y: 10, width: 25, height: 10 } },
-  { name: 'innate', label: 'bench.zone.innate', color: '#a855f7', rect: { x: 5, y: 22, width: 45, height: 8 } },
-  { name: 'sub1', label: 'bench.zone.sub1', color: '#ef4444', rect: { x: 5, y: 32, width: 45, height: 8 } },
-  { name: 'sub2', label: 'bench.zone.sub2', color: '#ef4444', rect: { x: 5, y: 42, width: 45, height: 8 } },
-  { name: 'sub3', label: 'bench.zone.sub3', color: '#ef4444', rect: { x: 5, y: 52, width: 45, height: 8 } },
-  { name: 'sub4', label: 'bench.zone.sub4', color: '#ef4444', rect: { x: 5, y: 62, width: 45, height: 8 } },
+  {
+    name: 'setSlot',
+    label: 'bench.zone.setSlot',
+    color: '#3b82f6',
+    rect: { x: 15, y: 0, width: 65, height: 8 },
+  },
+  {
+    name: 'mainStat',
+    label: 'bench.zone.mainStat',
+    color: '#22c55e',
+    rect: { x: 10, y: 10, width: 40, height: 10 },
+  },
+  {
+    name: 'quality',
+    label: 'bench.zone.quality',
+    color: '#eab308',
+    rect: { x: 55, y: 10, width: 25, height: 10 },
+  },
+  {
+    name: 'innate',
+    label: 'bench.zone.innate',
+    color: '#a855f7',
+    rect: { x: 5, y: 22, width: 45, height: 8 },
+  },
+  {
+    name: 'sub1',
+    label: 'bench.zone.sub1',
+    color: '#ef4444',
+    rect: { x: 5, y: 32, width: 45, height: 8 },
+  },
+  {
+    name: 'sub2',
+    label: 'bench.zone.sub2',
+    color: '#ef4444',
+    rect: { x: 5, y: 42, width: 45, height: 8 },
+  },
+  {
+    name: 'sub3',
+    label: 'bench.zone.sub3',
+    color: '#ef4444',
+    rect: { x: 5, y: 52, width: 45, height: 8 },
+  },
+  {
+    name: 'sub4',
+    label: 'bench.zone.sub4',
+    color: '#ef4444',
+    rect: { x: 5, y: 62, width: 45, height: 8 },
+  },
 ]
 
 type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
@@ -41,7 +89,12 @@ interface MultiZoneSelectorProps {
   locked?: boolean
 }
 
-export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = false }: MultiZoneSelectorProps) {
+export function MultiZoneSelector({
+  onChange,
+  initialZones,
+  parentRoi,
+  locked = false,
+}: MultiZoneSelectorProps) {
   const t = useTranslations()
   const [zones, setZones] = useState<ZoneConfig[]>(initialZones ?? DEFAULT_ZONES)
   const [selectedZone, setSelectedZone] = useState<string | null>(null)
@@ -83,8 +136,8 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
 
       // Convert pixel delta to % of overlay, then scale to zone coordinate space
       const pr = parentRoiRef.current
-      const scaleX = pr ? (100 / pr.width) : 1
-      const scaleY = pr ? (100 / pr.height) : 1
+      const scaleX = pr ? 100 / pr.width : 1
+      const scaleY = pr ? 100 / pr.height : 1
       const dx = ((clientX - drag.startMouseX) / rect.width) * 100 * scaleX
       const dy = ((clientY - drag.startMouseY) / rect.height) * 100 * scaleY
       let newRect: RoiRect
@@ -186,7 +239,7 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
     clientX: number,
     clientY: number,
     type: 'move' | 'resize',
-    handle?: Handle,
+    handle?: Handle
   ) {
     const zone = zonesRef.current.find(z => z.name === zoneName)
     if (!zone) return
@@ -200,13 +253,23 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
     }
   }
 
-  function handleMouseDown(e: React.MouseEvent, zoneName: ZoneName, type: 'move' | 'resize', handle?: Handle) {
+  function handleMouseDown(
+    e: React.MouseEvent,
+    zoneName: ZoneName,
+    type: 'move' | 'resize',
+    handle?: Handle
+  ) {
     e.preventDefault()
     e.stopPropagation()
     startDrag(zoneName, e.clientX, e.clientY, type, handle)
   }
 
-  function handleTouchStart(e: React.TouchEvent, zoneName: ZoneName, type: 'move' | 'resize', handle?: Handle) {
+  function handleTouchStart(
+    e: React.TouchEvent,
+    zoneName: ZoneName,
+    type: 'move' | 'resize',
+    handle?: Handle
+  ) {
     e.stopPropagation()
     const touch = e.touches[0]
     if (e.touches.length === 1 && touch) {
@@ -239,13 +302,45 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
       case 'se':
         return { ...base, width: 10, height: 10, bottom: -5, right: -5, cursor: 'se-resize' }
       case 'n':
-        return { ...base, width: 20, height: 8, top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          top: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 'n-resize',
+        }
       case 's':
-        return { ...base, width: 20, height: 8, bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          bottom: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 's-resize',
+        }
       case 'e':
-        return { ...base, width: 8, height: 20, right: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'e-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          right: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'e-resize',
+        }
       case 'w':
-        return { ...base, width: 8, height: 20, left: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'w-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          left: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'w-resize',
+        }
     }
   }
 
@@ -267,125 +362,155 @@ export function MultiZoneSelector({ onChange, initialZones, parentRoi, locked = 
         const displayTop = parentRoi
           ? parentRoi.y + (zone.rect.y / 100) * parentRoi.height
           : zone.rect.y
-        const displayWidth = parentRoi
-          ? (zone.rect.width / 100) * parentRoi.width
-          : zone.rect.width
+        const displayWidth = parentRoi ? (zone.rect.width / 100) * parentRoi.width : zone.rect.width
         const displayHeight = parentRoi
           ? (zone.rect.height / 100) * parentRoi.height
           : zone.rect.height
 
         return (
-        <div
-          key={zone.name}
-          style={{
-            position: 'absolute',
-            left: `${displayLeft}%`,
-            top: `${displayTop}%`,
-            width: `${displayWidth}%`,
-            height: `${displayHeight}%`,
-            border: locked ? `1px solid ${zone.color}4D` : `2px solid ${zone.color}`,
-            backgroundColor: locked ? `${zone.color}0D` : `${zone.color}26`,
-            cursor: locked ? 'default' : 'move',
-            pointerEvents: locked ? 'none' : 'auto',
-            boxSizing: 'border-box',
-            touchAction: 'none',
-            overflow: 'visible',
-            zIndex: 55,
-          }}
-          onMouseDown={locked ? undefined : (e) => handleMouseDown(e, zone.name, 'move')}
-          onTouchStart={locked ? undefined : (e) => handleTouchStart(e, zone.name, 'move')}
-          onClick={() => !locked && setSelectedZone(zone.name === selectedZone ? null : zone.name)}
-        >
-          {/* Zone label — hidden when locked */}
-          {!locked && (
-          <span
+          <div
+            key={zone.name}
             style={{
               position: 'absolute',
-              top: -16,
-              left: 0,
-              fontSize: 10,
-              lineHeight: '14px',
-              color: zone.color,
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              padding: '0 3px',
-              borderRadius: 2,
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              userSelect: 'none',
+              left: `${displayLeft}%`,
+              top: `${displayTop}%`,
+              width: `${displayWidth}%`,
+              height: `${displayHeight}%`,
+              border: locked ? `1px solid ${zone.color}4D` : `2px solid ${zone.color}`,
+              backgroundColor: locked ? `${zone.color}0D` : `${zone.color}26`,
+              cursor: locked ? 'default' : 'move',
+              pointerEvents: locked ? 'none' : 'auto',
+              boxSizing: 'border-box',
+              touchAction: 'none',
+              overflow: 'visible',
+              zIndex: 55,
             }}
+            onMouseDown={locked ? undefined : e => handleMouseDown(e, zone.name, 'move')}
+            onTouchStart={locked ? undefined : e => handleTouchStart(e, zone.name, 'move')}
+            onClick={() =>
+              !locked && setSelectedZone(zone.name === selectedZone ? null : zone.name)
+            }
           >
-            {t(zone.label)}
-          </span>
-          )}
+            {/* Zone label — hidden when locked */}
+            {!locked && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -16,
+                  left: 0,
+                  fontSize: 10,
+                  lineHeight: '14px',
+                  color: zone.color,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  padding: '0 3px',
+                  borderRadius: 2,
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}
+              >
+                {t(zone.label)}
+              </span>
+            )}
 
-          {/* Resize handles (corners + edges) — hidden when locked */}
-          {!locked && allHandles.map((handle) => (
-            <div
-              key={handle}
-              style={getHandleStyle(handle, zone.color)}
-              onMouseDown={(e) => handleMouseDown(e, zone.name, 'resize', handle)}
-              onTouchStart={(e) => handleTouchStart(e, zone.name, 'resize', handle)}
-            />
-          ))}
+            {/* Resize handles (corners + edges) — hidden when locked */}
+            {!locked &&
+              allHandles.map(handle => (
+                <div
+                  key={handle}
+                  style={getHandleStyle(handle, zone.color)}
+                  onMouseDown={e => handleMouseDown(e, zone.name, 'resize', handle)}
+                  onTouchStart={e => handleTouchStart(e, zone.name, 'resize', handle)}
+                />
+              ))}
 
-          {/* Inline position/size editor */}
-          {selectedZone === zone.name && !locked && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              marginTop: 4,
-              background: 'rgba(0,0,0,0.95)',
-              padding: '6px 8px',
-              borderRadius: 6,
-              display: 'flex',
-              gap: 6,
-              zIndex: 200,
-              fontSize: 11,
-              color: 'white',
-              alignItems: 'center',
-              whiteSpace: 'nowrap',
-            }}>
-              <span style={{ fontWeight: 'bold', marginRight: 4 }}>{t(zone.label)}</span>
-              {(['x', 'y', 'width', 'height'] as const).map(prop => (
-                <label key={prop} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {prop[0].toUpperCase()}:
-                  <input
-                    type="number"
-                    value={Math.round(zone.rect[prop])}
-                    onChange={e => {
-                      const newRect = { ...zone.rect, [prop]: Number(e.target.value) }
-                      const updated = zones.map(z => z.name === zone.name ? { ...z, rect: newRect } : z)
+            {/* Inline position/size editor */}
+            {selectedZone === zone.name && !locked && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  marginTop: 4,
+                  background: 'rgba(0,0,0,0.95)',
+                  padding: '6px 8px',
+                  borderRadius: 6,
+                  display: 'flex',
+                  gap: 6,
+                  zIndex: 200,
+                  fontSize: 11,
+                  color: 'white',
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span style={{ fontWeight: 'bold', marginRight: 4 }}>{t(zone.label)}</span>
+                {(['x', 'y', 'width', 'height'] as const).map(prop => (
+                  <label key={prop} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {prop[0]!.toUpperCase()}:
+                    <input
+                      type="number"
+                      value={Math.round(zone.rect[prop])}
+                      onChange={e => {
+                        const newRect = { ...zone.rect, [prop]: Number(e.target.value) }
+                        const updated = zones.map(z =>
+                          z.name === zone.name ? { ...z, rect: newRect } : z
+                        )
+                        setZones(updated)
+                        onChangeRef.current(updated)
+                      }}
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        width: 42,
+                        background: '#333',
+                        color: 'white',
+                        border: '1px solid #555',
+                        borderRadius: 3,
+                        padding: '2px 4px',
+                        fontSize: 11,
+                      }}
+                      min={0}
+                      max={100}
+                    />
+                  </label>
+                ))}
+                {zone.name.startsWith('sub') && (
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      const currentRect = zone.rect
+                      const updated = zones.map(z =>
+                        z.name.startsWith('sub')
+                          ? {
+                              ...z,
+                              rect: {
+                                ...z.rect,
+                                width: currentRect.width,
+                                height: currentRect.height,
+                              },
+                            }
+                          : z
+                      )
                       setZones(updated)
                       onChangeRef.current(updated)
                     }}
-                    onMouseDown={e => e.stopPropagation()}
-                    onClick={e => e.stopPropagation()}
-                    style={{ width: 42, background: '#333', color: 'white', border: '1px solid #555', borderRadius: 3, padding: '2px 4px', fontSize: 11 }}
-                    min={0}
-                    max={100}
-                  />
-                </label>
-              ))}
-              {zone.name.startsWith('sub') && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    const currentRect = zone.rect
-                    const updated = zones.map(z =>
-                      z.name.startsWith('sub') ? { ...z, rect: { ...z.rect, width: currentRect.width, height: currentRect.height } } : z
-                    )
-                    setZones(updated)
-                    onChangeRef.current(updated)
-                  }}
-                  style={{ background: '#4a5', color: 'white', border: 'none', borderRadius: 3, padding: '2px 6px', fontSize: 10, cursor: 'pointer' }}
-                >
-                  → Tous subs
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+                    style={{
+                      background: '#4a5',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 3,
+                      padding: '2px 6px',
+                      fontSize: 10,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    → Tous subs
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )
       })}
     </div>

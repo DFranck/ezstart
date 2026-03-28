@@ -37,6 +37,7 @@ export function Providers({
               ? {
                   appName: 'gacha-analyzer',
                   globalCss: globalThemeCss,
+                  appCss: '',
                 }
               : undefined
           }
