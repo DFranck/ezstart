@@ -134,7 +134,7 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 
 ## 📚 Documentation
 
-- 📋 **[BACKLOG.md](./BACKLOG.md)** — Projets en cours — "continue [projet]" pour reprendre
+- 📋 **[BACKLOG.md](./BACKLOG.md)** — Index monorepo + infra — "continue [projet]" pour reprendre
 - 📐 **[DEV-RULES.md](./DEV-RULES.md)** — Règles de développement obligatoires
 - 🚀 **[DEPLOY.md](./DEPLOY.md)** — Guide de déploiement (Railway/Vercel)
 - 📦 [packages/ui/README.md](./packages/ui/README.md) — Composants UI
@@ -142,6 +142,16 @@ DEV-RULES couvre : UI/UX, TypeScript, MongoDB, routing, tests, déploiement, .en
 - 🔐 [packages/auth-sdk/HTTPONLY-MIGRATION.md](./packages/auth-sdk/HTTPONLY-MIGRATION.md) — Auth SDK
 - 🌿 [apps/green-pulse/FORMS.md](./apps/green-pulse/FORMS.md) — GreenPulse Forms
 - 🔀 [apps/green-pulse/api/docs/ROUTING-PATTERN.md](./apps/green-pulse/api/docs/ROUTING-PATTERN.md) — Action-based routing reference
+
+### Backlogs per-app
+- 🎮 [apps/gacha-analyzer/BACKLOG.md](./apps/gacha-analyzer/BACKLOG.md) — Gacha Analyzer
+- 💰 [apps/ezbill/BACKLOG.md](./apps/ezbill/BACKLOG.md) — EZBill
+- 🔐 [apps/ezauth/BACKLOG.md](./apps/ezauth/BACKLOG.md) — EZAuth
+- 💳 [apps/ezpay/BACKLOG.md](./apps/ezpay/BACKLOG.md) — EZPay
+- 🚀 [apps/ezstart/BACKLOG.md](./apps/ezstart/BACKLOG.md) — EZStart
+- 🌿 [apps/green-pulse/BACKLOG.md](./apps/green-pulse/BACKLOG.md) — GreenPulse
+- 🏮 [apps/fengshui/BACKLOG.md](./apps/fengshui/BACKLOG.md) — FengShui
+- 🏢 [apps/asc-tcd/BACKLOG.md](./apps/asc-tcd/BACKLOG.md) — ASC-TCD
 
 ---
 
