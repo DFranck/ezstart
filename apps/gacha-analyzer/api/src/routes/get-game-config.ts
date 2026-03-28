@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getGameConfigModel } from '../models/game-config.js'
 
 const router: any = Router()
@@ -19,22 +19,13 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
     }).lean().exec()
 
     if (!config) {
-      return res.json({
-        success: true,
-        data: null,
-      })
+      return sendSuccess(res, null)
     }
 
-    res.json({
-      success: true,
-      data: config,
-    })
+    return sendSuccess(res, config)
   } catch (error) {
     logger.error('[get-game-config] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch game config',
-    })
+    return sendError(res, 'Failed to fetch game config')
   }
 })
 
@@ -47,16 +38,10 @@ router.get('/:gameType', async (req: any, res: any) => {
       .lean()
       .exec()
 
-    res.json({
-      success: true,
-      data: configs,
-    })
+    return sendSuccess(res, configs)
   } catch (error) {
     logger.error('[get-game-config] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch game configs',
-    })
+    return sendError(res, 'Failed to fetch game configs')
   }
 })
 

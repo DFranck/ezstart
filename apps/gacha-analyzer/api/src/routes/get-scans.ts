@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
@@ -21,11 +21,7 @@ router.get('/', async (req: any, res: any) => {
   try {
     const validation = querySchema.safeParse(req.query)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid query parameters',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid query parameters', validation.error.errors, 400)
     }
 
     const { gameType, status, limit, offset } = validation.data
@@ -49,21 +45,10 @@ router.get('/', async (req: any, res: any) => {
     // Map _id → id for frontend compatibility
     const mapped = scans.map((s: any) => ({ ...s, id: s._id?.toString(), _id: undefined }))
 
-    res.json({
-      success: true,
-      data: mapped,
-      meta: {
-        total,
-        limit,
-        offset,
-      },
-    })
+    return sendSuccess(res, mapped, { total, limit, offset })
   } catch (error) {
     logger.error('[get-scans] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch scans',
-    })
+    return sendError(res, 'Failed to fetch scans')
   }
 })
 

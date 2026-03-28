@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 import { summonersWarParser } from '../parsers/summoners-war.js'
@@ -20,11 +20,7 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
   try {
     const validation = querySchema.safeParse(req.query)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid query parameters',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid query parameters', validation.error.errors, 400)
     }
 
     const { profile } = validation.data
@@ -33,11 +29,11 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     const scan = await Scan.findById(req.params.id)
 
     if (!scan) {
-      return res.status(404).json({ success: false, error: 'Scan not found' })
+      return sendError(res, 'Scan not found', 404)
     }
 
     if (!scan.result?.rawText) {
-      return res.status(400).json({ success: false, error: 'Scan has no raw text to re-analyze' })
+      return sendError(res, 'Scan has no raw text to re-analyze', 400)
     }
     const startTime = Date.now()
 
@@ -71,13 +67,10 @@ router.post('/:id/reanalyze', async (req: any, res: any) => {
     // Map _id → id for frontend compatibility
     const mapped = { ...(scan.toObject() as any), id: (scan as any)._id?.toString(), _id: undefined }
 
-    res.json({ success: true, data: mapped })
+    return sendSuccess(res, mapped)
   } catch (error) {
     logger.error('[reanalyze-scan] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to re-analyze scan',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to re-analyze scan')
   }
 })
 

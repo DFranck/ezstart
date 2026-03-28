@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { upload } from '../middleware/upload.js'
 import { scanImage } from '../services/scan-service.js'
@@ -39,19 +39,12 @@ router.post('/', upload.fields([
     const files = req.files as Record<string, Express.Multer.File[]> | undefined
     const imageFile = files?.image?.[0]
     if (!imageFile) {
-      return res.status(400).json({
-        success: false,
-        error: 'No image file provided. Use field name "image".',
-      })
+      return sendError(res, 'No image file provided. Use field name "image".', 400)
     }
 
     const validation = scanBodySchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', validation.error.errors, 400)
     }
 
     const { gameType, profile, benchMode, presets } = validation.data
@@ -76,7 +69,7 @@ router.post('/', upload.fields([
 
     const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets, zoneBuffers, thumbnail)
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: {
         id: scanId,
@@ -87,10 +80,7 @@ router.post('/', upload.fields([
     })
   } catch (error) {
     logger.error('[scan-image] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to process scan',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to process scan')
   }
 })
 

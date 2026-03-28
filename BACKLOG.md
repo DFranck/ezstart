@@ -56,7 +56,9 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 ### Sécurité (du rapport audit)
 20. [x] CRITICAL: EZBill auth — JWT Bearer + X-User-Id fallback (dev), JWT_SECRET requis
 21. [x] CRITICAL: JWT Secret — fallback supprimé, crash si non défini
-22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars
+22. [ ] CRITICAL: Stripe — utiliser sk_test en dev, sk_live uniquement via Railway env vars (action manuelle)
+31. [ ] extract-app.js test — après extraction, vérifier automatiquement que pnpm install && pnpm build passent
+32. [ ] insert-app.js reverse — importer un standalone dans le monorepo (inverse de extract)
 23. [x] HIGH: Gacha-analyzer — auth middleware sur DELETE/PUT routes
 24. [x] HIGH: Green-Pulse — auth middleware centralisé sur workspaces
 25. [x] HIGH: EZPay — auth middleware sur GET routes sensibles

@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { getScanModel } from '../models/scan.js'
 
 const router: any = Router()
@@ -16,25 +16,16 @@ router.get('/:id', async (req: any, res: any) => {
     const scan = await Scan.findById(req.params.id).lean().exec()
 
     if (!scan) {
-      return res.status(404).json({
-        success: false,
-        error: 'Scan not found',
-      })
+      return sendError(res, 'Scan not found', 404)
     }
 
     // Map _id → id for frontend compatibility
     const mapped = { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined }
 
-    res.json({
-      success: true,
-      data: mapped,
-    })
+    return sendSuccess(res, mapped)
   } catch (error) {
     logger.error('[get-scan] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch scan',
-    })
+    return sendError(res, 'Failed to fetch scan')
   }
 })
 

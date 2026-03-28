@@ -6,7 +6,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { importMonsters } from '../services/monster-import-service.js'
 import { getMonsterModel } from '../models/monster.js'
@@ -17,16 +17,10 @@ const router: any = Router()
 router.post('/import', async (_req: any, res: any) => {
   try {
     const count = await importMonsters()
-    res.json({
-      success: true,
-      data: { imported: count },
-    })
+    return sendSuccess(res, { imported: count })
   } catch (error) {
     logger.error('[import-monsters] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to import monsters',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to import monsters')
   }
 })
 
@@ -45,11 +39,7 @@ router.get('/', async (req: any, res: any) => {
   try {
     const validation = listQuerySchema.safeParse(req.query)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid query parameters',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid query parameters', validation.error.errors, 400)
     }
 
     const { element, archetype, buildArchetype, stars, search, page, limit } = validation.data
@@ -69,24 +59,10 @@ router.get('/', async (req: any, res: any) => {
       MonsterModel.countDocuments(filter),
     ])
 
-    res.json({
-      success: true,
-      data: {
-        monsters,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
-    })
+    return sendSuccess(res, { monsters }, { page, limit, total, totalPages: Math.ceil(total / limit) })
   } catch (error) {
     logger.error('[list-monsters] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to list monsters',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to list monsters')
   }
 })
 
@@ -100,16 +76,10 @@ router.get('/by-build/:archetype', async (req: any, res: any) => {
       .sort({ naturalStars: -1, name: 1 })
       .lean()
 
-    res.json({
-      success: true,
-      data: { archetype, count: monsters.length, monsters },
-    })
+    return sendSuccess(res, { archetype, count: monsters.length, monsters })
   } catch (error) {
     logger.error('[monsters-by-build] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch monsters by build',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to fetch monsters by build')
   }
 })
 
@@ -118,10 +88,7 @@ router.get('/for-rune', async (req: any, res: any) => {
   try {
     const archetypesParam = req.query.archetypes as string
     if (!archetypesParam) {
-      return res.status(400).json({
-        success: false,
-        error: 'Query parameter "archetypes" is required (comma-separated)',
-      })
+      return sendError(res, 'Query parameter "archetypes" is required (comma-separated)', 400)
     }
 
     const archetypes = archetypesParam.split(',').map((a: string) => a.trim())
@@ -148,20 +115,10 @@ router.get('/for-rune', async (req: any, res: any) => {
       { $project: { matchCount: 0 } },
     ])
 
-    res.json({
-      success: true,
-      data: {
-        archetypes,
-        count: monsters.length,
-        monsters,
-      },
-    })
+    return sendSuccess(res, { archetypes, count: monsters.length, monsters })
   } catch (error) {
     logger.error('[monsters-for-rune] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch monsters for rune',
-    })
+    return sendError(res, error instanceof Error ? error.message : 'Failed to fetch monsters for rune')
   }
 })
 

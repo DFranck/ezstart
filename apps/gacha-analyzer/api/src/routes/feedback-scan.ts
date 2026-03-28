@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
@@ -18,11 +18,7 @@ router.post('/:id/feedback', async (req: any, res: any) => {
   try {
     const validation = feedbackBodySchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: validation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', validation.error.errors, 400)
     }
 
     const { opinion, comment } = validation.data
@@ -36,22 +32,13 @@ router.post('/:id/feedback', async (req: any, res: any) => {
     ).lean()
 
     if (!scan) {
-      return res.status(404).json({
-        success: false,
-        error: 'Scan not found',
-      })
+      return sendError(res, 'Scan not found', 404)
     }
 
-    res.json({
-      success: true,
-      data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
-    })
+    return sendSuccess(res, { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined })
   } catch (error) {
     logger.error('[feedback-scan] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to submit feedback',
-    })
+    return sendError(res, 'Failed to submit feedback')
   }
 })
 

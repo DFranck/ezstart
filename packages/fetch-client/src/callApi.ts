@@ -257,19 +257,48 @@ export async function callApi<T = any>(
 }
 
 /**
- * Factory that returns a callApi function with appName pre-bound.
- * Eliminates the need for per-app wrapper boilerplate.
+ * Factory that returns a callApi function with appName pre-bound,
+ * plus React Query helpers (queryKey, queryFn).
+ *
+ * The returned value is callable directly (backwards compatible)
+ * AND has `.queryKey()` / `.queryFn()` helpers for React Query.
  *
  * @example
  * ```ts
- * export const callApi = createCallApi('ezbill')
- * const res = await callApi<User[]>('/users')
+ * const api = createCallApi('ezbill')
+ *
+ * // Direct call (backwards compatible)
+ * const res = await api<User[]>('/users')
+ *
+ * // React Query helpers
+ * const { data } = useQuery({
+ *   queryKey: api.queryKey('/users', { page: 1 }),
+ *   queryFn: api.queryFn('/users', { page: 1 }),
+ * })
  * ```
  */
 export function createCallApi(appName: AppName) {
-  return function callApi<T = any>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) {
+  const call = <T = any>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) => {
     return baseCallApi<T>(endpoint, { ...options, appName })
   }
+
+  return Object.assign(call, {
+    /** Generate a React Query key: [appName, endpoint, params?] */
+    queryKey: (endpoint: string, params?: Record<string, any>) =>
+      [appName, endpoint, ...(params ? [params] : [])] as const,
+
+    /** Generate a React Query queryFn that calls this endpoint and returns data */
+    queryFn: <T = any>(endpoint: string, params?: Record<string, any>) =>
+      async () => {
+        const query = params
+          ? '?' + new URLSearchParams(
+              Object.entries(params).map(([k, v]) => [k, String(v)])
+            ).toString()
+          : ''
+        const response = await call<T>(endpoint + query)
+        return response.data
+      },
+  })
 }
 
 // Alias for createCallApi factory usage

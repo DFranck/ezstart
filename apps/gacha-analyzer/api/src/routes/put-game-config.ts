@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
 
@@ -26,20 +26,12 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
     const paramsValidation = paramsSchema.safeParse(req.params)
     if (!paramsValidation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid route parameters',
-        details: paramsValidation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid route parameters', paramsValidation.error.errors, 400)
     }
 
     const bodyValidation = bodySchema.safeParse(req.body)
     if (!bodyValidation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body',
-        details: bodyValidation.error.errors,
-      })
+      return sendValidationError(res, 'Invalid request body', bodyValidation.error.errors, 400)
     }
 
     const { gameType, layoutName } = paramsValidation.data
@@ -62,16 +54,10 @@ router.put('/:gameType/:layoutName', async (req: any, res: any) => {
       { upsert: true, new: true, lean: true }
     ).exec()
 
-    res.json({
-      success: true,
-      data: config,
-    })
+    return sendSuccess(res, config)
   } catch (error) {
     logger.error('[put-game-config] Error:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to save game config',
-    })
+    return sendError(res, 'Failed to save game config')
   }
 })
 
