@@ -1,0 +1,27 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "src/app/**/*": {
+      "maxDuration": 30
+    }
+  },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://gacha-analyzer.ezstart.xyz/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "ezstart-gacha-analyzer.vercel.app"
+        }
+      ]
+    }
+  ]
+}
