@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 
 export const restoreConversationRegistry = new OpenAPIRegistry()
@@ -29,25 +29,13 @@ restoreConversationRouter.post(
       )
 
       if (!conversation) {
-        return res.status(404).json({
-          success: false,
-          error: 'Conversation not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Conversation not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: { message: 'Conversation restored' },
-        timestamp: new Date().toISOString(),
-      })
+      return sendSuccess(res, { message: 'Conversation restored' })
     } catch (error) {
       logger.error('Restore conversation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to restore conversation',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to restore conversation')
     }
   },
   {

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import {
   UpdateConversationSchema,
@@ -28,12 +28,7 @@ updateConversationRouter.patch(
       const validation = UpdateConversationSchema.safeParse(req.body)
 
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const { title } = validation.data
@@ -46,29 +41,17 @@ updateConversationRouter.patch(
       )
 
       if (!conversation) {
-        return res.status(404).json({
-          success: false,
-          error: 'Conversation not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Conversation not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: {
-          id: conversation._id.toString(),
-          title: conversation.title,
-          updatedAt: conversation.updatedAt,
-        },
-        timestamp: new Date().toISOString(),
+      return sendSuccess(res, {
+        id: conversation._id.toString(),
+        title: conversation.title,
+        updatedAt: conversation.updatedAt,
       })
     } catch (error) {
       logger.error('Update conversation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to update conversation',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to update conversation')
     }
   },
   {

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 
 export const hardDeleteConversationRegistry = new OpenAPIRegistry()
@@ -25,25 +25,13 @@ hardDeleteConversationRouter.delete(
       const conversation = await Conversation.findByIdAndDelete(id)
 
       if (!conversation) {
-        return res.status(404).json({
-          success: false,
-          error: 'Conversation not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Conversation not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: { message: 'Conversation permanently deleted' },
-        timestamp: new Date().toISOString(),
-      })
+      return sendSuccess(res, { message: 'Conversation permanently deleted' })
     } catch (error) {
       logger.error('Hard delete conversation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to permanently delete conversation',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to permanently delete conversation')
     }
   },
   {

@@ -26,40 +26,24 @@ getConversationByIdRouter.get(
       const conversation = await Conversation.findById(id).lean().exec()
 
       if (!conversation) {
-        return res.status(404).json({
-          success: false,
-          error: 'Conversation not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Conversation not found', 404)
       }
 
       if (conversation.deletedAt) {
-        return res.status(410).json({
-          success: false,
-          error: 'Conversation was deleted',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Conversation was deleted', 410)
       }
 
-      res.json({
-        success: true,
-        data: {
-          id: conversation._id.toString(),
-          title: conversation.title,
-          preview: conversation.preview,
-          messages: conversation.messages,
-          createdAt: conversation.createdAt,
-          updatedAt: conversation.updatedAt,
-        },
-        timestamp: new Date().toISOString(),
+      return sendSuccess(res, {
+        id: conversation._id.toString(),
+        title: conversation.title,
+        preview: conversation.preview,
+        messages: conversation.messages,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
       })
     } catch (error) {
       logger.error('Get conversation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get conversation',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to get conversation')
     }
   },
   {

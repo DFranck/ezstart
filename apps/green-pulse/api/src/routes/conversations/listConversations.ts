@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import { ConversationListSchema, ApiResponseSchema } from '@green-pulse/types'
 
@@ -49,19 +49,10 @@ listConversationsRouter.get(
         unread: false, // TODO: Implement unread logic
       }))
 
-      res.json({
-        success: true,
-        data: { conversations: list },
-        meta: { total, limit: Number(limit), offset: Number(offset) },
-        timestamp: new Date().toISOString(),
-      })
+      return sendSuccess(res, { conversations: list }, { total, limit: Number(limit), offset: Number(offset) })
     } catch (error) {
       logger.error('List conversations error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to list conversations',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to list conversations')
     }
   },
   {

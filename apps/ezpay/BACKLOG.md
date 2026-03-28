@@ -6,7 +6,10 @@
 Payment System pour le monorepo @ezstart.
 
 ## Étapes
-<!-- Ajouter les tâches ici -->
+1. [ ] CRITICAL: Utiliser sk_test en dev, sk_live uniquement via Railway env vars
+2. [ ] Standardiser les réponses API (payments→data, stats→data)
+3. [ ] Ajouter React Query dans ezpay web si besoin
 
 ## Notes
-<!-- Contexte important -->
+- La clé Stripe LIVE ne doit JAMAIS être dans .env.local
+- Le pay-sdk est le package partagé, ezpay est l'app
