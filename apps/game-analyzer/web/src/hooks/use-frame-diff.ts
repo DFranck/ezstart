@@ -2,6 +2,13 @@
 
 import { useCallback, useRef, useState } from 'react'
 
+interface MaskRegion {
+  x: number       // % of frame (0-100)
+  y: number
+  width: number
+  height: number
+}
+
 interface UseFrameDiffOptions {
   /** % of sampled pixels that must differ to consider a significant change (default: 5) */
   threshold?: number
@@ -13,6 +20,8 @@ interface UseFrameDiffOptions {
   stabilizeMs?: number
   /** Called once the frame has stabilized after a significant change */
   onSignificantChange?: (frame: ImageData) => void
+  /** Masked regions to ignore in diff comparison (percentage coordinates 0-100) */
+  masks?: MaskRegion[]
 }
 
 interface UseFrameDiffReturn {
@@ -51,6 +60,7 @@ export function useFrameDiff(options: UseFrameDiffOptions = {}): UseFrameDiffRet
     sampleRate = 4,
     stabilizeMs = 500,
     onSignificantChange,
+    masks,
   } = options
 
   // Only lastStableFrame uses state — it changes rarely (after stabilization)

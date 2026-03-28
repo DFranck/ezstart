@@ -334,11 +334,14 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           const penaltiesTotal = qualityPen + innate + mismatchPen + lowRoll + nonGrind
           const bestOptim = analysis.archetypeOptimizations?.[0]
           const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12) as 0 | 3 | 6 | 9 | 12
+          const adjSetWeighted = (analysis as any).adjustedSetWeighted as number | undefined
+          const adjPotentialApi = (analysis as any).adjustedPotential as number | undefined
           const currentEff = analysis.setWeightedEfficiency ?? 0
-          const potentialEff = analysis.potentialEfficiency ?? currentEff
-          const effWithPenalties = currentEff + penaltiesTotal
+          const effWithPenalties = adjSetWeighted ?? (currentEff + penaltiesTotal)
+          const potentialWithPenalties = adjPotentialApi ?? ((analysis.potentialEfficiency ?? currentEff) + penaltiesTotal)
           const activeProfile = ((analysis as any).profile ?? 'mid') as PlayerProfile
           const activeThresh = (PROGRESSIVE_SELL_THRESHOLDS[activeProfile]?.[levelKey] ?? 0) + setBonus
+          const finalThresh = (PROGRESSIVE_SELL_THRESHOLDS[activeProfile]?.[12] ?? 0) + setBonus
 
           // Build positive/negative points
           const positives: string[] = []
@@ -443,7 +446,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                 </Div>
               )}
               <P className="text-muted-foreground font-mono text-[10px]">
-                📊 Score : {currentEff}% {penaltiesTotal !== 0 ? `${penaltiesTotal > 0 ? '+' : ''}${penaltiesTotal}` : ''} = {Math.round(effWithPenalties * 100) / 100} | Seuil {activeProfile} +{levelKey} : {activeThresh} → {effWithPenalties >= activeThresh ? 'au-dessus' : 'en-dessous'}
+                📊 Score ajusté : {Math.round(effWithPenalties * 100) / 100}% | Potentiel ajusté : {Math.round(potentialWithPenalties * 100) / 100}% (seuil final {activeProfile} : {finalThresh}) → {effWithPenalties >= activeThresh ? 'au-dessus' : 'en-dessous'}
               </P>
             </Div>
           )
@@ -556,10 +559,12 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                     {(() => {
                       const profiles: PlayerProfile[] = ['early', 'mid', 'late']
                       const levelKey = Math.min(Math.floor(rune.level / 3) * 3, 12) as 0 | 3 | 6 | 9 | 12
+                      const adjSetWeighted = (analysis as any).adjustedSetWeighted as number | undefined
+                      const adjPotentialApi = (analysis as any).adjustedPotential as number | undefined
+                      const activeProfileKey = ((analysis as any).profile ?? 'mid') as PlayerProfile
                       const currentEff = analysis.setWeightedEfficiency ?? 0
-                      const potentialEff = analysis.potentialEfficiency ?? currentEff
-                      const effWithPenalties = currentEff + penaltiesTotal
-                      const potentialWithPenalties = potentialEff + penaltiesTotal
+                      const effWithPenalties = adjSetWeighted ?? (currentEff + penaltiesTotal)
+                      const potentialWithPenalties = adjPotentialApi ?? ((analysis.potentialEfficiency ?? currentEff) + penaltiesTotal)
 
                       return (
                         <Div className="overflow-x-auto">
@@ -580,24 +585,14 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                                 {profiles.map(p => <td key={p} className="text-center px-1">{(PROGRESSIVE_SELL_THRESHOLDS[p][levelKey] ?? 0) + setBonus}</td>)}
                               </tr>
                               <tr>
-                                <td className="pr-2">Current eff:</td>
-                                {profiles.map(p => <td key={p} className="text-center px-1">{currentEff}</td>)}
-                              </tr>
-                              <tr>
-                                <td className="pr-2">+ penalties:</td>
-                                {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(effWithPenalties * 100) / 100}</td>)}
+                                <td className="pr-2">Adjusted score:</td>
+                                {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(effWithPenalties * 100) / 100}{p !== activeProfileKey ? '*' : ''}</td>)}
                               </tr>
                               {rune.level < 12 && (
-                                <>
-                                  <tr>
-                                    <td className="pr-2">Potential +12:</td>
-                                    {profiles.map(p => <td key={p} className="text-center px-1">{potentialEff}</td>)}
-                                  </tr>
-                                  <tr>
-                                    <td className="pr-2">+ penalties:</td>
-                                    {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(potentialWithPenalties * 100) / 100}</td>)}
-                                  </tr>
-                                </>
+                                <tr>
+                                  <td className="pr-2">Adjusted potential:</td>
+                                  {profiles.map(p => <td key={p} className="text-center px-1">{Math.round(potentialWithPenalties * 100) / 100}{p !== activeProfileKey ? '*' : ''}</td>)}
+                                </tr>
                               )}
                               <tr>
                                 <td className="pr-2">vs final thresh:</td>
@@ -635,6 +630,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                               </tr>
                             </tbody>
                           </table>
+                          <P className="text-muted-foreground/40 text-[8px] mt-1">* approximation (seul le profil {activeProfileKey} est exact)</P>
                         </Div>
                       )
                     })()}

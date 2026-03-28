@@ -562,6 +562,18 @@ export interface RuneAnalysis {
   mismatchPenalty?: number
   /** Set strength tier (S/A/B/C) — weaker sets need higher subs to justify */
   setStrength?: string
+  /** Adjusted set-weighted efficiency (main stat factor + penalties applied) */
+  adjustedSetWeighted?: number
+  /** Adjusted potential efficiency (set-weight ratio + main stat factor applied) */
+  adjustedPotential?: number
+  /** Ratio of set-weighted / Barion current — used to approximate set-weighted potential */
+  setWeightRatio?: number
+  /** Main stat tier for slots 2/4/6 (undefined for fixed slots 1/3/5) */
+  mainStatTier?: StatTier
+  /** Main stat factor applied to scoring based on main stat tier */
+  mainStatFactor?: number
+  /** Player profile used for analysis */
+  profile?: PlayerProfile
 }
 
 // ============================================

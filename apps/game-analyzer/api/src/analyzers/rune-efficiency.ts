@@ -1556,6 +1556,9 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     setStrength,
     mainStatTier,
     mainStatFactor,
+    adjustedSetWeighted: Math.round(adjustedSetWeighted * 100) / 100,
+    adjustedPotential: Math.round(adjustedPotential * 100) / 100,
+    setWeightRatio: Math.round(setWeightRatio * 1000) / 1000,
     profile,
     ...(isAncient ? { isAncient } : {}),
   }
