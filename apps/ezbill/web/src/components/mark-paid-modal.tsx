@@ -4,7 +4,7 @@ import { Company, CreateReceipt, Invoice } from '@ezbill/types';
 import { Button, H3, Input, Label, Modal, Section, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
 import { callApi, parseApiError } from '@/utils/api'
-import { getUserId } from '../utils/get-user-id';
+import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
 
@@ -17,6 +17,7 @@ interface MarkPaidModalProps {
 }
 
 export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: MarkPaidModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState<CreateReceipt & { paymentDate?: string }>({
@@ -46,7 +47,7 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
         // Use the dedicated mark-paid endpoint that handles both invoice update and receipt creation
         const markPaidRes = await callApi(`/invoices/${invoice._id}/mark-paid`, {
           method: 'POST',
-          userId: getUserId(),
+          userId: user?._id,
           body: {
             companyId: formData.companyId,
             paymentDate: formData.paymentDate,
@@ -54,9 +55,6 @@ export function MarkPaidModal({ isOpen, onClose, invoice, companies, onSave }: M
           },
         });
         if (!markPaidRes.ok) throw new Error(parseApiError(markPaidRes.data));
-
-        // Log the response to help debug
-        console.log('📋 Mark paid response:', markPaidRes.data);
 
         onSave();
         onClose();

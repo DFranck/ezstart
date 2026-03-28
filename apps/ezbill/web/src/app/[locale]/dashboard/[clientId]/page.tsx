@@ -66,7 +66,7 @@ type ShareState = {
   pdfUrl?: string
 }
 
-const ClientDashboardPage = (): any => {
+const ClientDashboardPage = () => {
   const params = useParams()
   const clientId = params.clientId as string
 

@@ -10,7 +10,6 @@ import StatsCard from '@/components/StatsCard'
 import { TopClientsChart } from '@/components/TopClientsChart'
 import { useBillingContext } from '@/contexts/billing-context'
 import { callApi } from '@/utils/api'
-import { getUserId } from '@/utils/get-user-id'
 import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
@@ -36,7 +35,7 @@ const PaymentMethodModal = dynamic(() => import('@/components/payment-method-mod
   ssr: false
 })
 
-const DashboardPage = (): any => {
+const DashboardPage = () => {
   const router = useRouter()
   const { user, isAuthenticated, login } = useAuth()
   const { clients, companies, paymentMethods, invoices, quotes, receipts, refetchAll, loading } =
@@ -150,17 +149,17 @@ const DashboardPage = (): any => {
       if (deleteDialog.type === 'company') {
         await callApi(`/companies/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: getUserId(),
+          userId: user?._id,
         })
       } else if (deleteDialog.type === 'client') {
         await callApi(`/clients/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: getUserId(),
+          userId: user?._id,
         })
       } else if (deleteDialog.type === 'payment-method') {
         await callApi(`/payment-methods/${deleteDialog.item._id}`, {
           method: 'DELETE',
-          userId: getUserId(),
+          userId: user?._id,
         })
       }
       toast.success(`${itemName} deleted successfully`)

@@ -1,9 +1,0 @@
-/**
- * Design System - @ezstart/ui
- *
- * Système de design centralisé avec tokens responsive.
- * Architecture inspirée de tag/ mais optimisée et étendue.
- */
-
-export * from './tokens'
-export * from './variants'

@@ -31,8 +31,8 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
-import { getUserId } from '../utils/get-user-id'
 import { InvoiceAIAssistant } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
@@ -60,6 +60,7 @@ export function QuoteModal({
   onSave,
   clientId,
 }: QuoteModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
@@ -159,21 +160,21 @@ export function QuoteModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const dataToSend = { ...formData, userId: getUserId() }
+    const dataToSend = { ...formData, userId: user?._id }
 
     return runWithFeedback({
       action: async () => {
         if (quote) {
           const res = await callApi(`/quotes/${quote._id}`, {
             method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/quotes', {
             method: 'POST',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))

@@ -1,16 +1,18 @@
 'use client'
 
 import { useBillingContext } from '@/contexts/billing-context'
-import { getUserId } from '@/utils/get-user-id'
 import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
 import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
+import { useAuth } from '@ezstart/auth-sdk'
 import { callApi } from '@/utils/api'
 import React from 'react'
 import { toast } from 'sonner'
 
 export function useClientDashboardHandlers() {
   const { clients, companies, paymentMethods, receipts, refetchAll } = useBillingContext()
+  const { user } = useAuth()
+  const userId = user?._id
 
   const generateInvoicePdfUrl = async (invoice: Invoice): Promise<string | null> => {
     try {
@@ -36,7 +38,7 @@ export function useClientDashboardHandlers() {
     try {
       const response = await callApi(`/invoices/${invoice._id}`, {
         method: 'PUT',
-        userId: getUserId(),
+        userId: userId,
         body: {
           status: 'sent',
         },
@@ -192,7 +194,7 @@ export function useClientDashboardHandlers() {
     try {
       const response = await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: getUserId(),
+        userId: userId,
         body: {
           status: 'sent',
         },
@@ -222,7 +224,7 @@ export function useClientDashboardHandlers() {
     try {
       const response = await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: getUserId(),
+        userId: userId,
         body: {
           status: 'accepted',
         },
@@ -244,7 +246,7 @@ export function useClientDashboardHandlers() {
     try {
       const response = await callApi(`/quotes/${quote._id}`, {
         method: 'PUT',
-        userId: getUserId(),
+        userId: userId,
         body: {
           status: 'rejected',
         },
@@ -288,7 +290,7 @@ export function useClientDashboardHandlers() {
     try {
       const response = await callApi(`/quotes/${quote._id}`, {
         method: 'DELETE',
-        userId: getUserId(),
+        userId: userId,
       })
 
       if (response.ok) {

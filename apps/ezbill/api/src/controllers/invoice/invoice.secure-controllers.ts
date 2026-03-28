@@ -327,18 +327,15 @@ export async function markInvoiceAsPaidSecureController(req: AuthRequest, res: R
       });
     }
 
-    console.log(`🚀 Marking invoice ${id} as paid for user ${userId}`);
     const result = await markInvoiceAsPaidService(id, req.body);
 
     if (!result) {
-      console.log(`❌ Invoice ${id} not found`);
       return res.status(404).json({
         error: 'Invoice not found',
         message: 'Invoice does not exist'
       });
     }
 
-    console.log(`✅ Invoice ${id} marked as paid. Receipt created:`, !!result.receipt);
     res.json(result);
   } catch (error) {
     console.error('Error in markInvoiceAsPaidSecureController:', error);

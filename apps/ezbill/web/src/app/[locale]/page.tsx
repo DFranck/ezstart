@@ -5,7 +5,7 @@ import { EZAuthLoginSection } from '@/components/ezauth-login-section'
 import { useAuth } from '@ezstart/auth-sdk'
 import { Card, CardContent, CardHeader, H1, H2, H3, Icon, P } from '@ezstart/ui/components'
 
-export default function HomePage(): any {
+export default function HomePage() {
   const { user, isAuthenticated } = useAuth()
 
   // useEffect(() => {

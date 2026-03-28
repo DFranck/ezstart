@@ -16,8 +16,8 @@ import {
   SelectValue,
   TextArea,
 } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
-import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 interface ClientModalProps {
@@ -28,6 +28,7 @@ interface ClientModalProps {
 }
 
 export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<BillingClient>({
@@ -88,14 +89,14 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
         if (client) {
           const res = await callApi(`/clients/${client._id}`, {
             method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
             body: formData,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/clients', {
             method: 'POST',
-            userId: getUserId(),
+            userId: user?._id,
             body: formData,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))

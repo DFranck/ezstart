@@ -24,12 +24,13 @@ import {
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@ezstart/auth-sdk'
 import { toast } from 'sonner'
-import { getUserId } from '../../../../utils/get-user-id'
 import { DeletedItemCard } from './components/deleted-item-card'
 
-export default function SettingsPage(): any {
+export default function SettingsPage() {
   const { companies, paymentMethods, refetchAll } = useBillingContext()
+  const { user } = useAuth()
   const {
     invalidateClients,
     invalidateCompanies,
@@ -57,7 +58,7 @@ export default function SettingsPage(): any {
   const loadDeletedItems = async () => {
     try {
       setLoading(true)
-      const userId = getUserId()
+      const userId = user?._id
       const [clients, companies, quotes, invoices, receipts, paymentMethods] = await Promise.all([
         callApi('/clients?deletedOnly=true&limit=100', { userId }),
         callApi('/companies?deletedOnly=true&limit=100', { userId }),
@@ -105,7 +106,7 @@ export default function SettingsPage(): any {
       const endpoint = getApiEndpoint(type)
       await callApi(`/${endpoint}/${id}/restore`, {
         method: 'POST',
-        userId: getUserId(),
+        userId: user?._id,
       })
       toast.success('Item restored successfully')
       invalidateResourceType(type) // Invalidate only the specific resource
@@ -145,7 +146,7 @@ export default function SettingsPage(): any {
       const endpoint = getApiEndpoint(type)
       await callApi(`/${endpoint}/${id}/hard-delete`, {
         method: 'DELETE',
-        userId: getUserId(),
+        userId: user?._id,
       })
       toast.success('Item permanently deleted')
       invalidateResourceType(type) // Invalidate only the specific resource
@@ -170,7 +171,7 @@ export default function SettingsPage(): any {
     try {
       await callApi(`/companies/${company._id}`, {
         method: 'DELETE',
-        userId: getUserId(),
+        userId: user?._id,
       })
       toast.success(`${company.companyName} deleted successfully`)
       refetchAll()
@@ -195,7 +196,7 @@ export default function SettingsPage(): any {
     try {
       await callApi(`/payment-methods/${paymentMethod._id}`, {
         method: 'DELETE',
-        userId: getUserId(),
+        userId: user?._id,
       })
       toast.success(`${paymentMethod.name} deleted successfully`)
       refetchAll()

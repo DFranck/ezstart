@@ -31,9 +31,9 @@ import {
   TableRow,
   TextArea,
 } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import { cn } from '@ezstart/ui/lib'
 import { useEffect, useState } from 'react'
-import { getUserId } from '../utils/get-user-id'
 import { InvoiceAIAssistant, InvoiceAction } from './invoice-ai-assistant'
 import { LoadingButton } from './loading-button'
 
@@ -65,6 +65,7 @@ export function InvoiceModal({
   onManagePaymentMethods,
   clientId,
 }: InvoiceModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
@@ -266,7 +267,7 @@ export function InvoiceModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const userId = getUserId()
+    const userId = user?._id
     console.log('Form submitted!', { formData, userId })
     if (!userId) {
       console.log('No user ID found!')
@@ -280,14 +281,14 @@ export function InvoiceModal({
         if (invoice) {
           const res = await callApi(`/invoices/${invoice._id}`, {
             method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/invoices', {
             method: 'POST',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))

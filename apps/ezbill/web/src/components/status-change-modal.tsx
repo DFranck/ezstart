@@ -3,7 +3,7 @@
 import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
 import { runWithFeedback } from '@ezstart/ui/utils';
 import { callApi, parseApiError } from '@/utils/api'
-import { getUserId } from '../utils/get-user-id';
+import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react';
 import { LoadingButton } from './loading-button';
 
@@ -42,6 +42,7 @@ export function StatusChangeModal({
   currentStatus,
   onSave,
 }: StatusChangeModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false);
   const [newStatus, setNewStatus] = useState(currentStatus);
 
@@ -62,7 +63,7 @@ export function StatusChangeModal({
       action: async () => {
         const res = await callApi(`${apiEndpoints[documentType]}/${documentId}`, {
           method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
           body: { status: newStatus },
         });
         if (!res.ok) throw new Error(parseApiError(res.data));

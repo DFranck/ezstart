@@ -53,7 +53,6 @@ export async function markInvoiceAsPaidService(
 
   // Don't create receipt if already paid AND receipt exists (to prevent duplicate receipts)
   if (invoice.status === 'paid' && existingReceipt) {
-    console.log(`⏭️  Invoice ${invoice.documentNumber} already paid with receipt ${existingReceipt.documentNumber}`);
     return {
       invoice: toApiObject<Invoice>(invoice),
       receipt: toApiObject<Receipt>(existingReceipt)
@@ -74,8 +73,6 @@ export async function markInvoiceAsPaidService(
 
   // Automatically generate a receipt
   try {
-    console.log(`🔄 Creating receipt for invoice ${updatedInvoice._id} for user ${updatedInvoice.userId}`);
-
     const { generateNextNumber } = await import('../../utils/generate-next-number');
 
     const receiptDocumentNumber = await generateNextNumber('receipt', updatedInvoice.userId);
@@ -118,32 +115,16 @@ export async function markInvoiceAsPaidService(
       total: updatedInvoice.total,
     };
 
-    console.log(`📄 Receipt data:`, {
-      documentNumber: receiptData.documentNumber,
-      userId: receiptData.userId,
-      clientId: receiptData.clientId,
-      invoiceId: receiptData.invoiceId,
-      total: receiptData.total
-    });
-
     // Reuse the ReceiptModel from above
     const receiptDoc = new ReceiptModel(receiptData);
     const savedReceipt = await receiptDoc.save();
-
-    console.log(`✅ Receipt created successfully: ${savedReceipt._id} (${savedReceipt.documentNumber})`);
 
     return {
       invoice: toApiObject<Invoice>(updatedInvoice),
       receipt: toApiObject<Receipt>(savedReceipt),
     };
   } catch (error) {
-    console.error('❌ Failed to create receipt for invoice:', error);
-    console.error('📋 Invoice data:', {
-      id: updatedInvoice._id,
-      userId: updatedInvoice.userId,
-      clientId: updatedInvoice.clientId,
-      documentNumber: updatedInvoice.documentNumber
-    });
+    console.error('Failed to create receipt for invoice:', error);
     // Return the invoice even if receipt creation fails
     return { invoice: toApiObject<Invoice>(updatedInvoice) };
   }

@@ -3,8 +3,8 @@
 import { callApi, parseApiError, runWithFeedback } from '@/utils/api'
 import { Company, CreateCompany } from '@ezbill/types'
 import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
-import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 interface CompanyModalProps {
@@ -15,6 +15,7 @@ interface CompanyModalProps {
 }
 
 export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<CreateCompany>({
@@ -57,7 +58,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const userId = getUserId()
+    const userId = user?._id
     if (!userId) return
 
     const dataToSend = { ...formData, userId }
@@ -67,14 +68,14 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
         if (company) {
           const res = await callApi(`/companies/${company._id}`, {
             method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/companies', {
             method: 'POST',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))

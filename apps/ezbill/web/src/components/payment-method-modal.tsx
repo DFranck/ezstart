@@ -16,8 +16,8 @@ import {
   SelectValue,
   TextArea,
 } from '@ezstart/ui/components'
+import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
-import { getUserId } from '../utils/get-user-id'
 import { LoadingButton } from './loading-button'
 
 // Bank region types
@@ -62,6 +62,7 @@ export function PaymentMethodModal({
   paymentMethod,
   onSave,
 }: PaymentMethodModalProps) {
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState<PaymentMethodFormData>({
@@ -169,7 +170,7 @@ export function PaymentMethodModal({
 
     const dataToSend = {
       ...cleanData,
-      userId: getUserId(),
+      userId: user?._id,
       name: selectedType?.label || formData.type,
     }
 
@@ -178,14 +179,14 @@ export function PaymentMethodModal({
         if (paymentMethod) {
           const res = await callApi(`/payment-methods/${paymentMethod._id}`, {
             method: 'PUT',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
         } else {
           const res = await callApi('/payment-methods', {
             method: 'POST',
-            userId: getUserId(),
+            userId: user?._id,
             body: dataToSend,
           })
           if (!res.ok) throw new Error(parseApiError(res.data))
