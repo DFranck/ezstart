@@ -114,7 +114,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
             <CardContent>
               <StatDisplay
                 label={t('labels.confidence')}
-                value={`${Math.round(scan.result.confidence * 100)}%`}
+                value={`${Math.round(scan.result.confidence)}%`}
               />
               <StatDisplay
                 label={t('labels.processingTime')}
