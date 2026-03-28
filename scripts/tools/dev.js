@@ -214,7 +214,9 @@ function main() {
   }
 
   // Build and run turbo command
-  const cmd = ['turbo', 'run', 'dev', ...filters, '--concurrency=15']
+  // Concurrency must be > number of persistent tasks (filters count)
+  const concurrency = Math.max(filters.length + 5, 30)
+  const cmd = ['turbo', 'run', 'dev', ...filters, `--concurrency=${concurrency}`]
 
   console.log(`\nLaunching: ${[...allApps].join(', ')}`)
   console.log(`> ${cmd.join(' ')}\n`)

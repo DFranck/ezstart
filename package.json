@@ -26,7 +26,7 @@
     "dev:gp": "rimraf apps/green-pulse/web/.next apps/ezauth/web/.next && turbo run dev --filter=web-green-pulse... --filter=api-green-pulse... --filter=@green-pulse/types... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
     "dev:ga": "rimraf apps/gacha-analyzer/web/.next apps/ezauth/web/.next && turbo run dev --filter=web-gacha-analyzer... --filter=api-gacha-analyzer... --filter=web-ezauth... --filter=api-ezauth... --concurrency=15",
     "dev:asc": "rimraf apps/asc-tcd/web/.next && turbo run dev --filter=web-asc-tcd...",
-    "dev:all": "rimraf apps/*/web/.next && turbo run dev --concurrency 50",
+    "dev:all": "rimraf apps/*/web/.next && turbo run dev --concurrency 60",
     "icons:generate": "node packages/next-config/scripts/generate-all-icons.js",
     "prepare": "husky"
   },
