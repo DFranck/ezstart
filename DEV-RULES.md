@@ -105,6 +105,22 @@ export default defineConfig({
 
 **OBJECTIF :** Maximiser le partage de code, minimiser la duplication, créer des composants agnostiques.
 
+### Patterns Standards Obligatoires (CRITIQUE)
+
+**Chaque app DOIT suivre ces patterns. Source de vérité : ezbill / green-pulse / gacha-analyzer.**
+
+| Pattern | Standard | Interdit |
+|---------|----------|----------|
+| **API calls** | `callApi` wrapper dans `src/config/api.ts` avec `appName` | `fetch()` direct, `axios` |
+| **Data fetching** | React Query (`useQuery`, `useMutation`) avec `queryKey` | `useState` + `useEffect` + `fetch` |
+| **Logging** | `@ezstart/logger` (`logger.debug/info/warn/error`) | `console.log/warn/error` |
+| **Feedback** | `sonner` toast (`toast.success/error`) | `alert()`, `window.confirm` |
+| **Components** | `@ezstart/ui/components` + `Tag` pour HTML | Composants custom, HTML brut |
+| **Styles** | CSS variables theme (OKLCH) | Couleurs Tailwind hardcodées |
+| **Réponses API** | `{ success, data, meta }` | Objets bruts, formats custom |
+
+**Exception** : les apps minimales (ezauth login forms, ezpay landing, asc-tcd statique) peuvent déroger si justifié.
+
 ### Pagination + React Query (CRITIQUE)
 
 **TOUTE API GET liste DOIT avoir de la pagination. TOUT fetch frontend DOIT utiliser React Query.**
