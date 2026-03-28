@@ -27,9 +27,12 @@ router.get('/', async (req: any, res: any) => {
 
     const total = await Scan.countDocuments(filter).exec()
 
+    // Map _id → id for frontend compatibility
+    const mapped = scans.map((s: any) => ({ ...s, id: s._id?.toString(), _id: undefined }))
+
     res.json({
       success: true,
-      data: scans,
+      data: mapped,
       meta: {
         total,
         limit: Number(limit),

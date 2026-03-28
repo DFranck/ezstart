@@ -1540,6 +1540,7 @@ export function analyzeRune(rune: RuneData, profile: PlayerProfile = 'mid'): Run
     qualityPenalty: qualityPenalty !== 0 ? qualityPenalty : undefined,
     mismatchPenalty: mismatchPenalty !== 0 ? mismatchPenalty : undefined,
     setStrength,
+    profile,
     ...(isAncient ? { isAncient } : {}),
   }
 }

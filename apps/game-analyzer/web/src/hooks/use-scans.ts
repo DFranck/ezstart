@@ -22,8 +22,8 @@ export function useScans(options: UseScansOptions = {}) {
       const query = params.toString()
       const endpoint = `/scans${query ? `?${query}` : ''}`
 
-      const response = await callApi<Scan[]>(endpoint)
-      return response.data
+      const response = await callApi<{ data: Scan[]; meta: { total: number } }>(endpoint)
+      return response.data?.data ?? []
     },
   })
 }

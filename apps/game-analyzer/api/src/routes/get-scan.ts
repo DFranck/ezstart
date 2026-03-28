@@ -21,9 +21,12 @@ router.get('/:id', async (req: any, res: any) => {
       })
     }
 
+    // Map _id → id for frontend compatibility
+    const mapped = { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined }
+
     res.json({
       success: true,
-      data: scan,
+      data: mapped,
     })
   } catch (error) {
     console.error('[get-scan] Error:', error)
