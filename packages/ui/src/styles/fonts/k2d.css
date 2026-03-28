@@ -1,0 +1,16 @@
+/**
+ * K2D Font
+ *
+ * A modern, geometric sans-serif font with a clean and friendly appearance
+ * Source: https://fonts.google.com/specimen/K2D
+ * License: Open Font License
+ *
+ * Usage: className="font-k2d"
+ *
+ * Note: Font is imported in globals.css (must be at top for Tailwind 4)
+ */
+
+/* Utility class - uses CSS variable from next/font/google */
+.font-k2d {
+  font-family: var(--font-k2d), 'K2D', system-ui, sans-serif;
+}

@@ -1,0 +1,16 @@
+/**
+ * Gugi Font
+ *
+ * A fun, rounded display font perfect for logos and headings
+ * Source: https://fonts.google.com/specimen/Gugi
+ * License: Open Font License
+ *
+ * Usage: className="font-gugi"
+ *
+ * Note: Font is imported in globals.css (must be at top for Tailwind 4)
+ */
+
+/* Utility class - uses CSS variable from next/font/google */
+.font-gugi {
+  font-family: var(--font-gugi), 'Gugi', system-ui, sans-serif;
+}

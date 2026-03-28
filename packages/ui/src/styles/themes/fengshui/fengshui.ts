@@ -1,0 +1,28 @@
+/**
+ * Fengshui Theme CSS
+ * Source: packages/ui/src/styles/themes/fengshui/fengshui.css
+ *
+ * ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
+ * Run `pnpm generate:themes` to regenerate from CSS source
+ */
+export const fengshuiThemeCss = `/* FengShui Theme Variables - Gold & Red palette */
+
+:root {
+  --fengshui-primary: oklch(0.78 0.16 80);
+  --fengshui-secondary: oklch(0.52 0.20 28);
+  --fengshui-primary-dark: oklch(0.70 0.14 80);
+  --fengshui-secondary-dark: oklch(0.45 0.18 28);
+}
+
+.dark {
+  --fengshui-primary: oklch(0.72 0.14 80);
+  --fengshui-secondary: oklch(0.48 0.18 28);
+  --fengshui-primary-dark: oklch(0.65 0.12 80);
+  --fengshui-secondary-dark: oklch(0.42 0.16 28);
+}
+
+@theme inline {
+  --color-fengshui-primary: var(--fengshui-primary);
+  --color-fengshui-secondary: var(--fengshui-secondary);
+}
+`

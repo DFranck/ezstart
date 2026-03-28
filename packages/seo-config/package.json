@@ -1,0 +1,31 @@
+{
+  "name": "@ezstart/seo-config",
+  "version": "0.0.1",
+  "description": "Centralized SEO configuration with robots.txt, sitemap.xml, and metadata helpers",
+  "main": "./src/index.ts",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./metadata": "./src/metadata.ts",
+    "./metadata-enhanced": "./src/metadata-enhanced.ts",
+    "./robots": "./src/robots.ts",
+    "./sitemap": "./src/sitemap.ts",
+    "./json-ld": "./src/json-ld.ts"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next": "^15.5.9"
+  },
+  "devDependencies": {
+    "@ezstart/typescript-config": "workspace:*",
+    "next": "^15.5.9",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@ezstart/config": "workspace:*",
+    "schema-dts": "^1.1.5"
+  }
+}

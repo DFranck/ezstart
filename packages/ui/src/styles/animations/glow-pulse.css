@@ -1,0 +1,33 @@
+/* Glow Pulse Animation - for logos with drop-shadow effects */
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgb(16 185 129 / 1))
+      drop-shadow(0 0 16px rgb(16 185 129 / 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgb(16 185 129 / 0.6))
+      drop-shadow(0 0 24px rgb(16 185 129 / 0.4));
+  }
+}
+
+@keyframes glow-pulse-sm {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgb(16 185 129 / 0.8))
+      drop-shadow(0 0 16px rgb(16 185 129 / 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgb(16 185 129 / 0.5))
+      drop-shadow(0 0 20px rgb(16 185 129 / 0.3));
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-glow-pulse-sm {
+  animation: glow-pulse-sm 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
