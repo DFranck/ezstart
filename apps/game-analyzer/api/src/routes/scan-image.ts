@@ -54,6 +54,7 @@ router.post('/', upload.fields([
     }
 
     const { gameType, profile, benchMode, presets } = validation.data
+    const thumbnail: string | undefined = req.body.thumbnail || undefined
     const imageAltFile = files?.imageAlt?.[0]
     const imageFullFile = files?.imageFull?.[0]
 
@@ -72,7 +73,7 @@ router.post('/', upload.fields([
       return hasAny ? zones : undefined
     })()
 
-    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets, zoneBuffers)
+    const { scanId, result } = await scanImage(imageFile.buffer, gameType as GameType, profile, imageAltFile?.buffer, imageFullFile?.buffer, benchMode, presets, zoneBuffers, thumbnail)
 
     res.status(201).json({
       success: true,

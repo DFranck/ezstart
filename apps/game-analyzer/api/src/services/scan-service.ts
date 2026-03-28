@@ -173,7 +173,8 @@ export async function scanImage(
   imageFullBuffer?: Buffer,
   benchMode: boolean = false,
   presets?: string[],
-  zoneBuffers?: Record<string, Buffer>
+  zoneBuffers?: Record<string, Buffer>,
+  thumbnail?: string
 ): Promise<{ scanId: string; result: ScanResult }> {
   const Scan = await getScanModel()
 
@@ -182,6 +183,7 @@ export async function scanImage(
     gameType,
     imageUrl: `memory://${Date.now()}`,
     status: 'processing',
+    ...(thumbnail ? { thumbnail } : {}),
   })
   await scan.save()
 

@@ -123,6 +123,15 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
         </Div>
       </Div>
 
+      {/* Thumbnail — captured screenshot */}
+      {scan.thumbnail ? (
+        <img src={scan.thumbnail} alt="Scanned capture" className="w-full rounded-lg" />
+      ) : (
+        <Div className="rounded-md bg-muted/30 border border-border px-3 py-4 text-center">
+          <P className="text-sm text-muted-foreground">{t('scanDetail.noThumbnail', { defaultMessage: 'Image non disponible' })}</P>
+        </Div>
+      )}
+
       {/* Rune Card with full template */}
       {scan.result && hasRuneData && (
         <RuneCardWithTemplate

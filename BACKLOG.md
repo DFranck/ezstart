@@ -123,7 +123,8 @@ apps/
 79. [x] History page fix — _id→id mapping, confidence display, scan cards avec set/slot/advice badge
 80. [x] Scan detail fix — memory:// image fallback, confidence ×100 fix
 81. [x] Re-analyser — endpoint API + bouton pour re-parser avec nouveau code (en cours)
-82. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
+82. [ ] Scan feedback — agree/disagree + commentaire par scan, filtrable dans history, data pour améliorer le scoring
+83. [ ] Estimation rolls améliorée — utiliser le hint (aX%) du rawText pour le dernier roll exact
 83. [ ] Détection grind existant (couleur verte in-game → savoir si stat déjà grindée)
 84. [ ] Fallback IA cascade (Gemini free tier)
 85. [ ] Nikke gear analyzer (parser, analyzer, gear cards, /data Nikke)

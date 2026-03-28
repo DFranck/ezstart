@@ -43,6 +43,9 @@ const scanSchema = new Schema<Scan>(
       type: String,
       required: true,
     },
+    thumbnail: {
+      type: String,
+    },
     status: {
       type: String,
       enum: ['pending', 'processing', 'completed', 'failed'],

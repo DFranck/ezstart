@@ -10,6 +10,8 @@ interface ScanInput {
   profile?: string
   benchMode?: boolean
   presets?: string[]
+  /** Base64 JPEG thumbnail of the cropped area */
+  thumbnail?: string
   zoneSetSlot?: File
   zoneMainStat?: File
   zoneQuality?: File
@@ -24,7 +26,7 @@ export function useScan() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile, benchMode, presets, zoneSetSlot, zoneMainStat, zoneQuality, zoneInnate, zoneSub1, zoneSub2, zoneSub3, zoneSub4 }: ScanInput): Promise<ScanResult> => {
+    mutationFn: async ({ image, imageAlt, imageFull, gameType, profile, benchMode, presets, thumbnail, zoneSetSlot, zoneMainStat, zoneQuality, zoneInnate, zoneSub1, zoneSub2, zoneSub3, zoneSub4 }: ScanInput): Promise<ScanResult> => {
       const formData = new FormData()
       formData.append('image', image)
       if (imageAlt) formData.append('imageAlt', imageAlt)
@@ -33,6 +35,7 @@ export function useScan() {
       if (profile) formData.append('profile', profile)
       if (benchMode !== undefined) formData.append('benchMode', String(benchMode))
       if (presets && presets.length > 0) formData.append('presets', JSON.stringify(presets))
+      if (thumbnail) formData.append('thumbnail', thumbnail)
       if (zoneSetSlot) formData.append('zoneSetSlot', zoneSetSlot)
       if (zoneMainStat) formData.append('zoneMainStat', zoneMainStat)
       if (zoneQuality) formData.append('zoneQuality', zoneQuality)

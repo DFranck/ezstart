@@ -19,6 +19,7 @@ router.get('/', async (req: any, res: any) => {
     if (status) filter.status = status
 
     const scans = await Scan.find(filter)
+      .select('-thumbnail')
       .sort({ createdAt: -1 })
       .skip(Number(offset))
       .limit(Number(limit))

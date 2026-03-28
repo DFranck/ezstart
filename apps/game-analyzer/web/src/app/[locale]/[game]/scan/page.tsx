@@ -134,6 +134,12 @@ async function imageDataToBlob(imageData: ImageData): Promise<Blob> {
   })
 }
 
+/** Convert ImageData to a compressed JPEG base64 data URL for thumbnail storage */
+function imageDataToJpegBase64(imageData: ImageData, quality = 0.5): string {
+  const canvas = canvasFromImageData(imageData)
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
 export default function GameScanPage() {
   const t = useTranslations()
   const params = useParams()
@@ -293,6 +299,9 @@ export default function GameScanPage() {
       scanningRef.current = true
       setScanCount(prev => prev + 1)
 
+      // Generate compressed JPEG thumbnail from the raw crop before preprocessing
+      const thumbnail = imageDataToJpegBase64(frame)
+
       // Apply blackout masks before preprocessing
       const maskedFrame = masksRef.current.length > 0 ? applyBlackoutMasks(frame, masksRef.current) : frame
       const processed = preprocessForOcr(maskedFrame, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
@@ -323,6 +332,7 @@ export default function GameScanPage() {
             profile,
             benchMode: false,
             presets: savedPresets.current,
+            thumbnail,
           },
           { onSettled: () => { scanningRef.current = false } }
         )
@@ -368,8 +378,12 @@ export default function GameScanPage() {
     setCachedResult(null)
     scanningRef.current = true
     setScanCount(prev => prev + 1)
-    lastHashRef.current = quickHash(cropImageData(currentFrame, roiRef.current))
     const cropped = cropImageData(currentFrame, roiRef.current)
+    lastHashRef.current = quickHash(cropped)
+
+    // Generate compressed JPEG thumbnail from the raw crop
+    const thumbnail = imageDataToJpegBase64(cropped)
+
     // Apply blackout masks before preprocessing
     const maskedCropped = masksRef.current.length > 0 ? applyBlackoutMasks(cropped, masksRef.current) : cropped
     const processed = preprocessForOcr(maskedCropped, { scale: 2, contrast: 1.0, binarize: false, grayscale: false })
@@ -400,6 +414,7 @@ export default function GameScanPage() {
           profile,
           benchMode: false,
           presets: savedPresets.current,
+          thumbnail,
         },
         { onSettled: () => { scanningRef.current = false } }
       )
