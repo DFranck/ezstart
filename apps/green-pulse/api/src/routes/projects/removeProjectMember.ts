@@ -3,6 +3,8 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -24,29 +26,17 @@ docRouter.delete('/:id/members/:userId', async (req, res) => {
     const project = await Project.findById(req.params.id)
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        error: 'Project not found',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Project not found', 404)
     }
 
     // Remove member
     project.members = project.members.filter((m: any) => m.userId !== req.params.userId)
     await project.save()
 
-    res.json({
-      success: true,
-      data: project,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, project)
   } catch (error) {
     logger.error('Error removing member:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to remove member',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to remove member')
   }
 }, {
   summary: 'Remove member from project',

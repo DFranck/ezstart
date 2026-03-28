@@ -26,12 +26,7 @@ updateFormInstanceRouter.put(
     try {
       const validation = UpdateFormInstanceRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors)
       }
 
       const FormInstance = await getFormInstanceModel()
@@ -44,25 +39,13 @@ updateFormInstanceRouter.put(
       )
 
       if (!instance) {
-        return res.status(404).json({
-          success: false,
-          error: 'Form instance not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Form instance not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: instance,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, instance)
     } catch (error) {
       logger.error('Error updating form instance:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to update form instance',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to update form instance')
     }
   },
   {

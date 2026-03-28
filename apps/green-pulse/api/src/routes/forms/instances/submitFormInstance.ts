@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   FormInstanceSchema,
   SubmitFormInstanceRequestSchema,
@@ -29,12 +29,7 @@ submitFormInstanceRouter.post(
         ...req.body,
       })
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors)
       }
 
       const FormInstance = await getFormInstanceModel()
@@ -43,11 +38,7 @@ submitFormInstanceRouter.post(
       const instance = await FormInstance.findById(req.params.id)
 
       if (!instance) {
-        return res.status(404).json({
-          success: false,
-          error: 'Form instance not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Form instance not found', 404)
       }
 
       // Update instance with submission data
@@ -66,18 +57,10 @@ submitFormInstanceRouter.post(
 
       await instance.save()
 
-      res.json({
-        success: true,
-        data: instance,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, instance)
     } catch (error) {
       logger.error('Error submitting form instance:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to submit form instance',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to submit form instance')
     }
   },
   {

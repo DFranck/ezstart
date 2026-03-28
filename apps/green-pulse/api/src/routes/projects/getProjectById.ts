@@ -3,6 +3,8 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -24,11 +26,7 @@ docRouter.get('/:id', async (req, res) => {
     const project = await Project.findById(req.params.id).lean()
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        error: 'Project not found',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Project not found', 404)
     }
 
     // TODO: Check if user has access to this project
@@ -36,18 +34,10 @@ docRouter.get('/:id', async (req, res) => {
     // const hasAccess = project.ownerId === userId || project.members.some(m => m.userId === userId)
     // if (!hasAccess) return 403
 
-    res.json({
-      success: true,
-      data: project,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, project)
   } catch (error) {
     logger.error('Error fetching project:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch project',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to fetch project')
   }
 }, {
   summary: 'Get project by ID',

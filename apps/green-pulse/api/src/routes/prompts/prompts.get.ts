@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
@@ -40,32 +40,18 @@ docRouter.get(
       const prompt = await SystemPrompt.findOne({ key }).lean().exec()
 
       if (!prompt) {
-        return res.status(404).json({
-          success: false,
-          data: null,
-          error: 'Prompt not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Prompt not found', 404)
       }
 
-      res.json({
-        success: true,
-        data: {
-          ...prompt,
-          _id: (prompt as any)._id.toString(),
-          createdAt: (prompt as any).createdAt?.toISOString(),
-          updatedAt: (prompt as any).updatedAt?.toISOString(),
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        ...prompt,
+        _id: (prompt as any)._id.toString(),
+        createdAt: (prompt as any).createdAt?.toISOString(),
+        updatedAt: (prompt as any).updatedAt?.toISOString(),
       })
     } catch (error) {
       logger.error('Error getting prompt:', error)
-      res.status(500).json({
-        success: false,
-        data: null,
-        error: 'Failed to get prompt',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to get prompt')
     }
   },
   {

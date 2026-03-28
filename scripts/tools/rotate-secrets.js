@@ -30,7 +30,10 @@ const prodJwtSecret = crypto.randomBytes(64).toString('base64url')
 const JWT_APPS = [
   'apps/ezauth/api',
   'apps/ezbill/api',
-  // Add more as they adopt JWT auth
+  'apps/gacha-analyzer/api',
+  'apps/green-pulse/api',
+  'apps/ezpay/api',
+  // ezstart n'a pas besoin de JWT (monitoring public)
 ]
 
 console.log(isDryRun ? '\n🔍 DRY RUN\n' : '\n🔐 Rotating secrets...\n')
@@ -103,6 +106,9 @@ if (doBoth || prodOnly) {
   console.log('  ├──────────────────────┼────────────────┤')
   console.log('  │ ezauth-api           │ JWT_SECRET     │')
   console.log('  │ ezbill-api           │ JWT_SECRET     │')
+  console.log('  │ gacha-analyzer-api   │ JWT_SECRET     │')
+  console.log('  │ greenpulse-api       │ JWT_SECRET     │')
+  console.log('  │ ezpay-api            │ JWT_SECRET     │')
   console.log('  └──────────────────────┴────────────────┘')
   console.log(`  Value: ${prodJwtSecret}`)
 }

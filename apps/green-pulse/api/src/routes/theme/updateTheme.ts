@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getThemeOverrideModel } from '../../models/ThemeOverride.js'
 
@@ -35,12 +35,7 @@ docRouter.put(
       const validation = UpdateThemeRequestSchema.safeParse(req.body)
 
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          data: null,
-          error: 'Invalid request body',
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request body', validation.error.errors)
       }
 
       const { overrides } = validation.data
@@ -78,23 +73,14 @@ docRouter.put(
         }
       }
 
-      res.json({
-        success: true,
-        data: {
-          appName: themeOverride?.appName || appName,
-          overrides: overridesObj,
-          updatedAt: (themeOverride?.updatedAt || new Date()).toISOString(),
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        appName: themeOverride?.appName || appName,
+        overrides: overridesObj,
+        updatedAt: (themeOverride?.updatedAt || new Date()).toISOString(),
       })
     } catch (error) {
       logger.error('Error updating theme:', error)
-      res.status(500).json({
-        success: false,
-        data: null,
-        error: 'Failed to update theme',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to update theme')
     }
   },
   {

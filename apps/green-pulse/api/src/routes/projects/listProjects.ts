@@ -3,6 +3,8 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -21,11 +23,7 @@ docRouter.get('/', async (req, res) => {
     const { userId, status } = req.query
 
     if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: 'userId is required',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'userId is required', 400)
     }
 
     const Project = await getProjectModel()
@@ -49,19 +47,10 @@ docRouter.get('/', async (req, res) => {
       Project.countDocuments(query),
     ])
 
-    res.json({
-      success: true,
-      data: projects,
-      meta: { total, limit: Number(limit), offset: Number(offset) },
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, projects, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
     logger.error('Error fetching projects:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch projects',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to fetch projects')
   }
 }, {
   summary: 'List user projects (owned or shared)',

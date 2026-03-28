@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import {
   ExtractFormDataRequestSchema,
   ExtractFormDataResponseSchema,
@@ -25,12 +25,7 @@ extractFormDataRouter.post(
     try {
       const validation = ExtractFormDataRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors)
       }
 
       // Use AI extraction service
@@ -40,18 +35,10 @@ extractFormDataRouter.post(
         validation.data.conversationHistory
       )
 
-      res.json({
-        success: true,
-        data: result,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, result)
     } catch (error) {
       logger.error('Error extracting form data:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to extract form data',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to extract form data')
     }
   },
   {

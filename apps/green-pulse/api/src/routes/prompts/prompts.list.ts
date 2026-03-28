@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
@@ -47,25 +47,15 @@ docRouter.get(
         SystemPrompt.countDocuments(filter),
       ])
 
-      res.json({
-        success: true,
-        data: prompts.map((p: any) => ({
-          ...p,
-          _id: p._id.toString(),
-          createdAt: p.createdAt?.toISOString(),
-          updatedAt: p.updatedAt?.toISOString(),
-        })),
-        meta: { total, limit: Number(limit), offset: Number(offset) },
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, prompts.map((p: any) => ({
+        ...p,
+        _id: p._id.toString(),
+        createdAt: p.createdAt?.toISOString(),
+        updatedAt: p.updatedAt?.toISOString(),
+      })), { total, limit: Number(limit), offset: Number(offset) })
     } catch (error) {
       logger.error('Error listing prompts:', error)
-      res.status(500).json({
-        success: false,
-        data: [],
-        error: 'Failed to list prompts',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to list prompts')
     }
   },
   {

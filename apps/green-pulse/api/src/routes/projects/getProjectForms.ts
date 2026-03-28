@@ -3,6 +3,8 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -23,18 +25,10 @@ docRouter.get('/:id/forms', async (req, res) => {
     // @ts-expect-error - Mongoose type inference issue
     const forms = await FormInstance.find({ projectId: req.params.id }).sort({ createdAt: -1 }).lean()
 
-    res.json({
-      success: true,
-      data: forms,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, forms)
   } catch (error) {
     logger.error('Error fetching project forms:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch project forms',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to fetch project forms')
   }
 }, {
   summary: 'Get all form instances for a project',

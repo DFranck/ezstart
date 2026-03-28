@@ -3,6 +3,9 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -21,12 +24,7 @@ docRouter.put('/:id', async (req, res) => {
   try {
     const validation = UpdateProjectRequestSchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request',
-        details: validation.error.errors,
-        timestamp: new Date().toISOString(),
-      })
+      return sendValidationError(res, 'Invalid request', validation.error.errors)
     }
 
     const Project = await getProjectModel()
@@ -39,25 +37,13 @@ docRouter.put('/:id', async (req, res) => {
     )
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        error: 'Project not found',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Project not found', 404)
     }
 
-    res.json({
-      success: true,
-      data: project,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, project)
   } catch (error) {
     logger.error('Error updating project:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update project',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to update project')
   }
 }, {
   summary: 'Update project',

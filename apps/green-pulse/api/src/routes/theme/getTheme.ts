@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { getThemeOverrideModel } from '../../models/ThemeOverride.js'
 
@@ -37,11 +37,7 @@ docRouter.get(
       const themeOverride = await ThemeOverride.findOne({ appName }).lean().exec()
 
       if (!themeOverride) {
-        return res.json({
-          success: true,
-          data: null,
-          timestamp: new Date().toISOString(),
-        })
+        return sendSuccess(res, null)
       }
 
       // Convert Map to Object
@@ -52,24 +48,15 @@ docRouter.get(
         }
       }
 
-      res.json({
-        success: true,
-        data: {
-          appName: themeOverride.appName,
-          overrides,
-          updatedAt: themeOverride.updatedAt.toISOString(),
-          updatedBy: themeOverride.updatedBy,
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        appName: themeOverride.appName,
+        overrides,
+        updatedAt: themeOverride.updatedAt.toISOString(),
+        updatedBy: themeOverride.updatedBy,
       })
     } catch (error) {
       logger.error('Error fetching theme:', error)
-      res.status(500).json({
-        success: false,
-        data: null,
-        error: 'Failed to fetch theme',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to fetch theme')
     }
   },
   {

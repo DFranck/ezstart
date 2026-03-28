@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 
@@ -36,16 +36,16 @@ docRouter.post(
   '/',
   async (req, res) => {
     try {
-      const body = CreatePromptBodySchema.parse(req.body)
+      const validation = CreatePromptBodySchema.safeParse(req.body)
+      if (!validation.success) {
+        return sendValidationError(res, 'Validation error', validation.error.errors)
+      }
+      const body = validation.data
 
       // Check if key already exists
       const existing = await SystemPrompt.findOne({ key: body.key }).lean().exec()
       if (existing) {
-        return res.status(409).json({
-          success: false,
-          error: 'A prompt with this key already exists',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'A prompt with this key already exists', 409)
       }
 
       // If setting as default, unset other defaults of same type
@@ -63,33 +63,15 @@ docRouter.post(
 
       await prompt.save()
 
-      res.status(201).json({
-        success: true,
-        data: {
-          ...prompt.toObject(),
-          _id: prompt._id.toString(),
-          createdAt: prompt.createdAt?.toISOString(),
-          updatedAt: prompt.updatedAt?.toISOString(),
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res.status(201), {
+        ...prompt.toObject(),
+        _id: prompt._id.toString(),
+        createdAt: prompt.createdAt?.toISOString(),
+        updatedAt: prompt.updatedAt?.toISOString(),
       })
     } catch (error: any) {
       logger.error('Error creating prompt:', error)
-
-      if (error.name === 'ZodError') {
-        return res.status(400).json({
-          success: false,
-          error: 'Validation error',
-          details: error.errors,
-          timestamp: new Date().toISOString(),
-        })
-      }
-
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create prompt',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to create prompt')
     }
   },
   {

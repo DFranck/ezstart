@@ -3,6 +3,9 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -21,21 +24,12 @@ docRouter.post('/', async (req, res) => {
   try {
     const validation = CreateProjectRequestSchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request',
-        details: validation.error.errors,
-        timestamp: new Date().toISOString(),
-      })
+      return sendValidationError(res, 'Invalid request', validation.error.errors)
     }
 
     const { userId } = req.query
     if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: 'userId is required',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'userId is required', 400)
     }
 
     const Project = await getProjectModel()
@@ -48,18 +42,10 @@ docRouter.post('/', async (req, res) => {
     })
     await newProject.save()
 
-    res.status(201).json({
-      success: true,
-      data: newProject,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res.status(201), newProject)
   } catch (error) {
     logger.error('Error creating project:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create project',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to create project')
   }
 }, {
   summary: 'Create new project',

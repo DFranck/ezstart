@@ -3,6 +3,9 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import {
   ProjectSchema,
@@ -21,12 +24,7 @@ docRouter.put('/:id/members/:userId', async (req, res) => {
   try {
     const validation = UpdateProjectMemberRequestSchema.safeParse(req.body)
     if (!validation.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request',
-        details: validation.error.errors,
-        timestamp: new Date().toISOString(),
-      })
+      return sendValidationError(res, 'Invalid request', validation.error.errors)
     }
 
     const Project = await getProjectModel()
@@ -35,38 +33,22 @@ docRouter.put('/:id/members/:userId', async (req, res) => {
     const project = await Project.findById(req.params.id)
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        error: 'Project not found',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Project not found', 404)
     }
 
     // Find and update member
     const member = project.members.find((m: any) => m.userId === req.params.userId)
     if (!member) {
-      return res.status(404).json({
-        success: false,
-        error: 'Member not found',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Member not found', 404)
     }
 
     member.role = validation.data.role
     await project.save()
 
-    res.json({
-      success: true,
-      data: project,
-      timestamp: new Date().toISOString(),
-    })
+    sendSuccess(res, project)
   } catch (error) {
     logger.error('Error updating member role:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update member role',
-      timestamp: new Date().toISOString(),
-    })
+    sendError(res, 'Failed to update member role')
   }
 }, {
   summary: 'Update member role',

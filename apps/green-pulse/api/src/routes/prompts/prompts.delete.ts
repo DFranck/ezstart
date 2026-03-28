@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { z } from 'zod'
 import { SystemPrompt } from '../../models/SystemPrompt.js'
 import { clearPromptCache } from '../../services/prompt.service.js'
@@ -25,20 +25,12 @@ docRouter.delete(
       const prompt = await SystemPrompt.findOne({ key }).exec()
 
       if (!prompt) {
-        return res.status(404).json({
-          success: false,
-          error: 'Prompt not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Prompt not found', 404)
       }
 
       // Prevent deletion of default prompts
       if (prompt.isDefault) {
-        return res.status(400).json({
-          success: false,
-          error: 'Cannot delete a default prompt. Set another prompt as default first.',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Cannot delete a default prompt. Set another prompt as default first.', 400)
       }
 
       await SystemPrompt.deleteOne({ key })
@@ -46,18 +38,10 @@ docRouter.delete(
       // Clear cache
       clearPromptCache()
 
-      res.json({
-        success: true,
-        message: `Prompt "${key}" deleted successfully`,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, { message: `Prompt "${key}" deleted successfully` })
     } catch (error) {
       logger.error('Error deleting prompt:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete prompt',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to delete prompt')
     }
   },
   {
