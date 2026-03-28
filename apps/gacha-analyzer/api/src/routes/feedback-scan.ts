@@ -3,26 +3,34 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
 const router: any = Router()
 
+const feedbackBodySchema = z.object({
+  opinion: z.enum(['agree', 'disagree']),
+  comment: z.string().optional().default(''),
+})
+
 router.post('/:id/feedback', async (req: any, res: any) => {
   try {
-    const { opinion, comment } = req.body
-
-    if (!opinion || !['agree', 'disagree'].includes(opinion)) {
+    const validation = feedbackBodySchema.safeParse(req.body)
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        error: 'opinion must be agree or disagree',
+        error: 'Invalid request body',
+        details: validation.error.errors,
       })
     }
+
+    const { opinion, comment } = validation.data
 
     const Scan = await getScanModel()
 
     const scan = await Scan.findByIdAndUpdate(
       req.params.id,
-      { feedback: { opinion, comment: comment || '', createdAt: new Date() } },
+      { feedback: { opinion, comment, createdAt: new Date() } },
       { new: true }
     ).lean()
 

@@ -38,7 +38,7 @@ Usage : "reprend/continue [nom-du-projet]" → Claude lit le state, suit le work
 5. [x] Pagination globale — toutes les APIs paginées (ezauth, ezbill, ezpay, green-pulse, gacha-analyzer)
 6. [x] Fix generators (create-app.js) — path bugs fixés, auto-register ports/tsconfig/scripts
 7. [x] insert-app.js — scaffolding complet avec wiring automatique + templates
-8. [ ] extract-app.js — extraire une app en standalone avec ses dépendances packages
+8. [x] extract-app.js — recursive dep analysis, copies app + packages, generates standalone config
 9. [ ] new-monorepo.js — starter kit template pour créer un nouveau monorepo @ezstart-like
 10. [x] Workspace validator — `scripts/tools/validate-workspace.js` vérifie tsconfig/scripts/config
 11. [ ] Dynamic dev launcher — remplacer les 10+ scripts dev:x par un launcher dynamique

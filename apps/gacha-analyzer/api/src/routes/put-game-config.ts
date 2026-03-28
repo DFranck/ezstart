@@ -3,21 +3,46 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { z } from 'zod'
 import { getGameConfigModel } from '../models/game-config.js'
 
 const router: any = Router()
 
+const paramsSchema = z.object({
+  gameType: z.enum(['summoners-war', 'nikke']),
+  layoutName: z.string().min(1),
+})
+
+const bodySchema = z.object({
+  displayName: z.string().optional(),
+  bestPresets: z.array(z.string()).optional(),
+  zones: z.record(z.any()).optional(),
+  masks: z.record(z.any()).optional(),
+  roi: z.record(z.any()).optional(),
+})
+
 router.put('/:gameType/:layoutName', async (req: any, res: any) => {
   try {
-    const { bestPresets, zones, masks, roi, displayName } = req.body
-    const { gameType, layoutName } = req.params
-
-    if (!gameType || !layoutName) {
+    const paramsValidation = paramsSchema.safeParse(req.params)
+    if (!paramsValidation.success) {
       return res.status(400).json({
         success: false,
-        error: 'gameType and layoutName are required',
+        error: 'Invalid route parameters',
+        details: paramsValidation.error.errors,
       })
     }
+
+    const bodyValidation = bodySchema.safeParse(req.body)
+    if (!bodyValidation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request body',
+        details: bodyValidation.error.errors,
+      })
+    }
+
+    const { gameType, layoutName } = paramsValidation.data
+    const { bestPresets, zones, masks, roi, displayName } = bodyValidation.data
 
     const GameConfig = await getGameConfigModel()
 

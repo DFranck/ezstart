@@ -3,16 +3,33 @@
  */
 
 import { Router } from '@ezstart/express-core'
+import { z } from 'zod'
 import { getScanModel } from '../models/scan.js'
 
 const router: any = Router()
 
+const querySchema = z.object({
+  gameType: z.enum(['summoners-war', 'nikke']).optional(),
+  status: z.enum(['pending', 'processing', 'completed', 'failed']).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+})
+
 // GET /scans — Get all scans (most recent first)
 router.get('/', async (req: any, res: any) => {
   try {
-    const Scan = await getScanModel()
+    const validation = querySchema.safeParse(req.query)
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid query parameters',
+        details: validation.error.errors,
+      })
+    }
 
-    const { gameType, status, limit = '50', offset = '0' } = req.query
+    const { gameType, status, limit, offset } = validation.data
+
+    const Scan = await getScanModel()
 
     const filter: Record<string, string> = {}
     if (gameType) filter.gameType = gameType
@@ -21,8 +38,8 @@ router.get('/', async (req: any, res: any) => {
     const scans = await Scan.find(filter)
       .select('-thumbnail')
       .sort({ createdAt: -1 })
-      .skip(Number(offset))
-      .limit(Number(limit))
+      .skip(offset)
+      .limit(limit)
       .lean()
       .exec()
 
@@ -36,8 +53,8 @@ router.get('/', async (req: any, res: any) => {
       data: mapped,
       meta: {
         total,
-        limit: Number(limit),
-        offset: Number(offset),
+        limit,
+        offset,
       },
     })
   } catch (error) {

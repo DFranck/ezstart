@@ -1,4 +1,5 @@
 import { Router } from '@ezstart/express-core'
+import { authMiddleware } from '../../middleware/auth.js'
 
 // Import all action routers and registries
 import listWorkspacesRouter, { listWorkspacesRegistry } from './listWorkspaces.js'
@@ -22,8 +23,9 @@ export const workspaceRegistries = [
   removeWorkspaceMemberRegistry,
 ]
 
-// Combine all routers
+// Combine all routers — all workspace routes require authentication
 const router: any = Router()
+router.use(authMiddleware)
 
 router.use('/', listWorkspacesRouter)
 router.use('/', getWorkspaceByIdRouter)
