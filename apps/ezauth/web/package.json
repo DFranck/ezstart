@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @ezstart/config --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "build": "next build",
     "dev": "node ../../../packages/config/bin/dev-server.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ../../../packages/config/bin/dev-server.js",
     "dev:port": "next dev -p $PORT",
-    "build": "pnpm --filter @gacha-analyzer/types --filter @ezstart/config --filter @ezstart/fetch-client --filter @ezstart/ui --filter @ezstart/auth-sdk --filter @ezstart/next-theme build && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
