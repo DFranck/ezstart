@@ -44,6 +44,8 @@ export interface Scan {
   id: string
   gameType: GameType
   imageUrl: string
+  /** Base64 JPEG thumbnail of the scanned area (compressed, ~50-100KB) */
+  thumbnail?: string
   status: ScanStatus
   result?: ScanResult
   createdAt: Date
