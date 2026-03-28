@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import {
   CreateConversationSchema,
@@ -26,12 +26,7 @@ createConversationRouter.post(
     try {
       const validation = CreateConversationSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const { title, userId } = validation.data
@@ -43,23 +38,15 @@ createConversationRouter.post(
         messages: [],
       })
 
-      res.json({
-        success: true,
-        data: {
-          id: conversation._id.toString(),
-          title: conversation.title,
-          createdAt: conversation.createdAt,
-          updatedAt: conversation.updatedAt,
-        },
-        timestamp: new Date().toISOString(),
+      return sendSuccess(res, {
+        id: conversation._id.toString(),
+        title: conversation.title,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
       })
     } catch (error) {
       logger.error('Create conversation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create conversation',
-        timestamp: new Date().toISOString(),
-      })
+      return sendError(res, 'Failed to create conversation')
     }
   },
   {

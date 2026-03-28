@@ -19,19 +19,13 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   const userId = req.headers['x-user-id'] as string
 
   if (!userId) {
-    return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'X-User-Id header is required'
-    })
+    return sendError(res, 'Unauthorized: X-User-Id header is required', 401)
   }
 
   // Validate userId format (MongoDB ObjectId)
   const objectIdRegex = /^[a-f\d]{24}$/i
   if (!objectIdRegex.test(userId)) {
-    return res.status(400).json({
-      error: 'Invalid User ID',
-      message: 'X-User-Id must be a valid MongoDB ObjectId'
-    })
+    return sendError(res, 'Invalid User ID: X-User-Id must be a valid MongoDB ObjectId', 400)
   }
 
   req.userId = userId

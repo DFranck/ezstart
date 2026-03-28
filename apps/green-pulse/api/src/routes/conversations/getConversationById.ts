@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import { Router, createRouterWithDoc, OpenAPIRegistry, sendSuccess, sendError } from '@ezstart/express-core'
 import { Conversation } from '../../models/Conversation.js'
 import { ConversationSchema, ApiResponseSchema } from '@green-pulse/types'
 
