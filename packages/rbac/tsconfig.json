@@ -2,8 +2,7 @@
   "extends": "@ezstart/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "typeRoots": ["./node_modules/@types", "./src"]
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
