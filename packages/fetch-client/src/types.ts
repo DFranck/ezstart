@@ -5,8 +5,10 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 export type ApiError = { error: string; [key: string]: any }
 
 export type ApiResponse<T> =
-  | { ok: true; status: number; url: string; data: T }
-  | { ok: false; status: number; url: string; data: ApiError | null }
+  | { ok: true; status: number; url: string; data: T; meta?: ApiMeta; error?: undefined; raw?: any }
+  | { ok: false; status: number; url: string; data: ApiError | null; meta?: ApiMeta; error?: string; raw?: any }
+
+export type ApiMeta = { total?: number; limit?: number; offset?: number; [key: string]: any }
 
 export type LogLevel = 'none' | 'errors' | 'all'
 

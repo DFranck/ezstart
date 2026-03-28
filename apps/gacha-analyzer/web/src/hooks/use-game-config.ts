@@ -12,15 +12,9 @@ interface GameLayoutData {
   updatedAt: string
 }
 
-interface GameLayoutsResponse {
-  success: boolean
-  data: GameLayoutData[]
-}
+type GameLayoutsResponse = GameLayoutData[]
 
-interface GameLayoutResponse {
-  success: boolean
-  data: GameLayoutData | null
-}
+type GameLayoutResponse = GameLayoutData | null
 
 /** List all layouts for a game */
 export function useGameLayouts(gameType: string) {
@@ -28,7 +22,7 @@ export function useGameLayouts(gameType: string) {
     queryKey: ['game-layouts', gameType],
     queryFn: async () => {
       const response = await callApi<GameLayoutsResponse>(`/config/${gameType}`)
-      return response.data?.data ?? []
+      return response.data ?? []
     },
     staleTime: 1000 * 60 * 60,
   })

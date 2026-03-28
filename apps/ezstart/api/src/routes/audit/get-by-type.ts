@@ -8,7 +8,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -52,19 +52,13 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
     const { type: auditType } = req.params
 
     if (!auditType) {
-      return res.status(400).json({
-        error: 'Invalid request',
-        message: 'Audit type parameter is required',
-      })
+      return sendError(res, 'Audit type parameter is required', 400)
     }
 
     // Read audits.json
     const auditsJsonPath = join(process.cwd(), '../../../docs/audits.json')
     if (!existsSync(auditsJsonPath)) {
-      return res.status(404).json({
-        error: 'Audits file not found',
-        message: 'docs/audits.json does not exist',
-      })
+      return sendError(res, 'Audits file not found (docs/audits.json does not exist)', 404)
     }
 
     const auditsJson = JSON.parse(readFileSync(auditsJsonPath, 'utf-8'))
@@ -90,17 +84,14 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
     }
 
     if (!auditData || !domainKey) {
-      return res.status(404).json({
-        error: 'Audit type not found',
-        message: `No audit found for type: ${auditType}`,
-      })
+      return sendError(res, `No audit found for type: ${auditType}`, 404)
     }
 
     const score = auditData.score || null
     const lastUpdated = auditData.lastUpdate || auditsJson.lastUpdated
     const status = score === null ? 'not-audited' : score >= 90 ? 'complete' : 'partial'
 
-    res.json({
+    sendSuccess(res, {
       auditType,
       emoji: domains[domainKey]?.emoji || '📊',
       name: auditType.charAt(0).toUpperCase() + auditType.slice(1),
@@ -109,8 +100,7 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
       score,
       lastUpdated,
       status,
-      content: JSON.stringify(auditData, null, 2), // Return JSON instead of markdown
-      // New human-readable fields
+      content: JSON.stringify(auditData, null, 2),
       audited: auditData.audited || [],
       notAudited: auditData.notAudited || [],
       why: auditData.why || '',
@@ -118,10 +108,7 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('[Audits] Error reading audit by type:', error)
-    res.status(500).json({
-      error: 'Failed to get audit',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to get audit')
   }
 }
 

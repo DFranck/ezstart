@@ -5,7 +5,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { DEPLOYMENT_CONFIGS } from '@ezstart/monitoring'
 import { exec } from 'child_process'
 import { promisify } from 'util'
@@ -60,7 +60,7 @@ const listDeploymentsHandler = async (_: Request, res: Response) => {
       })
     )
 
-    res.json({
+    sendSuccess(res, {
       deployments,
       summary: {
         total: deployments.length,
@@ -70,10 +70,7 @@ const listDeploymentsHandler = async (_: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get deployments',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to get deployments')
   }
 }
 

@@ -5,7 +5,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { DEPLOYMENT_CONFIGS } from '@ezstart/monitoring'
 import { exec } from 'child_process'
 import { promisify } from 'util'
@@ -22,13 +22,13 @@ const getDeploymentByIdHandler = async (req: Request, res: Response) => {
     const { id } = req.params
 
     if (!id) {
-      return res.status(400).json({ error: 'Deployment ID is required' })
+      return sendError(res, 'Deployment ID is required', 400)
     }
 
     const config = DEPLOYMENT_CONFIGS[id]
 
     if (!config) {
-      return res.status(404).json({ error: 'Deployment not found' })
+      return sendError(res, 'Deployment not found', 404)
     }
 
     let commits: Array<{
@@ -59,7 +59,7 @@ const getDeploymentByIdHandler = async (req: Request, res: Response) => {
       logger.warn(`Failed to get git history for ${id}:`, gitError)
     }
 
-    res.json({
+    sendSuccess(res, {
       id,
       ...config,
       commits,
@@ -67,10 +67,7 @@ const getDeploymentByIdHandler = async (req: Request, res: Response) => {
       healthStatus: 'unknown',
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get deployment',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to get deployment')
   }
 }
 

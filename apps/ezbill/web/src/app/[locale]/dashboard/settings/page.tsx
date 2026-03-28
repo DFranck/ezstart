@@ -68,11 +68,10 @@ export default function SettingsPage() {
         callApi('/payment-methods?deletedOnly=true&limit=100', { userId }),
       ])
 
-      // Handle both paginated { data: [...] } and legacy array responses
+      // With auto-unwrap, response.data is already the array
       const extractItems = (response: any) => {
         if (!response.ok || !response.data) return []
         if (Array.isArray(response.data)) return response.data
-        if (response.data.data && Array.isArray(response.data.data)) return response.data.data
         return []
       }
 

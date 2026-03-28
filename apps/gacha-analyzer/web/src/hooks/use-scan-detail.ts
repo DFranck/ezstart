@@ -6,8 +6,8 @@ export function useScanDetail(id: string) {
   return useQuery({
     queryKey: ['scan', id],
     queryFn: async (): Promise<Scan | null> => {
-      const response = await callApi<{ data: Scan }>(`/scans/${id}`)
-      return response.data?.data ?? null
+      const response = await callApi<Scan>(`/scans/${id}`)
+      return response.data ?? null
     },
     enabled: !!id,
   })

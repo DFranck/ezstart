@@ -8,7 +8,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -63,10 +63,7 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
     const exists = existsSync(auditsJsonPath)
 
     if (!exists) {
-      return res.status(404).json({
-        error: 'Audits file not found',
-        message: 'docs/audits.json does not exist',
-      })
+      return sendError(res, 'Audits file not found (docs/audits.json does not exist)', 404)
     }
 
     const auditsJson = JSON.parse(readFileSync(auditsJsonPath, 'utf-8'))
@@ -122,7 +119,7 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
 
     const allAudits = [...domainAudits, ...audits]
 
-    res.json({
+    sendSuccess(res, {
       audits: allAudits,
       summary: {
         total: allAudits.length,
@@ -134,10 +131,7 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
     })
   } catch (error) {
     logger.error('[Audits] Error reading audits.json:', error)
-    res.status(500).json({
-      error: 'Failed to get audits',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to get audits')
   }
 }
 

@@ -14,19 +14,7 @@ const extractInvoiceBodySchema = z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string(),
   })).optional(),
-  currentInvoiceData: z.object({
-    clientName: z.string().optional(),
-    items: z.array(z.object({
-      label: z.string(),
-      quantity: z.number(),
-      price: z.number(),
-    })).optional(),
-    description: z.string().optional(),
-    dueDate: z.string().optional(),
-    notes: z.string().optional(),
-    currency: z.enum(['USD', 'EUR', 'GBP', 'JPY', 'VND', 'THB', 'AUD', 'CAD', 'CNY', 'CHF']).optional(),
-    taxRate: z.number().optional(),
-  }).optional(),
+  currentInvoiceData: z.record(z.unknown()).optional(),
 })
 
 export async function extractInvoiceData(req: Request, res: Response) {
@@ -40,7 +28,11 @@ export async function extractInvoiceData(req: Request, res: Response) {
     const { text, conversationHistory, currentInvoiceData } = parsed.data
 
     // Use conversational AI with function calling
-    const response = await chatWithInvoiceAssistant(text, conversationHistory, currentInvoiceData)
+    const response = await chatWithInvoiceAssistant(
+      text,
+      conversationHistory as Array<{ role: 'user' | 'assistant'; content: string }>,
+      currentInvoiceData as any
+    )
 
     sendSuccess(res, {
       action: response.action,

@@ -1,6 +1,6 @@
 import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
-import type { ApiError, ApiResponse, CallApiOptions, LogLevel } from './types'
+import type { ApiError, ApiMeta, ApiResponse, CallApiOptions, LogLevel } from './types'
 
 /**
  * Get access token from auth store if available (browser only)
@@ -182,26 +182,41 @@ export async function callApi<T = any>(
     const duration = Date.now() - startTime
 
     // Parse response body
-    let data: T | ApiError | null = null
+    let json: any = null
     try {
-      data = (await res.json()) as T | ApiError
+      json = await res.json()
     } catch {
       // Non-JSON response (e.g., 204 No Content)
-      data = null
+      json = null
     }
+
+    // Auto-unwrap standardized API response { success, data, meta }
+    const isStandardResponse = json && typeof json === 'object' && 'success' in json
 
     if (res.ok) {
       // Log successful response if enabled
       if (effectiveLogLevel === 'all') {
-        console.log(`✅ Response [${res.status}] (${duration}ms):`, data)
+        console.log(`✅ Response [${res.status}] (${duration}ms):`, json)
         console.groupEnd()
+      }
+
+      if (isStandardResponse) {
+        return {
+          ok: (json.success && res.ok) as true,
+          status: res.status,
+          url: res.url,
+          data: (json.data ?? json) as T,
+          meta: json.meta as ApiMeta | undefined,
+          error: json.error as string | undefined,
+          raw: json,
+        }
       }
 
       return {
         ok: true as const,
         status: res.status,
         url: res.url,
-        data: data as T,
+        data: json as T,
       }
     } else {
       // Log error details if enabled (errors or all)
@@ -216,16 +231,28 @@ export async function callApi<T = any>(
           query,
           body,
           headers,
-          response: data,
+          response: json,
         })
         console.groupEnd()
+      }
+
+      if (isStandardResponse) {
+        return {
+          ok: false as const,
+          status: res.status,
+          url: res.url,
+          data: json.data as ApiError | null,
+          meta: json.meta as ApiMeta | undefined,
+          error: json.error as string | undefined,
+          raw: json,
+        }
       }
 
       return {
         ok: false as const,
         status: res.status,
         url: res.url,
-        data: data as ApiError | null,
+        data: json as ApiError | null,
       }
     }
   } catch (err) {

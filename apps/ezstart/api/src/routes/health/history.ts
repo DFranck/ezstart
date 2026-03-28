@@ -4,7 +4,7 @@
  * Get health check history with uptime statistics
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'

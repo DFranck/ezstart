@@ -31,18 +31,19 @@ export function useScans(options: UseScansOptions = {}): UseScansResult {
       params.set('limit', pageSize.toString())
       params.set('offset', offset.toString())
 
-      const response = await callApi<{ data: Scan[]; meta: { total: number } }>(`/scans?${params}`)
-      return response.data
+      const response = await callApi<Scan[]>(`/scans?${params}`)
+      return { scans: response.data ?? [], meta: response.meta }
     },
   })
 
   const result = query.data
   return {
-    scans: result?.data ?? [],
+    scans: result?.scans ?? [],
     total: result?.meta?.total ?? 0,
     page,
     pageSize,
     hasMore: (result?.meta?.total ?? 0) > page * pageSize,
+
     isLoading: query.isLoading,
   }
 }

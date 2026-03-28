@@ -4,7 +4,7 @@
  * Get all health check results for monitored services
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -81,7 +81,7 @@ const getAllHealthChecksHandler = async (_: Request, res: Response) => {
     // Flatten results (we get array of arrays)
     const results = allResults.flat()
 
-    res.json({
+    sendSuccess(res, {
       services: results,
       environment,
       summary: {
@@ -93,10 +93,7 @@ const getAllHealthChecksHandler = async (_: Request, res: Response) => {
       },
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to perform health checks',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to perform health checks')
   }
 }
 

@@ -4,7 +4,7 @@
  * Get health check for specific service
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -61,7 +61,7 @@ const getServiceHealthHandler = async (req: Request, res: Response) => {
     const config = MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
 
     if (!config) {
-      return res.status(404).json({ error: 'Service not found' })
+      return sendError(res, 'Service not found', 404)
     }
 
     const environment =
@@ -85,17 +85,14 @@ const getServiceHealthHandler = async (req: Request, res: Response) => {
       history: healthChecker.getHistory(result.name, 10),
     }))
 
-    res.json({
+    sendSuccess(res, {
       serviceId,
       serviceName: config.name,
       environment,
       checks: detailedResults,
     })
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to check service health',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    })
+    sendError(res, error instanceof Error ? error.message : 'Failed to check service health')
   }
 }
 
