@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
 
@@ -22,28 +22,15 @@ createProjectRouter.post(
     try {
       const validation = ESGPayloadSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid ESG payload format',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid ESG payload format', validation.error.errors)
       }
 
       const project = await esgService.createProject(validation.data)
 
-      res.json({
-        success: true,
-        data: project,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, project)
     } catch (error) {
       logger.error('Project creation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create ESG project',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to create ESG project')
     }
   },
   {

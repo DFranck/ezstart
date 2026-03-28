@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
 
@@ -22,31 +22,18 @@ processEsgDataRouter.post(
     try {
       const validation = ESGPayloadSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid ESG payload format',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid ESG payload format', validation.error.errors)
       }
 
       const result = await esgService.processESGData(validation.data)
 
-      res.json({
-        success: true,
-        data: {
-          message: 'ESG data processing initiated',
-          ...result,
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        message: 'ESG data processing initiated',
+        ...result,
       })
     } catch (error) {
       logger.error('ESG processing error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process ESG data',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to process ESG data')
     }
   },
   {

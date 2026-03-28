@@ -7,7 +7,10 @@ import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
-  Router
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import { extractEsgPayload, validateEsgData } from '../../services/gemini.service.js'
 import {
@@ -30,33 +33,20 @@ extractEsgDataRouter.post(
     try {
       const validation = TextExtractionRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request format',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
       const { text } = validation.data
       const extractedData = await extractEsgPayload(text)
       const validationResult = await validateEsgData(extractedData)
 
-      res.json({
-        success: true,
-        data: {
-          extracted_data: extractedData,
-          validation: validationResult,
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        extracted_data: extractedData,
+        validation: validationResult,
       })
     } catch (error) {
       logger.error('Extraction error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to extract ESG data',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to extract ESG data')
     }
   },
   {

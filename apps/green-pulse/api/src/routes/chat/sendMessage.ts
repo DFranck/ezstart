@@ -8,7 +8,10 @@ import { logger } from '@ezstart/logger/server'
 import {
   createRouterWithDoc,
   OpenAPIRegistry,
-  Router
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
 } from '@ezstart/express-core'
 import { UnifiedChat } from '@ezstart/ai-sdk'
 import { validateEsgData } from '../../services/gemini.service.js'
@@ -35,12 +38,7 @@ sendMessageRouter.post(
     try {
       const validation = ChatRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request format',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request format', validation.error.errors)
       }
 
       let { message, extract_esg, session_id, conversation_id, userId, providerId } = validation.data
@@ -142,19 +140,15 @@ sendMessageRouter.post(
         }
       }
 
-      res.json({
-        success: true,
-        data: {
-          response: result.response,
-          extracted_data: result.extractedData,
-          validation: validationResult,
-          session_id: session_id || `session_${Date.now()}`,
-          conversation_id,
-          suggestions: result.extractedData
-            ? ['Review extracted data', 'Submit to ESG system', 'Add more details']
-            : ['Tell me about your energy usage', 'Upload a utility bill', 'Take a photo of your meter']
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        response: result.response,
+        extracted_data: result.extractedData,
+        validation: validationResult,
+        session_id: session_id || `session_${Date.now()}`,
+        conversation_id,
+        suggestions: result.extractedData
+          ? ['Review extracted data', 'Submit to ESG system', 'Add more details']
+          : ['Tell me about your energy usage', 'Upload a utility bill', 'Take a photo of your meter']
       })
     } catch (error) {
       logger.error('Chat error:', error)
@@ -181,11 +175,7 @@ sendMessageRouter.post(
         }
       }
 
-      res.status(statusCode).json({
-        success: false,
-        error: errorMessage,
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, errorMessage, statusCode)
     }
   },
   {

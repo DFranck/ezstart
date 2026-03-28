@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError, sendValidationError } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { ESGPayloadSchema } from '@green-pulse/types'
 
@@ -23,37 +23,20 @@ pushActivityDataRouter.post(
       const { project_id, ...payload } = req.body
 
       if (!project_id) {
-        return res.status(400).json({
-          success: false,
-          error: 'project_id is required',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'project_id is required', 400)
       }
 
       const validation = ESGPayloadSchema.safeParse(payload)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid ESG payload format',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid ESG payload format', validation.error.errors)
       }
 
       const result = await esgService.pushActivityData(project_id, validation.data)
 
-      res.json({
-        success: true,
-        data: result,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, result)
     } catch (error) {
       logger.error('Activity data error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to push activity data',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to push activity data')
     }
   },
   {

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 
 export const getReportStatusRegistry = new OpenAPIRegistry()
@@ -22,27 +22,15 @@ getReportStatusRouter.get(
       const { jobId } = req.params
 
       if (!jobId) {
-        return res.status(400).json({
-          success: false,
-          error: 'jobId is required',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'jobId is required', 400)
       }
 
       const status = await esgService.getReportStatus(jobId)
 
-      res.json({
-        success: true,
-        data: status,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, status)
     } catch (error) {
       logger.error('Report status error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get report status',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to get report status')
     }
   },
   {

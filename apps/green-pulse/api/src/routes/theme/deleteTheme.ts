@@ -28,25 +28,13 @@ docRouter.delete(
       const result = await ThemeOverride.deleteOne({ appName })
 
       if (result.deletedCount === 0) {
-        return res.json({
-          success: true,
-          message: 'No theme overrides to delete',
-          timestamp: new Date().toISOString(),
-        })
+        return sendSuccess(res, { message: 'No theme overrides to delete' })
       }
 
-      res.json({
-        success: true,
-        message: 'Theme overrides deleted successfully',
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, { message: 'Theme overrides deleted successfully' })
     } catch (error) {
       logger.error('Error deleting theme:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete theme',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to delete theme')
     }
   },
   {

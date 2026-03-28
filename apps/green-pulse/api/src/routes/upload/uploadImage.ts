@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
 import { readImage } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'
 
@@ -22,36 +22,21 @@ uploadImageRouter.post(
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'Image file is required',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Image file is required', 400)
       }
 
       const extractedData = await readImage(req.file.path)
 
-      // Keep image file for reference (don't delete)
-      // In production, you'd upload to cloud storage
-
-      res.json({
-        success: true,
-        data: {
-          type: 'image',
-          extracted_data: extractedData,
-          file_id: req.file.filename,
-          original_name: req.file.originalname,
-          file_path: req.file.path, // For temporary access
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        type: 'image',
+        extracted_data: extractedData,
+        file_id: req.file.filename,
+        original_name: req.file.originalname,
+        file_path: req.file.path,
       })
     } catch (error) {
       logger.error('Image upload error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process image',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to process image')
     }
   },
   {

@@ -4,7 +4,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
+import { z } from 'zod'
+
+const generateReportSchema = z.object({
+  project_id: z.string().min(1).describe('ESG project identifier'),
+  standard: z.string().default('GHG-Protocol').describe('ESG reporting standard'),
+})
 import { esgService } from '../../services/esg.service.js'
 
 export const generateReportRegistry = new OpenAPIRegistry()
@@ -19,30 +25,18 @@ generateReportRouter.post(
   '/',
   async (req, res) => {
     try {
-      const { project_id, standard = 'GHG-Protocol' } = req.body
-
-      if (!project_id) {
-        return res.status(400).json({
-          success: false,
-          error: 'project_id is required',
-          timestamp: new Date().toISOString(),
-        })
+      const validation = generateReportSchema.safeParse(req.body)
+      if (!validation.success) {
+        return sendError(res, 'project_id is required', 400)
       }
 
+      const { project_id, standard } = validation.data
       const report = await esgService.generateReport(project_id, standard)
 
-      res.json({
-        success: true,
-        data: report,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, report)
     } catch (error) {
       logger.error('Report generation error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to generate report',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to generate report')
     }
   },
   {

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import { Router, OpenAPIRegistry, createRouterWithDoc, sendSuccess, sendError } from '@ezstart/express-core'
 import fs from 'fs'
 import { transcribeAudio } from '../../services/gemini.service.js'
 import { upload } from './multerConfig.js'
@@ -23,11 +23,7 @@ uploadAudioRouter.post(
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          error: 'Audio file is required',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Audio file is required', 400)
       }
 
       const text = await transcribeAudio(req.file.path)
@@ -35,15 +31,11 @@ uploadAudioRouter.post(
       // Clean up uploaded file
       fs.unlinkSync(req.file.path)
 
-      res.json({
-        success: true,
-        data: {
-          type: 'audio',
-          text,
-          file_id: req.file.filename,
-          original_name: req.file.originalname,
-        },
-        timestamp: new Date().toISOString(),
+      sendSuccess(res, {
+        type: 'audio',
+        text,
+        file_id: req.file.filename,
+        original_name: req.file.originalname,
       })
     } catch (error) {
       // Clean up file if it exists
@@ -54,11 +46,7 @@ uploadAudioRouter.post(
       }
 
       logger.error('Audio upload error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process audio file',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to process audio file')
     }
   },
   {
