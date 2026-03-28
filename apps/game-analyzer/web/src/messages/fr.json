@@ -20,7 +20,9 @@
     "back": "Retour",
     "viewAll": "Voir tout",
     "tryAgain": "Reessayer",
-    "reanalyze": "Re-analyser"
+    "reanalyze": "Re-analyser",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "labels": {
     "game": "Jeu",

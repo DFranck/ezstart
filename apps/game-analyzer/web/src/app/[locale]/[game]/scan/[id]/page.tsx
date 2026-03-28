@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Div, Input, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from '@ezstart/ui/components'
+import { Badge, Button, Div, Input, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
@@ -281,7 +281,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <Textarea
+              <TextArea
                 value={reportDescription}
                 onChange={(e) => setReportDescription(e.target.value)}
                 placeholder={t('report.descriptionPlaceholder')}

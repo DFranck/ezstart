@@ -105,6 +105,15 @@ export default defineConfig({
 
 **OBJECTIF :** Maximiser le partage de code, minimiser la duplication, créer des composants agnostiques.
 
+### Pagination + React Query (CRITIQUE)
+
+**TOUTE API GET liste DOIT avoir de la pagination. TOUT fetch frontend DOIT utiliser React Query.**
+
+- ✅ API : chaque endpoint liste a `limit` (default 20) + `offset`, retourne `{ data, meta: { total, limit, offset } }`
+- ✅ Frontend : React Query `useQuery` avec page/limit dans la queryKey pour le cache automatique
+- ❌ JAMAIS charger toutes les données d'un coup (pas de `limit=200` ou unlimited)
+- ✅ Pagination UI : "X-Y sur Z" + boutons Précédent/Suivant ou infinite scroll
+
 ### Agnosticité des Packages (CRITIQUE)
 
 **Les packages dans `/packages/` DOIVENT être 100% agnostiques — JAMAIS de logique métier spécifique à un projet.**

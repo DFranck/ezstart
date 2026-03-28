@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import type { GameType } from '@game-analyzer/types'
+import type { GameType, ScanStatus } from '@game-analyzer/types'
 import { ScanCard } from '@/components/scan-card'
 import { useScans } from '@/hooks/use-scans'
 
@@ -14,6 +14,8 @@ const RUNE_SETS = [
   'guard', 'endure', 'shield', 'revenge', 'nemesis', 'vampire', 'energy',
   'destroy', 'fight', 'determination', 'enhance', 'accuracy', 'tolerance', 'cruel',
 ]
+
+const PAGE_SIZE = 20
 
 export default function GameHistoryPage() {
   const t = useTranslations()
@@ -27,18 +29,28 @@ export default function GameHistoryPage() {
   const [slotFilter, setSlotFilter] = useState('all')
   const [feedbackFilter, setFeedbackFilter] = useState('all')
   const [reportFilter, setReportFilter] = useState('all')
+  const [page, setPage] = useState(1)
 
-  const { data: scans, isLoading } = useScans({
+  // Reset page when status filter changes (sent to API)
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value)
+    setPage(1)
+  }
+
+  const apiStatus = statusFilter !== 'all' ? statusFilter as ScanStatus : undefined
+
+  const { scans, total, hasMore, isLoading } = useScans({
     gameType: game,
-    limit: 200,
+    status: apiStatus,
+    page,
+    pageSize: PAGE_SIZE,
   })
 
-  const filteredScans = (scans ?? []).filter(scan => {
+  const filteredScans = scans.filter(scan => {
     const data = scan.result?.data as Record<string, unknown> | undefined
     const analysis = scan.result?.analysis as Record<string, unknown> | undefined
     const advice = analysis?.progressiveAdvice as { action?: string } | undefined
 
-    if (statusFilter !== 'all' && scan.status !== statusFilter) return false
     if (levelFilter !== 'all' && data?.level !== Number(levelFilter)) return false
     if (adviceFilter !== 'all' && advice?.action !== adviceFilter) return false
     if (setFilter !== 'all' && data?.set !== setFilter) return false
@@ -54,8 +66,10 @@ export default function GameHistoryPage() {
     return true
   })
 
-  const isFiltered = statusFilter !== 'all' || levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all' || reportFilter !== 'all'
-  const totalCount = scans?.length ?? 0
+  const hasClientFilters = levelFilter !== 'all' || adviceFilter !== 'all' || setFilter !== 'all' || slotFilter !== 'all' || feedbackFilter !== 'all' || reportFilter !== 'all'
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const rangeStart = (page - 1) * PAGE_SIZE + 1
+  const rangeEnd = Math.min(page * PAGE_SIZE, total)
 
   return (
     <Div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -71,7 +85,7 @@ export default function GameHistoryPage() {
 
       {/* Filters */}
       <Div className="flex flex-wrap gap-2 mb-4">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -161,11 +175,11 @@ export default function GameHistoryPage() {
       </Div>
 
       {/* Results count */}
-      {!isLoading && scans && (
+      {!isLoading && total > 0 && (
         <P className="text-xs text-muted-foreground mb-3">
-          {isFiltered
-            ? `${filteredScans.length} / ${totalCount} runes`
-            : `${totalCount} runes`
+          {hasClientFilters
+            ? `${filteredScans.length} / ${scans.length} runes (page ${page}/${totalPages}, ${total} total)`
+            : `${rangeStart}-${rangeEnd} sur ${total} runes`
           }
         </P>
       )}
@@ -187,6 +201,33 @@ export default function GameHistoryPage() {
         <Div className="text-center py-12">
           <P className="text-muted-foreground mb-2">{t('history.empty')}</P>
           <P className="text-sm text-muted-foreground">{t('history.emptyDescription')}</P>
+        </Div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && total > PAGE_SIZE && (
+        <Div className="flex items-center justify-between mt-4">
+          <P className="text-sm text-muted-foreground">
+            Page {page} / {totalPages}
+          </P>
+          <Div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              {t('actions.previous')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!hasMore}
+              onClick={() => setPage(p => p + 1)}
+            >
+              {t('actions.next')}
+            </Button>
+          </Div>
         </Div>
       )}
     </Div>
