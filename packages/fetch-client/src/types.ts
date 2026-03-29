@@ -6,7 +6,15 @@ export type ApiError = { error: string; [key: string]: any }
 
 export type ApiResponse<T> =
   | { ok: true; status: number; url: string; data: T; meta?: ApiMeta; error?: undefined; raw?: any }
-  | { ok: false; status: number; url: string; data: ApiError | null; meta?: ApiMeta; error?: string; raw?: any }
+  | {
+      ok: false
+      status: number
+      url: string
+      data: ApiError | null
+      meta?: ApiMeta
+      error?: string
+      raw?: any
+    }
 
 export type ApiMeta = { total?: number; limit?: number; offset?: number; [key: string]: any }
 
@@ -39,4 +47,10 @@ export type CallApiOptions = {
    * @default 'errors'
    */
   logLevel?: LogLevel
+  /**
+   * Custom token resolver for cross-domain JWT injection.
+   * When provided, this function is called instead of reading from localStorage.
+   * Falls back to the default 'ezauth-storage' localStorage key if not set.
+   */
+  getToken?: () => string | null
 }

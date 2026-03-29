@@ -3,7 +3,7 @@ export { AuthClient, createAuthClient, detectAuthMode } from './client.js'
 export type { AuthClientConfig } from './client.js'
 
 // Store
-export { useAuthStore, useAuthStoreSSR } from './store.js'
+export { useAuthStore, useAuthStoreSSR, configureAuthStorage } from './store.js'
 export type { AuthState, AuthMode } from './store.js'
 
 // Provider and hooks
@@ -31,7 +31,7 @@ export type {
   TokenRequest,
   AuthCode,
   AuthCodeResponse,
-  JWTPayload
+  JWTPayload,
 } from './types.js'
 
 // Zod schemas for validation and OpenAPI
@@ -45,5 +45,5 @@ export {
   tokenResponseSchema,
   userResponseSchema,
   verifyResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from './schemas.js'

@@ -34,6 +34,7 @@ export function ThemeEditor({
   onError,
   enableHistory = true,
   showPresets = false,
+  getAuthState,
 }: ThemeEditorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [autoInvertForOppositeTheme, setAutoInvertForOppositeTheme] = useState(true)
@@ -210,31 +211,23 @@ export function ThemeEditor({
 
   // Admin-only check using RBAC
   if (adminOnly) {
-    // Check if running in a Next.js/React environment with zustand auth
-    if (typeof window !== 'undefined') {
-      try {
-        // Dynamically import the auth store (optional dependency)
-        const authStore = (window as any).__ezauth_store__
-        if (authStore) {
-          const { user, isAuthenticated } = authStore.getState()
+    if (!getAuthState) return null // No auth provider — hide for safety
 
-          // User must be authenticated AND have admin/superadmin role OR theme:edit permission
-          if (!isAuthenticated) return null
+    try {
+      const { user, isAuthenticated } = getAuthState()
 
-          const hasAdminRole = user?.roles?.includes('admin') || user?.roles?.includes('superadmin')
-          const hasThemePermission = user?.permissions?.includes('theme:edit')
+      // User must be authenticated AND have admin/superadmin role OR theme:edit permission
+      if (!isAuthenticated) return null
 
-          if (!hasAdminRole && !hasThemePermission) {
-            return null
-          }
-        } else {
-          // No auth store available - hide for safety
-          return null
-        }
-      } catch {
-        // Failed to check auth - hide for safety
+      const hasAdminRole = user?.roles?.includes('admin') || user?.roles?.includes('superadmin')
+      const hasThemePermission = user?.permissions?.includes('theme:edit')
+
+      if (!hasAdminRole && !hasThemePermission) {
         return null
       }
+    } catch {
+      // Failed to check auth - hide for safety
+      return null
     }
   }
 

@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
  * Seed a collection with test data
  * Generic helper for seeding any MongoDB collection
  */
-export async function seedCollection<T>(
+export async function seedCollection<T extends Record<string, unknown>>(
   collectionName: string,
   data: T[]
 ): Promise<void> {
@@ -19,8 +19,8 @@ export async function seedCollection<T>(
   }
 
   if (data.length > 0) {
-    // @ts-expect-error - Generic type T can't be constrained to MongoDB Document
-    await collection.insertMany(data)
+    // Cast needed: MongoDB's insertMany expects OptionalUnlessRequiredId which can't be expressed generically
+    await collection.insertMany(data as any[])
   }
 }
 

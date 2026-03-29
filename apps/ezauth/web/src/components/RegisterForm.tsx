@@ -173,7 +173,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={loading} className="w-full" variant={'ezstart'}>
+        <Button type="submit" disabled={loading} className="w-full" variant={'brand'}>
           {loading ? 'Creating account...' : 'Create account'}
         </Button>
       </form>

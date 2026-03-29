@@ -4,7 +4,7 @@
  */
 
 import type { AuthUser } from '@ezstart/auth-sdk/server'
-import { ROLE_HIERARCHY, ROLE_PERMISSIONS, ROLE_FEATURES, type Role, type Permission, type Feature } from './types.js'
+import { getRBACConfig, type Role, type Permission, type Feature } from './types.js'
 
 /**
  * Check if user has a specific role
@@ -82,8 +82,9 @@ export function hasPermission(user: AuthUser | null, permission: Permission): bo
 
   // Check role-based permissions
   if (user.roles) {
+    const { permissions: rolePermissions } = getRBACConfig()
     return user.roles.some(role => {
-      const rolePerms = ROLE_PERMISSIONS[role as Role]
+      const rolePerms = rolePermissions[role]
       return rolePerms?.includes(permission)
     })
   }
@@ -120,9 +121,10 @@ export function hasFeature(user: AuthUser | null, feature: Feature): boolean {
 
   // Check role-based features
   if (user.roles) {
+    const { features: roleFeatures } = getRBACConfig()
     return user.roles.some(role => {
-      const roleFeatures = ROLE_FEATURES[role as Role]
-      return roleFeatures?.includes(feature)
+      const feats = roleFeatures[role]
+      return feats?.includes(feature)
     })
   }
 
@@ -143,7 +145,11 @@ export function hasAnyFeature(user: AuthUser | null, features: Feature[]): boole
  * - Admin can manage users ONLY in apps where they have admin role
  * - Manager can manage users they created (managedBy)
  */
-export function canManageUser(currentUser: AuthUser | null, targetUser: AuthUser, appName?: string): boolean {
+export function canManageUser(
+  currentUser: AuthUser | null,
+  targetUser: AuthUser,
+  appName?: string
+): boolean {
   if (!currentUser) return false
 
   // Superadmin can manage everyone everywhere
@@ -184,9 +190,8 @@ export function canManageUser(currentUser: AuthUser | null, targetUser: AuthUser
 export function getHighestRoleLevel(user: AuthUser | null): number {
   if (!user?.roles || !Array.isArray(user.roles) || user.roles.length === 0) return 0
 
-  return Math.max(
-    ...user.roles.map(role => ROLE_HIERARCHY[role as Role] || 0)
-  )
+  const { hierarchy } = getRBACConfig()
+  return Math.max(...user.roles.map(role => hierarchy[role] || 0))
 }
 
 /**
@@ -194,7 +199,8 @@ export function getHighestRoleLevel(user: AuthUser | null): number {
  */
 export function isRoleHigherThan(user: AuthUser | null, role: Role): boolean {
   const userLevel = getHighestRoleLevel(user)
-  const targetLevel = ROLE_HIERARCHY[role]
+  const { hierarchy } = getRBACConfig()
+  const targetLevel = hierarchy[role] ?? 0
   return userLevel > targetLevel
 }
 
@@ -205,15 +211,19 @@ export function isRoleHigherThan(user: AuthUser | null, role: Role): boolean {
  */
 export function useRBAC(user: AuthUser | null, appName?: string) {
   return {
-    hasRole: (role: Role, overrideAppName?: string) => hasRole(user, role, overrideAppName || appName),
-    hasAnyRole: (roles: Role[], overrideAppName?: string) => hasAnyRole(user, roles, overrideAppName || appName),
-    hasAllRoles: (roles: Role[], overrideAppName?: string) => hasAllRoles(user, roles, overrideAppName || appName),
+    hasRole: (role: Role, overrideAppName?: string) =>
+      hasRole(user, role, overrideAppName || appName),
+    hasAnyRole: (roles: Role[], overrideAppName?: string) =>
+      hasAnyRole(user, roles, overrideAppName || appName),
+    hasAllRoles: (roles: Role[], overrideAppName?: string) =>
+      hasAllRoles(user, roles, overrideAppName || appName),
     hasPermission: (permission: Permission) => hasPermission(user, permission),
     hasAnyPermission: (permissions: Permission[]) => hasAnyPermission(user, permissions),
     hasAllPermissions: (permissions: Permission[]) => hasAllPermissions(user, permissions),
     hasFeature: (feature: Feature) => hasFeature(user, feature),
     hasAnyFeature: (features: Feature[]) => hasAnyFeature(user, features),
-    canManageUser: (targetUser: AuthUser, overrideAppName?: string) => canManageUser(user, targetUser, overrideAppName || appName),
+    canManageUser: (targetUser: AuthUser, overrideAppName?: string) =>
+      canManageUser(user, targetUser, overrideAppName || appName),
     isRoleHigherThan: (role: Role) => isRoleHigherThan(user, role),
     roleLevel: getHighestRoleLevel(user),
     appName, // Expose current app name

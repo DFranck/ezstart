@@ -22,6 +22,15 @@ export interface AuthState {
   setLoggingIn: (isLoggingIn: boolean) => void
 }
 
+const DEFAULT_STORAGE_KEY = 'ezauth-storage'
+
+let _storageKey = DEFAULT_STORAGE_KEY
+
+/** Configure the localStorage key used by auth-sdk persist. Call before store hydration. */
+export function configureAuthStorage(key: string) {
+  _storageKey = key
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -37,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
           accessToken: mode === 'localStorage' ? accessToken : null, // Only store token for localStorage mode
           isAuthenticated: true,
           mode,
-          isLoggingIn: false
+          isLoggingIn: false,
         })
       },
 
@@ -46,14 +55,14 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           accessToken: null,
           isAuthenticated: false,
-          mode: 'localStorage' // Reset to default
+          mode: 'localStorage', // Reset to default
         })
       },
 
       updateUser: (user: AuthUser) => {
-        set((state) => ({
+        set(state => ({
           ...state,
-          user
+          user,
         }))
       },
 
@@ -61,33 +70,29 @@ export const useAuthStore = create<AuthState>()(
 
       setLoggingIn: (isLoggingIn: boolean) => {
         set({ isLoggingIn })
-      }
+      },
     }),
     {
-      name: 'ezauth-storage',
-      partialize: (state) => ({
+      name: _storageKey,
+      partialize: state => ({
         user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
-        mode: state.mode
-      })
+        mode: state.mode,
+      }),
     }
   )
 )
 
-// Expose store globally for cross-package access (e.g., @ezstart/ui ThemeEditor)
+// Cross-tab/cross-app synchronization (for localhost development)
 if (typeof window !== 'undefined') {
-  (window as any).__ezauth_store__ = useAuthStore
-
-  // Cross-tab/cross-app synchronization (for localhost development)
   // Only create BroadcastChannel if available (not in Edge Runtime)
-  const authChannel = typeof BroadcastChannel !== 'undefined'
-    ? new BroadcastChannel('ezauth-sync')
-    : null
+  const authChannel =
+    typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ezauth-sync') : null
 
   // Listen for auth changes from other tabs/apps
   if (authChannel) {
-    authChannel.onmessage = (event) => {
+    authChannel.onmessage = event => {
       const { type, user, accessToken, mode } = event.data
 
       if (type === 'LOGIN') {
@@ -109,7 +114,7 @@ if (typeof window !== 'undefined') {
       logout: () => {
         originalLogout()
         authChannel.postMessage({ type: 'LOGOUT' })
-      }
+      },
     })
   }
 }

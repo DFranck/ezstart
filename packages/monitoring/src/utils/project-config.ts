@@ -16,14 +16,30 @@ import {
 import type { ProjectId, ProjectConfig } from '../types/project.js'
 
 /**
- * Manual endpoint counts for APIs
- * TODO: Could be auto-detected by parsing route files
+ * Default endpoint counts for APIs
+ * Can be extended at runtime via registerEndpointCount()
  */
-const API_ENDPOINTS_COUNT: Partial<Record<AppName, number>> = {
+const DEFAULT_API_ENDPOINTS_COUNT: Partial<Record<string, number>> = {
   ezauth: 8,
   ezbill: 49,
   ezpay: 6,
   'green-pulse': 2,
+}
+
+let _apiEndpointsCounts: Partial<Record<string, number>> = { ...DEFAULT_API_ENDPOINTS_COUNT }
+
+/**
+ * Register endpoint count for an app at runtime
+ */
+export function registerEndpointCount(appName: string, count: number) {
+  _apiEndpointsCounts = { ..._apiEndpointsCounts, [appName]: count }
+}
+
+/**
+ * Get all registered endpoint counts
+ */
+export function getApiEndpointsCounts(): Partial<Record<string, number>> {
+  return _apiEndpointsCounts
 }
 
 /**
@@ -47,7 +63,7 @@ function generateEndpoints(app: AppName): ProjectConfig['endpoints'] {
         return `${apiUrl}${healthPath}`
       },
       platform: metadata.apiPlatform,
-      endpointsCount: API_ENDPOINTS_COUNT[app],
+      endpointsCount: _apiEndpointsCounts[app],
       getSwaggerUrl: env => {
         const apiUrl = getApiUrl(app, env)
         return `${apiUrl}/docs`

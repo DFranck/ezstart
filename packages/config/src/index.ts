@@ -5,5 +5,21 @@ export * from './env.js'
 
 // Re-export commonly used functions
 export { URLS } from './urls.js'
-export { getAllowedOrigins, createCorsConfig } from './cors.js'
+export {
+  getAllowedOrigins,
+  createCorsConfig,
+  setCorsDependencies,
+  getCorsDependencies,
+} from './cors.js'
 export { getAppUrls, isLocal, isProduction } from './env.js'
+
+// Re-export new registry and domain utilities
+export {
+  getRegistry,
+  registerApp,
+  resetRegistry,
+  setRootDomain,
+  getRootDomain,
+  isProjectDomain,
+} from './urls.js'
+export type { AppConfig } from './urls.js'

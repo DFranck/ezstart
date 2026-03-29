@@ -8,6 +8,46 @@
 import type { Metadata } from 'next'
 import { getCanonicalUrl, type AppName } from '@ezstart/config/urls'
 import { getAppSEO, type AppSEOKey } from './apps'
+import type { AppSEOConfig } from './apps/ezstart'
+import type { BrandConfig } from './metadata'
+
+/** Organization info for Schema.org generation */
+export interface OrganizationConfig {
+  /** Organization name */
+  name: string
+  /** Contact email */
+  contactEmail?: string
+  /** Founding date (e.g., '2024') */
+  foundingDate?: string
+  /** Social media / external profile URLs */
+  sameAs?: string[]
+}
+
+/** Software schema config for Schema.org SoftwareApplication */
+export interface SoftwareSchemaConfig {
+  /** Application category (default: 'WebApplication') */
+  applicationCategory?: string
+  /** Price (default: '0') */
+  price?: string
+  /** Currency (default: 'USD') */
+  priceCurrency?: string
+  /** Aggregate rating - only include if you have real data */
+  aggregateRating?: {
+    ratingValue: string
+    ratingCount: string
+    bestRating?: string
+    worstRating?: string
+  }
+  /** Software version */
+  softwareVersion?: string
+  /** Date published (ISO format) */
+  datePublished?: string
+  /** Author organization */
+  author?: {
+    name: string
+    url: string
+  }
+}
 
 export interface EnhancedMetadataConfig {
   /** App name - auto-detects canonical URL and loads SEO config */
@@ -28,6 +68,32 @@ export interface EnhancedMetadataConfig {
   includeFAQSchema?: boolean
   /** Include Organization Schema.org (default: false) */
   includeOrgSchema?: boolean
+  /** Branding overrides (author, creator, twitter handle) */
+  brand?: BrandConfig
+  /** Category for metadata (default: 'Technology') */
+  category?: string
+}
+
+/** Config for generating enhanced metadata from custom data (no app registry lookup) */
+export interface CustomEnhancedMetadataConfig {
+  /** SEO data to use directly (instead of looking up from app registry) */
+  seoData: AppSEOConfig
+  /** Base domain URL */
+  domain: string
+  /** Page-specific title */
+  pageTitle?: string
+  /** Page-specific description */
+  pageDescription?: string
+  /** Page path for canonical URL */
+  pagePath?: string
+  /** Custom OG image */
+  ogImage?: string
+  /** Override locale */
+  locale?: string
+  /** Branding overrides */
+  brand?: BrandConfig
+  /** Category for metadata */
+  category?: string
 }
 
 /**
@@ -57,6 +123,51 @@ export interface EnhancedMetadataConfig {
 export function createEnhancedMetadata(config: EnhancedMetadataConfig): Metadata {
   const seoData = getAppSEO(config.app)
   const domain = getCanonicalUrl(config.app, 'web')
+
+  return buildEnhancedMetadata({
+    seoData,
+    domain,
+    pageTitle: config.pageTitle,
+    pageDescription: config.pageDescription,
+    pagePath: config.pagePath,
+    ogImage: config.ogImage,
+    locale: config.locale,
+    brand: config.brand,
+    category: config.category,
+  })
+}
+
+/**
+ * Creates enhanced metadata from custom SEO data (no app registry lookup)
+ *
+ * @example
+ * ```ts
+ * import { createCustomEnhancedMetadata } from '@ezstart/seo-config/metadata-enhanced'
+ *
+ * export const metadata = createCustomEnhancedMetadata({
+ *   seoData: myAppSEOConfig,
+ *   domain: 'https://myapp.com',
+ *   brand: { author: 'My Team', twitterHandle: '@myapp' },
+ * })
+ * ```
+ */
+export function createCustomEnhancedMetadata(config: CustomEnhancedMetadataConfig): Metadata {
+  return buildEnhancedMetadata(config)
+}
+
+/** Internal shared implementation for enhanced metadata */
+function buildEnhancedMetadata(config: {
+  seoData: AppSEOConfig
+  domain: string
+  pageTitle?: string
+  pageDescription?: string
+  pagePath?: string
+  ogImage?: string
+  locale?: string
+  brand?: BrandConfig
+  category?: string
+}): Metadata {
+  const { seoData, domain, brand } = config
   const canonicalUrl = config.pagePath ? `${domain}${config.pagePath}` : domain
 
   // Use page-specific or default from SEO data
@@ -64,6 +175,12 @@ export function createEnhancedMetadata(config: EnhancedMetadataConfig): Metadata
   const description = config.pageDescription || seoData.shortDescription
   const ogImage = config.ogImage || `${domain}/og-image.png`
   const locale = config.locale || 'en_US'
+
+  // Resolve branding — defaults to app name, no hardcoded org
+  const resolvedAuthor = brand?.author ?? seoData.appName
+  const resolvedCreator = brand?.creator ?? seoData.appName
+  const resolvedPublisher = brand?.publisher ?? seoData.appName
+  const resolvedTwitter = brand?.twitterHandle
 
   // Extract all keywords for metadata
   const allKeywords = [
@@ -84,9 +201,9 @@ export function createEnhancedMetadata(config: EnhancedMetadataConfig): Metadata
         },
     description,
     keywords: allKeywords,
-    authors: [{ name: 'EZStart Team' }],
-    creator: 'EZStart',
-    publisher: 'EZStart',
+    authors: [{ name: resolvedAuthor }],
+    creator: resolvedCreator,
+    publisher: resolvedPublisher,
     metadataBase: new URL(domain),
     alternates: {
       canonical: config.pagePath || '/',
@@ -120,8 +237,7 @@ export function createEnhancedMetadata(config: EnhancedMetadataConfig): Metadata
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@ezstart',
-      creator: '@ezstart',
+      ...(resolvedTwitter && { site: resolvedTwitter, creator: resolvedTwitter }),
       title: config.pageTitle || seoData.appName,
       description,
       images: [ogImage],
@@ -129,7 +245,7 @@ export function createEnhancedMetadata(config: EnhancedMetadataConfig): Metadata
     manifest: '/manifest.json',
     // Add app-specific metadata
     applicationName: seoData.appName,
-    category: 'Technology',
+    category: config.category ?? 'Technology',
   }
 
   return metadata
@@ -176,13 +292,13 @@ export function createEnhancedViewport(themeColor = '#000000') {
  * }
  * ```
  */
-export function generateFAQSchema(appKey: AppSEOKey) {
-  const seoData = getAppSEO(appKey)
+export function generateFAQSchema(appKeyOrFaq: AppSEOKey | { question: string; answer: string }[]) {
+  const faq = Array.isArray(appKeyOrFaq) ? appKeyOrFaq : getAppSEO(appKeyOrFaq).faq
 
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: seoData.faq.map(item => ({
+    mainEntity: faq.map(item => ({
       '@type': 'Question',
       name: item.question,
       acceptedAnswer: {
@@ -217,27 +333,53 @@ export function generateFAQSchema(appKey: AppSEOKey) {
  * }
  * ```
  */
-export function generateOrganizationSchema(appKey: AppSEOKey) {
-  const seoData = getAppSEO(appKey)
-  const domain = getCanonicalUrl(appKey as AppName, 'web')
+export function generateOrganizationSchema(
+  appKeyOrConfig:
+    | AppSEOKey
+    | (OrganizationConfig & { description?: string; url?: string; logoUrl?: string })
+) {
+  // App registry lookup
+  if (typeof appKeyOrConfig === 'string') {
+    const seoData = getAppSEO(appKeyOrConfig)
+    const domain = getCanonicalUrl(appKeyOrConfig as AppName, 'web')
 
+    return buildOrgSchema({
+      name: seoData.appName,
+      url: domain,
+      logoUrl: `${domain}/logo.png`,
+      description: seoData.shortDescription,
+    })
+  }
+
+  // Direct config
+  return buildOrgSchema(appKeyOrConfig)
+}
+
+function buildOrgSchema(config: {
+  name: string
+  url?: string
+  logoUrl?: string
+  description?: string
+  contactEmail?: string
+  foundingDate?: string
+  sameAs?: string[]
+}) {
   return {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: seoData.appName,
-    url: domain,
-    logo: `${domain}/logo.png`,
-    description: seoData.shortDescription,
-    foundingDate: '2024',
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'Customer Support',
-      email: 'contact@ezstart.xyz',
-    },
-    sameAs: [
-      'https://github.com/JOBOYA/ez-hub',
-      // Add more social media links as needed
-    ],
+    '@context': 'https://schema.org' as const,
+    '@type': 'Organization' as const,
+    name: config.name,
+    ...(config.url && { url: config.url }),
+    ...(config.logoUrl && { logo: config.logoUrl }),
+    ...(config.description && { description: config.description }),
+    ...(config.foundingDate && { foundingDate: config.foundingDate }),
+    ...(config.contactEmail && {
+      contactPoint: {
+        '@type': 'ContactPoint' as const,
+        contactType: 'Customer Support',
+        email: config.contactEmail,
+      },
+    }),
+    ...(config.sameAs && config.sameAs.length > 0 && { sameAs: config.sameAs }),
   }
 }
 
@@ -263,41 +405,59 @@ export function generateOrganizationSchema(appKey: AppSEOKey) {
  * }
  * ```
  */
-export function generateSoftwareSchema(appKey: AppSEOKey) {
-  const seoData = getAppSEO(appKey)
-  const domain = getCanonicalUrl(appKey as AppName, 'web')
+export function generateSoftwareSchema(
+  appKeyOrConfig:
+    | AppSEOKey
+    | { seoData: AppSEOConfig; domain: string; software?: SoftwareSchemaConfig },
+  softwareConfig?: SoftwareSchemaConfig
+) {
+  let seoData: AppSEOConfig
+  let domain: string
+  let software: SoftwareSchemaConfig | undefined
+
+  if (typeof appKeyOrConfig === 'string') {
+    seoData = getAppSEO(appKeyOrConfig)
+    domain = getCanonicalUrl(appKeyOrConfig as AppName, 'web')
+    software = softwareConfig
+  } else {
+    seoData = appKeyOrConfig.seoData
+    domain = appKeyOrConfig.domain
+    software = appKeyOrConfig.software
+  }
 
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: seoData.appName,
-    applicationCategory: 'DeveloperApplication',
+    applicationCategory: software?.applicationCategory ?? 'WebApplication',
     operatingSystem: 'Web',
     offers: {
       '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
+      price: software?.price ?? '0',
+      priceCurrency: software?.priceCurrency ?? 'USD',
     },
-    aggregateRating:
-      seoData.socialProof.stats.length > 0
-        ? {
-            '@type': 'AggregateRating',
-            ratingValue: '4.8',
-            ratingCount: '100',
-            bestRating: '5',
-            worstRating: '1',
-          }
-        : undefined,
+    // Only include rating if explicitly provided with real data
+    ...(software?.aggregateRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: software.aggregateRating.ratingValue,
+        ratingCount: software.aggregateRating.ratingCount,
+        bestRating: software.aggregateRating.bestRating ?? '5',
+        worstRating: software.aggregateRating.worstRating ?? '1',
+      },
+    }),
     description: seoData.longDescription,
     url: domain,
     screenshot: `${domain}/screenshot.png`,
-    softwareVersion: '1.0',
-    datePublished: '2024-01-01',
-    author: {
-      '@type': 'Organization',
-      name: 'EZStart',
-      url: 'https://www.ezstart.xyz',
-    },
+    ...(software?.softwareVersion && { softwareVersion: software.softwareVersion }),
+    ...(software?.datePublished && { datePublished: software.datePublished }),
+    ...(software?.author && {
+      author: {
+        '@type': 'Organization',
+        name: software.author.name,
+        url: software.author.url,
+      },
+    }),
   }
 }
 
@@ -317,9 +477,42 @@ export function generateSoftwareSchema(appKey: AppSEOKey) {
  * }
  * ```
  */
-export function generateLandingMetadata(appKey: AppSEOKey): Metadata {
-  const seoData = getAppSEO(appKey)
-  const domain = getCanonicalUrl(appKey as AppName, 'web')
+export function generateLandingMetadata(
+  appKeyOrConfig:
+    | AppSEOKey
+    | {
+        seoData: AppSEOConfig
+        domain: string
+        brand?: BrandConfig
+        pagePath?: string
+        category?: string
+      }
+): Metadata {
+  let seoData: AppSEOConfig
+  let domain: string
+  let brand: BrandConfig | undefined
+  let pagePath: string
+  let category: string
+
+  if (typeof appKeyOrConfig === 'string') {
+    seoData = getAppSEO(appKeyOrConfig)
+    domain = getCanonicalUrl(appKeyOrConfig as AppName, 'web')
+    brand = undefined
+    pagePath = '/landing-v2'
+    category = 'Technology'
+  } else {
+    seoData = appKeyOrConfig.seoData
+    domain = appKeyOrConfig.domain
+    brand = appKeyOrConfig.brand
+    pagePath = appKeyOrConfig.pagePath ?? '/'
+    category = appKeyOrConfig.category ?? 'Technology'
+  }
+
+  // Resolve branding
+  const resolvedAuthor = brand?.author ?? seoData.appName
+  const resolvedCreator = brand?.creator ?? seoData.appName
+  const resolvedPublisher = brand?.publisher ?? seoData.appName
+  const resolvedTwitter = brand?.twitterHandle
 
   // Use long description for landing pages
   const description = seoData.longDescription
@@ -338,12 +531,12 @@ export function generateLandingMetadata(appKey: AppSEOKey): Metadata {
     },
     description,
     keywords: allKeywords,
-    authors: [{ name: 'EZStart Team' }],
-    creator: 'EZStart',
-    publisher: 'EZStart',
+    authors: [{ name: resolvedAuthor }],
+    creator: resolvedCreator,
+    publisher: resolvedPublisher,
     metadataBase: new URL(domain),
     alternates: {
-      canonical: '/landing-v2',
+      canonical: pagePath,
     },
     robots: {
       index: true,
@@ -358,7 +551,7 @@ export function generateLandingMetadata(appKey: AppSEOKey): Metadata {
     },
     openGraph: {
       type: 'website',
-      url: `${domain}/landing-v2`,
+      url: `${domain}${pagePath}`,
       title: `${seoData.appName} - ${seoData.tagline}`,
       description,
       siteName: seoData.appName,
@@ -374,15 +567,14 @@ export function generateLandingMetadata(appKey: AppSEOKey): Metadata {
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@ezstart',
-      creator: '@ezstart',
+      ...(resolvedTwitter && { site: resolvedTwitter, creator: resolvedTwitter }),
       title: `${seoData.appName} - ${seoData.tagline}`,
       description,
       images: [`${domain}/og-image.png`],
     },
     manifest: '/manifest.json',
     applicationName: seoData.appName,
-    category: 'Technology',
+    category,
     // Additional metadata for landing pages
     other: {
       'apple-mobile-web-app-capable': 'yes',

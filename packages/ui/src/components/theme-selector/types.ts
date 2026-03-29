@@ -63,6 +63,12 @@ export interface ThemeEditorProps {
   showPresets?: boolean
   /** Theme switcher component */
   themeSwitcher?: React.ReactNode
+
+  /** Auth state getter for admin-only access check (replaces window global coupling) */
+  getAuthState?: () => {
+    user: { roles?: string[]; permissions?: string[] } | null
+    isAuthenticated: boolean
+  }
 }
 
 /** @deprecated Use ThemeEditorProps instead */

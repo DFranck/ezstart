@@ -9,7 +9,7 @@ import type {
   HealthStatus,
   MonitoredServiceId,
 } from '../types/index.js'
-import { MONITORED_SERVICES, getUrlsToCheck } from '../types/index.js'
+import { getMonitoredServices, getUrlsToCheck } from '../types/index.js'
 
 export class HealthChecker {
   private results: Map<string, HealthCheckResult[]> = new Map()
@@ -182,14 +182,18 @@ export class HealthChecker {
    * - Production: Check ALL production URLs (Railway + Render + Vercel)
    */
   async checkAllEnvironments(
-    serviceId: MonitoredServiceId,
+    serviceId: MonitoredServiceId | string,
     environment: 'development' | 'production' = 'development',
     options?: {
       timeout?: number
       retries?: number
     }
   ): Promise<HealthCheckResult[]> {
-    const config = MONITORED_SERVICES[serviceId]
+    const services = getMonitoredServices()
+    const config = services[serviceId]
+    if (!config) {
+      throw new Error(`[HealthChecker] Unknown service: ${serviceId}`)
+    }
     const urlsToCheck = getUrlsToCheck(serviceId, environment)
 
     const results = await Promise.all(

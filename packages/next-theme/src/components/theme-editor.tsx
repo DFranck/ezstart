@@ -24,10 +24,15 @@ export function ThemeEditor({
   adminOnly = false,
   enableHistory = true,
   showPresets = false,
+  getAuthState,
 }: {
   adminOnly?: boolean
   enableHistory?: boolean
   showPresets?: boolean
+  getAuthState?: () => {
+    user: { roles?: string[]; permissions?: string[] } | null
+    isAuthenticated: boolean
+  }
 }) {
   const { globalCss, appCss, appName } = useThemeSelectorContext()
   const { theme, resolvedTheme } = useTheme()
@@ -48,6 +53,7 @@ export function ThemeEditor({
       adminOnly={adminOnly}
       enableHistory={enableHistory}
       showPresets={showPresets}
+      getAuthState={getAuthState}
     />
   )
 }

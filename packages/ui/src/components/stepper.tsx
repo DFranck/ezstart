@@ -111,7 +111,7 @@ export const useStepper = () => {
 export interface StepButton {
   label: string
   icon?: string
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'ezstart'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'brand'
   disabled?: boolean
   hidden?: boolean
   onClick?: () => void
@@ -364,7 +364,7 @@ function StepperHeader({
               aria-disabled={!isAccessible}
               onClick={() => isAccessible && onStepClick?.(index)}
               variant={
-                isActive ? 'default' : isCompleted && !theme?.primaryColor ? 'ezstart' : 'ghost'
+                isActive ? 'default' : isCompleted && !theme?.primaryColor ? 'brand' : 'ghost'
               }
               style={buttonStyle}
             >
@@ -399,10 +399,7 @@ function StepperHeader({
       {/* Thin progress bar */}
       <div className="h-1 w-full bg-muted">
         <div
-          className={cn(
-            'h-1 transition-[width] duration-300',
-            !theme?.primaryColor && 'bg-ezstart'
-          )}
+          className={cn('h-1 transition-[width] duration-300', !theme?.primaryColor && 'bg-brand')}
           style={{
             width: `${progress}%`,
             background:
@@ -473,7 +470,7 @@ function StepperNavigation({
     next: {
       label: isLastStep ? 'Finish' : 'Next',
       icon: isLastStep ? 'lucide:Check' : 'lucide:ArrowRight',
-      variant: theme?.primaryColor ? 'ghost' : 'ezstart', // ghost pour pouvoir styler avec style
+      variant: theme?.primaryColor ? 'ghost' : 'brand', // ghost pour pouvoir styler avec style
       onClick: onNext,
     },
   }
@@ -536,7 +533,7 @@ function StepperNavigation({
             <Button
               onClick={buttons.next.onClick}
               disabled={buttons.next.disabled}
-              variant={buttons.next.variant || 'ezstart'}
+              variant={buttons.next.variant || 'brand'}
               className={buttons.next.className}
               style={theme?.primaryColor ? nextButtonStyle : undefined}
             >

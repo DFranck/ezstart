@@ -1,6 +1,18 @@
 import type { Metadata } from 'next'
 import { getCanonicalUrl, type AppName } from '@ezstart/config/urls'
 
+/** Branding config injected by the consumer (no hardcoded defaults) */
+export interface BrandConfig {
+  /** Author name (e.g., 'My Team') */
+  author?: string
+  /** Creator name */
+  creator?: string
+  /** Publisher name */
+  publisher?: string
+  /** Twitter handle (e.g., '@myapp') */
+  twitterHandle?: string
+}
+
 export type MetadataConfig =
   | {
       /** App name - auto-detects canonical URL from @ezstart/config */
@@ -12,6 +24,8 @@ export type MetadataConfig =
       ogImage?: string
       twitterHandle?: string
       locale?: string
+      /** Branding overrides */
+      brand?: BrandConfig
       /** Custom icons (overrides default favicon detection) */
       icons?: {
         icon?: string | Array<{ url: string; sizes?: string; type?: string }>
@@ -29,6 +43,8 @@ export type MetadataConfig =
       ogImage?: string
       twitterHandle?: string
       locale?: string
+      /** Branding overrides */
+      brand?: BrandConfig
       /** Custom icons (overrides default favicon detection) */
       icons?: {
         icon?: string | Array<{ url: string; sizes?: string; type?: string }>
@@ -70,10 +86,17 @@ export function createMetadata(config: MetadataConfig): Metadata {
     keywords = [],
     themeColor = '#000000',
     ogImage = `${domain}/og-image.png`,
-    twitterHandle = '@ezstart',
+    twitterHandle,
     locale = 'en_US',
     icons,
+    brand,
   } = config
+
+  // Use brand config, then twitterHandle shortcut, then no default
+  const resolvedTwitter = brand?.twitterHandle ?? twitterHandle
+  const resolvedAuthor = brand?.author ?? appName
+  const resolvedCreator = brand?.creator ?? appName
+  const resolvedPublisher = brand?.publisher ?? appName
 
   return {
     title: {
@@ -82,9 +105,9 @@ export function createMetadata(config: MetadataConfig): Metadata {
     },
     description,
     keywords,
-    authors: [{ name: 'EZStart Team' }],
-    creator: 'EZStart',
-    publisher: 'EZStart',
+    authors: [{ name: resolvedAuthor }],
+    creator: resolvedCreator,
+    publisher: resolvedPublisher,
     metadataBase: new URL(domain),
     alternates: {
       canonical: '/',
@@ -121,7 +144,7 @@ export function createMetadata(config: MetadataConfig): Metadata {
       title: appName,
       description,
       images: [ogImage],
-      creator: twitterHandle,
+      ...(resolvedTwitter && { creator: resolvedTwitter }),
     },
     manifest: '/manifest.json',
     ...(icons && { icons }), // Add icons if provided

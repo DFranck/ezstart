@@ -284,8 +284,46 @@ export function getCurrentEnvironment(): Environment {
 }
 
 /**
+ * Configurable root domain for project domain checks.
+ * Default: 'ezstart.xyz'
+ */
+let _rootDomain = 'ezstart.xyz'
+
+/**
+ * Set the root domain used by isProjectDomain / isEzstartDomain
+ */
+export function setRootDomain(domain: string): void {
+  _rootDomain = domain
+}
+
+/**
+ * Get the current root domain
+ */
+export function getRootDomain(): string {
+  return _rootDomain
+}
+
+/**
+ * Check if a hostname belongs to the project domain (configurable)
+ *
+ * @example
+ * isProjectDomain('ezbill.ezstart.xyz') // true
+ * isProjectDomain('app-externe.com') // false
+ * isProjectDomain('localhost') // false
+ */
+export function isProjectDomain(hostname: string): boolean {
+  return (
+    hostname.endsWith(`.${_rootDomain}`) ||
+    hostname === _rootDomain ||
+    hostname === `www.${_rootDomain}`
+  )
+}
+
+/**
  * Check if a hostname belongs to ezstart domain
  * Useful for auth mode validation
+ *
+ * @deprecated Use isProjectDomain() instead — same behavior, configurable via setRootDomain()
  *
  * @example
  * isEzstartDomain('ezbill.ezstart.xyz') // true
@@ -293,11 +331,7 @@ export function getCurrentEnvironment(): Environment {
  * isEzstartDomain('localhost') // false
  */
 export function isEzstartDomain(hostname: string): boolean {
-  return (
-    hostname.endsWith('.ezstart.xyz') ||
-    hostname === 'ezstart.xyz' ||
-    hostname === 'www.ezstart.xyz'
-  )
+  return isProjectDomain(hostname)
 }
 
 /**
@@ -465,4 +499,58 @@ export function getLogoUrl(app: AppName): string | undefined {
   // If it's a relative path (PWA icons), prefix with production web URL
   const webUrl = URLS[app].web.production
   return `${webUrl}${metadata.logo}`
+}
+
+// ---------------------------------------------------------------------------
+// Dynamic App Registry
+// ---------------------------------------------------------------------------
+
+/**
+ * App config combining URLs and metadata
+ */
+export interface AppConfig {
+  urls: AppUrls
+  metadata: ProjectMetadata
+}
+
+type AppRegistry = Record<string, AppConfig>
+
+// Build the default registry from existing constants
+const _defaultRegistry: AppRegistry = Object.fromEntries(
+  (Object.keys(URLS) as AppName[]).map(app => [
+    app,
+    { urls: URLS[app], metadata: PROJECT_METADATA[app] },
+  ])
+)
+
+let _registry: AppRegistry = { ..._defaultRegistry }
+
+/**
+ * Get the full app registry (all registered apps with their URLs and metadata)
+ */
+export function getRegistry(): AppRegistry {
+  return _registry
+}
+
+/**
+ * Register a new app or override an existing one in the registry.
+ * This extends the registry without modifying the hardcoded URLS/PROJECT_METADATA constants.
+ *
+ * @example
+ * ```typescript
+ * registerApp('my-new-app', {
+ *   urls: { web: { local: 'http://localhost:6000', development: '...', production: '...' } },
+ *   metadata: { name: 'My App', description: '...', emoji: '🆕', githubPath: 'apps/my-new-app' }
+ * })
+ * ```
+ */
+export function registerApp(name: string, config: AppConfig): void {
+  _registry = { ..._registry, [name]: config }
+}
+
+/**
+ * Reset the registry to defaults (useful for testing)
+ */
+export function resetRegistry(): void {
+  _registry = { ..._defaultRegistry }
 }

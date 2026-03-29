@@ -1,20 +1,20 @@
-import cors from 'cors';
-import * as dotenv from 'dotenv';
-import express, { Express } from 'express';
-import type { AppName } from '@ezstart/config/urls';
-import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors';
-import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js';
+import cors from 'cors'
+import * as dotenv from 'dotenv'
+import express, { Express } from 'express'
+import type { AppName } from '@ezstart/config/urls'
+import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors'
+import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js'
 
 // Load .env.local first (priority), then .env as fallback
-dotenv.config({ path: '.env.local' });
-dotenv.config(); // Fallback to .env if vars not set
+dotenv.config({ path: '.env.local' })
+dotenv.config() // Fallback to .env if vars not set
 
 export interface CreateAppOptions {
   /**
    * Routes that need raw body (e.g., for webhook signature verification)
    * Example: ['/api/webhooks/stripe', '/api/webhooks/paypal']
    */
-  rawBodyRoutes?: string[];
+  rawBodyRoutes?: string[]
   /**
    * CORS origins to allow
    *
@@ -30,31 +30,37 @@ export interface CreateAppOptions {
    *
    * Option 3 (LEGACY): Not provided = allows all origins (*)
    */
-  apiApp?: AppName;
-  corsOrigins?: string[];
+  apiApp?: AppName
+  corsOrigins?: string[]
+  /** Path for the health check endpoint (default: '/health') */
+  healthPath?: string
+  /** Path for the root status endpoint (default: '/') */
+  rootPath?: string
 }
 
 export function createApp(options?: CreateAppOptions): Express {
-  const app = express();
+  const app = express()
 
   // Trust proxy - Required when behind reverse proxy (Railway, Vercel)
   // Allows Express to read X-Forwarded-* headers for real client IP
   // Critical for rate limiting to work correctly
-  app.set('trust proxy', true);
+  app.set('trust proxy', true)
 
   // Configure CORS
-  let corsOptions: any;
+  let corsOptions: any
 
   if (options?.apiApp) {
     // Option 1: Auto-detect CORS using @ezstart/config (RECOMMENDED)
-    corsOptions = createCorsConfig(options.apiApp);
+    corsOptions = createCorsConfig(options.apiApp)
 
     // Get allowed origins for logging
-    const allowedOrigins = getAllowedOrigins(options.apiApp);
+    const allowedOrigins = getAllowedOrigins(options.apiApp)
 
-    console.log(`✅ [CORS] Auto-configured for ${options.apiApp}: ${allowedOrigins.length} origins allowed`);
-    console.log(`   📋 Allowed origins:`);
-    allowedOrigins.forEach(origin => console.log(`      - ${origin}`));
+    console.log(
+      `✅ [CORS] Auto-configured for ${options.apiApp}: ${allowedOrigins.length} origins allowed`
+    )
+    console.log(`   📋 Allowed origins:`)
+    allowedOrigins.forEach(origin => console.log(`      - ${origin}`))
   } else if (options?.corsOrigins) {
     // Option 2: Manual CORS origins
     corsOptions = {
@@ -62,9 +68,9 @@ export function createApp(options?: CreateAppOptions): Express {
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
-    };
+    }
 
-    console.log(`✅ [CORS] Manually configured: ${options.corsOrigins.length} origins allowed`);
+    console.log(`✅ [CORS] Manually configured: ${options.corsOrigins.length} origins allowed`)
   } else {
     // Option 3: Allow all (LEGACY)
     corsOptions = {
@@ -72,61 +78,63 @@ export function createApp(options?: CreateAppOptions): Express {
       credentials: false,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
-    };
-    console.warn(`⚠️ [CORS] Allowing ALL origins (*) - Consider using apiApp option`);
+    }
+    console.warn(`⚠️ [CORS] Allowing ALL origins (*) - Consider using apiApp option`)
   }
 
-  app.use(cors(corsOptions));
+  app.use(cors(corsOptions))
 
   // Security Headers - Add comprehensive security headers to all responses
   // Automatically detects environment (NODE_ENV) and applies appropriate preset
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isProduction = process.env.NODE_ENV === 'production'
+  const isDevelopment = process.env.NODE_ENV === 'development'
 
   if (isProduction) {
-    app.use(securityHeaders(securityHeadersPresets.moderate()));
-    console.log('🔒 [Security] Production security headers enabled');
+    app.use(securityHeaders(securityHeadersPresets.moderate()))
+    console.log('🔒 [Security] Production security headers enabled')
   } else if (isDevelopment) {
-    app.use(securityHeaders(securityHeadersPresets.development()));
-    console.log('🔓 [Security] Development mode - relaxed headers');
+    app.use(securityHeaders(securityHeadersPresets.development()))
+    console.log('🔓 [Security] Development mode - relaxed headers')
   } else {
     // Default to moderate for other environments (test, staging, etc.)
-    app.use(securityHeaders(securityHeadersPresets.moderate()));
-    console.log('🔒 [Security] Moderate security headers enabled');
+    app.use(securityHeaders(securityHeadersPresets.moderate()))
+    console.log('🔒 [Security] Moderate security headers enabled')
   }
 
   // Apply raw body parser for specific routes BEFORE JSON parser
   if (options?.rawBodyRoutes) {
     options.rawBodyRoutes.forEach(route => {
-      app.use(route, express.raw({ type: 'application/json' }));
-    });
+      app.use(route, express.raw({ type: 'application/json' }))
+    })
   }
 
   // JSON parser for all other routes
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
 
   // ✅ Health check endpoints (automatically added to all APIs)
-  const serviceName = options?.apiApp || 'API';
+  const serviceName = options?.apiApp || 'API'
+  const healthPath = options?.healthPath ?? '/health'
+  const rootPath = options?.rootPath ?? '/'
 
   // Simple health check for Railway/Render (no monitoring, no fetch)
   // Used by: Railway Healthcheck Path
-  app.get('/health', (_req, res) => {
+  app.get(healthPath, (_req, res) => {
     res.status(200).json({
       status: 'ok',
       service: serviceName,
-      timestamp: new Date().toISOString()
-    });
-  });
+      timestamp: new Date().toISOString(),
+    })
+  })
 
-  // Root endpoint (same as /health for convenience)
-  app.get('/', (_req, res) => {
+  // Root endpoint (same as health for convenience)
+  app.get(rootPath, (_req, res) => {
     res.status(200).json({
       status: 'ok',
       service: serviceName,
-      timestamp: new Date().toISOString()
-    });
-  });
+      timestamp: new Date().toISOString(),
+    })
+  })
 
-  return app;
+  return app
 }

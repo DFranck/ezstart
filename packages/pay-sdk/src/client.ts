@@ -33,14 +33,20 @@ export class PayClient {
     }
   }
 
+  /** Resolve return URL: explicit config > window.location origin > undefined */
+  private getReturnUrl(): string | undefined {
+    return (
+      this.config.returnUrl ??
+      (typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.host}`
+        : undefined)
+    )
+  }
+
   // ===== DONATIONS =====
 
   async createDonation(data: CreateDonationRequest): Promise<PaymentResponse> {
-    // Auto-detect return URL from current window location
-    const returnUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.host}`
-        : undefined
+    const returnUrl = this.getReturnUrl()
 
     const response = await fetch(`${this.config.baseURL}/donate`, {
       method: 'POST',
@@ -106,10 +112,7 @@ export class PayClient {
   // ===== PURCHASES =====
 
   async createPurchase(data: CreatePurchaseRequest): Promise<PaymentResponse> {
-    const returnUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.host}`
-        : undefined
+    const returnUrl = this.getReturnUrl()
 
     const response = await fetch(`${this.config.baseURL}/purchase`, {
       method: 'POST',
@@ -147,10 +150,7 @@ export class PayClient {
   // ===== SUBSCRIPTIONS =====
 
   async createSubscription(data: CreateSubscriptionRequest): Promise<PaymentResponse> {
-    const returnUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.host}`
-        : undefined
+    const returnUrl = this.getReturnUrl()
 
     const response = await fetch(`${this.config.baseURL}/subscribe`, {
       method: 'POST',

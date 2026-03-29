@@ -3,14 +3,16 @@ import { Server as IOServer, Socket } from 'socket.io'
 
 export type SocketServerOptions = {
   onConnection?: (socket: Socket, io: IOServer) => void
-  corsOrigins?: string[]
+  /** CORS origins for Socket.IO. Required — no default to avoid accidental open access. */
+  corsOrigins: string[]
 }
 
-export function createSocketServer(
-  httpServer: HTTPServer,
-  options: SocketServerOptions = {}
-): IOServer {
-  const { corsOrigins = ['*'] } = options
+export function createSocketServer(httpServer: HTTPServer, options: SocketServerOptions): IOServer {
+  const { corsOrigins } = options
+
+  if (corsOrigins.length === 0) {
+    console.warn('⚠️ [Socket.IO] No CORS origins configured — connections may be blocked')
+  }
 
   const io = new IOServer(httpServer, {
     cors: {
@@ -19,7 +21,8 @@ export function createSocketServer(
     },
   })
 
-  const corsLabel = corsOrigins.length === 1 && corsOrigins[0] === '*' ? 'ALL (*)' : `${corsOrigins.length} origins`
+  const corsLabel =
+    corsOrigins.length === 1 && corsOrigins[0] === '*' ? 'ALL (*)' : `${corsOrigins.length} origins`
   console.log(`🧩 Socket.IO server initialized with CORS: ${corsLabel}`)
 
   io.on('connection', socket => {

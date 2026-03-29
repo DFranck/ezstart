@@ -1,6 +1,6 @@
 'use client'
 
-import { useGeneratePDF } from '@ezstart/ui/hooks'
+import { useGeneratePDF } from './use-generate-pdf'
 import type { DocumentProps } from '@react-pdf/renderer'
 import type { ReactElement } from 'react'
 
@@ -21,7 +21,7 @@ import type { ReactElement } from 'react'
 export function useInvoicePDF() {
   const { downloadPDF, isGenerating, error } = useGeneratePDF({
     onSuccess: () => console.log('Invoice PDF generated successfully'),
-    onError: (error) => console.error('Invoice PDF generation failed:', error),
+    onError: error => console.error('Invoice PDF generation failed:', error),
   })
 
   /**

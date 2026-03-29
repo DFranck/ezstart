@@ -5,7 +5,7 @@ import { cn } from '../lib/utils'
 import { Button } from './button'
 import { Card, CardContent } from './card'
 import { Icon } from './icon'
-import { H3, P } from './tag/src/v2/aliases'
+import { H3, P } from './tag'
 import { toast } from 'sonner'
 
 /**

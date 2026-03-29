@@ -44,13 +44,13 @@ const badgeVariants = cva(
         secondary: 'border-transparent bg-secondary text-secondary-foreground',
         destructive: 'border-transparent bg-destructive text-destructive-foreground',
         outline: 'text-foreground',
-        success: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300',
-        warning: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300',
-        info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
-        purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300',
-        cyan: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-300',
-        indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300',
-        pink: 'bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300',
+        success: 'border-transparent bg-success/20 text-success dark:bg-success/10',
+        warning: 'border-transparent bg-warning/20 text-warning dark:bg-warning/10',
+        info: 'border-transparent bg-info/20 text-info dark:bg-info/10',
+        purple: 'border-transparent bg-purple-500/15 text-purple-700 dark:text-purple-300',
+        cyan: 'border-transparent bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
+        indigo: 'border-transparent bg-indigo-500/15 text-indigo-700 dark:text-indigo-300',
+        pink: 'border-transparent bg-pink-500/15 text-pink-700 dark:text-pink-300',
       },
       size: {
         none: '', // No size classes - used for circle variant
@@ -80,9 +80,9 @@ const dotVariantClasses: Record<string, string> = {
   secondary: 'bg-secondary-foreground',
   destructive: 'bg-destructive',
   outline: 'bg-foreground',
-  success: 'bg-green-600 dark:bg-green-400',
-  warning: 'bg-yellow-600 dark:bg-yellow-400',
-  info: 'bg-blue-600 dark:bg-blue-400',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  info: 'bg-info',
   purple: 'bg-purple-600 dark:bg-purple-400',
   cyan: 'bg-cyan-600 dark:bg-cyan-400',
   indigo: 'bg-indigo-600 dark:bg-indigo-400',
@@ -90,8 +90,7 @@ const dotVariantClasses: Record<string, string> = {
 }
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
   /** Show a dot indicator before the text */
   dot?: boolean
   /** Pulse animation for real-time status */

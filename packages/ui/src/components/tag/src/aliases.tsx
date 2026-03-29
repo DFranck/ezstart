@@ -1,7 +1,14 @@
 // aliases.tsx
 
-import { createAlias } from './utils/create-alias';
+import { createAlias } from './utils/create-alias'
 
-//misc
-export const Span = createAlias('span');
-export const Div = createAlias('div');
+// Typography
+export const Span = createAlias('span')
+export const Strong = createAlias('strong')
+
+// Layout
+export const Div = createAlias('div')
+export const Article = createAlias('article')
+
+// Lists
+export const Ol = createAlias('ol')

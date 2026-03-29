@@ -1,4 +1,56 @@
-import { URLS, AppName, getAllWebUrls } from './urls.js'
+import { URLS, AppName, getAllWebUrls, getRegistry } from './urls.js'
+
+/**
+ * CORS dependency map: which apps can call which API.
+ * 'all' means every registered app is allowed.
+ * An array lists specific allowed callers.
+ * Apps not listed here default to same-app only.
+ */
+const CORS_DEPENDENCIES: Record<string, 'all' | string[]> = {
+  ezauth: 'all', // SSO — called by ALL web apps
+  ezstart: 'all', // Monitoring — called by ALL web apps
+  ezpay: ['ezpay', 'ezbill', 'fengshui'], // Payment callers
+  ezbill: ['ezbill'],
+  'green-pulse': ['green-pulse'],
+  'gacha-analyzer': ['gacha-analyzer'],
+}
+
+/**
+ * Set or update CORS dependencies for an API app.
+ *
+ * @example
+ * ```typescript
+ * setCorsDepencies('my-api', ['my-api', 'other-app'])
+ * setCorsDepencies('shared-api', 'all')
+ * ```
+ */
+export function setCorsDependencies(apiApp: string, deps: 'all' | string[]): void {
+  CORS_DEPENDENCIES[apiApp] = deps
+}
+
+/**
+ * Get the raw CORS dependency config for an API app
+ */
+export function getCorsDependencies(apiApp: string): 'all' | string[] | undefined {
+  return CORS_DEPENDENCIES[apiApp]
+}
+
+/**
+ * Collect all web URLs for a given app name, including dynamically registered apps.
+ * Falls back to getAllWebUrls for known AppName, or reads from registry.
+ */
+function collectWebUrls(appName: string): string[] {
+  // Try the static URLS first (typed AppName)
+  if (appName in URLS) {
+    return getAllWebUrls(appName as AppName)
+  }
+  // Fallback: check registry for dynamically registered apps
+  const registry = getRegistry()
+  const entry = registry[appName]
+  if (!entry) return []
+  const { web } = entry.urls
+  return [web.local, web.development, web.production].filter(Boolean)
+}
 
 /**
  * Get all allowed CORS origins for a given API
@@ -16,48 +68,21 @@ export function getAllowedOrigins(apiApp: AppName): string[] {
   // Add the API's own web URLs (for same-app calls)
   origins.push(...getAllWebUrls(apiApp))
 
-  // Add specific cross-app origins based on dependencies
-  switch (apiApp) {
-    case 'ezauth':
-      // EZAuth is called by ALL web apps (SSO)
-      Object.keys(URLS).forEach((app) => {
-        origins.push(...getAllWebUrls(app as AppName))
-      })
-      break
+  const deps = CORS_DEPENDENCIES[apiApp]
 
-    case 'ezpay':
-      // EZPay is called by apps that need payments
-      origins.push(...getAllWebUrls('ezpay'))
-      origins.push(...getAllWebUrls('ezbill')) // Invoice payments
-      origins.push(...getAllWebUrls('fengshui')) // Feng Shui consultations
-      break
-
-    case 'ezbill':
-      // EZBill API called only by EZBill web
-      origins.push(...getAllWebUrls('ezbill'))
-      break
-
-    case 'green-pulse':
-      // GreenPulse API called only by GreenPulse web
-      origins.push(...getAllWebUrls('green-pulse'))
-      break
-
-    case 'gacha-analyzer':
-      // Gacha Analyzer API called only by Gacha Analyzer web
-      origins.push(...getAllWebUrls('gacha-analyzer'))
-      break
-
-    case 'ezstart':
-      // EZStart API (monitoring) is called by ALL web apps
-      Object.keys(URLS).forEach((app) => {
-        origins.push(...getAllWebUrls(app as AppName))
-      })
-      break
-
-    default:
-      // By default, only same-app calls
-      origins.push(...getAllWebUrls(apiApp))
+  if (deps === 'all') {
+    // Allow every registered app (static + dynamic)
+    const registry = getRegistry()
+    Object.keys(registry).forEach(app => {
+      origins.push(...collectWebUrls(app))
+    })
+  } else if (Array.isArray(deps)) {
+    // Allow specific apps
+    deps.forEach(app => {
+      origins.push(...collectWebUrls(app))
+    })
   }
+  // else: no deps entry → same-app only (already added above)
 
   // Remove duplicates and return
   return Array.from(new Set(origins))
@@ -78,7 +103,10 @@ export function createCorsConfig(apiApp: AppName) {
   const allowedOrigins = getAllowedOrigins(apiApp)
 
   return {
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void
+    ) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) {
         return callback(null, true)

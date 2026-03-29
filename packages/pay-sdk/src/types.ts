@@ -1,12 +1,7 @@
 // Payment Types
 export type PaymentType = 'donation' | 'purchase' | 'subscription' | 'invoice'
 
-export type PaymentStatus =
-  | 'pending'
-  | 'completed'
-  | 'failed'
-  | 'refunded'
-  | 'cancelled'
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled'
 
 export type PaymentProvider = 'stripe' | 'paypal'
 
@@ -75,6 +70,8 @@ export interface Invoice extends Payment {
 export interface PayClientConfig {
   baseURL?: string
   appName: string
+  /** Explicit return URL for payment redirects. Falls back to window.location origin. */
+  returnUrl?: string
 }
 
 // API Requests

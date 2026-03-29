@@ -70,21 +70,21 @@ export function useGeneratePDF(options: UseGeneratePDFOptions = {}): UseGenerate
 
     try {
       const blob = await pdf(component).toBlob()
-      
+
       // Créer un lien de téléchargement
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.download = filename || options.filename || 'document.pdf'
-      
+
       // Déclencher le téléchargement
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       // Nettoyer l'URL
       URL.revokeObjectURL(url)
-      
+
       options.onSuccess?.()
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to generate PDF')

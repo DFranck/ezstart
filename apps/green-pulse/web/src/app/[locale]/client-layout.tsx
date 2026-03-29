@@ -44,10 +44,26 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         isChatPage
           ? []
           : [
-              { href: '/#how-it-works', label: t('navigation.howItWorks'), icon: 'lucide:Lightbulb' as const },
-              { href: '/#use-cases', label: t('navigation.useCases'), icon: 'lucide:Boxes' as const },
-              { href: '/#pricing', label: t('navigation.pricing'), icon: 'lucide:DollarSign' as const },
-              { href: '/#partnership', label: t('navigation.partnership'), icon: 'lucide:Handshake' as const },
+              {
+                href: '/#how-it-works',
+                label: t('navigation.howItWorks'),
+                icon: 'lucide:Lightbulb' as const,
+              },
+              {
+                href: '/#use-cases',
+                label: t('navigation.useCases'),
+                icon: 'lucide:Boxes' as const,
+              },
+              {
+                href: '/#pricing',
+                label: t('navigation.pricing'),
+                icon: 'lucide:DollarSign' as const,
+              },
+              {
+                href: '/#partnership',
+                label: t('navigation.partnership'),
+                icon: 'lucide:Handshake' as const,
+              },
               { href: '/careers', label: t('navigation.careers'), icon: 'lucide:Users' as const },
               ...(rbac.hasAnyRole(['admin', 'superadmin'])
                 ? [
@@ -106,7 +122,11 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
           />
           {/* ThemeEditor: visible only for manager, admin, superadmin */}
           {rbac.hasAnyRole(['manager', 'admin', 'superadmin']) && (
-            <ThemeEditor adminOnly={true} enableHistory={true} />
+            <ThemeEditor
+              adminOnly={true}
+              enableHistory={true}
+              getAuthState={() => useAuthStore.getState()}
+            />
           )}
           <ThemeSwitcher />
         </Div>

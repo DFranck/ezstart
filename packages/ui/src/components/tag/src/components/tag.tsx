@@ -1,51 +1,121 @@
-import { Slot } from '@radix-ui/react-slot';
-import type { VariantProps } from 'class-variance-authority';
-import { ComponentProps, ElementType } from 'react';
-import { cn } from '../../../../lib/utils';
-import { CustomVariants, SupportedAs } from '../types';
-import { tagVariants } from '../variants';
+import { Slot } from '@radix-ui/react-slot'
+import type { VariantProps } from 'class-variance-authority'
+import React, { ComponentProps, ElementType, useMemo } from 'react'
+import { cn } from '../../../../lib/utils'
+import { CustomVariants, INTENT_ARIA_MAP, SupportedAs, TagAriaProps } from '../types'
+import { tagVariants } from '../variants'
 
-export type TagProps<T extends SupportedAs = 'span'> = Omit<
-  ComponentProps<T>,
-  never
-> & {
-  as?: T;
-  asChild?: boolean;
-  CustomVariants?: CustomVariants<T>;
-} & CustomVariants<T>;
+export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, never> & {
+  as?: T
+  asChild?: boolean
+  CustomVariants?: CustomVariants<T>
+} & CustomVariants<T> &
+  TagAriaProps
 
-export function Tag<T extends SupportedAs = 'span'>({
+/**
+ * Filter props to only pass valid DOM attributes.
+ * Prevents React warnings for non-standard attributes.
+ */
+function filterDomSafeProps(props: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(
+    Object.entries(props).filter(([key, value]) => {
+      if (key.startsWith('data-') || key.startsWith('aria-')) return true
+      if (key === 'id' || key === 'className' || key === 'style') return true
+      if (key === 'role') return true
+      if (typeof value === 'string') return true
+      if (typeof value === 'number') return true
+      if (typeof value === 'boolean') return true
+      if (typeof value === 'function' && key.startsWith('on')) return true
+      return false
+    })
+  )
+}
+
+/**
+ * Build ARIA attributes based on intent and explicit props.
+ */
+function buildAriaAttributes(props: TagAriaProps & { intent?: string }): Record<string, any> {
+  const { intent, ariaLabel, ariaLabelledBy, ariaDescribedBy, ariaRole, ariaLive, ariaHidden } =
+    props
+
+  const ariaAttrs: Record<string, any> = {}
+
+  if (intent && INTENT_ARIA_MAP[intent as keyof typeof INTENT_ARIA_MAP]) {
+    Object.assign(ariaAttrs, INTENT_ARIA_MAP[intent as keyof typeof INTENT_ARIA_MAP])
+  }
+
+  if (ariaLabel) ariaAttrs['aria-label'] = ariaLabel
+  if (ariaLabelledBy) ariaAttrs['aria-labelledby'] = ariaLabelledBy
+  if (ariaDescribedBy) ariaAttrs['aria-describedby'] = ariaDescribedBy
+  if (ariaRole) ariaAttrs.role = ariaRole
+  if (ariaLive) ariaAttrs['aria-live'] = ariaLive
+  if (ariaHidden !== undefined) ariaAttrs['aria-hidden'] = ariaHidden
+
+  return ariaAttrs
+}
+
+function TagComponent<T extends SupportedAs = 'span'>({
   as,
   asChild,
   className,
   children,
+  ariaLabel,
+  ariaLabelledBy,
+  ariaDescribedBy,
+  ariaRole,
+  ariaLive,
+  ariaHidden,
   ...props
 }: TagProps<T> & { asChild?: boolean }) {
-  const tag = (as ?? 'span') as SupportedAs;
+  const tag = (as ?? 'span') as SupportedAs
 
-  const variantFn = tagVariants[tag as keyof typeof tagVariants];
-  const variantClass =
-    typeof variantFn === 'function'
-      ? variantFn(props as VariantProps<typeof variantFn>)
-      : '';
+  const variantFn = tagVariants[tag as keyof typeof tagVariants]
+  const variantClass = useMemo(
+    () =>
+      typeof variantFn === 'function' ? variantFn(props as VariantProps<typeof variantFn>) : '',
+    [variantFn, props]
+  )
 
-  const merged = cn([variantClass, className].filter(Boolean));
+  const merged = useMemo(
+    () => cn([variantClass, className].filter(Boolean)),
+    [variantClass, className]
+  )
 
-  const Component: ElementType = asChild ? Slot : as || 'span';
+  const Component: ElementType = asChild ? Slot : as || 'span'
 
-  const domSafeProps = Object.fromEntries(
-    Object.entries(props).filter(
-      ([_, value]) =>
-        typeof value === 'string' ||
-        typeof value === 'undefined' ||
-        typeof value === 'function' ||
-        (typeof value === 'object' && value !== null && !Array.isArray(value))
-    )
-  );
+  const domSafeProps = useMemo(() => filterDomSafeProps(props as Record<string, any>), [props])
+
+  const ariaAttributes = useMemo(
+    () =>
+      buildAriaAttributes({
+        intent: (props as any).intent,
+        ariaLabel,
+        ariaLabelledBy,
+        ariaDescribedBy,
+        ariaRole,
+        ariaLive,
+        ariaHidden,
+      }),
+    [
+      (props as any).intent,
+      ariaLabel,
+      ariaLabelledBy,
+      ariaDescribedBy,
+      ariaRole,
+      ariaLive,
+      ariaHidden,
+    ]
+  )
 
   return (
-    <Component className={merged} {...domSafeProps}>
+    <Component className={merged} {...ariaAttributes} {...domSafeProps}>
       {children}
     </Component>
-  );
+  )
 }
+
+export const Tag = React.memo(TagComponent) as typeof TagComponent & {
+  displayName?: string
+}
+
+Tag.displayName = 'Tag'

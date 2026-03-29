@@ -31,7 +31,7 @@ export function ProjectCard({ project }: Props) {
 
         <Div size="default" layout="row" className="justify-center md:justify-end gap-2 flex-wrap">
           {project.roles?.map(role => (
-            <Badge key={role} size={'lg'} variant="default" className="bg-ezstart text-white">
+            <Badge key={role} size={'lg'} variant="default" className="bg-brand text-white">
               {role}
             </Badge>
           ))}

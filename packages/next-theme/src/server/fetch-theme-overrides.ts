@@ -3,6 +3,7 @@
  * Prevents theme flash by loading overrides during SSR
  */
 
+import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
 
 export interface ThemeOverrides {
@@ -14,11 +15,9 @@ export interface ThemeOverrides {
  * Fetch theme overrides from API (server-side only)
  * Returns empty object if API call fails (graceful fallback to CSS defaults)
  */
-export async function fetchThemeOverrides(
-  appName: 'green-pulse' | 'ezbill' | 'ezauth' | 'ezpay' | 'ezstart' | 'fengshui' | 'gacha-analyzer'
-): Promise<ThemeOverrides> {
+export async function fetchThemeOverrides(appName: string): Promise<ThemeOverrides> {
   try {
-    const apiUrl = getApiUrl(appName)
+    const apiUrl = getApiUrl(appName as AppName)
     const endpoint = `${apiUrl}/api/theme`
 
     // Server-side fetch with short timeout to avoid blocking render

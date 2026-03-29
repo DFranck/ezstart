@@ -10,7 +10,8 @@
     "./metadata-enhanced": "./src/metadata-enhanced.ts",
     "./robots": "./src/robots.ts",
     "./sitemap": "./src/sitemap.ts",
-    "./json-ld": "./src/json-ld.ts"
+    "./json-ld": "./src/json-ld.ts",
+    "./apps": "./src/apps/index.ts"
   },
   "scripts": {
     "build": "tsc -b",

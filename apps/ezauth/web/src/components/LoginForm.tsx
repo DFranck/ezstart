@@ -39,7 +39,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
 
   const onSubmit = async (formData: FormData) => {
     if (loading) return // Prevent double submission
-    
+
     setLoading(true)
     setError('')
 
@@ -99,7 +99,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           name="email"
           rules={{
             required: 'Email or username is required',
-            minLength: { value: 3, message: 'Must be at least 3 characters' }
+            minLength: { value: 3, message: 'Must be at least 3 characters' },
           }}
           render={({ field }) => (
             <FormItem>
@@ -117,7 +117,7 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           name="password"
           rules={{
             required: 'Password is required',
-            minLength: { value: 6, message: 'Must be at least 6 characters' }
+            minLength: { value: 6, message: 'Must be at least 6 characters' },
           }}
           render={({ field }) => (
             <FormItem>
@@ -130,11 +130,11 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
           )}
         />
 
-        <Button 
-          type="submit" 
-          disabled={loading || !form.formState.isValid} 
-          className="w-full" 
-          variant={'ezstart'}
+        <Button
+          type="submit"
+          disabled={loading || !form.formState.isValid}
+          className="w-full"
+          variant={'brand'}
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>

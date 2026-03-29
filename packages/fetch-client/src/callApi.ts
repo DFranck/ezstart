@@ -6,11 +6,13 @@ import type { ApiError, ApiMeta, ApiResponse, CallApiOptions, LogLevel } from '.
  * Get access token from auth store if available (browser only)
  * This allows callApi to automatically inject JWT tokens for cross-domain requests
  */
-function getAccessTokenFromStore(): string | null {
+function getAccessTokenFromStore(customGetToken?: () => string | null): string | null {
+  if (customGetToken) return customGetToken()
+
   if (typeof window === 'undefined') return null
 
   try {
-    // Access Zustand store directly from localStorage
+    // Access Zustand store directly from localStorage (default fallback)
     const stored = localStorage.getItem('ezauth-storage')
     if (!stored) return null
 
@@ -90,7 +92,18 @@ export async function callApi<T = any>(
   endpoint: string,
   options: CallApiOptions
 ): Promise<ApiResponse<T>> {
-  const { method = 'GET', query, body, headers = {}, signal, userId, accessToken, appName, logLevel } = options
+  const {
+    method = 'GET',
+    query,
+    body,
+    headers = {},
+    signal,
+    userId,
+    accessToken,
+    appName,
+    logLevel,
+    getToken,
+  } = options
 
   // Auto-inject access token for cross-domain requests if not explicitly provided
   let finalAccessToken = accessToken
@@ -115,7 +128,7 @@ export async function callApi<T = any>(
 
       // If cross-domain, auto-inject token from store
       if (currentRootDomain !== apiRootDomain) {
-        finalAccessToken = getAccessTokenFromStore() || undefined
+        finalAccessToken = getAccessTokenFromStore(getToken) || undefined
       }
     }
   }
@@ -174,7 +187,15 @@ export async function callApi<T = any>(
         ...(finalAccessToken ? { Authorization: `Bearer ${finalAccessToken}` } : {}),
         ...headers,
       },
-      body: isFormData ? body : isFormUrlEncoded ? body : isStringBody ? body : body ? JSON.stringify(body) : undefined,
+      body: isFormData
+        ? body
+        : isFormUrlEncoded
+          ? body
+          : isStringBody
+            ? body
+            : body
+              ? JSON.stringify(body)
+              : undefined,
       credentials: 'include', // Required for httpOnly cookies in cross-origin requests
       signal,
     })
@@ -303,9 +324,16 @@ export async function callApi<T = any>(
  * })
  * ```
  */
-export function createCallApi(appName: AppName) {
+export function createCallApi(
+  appName: AppName,
+  factoryOptions?: { getToken?: () => string | null }
+) {
   const call = <T = any>(endpoint: string, options: Omit<CallApiOptions, 'appName'> = {}) => {
-    return baseCallApi<T>(endpoint, { ...options, appName })
+    return baseCallApi<T>(endpoint, {
+      ...options,
+      appName,
+      getToken: options.getToken ?? factoryOptions?.getToken,
+    })
   }
 
   return Object.assign(call, {
@@ -314,12 +342,12 @@ export function createCallApi(appName: AppName) {
       [appName, endpoint, ...(params ? [params] : [])] as const,
 
     /** Generate a React Query queryFn that calls this endpoint and returns data */
-    queryFn: <T = any>(endpoint: string, params?: Record<string, any>) =>
+    queryFn:
+      <T = any>(endpoint: string, params?: Record<string, any>) =>
       async () => {
         const query = params
-          ? '?' + new URLSearchParams(
-              Object.entries(params).map(([k, v]) => [k, String(v)])
-            ).toString()
+          ? '?' +
+            new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
           : ''
         const response = await call<T>(endpoint + query)
         return response.data

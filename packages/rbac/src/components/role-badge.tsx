@@ -4,12 +4,12 @@ import { type Role } from '../types.js'
 import { getRoleLabel } from '../helpers.js'
 
 // Map roles to Badge variants
-const roleToBadgeVariant = {
-  superadmin: 'destructive' as const,
-  admin: 'warning' as const,
-  manager: 'primary' as const,
-  'beta-tester': 'purple' as const,
-  client: 'success' as const,
+const roleToBadgeVariant: Record<string, string> = {
+  superadmin: 'destructive',
+  admin: 'warning',
+  manager: 'primary',
+  'beta-tester': 'purple',
+  client: 'success',
 }
 
 export interface RoleBadgeProps {
@@ -32,7 +32,13 @@ export interface RoleBadgeProps {
  */
 export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, showIcon = false, className }) => {
   const label = getRoleLabel(role)
-  const variant = roleToBadgeVariant[role] || 'default'
+  const variant = (roleToBadgeVariant[role] || 'default') as
+    | 'default'
+    | 'destructive'
+    | 'warning'
+    | 'primary'
+    | 'purple'
+    | 'success'
 
   return (
     <Badge variant={variant} size="sm" className={className}>
@@ -115,7 +121,7 @@ export const RoleBadgeList: React.FC<RoleBadgeListProps> = ({
 
   return (
     <div className={`flex flex-wrap gap-1 ${className || ''}`}>
-      {displayRoles.map((role) => (
+      {displayRoles.map(role => (
         <RoleBadge key={role} role={role} showIcon={showIcon} />
       ))}
       {remainingCount > 0 && (

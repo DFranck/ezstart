@@ -157,7 +157,7 @@ export default function AnalyzePage(): any {
                 context.currentStep === context.steps.length - 1
                   ? 'lucide:Download'
                   : 'lucide:ArrowRight',
-              variant: 'ezstart',
+              variant: 'brand',
               disabled: isUploadStep && !canProceedFromStep1,
               onClick: handleNext,
               tooltip:
