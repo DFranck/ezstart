@@ -3,7 +3,7 @@ import { routing } from '@/i18n/routing'
 import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
 import { ThemeEditor, ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
-import { Button, ClientLayout, Div, LocaleSwitcher } from '@ezstart/ui/components'
+import { Button, ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -96,7 +96,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
               height={32}
               className="animate-glow-pulse-sm hidden dark:block"
             />
-            <span className="sr-only">GreenPulse.AI</span>
+            <Span className="sr-only">GreenPulse.AI</Span>
           </Link>
         </Button>
       }

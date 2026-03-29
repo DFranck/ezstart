@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import type { RoiRect } from './roi-selector'
+import { Div, Span } from '@ezstart/ui/components'
 
 export type ZoneName =
   | 'setSlot'
@@ -345,7 +346,7 @@ export function MultiZoneSelector({
   }
 
   return (
-    <div
+    <Div
       ref={overlayRef}
       style={{
         position: 'absolute',
@@ -368,7 +369,7 @@ export function MultiZoneSelector({
           : zone.rect.height
 
         return (
-          <div
+          <Div
             key={zone.name}
             style={{
               position: 'absolute',
@@ -393,7 +394,7 @@ export function MultiZoneSelector({
           >
             {/* Zone label — hidden when locked */}
             {!locked && (
-              <span
+              <Span
                 style={{
                   position: 'absolute',
                   top: -16,
@@ -410,13 +411,13 @@ export function MultiZoneSelector({
                 }}
               >
                 {t(zone.label)}
-              </span>
+              </Span>
             )}
 
             {/* Resize handles (corners + edges) — hidden when locked */}
             {!locked &&
               allHandles.map(handle => (
-                <div
+                <Div
                   key={handle}
                   style={getHandleStyle(handle, zone.color)}
                   onMouseDown={e => handleMouseDown(e, zone.name, 'resize', handle)}
@@ -426,7 +427,7 @@ export function MultiZoneSelector({
 
             {/* Inline position/size editor */}
             {selectedZone === zone.name && !locked && (
-              <div
+              <Div
                 style={{
                   position: 'absolute',
                   top: '100%',
@@ -444,7 +445,7 @@ export function MultiZoneSelector({
                   whiteSpace: 'nowrap',
                 }}
               >
-                <span style={{ fontWeight: 'bold', marginRight: 4 }}>{t(zone.label)}</span>
+                <Span style={{ fontWeight: 'bold', marginRight: 4 }}>{t(zone.label)}</Span>
                 {(['x', 'y', 'width', 'height'] as const).map(prop => (
                   <label key={prop} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {prop[0]!.toUpperCase()}:
@@ -508,12 +509,12 @@ export function MultiZoneSelector({
                     → Tous subs
                   </button>
                 )}
-              </div>
+              </Div>
             )}
-          </div>
+          </Div>
         )
       })}
-    </div>
+    </Div>
   )
 }
 

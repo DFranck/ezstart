@@ -47,7 +47,7 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
         >
           <ChartStyle config={config} />
           <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
-            {children as any}
+            {children as React.ReactElement}
           </RechartsPrimitive.ResponsiveContainer>
         </div>
       </ChartContext.Provider>
@@ -143,35 +143,49 @@ const ChartTooltipContent: React.ForwardRefExoticComponent<
           </div>
         )}
         <div className="grid gap-1.5">
-          {payload.map((item: any, index: number) => {
-            const key = `${nameKey || item.name || item.dataKey || 'value'}`
-            const itemConfig = config[key as keyof typeof config]
-            const value = formatter
-              ? formatter(item.value, item.name, item, index, payload)
-              : item.value
+          {payload.map(
+            (
+              item: {
+                value: number
+                name: string
+                dataKey?: string
+                color?: string
+                fill?: string
+                stroke?: string
+              },
+              index: number
+            ) => {
+              const key = `${nameKey || item.name || item.dataKey || 'value'}`
+              const itemConfig = config[key as keyof typeof config]
+              const value = formatter
+                ? formatter(item.value, item.name, item, index, payload)
+                : item.value
 
-            return (
-              <div
-                key={item.dataKey}
-                className={cn(
-                  'flex w-full items-center justify-between gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground'
-                )}
-              >
-                <div className="flex items-center gap-1.5">
-                  {!hideIndicator && (
-                    <div
-                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                      style={{
-                        backgroundColor: item.color || itemConfig?.color,
-                      }}
-                    />
+              return (
+                <div
+                  key={item.dataKey}
+                  className={cn(
+                    'flex w-full items-center justify-between gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground'
                   )}
-                  <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
+                >
+                  <div className="flex items-center gap-1.5">
+                    {!hideIndicator && (
+                      <div
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                        style={{
+                          backgroundColor: item.color || itemConfig?.color,
+                        }}
+                      />
+                    )}
+                    <span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
+                  </div>
+                  <span className="font-mono font-medium tabular-nums text-foreground">
+                    {value}
+                  </span>
                 </div>
-                <span className="font-mono font-medium tabular-nums text-foreground">{value}</span>
-              </div>
-            )
-          })}
+              )
+            }
+          )}
         </div>
       </div>
     )

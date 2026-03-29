@@ -31,7 +31,7 @@ export function CopyCodeButton({ code, className }: CopyCodeButtonProps) {
       aria-label={copied ? 'Code copied' : 'Copy code to clipboard'}
     >
       <Icon name={copied ? 'lucide:Check' : 'lucide:Copy'} size={16} ariaHidden />
-      <span className="ml-2">{copied ? 'Copied!' : 'Copy'}</span>
+      <Span className="ml-2">{copied ? 'Copied!' : 'Copy'}</Span>
     </Button>
   )
 }

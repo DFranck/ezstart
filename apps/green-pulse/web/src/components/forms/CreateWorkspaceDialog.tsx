@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
-import { Button, Input, Label, TextArea, P, Modal } from '@ezstart/ui/components'
+import { Button, Div, Input, Label, Modal, P, Strong, TextArea } from '@ezstart/ui/components'
 import { useCreateWorkspace } from '@/hooks/useWorkspaces'
 import { useTranslations } from 'next-intl'
 
@@ -70,7 +70,7 @@ export function CreateWorkspaceDialog() {
         }
       >
         <form id="create-workspace-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <Div>
             <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
@@ -81,9 +81,9 @@ export function CreateWorkspaceDialog() {
               minLength={1}
               maxLength={100}
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="slug">{t('slug')}</Label>
             <Input
               id="slug"
@@ -96,7 +96,7 @@ export function CreateWorkspaceDialog() {
               pattern="[a-z0-9\-]+"
             />
             <P className="text-xs text-muted-foreground mt-1">
-              /forms/w/<strong>{slug || 'workspace-slug'}</strong>/projects
+              /forms/w/<Strong>{slug || 'workspace-slug'}</Strong>/projects
             </P>
             {createWorkspace.error && (
               <P className="text-xs text-destructive mt-1">
@@ -106,9 +106,9 @@ export function CreateWorkspaceDialog() {
                   : (createWorkspace.error as any)?.message || 'Failed to create workspace'}
               </P>
             )}
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <TextArea
               id="description"
@@ -118,7 +118,7 @@ export function CreateWorkspaceDialog() {
               maxLength={500}
               rows={3}
             />
-          </div>
+          </Div>
         </form>
       </Modal>
     </>

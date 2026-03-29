@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
-import { Button, Input, Label, TextArea, P } from '@ezstart/ui/components'
+import { Button, Div, Input, Label, P, TextArea } from '@ezstart/ui/components'
 import { useCreateProject } from '@/hooks/useProjects'
 import { useWorkspaces } from '@/hooks/useWorkspaces'
 import {
@@ -82,7 +82,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <Div>
             <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
@@ -91,9 +91,9 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
               placeholder={t('namePlaceholder')}
               required
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="description">{t('descriptionLabel')}</Label>
             <TextArea
               id="description"
@@ -102,13 +102,13 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
               placeholder={t('descriptionPlaceholder')}
               rows={2}
             />
-          </div>
+          </Div>
 
-          <div className="border-t pt-4">
+          <Div className="border-t pt-4">
             <P className="text-sm font-medium mb-3">{t('companyInfo')}</P>
 
-            <div className="space-y-3">
-              <div>
+            <Div className="space-y-3">
+              <Div>
                 <Label htmlFor="companyName">{t('companyName')}</Label>
                 <Input
                   id="companyName"
@@ -116,9 +116,9 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
                   onChange={e => setCompanyName(e.target.value)}
                   placeholder={t('companyNamePlaceholder')}
                 />
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label htmlFor="companyAddress">{t('address')}</Label>
                 <Input
                   id="companyAddress"
@@ -126,9 +126,9 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
                   onChange={e => setCompanyAddress(e.target.value)}
                   placeholder={t('addressPlaceholder')}
                 />
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label htmlFor="companySector">{t('sector')}</Label>
                 <Input
                   id="companySector"
@@ -136,9 +136,9 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
                   onChange={e => setCompanySector(e.target.value)}
                   placeholder={t('sectorPlaceholder')}
                 />
-              </div>
-            </div>
-          </div>
+              </Div>
+            </Div>
+          </Div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -1,5 +1,5 @@
 import { Client } from '@ezbill/types'
-import { Badge, Button, Card, CardContent, Icon } from '@ezstart/ui/components'
+import { Badge, Button, Card, CardContent, Icon, Div, H3, P } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 
 const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): any => {
   return (
-    <div key={client._id} className="group relative">
+    <Div key={client._id} className="group relative">
       <Card
         onClick={() => onClick(client)}
         className={cn(
@@ -26,30 +26,30 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): an
       >
         <CardContent className="p-4 sm:p-6">
           {/* Client Avatar */}
-          <div className="w-12 h-12 bg-gradient-client rounded-xl flex items-center justify-center mb-4">
+          <Div className="w-12 h-12 bg-gradient-client rounded-xl flex items-center justify-center mb-4">
             <Icon
               name={client.isCompany ? 'lucide:Building' : 'lucide:User'}
               className="w-6 h-6 text-white"
             />
-          </div>
+          </Div>
 
-          <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-1">
+          <H3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-1">
             {client.clientName}
-          </h3>
-          <p className="text-muted-foreground text-sm mb-1 line-clamp-1">{client.email}</p>
-          <p className="text-muted-foreground/80 text-sm line-clamp-1">
+          </H3>
+          <P className="text-muted-foreground text-sm mb-1 line-clamp-1">{client.email}</P>
+          <P className="text-muted-foreground/80 text-sm line-clamp-1">
             {client.city}, {client.country}
-          </p>
+          </P>
 
           {/* Client Type Badge */}
-          <div className="absolute top-3 right-3">
+          <Div className="absolute top-3 right-3">
             <Badge variant={client.isCompany ? 'purple' : 'success'}>
               {client.isCompany ? 'Company' : 'Individual'}
             </Badge>
-          </div>
+          </Div>
 
           {/* Floating Actions */}
-          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+          <Div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
             <Button
               size="sm"
               variant="outline"
@@ -72,10 +72,10 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): an
             >
               <Icon name="lucide:Trash2" className="w-4 h-4 sm:w-3 sm:h-3" />
             </Button>
-          </div>
+          </Div>
         </CardContent>
       </Card>
-    </div>
+    </Div>
   )
 }
 

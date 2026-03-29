@@ -20,7 +20,7 @@ import { groupQuotesByMonth, groupQuotesByStatus } from '@/utils/group-quotes'
 import { groupReceiptsByMonth } from '@/utils/group-receipts'
 import { Client, Invoice, Quote, Receipt } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Icon, Skeleton, SkeletonCard } from '@ezstart/ui/components'
+import { Button, Icon, Skeleton, SkeletonCard, Div } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { redirect, useParams } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
@@ -235,37 +235,37 @@ const ClientDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full">
+      <Div className="w-full">
         {/* Header Skeleton */}
-        <div className="bg-card border-b border-border py-6 px-4">
-          <div className="max-w-7xl mx-auto space-y-4">
+        <Div className="bg-card border-b border-border py-6 px-4">
+          <Div className="max-w-7xl mx-auto space-y-4">
             <Skeleton className="h-10 w-64" variant="shimmer" />
             <Skeleton className="h-4 w-48" variant="shimmer" />
-            <div className="flex gap-2">
+            <Div className="flex gap-2">
               <Skeleton className="h-10 w-32" variant="shimmer" />
               <Skeleton className="h-10 w-32" variant="shimmer" />
-            </div>
-          </div>
-        </div>
+            </Div>
+          </Div>
+        </Div>
 
         {/* Body Skeleton */}
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6 pt-6">
+        <Div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6 pt-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-24 w-full rounded-xl" variant="shimmer" />
             ))}
-          </div>
+          </Div>
 
           {/* Invoices Section */}
-          <div className="space-y-4">
+          <Div className="space-y-4">
             <Skeleton className="h-8 w-48" variant="shimmer" />
             {Array.from({ length: 3 }).map((_, i) => (
               <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
             ))}
-          </div>
-        </div>
-      </div>
+          </Div>
+        </Div>
+      </Div>
     )
   }
 
@@ -281,7 +281,7 @@ const ClientDashboardPage = () => {
       />
 
       {/* Body */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6">
+      <Div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-6 lg:px-8 pb-6 w-full space-y-6">
         {/* Stats */}
         <ClientStats
           totalRevenue={totalRevenue}
@@ -310,10 +310,10 @@ const ClientDashboardPage = () => {
           }}
         >
           {clientInvoices.length > 0 && (
-            <div className="space-y-4">
+            <Div className="space-y-4">
               {/* Group By Selector - Only show if 3+ invoices */}
               {clientInvoices.length >= 3 && (
-                <div className="flex gap-2 flex-wrap">
+                <Div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
                     variant={invoiceGroupBy === 'month' ? 'default' : 'outline'}
@@ -338,7 +338,7 @@ const ClientDashboardPage = () => {
                     <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
                     {tDashboard('byStatus')}
                   </Button>
-                </div>
+                </Div>
               )}
 
               {/* Collapsible Groups - Only if 3+ invoices, otherwise flat list */}
@@ -391,7 +391,7 @@ const ClientDashboardPage = () => {
                   )
                 })
               )}
-            </div>
+            </Div>
           )}
         </DashboardSection>
 
@@ -415,10 +415,10 @@ const ClientDashboardPage = () => {
           }}
         >
           {clientQuotes.length > 0 && (
-            <div className="space-y-4">
+            <Div className="space-y-4">
               {/* Group By Selector - Only show if 3+ quotes */}
               {clientQuotes.length >= 3 && (
-                <div className="flex gap-2 flex-wrap">
+                <Div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
                     variant={quoteGroupBy === 'month' ? 'default' : 'outline'}
@@ -435,7 +435,7 @@ const ClientDashboardPage = () => {
                     <Icon name="lucide:Tag" className="w-4 h-4 mr-2" />
                     {tDashboard('byStatus')}
                   </Button>
-                </div>
+                </Div>
               )}
 
               {/* Collapsible Groups - Only if 3+ quotes, otherwise flat list */}
@@ -494,7 +494,7 @@ const ClientDashboardPage = () => {
                   )
                 })
               )}
-            </div>
+            </Div>
           )}
         </DashboardSection>
 
@@ -519,7 +519,7 @@ const ClientDashboardPage = () => {
           className="mb-0"
         >
           {clientReceipts.length > 0 && (
-            <div className="space-y-4">
+            <Div className="space-y-4">
               {/* Collapsible Groups - Only if 3+ receipts, otherwise flat list */}
               {clientReceipts.length >= 3 ? (
                 <CollapsibleGroup
@@ -556,10 +556,10 @@ const ClientDashboardPage = () => {
                   />
                 ))
               )}
-            </div>
+            </Div>
           )}
         </DashboardSection>
-      </div>
+      </Div>
 
       {/* CRUD Modals */}
       <InvoiceModal

@@ -8,6 +8,8 @@ import {
   CardHeader,
   H3,
   Icon,
+  Div,
+  P,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
@@ -21,7 +23,7 @@ type Props = {
 
 const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): any => {
   return (
-    <div key={client._id} className="group relative">
+    <Div key={client._id} className="group relative">
       <Card
         onClick={() => onClick(client)}
         className={cn(
@@ -45,12 +47,12 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): an
         <CardContent className="p-4 sm:p-6 hidden">
           {/* Client Avatar */}
           {client.email && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">{client.email}</p>
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">{client.email}</P>
           )}
           {client.city && client.country && (
-            <p className="text-muted-foreground/80 text-sm line-clamp-1">
+            <P className="text-muted-foreground/80 text-sm line-clamp-1">
               {client.city}, {client.country}
-            </p>
+            </P>
           )}
         </CardContent>
         {/* Floating Actions */}
@@ -79,7 +81,7 @@ const ClientCard = ({ client, onEdit, onDelete, onClick, className }: Props): an
           </Button>
         </CardFooter>
       </Card>
-    </div>
+    </Div>
   )
 }
 

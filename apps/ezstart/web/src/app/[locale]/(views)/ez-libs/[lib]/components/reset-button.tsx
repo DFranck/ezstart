@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import { Button, Icon } from '@ezstart/ui/components';
+import { Button, Icon } from '@ezstart/ui/components'
 
 type ResetButtonProps = {
-  onReset: () => void;
-  className?: string;
-};
+  onReset: () => void
+  className?: string
+}
 
 export function ResetButton({ onReset, className }: ResetButtonProps) {
   return (
@@ -17,7 +17,7 @@ export function ResetButton({ onReset, className }: ResetButtonProps) {
       aria-label="Reset to default values"
     >
       <Icon name="lucide:RotateCcw" size={16} ariaHidden />
-      <span className="ml-2">Reset</span>
+      <Span className="ml-2">Reset</Span>
     </Button>
-  );
+  )
 }

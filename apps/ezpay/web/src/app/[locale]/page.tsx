@@ -1,59 +1,60 @@
 import { useTranslations } from 'next-intl'
+import { Div, H1, H2, H3, Main, P } from '@ezstart/ui/components'
 
 export default function HomePage(): any {
   const t = useTranslations('home')
 
   return (
-    <main className="container mx-auto py-12 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-4">{t('title')}</h1>
-        <p className="text-xl text-muted-foreground mb-8">{t('subtitle')}</p>
+    <Main className="container mx-auto py-12 px-4">
+      <Div className="max-w-4xl mx-auto text-center">
+        <H1 className="text-4xl font-bold mb-4">{t('title')}</H1>
+        <P className="text-xl text-muted-foreground mb-8">{t('subtitle')}</P>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-12">
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">{t('donations')}</h3>
-            <p className="text-sm text-muted-foreground">{t('donationsDescription')}</p>
-          </div>
+        <Div className="grid md:grid-cols-3 gap-6 mt-12">
+          <Div className="p-6 border rounded-lg">
+            <H3 className="text-lg font-semibold mb-2">{t('donations')}</H3>
+            <P className="text-sm text-muted-foreground">{t('donationsDescription')}</P>
+          </Div>
 
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">{t('purchases')}</h3>
-            <p className="text-sm text-muted-foreground">{t('purchasesDescription')}</p>
-          </div>
+          <Div className="p-6 border rounded-lg">
+            <H3 className="text-lg font-semibold mb-2">{t('purchases')}</H3>
+            <P className="text-sm text-muted-foreground">{t('purchasesDescription')}</P>
+          </Div>
 
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">{t('subscriptions')}</h3>
-            <p className="text-sm text-muted-foreground">{t('subscriptionsDescription')}</p>
-          </div>
-        </div>
+          <Div className="p-6 border rounded-lg">
+            <H3 className="text-lg font-semibold mb-2">{t('subscriptions')}</H3>
+            <P className="text-sm text-muted-foreground">{t('subscriptionsDescription')}</P>
+          </Div>
+        </Div>
 
-        <div className="mt-12 p-6 bg-muted rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4">{t('gettingStarted')}</h2>
-          <div className="text-left space-y-4">
-            <div>
-              <h3 className="font-semibold">{t('installSdk')}</h3>
+        <Div className="mt-12 p-6 bg-muted rounded-lg">
+          <H2 className="text-2xl font-semibold mb-4">{t('gettingStarted')}</H2>
+          <Div className="text-left space-y-4">
+            <Div>
+              <H3 className="font-semibold">{t('installSdk')}</H3>
               <code className="text-sm bg-background p-2 block rounded mt-2">
                 pnpm add @ezstart/pay-sdk
               </code>
-            </div>
+            </Div>
 
-            <div>
-              <h3 className="font-semibold">{t('setupClient')}</h3>
+            <Div>
+              <H3 className="font-semibold">{t('setupClient')}</H3>
               <code className="text-sm bg-background p-2 block rounded mt-2">
                 {`import { createPayClient } from '@ezstart/pay-sdk'`}
                 <br />
                 {`const client = createPayClient({ appName: 'my-app' })`}
               </code>
-            </div>
+            </Div>
 
-            <div>
-              <h3 className="font-semibold">{t('useComponents')}</h3>
+            <Div>
+              <H3 className="font-semibold">{t('useComponents')}</H3>
               <code className="text-sm bg-background p-2 block rounded mt-2">
                 {`import { DonateModal, DonationWall } from '@ezstart/pay-sdk'`}
               </code>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+            </Div>
+          </Div>
+        </Div>
+      </Div>
+    </Main>
   )
 }

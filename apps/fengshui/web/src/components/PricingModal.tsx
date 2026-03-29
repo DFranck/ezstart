@@ -4,7 +4,18 @@ import { GRADIENT_BG } from '@/lib/theme-colors'
 import { useAuth } from '@ezstart/auth-sdk'
 import { usePay } from '@ezstart/pay-sdk'
 import { logger } from '@ezstart/logger'
-import { Button, Card, CardContent, Div, H3, Icon, Modal, Span } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  Div,
+  H3,
+  Icon,
+  LI,
+  Modal,
+  Span,
+  UL,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -98,14 +109,14 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 <Span className="text-3xl font-bold text-foreground">{t('freePrice')}</Span>
               </Div>
             </Div>
-            <ul className="space-y-3">
+            <UL className="space-y-3">
               {freeFeatures.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <LI key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                   <Icon name="lucide:Check" className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                   {feature}
-                </li>
+                </LI>
               ))}
-            </ul>
+            </UL>
             <Button variant="outline" className="w-full mt-6" onClick={onClose}>
               {t('freeTitle')}
             </Button>
@@ -124,14 +135,14 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
               <H3 className="text-lg font-bold text-foreground">{t('premiumTitle', { year })}</H3>
             </Div>
 
-            <ul className="space-y-3 mb-6">
+            <UL className="space-y-3 mb-6">
               {premiumFeatures.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                <LI key={idx} className="flex items-start gap-2 text-sm text-foreground">
                   <Icon name="lucide:Star" className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
                   {feature}
-                </li>
+                </LI>
               ))}
-            </ul>
+            </UL>
 
             {/* Price options */}
             <Div className="space-y-2">

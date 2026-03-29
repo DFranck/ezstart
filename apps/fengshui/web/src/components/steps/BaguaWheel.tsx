@@ -5,6 +5,7 @@ import { Direction, DIRECTIONS } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { useId, useMemo, useRef, useState } from 'react'
+import { Div } from '@ezstart/ui/components'
 
 type CardsMode = 'hover' | 'all'
 
@@ -139,14 +140,20 @@ export default function BaguaWheel({
   }, [rot]) // labelR, cx, cy et r ne bougent pas pendant le rendu
 
   return (
-    <div className="w-full h-auto aspect-square max-w-[90vw] sm:max-w-[600px] mx-auto">
-      <div
+    <Div className="w-full h-auto aspect-square max-w-[90vw] sm:max-w-[600px] mx-auto">
+      <Div
         className="relative"
         onMouseLeave={() => {
           if (!pinnedDir) setHoverLabelDir(null)
         }}
       >
-        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Roue Bagua">
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          aria-label="Roue Bagua"
+        >
           <defs>
             <clipPath id={clipId}>
               <circle cx={cx} cy={cy} r={r} />
@@ -242,7 +249,7 @@ export default function BaguaWheel({
             })}
           </g>
         </svg>
-      </div>
-    </div>
+      </Div>
+    </Div>
   )
 }

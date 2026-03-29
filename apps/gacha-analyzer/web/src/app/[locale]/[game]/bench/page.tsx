@@ -10,6 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -523,10 +524,10 @@ export default function BenchPage() {
               <P className="text-sm font-medium">
                 {t('labels.confidence')}: {resultData.confidence}%
                 {resultData.rawText && (
-                  <span className="ml-4 text-muted-foreground">
+                  <Span className="ml-4 text-muted-foreground">
                     Raw: {resultData.rawText.substring(0, 120)}
                     {resultData.rawText.length > 120 ? '...' : ''}
-                  </span>
+                  </Span>
                 )}
               </P>
             </Div>
@@ -558,16 +559,16 @@ export default function BenchPage() {
                           <td className="py-2 px-3 font-mono text-xs">
                             {r.preset}
                             {idx === 0 && (
-                              <span className="ml-2 text-xs text-primary font-medium">BEST</span>
+                              <Span className="ml-2 text-xs text-primary font-medium">BEST</Span>
                             )}
                           </td>
                           <td className="text-right py-2 px-3">{r.confidence}%</td>
                           <td className="text-right py-2 px-3">{r.subsCount}</td>
                           <td className="text-center py-2 px-3">
                             {r.success ? (
-                              <span className="text-success-foreground">OK</span>
+                              <Span className="text-success-foreground">OK</Span>
                             ) : (
-                              <span className="text-destructive-foreground">FAIL</span>
+                              <Span className="text-destructive-foreground">FAIL</Span>
                             )}
                           </td>
                         </tr>

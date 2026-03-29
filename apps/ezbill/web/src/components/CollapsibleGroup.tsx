@@ -6,6 +6,8 @@ import {
   Badge,
   Button,
   Icon,
+  Div,
+  Span,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { ReactNode, useState } from 'react'
@@ -66,16 +68,16 @@ function CollapsibleGroup<T>({
   }
 
   if (groups.length === 0 && emptyMessage) {
-    return <div className="text-center py-8 text-muted-foreground">{emptyMessage}</div>
+    return <Div className="text-center py-8 text-muted-foreground">{emptyMessage}</Div>
   }
 
   const allOpen = openGroups.length === groups.length
 
   return (
-    <div className={cn('space-y-3', className)}>
+    <Div className={cn('space-y-3', className)}>
       {/* Toggle All Button */}
       {showToggleAll && groups.length > 1 && (
-        <div className="flex justify-end mb-2">
+        <Div className="flex justify-end mb-2">
           <Button
             variant="ghost"
             size="sm"
@@ -88,7 +90,7 @@ function CollapsibleGroup<T>({
             />
             {allOpen ? 'Collapse All' : 'Expand All'}
           </Button>
-        </div>
+        </Div>
       )}
 
       {/* Accordion Groups */}
@@ -105,27 +107,27 @@ function CollapsibleGroup<T>({
             className="border rounded-xl bg-card !border-b"
           >
             <AccordionTrigger className="hover:no-underline px-4 py-3">
-              <div className="flex items-center justify-between w-full pr-2">
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-base">{group.label}</span>
+              <Div className="flex items-center justify-between w-full pr-2">
+                <Div className="flex items-center gap-3">
+                  <Span className="font-semibold text-base">{group.label}</Span>
                   <Badge variant="secondary" className="font-normal">
                     {group.count} {group.count === 1 ? 'item' : 'items'}
                   </Badge>
-                </div>
-              </div>
+                </Div>
+              </Div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4 pt-2">
-              <div className="space-y-3">
+              <Div className="space-y-3">
                 {group.items.map((item, idx) => {
                   const key = getItemKey ? getItemKey(item, idx) : `${group.id}-item-${idx}`
-                  return <div key={key}>{renderItem(item, idx)}</div>
+                  return <Div key={key}>{renderItem(item, idx)}</Div>
                 })}
-              </div>
+              </Div>
             </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
-    </div>
+    </Div>
   )
 }
 

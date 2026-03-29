@@ -13,6 +13,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  Div,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useState } from 'react'
@@ -112,14 +113,14 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
   return (
     <Card className={className} variant="floating">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+        <Div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Div>
             <CardTitle>Revenue Over Time</CardTitle>
             <CardDescription>Total paid invoices by month</CardDescription>
-          </div>
+          </Div>
 
           {/* Controls: hidden on mobile, interactive on desktop */}
-          <div className="flex-wrap gap-2 hidden sm:flex">
+          <Div className="flex-wrap gap-2 hidden sm:flex">
             <Button
               variant={period === '6m' ? 'default' : 'outline'}
               size="sm"
@@ -148,8 +149,8 @@ export function RevenueChart({ invoices, className }: RevenueChartProps) {
                 ))}
               </select>
             )}
-          </div>
-        </div>
+          </Div>
+        </Div>
       </CardHeader>
 
       <CardContent>

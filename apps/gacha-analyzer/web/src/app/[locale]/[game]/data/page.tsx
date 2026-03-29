@@ -13,16 +13,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  DataTable,
-  DataTableColumnHeader,
-  type ColumnDef,
-  type SortingState,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-  type ChartConfig,
+  ChartTooltip,
+  ChartTooltipContent,
+  DataTable,
+  DataTableColumnHeader,
   Div,
   P,
   Select,
@@ -31,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
   Span,
+  Strong,
   Table,
   TableBody,
   TableCell,
@@ -40,6 +38,9 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  type ChartConfig,
+  type ColumnDef,
+  type SortingState,
 } from '@ezstart/ui/components'
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
@@ -65,9 +66,9 @@ function TT({ children, tip }: { children: React.ReactNode; tip: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 cursor-help">
+        <Span className="underline decoration-dotted decoration-muted-foreground/50 underline-offset-2 cursor-help">
           {children}
-        </span>
+        </Span>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[280px] text-xs">
         {tip}
@@ -317,7 +318,7 @@ function SetRadarChart() {
               <SelectContent>
                 {SET_KEYS.map(k => (
                   <SelectItem key={k} value={k}>
-                    <span className="capitalize">{k}</span>
+                    <Span className="capitalize">{k}</Span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -333,7 +334,7 @@ function SetRadarChart() {
                 <SelectItem value="none">{td('none')}</SelectItem>
                 {SET_KEYS.map(k => (
                   <SelectItem key={k} value={k}>
-                    <span className="capitalize">{k}</span>
+                    <Span className="capitalize">{k}</Span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -1269,8 +1270,8 @@ const gemGrindColumns: ColumnDef<GemGrindRec, unknown>[] = [
     header: ({ header }) => <DataTableColumnHeader header={header} title="Archetype" />,
     cell: ({ row }) => (
       <Div className="flex items-center gap-1.5">
-        <span>{row.original.emoji}</span>
-        <span className="font-medium text-xs">{row.original.archetype}</span>
+        <Span>{row.original.emoji}</Span>
+        <Span className="font-medium text-xs">{row.original.archetype}</Span>
       </Div>
     ),
     filterFn: 'includesString',
@@ -1570,8 +1571,8 @@ export default function GameDataPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Div className="flex items-center gap-1.5 cursor-help">
-                                  <span>{row.emoji}</span>
-                                  <span className="font-medium text-xs">{row.archetype}</span>
+                                  <Span>{row.emoji}</Span>
+                                  <Span className="font-medium text-xs">{row.archetype}</Span>
                                 </Div>
                               </TooltipTrigger>
                               <TooltipContent side="right" className="max-w-[200px]">
@@ -1595,11 +1596,11 @@ export default function GameDataPage() {
               </Div>
 
               <P className="text-xs text-muted-foreground italic">
-                Color coding: <span className="text-ga-roll-legend font-bold">1.0-0.9</span> top
-                priority, <span className="text-ga-roll-hero font-semibold">0.7-0.89</span> high,{' '}
-                <span className="text-ga-roll-rare">0.5-0.69</span> medium,{' '}
-                <span className="text-ga-roll-magic">0.3-0.49</span> low,{' '}
-                <span className="text-ga-roll-normal">below 0.3</span> useless.
+                Color coding: <Span className="text-ga-roll-legend font-bold">1.0-0.9</Span> top
+                priority, <Span className="text-ga-roll-hero font-semibold">0.7-0.89</Span> high,{' '}
+                <Span className="text-ga-roll-rare">0.5-0.69</Span> medium,{' '}
+                <Span className="text-ga-roll-magic">0.3-0.49</Span> low,{' '}
+                <Span className="text-ga-roll-normal">below 0.3</Span> useless.
               </P>
             </Div>
           </AccordionContent>
@@ -1640,8 +1641,8 @@ export default function GameDataPage() {
                     </TT>
                   </P>
                   <P className="text-xs text-muted-foreground">
-                    The scanner shows two quality tiers: <strong>Current</strong> (what the rune has
-                    now) and <strong>Post-Gem</strong> (what it could become if you gem the worst
+                    The scanner shows two quality tiers: <Strong>Current</Strong> (what the rune has
+                    now) and <Strong>Post-Gem</Strong> (what it could become if you gem the worst
                     substat for the best archetype). A rune with &quot;Rare → Hero&quot; means
                     it&apos;s currently Rare quality but could reach Hero with a gem. This is used
                     by the{' '}
@@ -1663,13 +1664,13 @@ export default function GameDataPage() {
                   </P>
                   <P className="text-xs text-muted-foreground">
                     The raw efficiency formula:{' '}
-                    <span className="font-mono">
+                    <Span className="font-mono">
                       sum(substat_value / max_roll_value) / TOTAL_EVENTS * 100
-                    </span>
+                    </Span>
                     . For each substat, the ratio is{' '}
-                    <span className="font-mono">
+                    <Span className="font-mono">
                       current_value / (max_single_roll * number_of_rolls_into_that_stat)
-                    </span>
+                    </Span>
                     . TOTAL_EVENTS = 8 for a 6-star rune at +12 (initial 4 subs + 4 power-up rolls).
                     This gives a 0-100 score where 100 means every roll was max.
                   </P>
@@ -1677,7 +1678,7 @@ export default function GameDataPage() {
                     Example: a +12 rune with SPD 18 (3 rolls max = 18), CR 12 (2 rolls max = 12),
                     HP% 8 (1 roll max = 8), DEF% 13 (2 rolls max = 16). Ratios: 18/18 + 12/12 + 8/8
                     + 13/16 = 1 + 1 + 1 + 0.81 = 3.81. Efficiency = 3.81/8 * 100 ={' '}
-                    <strong>47.6%</strong>.
+                    <Strong>47.6%</Strong>.
                   </P>
                 </CardContent>
               </Card>
@@ -1692,16 +1693,16 @@ export default function GameDataPage() {
                   <P className="text-xs text-muted-foreground">
                     For runes not yet at +12, the scanner calculates what the efficiency WOULD be if
                     all remaining power-up rolls landed at max value. Formula:{' '}
-                    <span className="font-mono">
+                    <Span className="font-mono">
                       current_efficiency + (remaining_rolls * max_single_roll_ratio / TOTAL_EVENTS *
                       100)
-                    </span>
+                    </Span>
                     . A +6 rune has 2 rolls left, so potential adds up to 2 max-roll ratios.
                   </P>
                   <P className="text-xs text-muted-foreground mt-1">
                     Example: a +6 rune with current efficiency 25% has 2 remaining rolls. Best case
                     each roll = 1.0 ratio, so potential = 25 + (2 * 1.0/8 * 100) = 25 + 25 ={' '}
-                    <strong>50%</strong>. This is used by the progressive advice to decide if the
+                    <Strong>50%</Strong>. This is used by the progressive advice to decide if the
                     rune is worth upgrading further.
                   </P>
                 </CardContent>
@@ -1719,16 +1720,16 @@ export default function GameDataPage() {
                     After calculating potential +12, the scanner adds the value of legend
                     grindstones to all grindable substats (HP, HP%, ATK, ATK%, DEF, DEF%, SPD).
                     Formula:{' '}
-                    <span className="font-mono">
+                    <Span className="font-mono">
                       potential_efficiency + sum(legend_grind_max / max_roll_value) / TOTAL_EVENTS *
                       100
-                    </span>{' '}
+                    </Span>{' '}
                     for each grindable stat present.
                   </P>
                   <P className="text-xs text-muted-foreground mt-1">
                     Example: a rune at potential 50% with SPD (grind +5) and HP% (grind +10%). Grind
-                    gain = (5/6 + 10/8) / 8 * 100 = (0.83 + 1.25) / 8 * 100 = <strong>+26%</strong>.
-                    After Grind = 50 + 26 = <strong>76%</strong>. This is the rune&apos;s realistic
+                    gain = (5/6 + 10/8) / 8 * 100 = (0.83 + 1.25) / 8 * 100 = <Strong>+26%</Strong>.
+                    After Grind = 50 + 26 = <Strong>76%</Strong>. This is the rune&apos;s realistic
                     ceiling.
                   </P>
                 </CardContent>
@@ -1744,7 +1745,7 @@ export default function GameDataPage() {
                   <P className="text-xs text-muted-foreground">
                     The post-optimization score is the weighted efficiency after applying both the
                     best enchanted gem AND all legend grinds. Unlike raw After Grind, this uses{' '}
-                    <strong>weighted</strong> efficiency (stat importance matters) and accounts for
+                    <Strong>weighted</Strong> efficiency (stat importance matters) and accounts for
                     the fact that gemming replaces a substat — including any rolls that went into
                     the replaced stat (lost rolls).
                   </P>
@@ -1752,7 +1753,7 @@ export default function GameDataPage() {
                     Example: a Violent rune for a Bruiser with RES 12% (3 rolls). Gemming RES → HP%
                     removes 3 bad rolls but adds a legend gem value (7-11% HP%). The post-optim
                     score recalculates weighted efficiency with the new substat, re-applies grinds,
-                    and gives the <strong>true final score</strong> used to rank runes.
+                    and gives the <Strong>true final score</Strong> used to rank runes.
                   </P>
                 </CardContent>
               </Card>
@@ -1834,7 +1835,7 @@ export default function GameDataPage() {
                 <CardContent className="pt-3">
                   <P className="font-medium text-sm mb-1">Auto-sell: Dead Stat Combos</P>
                   <P className="text-xs text-muted-foreground">
-                    Runes with <strong>ACC + RES</strong> together are auto-sell. No monster needs
+                    Runes with <Strong>ACC + RES</Strong> together are auto-sell. No monster needs
                     both stats — this combination means the rune has no viable archetype.
                   </P>
                 </CardContent>
@@ -1874,7 +1875,7 @@ export default function GameDataPage() {
                     <Card key={s.slot} size="sm">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center justify-between">
-                          <span>Slot {s.slot}</span>
+                          <Span>Slot {s.slot}</Span>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant="outline" className="text-xs cursor-help">
@@ -1928,9 +1929,9 @@ export default function GameDataPage() {
                     <Div key={ms.stat}>
                       <P className="font-medium text-sm mb-2">
                         {ms.stat}{' '}
-                        <span className="text-muted-foreground text-xs">
+                        <Span className="text-muted-foreground text-xs">
                           (Slots {ms.slots.join(', ')})
-                        </span>
+                        </Span>
                       </P>
                       <Div className="overflow-x-auto">
                         <Table size="compact">
@@ -2001,15 +2002,15 @@ export default function GameDataPage() {
                     <CardContent className="pt-3">
                       <P className="font-medium text-sm mb-1">How to read a roll breakdown</P>
                       <P className="text-xs text-muted-foreground">
-                        Example: <span className="font-mono">SPD +18 (★●◆)</span> means 3 rolls into
+                        Example: <Span className="font-mono">SPD +18 (★●◆)</Span> means 3 rolls into
                         SPD. First roll was Legend (max), second Hero, third Rare. The overall
                         quality for that substat is the average of all individual rolls.
                       </P>
                       <P className="text-xs text-muted-foreground mt-1">
                         Roll quality is calculated as:{' '}
-                        <span className="font-mono">(value - min) / (max - min)</span> for each
+                        <Span className="font-mono">(value - min) / (max - min)</Span> for each
                         roll. A roll of 6 on SPD (range 4-6) ={' '}
-                        <span className="font-mono">(6-4)/(6-4) = 100%</span> = Legend.
+                        <Span className="font-mono">(6-4)/(6-4) = 100%</Span> = Legend.
                       </P>
                     </CardContent>
                   </Card>
@@ -2053,13 +2054,13 @@ export default function GameDataPage() {
                   </P>
                   <P className="text-xs text-muted-foreground">
                     The scanner picks the gem target using this priority:{' '}
-                    <strong>1) Dead stats</strong> (ACC on a DPS, RES on a bomber) →{' '}
-                    <strong>2) Flat stats</strong> (ATK flat, DEF flat, HP flat — almost always
-                    worse than %) → <strong>3) Lowest weight stat</strong> for the set. The gem
+                    <Strong>1) Dead stats</Strong> (ACC on a DPS, RES on a bomber) →{' '}
+                    <Strong>2) Flat stats</Strong> (ATK flat, DEF flat, HP flat — almost always
+                    worse than %) → <Strong>3) Lowest weight stat</Strong> for the set. The gem
                     replacement is the highest-weight stat not already on the rune.
                   </P>
                   <P className="text-xs text-muted-foreground mt-1">
-                    <strong>Never gem out:</strong> SPD, CR, or CD — these are universally valuable
+                    <Strong>Never gem out:</Strong> SPD, CR, or CD — these are universally valuable
                     and the scanner will never recommend replacing them.
                   </P>
                 </CardContent>

@@ -8,6 +8,9 @@ import {
   H1,
   Icon,
   PWAInstallPrompt,
+  Div,
+  P,
+  Span,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
@@ -47,29 +50,29 @@ const ClientLayout = ({
       mobileLogoIcon="custom:Ezbill"
       mobileLogoHref={'/'}
       headerLeftContent={
-        <div className="flex items-center space-x-4">
+        <Div className="flex items-center space-x-4">
           <Link
             href={'/'}
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <Icon name="custom:Ezbill" size={30} />
-            <div>
+            <Div>
               <H1
                 size={'h5'}
                 className="text-start w-fit font-bold bg-gradient-to-r from-ezbill-client to-ezbill-invoice bg-clip-text text-transparent"
               >
                 EZBill
               </H1>
-              <p className="text-xs text-muted-foreground -mt-1">
+              <P className="text-xs text-muted-foreground -mt-1">
                 {t('layout.professionalBilling')}
-              </p>
-            </div>
+              </P>
+            </Div>
           </Link>
-        </div>
+        </Div>
       }
       navLinks={navLinks}
       headerRightContent={
-        <div className="flex items-center space-x-2 sm:space-x-3">
+        <Div className="flex items-center space-x-2 sm:space-x-3">
           {isAuthenticated ? (
             <>
               {showLogoutButton && (
@@ -82,7 +85,7 @@ const ClientLayout = ({
                   className="font-medium px-2 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200"
                 >
                   <Icon name="lucide:LogOut" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('auth.logout')}</span>
+                  <Span className="hidden sm:inline">{t('auth.logout')}</Span>
                 </Button>
               )}
             </>
@@ -96,12 +99,12 @@ const ClientLayout = ({
             >
               <>
                 <Icon name="lucide:LogIn" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
-                <span className="hidden sm:inline">{t('auth.login')}</span>
+                <Span className="hidden sm:inline">{t('auth.login')}</Span>
               </>
             </Button>
           )}
           <ThemeSwitcher />
-        </div>
+        </Div>
       }
       LinkComponent={Link}
       showFooter={true}

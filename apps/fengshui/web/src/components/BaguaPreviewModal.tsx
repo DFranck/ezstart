@@ -5,7 +5,7 @@ import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/direction
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { logger } from '@ezstart/logger'
-import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { Button, Div, H2, H3, Icon, Modal, P, Span } from '@ezstart/ui/components'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
@@ -627,19 +627,19 @@ export function BaguaPreviewModal({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <span className="font-semibold flex items-center">
+        <Span className="font-semibold flex items-center">
           <Icon name="lucide:Compass" className="w-5 h-5 mr-2 text-foreground/60" />
           Analyse Feng Shui Bagua
-        </span>
+        </Span>
       }
       description={
-        <span className="block">
-          <span className="hidden sm:inline">{t('pdfModal.previewTitle')} • </span>
+        <Span className="block">
+          <Span className="hidden sm:inline">{t('pdfModal.previewTitle')} • </Span>
           {isGenerating ? t('pdfModal.generatingPdf') : t('pdfModal.clickToGenerate')}
-        </span>
+        </Span>
       }
       footer={
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2">
+        <Div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2">
           <Button
             onClick={generatePDF}
             disabled={isGenerating}
@@ -656,52 +656,52 @@ export function BaguaPreviewModal({
             <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
             {t('pdfModal.downloadPdf')}
           </Button>
-        </div>
+        </Div>
       }
       className="max-w-[800px] w-[95vw] max-h-[95vh] overflow-y-auto"
     >
       {/* LOADER EN HAUT - Toujours visible pendant génération */}
-      <div className="flex flex-col items-center gap-4 px-2 sm:px-0">
+      <Div className="flex flex-col items-center gap-4 px-2 sm:px-0">
         {isGenerating && (
-          <div
+          <Div
             className="w-full border border-border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-primary/10 text-center flex items-center justify-center"
             style={{ minHeight: 'calc(-6rem + 70vh)', maxHeight: 'calc(-6rem + 70vh)' }}
           >
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex items-center gap-4">
+            <Div className="flex flex-col items-center gap-6">
+              <Div className="flex items-center gap-4">
                 <Icon name="lucide:FileText" className="w-12 h-12 text-primary" />
                 <Icon name="lucide:Loader2" className="w-10 h-10 text-primary animate-spin" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-2">
+              </Div>
+              <Div>
+                <H3 className="font-semibold text-foreground mb-2">
                   {t('pdfModal.generatingInProgress')}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-1">
+                </H3>
+                <P className="text-sm text-muted-foreground mb-1">
                   {t('pdfModal.capturingAnalysis')}
-                </p>
-                <p className="text-xs text-muted-foreground">{t('pdfModal.twoPages')}</p>
-              </div>
-            </div>
-          </div>
+                </P>
+                <P className="text-xs text-muted-foreground">{t('pdfModal.twoPages')}</P>
+              </Div>
+            </Div>
+          </Div>
         )}
 
         {/* APERÇU PDF - Affiché quand terminé */}
         {pdfUrl && !isGenerating && (
-          <div className="w-full">
+          <Div className="w-full">
             {isMobile ? (
               // Mobile: Message informatif
-              <div className="border border-border rounded-lg p-6 bg-muted text-center">
+              <Div className="border border-border rounded-lg p-6 bg-muted text-center">
                 <Icon name="lucide:FileCheck" className="w-12 h-12 mx-auto mb-3 text-success" />
-                <h3 className="font-semibold text-foreground mb-2">PDF généré avec succès !</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <H3 className="font-semibold text-foreground mb-2">PDF généré avec succès !</H3>
+                <P className="text-sm text-muted-foreground mb-4">
                   L'aperçu n'est pas disponible sur mobile, mais votre PDF 2 pages est prêt.
-                </p>
-              </div>
+                </P>
+              </Div>
             ) : (
               // Desktop: Preview des 2 pages
-              <div className="border border-border rounded-lg p-4 bg-background shadow-inner">
+              <Div className="border border-border rounded-lg p-4 bg-background shadow-inner">
                 {Object.keys(previewImageUrls).length > 0 ? (
-                  <div className="space-y-6">
+                  <Div className="space-y-6">
                     {/* Page 1 - Wheel */}
                     {previewImageUrls.page1 && (
                       <img
@@ -721,21 +721,21 @@ export function BaguaPreviewModal({
                         style={{ maxWidth: '400px' }}
                       />
                     )}
-                  </div>
+                  </Div>
                 ) : (
-                  <div className="flex items-center justify-center h-64 text-muted-foreground">
+                  <Div className="flex items-center justify-center h-64 text-muted-foreground">
                     <Icon name="lucide:ImageIcon" className="w-12 h-12 mr-2" />
-                    <span>Preview en cours de chargement...</span>
-                  </div>
+                    <Span>Preview en cours de chargement...</Span>
+                  </Div>
                 )}
-              </div>
+              </Div>
             )}
-          </div>
+          </Div>
         )}
 
         {/* Containers CACHÉS pour capture PDF */}
         {/* Wheel MASQUÉE pour capture PDF */}
-        <div
+        <Div
           ref={wheelRef}
           style={{
             width: '600px',
@@ -760,10 +760,10 @@ export function BaguaPreviewModal({
               onSectorClick={() => {}} // Forcer le rendu des zones colorées cliquables
             />
           )}
-        </div>
+        </Div>
 
         {/* Grid MASQUÉE pour capture PDF */}
-        <div
+        <Div
           ref={gridRef}
           style={{
             width: '600px',
@@ -775,7 +775,7 @@ export function BaguaPreviewModal({
           data-bagua="grid-container"
         >
           {planImage && config && (
-            <div
+            <Div
               style={{
                 width: '600px',
                 height: '600px',
@@ -784,7 +784,7 @@ export function BaguaPreviewModal({
                 justifyContent: 'center',
               }}
             >
-              <div style={{ maxWidth: '600px', maxHeight: '600px' }}>
+              <Div style={{ maxWidth: '600px', maxHeight: '600px' }}>
                 <BaguaGrid
                   src={planImage}
                   bearingFromNorth={bearingFromNorth}
@@ -793,13 +793,13 @@ export function BaguaPreviewModal({
                   cardsMode={undefined}
                   transformations={transformations}
                 />
-              </div>
-            </div>
+              </Div>
+            </Div>
           )}
-        </div>
+        </Div>
 
         {/* Conteneur des BaguaSectorCard pour capture PDF */}
-        <div
+        <Div
           ref={cardsRef}
           className="relative"
           style={{
@@ -855,7 +855,7 @@ export function BaguaPreviewModal({
                 const accent = sector.colorHex || '#000000'
                 const accents = sector.colorHexes || []
                 return (
-                  <div
+                  <Div
                     key={`pdf-card-${dir}`}
                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 shadow-lg overflow-hidden"
                     style={{
@@ -867,7 +867,7 @@ export function BaguaPreviewModal({
                     }}
                   >
                     {/* Header compact avec couleur de fond */}
-                    <div
+                    <Div
                       className="h-6 flex items-center justify-center text-xs font-bold"
                       style={{
                         background:
@@ -879,21 +879,21 @@ export function BaguaPreviewModal({
                       }}
                     >
                       {dir} • {sector.element} •{sector.number}
-                    </div>
+                    </Div>
 
                     {/* Contenu compact */}
-                    <div className="p-2 space-y-1">
+                    <Div className="p-2 space-y-1">
                       {/* Titre */}
-                      <div
+                      <Div
                         className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
                         style={{ color: pdfTextColor }}
                       >
                         {sector.title}
-                      </div>
+                      </Div>
 
                       {/* Premier tip ou enhancer */}
                       {(sector.tips?.[0] || sector.enhancers?.[0]) && (
-                        <div
+                        <Div
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }} // Toujours gris pour PDF
                         >
@@ -917,12 +917,12 @@ export function BaguaPreviewModal({
                           {((sector.tips?.[0] || sector.enhancers?.[0])?.length || 0) > 35
                             ? (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 32) + '...'
                             : sector.tips?.[0] || sector.enhancers?.[0]}
-                        </div>
+                        </Div>
                       )}
                       {/* Etoile volante — Premium only */}
                       {isPremium && sector.star && (
-                        <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
-                          <div
+                        <Div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
+                          <Div
                             className="text-[9px] leading-tight flex items-center"
                             style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
                           >
@@ -934,8 +934,8 @@ export function BaguaPreviewModal({
                               }}
                             />
                             {sector.star.star} - {sector.star.element}
-                          </div>
-                          <div
+                          </Div>
+                          <Div
                             className="text-[9px] leading-tight flex items-center"
                             style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
                           >
@@ -945,18 +945,18 @@ export function BaguaPreviewModal({
                                 {sector.star.remedies?.join(', ')}
                               </>
                             )}
-                          </div>
-                        </div>
+                          </Div>
+                        </Div>
                       )}
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 )
               }
             )}
-        </div>
+        </Div>
 
         {/* Conteneur des VRAIES cartes React pour page 3 en GRILLE */}
-        <div
+        <Div
           ref={cardsGridRef}
           style={{
             width: '800px',
@@ -969,7 +969,7 @@ export function BaguaPreviewModal({
           }}
         >
           {/* Title */}
-          <h2
+          <H2
             style={{
               textAlign: 'center',
               fontSize: '24px',
@@ -979,10 +979,10 @@ export function BaguaPreviewModal({
             }}
           >
             {t('pdfModal.detailedSectors')}
-          </h2>
+          </H2>
 
           {/* Grid layout for cards - Positioned like BaguaGrid */}
-          <div
+          <Div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -1004,7 +1004,7 @@ export function BaguaPreviewModal({
                 const accent = sector.colorHex || '#000000'
                 const accents = sector.colorHexes || []
                 return (
-                  <div
+                  <Div
                     key={`grid-card-${dir}`}
                     className="rounded-lg border-2 shadow-lg overflow-hidden"
                     style={{
@@ -1018,7 +1018,7 @@ export function BaguaPreviewModal({
                     }}
                   >
                     {/* Header compact avec couleur de fond - IDENTIQUE */}
-                    <div
+                    <Div
                       className="h-6 flex items-center justify-center text-xs font-bold"
                       style={{
                         background:
@@ -1030,21 +1030,21 @@ export function BaguaPreviewModal({
                       }}
                     >
                       {dir} • {sector.element} • {sector.number}
-                    </div>
+                    </Div>
 
                     {/* Contenu compact - PAGE 2 ENRICHIE */}
-                    <div className="p-2 space-y-1">
+                    <Div className="p-2 space-y-1">
                       {/* Titre */}
-                      <div
+                      <Div
                         className="text-xs font-semibold flex items-center justify-center gap-2 text-center"
                         style={{ color: pdfTextColor }}
                       >
                         {sector.title}
-                      </div>
+                      </Div>
 
                       {/* Summary avec icône du secteur - NOUVEAU pour page 2 */}
                       {sector.summary && (
-                        <div
+                        <Div
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
@@ -1056,12 +1056,12 @@ export function BaguaPreviewModal({
                           {sector.summary.length > 35
                             ? sector.summary.substring(0, 32) + '...'
                             : sector.summary}
-                        </div>
+                        </Div>
                       )}
 
                       {/* Relations éléments - NOUVEAU pour page 2 */}
                       {(sector.nourisher || sector.controller) && (
-                        <div
+                        <Div
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
@@ -1073,12 +1073,12 @@ export function BaguaPreviewModal({
                           {sector.nourisher && `${t('bagua.nourishedBy')}: ${sector.nourisher}`}
                           {sector.nourisher && sector.controller && ' • '}
                           {sector.controller && `${t('bagua.controlledBy')}: ${sector.controller}`}
-                        </div>
+                        </Div>
                       )}
 
                       {/* Matières recommandées - NOUVEAU pour page 2 */}
                       {sector.matiere && (
-                        <div
+                        <Div
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
@@ -1090,12 +1090,12 @@ export function BaguaPreviewModal({
                           {sector.matiere.length > 32
                             ? sector.matiere.substring(0, 29) + '...'
                             : sector.matiere}
-                        </div>
+                        </Div>
                       )}
 
                       {/* Premier tip ou enhancer */}
                       {(sector.tips?.[0] || sector.enhancers?.[0]) && (
-                        <div
+                        <Div
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }} // Toujours gris pour PDF
                         >
@@ -1119,13 +1119,13 @@ export function BaguaPreviewModal({
                           {((sector.tips?.[0] || sector.enhancers?.[0])?.length || 0) > 35
                             ? (sector.tips?.[0] || sector.enhancers?.[0])?.substring(0, 32) + '...'
                             : sector.tips?.[0] || sector.enhancers?.[0]}
-                        </div>
+                        </Div>
                       )}
 
                       {/* Etoile volante — Premium only */}
                       {isPremium && sector.star && (
-                        <div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
-                          <div
+                        <Div className="border-t pt-1" style={{ borderColor: pdfBorderColor }}>
+                          <Div
                             className="text-[9px] leading-tight flex items-center"
                             style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
                           >
@@ -1137,8 +1137,8 @@ export function BaguaPreviewModal({
                               }}
                             />
                             {sector.star.star} - {sector.star.element}
-                          </div>
-                          <div
+                          </Div>
+                          <Div
                             className="text-[9px] leading-tight flex items-center"
                             style={{ color: isDarkMode ? '#a0a0a0' : '#6b7280' }}
                           >
@@ -1148,16 +1148,16 @@ export function BaguaPreviewModal({
                                 {sector.star.remedies?.join(', ')}
                               </>
                             )}
-                          </div>
-                        </div>
+                          </Div>
+                        </Div>
                       )}
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 )
               })}
-          </div>
-        </div>
-      </div>
+          </Div>
+        </Div>
+      </Div>
     </Modal>
   )
 }

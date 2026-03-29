@@ -4,9 +4,11 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Div,
   H3,
   P,
   Select,
+  Span,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -91,12 +93,12 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
           <H3 size="h5">{projectName} - Trending Metrics</H3>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-96">
-          <div className="text-center space-y-2">
+          <Div className="text-center space-y-2">
             <P className="text-muted-foreground">No trending data available</P>
             <P className="text-xs text-muted-foreground">
               {error ? 'Failed to load data' : 'No health checks recorded yet'}
             </P>
-          </div>
+          </Div>
         </CardContent>
       </Card>
     )
@@ -177,26 +179,26 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
+        <Div className="flex items-start justify-between">
+          <Div>
             <H3 size="h5">{projectName} - Trending Metrics</H3>
-            <div className="flex gap-6 mt-2 text-sm">
+            <Div className="flex gap-6 mt-2 text-sm">
               <P className="text-muted-foreground">
                 Overall Uptime:{' '}
-                <span className="font-semibold text-foreground">{overallUptime}%</span>
+                <Span className="font-semibold text-foreground">{overallUptime}%</Span>
               </P>
               <P className="text-muted-foreground">
                 Avg Response:{' '}
-                <span className="font-semibold text-foreground">
+                <Span className="font-semibold text-foreground">
                   {avgResponseTime ? `${avgResponseTime}ms` : 'N/A'}
-                </span>
+                </Span>
               </P>
               <P className="text-muted-foreground">
                 Total Checks:{' '}
-                <span className="font-semibold text-foreground">{overallStats.totalChecks}</span>
+                <Span className="font-semibold text-foreground">{overallStats.totalChecks}</Span>
               </P>
-            </div>
-          </div>
+            </Div>
+          </Div>
           <Select value={String(hours)} onValueChange={val => setHours(Number(val))}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -209,17 +211,17 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
               <SelectItem value="168">Last 7d</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </Div>
       </CardHeader>
       <CardContent>
         {sampledData.length === 0 ? (
-          <div className="flex items-center justify-center h-96">
+          <Div className="flex items-center justify-center h-96">
             <P className="text-muted-foreground">No data available for the selected period</P>
-          </div>
+          </Div>
         ) : (
-          <div className="space-y-8">
+          <Div className="space-y-8">
             {/* Response Time Chart */}
-            <div>
+            <Div>
               <H3 size="h6" className="mb-4">
                 Response Time (ms)
               </H3>
@@ -265,10 +267,10 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                   })}
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </Div>
 
             {/* Status Chart */}
-            <div>
+            <Div>
               <H3 size="h6" className="mb-4">
                 Service Availability
               </H3>
@@ -319,8 +321,8 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                   })}
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </Div>
+          </Div>
         )}
       </CardContent>
     </Card>

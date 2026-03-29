@@ -5,10 +5,12 @@ import { LoginButton, RequireAuth, useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import {
   ClientLayout as BaseClientLayout,
+  Div,
   H2,
   Icon,
   LocaleSwitcher,
   PWAInstallPrompt,
+  Span,
   type NavigationLink,
 } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
@@ -54,10 +56,10 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
         mobileLogoIcon="custom:Ezstart"
         mobileLogoHref={`/${currentLocale}/`}
         creator={
-          <div className="flex items-center gap-2">
-            <span>
+          <Div className="flex items-center gap-2">
+            <Span>
               {t('footer.createdWith')} ❤️ {t('footer.by')}{' '}
-            </span>
+            </Span>
             <Link
               target="_blank"
               href="https://www.linkedin.com/in/franck-seradni/"
@@ -65,7 +67,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
             >
               @Franck
             </Link>
-          </div>
+          </Div>
         }
         currentPath={pathname}
         headerLeftContent={
@@ -79,7 +81,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
         }
         navLinks={navLinks}
         headerRightContent={
-          <div className="flex items-center gap-2">
+          <Div className="flex items-center gap-2">
             <LoginButton>{isAuthenticated ? t('auth.logout') : t('auth.login')}</LoginButton>
             <LocaleSwitcher
               locales={locales}
@@ -87,21 +89,21 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
               onLocaleChange={handleLocaleChange}
             />
             <ThemeSwitcher />
-          </div>
+          </Div>
         }
         // Footer customization
         footerLeftContent={
-          <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
-            <span className="text-xs opacity-70 select-none">
+          <Div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
+            <Span className="text-xs opacity-70 select-none">
               {t('footer.copyright', { year: new Date().getFullYear() })}
-            </span>
+            </Span>
             <Link href={`/${currentLocale}/legal-notices`} className="hover:underline text-xs">
               {t('footer.legalNotices')}
             </Link>
-          </div>
+          </Div>
         }
         footerRightContent={
-          <div className="flex gap-3 items-center">
+          <Div className="flex gap-3 items-center">
             <Link
               href="https://github.com/DFranck/ez-start"
               target="_blank"
@@ -118,7 +120,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
             >
               <Icon name="fa:FaEnvelope" size={16} />
             </Link>
-          </div>
+          </Div>
         }
         LinkComponent={Link}
       >

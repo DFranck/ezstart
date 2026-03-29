@@ -174,19 +174,20 @@ export function AuthProvider({
           if (user) {
             store.updateUser(user)
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Only logout on 401 (unauthorized) - not on network/server errors
+          const err = error as { message?: string; status?: number }
           const isAuthFailure =
-            error?.message?.includes('401') ||
-            error?.status === 401 ||
-            error?.message?.toLowerCase().includes('unauthorized')
+            err?.message?.includes('401') ||
+            err?.status === 401 ||
+            err?.message?.toLowerCase().includes('unauthorized')
 
           if (isAuthFailure) {
             logger.debug('[AuthProvider] httpOnly auth failure (401), logging out')
             store.logout()
           } else {
             logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', {
-              error: error?.message,
+              error: err?.message,
             })
           }
         }
@@ -273,10 +274,10 @@ export function useAuth() {
         const user = await client.getCurrentUser(store.accessToken)
         store.updateUser(user)
         return user
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Failed to refresh user:', error)
         // Only logout on 401 - keep session on transient errors
-        if (error?.status === 401) {
+        if ((error as { status?: number })?.status === 401) {
           store.logout()
         }
         throw error
@@ -286,10 +287,10 @@ export function useAuth() {
         const user = await client.getCurrentUser()
         store.updateUser(user)
         return user
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error('Failed to refresh user:', error)
         // Only logout on 401 - keep session on transient errors
-        if (error?.status === 401) {
+        if ((error as { status?: number })?.status === 401) {
           store.logout()
         }
         throw error

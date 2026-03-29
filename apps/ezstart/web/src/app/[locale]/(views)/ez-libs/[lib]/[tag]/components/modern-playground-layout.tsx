@@ -19,35 +19,35 @@ export function ModernPlaygroundLayout({
   activeVariants,
 }: ModernPlaygroundLayoutProps) {
   return (
-    <div className="space-y-6 py-8">
+    <Div className="space-y-6 py-8">
       {/* Header */}
-      <div className="space-y-3">
+      <Div className="space-y-3">
         <H3 className="text-center">{title}</H3>
         {activeVariants && Object.keys(activeVariants).length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <Div className="flex flex-wrap items-center justify-center gap-2">
             {Object.entries(activeVariants).map(([key, value]) => (
               <Badge key={key} variant="secondary" size="sm">
                 {key}: {value}
               </Badge>
             ))}
-          </div>
+          </Div>
         )}
-      </div>
+      </Div>
 
       {/* Main Layout: Preview + Controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Preview Section */}
-        <div className="space-y-4 order-2 lg:order-1">
+        <Div className="space-y-4 order-2 lg:order-1">
           <Card variant="outline" className="relative overflow-hidden min-h-[400px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+            <Div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
             <CardContent className="relative z-10 flex items-center justify-center min-h-[400px] p-8">
               {preview}
             </CardContent>
           </Card>
-        </div>
+        </Div>
 
         {/* Controls Section */}
-        <div className="space-y-4 order-1 lg:order-2">
+        <Div className="space-y-4 order-1 lg:order-2">
           <Card variant="default">
             <CardHeader>
               <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">
@@ -56,13 +56,13 @@ export function ModernPlaygroundLayout({
             </CardHeader>
             <CardContent>{controls}</CardContent>
           </Card>
-        </div>
-      </div>
+        </Div>
+      </Div>
 
       {/* Code Section */}
       <Card variant="floating">
         <CardContent className="p-6">{codeView}</CardContent>
       </Card>
-    </div>
+    </Div>
   )
 }

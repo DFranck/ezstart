@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent, Div, P } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, Div, P, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -67,7 +67,7 @@ export function ScanCard({ scan }: ScanCardProps) {
                   <SetIcon set={runeData.set as string} className="w-5 h-5 shrink-0" />
                   <P className="text-sm font-medium capitalize truncate">
                     {runeData.set as string}
-                    <span className="text-muted-foreground"> ({runeData.slot})</span> +
+                    <Span className="text-muted-foreground"> ({runeData.slot})</Span> +
                     {runeData.level}
                   </P>
                   <Badge
@@ -131,7 +131,7 @@ export function ScanCard({ scan }: ScanCardProps) {
                 )}
                 {runeData.subStats && runeData.subStats.length > 0 && (
                   <>
-                    <span className="text-border">|</span>
+                    <Span className="text-border">|</Span>
                     <P className="truncate">
                       {runeData.subStats
                         .map((s: { type: StatType }) =>
@@ -143,7 +143,7 @@ export function ScanCard({ scan }: ScanCardProps) {
                 )}
                 {analysis?.setWeightedEfficiency !== undefined && (
                   <>
-                    <span className="text-border">|</span>
+                    <Span className="text-border">|</Span>
                     <P className="shrink-0 font-medium">
                       {t('scanCard.eff')}: {analysis.setWeightedEfficiency}%
                     </P>

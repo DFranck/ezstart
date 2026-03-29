@@ -1,5 +1,15 @@
 import { Company } from '@ezbill/types'
-import { Button, Card, CardContent, CardFooter, CardHeader, H3, Icon } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  H3,
+  Icon,
+  Div,
+  P,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
 type Props = {
@@ -11,7 +21,7 @@ type Props = {
 
 const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
   return (
-    <div key={company._id} className="group relative">
+    <Div key={company._id} className="group relative">
       <Card
         className={cn(
           'hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 border-ezbill-company/20 hover:border-ezbill-company/40 group-hover:-translate-y-1',
@@ -21,34 +31,34 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
       >
         <CardHeader className="flex items-center justify-between">
           {/* Company Icon */}
-          <div className="min-w-8 h-8 bg-gradient-company rounded-xl flex items-center justify-center">
+          <Div className="min-w-8 h-8 bg-gradient-company rounded-xl flex items-center justify-center">
             <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
-          </div>
+          </Div>
           <H3 size={'h6'} className="text-right">
             {company.companyName}
           </H3>
         </CardHeader>
         <CardContent>
           {company.email && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Mail" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.email}
-            </p>
+            </P>
           )}
           {company.phone && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Phone" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.phone}
-            </p>
+            </P>
           )}
           {(company.city || company.country || company.address) && (
-            <p className="text-muted-foreground/80 text-sm line-clamp-2">
+            <P className="text-muted-foreground/80 text-sm line-clamp-2">
               <Icon name="lucide:MapPin" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {[company.address, company.city, company.country].filter(Boolean).join(', ')}
-            </p>
+            </P>
           )}
           {company.website && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Globe" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               <a
                 href={company.website}
@@ -59,10 +69,10 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
               >
                 {company.website.replace(/^https?:\/\//, '')}
               </a>
-            </p>
+            </P>
           )}
           {company.taxNumber && (
-            <p className="text-muted-foreground/60 text-xs mt-2">Tax: {company.taxNumber}</p>
+            <P className="text-muted-foreground/60 text-xs mt-2">Tax: {company.taxNumber}</P>
           )}
         </CardContent>
         {/* Floating Actions */}
@@ -91,7 +101,7 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
           </Button>
         </CardFooter>
       </Card>
-    </div>
+    </Div>
   )
 }
 

@@ -17,12 +17,12 @@ import { PlaygroundVariantSelects } from '../components/playground-variant-selec
 import { ModernPlaygroundLayout } from '../components/modern-playground-layout'
 
 export const HeadingPlayground = () => (
-  <div className="space-y-6 py-8">
+  <Div className="space-y-6 py-8">
     <Accordion type="multiple" className="w-full">
       {HEADING_TAGS.map(tag => (
         <AccordionItem value={tag} key={tag}>
           <AccordionTrigger className="text-xl font-semibold">
-            <span className="font-mono">&lt;{tag}&gt;</span> Playground
+            <Span className="font-mono">&lt;{tag}&gt;</Span> Playground
           </AccordionTrigger>
           <AccordionContent>
             <HeadingVariantTester tag={tag} />
@@ -30,7 +30,7 @@ export const HeadingPlayground = () => (
         </AccordionItem>
       ))}
     </Accordion>
-  </div>
+  </Div>
 )
 
 type TesterProps = {
@@ -64,7 +64,7 @@ const HeadingVariantTester = ({ tag }: TesterProps): any => {
   const fakeAliasCode = buildFakeTag(tag, selected, aliasComponent, content)
 
   return (
-    <div className="pt-4">
+    <Div className="pt-4">
       <ModernPlaygroundLayout
         title={`<${tag}> Component`}
         activeVariants={selected}
@@ -73,9 +73,11 @@ const HeadingVariantTester = ({ tag }: TesterProps): any => {
             {content}
           </Tag>
         }
-        controls={<PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />}
+        controls={
+          <PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />
+        }
         codeView={<PlaygroundCodeView fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />}
       />
-    </div>
+    </Div>
   )
 }

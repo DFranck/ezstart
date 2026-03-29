@@ -52,9 +52,9 @@ function AuditsMonitoringContent(): any {
   if (isLoading) {
     return (
       <Section size="full">
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner size="xl" text={t('loading')} variant="fancy" />
-        </div>
+        </Div>
       </Section>
     )
   }
@@ -70,13 +70,13 @@ function AuditsMonitoringContent(): any {
 
     return (
       <Section size="full">
-        <div className="flex items-center justify-center py-20">
-          <div className="space-y-4 text-center max-w-lg">
-            <div className="text-6xl">⚠️</div>
+        <Div className="flex items-center justify-center py-20">
+          <Div className="space-y-4 text-center max-w-lg">
+            <Div className="text-6xl">⚠️</Div>
             <P className="text-destructive font-semibold">Failed to load monitoring data</P>
             <P className="text-muted-foreground">{errorMessage}</P>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Section>
     )
   }
@@ -91,11 +91,11 @@ function AuditsMonitoringContent(): any {
         <Div layout={'center'}>
           <H1>{t('auditsPage.title')}</H1>
           <P className="text-muted-foreground">{t('auditsPage.description')}</P>
-          <div className="flex items-center gap-3">
+          <Div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
               Next update in: {minutes}:{String(seconds).padStart(2, '0')}
             </P>
-          </div>
+          </Div>
         </Div>
 
         <Div layout="grid" size={'full'}>
@@ -138,24 +138,24 @@ function AuditsMonitoringContent(): any {
             return (
               <>
                 {/* Audits Grid */}
-                <div className={`grid ${gridCols} gap-4 mt-4`}>
+                <Div className={`grid ${gridCols} gap-4 mt-4`}>
                   {filteredAudits.map((audit: any) => (
-                    <div key={audit.auditType} id={`audit-${audit.auditType}`}>
+                    <Div key={audit.auditType} id={`audit-${audit.auditType}`}>
                       <AuditCard audit={audit} />
-                    </div>
+                    </Div>
                   ))}
-                </div>
+                </Div>
 
                 {filteredAudits.length === 0 && audits.length > 0 && (
-                  <div className="text-center py-12">
+                  <Div className="text-center py-12">
                     <P className="text-muted-foreground">No audits match your filters.</P>
-                  </div>
+                  </Div>
                 )}
 
                 {audits.length === 0 && (
-                  <div className="text-center py-12">
+                  <Div className="text-center py-12">
                     <P className="text-muted-foreground">{t('auditsPage.noAudits')}</P>
-                  </div>
+                  </Div>
                 )}
               </>
             )

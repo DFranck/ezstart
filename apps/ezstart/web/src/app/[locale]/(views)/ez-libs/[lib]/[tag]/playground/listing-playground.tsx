@@ -48,13 +48,13 @@ export default function ListingPlayground() {
   const fakeTagCodeLI = buildFakeTag('li', selectedLI, 'LI', 'List item content')
 
   return (
-    <div className="space-y-6 py-8">
+    <Div className="space-y-6 py-8">
       {/* Header */}
       <H3 className="text-center">&lt;UL&gt; & &lt;LI&gt; Component Playground</H3>
 
       {/* Preview */}
       <Card variant="outline" className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <Div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <CardContent className="relative z-10 flex items-center justify-center min-h-[300px] p-8">
           <UL {...selectedUL}>
             <LI {...selectedLI}>First list item</LI>
@@ -66,7 +66,7 @@ export default function ListingPlayground() {
       </Card>
 
       {/* Controls - 2 column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* UL Controls */}
         <Card variant="default">
           <CardHeader>
@@ -75,7 +75,11 @@ export default function ListingPlayground() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PlaygroundVariantSelects meta={metaUL} selected={selectedUL} onChange={handleChangeUL} />
+            <PlaygroundVariantSelects
+              meta={metaUL}
+              selected={selectedUL}
+              onChange={handleChangeUL}
+            />
           </CardContent>
         </Card>
 
@@ -87,13 +91,17 @@ export default function ListingPlayground() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PlaygroundVariantSelects meta={metaLI} selected={selectedLI} onChange={handleChangeLI} />
+            <PlaygroundVariantSelects
+              meta={metaLI}
+              selected={selectedLI}
+              onChange={handleChangeLI}
+            />
           </CardContent>
         </Card>
-      </div>
+      </Div>
 
       {/* Code Section - 2 column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card variant="floating">
           <CardHeader>
             <Label className="text-sm font-medium">UL Usage</Label>
@@ -111,7 +119,7 @@ export default function ListingPlayground() {
             <PlaygroundCodeView fakeTagCode={fakeTagCodeLI} fakeAliasCode={fakeTagCodeLI} />
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </Div>
+    </Div>
   )
 }

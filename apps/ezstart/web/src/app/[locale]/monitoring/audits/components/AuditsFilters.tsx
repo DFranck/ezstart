@@ -10,7 +10,9 @@ import {
   CommandList,
   CommandSeparator,
   Div,
+  P,
   Select,
+  Span,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -45,7 +47,11 @@ interface Audit {
 
 interface AuditsFiltersProps {
   audits: Audit[]
-  onFilterChange?: (filters: { domain: DomainFilter; search: string; selectedAudit: string | null }) => void
+  onFilterChange?: (filters: {
+    domain: DomainFilter
+    search: string
+    selectedAudit: string | null
+  }) => void
   children: (filteredAudits: Audit[]) => React.ReactNode
 }
 
@@ -110,7 +116,6 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
       : searchFilteredAudits
   }, [audits, activeDomain, searchQuery, selectedAuditType])
 
-
   // Group by score
   const perfect = filteredAudits.filter(a => a.score === 100)
   const excellent = filteredAudits.filter(a => a.score !== null && a.score >= 90 && a.score < 100)
@@ -158,19 +163,19 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
 
   const handleAuditSelect = (auditType: string) => {
     // Toggle: if already selected, deselect it (return to full view)
-    setSelectedAuditType(prev => prev === auditType ? null : auditType)
+    setSelectedAuditType(prev => (prev === auditType ? null : auditType))
   }
 
   return (
     <Div layout="col" className="w-full max-w-4xl gap-2">
       {/* Domain Filter - Mobile: Select, Desktop: Tabs */}
-      <div className="space-y-2 sm:space-y-3">
-        <p className="text-xs sm:text-sm font-medium text-muted-foreground px-1">
+      <Div className="space-y-2 sm:space-y-3">
+        <P className="text-xs sm:text-sm font-medium text-muted-foreground px-1">
           Filter by Domain
-        </p>
+        </P>
 
         {/* Mobile: Dropdown */}
-        <div className="lg:hidden">
+        <Div className="lg:hidden">
           <Select
             value={activeDomain}
             onValueChange={value => handleDomainChange(value as DomainFilter)}
@@ -183,17 +188,17 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                 const count = getDomainCount(tab.key as DomainFilter)
                 return (
                   <SelectItem key={tab.key} value={tab.key}>
-                    <div className="flex items-center gap-2 w-full">
-                      <span>{tab.emoji}</span>
-                      <span className="flex-1">{tab.label}</span>
-                      <span className="text-xs text-muted-foreground">({count})</span>
-                    </div>
+                    <Div className="flex items-center gap-2 w-full">
+                      <Span>{tab.emoji}</Span>
+                      <Span className="flex-1">{tab.label}</Span>
+                      <Span className="text-xs text-muted-foreground">({count})</Span>
+                    </Div>
                   </SelectItem>
                 )
               })}
             </SelectContent>
           </Select>
-        </div>
+        </Div>
 
         {/* Desktop: Tabs */}
         <Div className="hidden lg:block">
@@ -206,16 +211,16 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                 const count = getDomainCount(tab.key as DomainFilter)
                 return (
                   <TabsTrigger key={tab.key} value={tab.key}>
-                    <span>{tab.emoji}</span>
-                    <span>{tab.label}</span>
-                    <span className="ml-1 text-xs text-muted-foreground">({count})</span>
+                    <Span>{tab.emoji}</Span>
+                    <Span>{tab.label}</Span>
+                    <Span className="ml-1 text-xs text-muted-foreground">({count})</Span>
                   </TabsTrigger>
                 )
               })}
             </TabsList>
           </Tabs>
         </Div>
-      </div>
+      </Div>
 
       {/* Command Search + Score Groups */}
       <Command className="rounded-lg border shadow-md">
@@ -244,8 +249,8 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                         : ''
                     }`}
                   >
-                    <span className="flex-shrink-0">{audit.emoji}</span>
-                    <span className="flex-1 text-sm truncate">{audit.name}</span>
+                    <Span className="flex-shrink-0">{audit.emoji}</Span>
+                    <Span className="flex-1 text-sm truncate">{audit.name}</Span>
                     <Badge className="bg-status-healthy/10 text-status-healthy border-status-healthy/20 px-1.5 py-0.5 text-[10px] leading-none flex-shrink-0">
                       {audit.score}
                     </Badge>
@@ -273,8 +278,8 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                         : ''
                     }`}
                   >
-                    <span className="flex-shrink-0">{audit.emoji}</span>
-                    <span className="flex-1 text-sm truncate">{audit.name}</span>
+                    <Span className="flex-shrink-0">{audit.emoji}</Span>
+                    <Span className="flex-1 text-sm truncate">{audit.name}</Span>
                     <Badge className="bg-status-healthy/10 text-status-healthy border-status-healthy/20 px-1.5 py-0.5 text-[10px] leading-none flex-shrink-0">
                       {audit.score}
                     </Badge>
@@ -288,10 +293,7 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
           {/* Good (80-89) */}
           {good.length > 0 && (
             <>
-              <CommandGroup
-                heading={`👍 Good (80-89) - ${good.length}`}
-                headingVariant="degraded"
-              >
+              <CommandGroup heading={`👍 Good (80-89) - ${good.length}`} headingVariant="degraded">
                 {good.map(audit => (
                   <CommandItem
                     key={audit.auditType}
@@ -302,8 +304,8 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                         : ''
                     }`}
                   >
-                    <span className="flex-shrink-0">{audit.emoji}</span>
-                    <span className="flex-1 text-sm truncate">{audit.name}</span>
+                    <Span className="flex-shrink-0">{audit.emoji}</Span>
+                    <Span className="flex-1 text-sm truncate">{audit.name}</Span>
                     <Badge className="bg-status-degraded/10 text-status-degraded border-status-degraded/20 px-1.5 py-0.5 text-[10px] leading-none flex-shrink-0">
                       {audit.score}
                     </Badge>
@@ -330,8 +332,8 @@ export function AuditsFilters({ audits, children }: AuditsFiltersProps) {
                       : ''
                   }`}
                 >
-                  <span className="flex-shrink-0">{audit.emoji}</span>
-                  <span className="flex-1 text-sm truncate">{audit.name}</span>
+                  <Span className="flex-shrink-0">{audit.emoji}</Span>
+                  <Span className="flex-1 text-sm truncate">{audit.name}</Span>
                   <Badge className="bg-status-unhealthy/10 text-status-unhealthy border-status-unhealthy/20 px-1.5 py-0.5 text-[10px] leading-none flex-shrink-0">
                     {audit.score}
                   </Badge>

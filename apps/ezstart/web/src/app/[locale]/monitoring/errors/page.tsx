@@ -45,9 +45,9 @@ function ErrorsMonitoringContent(): any {
   if (isLoading) {
     return (
       <Section size="full">
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner size="xl" text={t('loading')} variant="fancy" />
-        </div>
+        </Div>
       </Section>
     )
   }
@@ -63,13 +63,13 @@ function ErrorsMonitoringContent(): any {
 
     return (
       <Section size="full">
-        <div className="flex items-center justify-center py-20">
-          <div className="space-y-4 text-center max-w-lg">
-            <div className="text-6xl">⚠️</div>
+        <Div className="flex items-center justify-center py-20">
+          <Div className="space-y-4 text-center max-w-lg">
+            <Div className="text-6xl">⚠️</Div>
             <P className="text-destructive font-semibold">Failed to load monitoring data</P>
             <P className="text-muted-foreground">{errorMessage}</P>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Section>
     )
   }
@@ -84,11 +84,11 @@ function ErrorsMonitoringContent(): any {
         <Div layout={'center'}>
           <H1>{t('errorsPage.title')}</H1>
           <P className="text-muted-foreground">{t('errorsPage.description')}</P>
-          <div className="flex items-center gap-3">
+          <Div className="flex items-center gap-3">
             <P className="text-xs text-muted-foreground">
               Next update in: {minutes}:{String(seconds).padStart(2, '0')}
             </P>
-          </div>
+          </Div>
         </Div>
 
         <Div layout="grid" size={'full'}>

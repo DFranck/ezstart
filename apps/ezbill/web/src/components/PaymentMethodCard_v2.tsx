@@ -7,6 +7,8 @@ import {
   CardFooter,
   CardHeader,
   Icon,
+  Div,
+  P,
 } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
@@ -19,7 +21,7 @@ type Props = {
 
 const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props): any => {
   return (
-    <div key={paymentMethod._id} className="group relative">
+    <Div key={paymentMethod._id} className="group relative">
       <Card
         className={cn(
           'hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 border-ezbill-payment/20 hover:border-ezbill-payment/40 group-hover:-translate-y-1',
@@ -28,7 +30,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
         onClick={() => onEdit(paymentMethod)}
       >
         <CardHeader className="flex items-center justify-between">
-          <div className="w-8 h-8 bg-gradient-payment rounded-xl flex items-center justify-center">
+          <Div className="w-8 h-8 bg-gradient-payment rounded-xl flex items-center justify-center">
             <Icon
               name={
                 paymentMethod.type === 'crypto_wallet'
@@ -39,7 +41,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
               }
               className="w-6 h-6 text-white"
             />
-          </div>
+          </Div>
           {paymentMethod.isDefault && (
             <Badge variant="success" size="sm">
               Default
@@ -47,22 +49,22 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
           )}
         </CardHeader>
         <CardContent className="">
-          <p className="text-muted-foreground text-sm mb-2 capitalize">
+          <P className="text-muted-foreground text-sm mb-2 capitalize">
             <Icon name="lucide:Info" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
             {paymentMethod.type.replace(/_/g, ' ')}
-          </p>
+          </P>
 
           {paymentMethod.type === 'crypto_wallet' && (
             <>
-              <p className="text-muted-foreground text-sm mb-1">
+              <P className="text-muted-foreground text-sm mb-1">
                 <Icon name="lucide:Coins" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                 {paymentMethod.currency} • {paymentMethod.network}
-              </p>
+              </P>
               {paymentMethod.walletAddress && (
-                <p className="text-muted-foreground/80 text-xs line-clamp-1 font-mono break-all">
+                <P className="text-muted-foreground/80 text-xs line-clamp-1 font-mono break-all">
                   <Icon name="lucide:Hash" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   {paymentMethod.walletAddress}
-                </p>
+                </P>
               )}
             </>
           )}
@@ -70,42 +72,42 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
           {paymentMethod.type === 'bank_transfer' && (
             <>
               {paymentMethod.bankName && (
-                <p className="text-muted-foreground text-sm mb-1">
+                <P className="text-muted-foreground text-sm mb-1">
                   <Icon name="lucide:Building2" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   {paymentMethod.bankName}
-                </p>
+                </P>
               )}
               {paymentMethod.accountNumber && (
-                <p className="text-muted-foreground/80 text-sm mb-1">
+                <P className="text-muted-foreground/80 text-sm mb-1">
                   <Icon name="lucide:CreditCard" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
                   Account: {paymentMethod.accountNumber}
-                </p>
+                </P>
               )}
               {paymentMethod.iban && (
-                <p className="text-muted-foreground/80 text-sm mb-1 font-mono text-xs">
+                <P className="text-muted-foreground/80 text-sm mb-1 font-mono text-xs">
                   IBAN: {paymentMethod.iban}
-                </p>
+                </P>
               )}
               {paymentMethod.swift && (
-                <p className="text-muted-foreground/80 text-sm mb-1">
+                <P className="text-muted-foreground/80 text-sm mb-1">
                   SWIFT: {paymentMethod.swift}
-                </p>
+                </P>
               )}
             </>
           )}
 
           {paymentMethod.type === 'cash' && (
-            <p className="text-muted-foreground text-sm">
+            <P className="text-muted-foreground text-sm">
               <Icon name="lucide:Banknote" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               Cash payment
-            </p>
+            </P>
           )}
 
           {paymentMethod.instructions && (
-            <p className="text-muted-foreground/60 text-xs mt-2 italic line-clamp-2">
+            <P className="text-muted-foreground/60 text-xs mt-2 italic line-clamp-2">
               <Icon name="lucide:MessageCircle" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {paymentMethod.instructions}
-            </p>
+            </P>
           )}
         </CardContent>
         {/* Floating Actions */}
@@ -134,7 +136,7 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, className }: Props
           </Button>
         </CardFooter>
       </Card>
-    </div>
+    </Div>
   )
 }
 

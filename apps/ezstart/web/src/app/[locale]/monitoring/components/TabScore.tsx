@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, H2, P } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, Div, H2, P, Span } from '@ezstart/ui/components'
 
 interface TabScoreProps {
   score: number
@@ -51,19 +51,19 @@ export function TabScore({ score, status, title = 'Overall Score', subtitle }: T
         {subtitle && <P className="text-sm text-muted-foreground text-center">{subtitle}</P>}
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex items-end">
-            <div className={`text-8xl font-bold ${getScoreColor()}`}>{score}</div>
-            <span className={`text-3xl font-semibold mb-2 ml-1 ${getScoreColor()}`}>%</span>
-            <div className="absolute -top-2 -right-2 text-4xl">{getStatusEmoji()}</div>
-          </div>
+        <Div className="flex flex-col items-center space-y-4">
+          <Div className="relative flex items-end">
+            <Div className={`text-8xl font-bold ${getScoreColor()}`}>{score}</Div>
+            <Span className={`text-3xl font-semibold mb-2 ml-1 ${getScoreColor()}`}>%</Span>
+            <Div className="absolute -top-2 -right-2 text-4xl">{getStatusEmoji()}</Div>
+          </Div>
 
           <P className="text-xl font-semibold capitalize text-center">{status}</P>
 
-          <div className="w-full max-w-md relative">
+          <Div className="w-full max-w-md relative">
             {/* Progress bar */}
-            <div className="h-3 bg-muted rounded-full overflow-hidden">
-              <div
+            <Div className="h-3 bg-muted rounded-full overflow-hidden">
+              <Div
                 className={`h-full ${
                   score >= 90
                     ? 'bg-status-healthy'
@@ -75,16 +75,16 @@ export function TabScore({ score, status, title = 'Overall Score', subtitle }: T
                 } transition-all duration-500`}
                 style={{ width: `${score}%` }}
               />
-            </div>
+            </Div>
 
             {/* Target marker at 90% */}
-            <div
+            <Div
               className="absolute top-0 h-3 w-0.5 bg-foreground/40"
               style={{ left: '90%' }}
               title="Target: 90+"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
       </CardContent>
     </Card>
   )

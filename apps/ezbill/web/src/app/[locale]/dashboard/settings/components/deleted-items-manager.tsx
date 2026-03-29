@@ -1,7 +1,7 @@
 'use client'
 
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
-import { Button, Card, H4 } from '@ezstart/ui/components'
+import { Button, Card, H4, Div, P } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 interface DeletedItemsManagerProps<T extends { _id: string; deletedAt?: string }> {
@@ -29,12 +29,14 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
     isOpen: boolean
     item: T | null
   }>({ isOpen: false, item: null })
-  
+
   if (safeItems.length === 0) {
     return (
       <Card className="p-4">
         <H4>{title}</H4>
-        <p className="text-sm text-muted-foreground mt-2">No deleted {title.toLowerCase()} found.</p>
+        <P className="text-sm text-muted-foreground mt-2">
+          No deleted {title.toLowerCase()} found.
+        </P>
       </Card>
     )
   }
@@ -56,18 +58,20 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
 
   return (
     <Card className="p-4">
-      <H4>{title} ({safeItems.length})</H4>
-      <div className="mt-4 space-y-3">
-        {safeItems.map((item) => (
-          <div key={item._id} className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex-1">
-              <div className="font-medium">{getDisplayName(item)}</div>
-              <div className="text-sm text-muted-foreground">{getDescription(item)}</div>
-              <div className="text-xs text-muted-foreground mt-1">
+      <H4>
+        {title} ({safeItems.length})
+      </H4>
+      <Div className="mt-4 space-y-3">
+        {safeItems.map(item => (
+          <Div key={item._id} className="flex items-center justify-between p-3 border rounded-lg">
+            <Div className="flex-1">
+              <Div className="font-medium">{getDisplayName(item)}</Div>
+              <Div className="text-sm text-muted-foreground">{getDescription(item)}</Div>
+              <Div className="text-xs text-muted-foreground mt-1">
                 Deleted: {formatDeletedDate(item.deletedAt)}
-              </div>
-            </div>
-            <div className="flex gap-2">
+              </Div>
+            </Div>
+            <Div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -84,11 +88,11 @@ export function DeletedItemsManager<T extends { _id: string; deletedAt?: string 
               >
                 Delete Forever
               </Button>
-            </div>
-          </div>
+            </Div>
+          </Div>
         ))}
-      </div>
-      
+      </Div>
+
       <DeleteConfirmationDialog
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false, item: null })}

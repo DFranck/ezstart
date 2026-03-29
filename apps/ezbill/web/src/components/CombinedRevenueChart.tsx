@@ -13,6 +13,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  Div,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useState } from 'react'
@@ -145,16 +146,16 @@ export function CombinedRevenueChart({ invoices, quotes, className }: CombinedRe
   return (
     <Card className={className} variant="floating">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+        <Div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Div>
             <CardTitle>Revenue Overview</CardTitle>
             <CardDescription>
               Payments received (bars), invoices & quotes created (lines)
             </CardDescription>
-          </div>
+          </Div>
 
           {/* Controls: hidden on mobile, interactive on desktop */}
-          <div className="flex-wrap gap-2 hidden sm:flex">
+          <Div className="flex-wrap gap-2 hidden sm:flex">
             <Button
               variant={period === '6m' ? 'default' : 'outline'}
               size="sm"
@@ -183,16 +184,13 @@ export function CombinedRevenueChart({ invoices, quotes, className }: CombinedRe
                 ))}
               </select>
             )}
-          </div>
-        </div>
+          </Div>
+        </Div>
       </CardHeader>
 
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 10, right: 0, bottom: 0, left: -14 }}
-          >
+          <ComposedChart data={chartData} margin={{ top: 10, right: 0, bottom: 0, left: -14 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis
               dataKey="month"

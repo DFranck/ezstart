@@ -36,10 +36,10 @@ export default function DivPlayground() {
 
   const content = (
     <>
-      <div>
+      <Div>
         <H2>I'm a Div</H2>
         <H4>Play with me, controls are on the right</H4>
-      </div>
+      </Div>
 
       <P className="line-clamp-3 md:line-clamp-none">
         Lorem ipsum dolor, sit amet consectetur adipisicing elit. Error, accusantium quasi officia
@@ -57,7 +57,9 @@ export default function DivPlayground() {
       title="<Div> Component Playground"
       activeVariants={selected}
       preview={<Div {...selected}>{content}</Div>}
-      controls={<PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />}
+      controls={
+        <PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />
+      }
       codeView={<PlaygroundCodeView fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />}
     />
   )

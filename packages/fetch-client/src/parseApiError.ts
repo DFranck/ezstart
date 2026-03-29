@@ -2,13 +2,13 @@ import type { ApiError } from './types'
 
 /**
  * Parse API error response into human-readable message (always in English)
- * 
+ *
  * Handles multiple API error formats:
  * - Rate limit errors: { error: { message, code, retryAfter } }
  * - Validation errors: { error: { message, code } }
  * - Standard errors: { error: "message" }
  * - Legacy errors: { message: "..." }
- * 
+ *
  * @example
  * ```ts
  * const response = await callApi('/users', { appName: 'ezbill', method: 'POST', body })
@@ -27,7 +27,7 @@ export function parseApiError(errorData: ApiError | null | undefined): string {
   // Handle nested error object (current standard format)
   // Example: { error: { message: "...", code: "..." } }
   if (typeof errorData.error === 'object' && errorData.error !== null) {
-    const nestedError = errorData.error as any
+    const nestedError = errorData.error as { message?: string }
     if (nestedError.message) {
       return nestedError.message
     }

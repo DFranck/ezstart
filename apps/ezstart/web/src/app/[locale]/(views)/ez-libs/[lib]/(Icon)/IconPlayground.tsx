@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Button,
   Div,
   H3,
   H4,
@@ -279,13 +280,14 @@ const IconPlayground = ({ title }: Props): any => {
         <H4>Popular Icons</H4>
         <Div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
           {POPULAR_ICONS.map(iconName => (
-            <button
+            <Button
               key={iconName}
+              variant="outline"
               onClick={() => {
                 setPlaygroundValue(iconName)
                 setQuery(iconName)
               }}
-              className="group flex flex-col items-center justify-center p-4 rounded-lg border border-border hover:border-primary hover:bg-accent transition-all cursor-pointer aspect-square hover:shadow-md"
+              className="group flex flex-col items-center justify-center p-4 rounded-lg border border-border hover:border-primary hover:bg-accent transition-all cursor-pointer aspect-square hover:shadow-md h-auto"
               aria-label={`Select ${iconName}`}
             >
               <Icon
@@ -297,7 +299,7 @@ const IconPlayground = ({ title }: Props): any => {
               <Span className="text-xs mt-2 text-center text-muted-foreground group-hover:text-foreground truncate w-full transition-colors">
                 {iconName.split(':')[1]}
               </Span>
-            </button>
+            </Button>
           ))}
         </Div>
       </Div>

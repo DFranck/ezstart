@@ -10,10 +10,12 @@ import {
   H2,
   H3,
   Icon,
+  LI,
   P,
   Section,
   Span,
   Strong,
+  UL,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -111,11 +113,11 @@ export default function CareersPage() {
                       <H3 size="h6" className="mb-2">
                         {item.title}
                       </H3>
-                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <UL className="list-disc list-inside space-y-1 text-muted-foreground">
                         {item.tasks.map((task, taskIndex) => (
-                          <li key={taskIndex}>{task}</li>
+                          <LI key={taskIndex}>{task}</LI>
                         ))}
-                      </ul>
+                      </UL>
                     </Div>
                   ))}
                 </Div>
@@ -132,19 +134,19 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.requirements.mustHave.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <UL className="list-disc list-inside space-y-2">
                       {(t.raw('bdRole.sections.requirements.mustHave.items') as string[]).map(
                         (item, index) => (
-                          <li key={index} className="leading-relaxed">
+                          <LI key={index} className="leading-relaxed">
                             <Span
                               dangerouslySetInnerHTML={{
-                                __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                                __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                               }}
                             />
-                          </li>
+                          </LI>
                         )
                       )}
-                    </ul>
+                    </UL>
                   </Div>
 
                   {/* Ideal Background */}
@@ -152,19 +154,19 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.requirements.idealBackground.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <UL className="list-disc list-inside space-y-2">
                       {(
                         t.raw('bdRole.sections.requirements.idealBackground.items') as string[]
                       ).map((item, index) => (
-                        <li key={index} className="leading-relaxed">
+                        <LI key={index} className="leading-relaxed">
                           <Span
                             dangerouslySetInnerHTML={{
-                              __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                              __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                             }}
                           />
-                        </li>
+                        </LI>
                       ))}
-                    </ul>
+                    </UL>
                   </Div>
 
                   {/* NOT Required */}
@@ -172,13 +174,13 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.requirements.notRequired.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <UL className="list-disc list-inside space-y-1 text-muted-foreground">
                       {(t.raw('bdRole.sections.requirements.notRequired.items') as string[]).map(
                         (item, index) => (
-                          <li key={index}>{item}</li>
+                          <LI key={index}>{item}</LI>
                         )
                       )}
-                    </ul>
+                    </UL>
                   </Div>
                 </Div>
               </Div>
@@ -194,19 +196,19 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.offer.compensation.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <UL className="list-disc list-inside space-y-2">
                       {(t.raw('bdRole.sections.offer.compensation.items') as string[]).map(
                         (item, index) => (
-                          <li key={index} className="leading-relaxed">
+                          <LI key={index} className="leading-relaxed">
                             <Span
                               dangerouslySetInnerHTML={{
-                                __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                                __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                               }}
                             />
-                          </li>
+                          </LI>
                         )
                       )}
-                    </ul>
+                    </UL>
                   </Div>
 
                   {/* Growth & Impact */}
@@ -214,19 +216,19 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.offer.growth.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <UL className="list-disc list-inside space-y-2">
                       {(t.raw('bdRole.sections.offer.growth.items') as string[]).map(
                         (item, index) => (
-                          <li key={index} className="leading-relaxed">
+                          <LI key={index} className="leading-relaxed">
                             <Span
                               dangerouslySetInnerHTML={{
-                                __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                                __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                               }}
                             />
-                          </li>
+                          </LI>
                         )
                       )}
-                    </ul>
+                    </UL>
                   </Div>
 
                   {/* Team Culture */}
@@ -234,19 +236,19 @@ export default function CareersPage() {
                     <H3 size="h6" className="mb-2">
                       {t('bdRole.sections.offer.culture.title')}
                     </H3>
-                    <ul className="list-disc list-inside space-y-2">
+                    <UL className="list-disc list-inside space-y-2">
                       {(t.raw('bdRole.sections.offer.culture.items') as string[]).map(
                         (item, index) => (
-                          <li key={index} className="leading-relaxed">
+                          <LI key={index} className="leading-relaxed">
                             <Span
                               dangerouslySetInnerHTML={{
-                                __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                                __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                               }}
                             />
-                          </li>
+                          </LI>
                         )
                       )}
-                    </ul>
+                    </UL>
                   </Div>
                 </Div>
               </Div>
@@ -263,7 +265,8 @@ export default function CareersPage() {
                   </a>
                 </Button>
                 <P className="text-sm text-muted-foreground mt-4">
-                  Send your CV and a brief description to: <Strong>aseradni@nexora-venture.com</Strong>
+                  Send your CV and a brief description to:{' '}
+                  <Strong>aseradni@nexora-venture.com</Strong>
                 </P>
               </Div>
             </CardContent>
@@ -292,11 +295,11 @@ export default function CareersPage() {
               <H3 size="h5" className="mb-4 text-gp-primary">
                 {t('mission.traction.title')}
               </H3>
-              <ul className="list-disc list-inside space-y-2">
+              <UL className="list-disc list-inside space-y-2">
                 {(t.raw('mission.traction.items') as string[]).map((item, index) => (
-                  <li key={index}>{item}</li>
+                  <LI key={index}>{item}</LI>
                 ))}
-              </ul>
+              </UL>
             </Div>
 
             {/* Our Values */}
@@ -304,17 +307,17 @@ export default function CareersPage() {
               <H3 size="h5" className="mb-4 text-gp-primary">
                 {t('mission.values.title')}
               </H3>
-              <ul className="list-disc list-inside space-y-2">
+              <UL className="list-disc list-inside space-y-2">
                 {(t.raw('mission.values.items') as string[]).map((item, index) => (
-                  <li key={index} className="leading-relaxed">
+                  <LI key={index} className="leading-relaxed">
                     <Span
                       dangerouslySetInnerHTML={{
-                        __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                        __html: item.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                       }}
                     />
-                  </li>
+                  </LI>
                 ))}
-              </ul>
+              </UL>
             </Div>
           </Div>
         </Div>
@@ -328,18 +331,22 @@ export default function CareersPage() {
           </H2>
           <Div className="bg-card p-8 rounded-lg border shadow-sm">
             <P className="mb-6 text-base leading-relaxed">{t('future.content')}</P>
-            <ul className="space-y-3 mb-6">
+            <UL className="space-y-3 mb-6">
               {(t.raw('future.roles') as string[]).map((role, index) => (
-                <li key={index} className="flex items-start gap-3 leading-relaxed">
-                  <Icon name="lucide:Sparkles" size={18} className="text-gp-primary flex-shrink-0 mt-0.5" />
+                <LI key={index} className="flex items-start gap-3 leading-relaxed">
+                  <Icon
+                    name="lucide:Sparkles"
+                    size={18}
+                    className="text-gp-primary flex-shrink-0 mt-0.5"
+                  />
                   <Span
                     dangerouslySetInnerHTML={{
-                      __html: role.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                      __html: role.replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
                     }}
                   />
-                </li>
+                </LI>
               ))}
-            </ul>
+            </UL>
             <P className="text-muted-foreground text-sm italic border-t pt-4">{t('future.cta')}</P>
           </Div>
         </Div>
@@ -351,7 +358,7 @@ export default function CareersPage() {
           <P className="text-sm">
             <Span
               dangerouslySetInnerHTML={{
-                __html: t('footer.eoe').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                __html: t('footer.eoe').replace(/\*\*(.*?)\*\*/g, '<Strong>$1</Strong>'),
               }}
             />
           </P>

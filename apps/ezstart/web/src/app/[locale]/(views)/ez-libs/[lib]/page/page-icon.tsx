@@ -19,7 +19,7 @@ const EzIconPage = (): any => {
   if (!lib) {
     return (
       <Main withHeaderOffset>
-        <p>{t('notFound')}</p>
+        <P>{t('notFound')}</P>
       </Main>
     )
   }

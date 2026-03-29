@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, H3, P, Spinner } from '@ezstart/ui/components'
+import { Card, CardContent, CardHeader, Div, H3, P, Span, Spinner } from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import {
   LineChart,
@@ -98,26 +98,26 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
     <Card>
       <CardHeader>
         <H3 size="h5">{title || `${serviceId} - Last ${hours}h`}</H3>
-        <div className="flex gap-4 text-sm">
+        <Div className="flex gap-4 text-sm">
           <P className="text-muted-foreground">
-            Uptime: <span className="font-semibold text-foreground">{data.uptimePercentage}%</span>
+            Uptime: <Span className="font-semibold text-foreground">{data.uptimePercentage}%</Span>
           </P>
           <P className="text-muted-foreground">
             Avg Response:{' '}
-            <span className="font-semibold text-foreground">
+            <Span className="font-semibold text-foreground">
               {data.avgResponseTime ? `${data.avgResponseTime}ms` : 'N/A'}
-            </span>
+            </Span>
           </P>
           <P className="text-muted-foreground">
-            Checks: <span className="font-semibold text-foreground">{data.totalChecks}</span>
+            Checks: <Span className="font-semibold text-foreground">{data.totalChecks}</Span>
           </P>
-        </div>
+        </Div>
       </CardHeader>
       <CardContent>
         {sampledData.length === 0 ? (
-          <div className="flex items-center justify-center h-64">
+          <Div className="flex items-center justify-center h-64">
             <P className="text-muted-foreground">No data available for the selected period</P>
-          </div>
+          </Div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={sampledData}>

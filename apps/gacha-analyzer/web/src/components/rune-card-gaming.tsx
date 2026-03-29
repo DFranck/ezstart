@@ -4,6 +4,7 @@ import {
   Badge,
   Div,
   P,
+  Span,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -445,9 +446,9 @@ export function RuneCardGaming({ rune, analysis, confidence }: RuneCardGamingPro
                   <P className="text-sm font-bold">
                     {analysis.grindedEfficiency}%
                     {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                      <span className="text-success-foreground text-xs ml-1">
+                      <Span className="text-success-foreground text-xs ml-1">
                         (+{analysis.grindGain}%)
-                      </span>
+                      </Span>
                     )}
                   </P>
                 </Div>

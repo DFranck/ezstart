@@ -8,7 +8,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -48,8 +54,8 @@ const allAuditsResponseSchema = z.object({
 })
 
 const errorResponseSchema = z.object({
-  error: z.string(),
-  message: z.string(),
+  error: z.string().describe('Error type or code'),
+  message: z.string().describe('Human-readable error message'),
 })
 
 // ========================================
@@ -71,27 +77,29 @@ const getAllAuditsHandler = (_: Request, res: Response) => {
 
     // Transform audits.json structure to match expected API format
     const audits = Object.entries(domains).flatMap(([domainKey, domainData]: [string, any]) => {
-      return Object.entries(domainData.categories || {}).map(([categoryKey, categoryData]: [string, any]) => {
-        const score = categoryData.score
-        const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
+      return Object.entries(domainData.categories || {}).map(
+        ([categoryKey, categoryData]: [string, any]) => {
+          const score = categoryData.score
+          const status = score >= 90 ? 'complete' : score >= 70 ? 'partial' : 'not-audited'
 
-        return {
-          auditType: categoryKey,
-          emoji: domainData.emoji || '📊',
-          name: categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
-          description: categoryData.description || `${domainData.agent} - ${categoryKey}`,
-          filePath: `docs/audits.json → domains.${domainKey}.categories.${categoryKey}`,
-          score,
-          lastUpdated: categoryData.lastUpdate || auditsJson.lastUpdated,
-          status,
-          exists: true,
-          // New human-readable fields
-          audited: categoryData.audited || [],
-          notAudited: categoryData.notAudited || [],
-          why: categoryData.why || '',
-          nextSteps: categoryData.nextSteps || [],
+          return {
+            auditType: categoryKey,
+            emoji: domainData.emoji || '📊',
+            name: categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1),
+            description: categoryData.description || `${domainData.agent} - ${categoryKey}`,
+            filePath: `docs/audits.json → domains.${domainKey}.categories.${categoryKey}`,
+            score,
+            lastUpdated: categoryData.lastUpdate || auditsJson.lastUpdated,
+            status,
+            exists: true,
+            // New human-readable fields
+            audited: categoryData.audited || [],
+            notAudited: categoryData.notAudited || [],
+            why: categoryData.why || '',
+            nextSteps: categoryData.nextSteps || [],
+          }
         }
-      })
+      )
     })
 
     // Add domain-level scores as well

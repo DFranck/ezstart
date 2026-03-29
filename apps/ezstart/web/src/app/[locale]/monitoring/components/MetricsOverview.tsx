@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, Div, H3, P } from '@ezstart/ui/components'
+import { Card, CardContent, Div, H3, P, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 
 interface MetricCardProps {
@@ -30,19 +30,19 @@ function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
       <CardContent>
         <Div layout={'center'}>
           <P className="text-sm text-muted-foreground">{title}</P>
-          <div className="flex items-baseline gap-2">
-            {icon && <span className="text-2xl">{icon}</span>}
+          <Div className="flex items-baseline gap-2">
+            {icon && <Span className="text-2xl">{icon}</Span>}
             <H3 size="h2" className="font-bold">
               {value}
             </H3>
-          </div>
+          </Div>
           {subtitle && <P className="text-xs text-muted-foreground">{subtitle}</P>}
         </Div>
         {trend && (
-          <div className={`flex items-center gap-1 ${getTrendColor()}`}>
-            <span className="text-2xl">{getTrendIcon()}</span>
+          <Div className={`flex items-center gap-1 ${getTrendColor()}`}>
+            <Span className="text-2xl">{getTrendIcon()}</Span>
             <P className="text-sm font-semibold">{Math.abs(trend.value)}%</P>
-          </div>
+          </Div>
         )}
       </CardContent>
     </Card>

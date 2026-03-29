@@ -1,38 +1,35 @@
-'use client';
+'use client'
 
-import { Button, Div, Icon, KnownIconName } from '@ezstart/ui/components';
-import { ReactNode, useState } from 'react';
+import { Button, Div, Icon, KnownIconName } from '@ezstart/ui/components'
+import { ReactNode, useState } from 'react'
 
-type DeviceSize = 'mobile' | 'tablet' | 'desktop';
+type DeviceSize = 'mobile' | 'tablet' | 'desktop'
 
 type ResponsivePreviewProps = {
-  children: ReactNode;
-  className?: string;
-};
+  children: ReactNode
+  className?: string
+}
 
 const DEVICE_WIDTHS: Record<DeviceSize, string> = {
   mobile: 'max-w-[375px]',
   tablet: 'max-w-[768px]',
   desktop: 'max-w-full',
-};
+}
 
 const DEVICE_ICONS: Record<DeviceSize, KnownIconName> = {
   mobile: 'lucide:Smartphone',
   tablet: 'lucide:Tablet',
   desktop: 'lucide:Monitor',
-};
+}
 
-export function ResponsivePreview({
-  children,
-  className,
-}: ResponsivePreviewProps) {
-  const [device, setDevice] = useState<DeviceSize>('desktop');
+export function ResponsivePreview({ children, className }: ResponsivePreviewProps) {
+  const [device, setDevice] = useState<DeviceSize>('desktop')
 
   return (
     <Div className={className}>
       {/* Device Selector */}
-      <div className="flex gap-2 mb-4 justify-center">
-        {(Object.keys(DEVICE_WIDTHS) as DeviceSize[]).map((size) => (
+      <Div className="flex gap-2 mb-4 justify-center">
+        {(Object.keys(DEVICE_WIDTHS) as DeviceSize[]).map(size => (
           <Button
             key={size}
             variant={device === size ? 'default' : 'outline'}
@@ -42,10 +39,10 @@ export function ResponsivePreview({
             aria-pressed={device === size}
           >
             <Icon name={DEVICE_ICONS[size]} size={16} ariaHidden />
-            <span className="ml-2 capitalize">{size}</span>
+            <Span className="ml-2 capitalize">{size}</Span>
           </Button>
         ))}
-      </div>
+      </Div>
 
       {/* Preview Container */}
       <Div
@@ -56,5 +53,5 @@ export function ResponsivePreview({
         {children}
       </Div>
     </Div>
-  );
+  )
 }

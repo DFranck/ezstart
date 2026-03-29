@@ -1,4 +1,4 @@
-import { Button, H2, H3, Icon, Main, P, Section } from '@ezstart/ui/components'
+import { Button, Div, H2, H3, Icon, Main, P, Section, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
@@ -24,17 +24,17 @@ const LegalNoticesPage = (): any => {
   return (
     <Main withHeaderOffset>
       <Section id="legal-notices" className="space-y-8">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
+        <Div className="max-w-4xl mx-auto text-center space-y-6">
           <H2>{t('title')}</H2>
           <P className="text-lg text-muted-foreground">{t('intro')}</P>
-        </div>
+        </Div>
 
         {sections.map(section => (
           <Section key={section.id} role="region" aria-labelledby={section.id}>
-            <div className="flex items-center gap-3 mb-2">
-              <span>{icons[section.id] ?? <Icon name="fa:FaFile" size={20} />}</span>
+            <Div className="flex items-center gap-3 mb-2">
+              <Span>{icons[section.id] ?? <Icon name="fa:FaFile" size={20} />}</Span>
               <H3 id={section.id}>{section.title}</H3>
-            </div>
+            </Div>
             {section.content
               .split('\n')
               .filter(Boolean)

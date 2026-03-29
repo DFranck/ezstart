@@ -1,6 +1,6 @@
 'use client'
 
-import { H1, P, Badge } from '@ezstart/ui/components'
+import { Badge, Div, H1, P } from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { useFormInstance } from '@/hooks/useForms'
 import { useTranslations } from 'next-intl'
@@ -21,20 +21,20 @@ export function FormInstanceHeader({
 
   if (isLoading) {
     return (
-      <div>
-        <div className="h-6 w-96 bg-muted rounded mb-2 animate-pulse" />
-        <div className="h-4 w-64 bg-muted rounded animate-pulse" />
-      </div>
+      <Div>
+        <Div className="h-6 w-96 bg-muted rounded mb-2 animate-pulse" />
+        <Div className="h-4 w-64 bg-muted rounded animate-pulse" />
+      </Div>
     )
   }
 
   if (!formInstance) {
     return (
-      <div>
+      <Div>
         <H1 size="h3" className="text-destructive">
           {t('formNotFound')}
         </H1>
-      </div>
+      </Div>
     )
   }
 
@@ -55,19 +55,19 @@ export function FormInstanceHeader({
   }
 
   return (
-    <div>
+    <Div>
       <WorkspaceBreadcrumbs
         workspaceSlug={workspaceSlug}
         projectId={projectId}
         formId={formInstanceId}
       />
 
-      <div className="flex items-center justify-between mt-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+      <Div className="flex items-center justify-between mt-4">
+        <Div>
+          <Div className="flex items-center gap-3 mb-2">
             <H1 size="h3">{formInstance?.data?.formConfigId || 'Form'}</H1>
             {getStatusBadge()}
-          </div>
+          </Div>
           <P className="text-sm text-muted-foreground">
             {formInstance?.data?.createdAt && (
               <>
@@ -84,8 +84,8 @@ export function FormInstanceHeader({
               </>
             )}
           </P>
-        </div>
-      </div>
-    </div>
+        </Div>
+      </Div>
+    </Div>
   )
 }

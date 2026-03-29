@@ -2,6 +2,7 @@
 
 import StatsCard from '@/components/StatsCard'
 import { useTranslations } from 'next-intl'
+import { Div } from '@ezstart/ui/components'
 
 interface ClientStatsProps {
   totalRevenue: number
@@ -18,7 +19,7 @@ export function ClientStats({
 }: ClientStatsProps) {
   const tDashboard = useTranslations('dashboard')
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <Div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <StatsCard
         title={tDashboard('totalRevenue')}
         value={`$${totalRevenue.toFixed(2)}`}
@@ -43,6 +44,6 @@ export function ClientStats({
         icon="lucide:FileText"
         iconGradient="bg-gradient-receipt"
       />
-    </div>
+    </Div>
   )
 }

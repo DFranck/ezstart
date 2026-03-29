@@ -3,7 +3,7 @@
 import { useBillingContext } from '@/contexts/billing-context'
 import { convertToInvoicePDFData, convertToReceiptPDFData } from '@/utils/pdf-converters'
 import { Invoice, Quote, Receipt } from '@ezbill/types'
-import { Button, Icon, Modal } from '@ezstart/ui/components'
+import { Button, Icon, Modal, Div, H3, P, Span } from '@ezstart/ui/components'
 import { useInvoicePDF } from '@/hooks/useInvoicePDF'
 import { InvoicePDF, ReceiptPDF } from '@ezbill/templates'
 import type { PDFInvoiceData, PDFReceiptData } from '@ezbill/types'
@@ -211,13 +211,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
             }
             className="w-5 h-5 mr-2 text-foreground/60"
           />
-          <span className="font-semibold">{title}</span>
+          <Span className="font-semibold">{title}</Span>
         </>
       }
       description={<>{t('escToClose')}</>}
       footer={
-        <div className="flex items-center justify-between w-full">
-          <div className="hidden md:flex items-center gap-2">
+        <Div className="flex items-center justify-between w-full">
+          <Div className="hidden md:flex items-center gap-2">
             <Button
               variant="outline"
               onClick={handleGeneratePreview}
@@ -241,13 +241,13 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               />
               {isGenerating ? t('downloading') : t('downloadPdf')}
             </Button>
-          </div>
-        </div>
+          </Div>
+        </Div>
       }
       className="max-w-[1100px] w-[98vw]"
     >
       {/* PDF container */}
-      <div className="">
+      <Div className="">
         {pdfBlob ? (
           <>
             {/* Desktop PDF Preview */}
@@ -257,12 +257,12 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
               title={`${title} – PDF preview`}
             />
             {/* Mobile PDF Download */}
-            <div className="sm:hidden flex flex-col items-center justify-center p-8 text-center h-[50vh] bg-muted/20 rounded-lg">
-              <div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-4">
+            <Div className="sm:hidden flex flex-col items-center justify-center p-8 text-center h-[50vh] bg-muted/20 rounded-lg">
+              <Div className="w-16 h-16 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-4">
                 <Icon name="lucide:FileDown" className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">{t('pdfReady')}</h3>
-              <p className="text-foreground/60 mb-4 text-sm">{t('mobileNoPreview')}</p>
+              </Div>
+              <H3 className="text-lg font-semibold text-foreground mb-2">{t('pdfReady')}</H3>
+              <P className="text-foreground/60 mb-4 text-sm">{t('mobileNoPreview')}</P>
               <Button
                 onClick={() => {
                   const link = document.createElement('a')
@@ -277,33 +277,33 @@ export function PreviewPdfModal({ isOpen, onClose, kind, doc }: PreviewPdfModalP
                 <Icon name="lucide:Download" className="w-4 h-4 mr-2" />
                 {t('downloadPdf')}
               </Button>
-            </div>
+            </Div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
-            <div className="w-20 h-20 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-6">
+          <Div className="flex flex-col items-center justify-center p-12 text-center h-[50vh]">
+            <Div className="w-20 h-20 bg-gradient-to-r from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center mb-6">
               <Icon
                 name={isGeneratingPreview ? 'lucide:Loader2' : 'lucide:FileText'}
                 className={`w-10 h-10 text-primary ${isGeneratingPreview ? 'animate-spin' : ''}`}
               />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+            </Div>
+            <H3 className="text-xl font-semibold text-foreground mb-2">
               {isGeneratingPreview ? t('generatingPreview') : t('instantGeneration')}
-            </h3>
-            <p className="text-foreground/60 mb-6 max-w-md">
+            </H3>
+            <P className="text-foreground/60 mb-6 max-w-md">
               {isGeneratingPreview
                 ? t('pleaseWait')
                 : t('clickRefresh', {
                     kind: kind === 'invoice' ? 'invoice' : kind === 'quote' ? 'quote' : 'receipt',
                   })}
-            </p>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            </P>
+            <Div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Icon name="lucide:Zap" className="w-4 h-4 text-warning" />
-              <span>{t('clientSideGeneration')}</span>
-            </div>
-          </div>
+              <Span>{t('clientSideGeneration')}</Span>
+            </Div>
+          </Div>
         )}
-      </div>
+      </Div>
     </Modal>
   )
 }

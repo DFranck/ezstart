@@ -16,12 +16,14 @@ import {
   H3,
   Icon,
   KnownIconName,
+  LI,
   P,
   Section,
   Span,
   SplitSection,
   SplitSectionItem,
   Strong,
+  UL,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -72,7 +74,7 @@ export default function HomePage(): any {
             {t('hero.subtitle')
               .split(' ')
               .map((word, index) => (
-                <span
+                <Span
                   key={`word-${index}-${word}`}
                   className="inline-block"
                   style={{
@@ -84,7 +86,7 @@ export default function HomePage(): any {
                 >
                   {word}
                   {index < t('hero.subtitle').split(' ').length - 1 ? '\u00A0' : ''}
-                </span>
+                </Span>
               ))}
           </H2>
           <style jsx>{`
@@ -536,11 +538,11 @@ export default function HomePage(): any {
                     </Div>
                   </CardHeader>
                   <CardContent>
-                    <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                    <UL className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
                       {value.items.map((item, itemIndex) => (
-                        <li key={itemIndex}>{item}</li>
+                        <LI key={itemIndex}>{item}</LI>
                       ))}
-                    </ul>
+                    </UL>
                   </CardContent>
                 </Card>
                 {/* Plus symbol between cards (not after last card) */}

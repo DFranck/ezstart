@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Div,
   P,
   Span,
   Spinner,
@@ -25,7 +26,7 @@ import { Suspense } from 'react'
 const LoginForm = dynamic(
   () => import('@/components/LoginForm').then(mod => ({ default: mod.LoginForm })),
   {
-    loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
+    loading: () => <Div className="animate-pulse bg-muted rounded h-32" />,
   }
 )
 
@@ -37,16 +38,17 @@ function LoginContent() {
 
   return (
     <Card className="max-w-md w-full relative">
-      <div className="absolute top-4 left-4">
+      <Div className="absolute top-4 left-4">
         <BackButton />
-      </div>
-      <div className="absolute top-4 right-4">
+      </Div>
+      <Div className="absolute top-4 right-4">
         <ThemeSwitcher />
-      </div>
+      </Div>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl md:text-2xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Sign in to access <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
+          Sign in to access{' '}
+          <Span className={`${theme.primaryColor} font-semibold`}>{theme.name}</Span>
         </CardDescription>
         {theme.showEzstartMessage && (
           <P variant={'description'} size={'xs'} className="hidden md:block">
@@ -62,7 +64,7 @@ function LoginContent() {
         {/* Classic Email/Password Form */}
         <LoginForm app={app} redirect_uri={redirect_uri} />
 
-        <div className="text-center">
+        <Div className="text-center">
           <P size={'xs'}>
             Don't have an account?{' '}
             <Link
@@ -72,7 +74,7 @@ function LoginContent() {
               Sign up
             </Link>
           </P>
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )

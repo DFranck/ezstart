@@ -1,6 +1,6 @@
 'use client'
 
-import { Icon, Spinner } from '@ezstart/ui/components'
+import { Div, Icon, Spinner } from '@ezstart/ui/components'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect } from 'react'
 
@@ -21,9 +21,9 @@ function HomeContent() {
   }, [router, searchParams])
 
   return (
-    <div className="text-center">
+    <Div className="text-center">
       <Spinner variant="primary" size="lg" text="Redirecting to login..." textSize="sm" />
-    </div>
+    </Div>
   )
 }
 
@@ -31,9 +31,9 @@ export default function HomePage(): any {
   return (
     <Suspense
       fallback={
-        <div className="text-center">
+        <Div className="text-center">
           <Spinner variant="primary" size="md" text="Loading..." />
-        </div>
+        </Div>
       }
     >
       <HomeContent />

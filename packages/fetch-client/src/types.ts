@@ -2,10 +2,18 @@ import type { AppName } from '@ezstart/config/urls'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
-export type ApiError = { error: string; [key: string]: any }
+export type ApiError = { error: string; [key: string]: unknown }
 
 export type ApiResponse<T> =
-  | { ok: true; status: number; url: string; data: T; meta?: ApiMeta; error?: undefined; raw?: any }
+  | {
+      ok: true
+      status: number
+      url: string
+      data: T
+      meta?: ApiMeta
+      error?: undefined
+      raw?: unknown
+    }
   | {
       ok: false
       status: number
@@ -13,10 +21,10 @@ export type ApiResponse<T> =
       data: ApiError | null
       meta?: ApiMeta
       error?: string
-      raw?: any
+      raw?: unknown
     }
 
-export type ApiMeta = { total?: number; limit?: number; offset?: number; [key: string]: any }
+export type ApiMeta = { total?: number; limit?: number; offset?: number; [key: string]: unknown }
 
 export type LogLevel = 'none' | 'errors' | 'all'
 
@@ -24,9 +32,9 @@ export type CallApiOptions = {
   /** HTTP method (default: GET) */
   method?: HttpMethod
   /** Query parameters to append to URL */
-  query?: Record<string, any>
+  query?: Record<string, string>
   /** Request body (will be JSON stringified) */
-  body?: any
+  body?: unknown
   /** Custom headers */
   headers?: Record<string, string>
   /** AbortSignal for request cancellation */

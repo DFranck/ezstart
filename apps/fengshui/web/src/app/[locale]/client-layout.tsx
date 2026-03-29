@@ -4,7 +4,14 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { GRADIENT_TEXT } from '@/lib/theme-colors'
 import { LoginButton, useAuth } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { ClientLayout as BaseClientLayout, H1, LocaleSwitcher, P } from '@ezstart/ui/components'
+import {
+  ClientLayout as BaseClientLayout,
+  Div,
+  H1,
+  LocaleSwitcher,
+  P,
+  Span,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
@@ -35,24 +42,28 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
       className={cn(isAnalyzePage ? 'mb-24 sm:mb-0' : 'mb-10 sm:mb-0')}
       appName="Feng Shui"
       headerPosition="sticky"
-      creator={
-        <span>Made with ❤️ for a peaceful living place and life serenity</span>
-      }
+      creator={<Span>Made with ❤️ for a peaceful living place and life serenity</Span>}
       currentPath={pathname}
       headerLeftContent={
-        <div className="flex items-center space-x-4">
+        <Div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="Feng Shui" width={100} height={100} className="object-contain" />
-            <div>
+            <Image
+              src="/logo.png"
+              alt="Feng Shui"
+              width={100}
+              height={100}
+              className="object-contain"
+            />
+            <Div>
               <H1 size={'h5'} className={`text-start w-fit font-bold ${GRADIENT_TEXT}`}>
                 Feng Shui {new Date().getFullYear()}
               </H1>
               <P className="text-xs text-muted-foreground -mt-1 line-clamp-1">
                 {t('hero.subtitle', { year: new Date().getFullYear() })}
               </P>
-            </div>
+            </Div>
           </Link>
-        </div>
+        </Div>
       }
       navLinks={[
         { href: '/', label: t('navigation.home'), icon: 'lucide:Home' },
@@ -60,7 +71,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
         { href: '/donate', label: t('common.donate'), icon: 'lucide:Leaf' },
       ]}
       headerRightContent={
-        <div className="flex items-center gap-2">
+        <Div className="flex items-center gap-2">
           <LoginButton>{isAuthenticated ? t('common.logout') : t('common.login')}</LoginButton>
           <LocaleSwitcher
             locales={locales}
@@ -68,7 +79,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
             onLocaleChange={handleLocaleChange}
           />
           <ThemeSwitcher />
-        </div>
+        </Div>
       }
       LinkComponent={Link}
     >

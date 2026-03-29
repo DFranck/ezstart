@@ -48,7 +48,7 @@ export function createApp(options?: CreateAppOptions): Express {
   app.set('trust proxy', true)
 
   // Configure CORS
-  let corsOptions: any
+  let corsOptions: cors.CorsOptions
 
   if (options?.apiApp) {
     // Option 1: Auto-detect CORS using @ezstart/config (RECOMMENDED)

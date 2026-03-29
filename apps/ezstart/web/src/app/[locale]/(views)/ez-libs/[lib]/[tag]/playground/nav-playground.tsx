@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  Button,
-  DEFAULT_NAV_VARIANTS,
-  H4,
-  Nav,
-  tagVariantsMeta,
-} from '@ezstart/ui/components'
+import { Button, DEFAULT_NAV_VARIANTS, H4, Nav, tagVariantsMeta } from '@ezstart/ui/components'
 import { useState } from 'react'
 import PlaygroundCodeView from '../components/playground-code-view'
 import { PlaygroundVariantSelects } from '../components/playground-variant-selects'
@@ -36,7 +30,7 @@ export default function NavPlayground() {
   const content = (
     <Nav {...selected}>
       <H4>My App</H4>
-      <div className="flex gap-2">
+      <Div className="flex gap-2">
         <Button variant="ghost" size="sm">
           Home
         </Button>
@@ -46,7 +40,7 @@ export default function NavPlayground() {
         <Button variant="ghost" size="sm">
           Settings
         </Button>
-      </div>
+      </Div>
     </Nav>
   )
 
@@ -58,7 +52,9 @@ export default function NavPlayground() {
       title="<Nav> Component Playground"
       activeVariants={selected}
       preview={content}
-      controls={<PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />}
+      controls={
+        <PlaygroundVariantSelects meta={meta} selected={selected} onChange={handleChange} />
+      }
       codeView={<PlaygroundCodeView fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />}
     />
   )

@@ -30,6 +30,8 @@ import {
   TableHeader,
   TableRow,
   TextArea,
+  Div,
+  H3,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
@@ -322,7 +324,7 @@ export function InvoiceModal({
       title={invoice ? tInvoice('edit') : tInvoice('create')}
       description={invoice ? tInvoice('edit') : tInvoice('create')}
       footer={
-        <div className="flex gap-3">
+        <Div className="flex gap-3">
           {/* AI Assistant Toggle Button (when collapsed) */}
           {!showAIAssistant && (
             <InvoiceAIAssistant
@@ -369,18 +371,18 @@ export function InvoiceModal({
             />
             {invoice ? tInvoice('update') : tInvoice('create')}
           </LoadingButton>
-        </div>
+        </Div>
       }
     >
-      <div className="flex flex-col lg:flex-row gap-0 relative">
+      <Div className="flex flex-col lg:flex-row gap-0 relative">
         {/* Main Form */}
-        <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
+        <Div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6 p-1">
-            <div
+            <Div
               className={`grid gap-6 ${showAIAssistant ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}
             >
               {!clientId && (
-                <div>
+                <Div>
                   <Label className="text-sm font-medium  mb-3 block flex items-center">
                     <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                     Client *
@@ -400,15 +402,15 @@ export function InvoiceModal({
                           value={client._id}
                           className="hover:bg-primary/5"
                         >
-                          <div className="flex items-center">{client.clientName}</div>
+                          <Div className="flex items-center">{client.clientName}</Div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </Div>
               )}
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
                   {tCommon('billOnBehalf')}
@@ -424,10 +426,10 @@ export function InvoiceModal({
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     <SelectItem value="personal" className="hover:bg-primary/5">
-                      <div className="flex items-center">
+                      <Div className="flex items-center">
                         <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                         {tCommon('personalName')}
-                      </div>
+                      </Div>
                     </SelectItem>
                     {companies?.map(company => (
                       <SelectItem
@@ -435,30 +437,30 @@ export function InvoiceModal({
                         value={company._id}
                         className="hover:bg-primary/5"
                       >
-                        <div className="flex items-center">
+                        <Div className="flex items-center">
                           <Icon
                             name="lucide:Building2"
                             className="w-4 h-4 mr-2 text-ezbill-company"
                           />
                           {company.companyName}
-                        </div>
+                        </Div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium mb-3 block flex items-center">
                   <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
                   {tCommon('paymentMethods' as any) || 'Payment Methods'}
                 </Label>
                 {paymentMethods && paymentMethods.length > 0 ? (
-                  <div className="space-y-2 border rounded-lg p-3">
+                  <Div className="space-y-2 border rounded-lg p-3">
                     {paymentMethods.map(method => {
                       const isChecked = formData.paymentMethodIds?.includes(method._id) || false
                       return (
-                        <div key={method._id} className="flex items-center space-x-3">
+                        <Div key={method._id} className="flex items-center space-x-3">
                           <Checkbox
                             id={`payment-${method._id}`}
                             checked={isChecked}
@@ -486,22 +488,22 @@ export function InvoiceModal({
                               }
                               className="w-4 h-4 mr-2 text-ezbill-payment"
                             />
-                            <span>{method.name}</span>
+                            <Span>{method.name}</Span>
                             {method.isDefault && (
-                              <span className="ml-2 text-xs text-success">(Default)</span>
+                              <Span className="ml-2 text-xs text-success">(Default)</Span>
                             )}
                           </Label>
-                        </div>
+                        </Div>
                       )
                     })}
-                  </div>
+                  </Div>
                 ) : (
-                  <div className="bg-warning/5 backdrop-blur-sm rounded-xl p-4 border border-warning/20">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
+                  <Div className="bg-warning/5 backdrop-blur-sm rounded-xl p-4 border border-warning/20">
+                    <Div className="flex items-center justify-between">
+                      <Div className="flex items-center">
                         <Icon name="lucide:AlertCircle" className="w-5 h-5 text-warning mr-2" />
-                        <span className="text-sm text-warning">{tPM('noMethods')}</span>
-                      </div>
+                        <Span className="text-sm text-warning">{tPM('noMethods')}</Span>
+                      </Div>
                       {onManagePaymentMethods && (
                         <Button
                           type="button"
@@ -513,12 +515,12 @@ export function InvoiceModal({
                           {tPM('addMethod')}
                         </Button>
                       )}
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 )}
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-warning" />
                   Currency
@@ -533,33 +535,33 @@ export function InvoiceModal({
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {currencies.map(({ value, label, symbol }) => (
                       <SelectItem key={value} value={value} className="hover:bg-primary/5">
-                        <div className="flex items-center">
+                        <Div className="flex items-center">
                           {label}
                           <Span className="ml-2 text-warning">{symbol}</Span>
-                        </div>
+                        </Div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-warning" />
                   Due Date
                 </Label>
-                <div className="relative">
+                <Div className="relative">
                   <Input
                     type="date"
                     value={formData.dueDate}
                     onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
                   />
-                </div>
-              </div>
+                </Div>
+              </Div>
 
-              <div>
-                <div className="">
-                  <div className="flex items-center space-x-3 mb-4">
+              <Div>
+                <Div className="">
+                  <Div className="flex items-center space-x-3 mb-4">
                     <Checkbox
                       id="showTaxes"
                       checked={showTaxes}
@@ -580,9 +582,9 @@ export function InvoiceModal({
                       <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-warning" />
                       Add Taxes
                     </Label>
-                  </div>
+                  </Div>
                   {showTaxes && (
-                    <div>
+                    <Div>
                       <Label className="text-sm font-medium  mb-3 block flex items-center">
                         <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-warning" />
                         Tax Rate (%)
@@ -601,20 +603,20 @@ export function InvoiceModal({
                         }
                         className="w-full  focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                       />
-                    </div>
+                    </Div>
                   )}
-                </div>
-              </div>
-            </div>
+                </Div>
+              </Div>
+            </Div>
 
-            <div>
+            <Div>
               {/* Billing Type Toggle */}
-              <div className="mb-6">
+              <Div className="mb-6">
                 <Label className="text-sm font-medium mb-3 block flex items-center">
                   <Icon name="lucide:FileType" className="w-4 h-4 mr-2 text-primary" />
                   Billing Type *
                 </Label>
-                <div className="flex gap-3">
+                <Div className="flex gap-3">
                   <Button
                     type="button"
                     variant={formData.billingType === 'itemized' ? 'default' : 'outline'}
@@ -633,34 +635,34 @@ export function InvoiceModal({
                     <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                     Flat Rate
                   </Button>
-                </div>
-              </div>
+                </Div>
+              </Div>
 
               {/* Itemized Mode: Table */}
               {formData.billingType === 'itemized' && (
                 <>
-                  <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <div className="rounded-xl overflow-hidden">
+                  <Div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <Div className="rounded-xl overflow-hidden">
                       <Table className="w-full min-w-[600px]">
                         <TableHeader>
                           <TableRow>
                             <TableHead className="font-semibold ">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                                 Description
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="font-semibold w-24">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
                                 Qty
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="font-semibold w-28">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
                                 Price
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="w-12"></TableHead>
                           </TableRow>
@@ -729,8 +731,8 @@ export function InvoiceModal({
                           ))}
                         </TableBody>
                       </Table>
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                   <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
                     <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                     Add Line Item
@@ -740,8 +742,8 @@ export function InvoiceModal({
 
               {/* Flat-Rate Mode: Description + Amount */}
               {formData.billingType === 'flat-rate' && (
-                <div className="space-y-4">
-                  <div>
+                <Div className="space-y-4">
+                  <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
                       Description *
@@ -754,8 +756,8 @@ export function InvoiceModal({
                       rows={6}
                       className="w-full resize-none"
                     />
-                  </div>
-                  <div>
+                  </Div>
+                  <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-success" />
                       Amount *
@@ -775,51 +777,51 @@ export function InvoiceModal({
                       required
                       className="w-full"
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               )}
-            </div>
+            </Div>
 
             {/* Totals */}
-            <div>
-              <div className="flex items-center mb-4">
+            <Div>
+              <Div className="flex items-center mb-4">
                 <Icon name="lucide:Calculator" className="w-5 h-5 mr-2 text-primary" />
-                <h3 className="text-lg font-semibold ">Invoice Summary</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
-                  <span className="flex items-center font-medium ">
+                <H3 className="text-lg font-semibold ">Invoice Summary</H3>
+              </Div>
+              <Div className="space-y-3">
+                <Div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
+                  <Span className="flex items-center font-medium ">
                     <Icon name="lucide:Minus" className="w-4 h-4 mr-2" />
                     Subtotal:
-                  </span>
-                  <span className="font-semibold ">
+                  </Span>
+                  <Span className="font-semibold ">
                     {subtotal.toFixed(2)} {formData.currency}
-                  </span>
-                </div>
+                  </Span>
+                </Div>
                 {showTaxes && (
-                  <div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
-                    <span className="flex items-center font-medium ">
+                  <Div className="flex justify-between items-center text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-3">
+                    <Span className="flex items-center font-medium ">
                       <Icon name="lucide:Percent" className="w-4 h-4 mr-2" />
                       Tax ({formData.taxRate}%):
-                    </span>
-                    <span className="font-semibold ">
+                    </Span>
+                    <Span className="font-semibold ">
                       {taxAmount.toFixed(2)} {formData.currency}
-                    </span>
-                  </div>
+                    </Span>
+                  </Div>
                 )}
-                <div className="flex justify-between items-center bg-gradient-invoice text-white rounded-lg p-4 shadow-lg">
-                  <span className="flex items-center font-bold text-lg">
+                <Div className="flex justify-between items-center bg-gradient-invoice text-white rounded-lg p-4 shadow-lg">
+                  <Span className="flex items-center font-bold text-lg">
                     <Icon name="lucide:DollarSign" className="w-5 h-5 mr-2" />
                     Total:
-                  </span>
-                  <span className="font-bold text-xl">
+                  </Span>
+                  <Span className="font-bold text-xl">
                     {total.toFixed(2)} {formData.currency}
-                  </span>
-                </div>
-              </div>
-            </div>
+                  </Span>
+                </Div>
+              </Div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
                 Notes
@@ -831,9 +833,9 @@ export function InvoiceModal({
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Additional notes for this invoice..."
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 text-primary" />
                 Terms & Conditions
@@ -845,13 +847,13 @@ export function InvoiceModal({
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Payment due upon receipt. Late payment penalties may apply..."
               />
-            </div>
+            </Div>
           </form>
-        </div>
+        </Div>
 
         {/* AI Assistant Sidebar (when expanded) */}
         {showAIAssistant && (
-          <div className="w-full lg:w-1/3 mt-4 lg:mt-0">
+          <Div className="w-full lg:w-1/3 mt-4 lg:mt-0">
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}
@@ -867,9 +869,9 @@ export function InvoiceModal({
                 taxRate: formData.taxRate,
               }}
             />
-          </div>
+          </Div>
         )}
-      </div>
+      </Div>
     </Modal>
   )
 }

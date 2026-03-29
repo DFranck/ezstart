@@ -2,7 +2,7 @@
 import { routing } from '@/i18n/routing'
 import { LoginButton, useAuthStore } from '@ezstart/auth-sdk'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
-import { ClientLayout, Div, LocaleSwitcher } from '@ezstart/ui/components'
+import { ClientLayout, Div, LocaleSwitcher, Span } from '@ezstart/ui/components'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname, useRouter, useParams } from 'next/navigation'
@@ -38,9 +38,7 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
         { href: `/${game}/data`, label: t('nav.data'), icon: 'lucide:Database' as const },
         { href: `/${game}/sources`, label: t('nav.sources'), icon: 'lucide:BookOpen' as const },
       ]
-    : [
-        { href: '/', label: t('nav.home'), icon: 'lucide:Home' as const },
-      ]
+    : [{ href: '/', label: t('nav.home'), icon: 'lucide:Home' as const }]
 
   return (
     <ClientLayout
@@ -49,8 +47,8 @@ const AppClientLayout = ({ children }: { children: React.ReactNode }): any => {
       navLinks={navLinks}
       headerLeftContent={
         <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <span>🎮</span>
-          <span>Gacha Analyzer</span>
+          <Span>🎮</Span>
+          <Span>Gacha Analyzer</Span>
         </Link>
       }
       headerRightContent={

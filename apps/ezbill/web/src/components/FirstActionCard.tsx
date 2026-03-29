@@ -1,4 +1,4 @@
-import { Card, CardContent, H3, Icon, P } from '@ezstart/ui/components'
+import { Card, CardContent, H3, Icon, P, Div } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import React from 'react'
 
@@ -25,15 +25,15 @@ const FirstActionCard = ({
       )}
       onClick={() => setter(true)}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+      <Div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></Div>
       <CardContent className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
+        <Div className="flex items-center justify-between mb-4">
           <Icon name="lucide:UserPlus" className="w-8 h-8" />
           <Icon
             name="lucide:ArrowRight"
             className="w-5 h-5 opacity-70 group-hover:translate-x-1 transition-transform"
           />
-        </div>
+        </Div>
         <H3 className="text-left" size={'h5'}>
           {title}
         </H3>

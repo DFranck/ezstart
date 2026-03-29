@@ -4,7 +4,13 @@
  * Get health check history with uptime statistics
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -30,18 +36,24 @@ const historyQuerySchema = z.object({
 const historyResponseSchema = z.object({
   id: z.string().describe('Unique identifier of the service'),
   name: z.string().describe('Human-readable name of the service'),
-  history: z.array(
-    z.object({
-      timestamp: z.string(),
-      status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']),
-      responseTime: z.number().nullable(),
+  history: z
+    .array(
+      z.object({
+        timestamp: z.string().describe('ISO timestamp of the health check'),
+        status: z
+          .enum(['healthy', 'degraded', 'unhealthy', 'unknown'])
+          .describe('Health status at this point'),
+        responseTime: z.number().nullable().describe('Response time in ms'),
+      })
+    )
+    .describe('Historical health check results'),
+  uptime: z
+    .object({
+      '24h': z.number().describe('Uptime percentage over last 24 hours'),
+      '7d': z.number().describe('Uptime percentage over last 7 days'),
+      '30d': z.number().describe('Uptime percentage over last 30 days'),
     })
-  ).describe('Historical health check results'),
-  uptime: z.object({
-    '24h': z.number(),
-    '7d': z.number(),
-    '30d': z.number(),
-  }).describe('Uptime percentage for different time periods'),
+    .describe('Uptime percentage for different time periods'),
 })
 
 // ========================================

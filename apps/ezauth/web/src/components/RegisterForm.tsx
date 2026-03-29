@@ -3,6 +3,7 @@
 import type { RegisterRequest } from '@ezstart/auth-sdk'
 import {
   Button,
+  Div,
   Form,
   FormControl,
   FormField,
@@ -10,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  P,
   PasswordInput,
 } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/fetch-client'
@@ -95,9 +97,9 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
-          <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
             {error}
-          </div>
+          </Div>
         )}
 
         <FormField
@@ -128,7 +130,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <Div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <FormField
             control={form.control}
             name="firstName"
@@ -155,7 +157,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
               </FormItem>
             )}
           />
-        </div>
+        </Div>
 
         <FormField
           control={form.control}
@@ -172,7 +174,7 @@ export function RegisterForm({ app, redirect_uri }: RegisterFormProps) {
                 />
               </FormControl>
               <FormMessage />
-              <p className="mt-1 text-xs text-muted-foreground">{t('passwordHint')}</p>
+              <P className="mt-1 text-xs text-muted-foreground">{t('passwordHint')}</P>
             </FormItem>
           )}
         />

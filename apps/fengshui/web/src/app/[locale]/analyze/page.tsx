@@ -2,7 +2,7 @@
 'use client'
 
 import { THEME_COLORS } from '@/lib/theme-colors'
-import { Stepper, type StepperTheme, WelcomeModal } from '@ezstart/ui/components'
+import { Div, Stepper, type StepperTheme, WelcomeModal } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
@@ -11,13 +11,13 @@ import { useState } from 'react'
 // Dynamic imports for heavy step components (~900 lines total)
 // Reduces initial bundle size and improves First Load JS
 const AnalysisStep = dynamic(() => import('@/components/steps/AnalysisStep'), {
-  loading: () => <div className="flex items-center justify-center p-8">Loading analysis...</div>,
+  loading: () => <Div className="flex items-center justify-center p-8">Loading analysis...</Div>,
 })
 const CardinalPointsStep = dynamic(() => import('@/components/steps/CardinalPointsStep-v2'), {
-  loading: () => <div className="flex items-center justify-center p-8">Loading compass...</div>,
+  loading: () => <Div className="flex items-center justify-center p-8">Loading compass...</Div>,
 })
 const UploadStep = dynamic(() => import('@/components/steps/UploadStep'), {
-  loading: () => <div className="flex items-center justify-center p-8">Loading uploader...</div>,
+  loading: () => <Div className="flex items-center justify-center p-8">Loading uploader...</Div>,
 })
 
 export default function AnalyzePage(): any {

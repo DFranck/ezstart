@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { logger } from '@ezstart/logger'
-import { Button, Input, P, Card, CardContent } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, Input, P } from '@ezstart/ui/components'
 import { useExtractFormData } from '@/hooks/useForms'
 import type { FormConfig } from '@green-pulse/types'
 
@@ -121,11 +121,11 @@ export function FormChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <Div className="flex flex-col h-full">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <Div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message, idx) => (
-          <div
+          <Div
             key={idx}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
@@ -143,25 +143,25 @@ export function FormChatInterface({
                 <P className="text-xs opacity-70 mt-1">{message.timestamp.toLocaleTimeString()}</P>
               </CardContent>
             </Card>
-          </div>
+          </Div>
         ))}
 
         {isExtracting && (
-          <div className="flex justify-start">
+          <Div className="flex justify-start">
             <Card className="bg-muted">
               <CardContent className="p-3">
                 <P className="text-sm">Analyzing and extracting...</P>
               </CardContent>
             </Card>
-          </div>
+          </Div>
         )}
 
-        <div ref={messagesEndRef} />
-      </div>
+        <Div ref={messagesEndRef} />
+      </Div>
 
       {/* Input Area */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
+      <Div className="border-t p-4">
+        <Div className="flex gap-2">
           <Input
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -177,10 +177,10 @@ export function FormChatInterface({
           <Button onClick={handleSend} disabled={!input.trim() || disabled || isExtracting}>
             Send
           </Button>
-        </div>
+        </Div>
 
         {formConfig.extraction?.fields && (
-          <div className="mt-3">
+          <Div className="mt-3">
             <P className="text-xs text-muted-foreground">
               💡 I can extract:{' '}
               {formConfig.extraction.fields
@@ -190,9 +190,9 @@ export function FormChatInterface({
               {formConfig.extraction.fields.length > 5 &&
                 ` and ${formConfig.extraction.fields.length - 5} more`}
             </P>
-          </div>
+          </Div>
         )}
-      </div>
-    </div>
+      </Div>
+    </Div>
   )
 }

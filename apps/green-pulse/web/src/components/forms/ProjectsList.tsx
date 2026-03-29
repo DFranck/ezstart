@@ -3,7 +3,17 @@ import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@ezstart/auth-sdk'
 
 import { useProjects } from '@/hooks/useProjects'
-import { Card, CardContent, H3, P, Badge, Button, SkeletonCard } from '@ezstart/ui/components'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Div,
+  H3,
+  P,
+  SkeletonCard,
+  Span,
+} from '@ezstart/ui/components'
 import Link from 'next/link'
 
 interface ProjectsListProps {
@@ -17,11 +27,18 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <Div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <SkeletonCard key={i} showHeader showFooter={false} lines={3} variant="shimmer" size="lg" />
+          <SkeletonCard
+            key={i}
+            showHeader
+            showFooter={false}
+            lines={3}
+            variant="shimmer"
+            size="lg"
+          />
         ))}
-      </div>
+      </Div>
     )
   }
 
@@ -45,65 +62,58 @@ export function ProjectsList({ workspaceSlug }: ProjectsListProps) {
           <H3 size="h4" className="mb-2">
             {t('noProjects')}
           </H3>
-          <P className="text-muted-foreground mb-4">
-            {t('noProjectsDescription')}
-          </P>
+          <P className="text-muted-foreground mb-4">{t('noProjectsDescription')}</P>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <Div className="space-y-4">
       {projects.map((project: any) => (
-        <Link
-          key={project._id}
-          href={`/w/${workspaceSlug}/p/${project._id}`}
-        >
+        <Link key={project._id} href={`/w/${workspaceSlug}/p/${project._id}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
+              <Div className="flex items-start justify-between mb-4">
+                <Div className="flex-1">
                   <H3 size="h4" className="mb-2">
                     📁 {project.name}
                   </H3>
                   {project.description && (
                     <P className="text-sm text-muted-foreground">{project.description}</P>
                   )}
-                </div>
+                </Div>
                 <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
                   {project.status}
                 </Badge>
-              </div>
+              </Div>
 
               {project.companyName && (
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Company:</span>
-                    <span className="font-medium">{project.companyName}</span>
-                  </div>
+                <Div className="space-y-2 text-sm">
+                  <Div className="flex items-center gap-2">
+                    <Span className="text-muted-foreground">Company:</Span>
+                    <Span className="font-medium">{project.companyName}</Span>
+                  </Div>
                   {project.companySector && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">Sector:</span>
-                      <span>{project.companySector}</span>
-                    </div>
+                    <Div className="flex items-center gap-2">
+                      <Span className="text-muted-foreground">Sector:</Span>
+                      <Span>{project.companySector}</Span>
+                    </Div>
                   )}
-                </div>
+                </Div>
               )}
 
-              <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
-                <span>👥 {project.members?.length || 0} members</span>
-                <span>📄 {project.formConfigIds?.length || 0} form types</span>
+              <Div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+                <Span>👥 {project.members?.length || 0} members</Span>
+                <Span>📄 {project.formConfigIds?.length || 0} form types</Span>
                 {project.updatedAt && (
-                  <span>
-                    Updated {new Date(project.updatedAt).toLocaleDateString()}
-                  </span>
+                  <Span>Updated {new Date(project.updatedAt).toLocaleDateString()}</Span>
                 )}
-              </div>
+              </Div>
             </CardContent>
           </Card>
         </Link>
       ))}
-    </div>
+    </Div>
   )
 }

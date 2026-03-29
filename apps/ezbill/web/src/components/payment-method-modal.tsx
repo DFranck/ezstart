@@ -15,6 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
   TextArea,
+  Div,
+  H4,
+  P,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
@@ -228,7 +231,7 @@ export function PaymentMethodModal({
       case 'bank_transfer':
         return (
           <>
-            <div className="lg:col-span-2">
+            <Div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Name *
@@ -238,24 +241,24 @@ export function PaymentMethodModal({
                 onChange={e => setFormData({ ...formData, bankName: e.target.value })}
                 placeholder="JPMorgan Chase, BNP Paribas..."
               />
-            </div>
+            </Div>
 
-            <div className="lg:col-span-2">
+            <Div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 flex items-center">
                 <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Bank Region *
               </Label>
-              <div className="flex gap-3">
+              <Div className="flex gap-3">
                 <Button
                   type="button"
                   variant={formData.bankRegion === 'international' ? 'default' : 'outline'}
                   onClick={() => setFormData({ ...formData, bankRegion: 'international' })}
                 >
                   <Icon name="lucide:Globe" className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-semibold">International</div>
-                    <div className="text-xs opacity-80">IBAN/SWIFT</div>
-                  </div>
+                  <Div className="text-center">
+                    <Div className="font-semibold">International</Div>
+                    <Div className="text-xs opacity-80">IBAN/SWIFT</Div>
+                  </Div>
                 </Button>
                 <Button
                   type="button"
@@ -264,22 +267,22 @@ export function PaymentMethodModal({
                   onClick={() => setFormData({ ...formData, bankRegion: 'domestic' })}
                 >
                   <Icon name="lucide:Building" className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-semibold">Domestic</div>
-                    <div className="text-xs opacity-80">Account/Routing</div>
-                  </div>
+                  <Div className="text-center">
+                    <Div className="font-semibold">Domestic</Div>
+                    <Div className="text-xs opacity-80">Account/Routing</Div>
+                  </Div>
                 </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
+              </Div>
+              <P className="text-xs text-muted-foreground mt-2">
                 {formData.bankRegion === 'international'
                   ? 'For Europe, Middle East, Africa (SEPA transfers)'
                   : 'For USA, Canada, UK, Asia (local transfers)'}
-              </p>
-            </div>
+              </P>
+            </Div>
 
             {formData.bankRegion === 'international' ? (
               <>
-                <div>
+                <Div>
                   <Label className="text-sm font-medium mb-3 flex items-center">
                     <Icon name="lucide:CreditCard" className="w-4 h-4 mr-2 text-ezbill-payment" />
                     IBAN *
@@ -290,8 +293,8 @@ export function PaymentMethodModal({
                     placeholder="FR14 2004 1010 0505 0001 3M02 606"
                     className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
                   />
-                </div>
-                <div>
+                </Div>
+                <Div>
                   <Label className="text-sm font-medium mb-3 flex items-center">
                     <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-payment" />
                     SWIFT/BIC Code
@@ -302,11 +305,11 @@ export function PaymentMethodModal({
                     placeholder="BNPAFRPP"
                     className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
                   />
-                </div>
+                </Div>
               </>
             ) : (
               <>
-                <div>
+                <Div>
                   <Label className="text-sm font-medium mb-3 flex items-center">
                     <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-payment" />
                     Account Number *
@@ -317,8 +320,8 @@ export function PaymentMethodModal({
                     placeholder="1234567890"
                     className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
                   />
-                </div>
-                <div>
+                </Div>
+                <Div>
                   <Label className="text-sm font-medium mb-3 flex items-center">
                     <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-payment" />
                     Routing/Sort Code
@@ -329,7 +332,7 @@ export function PaymentMethodModal({
                     placeholder="026009593 (USA) or 12-34-56 (UK)"
                     className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
                   />
-                </div>
+                </Div>
               </>
             )}
           </>
@@ -338,7 +341,7 @@ export function PaymentMethodModal({
       case 'crypto_wallet':
         return (
           <>
-            <div className="lg:col-span-2">
+            <Div className="lg:col-span-2">
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Wallet" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Wallet Address *
@@ -349,8 +352,8 @@ export function PaymentMethodModal({
                 placeholder="cosmos1abc123def456ghi789jkl012mno345pqr678stu"
                 className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm"
               />
-            </div>
-            <div>
+            </Div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Network" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Network
@@ -361,8 +364,8 @@ export function PaymentMethodModal({
                 placeholder="Cosmos Hub, Ethereum, Bitcoin..."
                 className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
-            </div>
-            <div>
+            </Div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Coins" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Currency/Token
@@ -373,13 +376,13 @@ export function PaymentMethodModal({
                 placeholder="USDC, ETH, BTC, ATOM..."
                 className="w-full focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md"
               />
-            </div>
+            </Div>
           </>
         )
 
       case 'cash':
         return (
-          <div className="lg:col-span-2">
+          <Div className="lg:col-span-2">
             <Label className="text-sm font-medium mb-3 block flex items-center">
               <Icon name="lucide:Banknote" className="w-4 h-4 mr-2 text-ezbill-payment" />
               Instructions (Optional)
@@ -391,7 +394,7 @@ export function PaymentMethodModal({
               rows={3}
               className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md min-h-[100px] resize-none"
             />
-          </div>
+          </Div>
         )
 
       default:
@@ -406,7 +409,7 @@ export function PaymentMethodModal({
       title={paymentMethod ? tPM('edit') : tPM('create')}
       description={tPM('description')}
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        <Div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
             variant="outline"
             onClick={onClose}
@@ -426,7 +429,7 @@ export function PaymentMethodModal({
             <Icon name={paymentMethod ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {paymentMethod ? tPM('edit') : tPM('create')}
           </LoadingButton>
-        </div>
+        </Div>
       }
     >
       <form
@@ -434,7 +437,7 @@ export function PaymentMethodModal({
         onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 m-1"
       >
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-ezbill-payment" />
             Payment Type *
@@ -449,28 +452,28 @@ export function PaymentMethodModal({
             <SelectContent>
               {paymentMethodTypes.map(type => (
                 <SelectItem key={type.value} value={type.value}>
-                  <div className="flex items-center">
+                  <Div className="flex items-center">
                     <Icon name={type.icon} className="w-4 h-4 mr-2 text-ezbill-payment" />
                     {type.label}
-                  </div>
+                  </Div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </Div>
 
-        <div className="lg:col-span-2 border-t border-border pt-6 mt-2">
-          <div className="flex items-center mb-4">
+        <Div className="lg:col-span-2 border-t border-border pt-6 mt-2">
+          <Div className="flex items-center mb-4">
             <Icon
               name={selectedType?.icon || 'lucide:Settings'}
               className="w-5 h-5 mr-2 text-ezbill-payment"
             />
-            <h4 className="text-lg font-semibold ">{selectedType?.label} Details</h4>
-          </div>
-        </div>
+            <H4 className="text-lg font-semibold ">{selectedType?.label} Details</H4>
+          </Div>
+        </Div>
         {renderFieldsForType()}
 
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-payment" />
             Additional Instructions
@@ -482,11 +485,11 @@ export function PaymentMethodModal({
             rows={2}
             className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 shadow-sm hover:shadow-md min-h-[80px] resize-none"
           />
-        </div>
+        </Div>
 
-        <div className="lg:col-span-2">
-          <div className="p-4 border rounded-md">
-            <div className="flex items-center space-x-3">
+        <Div className="lg:col-span-2">
+          <Div className="p-4 border rounded-md">
+            <Div className="flex items-center space-x-3">
               <Checkbox
                 id="isDefault"
                 checked={formData.isDefault}
@@ -502,9 +505,9 @@ export function PaymentMethodModal({
                 <Icon name="lucide:Star" className="w-4 h-4 mr-2 text-ezbill-payment" />
                 Make this my default payment method
               </Label>
-            </div>
-          </div>
-        </div>
+            </Div>
+          </Div>
+        </Div>
       </form>
     </Modal>
   )

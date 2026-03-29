@@ -15,6 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
   TextArea,
+  Div,
+  H4,
+  Span,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
@@ -122,7 +125,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
       title={client ? tClient('edit') : tClient('create')}
       description={client ? tClient('edit') : tClient('create')}
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        <Div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
             variant="outline"
             onClick={onClose}
@@ -144,7 +147,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
               {client ? tClient('update') : tClient('create')}
             </>
           </LoadingButton>
-        </div>
+        </Div>
       }
     >
       <form
@@ -152,22 +155,22 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
         onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 m-1"
       >
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
             Client Name *
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.clientName}
               onChange={e => setFormData({ ...formData, clientName: e.target.value })}
               required
               placeholder="Enter client name"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3  flex items-center">
             <Icon name="lucide:Type" className="w-4 h-4 mr-2 text-ezbill-client" />
             Client Type
@@ -181,82 +184,82 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="individual" className="hover:bg-primary/5">
-                <div className="flex items-center">
+                <Div className="flex items-center">
                   <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Individual
-                </div>
+                </Div>
               </SelectItem>
               <SelectItem value="company" className="hover:bg-primary/5">
-                <div className="flex items-center">
+                <Div className="flex items-center">
                   <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-client" />
                   Company
-                </div>
+                </Div>
               </SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3  flex items-center">
             <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-ezbill-client" />
             Email
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
               placeholder="client@example.com"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3  flex items-center">
             <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-ezbill-client" />
             Phone
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
               placeholder="+1 (555) 123-4567"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-client" />
             Website
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               type="url"
               value={formData.website}
               onChange={e => setFormData({ ...formData, website: e.target.value })}
               placeholder="https://example.com"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-client" />
             Address
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
               placeholder="123 Main Street"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className="lg:col-span-2">
-          <div className="  p-4 border rounded-md">
-            <div className="flex items-center space-x-3">
+        <Div className="lg:col-span-2">
+          <Div className="  p-4 border rounded-md">
+            <Div className="flex items-center space-x-3">
               <Checkbox
                 id="showFullAddress"
                 checked={showFullAddress}
@@ -269,13 +272,13 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Add detailed address (city, postal code, country)
               </Label>
-            </div>
-          </div>
-        </div>
+            </Div>
+          </Div>
+        </Div>
 
         {showFullAddress && (
           <>
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-client" />
                 City
@@ -286,9 +289,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="New York"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3  flex items-center">
                 <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Postal Code
@@ -299,9 +302,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="10001"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Country
@@ -312,20 +315,20 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="United States"
               />
-            </div>
+            </Div>
           </>
         )}
 
         {formData.isCompany && (
           <>
-            <div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
-              <div className="flex items-center mb-4">
+            <Div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
+              <Div className="flex items-center mb-4">
                 <Icon name="lucide:Building2" className="w-5 h-5 mr-2 text-accent" />
-                <h4 className="text-lg font-semibold text-foreground">Company Information</h4>
-              </div>
-            </div>
+                <H4 className="text-lg font-semibold text-foreground">Company Information</H4>
+              </Div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-accent" />
                 Registration Number
@@ -338,9 +341,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="12345678"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-accent" />
                 Tax Number
@@ -351,21 +354,21 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="TAX123456789"
               />
-            </div>
+            </Div>
           </>
         )}
 
         {formData.isCompany && (
           <>
-            <div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
-              <div className="flex items-center mb-4">
+            <Div className="lg:col-span-2 border-t border-primary/10 pt-6 mt-2">
+              <Div className="flex items-center mb-4">
                 <Icon name="lucide:Users" className="w-5 h-5 mr-2 text-ezbill-client" />
-                <h4 className="text-lg font-semibold text-foreground">Contact Person</h4>
-                <span className="ml-2 text-sm text-muted-foreground">(Optional)</span>
-              </div>
-            </div>
+                <H4 className="text-lg font-semibold text-foreground">Contact Person</H4>
+                <Span className="ml-2 text-sm text-muted-foreground">(Optional)</Span>
+              </Div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Name
@@ -376,9 +379,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="Jean-Baptiste"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Briefcase" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Job Title
@@ -389,9 +392,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="Project Manager"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Email
@@ -403,9 +406,9 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="jean-baptiste@company.com"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-ezbill-client" />
                 Contact Phone
@@ -416,11 +419,11 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
                 className="w-full px-4 py-3  backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="+33 6 12 34 56 78"
               />
-            </div>
+            </Div>
           </>
         )}
 
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-ezbill-client" />
             Notes
@@ -432,7 +435,7 @@ export function ClientModal({ isOpen, onClose, client, onSave }: ClientModalProp
             placeholder="Additional notes about this client..."
             rows={4}
           />
-        </div>
+        </Div>
       </form>
     </Modal>
   )

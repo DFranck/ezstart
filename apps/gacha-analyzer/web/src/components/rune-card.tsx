@@ -9,6 +9,7 @@ import {
   H3,
   P,
   Progress,
+  Span,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -297,14 +298,14 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                       </P>
                       {subAnalysis && (
                         <P className="text-xs">
-                          <span className={getRollQualityColor(subAnalysis.efficiency)}>
+                          <Span className={getRollQualityColor(subAnalysis.efficiency)}>
                             {tRune(`rollQuality.${getRollQualityTier(subAnalysis.efficiency)}`)}
-                          </span>
-                          <span className="text-muted-foreground">
+                          </Span>
+                          <Span className="text-muted-foreground">
                             {' '}
                             ({subAnalysis.rolls}{' '}
                             {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})
-                          </span>
+                          </Span>
                         </P>
                       )}
                     </Div>
@@ -435,7 +436,7 @@ export function RuneCard({ rune, analysis, confidence }: RuneCardProps) {
                   .filter(s => s.grindable && s.grindAmount && s.grindAmount > 0)
                   .map((sub, i) => (
                     <P key={i} className="text-xs text-muted-foreground">
-                      <span className="font-medium">{formatStatLabel(sub.type)}</span>{' '}
+                      <Span className="font-medium">{formatStatLabel(sub.type)}</Span>{' '}
                       {formatStatValue(sub.type, sub.value)}
                       {'\u2192'}
                       {formatStatValue(sub.type, sub.grindedValue!)}

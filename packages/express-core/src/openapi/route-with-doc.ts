@@ -27,7 +27,7 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, b
     options: RouteDocOptions
   ) {
     const fullPath = basePath + path
-    const requestDoc: any = {}
+    const requestDoc: Record<string, unknown> = {}
     // ✅ BODY
     if (options.bodySchema) {
       requestDoc.body = {
@@ -49,7 +49,10 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, b
       requestDoc.params = openApiCompatible(options.paramsSchema, `${options.summary}Params`)
     }
 
-    const responses: Record<number, any> = {
+    const responses: Record<
+      number,
+      { description: string; content?: Record<string, { schema: ZodTypeAny }> }
+    > = {
       [options.status ?? 200]: {
         description: 'Success',
         content: options.responseSchema
@@ -113,7 +116,7 @@ export function createRouterWithDoc(registry: OpenAPIRegistry, router: Router, b
       request: Object.keys(requestDoc).length ? requestDoc : undefined,
       responses,
     })
-    ;(router as any)[method](path, ...middlewares)
+    ;(router[method] as (...args: unknown[]) => void)(path, ...middlewares)
   }
 
   return {

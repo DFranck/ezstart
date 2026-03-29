@@ -1,6 +1,15 @@
-export function toApiObject<T = any>(doc: any): T {
-  if (!doc) return doc;
-  const obj = doc.toObject ? doc.toObject() : doc;
+interface MongooseDoc {
+  toObject?: () => Record<string, unknown>
+  _id?: { toString(): string }
+  createdAt?: string | { toISOString(): string }
+  updatedAt?: string | { toISOString(): string }
+  deletedAt?: unknown
+  [key: string]: unknown
+}
+
+export function toApiObject<T = Record<string, unknown>>(doc: MongooseDoc): T {
+  if (!doc) return doc as T
+  const obj = (doc.toObject ? doc.toObject() : doc) as MongooseDoc
 
   return {
     ...obj,
@@ -8,11 +17,11 @@ export function toApiObject<T = any>(doc: any): T {
     createdAt:
       typeof obj.createdAt === 'string'
         ? obj.createdAt
-        : obj.createdAt?.toISOString(),
+        : (obj.createdAt as { toISOString(): string } | undefined)?.toISOString(),
     updatedAt:
       typeof obj.updatedAt === 'string'
         ? obj.updatedAt
-        : obj.updatedAt?.toISOString(),
+        : (obj.updatedAt as { toISOString(): string } | undefined)?.toISOString(),
     deletedAt: obj.deletedAt ?? undefined,
-  };
+  } as T
 }

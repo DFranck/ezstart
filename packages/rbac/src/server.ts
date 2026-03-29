@@ -30,7 +30,7 @@ export function requireRole(...roles: Role[]) {
       return res.status(401).json({ error: 'Authentication required' })
     }
 
-    const user = req.user as any
+    const user = req.user!
 
     // Check globalRoles (e.g., superadmin)
     const globalRoles = user.globalRoles || []
@@ -68,7 +68,7 @@ export function requirePermission(...permissions: Permission[]) {
       return res.status(401).json({ error: 'Authentication required' })
     }
 
-    const user = req.user as any
+    const user = req.user!
 
     // Superadmin has all permissions (check globalRoles)
     if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
@@ -99,7 +99,7 @@ export function requireFeature(...features: Feature[]) {
       return res.status(401).json({ error: 'Authentication required' })
     }
 
-    const user = req.user as any
+    const user = req.user!
 
     // Superadmin has all features (check globalRoles)
     if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {
@@ -127,7 +127,7 @@ export function requireFeature(...features: Feature[]) {
 export function canManageUser(req: Request, targetUserId: string): boolean {
   if (!req.user) return false
 
-  const user = req.user as any
+  const user = req.user!
 
   // Superadmin can manage everyone (check globalRoles)
   if (user.globalRoles?.includes('superadmin') || user.roles?.includes('superadmin')) {

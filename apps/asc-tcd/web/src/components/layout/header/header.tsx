@@ -32,7 +32,7 @@ export default function Header() {
 
   return (
     <Tag as="header" layout={'spaced'} position={'fixed'} className="flex-col pt-safe-top">
-      <div
+      <Div
         className={cn(
           ' py-4 pr-2 pl-4 md:px-6 flex items-center justify-between transition-all duration-300',
           {
@@ -58,7 +58,7 @@ export default function Header() {
           </Div>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <Div className="flex items-center gap-2">
           {isDesktop && (
             <NavMenu
               className={cn('sticky top-14 flex items-center justify-center gap-2 w-full z-20')}
@@ -66,10 +66,10 @@ export default function Header() {
           )}
           {/* <HeaderControls /> */}
           {isTablet && <Burger setIsOpen={setIsOpen} isOpen={isOpen} />}
-        </div>
-      </div>
+        </Div>
+      </Div>
       {isTablet && (
-        <div
+        <Div
           // ref={mobileMenuRef}
           className={cn(
             'transition-all duration-500 ease-in-out overflow-hidden px-6 ',
@@ -77,7 +77,7 @@ export default function Header() {
           )}
         >
           <MobileNavMenu setIsOpen={setIsOpen} />
-        </div>
+        </Div>
       )}
     </Tag>
   )

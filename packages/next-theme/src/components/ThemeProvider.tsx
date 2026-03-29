@@ -4,7 +4,7 @@ import * as React from 'react'
 import { ThemeProvider as NextThemesProvider, type Attribute } from 'next-themes'
 
 export interface ThemeProviderProps {
-  children: any
+  children: React.ReactNode
   defaultTheme?: string
   storageKey?: string
   enableSystem?: boolean

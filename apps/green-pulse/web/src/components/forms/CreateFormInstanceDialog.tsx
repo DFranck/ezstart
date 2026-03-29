@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { logger } from '@ezstart/logger'
 import { useRouter } from 'next/navigation'
-import { Button, Label, P, Card, CardContent } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Div, Label, P, Span } from '@ezstart/ui/components'
 import { useCreateFormInstance } from '@/hooks/useForms'
 import { useFormConfigs } from '@/hooks/useForms'
 import {
@@ -79,14 +79,14 @@ export function CreateFormInstanceDialog({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Form Template Selection */}
-          <div>
+          <Div>
             <Label className="mb-3 block">{t('selectTemplate')}</Label>
             {isLoading ? (
               <P className="text-sm text-muted-foreground">{t('loadingTemplates')}</P>
             ) : formConfigs.length === 0 ? (
               <P className="text-sm text-muted-foreground">{t('noTemplates')}</P>
             ) : (
-              <div className="grid gap-3">
+              <Div className="grid gap-3">
                 {formConfigs.map((config: any) => (
                   <Card
                     key={config.id}
@@ -98,32 +98,32 @@ export function CreateFormInstanceDialog({
                     onClick={() => setSelectedConfigId(config.id)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">{config.icon || '📄'}</span>
-                        <div className="flex-1">
+                      <Div className="flex items-start gap-3">
+                        <Span className="text-2xl">{config.icon || '📄'}</Span>
+                        <Div className="flex-1">
                           <P className="font-medium mb-1">{config.name}</P>
                           <P className="text-sm text-muted-foreground">{config.description}</P>
-                          <div className="flex gap-2 mt-2">
-                            <span className="text-xs px-2 py-1 bg-muted rounded">
+                          <Div className="flex gap-2 mt-2">
+                            <Span className="text-xs px-2 py-1 bg-muted rounded">
                               {config.category}
-                            </span>
-                            <span className="text-xs px-2 py-1 bg-muted rounded">
+                            </Span>
+                            <Span className="text-xs px-2 py-1 bg-muted rounded">
                               {t('fields', { count: config.extraction?.fields?.length || 0 })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                            </Span>
+                          </Div>
+                        </Div>
+                      </Div>
                     </CardContent>
                   </Card>
                 ))}
-              </div>
+              </Div>
             )}
-          </div>
+          </Div>
 
           {/* Filling Mode Selection */}
-          <div>
+          <Div>
             <Label className="mb-3 block">{t('fillingMode')}</Label>
-            <div className="grid gap-3">
+            <Div className="grid gap-3">
               <Card
                 className={`cursor-pointer transition-all ${
                   mode === 'chat'
@@ -133,13 +133,13 @@ export function CreateFormInstanceDialog({
                 onClick={() => setMode('chat')}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">💬</span>
-                    <div>
+                  <Div className="flex items-start gap-3">
+                    <Span className="text-2xl">💬</Span>
+                    <Div>
                       <P className="font-medium mb-1">{t('chatMode')}</P>
                       <P className="text-sm text-muted-foreground">{t('chatModeDescription')}</P>
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 </CardContent>
               </Card>
 
@@ -152,13 +152,13 @@ export function CreateFormInstanceDialog({
                 onClick={() => setMode('vocal')}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">🎤</span>
-                    <div>
+                  <Div className="flex items-start gap-3">
+                    <Span className="text-2xl">🎤</Span>
+                    <Div>
                       <P className="font-medium mb-1">{t('vocalMode')}</P>
                       <P className="text-sm text-muted-foreground">{t('vocalModeDescription')}</P>
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 </CardContent>
               </Card>
 
@@ -171,17 +171,17 @@ export function CreateFormInstanceDialog({
                 onClick={() => setMode('manual')}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">✍️</span>
-                    <div>
+                  <Div className="flex items-start gap-3">
+                    <Span className="text-2xl">✍️</Span>
+                    <Div>
                       <P className="font-medium mb-1">{t('manualMode')}</P>
                       <P className="text-sm text-muted-foreground">{t('manualModeDescription')}</P>
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
+            </Div>
+          </Div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

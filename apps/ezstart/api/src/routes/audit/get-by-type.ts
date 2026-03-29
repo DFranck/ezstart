@@ -8,7 +8,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import type { Request, Response } from 'express'
@@ -39,8 +45,8 @@ const specificAuditResponseSchema = z.object({
 })
 
 const errorResponseSchema = z.object({
-  error: z.string(),
-  message: z.string(),
+  error: z.string().describe('Error type or code'),
+  message: z.string().describe('Human-readable error message'),
 })
 
 // ========================================
@@ -95,7 +101,8 @@ const getSpecificAuditHandler = (req: Request, res: Response) => {
       auditType,
       emoji: domains[domainKey]?.emoji || '📊',
       name: auditType.charAt(0).toUpperCase() + auditType.slice(1),
-      description: auditData.description || `${domains[domainKey]?.agent || 'Agent'} - ${auditType}`,
+      description:
+        auditData.description || `${domains[domainKey]?.agent || 'Agent'} - ${auditType}`,
       filePath: `docs/audits.json → domains.${domainKey}${auditData.score ? '' : '.categories.' + auditType}`,
       score,
       lastUpdated,

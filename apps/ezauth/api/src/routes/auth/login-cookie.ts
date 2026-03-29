@@ -3,6 +3,7 @@ import {
   OpenAPIRegistry,
   Router,
   createStrictRateLimiter,
+  createCsrfMiddleware,
   sendSuccess,
   sendError,
   sendValidationError,
@@ -22,6 +23,7 @@ const docRouter = createRouterWithDoc(loginCookieRegistry, router)
 
 // Rate limiting for login-cookie endpoint (5 req/min per IP)
 const loginCookieRateLimiter = createStrictRateLimiter()
+const csrf = createCsrfMiddleware()
 
 // Login with httpOnly cookie (DUAL-MODE)
 const loginCookieController = async (req: any, res: any) => {
@@ -52,7 +54,20 @@ const loginCookieController = async (req: any, res: any) => {
   }
 }
 
-docRouter.post('/login-cookie', loginCookieRateLimiter, loginCookieController, {
+// Generate CSRF token (client calls GET before POST)
+docRouter.get(
+  '/login-cookie/csrf',
+  csrf.generateToken,
+  ((_req: any, res: any) => {
+    sendSuccess(res, { message: 'CSRF token generated' })
+  }) as any,
+  {
+    summary: 'Generate CSRF token for login-cookie',
+    tags: ['Authentication'],
+  }
+)
+
+docRouter.post('/login-cookie', loginCookieRateLimiter, csrf.verifyToken, loginCookieController, {
   summary: 'Login with httpOnly cookie (dual-mode)',
   tags: ['Authentication'],
   bodySchema: loginRequestSchema,

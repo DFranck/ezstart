@@ -2,7 +2,7 @@
 
 import { callApi, parseApiError, runWithFeedback } from '@/config/api'
 import { Company, CreateCompany } from '@ezbill/types'
-import { Button, Checkbox, Icon, Input, Label, Modal } from '@ezstart/ui/components'
+import { Button, Checkbox, Icon, Input, Label, Modal, Div, H4 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
@@ -103,7 +103,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
       title={company ? tCompany('edit') : tCompany('create')}
       description={company ? tCompany('edit') : tCompany('create')}
       footer={
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        <Div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
           <Button
             variant="outline"
             onClick={onClose}
@@ -123,7 +123,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             <Icon name={company ? 'lucide:Save' : 'lucide:Plus'} className="w-4 h-4 mr-2" />
             {company ? tCompany('update') : tCompany('create')}
           </LoadingButton>
-        </div>
+        </Div>
       }
     >
       <form
@@ -131,82 +131,82 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
         onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 m-1"
       >
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
             Company Name *
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.companyName}
               onChange={e => setFormData({ ...formData, companyName: e.target.value })}
               required
               placeholder="Enter company name"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:Mail" className="w-4 h-4 mr-2 text-ezbill-company" />
             Email
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
               placeholder="company@example.com"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:Phone" className="w-4 h-4 mr-2 text-ezbill-company" />
             Phone
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.phone}
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
               placeholder="+1 (555) 123-4567"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 flex items-center">
             <Icon name="lucide:Globe" className="w-4 h-4 mr-2 text-ezbill-company" />
             Website
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               type="url"
               value={formData.website}
               onChange={e => setFormData({ ...formData, website: e.target.value })}
               placeholder="https://company.com"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className="lg:col-span-2">
+        <Div className="lg:col-span-2">
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-company" />
             Address
           </Label>
-          <div className="relative">
+          <Div className="relative">
             <Input
               value={formData.address}
               onChange={e => setFormData({ ...formData, address: e.target.value })}
               placeholder="123 Business Street"
             />
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className="lg:col-span-2">
-          <div className="p-4 border rounded-md">
-            <div className="flex items-center space-x-3">
+        <Div className="lg:col-span-2">
+          <Div className="p-4 border rounded-md">
+            <Div className="flex items-center space-x-3">
               <Checkbox
                 id="showFullAddress"
                 checked={showFullAddress}
@@ -220,13 +220,13 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
                 <Icon name="lucide:MapPin" className="w-4 h-4 mr-2 text-ezbill-company" />
                 Add detailed address (city, postal code, country)
               </Label>
-            </div>
-          </div>
-        </div>
+            </Div>
+          </Div>
+        </Div>
 
         {showFullAddress && (
           <>
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Building" className="w-4 h-4 mr-2 text-ezbill-company" />
                 City
@@ -237,9 +237,9 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
                 className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="New York"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 flex items-center">
                 <Icon name="lucide:Hash" className="w-4 h-4 mr-2 text-ezbill-company" />
                 Postal Code
@@ -250,9 +250,9 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
                 className="w-full focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="10001"
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium mb-3 block flex items-center">
                 <Icon name="lucide:Flag" className="w-4 h-4 mr-2 text-ezbill-company" />
                 Country
@@ -263,18 +263,18 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
                 className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 shadow-sm hover:shadow-md"
                 placeholder="United States"
               />
-            </div>
+            </Div>
           </>
         )}
 
-        <div className="lg:col-span-2 border-t border-border pt-6 mt-2">
-          <div className="flex items-center mb-4">
+        <Div className="lg:col-span-2 border-t border-border pt-6 mt-2">
+          <Div className="flex items-center mb-4">
             <Icon name="lucide:Scale" className="w-5 h-5 mr-2 text-warning" />
-            <h4 className="text-lg font-semibold ">Legal Information</h4>
-          </div>
-        </div>
+            <H4 className="text-lg font-semibold ">Legal Information</H4>
+          </Div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-warning" />
             Registration Number
@@ -285,9 +285,9 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
             placeholder="12345678"
           />
-        </div>
+        </Div>
 
-        <div>
+        <Div>
           <Label className="text-sm font-medium mb-3 block flex items-center">
             <Icon name="lucide:Receipt" className="w-4 h-4 mr-2 text-warning" />
             Tax Number
@@ -298,7 +298,7 @@ export function CompanyModal({ isOpen, onClose, company, onSave }: CompanyModalP
             className="w-full px-4 py-3 backdrop-blur-sm border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
             placeholder="TAX123456789"
           />
-        </div>
+        </Div>
       </form>
     </Modal>
   )

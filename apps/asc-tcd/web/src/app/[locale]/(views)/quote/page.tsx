@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Checkbox, H1, Input, Label, Main, P, Section } from '@ezstart/ui/components'
+import { Button, Checkbox, Div, H1, Input, Label, Main, P, Section } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 export default function PageQuote(): any {
@@ -71,7 +71,7 @@ export default function PageQuote(): any {
       {/* FORMULAIRE */}
       <Section className="py-8">
         <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
-          <div>
+          <Div>
             <Label htmlFor="organisation">Nom de l'organisme</Label>
             <Input
               id="organisation"
@@ -80,9 +80,9 @@ export default function PageQuote(): any {
               onChange={e => handleChange('organisation', e.target.value)}
               required
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="contactName">Nom du contact</Label>
             <Input
               id="contactName"
@@ -91,9 +91,9 @@ export default function PageQuote(): any {
               onChange={e => handleChange('contactName', e.target.value)}
               required
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
@@ -102,9 +102,9 @@ export default function PageQuote(): any {
               onChange={e => handleChange('email', e.target.value)}
               required
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="phone">Téléphone</Label>
             <Input
               id="phone"
@@ -112,9 +112,9 @@ export default function PageQuote(): any {
               value={form.phone}
               onChange={e => handleChange('phone', e.target.value)}
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="nbPlants">Nombre de végétaux à transplanter</Label>
             <Input
               id="nbPlants"
@@ -123,39 +123,39 @@ export default function PageQuote(): any {
               value={form.nbPlants}
               onChange={e => handleChange('nbPlants', e.target.value)}
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label>Types de végétaux</Label>
-            <div className="flex flex-col gap-1 mt-2">
-              <div className="flex items-center gap-2">
+            <Div className="flex flex-col gap-1 mt-2">
+              <Div className="flex items-center gap-2">
                 <Checkbox
                   id="trees"
                   checked={form.types.trees}
                   onCheckedChange={checked => handleChange('types.trees', checked)}
                 />
                 <Label htmlFor="trees">Arbres et arbustes</Label>
-              </div>
-              <div className="flex items-center gap-2">
+              </Div>
+              <Div className="flex items-center gap-2">
                 <Checkbox
                   id="hedges"
                   checked={form.types.hedges}
                   onCheckedChange={checked => handleChange('types.hedges', checked)}
                 />
                 <Label htmlFor="hedges">Haies et thorbaces</Label>
-              </div>
-              <div className="flex items-center gap-2">
+              </Div>
+              <Div className="flex items-center gap-2">
                 <Checkbox
                   id="plants"
                   checked={form.types.plants}
                   onCheckedChange={checked => handleChange('types.plants', checked)}
                 />
                 <Label htmlFor="plants">Plantes (linaire, grasses, fruitières, etc.)</Label>
-              </div>
-            </div>
-          </div>
+              </Div>
+            </Div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="date">Date de transplantation souhaitée</Label>
             <Input
               id="date"
@@ -163,9 +163,9 @@ export default function PageQuote(): any {
               value={form.date}
               onChange={e => handleChange('date', e.target.value)}
             />
-          </div>
+          </Div>
 
-          <div>
+          <Div>
             <Label htmlFor="distance">Distance du déplacement (km)</Label>
             <Input
               id="distance"
@@ -174,7 +174,7 @@ export default function PageQuote(): any {
               value={form.distance}
               onChange={e => handleChange('distance', e.target.value)}
             />
-          </div>
+          </Div>
 
           <Button type="submit" className="md:col-span-2">
             Envoyer

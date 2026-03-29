@@ -38,6 +38,7 @@ export type { RateLimitOptions } from './middleware/rateLimit.js'
 export { securityHeaders, securityHeadersPresets } from './middleware/security-headers.js'
 export type { SecurityHeadersOptions } from './middleware/security-headers.js'
 export { createAuthMiddleware } from './middleware/auth.js'
+export { createCsrfMiddleware } from './middleware/csrf.js'
 
 // Versioning
 export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from './versioning.js'
@@ -45,6 +46,7 @@ export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from 
 // Types & Validation (Zod + OpenAPI)
 export { z, mongoIdSchema, listingQuerySchema } from './types/zod.js'
 export type { Infer, Input, ListingQuery } from './types/zod.js'
+export type { Json, JsonObject, JsonResponse } from './types/json.js'
 
 // OpenAPI helpers (incl. OpenAPIRegistry, createRouterWithDoc, etc.)
 export { OpenApiGeneratorV3, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi'

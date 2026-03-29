@@ -4,9 +4,9 @@ import { SupportedAs } from '../types'
 
 export function createAlias<T extends SupportedAs>(as: T) {
   const AliasComponent = React.memo(
-    React.forwardRef<any, Omit<TagProps<T>, 'as'>>((props, _ref) => {
+    React.forwardRef<any, Omit<TagProps<T>, 'as'>>((props, ref) => {
       const allProps = { ...props, as } as unknown as TagProps<T>
-      return <Tag {...allProps} />
+      return <Tag ref={ref} {...allProps} />
     })
   ) as React.NamedExoticComponent<Omit<TagProps<T>, 'as'>> & {
     displayName?: string

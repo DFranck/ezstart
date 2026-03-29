@@ -2,7 +2,7 @@
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
 import { logger } from '@ezstart/logger'
-import { Card, P, Section, Spinner } from '@ezstart/ui/components'
+import { Card, Div, P, Section, Spinner } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { SystemOverview } from './components/SystemOverview'
@@ -54,9 +54,9 @@ function MonitoringOverviewContent(): any {
   if (isLoading) {
     return (
       <Section size="full">
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Div className="flex flex-col items-center justify-center py-20 gap-4">
           <Spinner size="xl" text={t('loading')} variant="fancy" />
-        </div>
+        </Div>
       </Section>
     )
   }
@@ -72,13 +72,13 @@ function MonitoringOverviewContent(): any {
 
     return (
       <Section size="full">
-        <div className="flex items-center justify-center py-20">
-          <div className="space-y-4 text-center max-w-lg">
-            <div className="text-6xl">⚠️</div>
+        <Div className="flex items-center justify-center py-20">
+          <Div className="space-y-4 text-center max-w-lg">
+            <Div className="text-6xl">⚠️</Div>
             <P className="text-destructive font-semibold">Failed to load monitoring data</P>
             <P className="text-muted-foreground">{errorMessage}</P>
-          </div>
-        </div>
+          </Div>
+        </Div>
       </Section>
     )
   }

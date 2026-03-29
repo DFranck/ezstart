@@ -1,5 +1,5 @@
 import { Company } from '@ezbill/types'
-import { Button, Card, CardContent, Icon } from '@ezstart/ui/components'
+import { Button, Card, CardContent, Icon, Div, H3, P } from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 
 const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
   return (
-    <div key={company._id} className="group relative">
+    <Div key={company._id} className="group relative">
       <Card
         className={cn(
           'hover:shadow-xl hover:shadow-foreground/10 cursor-pointer transition-all duration-300 border-ezbill-company/20 hover:border-ezbill-company/40 group-hover:-translate-y-1',
@@ -21,33 +21,33 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
       >
         <CardContent className="p-4 sm:p-6">
           {/* Company Icon */}
-          <div className="w-12 h-12 bg-gradient-company rounded-xl flex items-center justify-center mb-4">
+          <Div className="w-12 h-12 bg-gradient-company rounded-xl flex items-center justify-center mb-4">
             <Icon name="lucide:Building2" className="w-6 h-6 text-white" />
-          </div>
+          </Div>
 
-          <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-1">
+          <H3 className="text-base sm:text-lg font-bold text-foreground mb-2 line-clamp-1">
             {company.companyName}
-          </h3>
+          </H3>
           {company.email && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Mail" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.email}
-            </p>
+            </P>
           )}
           {company.phone && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Phone" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {company.phone}
-            </p>
+            </P>
           )}
           {(company.city || company.country || company.address) && (
-            <p className="text-muted-foreground/80 text-sm line-clamp-2">
+            <P className="text-muted-foreground/80 text-sm line-clamp-2">
               <Icon name="lucide:MapPin" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               {[company.address, company.city, company.country].filter(Boolean).join(', ')}
-            </p>
+            </P>
           )}
           {company.website && (
-            <p className="text-muted-foreground text-sm mb-1 line-clamp-1">
+            <P className="text-muted-foreground text-sm mb-1 line-clamp-1">
               <Icon name="lucide:Globe" className="w-4 h-4 sm:w-3 sm:h-3 inline mr-1" />
               <a
                 href={company.website}
@@ -58,14 +58,14 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
               >
                 {company.website.replace(/^https?:\/\//, '')}
               </a>
-            </p>
+            </P>
           )}
           {company.taxNumber && (
-            <p className="text-muted-foreground/60 text-xs mt-2">Tax: {company.taxNumber}</p>
+            <P className="text-muted-foreground/60 text-xs mt-2">Tax: {company.taxNumber}</P>
           )}
 
           {/* Floating Actions */}
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+          <Div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
             <Button
               size="sm"
               variant="outline"
@@ -88,10 +88,10 @@ const CompanyCard = ({ company, onEdit, onDelete, className }: Props): any => {
             >
               <Icon name="lucide:Trash2" className="w-5 h-5 sm:w-4 sm:h-4" />
             </Button>
-          </div>
+          </Div>
         </CardContent>
       </Card>
-    </div>
+    </Div>
   )
 }
 

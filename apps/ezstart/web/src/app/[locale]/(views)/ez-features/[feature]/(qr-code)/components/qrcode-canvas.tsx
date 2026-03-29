@@ -103,13 +103,13 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
   if (!config.url) {
     return (
       <Div layout="center" className="min-h-[300px] bg-muted/50 rounded-lg">
-        <p className="text-muted-foreground">Enter a URL to generate QR code</p>
+        <P className="text-muted-foreground">Enter a URL to generate QR code</P>
       </Div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <Div className="space-y-4">
       {/* Canvas Preview */}
       <Div layout="center" className="p-6 bg-muted/50 rounded-lg">
         <canvas
@@ -120,33 +120,33 @@ export function QRCodeCanvas({ config }: QRCodeCanvasProps) {
       </Div>
 
       {/* Download Options */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Download</p>
-        <div className="flex flex-wrap gap-2">
+      <Div className="space-y-2">
+        <P className="text-sm font-medium">Download</P>
+        <Div className="flex flex-wrap gap-2">
           <Button onClick={() => handleDownload('png')} variant="default" size="sm">
             <Icon name="lucide:Download" size={16} ariaHidden />
-            <span className="ml-2">PNG</span>
+            <Span className="ml-2">PNG</Span>
           </Button>
           <Button onClick={() => handleDownload('svg')} variant="default" size="sm">
             <Icon name="lucide:Download" size={16} ariaHidden />
-            <span className="ml-2">SVG</span>
+            <Span className="ml-2">SVG</Span>
           </Button>
           <Button onClick={handleCopyImage} variant="outline" size="sm">
             <Icon name="lucide:Copy" size={16} ariaHidden />
-            <span className="ml-2">Copy Image</span>
+            <Span className="ml-2">Copy Image</Span>
           </Button>
-        </div>
-      </div>
+        </Div>
+      </Div>
 
       {/* Info */}
       {config.redirectType === 'temporary' && (
         <Div variant="card" size="sm" className="text-sm bg-muted/50">
           <Icon name="lucide:Info" size={16} className="inline mr-2" ariaHidden />
-          <span className="text-muted-foreground">
+          <Span className="text-muted-foreground">
             Temporary redirect: URL can be changed later without regenerating the QR code
-          </span>
+          </Span>
         </Div>
       )}
-    </div>
+    </Div>
   )
 }

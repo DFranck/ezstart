@@ -13,6 +13,7 @@ import {
   H3,
   Icon,
   P,
+  Span,
   Table,
   TableBody,
   TableCell,
@@ -249,7 +250,7 @@ export function WaitlistManagement() {
                         {entry.accessCode}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground">-</span>
+                      <Span className="text-muted-foreground">-</Span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

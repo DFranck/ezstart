@@ -1,7 +1,17 @@
 'use client'
 
 import { useWorkspaces } from '@/hooks/useWorkspaces'
-import { Card, CardContent, CardHeader, H3, P, Badge, SkeletonCard } from '@ezstart/ui/components'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H3,
+  P,
+  SkeletonCard,
+  Span,
+} from '@ezstart/ui/components'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@ezstart/auth-sdk'
@@ -13,11 +23,11 @@ export function WorkspacesList() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
         ))}
-      </div>
+      </Div>
     )
   }
 
@@ -41,28 +51,22 @@ export function WorkspacesList() {
           <H3 size="h4" className="mb-2">
             {t('noWorkspaces')}
           </H3>
-          <P className="text-muted-foreground mb-4">
-            {t('noWorkspacesDescription')}
-          </P>
+          <P className="text-muted-foreground mb-4">{t('noWorkspacesDescription')}</P>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <Div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {workspaces.map((workspace: any) => (
         <Link key={workspace._id} href={`/w/${workspace.slug}`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
+              <Div className="flex items-start justify-between">
+                <Div className="flex-1">
                   <H3 size="h4" className="mb-1">
-                    {workspace.logoUrl ? (
-                      <span className="mr-2">{workspace.logoUrl}</span>
-                    ) : (
-                      '🏢 '
-                    )}
+                    {workspace.logoUrl ? <Span className="mr-2">{workspace.logoUrl}</Span> : '🏢 '}
                     {workspace.name}
                   </H3>
                   {workspace.description && (
@@ -70,29 +74,30 @@ export function WorkspacesList() {
                       {workspace.description}
                     </P>
                   )}
-                </div>
+                </Div>
                 <Badge variant={workspace.currentUserRole === 'owner' ? 'default' : 'secondary'}>
                   {workspace.currentUserRole}
                 </Badge>
-              </div>
+              </Div>
             </CardHeader>
 
             <CardContent>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">
-                    📁 {workspace.projectCount || 0} project{workspace.projectCount !== 1 ? 's' : ''}
-                  </span>
-                  <span className="text-muted-foreground">
+              <Div className="flex items-center justify-between text-sm">
+                <Div className="flex items-center gap-4">
+                  <Span className="text-muted-foreground">
+                    📁 {workspace.projectCount || 0} project
+                    {workspace.projectCount !== 1 ? 's' : ''}
+                  </Span>
+                  <Span className="text-muted-foreground">
                     👥 {workspace.memberCount || 0} member{workspace.memberCount !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                  </Span>
+                </Div>
                 <Badge variant="outline">{workspace.status}</Badge>
-              </div>
+              </Div>
             </CardContent>
           </Card>
         </Link>
       ))}
-    </div>
+    </Div>
   )
 }

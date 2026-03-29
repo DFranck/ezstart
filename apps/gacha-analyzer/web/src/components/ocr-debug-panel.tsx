@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Card, CardContent, Div, P } from '@ezstart/ui/components'
+import { Card, CardContent, Div, P, Span } from '@ezstart/ui/components'
 import type { OcrSource } from '@gacha-analyzer/types'
 
 interface OcrDebugPanelProps {
@@ -32,9 +32,7 @@ function SourceDetails({ source }: { source: OcrSource }) {
                 : 'bg-destructive'
           }`}
         />
-        <P className="text-xs text-muted-foreground">
-          {Math.round(source.confidence)}% confidence
-        </P>
+        <P className="text-xs text-muted-foreground">{Math.round(source.confidence)}% confidence</P>
       </Div>
       <P className="text-xs text-muted-foreground">
         {source.subsFound} {t('scan.subsFound')}
@@ -48,7 +46,12 @@ function SourceDetails({ source }: { source: OcrSource }) {
   )
 }
 
-export function OcrDebugPanel({ previews, sources, mergedConfidence, mergedSubs }: OcrDebugPanelProps) {
+export function OcrDebugPanel({
+  previews,
+  sources,
+  mergedConfidence,
+  mergedSubs,
+}: OcrDebugPanelProps) {
   const t = useTranslations()
   const [open, setOpen] = useState(false)
 
@@ -64,50 +67,55 @@ export function OcrDebugPanel({ previews, sources, mergedConfidence, mergedSubs 
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left hover:bg-muted/50 transition-colors"
       >
         <Div className="flex items-center gap-2">
-          <span className="text-xs">{open ? '\u25BC' : '\u25B6'}</span>
-          <span>{t('scan.debugOcr')} ({sourceCount} {t('scan.sources')})</span>
+          <Span className="text-xs">{open ? '\u25BC' : '\u25B6'}</Span>
+          <Span>
+            {t('scan.debugOcr')} ({sourceCount} {t('scan.sources')})
+          </Span>
         </Div>
         <P className="text-xs text-muted-foreground">
-          {t('scan.mergedResult')}: {mergedSubs} {t('scan.subsFound')}, {Math.round(mergedConfidence)}% confidence
+          {t('scan.mergedResult')}: {mergedSubs} {t('scan.subsFound')},{' '}
+          {Math.round(mergedConfidence)}% confidence
         </P>
       </button>
 
       {open && (
         <CardContent className="pt-0">
-          <Div className={`grid grid-cols-1 ${sourceCount <= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4`}>
+          <Div
+            className={`grid grid-cols-1 ${sourceCount <= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4`}
+          >
             {/* When we have previews, render them with matched sources */}
-            {previews.length > 0 && previews.map((preview, idx) => {
-              const source = sources?.[idx]
-              const label = source ? (SOURCE_LABELS[source.name] || source.name) : preview.name
+            {previews.length > 0 &&
+              previews.map((preview, idx) => {
+                const source = sources?.[idx]
+                const label = source ? SOURCE_LABELS[source.name] || source.name : preview.name
 
-              return (
-                <Div key={preview.name} className="space-y-2 border rounded-lg p-3">
-                  <P className="text-xs font-semibold">{label}</P>
+                return (
+                  <Div key={preview.name} className="space-y-2 border rounded-lg p-3">
+                    <P className="text-xs font-semibold">{label}</P>
 
-                  <img
-                    src={preview.dataUrl}
-                    alt={label}
-                    className="w-full border rounded bg-black/5"
-                  />
+                    <img
+                      src={preview.dataUrl}
+                      alt={label}
+                      className="w-full border rounded bg-black/5"
+                    />
 
-                  {source && (
-                    <SourceDetails source={source} />
-                  )}
-                </Div>
-              )
-            })}
+                    {source && <SourceDetails source={source} />}
+                  </Div>
+                )
+              })}
 
             {/* When no previews (upload mode), render sources directly */}
-            {previews.length === 0 && sources?.map((source) => {
-              const label = SOURCE_LABELS[source.name] || source.name
+            {previews.length === 0 &&
+              sources?.map(source => {
+                const label = SOURCE_LABELS[source.name] || source.name
 
-              return (
-                <Div key={source.name} className="space-y-2 border rounded-lg p-3">
-                  <P className="text-xs font-semibold">{label}</P>
-                  <SourceDetails source={source} />
-                </Div>
-              )
-            })}
+                return (
+                  <Div key={source.name} className="space-y-2 border rounded-lg p-3">
+                    <P className="text-xs font-semibold">{label}</P>
+                    <SourceDetails source={source} />
+                  </Div>
+                )
+              })}
           </Div>
         </CardContent>
       )}

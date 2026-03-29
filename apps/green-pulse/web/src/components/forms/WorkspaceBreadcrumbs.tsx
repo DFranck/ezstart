@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { P } from '@ezstart/ui/components'
+import { Nav, P, Span } from '@ezstart/ui/components'
 
 interface WorkspaceBreadcrumbsProps {
   workspaceSlug: string
@@ -19,23 +19,20 @@ export function WorkspaceBreadcrumbs({
   formName,
 }: WorkspaceBreadcrumbsProps) {
   return (
-    <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap overflow-x-auto">
+    <Nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap overflow-x-auto">
       <Link href="/dashboard" className="hover:text-foreground transition-colors">
         📋 Dashboard
       </Link>
 
-      <span>/</span>
+      <Span>/</Span>
 
-      <Link
-        href={`/w/${workspaceSlug}`}
-        className="hover:text-foreground transition-colors"
-      >
+      <Link href={`/w/${workspaceSlug}`} className="hover:text-foreground transition-colors">
         {workspaceSlug}
       </Link>
 
       {projectId && (
         <>
-          <span>/</span>
+          <Span>/</Span>
           {formId ? (
             <Link
               href={`/w/${workspaceSlug}/p/${projectId}`}
@@ -44,17 +41,17 @@ export function WorkspaceBreadcrumbs({
               {projectName || 'Project'}
             </Link>
           ) : (
-            <span className="text-foreground font-medium">{projectName || 'Project'}</span>
+            <Span className="text-foreground font-medium">{projectName || 'Project'}</Span>
           )}
         </>
       )}
 
       {formId && (
         <>
-          <span>/</span>
-          <span className="text-foreground font-medium">{formName || 'Form'}</span>
+          <Span>/</Span>
+          <Span className="text-foreground font-medium">{formName || 'Form'}</Span>
         </>
       )}
-    </nav>
+    </Nav>
   )
 }

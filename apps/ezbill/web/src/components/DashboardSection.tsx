@@ -1,4 +1,15 @@
-import { Button, Card, CardContent, Icon, KnownIconName, P } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  Icon,
+  KnownIconName,
+  P,
+  Div,
+  H2,
+  H3,
+  Span,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { ReactNode } from 'react'
 
@@ -42,10 +53,10 @@ const DashboardSection = ({
   return (
     <Card variant="floating" className={cn('', className)}>
       <CardContent className="p-0">
-        <div className="p-4 sm:p-6 border-b border-foreground/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div
+        <Div className="p-4 sm:p-6 border-b border-foreground/10">
+          <Div className="flex items-center justify-between">
+            <Div className="flex items-center space-x-2 sm:space-x-3">
+              <Div
                 className={cn(
                   'w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center',
                   'hidden sm:flex',
@@ -53,14 +64,14 @@ const DashboardSection = ({
                 )}
               >
                 <Icon name={icon} className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold ">{title}</h2>
+              </Div>
+              <Div>
+                <H2 className="text-lg sm:text-xl font-bold ">{title}</H2>
                 <P size="xs" variant={'description'}>
                   {description}
                 </P>
-              </div>
-            </div>
+              </Div>
+            </Div>
             {!hideAddButton && onAdd && addButtonText && addButtonIcon && addButtonGradient && (
               <Button
                 onClick={onAdd}
@@ -70,25 +81,25 @@ const DashboardSection = ({
                 )}
               >
                 <Icon name={addButtonIcon} className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">{addButtonText}</span>
+                <Span className="hidden sm:inline">{addButtonText}</Span>
               </Button>
             )}
-          </div>
-        </div>
+          </Div>
+        </Div>
 
-        <div className="p-4 sm:p-6">
+        <Div className="p-4 sm:p-6">
           {isEmpty && emptyState ? (
-            <div className="text-center py-12">
-              <div
+            <Div className="text-center py-12">
+              <Div
                 className={cn(
                   'w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6',
                   emptyState.iconBg
                 )}
               >
                 <Icon name={emptyState.icon} className="w-10 h-10" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{emptyState.title}</h3>
-              <p className="text-foreground/60 mb-6">{emptyState.description}</p>
+              </Div>
+              <H3 className="text-lg font-semibold mb-2">{emptyState.title}</H3>
+              <P className="text-foreground/60 mb-6">{emptyState.description}</P>
               {onAdd && addButtonIcon && addButtonGradient && (
                 <Button
                   onClick={onAdd}
@@ -98,11 +109,11 @@ const DashboardSection = ({
                   {emptyState.buttonText}
                 </Button>
               )}
-            </div>
+            </Div>
           ) : (
             children
           )}
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )

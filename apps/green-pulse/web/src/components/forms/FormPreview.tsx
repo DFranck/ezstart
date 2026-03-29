@@ -1,6 +1,6 @@
 'use client'
 
-import { H3, P, Input, Label, Badge, Card, CardContent } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, Div, H3, Input, Label, P, Span } from '@ezstart/ui/components'
 import type { FormConfig } from '@green-pulse/types'
 
 interface FormPreviewProps {
@@ -28,8 +28,7 @@ export function FormPreview({
   const getConfidenceBadge = (confidence?: number) => {
     if (!confidence) return null
 
-    const variant =
-      confidence >= 0.8 ? 'default' : confidence >= 0.6 ? 'secondary' : 'destructive'
+    const variant = confidence >= 0.8 ? 'default' : confidence >= 0.6 ? 'secondary' : 'destructive'
 
     return (
       <Badge variant={variant} size="sm">
@@ -39,43 +38,40 @@ export function FormPreview({
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <Div className="p-6">
+      <Div className="mb-6">
         <H3 size="h4" className="mb-2">
           Form Preview
         </H3>
-        <div className="flex items-center gap-2">
+        <Div className="flex items-center gap-2">
           <P className="text-sm text-muted-foreground">
             {filledCount} / {totalCount} fields filled
           </P>
-          <div className="flex-1 bg-muted rounded-full h-2">
-            <div
+          <Div className="flex-1 bg-muted rounded-full h-2">
+            <Div
               className="bg-primary h-full rounded-full transition-all"
               style={{ width: `${(filledCount / totalCount) * 100}%` }}
             />
-          </div>
-        </div>
-      </div>
+          </Div>
+        </Div>
+      </Div>
 
-      <div className="space-y-4">
+      <Div className="space-y-4">
         {fields.map(field => {
           const value = extractedFields[field.id]
           const isFilled = value !== undefined && value !== null && value !== ''
           const confidence = extractedFields[`${field.id}_confidence`]
 
           return (
-            <Card
-              key={field.id}
-              className={isFilled ? 'border-primary' : 'border-muted'}
-            >
+            <Card key={field.id} className={isFilled ? 'border-primary' : 'border-muted'}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
+                <Div className="flex items-start justify-between mb-2">
                   <Label htmlFor={field.id} className="flex items-center gap-2">
                     {field.label}
-                    {field.required && <span className="text-destructive">*</span>}
+                    {field.required && <Span className="text-destructive">*</Span>}
                   </Label>
                   {isFilled && confidence && getConfidenceBadge(confidence)}
-                </div>
+                </Div>
 
                 <Input
                   id={field.id}
@@ -84,9 +80,7 @@ export function FormPreview({
                   onChange={e =>
                     handleFieldChange(
                       field.id,
-                      field.type === 'number'
-                        ? parseFloat(e.target.value)
-                        : e.target.value
+                      field.type === 'number' ? parseFloat(e.target.value) : e.target.value
                     )
                   }
                   placeholder={
@@ -97,28 +91,23 @@ export function FormPreview({
                 />
 
                 {field.helpText && (
-                  <P className="text-xs text-muted-foreground mt-1">
-                    {field.helpText}
-                  </P>
+                  <P className="text-xs text-muted-foreground mt-1">{field.helpText}</P>
                 )}
 
                 {field.extraction?.keywords && field.extraction.keywords.length > 0 && (
-                  <div className="flex gap-1 mt-2 flex-wrap">
+                  <Div className="flex gap-1 mt-2 flex-wrap">
                     {field.extraction.keywords.slice(0, 3).map(keyword => (
-                      <span
-                        key={keyword}
-                        className="text-xs px-2 py-0.5 bg-muted rounded"
-                      >
+                      <Span key={keyword} className="text-xs px-2 py-0.5 bg-muted rounded">
                         {keyword}
-                      </span>
+                      </Span>
                     ))}
-                  </div>
+                  </Div>
                 )}
               </CardContent>
             </Card>
           )
         })}
-      </div>
+      </Div>
 
       {filledCount === totalCount && (
         <Card className="mt-6 border-primary bg-primary/5">
@@ -129,6 +118,6 @@ export function FormPreview({
           </CardContent>
         </Card>
       )}
-    </div>
+    </Div>
   )
 }

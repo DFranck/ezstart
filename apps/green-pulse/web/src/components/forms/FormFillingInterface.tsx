@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useFormInstance, useFormConfig } from '@/hooks/useForms'
-import { H1, P, Badge, Button, Skeleton, SkeletonForm } from '@ezstart/ui/components'
+import { Badge, Button, Div, H1, P, Skeleton, SkeletonForm } from '@ezstart/ui/components'
 import { WorkspaceBreadcrumbs } from './WorkspaceBreadcrumbs'
 import { FormChatInterface } from './FormChatInterface'
 import { FormPreview } from './FormPreview'
@@ -22,9 +22,7 @@ export function FormFillingInterface({
   const { data: instanceData, isLoading: instanceLoading } = useFormInstance(formInstanceId)
   const instance = instanceData?.data
 
-  const { data: configData, isLoading: configLoading } = useFormConfig(
-    instance?.formConfigId || ''
-  )
+  const { data: configData, isLoading: configLoading } = useFormConfig(instance?.formConfigId || '')
   const config = configData?.data
 
   const updateInstance = useUpdateFormInstance(formInstanceId)
@@ -40,22 +38,22 @@ export function FormFillingInterface({
 
   if (instanceLoading || configLoading) {
     return (
-      <div className="h-screen flex">
+      <Div className="h-screen flex">
         {/* Left side - Form preview skeleton */}
-        <div className="flex-1 p-8 space-y-4">
+        <Div className="flex-1 p-8 space-y-4">
           <Skeleton className="h-8 w-64" variant="shimmer" />
           <SkeletonForm fields={6} showButton variant="shimmer" />
-        </div>
+        </Div>
         {/* Right side - PDF preview skeleton */}
-        <div className="w-1/2 border-l p-8">
+        <Div className="w-1/2 border-l p-8">
           <Skeleton className="h-full w-full rounded-lg" variant="shimmer" />
-        </div>
-      </div>
+        </Div>
+      </Div>
     )
   }
 
   if (!instance || !config) {
-    return <div className="p-8">Form not found</div>
+    return <Div className="p-8">Form not found</Div>
   }
 
   const handleFieldsUpdate = (fields: Record<string, any>) => {
@@ -64,15 +62,15 @@ export function FormFillingInterface({
   }
 
   const handleSubmit = async () => {
-    if (window.confirm('Submit this form? You won\'t be able to edit it after submission.')) {
+    if (window.confirm("Submit this form? You won't be able to edit it after submission.")) {
       await submitInstance.mutateAsync()
     }
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <Div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="border-b p-4 bg-background">
+      <Div className="border-b p-4 bg-background">
         <WorkspaceBreadcrumbs
           workspaceSlug={workspaceSlug}
           projectId={projectId}
@@ -81,14 +79,14 @@ export function FormFillingInterface({
           formName={config.name}
         />
 
-        <div className="flex items-center justify-between mt-3">
-          <div>
+        <Div className="flex items-center justify-between mt-3">
+          <Div>
             <H1 size="h3" className="mb-1">
               {config.icon} {config.name}
             </H1>
             <P className="text-sm text-muted-foreground">{config.description}</P>
-          </div>
-          <div className="flex items-center gap-3">
+          </Div>
+          <Div className="flex items-center gap-3">
             <Badge variant="outline">{instance.mode}</Badge>
             <Badge
               variant={
@@ -104,22 +102,19 @@ export function FormFillingInterface({
             {instance.status !== 'submitted' && (
               <Button
                 onClick={handleSubmit}
-                disabled={
-                  submitInstance.isPending ||
-                  Object.keys(extractedFields).length === 0
-                }
+                disabled={submitInstance.isPending || Object.keys(extractedFields).length === 0}
               >
                 {submitInstance.isPending ? 'Submitting...' : 'Submit Form'}
               </Button>
             )}
-          </div>
-        </div>
-      </div>
+          </Div>
+        </Div>
+      </Div>
 
       {/* Split Screen: Chat + Form Preview */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <Div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left: Chat Interface */}
-        <div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 border-b lg:border-b-0 lg:border-r flex flex-col overflow-y-auto">
+        <Div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 border-b lg:border-b-0 lg:border-r flex flex-col overflow-y-auto">
           <FormChatInterface
             formConfig={config}
             formInstanceId={formInstanceId}
@@ -127,18 +122,18 @@ export function FormFillingInterface({
             onFieldsUpdate={handleFieldsUpdate}
             disabled={instance.status === 'submitted'}
           />
-        </div>
+        </Div>
 
         {/* Right: Form Preview */}
-        <div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 overflow-y-auto">
+        <Div className="w-full lg:w-1/2 min-h-[50vh] lg:min-h-0 overflow-y-auto">
           <FormPreview
             formConfig={config}
             extractedFields={extractedFields}
             onFieldsUpdate={handleFieldsUpdate}
             disabled={instance.status === 'submitted'}
           />
-        </div>
-      </div>
-    </div>
+        </Div>
+      </Div>
+    </Div>
   )
 }

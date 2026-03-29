@@ -13,7 +13,7 @@ export const HeaderLib = ({ libTitle }: { libTitle: string }) => {
   const libraries = getTranslationArray<LibraryItem>(t, 'items')
   const lib = libraries.find(lib => lib.title.toLowerCase() === libTitle.toLowerCase())
   if (!lib) {
-    return <p>Librairie introuvable</p>
+    return <P>Librairie introuvable</P>
   }
 
   return (

@@ -5,6 +5,7 @@ import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/direction
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
 import { useMemo, useState } from 'react'
+import { Div } from '@ezstart/ui/components'
 
 type CardsMode = 'hover' | 'all'
 
@@ -99,14 +100,14 @@ export default function BaguaGrid({
   }, [bearingFromNorth, config])
 
   return (
-    <div className="mx-auto ">
-      <div className="relative ">
+    <Div className="mx-auto ">
+      <Div className="relative ">
         {/* Plan en taille maximale avec ratio conservé */}
-        <div className="w-full relative overflow-hidden">
+        <Div className="w-full relative overflow-hidden">
           <img src={src} alt="Plan Bagua" className="w-full h-auto object-contain" />
 
           {/* Grille 3x3 overlay absolute */}
-          <div
+          <Div
             className="absolute inset-0 grid grid-cols-3"
             onMouseLeave={() => {
               if (!pinnedSector) setHoverSector(null)
@@ -127,7 +128,7 @@ export default function BaguaGrid({
               const bgColor = sectorColor + (isHovered ? '9D' : '6D')
 
               return (
-                <div
+                <Div
                   key={direction}
                   className="relative cursor-pointer transition-all duration-200"
                   style={{
@@ -152,20 +153,20 @@ export default function BaguaGrid({
                   }}
                 >
                   {/* Label direction top-left */}
-                  <div
+                  <Div
                     className="absolute top-1 left-1 text-white font-bold text-sm px-1 py-0.5 rounded bg-black/70"
                     style={{
                       textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                     }}
                   >
                     {direction === 'C' ? 'C' : direction}
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               )
             })}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Div>
+        </Div>
+      </Div>
+    </Div>
   )
 }

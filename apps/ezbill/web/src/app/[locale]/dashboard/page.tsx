@@ -80,9 +80,9 @@ const DashboardPage = () => {
   // Show loading while checking auth
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center">
+      <Div className="flex flex-1 flex-col items-center justify-center">
         <Spinner variant="fancy" size="xl" text={tDashboard('checkingAuth')} textSize="md" />
-      </div>
+      </Div>
     )
   }
 
@@ -188,9 +188,9 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
+      <Div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
         {/* Stats + Chart Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <Div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <Div layout={'col'}>
             <Skeleton className="h-24 w-full rounded-xl" variant="shimmer" />
             <Skeleton className="h-24 w-full rounded-xl hidden md:block" variant="shimmer" />
@@ -198,21 +198,21 @@ const DashboardPage = () => {
             <Skeleton className="h-24 w-full rounded-xl hidden md:block" variant="shimmer" />
           </Div>
           <Skeleton className="h-96 w-full rounded-xl" variant="shimmer" />
-        </div>
+        </Div>
 
         {/* Top Clients Chart Skeleton */}
         <Skeleton className="h-64 w-full rounded-xl" variant="shimmer" />
 
         {/* Clients Grid Skeleton */}
-        <div className="space-y-4">
+        <Div className="space-y-4">
           <Skeleton className="h-8 w-48" variant="shimmer" />
-          <div className="grid grid-cols-1 gap-4">
+          <Div className="grid grid-cols-1 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" />
             ))}
-          </div>
-        </div>
-      </div>
+          </Div>
+        </Div>
+      </Div>
     )
   }
 
@@ -251,10 +251,10 @@ const DashboardPage = () => {
         ctaText={tWelcome('startCreating')}
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
+      <Div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 space-y-6 w-full">
         {/* Stats Section - Only show when there's meaningful data */}
         {hasData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <Div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Div layout={'col'}>
               <StatsCard
                 title={tDashboard('totalRevenue')}
@@ -286,11 +286,11 @@ const DashboardPage = () => {
             </Div>
 
             <RevenueChart invoices={allInvoices} className="h-fit" />
-          </div>
+          </Div>
         )}
         {/* Quick Actions - Only show when missing data */}
         {(!hasCompanies || !hasClients || paymentMethods.length === 0) && (
-          <div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <Div className="flex flex-wrap gap-4 sm:gap-6 mb-6 sm:mb-8">
             {!hasCompanies && (
               <FirstActionCard
                 title={tDashboard('createCompany')}
@@ -319,14 +319,14 @@ const DashboardPage = () => {
                 descriptionClassName="text-primary-foreground/80"
               />
             )}
-          </div>
+          </Div>
         )}
 
         {/* Charts Section - Only show when there are invoices */}
         {allInvoices.length > 0 && (
-          <div className="mb-6 sm:mb-8">
+          <Div className="mb-6 sm:mb-8">
             <TopClientsChart invoices={allInvoices} clients={clients} className="h-fit" />
-          </div>
+          </Div>
         )}
 
         {/* Clients Section - Always show if user has companies/payment methods set up */}
@@ -366,7 +366,7 @@ const DashboardPage = () => {
             />
           </DashboardSection>
         )}
-      </div>
+      </Div>
 
       {/* Modals */}
       <CompanyModal

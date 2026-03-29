@@ -136,7 +136,7 @@ const CardinalWheel = ({
   ] as const
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <Div className="max-w-4xl mx-auto">
       {/* Header */}
       <Card variant={'ghost'} className={cn('gap-2 max-w-lg mx-auto')}>
         <CardHeader className="flex items-center gap-2">
@@ -167,7 +167,7 @@ const CardinalWheel = ({
         </CardContent>
       </Card>
       {/* Contrôles */}
-      {/* <div className="flex items-center justify-center space-x-2 mb-4">
+      {/* <Div className="flex items-center justify-center space-x-2 mb-4">
         <Div layout={'center'}>
           <Label htmlFor="-rotate-45">45°</Label>
           <Button id="-rotate-45" onClick={() => handleRotate(currentRotation - 45)} size="sm">
@@ -187,7 +187,7 @@ const CardinalWheel = ({
           </Button>
         </Div>
 
-        <div className="w-px h-8 bg-gray-300 mx-2" />
+        <Div className="w-px h-8 bg-gray-300 mx-2" />
 
         <Div layout={'center'}>
           <Label htmlFor="+rotate-1">1°</Label>
@@ -207,23 +207,23 @@ const CardinalWheel = ({
             <Icon name="lucide:RotateCw" className="w-4 h-4" />
           </Button>
         </Div>
-      </div> */}
+      </Div> */}
 
       {/* Roue */}
-      <div className="relative flex justify-center items-center ">
-        <div ref={wrapperRef} className="relative w-full h-72 md:h-[550px]">
+      <Div className="relative flex justify-center items-center ">
+        <Div ref={wrapperRef} className="relative w-full h-72 md:h-[550px]">
           {/* Plan centré */}
-          <div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <Div className="absolute w-44 h-44 md:w-96 md:h-96 rounded-2xl border-4 border-white shadow-2xl overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <img
               src={uploadData.preview}
               alt="Plan uploadé"
               className="w-full h-full object-contain bg-white"
             />
-            <div className="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-white p-4 text-center pointer-events-none">
-              <div className="text-2xl font-bold mb-1 drop-shadow-lg">{t('cardinal.yourPlan')}</div>
-              <div className="text-sm opacity-90 drop-shadow-lg">{t('cardinal.fixedCenter')}</div>
-            </div>
-          </div>
+            <Div className="absolute inset-0 bg-black/10 flex flex-col items-center justify-center text-white p-4 text-center pointer-events-none">
+              <Div className="text-2xl font-bold mb-1 drop-shadow-lg">{t('cardinal.yourPlan')}</Div>
+              <Div className="text-sm opacity-90 drop-shadow-lg">{t('cardinal.fixedCenter')}</Div>
+            </Div>
+          </Div>
 
           {/* Pastilles cardinales (même rayon que les lignes) - DRAGGABLE */}
           {cardinalPoints.map(({ direction, angle, label }) => {
@@ -231,7 +231,7 @@ const CardinalWheel = ({
             const x = Math.cos(a) * radius
             const y = Math.sin(a) * radius
             return (
-              <div
+              <Div
                 key={direction}
                 className={cn(
                   `absolute bg-gradient-to-r ${THEME_COLORS.gradientClasses} w-10 h-10 md:w-20 md:h-20 rounded-full border-2 border-background shadow-xl z-50 cursor-grab active:cursor-grabbing transition-transform`,
@@ -247,11 +247,11 @@ const CardinalWheel = ({
                 onMouseDown={handleDragStart}
                 onTouchStart={handleDragStart}
               >
-                <div className="h-full flex flex-col items-center justify-center text-white p-2 text-center pointer-events-none">
-                  <div className="text-lg md:text-xl font-bold">{direction}</div>
-                  <div className="text-xs md:text-sm opacity-90 hidden md:block">{label}</div>
-                </div>
-              </div>
+                <Div className="h-full flex flex-col items-center justify-center text-white p-2 text-center pointer-events-none">
+                  <Div className="text-lg md:text-xl font-bold">{direction}</Div>
+                  <Div className="text-xs md:text-sm opacity-90 hidden md:block">{label}</Div>
+                </Div>
+              </Div>
             )
           })}
 
@@ -283,13 +283,13 @@ const CardinalWheel = ({
           </svg>
 
           {/* Cercle guide → même centre / rayon */}
-          <div
+          <Div
             className="absolute rounded-full border-2 border-dashed border-foreground/40 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{ width: radius * 2, height: radius * 2 }}
           />
-        </div>
-      </div>
-    </div>
+        </Div>
+      </Div>
+    </Div>
   )
 }
 

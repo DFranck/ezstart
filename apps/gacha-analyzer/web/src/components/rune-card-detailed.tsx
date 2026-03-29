@@ -9,6 +9,7 @@ import {
   H3,
   P,
   Progress,
+  Span,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -322,14 +323,14 @@ export function RuneCardDetailed({ rune, analysis, confidence }: RuneCardDetaile
                       </P>
                       {subAnalysis && (
                         <P className="text-xs">
-                          <span className={getRollQualityColor(subAnalysis.efficiency)}>
+                          <Span className={getRollQualityColor(subAnalysis.efficiency)}>
                             {tRune(`rollQuality.${getRollQualityTier(subAnalysis.efficiency)}`)}
-                          </span>
-                          <span className="text-muted-foreground">
+                          </Span>
+                          <Span className="text-muted-foreground">
                             {' '}
                             ({subAnalysis.rolls}{' '}
                             {subAnalysis.rolls > 1 ? tRune('rolls') : tRune('roll')})
-                          </span>
+                          </Span>
                         </P>
                       )}
                     </Div>

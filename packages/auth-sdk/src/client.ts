@@ -179,8 +179,9 @@ export class AuthClient {
     const result = await response.json()
 
     if (!response.ok) {
-      const error: any = new Error(result.error || 'Failed to get user info')
-      error.status = response.status
+      const error = Object.assign(new Error(result.error || 'Failed to get user info'), {
+        status: response.status,
+      })
       throw error
     }
 

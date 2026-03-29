@@ -2,7 +2,7 @@
 
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog'
 import { Client, Company, Invoice, PaymentMethod, Quote, Receipt } from '@ezbill/types'
-import { Button } from '@ezstart/ui/components'
+import { Button, Div } from '@ezstart/ui/components'
 import { useState } from 'react'
 
 type DeletedItem = Client | Company | Invoice | Quote | Receipt | PaymentMethod
@@ -56,20 +56,25 @@ const formatDeletedDate = (deletedAt?: string) => {
   }
 }
 
-export function DeletedItemCard({ item, type, onRestore, onHardDelete }: DeletedItemCardProps): any {
+export function DeletedItemCard({
+  item,
+  type,
+  onRestore,
+  onHardDelete,
+}: DeletedItemCardProps): any {
   const [deleteDialog, setDeleteDialog] = useState(false)
 
   return (
     <>
-      <div className="flex items-center justify-between p-3 border rounded-lg bg-card">
-        <div className="flex-1">
-          <div className="font-medium">{getDisplayName(item, type)}</div>
-          <div className="text-sm text-muted-foreground">{getDescription(item, type)}</div>
-          <div className="text-xs text-muted-foreground mt-1">
+      <Div className="flex items-center justify-between p-3 border rounded-lg bg-card">
+        <Div className="flex-1">
+          <Div className="font-medium">{getDisplayName(item, type)}</Div>
+          <Div className="text-sm text-muted-foreground">{getDescription(item, type)}</Div>
+          <Div className="text-xs text-muted-foreground mt-1">
             Deleted: {formatDeletedDate(item.deletedAt)}
-          </div>
-        </div>
-        <div className="flex gap-2">
+          </Div>
+        </Div>
+        <Div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -86,8 +91,8 @@ export function DeletedItemCard({ item, type, onRestore, onHardDelete }: Deleted
           >
             Delete Forever
           </Button>
-        </div>
-      </div>
+        </Div>
+      </Div>
 
       <DeleteConfirmationDialog
         isOpen={deleteDialog}

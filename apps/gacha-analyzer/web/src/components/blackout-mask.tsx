@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Div, Span } from '@ezstart/ui/components'
 
 export interface MaskRect {
   id: string
-  x: number      // % of container
+  x: number // % of container
   y: number
   width: number
   height: number
@@ -32,7 +33,15 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, locked = false, maskColor = 'rgba(255, 0, 0, 1)' }: BlackoutMaskProps) {
+export function BlackoutMask({
+  masks,
+  onChange,
+  onAdd,
+  onRemove,
+  parentRoi,
+  locked = false,
+  maskColor = 'rgba(255, 0, 0, 1)',
+}: BlackoutMaskProps) {
   const t = useTranslations('bench')
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -66,8 +75,8 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
 
       // Convert pixel delta to % of overlay, then scale to mask coordinate space
       const pr = parentRoiRef.current
-      const scaleX = pr ? (100 / pr.width) : 1
-      const scaleY = pr ? (100 / pr.height) : 1
+      const scaleX = pr ? 100 / pr.width : 1
+      const scaleY = pr ? 100 / pr.height : 1
       const dx = ((clientX - drag.startMouseX) / rect.width) * 100 * scaleX
       const dy = ((clientY - drag.startMouseY) / rect.height) * 100 * scaleY
       const s = drag.startMask
@@ -127,7 +136,7 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
         return
       }
 
-      const newMasks = masksRef.current.map(m => m.id === drag.maskId ? updated : m)
+      const newMasks = masksRef.current.map(m => (m.id === drag.maskId ? updated : m))
       masksRef.current = newMasks
       onChangeRef.current(newMasks)
     }
@@ -166,7 +175,7 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
     clientY: number,
     maskId: string,
     type: 'move' | 'resize',
-    handle?: Handle,
+    handle?: Handle
   ) {
     const mask = masksRef.current.find(m => m.id === maskId)
     if (!mask) return
@@ -180,13 +189,23 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
     }
   }
 
-  function handleMouseDown(e: React.MouseEvent, maskId: string, type: 'move' | 'resize', handle?: Handle) {
+  function handleMouseDown(
+    e: React.MouseEvent,
+    maskId: string,
+    type: 'move' | 'resize',
+    handle?: Handle
+  ) {
     e.preventDefault()
     e.stopPropagation()
     startDrag(e.clientX, e.clientY, maskId, type, handle)
   }
 
-  function handleTouchStart(e: React.TouchEvent, maskId: string, type: 'move' | 'resize', handle?: Handle) {
+  function handleTouchStart(
+    e: React.TouchEvent,
+    maskId: string,
+    type: 'move' | 'resize',
+    handle?: Handle
+  ) {
     e.stopPropagation()
     const touch = e.touches[0]
     if (e.touches.length === 1 && touch) {
@@ -219,20 +238,52 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
       case 'se':
         return { ...base, width: 10, height: 10, bottom: -5, right: -5, cursor: 'se-resize' }
       case 'n':
-        return { ...base, width: 20, height: 8, top: -4, left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          top: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 'n-resize',
+        }
       case 's':
-        return { ...base, width: 20, height: 8, bottom: -4, left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' }
+        return {
+          ...base,
+          width: 20,
+          height: 8,
+          bottom: -4,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          cursor: 's-resize',
+        }
       case 'e':
-        return { ...base, width: 8, height: 20, right: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'e-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          right: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'e-resize',
+        }
       case 'w':
-        return { ...base, width: 8, height: 20, left: -4, top: '50%', transform: 'translateY(-50%)', cursor: 'w-resize' }
+        return {
+          ...base,
+          width: 8,
+          height: 20,
+          left: -4,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          cursor: 'w-resize',
+        }
     }
   }
 
   return (
     <>
       {/* Overlay container for mask rectangles */}
-      <div
+      <Div
         ref={overlayRef}
         style={{
           position: 'absolute',
@@ -243,107 +294,102 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
       >
         {masks.map((mask, idx) => {
           // When parentRoi is set, map mask % into the ROI area within the full container
-          const displayLeft = parentRoi
-            ? parentRoi.x + (mask.x / 100) * parentRoi.width
-            : mask.x
-          const displayTop = parentRoi
-            ? parentRoi.y + (mask.y / 100) * parentRoi.height
-            : mask.y
-          const displayWidth = parentRoi
-            ? (mask.width / 100) * parentRoi.width
-            : mask.width
-          const displayHeight = parentRoi
-            ? (mask.height / 100) * parentRoi.height
-            : mask.height
+          const displayLeft = parentRoi ? parentRoi.x + (mask.x / 100) * parentRoi.width : mask.x
+          const displayTop = parentRoi ? parentRoi.y + (mask.y / 100) * parentRoi.height : mask.y
+          const displayWidth = parentRoi ? (mask.width / 100) * parentRoi.width : mask.width
+          const displayHeight = parentRoi ? (mask.height / 100) * parentRoi.height : mask.height
 
           return (
-          <div
-            key={mask.id}
-            style={{
-              position: 'absolute',
-              left: `${displayLeft}%`,
-              top: `${displayTop}%`,
-              width: `${displayWidth}%`,
-              height: `${displayHeight}%`,
-              backgroundColor: maskColor,
-              border: locked ? '1px solid rgba(255, 0, 0, 0.3)' : '2px dashed rgba(255, 255, 255, 0.8)',
-              cursor: locked ? 'default' : 'move',
-              pointerEvents: locked ? 'none' : 'auto',
-              boxSizing: 'border-box',
-              touchAction: 'none',
-              overflow: 'visible',
-              zIndex: 70,
-            }}
-            onMouseDown={locked ? undefined : (e) => handleMouseDown(e, mask.id, 'move')}
-            onTouchStart={locked ? undefined : (e) => handleTouchStart(e, mask.id, 'move')}
-          >
-            {/* Label — hidden when locked */}
-            {!locked && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: 4,
-                  fontSize: 9,
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                  lineHeight: 1,
-                }}
-              >
-                Mask {idx + 1}
-              </span>
-            )}
+            <Div
+              key={mask.id}
+              style={{
+                position: 'absolute',
+                left: `${displayLeft}%`,
+                top: `${displayTop}%`,
+                width: `${displayWidth}%`,
+                height: `${displayHeight}%`,
+                backgroundColor: maskColor,
+                border: locked
+                  ? '1px solid rgba(255, 0, 0, 0.3)'
+                  : '2px dashed rgba(255, 255, 255, 0.8)',
+                cursor: locked ? 'default' : 'move',
+                pointerEvents: locked ? 'none' : 'auto',
+                boxSizing: 'border-box',
+                touchAction: 'none',
+                overflow: 'visible',
+                zIndex: 70,
+              }}
+              onMouseDown={locked ? undefined : e => handleMouseDown(e, mask.id, 'move')}
+              onTouchStart={locked ? undefined : e => handleTouchStart(e, mask.id, 'move')}
+            >
+              {/* Label — hidden when locked */}
+              {!locked && (
+                <Span
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    left: 4,
+                    fontSize: 9,
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                    lineHeight: 1,
+                  }}
+                >
+                  Mask {idx + 1}
+                </Span>
+              )}
 
-            {/* Remove button — hidden when locked */}
-            {!locked && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRemove(mask.id)
-                }}
-                style={{
-                  position: 'absolute',
-                  top: -6,
-                  right: -6,
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  fontSize: 10,
-                  lineHeight: '16px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  pointerEvents: 'auto',
-                  zIndex: 75,
-                  padding: 0,
-                }}
-                title={t('removeMask')}
-              >
-                ×
-              </button>
-            )}
+              {/* Remove button — hidden when locked */}
+              {!locked && (
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onRemove(mask.id)
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    width: 16,
+                    height: 16,
+                    borderRadius: '50%',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: 10,
+                    lineHeight: '16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    pointerEvents: 'auto',
+                    zIndex: 75,
+                    padding: 0,
+                  }}
+                  title={t('removeMask')}
+                >
+                  ×
+                </button>
+              )}
 
-            {/* Resize handles (corners + edges) — hidden when locked */}
-            {!locked && allHandles.map((handle) => (
-              <div
-                key={handle}
-                style={getHandleStyle(handle)}
-                onMouseDown={(e) => handleMouseDown(e, mask.id, 'resize', handle)}
-                onTouchStart={(e) => handleTouchStart(e, mask.id, 'resize', handle)}
-              />
-            ))}
-          </div>
+              {/* Resize handles (corners + edges) — hidden when locked */}
+              {!locked &&
+                allHandles.map(handle => (
+                  <Div
+                    key={handle}
+                    style={getHandleStyle(handle)}
+                    onMouseDown={e => handleMouseDown(e, mask.id, 'resize', handle)}
+                    onTouchStart={e => handleTouchStart(e, mask.id, 'resize', handle)}
+                  />
+                ))}
+            </Div>
           )
         })}
-      </div>
+      </Div>
 
       {/* Add mask button — positioned below the overlay, hidden when locked */}
       {!locked && (
-        <div
+        <Div
           style={{
             position: 'absolute',
             bottom: 8,
@@ -354,17 +400,17 @@ export function BlackoutMask({ masks, onChange, onAdd, onRemove, parentRoi, lock
         >
           <button
             type="button"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               onAdd()
             }}
             className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white text-xs rounded-md px-2 py-1 transition-colors"
             title={t('addMask')}
           >
-            <span className="text-sm font-bold">+</span>
-            <span>{t('masks')}</span>
+            <Span className="text-sm font-bold">+</Span>
+            <Span>{t('masks')}</Span>
           </button>
-        </div>
+        </Div>
       )}
     </>
   )

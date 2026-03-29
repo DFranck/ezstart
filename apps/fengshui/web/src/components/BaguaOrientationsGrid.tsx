@@ -15,8 +15,10 @@ import {
   H4,
   H5,
   Icon,
+  LI,
   P,
   Span,
+  UL,
 } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { RefObject, forwardRef, useState } from 'react'
@@ -281,14 +283,14 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                   <Icon name="lucide:Sparkles" className="w-4 h-4" />
                   {t('bagua.naturalActivators')}
                 </H5>
-                <ul className="space-y-1">
+                <UL className="space-y-1">
                   {sector.enhancers.map((enhancer: string, idx: number) => (
-                    <li key={idx} className="text-sm flex items-start gap-2">
+                    <LI key={idx} className="text-sm flex items-start gap-2">
                       <Span className="w-1.5 h-1.5 rounded-full bg-muted mt-2 flex-shrink-0" />
                       {enhancer}
-                    </li>
+                    </LI>
                   ))}
-                </ul>
+                </UL>
               </Div>
 
               <Div>
@@ -351,17 +353,17 @@ const SectorCard = forwardRef<HTMLDivElement, SectorCardProps>(function SectorCa
                           <Icon name="lucide:Shield" className="w-4 h-4" />
                           {t('bagua.specificRemedies', { year })}
                         </H5>
-                        <ul className="space-y-1">
+                        <UL className="space-y-1">
                           {sector.star.remedies.map((remedy: string, idx: number) => (
-                            <li
+                            <LI
                               key={idx}
                               className="text-sm text-muted-foreground flex items-start gap-2"
                             >
                               <Span className="w-1.5 h-1.5 rounded-full bg-muted-foreground mt-2 flex-shrink-0" />
                               {remedy}
-                            </li>
+                            </LI>
                           ))}
-                        </ul>
+                        </UL>
                       </Div>
                     )}
                   </Div>
@@ -399,17 +401,17 @@ function InfoSection({ title, items, icon, accent, danger }: InfoSectionProps) {
         <Icon name={icon as any} className="w-4 h-4" style={{ color }} />
         {title}
       </H4>
-      <ul className="space-y-1">
+      <UL className="space-y-1">
         {items.map((item: string, index: number) => (
-          <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+          <LI key={index} className="text-sm text-muted-foreground flex items-start gap-2">
             <Span
               className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
               style={{ backgroundColor: color }}
             />
             {item}
-          </li>
+          </LI>
         ))}
-      </ul>
+      </UL>
     </Div>
   )
 }

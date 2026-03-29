@@ -14,9 +14,11 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Div,
   H2,
   Icon,
   P,
+  Span,
   StepContent,
   useStepper,
 } from '@ezstart/ui/components'
@@ -179,7 +181,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
         }, [])
 
         return (
-          <div className="mx-auto w-full max-w-7xl">
+          <Div className="mx-auto w-full max-w-7xl">
             {/* Header avec bouton PDF */}
 
             <Card variant={'ghost'} className={cn('gap-2 mx-auto mb-6', {})}>
@@ -191,7 +193,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
               </CardHeader>
               <CardContent className="">
                 <P variant={'description'}>{t('analysis.description')}</P>
-                <div className="flex gap-2 mt-4">
+                <Div className="flex gap-2 mt-4">
                   <Button
                     onClick={handleOpenPreview}
                     variant="ghost"
@@ -203,12 +205,12 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     }}
                   >
                     <Icon name="lucide:FileDown" className="w-4 h-4" />
-                    <span>{t('analysis.pdfPreview')}</span>
+                    <Span>{t('analysis.pdfPreview')}</Span>
                   </Button>
-                </div>
+                </Div>
 
                 {/* Toggle visualisation */}
-                <div className="flex gap-1 mt-3 p-1 bg-muted rounded-lg">
+                <Div className="flex gap-1 mt-3 p-1 bg-muted rounded-lg">
                   <Button
                     onClick={() => setVisualizationMode('wheel')}
                     variant={visualizationMode === 'wheel' ? 'default' : 'ghost'}
@@ -227,9 +229,9 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                     <Icon name="lucide:Grid3X3" className="w-4 h-4" />
                     {t('analysis.grid')}
                   </Button>
-                </div>
-                <div className="w-full py-4 flex lg:hidden items-center justify-center">
-                  <div className="w-full  max-w-[600px]">
+                </Div>
+                <Div className="w-full py-4 flex lg:hidden items-center justify-center">
+                  <Div className="w-full  max-w-[600px]">
                     {visualizationMode === 'wheel' ? (
                       <BaguaWheel
                         src={uploadData.preview!}
@@ -252,15 +254,15 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                         onSectorClick={handleSectorClick}
                       />
                     )}
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Colonne gauche : Visualization Bagua (hidden below lg, shown in Card above) */}
-              <div className="hidden lg:block lg:col-span-1">
-                <div className="sticky top-36">
-                  <div ref={containerRef}>
+              <Div className="hidden lg:block lg:col-span-1">
+                <Div className="sticky top-36">
+                  <Div ref={containerRef}>
                     {visualizationMode === 'wheel' ? (
                       <BaguaWheel
                         src={uploadData.preview!}
@@ -283,12 +285,12 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                         onSectorClick={handleSectorClick}
                       />
                     )}
-                  </div>
-                </div>
-              </div>
+                  </Div>
+                </Div>
+              </Div>
 
               {/* Colonne droite : Orientations détaillées */}
-              <div className="lg:col-span-2">
+              <Div className="lg:col-span-2">
                 <BaguaOrientationsGrid
                   config={cfg || undefined}
                   expandedSectors={expandedSectors}
@@ -301,8 +303,8 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
                   onOpenPricing={() => setIsPricingOpen(true)}
                   onLogin={login}
                 />
-              </div>
-            </div>
+              </Div>
+            </Div>
 
             {/* Preview Modal */}
             {cfg && (
@@ -324,7 +326,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
               onClose={() => setIsPricingOpen(false)}
               year={cfg?.year || new Date().getFullYear()}
             />
-          </div>
+          </Div>
         )
       }}
     </StepContent>

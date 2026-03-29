@@ -2,7 +2,7 @@
 import { useTranslations } from 'next-intl'
 
 import { useProjectForms } from '@/hooks/useProjects'
-import { Card, CardContent, H3, P, Badge, SkeletonCard } from '@ezstart/ui/components'
+import { Badge, Card, CardContent, Div, H3, P, SkeletonCard } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 interface FormInstancesListProps {
@@ -16,11 +16,18 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <Div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonCard key={i} showHeader showFooter={false} lines={2} variant="shimmer" size="sm" />
+          <SkeletonCard
+            key={i}
+            showHeader
+            showFooter={false}
+            lines={2}
+            variant="shimmer"
+            size="sm"
+          />
         ))}
-      </div>
+      </Div>
     )
   }
 
@@ -44,38 +51,31 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
           <H3 size="h4" className="mb-2">
             {t('noForms')}
           </H3>
-          <P className="text-muted-foreground mb-4">
-            {t('noFormsDescription')}
-          </P>
+          <P className="text-muted-foreground mb-4">{t('noFormsDescription')}</P>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <Div className="space-y-3">
       {forms.map((form: any) => (
-        <Link
-          key={form._id}
-          href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}
-        >
+        <Link key={form._id} href={`/w/${workspaceSlug}/p/${projectId}/f/${form._id}`}>
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <H3 size="h5">
-                      📄 {form.formConfigId || 'Untitled Form'}
-                    </H3>
+              <Div className="flex items-start justify-between">
+                <Div className="flex-1">
+                  <Div className="flex items-center gap-2 mb-1">
+                    <H3 size="h5">📄 {form.formConfigId || 'Untitled Form'}</H3>
                     <Badge variant="outline" size="sm">
                       {form.mode || 'manual'}
                     </Badge>
-                  </div>
+                  </Div>
                   <P className="text-sm text-muted-foreground">
                     {Object.keys(form.fields || {}).length} field
                     {Object.keys(form.fields || {}).length !== 1 ? 's' : ''} filled
                   </P>
-                </div>
+                </Div>
                 <Badge
                   variant={
                     form.status === 'submitted'
@@ -87,7 +87,7 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
                 >
                   {form.status}
                 </Badge>
-              </div>
+              </Div>
 
               {form.updatedAt && (
                 <P className="text-xs text-muted-foreground mt-2">
@@ -98,6 +98,6 @@ export function FormInstancesList({ projectId, workspaceSlug }: FormInstancesLis
           </Card>
         </Link>
       ))}
-    </div>
+    </Div>
   )
 }

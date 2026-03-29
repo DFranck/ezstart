@@ -2,7 +2,7 @@
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
 import { InsufficientPermissions, RequireRole } from '@ezstart/rbac'
-import { Button, Card, Div, Icon, Section, Spinner } from '@ezstart/ui/components'
+import { Aside, Button, Card, Div, Icon, Nav, Section, Spinner } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -46,8 +46,8 @@ function AdminSidebar() {
   }
 
   return (
-    <aside className="w-64 border-r bg-card min-h-[calc(100vh-4rem)] p-4 hidden md:block">
-      <nav className="space-y-1">
+    <Aside className="w-64 border-r bg-card min-h-[calc(100vh-4rem)] p-4 hidden md:block">
+      <Nav className="space-y-1">
         {navItems.map(item => (
           <Link key={item.href} href={item.href}>
             <Button
@@ -60,8 +60,8 @@ function AdminSidebar() {
             </Button>
           </Link>
         ))}
-      </nav>
-    </aside>
+      </Nav>
+    </Aside>
   )
 }
 

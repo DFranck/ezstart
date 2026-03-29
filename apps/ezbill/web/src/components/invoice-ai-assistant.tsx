@@ -208,8 +208,8 @@ Examples:
         className="absolute top-2 right-12 z-10 bg-primary/10 hover:bg-primary/20 border-primary/30 backdrop-blur-sm"
       >
         <Icon name="lucide:Sparkles" className="mr-2 text-primary" />
-        <span className="hidden sm:inline">AI Assistant</span>
-        <span className="sm:hidden">AI</span>
+        <Span className="hidden sm:inline">AI Assistant</Span>
+        <Span className="sm:hidden">AI</Span>
       </Button>
     )
   }

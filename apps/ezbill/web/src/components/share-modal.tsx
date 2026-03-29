@@ -1,5 +1,5 @@
 'use client'
-import { Button, Icon, Modal, Span } from '@ezstart/ui/components'
+import { Button, Icon, Modal, Span, Div, P } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -115,9 +115,9 @@ export function ShareModal({
         </>
       }
     >
-      <div className="space-y-6">
+      <Div className="space-y-6">
         {/* Share Options Grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <Div className="grid grid-cols-2 gap-3">
           {shareOptions.map(option => (
             <a
               key={option.name}
@@ -131,25 +131,25 @@ export function ShareModal({
               <Span className="text-sm font-medium text-foreground">{option.name}</Span>
             </a>
           ))}
-        </div>
+        </Div>
 
         {/* Info Card */}
-        <div className="bg-muted/50 backdrop-blur-sm rounded-xl p-4 border border-border">
-          <div className="flex items-start space-x-3">
+        <Div className="bg-muted/50 backdrop-blur-sm rounded-xl p-4 border border-border">
+          <Div className="flex items-start space-x-3">
             <Icon name="lucide:Info" className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-muted-foreground">
+            <Div className="text-sm text-muted-foreground">
               {isAlreadySent ? (
-                <p>{t('reshareInfo', { type: documentType, client: clientName })}</p>
+                <P>{t('reshareInfo', { type: documentType, client: clientName })}</P>
               ) : (
-                <div className="space-y-1">
-                  <p>{t('shareInfo', { type: documentType })}</p>
-                  <p>{t('markAsSentInfo', { client: clientName })}</p>
-                </div>
+                <Div className="space-y-1">
+                  <P>{t('shareInfo', { type: documentType })}</P>
+                  <P>{t('markAsSentInfo', { client: clientName })}</P>
+                </Div>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
+            </Div>
+          </Div>
+        </Div>
+      </Div>
     </Modal>
   )
 }

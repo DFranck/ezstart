@@ -1,6 +1,6 @@
 'use client'
 import { useAuth } from '@ezstart/auth-sdk'
-import { Button, Card, CardContent, CardHeader, H3 } from '@ezstart/ui/components'
+import { Button, Card, CardContent, CardHeader, H3, Div, P } from '@ezstart/ui/components'
 import Link from 'next/link'
 
 export function EZAuthLoginSection() {
@@ -17,13 +17,13 @@ export function EZAuthLoginSection() {
             <Link href={'/dashboard'}>Dashboard</Link>
           </Button>
         </CardContent>
-        {/* <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p> */}
+        {/* <P className="text-sm text-muted-foreground">Redirecting to dashboard...</P> */}
       </Card>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <Div className="space-y-4">
       <Button
         onClick={() => login()}
         className="w-full bg-gradient-company hover:from-indigo-700 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg"
@@ -31,9 +31,9 @@ export function EZAuthLoginSection() {
         Sign In with EZAuth
       </Button>
 
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">Secure authentication powered by EZAuth</p>
-      </div>
-    </div>
+      <Div className="text-center">
+        <P className="text-xs text-muted-foreground">Secure authentication powered by EZAuth</P>
+      </Div>
+    </Div>
   )
 }

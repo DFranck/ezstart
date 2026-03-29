@@ -204,6 +204,7 @@ export async function callApi<T = any>(
     const duration = Date.now() - startTime
 
     // Parse response body
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let json: any = null
     try {
       json = await res.json()

@@ -19,6 +19,8 @@ export type TagProps<T extends SupportedAs = 'span'> = Omit<ComponentProps<T>, n
 function filterDomSafeProps(props: Record<string, any>): Record<string, any> {
   return Object.fromEntries(
     Object.entries(props).filter(([key, value]) => {
+      // ref is handled separately — never spread it via domSafeProps
+      if (key === 'ref') return false
       if (key.startsWith('data-') || key.startsWith('aria-')) return true
       if (key === 'id' || key === 'className' || key === 'style') return true
       if (key === 'role') return true
@@ -65,8 +67,9 @@ function TagComponent<T extends SupportedAs = 'span'>({
   ariaRole,
   ariaLive,
   ariaHidden,
+  ref,
   ...props
-}: TagProps<T> & { asChild?: boolean }) {
+}: TagProps<T> & { asChild?: boolean; ref?: React.Ref<any> }) {
   const tag = (as ?? 'span') as SupportedAs
 
   const variantFn = tagVariants[tag as keyof typeof tagVariants]
@@ -108,7 +111,7 @@ function TagComponent<T extends SupportedAs = 'span'>({
   )
 
   return (
-    <Component className={merged} {...ariaAttributes} {...domSafeProps}>
+    <Component ref={ref} className={merged} {...ariaAttributes} {...domSafeProps}>
       {children}
     </Component>
   )

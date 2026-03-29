@@ -2,7 +2,7 @@
 import { Spinner } from '@ezstart/ui/components'
 import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useAuth } from './provider.js'
 
 interface AuthCallbackPageProps {
@@ -27,7 +27,7 @@ function CallbackContent({
   processingMessage = 'Processing authentication...',
   errorButtonText = 'Go Back',
   errorButtonClassName = 'px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
-}: AuthCallbackPageProps): any {
+}: AuthCallbackPageProps): React.ReactElement {
   const { handleCallback } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -59,14 +59,14 @@ function CallbackContent({
     const lockKey = `auth_processing_${code}`
 
     // Check if another instance is already processing this code
-    if (typeof window !== 'undefined' && (window as any)[lockKey]) {
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, boolean>)[lockKey]) {
       return
     }
 
     const processCallback = async () => {
       // Set global lock
       if (typeof window !== 'undefined') {
-        ;(window as any)[lockKey] = true
+        ;(window as unknown as Record<string, boolean>)[lockKey] = true
       }
 
       try {
@@ -94,7 +94,7 @@ function CallbackContent({
       } finally {
         // Release global lock
         if (typeof window !== 'undefined') {
-          delete (window as any)[lockKey]
+          delete (window as unknown as Record<string, boolean>)[lockKey]
         }
       }
     }
@@ -200,7 +200,7 @@ function CallbackContent({
  * }
  * ```
  */
-export function AuthCallbackPage(props: AuthCallbackPageProps): any {
+export function AuthCallbackPage(props: AuthCallbackPageProps): React.ReactElement {
   return (
     <Suspense
       fallback={

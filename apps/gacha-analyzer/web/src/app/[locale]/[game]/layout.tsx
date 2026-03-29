@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import type { GameType } from '@gacha-analyzer/types'
 import { GAME_CONFIG } from '@/config/games'
+import { Div, H1, Main } from '@ezstart/ui/components'
 
 const VALID_GAMES: GameType[] = ['summoners-war', 'nikke']
 
@@ -25,7 +26,7 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
   const t = useTranslations()
   const game = params.game as string
   // Measure the actual header height to pull the banner flush against it.
-  // pt-16 (64px) on <main> is a fixed offset, but the header height varies
+  // pt-16 (64px) on <Main> is a fixed offset, but the header height varies
   // with scroll (py-4 at top vs py-2 when scrolled). The gap = 64 - headerHeight.
   const [headerHeight, setHeaderHeight] = useState(0)
 
@@ -65,7 +66,7 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
     <>
       {/* Decorative game banner with overlay title */}
       {bgImage && (
-        <div
+        <Div
           className="relative w-full h-[150px] sm:h-[200px] overflow-hidden transition-[margin] duration-200 ease-out"
           style={bannerOffset > 0 ? { marginTop: `-${bannerOffset}px` } : undefined}
         >
@@ -78,16 +79,16 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
             priority
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background" />
+          <Div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/40 to-background" />
           {/* H1 centred on the banner */}
           {pageTitle && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <h1 className="text-3xl sm:text-4xl font-black text-foreground drop-shadow-lg">
+            <Div className="absolute inset-0 flex items-center justify-center">
+              <H1 className="text-3xl sm:text-4xl font-black text-foreground drop-shadow-lg">
                 {pageTitle}
-              </h1>
-            </div>
+              </H1>
+            </Div>
           )}
-        </div>
+        </Div>
       )}
       {children}
     </>

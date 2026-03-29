@@ -1,6 +1,6 @@
 'use client'
 
-import { Dropdown, DropdownItem, Icon } from '@ezstart/ui/components'
+import { Dropdown, DropdownItem, Icon, Span } from '@ezstart/ui/components'
 import { useLocale } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -30,7 +30,7 @@ export function LocaleSwitcher() {
   const triggerLabel = (
     <>
       <Icon name="lucide:Globe" />
-      <span className="align-middle hidden md:inline">{activeLabel}</span>
+      <Span className="align-middle hidden md:inline">{activeLabel}</Span>
     </>
   )
 

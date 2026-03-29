@@ -20,7 +20,7 @@ export const SkillsSection = ({ id }: Props): React.JSX.Element => {
       <UL layout="grid" className="grid-cols-2 md:grid-cols-4 lg:grid-cols-4 w-full" size={'xs'}>
         {skillData.skills.map((cat: Skills, index) => (
           <LI key={index} className="items-start">
-            <article className="w-full">
+            <Article className="w-full">
               <UL className="w-full py-4 px-2 md:py-4 " size={'xs'}>
                 <H3 size="h5" className="text-center md:text-start">
                   {t(`categories.${cat.category}`, { default: cat.category })}
@@ -32,7 +32,7 @@ export const SkillsSection = ({ id }: Props): React.JSX.Element => {
                   </LI>
                 ))}
               </UL>
-            </article>
+            </Article>
           </LI>
         ))}
       </UL>

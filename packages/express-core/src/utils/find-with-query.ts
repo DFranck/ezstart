@@ -1,15 +1,26 @@
 import { toApiObject } from './to-api-object.js'
+import type { Model, FilterQuery } from 'mongoose'
 
 type FindWithQueryOptions = {
-  extraFilter?: Record<string, any>
+  extraFilter?: FilterQuery<unknown>
   projection?: Record<string, number>
   sort?: Record<string, 1 | -1>
   populate?: string[]
 }
 
+type PaginatedQuery = {
+  page?: number
+  limit?: number
+  includeDeleted?: boolean
+  deletedOnly?: boolean
+  from?: string
+  to?: string
+  [key: string]: unknown
+}
+
 export async function findWithQuery<T>(
-  model: any,
-  query: any = {},
+  model: Model<T>,
+  query: PaginatedQuery = {},
   {
     extraFilter = {},
     projection = {},
@@ -19,19 +30,20 @@ export async function findWithQuery<T>(
 ): Promise<T[]> {
   const { page = 1, limit = 20, includeDeleted, deletedOnly, from, to, ...otherFilters } = query
 
-  const filter: Record<string, any> = { ...extraFilter }
+  const filter: FilterQuery<T> = { ...extraFilter } as FilterQuery<T>
 
   if (includeDeleted) {
   } else if (deletedOnly) {
-    filter.deletedAt = { $ne: null }
+    filter.deletedAt = { $ne: null } as FilterQuery<T>[keyof FilterQuery<T>]
   } else {
-    filter.deletedAt = null
+    filter.deletedAt = null as FilterQuery<T>[keyof FilterQuery<T>]
   }
 
   if (from || to) {
-    filter.createdAt = {}
-    if (from) filter.createdAt.$gte = new Date(from)
-    if (to) filter.createdAt.$lte = new Date(to)
+    const dateFilter: { $gte?: Date; $lte?: Date } = {}
+    if (from) dateFilter.$gte = new Date(from)
+    if (to) dateFilter.$lte = new Date(to)
+    filter.createdAt = dateFilter as FilterQuery<T>[keyof FilterQuery<T>]
   }
 
   Object.assign(filter, otherFilters)
@@ -47,5 +59,5 @@ export async function findWithQuery<T>(
   }
 
   const docs = await queryBuilder.exec()
-  return docs.map(toApiObject)
+  return docs.map(toApiObject<T>)
 }

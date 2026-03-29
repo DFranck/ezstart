@@ -7,10 +7,7 @@ import Link from 'next/link'
 import type { GameType } from '@gacha-analyzer/types'
 import { GAME_CONFIG } from '@/config/games'
 
-const games: { type: GameType }[] = [
-  { type: 'summoners-war' },
-  { type: 'nikke' },
-]
+const games: { type: GameType }[] = [{ type: 'summoners-war' }, { type: 'nikke' }]
 
 export default function HomePage() {
   const t = useTranslations()
@@ -27,13 +24,15 @@ export default function HomePage() {
 
       {/* Game Selection */}
       <Div className="mb-6">
-        <P className="text-sm font-medium mb-4 text-center text-muted-foreground">{t('home.selectGame')}</P>
+        <P className="text-sm font-medium mb-4 text-center text-muted-foreground">
+          {t('home.selectGame')}
+        </P>
       </Div>
 
       <Div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {games.map((game) => (
+        {games.map(game => (
           <Link key={game.type} href={`/${game.type}/scan`}>
-            <div className="group relative overflow-hidden rounded-lg border-2 border-transparent hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer h-full min-h-[220px]">
+            <Div className="group relative overflow-hidden rounded-lg border-2 border-transparent hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer h-full min-h-[220px]">
               {/* Background image */}
               <Image
                 src={GAME_CONFIG[game.type]!.bg}
@@ -44,9 +43,9 @@ export default function HomePage() {
                 priority
               />
               {/* Dark overlay */}
-              <div className="absolute inset-0 bg-background/60 group-hover:bg-background/50 transition-colors duration-300" />
+              <Div className="absolute inset-0 bg-background/60 group-hover:bg-background/50 transition-colors duration-300" />
               {/* Text content */}
-              <div className="relative z-10 flex flex-col items-center justify-center h-full min-h-[220px] py-8 px-6 text-center">
+              <Div className="relative z-10 flex flex-col items-center justify-center h-full min-h-[220px] py-8 px-6 text-center">
                 <Image
                   src={GAME_CONFIG[game.type]!.logo}
                   alt={t(`games.${game.type}`)}
@@ -59,8 +58,8 @@ export default function HomePage() {
                 <P className="text-sm text-muted-foreground">
                   {t(`home.gameDescription.${game.type}`)}
                 </P>
-              </div>
-            </div>
+              </Div>
+            </Div>
           </Link>
         ))}
       </Div>

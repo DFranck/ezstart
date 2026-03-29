@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { Button, H3, Label, Modal, Section, Select } from '@ezstart/ui/components';
-import { runWithFeedback } from '@ezstart/ui/utils';
+import { Button, H3, Label, Modal, Section, Select, Div } from '@ezstart/ui/components'
+import { runWithFeedback } from '@ezstart/ui/utils'
 import { callApi, parseApiError } from '@/config/api'
 import { useAuth } from '@ezstart/auth-sdk'
-import { useState } from 'react';
-import { LoadingButton } from './loading-button';
+import { useState } from 'react'
+import { LoadingButton } from './loading-button'
 
 interface StatusChangeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  documentType: 'invoice' | 'quote' | 'receipt';
-  documentId: string;
-  currentStatus: string;
-  onSave: () => void;
+  isOpen: boolean
+  onClose: () => void
+  documentType: 'invoice' | 'quote' | 'receipt'
+  documentId: string
+  currentStatus: string
+  onSave: () => void
 }
 
 const statusOptions = {
@@ -32,7 +32,7 @@ const statusOptions = {
     { value: 'issued', label: 'Issued' },
     { value: 'refunded', label: 'Refunded' },
   ],
-};
+}
 
 export function StatusChangeModal({
   isOpen,
@@ -43,39 +43,39 @@ export function StatusChangeModal({
   onSave,
 }: StatusChangeModalProps) {
   const { user } = useAuth()
-  const [isLoading, setIsLoading] = useState(false);
-  const [newStatus, setNewStatus] = useState(currentStatus);
+  const [isLoading, setIsLoading] = useState(false)
+  const [newStatus, setNewStatus] = useState(currentStatus)
 
   const apiEndpoints = {
     invoice: '/invoices',
     quote: '/quotes',
     receipt: '/receipts',
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (newStatus === currentStatus) {
-      onClose();
-      return;
+      onClose()
+      return
     }
 
     return runWithFeedback({
       action: async () => {
         const res = await callApi(`${apiEndpoints[documentType]}/${documentId}`, {
           method: 'PUT',
-            userId: user?._id,
+          userId: user?._id,
           body: { status: newStatus },
-        });
-        if (!res.ok) throw new Error(parseApiError(res.data));
-        onSave();
-        onClose();
+        })
+        if (!res.ok) throw new Error(parseApiError(res.data))
+        onSave()
+        onClose()
       },
       toastLoading: { message: `Updating ${documentType} status...` },
       toastSuccess: { message: `${documentType} status updated` },
       toastError: { message: `Failed to update ${documentType} status` },
       onLoadingChange: setIsLoading,
-    });
-  };
+    })
+  }
 
   return (
     <Modal
@@ -84,37 +84,33 @@ export function StatusChangeModal({
       title={`Change ${documentType} Status`}
       description={`Update the status of this ${documentType}`}
       footer={
-        <div className="flex gap-2 justify-end">
+        <Div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
-          <LoadingButton 
-            loading={isLoading} 
+          <LoadingButton
+            loading={isLoading}
             type="submit"
             disabled={newStatus === currentStatus}
             form="status-change-form"
           >
             Update Status
           </LoadingButton>
-        </div>
+        </Div>
       }
     >
       <form id="status-change-form" onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>New Status</Label>
-            <Select
-              value={newStatus}
-              onValueChange={setNewStatus}
-            >
-              {statusOptions[documentType].map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-        </form>
+        <Div>
+          <Label>New Status</Label>
+          <Select value={newStatus} onValueChange={setNewStatus}>
+            {statusOptions[documentType].map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </Div>
+      </form>
     </Modal>
-  );
+  )
 }

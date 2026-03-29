@@ -21,6 +21,8 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Div,
+  Span,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useState } from 'react'
@@ -205,19 +207,19 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 space-y-6">
+      <Div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 space-y-6">
         {/* Tabs skeleton */}
-        <div className="flex gap-2 border-b">
+        <Div className="flex gap-2 border-b">
           <Skeleton className="h-10 w-32" variant="shimmer" />
           <Skeleton className="h-10 w-32" variant="shimmer" />
           <Skeleton className="h-10 w-32" variant="shimmer" />
-        </div>
+        </Div>
         {/* Content skeleton */}
-        <div className="space-y-4">
+        <Div className="space-y-4">
           <SkeletonCard showHeader showFooter={false} lines={3} variant="shimmer" size="lg" />
           <SkeletonCard showHeader showFooter={false} lines={2} variant="shimmer" size="lg" />
-        </div>
-      </div>
+        </Div>
+      </Div>
     )
   }
 
@@ -237,8 +239,8 @@ export default function SettingsPage() {
   const deletedItemGroups = groupDeletedItems(safeDeletedItems)
 
   return (
-    <div className="max-w-7xl w-full mx-auto py-6 sm:py-8 space-y-6">
-      <div>
+    <Div className="max-w-7xl w-full mx-auto py-6 sm:py-8 space-y-6">
+      <Div>
         <Tabs defaultValue="business" className="space-y-8 mx-2 md:mx-4 lg:mx-6">
           <TabsList>
             <TabsTrigger value="business">
@@ -252,7 +254,7 @@ export default function SettingsPage() {
             <TabsTrigger value="deleted-items">
               <Icon name="lucide:Trash2" />
               {tSettings('deletedItems')}{' '}
-              {totalDeleted > 0 && <span className="ml-2">({totalDeleted})</span>}
+              {totalDeleted > 0 && <Span className="ml-2">({totalDeleted})</Span>}
             </TabsTrigger>
           </TabsList>
 
@@ -340,9 +342,9 @@ export default function SettingsPage() {
               className={isMobile ? 'border-0 shadow-none' : ''}
             >
               {deletedItemGroups.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <Div className="text-center py-8 text-muted-foreground">
                   {tSettings('noDeletedItems')}
-                </div>
+                </Div>
               ) : (
                 <CollapsibleGroup
                   groups={deletedItemGroups}
@@ -362,7 +364,7 @@ export default function SettingsPage() {
             </DashboardSection>
           </TabsContent>
         </Tabs>
-      </div>
+      </Div>
 
       {/* Modals */}
       <CompanyModal
@@ -378,6 +380,6 @@ export default function SettingsPage() {
         paymentMethod={editingPaymentMethod}
         onSave={refetchAll}
       />
-    </div>
+    </Div>
   )
 }

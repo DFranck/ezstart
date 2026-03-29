@@ -39,7 +39,7 @@ export function ProjectCard({ project }: Props) {
       </Div>
 
       {project.src && (
-        <div className="max-h-56 md:max-h-96 overflow-y-auto rounded">
+        <Div className="max-h-56 md:max-h-96 overflow-y-auto rounded">
           <Image
             src={isMobile && project.src.mobile ? project.src.mobile : project.src.desktop}
             alt={project.title}
@@ -47,7 +47,7 @@ export function ProjectCard({ project }: Props) {
             height={300}
             className="w-full h-auto object-contain"
           />
-        </div>
+        </Div>
       )}
 
       <Div size="xs">

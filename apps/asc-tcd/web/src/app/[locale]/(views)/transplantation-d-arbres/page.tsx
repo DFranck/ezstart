@@ -1,7 +1,7 @@
 'use client'
 
 import BoutiqueCta from '@/components/BoutiqueCta'
-import { ACarousel, Button, Div, H2, Hero, Main, P, Section } from '@ezstart/ui/components'
+import { ACarousel, Button, Div, H2, Hero, Main, P, Section, Span } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
 import { useTranslations } from 'next-intl'
@@ -55,14 +55,14 @@ export default function PageTransplantationArbres(): any {
       {/* HERO */}
       <Hero
         title={
-          <span className="text-foreground">
+          <Span className="text-foreground">
             Transplantation d’arbres matures et déplacement d'arbres sur chantier.
-          </span>
+          </Span>
         }
         subtitle={
-          <span className="text-foreground" style={{ fontFamily: `'Cambria', Georgia, serif` }}>
+          <Span className="text-foreground" style={{ fontFamily: `'Cambria', Georgia, serif` }}>
             ASC
-          </span>
+          </Span>
         }
         // textureSrc='/images/fond-noisy.jpg'
         imageSrc="/images/hero-transplantation.jpg"
@@ -122,8 +122,8 @@ export default function PageTransplantationArbres(): any {
         </H2>
 
         {/* ✅ Conteneur scrollable sur mobile */}
-        <div className="mt-8 w-full overflow-x-auto">
-          <div className="flex justify-center">
+        <Div className="mt-8 w-full overflow-x-auto">
+          <Div className="flex justify-center">
             <table className="border border-border text-left text-xs sm:text-sm rounded-lg overflow-hidden min-w-[700px]">
               <thead className="bg-primary text-primary-foreground">
                 <tr>
@@ -203,8 +203,8 @@ export default function PageTransplantationArbres(): any {
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
+          </Div>
+        </Div>
 
         {/* Texte explicatif */}
         <P className="mt-6 text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">

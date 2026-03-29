@@ -1,4 +1,14 @@
-import { Button, Card, CardContent, Icon, KnownIconName } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  CardContent,
+  Icon,
+  KnownIconName,
+  Div,
+  H3,
+  P,
+  Span,
+} from '@ezstart/ui/components'
 import { cn } from '@ezstart/ui/lib'
 import { ReactNode, useState } from 'react'
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog'
@@ -53,7 +63,7 @@ export function DocumentCard({
   }
 
   return (
-    <div className="group relative">
+    <Div className="group relative">
       <Card
         role="button"
         tabIndex={0}
@@ -67,15 +77,15 @@ export function DocumentCard({
         )}
       >
         <CardContent>
-          <div
+          <Div
             className={
               type === 'invoice' || type === 'receipt'
                 ? 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'
                 : 'flex items-center justify-between'
             }
           >
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div
+            <Div className="flex items-center space-x-2 sm:space-x-4">
+              <Div
                 className={cn(
                   'rounded-xl flex items-center justify-center',
                   iconGradient,
@@ -92,18 +102,18 @@ export function DocumentCard({
                       : 'w-6 h-6 text-white'
                   }
                 />
-              </div>
-              <div>
-                <h3
+              </Div>
+              <Div>
+                <H3
                   className={cn(
                     'font-semibold text-foreground',
                     type === 'invoice' || type === 'receipt' ? 'text-base sm:text-lg' : 'text-lg'
                   )}
                 >
                   #{documentNumber}
-                </h3>
-                <div className="flex flex-wrap items-center gap-2 sm:space-x-4 sm:gap-0 mt-1">
-                  <span
+                </H3>
+                <Div className="flex flex-wrap items-center gap-2 sm:space-x-4 sm:gap-0 mt-1">
+                  <Span
                     className={cn(
                       'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                       statusStyles.bg,
@@ -111,30 +121,30 @@ export function DocumentCard({
                     )}
                   >
                     {status}
-                  </span>
-                  <span className="text-xs sm:text-sm text-muted-foreground">
+                  </Span>
+                  <Span className="text-xs sm:text-sm text-muted-foreground">
                     {new Date(createdAt).toLocaleDateString()}
-                  </span>
+                  </Span>
                   {additionalInfo}
-                </div>
-              </div>
-            </div>
+                </Div>
+              </Div>
+            </Div>
 
-            <div
+            <Div
               className={
                 type === 'invoice' || type === 'receipt'
                   ? 'flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0'
                   : 'flex items-center space-x-4'
               }
             >
-              <div
+              <Div
                 className={
                   type === 'invoice' || type === 'receipt'
                     ? 'text-left sm:text-right'
                     : 'text-right'
                 }
               >
-                <p
+                <P
                   className={cn(
                     'font-bold text-foreground',
                     type === 'invoice' || type === 'receipt'
@@ -143,11 +153,11 @@ export function DocumentCard({
                   )}
                 >
                   ${total} {currency}
-                </p>
-              </div>
+                </P>
+              </Div>
 
               {actions && (
-                <div
+                <Div
                   className={
                     type === 'invoice' || type === 'receipt'
                       ? 'flex flex-wrap gap-2 justify-start sm:justify-end'
@@ -157,14 +167,14 @@ export function DocumentCard({
                   onKeyDown={e => e.stopPropagation()}
                 >
                   {actions}
-                </div>
+                </Div>
               )}
-            </div>
-          </div>
+            </Div>
+          </Div>
           {children}
         </CardContent>
       </Card>
-    </div>
+    </Div>
   )
 }
 
@@ -238,17 +248,17 @@ export function InvoiceCard({
               className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
             >
               <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Send</span>
+              <Span className="hidden xs:inline sm:hidden md:inline">Send</Span>
             </Button>
           )}
           <Button size="sm" variant="outline" onClick={onDownload}>
             <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-            <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+            <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
           </Button>
           {status === 'paid' && onDownloadReceipt && (
             <Button size="sm" variant="outline" onClick={onDownloadReceipt}>
               <Icon name="lucide:Receipt" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Receipt</span>
+              <Span className="hidden xs:inline sm:hidden md:inline">Receipt</Span>
             </Button>
           )}
           {permissions.canMarkAsPaid && (
@@ -258,8 +268,8 @@ export function InvoiceCard({
               className="bg-ezbill-paid hover:bg-ezbill-paid/90 text-ezbill-paid-foreground"
             >
               <Icon name="lucide:CheckCircle" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-              <span className="hidden xs:inline sm:hidden md:inline">Mark Paid</span>
-              <span className="inline xs:hidden sm:inline md:hidden">Paid</span>
+              <Span className="hidden xs:inline sm:hidden md:inline">Mark Paid</Span>
+              <Span className="inline xs:hidden sm:inline md:hidden">Paid</Span>
             </Button>
           )}
         </>
@@ -333,9 +343,9 @@ export function QuoteCard({
         onClick={onClick}
         className={className}
         additionalInfo={
-          <span className="text-sm text-muted-foreground">
+          <Span className="text-sm text-muted-foreground">
             Valid until: {validUntil ? new Date(validUntil).toLocaleDateString() : '-'}
-          </span>
+          </Span>
         }
         actions={
           <>
@@ -369,7 +379,7 @@ export function QuoteCard({
                 className="bg-ezbill-sent hover:bg-ezbill-sent/90 text-ezbill-sent-foreground"
               >
                 <Icon name="lucide:Send" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden xs:inline sm:hidden md:inline">Send</span>
+                <Span className="hidden xs:inline sm:hidden md:inline">Send</Span>
               </Button>
             )}
             {permissions.canAccept && onAccept && (
@@ -379,7 +389,7 @@ export function QuoteCard({
                 className="bg-ezbill-accepted hover:bg-ezbill-accepted/90 text-ezbill-accepted-foreground"
               >
                 <Icon name="lucide:Check" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden xs:inline sm:hidden md:inline">Accept</span>
+                <Span className="hidden xs:inline sm:hidden md:inline">Accept</Span>
               </Button>
             )}
             {permissions.canDecline && onDecline && (
@@ -389,13 +399,13 @@ export function QuoteCard({
                 className="bg-ezbill-rejected hover:bg-ezbill-rejected/90 text-ezbill-rejected-foreground"
               >
                 <Icon name="lucide:X" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden xs:inline sm:hidden md:inline">Decline</span>
+                <Span className="hidden xs:inline sm:hidden md:inline">Decline</Span>
               </Button>
             )}
             {onDownload && (
               <Button size="sm" variant="outline" onClick={onDownload}>
                 <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+                <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
               </Button>
             )}
             {permissions.canConvertToInvoice && (
@@ -405,7 +415,7 @@ export function QuoteCard({
                 className="bg-ezbill-invoice hover:bg-ezbill-invoice/90 text-ezbill-invoice-foreground"
               >
                 <Icon name="lucide:ArrowRight" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-                <span className="hidden xs:inline sm:hidden md:inline">Invoice</span>
+                <Span className="hidden xs:inline sm:hidden md:inline">Invoice</Span>
               </Button>
             )}
           </>
@@ -469,7 +479,7 @@ export function ReceiptCard({
         onDownload && (
           <Button size="sm" variant="outline" onClick={onDownload} title="Download receipt">
             <Icon name="lucide:Download" className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-1" />
-            <span className="hidden xs:inline sm:hidden md:inline">Download</span>
+            <Span className="hidden xs:inline sm:hidden md:inline">Download</Span>
           </Button>
         )
       }

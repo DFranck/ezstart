@@ -8,6 +8,7 @@ import {
   CardContent,
   Div,
   P,
+  Span,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -401,16 +402,16 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
           <Div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             {analysis.potentialEfficiency !== undefined && (
               <P>
-                <span className="font-medium">{tRune('potential12')}:</span>{' '}
+                <Span className="font-medium">{tRune('potential12')}:</Span>{' '}
                 {analysis.potentialEfficiency}%
               </P>
             )}
             {analysis.grindedEfficiency !== undefined && (
               <P>
-                <span className="font-medium">{tRune('afterGrind')}:</span>{' '}
+                <Span className="font-medium">{tRune('afterGrind')}:</Span>{' '}
                 {analysis.grindedEfficiency}%
                 {analysis.grindGain !== undefined && analysis.grindGain > 0 && (
-                  <span className="text-success-foreground"> (+{analysis.grindGain}%)</span>
+                  <Span className="text-success-foreground"> (+{analysis.grindGain}%)</Span>
                 )}
               </P>
             )}
@@ -661,7 +662,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                           {formatStatValue(rune.innateStat.type, rune.innateStat.value)} [
                           {analysis.innateTier ?? getStatTier(rune.set, rune.innateStat.type)}-tier]
                           → score:{' '}
-                          <span
+                          <Span
                             className={
                               (analysis.innateScore ?? 0) > 0
                                 ? 'text-success-foreground'
@@ -673,7 +674,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                             {analysis.innateScore !== undefined
                               ? (analysis.innateScore > 0 ? '+' : '') + analysis.innateScore
                               : '0'}
-                          </span>
+                          </Span>
                         </P>
                       )}
                       <P className="text-muted-foreground">Substats: {rune.subStats.length}/4</P>
@@ -705,7 +706,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                             <Div key={idx} className="space-y-0.5 pl-1">
                               <P className="text-muted-foreground">
                                 {formatStatLabel(item.type)} [
-                                <span className={tierColor}>{item.tier}</span>]: value={item.value}
+                                <Span className={tierColor}>{item.tier}</Span>]: value={item.value}
                                 {sfx}, rolls={item.rolls}, maxPossible={item.maxPossible}
                                 {sfx}
                               </P>
@@ -715,10 +716,10 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                               </P>
                               <P className="text-muted-foreground/60 pl-2">
                                 x tierWeight({item.tier}) ={' '}
-                                <span className={tierColor}>{item.tierWeight}</span>
+                                <Span className={tierColor}>{item.tierWeight}</Span>
                               </P>
                               <P className="text-muted-foreground/60 pl-2">
-                                x grindBonus = <span className={grindColor}>{item.grindBonus}</span>{' '}
+                                x grindBonus = <Span className={grindColor}>{item.grindBonus}</Span>{' '}
                                 {item.grindBonus > 1 ? '(grindable)' : '(non-grindable)'}
                               </P>
                               <P className={`pl-2 ${contribColor}`}>
@@ -753,7 +754,7 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                         className={qualityPen < 0 ? 'text-destructive' : 'text-success-foreground'}
                       >
                         Quality: {quality} ={' '}
-                        <span className="font-bold">{qualityPen === 0 ? '✓ 0' : qualityPen}</span>
+                        <Span className="font-bold">{qualityPen === 0 ? '✓ 0' : qualityPen}</Span>
                       </P>
                       <P className={innate < 0 ? 'text-destructive' : 'text-success-foreground'}>
                         Innate:{' '}
@@ -761,23 +762,23 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                           ? `${formatStatLabel(rune.innateStat.type)} [${analysis.innateTier ?? '?'}]`
                           : 'none'}{' '}
                         ={' '}
-                        <span className="font-bold">
+                        <Span className="font-bold">
                           {innate === 0 ? '✓ 0' : (innate > 0 ? '+' : '') + innate}
-                        </span>
+                        </Span>
                       </P>
                       <P className={lowRoll < 0 ? 'text-destructive' : 'text-success-foreground'}>
                         Low-roll:{' '}
-                        <span className="font-bold">{lowRoll === 0 ? '✓ 0' : lowRoll}</span>
+                        <Span className="font-bold">{lowRoll === 0 ? '✓ 0' : lowRoll}</Span>
                       </P>
                       <P className={nonGrind < 0 ? 'text-destructive' : 'text-success-foreground'}>
                         Non-grindable:{' '}
-                        <span className="font-bold">{nonGrind === 0 ? '✓ 0' : nonGrind}</span>
+                        <Span className="font-bold">{nonGrind === 0 ? '✓ 0' : nonGrind}</Span>
                       </P>
                       <P
                         className={mismatchPen < 0 ? 'text-destructive' : 'text-success-foreground'}
                       >
                         Mismatch:{' '}
-                        <span className="font-bold">{mismatchPen === 0 ? '✓ 0' : mismatchPen}</span>
+                        <Span className="font-bold">{mismatchPen === 0 ? '✓ 0' : mismatchPen}</Span>
                       </P>
                       <P
                         className={
@@ -788,18 +789,18 @@ export function RuneCardCompact({ rune, analysis, confidence }: RuneCardCompactP
                               : 'text-muted-foreground'
                         }
                       >
-                        Set: {rune.set} (<span className="font-bold">{setStrengthTier}</span>) →{' '}
-                        <span className="font-bold">+{setBonus}%</span> seuils
+                        Set: {rune.set} (<Span className="font-bold">{setStrengthTier}</Span>) →{' '}
+                        <Span className="font-bold">+{setBonus}%</Span> seuils
                       </P>
                       <P
                         className={`font-medium ${penaltiesTotal > 0 ? 'text-success-foreground' : penaltiesTotal < 0 ? 'text-destructive' : 'text-success-foreground'}`}
                       >
                         Total:{' '}
-                        <span className="font-bold">
+                        <Span className="font-bold">
                           {penaltiesTotal === 0
                             ? '✓ 0'
                             : (penaltiesTotal > 0 ? '+' : '') + penaltiesTotal}
-                        </span>
+                        </Span>
                       </P>
                     </Div>
 

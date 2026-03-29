@@ -1,11 +1,25 @@
-'use client';
+'use client'
 
-import { Button, Card, CardContent, CardHeader, Div, H1, H3, Icon, Input, Label, P, Section, Spinner } from '@ezstart/ui/components';
-import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk';
-import { useSafeTranslations } from '@/hooks/useSafeIntl';
-import { useState } from 'react';
-import { QRCodeCanvas } from './components/qrcode-canvas';
-import { QRCodeConfig } from './types';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H1,
+  H3,
+  Icon,
+  Input,
+  Label,
+  P,
+  Section,
+  Spinner,
+} from '@ezstart/ui/components'
+import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
+import { useSafeTranslations } from '@/hooks/useSafeIntl'
+import { useState } from 'react'
+import { QRCodeCanvas } from './components/qrcode-canvas'
+import { QRCodeConfig } from './types'
 
 const DEFAULT_CONFIG: QRCodeConfig = {
   url: '',
@@ -15,19 +29,19 @@ const DEFAULT_CONFIG: QRCodeConfig = {
   errorCorrectionLevel: 'M',
   includeMargin: true,
   redirectType: 'permanent',
-};
+}
 
 function QRCodeGeneratorContent() {
-  const t = useSafeTranslations('qrCode');
-  const [config, setConfig] = useState<QRCodeConfig>(DEFAULT_CONFIG);
+  const t = useSafeTranslations('qrCode')
+  const [config, setConfig] = useState<QRCodeConfig>(DEFAULT_CONFIG)
 
   const handleReset = () => {
-    setConfig(DEFAULT_CONFIG);
-  };
+    setConfig(DEFAULT_CONFIG)
+  }
 
   const updateConfig = (updates: Partial<QRCodeConfig>) => {
-    setConfig((prev) => ({ ...prev, ...updates }));
-  };
+    setConfig(prev => ({ ...prev, ...updates }))
+  }
 
   return (
     <>
@@ -44,159 +58,176 @@ function QRCodeGeneratorContent() {
 
       {/* Generator Section */}
       <Section size="default">
+        <Div className="grid lg:grid-cols-2 gap-6">
+          {/* Configuration Panel */}
+          <Card variant="elevated">
+            <CardHeader>
+              <H3>{t('generator.configuration.title')}</H3>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* URL Input */}
+              <Div className="space-y-2">
+                <Label htmlFor="qr-url">{t('generator.configuration.urlLabel')} *</Label>
+                <Input
+                  id="qr-url"
+                  type="url"
+                  placeholder={t('generator.configuration.urlPlaceholder')}
+                  value={config.url}
+                  onChange={e => updateConfig({ url: e.target.value })}
+                  required
+                />
+              </Div>
 
-      <div className='grid lg:grid-cols-2 gap-6'>
-        {/* Configuration Panel */}
-        <Card variant='elevated'>
-          <CardHeader>
-            <H3>{t('generator.configuration.title')}</H3>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            {/* URL Input */}
-            <div className='space-y-2'>
-              <Label htmlFor='qr-url'>{t('generator.configuration.urlLabel')} *</Label>
-              <Input
-                id='qr-url'
-                type='url'
-                placeholder={t('generator.configuration.urlPlaceholder')}
-                value={config.url}
-                onChange={(e) => updateConfig({ url: e.target.value })}
-                required
-              />
-            </div>
+              {/* Redirect Type */}
+              <Div className="space-y-2">
+                <Label htmlFor="redirect-type">
+                  {t('generator.configuration.redirectTypeLabel')}
+                </Label>
+                <select
+                  id="redirect-type"
+                  value={config.redirectType}
+                  onChange={e =>
+                    updateConfig({ redirectType: e.target.value as 'permanent' | 'temporary' })
+                  }
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="permanent">
+                    {t('generator.configuration.redirectType.permanent')}
+                  </option>
+                  <option value="temporary">
+                    {t('generator.configuration.redirectType.temporary')}
+                  </option>
+                </select>
+              </Div>
 
-            {/* Redirect Type */}
-            <div className='space-y-2'>
-              <Label htmlFor='redirect-type'>{t('generator.configuration.redirectTypeLabel')}</Label>
-              <select
-                id='redirect-type'
-                value={config.redirectType}
-                onChange={(e) => updateConfig({ redirectType: e.target.value as 'permanent' | 'temporary' })}
-                className='w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
-              >
-                <option value='permanent'>{t('generator.configuration.redirectType.permanent')}</option>
-                <option value='temporary'>{t('generator.configuration.redirectType.temporary')}</option>
-              </select>
-            </div>
+              {/* Size Control */}
+              <Div className="space-y-2">
+                <Label htmlFor="qr-size">
+                  {t('generator.configuration.sizeLabel')}: {config.size}px
+                </Label>
+                <input
+                  id="qr-size"
+                  type="range"
+                  value={config.size}
+                  onChange={e => updateConfig({ size: Number(e.target.value) })}
+                  min={128}
+                  max={512}
+                  step={32}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+              </Div>
 
-            {/* Size Control */}
-            <div className='space-y-2'>
-              <Label htmlFor='qr-size'>{t('generator.configuration.sizeLabel')}: {config.size}px</Label>
-              <input
-                id='qr-size'
-                type='range'
-                value={config.size}
-                onChange={(e) => updateConfig({ size: Number(e.target.value) })}
-                min={128}
-                max={512}
-                step={32}
-                className='w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary'
-              />
-            </div>
+              {/* Color Controls */}
+              <Div className="grid grid-cols-2 gap-4">
+                <Div className="space-y-2">
+                  <Label htmlFor="fg-color">
+                    {t('generator.configuration.foregroundColorLabel')}
+                  </Label>
+                  <Div className="flex gap-2">
+                    <input
+                      id="fg-color"
+                      type="color"
+                      value={config.foregroundColor}
+                      onChange={e => updateConfig({ foregroundColor: e.target.value })}
+                      className="h-10 w-20 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={config.foregroundColor}
+                      onChange={e => updateConfig({ foregroundColor: e.target.value })}
+                      className="flex-1"
+                    />
+                  </Div>
+                </Div>
 
-            {/* Color Controls */}
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='fg-color'>{t('generator.configuration.foregroundColorLabel')}</Label>
-                <div className='flex gap-2'>
-                  <input
-                    id='fg-color'
-                    type='color'
-                    value={config.foregroundColor}
-                    onChange={(e) => updateConfig({ foregroundColor: e.target.value })}
-                    className='h-10 w-20 cursor-pointer'
-                  />
-                  <Input
-                    type='text'
-                    value={config.foregroundColor}
-                    onChange={(e) => updateConfig({ foregroundColor: e.target.value })}
-                    className='flex-1'
-                  />
-                </div>
-              </div>
+                <Div className="space-y-2">
+                  <Label htmlFor="bg-color">
+                    {t('generator.configuration.backgroundColorLabel')}
+                  </Label>
+                  <Div className="flex gap-2">
+                    <input
+                      id="bg-color"
+                      type="color"
+                      value={config.backgroundColor}
+                      onChange={e => updateConfig({ backgroundColor: e.target.value })}
+                      className="h-10 w-20 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={config.backgroundColor}
+                      onChange={e => updateConfig({ backgroundColor: e.target.value })}
+                      className="flex-1"
+                    />
+                  </Div>
+                </Div>
+              </Div>
 
-              <div className='space-y-2'>
-                <Label htmlFor='bg-color'>{t('generator.configuration.backgroundColorLabel')}</Label>
-                <div className='flex gap-2'>
-                  <input
-                    id='bg-color'
-                    type='color'
-                    value={config.backgroundColor}
-                    onChange={(e) => updateConfig({ backgroundColor: e.target.value })}
-                    className='h-10 w-20 cursor-pointer'
-                  />
-                  <Input
-                    type='text'
-                    value={config.backgroundColor}
-                    onChange={(e) => updateConfig({ backgroundColor: e.target.value })}
-                    className='flex-1'
-                  />
-                </div>
-              </div>
-            </div>
+              {/* Error Correction Level */}
+              <Div className="space-y-2">
+                <Label htmlFor="error-correction">
+                  {t('generator.configuration.errorCorrectionLabel')}
+                </Label>
+                <select
+                  id="error-correction"
+                  value={config.errorCorrectionLevel}
+                  onChange={e =>
+                    updateConfig({
+                      errorCorrectionLevel: e.target.value as QRCodeConfig['errorCorrectionLevel'],
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="L">{t('generator.configuration.errorCorrection.low')}</option>
+                  <option value="M">{t('generator.configuration.errorCorrection.medium')}</option>
+                  <option value="Q">{t('generator.configuration.errorCorrection.quartile')}</option>
+                  <option value="H">{t('generator.configuration.errorCorrection.high')}</option>
+                </select>
+                <P className="text-sm text-muted-foreground">
+                  {t('generator.configuration.errorCorrectionHelp')}
+                </P>
+              </Div>
 
-            {/* Error Correction Level */}
-            <div className='space-y-2'>
-              <Label htmlFor='error-correction'>{t('generator.configuration.errorCorrectionLabel')}</Label>
-              <select
-                id='error-correction'
-                value={config.errorCorrectionLevel}
-                onChange={(e) => updateConfig({ errorCorrectionLevel: e.target.value as QRCodeConfig['errorCorrectionLevel'] })}
-                className='w-full px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
-              >
-                <option value='L'>{t('generator.configuration.errorCorrection.low')}</option>
-                <option value='M'>{t('generator.configuration.errorCorrection.medium')}</option>
-                <option value='Q'>{t('generator.configuration.errorCorrection.quartile')}</option>
-                <option value='H'>{t('generator.configuration.errorCorrection.high')}</option>
-              </select>
-              <p className='text-sm text-muted-foreground'>
-                {t('generator.configuration.errorCorrectionHelp')}
-              </p>
-            </div>
+              {/* Include Margin */}
+              <Div className="flex items-center gap-2">
+                <input
+                  id="include-margin"
+                  type="checkbox"
+                  checked={config.includeMargin}
+                  onChange={e => updateConfig({ includeMargin: e.target.checked })}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="include-margin" className="cursor-pointer">
+                  {t('generator.configuration.includeMarginLabel')}
+                </Label>
+              </Div>
 
-            {/* Include Margin */}
-            <div className='flex items-center gap-2'>
-              <input
-                id='include-margin'
-                type='checkbox'
-                checked={config.includeMargin}
-                onChange={(e) => updateConfig({ includeMargin: e.target.checked })}
-                className='h-4 w-4'
-              />
-              <Label htmlFor='include-margin' className='cursor-pointer'>
-                {t('generator.configuration.includeMarginLabel')}
-              </Label>
-            </div>
+              {/* Actions */}
+              <Div className="flex gap-2 pt-4">
+                <Button onClick={handleReset} variant="outline" className="flex-1">
+                  {t('generator.configuration.resetButton')}
+                </Button>
+              </Div>
+            </CardContent>
+          </Card>
 
-            {/* Actions */}
-            <div className='flex gap-2 pt-4'>
-              <Button onClick={handleReset} variant='outline' className='flex-1'>
-                {t('generator.configuration.resetButton')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Preview Panel */}
-        <Card variant='elevated'>
-          <CardHeader>
-            <H3>{t('generator.preview.title')}</H3>
-          </CardHeader>
-          <CardContent>
-            <QRCodeCanvas config={config} />
-          </CardContent>
-        </Card>
-      </div>
+          {/* Preview Panel */}
+          <Card variant="elevated">
+            <CardHeader>
+              <H3>{t('generator.preview.title')}</H3>
+            </CardHeader>
+            <CardContent>
+              <QRCodeCanvas config={config} />
+            </CardContent>
+          </Card>
+        </Div>
       </Section>
 
       {/* Use Cases Section */}
       <Section size="narrow" className="bg-muted/50">
         <Div layout="center">
           <H3>{t('useCases.title')}</H3>
-          <P className="text-muted-foreground mb-6">
-            {t('useCases.description')}
-          </P>
-          <div className="grid md:grid-cols-3 gap-4">
+          <P className="text-muted-foreground mb-6">{t('useCases.description')}</P>
+          <Div className="grid md:grid-cols-3 gap-4">
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Briefcase" className="w-8 h-8 mx-auto text-primary" />
@@ -224,15 +255,15 @@ function QRCodeGeneratorContent() {
                 </P>
               </CardContent>
             </Card>
-          </div>
+          </Div>
         </Div>
       </Section>
     </>
-  );
+  )
 }
 
 export default function QRCodeGeneratorPage() {
-  const t = useSafeTranslations('auth');
+  const t = useSafeTranslations('auth')
 
   return (
     <RequireAuth
@@ -253,5 +284,5 @@ export default function QRCodeGeneratorPage() {
     >
       <QRCodeGeneratorContent />
     </RequireAuth>
-  );
+  )
 }

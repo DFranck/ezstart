@@ -4,7 +4,13 @@
  * Get all health check results for monitored services
  */
 
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { HealthChecker, MONITORED_SERVICES } from '@ezstart/monitoring'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
@@ -20,27 +26,31 @@ const healthChecker = new HealthChecker()
 // ========================================
 
 const healthCheckResultSchema = z.object({
-  id: z.string(),
-  serviceId: z.string(),
-  name: z.string(),
-  status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']),
-  responseTime: z.number().nullable(),
-  error: z.string().optional(),
-  uptime: z.number(),
-  avgResponseTime: z.number(),
+  id: z.string().describe('Unique identifier of the health check'),
+  serviceId: z.string().describe('Identifier of the monitored service'),
+  name: z.string().describe('Human-readable name of the service'),
+  status: z.enum(['healthy', 'degraded', 'unhealthy', 'unknown']).describe('Current health status'),
+  responseTime: z.number().nullable().describe('Response time in ms (null if unreachable)'),
+  error: z.string().optional().describe('Error message if health check failed'),
+  uptime: z.number().describe('Uptime percentage over last 24 hours'),
+  avgResponseTime: z.number().describe('Average response time over recent checks'),
 })
 
 const healthCheckSummarySchema = z.object({
-  total: z.number(),
-  healthy: z.number(),
-  degraded: z.number(),
-  unhealthy: z.number(),
-  unknown: z.number(),
+  total: z.number().describe('Total number of monitored services'),
+  healthy: z.number().describe('Number of healthy services'),
+  degraded: z.number().describe('Number of degraded services'),
+  unhealthy: z.number().describe('Number of unhealthy services'),
+  unknown: z.number().describe('Number of services with unknown status'),
 })
 
 const allHealthChecksResponseSchema = z.object({
-  services: z.array(healthCheckResultSchema).describe('List of health check results for all services'),
-  environment: z.enum(['development', 'production']).describe('Current environment (development or production)'),
+  services: z
+    .array(healthCheckResultSchema)
+    .describe('List of health check results for all services'),
+  environment: z
+    .enum(['development', 'production'])
+    .describe('Current environment (development or production)'),
   summary: healthCheckSummarySchema.describe('Summary statistics of health checks'),
 })
 
@@ -50,15 +60,13 @@ const allHealthChecksResponseSchema = z.object({
 
 const getAllHealthChecksHandler = async (_: Request, res: Response) => {
   try {
-    const environment =
-      process.env.NODE_ENV === 'production' ? 'production' : 'development'
+    const environment = process.env.NODE_ENV === 'production' ? 'production' : 'development'
     const timeout = Number(process.env.HEALTH_CHECK_TIMEOUT) || 5000
     const retries = Number(process.env.HEALTH_CHECK_RETRIES) || 3
 
     const allResults = await Promise.all(
       Object.keys(MONITORED_SERVICES).map(async serviceId => {
-        const config =
-          MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
+        const config = MONITORED_SERVICES[serviceId as keyof typeof MONITORED_SERVICES]
 
         // Check all environments for this service
         const envResults = await healthChecker.checkAllEnvironments(

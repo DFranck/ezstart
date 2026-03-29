@@ -133,7 +133,13 @@ export function UptimeGraph({
   }
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean
+    payload?: Array<{ payload: { timestamp: string; uptime: number; responseTime: number } }>
+  }) => {
     if (!active || !payload || !payload.length) return null
 
     const data = payload[0].payload

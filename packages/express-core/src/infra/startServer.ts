@@ -41,7 +41,7 @@ export function startServer(app: express.Express, opts: StartServerOptions): HTT
 
     const pathsCount = Object.keys(openApiDoc.paths || {}).length
     const operationsCount = Object.values(openApiDoc.paths || {}).reduce(
-      (total, path: any) =>
+      (total, path) =>
         total +
         Object.keys(path).filter(k => ['get', 'post', 'put', 'patch', 'delete'].includes(k)).length,
       0

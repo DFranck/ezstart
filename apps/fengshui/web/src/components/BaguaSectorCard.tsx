@@ -4,7 +4,7 @@
 /* path: /components/BaguaSectorCard.tsx */
 import type { Direction } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
-import { Div, H3, H4, Icon, P, Span } from '@ezstart/ui/components'
+import { Div, H3, H4, Icon, LI, P, Section, Span, UL } from '@ezstart/ui/components'
 import { useMemo } from 'react'
 
 type Props = {
@@ -193,11 +193,11 @@ function ListBlock(props: {
 }) {
   const { title, items, bullet, color, danger } = props
   return (
-    <section aria-label={title}>
+    <Section aria-label={title}>
       <H4 className="mb-1 text-[11px] font-semibold text-foreground">{title}</H4>
-      <ul className="space-y-1.5">
+      <UL className="space-y-1.5">
         {items.map(it => (
-          <li key={it} className="flex items-start gap-1.5 text-[12px] text-foreground">
+          <LI key={it} className="flex items-start gap-1.5 text-[12px] text-foreground">
             <Icon
               name={bullet as any}
               className="mt-[2px] h-3.5 w-3.5 shrink-0"
@@ -205,17 +205,17 @@ function ListBlock(props: {
               aria-hidden
             />
             <Span className="leading-5">{it}</Span>
-          </li>
+          </LI>
         ))}
-      </ul>
-    </section>
+      </UL>
+    </Section>
   )
 }
 
 function ListFlat(props: { title: string; items: string[]; icon: string; color: string }) {
   const { title, items, icon, color } = props
   return (
-    <section aria-label={title}>
+    <Section aria-label={title}>
       <H4 className="mb-1 text-[11px] font-semibold text-foreground">{title}</H4>
       <Div className="flex flex-wrap gap-1.5">
         {items.map(it => (
@@ -229,6 +229,6 @@ function ListFlat(props: { title: string; items: string[]; icon: string; color: 
           </Span>
         ))}
       </Div>
-    </section>
+    </Section>
   )
 }

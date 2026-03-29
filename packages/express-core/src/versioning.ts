@@ -17,7 +17,11 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
  * app.use(createVersionedRouter('/api', router))
  * ```
  */
-export function createVersionedRouter(basePath: string, router: Router, currentVersion: string = 'v1'): Router {
+export function createVersionedRouter(
+  basePath: string,
+  router: Router,
+  currentVersion: string = 'v1'
+): Router {
   const versionedRouter = Router()
 
   // Register routes for both versioned and non-versioned paths
@@ -55,9 +59,9 @@ export function extractVersionFromPath() {
   return (req: Request, res: Response, next: NextFunction) => {
     const versionMatch = req.path.match(/\/v(\d+)\//)
     if (versionMatch) {
-      ;(req as any).apiVersion = `v${versionMatch[1]}`
+      ;(req as Request & { apiVersion: string }).apiVersion = `v${versionMatch[1]}`
     } else {
-      ;(req as any).apiVersion = 'v1' // Default version
+      ;(req as Request & { apiVersion: string }).apiVersion = 'v1' // Default version
     }
     next()
   }

@@ -40,9 +40,9 @@ export default function PPlayground() {
       activeVariants={selected}
       preview={<P {...selected}>{content}</P>}
       controls={
-        <div className="space-y-6">
+        <Div className="space-y-6">
           {/* Content Input */}
-          <div className="space-y-2">
+          <Div className="space-y-2">
             <Label htmlFor="contentInput" className="text-sm font-medium">
               Content
             </Label>
@@ -53,14 +53,18 @@ export default function PPlayground() {
               onChange={e => setContentInput(e.target.value)}
               placeholder="Type text or use 'lorem20'"
             />
-            <p className="text-xs text-muted-foreground">
+            <P className="text-xs text-muted-foreground">
               Tip: Use "lorem" followed by a number (e.g., "lorem20") to generate Lorem Ipsum text
-            </p>
-          </div>
+            </P>
+          </Div>
 
           {/* Variant Controls */}
-          <PlaygroundVariantSelects meta={pVariantsMeta} selected={selected} onChange={handleChange} />
-        </div>
+          <PlaygroundVariantSelects
+            meta={pVariantsMeta}
+            selected={selected}
+            onChange={handleChange}
+          />
+        </Div>
       }
       codeView={<PlaygroundCodeView fakeTagCode={fakeTagCode} fakeAliasCode={fakeAliasCode} />}
     />

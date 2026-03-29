@@ -14,11 +14,13 @@ import {
   Conversation,
   Div,
   Icon,
+  Nav,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Span,
   Thread,
   ThreadComposer,
   ThreadHeader,
@@ -199,7 +201,7 @@ export function LiaThread({
             height={32}
             className="animate-glow-pulse-sm hidden dark:block"
           />
-          <span className="sr-only">GreenPulse.AI</span>
+          <Span className="sr-only">GreenPulse.AI</Span>
         </Link>
       </Button>
     </Div>
@@ -261,7 +263,7 @@ export function LiaThread({
   )
 
   const beforeConv = (
-    <nav className="space-y-1">
+    <Nav className="space-y-1">
       {navItems.map(item => {
         const isActive = pathname === item.href
 
@@ -297,7 +299,7 @@ export function LiaThread({
           </Link>
         )
       })}
-    </nav>
+    </Nav>
   )
 
   // Footer with My Plan, My Tools, and User Info
@@ -307,12 +309,12 @@ export function LiaThread({
       <Div className="space-y-1">
         <Div className="flex items-center gap-2 px-2 py-1">
           <Icon name="lucide:Briefcase" size={16} className="text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">
+          <Span className="text-xs font-medium text-muted-foreground">
             {tChat('sidebar.myPlan')}
-          </span>
+          </Span>
         </Div>
         <Div className="px-2">
-          <span className="text-sm font-semibold">{tChat('plans.free')}</span>
+          <Span className="text-sm font-semibold">{tChat('plans.free')}</Span>
         </Div>
       </Div>
 
@@ -322,11 +324,11 @@ export function LiaThread({
       {/* My tools section - Upgrade */}
       <Div className="space-y-1">
         <Div className="px-2 py-1">
-          <span className="text-xs font-medium text-muted-foreground">
+          <Span className="text-xs font-medium text-muted-foreground">
             {tChat('sidebar.upgradePrompt')}
-          </span>
+          </Span>
         </Div>
-        <nav className="space-y-0.5">
+        <Nav className="space-y-0.5">
           {toolsItems.map(item => (
             <Button
               key={item.href}
@@ -336,10 +338,10 @@ export function LiaThread({
               disabled
             >
               <Icon name={item.icon} className="mr-2" size={14} />
-              <span className="text-xs">{item.label}</span>
+              <Span className="text-xs">{item.label}</Span>
             </Button>
           ))}
-        </nav>
+        </Nav>
       </Div>
 
       {/* User info section */}
@@ -366,7 +368,7 @@ export function LiaThread({
           disabled
         >
           <Icon name="lucide:Settings" className="mr-2" size={14} />
-          <span className="text-xs">{tChat('sidebar.settings')}</span>
+          <Span className="text-xs">{tChat('sidebar.settings')}</Span>
         </Button>
       </Div>
     </Div>
@@ -417,8 +419,8 @@ export function LiaThread({
                 return (
                   <SelectItem key={model.id} value={model.id} disabled={isComingSoon}>
                     <Div className="flex flex-col">
-                      <span className="font-medium">{model.name}</span>
-                      <span className="text-xs text-muted-foreground">{model.provider}</span>
+                      <Span className="font-medium">{model.name}</Span>
+                      <Span className="text-xs text-muted-foreground">{model.provider}</Span>
                     </Div>
                   </SelectItem>
                 )
@@ -461,14 +463,14 @@ export function LiaThread({
         }
         headerSlot={
           providers.length > 0 && selectedProvider && onProviderChange ? (
-            <div className="px-4 py-2 border-b border-border bg-muted/30">
+            <Div className="px-4 py-2 border-b border-border bg-muted/30">
               <AISelector
                 value={selectedProvider}
                 onChange={onProviderChange}
                 providers={providers}
                 showCapabilities={true}
               />
-            </div>
+            </Div>
           ) : null
         }
       />

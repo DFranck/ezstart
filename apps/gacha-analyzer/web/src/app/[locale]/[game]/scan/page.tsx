@@ -482,7 +482,7 @@ export default function GameScanPage() {
     <Div className="container mx-auto px-4 py-6 max-w-6xl">
       {/* Flash overlay — full-screen color flash on scan result */}
       {flashColor && (
-        <div
+        <Div
           className="fixed inset-0 pointer-events-none z-50"
           style={{
             backgroundColor: flashColor,

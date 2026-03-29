@@ -30,6 +30,8 @@ import {
   TableHeader,
   TableRow,
   TextArea,
+  Div,
+  H4,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
 import { useState } from 'react'
@@ -201,8 +203,8 @@ export function QuoteModal({
       description={quote ? tQuote('edit') : tQuote('create')}
       size="full"
       footer={
-        <div className="space-y-4">
-          <div className="flex gap-3 justify-end">
+        <Div className="space-y-4">
+          <Div className="flex gap-3 justify-end">
             <Button
               variant="outline"
               onClick={onClose}
@@ -231,11 +233,11 @@ export function QuoteModal({
               />
               {quote ? tQuote('update') : tQuote('create')}
             </LoadingButton>
-          </div>
-        </div>
+          </Div>
+        </Div>
       }
     >
-      <div className="flex flex-col lg:flex-row gap-0 relative">
+      <Div className="flex flex-col lg:flex-row gap-0 relative">
         {/* AI Assistant Toggle Button (when collapsed) */}
         {!showAIAssistant && (
           <InvoiceAIAssistant
@@ -246,13 +248,13 @@ export function QuoteModal({
         )}
 
         {/* Main Form */}
-        <div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
+        <Div className={showAIAssistant ? 'w-full lg:w-2/3 lg:pr-4' : 'w-full'}>
           <form id="quote-form" onSubmit={handleSubmit} className="space-y-6 p-1">
-            <div
+            <Div
               className={`grid gap-6 ${showAIAssistant ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}
             >
               {!clientId && (
-                <div>
+                <Div>
                   <Label className="text-sm font-medium  mb-3 block flex items-center">
                     <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                     Client *
@@ -272,15 +274,15 @@ export function QuoteModal({
                           value={client._id}
                           className="hover:bg-warning/5"
                         >
-                          <div className="flex items-center">{client.clientName}</div>
+                          <Div className="flex items-center">{client.clientName}</Div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </Div>
               )}
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Building2" className="w-4 h-4 mr-2 text-ezbill-company" />
                   Bill on behalf of
@@ -296,10 +298,10 @@ export function QuoteModal({
                   </SelectTrigger>
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     <SelectItem value="personal" className="hover:bg-warning/5">
-                      <div className="flex items-center">
+                      <Div className="flex items-center">
                         <Icon name="lucide:User" className="w-4 h-4 mr-2 text-ezbill-client" />
                         Personal (your name)
-                      </div>
+                      </Div>
                     </SelectItem>
                     {companies?.map(company => (
                       <SelectItem
@@ -307,20 +309,20 @@ export function QuoteModal({
                         value={company._id}
                         className="hover:bg-warning/5"
                       >
-                        <div className="flex items-center">
+                        <Div className="flex items-center">
                           <Icon
                             name="lucide:Building2"
                             className="w-4 h-4 mr-2 text-ezbill-company"
                           />
                           {company.companyName}
-                        </div>
+                        </Div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-ezbill-quote" />
                   Currency
@@ -335,33 +337,33 @@ export function QuoteModal({
                   <SelectContent className="bg-popover border shadow-xl rounded-xl">
                     {currencies.map(({ value, label, symbol }) => (
                       <SelectItem key={value} value={value} className="hover:bg-warning/5">
-                        <div className="flex items-center">
+                        <Div className="flex items-center">
                           {label}
                           <Span className="ml-2 text-warning">{symbol}</Span>
-                        </div>
+                        </Div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </Div>
 
-              <div>
+              <Div>
                 <Label className="text-sm font-medium  mb-3 block flex items-center">
                   <Icon name="lucide:Calendar" className="w-4 h-4 mr-2 text-ezbill-quote" />
                   Valid Until
                 </Label>
-                <div className="relative">
+                <Div className="relative">
                   <Input
                     type="date"
                     value={formData.validUntil}
                     onChange={e => setFormData({ ...formData, validUntil: e.target.value })}
                   />
-                </div>
-              </div>
+                </Div>
+              </Div>
 
-              <div>
-                <div className="">
-                  <div className="flex items-center space-x-3 mb-4">
+              <Div>
+                <Div className="">
+                  <Div className="flex items-center space-x-3 mb-4">
                     <Checkbox
                       id="showTaxes"
                       checked={showTaxes}
@@ -382,9 +384,9 @@ export function QuoteModal({
                       <Icon name="lucide:Calculator" className="w-4 h-4 mr-2 text-warning" />
                       Add Taxes
                     </Label>
-                  </div>
+                  </Div>
                   {showTaxes && (
-                    <div>
+                    <Div>
                       <Label className="text-sm font-medium  mb-3 block flex items-center">
                         <Icon name="lucide:Percent" className="w-4 h-4 mr-2 text-warning" />
                         Tax Rate (%)
@@ -400,20 +402,20 @@ export function QuoteModal({
                         }
                         className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md"
                       />
-                    </div>
+                    </Div>
                   )}
-                </div>
-              </div>
-            </div>
+                </Div>
+              </Div>
+            </Div>
 
-            <div>
+            <Div>
               {/* Billing Type Toggle */}
-              <div className="mb-6">
+              <Div className="mb-6">
                 <Label className="text-sm font-medium mb-3 block flex items-center">
                   <Icon name="lucide:FileType" className="w-4 h-4 mr-2 text-primary" />
                   Billing Type *
                 </Label>
-                <div className="flex gap-3">
+                <Div className="flex gap-3">
                   <Button
                     type="button"
                     variant={formData.billingType === 'itemized' ? 'default' : 'outline'}
@@ -432,34 +434,34 @@ export function QuoteModal({
                     <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                     Flat Rate
                   </Button>
-                </div>
-              </div>
+                </Div>
+              </Div>
 
               {/* Itemized Mode: Table */}
               {formData.billingType === 'itemized' && (
                 <>
-                  <div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
-                    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                  <Div className="bg-card/60 backdrop-blur-sm rounded-xl border overflow-hidden">
+                    <Div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                       <Table className="w-full min-w-[600px]">
                         <TableHeader>
                           <TableRow className="bg-gradient-to-r from-warning/10 to-warning/5">
                             <TableHead className="font-semibold ">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                                 Description
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="w-20 font-semibold ">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:Hash" className="w-4 h-4 mr-2" />
                                 Qty
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="w-24 font-semibold ">
-                              <div className="flex items-center">
+                              <Div className="flex items-center">
                                 <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2" />
                                 Price
-                              </div>
+                              </Div>
                             </TableHead>
                             <TableHead className="w-16"></TableHead>
                           </TableRow>
@@ -519,8 +521,8 @@ export function QuoteModal({
                           ))}
                         </TableBody>
                       </Table>
-                    </div>
-                  </div>
+                    </Div>
+                  </Div>
                   <Button type="button" variant="outline" className="mt-2" onClick={addLineItem}>
                     <Icon name="lucide:Plus" className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                     Add Line Item
@@ -530,8 +532,8 @@ export function QuoteModal({
 
               {/* Flat-Rate Mode: Description + Amount */}
               {formData.billingType === 'flat-rate' && (
-                <div className="space-y-4">
-                  <div>
+                <Div className="space-y-4">
+                  <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:FileText" className="w-4 h-4 mr-2 text-primary" />
                       Description *
@@ -544,8 +546,8 @@ export function QuoteModal({
                       rows={6}
                       className="w-full resize-none"
                     />
-                  </div>
-                  <div>
+                  </Div>
+                  <Div>
                     <Label className="text-sm font-medium mb-3 block flex items-center">
                       <Icon name="lucide:DollarSign" className="w-4 h-4 mr-2 text-success" />
                       Amount *
@@ -565,40 +567,40 @@ export function QuoteModal({
                       required
                       className="w-full"
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               )}
-            </div>
+            </Div>
             {/* Totals */}
-            <div className="">
-              <div className="flex items-center mb-3">
+            <Div className="">
+              <Div className="flex items-center mb-3">
                 <Icon name="lucide:Calculator" className="w-4 h-4 mr-2" />
-                <h4 className="font-semibold ">Quote Summary</h4>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-                  <span className="font-medium ">Subtotal:</span>
-                  <span className="font-semibold">
+                <H4 className="font-semibold ">Quote Summary</H4>
+              </Div>
+              <Div className="space-y-2">
+                <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
+                  <Span className="font-medium ">Subtotal:</Span>
+                  <Span className="font-semibold">
                     {subtotal.toFixed(2)} {formData.currency}
-                  </span>
-                </div>
+                  </Span>
+                </Div>
                 {showTaxes && (
-                  <div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
-                    <span className="font-medium ">Tax ({formData.taxRate}%):</span>
-                    <span className="font-semibold">
+                  <Div className="flex justify-between text-sm bg-muted/40 backdrop-blur-sm rounded-lg p-2">
+                    <Span className="font-medium ">Tax ({formData.taxRate}%):</Span>
+                    <Span className="font-semibold">
                       {taxAmount.toFixed(2)} {formData.currency}
-                    </span>
-                  </div>
+                    </Span>
+                  </Div>
                 )}
-                <div className="flex justify-between bg-gradient-quote text-white rounded-lg p-3 shadow">
-                  <span className="font-bold">Total:</span>
-                  <span className="font-bold text-lg">
+                <Div className="flex justify-between bg-gradient-quote text-white rounded-lg p-3 shadow">
+                  <Span className="font-bold">Total:</Span>
+                  <Span className="font-bold text-lg">
                     {total.toFixed(2)} {formData.currency}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div>
+                  </Span>
+                </Div>
+              </Div>
+            </Div>
+            <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileText" className="w-4 h-4 mr-2" />
                 Notes
@@ -610,9 +612,9 @@ export function QuoteModal({
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Additional notes for this quote..."
               />
-            </div>
+            </Div>
 
-            <div>
+            <Div>
               <Label className="text-sm font-medium  mb-3 block flex items-center">
                 <Icon name="lucide:FileCheck" className="w-4 h-4 mr-2 " />
                 Terms & Conditions
@@ -624,21 +626,21 @@ export function QuoteModal({
                 className="w-full px-4 py-3 bg-background/60 backdrop-blur-sm border border-border rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 shadow-sm hover:shadow-md resize-none"
                 placeholder="Quote terms and conditions..."
               />
-            </div>
+            </Div>
           </form>
-        </div>
+        </Div>
 
         {/* AI Assistant Sidebar (when expanded) */}
         {showAIAssistant && (
-          <div className="w-full lg:w-1/3 h-[400px] lg:h-[600px] mt-4 lg:mt-0">
+          <Div className="w-full lg:w-1/3 h-[400px] lg:h-[600px] mt-4 lg:mt-0">
             <InvoiceAIAssistant
               isCollapsed={false}
               onToggle={() => setShowAIAssistant(false)}
               onDataExtracted={handleAIExtraction}
             />
-          </div>
+          </Div>
         )}
-      </div>
+      </Div>
     </Modal>
   )
 }

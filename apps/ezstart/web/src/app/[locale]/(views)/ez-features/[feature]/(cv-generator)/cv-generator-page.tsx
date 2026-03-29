@@ -13,6 +13,7 @@ import {
   Label,
   P,
   Section,
+  Span,
   Spinner,
 } from '@ezstart/ui/components'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
@@ -122,16 +123,16 @@ function CVGeneratorContent() {
 
       {/* Generator Section */}
       <Section size="default">
-        <div className="grid lg:grid-cols-2 gap-6">
+        <Div className="grid lg:grid-cols-2 gap-6">
           {/* Configuration Panel */}
-          <div className="space-y-6">
+          <Div className="space-y-6">
             {/* AI Configuration */}
             <Card variant="elevated">
               <CardHeader>
                 <H3>{t('generator.aiConfig.title')}</H3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
+                <Div className="flex items-center gap-2">
                   <input
                     id="use-ai"
                     type="checkbox"
@@ -142,11 +143,11 @@ function CVGeneratorContent() {
                   <Label htmlFor="use-ai" className="cursor-pointer">
                     {t('generator.aiConfig.useAiLabel')}
                   </Label>
-                </div>
+                </Div>
 
                 {config.useAI && (
                   <>
-                    <div className="space-y-2">
+                    <Div className="space-y-2">
                       <Label htmlFor="job-posting">
                         {t('generator.aiConfig.jobPostingLabel')} *
                       </Label>
@@ -158,9 +159,9 @@ function CVGeneratorContent() {
                         className="w-full h-32 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y"
                         required={config.useAI}
                       />
-                    </div>
+                    </Div>
 
-                    <div className="space-y-2">
+                    <Div className="space-y-2">
                       <Label htmlFor="github-username">{t('generator.aiConfig.githubLabel')}</Label>
                       <Input
                         id="github-username"
@@ -172,12 +173,12 @@ function CVGeneratorContent() {
                           })
                         }
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <P className="text-xs text-muted-foreground">
                         {t('generator.aiConfig.githubHelp')}
-                      </p>
-                    </div>
+                      </P>
+                    </Div>
 
-                    <div className="space-y-2">
+                    <Div className="space-y-2">
                       <Label htmlFor="linkedin-profile">
                         {t('generator.aiConfig.linkedInLabel')}
                       </Label>
@@ -192,9 +193,9 @@ function CVGeneratorContent() {
                           })
                         }
                       />
-                    </div>
+                    </Div>
 
-                    <div className="space-y-2">
+                    <Div className="space-y-2">
                       <Label htmlFor="additional-context">
                         {t('generator.aiConfig.additionalContextLabel')}
                       </Label>
@@ -209,7 +210,7 @@ function CVGeneratorContent() {
                         }
                         className="w-full h-24 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y"
                       />
-                    </div>
+                    </Div>
 
                     <Button
                       onClick={handleAIGenerate}
@@ -219,12 +220,12 @@ function CVGeneratorContent() {
                       {isGenerating ? (
                         <>
                           <Icon name="lucide:Loader2" size={16} spin ariaHidden />
-                          <span className="ml-2">{t('generator.aiConfig.generating')}</span>
+                          <Span className="ml-2">{t('generator.aiConfig.generating')}</Span>
                         </>
                       ) : (
                         <>
                           <Icon name="lucide:Sparkles" size={16} ariaHidden />
-                          <span className="ml-2">{t('generator.aiConfig.generateButton')}</span>
+                          <Span className="ml-2">{t('generator.aiConfig.generateButton')}</Span>
                         </>
                       )}
                     </Button>
@@ -239,7 +240,7 @@ function CVGeneratorContent() {
                 <H3>{t('generator.personalInfo.title')}</H3>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="cv-name">{t('generator.personalInfo.nameLabel')} *</Label>
                   <Input
                     id="cv-name"
@@ -252,9 +253,9 @@ function CVGeneratorContent() {
                     }
                     required
                   />
-                </div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="cv-title">{t('generator.personalInfo.titleLabel')} *</Label>
                   <Input
                     id="cv-title"
@@ -267,10 +268,10 @@ function CVGeneratorContent() {
                     }
                     required
                   />
-                </div>
+                </Div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <Div className="grid grid-cols-2 gap-4">
+                  <Div className="space-y-2">
                     <Label htmlFor="cv-email">{t('generator.personalInfo.emailLabel')}</Label>
                     <Input
                       id="cv-email"
@@ -283,9 +284,9 @@ function CVGeneratorContent() {
                         })
                       }
                     />
-                  </div>
+                  </Div>
 
-                  <div className="space-y-2">
+                  <Div className="space-y-2">
                     <Label htmlFor="cv-phone">{t('generator.personalInfo.phoneLabel')}</Label>
                     <Input
                       id="cv-phone"
@@ -298,10 +299,10 @@ function CVGeneratorContent() {
                         })
                       }
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="cv-location">{t('generator.personalInfo.locationLabel')}</Label>
                   <Input
                     id="cv-location"
@@ -313,10 +314,10 @@ function CVGeneratorContent() {
                       })
                     }
                   />
-                </div>
+                </Div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <Div className="grid grid-cols-2 gap-4">
+                  <Div className="space-y-2">
                     <Label htmlFor="cv-github">{t('generator.personalInfo.githubLabel')}</Label>
                     <Input
                       id="cv-github"
@@ -328,9 +329,9 @@ function CVGeneratorContent() {
                         })
                       }
                     />
-                  </div>
+                  </Div>
 
-                  <div className="space-y-2">
+                  <Div className="space-y-2">
                     <Label htmlFor="cv-linkedin">{t('generator.personalInfo.linkedInLabel')}</Label>
                     <Input
                       id="cv-linkedin"
@@ -342,8 +343,8 @@ function CVGeneratorContent() {
                         })
                       }
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               </CardContent>
             </Card>
 
@@ -353,7 +354,7 @@ function CVGeneratorContent() {
                 <H3>{t('generator.summary.title')}</H3>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="cv-summary">{t('generator.summary.label')}</Label>
                   <textarea
                     id="cv-summary"
@@ -363,11 +364,11 @@ function CVGeneratorContent() {
                     className="w-full h-32 px-3 py-2 bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y"
                   />
                   {config.useAI && (
-                    <p className="text-xs text-muted-foreground">
+                    <P className="text-xs text-muted-foreground">
                       {t('generator.aiConfig.aiOptimizationNote')}
-                    </p>
+                    </P>
                   )}
-                </div>
+                </Div>
               </CardContent>
             </Card>
 
@@ -382,9 +383,9 @@ function CVGeneratorContent() {
                   onSelect={template => updateConfig({ template })}
                 />
 
-                <div className="space-y-2">
+                <Div className="space-y-2">
                   <Label htmlFor="cv-color">{t('generator.design.colorLabel')}</Label>
-                  <div className="flex gap-2">
+                  <Div className="flex gap-2">
                     <input
                       id="cv-color"
                       type="color"
@@ -398,15 +399,15 @@ function CVGeneratorContent() {
                       onChange={e => updateConfig({ primaryColor: e.target.value })}
                       className="flex-1"
                     />
-                  </div>
-                </div>
+                  </Div>
+                </Div>
               </CardContent>
             </Card>
 
             <Button onClick={handleReset} variant="outline" className="w-full">
               {t('generator.resetButton')}
             </Button>
-          </div>
+          </Div>
 
           {/* Preview Panel */}
           <Card variant="elevated" className="lg:sticky lg:top-6 h-fit">
@@ -417,7 +418,7 @@ function CVGeneratorContent() {
               <CVPreview data={data} config={config} />
             </CardContent>
           </Card>
-        </div>
+        </Div>
       </Section>
 
       {/* Features Section */}
@@ -425,7 +426,7 @@ function CVGeneratorContent() {
         <Div layout="center">
           <H3>{t('features.title')}</H3>
           <P className="text-muted-foreground mb-6">{t('features.description')}</P>
-          <div className="grid md:grid-cols-3 gap-4">
+          <Div className="grid md:grid-cols-3 gap-4">
             <Card variant="outline">
               <CardContent className="text-center py-6 space-y-2">
                 <Icon name="lucide:Sparkles" className="w-8 h-8 mx-auto text-primary" />
@@ -453,7 +454,7 @@ function CVGeneratorContent() {
                 </P>
               </CardContent>
             </Card>
-          </div>
+          </Div>
         </Div>
       </Section>
     </>

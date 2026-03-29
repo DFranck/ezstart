@@ -2,7 +2,7 @@
 
 import { useUserStore } from '@/stores/useUserStore'
 import { logger } from '@ezstart/logger'
-import { Icon, Input, Span } from '@ezstart/ui/components'
+import { Icon, Input, Span, Div } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -66,7 +66,7 @@ export function LoginSection() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <Div className="flex flex-col gap-4">
       {!user ? (
         <form
           onSubmit={e => {
@@ -94,15 +94,15 @@ export function LoginSection() {
           </LoadingButton>
         </form>
       ) : (
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3 p-4 bg-success/10 border border-success/20 rounded-xl">
-            <div className="w-8 h-8 bg-gradient-payment rounded-lg flex items-center justify-center">
+        <Div className="text-center space-y-4">
+          <Div className="flex items-center justify-center gap-3 p-4 bg-success/10 border border-success/20 rounded-xl">
+            <Div className="w-8 h-8 bg-gradient-payment rounded-lg flex items-center justify-center">
               <Icon name="lucide:Check" className="w-4 h-4 text-white" />
-            </div>
+            </Div>
             <Span className="text-lg font-semibold text-success">
               {t('connectedAs', { username: user.username })}
             </Span>
-          </div>
+          </Div>
           <LoadingButton
             variant="outline"
             onClick={handleLogout}
@@ -111,8 +111,8 @@ export function LoginSection() {
             <Icon name="lucide:LogOut" className="w-4 h-4 mr-2" />
             {tAuth('logout')}
           </LoadingButton>
-        </div>
+        </Div>
       )}
-    </div>
+    </Div>
   )
 }

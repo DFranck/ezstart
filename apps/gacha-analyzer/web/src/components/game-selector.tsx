@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div } from '@ezstart/ui/components'
+import { Button, Div, Span } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import type { GameType } from '@gacha-analyzer/types'
@@ -11,17 +11,14 @@ interface GameSelectorProps {
   onChange: (game: GameType) => void
 }
 
-const games: { type: GameType }[] = [
-  { type: 'summoners-war' },
-  { type: 'nikke' },
-]
+const games: { type: GameType }[] = [{ type: 'summoners-war' }, { type: 'nikke' }]
 
 export function GameSelector({ value, onChange }: GameSelectorProps) {
   const t = useTranslations('games')
 
   return (
     <Div className="flex gap-3">
-      {games.map((game) => (
+      {games.map(game => (
         <Button
           key={game.type}
           variant={value === game.type ? 'default' : 'outline'}
@@ -37,7 +34,7 @@ export function GameSelector({ value, onChange }: GameSelectorProps) {
             style={{ width: 'auto', height: 'auto' }}
             className="max-h-[24px] object-contain [filter:drop-shadow(0_0_6px_rgba(255,255,255,0.8))_drop-shadow(0_0_16px_rgba(255,255,255,0.3))]"
           />
-          <span className="sr-only">{t(game.type)}</span>
+          <Span className="sr-only">{t(game.type)}</Span>
         </Button>
       ))}
     </Div>

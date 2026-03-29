@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Div,
   H1,
   P,
   Section,
@@ -27,7 +28,7 @@ const CreateWorkspaceDialog = dynamic(
       default: mod.CreateWorkspaceDialog,
     })),
   {
-    loading: () => <div className="animate-pulse bg-muted rounded h-10 w-40" />,
+    loading: () => <Div className="animate-pulse bg-muted rounded h-10 w-40" />,
   }
 )
 
@@ -67,15 +68,15 @@ function DashboardContent(): any {
       />
 
       <Section size={'xl'} className="mt-20">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+        <Div>
+          <Div className="flex items-center gap-3 mb-2">
             <H1 size="h2">📋 {t('title')}</H1>
             <Badge variant="secondary" className="text-xs">
               {t('underDevelopment')}
             </Badge>
-          </div>
+          </Div>
           <P className="text-muted-foreground">{t('description')}</P>
-        </div>
+        </Div>
 
         <CreateWorkspaceDialog />
       </Section>
@@ -89,20 +90,20 @@ function DashboardContent(): any {
 
 function WorkspacesListSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <Div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {[1, 2, 3].map(i => (
         <Card key={i}>
           <CardHeader>
-            <div className="h-6 w-3/4 bg-muted rounded mb-2 animate-pulse" />
-            <div className="h-4 w-full bg-muted rounded animate-pulse" />
+            <Div className="h-6 w-3/4 bg-muted rounded mb-2 animate-pulse" />
+            <Div className="h-4 w-full bg-muted rounded animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="h-4 w-1/2 bg-muted rounded mb-2 animate-pulse" />
-            <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+            <Div className="h-4 w-1/2 bg-muted rounded mb-2 animate-pulse" />
+            <Div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
           </CardContent>
         </Card>
       ))}
-    </div>
+    </Div>
   )
 }
 

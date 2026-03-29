@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Div, H2, Hero, Icon, Main, P, Section } from '@ezstart/ui/components'
+import { Button, Div, H2, Hero, Icon, Main, P, Section, Span } from '@ezstart/ui/components'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -10,12 +10,12 @@ export default function Page(): any {
       {/* Hero Section */}
       <Hero
         title="Solutions environnementales pensées et créées pour vous"
-        subtitle={<span style={{ fontFamily: `'Cambria', Georgia, serif` }}>ASC</span>}
+        subtitle={<Span style={{ fontFamily: `'Cambria', Georgia, serif` }}>ASC</Span>}
         imageSrc="/images/hero-home.jpg"
         paragraph={
-          <span className="italic font-light mt-2 text-white">
+          <Span className="italic font-light mt-2 text-white">
             "Ne coupons plus les arbres, transplantons les"
-          </span>
+          </Span>
         }
         // overlay={false}
       />

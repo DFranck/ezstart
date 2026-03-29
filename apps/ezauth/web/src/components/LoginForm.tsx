@@ -3,6 +3,7 @@
 import type { LoginRequest } from '@ezstart/auth-sdk'
 import {
   Button,
+  Div,
   Form,
   FormControl,
   FormField,
@@ -88,9 +89,9 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
         {error && (
-          <div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
+          <Div className="bg-destructive/15 border border-destructive/50 text-destructive px-4 py-3 rounded-md">
             {error}
-          </div>
+          </Div>
         )}
 
         <FormField

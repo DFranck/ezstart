@@ -3,13 +3,14 @@ import type { ZodObject, ZodTypeAny } from 'zod'
 
 export function checkMissingDescriptions(schema: ZodTypeAny, name: string) {
   // Si ce n’est pas un ZodObject → on ignore
-  if ((schema as any)?._def?.typeName !== 'ZodObject') return
+  if ((schema as ZodTypeAny & { _def?: { typeName?: string } })?._def?.typeName !== 'ZodObject')
+    return
 
-  const shape = (schema as ZodObject<any>)?.shape ?? {}
+  const shape = (schema as ZodObject<Record<string, ZodTypeAny>>)?.shape ?? {}
   const missing: string[] = []
 
   for (const key in shape) {
-    const field: any = shape[key]
+    const field = shape[key] as ZodTypeAny & { _def?: { description?: string } }
     const desc = field._def?.description
 
     if (!desc || desc.trim().length === 0) {

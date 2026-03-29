@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Div,
   P,
   Span,
 } from '@ezstart/ui/components'
@@ -21,9 +22,12 @@ import { Suspense } from 'react'
 // Dynamic import for RegisterForm (182 lines)
 // Form is only shown after user clicks "Sign up with email"
 // Reduces initial bundle size
-const RegisterForm = dynamic(() => import('@/components/RegisterForm').then(mod => ({ default: mod.RegisterForm })), {
-  loading: () => <div className="animate-pulse bg-muted rounded h-32" />,
-})
+const RegisterForm = dynamic(
+  () => import('@/components/RegisterForm').then(mod => ({ default: mod.RegisterForm })),
+  {
+    loading: () => <Div className="animate-pulse bg-muted rounded h-32" />,
+  }
+)
 
 function RegisterContent() {
   const searchParams = useSearchParams()
@@ -32,16 +36,17 @@ function RegisterContent() {
 
   return (
     <Card className="max-w-md w-full relative">
-      <div className="absolute top-4 left-4">
+      <Div className="absolute top-4 left-4">
         <BackButton />
-      </div>
-      <div className="absolute top-4 right-4">
+      </Div>
+      <Div className="absolute top-4 right-4">
         <ThemeSwitcher />
-      </div>
+      </Div>
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-2xl md:text-3xl font-bold">EZAuth</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Create account to access <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
+          Create account to access{' '}
+          <Span className={`${theme.primaryColor} font-medium`}>{theme.name}</Span>
         </CardDescription>
         {theme.showEzstartMessage && (
           <P variant={'description'} size={'xs'} className="hidden md:block">
@@ -57,7 +62,7 @@ function RegisterContent() {
         {/* Classic Email/Password Form */}
         <RegisterForm app={app} redirect_uri={searchParams.get('redirect_uri')} />
 
-        <div className="text-center">
+        <Div className="text-center">
           <P size={'xs'}>
             Already have an account?{' '}
             <Link
@@ -67,7 +72,7 @@ function RegisterContent() {
               Sign in
             </Link>
           </P>
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )
@@ -75,7 +80,7 @@ function RegisterContent() {
 
 export default function RegisterPage(): any {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Div>Loading...</Div>}>
       <RegisterContent />
     </Suspense>
   )

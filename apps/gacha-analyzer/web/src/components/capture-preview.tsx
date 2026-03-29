@@ -1,6 +1,16 @@
 'use client'
 
-import { Button, Card, Div, P, Tabs, TabsContent, TabsList, TabsTrigger } from '@ezstart/ui/components'
+import {
+  Button,
+  Card,
+  Div,
+  P,
+  Span,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RoiRect } from './roi-selector'
@@ -54,16 +64,16 @@ interface CapturePreviewProps {
   extraButtons?: React.ReactNode
 }
 
-const MIN_ZOOM = 5   // minimum ROI size = 5% of source
-const MAX_ZOOM = 100  // maximum ROI size = 100% of source
+const MIN_ZOOM = 5 // minimum ROI size = 5% of source
+const MAX_ZOOM = 100 // maximum ROI size = 100% of source
 
-const MIN_VP_SIZE = 10  // minimum viewport size = 10% (zoom 10x)
+const MIN_VP_SIZE = 10 // minimum viewport size = 10% (zoom 10x)
 const MAX_VP_SIZE = 100 // maximum viewport size = 100% (no zoom)
 
 interface ViewPort {
-  x: number      // % of source window (0-100)
+  x: number // % of source window (0-100)
   y: number
-  width: number  // % visible (100 = all, 50 = zoom 2x, 25 = zoom 4x)
+  width: number // % visible (100 = all, 50 = zoom 2x, 25 = zoom 4x)
   height: number
 }
 
@@ -550,34 +560,37 @@ export function CapturePreview({
   }, [])
 
   // Preview resize handlers
-  const startPreviewResize = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    isResizingRef.current = true
-    resizeStartYRef.current = e.clientY
-    resizeStartHeightRef.current = previewHeight
+  const startPreviewResize = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      isResizingRef.current = true
+      resizeStartYRef.current = e.clientY
+      resizeStartHeightRef.current = previewHeight
 
-    function handleMouseMove(ev: MouseEvent) {
-      if (!isResizingRef.current) return
-      const delta = ev.clientY - resizeStartYRef.current
-      const newHeight = Math.max(150, Math.min(1200, resizeStartHeightRef.current + delta))
-      setPreviewHeight(newHeight)
-    }
+      function handleMouseMove(ev: MouseEvent) {
+        if (!isResizingRef.current) return
+        const delta = ev.clientY - resizeStartYRef.current
+        const newHeight = Math.max(150, Math.min(1200, resizeStartHeightRef.current + delta))
+        setPreviewHeight(newHeight)
+      }
 
-    function handleMouseUp() {
-      if (!isResizingRef.current) return
-      isResizingRef.current = false
-      setPreviewHeight(prev => {
-        localStorage.setItem(PREVIEW_HEIGHT_KEY, String(prev))
-        return prev
-      })
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
+      function handleMouseUp() {
+        if (!isResizingRef.current) return
+        isResizingRef.current = false
+        setPreviewHeight(prev => {
+          localStorage.setItem(PREVIEW_HEIGHT_KEY, String(prev))
+          return prev
+        })
+        window.removeEventListener('mousemove', handleMouseMove)
+        window.removeEventListener('mouseup', handleMouseUp)
+      }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
-  }, [previewHeight])
+      window.addEventListener('mousemove', handleMouseMove)
+      window.addEventListener('mouseup', handleMouseUp)
+    },
+    [previewHeight]
+  )
 
   // Zoom button handlers
   const handleZoomIn = useCallback(() => {
@@ -633,7 +646,7 @@ export function CapturePreview({
 
   // Compute zoom percentage (100% = full window, smaller = more zoomed in)
   const zoomPercent = roi ? Math.round(roi.width) : 100
-  const fullZoomPercent = Math.round(100 / viewPort.width * 100)
+  const fullZoomPercent = Math.round((100 / viewPort.width) * 100)
   const isFullZoomed = viewPort.width < 100
 
   if (!isSupported) {
@@ -647,7 +660,11 @@ export function CapturePreview({
   // Zoom canvas with overlays (shared between both views)
   const zoomCanvas = (
     <Card className="bg-muted">
-      <div ref={containerRef} className="relative overflow-hidden" style={{ height: effectiveHeight }}>
+      <Div
+        ref={containerRef}
+        className="relative overflow-hidden"
+        style={{ height: effectiveHeight }}
+      >
         <canvas
           ref={canvasRef}
           className="w-full block"
@@ -655,11 +672,7 @@ export function CapturePreview({
         />
         {/* Multi-zone overlay on zoom view */}
         {zones && onZonesChange && (
-          <MultiZoneSelector
-            onChange={onZonesChange}
-            initialZones={zones}
-            locked={zonesLocked}
-          />
+          <MultiZoneSelector onChange={onZonesChange} initialZones={zones} locked={zonesLocked} />
         )}
         {/* Blackout mask overlay on zoom view */}
         {masks && onMasksChange && onMaskAdd && onMaskRemove && (
@@ -674,7 +687,7 @@ export function CapturePreview({
         )}
         {/* Zoom indicator + buttons — hidden when zoom is disabled or compact */}
         {!disableZoom && !compact && (
-          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
+          <Div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1">
             <button
               type="button"
               onClick={handleZoomOut}
@@ -683,9 +696,9 @@ export function CapturePreview({
             >
               -
             </button>
-            <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+            <Span className="text-white text-xs font-mono min-w-[3rem] text-center">
               {t('capture.zoom')}: {zoomPercent}%
-            </span>
+            </Span>
             <button
               type="button"
               onClick={handleZoomIn}
@@ -694,11 +707,11 @@ export function CapturePreview({
             >
               +
             </button>
-          </div>
+          </Div>
         )}
         {/* Resize handle — bottom-right corner, hidden in compact mode */}
         {!compact && (
-          <div
+          <Div
             className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
             onMouseDown={startPreviewResize}
             style={{
@@ -707,7 +720,7 @@ export function CapturePreview({
             }}
           />
         )}
-      </div>
+      </Div>
     </Card>
   )
 
@@ -719,7 +732,7 @@ export function CapturePreview({
   // Full canvas with ROI selector + zones + masks + viewport zoom
   const fullCanvas = (
     <Card className="bg-muted">
-      <div
+      <Div
         ref={fullContainerRef}
         className="relative overflow-hidden"
         style={{
@@ -728,7 +741,7 @@ export function CapturePreview({
         }}
       >
         {/* Scaled inner container — CSS transform handles the viewport zoom */}
-        <div
+        <Div
           style={{
             transform: `scale(${vpScale}) translate(${vpTranslateX}%, ${vpTranslateY}%)`,
             transformOrigin: 'top left',
@@ -745,11 +758,7 @@ export function CapturePreview({
             style={{ height: effectiveHeight, pointerEvents: 'none' }}
           />
           {roi && onRoiChange && (
-            <RoiSelector
-              onChange={onRoiChange}
-              initialRoi={roi}
-              locked={zonesLocked}
-            />
+            <RoiSelector onChange={onRoiChange} initialRoi={roi} locked={zonesLocked} />
           )}
           {/* Multi-zone overlay on full view — positions are relative to the ROI */}
           {zones && onZonesChange && roi && (
@@ -772,10 +781,10 @@ export function CapturePreview({
               maskColor={maskColor}
             />
           )}
-        </div>
+        </Div>
         {/* Zoom controls for full view — hidden in compact mode */}
         {!disableZoom && !compact && (
-          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1 z-40">
+          <Div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 rounded-md px-2 py-1 z-40">
             <button
               type="button"
               onClick={handleFullZoomOut}
@@ -784,9 +793,9 @@ export function CapturePreview({
             >
               -
             </button>
-            <span className="text-white text-xs font-mono min-w-[3rem] text-center">
+            <Span className="text-white text-xs font-mono min-w-[3rem] text-center">
               {fullZoomPercent}%
-            </span>
+            </Span>
             <button
               type="button"
               onClick={handleFullZoomIn}
@@ -805,11 +814,11 @@ export function CapturePreview({
                 1:1
               </button>
             )}
-          </div>
+          </Div>
         )}
         {/* Resize handle — bottom-right corner, hidden in compact mode */}
         {!compact && (
-          <div
+          <Div
             className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50"
             onMouseDown={startPreviewResize}
             style={{
@@ -818,7 +827,7 @@ export function CapturePreview({
             }}
           />
         )}
-      </div>
+      </Div>
     </Card>
   )
 
@@ -832,12 +841,8 @@ export function CapturePreview({
               <TabsTrigger value="zoom">{t('capture.zoomView')}</TabsTrigger>
               <TabsTrigger value="full">{t('capture.fullView')}</TabsTrigger>
             </TabsList>
-            <TabsContent value="zoom">
-              {zoomCanvas}
-            </TabsContent>
-            <TabsContent value="full">
-              {fullCanvas}
-            </TabsContent>
+            <TabsContent value="zoom">{zoomCanvas}</TabsContent>
+            <TabsContent value="full">{fullCanvas}</TabsContent>
           </Tabs>
         ) : mode === 'full' ? (
           fullCanvas
@@ -847,7 +852,22 @@ export function CapturePreview({
       ) : (
         <Card className="bg-muted border-dashed border-2 border-border">
           <Div className="aspect-video flex flex-col items-center justify-center gap-3 px-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/40"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" x2="3" y1="12" y2="12" /></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-muted-foreground/40"
+            >
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" x2="3" y1="12" y2="12" />
+            </svg>
             <P className="text-muted-foreground text-sm text-center">{t('capture.selectWindow')}</P>
           </Div>
         </Card>
@@ -857,8 +877,12 @@ export function CapturePreview({
       {!compact && isCapturing && currentFrame && (mode !== 'full' || isFullZoomed) && (
         <P className="text-xs text-muted-foreground">
           {mode === 'full' || (mode === 'both' && activeTab === 'full')
-            ? (disableZoom ? t('capture.fullPanHintOnly') : t('capture.fullPanHint'))
-            : (disableZoom ? t('capture.dragToNavigateOnly') : t('capture.dragToNavigate'))}
+            ? disableZoom
+              ? t('capture.fullPanHintOnly')
+              : t('capture.fullPanHint')
+            : disableZoom
+              ? t('capture.dragToNavigateOnly')
+              : t('capture.dragToNavigate')}
         </P>
       )}
 
@@ -871,27 +895,34 @@ export function CapturePreview({
             />
             <P className={`text-sm ${statusColor}`}>{statusText()}</P>
           </Div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onStop}
-            className="text-xs"
-          >
+          <Button size="sm" variant="outline" onClick={onStop} className="text-xs">
             {t('capture.stop')}
           </Button>
         </Div>
       ) : (
         <>
-          {error && (
-            <P className={`text-sm ${statusColor}`}>{statusText()}</P>
-          )}
+          {error && <P className={`text-sm ${statusColor}`}>{statusText()}</P>}
           <Div className="flex items-center gap-2">
             <Button
               className="flex-1 h-12 text-base font-semibold"
               variant="default"
               onClick={onStart}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" />
+              </svg>
               {t('capture.start')}
             </Button>
             {extraButtons}

@@ -5,7 +5,7 @@ import { ThemeProvider as NextThemesProvider, type Attribute } from 'next-themes
 import { ThemeSelectorProvider } from './theme-selector-context'
 
 export interface ThemeProviderProps {
-  children: any
+  children: React.ReactNode
   defaultTheme?: string
   storageKey?: string
   enableSystem?: boolean

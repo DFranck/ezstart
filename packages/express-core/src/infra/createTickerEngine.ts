@@ -14,6 +14,7 @@ type GameRoom<State> = {
 }
 
 const defaultInterval = 100
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rooms = new Map<string, GameRoom<any>>()
 
 export function createTickerEngine<State>(opts: TickerOptions<State>) {

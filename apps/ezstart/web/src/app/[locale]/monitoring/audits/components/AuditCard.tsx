@@ -1,7 +1,19 @@
 'use client'
 
 import type { AuditType } from '@ezstart/monitoring'
-import { Badge, Card, CardContent, CardHeader, H3, Icon, P } from '@ezstart/ui/components'
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  Div,
+  H3,
+  Icon,
+  LI,
+  P,
+  Span,
+  UL,
+} from '@ezstart/ui/components'
 
 interface AuditCardProps {
   audit: {
@@ -42,20 +54,20 @@ export function AuditCard({ audit }: AuditCardProps) {
   return (
     <Card variant="floating" className="hover:border-primary/50 transition-colors">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+        <Div className="flex items-start justify-between">
+          <Div className="flex-1">
             <H3 size="h5" className="mb-1">
               {audit.emoji} {audit.name}
             </H3>
             <P className="text-sm text-muted-foreground">{audit.description}</P>
-          </div>
+          </Div>
           <Badge className={getStatusColor()}>{audit.status}</Badge>
-        </div>
+        </Div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <Div className="space-y-4">
           {/* Score + Last Updated */}
-          <div className="flex items-center justify-between pb-3 border-b border-border">
+          <Div className="flex items-center justify-between pb-3 border-b border-border">
             {audit.score !== null ? (
               <>
                 <P className="text-sm text-muted-foreground">Score</P>
@@ -64,78 +76,87 @@ export function AuditCard({ audit }: AuditCardProps) {
                 </P>
               </>
             ) : (
-              <div className="flex items-center justify-center w-full p-2 bg-muted/50 rounded-md">
+              <Div className="flex items-center justify-center w-full p-2 bg-muted/50 rounded-md">
                 <P className="text-sm text-muted-foreground">Not audited yet</P>
-              </div>
+              </Div>
             )}
-          </div>
+          </Div>
 
           {audit.lastUpdated && (
-            <div className="flex items-center justify-between text-sm pb-3 border-b border-border">
+            <Div className="flex items-center justify-between text-sm pb-3 border-b border-border">
               <P className="text-muted-foreground">Last Updated</P>
               <P className="font-medium">{new Date(audit.lastUpdated).toLocaleDateString()}</P>
-            </div>
+            </Div>
           )}
 
           {/* WHY explanation */}
           {audit.why && (
-            <div className="space-y-2">
+            <Div className="space-y-2">
               <P className="text-sm font-medium text-foreground">📊 Analysis</P>
               <P className="text-sm text-muted-foreground leading-relaxed">{audit.why}</P>
-            </div>
+            </Div>
           )}
 
           {/* Audited items (completed) */}
           {audit.audited && audit.audited.length > 0 && (
-            <div className="space-y-2">
+            <Div className="space-y-2">
               <P className="text-sm font-medium text-status-healthy">✅ Audited</P>
-              <ul className="space-y-1">
+              <UL className="space-y-1">
                 {audit.audited.map((item, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <Icon name="lucide:Check" className="w-4 h-4 text-status-healthy mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                  </li>
+                  <LI key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <Icon
+                      name="lucide:Check"
+                      className="w-4 h-4 text-status-healthy mt-0.5 flex-shrink-0"
+                    />
+                    <Span>{item}</Span>
+                  </LI>
                 ))}
-              </ul>
-            </div>
+              </UL>
+            </Div>
           )}
 
           {/* Not Audited items (gaps) */}
           {audit.notAudited && audit.notAudited.length > 0 && (
-            <div className="space-y-2">
+            <Div className="space-y-2">
               <P className="text-sm font-medium text-status-degraded">⚠️ Not Audited</P>
-              <ul className="space-y-1">
+              <UL className="space-y-1">
                 {audit.notAudited.map((item, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <Icon name="lucide:X" className="w-4 h-4 text-status-degraded mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                  </li>
+                  <LI key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <Icon
+                      name="lucide:X"
+                      className="w-4 h-4 text-status-degraded mt-0.5 flex-shrink-0"
+                    />
+                    <Span>{item}</Span>
+                  </LI>
                 ))}
-              </ul>
-            </div>
+              </UL>
+            </Div>
           )}
 
           {/* Next Steps */}
           {audit.nextSteps && audit.nextSteps.length > 0 && (
-            <div className="space-y-2">
+            <Div className="space-y-2">
               <P className="text-sm font-medium text-primary">🎯 Next Steps</P>
-              <ul className="space-y-1">
+              <UL className="space-y-1">
                 {audit.nextSteps.map((step, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <Icon name="lucide:ArrowRight" className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>{step}</span>
-                  </li>
+                  <LI key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <Icon
+                      name="lucide:ArrowRight"
+                      className="w-4 h-4 text-primary mt-0.5 flex-shrink-0"
+                    />
+                    <Span>{step}</Span>
+                  </LI>
                 ))}
-              </ul>
-            </div>
+              </UL>
+            </Div>
           )}
 
           {!audit.exists && (
-            <div className="p-2 bg-status-degraded/10 rounded-md">
+            <Div className="p-2 bg-status-degraded/10 rounded-md">
               <P className="text-xs text-status-degraded">Audit data not found</P>
-            </div>
+            </Div>
           )}
-        </div>
+        </Div>
       </CardContent>
     </Card>
   )
