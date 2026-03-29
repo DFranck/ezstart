@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Div, H2, Icon, Input, Label, Modal, P, TextArea } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { usePay } from '../provider.js'
 import { DonateButton } from './DonateButton.js'
@@ -94,7 +95,7 @@ export function DonateModal({
         window.location.href = result.checkoutUrl
       }
     } catch (error) {
-      console.error('Donation failed:', error)
+      logger.error('Donation failed:', error)
     }
   }
 

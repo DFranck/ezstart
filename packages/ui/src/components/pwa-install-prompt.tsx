@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useEffect, useState } from 'react'
 import { Badge } from './badge'
 import { Button } from './button'
@@ -87,13 +88,13 @@ export function PWAInstallPrompt({
       const { outcome } = await deferredPrompt.userChoice
 
       if (outcome === 'accepted') {
-        console.log(`PWA ${appName} installed successfully!`)
+        logger.info(`PWA ${appName} installed successfully!`)
         setIsInstalled(true)
       } else {
-        console.log(`PWA ${appName} installation cancelled`)
+        logger.info(`PWA ${appName} installation cancelled`)
       }
     } catch (error) {
-      console.error('Error installing PWA:', error)
+      logger.error('Error installing PWA:', error)
     }
 
     setDeferredPrompt(null)

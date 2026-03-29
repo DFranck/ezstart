@@ -1,4 +1,11 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
@@ -10,21 +17,24 @@ const docRouter = createRouterWithDoc(waitlistAddRegistry, router)
 
 // Schemas for validation and documentation
 const addEmailSchema = z.object({
-  email: z.string().email('Invalid email format').describe('Email address to add to the waitlist')
+  email: z.string().email('Invalid email format').describe('Email address to add to the waitlist'),
 })
 
 const waitlistResponseSchema = z.object({
   success: z.boolean().describe('Indicates if the operation was successful'),
   message: z.string().optional().describe('Optional success message'),
-  alreadyExists: z.boolean().optional().describe('Indicates if the email was already in the waitlist'),
+  alreadyExists: z
+    .boolean()
+    .optional()
+    .describe('Indicates if the email was already in the waitlist'),
   count: z.number().describe('Total number of emails in the waitlist'),
   appName: z.string().optional().describe('Name of the application'),
-  emails: z.array(z.string()).optional().describe('List of emails in the waitlist (admin only)')
+  emails: z.array(z.string()).optional().describe('List of emails in the waitlist (admin only)'),
 })
 
 const errorSchema = z.object({
   success: z.literal(false).describe('Always false for error responses'),
-  error: z.string().describe('Error message explaining what went wrong')
+  error: z.string().describe('Error message explaining what went wrong'),
 })
 
 // Add email to waitlist for an app
@@ -47,7 +57,7 @@ const addEmailController = async (req: any, res: any) => {
     if (!waitlist) {
       waitlist = new WaitlistModel({
         appName,
-        emails: []
+        emails: [],
       })
     }
 
@@ -56,12 +66,7 @@ const addEmailController = async (req: any, res: any) => {
     const existingEntry = waitlist.findEntryByEmail(emailLower)
 
     if (existingEntry) {
-      return res.status(409).json({
-        success: false,
-        error: 'Email already registered',
-        code: 'EMAIL_EXISTS',
-        count: waitlist.emails.length
-      })
+      return sendError(res, 'Email already registered', 409)
     }
 
     // Add email with default status 'pending'
@@ -73,14 +78,14 @@ const addEmailController = async (req: any, res: any) => {
       invitedBy: null,
       activatedAt: null,
       notes: '',
-      addedAt: new Date()
+      addedAt: new Date(),
     })
     await waitlist.save()
 
-    res.status(201).json({
-      success: true,
+    res.status(201)
+    sendSuccess(res, {
       message: 'Successfully added to waitlist',
-      count: waitlist.emails.length
+      count: waitlist.emails.length,
     })
   } catch (error) {
     logger.error('Error adding to waitlist:', error)
@@ -97,8 +102,8 @@ docRouter.post('/:appName/add', addEmailController, {
   extraResponses: {
     400: { description: 'Invalid email', schema: errorSchema },
     409: { description: 'Email already exists', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

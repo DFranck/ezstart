@@ -29,6 +29,7 @@
   ],
   "dependencies": {
     "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "zod": "^3.23.8"
   },
   "peerDependencies": {

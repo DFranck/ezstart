@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { z } from 'zod'
@@ -11,7 +17,10 @@ const docRouter = createRouterWithDoc(checkStatusRegistry, router)
 // Schemas
 const checkStatusResponseSchema = z.object({
   found: z.boolean().describe('Whether email was found in waitlist'),
-  status: z.enum(['pending', 'invited', 'activated', 'rejected']).optional().describe('Current status'),
+  status: z
+    .enum(['pending', 'invited', 'activated', 'rejected'])
+    .optional()
+    .describe('Current status'),
   accessCode: z.string().optional().describe('Access code if invited'),
   appName: z.string().describe('Application name'),
 })
@@ -31,7 +40,7 @@ const checkStatusController = async (req: any, res: any) => {
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {
-      return res.json({
+      return sendSuccess(res, {
         found: false,
         appName,
       })
@@ -40,13 +49,13 @@ const checkStatusController = async (req: any, res: any) => {
     const entry = waitlist.findEntryByEmail(email)
 
     if (!entry) {
-      return res.json({
+      return sendSuccess(res, {
         found: false,
         appName,
       })
     }
 
-    res.json({
+    sendSuccess(res, {
       found: true,
       status: entry.status,
       accessCode: entry.status === 'invited' ? entry.accessCode : undefined,
@@ -54,10 +63,7 @@ const checkStatusController = async (req: any, res: any) => {
     })
   } catch (error) {
     logger.error('Error checking waitlist status:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to check status'
-    })
+    sendError(res, 'Failed to check status', 500)
   }
 }
 
@@ -66,8 +72,8 @@ docRouter.get('/:appName/status/:email', checkStatusController, {
   tags: ['Waitlist'],
   responseSchema: checkStatusResponseSchema,
   extraResponses: {
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

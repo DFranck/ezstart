@@ -1,11 +1,12 @@
-import { Request, Response } from 'express';
-import { sendSuccess, sendError } from '../helpers/api-response.js';
+import { Request, Response } from 'express'
+import { logger } from '@ezstart/logger/server'
+import { sendSuccess, sendError } from '../helpers/api-response.js'
 
 type DeleteControllerOptions = {
-  statusCode?: number;
-  sendBody?: boolean;
-  validateId?: (id: string) => boolean;
-};
+  statusCode?: number
+  sendBody?: boolean
+  validateId?: (id: string) => boolean
+}
 
 export function makeDeleteController<T>(
   service: (id: string) => Promise<T | null>,
@@ -16,30 +17,30 @@ export function makeDeleteController<T>(
     statusCode = 204,
     sendBody = false,
     validateId, // facultatif
-  } = options;
+  } = options
 
   return async (req: Request, res: Response) => {
-    const id = req.params.id;
+    const id = req.params.id
 
     if (!id || (validateId && !validateId(id))) {
-      return sendError(res, 'Invalid ID', 400);
+      return sendError(res, 'Invalid ID', 400)
     }
 
     try {
-      const deleted = await service(id);
+      const deleted = await service(id)
 
       if (!deleted) {
-        return sendError(res, `${label} not found`, 404);
+        return sendError(res, `${label} not found`, 404)
       }
 
       if (sendBody) {
-        return res.status(statusCode).json({ success: true, data: deleted });
+        return res.status(statusCode).json({ success: true, data: deleted })
       } else {
-        return res.status(statusCode).send();
+        return res.status(statusCode).send()
       }
     } catch (err) {
-      console.error(`[${label}]`, err);
-      return sendError(res, `Failed to delete ${label}`);
+      logger.error(`[${label}]`, err)
+      return sendError(res, `Failed to delete ${label}`)
     }
-  };
+  }
 }

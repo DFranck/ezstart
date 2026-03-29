@@ -1,4 +1,5 @@
 import { getPort, type AppName } from '@ezstart/config'
+import { logger } from '@ezstart/logger/server'
 
 /**
  * Get the port for an API service
@@ -25,7 +26,10 @@ export function getApiPort(appName: AppName): number {
   try {
     return getPort(appName, 'api')
   } catch (error) {
-    console.error(`❌ Failed to get port for ${appName}:`, error instanceof Error ? error.message : 'Unknown error')
+    logger.error(
+      `❌ Failed to get port for ${appName}:`,
+      error instanceof Error ? error.message : 'Unknown error'
+    )
     throw error
   }
 }

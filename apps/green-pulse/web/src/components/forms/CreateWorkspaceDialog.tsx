@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { logger } from '@ezstart/logger'
 import { Button, Input, Label, TextArea, P, Modal } from '@ezstart/ui/components'
 import { useCreateWorkspace } from '@/hooks/useWorkspaces'
 
@@ -28,7 +29,7 @@ export function CreateWorkspaceDialog() {
       setDescription('')
       setOpen(false)
     } catch (error) {
-      console.error('Failed to create workspace:', error)
+      logger.error('Failed to create workspace:', error)
     }
   }
 
@@ -36,7 +37,12 @@ export function CreateWorkspaceDialog() {
     setName(value)
     // Auto-generate slug from name
     if (!slug || slug === name.toLowerCase().replace(/\s+/g, '-')) {
-      setSlug(value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
+      setSlug(
+        value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+      )
     }
   }
 
@@ -54,11 +60,7 @@ export function CreateWorkspaceDialog() {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              form="create-workspace-form"
-              disabled={createWorkspace.isPending}
-            >
+            <Button type="submit" form="create-workspace-form" disabled={createWorkspace.isPending}>
               {createWorkspace.isPending ? 'Creating...' : 'Create Workspace'}
             </Button>
           </>
@@ -96,7 +98,7 @@ export function CreateWorkspaceDialog() {
             {createWorkspace.error && (
               <P className="text-xs text-destructive mt-1">
                 {(createWorkspace.error as any)?.message?.includes('409') ||
-                 (createWorkspace.error as any)?.message?.includes('already exists')
+                (createWorkspace.error as any)?.message?.includes('already exists')
                   ? `Slug "${slug}" is already taken. Please try another.`
                   : (createWorkspace.error as any)?.message || 'Failed to create workspace'}
               </P>

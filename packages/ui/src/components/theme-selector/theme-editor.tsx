@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { runWithFeedback } from '../../utils'
 import { Button } from '../button'
@@ -125,7 +126,7 @@ export function ThemeEditor({
       toastSuccess: { message: 'Theme saved successfully!' },
       toastError: { message: 'Failed to save theme' },
       onError: error => {
-        console.error('Failed to save theme:', error)
+        logger.error('Failed to save theme:', error)
       },
     })
   }, [editor, apiEndpoint, defaultTheme])

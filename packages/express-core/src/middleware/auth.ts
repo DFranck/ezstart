@@ -1,0 +1,69 @@
+import type { Request, Response, NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
+import { sendError } from '../helpers/api-response.js'
+
+const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i
+
+/**
+ * Extract and validate userId from JWT Bearer token or X-User-Id header fallback.
+ * Returns userId if valid, null otherwise.
+ */
+function extractUserId(req: Request, jwtSecret: string): string | null {
+  // 1. Try Bearer token (JWT signed by EZAuth)
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7)
+    try {
+      const decoded = jwt.verify(token, jwtSecret) as Record<string, unknown>
+      const userId = (decoded.userId || decoded.sub || decoded.id) as string | undefined
+      if (userId && OBJECT_ID_REGEX.test(userId)) {
+        return userId
+      }
+    } catch {
+      // Token invalid — fall through to X-User-Id fallback
+    }
+  }
+
+  // 2. Fallback: X-User-Id header (legacy / dev only)
+  const headerUserId = req.headers['x-user-id'] as string | undefined
+  if (headerUserId && OBJECT_ID_REGEX.test(headerUserId)) {
+    return headerUserId
+  }
+
+  return null
+}
+
+/**
+ * Create an authentication middleware that verifies JWT Bearer tokens from EZAuth.
+ * Falls back to X-User-Id header for backward compatibility (dev/legacy).
+ *
+ * @param jwtSecret - JWT secret string. Defaults to process.env.JWT_SECRET.
+ */
+export function createAuthMiddleware(jwtSecret?: string) {
+  const resolved = jwtSecret ?? process.env.JWT_SECRET
+  if (!resolved) throw new Error('JWT_SECRET environment variable is required')
+  const secret: string = resolved
+
+  function authMiddleware(req: Request, res: Response, next: NextFunction) {
+    const userId = extractUserId(req, secret)
+
+    if (!userId) {
+      return sendError(res, 'Authentication required', 401)
+    }
+
+    req.userId = userId
+    next()
+  }
+
+  function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+    const userId = extractUserId(req, secret)
+
+    if (userId) {
+      req.userId = userId
+    }
+
+    next()
+  }
+
+  return { authMiddleware, optionalAuthMiddleware }
+}

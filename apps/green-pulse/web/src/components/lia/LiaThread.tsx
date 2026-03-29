@@ -6,6 +6,7 @@ import { useConversations } from '@/hooks/useConversations'
 import type { AIProviderInfo } from '@ezstart/ai-sdk'
 import { AISelector } from '@ezstart/ai-sdk/client'
 import { useAuthStore } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { ThemeSwitcher } from '@ezstart/next-theme/components'
 import { useRBAC } from '@ezstart/rbac'
 import {
@@ -138,7 +139,7 @@ export function LiaThread({
         clearMessages()
       }
     } catch (error) {
-      console.error('Failed to create new conversation:', error)
+      logger.error('Failed to create new conversation:', error)
     }
   }, [createConversation, clearMessages, setActiveConversationId])
 
@@ -158,7 +159,7 @@ export function LiaThread({
       try {
         await renameConversation(id, newTitle)
       } catch (error) {
-        console.error('Failed to rename conversation:', error)
+        logger.error('Failed to rename conversation:', error)
       }
     },
     [renameConversation]
@@ -175,7 +176,7 @@ export function LiaThread({
           clearMessages()
         }
       } catch (error) {
-        console.error('Failed to delete conversation:', error)
+        logger.error('Failed to delete conversation:', error)
       }
     },
     [softDeleteConversation, activeConversationId, clearMessages]
@@ -406,9 +407,7 @@ export function LiaThread({
           <Select value={selectedMockModel} onValueChange={setSelectedMockModel}>
             <SelectTrigger className="w-[280px]">
               <SelectValue
-                placeholder={
-                  locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'
-                }
+                placeholder={locale === 'fr' ? 'Sélectionner un modèle' : 'Select a model'}
               />
             </SelectTrigger>
             <SelectContent>
@@ -418,9 +417,7 @@ export function LiaThread({
                 return (
                   <SelectItem key={model.id} value={model.id} disabled={isComingSoon}>
                     <Div className="flex flex-col">
-                      <span className="font-medium">
-                        {model.name}
-                      </span>
+                      <span className="font-medium">{model.name}</span>
                       <span className="text-xs text-muted-foreground">{model.provider}</span>
                     </Div>
                   </SelectItem>

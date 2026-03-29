@@ -1,6 +1,7 @@
 'use client'
 
 import { getGradientWithOpacity, GRADIENT_TEXT } from '@/lib/theme-colors'
+import { logger } from '@ezstart/logger'
 import { Button, H1, Icon, P, Section } from '@ezstart/ui/components'
 import { callApi } from '@ezstart/fetch-client'
 import { useTranslations } from 'next-intl'
@@ -25,7 +26,7 @@ export default function DonateSuccessPage(): any {
             setVerified(true)
           }
         })
-        .catch(err => console.error('Failed to verify payment:', err))
+        .catch(err => logger.error('Failed to verify payment:', err))
     }
   }, [sessionId, verified])
 

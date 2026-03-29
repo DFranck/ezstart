@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { MONITORING_API_URL } from '../lib/config'
+import { callApi } from '@/config/api'
 
 export interface ErrorLog {
   id: string
@@ -23,20 +23,16 @@ export interface ErrorsData {
 }
 
 async function fetchErrors(): Promise<ErrorsData> {
-  const timestamp = Date.now()
-  const response = await fetch(`${MONITORING_API_URL}/api/activity?_t=${timestamp}`, {
-    cache: 'no-store',
-    signal: AbortSignal.timeout(30000), // 30s timeout
+  const response = await callApi<{ logs: any[] }>('/activity', {
+    query: { _t: String(Date.now()) },
   })
 
   if (!response.ok) {
     throw new Error('Failed to fetch error logs')
   }
 
-  const data = await response.json()
-
   // Filter only errors
-  const errorLogs = (data.logs || []).filter((log: any) => log.type === 'error')
+  const errorLogs = (response.data.logs || []).filter((log: any) => log.type === 'error')
 
   return { logs: errorLogs }
 }

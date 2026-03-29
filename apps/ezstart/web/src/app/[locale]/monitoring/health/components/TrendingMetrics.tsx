@@ -1,10 +1,33 @@
 'use client'
 
-import { Card, CardContent, CardHeader, H3, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Spinner } from '@ezstart/ui/components'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  H3,
+  P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Spinner,
+} from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts'
-import { MONITORING_API_URL } from '../../lib/config'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Area,
+  AreaChart,
+} from 'recharts'
+import { callApi } from '@/config/api'
 
 interface TrendingMetricsProps {
   projectId: string
@@ -38,11 +61,11 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
   const { data, isLoading, error } = useQuery<ProjectHistoryResponse>({
     queryKey: ['monitoring', 'project-history', projectId, hours],
     queryFn: async () => {
-      const res = await fetch(`${MONITORING_API_URL}/api/history/project/${projectId}?hours=${hours}`, {
-        cache: 'no-store',
+      const res = await callApi<ProjectHistoryResponse>(`/history/project/${projectId}`, {
+        query: { hours: String(hours) },
       })
       if (!res.ok) throw new Error('Failed to fetch project history')
-      return res.json()
+      return res.data
     },
     staleTime: 60000, // 1 minute
     refetchInterval: 300000, // 5 minutes
@@ -116,9 +139,10 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
   )
 
   // Sample data if too many points (max 60 points for readability)
-  const sampledData = chartData.length > 60
-    ? chartData.filter((_, i) => i % Math.ceil(chartData.length / 60) === 0)
-    : chartData
+  const sampledData =
+    chartData.length > 60
+      ? chartData.filter((_, i) => i % Math.ceil(chartData.length / 60) === 0)
+      : chartData
 
   // Calculate overall stats
   const overallStats = data.services.reduce(
@@ -134,13 +158,15 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
     { totalChecks: 0, healthyChecks: 0, totalResponseTime: 0, responseTimeCount: 0 }
   )
 
-  const overallUptime = overallStats.totalChecks > 0
-    ? ((overallStats.healthyChecks / overallStats.totalChecks) * 100).toFixed(2)
-    : '0'
+  const overallUptime =
+    overallStats.totalChecks > 0
+      ? ((overallStats.healthyChecks / overallStats.totalChecks) * 100).toFixed(2)
+      : '0'
 
-  const avgResponseTime = overallStats.responseTimeCount > 0
-    ? Math.round(overallStats.totalResponseTime / overallStats.responseTimeCount)
-    : null
+  const avgResponseTime =
+    overallStats.responseTimeCount > 0
+      ? Math.round(overallStats.totalResponseTime / overallStats.responseTimeCount)
+      : null
 
   const colors = {
     api: 'hsl(var(--chart-1))',
@@ -156,7 +182,8 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
             <H3 size="h5">{projectName} - Trending Metrics</H3>
             <div className="flex gap-6 mt-2 text-sm">
               <P className="text-muted-foreground">
-                Overall Uptime: <span className="font-semibold text-foreground">{overallUptime}%</span>
+                Overall Uptime:{' '}
+                <span className="font-semibold text-foreground">{overallUptime}%</span>
               </P>
               <P className="text-muted-foreground">
                 Avg Response:{' '}
@@ -165,11 +192,12 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                 </span>
               </P>
               <P className="text-muted-foreground">
-                Total Checks: <span className="font-semibold text-foreground">{overallStats.totalChecks}</span>
+                Total Checks:{' '}
+                <span className="font-semibold text-foreground">{overallStats.totalChecks}</span>
               </P>
             </div>
           </div>
-          <Select value={String(hours)} onValueChange={(val) => setHours(Number(val))}>
+          <Select value={String(hours)} onValueChange={val => setHours(Number(val))}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -192,7 +220,9 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
           <div className="space-y-8">
             {/* Response Time Chart */}
             <div>
-              <H3 size="h6" className="mb-4">Response Time (ms)</H3>
+              <H3 size="h6" className="mb-4">
+                Response Time (ms)
+              </H3>
               <ResponsiveContainer width="100%" height={250}>
                 <AreaChart data={sampledData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -201,10 +231,7 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
+                  <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
@@ -242,7 +269,9 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
 
             {/* Status Chart */}
             <div>
-              <H3 size="h6" className="mb-4">Service Availability</H3>
+              <H3 size="h6" className="mb-4">
+                Service Availability
+              </H3>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={sampledData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -254,7 +283,7 @@ export function TrendingMetrics({ projectId, projectName }: TrendingMetricsProps
                   <YAxis
                     domain={[0, 1]}
                     ticks={[0, 1]}
-                    tickFormatter={(value) => (value === 1 ? 'UP' : 'DOWN')}
+                    tickFormatter={value => (value === 1 ? 'UP' : 'DOWN')}
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />

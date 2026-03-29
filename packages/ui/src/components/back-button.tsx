@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import type { VariantProps } from 'class-variance-authority'
 import { Button } from './button'
 import { Icon, type KnownIconName } from './icon'
@@ -8,8 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tool
 type ButtonVariantProps = VariantProps<typeof import('./button').buttonVariants>
 
 export interface BackButtonProps
-  extends Omit<React.ComponentProps<'button'>, 'onClick'>,
-    ButtonVariantProps {
+  extends Omit<React.ComponentProps<'button'>, 'onClick'>, ButtonVariantProps {
   onClick?: () => void
   icon?: KnownIconName
   title?: string
@@ -43,7 +43,7 @@ export function BackButton({
           window.location.href = url.origin
           return
         } catch (error) {
-          console.error('Invalid redirect_uri:', redirectUri)
+          logger.error('Invalid redirect_uri:', redirectUri)
         }
       }
 

@@ -33,6 +33,9 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "dependencies": {
+    "@ezstart/logger": "workspace:*"
+  },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
     "@types/node": "^20",

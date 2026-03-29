@@ -1,4 +1,8 @@
 // @ezstart/api-core/src/index.ts
+
+// Global Express augmentations (userId, validatedQuery, etc.)
+import './types/express-aug.js'
+
 // Controller factory
 export { makeCreateController } from './controller-factory/make-create-controller.js'
 export { makeDeleteController } from './controller-factory/make-delete-controller.js'
@@ -28,11 +32,12 @@ export {
   createRateLimiter,
   createStrictRateLimiter,
   createVeryStrictRateLimiter,
-  createModerateRateLimiter
+  createModerateRateLimiter,
 } from './middleware/rateLimit.js'
 export type { RateLimitOptions } from './middleware/rateLimit.js'
 export { securityHeaders, securityHeadersPresets } from './middleware/security-headers.js'
 export type { SecurityHeadersOptions } from './middleware/security-headers.js'
+export { createAuthMiddleware } from './middleware/auth.js'
 
 // Versioning
 export { createVersionedRouter, addVersionHeader, extractVersionFromPath } from './versioning.js'

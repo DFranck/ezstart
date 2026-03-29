@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { logger } from '@ezstart/logger/server'
 import { sendSuccess, sendError } from '../helpers/api-response.js'
 
 export function makeGetListController<Q, T>(service: (query: Q) => Promise<T[]>, logTag: string) {
@@ -9,7 +10,7 @@ export function makeGetListController<Q, T>(service: (query: Q) => Promise<T[]>,
       const items = await service(query)
       return sendSuccess(res, items)
     } catch (err) {
-      console.error(`[${logTag}]`, err)
+      logger.error(`[${logTag}]`, err)
       return sendError(res, `Failed to fetch ${logTag}`)
     }
   }

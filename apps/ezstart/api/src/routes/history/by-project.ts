@@ -20,6 +20,13 @@ import { z } from 'zod'
 
 const projectHistoryQuerySchema = z.object({
   hours: z.coerce.number().min(1).max(168).default(24).describe('Hours to look back'),
+  limit: z.coerce
+    .number()
+    .min(1)
+    .max(1000)
+    .default(50)
+    .describe('Max number of records per service'),
+  offset: z.coerce.number().min(0).default(0).describe('Number of items to skip per service'),
 })
 
 export const router: ReturnType<typeof Router> = Router()
@@ -28,7 +35,13 @@ const getByProjectHandler = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params as { projectId: string }
     const parsed = projectHistoryQuerySchema.safeParse(req.query)
-    const hours = parsed.success ? parsed.data.hours : Math.min(Number(req.query.hours) || 24, 168)
+    const { hours, limit, offset } = parsed.success
+      ? parsed.data
+      : {
+          hours: Math.min(Number(req.query.hours) || 24, 168),
+          limit: Math.min(Number(req.query.limit) || 50, 1000),
+          offset: Math.max(Number(req.query.offset) || 0, 0),
+        }
 
     // Map project to service IDs
     const serviceIds = [`${projectId}-api`, `${projectId}-web`]
@@ -38,26 +51,33 @@ const getByProjectHandler = async (req: Request, res: Response) => {
 
     const histories = await Promise.all(
       serviceIds.map(async serviceId => {
-        const history = (await HealthCheck.find({
-          serviceId,
-          timestamp: { $gte: cutoffTime },
-        })
-          .sort({ timestamp: 1 })
-          .select('status responseTime timestamp error')
-          .lean()
-          .exec()) as any[]
+        const filter = { serviceId, timestamp: { $gte: cutoffTime } }
+
+        const [history, serviceTotal] = await Promise.all([
+          HealthCheck.find(filter)
+            .sort({ timestamp: 1 })
+            .skip(offset)
+            .limit(limit)
+            .select('status responseTime timestamp error')
+            .lean()
+            .exec() as Promise<any[]>,
+          HealthCheck.countDocuments(filter),
+        ])
 
         // No data = return null (will be filtered out)
-        if (history.length === 0) return null
+        if (history.length === 0 && serviceTotal === 0) return null
 
         const totalChecks = history.length
         const healthyChecks = history.filter((h: any) => h.status === 'healthy').length
         const uptimePercentage = totalChecks > 0 ? (healthyChecks / totalChecks) * 100 : 0
 
-        const healthyWithResponse = history.filter((h: any) => h.status === 'healthy' && h.responseTime !== null)
+        const healthyWithResponse = history.filter(
+          (h: any) => h.status === 'healthy' && h.responseTime !== null
+        )
         const avgResponseTime =
           healthyWithResponse.length > 0
-            ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) / healthyWithResponse.length
+            ? healthyWithResponse.reduce((sum: number, h: any) => sum + (h.responseTime || 0), 0) /
+              healthyWithResponse.length
             : null
 
         return {
@@ -66,6 +86,7 @@ const getByProjectHandler = async (req: Request, res: Response) => {
           healthyChecks,
           uptimePercentage: Number(uptimePercentage.toFixed(2)),
           avgResponseTime: avgResponseTime ? Math.round(avgResponseTime) : null,
+          totalRecords: serviceTotal,
           history: history.map((h: any) => ({
             status: h.status,
             responseTime: h.responseTime,
@@ -79,7 +100,8 @@ const getByProjectHandler = async (req: Request, res: Response) => {
     const validHistories = histories.filter(h => h !== null)
 
     // Empty data is OK (200), return empty array
-    sendSuccess(res, { projectId, hours, services: validHistories })
+    const total = validHistories.reduce((sum, h: any) => sum + (h.totalRecords || 0), 0)
+    sendSuccess(res, { projectId, hours, services: validHistories }, { total, limit, offset })
   } catch (error) {
     // Real error (DB connection, query failure, etc) = 500
     logger.error('[History] Error fetching project history:', error)

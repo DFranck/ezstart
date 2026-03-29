@@ -1,6 +1,7 @@
 'use client'
 
 import { useUserStore } from '@/stores/useUserStore'
+import { logger } from '@ezstart/logger'
 import { Icon, Input, Span } from '@ezstart/ui/components'
 import { runWithFeedback } from '@ezstart/ui/utils'
 import { useState } from 'react'
@@ -41,7 +42,7 @@ export function LoginSection() {
       toastError: { message: 'Failed to login' },
       onLoadingChange: setIsLoggingIn,
       onError: err => {
-        console.error('Failed to register user', err)
+        logger.error('Failed to register user', err)
       },
     })
   }
@@ -55,7 +56,7 @@ export function LoginSection() {
       toastSuccess: { message: 'Logged out successfully' },
       toastError: { message: 'Failed to logout' },
       onError: err => {
-        console.error('Failed to logout', err)
+        logger.error('Failed to logout', err)
       },
     })
   }
@@ -94,12 +95,10 @@ export function LoginSection() {
             <div className="w-8 h-8 bg-gradient-payment rounded-lg flex items-center justify-center">
               <Icon name="lucide:Check" className="w-4 h-4 text-white" />
             </div>
-            <Span className="text-lg font-semibold text-success">
-              Connected as {user.username}
-            </Span>
+            <Span className="text-lg font-semibold text-success">Connected as {user.username}</Span>
           </div>
-          <LoadingButton 
-            variant="outline" 
+          <LoadingButton
+            variant="outline"
             onClick={handleLogout}
             className="w-full border-gray-300 hover:border-gray-400"
           >

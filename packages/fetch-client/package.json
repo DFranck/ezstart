@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ezstart/config": "workspace:*"
+    "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*"
   },
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",

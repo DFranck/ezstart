@@ -1,7 +1,13 @@
 /* path: /apps/fengshui/web/config/loadBaguaConfig.ts */
 
 import { Direction } from '@/types/directions'
-import { YearBaguaConfig, BaguaBaseConfig, BaguaStarsConfig, CombinedOrientation } from '@/types/yearBaguaConfig'
+import { logger } from '@ezstart/logger'
+import {
+  YearBaguaConfig,
+  BaguaBaseConfig,
+  BaguaStarsConfig,
+  CombinedOrientation,
+} from '@/types/yearBaguaConfig'
 
 // Version client : utilise les données des messages next-intl
 export function loadBaguaConfigFromMessages(messages: any): YearBaguaConfig {
@@ -37,7 +43,7 @@ export async function loadBaguaConfig(
       validateStarsConfig(starsConfig.default ?? starsConfig)
     )
   } catch (error) {
-    console.error(`Failed to load Bagua config for locale ${locale}:`, error)
+    logger.error(`Failed to load Bagua config for locale ${locale}:`, error)
     // Fallback to French
     const baseConfig = await import('../messages/fr/base.json')
     const starsConfig = await import('../messages/fr/stars.json')
@@ -51,14 +57,14 @@ export async function loadBaguaConfig(
 
 function combineConfigs(base: BaguaBaseConfig, stars: BaguaStarsConfig): YearBaguaConfig {
   const orientations: Record<Direction, CombinedOrientation> = {} as any
-  
+
   // Directions principales + Centre
   const dirs: Direction[] = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO', 'C']
-  
+
   for (const dir of dirs) {
     const baseSector = base.sectors[dir]
     const star = stars.stars[dir]
-    
+
     if (baseSector) {
       orientations[dir] = {
         ...baseSector,
@@ -70,16 +76,16 @@ function combineConfigs(base: BaguaBaseConfig, stars: BaguaStarsConfig): YearBag
         remedies: star?.remedies || [],
         avoid: [],
         symbols: [],
-        notes: undefined
+        notes: undefined,
       }
     }
   }
-  
+
   return {
     year: stars.year,
     locale: base.locale,
     rotationOffsetDeg: 0,
-    orientations
+    orientations,
   }
 }
 
@@ -88,7 +94,7 @@ function validateBaseConfig(raw: unknown): BaguaBaseConfig {
   if (!cfg || typeof cfg.locale !== 'string') {
     throw new Error('Invalid base Bagua config: missing locale')
   }
-  
+
   const dirs: Direction[] = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO', 'C']
   for (const d of dirs) {
     const s = cfg.sectors[d]
@@ -104,7 +110,7 @@ function validateStarsConfig(raw: unknown): BaguaStarsConfig {
   if (!cfg || typeof cfg.year !== 'number' || typeof cfg.locale !== 'string') {
     throw new Error('Invalid stars Bagua config: missing year/locale')
   }
-  
+
   const dirs: Direction[] = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO', 'C']
   for (const d of dirs) {
     const s = cfg.stars[d]

@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import {
   WorkspaceSchema,
   UpdateWorkspaceMemberRequestSchema,
@@ -10,7 +17,11 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 export const updateWorkspaceMemberRegistry = new OpenAPIRegistry()
 
 const router: any = Router()
-export const updateWorkspaceMemberRouter = createRouterWithDoc(updateWorkspaceMemberRegistry, router, '/workspaces')
+export const updateWorkspaceMemberRouter = createRouterWithDoc(
+  updateWorkspaceMemberRegistry,
+  router,
+  '/workspaces'
+)
 
 // PUT /api/workspaces/:id/members/:uid - Update member role
 updateWorkspaceMemberRouter.put(
@@ -21,12 +32,7 @@ updateWorkspaceMemberRouter.put(
 
       const validation = UpdateWorkspaceMemberRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const Workspace = await getWorkspaceModel()
@@ -35,48 +41,28 @@ updateWorkspaceMemberRouter.put(
       const workspace = await Workspace.findById(req.params.id)
 
       if (!workspace) {
-        return res.status(404).json({
-          success: false,
-          error: 'Workspace not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Workspace not found', 404)
       }
 
       // Only owner can update roles
       if (workspace.ownerId !== userId) {
-        return res.status(403).json({
-          success: false,
-          error: 'Forbidden - only owner can update member roles',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Forbidden - only owner can update member roles', 403)
       }
 
       // Find member
       const member = workspace.members?.find((m: any) => m.userId === req.params.uid)
       if (!member) {
-        return res.status(404).json({
-          success: false,
-          error: 'Member not found in workspace',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Member not found in workspace', 404)
       }
 
       // Update role
       member.role = validation.data.role
       await workspace.save()
 
-      res.json({
-        success: true,
-        data: workspace,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, workspace)
     } catch (error) {
       logger.error('Error updating workspace member:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Internal server error')
     }
   },
   {

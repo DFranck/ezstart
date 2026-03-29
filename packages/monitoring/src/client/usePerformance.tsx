@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useEffect, useCallback } from 'react'
 
 interface PerformanceMetricOptions {
@@ -56,7 +57,9 @@ export function usePerformance({
     }
 
     function trackPageLoad() {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming
 
       if (navigation) {
         const pageLoadTime = navigation.loadEventEnd - navigation.fetchStart
@@ -68,7 +71,9 @@ export function usePerformance({
           duration: Math.round(pageLoadTime),
           status: 'success',
           metadata: {
-            domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart),
+            domContentLoaded: Math.round(
+              navigation.domContentLoadedEventEnd - navigation.fetchStart
+            ),
             domInteractive: Math.round(navigation.domInteractive - navigation.fetchStart),
           },
         })
@@ -107,7 +112,7 @@ export function usePerformance({
       })
     } catch (error) {
       // Silently fail - don't break the app if monitoring is down
-      console.warn('[Performance] Failed to send metric:', error)
+      logger.warn('[Performance] Failed to send metric:', error)
     }
   }
 

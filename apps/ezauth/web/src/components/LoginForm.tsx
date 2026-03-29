@@ -12,7 +12,8 @@ import {
   Input,
   PasswordInput,
 } from '@ezstart/ui/components'
-import { getApiUrl } from '@ezstart/config/urls'
+import { callApi } from '@ezstart/fetch-client'
+import { logger } from '@ezstart/logger'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -51,32 +52,28 @@ export function LoginForm({ app, redirect_uri }: LoginFormProps) {
         redirect_uri: redirect_uri || undefined,
       }
 
-      const apiUrl = `${getApiUrl('ezauth')}/api/auth/login`
-
-      const response = await fetch(apiUrl, {
+      const response = await callApi('/auth/login', {
+        appName: 'ezauth',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
+        body: loginData,
       })
 
-      const result = await response.json()
-
       if (!response.ok) {
-        throw new Error(result.error || 'Login failed')
+        throw new Error(response.error || (response.data as any)?.error || 'Login failed')
       }
+
+      const result = response.data as any
 
       // Redirect with authorization code
       if (redirect_uri) {
-        console.log('🔀 Redirecting to:', redirect_uri)
+        logger.info('Redirecting to:', redirect_uri)
         const url = new URL(redirect_uri)
         url.searchParams.set('code', result.code)
         window.location.href = url.toString()
         // Don't set loading to false here since we're redirecting
         return
       } else {
-        console.error('❌ No redirect_uri provided! Cannot redirect after login.')
+        logger.error('No redirect_uri provided! Cannot redirect after login.')
         throw new Error('No redirect URL configured. Please provide redirect_uri parameter.')
       }
     } catch (err) {

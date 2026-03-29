@@ -1,4 +1,5 @@
 import { getApiUrl, getWebUrl, getCurrentEnvironment } from '@ezstart/config/urls'
+import { logger } from '@ezstart/logger'
 import type { AuthToken, AuthUser } from './types.js'
 import type { AuthMode } from './store.js'
 
@@ -217,7 +218,7 @@ export class AuthClient {
       })
     } catch (error) {
       // Logout can fail silently - we still clear local state
-      console.error('Logout API call failed:', error)
+      logger.error('Logout API call failed:', error)
     }
   }
 }

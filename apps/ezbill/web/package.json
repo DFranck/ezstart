@@ -18,6 +18,7 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/rbac": "workspace:*",
     "@ezstart/ui": "workspace:*",

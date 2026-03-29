@@ -1,3 +1,5 @@
+import { logger } from '@ezstart/logger/server'
+
 export type TickerOptions<State> = {
   tickIntervalMs?: number
   createInitialState: (gameId: string) => State
@@ -19,7 +21,7 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
 
   function ensureRoom(gameId: string) {
     if (!rooms.has(gameId)) {
-      console.log(`[ticker] 🆕 Creating room for game: ${gameId}`)
+      logger.debug(`[ticker] 🆕 Creating room for game: ${gameId}`)
       const initialState = createInitialState(gameId)
       const room: GameRoom<State> = {
         gameId,
@@ -32,7 +34,7 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
   }
 
   function startTickLoop(gameId: string, initialState: State): NodeJS.Timeout {
-    console.log(`[⏱️ ticker] Started ticking for game ${gameId} every ${tickIntervalMs}ms`)
+    logger.debug(`[⏱️ ticker] Started ticking for game ${gameId} every ${tickIntervalMs}ms`)
 
     return setInterval(async () => {
       const room = rooms.get(gameId)
@@ -56,7 +58,7 @@ export function createTickerEngine<State>(opts: TickerOptions<State>) {
     if (!room) return false
     clearInterval(room.interval)
     rooms.delete(gameId)
-    console.log(`[🗑️ ticker] Destroyed room for gameId: ${gameId}`)
+    logger.debug(`[🗑️ ticker] Destroyed room for gameId: ${gameId}`)
     return true
   }
   function getState(gameId: string): State | undefined {

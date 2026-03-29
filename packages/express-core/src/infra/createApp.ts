@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv'
 import express, { Express } from 'express'
 import type { AppName } from '@ezstart/config/urls'
 import { createCorsConfig, getAllowedOrigins } from '@ezstart/config/cors'
+import { logger } from '@ezstart/logger/server'
 import { securityHeaders, securityHeadersPresets } from '../middleware/security-headers.js'
 
 // Load .env.local first (priority), then .env as fallback
@@ -56,11 +57,11 @@ export function createApp(options?: CreateAppOptions): Express {
     // Get allowed origins for logging
     const allowedOrigins = getAllowedOrigins(options.apiApp)
 
-    console.log(
+    logger.info(
       `✅ [CORS] Auto-configured for ${options.apiApp}: ${allowedOrigins.length} origins allowed`
     )
-    console.log(`   📋 Allowed origins:`)
-    allowedOrigins.forEach(origin => console.log(`      - ${origin}`))
+    logger.debug(`   📋 Allowed origins:`)
+    allowedOrigins.forEach(origin => logger.debug(`      - ${origin}`))
   } else if (options?.corsOrigins) {
     // Option 2: Manual CORS origins
     corsOptions = {
@@ -70,7 +71,7 @@ export function createApp(options?: CreateAppOptions): Express {
       allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
     }
 
-    console.log(`✅ [CORS] Manually configured: ${options.corsOrigins.length} origins allowed`)
+    logger.info(`✅ [CORS] Manually configured: ${options.corsOrigins.length} origins allowed`)
   } else {
     // Option 3: Allow all (LEGACY)
     corsOptions = {
@@ -79,7 +80,7 @@ export function createApp(options?: CreateAppOptions): Express {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
     }
-    console.warn(`⚠️ [CORS] Allowing ALL origins (*) - Consider using apiApp option`)
+    logger.warn(`⚠️ [CORS] Allowing ALL origins (*) - Consider using apiApp option`)
   }
 
   app.use(cors(corsOptions))
@@ -91,14 +92,14 @@ export function createApp(options?: CreateAppOptions): Express {
 
   if (isProduction) {
     app.use(securityHeaders(securityHeadersPresets.moderate()))
-    console.log('🔒 [Security] Production security headers enabled')
+    logger.info('🔒 [Security] Production security headers enabled')
   } else if (isDevelopment) {
     app.use(securityHeaders(securityHeadersPresets.development()))
-    console.log('🔓 [Security] Development mode - relaxed headers')
+    logger.info('🔓 [Security] Development mode - relaxed headers')
   } else {
     // Default to moderate for other environments (test, staging, etc.)
     app.use(securityHeaders(securityHeadersPresets.moderate()))
-    console.log('🔒 [Security] Moderate security headers enabled')
+    logger.info('🔒 [Security] Moderate security headers enabled')
   }
 
   // Apply raw body parser for specific routes BEFORE JSON parser

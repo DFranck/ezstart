@@ -2,6 +2,7 @@ import {
   createRouterWithDoc,
   OpenAPIRegistry,
   Router,
+  sendSuccess,
   sendError,
   sendValidationError,
 } from '@ezstart/express-core'
@@ -68,8 +69,7 @@ const getAllWaitlistsController = async (req: any, res: any) => {
       {} as Record<string, string[]>
     )
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       waitlists: result,
       totalCount: Object.values(result).reduce(
         (sum: number, emails: unknown) => sum + (emails as string[]).length,

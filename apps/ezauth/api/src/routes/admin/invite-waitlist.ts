@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { getAuthUserModel } from '../../models/auth-user.js'
@@ -31,13 +37,11 @@ const errorSchema = z.object({
 const inviteWaitlistController = async (req: any, res: any) => {
   try {
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isAdmin =
+      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
-      return res.status(403).json({
-        success: false,
-        error: 'Admin access required'
-      })
+      return sendError(res, 'Admin access required', 403)
     }
 
     const WaitlistModel = await getWaitlistModel()
@@ -49,29 +53,19 @@ const inviteWaitlistController = async (req: any, res: any) => {
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {
-      return res.status(404).json({
-        success: false,
-        error: `Waitlist not found for app: ${appName}`
-      })
+      return sendError(res, `Waitlist not found for app: ${appName}`, 404)
     }
 
     // Find email entry
     const entry = waitlist.findEntryByEmail(email)
 
     if (!entry) {
-      return res.status(404).json({
-        success: false,
-        error: `Email not found in waitlist: ${email}`
-      })
+      return sendError(res, `Email not found in waitlist: ${email}`, 404)
     }
 
     // Check if already invited
     if (entry.status === 'invited' && entry.accessCode) {
-      return res.status(409).json({
-        success: false,
-        error: 'Email already invited',
-        accessCode: entry.accessCode
-      })
+      return sendError(res, 'Email already invited', 409)
     }
 
     // Generate access code
@@ -122,13 +116,12 @@ const inviteWaitlistController = async (req: any, res: any) => {
 
       logger.info(`✅ Auto-granted beta-tester role to ${email} for ${appName}`)
 
-      return res.json({
-        success: true,
+      return sendSuccess(res, {
         accessCode,
         email: entry.email,
         appName: waitlist.appName,
         autoGranted: true,
-        message: 'User already exists - access granted immediately'
+        message: 'User already exists - access granted immediately',
       })
     }
 
@@ -146,20 +139,16 @@ const inviteWaitlistController = async (req: any, res: any) => {
     // TODO: Send email with access code (implement email service later)
     logger.info(`📧 [TODO] Send beta access email to ${email} with code: ${accessCode}`)
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       accessCode,
       email: entry.email,
       appName: waitlist.appName,
       autoGranted: false,
-      message: 'Access code generated - user needs to register with code'
+      message: 'Access code generated - user needs to register with code',
     })
   } catch (error) {
     logger.error('Error inviting from waitlist:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to invite email'
-    })
+    sendError(res, 'Failed to invite email', 500)
   }
 }
 
@@ -173,8 +162,8 @@ docRouter.post('/:appName/:email/invite', verifyTokenMiddleware, inviteWaitlistC
     403: { description: 'Forbidden - Admin access required', schema: errorSchema },
     404: { description: 'Waitlist or email not found', schema: errorSchema },
     409: { description: 'Email already invited', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

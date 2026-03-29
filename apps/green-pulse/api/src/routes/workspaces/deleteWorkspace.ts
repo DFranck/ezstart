@@ -1,16 +1,23 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
-  WorkspaceSchema,
-  ApiResponseSchema,
-} from '@green-pulse/types'
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
+import { WorkspaceSchema, ApiResponseSchema } from '@green-pulse/types'
 import { getWorkspaceModel } from '../../models/Workspace.js'
 import { getProjectModel } from '../../models/Project.js'
 
 export const deleteWorkspaceRegistry = new OpenAPIRegistry()
 
 const router: any = Router()
-export const deleteWorkspaceRouter = createRouterWithDoc(deleteWorkspaceRegistry, router, '/workspaces')
+export const deleteWorkspaceRouter = createRouterWithDoc(
+  deleteWorkspaceRegistry,
+  router,
+  '/workspaces'
+)
 
 // DELETE /api/workspaces/:id - Delete workspace
 deleteWorkspaceRouter.delete(
@@ -26,20 +33,12 @@ deleteWorkspaceRouter.delete(
       const workspace = await Workspace.findById(req.params.id)
 
       if (!workspace) {
-        return res.status(404).json({
-          success: false,
-          error: 'Workspace not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Workspace not found', 404)
       }
 
       // Only owner can delete workspace
       if (workspace.ownerId !== userId) {
-        return res.status(403).json({
-          success: false,
-          error: 'Forbidden - only owner can delete workspace',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Forbidden - only owner can delete workspace', 403)
       }
 
       // Delete all projects in workspace
@@ -49,18 +48,10 @@ deleteWorkspaceRouter.delete(
       // @ts-expect-error - Mongoose type inference issue
       await Workspace.findByIdAndDelete(req.params.id)
 
-      res.json({
-        success: true,
-        data: { deleted: true },
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, { deleted: true })
     } catch (error) {
       logger.error('Error deleting workspace:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Internal server error')
     }
   },
   {

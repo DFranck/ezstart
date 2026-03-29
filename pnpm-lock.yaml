@@ -91,6 +91,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -264,6 +267,12 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../../../packages/config
+      '@ezstart/fetch-client':
+        specifier: workspace:*
+        version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -352,9 +361,6 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.1
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -386,9 +392,6 @@ importers:
       '@types/express-serve-static-core':
         specifier: ^4.19.6
         version: 4.19.7
-      '@types/jsonwebtoken':
-        specifier: ^9.0.9
-        version: 9.0.10
       '@types/node':
         specifier: ^20.7.0
         version: 20.19.26
@@ -482,6 +485,9 @@ importers:
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -591,9 +597,6 @@ importers:
       helmet:
         specifier: ^7.1.0
         version: 7.2.0
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -619,9 +622,6 @@ importers:
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.25
-      '@types/jsonwebtoken':
-        specifier: ^9.0.9
-        version: 9.0.10
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.26
@@ -789,6 +789,9 @@ importers:
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/monitoring':
         specifier: workspace:*
         version: link:../../../packages/monitoring
@@ -916,6 +919,9 @@ importers:
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -1031,9 +1037,6 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.1
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -1053,9 +1056,6 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.25
-      '@types/jsonwebtoken':
-        specifier: ^9.0.9
-        version: 9.0.10
       '@types/multer':
         specifier: ^1.4.12
         version: 1.4.13
@@ -1092,6 +1092,9 @@ importers:
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -1204,9 +1207,6 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.1
-      jsonwebtoken:
-        specifier: ^9.0.3
-        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -1235,9 +1235,6 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.25
-      '@types/jsonwebtoken':
-        specifier: ^9.0.7
-        version: 9.0.10
       '@types/multer':
         specifier: ^1.4.12
         version: 1.4.13
@@ -1281,6 +1278,9 @@ importers:
       '@ezstart/fetch-client':
         specifier: workspace:*
         version: link:../../../packages/fetch-client
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../../../packages/logger
       '@ezstart/next-theme':
         specifier: workspace:*
         version: link:../../../packages/next-theme
@@ -1375,6 +1375,9 @@ importers:
 
   packages/ai-sdk:
     dependencies:
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@google/generative-ai':
         specifier: ^0.21.0
         version: 0.21.0
@@ -1448,6 +1451,10 @@ importers:
         version: 5.7.3
 
   packages/config:
+    dependencies:
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -1524,6 +1531,9 @@ importers:
       express-rate-limit:
         specifier: ^7.5.1
         version: 7.5.1(express@4.22.1)
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.3
       mongoose:
         specifier: ^8.15.1
         version: 8.20.2(socks@2.8.7)
@@ -1552,6 +1562,9 @@ importers:
       '@types/express':
         specifier: ^4.17.23
         version: 4.17.25
+      '@types/jsonwebtoken':
+        specifier: ^9.0.9
+        version: 9.0.10
       '@types/socket.io':
         specifier: ^3.0.2
         version: 3.0.2
@@ -1579,6 +1592,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
     devDependencies:
       '@ezstart/typescript-config':
         specifier: workspace:*
@@ -1620,6 +1636,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1673,6 +1692,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1723,6 +1745,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@ezstart/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1846,6 +1871,9 @@ importers:
       '@ezstart/config':
         specifier: workspace:*
         version: link:../config
+      '@ezstart/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1882,9 +1910,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.7
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@react-pdf/renderer':
-        specifier: ^4.3.0
-        version: 4.3.1(react@19.2.3)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

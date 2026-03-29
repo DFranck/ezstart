@@ -4,6 +4,7 @@
  */
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useEffect, useState } from 'react'
 import { useAIStore } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
@@ -36,11 +37,11 @@ export function useProviders(appName: AppName = 'green-pulse') {
         setError(error)
 
         // Only log error once (not on every render)
-        console.error('⚠️ Failed to fetch AI providers:', error.message)
+        logger.error('Failed to fetch AI providers:', error.message)
 
         // Provide helpful message for rate limiting
         if (error.message?.includes('Too many requests') || error.message?.includes('RATE_LIMIT')) {
-          console.warn('Rate limit reached. Providers will retry on next page load.')
+          logger.warn('Rate limit reached. Providers will retry on next page load.')
         }
       } finally {
         setLoading(false)

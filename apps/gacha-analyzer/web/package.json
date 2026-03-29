@@ -15,6 +15,7 @@
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
     "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "@gacha-analyzer/types": "workspace:*",

@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Icon, KnownIconName } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useAuth } from './provider.js'
 
 export interface LoginButtonProps {
@@ -59,7 +60,7 @@ export function LoginButton({
         await login() // login redirects, so no need to reset loading
       }
     } catch (error) {
-      console.error(isAuthenticated ? 'Logout failed:' : 'Login failed:', error)
+      logger.error(isAuthenticated ? 'Logout failed:' : 'Login failed:', error)
       setLoggingIn(false)
     }
   }

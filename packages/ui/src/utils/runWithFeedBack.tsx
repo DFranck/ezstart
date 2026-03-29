@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@ezstart/logger'
 import type { ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Icon } from '../components'
@@ -126,7 +127,7 @@ export async function runWithFeedback<T>({
     }
 
     onError?.(e)
-    if (!onError) console.error('Unhandled error in runWithFeedback:', e)
+    if (!onError) logger.error('Unhandled error in runWithFeedback:', e)
 
     if (throwOnError) throw e
     return undefined

@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger'
 import { oklchColorSchema, hexColorSchema } from '../schemas/theme.schema'
 
 /**
@@ -35,7 +36,7 @@ export function sanitizeColorValues(values: Record<string, string>): Record<stri
     try {
       sanitized[key] = sanitizeColorValue(value)
     } catch (error) {
-      console.warn(`Skipping invalid color for ${key}:`, error)
+      logger.warn(`Skipping invalid color for ${key}:`, error)
       // Skip invalid values instead of throwing
     }
   }
@@ -62,9 +63,7 @@ export function isHexColor(value: string): boolean {
  * Returns { l, c, h, a } or null if invalid
  * Supports both decimal (0.62) and percentage (62%) formats for lightness
  */
-export function parseOklch(
-  value: string
-): { l: number; c: number; h: number; a?: number } | null {
+export function parseOklch(value: string): { l: number; c: number; h: number; a?: number } | null {
   // Match OKLCH with optional % on lightness: oklch(62.104% 0.134 244.743) or oklch(0.62104 0.134 244.743)
   const match = value.match(/oklch\(([\d.]+)%?\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/)
 

@@ -1,11 +1,14 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
-import {
-  userResponseSchema,
-  errorResponseSchema
-} from '@ezstart/auth-sdk/server'
+import { userResponseSchema, errorResponseSchema } from '@ezstart/auth-sdk/server'
 
 export const meRegistry = new OpenAPIRegistry()
 const router: ExpressRouter = Router()
@@ -32,10 +35,7 @@ const meController = async (req: any, res: any) => {
     const payload = await AuthService.verifyToken(token)
     const user = await AuthService.getUserById(payload.userId)
 
-    res.json({
-      success: true,
-      user
-    })
+    sendSuccess(res, { user })
   } catch (error) {
     logger.error('Get user error:', error)
     sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
@@ -47,8 +47,8 @@ docRouter.get('/me', meController, {
   tags: ['User'],
   responseSchema: userResponseSchema,
   extraResponses: {
-    401: { description: 'Invalid or missing token', schema: errorResponseSchema }
-  }
+    401: { description: 'Invalid or missing token', schema: errorResponseSchema },
+  },
 })
 
 export default router

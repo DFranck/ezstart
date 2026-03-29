@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { logger } from '@ezstart/logger'
 import { Button, Input, Label, TextArea, P } from '@ezstart/ui/components'
 import { useCreateProject } from '@/hooks/useProjects'
 import { useWorkspaces } from '@/hooks/useWorkspaces'
@@ -39,7 +40,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
     e.preventDefault()
 
     if (!workspace?._id) {
-      console.error('Workspace not found')
+      logger.error('Workspace not found')
       return
     }
 
@@ -61,7 +62,7 @@ export function CreateProjectDialog({ workspaceSlug }: CreateProjectDialogProps)
       setCompanySector('')
       setOpen(false)
     } catch (error) {
-      console.error('Failed to create project:', error)
+      logger.error('Failed to create project:', error)
     }
   }
 

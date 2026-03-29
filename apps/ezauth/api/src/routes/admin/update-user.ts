@@ -1,4 +1,11 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -12,16 +19,25 @@ const docRouter = createRouterWithDoc(updateUserRegistry, router)
 // Schemas
 const updateUserRequestSchema = z.object({
   // New role structure
-  globalRoles: z.array(z.enum(['superadmin'])).optional().describe('Global roles to assign'),
-  appRoles: z.record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client']))).optional().describe('Per-app roles mapping'),
+  globalRoles: z
+    .array(z.enum(['superadmin']))
+    .optional()
+    .describe('Global roles to assign'),
+  appRoles: z
+    .record(z.string(), z.array(z.enum(['admin', 'manager', 'beta-tester', 'client'])))
+    .optional()
+    .describe('Per-app roles mapping'),
   // Legacy fields
-  roles: z.array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client'])).optional().describe('Legacy roles array'),
+  roles: z
+    .array(z.enum(['superadmin', 'admin', 'manager', 'beta-tester', 'client']))
+    .optional()
+    .describe('Legacy roles array'),
   permissions: z.array(z.string()).optional().describe('User permissions'),
   features: z.array(z.string()).optional().describe('Enabled feature flags'),
   apps: z.array(z.string()).optional().describe('Accessible applications'),
   isVerified: z.boolean().optional().describe('Email verification status'),
   organizationId: z.string().optional().describe('Organization ID'),
-  managedBy: z.string().optional().describe('Manager user ID')
+  managedBy: z.string().optional().describe('Manager user ID'),
 })
 
 const userSchema = z.object({
@@ -38,22 +54,22 @@ const userSchema = z.object({
   organizationId: z.string().optional().describe('Organization ID'),
   managedBy: z.string().optional().describe('Manager user ID'),
   createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string')
+  updatedAt: z.string().describe('Last update date ISO string'),
 })
 
 const updateUserResponseSchema = z.object({
   user: userSchema.describe('Updated user object'),
-  message: z.string().describe('Success message')
+  message: z.string().describe('Success message'),
 })
 
 const errorSchema = z.object({
   error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details')
+  details: z.string().optional().describe('Additional error details'),
 })
 
 // Params validation schema
 const updateUserParamsSchema = z.object({
-  id: z.string().min(1, 'User ID is required')
+  id: z.string().min(1, 'User ID is required'),
 })
 
 // Controller
@@ -74,7 +90,8 @@ const updateUserController = async (req: any, res: any) => {
     }
 
     const currentUser = req.user
-    const isSuperAdmin = currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
+    const isSuperAdmin =
+      currentUser.globalRoles?.includes('superadmin') || currentUser.roles?.includes('superadmin')
 
     if (!isSuperAdmin) {
       return sendError(res, 'Superadmin access required for user management from ezstart', 403)
@@ -105,10 +122,18 @@ const updateUserController = async (req: any, res: any) => {
     }
 
     // Update other fields
-    const allowedFields = ['roles', 'permissions', 'features', 'apps', 'isVerified', 'organizationId', 'managedBy'] as const
+    const allowedFields = [
+      'roles',
+      'permissions',
+      'features',
+      'apps',
+      'isVerified',
+      'organizationId',
+      'managedBy',
+    ] as const
     allowedFields.forEach(field => {
       if ((body as any)[field] !== undefined) {
-        (user as any)[field] = (body as any)[field]
+        ;(user as any)[field] = (body as any)[field]
       }
     })
 
@@ -122,7 +147,7 @@ const updateUserController = async (req: any, res: any) => {
       })
     }
 
-    res.json({
+    sendSuccess(res, {
       user: {
         ...user.toObject(),
         _id: (user._id as any).toString(),
@@ -131,9 +156,9 @@ const updateUserController = async (req: any, res: any) => {
         roles: user.roles || [],
         permissions: user.permissions || [],
         features: user.features || [],
-        isVerified: user.isVerified
+        isVerified: user.isVerified,
       },
-      message: 'User updated successfully'
+      message: 'User updated successfully',
     })
   } catch (error: any) {
     logger.error('Error updating user:', error)
@@ -150,8 +175,8 @@ docRouter.patch('/users/:id', verifyTokenMiddleware, updateUserController, {
     401: { description: 'Unauthorized', schema: errorSchema },
     403: { description: 'Forbidden', schema: errorSchema },
     404: { description: 'User not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

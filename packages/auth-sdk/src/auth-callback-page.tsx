@@ -1,5 +1,6 @@
 'use client'
 import { Spinner } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useAuth } from './provider.js'
@@ -73,9 +74,8 @@ function CallbackContent({
         setStatus('success')
 
         // Get saved redirect URL from localStorage (set by redirectToLogin)
-        const savedRedirect = typeof window !== 'undefined'
-          ? localStorage.getItem('ezauth_redirect_after_login')
-          : null
+        const savedRedirect =
+          typeof window !== 'undefined' ? localStorage.getItem('ezauth_redirect_after_login') : null
 
         // Use saved redirect if available, otherwise use prop default
         const finalRedirect = savedRedirect || redirectTo
@@ -88,7 +88,7 @@ function CallbackContent({
         // Redirect after successful auth
         setTimeout(() => router.push(finalRedirect), 1500)
       } catch (err) {
-        console.error('❌ [AuthCallback] Authentication failed:', err)
+        logger.error('[AuthCallback] Authentication failed:', err)
         setStatus('error')
         setError(err instanceof Error ? err.message : 'Authentication failed')
       } finally {

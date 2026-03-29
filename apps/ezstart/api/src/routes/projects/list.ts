@@ -16,28 +16,37 @@ export const router: ReturnType<typeof Router> = Router()
 
 const projectHealthChecker = new ProjectHealthChecker()
 
-const listProjectsHandler = async (_: Request, res: Response) => {
+const listProjectsHandler = async (req: Request, res: Response) => {
   try {
-    const environment =
-      process.env.NODE_ENV === 'production' ? 'production' : 'local'
+    const limit = Math.min(Number(req.query.limit) || 50, 100)
+    const offset = Math.max(Number(req.query.offset) || 0, 0)
+
+    const environment = process.env.NODE_ENV === 'production' ? 'production' : 'local'
     const timeout = Number(process.env.HEALTH_CHECK_TIMEOUT) || 5000
     const retries = Number(process.env.HEALTH_CHECK_RETRIES) || 3
 
-    const projects = await projectHealthChecker.checkAllProjects(environment, {
+    const allProjects = await projectHealthChecker.checkAllProjects(environment, {
       timeout,
       retries,
     })
 
-    sendSuccess(res, {
-      projects,
-      environment,
-      summary: {
-        total: projects.length,
-        healthy: projects.filter(p => p.overallStatus === 'healthy').length,
-        degraded: projects.filter(p => p.overallStatus === 'degraded').length,
-        unhealthy: projects.filter(p => p.overallStatus === 'unhealthy').length,
+    const total = allProjects.length
+    const projects = allProjects.slice(offset, offset + limit)
+
+    sendSuccess(
+      res,
+      {
+        projects,
+        environment,
+        summary: {
+          total,
+          healthy: projects.filter(p => p.overallStatus === 'healthy').length,
+          degraded: projects.filter(p => p.overallStatus === 'degraded').length,
+          unhealthy: projects.filter(p => p.overallStatus === 'unhealthy').length,
+        },
       },
-    })
+      { total, limit, offset }
+    )
   } catch (error) {
     sendError(res, error instanceof Error ? error.message : 'Failed to check projects')
   }

@@ -17,16 +17,16 @@ import {
   convertQuoteToInvoiceService,
   createQuoteService,
   getQuoteByIdService,
-  getQuotesService,
+  getQuotesPaginatedService,
   hardDeleteQuoteService,
   rejectQuoteService,
   removeLineItemToQuoteService,
   restoreQuoteService,
   softDeleteQuoteService,
   updateQuoteService,
-} from '../../services/quote/index.js';
-import { AuthRequest, getAuthenticatedUserId } from '../../types/auth.js';
-import { BillingPermissionError, validateBillingAction } from '../../utils/billing-permissions.js';
+} from '../../services/quote/index.js'
+import { AuthRequest, getAuthenticatedUserId } from '../../types/auth.js'
+import { BillingPermissionError, validateBillingAction } from '../../utils/billing-permissions.js'
 
 export async function createSecureQuoteController(req: AuthRequest, res: Response) {
   try {
@@ -50,7 +50,8 @@ export async function createSecureQuoteController(req: AuthRequest, res: Respons
 
     const quote = await createQuoteService(secureQuoteData)
 
-    res.status(201).json({ success: true, data: quote })
+    res.status(201)
+    sendSuccess(res, quote)
   } catch (error) {
     logger.error('Error in createSecureQuoteController:', error)
     sendError(res, 'Failed to create quote')
@@ -66,9 +67,9 @@ export async function getSecureQuotesController(req: AuthRequest, res: Response)
     }
 
     const query = { ...req.query, userId } as GetQuotesQuery & { userId: string }
-    const quotes = await getQuotesService(query)
+    const result = await getQuotesPaginatedService(query)
 
-    sendSuccess(res, quotes)
+    sendSuccess(res, result)
   } catch (error) {
     logger.error('Error in getSecureQuotesController:', error)
     sendError(res, 'Failed to retrieve quotes')
@@ -451,7 +452,8 @@ export async function convertQuoteToInvoiceSecureController(req: AuthRequest, re
       return sendError(res, 'Quote not found or already deleted', 404)
     }
 
-    res.status(201).json({ success: true, data: invoice })
+    res.status(201)
+    sendSuccess(res, invoice)
   } catch (error: any) {
     logger.error('Error in convertQuoteToInvoiceSecureController:', error)
     sendError(res, error.message || 'Failed to convert quote to invoice')

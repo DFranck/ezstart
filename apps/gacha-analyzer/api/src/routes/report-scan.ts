@@ -77,10 +77,8 @@ router.post('/:id/report', async (req: any, res: any) => {
       return sendError(res, 'Scan not found', 404)
     }
 
-    return res.status(201).json({
-      success: true,
-      data: { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined },
-    })
+    res.status(201)
+    return sendSuccess(res, { ...(scan as any), id: (scan as any)._id?.toString(), _id: undefined })
   } catch (error) {
     logger.error('[report-scan] Error creating report:', error)
     return sendError(res, 'Failed to create report')

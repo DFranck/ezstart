@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger'
 import { URLS, AppName, getAllWebUrls, getRegistry } from './urls.js'
 
 /**
@@ -115,7 +116,7 @@ export function createCorsConfig(apiApp: AppName) {
       if (allowedOrigins.includes(origin)) {
         callback(null, true)
       } else {
-        console.warn(`⚠️ [CORS] Blocked origin: ${origin}`)
+        logger.warn(`[CORS] Blocked origin: ${origin}`)
         callback(new Error('Not allowed by CORS'))
       }
     },

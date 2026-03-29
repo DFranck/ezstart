@@ -1,11 +1,19 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  createStrictRateLimiter,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
   loginRequestSchema,
   userResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 
 export const loginCookieRegistry = new OpenAPIRegistry()
@@ -33,14 +41,11 @@ const loginCookieController = async (req: any, res: any) => {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
     })
 
     // Return user info (frontend will store in localStorage for client-side access)
-    res.json({
-      success: true,
-      user: authResult.user
-    })
+    sendSuccess(res, { user: authResult.user })
   } catch (error) {
     logger.error('Login cookie error:', error)
     sendError(res, error instanceof Error ? error.message : 'Login failed', 401)
@@ -54,8 +59,8 @@ docRouter.post('/login-cookie', loginCookieRateLimiter, loginCookieController, {
   responseSchema: userResponseSchema,
   extraResponses: {
     401: { description: 'Login failed', schema: errorResponseSchema },
-    429: { description: 'Too many login attempts', schema: errorResponseSchema }
-  }
+    429: { description: 'Too many login attempts', schema: errorResponseSchema },
+  },
 })
 
 export default router

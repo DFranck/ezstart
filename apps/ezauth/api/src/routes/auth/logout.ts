@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { errorResponseSchema } from '@ezstart/auth-sdk/server'
 
@@ -14,17 +20,17 @@ const logoutController = async (req: any, res: any) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+    domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
   })
 
-  res.json({ success: true, message: 'Logged out successfully' })
+  sendSuccess(res, { message: 'Logged out successfully' })
 }
 
 docRouter.post('/logout', logoutController, {
   summary: 'Logout and clear httpOnly cookie',
   tags: ['Authentication'],
   responseSchema: errorResponseSchema, // Using for success response too
-  status: 200
+  status: 200,
 })
 
 export default router

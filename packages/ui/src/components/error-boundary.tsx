@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { Component, ErrorInfo, ReactNode } from 'react'
 import { cn } from '../lib/utils'
 import { Button } from './button'
@@ -107,7 +108,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log to console
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    logger.error('ErrorBoundary caught an error:', { error, errorInfo })
 
     // Store error info in state
     this.setState({ errorInfo })
@@ -124,7 +125,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     // Check if max retries exceeded
     if (retryCount >= maxRetries) {
-      console.warn(`Max retries (${maxRetries}) exceeded. Error boundary will not reset.`)
+      logger.warn(`Max retries (${maxRetries}) exceeded. Error boundary will not reset.`)
       return
     }
 
@@ -155,7 +156,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         toast.success('Error copied to clipboard')
       })
       .catch(err => {
-        console.error('Failed to copy error:', err)
+        logger.error('Failed to copy error:', err)
         toast.error('Failed to copy error')
       })
   }

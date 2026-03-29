@@ -7,6 +7,8 @@
  * For the full PlausibleAnalytics component, use it directly in your Next.js app layouts.
  */
 
+import { logger } from '@ezstart/logger'
+
 declare global {
   interface Window {
     plausible?: (event: string, options?: { props?: Record<string, any>; u?: string }) => void
@@ -26,7 +28,7 @@ export function trackEvent(eventName: string, props?: Record<string, string | nu
   if (typeof window !== 'undefined' && (window as any).plausible) {
     ;(window as any).plausible(eventName, { props })
   } else {
-    console.warn('[Analytics] Plausible not loaded yet')
+    logger.warn('[Analytics] Plausible not loaded yet')
   }
 }
 

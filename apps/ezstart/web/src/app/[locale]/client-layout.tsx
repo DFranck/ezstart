@@ -11,6 +11,7 @@ import {
   PWAInstallPrompt,
   type NavigationLink,
 } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useDevice } from '@ezstart/ui/hooks'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -33,7 +34,7 @@ const ClientLayout = ({ children }: ClientLayoutProps): any => {
   try {
     currentLocale = useLocale()
   } catch (error) {
-    console.warn('useLocale failed, using fallback:', error)
+    logger.warn('useLocale failed, using fallback:', error)
     currentLocale = 'en'
   }
 

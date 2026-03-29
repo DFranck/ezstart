@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import {
   WorkspaceSchema,
   CreateWorkspaceRequestSchema,
@@ -10,7 +17,11 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 export const createWorkspaceRegistry = new OpenAPIRegistry()
 
 const router: any = Router()
-export const createWorkspaceRouter = createRouterWithDoc(createWorkspaceRegistry, router, '/workspaces')
+export const createWorkspaceRouter = createRouterWithDoc(
+  createWorkspaceRegistry,
+  router,
+  '/workspaces'
+)
 
 // POST /api/workspaces - Create new workspace
 createWorkspaceRouter.post(
@@ -21,12 +32,7 @@ createWorkspaceRouter.post(
 
       const validation = CreateWorkspaceRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const Workspace = await getWorkspaceModel()
@@ -35,11 +41,7 @@ createWorkspaceRouter.post(
       // @ts-expect-error - Mongoose type inference issue
       const existing = await Workspace.findOne({ slug: validation.data.slug })
       if (existing) {
-        return res.status(409).json({
-          success: false,
-          error: 'Workspace with this slug already exists',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Workspace with this slug already exists', 409)
       }
 
       // Create workspace
@@ -52,18 +54,11 @@ createWorkspaceRouter.post(
 
       await workspace.save()
 
-      res.status(201).json({
-        success: true,
-        data: workspace,
-        timestamp: new Date().toISOString(),
-      })
+      res.status(201)
+      sendSuccess(res, workspace)
     } catch (error) {
       logger.error('Error creating workspace:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Internal server error')
     }
   },
   {

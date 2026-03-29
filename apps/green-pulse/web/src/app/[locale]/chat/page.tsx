@@ -5,7 +5,9 @@ import { ThreadProvider } from '@/components/lia/ThreadProvider'
 import { useConversations } from '@/hooks/useConversations'
 import { useProviders } from '@ezstart/ai-sdk/client'
 import { LoginButton, RequireAuth, useAuthStore } from '@ezstart/auth-sdk'
+import { callApi } from '@ezstart/fetch-client'
 import { getApiUrl } from '@ezstart/config'
+import { logger } from '@ezstart/logger'
 import { InsufficientPermissions } from '@ezstart/rbac'
 import {
   Button,
@@ -75,7 +77,7 @@ function LiaPageContent(): any {
         // Save conversation_id for subsequent messages
         if (conversationId && !activeConversationId) {
           const userInfo = isAuthenticated && user?._id ? `userId: ${user._id}` : 'anonymous'
-          console.log(`✅ Conversation created: ${conversationId} (${userInfo})`)
+          logger.info(`Conversation created: ${conversationId} (${userInfo})`)
           setActiveConversationId(conversationId)
           // Trigger conversation list reload
           if (onConversationCreated) {
@@ -89,7 +91,7 @@ function LiaPageContent(): any {
         }
       },
       onError: (error: Error) => {
-        console.error('LIA Chat Error:', error)
+        logger.error('LIA Chat Error:', error)
 
         // Map error messages to translated versions
         let translatedError = t('errors.sendFailed')
@@ -145,12 +147,14 @@ function BetaAccessRequest() {
     queryKey: ['waitlist-status', user?.email],
     queryFn: async () => {
       if (!user?.email) return null
-      const apiUrl = getApiUrl('ezauth')
-      const response = await fetch(
-        `${apiUrl}/api/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`
+      const response = await callApi(
+        `/waitlist/green-pulse/status/${encodeURIComponent(user.email)}`,
+        {
+          appName: 'ezauth',
+        }
       )
       if (!response.ok) return null
-      return response.json()
+      return response.data
     },
     enabled: !!user?.email,
   })
@@ -160,21 +164,20 @@ function BetaAccessRequest() {
 
     await runWithFeedback({
       action: async () => {
-        const apiUrl = getApiUrl('ezauth')
-        const response = await fetch(`${apiUrl}/api/waitlist/green-pulse/add`, {
+        const response = await callApi('/waitlist/green-pulse/add', {
+          appName: 'ezauth',
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email }),
+          body: { email: user.email },
         })
 
-        const data = await response.json()
-
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to request beta access')
+          throw new Error(
+            response.error || (response.data as any)?.error || 'Failed to request beta access'
+          )
         }
 
         await refetchStatus()
-        return data
+        return response.data
       },
       toastLoading: { message: 'Requesting beta access...' },
       toastSuccess: { message: 'Beta access requested! Waiting for admin approval.' },
@@ -186,23 +189,21 @@ function BetaAccessRequest() {
 
     await runWithFeedback({
       action: async () => {
-        const apiUrl = getApiUrl('ezauth')
-        const response = await fetch(`${apiUrl}/api/auth/register-with-code`, {
+        const response = await callApi('/auth/register-with-code', {
+          appName: 'ezauth',
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+          body: {
             email: user.email,
             accessCode: accessCode.trim().toUpperCase(),
-          }),
+          },
         })
 
         if (!response.ok) {
-          const data = await response.json()
-          throw new Error(data.error || 'Invalid access code')
+          throw new Error(response.error || (response.data as any)?.error || 'Invalid access code')
         }
 
         await refetchUser()
-        return response.json()
+        return response.data
       },
       toastLoading: { message: 'Activating...' },
       toastSuccess: { message: 'Access activated! Refreshing session...' },

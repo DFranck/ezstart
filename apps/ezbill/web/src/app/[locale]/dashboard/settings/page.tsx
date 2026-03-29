@@ -23,8 +23,10 @@ import {
   TabsTrigger,
 } from '@ezstart/ui/components'
 import { useDevice } from '@ezstart/ui/hooks'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { DeletedItemCard } from './components/deleted-item-card'
 
@@ -45,19 +47,12 @@ export default function SettingsPage() {
   const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | undefined>(
     undefined
   )
-  const [deletedItems, setDeletedItems] = useState({
-    clients: [] as Client[],
-    companies: [] as Company[],
-    quotes: [] as Quote[],
-    invoices: [] as Invoice[],
-    receipts: [] as Receipt[],
-    paymentMethods: [] as PaymentMethod[],
-  })
-  const [loading, setLoading] = useState(true)
   const { isMobile } = useDevice()
-  const loadDeletedItems = async () => {
-    try {
-      setLoading(true)
+  const queryClient = useQueryClient()
+
+  const { data: deletedItems, isLoading: loading } = useQuery({
+    queryKey: ['deleted-items', user?._id],
+    queryFn: async () => {
       const userId = user?._id
       const [clients, companies, quotes, invoices, receipts, paymentMethods] = await Promise.all([
         callApi('/clients?deletedOnly=true&limit=100', { userId }),
@@ -75,24 +70,22 @@ export default function SettingsPage() {
         return []
       }
 
-      setDeletedItems({
-        clients: extractItems(clients),
-        companies: extractItems(companies),
-        quotes: extractItems(quotes),
-        invoices: extractItems(invoices),
-        receipts: extractItems(receipts),
-        paymentMethods: extractItems(paymentMethods),
-      })
-    } catch (error) {
-      console.error('Error loading deleted items:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+      return {
+        clients: extractItems(clients) as Client[],
+        companies: extractItems(companies) as Company[],
+        quotes: extractItems(quotes) as Quote[],
+        invoices: extractItems(invoices) as Invoice[],
+        receipts: extractItems(receipts) as Receipt[],
+        paymentMethods: extractItems(paymentMethods) as PaymentMethod[],
+      }
+    },
+    enabled: !!user?._id,
+    staleTime: 30000,
+  })
 
-  useEffect(() => {
-    loadDeletedItems()
-  }, [])
+  const invalidateDeletedItems = () => {
+    queryClient.invalidateQueries({ queryKey: ['deleted-items'] })
+  }
 
   // Map type to API endpoint
   const getApiEndpoint = (type: string): string => {
@@ -109,9 +102,9 @@ export default function SettingsPage() {
       })
       toast.success('Item restored successfully')
       invalidateResourceType(type) // Invalidate only the specific resource
-      await loadDeletedItems() // Refresh the deleted items list
+      invalidateDeletedItems() // Refresh the deleted items list
     } catch (error) {
-      console.error(`Error restoring ${type}:`, error)
+      logger.error(`Error restoring ${type}:`, error)
       toast.error('Failed to restore item')
     }
   }
@@ -149,9 +142,9 @@ export default function SettingsPage() {
       })
       toast.success('Item permanently deleted')
       invalidateResourceType(type) // Invalidate only the specific resource
-      await loadDeletedItems() // Refresh the deleted items list
+      invalidateDeletedItems() // Refresh the deleted items list
     } catch (error) {
-      console.error(`Error permanently deleting ${type}:`, error)
+      logger.error(`Error permanently deleting ${type}:`, error)
       toast.error('Failed to permanently delete item')
     }
   }
@@ -174,9 +167,9 @@ export default function SettingsPage() {
       })
       toast.success(`${company.companyName} deleted successfully`)
       refetchAll()
-      loadDeletedItems() // Refresh deleted items list
+      invalidateDeletedItems() // Refresh deleted items list
     } catch (error) {
-      console.error('Error deleting company:', error)
+      logger.error('Error deleting company:', error)
       toast.error(`Failed to delete ${company.companyName}. Please try again.`)
     }
   }
@@ -199,9 +192,9 @@ export default function SettingsPage() {
       })
       toast.success(`${paymentMethod.name} deleted successfully`)
       refetchAll()
-      loadDeletedItems() // Refresh deleted items list
+      invalidateDeletedItems() // Refresh deleted items list
     } catch (error) {
-      console.error('Error deleting payment method:', error)
+      logger.error('Error deleting payment method:', error)
       toast.error(`Failed to delete ${paymentMethod.name}. Please try again.`)
     }
   }
@@ -224,12 +217,20 @@ export default function SettingsPage() {
     )
   }
 
-  const totalDeleted = Object.values(deletedItems).reduce((sum, items) => sum + items.length, 0)
+  const safeDeletedItems = deletedItems ?? {
+    clients: [] as Client[],
+    companies: [] as Company[],
+    quotes: [] as Quote[],
+    invoices: [] as Invoice[],
+    receipts: [] as Receipt[],
+    paymentMethods: [] as PaymentMethod[],
+  }
+  const totalDeleted = Object.values(safeDeletedItems).reduce((sum, items) => sum + items.length, 0)
 
   // Group data
   const companyGroups = groupCompaniesAsOne(companies)
   const paymentMethodGroups = groupPaymentMethodsByType(paymentMethods)
-  const deletedItemGroups = groupDeletedItems(deletedItems)
+  const deletedItemGroups = groupDeletedItems(safeDeletedItems)
 
   return (
     <div className="max-w-7xl w-full mx-auto py-6 sm:py-8 space-y-6">

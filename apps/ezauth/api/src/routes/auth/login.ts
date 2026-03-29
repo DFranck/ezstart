@@ -1,11 +1,19 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, createStrictRateLimiter, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  createStrictRateLimiter,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
   loginRequestSchema,
   authCodeResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 
 export const loginRegistry = new OpenAPIRegistry()
@@ -25,11 +33,10 @@ const loginController = async (req: any, res: any) => {
 
     const authCode = await AuthService.login(parsed.data)
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       code: authCode.code,
       expires_at: authCode.expires_at,
-      message: 'Login successful'
+      message: 'Login successful',
     })
   } catch (error) {
     logger.error('Login error:', error)
@@ -44,8 +51,8 @@ docRouter.post('/login', loginRateLimiter, loginController, {
   responseSchema: authCodeResponseSchema,
   extraResponses: {
     401: { description: 'Login failed', schema: errorResponseSchema },
-    429: { description: 'Too many login attempts', schema: errorResponseSchema }
-  }
+    429: { description: 'Too many login attempts', schema: errorResponseSchema },
+  },
 })
 
 export default router

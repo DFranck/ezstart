@@ -2,8 +2,17 @@
 
 import { Card, CardContent, CardHeader, H3, P, Spinner } from '@ezstart/ui/components'
 import { useQuery } from '@tanstack/react-query'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { MONITORING_API_URL } from '../lib/config'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
+import { callApi } from '@/config/api'
 
 interface TrendingGraphProps {
   serviceId: string
@@ -32,11 +41,11 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
   const { data, isLoading, error } = useQuery<HistoryResponse>({
     queryKey: ['monitoring', 'history', serviceId, hours],
     queryFn: async () => {
-      const res = await fetch(`${MONITORING_API_URL}/api/history/${serviceId}?hours=${hours}`, {
-        cache: 'no-store',
+      const res = await callApi<HistoryResponse>(`/history/${serviceId}`, {
+        query: { hours: String(hours) },
       })
       if (!res.ok) throw new Error('Failed to fetch history')
-      return res.json()
+      return res.data
     },
     staleTime: 60000, // 1 minute
     refetchInterval: 300000, // 5 minutes
@@ -80,9 +89,10 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
   }))
 
   // Sample data if too many points (max 48 points for readability)
-  const sampledData = chartData.length > 48
-    ? chartData.filter((_, i) => i % Math.ceil(chartData.length / 48) === 0)
-    : chartData
+  const sampledData =
+    chartData.length > 48
+      ? chartData.filter((_, i) => i % Math.ceil(chartData.length / 48) === 0)
+      : chartData
 
   return (
     <Card>
@@ -128,7 +138,7 @@ export function TrendingGraph({ serviceId, title, hours = 24 }: TrendingGraphPro
                 orientation="right"
                 domain={[0, 1]}
                 ticks={[0, 1]}
-                tickFormatter={(value) => (value === 1 ? 'Healthy' : 'Down')}
+                tickFormatter={value => (value === 1 ? 'Healthy' : 'Down')}
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />

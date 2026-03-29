@@ -21,7 +21,6 @@
     "@gacha-analyzer/types": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.34.5",
@@ -30,7 +29,6 @@
   "devDependencies": {
     "@ezstart/typescript-config": "workspace:*",
     "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.19.9",
     "tsx": "^4.20.0",

@@ -5,7 +5,13 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendSuccess, sendError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { DEPLOYMENT_CONFIGS } from '@ezstart/monitoring'
 import { exec } from 'child_process'
 import { promisify } from 'util'
@@ -17,10 +23,17 @@ export const registry = new OpenAPIRegistry()
 export const router: ReturnType<typeof Router> = Router()
 const docRouter = createRouterWithDoc(registry, router)
 
-const listDeploymentsHandler = async (_: Request, res: Response) => {
+const listDeploymentsHandler = async (req: Request, res: Response) => {
   try {
+    const limit = Math.min(Number(req.query.limit) || 50, 100)
+    const offset = Math.max(Number(req.query.offset) || 0, 0)
+
+    const allEntries = Object.entries(DEPLOYMENT_CONFIGS)
+    const total = allEntries.length
+    const paginatedEntries = allEntries.slice(offset, offset + limit)
+
     const deployments = await Promise.all(
-      Object.entries(DEPLOYMENT_CONFIGS).map(async ([id, config]) => {
+      paginatedEntries.map(async ([id, config]) => {
         let lastCommit: {
           hash: string
           message: string
@@ -60,15 +73,19 @@ const listDeploymentsHandler = async (_: Request, res: Response) => {
       })
     )
 
-    sendSuccess(res, {
-      deployments,
-      summary: {
-        total: deployments.length,
-        railway: deployments.filter(d => d.platform === 'railway').length,
-        vercel: deployments.filter(d => d.platform === 'vercel').length,
-        active: deployments.filter(d => d.status === 'active').length,
+    sendSuccess(
+      res,
+      {
+        deployments,
+        summary: {
+          total,
+          railway: deployments.filter(d => d.platform === 'railway').length,
+          vercel: deployments.filter(d => d.platform === 'vercel').length,
+          active: deployments.filter(d => d.status === 'active').length,
+        },
       },
-    })
+      { total, limit, offset }
+    )
   } catch (error) {
     sendError(res, error instanceof Error ? error.message : 'Failed to get deployments')
   }

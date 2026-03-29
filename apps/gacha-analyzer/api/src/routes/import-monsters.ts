@@ -78,13 +78,22 @@ router.get('/', async (req: any, res: any) => {
 router.get('/by-build/:archetype', async (req: any, res: any) => {
   try {
     const { archetype } = req.params
+    const limit = Math.min(Number(req.query.limit) || 20, 100)
+    const offset = Math.max(Number(req.query.offset) || 0, 0)
     const MonsterModel = await getMonsterModel()
 
-    const monsters = await (MonsterModel.find as any)({ buildArchetypes: archetype })
-      .sort({ naturalStars: -1, name: 1 })
-      .lean()
+    const filter = { buildArchetypes: archetype }
 
-    return sendSuccess(res, { archetype, count: monsters.length, monsters })
+    const [monsters, total] = await Promise.all([
+      (MonsterModel.find as any)(filter)
+        .sort({ naturalStars: -1, name: 1 })
+        .skip(offset)
+        .limit(limit)
+        .lean(),
+      MonsterModel.countDocuments(filter),
+    ])
+
+    return sendSuccess(res, { archetype, monsters }, { total, limit, offset })
   } catch (error) {
     logger.error('[monsters-by-build] Error:', error)
     return sendError(
@@ -103,17 +112,22 @@ router.get('/for-rune', async (req: any, res: any) => {
     }
 
     const archetypes = archetypesParam.split(',').map((a: string) => a.trim())
+    const limit = Math.min(Number(req.query.limit) || 15, 100)
+    const offset = Math.max(Number(req.query.offset) || 0, 0)
     const MonsterModel = await getMonsterModel()
+
+    const matchFilter = {
+      buildArchetypes: { $in: archetypes },
+      naturalStars: { $gte: 4 },
+      obtainable: true,
+    }
+
+    // Count total matching documents
+    const total = await MonsterModel.countDocuments(matchFilter)
 
     // Prioritize nat4+, obtainable, and monsters matching multiple archetypes
     const monsters = await MonsterModel.aggregate([
-      {
-        $match: {
-          buildArchetypes: { $in: archetypes },
-          naturalStars: { $gte: 4 },
-          obtainable: true,
-        },
-      },
+      { $match: matchFilter },
       {
         $addFields: {
           matchCount: {
@@ -122,11 +136,12 @@ router.get('/for-rune', async (req: any, res: any) => {
         },
       },
       { $sort: { matchCount: -1, naturalStars: -1, name: 1 } },
-      { $limit: 15 },
+      { $skip: offset },
+      { $limit: limit },
       { $project: { matchCount: 0 } },
     ])
 
-    return sendSuccess(res, { archetypes, count: monsters.length, monsters })
+    return sendSuccess(res, { archetypes, monsters }, { total, limit, offset })
   } catch (error) {
     logger.error('[monsters-for-rune] Error:', error)
     return sendError(

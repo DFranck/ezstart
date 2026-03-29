@@ -21,9 +21,13 @@ import { z } from 'zod'
 
 const activityQuerySchema = z.object({
   type: z.string().optional().describe('Filter by activity type'),
-  severity: z.enum(['critical', 'error', 'warning', 'info', 'success']).optional().describe('Filter by severity'),
+  severity: z
+    .enum(['critical', 'error', 'warning', 'info', 'success'])
+    .optional()
+    .describe('Filter by severity'),
   project: z.string().optional().describe('Filter by project slug'),
   limit: z.coerce.number().default(50).describe('Max number of logs'),
+  offset: z.coerce.number().default(0).describe('Number of items to skip'),
   since: z.string().default('7d').describe('Relative time or ISO timestamp'),
 })
 
@@ -32,7 +36,14 @@ export const router: ReturnType<typeof Router> = Router()
 const listActivityHandler = async (req: Request, res: Response) => {
   try {
     const parsed = activityQuerySchema.safeParse(req.query)
-    const { type, severity, project, limit = 50, since = '7d' } = parsed.success ? parsed.data : req.query as any
+    const {
+      type,
+      severity,
+      project,
+      limit = 50,
+      offset = 0,
+      since = '7d',
+    } = parsed.success ? parsed.data : (req.query as any)
 
     const allLogs: ActivityLog[] = []
 
@@ -68,10 +79,12 @@ const listActivityHandler = async (req: Request, res: Response) => {
     // Sort by timestamp (most recent first)
     filteredLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 
-    // Limit results
-    filteredLogs = filteredLogs.slice(0, Number(limit))
+    const total = filteredLogs.length
 
-    sendSuccess(res, filteredLogs, { total: filteredLogs.length })
+    // Apply offset and limit
+    filteredLogs = filteredLogs.slice(Number(offset), Number(offset) + Number(limit))
+
+    sendSuccess(res, filteredLogs, { total, limit: Number(limit), offset: Number(offset) })
   } catch (error) {
     logger.error('[Activity] Error fetching activity logs:', error)
     sendError(res, error instanceof Error ? error.message : 'Failed to fetch activity logs')

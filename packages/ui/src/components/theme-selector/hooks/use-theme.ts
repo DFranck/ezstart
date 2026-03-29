@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useCallback, useEffect, useState } from 'react'
 import type { ThemeConfig, ThemeVariable, UseThemeOptions } from '../types'
 import { themeApiResponseSchema } from '../schemas/theme.schema'
@@ -53,7 +54,7 @@ export function useTheme(options: UseThemeOptions): UseThemeReturn {
 
       if (!response.ok) {
         // API exists but returned error -> use default theme
-        console.warn(`Theme API returned ${response.status}, using default theme`)
+        logger.warn(`Theme API returned ${response.status}, using default theme`)
         setVariables(defaultTheme.variables)
         return
       }
@@ -84,7 +85,7 @@ export function useTheme(options: UseThemeOptions): UseThemeReturn {
     } catch (err) {
       // Network error or API doesn't exist -> use default theme
       const error = err instanceof Error ? err : new Error('Failed to load theme')
-      console.warn('Failed to load theme, using default:', error.message)
+      logger.warn('Failed to load theme, using default:', error.message)
 
       setError(error)
       setVariables(defaultTheme.variables)

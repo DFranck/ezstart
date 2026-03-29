@@ -4,6 +4,7 @@
  */
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { useState, useCallback } from 'react'
 import { useAIStore } from '../store/aiStore.js'
 import { callApi } from '@ezstart/fetch-client'
@@ -72,7 +73,7 @@ export function useAIChat(options: UseAIChatOptions = {}) {
           setExtractedData(response.data.extracted_data)
         }
       } catch (error) {
-        console.error('Chat error:', error)
+        logger.error('Chat error:', error)
         // Add error message
         const errorMessage: ChatMessage = {
           id: crypto.randomUUID(),

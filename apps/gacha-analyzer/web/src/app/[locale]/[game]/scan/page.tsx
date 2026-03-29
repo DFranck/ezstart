@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -293,7 +294,7 @@ export default function GameScanPage() {
       const hash = quickHash(frame)
       const cached = scanCacheRef.current.get(hash)
       if (cached) {
-        console.log('[scan] Cache hit — skipping OCR')
+        logger.debug('[scan] Cache hit — skipping OCR')
         setCachedResult(cached)
         return
       }

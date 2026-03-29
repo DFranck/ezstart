@@ -1,7 +1,16 @@
 'use client'
 
 import { callApi } from '@/config/api'
-import { Button, Div, Icon, Span, Thread, ThreadMessage, ThreadComposer } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
+import {
+  Button,
+  Div,
+  Icon,
+  Span,
+  Thread,
+  ThreadMessage,
+  ThreadComposer,
+} from '@ezstart/ui/components'
 import { useState, useEffect } from 'react'
 
 interface Message {
@@ -84,9 +93,7 @@ Examples:
   }
 
   const [messages, setMessages] = useState<Message[]>(
-    initialHistory && initialHistory.length > 0
-      ? initialHistory
-      : [getInitialMessage()]
+    initialHistory && initialHistory.length > 0 ? initialHistory : [getInitialMessage()]
   )
   const [isLoading, setIsLoading] = useState(false)
 
@@ -156,7 +163,7 @@ Examples:
         setMessages(prev => [...prev, errorMessage])
       }
     } catch (error) {
-      console.error('AI conversation error:', error)
+      logger.error('AI conversation error:', error)
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Oops! Something went wrong. Please try again.',

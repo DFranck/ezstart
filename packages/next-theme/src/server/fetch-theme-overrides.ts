@@ -3,6 +3,7 @@
  * Prevents theme flash by loading overrides during SSR
  */
 
+import { logger } from '@ezstart/logger'
 import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
 
@@ -36,7 +37,7 @@ export async function fetchThemeOverrides(appName: string): Promise<ThemeOverrid
     } as RequestInit)
 
     if (!response.ok) {
-      console.warn(`[fetchThemeOverrides] API returned ${response.status}, using CSS defaults`)
+      logger.warn(`[fetchThemeOverrides] API returned ${response.status}, using CSS defaults`)
       return { appName, overrides: {} }
     }
 
@@ -52,7 +53,7 @@ export async function fetchThemeOverrides(appName: string): Promise<ThemeOverrid
     return { appName, overrides: {} }
   } catch (error) {
     // Network error or timeout - fail gracefully
-    console.warn(`[fetchThemeOverrides] Failed to fetch theme for ${appName}:`, error)
+    logger.warn(`[fetchThemeOverrides] Failed to fetch theme for ${appName}:`, error)
     return { appName, overrides: {} }
   }
 }

@@ -1,17 +1,24 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
 import {
-  WorkspaceSchema,
-  ListWorkspacesQuerySchema,
-  ApiResponseSchema,
-} from '@green-pulse/types'
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
+import { WorkspaceSchema, ListWorkspacesQuerySchema, ApiResponseSchema } from '@green-pulse/types'
 import { getWorkspaceModel } from '../../models/Workspace.js'
 import { getProjectModel } from '../../models/Project.js'
 
 export const listWorkspacesRegistry = new OpenAPIRegistry()
 
 const router: any = Router()
-export const listWorkspacesRouter = createRouterWithDoc(listWorkspacesRegistry, router, '/workspaces')
+export const listWorkspacesRouter = createRouterWithDoc(
+  listWorkspacesRegistry,
+  router,
+  '/workspaces'
+)
 
 // GET /api/workspaces - List user's workspaces
 listWorkspacesRouter.get(
@@ -22,12 +29,7 @@ listWorkspacesRouter.get(
 
       const validation = ListWorkspacesQuerySchema.safeParse(req.query)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const { status, limit, offset } = validation.data
@@ -44,17 +46,24 @@ listWorkspacesRouter.get(
       }
 
       // @ts-expect-error - Mongoose type inference issue
-      const workspaces = await Workspace.find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).lean()
+      const workspaces = await Workspace.find(query)
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit)
+        .lean()
 
       const total = await Workspace.countDocuments(query)
 
       // Add stats to each workspace
       const workspacesWithStats = await Promise.all(
         workspaces.map(async (workspace: any) => {
-          const projectCount = await Project.countDocuments({ workspaceId: workspace._id?.toString() })
+          const projectCount = await Project.countDocuments({
+            workspaceId: workspace._id?.toString(),
+          })
           const memberCount = workspace.members?.length || 0
           const currentUserMember = workspace.members?.find((m: any) => m.userId === userId)
-          const currentUserRole = workspace.ownerId === userId ? 'owner' : currentUserMember?.role || undefined
+          const currentUserRole =
+            workspace.ownerId === userId ? 'owner' : currentUserMember?.role || undefined
 
           return {
             ...workspace,
@@ -65,18 +74,10 @@ listWorkspacesRouter.get(
         })
       )
 
-      res.json({
-        success: true,
-        data: { workspaces: workspacesWithStats, total },
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, { workspaces: workspacesWithStats, total })
     } catch (error) {
       logger.error('Error listing workspaces:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Internal server error')
     }
   },
   {

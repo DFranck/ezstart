@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -43,13 +49,11 @@ const errorSchema = z.object({
 const getWaitlistController = async (req: any, res: any) => {
   try {
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isAdmin =
+      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
-      return res.status(403).json({
-        success: false,
-        error: 'Admin access required'
-      })
+      return sendError(res, 'Admin access required', 403)
     }
 
     const WaitlistModel = await getWaitlistModel()
@@ -61,7 +65,7 @@ const getWaitlistController = async (req: any, res: any) => {
 
     if (!waitlist) {
       // Return empty waitlist if not found
-      return res.json({
+      return sendSuccess(res, {
         entries: [],
         stats: {
           total: 0,
@@ -69,7 +73,7 @@ const getWaitlistController = async (req: any, res: any) => {
           invited: 0,
           activated: 0,
           rejected: 0,
-        }
+        },
       })
     }
 
@@ -82,16 +86,13 @@ const getWaitlistController = async (req: any, res: any) => {
       rejected: waitlist.emails.filter((e: any) => e.status === 'rejected').length,
     }
 
-    res.json({
+    sendSuccess(res, {
       entries: waitlist.emails,
       stats,
     })
   } catch (error) {
     logger.error('Error fetching waitlist:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch waitlist'
-    })
+    sendError(res, 'Failed to fetch waitlist', 500)
   }
 }
 
@@ -101,8 +102,8 @@ docRouter.get('/:appName', verifyTokenMiddleware, getWaitlistController, {
   responseSchema: getWaitlistResponseSchema,
   extraResponses: {
     403: { description: 'Forbidden - Admin access required', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

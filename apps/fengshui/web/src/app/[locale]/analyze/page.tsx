@@ -3,6 +3,7 @@
 
 import { THEME_COLORS } from '@/lib/theme-colors'
 import { Stepper, type StepperTheme, WelcomeModal } from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -56,11 +57,11 @@ export default function AnalyzePage(): any {
   ] as const
 
   const handleStepChange = (idx: number, id: string) => {
-    console.log(`Étape changée: ${id} (${idx + 1}/${steps.length})`)
+    logger.debug(`Étape changée: ${id} (${idx + 1}/${steps.length})`)
   }
 
   const handleComplete = (allData: Record<string, unknown>) => {
-    console.log('✅ Analyse terminée! Données collectées:', allData)
+    logger.info('Analyse terminée! Données collectées:', allData)
     // Déclencher l'ouverture du preview PDF avec un compteur pour forcer le re-trigger
     setTriggerPreview(prev => prev + 1)
   }

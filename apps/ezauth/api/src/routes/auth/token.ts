@@ -1,11 +1,18 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import { logger } from '@ezstart/logger/server'
 import {
   tokenRequestSchema,
   tokenResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 
 export const tokenRegistry = new OpenAPIRegistry()
@@ -29,13 +36,10 @@ const tokenController = async (req: any, res: any) => {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined
+      domain: process.env.NODE_ENV === 'production' ? '.ezstart.xyz' : undefined,
     })
 
-    res.json({
-      success: true,
-      ...token
-    })
+    sendSuccess(res, token)
   } catch (error) {
     logger.error('Token exchange error:', error)
     sendError(res, error instanceof Error ? error.message : 'Token exchange failed', 400)
@@ -48,8 +52,8 @@ docRouter.post('/token', tokenController, {
   bodySchema: tokenRequestSchema,
   responseSchema: tokenResponseSchema,
   extraResponses: {
-    400: { description: 'Token exchange failed', schema: errorResponseSchema }
-  }
+    400: { description: 'Token exchange failed', schema: errorResponseSchema },
+  },
 })
 
 export default router

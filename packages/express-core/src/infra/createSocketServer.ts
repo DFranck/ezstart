@@ -1,4 +1,5 @@
 import { Server as HTTPServer } from 'http'
+import { logger } from '@ezstart/logger/server'
 import { Server as IOServer, Socket } from 'socket.io'
 
 export type SocketServerOptions = {
@@ -11,7 +12,7 @@ export function createSocketServer(httpServer: HTTPServer, options: SocketServer
   const { corsOrigins } = options
 
   if (corsOrigins.length === 0) {
-    console.warn('⚠️ [Socket.IO] No CORS origins configured — connections may be blocked')
+    logger.warn('⚠️ [Socket.IO] No CORS origins configured — connections may be blocked')
   }
 
   const io = new IOServer(httpServer, {
@@ -23,10 +24,10 @@ export function createSocketServer(httpServer: HTTPServer, options: SocketServer
 
   const corsLabel =
     corsOrigins.length === 1 && corsOrigins[0] === '*' ? 'ALL (*)' : `${corsOrigins.length} origins`
-  console.log(`🧩 Socket.IO server initialized with CORS: ${corsLabel}`)
+  logger.info(`🧩 Socket.IO server initialized with CORS: ${corsLabel}`)
 
   io.on('connection', socket => {
-    console.log(`⚡ Socket.IO server New connection: ${socket.id}`)
+    logger.debug(`⚡ Socket.IO server New connection: ${socket.id}`)
 
     options.onConnection?.(socket, io)
   })

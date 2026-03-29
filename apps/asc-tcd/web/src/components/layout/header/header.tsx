@@ -3,6 +3,7 @@
 import { Burger, Div, H2, P, Tag } from '@ezstart/ui/components'
 import { useClickOutside, useDevice, useOnScroll } from '@ezstart/ui/hooks'
 import { cn } from '@ezstart/ui/lib'
+import { logger } from '@ezstart/logger'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
@@ -17,14 +18,14 @@ export default function Header() {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   useClickOutside(mobileMenuRef, () => {
     if (isTablet && isOpen) {
-      console.log('isTablet && isOpen')
+      logger.debug('isTablet && isOpen')
       setIsOpen(false)
     }
   })
 
   useEffect(() => {
     if (!isTablet && isOpen) {
-      console.log('!isTablet && isOpen')
+      logger.debug('!isTablet && isOpen')
       setIsOpen(false)
     }
   }, [isTablet, isOpen])

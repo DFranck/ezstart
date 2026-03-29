@@ -1,22 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
-import { MONITORING_API_URL } from '../lib/config'
+import { callApi } from '@/config/api'
 
 export interface AuditsData {
   audits: any[]
 }
 
 async function fetchAudits(): Promise<AuditsData> {
-  const timestamp = Date.now()
-  const response = await fetch(`${MONITORING_API_URL}/api/audits?_t=${timestamp}`, {
-    cache: 'no-store',
-    signal: AbortSignal.timeout(30000), // 30s timeout
+  const response = await callApi<AuditsData>('/audits', {
+    query: { _t: String(Date.now()) },
   })
 
   if (!response.ok) {
     throw new Error('Failed to fetch audits data')
   }
 
-  return response.json()
+  return response.data
 }
 
 export function useMonitoringAudits() {

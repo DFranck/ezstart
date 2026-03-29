@@ -3,6 +3,7 @@
  * Single interface to chat with any AI provider
  */
 
+import { logger } from '@ezstart/logger'
 import { providerRegistry } from '../registry/ProviderRegistry.js'
 import type { ChatMessage, ProviderSendOptions, ProviderResponse } from '../providers/base.js'
 import type { AIProviderInfo } from '../registry/types.js'
@@ -47,10 +48,10 @@ export class UnifiedChat {
 
     for (const providerId of providerIds) {
       try {
-        console.log(`🤖 Trying provider: ${providerId}`)
+        logger.debug(`Trying provider: ${providerId}`)
         return await this.send(message, providerId, options)
       } catch (error) {
-        console.warn(`⚠️  Provider ${providerId} failed:`, error)
+        logger.warn(`Provider ${providerId} failed:`, error)
         errors.push(error as Error)
         continue
       }

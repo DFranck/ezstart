@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { useRBAC } from '@ezstart/rbac'
 import { useMessages } from 'next-intl'
 
@@ -21,7 +22,7 @@ export const useNavLinks = (): NavItem[] => {
   try {
     messages = useMessages() as Record<string, any>
   } catch (error) {
-    console.warn('useMessages failed in useNavLinks, using fallback:', error)
+    logger.warn('useMessages failed in useNavLinks, using fallback:', error)
     // Return empty array as fallback
     return []
   }

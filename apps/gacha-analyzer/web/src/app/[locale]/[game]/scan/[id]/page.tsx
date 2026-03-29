@@ -1,6 +1,19 @@
 'use client'
 
-import { Badge, Button, Div, Input, P, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextArea } from '@ezstart/ui/components'
+import {
+  Badge,
+  Button,
+  Div,
+  Input,
+  P,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  TextArea,
+} from '@ezstart/ui/components'
+import { logger } from '@ezstart/logger'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { use, useCallback, useState } from 'react'
@@ -64,7 +77,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       await callApi(`/scans/${id}/reanalyze`, { method: 'POST' })
       await queryClient.invalidateQueries({ queryKey: ['scan', id] })
     } catch (e) {
-      console.error('[reanalyze] Error:', e)
+      logger.error('[reanalyze] Error:', e)
     } finally {
       setIsReanalyzing(false)
     }
@@ -77,7 +90,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       setShowDisagreeInput(false)
       setFeedbackComment('')
     } catch (e) {
-      console.error('[feedback] Error:', e)
+      logger.error('[feedback] Error:', e)
     }
   }
 
@@ -94,13 +107,19 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       setReportDescription('')
       setReportCategory('wrong-ocr')
     } catch (e) {
-      console.error('[report] Error:', e)
+      logger.error('[report] Error:', e)
     } finally {
       setIsSubmittingReport(false)
     }
   }
 
-  const REPORT_CATEGORIES: ReportCategory[] = ['wrong-ocr', 'wrong-advice', 'wrong-gem', 'wrong-efficiency', 'other']
+  const REPORT_CATEGORIES: ReportCategory[] = [
+    'wrong-ocr',
+    'wrong-advice',
+    'wrong-gem',
+    'wrong-efficiency',
+    'other',
+  ]
 
   const REPORT_STATUS_STYLES: Record<string, string> = {
     open: 'bg-destructive/20 text-destructive border-destructive/40',
@@ -137,31 +156,65 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       <Div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/${game}/history`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="m15 18-6-6 6-6"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-1.5"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
             {t('actions.back')}
           </Link>
         </Button>
 
         <Div className="flex items-center gap-2">
           {scan.result?.rawText && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReanalyze}
-              disabled={isReanalyzing}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+            <Button variant="outline" size="sm" onClick={handleReanalyze} disabled={isReanalyzing}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1.5"
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 21h5v-5" />
+              </svg>
               {isReanalyzing ? t('scanDetail.reanalyzing') : t('actions.reanalyze')}
             </Button>
           )}
 
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          <Button variant="destructive" size="sm" onClick={handleDelete} disabled={isDeleting}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-1.5"
+            >
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
             {t('actions.delete')}
           </Button>
         </Div>
@@ -172,7 +225,9 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
         <img src={scan.thumbnail} alt="Scanned capture" className="w-full rounded-lg" />
       ) : (
         <Div className="rounded-md bg-muted/30 border border-border px-3 py-4 text-center">
-          <P className="text-sm text-muted-foreground">{t('scanDetail.noThumbnail', { defaultMessage: 'Image non disponible' })}</P>
+          <P className="text-sm text-muted-foreground">
+            {t('scanDetail.noThumbnail', { defaultMessage: 'Image non disponible' })}
+          </P>
         </Div>
       )}
 
@@ -213,30 +268,51 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
         <Div className="flex items-center gap-2">
           {scan.feedback ? (
             <Div className="flex items-center gap-2">
-              <Badge className={scan.feedback.opinion === 'agree' ? 'bg-success/20 text-success-foreground border-success/40' : 'bg-destructive/20 text-destructive border-destructive/40'}>
-                {scan.feedback.opinion === 'agree' ? `👍 ${t('feedback.agree')}` : `👎 ${t('feedback.disagree')}`}
+              <Badge
+                className={
+                  scan.feedback.opinion === 'agree'
+                    ? 'bg-success/20 text-success-foreground border-success/40'
+                    : 'bg-destructive/20 text-destructive border-destructive/40'
+                }
+              >
+                {scan.feedback.opinion === 'agree'
+                  ? `👍 ${t('feedback.agree')}`
+                  : `👎 ${t('feedback.disagree')}`}
               </Badge>
-              {scan.feedback.comment && <P className="text-xs text-muted-foreground">{scan.feedback.comment}</P>}
+              {scan.feedback.comment && (
+                <P className="text-xs text-muted-foreground">{scan.feedback.comment}</P>
+              )}
             </Div>
           ) : showDisagreeInput ? (
             <Div className="flex items-center gap-2 w-full">
               <Input
                 value={feedbackComment}
-                onChange={(e) => setFeedbackComment(e.target.value)}
+                onChange={e => setFeedbackComment(e.target.value)}
                 placeholder={t('feedback.commentPlaceholder')}
                 className="text-sm flex-1"
               />
               <Button size="sm" onClick={() => handleFeedback('disagree', feedbackComment)}>
                 {t('feedback.send')}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => { setShowDisagreeInput(false); setFeedbackComment('') }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowDisagreeInput(false)
+                  setFeedbackComment('')
+                }}
+              >
                 {t('feedback.cancel')}
               </Button>
             </Div>
           ) : (
             <Div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleFeedback('agree')}>👍 {t('feedback.agree')}</Button>
-              <Button variant="outline" size="sm" onClick={() => setShowDisagreeInput(true)}>👎 {t('feedback.disagree')}</Button>
+              <Button variant="outline" size="sm" onClick={() => handleFeedback('agree')}>
+                👍 {t('feedback.agree')}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowDisagreeInput(true)}>
+                👎 {t('feedback.disagree')}
+              </Button>
             </Div>
           )}
         </Div>
@@ -252,7 +328,9 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
               {scan.reports.map((report, index) => (
                 <Div key={index} className="rounded-md border border-border p-3 space-y-1.5">
                   <Div className="flex items-center gap-2">
-                    <Badge className={`border text-[10px] px-1.5 py-0 ${REPORT_STATUS_STYLES[report.status] ?? ''}`}>
+                    <Badge
+                      className={`border text-[10px] px-1.5 py-0 ${REPORT_STATUS_STYLES[report.status] ?? ''}`}
+                    >
                       {t(`report.status.${report.status}`)}
                     </Badge>
                     <Badge variant="outline" className="text-[10px]">
@@ -261,7 +339,9 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
                   </Div>
                   <P className="text-sm text-muted-foreground">{report.description}</P>
                   {report.resolution && (
-                    <P className="text-sm text-success-foreground">{t('report.resolution')}: {report.resolution}</P>
+                    <P className="text-sm text-success-foreground">
+                      {t('report.resolution')}: {report.resolution}
+                    </P>
                   )}
                 </Div>
               ))}
@@ -271,28 +351,44 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
           {/* Report form toggle */}
           {showReportForm ? (
             <Div className="space-y-3 rounded-md border border-border p-3">
-              <Select value={reportCategory} onValueChange={(v) => setReportCategory(v as ReportCategory)}>
+              <Select
+                value={reportCategory}
+                onValueChange={v => setReportCategory(v as ReportCategory)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t('report.category')} />
                 </SelectTrigger>
                 <SelectContent>
                   {REPORT_CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{t(`report.categories.${cat}`)}</SelectItem>
+                    <SelectItem key={cat} value={cat}>
+                      {t(`report.categories.${cat}`)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <TextArea
                 value={reportDescription}
-                onChange={(e) => setReportDescription(e.target.value)}
+                onChange={e => setReportDescription(e.target.value)}
                 placeholder={t('report.descriptionPlaceholder')}
                 className="text-sm"
                 rows={3}
               />
               <Div className="flex items-center gap-2">
-                <Button size="sm" onClick={handleReport} disabled={isSubmittingReport || !reportDescription.trim()}>
+                <Button
+                  size="sm"
+                  onClick={handleReport}
+                  disabled={isSubmittingReport || !reportDescription.trim()}
+                >
                   {t('report.send')}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => { setShowReportForm(false); setReportDescription('') }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowReportForm(false)
+                    setReportDescription('')
+                  }}
+                >
                   {t('report.cancel')}
                 </Button>
               </Div>

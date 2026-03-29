@@ -1,35 +1,36 @@
-import { Request, Response } from 'express';
-import { sendSuccess, sendError } from '../helpers/api-response.js';
+import { Request, Response } from 'express'
+import { logger } from '@ezstart/logger/server'
+import { sendSuccess, sendError } from '../helpers/api-response.js'
 
 type RestoreControllerOptions = {
-  validateId?: (id: string) => boolean;
-};
+  validateId?: (id: string) => boolean
+}
 
 export function makeRestoreController<T>(
   service: (id: string) => Promise<T | null>,
   logTag: string,
   options: RestoreControllerOptions = {}
 ) {
-  const { validateId } = options;
+  const { validateId } = options
 
   return async (req: Request, res: Response) => {
-    const id = req.params.id;
+    const id = req.params.id
 
     if (!id || (validateId && !validateId(id))) {
-      return sendError(res, 'Invalid ID', 400);
+      return sendError(res, 'Invalid ID', 400)
     }
 
     try {
-      const restored = await service(id);
+      const restored = await service(id)
 
       if (!restored) {
-        return sendError(res, `${logTag} not found`, 404);
+        return sendError(res, `${logTag} not found`, 404)
       }
 
-      return sendSuccess(res, restored);
+      return sendSuccess(res, restored)
     } catch (err) {
-      console.error(`[${logTag}]`, err);
-      return sendError(res, `Failed to restore ${logTag}`);
+      logger.error(`[${logTag}]`, err)
+      return sendError(res, `Failed to restore ${logTag}`)
     }
-  };
+  }
 }

@@ -3,6 +3,7 @@
  * Uses culori for accurate color space conversions
  */
 
+import { logger } from '@ezstart/logger'
 import { formatHex, oklch, parseHex } from 'culori'
 import { parseOklch, stringifyOklch } from './sanitize-color'
 
@@ -14,7 +15,7 @@ export function oklchToHex(oklchString: string): string {
   try {
     const parsed = parseOklch(oklchString)
     if (!parsed) {
-      console.error('[oklchToHex] Failed to parse:', oklchString)
+      logger.error('[oklchToHex] Failed to parse:', oklchString)
       return '#000000'
     }
 
@@ -26,7 +27,7 @@ export function oklchToHex(oklchString: string): string {
 
     return hex || '#000000'
   } catch (error) {
-    console.error('[oklchToHex] Error:', error, 'for input:', oklchString)
+    logger.error('[oklchToHex] Error:', { error, input: oklchString })
     return '#000000'
   }
 }
@@ -39,20 +40,20 @@ export function hexToOklch(hexString: string): string {
   try {
     const color = parseHex(hexString)
     if (!color) {
-      console.error('[hexToOklch] Failed to parse:', hexString)
+      logger.error('[hexToOklch] Failed to parse:', hexString)
       return hexString
     }
 
     const oklchColor = oklch(color)
     if (!oklchColor) {
-      console.error('[hexToOklch] Failed to convert to OKLCH:', hexString)
+      logger.error('[hexToOklch] Failed to convert to OKLCH:', hexString)
       return hexString
     }
 
     const { l, c, h } = oklchColor
     return stringifyOklch(l || 0, c || 0, h || 0)
   } catch (error) {
-    console.error('[hexToOklch] Error:', error, 'for input:', hexString)
+    logger.error('[hexToOklch] Error:', { error, input: hexString })
     return hexString
   }
 }
@@ -97,6 +98,6 @@ export function toOklch(colorString: string): string {
   }
 
   // Unknown format
-  console.warn(`[toOklch] Unknown format: ${trimmed}`)
+  logger.warn(`[toOklch] Unknown format: ${trimmed}`)
   return 'oklch(0 0 0)'
 }

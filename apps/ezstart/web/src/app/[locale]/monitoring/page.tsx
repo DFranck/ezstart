@@ -1,6 +1,7 @@
 'use client'
 
 import { AccessDenied, LoginButton, RequireAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { Card, P, Section, Spinner } from '@ezstart/ui/components'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -31,7 +32,7 @@ function MonitoringOverviewContent(): any {
   // Socket.IO real-time updates
   useSocket({
     onHealthChecksUpdated: () => {
-      console.log('[Monitoring] Health checks updated via Socket.IO')
+      logger.debug('[Monitoring] Health checks updated via Socket.IO')
       queryClient.invalidateQueries({ queryKey: ['monitoring'] })
       resetCountdown()
     },

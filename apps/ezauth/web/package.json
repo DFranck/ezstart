@@ -14,6 +14,8 @@
   "dependencies": {
     "@ezstart/auth-sdk": "workspace:*",
     "@ezstart/config": "workspace:*",
+    "@ezstart/fetch-client": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "@ezstart/next-theme": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "autoprefixer": "^10.4.19",

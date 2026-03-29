@@ -4,7 +4,14 @@
  */
 
 import { logger } from '@ezstart/logger/server'
-import { Router, OpenAPIRegistry, createRouterWithDoc } from '@ezstart/express-core'
+import {
+  Router,
+  OpenAPIRegistry,
+  createRouterWithDoc,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { esgService } from '../../services/esg.service.js'
 import { WebhookEventSchema } from '@green-pulse/types'
 
@@ -82,21 +89,12 @@ handleEsgReportRouter.post(
       const payload = JSON.stringify(req.body)
 
       if (!signature || !esgService.verifyWebhookSignature(payload, signature)) {
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid webhook signature',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Invalid webhook signature', 401)
       }
 
       const validation = WebhookEventSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid webhook payload',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid webhook payload', validation.error.errors, 400)
       }
 
       const event = validation.data
@@ -120,18 +118,10 @@ handleEsgReportRouter.post(
           logger.warn(`Unknown webhook event type: ${event.event_type}`)
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Webhook processed successfully',
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, { message: 'Webhook processed successfully' })
     } catch (error) {
       logger.error('Webhook processing error:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process webhook',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Failed to process webhook')
     }
   },
   {

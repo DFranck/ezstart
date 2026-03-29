@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { logger } from '@ezstart/logger'
 import { useRouter } from 'next/navigation'
 import { Button, Label, P, Card, CardContent } from '@ezstart/ui/components'
 import { useCreateFormInstance } from '@/hooks/useForms'
@@ -49,14 +50,12 @@ export function CreateFormInstanceDialog({
       const formInstanceId = result?.data?._id
 
       if (formInstanceId) {
-        router.push(
-          `/w/${workspaceSlug}/p/${projectId}/f/${formInstanceId}`
-        )
+        router.push(`/w/${workspaceSlug}/p/${projectId}/f/${formInstanceId}`)
       }
 
       setOpen(false)
     } catch (error) {
-      console.error('Failed to create form instance:', error)
+      logger.error('Failed to create form instance:', error)
     }
   }
 
@@ -72,9 +71,7 @@ export function CreateFormInstanceDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Form Instance</DialogTitle>
-          <DialogDescription>
-            Choose a form template and filling mode
-          </DialogDescription>
+          <DialogDescription>Choose a form template and filling mode</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,9 +101,7 @@ export function CreateFormInstanceDialog({
                         <span className="text-2xl">{config.icon || '📄'}</span>
                         <div className="flex-1">
                           <P className="font-medium mb-1">{config.name}</P>
-                          <P className="text-sm text-muted-foreground">
-                            {config.description}
-                          </P>
+                          <P className="text-sm text-muted-foreground">{config.description}</P>
                           <div className="flex gap-2 mt-2">
                             <span className="text-xs px-2 py-1 bg-muted rounded">
                               {config.category}
@@ -197,10 +192,7 @@ export function CreateFormInstanceDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!selectedConfigId || createFormInstance.isPending}
-            >
+            <Button type="submit" disabled={!selectedConfigId || createFormInstance.isPending}>
               {createFormInstance.isPending ? 'Creating...' : 'Create & Fill Form'}
             </Button>
           </DialogFooter>

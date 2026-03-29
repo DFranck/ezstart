@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger'
 import type { ThemeVariable, ThemeVariableCategory } from '../types'
 
 /**
@@ -137,7 +138,7 @@ export function extractRootVariables(cssContent: string): ThemeVariable[] {
 
   if (!rootBlock) {
     // Fallback: parse entire content
-    console.warn('No :root block found, parsing entire CSS content')
+    logger.warn('No :root block found, parsing entire CSS content')
     return parseThemeCSS(cssContent)
   }
 
@@ -151,7 +152,7 @@ export function extractDarkVariables(cssContent: string): ThemeVariable[] {
   const darkBlock = extractBlockContent(cssContent, '\\.dark')
 
   if (!darkBlock) {
-    console.warn('No .dark block found in CSS')
+    logger.warn('No .dark block found in CSS')
     return []
   }
 

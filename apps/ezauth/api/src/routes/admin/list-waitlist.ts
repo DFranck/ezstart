@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getWaitlistModel } from '../../models/waitlist.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -12,7 +18,9 @@ const docRouter = createRouterWithDoc(listWaitlistRegistry, router)
 // Schemas
 const waitlistEntrySchema = z.object({
   email: z.string().describe('Email address'),
-  status: z.enum(['pending', 'invited', 'activated', 'rejected']).describe('Current waitlist status'),
+  status: z
+    .enum(['pending', 'invited', 'activated', 'rejected'])
+    .describe('Current waitlist status'),
   accessCode: z.string().nullable().describe('Access code if invited'),
   invitedAt: z.string().nullable().describe('Invitation date ISO string'),
   invitedBy: z.string().nullable().describe('ID of admin who invited'),
@@ -25,19 +33,23 @@ const listWaitlistResponseSchema = z.object({
   success: z.boolean().describe('Whether the operation succeeded'),
   appName: z.string().describe('Application name'),
   entries: z.array(waitlistEntrySchema).describe('Waitlist entries'),
-  pagination: z.object({
-    page: z.number().describe('Current page number'),
-    limit: z.number().describe('Items per page'),
-    total: z.number().describe('Total number of entries'),
-    totalPages: z.number().describe('Total number of pages'),
-  }).describe('Pagination metadata'),
-  stats: z.object({
-    total: z.number().describe('Total entries count'),
-    pending: z.number().describe('Pending entries count'),
-    invited: z.number().describe('Invited entries count'),
-    activated: z.number().describe('Activated entries count'),
-    rejected: z.number().describe('Rejected entries count'),
-  }).describe('Waitlist statistics'),
+  pagination: z
+    .object({
+      page: z.number().describe('Current page number'),
+      limit: z.number().describe('Items per page'),
+      total: z.number().describe('Total number of entries'),
+      totalPages: z.number().describe('Total number of pages'),
+    })
+    .describe('Pagination metadata'),
+  stats: z
+    .object({
+      total: z.number().describe('Total entries count'),
+      pending: z.number().describe('Pending entries count'),
+      invited: z.number().describe('Invited entries count'),
+      activated: z.number().describe('Activated entries count'),
+      rejected: z.number().describe('Rejected entries count'),
+    })
+    .describe('Waitlist statistics'),
 })
 
 const errorSchema = z.object({
@@ -49,13 +61,11 @@ const errorSchema = z.object({
 const listWaitlistController = async (req: any, res: any) => {
   try {
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isAdmin =
+      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
-      return res.status(403).json({
-        success: false,
-        error: 'Admin access required'
-      })
+      return sendError(res, 'Admin access required', 403)
     }
 
     const WaitlistModel = await getWaitlistModel()
@@ -69,10 +79,7 @@ const listWaitlistController = async (req: any, res: any) => {
     const waitlist = await WaitlistModel.findOne({ appName })
 
     if (!waitlist) {
-      return res.status(404).json({
-        success: false,
-        error: `Waitlist not found for app: ${appName}`
-      })
+      return sendError(res, `Waitlist not found for app: ${appName}`, 404)
     }
 
     // Filter by status if provided
@@ -95,24 +102,20 @@ const listWaitlistController = async (req: any, res: any) => {
     const skip = (page - 1) * limit
     const paginatedEntries = entries.slice(skip, skip + limit)
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       appName: waitlist.appName,
       entries: paginatedEntries,
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       },
-      stats
+      stats,
     })
   } catch (error) {
     logger.error('Error listing waitlist:', error)
-    res.status(500).json({
-      success: false,
-      error: 'Failed to list waitlist'
-    })
+    sendError(res, 'Failed to list waitlist', 500)
   }
 }
 
@@ -124,8 +127,8 @@ docRouter.get('/:appName', verifyTokenMiddleware, listWaitlistController, {
   extraResponses: {
     403: { description: 'Forbidden - Admin access required', schema: errorSchema },
     404: { description: 'Waitlist not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

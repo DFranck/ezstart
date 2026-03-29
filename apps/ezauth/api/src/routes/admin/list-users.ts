@@ -1,4 +1,11 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -21,24 +28,24 @@ const userSchema = z.object({
   organizationId: z.string().optional().describe('Organization ID'),
   managedBy: z.string().optional().describe('Manager user ID'),
   createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string')
+  updatedAt: z.string().describe('Last update date ISO string'),
 })
 
 const paginationSchema = z.object({
   page: z.number().describe('Current page number'),
   limit: z.number().describe('Items per page'),
   total: z.number().describe('Total number of items'),
-  totalPages: z.number().describe('Total number of pages')
+  totalPages: z.number().describe('Total number of pages'),
 })
 
 const listUsersResponseSchema = z.object({
   users: z.array(userSchema).describe('List of users'),
-  pagination: paginationSchema.describe('Pagination metadata')
+  pagination: paginationSchema.describe('Pagination metadata'),
 })
 
 const errorSchema = z.object({
   error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details')
+  details: z.string().optional().describe('Additional error details'),
 })
 
 // Query validation schema
@@ -46,7 +53,7 @@ const listUsersQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(200).optional().default(50),
   search: z.string().optional(),
-  role: z.string().optional()
+  role: z.string().optional(),
 })
 
 // Controller
@@ -57,7 +64,8 @@ const listUsersController = async (req: any, res: any) => {
     }
 
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isAdmin =
+      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
       return sendError(res, 'Admin access required', 403)
@@ -88,23 +96,23 @@ const listUsersController = async (req: any, res: any) => {
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
-      AuthUser.countDocuments(query)
+      AuthUser.countDocuments(query),
     ])
 
-    res.json({
+    sendSuccess(res, {
       users: users.map((u: any) => ({
         ...u,
         _id: u._id.toString(),
         roles: u.roles || [],
         permissions: u.permissions || [],
-        features: u.features || []
+        features: u.features || [],
       })),
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     })
   } catch (error: any) {
     logger.error('Error listing users:', error)
@@ -119,8 +127,8 @@ docRouter.get('/users', verifyTokenMiddleware, listUsersController, {
   extraResponses: {
     401: { description: 'Unauthorized', schema: errorSchema },
     403: { description: 'Forbidden', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

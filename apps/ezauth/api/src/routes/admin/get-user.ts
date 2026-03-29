@@ -1,4 +1,10 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { getAuthUserModel } from '../../models/auth-user.js'
 import { verifyTokenMiddleware } from '../../middleware/auth.js'
@@ -21,64 +27,65 @@ const userSchema = z.object({
   organizationId: z.string().optional().describe('Organization ID'),
   managedBy: z.string().optional().describe('Manager user ID'),
   createdAt: z.string().describe('Creation date ISO string'),
-  updatedAt: z.string().describe('Last update date ISO string')
+  updatedAt: z.string().describe('Last update date ISO string'),
 })
 
 const getUserResponseSchema = z.object({
-  user: userSchema.describe('User object')
+  user: userSchema.describe('User object'),
 })
 
 const errorSchema = z.object({
   error: z.string().describe('Error message'),
-  details: z.string().optional().describe('Additional error details')
+  details: z.string().optional().describe('Additional error details'),
 })
 
 // Controller
 const getUserController = async (req: any, res: any) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' })
+      return sendError(res, 'Authentication required', 401)
     }
 
     const currentUser = req.user
-    const isAdmin = currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
+    const isAdmin =
+      currentUser.roles?.includes('admin') || currentUser.roles?.includes('superadmin')
 
     if (!isAdmin) {
-      return res.status(403).json({ error: 'Admin access required' })
+      return sendError(res, 'Admin access required', 403)
     }
 
     const AuthUser = await getAuthUserModel()
     const user = await AuthUser.findById(req.params.id).select('-passwordHash').lean()
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' })
+      return sendError(res, 'User not found', 404)
     }
 
     // Check if admin has permission to view this user
     if (!currentUser.roles?.includes('superadmin')) {
       if (user.roles?.includes('superadmin')) {
-        return res.status(403).json({ error: 'Cannot view superadmin users' })
+        return sendError(res, 'Cannot view superadmin users', 403)
       }
-      if (currentUser.apps?.length > 0 && !user.apps?.some((app: string) => currentUser.apps.includes(app))) {
-        return res.status(403).json({ error: 'User not in your apps' })
+      if (
+        currentUser.apps?.length > 0 &&
+        !user.apps?.some((app: string) => currentUser.apps.includes(app))
+      ) {
+        return sendError(res, 'User not in your apps', 403)
       }
     }
 
-    res.json({
+    sendSuccess(res, {
       user: {
         ...user,
         _id: user._id.toString(),
         roles: user.roles || [],
         permissions: user.permissions || [],
-        features: user.features || []
-      }
+        features: user.features || [],
+      },
     })
   } catch (error: any) {
     logger.error('Error getting user:', error)
-    res.status(500).json({
-      error: 'Failed to get user',
-      details: error.message
-    })
+    sendError(res, 'Failed to get user', 500)
   }
 }
 
@@ -90,8 +97,8 @@ docRouter.get('/users/:id', verifyTokenMiddleware, getUserController, {
     401: { description: 'Unauthorized', schema: errorSchema },
     403: { description: 'Forbidden', schema: errorSchema },
     404: { description: 'User not found', schema: errorSchema },
-    500: { description: 'Server error', schema: errorSchema }
-  }
+    500: { description: 'Server error', schema: errorSchema },
+  },
 })
 
 export default router

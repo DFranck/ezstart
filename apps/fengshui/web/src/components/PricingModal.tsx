@@ -3,6 +3,7 @@
 import { GRADIENT_BG } from '@/lib/theme-colors'
 import { useAuth } from '@ezstart/auth-sdk'
 import { usePay } from '@ezstart/pay-sdk'
+import { logger } from '@ezstart/logger'
 import { Button, Card, CardContent, Icon, Modal } from '@ezstart/ui/components'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -63,18 +64,13 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
         }
       }
     } catch (err) {
-      console.error('Payment error:', err)
+      logger.error('Payment error:', err)
     } finally {
       setLoading(null)
     }
   }
 
-  const freeFeatures = [
-    t('freeFeature1'),
-    t('freeFeature2'),
-    t('freeFeature3'),
-    t('freeFeature4'),
-  ]
+  const freeFeatures = [t('freeFeature1'), t('freeFeature2'), t('freeFeature3'), t('freeFeature4')]
 
   const premiumFeatures = [
     t('premiumFeature1'),
@@ -105,16 +101,15 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
             <ul className="space-y-3">
               {freeFeatures.map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <Icon name="lucide:Check" className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <Icon
+                    name="lucide:Check"
+                    className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"
+                  />
                   {feature}
                 </li>
               ))}
             </ul>
-            <Button
-              variant="outline"
-              className="w-full mt-6"
-              onClick={onClose}
-            >
+            <Button variant="outline" className="w-full mt-6" onClick={onClose}>
               {t('freeTitle')}
             </Button>
           </CardContent>
@@ -129,15 +124,16 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
           <CardContent className="p-6">
             <div className="text-center mb-6">
               <Icon name="lucide:Star" className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-foreground">
-                {t('premiumTitle', { year })}
-              </h3>
+              <h3 className="text-lg font-bold text-foreground">{t('premiumTitle', { year })}</h3>
             </div>
 
             <ul className="space-y-3 mb-6">
               {premiumFeatures.map((feature, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                  <Icon name="lucide:Star" className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <Icon
+                    name="lucide:Star"
+                    className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0"
+                  />
                   {feature}
                 </li>
               ))}
@@ -156,7 +152,8 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 ) : (
                   <Icon name="lucide:Zap" className="w-4 h-4 mr-2" />
                 )}
-                {t('oneTime')} — {PRICES.oneshot.amount}{PRICES.oneshot.currency}
+                {t('oneTime')} — {PRICES.oneshot.amount}
+                {PRICES.oneshot.currency}
               </Button>
 
               {/* Monthly */}
@@ -171,7 +168,9 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 ) : (
                   <Icon name="lucide:RefreshCw" className="w-4 h-4 mr-2" />
                 )}
-                {t('monthly')} — {PRICES.monthly.amount}{PRICES.monthly.currency}{t('perMonth')}
+                {t('monthly')} — {PRICES.monthly.amount}
+                {PRICES.monthly.currency}
+                {t('perMonth')}
               </Button>
 
               {/* Yearly */}
@@ -186,7 +185,9 @@ export default function PricingModal({ isOpen, onClose, year }: PricingModalProp
                 ) : (
                   <Icon name="lucide:Crown" className="w-4 h-4 mr-2" />
                 )}
-                {t('yearly')} — {PRICES.yearly.amount}{PRICES.yearly.currency}{t('perYear')}
+                {t('yearly')} — {PRICES.yearly.amount}
+                {PRICES.yearly.currency}
+                {t('perYear')}
                 <span className="ml-1 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded-full">
                   {t('bestValue')}
                 </span>

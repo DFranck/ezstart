@@ -34,13 +34,22 @@ router.get('/:gameType/:layoutName', async (req: any, res: any) => {
 router.get('/:gameType', async (req: any, res: any) => {
   try {
     const GameConfig = await getGameConfigModel()
+    const limit = Math.min(Number(req.query.limit) || 20, 100)
+    const offset = Math.max(Number(req.query.offset) || 0, 0)
 
-    const configs = await (GameConfig.find as any)({ gameType: req.params.gameType })
-      .sort({ updatedAt: -1 })
-      .lean()
-      .exec()
+    const filter = { gameType: req.params.gameType }
 
-    return sendSuccess(res, configs)
+    const [configs, total] = await Promise.all([
+      (GameConfig.find as any)(filter)
+        .sort({ updatedAt: -1 })
+        .skip(offset)
+        .limit(limit)
+        .lean()
+        .exec(),
+      GameConfig.countDocuments(filter),
+    ])
+
+    return sendSuccess(res, configs, { total, limit, offset })
   } catch (error) {
     logger.error('[get-game-config] Error:', error)
     return sendError(res, 'Failed to fetch game configs')

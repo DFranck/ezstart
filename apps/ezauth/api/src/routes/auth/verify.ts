@@ -1,10 +1,17 @@
-import { createRouterWithDoc, OpenAPIRegistry, Router, sendError, sendValidationError } from '@ezstart/express-core'
+import {
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  Router,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import { Router as ExpressRouter } from 'express'
 import { AuthService } from '../../services/auth.service.js'
 import {
   verifyRequestSchema,
   verifyResponseSchema,
-  errorResponseSchema
+  errorResponseSchema,
 } from '@ezstart/auth-sdk/server'
 
 export const verifyRegistry = new OpenAPIRegistry()
@@ -30,23 +37,18 @@ const verifyController = async (req: any, res: any) => {
       }
     }
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       valid: true,
       payload: {
         userId: payload.userId,
         email: payload.email,
         username: payload.username,
         apps: payload.apps,
-        exp: payload.exp
-      }
+        exp: payload.exp,
+      },
     })
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      valid: false,
-      error: error instanceof Error ? error.message : 'Invalid token'
-    })
+    sendError(res, error instanceof Error ? error.message : 'Invalid token', 401)
   }
 }
 
@@ -57,8 +59,8 @@ docRouter.post('/verify', verifyController, {
   responseSchema: verifyResponseSchema,
   extraResponses: {
     401: { description: 'Invalid token', schema: errorResponseSchema },
-    403: { description: 'No app access', schema: errorResponseSchema }
-  }
+    403: { description: 'No app access', schema: errorResponseSchema },
+  },
 })
 
 export default router

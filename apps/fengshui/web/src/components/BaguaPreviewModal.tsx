@@ -4,6 +4,7 @@ import { Transformations } from '@/types/bagua'
 import { Direction, DIRECTIONS, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import type { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { calculateBaguaRotation } from '@/utils/baguaRotation'
+import { logger } from '@ezstart/logger'
 import { Button, Icon, Modal } from '@ezstart/ui/components'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -150,26 +151,26 @@ export function BaguaPreviewModal({
       `
       document.head.appendChild(hideScrollbarStyle)
 
-      console.log('Starting PDF generation with iframe-safe approach...')
+      logger.debug('Starting PDF generation with iframe-safe approach...')
 
       // Attendre que les éléments soient rendus - délai augmenté pour SVG
       await new Promise(resolve => setTimeout(resolve, 3000))
 
       if (!wheelRef.current || !gridRef.current) {
-        console.error('Wheel or Grid element not found after delay')
+        logger.error('Wheel or Grid element not found after delay')
         throw new Error('Wheel or Grid element not found - make sure the modal is open')
       }
 
-      console.log('Wheel and Grid elements found:', wheelRef.current, gridRef.current)
+      logger.debug('Wheel and Grid elements found')
 
       // Import libraries dynamically
       const domtoimage = (await import('dom-to-image')).default
       const jsPDF = (await import('jspdf')).default
 
-      console.log('Libraries imported, trying dom-to-image capture...')
+      logger.debug('Libraries imported, trying dom-to-image capture...')
 
       // Utiliser dom-to-image qui est plus fiable pour les SVG
-      console.log('Capturing element with dom-to-image...')
+      logger.debug('Capturing element with dom-to-image...')
 
       // dom-to-image.toPng avec haute résolution pour qualité PDF optimale
       // Capture à 1200px (2x) puis scale down pour meilleure qualité
@@ -178,7 +179,7 @@ export function BaguaPreviewModal({
       const scaleFactor = captureSize / containerSize
 
       // First capture the wheel component
-      console.log('Capturing wheel component...')
+      logger.debug('Capturing wheel component...')
       if (!wheelRef.current) throw new Error('Wheel container not found')
 
       // Temporarily make the wheel container visible for capture
@@ -230,7 +231,7 @@ export function BaguaPreviewModal({
       wheelRef.current.style.left = originalWheelStyle.left
       wheelRef.current.style.display = originalWheelStyle.display
 
-      console.log('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
+      logger.debug('dom-to-image capture successful, data URL length:', wheelDataUrl.length)
 
       // Créer un canvas à partir du wheelDataURL pour jsPDF
       const img = new Image()
@@ -249,7 +250,7 @@ export function BaguaPreviewModal({
         img.src = wheelDataUrl
       })
 
-      console.log('Canvas created successfully:', canvas.width, 'x', canvas.height)
+      logger.debug(`Canvas created successfully: ${canvas.width}x${canvas.height}`)
 
       // Create PDF with 2 pages
       const pdf = new jsPDF({
@@ -287,10 +288,10 @@ export function BaguaPreviewModal({
       }
 
       // Capture cards for wheel mode
-      console.log('Capturing cards for wheel mode...')
+      logger.debug('Capturing cards for wheel mode...')
 
       if (!cardsRef.current) {
-        console.error('Cards container not found')
+        logger.error('Cards container not found')
         throw new Error('Cards container not found')
       }
 
@@ -350,7 +351,7 @@ export function BaguaPreviewModal({
       const wheelImageData = await createWheelImage()
 
       // Capture Grid separately
-      console.log('Capturing grid for page 2...')
+      logger.debug('Capturing grid for page 2...')
       if (!gridRef.current) throw new Error('Grid container not found')
 
       // Temporarily make the grid container visible for capture
@@ -392,7 +393,7 @@ export function BaguaPreviewModal({
       const gridImageData = gridDataUrl
 
       // Capture page 3 from the REAL React cards in cardsGridRef
-      console.log('Capturing page 3 from real React cards grid...')
+      logger.debug('Capturing page 3 from real React cards grid...')
       if (!cardsGridRef.current) throw new Error('Cards grid container not found')
 
       // Temporarily make the cards grid container visible for capture
@@ -571,10 +572,10 @@ export function BaguaPreviewModal({
       // Generate blob and URL
       const blob = pdf.output('blob')
       const url = URL.createObjectURL(blob)
-      console.log('PDF generated successfully with 2 pages: Wheel + Combined Grid/Cards views')
+      logger.debug('PDF generated successfully with 2 pages: Wheel + Combined Grid/Cards views')
       setPdfUrl(url)
     } catch (error) {
-      console.error('Erreur génération PDF détaillée:', error)
+      logger.error('Erreur génération PDF détaillée:', error)
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
       toast.error(`Erreur lors de la génération du PDF: ${errorMessage}`)
     } finally {
@@ -600,7 +601,7 @@ export function BaguaPreviewModal({
       link.click()
       document.body.removeChild(link)
     } catch (error) {
-      console.error('Erreur téléchargement PDF:', error)
+      logger.error('Erreur téléchargement PDF:', error)
       toast.error('Erreur lors du téléchargement du PDF')
     }
   }
@@ -672,10 +673,10 @@ export function BaguaPreviewModal({
                 <Icon name="lucide:Loader2" className="w-10 h-10 text-blue-500 animate-spin" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">{t('pdfModal.generatingInProgress')}</h3>
-                <p className="text-sm text-gray-600 mb-1">
-                  {t('pdfModal.capturingAnalysis')}
-                </p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  {t('pdfModal.generatingInProgress')}
+                </h3>
+                <p className="text-sm text-gray-600 mb-1">{t('pdfModal.capturingAnalysis')}</p>
                 <p className="text-xs text-gray-500">{t('pdfModal.twoPages')}</p>
               </div>
             </div>
@@ -1045,8 +1046,14 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name={(sector.icon as any) || 'lucide:Info'} className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
-                          {sector.summary.length > 35 ? sector.summary.substring(0, 32) + '...' : sector.summary}
+                          <Icon
+                            name={(sector.icon as any) || 'lucide:Info'}
+                            className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
+                            style={{ color: accent }}
+                          />
+                          {sector.summary.length > 35
+                            ? sector.summary.substring(0, 32) + '...'
+                            : sector.summary}
                         </div>
                       )}
 
@@ -1056,7 +1063,11 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name="lucide:ArrowRightLeft" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
+                          <Icon
+                            name="lucide:ArrowRightLeft"
+                            className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
+                            style={{ color: accent }}
+                          />
                           {sector.nourisher && `${t('bagua.nourishedBy')}: ${sector.nourisher}`}
                           {sector.nourisher && sector.controller && ' • '}
                           {sector.controller && `${t('bagua.controlledBy')}: ${sector.controller}`}
@@ -1069,8 +1080,14 @@ export function BaguaPreviewModal({
                           className="text-[9px] leading-tight flex items-center"
                           style={{ color: '#6b7280' }}
                         >
-                          <Icon name="lucide:Layers" className="w-4 h-4 sm:w-3 sm:h-3 mr-1" style={{ color: accent }} />
-                          {sector.matiere.length > 32 ? sector.matiere.substring(0, 29) + '...' : sector.matiere}
+                          <Icon
+                            name="lucide:Layers"
+                            className="w-4 h-4 sm:w-3 sm:h-3 mr-1"
+                            style={{ color: accent }}
+                          />
+                          {sector.matiere.length > 32
+                            ? sector.matiere.substring(0, 29) + '...'
+                            : sector.matiere}
                         </div>
                       )}
 

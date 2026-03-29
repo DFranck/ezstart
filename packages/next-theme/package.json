@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@ezstart/config": "workspace:*",
+    "@ezstart/logger": "workspace:*",
     "@ezstart/ui": "workspace:*",
     "next-themes": "^0.4.6"
   },

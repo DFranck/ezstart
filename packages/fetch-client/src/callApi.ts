@@ -1,3 +1,4 @@
+import { logger } from '@ezstart/logger'
 import type { AppName } from '@ezstart/config/urls'
 import { getApiUrl } from '@ezstart/config/urls'
 import type { ApiError, ApiMeta, ApiResponse, CallApiOptions, LogLevel } from './types'
@@ -163,7 +164,7 @@ export async function callApi<T = any>(
   // Log request if enabled
   if (effectiveLogLevel === 'all') {
     console.group(`🌐 [callApi] ${method} ${url}`)
-    console.log('📤 Request:', {
+    logger.debug('Request:', {
       method,
       url,
       query,
@@ -217,7 +218,7 @@ export async function callApi<T = any>(
     if (res.ok) {
       // Log successful response if enabled
       if (effectiveLogLevel === 'all') {
-        console.log(`✅ Response [${res.status}] (${duration}ms):`, json)
+        logger.debug(`Response [${res.status}] (${duration}ms):`, json)
         console.groupEnd()
       }
 
@@ -244,7 +245,7 @@ export async function callApi<T = any>(
         if (effectiveLogLevel === 'errors') {
           console.group(`❌ [callApi] ${method} ${url} - ${res.status}`)
         }
-        console.warn(`🔴 Response [${res.status}] (${duration}ms):`, {
+        logger.warn(`Response [${res.status}] (${duration}ms):`, {
           url,
           method,
           status: res.status,
@@ -283,7 +284,7 @@ export async function callApi<T = any>(
       if (effectiveLogLevel === 'errors') {
         console.group(`💥 [callApi] ${method} ${url} - NETWORK ERROR`)
       }
-      console.error(`🔴 Fetch failed (${duration}ms):`, {
+      logger.error(`Fetch failed (${duration}ms):`, {
         error: (err as Error).message,
         endpoint,
         url,

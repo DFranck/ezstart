@@ -1,5 +1,5 @@
 import { logger } from '@ezstart/logger/server'
-import { Router } from '@ezstart/express-core'
+import { Router, sendSuccess, sendError } from '@ezstart/express-core'
 import { stripe } from '../services/stripe.js'
 import { getPaymentModel } from '../models/Payment.js'
 import type { Request, Response, Router as ExpressRouter } from 'express'
@@ -9,11 +9,11 @@ const router: ExpressRouter = Router()
 
 // Stripe webhook handler
 router.post('/webhooks/stripe', async (req: Request, res: Response) => {
-  const Payment = await getPaymentModel();
+  const Payment = await getPaymentModel()
   const sig = req.headers['stripe-signature']
 
   if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return res.status(400).json({ error: 'Missing signature or webhook secret' })
+    return sendError(res, 'Missing signature or webhook secret', 400)
   }
 
   let event: Stripe.Event
@@ -22,7 +22,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
     logger.error('Webhook signature verification failed:', err)
-    return res.status(400).json({ error: 'Invalid signature' })
+    return sendError(res, 'Invalid signature', 400)
   }
 
   try {
@@ -43,10 +43,7 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
           updateData['metadata.subscriptionId'] = session.subscription as string
         }
 
-        const result = await Payment.updateOne(
-          { paymentId: session.id },
-          updateData
-        )
+        const result = await Payment.updateOne({ paymentId: session.id }, updateData)
 
         if (result.matchedCount === 0) {
           logger.error(`❌ Payment not found in DB: ${session.id}`)
@@ -135,10 +132,10 @@ router.post('/webhooks/stripe', async (req: Request, res: Response) => {
         logger.info(`ℹ️ Unhandled event type: ${event.type}`)
     }
 
-    res.json({ received: true })
+    sendSuccess(res, { received: true })
   } catch (error) {
     logger.error('Webhook processing error:', error)
-    res.status(500).json({ error: 'Webhook processing failed' })
+    sendError(res, 'Webhook processing failed', 500)
   }
 })
 

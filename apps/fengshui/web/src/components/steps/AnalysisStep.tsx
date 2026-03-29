@@ -8,6 +8,7 @@ import type { CardinalStepData, UploadStepData } from '@/types/bagua'
 import { Direction, DIRECTIONS_WITH_CENTER } from '@/types/directions'
 import { YearBaguaConfig } from '@/types/yearBaguaConfig'
 import { useAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import {
   Button,
   Card,
@@ -60,7 +61,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
       const config = loadBaguaConfigFromMessages(messages)
       setCfg(config)
     } catch (error) {
-      console.error('Failed to load Bagua config from messages:', error)
+      logger.error('Failed to load Bagua config from messages:', error)
     }
   }, [messages])
 
@@ -93,7 +94,7 @@ export default function AnalysisStep({ triggerPreview }: { triggerPreview?: numb
 
       document.body.removeChild(tempDiv)
     } catch (error) {
-      console.error('Erreur génération PDF:', error)
+      logger.error('Erreur génération PDF:', error)
     } finally {
       setIsGeneratingPDF(false)
     }

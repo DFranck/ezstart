@@ -32,6 +32,7 @@ import {
   TextArea,
 } from '@ezstart/ui/components'
 import { useAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { cn } from '@ezstart/ui/lib'
 import { useEffect, useState } from 'react'
 import { InvoiceAIAssistant, InvoiceAction } from './invoice-ai-assistant'
@@ -69,9 +70,9 @@ export function InvoiceModal({
   const [isLoading, setIsLoading] = useState(false)
   const [showTaxes, setShowTaxes] = useState(invoice?.taxRate ? invoice.taxRate > 0 : false)
   const [showAIAssistant, setShowAIAssistant] = useState(false)
-  const [aiConversationHistory, setAiConversationHistory] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>(
-    invoice?.aiConversationHistory || []
-  )
+  const [aiConversationHistory, setAiConversationHistory] = useState<
+    Array<{ role: 'user' | 'assistant'; content: string }>
+  >(invoice?.aiConversationHistory || [])
 
   const [formData, setFormData] = useState<CreateInvoice & { paymentMethodIds?: string[] }>({
     userId: '', // Will be set in handleSubmit
@@ -91,7 +92,8 @@ export function InvoiceModal({
     notes: invoice?.notes || '',
     terms: invoice?.terms || '',
     taxRate: invoice?.taxRate || 0,
-    paymentMethodIds: invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+    paymentMethodIds:
+      invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
     aiConversationHistory: invoice?.aiConversationHistory || [],
   })
 
@@ -121,7 +123,8 @@ export function InvoiceModal({
       notes: invoice?.notes || '',
       terms: invoice?.terms || '',
       taxRate: invoice?.taxRate || 0,
-      paymentMethodIds: invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
+      paymentMethodIds:
+        invoice?.paymentMethodIds || paymentMethods?.filter(p => p.isDefault).map(p => p._id) || [],
       aiConversationHistory: invoice?.aiConversationHistory || [],
     })
     setShowTaxes(invoice?.taxRate ? invoice.taxRate > 0 : false)
@@ -268,9 +271,9 @@ export function InvoiceModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const userId = user?._id
-    console.log('Form submitted!', { formData, userId })
+    logger.debug('Form submitted!', { formData, userId })
     if (!userId) {
-      console.log('No user ID found!')
+      logger.debug('No user ID found!')
       return
     }
 

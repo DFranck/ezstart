@@ -13,6 +13,7 @@ import { callApi } from '@/config/api'
 import { groupClientsByActivity } from '@/utils/group-clients'
 import { Client, Company, PaymentMethod } from '@ezbill/types'
 import { useAuth } from '@ezstart/auth-sdk'
+import { logger } from '@ezstart/logger'
 import { Div, Spinner, SkeletonCard, Skeleton, WelcomeModal } from '@ezstart/ui/components'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -20,20 +21,30 @@ import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 
 // Dynamic imports for modals (lazy load on demand) - Performance optimization
-const ClientModal = dynamic(() => import('@/components/client-modal').then(mod => ({ default: mod.ClientModal })), {
-  loading: () => null,
-  ssr: false
-})
+const ClientModal = dynamic(
+  () => import('@/components/client-modal').then(mod => ({ default: mod.ClientModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const CompanyModal = dynamic(() => import('@/components/company-modal').then(mod => ({ default: mod.CompanyModal })), {
-  loading: () => null,
-  ssr: false
-})
+const CompanyModal = dynamic(
+  () => import('@/components/company-modal').then(mod => ({ default: mod.CompanyModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
-const PaymentMethodModal = dynamic(() => import('@/components/payment-method-modal').then(mod => ({ default: mod.PaymentMethodModal })), {
-  loading: () => null,
-  ssr: false
-})
+const PaymentMethodModal = dynamic(
+  () =>
+    import('@/components/payment-method-modal').then(mod => ({ default: mod.PaymentMethodModal })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
 const DashboardPage = () => {
   const router = useRouter()
@@ -165,7 +176,7 @@ const DashboardPage = () => {
       toast.success(`${itemName} deleted successfully`)
       refetchAll()
     } catch (error) {
-      console.error(`Error deleting ${deleteDialog.type}:`, error)
+      logger.error(`Error deleting ${deleteDialog.type}:`, error)
       toast.error(`Failed to delete ${itemName}. Please try again.`)
     }
   }
@@ -201,7 +212,8 @@ const DashboardPage = () => {
   }
 
   // Check if there's any meaningful data to show
-  const hasData = hasClients && (allInvoices.length > 0 || allQuotes.length > 0 || allReceipts.length > 0)
+  const hasData =
+    hasClients && (allInvoices.length > 0 || allQuotes.length > 0 || allReceipts.length > 0)
 
   return (
     <>
@@ -211,25 +223,28 @@ const DashboardPage = () => {
         description="Professional invoicing and billing made simple"
         features={[
           {
-            icon: "lucide:FileText",
-            title: "Create Invoices & Quotes",
-            description: "Generate professional invoices and quotes in seconds with customizable templates"
+            icon: 'lucide:FileText',
+            title: 'Create Invoices & Quotes',
+            description:
+              'Generate professional invoices and quotes in seconds with customizable templates',
           },
           {
-            icon: "lucide:Users",
-            title: "Manage Clients",
-            description: "Keep track of all your clients and companies in one organized dashboard"
+            icon: 'lucide:Users',
+            title: 'Manage Clients',
+            description: 'Keep track of all your clients and companies in one organized dashboard',
           },
           {
-            icon: "lucide:CreditCard",
-            title: "Track Payments",
-            description: "Monitor payment status, send reminders, and accept multiple payment methods"
+            icon: 'lucide:CreditCard',
+            title: 'Track Payments',
+            description:
+              'Monitor payment status, send reminders, and accept multiple payment methods',
           },
           {
-            icon: "lucide:BarChart3",
-            title: "Revenue Analytics",
-            description: "Visualize your revenue trends and identify your top clients with insightful charts"
-          }
+            icon: 'lucide:BarChart3',
+            title: 'Revenue Analytics',
+            description:
+              'Visualize your revenue trends and identify your top clients with insightful charts',
+          },
         ]}
         ctaText="Start Creating"
       />

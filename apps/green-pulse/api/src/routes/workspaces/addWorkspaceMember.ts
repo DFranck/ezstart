@@ -1,5 +1,12 @@
 import { logger } from '@ezstart/logger/server'
-import { Router, createRouterWithDoc, OpenAPIRegistry } from '@ezstart/express-core'
+import {
+  Router,
+  createRouterWithDoc,
+  OpenAPIRegistry,
+  sendSuccess,
+  sendError,
+  sendValidationError,
+} from '@ezstart/express-core'
 import {
   WorkspaceSchema,
   AddWorkspaceMemberRequestSchema,
@@ -10,7 +17,11 @@ import { getWorkspaceModel } from '../../models/Workspace.js'
 export const addWorkspaceMemberRegistry = new OpenAPIRegistry()
 
 const router: any = Router()
-export const addWorkspaceMemberRouter = createRouterWithDoc(addWorkspaceMemberRegistry, router, '/workspaces')
+export const addWorkspaceMemberRouter = createRouterWithDoc(
+  addWorkspaceMemberRegistry,
+  router,
+  '/workspaces'
+)
 
 // POST /api/workspaces/:id/members - Add member to workspace
 addWorkspaceMemberRouter.post(
@@ -21,12 +32,7 @@ addWorkspaceMemberRouter.post(
 
       const validation = AddWorkspaceMemberRequestSchema.safeParse(req.body)
       if (!validation.success) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid request',
-          details: validation.error.errors,
-          timestamp: new Date().toISOString(),
-        })
+        return sendValidationError(res, 'Invalid request', validation.error.errors, 400)
       }
 
       const Workspace = await getWorkspaceModel()
@@ -35,11 +41,7 @@ addWorkspaceMemberRouter.post(
       const workspace = await Workspace.findById(req.params.id)
 
       if (!workspace) {
-        return res.status(404).json({
-          success: false,
-          error: 'Workspace not found',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Workspace not found', 404)
       }
 
       // Check permissions: only owner or admin can add members
@@ -48,21 +50,15 @@ addWorkspaceMemberRouter.post(
       const isAdmin = member?.role === 'admin'
 
       if (!isOwner && !isAdmin) {
-        return res.status(403).json({
-          success: false,
-          error: 'Forbidden - only owner or admin can add members',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'Forbidden - only owner or admin can add members', 403)
       }
 
       // Check if user already a member
-      const existingMember = workspace.members?.find((m: any) => m.userId === validation.data.userId)
+      const existingMember = workspace.members?.find(
+        (m: any) => m.userId === validation.data.userId
+      )
       if (existingMember) {
-        return res.status(409).json({
-          success: false,
-          error: 'User is already a member of this workspace',
-          timestamp: new Date().toISOString(),
-        })
+        return sendError(res, 'User is already a member of this workspace', 409)
       }
 
       // Add member
@@ -75,18 +71,10 @@ addWorkspaceMemberRouter.post(
 
       await workspace.save()
 
-      res.json({
-        success: true,
-        data: workspace,
-        timestamp: new Date().toISOString(),
-      })
+      sendSuccess(res, workspace)
     } catch (error) {
       logger.error('Error adding workspace member:', error)
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      })
+      sendError(res, 'Internal server error')
     }
   },
   {

@@ -3,6 +3,7 @@
 import type { AuthUser } from '@ezstart/auth-sdk'
 import { RequireAuth, AccessDenied, LoginButton } from '@ezstart/auth-sdk'
 import { callApi } from '@ezstart/fetch-client'
+import { logger } from '@ezstart/logger'
 import { useRBAC, RequireRole, InsufficientPermissions } from '@ezstart/rbac'
 import {
   Badge,
@@ -23,8 +24,9 @@ import {
   SelectValue,
   Spinner,
 } from '@ezstart/ui/components'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { UserEditModal } from './components/user-edit-modal'
 import { UserManagementTable } from './components/user-management-table'
 import { useAuth } from '@ezstart/auth-sdk'
@@ -43,23 +45,23 @@ function AdminPanelContent() {
   const { user } = useAuth()
   const t = useTranslations()
   const rbac = useRBAC(user, 'ezstart') // Pass appName for app-specific checks
-  const [users, setUsers] = useState<AuthUser[]>([])
-  const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const limit = 50
   const [selectedUser, setSelectedUser] = useState<AuthUser | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
 
-  // Fetch users function using callApi
-  const fetchUsers = async (page = 1) => {
-    try {
-      setLoading(true)
-      setError(null)
-
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['admin', 'users', page, limit, searchQuery, roleFilter],
+    queryFn: async () => {
       const query: Record<string, any> = {
-        page: page.toString(),
-        limit: pagination.limit.toString(),
+        page: String(page),
+        limit: String(limit),
       }
 
       if (searchQuery) query.search = searchQuery
@@ -71,28 +73,23 @@ function AdminPanelContent() {
       })
 
       if (response.ok && response.data) {
-        setUsers(response.data.users)
-        setPagination(response.data.pagination)
-      } else {
-        const errorMsg =
-          response.status === 401
-            ? 'Unauthorized - Please login again'
-            : response.status === 403
-              ? 'Forbidden - Admin access required'
-              : `Failed to fetch users (${response.status})`
-        throw new Error(errorMsg)
+        return response.data
       }
-    } catch (err: any) {
-      setError(err.message)
-      console.error('Error fetching users:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  useEffect(() => {
-    fetchUsers()
-  }, [searchQuery, roleFilter])
+      const errorMsg =
+        response.status === 401
+          ? 'Unauthorized - Please login again'
+          : response.status === 403
+            ? 'Forbidden - Admin access required'
+            : `Failed to fetch users (${response.status})`
+      throw new Error(errorMsg)
+    },
+    staleTime: 30000,
+  })
+
+  const users = data?.users ?? []
+  const pagination = data?.pagination ?? { page: 1, limit, total: 0, totalPages: 0 }
+  const error = queryError?.message ?? null
 
   return (
     <Div size={'xs'}>
@@ -141,7 +138,7 @@ function AdminPanelContent() {
                     <SelectItem value="client">Client</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={() => fetchUsers(1)} variant="outline">
+                <Button onClick={() => refetch()} variant="outline">
                   Refresh
                 </Button>
               </Div>
@@ -163,19 +160,19 @@ function AdminPanelContent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={!pagination || pagination.page === 1}
-                    onClick={() => fetchUsers((pagination?.page ?? 1) - 1)}
+                    disabled={pagination.page === 1}
+                    onClick={() => setPage(p => p - 1)}
                   >
                     Previous
                   </Button>
                   <P className="text-sm py-2 px-3">
-                    Page {pagination?.page ?? 1} of {pagination?.totalPages ?? 1}
+                    Page {pagination.page} of {pagination.totalPages || 1}
                   </P>
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={!pagination || pagination.page === pagination.totalPages}
-                    onClick={() => fetchUsers((pagination?.page ?? 1) + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                    onClick={() => setPage(p => p + 1)}
                   >
                     Next
                   </Button>
@@ -195,7 +192,7 @@ function AdminPanelContent() {
           onClose={() => setSelectedUser(null)}
           onSave={() => {
             setSelectedUser(null)
-            fetchUsers(pagination.page)
+            refetch()
           }}
         />
       )}

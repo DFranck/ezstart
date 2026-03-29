@@ -6,6 +6,7 @@
  * @see https://docs.sentry.io/api/
  */
 
+import { logger } from '@ezstart/logger'
 import { z } from 'zod'
 
 /**
@@ -36,12 +37,15 @@ export const SentryIssueSchema = z.object({
       function: z.string().optional(),
     })
     .optional(),
-  tags: z.array(
-    z.object({
-      key: z.string(),
-      value: z.string(),
-    })
-  ).optional().default([]),
+  tags: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
 })
 
 export type SentryIssue = z.infer<typeof SentryIssueSchema>
@@ -57,12 +61,15 @@ export const SentryEventSchema = z.object({
   platform: z.string(),
   type: z.string(),
   metadata: z.any(),
-  tags: z.array(
-    z.object({
-      key: z.string(),
-      value: z.string(),
-    })
-  ).optional().default([]),
+  tags: z
+    .array(
+      z.object({
+        key: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional()
+    .default([]),
   dateCreated: z.string(),
   user: z
     .object({
@@ -268,9 +275,7 @@ export class SentryClient {
   /**
    * Map Sentry level to severity
    */
-  private mapLevelToSeverity(
-    level: SentryIssue['level']
-  ): ActivityLog['severity'] {
+  private mapLevelToSeverity(level: SentryIssue['level']): ActivityLog['severity'] {
     switch (level) {
       case 'fatal':
         return 'critical'
@@ -289,9 +294,7 @@ export class SentryClient {
   /**
    * Fetch all projects in the organization
    */
-  async fetchProjects(): Promise<
-    Array<{ id: string; name: string; slug: string }>
-  > {
+  async fetchProjects(): Promise<Array<{ id: string; name: string; slug: string }>> {
     const url = `${this.config.baseUrl}/organizations/${this.config.organizationSlug}/projects/`
 
     const response = await fetch(url, {
@@ -330,9 +333,7 @@ export function createSentryClient(): SentryClient | null {
   const authToken = process.env.SENTRY_AUTH_TOKEN
 
   if (!authToken) {
-    console.warn(
-      '⚠️  [SentryClient] SENTRY_AUTH_TOKEN not provided. Sentry integration disabled.'
-    )
+    logger.warn('[SentryClient] SENTRY_AUTH_TOKEN not provided. Sentry integration disabled.')
     return null
   }
 

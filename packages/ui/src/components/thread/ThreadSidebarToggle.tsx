@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@ezstart/logger'
 import { cn } from '../../lib/utils'
 import { Button } from '../button'
 import { Icon } from '../icon'
@@ -35,7 +36,7 @@ export function ThreadSidebarToggle({
   const layoutContext = useThreadLayout()
 
   if (!layoutContext) {
-    console.warn('ThreadSidebarToggle must be used within ThreadLayout')
+    logger.warn('ThreadSidebarToggle must be used within ThreadLayout')
     return null
   }
 

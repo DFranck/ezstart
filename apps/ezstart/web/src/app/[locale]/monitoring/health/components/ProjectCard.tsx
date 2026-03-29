@@ -1,6 +1,6 @@
 'use client'
 
-import { getApiUrl } from '@ezstart/config'
+import { logger } from '@ezstart/logger'
 import type { ProjectHealth } from '@ezstart/monitoring'
 import type { UptimeDataPoint } from '@ezstart/ui/components'
 import {
@@ -14,8 +14,9 @@ import {
   P,
   UptimeGraph,
 } from '@ezstart/ui/components'
+import { useQuery } from '@tanstack/react-query'
+import { callApi } from '@/config/api'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 interface ProjectCardProps {
   project: ProjectHealth
@@ -31,32 +32,20 @@ interface ServiceHistory {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const [servicesHistory, setServicesHistory] = useState<ServiceHistory[]>([])
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true)
+  const { data: historyData, isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['monitoring', 'project-history', project.id],
+    queryFn: async () => {
+      const res = await callApi<{ services: ServiceHistory[] }>(`/history/project/${project.id}`, {
+        query: { hours: '24' },
+      })
+      if (!res.ok) throw new Error('Failed to fetch history')
+      return res.data.services || []
+    },
+    staleTime: 60000,
+    refetchInterval: 300000,
+  })
 
-  // Fetch health check history for the project
-  useEffect(() => {
-    async function fetchHistory() {
-      try {
-        setIsLoadingHistory(true)
-        // Use getApiUrl to get the correct monitoring API URL based on environment
-        const MONITORING_API_URL = getApiUrl('ezstart')
-
-        const res = await fetch(`${MONITORING_API_URL}/api/history/project/${project.id}?hours=24`)
-        if (!res.ok) throw new Error('Failed to fetch history')
-
-        const data = await res.json()
-        setServicesHistory(data.services || [])
-      } catch (error) {
-        console.error('Failed to fetch project history:', error)
-        setServicesHistory([])
-      } finally {
-        setIsLoadingHistory(false)
-      }
-    }
-
-    fetchHistory()
-  }, [project.id])
+  const servicesHistory = historyData ?? []
 
   const getGithubUrlForEndpoint = (endpointType: string) => {
     if (!project.githubUrl) return null

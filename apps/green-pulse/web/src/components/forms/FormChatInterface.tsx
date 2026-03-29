@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { logger } from '@ezstart/logger'
 import { Button, Input, P, Card, CardContent } from '@ezstart/ui/components'
 import { useExtractFormData } from '@/hooks/useForms'
 import type { FormConfig } from '@green-pulse/types'
@@ -28,7 +29,9 @@ export function FormChatInterface({
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: formConfig.extraction?.systemPrompt || 'Hello! I\'m here to help you fill out this form. Just talk naturally about the information.',
+      content:
+        formConfig.extraction?.systemPrompt ||
+        "Hello! I'm here to help you fill out this form. Just talk naturally about the information.",
       timestamp: new Date(),
     },
   ])
@@ -82,8 +85,7 @@ export function FormChatInterface({
         const aiResponse: Message = {
           role: 'assistant',
           content:
-            extractionData.aiResponse ||
-            'Thanks! I\'ve extracted that information. Anything else?',
+            extractionData.aiResponse || "Thanks! I've extracted that information. Anything else?",
           timestamp: new Date(),
         }
         setMessages(prev => [...prev, aiResponse])
@@ -99,7 +101,7 @@ export function FormChatInterface({
         }
       }
     } catch (error) {
-      console.error('Extraction failed:', error)
+      logger.error('Extraction failed:', error)
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I had trouble processing that. Could you try rephrasing?',
@@ -138,9 +140,7 @@ export function FormChatInterface({
             >
               <CardContent className="p-3">
                 <P className="text-sm whitespace-pre-wrap">{message.content}</P>
-                <P className="text-xs opacity-70 mt-1">
-                  {message.timestamp.toLocaleTimeString()}
-                </P>
+                <P className="text-xs opacity-70 mt-1">{message.timestamp.toLocaleTimeString()}</P>
               </CardContent>
             </Card>
           </div>
@@ -174,10 +174,7 @@ export function FormChatInterface({
             disabled={disabled || isExtracting}
             className="flex-1"
           />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || disabled || isExtracting}
-          >
+          <Button onClick={handleSend} disabled={!input.trim() || disabled || isExtracting}>
             Send
           </Button>
         </div>

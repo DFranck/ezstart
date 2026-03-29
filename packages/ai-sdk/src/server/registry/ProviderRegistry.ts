@@ -3,6 +3,7 @@
  * Manages multiple AI providers dynamically
  */
 
+import { logger } from '@ezstart/logger'
 import type { ProviderConfig, AIProviderInfo } from './types.js'
 import type { IAIProvider } from '../providers/base.js'
 import { GeminiProvider } from '../providers/gemini.js'
@@ -22,7 +23,7 @@ export class ProviderRegistry {
     const instance = this.createInstance(config)
     this.instances.set(config.id, instance)
 
-    console.log(`✅ Registered AI provider: ${config.name} (${config.type})`)
+    logger.info(`Registered AI provider: ${config.name} (${config.type})`)
   }
 
   /**
@@ -31,7 +32,7 @@ export class ProviderRegistry {
   unregister(id: string): void {
     this.providers.delete(id)
     this.instances.delete(id)
-    console.log(`❌ Unregistered AI provider: ${id}`)
+    logger.info(`Unregistered AI provider: ${id}`)
   }
 
   /**
@@ -88,7 +89,7 @@ export class ProviderRegistry {
     if (config) {
       config.enabled = enabled
       const status = enabled ? 'enabled' : 'disabled'
-      console.log(`${enabled ? '✅' : '❌'} Provider "${id}" ${status}`)
+      logger.info(`Provider "${id}" ${status}`)
     }
   }
 

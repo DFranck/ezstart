@@ -14,8 +14,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 interface AuthProviderProps {
   children: ReactNode
   appName: string
-  authMode?: AuthMode  // 🆕 Replaces useHttpOnlyCookies (default: 'localStorage')
-  jwtPublicKey?: string  // 🆕 Required if authMode='jwt'
+  authMode?: AuthMode // 🆕 Replaces useHttpOnlyCookies (default: 'localStorage')
+  jwtPublicKey?: string // 🆕 Required if authMode='jwt'
 
   // @deprecated Use authMode instead
   useHttpOnlyCookies?: boolean
@@ -39,12 +39,11 @@ function resolveAuthMode(
   // Rule 1: Force localStorage in localhost
   if (env === 'local') {
     if (configuredMode !== 'localStorage') {
-      console.warn(
-        `⚠️ [AuthSDK] Forced localStorage mode in localhost`,
-        `\n  → Configured: ${configuredMode}`,
-        `\n  → Reason: httpOnly/jwt cookies don't work cross-port`,
-        `\n  → Domain: ${hostname}`
-      )
+      logger.warn(`[AuthSDK] Forced localStorage mode in localhost`, {
+        configured: configuredMode,
+        reason: "httpOnly/jwt cookies don't work cross-port",
+        domain: hostname,
+      })
     }
     return 'localStorage'
   }
@@ -56,25 +55,23 @@ function resolveAuthMode(
 
   // Rule 3: httpOnly on external domain (Warning + fallback)
   if (configuredMode === 'httpOnly' && !isEzstartDomain(hostname)) {
-    console.warn(
-      `⚠️ [AuthSDK] httpOnly mode on non-ezstart domain!`,
-      `\n  → Domain: ${hostname}`,
-      `\n  → httpOnly only works on *.ezstart.xyz`,
-      `\n  → Falling back to localStorage`,
-      `\n  → Consider using authMode="jwt" for external domains`
-    )
+    logger.warn(`[AuthSDK] httpOnly mode on non-ezstart domain!`, {
+      domain: hostname,
+      note: 'httpOnly only works on *.ezstart.xyz',
+      fallback: 'localStorage',
+      suggestion: 'Consider using authMode="jwt" for external domains',
+    })
     return 'localStorage'
   }
 
   // Rule 4: JWT mode (validate publicKey - REQUIRED)
   if (configuredMode === 'jwt') {
     if (!jwtPublicKey) {
-      console.error(
-        `❌ [EZAuth SDK] JWT mode requires jwtPublicKey!`,
-        `\n  → Add: jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}`,
-        `\n  → Get your key from: https://dashboard.ezauth.app (or your EZAuth instance)`,
-        `\n  → Falling back to localStorage (INSECURE)`
-      )
+      logger.error(`[EZAuth SDK] JWT mode requires jwtPublicKey!`, {
+        fix: 'Add: jwtPublicKey={process.env.NEXT_PUBLIC_EZAUTH_JWT_PUBLIC_KEY}',
+        docs: 'Get your key from: https://dashboard.ezauth.app (or your EZAuth instance)',
+        fallback: 'localStorage (INSECURE)',
+      })
       return 'localStorage'
     }
     return 'jwt'
@@ -82,12 +79,11 @@ function resolveAuthMode(
 
   // Rule 5: localStorage (warning in production)
   if (configuredMode === 'localStorage' && env === 'production') {
-    console.warn(
-      `⚠️ [AuthSDK] localStorage mode in production`,
-      `\n  → Domain: ${hostname}`,
-      `\n  → Warning: Vulnerable to XSS attacks`,
-      `\n  → Consider authMode="httpOnly" or "jwt"`
-    )
+    logger.warn(`[AuthSDK] localStorage mode in production`, {
+      domain: hostname,
+      warning: 'Vulnerable to XSS attacks',
+      suggestion: 'Consider authMode="httpOnly" or "jwt"',
+    })
   }
 
   return configuredMode
@@ -98,18 +94,17 @@ export function AuthProvider({
   appName,
   authMode = 'localStorage',
   jwtPublicKey,
-  useHttpOnlyCookies // deprecated
+  useHttpOnlyCookies, // deprecated
 }: AuthProviderProps) {
   const store = useAuthStore()
 
   // Handle deprecated prop
   if (useHttpOnlyCookies !== undefined) {
-    console.warn(
-      `⚠️ [AuthSDK] useHttpOnlyCookies is deprecated`,
-      `\n  → Use authMode="httpOnly" instead`,
-      `\n  → Old: useHttpOnlyCookies={true}`,
-      `\n  → New: authMode="httpOnly"`
-    )
+    logger.warn(`[AuthSDK] useHttpOnlyCookies is deprecated`, {
+      migration: 'Use authMode="httpOnly" instead',
+      old: 'useHttpOnlyCookies={true}',
+      new: 'authMode="httpOnly"',
+    })
     authMode = useHttpOnlyCookies ? 'httpOnly' : 'localStorage'
   }
 
@@ -181,15 +176,18 @@ export function AuthProvider({
           }
         } catch (error: any) {
           // Only logout on 401 (unauthorized) - not on network/server errors
-          const isAuthFailure = error?.message?.includes('401') ||
-                               error?.status === 401 ||
-                               error?.message?.toLowerCase().includes('unauthorized')
+          const isAuthFailure =
+            error?.message?.includes('401') ||
+            error?.status === 401 ||
+            error?.message?.toLowerCase().includes('unauthorized')
 
           if (isAuthFailure) {
             logger.debug('[AuthProvider] httpOnly auth failure (401), logging out')
             store.logout()
           } else {
-            logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', { error: error?.message })
+            logger.debug('[AuthProvider] httpOnly fetch error (not 401, keeping session)', {
+              error: error?.message,
+            })
           }
         }
       }
@@ -255,7 +253,7 @@ export function useAuth() {
 
       return authResult.user
     } catch (error) {
-      console.error('Auth callback error:', error)
+      logger.error('Auth callback error:', error)
       throw error
     }
   }
@@ -276,7 +274,7 @@ export function useAuth() {
         store.updateUser(user)
         return user
       } catch (error: any) {
-        console.error('Failed to refresh user:', error)
+        logger.error('Failed to refresh user:', error)
         // Only logout on 401 - keep session on transient errors
         if (error?.status === 401) {
           store.logout()
@@ -289,7 +287,7 @@ export function useAuth() {
         store.updateUser(user)
         return user
       } catch (error: any) {
-        console.error('Failed to refresh user:', error)
+        logger.error('Failed to refresh user:', error)
         // Only logout on 401 - keep session on transient errors
         if (error?.status === 401) {
           store.logout()

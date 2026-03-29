@@ -26,8 +26,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "openai": "^4.77.3",
+    "@ezstart/logger": "workspace:*",
     "@google/generative-ai": "^0.21.0",
+    "openai": "^4.77.3",
     "zustand": "^4.5.5"
   },
   "peerDependencies": {

@@ -1,25 +1,26 @@
-'use client';
+'use client'
 
-import { Button, Icon } from '@ezstart/ui/components';
-import { useState } from 'react';
+import { logger } from '@ezstart/logger'
+import { Button, Icon } from '@ezstart/ui/components'
+import { useState } from 'react'
 
 type CopyCodeButtonProps = {
-  code: string;
-  className?: string;
-};
+  code: string
+  className?: string
+}
 
 export function CopyCodeButton({ code, className }: CopyCodeButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err);
+      logger.error('Failed to copy:', err)
     }
-  };
+  }
 
   return (
     <Button
@@ -29,12 +30,8 @@ export function CopyCodeButton({ code, className }: CopyCodeButtonProps) {
       className={className}
       aria-label={copied ? 'Code copied' : 'Copy code to clipboard'}
     >
-      <Icon
-        name={copied ? 'lucide:Check' : 'lucide:Copy'}
-        size={16}
-        ariaHidden
-      />
+      <Icon name={copied ? 'lucide:Check' : 'lucide:Copy'} size={16} ariaHidden />
       <span className="ml-2">{copied ? 'Copied!' : 'Copy'}</span>
     </Button>
-  );
+  )
 }
